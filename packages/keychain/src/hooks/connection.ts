@@ -7,7 +7,7 @@ import {
   OpenSettingsCtx,
 } from "utils/connection";
 import { getChainName, isIframe } from "@cartridge/utils";
-import { RpcProvider, constants } from "starknet";
+import { RpcProvider } from "starknet";
 import {
   Prefund,
   ResponseCodes,
@@ -28,8 +28,6 @@ import {
   ControllerTheme,
 } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
-
-const CHAIN_ID_TIMEOUT = 3000;
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -201,17 +199,7 @@ export function useConnectionValue() {
       const update = async () => {
         try {
           let provider = new RpcProvider({ nodeUrl: rpcUrl });
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(
-              () => reject(new Error("Chain ID fetch timed out")),
-              CHAIN_ID_TIMEOUT,
-            ),
-          );
-          const chainIdPromise = provider.getChainId();
-          let chainId = (await Promise.race([
-            chainIdPromise,
-            timeoutPromise,
-          ])) as constants.StarknetChainId;
+          const chainId = await provider.getChainId();
           setChainId(chainId);
         } catch (e) {
           console.error(e);
