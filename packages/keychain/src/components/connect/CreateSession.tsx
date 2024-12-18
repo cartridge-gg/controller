@@ -1,7 +1,7 @@
 import { Container, Content, Footer } from "components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "utils/connection";
-import { Button, HStack, VStack, Text, Checkbox } from "@chakra-ui/react";
+import { Button, HStack, Text, Checkbox } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnection } from "hooks/connection";
 import { ControllerErrorAlert } from "components/ErrorAlert";
@@ -113,6 +113,29 @@ export function CreateSession({
         )}
       </Content>
       <Footer>
+        <div className="flex items-center text-sm text-muted-foreground py-4 gap-2">
+          <div className="font-medium">Expires in </div>
+          <Select
+            value={duration.toString()}
+            onValueChange={(val) => setDuration(BigInt(val))}
+          >
+            <SelectTrigger className="w-28">
+              <SelectValue
+                defaultValue={(60 * 60 * 24).toString()}
+                placeholder="1 HR"
+              />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectItem value={(60 * 60).toString()}>1 HR</SelectItem>
+              <SelectItem value={(60 * 60 * 24).toString()}>24 HRS</SelectItem>
+              <SelectItem value={(60 * 60 * 24 * 7).toString()}>
+                1 WEEK
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {!policies?.verified && (
           <HStack
             p={3}
@@ -142,6 +165,7 @@ export function CreateSession({
         {error && isControllerError(error) && (
           <ControllerErrorAlert error={error} />
         )}
+
         <HStack spacing={4} width="full">
           <Button onClick={() => onConnect()} isDisabled={isConnecting} px={10}>
             Skip
@@ -159,53 +183,7 @@ export function CreateSession({
           </Button>
         </HStack>
 
-        {!error && (
-          <div className="flex flex-col">
-            <div className="flex items-center text-sm text-muted-foreground py-4 gap-2">
-              <div className="font-medium">Expires in </div>
-              <Select
-                value={duration.toString()}
-                onValueChange={(val) => setDuration(BigInt(val))}
-              >
-                <SelectTrigger className="w-28">
-                  <SelectValue
-                    defaultValue={(60 * 60 * 24).toString()}
-                    placeholder="1 HR"
-                  />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value={(60 * 60).toString()}>1 HR</SelectItem>
-                  <SelectItem value={(60 * 60 * 24).toString()}>
-                    24 HRS
-                  </SelectItem>
-                  <SelectItem value={(60 * 60 * 24 * 7).toString()}>
-                    1 WEEK
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <VStack spacing={4} width="full">
-              <Button
-                colorScheme="colorful"
-                isDisabled={isDisabled || isConnecting}
-                isLoading={isConnecting}
-                onClick={() => onCreateSession()}
-                width="full"
-              >
-                {isUpdate ? "update" : "create"} session
-              </Button>
-              <Button
-                onClick={() => onConnect()}
-                isDisabled={isConnecting}
-                width="full"
-              >
-                Skip
-              </Button>
-            </VStack>
-          </div>
-        )}
+        {!error && <div className="flex flex-col"></div>}
       </Footer>
     </Container>
   );
