@@ -55,7 +55,7 @@ export function Session() {
   const onCallback = useCallback(
     async (response: SessionResponse) => {
       if (!queries.callback_uri && !queries.redirect_uri) {
-        navigate("/failure");
+        navigate("/failure", { replace: true });
         return;
       }
 
@@ -84,12 +84,13 @@ export function Session() {
                 title: "Session Registered!",
                 description: "Return to your terminal to continue",
               }.toString()}`,
+              { replace: true },
             );
             return;
           }
         } catch (e) {
           console.error("failed to call the callback url", e);
-          navigate("/failure");
+          navigate("/failure", { replace: true });
         }
 
         return;
@@ -98,7 +99,7 @@ export function Session() {
       if (queries.redirect_uri) {
         const url = decodeURIComponent(queries.redirect_uri);
         const query_name = queries.redirect_query_name ?? "session";
-        navigate(`${url}?${query_name}=${encodedResponse}`);
+        navigate(`${url}?${query_name}=${encodedResponse}`, { replace: true });
       }
     },
     [navigate, queries],

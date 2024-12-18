@@ -27,7 +27,7 @@ export function Authenticate() {
       setParams({ name, action, network });
 
       // Remove query params to avoid issues with password managers
-      navigate(".");
+      navigate(".", { replace: true });
     }
   }, [params, searchParams, navigate]);
 

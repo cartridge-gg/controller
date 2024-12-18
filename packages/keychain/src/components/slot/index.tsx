@@ -40,7 +40,7 @@ function Auth() {
         "",
       );
 
-      navigate(`/slot/consent${query}`);
+      navigate(`/slot/consent${query}`, { replace: true });
     }
   }, [user, controller, navigate, searchParams]);
 
