@@ -31,7 +31,7 @@ export function useProgressions({
     },
     {
       enabled: !!namespace && !!project,
-      refetchInterval: 30_000, // Refetch every 30 seconds
+      refetchInterval: 600_000, // Refetch every 10 minutes
       onSuccess: ({ playerAchievements }: { playerAchievements: Response }) => {
         const progressions = playerAchievements.items[0].achievements
           .map(parser)
