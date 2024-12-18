@@ -180,7 +180,8 @@ export function SendToken() {
                           handleMax(e)
                         }
                       >
-                        {formatBalance(t.balance.formatted)} {t.meta.symbol}
+                        {formatBalance(t.balance.formatted, ["~"])}{" "}
+                        {t.meta.symbol}
                       </div>
                     </div>
                   </div>

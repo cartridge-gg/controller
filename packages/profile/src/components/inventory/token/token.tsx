@@ -131,7 +131,7 @@ function ERC20() {
           t.balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
-            formatBalance(t.balance.formatted)
+            formatBalance(t.balance.formatted, ["~"])
           )
         } ${t.meta.symbol}`}
         description={

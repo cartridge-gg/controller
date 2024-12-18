@@ -85,7 +85,7 @@ function TokenCardContent({
 
       <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
         <div className="flex items-center gap-2">
-          <p>{formatBalance(token.balance.formatted)}</p>
+          <p>{formatBalance(token.balance.formatted, ["~"])}</p>
           <span className="text-muted-foreground">{token.meta.symbol}</span>
         </div>
 
