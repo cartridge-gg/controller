@@ -2,8 +2,8 @@ import { createContext } from "react";
 import Controller from "@/utils/controller";
 import { ConnectionCtx } from "@/utils/connection";
 import { UpgradeInterface } from "@/hooks/upgrade";
-import { ControllerTheme } from "@cartridge/presets";
 import { ParsedSessionPolicies } from "@/hooks/session";
+import { VerifiableControllerTheme } from "@/hooks/theme";
 
 export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
@@ -17,7 +17,7 @@ export type ConnectionContextValue = {
   chainId?: string;
   chainName?: string;
   policies?: ParsedSessionPolicies;
-  theme: ControllerTheme;
+  theme: VerifiableControllerTheme;
   hasPrefundRequest: boolean;
   error?: Error;
   upgrade: UpgradeInterface;
