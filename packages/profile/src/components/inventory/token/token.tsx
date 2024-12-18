@@ -109,7 +109,7 @@ function ERC20() {
 
   const compatibility = useMemo(() => {
     if (!version) return false;
-    return compare(version, "0.4.0", ">=");
+    return compare(version, "0.5.6", ">=");
   }, [version]);
 
   if (!t) {
