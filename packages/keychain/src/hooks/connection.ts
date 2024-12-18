@@ -11,7 +11,6 @@ import { RpcProvider } from "starknet";
 import {
   Prefund,
   ResponseCodes,
-  toArray,
   toSessionPolicies,
 } from "@cartridge/controller";
 import { mergeDefaultETHPrefund } from "utils/token";
@@ -29,7 +28,6 @@ import {
   ControllerTheme,
 } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
-import { VerifiableControllerTheme } from "./theme";
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -40,10 +38,7 @@ export function useConnectionValue() {
   const [rpcUrl, setRpcUrl] = useState<string>();
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
-  const [theme, setTheme] = useState<VerifiableControllerTheme>({
-    verified: true,
-    ...defaultTheme,
-  });
+  const [theme, setTheme] = useState<ControllerTheme>(defaultTheme);
   const [controller, setControllerRaw] = useState<Controller | undefined>();
   const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
@@ -136,17 +131,9 @@ export function useConnectionValue() {
       const decodedPreset = decodeURIComponent(themeParam);
       try {
         const parsedTheme = JSON.parse(decodedPreset) as ControllerTheme;
-        setTheme({
-          ...parsedTheme,
-          verified: true,
-        });
+        setTheme(parsedTheme);
       } catch (e) {
-        if (controllerConfigs[decodedPreset].theme) {
-          setTheme({
-            ...controllerConfigs[decodedPreset].theme,
-            verified: true,
-          });
-        }
+        setTheme(controllerConfigs[decodedPreset].theme || defaultTheme);
       }
     }
 
@@ -169,39 +156,28 @@ export function useConnectionValue() {
     }
 
     // Application provided policies take precedence over preset policies.
-    if (presetParam && presetParam in controllerConfigs) {
-      const verified =
-        origin &&
-        toArray(controllerConfigs[presetParam].origin).some((allowedOrigin) => {
-          const originUrl = new URL(origin);
-          return originUrl.hostname === allowedOrigin;
-        });
-
-      if (controllerConfigs[presetParam].theme) {
-        setTheme({
-          verified: !!verified,
-          ...controllerConfigs[presetParam].theme,
-        });
-      }
+    if (
+      presetParam &&
+      presetParam in controllerConfigs
+      // TODO: Reenable
+      //  &&
+      // origin &&
+      // (origin.startsWith("http://localhost") ||
+      //   toArray(controllerConfigs[presetParam].origin).includes(origin))
+    ) {
+      setTheme(controllerConfigs[presetParam].theme || defaultTheme);
 
       // Set policies from preset if no URL policies
       if (!policiesParam && controllerConfigs[presetParam].policies) {
         setPolicies(
           parseSessionPolicies({
-            verified: !!verified,
+            verified: true,
             policies: controllerConfigs[presetParam].policies,
           }),
         );
       }
     }
-  }, [
-    origin,
-    setTheme,
-    setPolicies,
-    setHasPrefundRequest,
-    setOrigin,
-    setPrefunds,
-  ]);
+  }, [setTheme, setPolicies, setHasPrefundRequest, setOrigin, setPrefunds]);
 
   useEffect(() => {
     const connection = connectToController<ParentMethods>({
