@@ -81,6 +81,17 @@ export function SendToken() {
     },
   });
 
+  const handleMax = useCallback(
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>,
+    ) => {
+      e.preventDefault();
+      if (!t) return;
+      form.setValue("amount", parseFloat(t.balance.formatted));
+    },
+    [t, form],
+  );
+
   const onSubmit = useCallback(
     async (values: z.infer<typeof formSchema>) => {
       if (!t) return;
@@ -165,14 +176,12 @@ export function SendToken() {
                       <FormLabel>Balance:</FormLabel>
                       <div
                         className="text-xs cursor-pointer hover:opacity-90"
-                        onClick={() =>
-                          form.setValue(
-                            "amount",
-                            parseFloat(t.balance.formatted),
-                          )
+                        onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                          handleMax(e)
                         }
                       >
-                        {formatBalance(t.balance.formatted)} {t.meta.symbol}
+                        {formatBalance(t.balance.formatted, ["~"])}{" "}
+                        {t.meta.symbol}
                       </div>
                     </div>
                   </div>
@@ -186,10 +195,19 @@ export function SendToken() {
                         className="[&::-webkit-inner-spin-button]:appearance-none"
                       />
                       {countervalue && (
-                        <span className="absolute right-4 top-3.5 text-sm text-muted-foreground">
+                        <span className="absolute right-14 top-3.5 text-sm text-muted-foreground">
                           {formatBalance(countervalue.formatted)}
                         </span>
                       )}
+                      <Button
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-xs/3 font-bold uppercase px-2 py-1.5 h-7 bg-muted text-secondary-foreground hover:opacity-70"
+                        variant="ghost"
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                          handleMax(e)
+                        }
+                      >
+                        Max
+                      </Button>
                     </div>
                   </FormControl>
                   <FormMessage />

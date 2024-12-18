@@ -1,11 +1,10 @@
-export const formatBalance = (balance: string) => {
+export const formatBalance = (balance: string, exludes?: string[]) => {
   // Catch prefix until number
-  let prefix = "";
-  for (const char of balance) {
-    if (!isNaN(parseInt(char))) {
-      break;
-    }
-    prefix += char;
-  }
-  return `${prefix}${parseFloat(balance.replace(prefix, "")).toLocaleString()}`;
+  const prefix = balance.slice(0, balance.search(/\d/));
+  // Exclude each substring from prefix
+  const cleaned =
+    exludes?.reduce((prev, curr) => prev.replace(curr, ""), prefix) ?? prefix;
+  return `${cleaned}${parseFloat(
+    balance.replace(prefix, ""),
+  ).toLocaleString()}`;
 };
