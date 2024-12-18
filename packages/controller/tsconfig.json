@@ -2,12 +2,11 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@cartridge/tsconfig/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
     "composite": false,
     "incremental": false,
     "moduleResolution": "node"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "package.json"]
 }

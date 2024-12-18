@@ -10,6 +10,7 @@ import {
   WalletEventListener,
   WalletEvents,
 } from "@starknet-io/types-js";
+import manifest from "../package.json";
 
 import { icon } from "./icon";
 import { ProviderOptions } from "./types";
@@ -17,7 +18,7 @@ import { ProviderOptions } from "./types";
 export default abstract class BaseProvider implements StarknetWindowObject {
   public id = "controller";
   public name = "Controller";
-  public version = "0.4.0";
+  public version = manifest.version;
   public icon = icon;
 
   public rpc: URL;
