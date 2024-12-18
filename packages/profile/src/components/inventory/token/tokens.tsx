@@ -77,10 +77,12 @@ function TokenCardContent({
       onMouseLeave={() => setHover(false)}
     >
       <div className="bg-secondary flex w-11 aspect-square items-center justify-center">
-        <img
-          src={token.meta.logoUrl ?? "/public/placeholder.svg"}
-          className="w-5 h-5"
-        />
+        <div className="flex items-center justify-center rounded-full overflow-hidden h-7 w-7 bg-quaternary">
+          <img
+            src={token.meta.logoUrl ?? "/public/placeholder.svg"}
+            className="w-6 h-6"
+          />
+        </div>
       </div>
 
       <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
