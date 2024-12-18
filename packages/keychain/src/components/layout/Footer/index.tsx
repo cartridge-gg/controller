@@ -3,8 +3,6 @@ import { CartridgeLogo } from "@cartridge/ui";
 import React, { useEffect, useRef } from "react";
 import { FOOTER_HEIGHT, useLayout } from "components/layout";
 import NextLink from "next/link";
-import { useControllerTheme } from "hooks/theme";
-import { ErrorAlert } from "../../ErrorAlert";
 
 export function Footer({
   children,
@@ -14,7 +12,6 @@ export function Footer({
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const { footer } = useLayout();
-  const theme = useControllerTheme();
 
   useEffect(() => {
     if (!ref.current) return;
@@ -55,16 +52,6 @@ export function Footer({
         p={4}
         pb={showCatridgeLogo ? 1 : 4}
       >
-        {!theme.verified && (
-          <div className="mb-5">
-            <ErrorAlert
-              title="Please proceed with caution"
-              description="Application domain does not match the configured domain."
-              variant="warning"
-              isExpanded
-            />
-          </div>
-        )}
         {children}
       </VStack>
 
