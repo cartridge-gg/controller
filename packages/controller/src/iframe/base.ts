@@ -13,7 +13,11 @@ export class IFrame<CallSender extends {}> implements Modal {
   url?: URL;
   private iframe?: HTMLIFrameElement;
   private container?: HTMLDivElement;
+  private iframeContainer?: HTMLDivElement;
+  private loadingScreen?: HTMLDivElement;
   private onClose?: () => void;
+  private isLoaded: boolean = false;
+  private loadPromise?: Promise<void>;
 
   constructor({
     id,
@@ -53,6 +57,8 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.src = url.toString();
     iframe.id = id;
     iframe.style.border = "none";
+    iframe.style.opacity = "0";
+    iframe.style.transition = "opacity 0.2s ease";
     iframe.sandbox.add("allow-forms");
     iframe.sandbox.add("allow-popups");
     iframe.sandbox.add("allow-scripts");
@@ -62,6 +68,33 @@ export class IFrame<CallSender extends {}> implements Modal {
     if (!!document.hasStorageAccess) {
       iframe.sandbox.add("allow-storage-access-by-user-activation");
     }
+
+    const loadingScreen = document.createElement("div");
+    loadingScreen.style.position = "absolute";
+    loadingScreen.style.top = "0";
+    loadingScreen.style.left = "0";
+    loadingScreen.style.width = "100%";
+    loadingScreen.style.height = "100%";
+    loadingScreen.style.display = "flex";
+    loadingScreen.style.alignItems = "center";
+    loadingScreen.style.justifyContent = "center";
+    loadingScreen.style.borderRadius = "8px";
+    loadingScreen.innerHTML = `
+      <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; 
+      border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;">
+      </div>
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+    `;
+
+    const iframeContainer = document.createElement("div");
+    iframeContainer.style.position = "relative";
+    iframeContainer.appendChild(iframe);
+    iframeContainer.appendChild(loadingScreen);
 
     const container = document.createElement("div");
     container.id = "controller";
@@ -78,10 +111,12 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.visibility = "hidden";
     container.style.opacity = "0";
     container.style.transition = "opacity 0.2s ease";
-    container.appendChild(iframe);
+    container.appendChild(iframeContainer);
 
     this.iframe = iframe;
     this.container = container;
+    this.iframeContainer = iframeContainer;
+    this.loadingScreen = loadingScreen;
 
     connectToChild<CallSender>({
       iframe: this.iframe,
@@ -120,6 +155,15 @@ export class IFrame<CallSender extends {}> implements Modal {
     }
 
     this.onClose = onClose;
+
+    this.loadPromise = new Promise((resolve) => {
+      iframe.addEventListener("load", () => {
+        // this.isLoaded = true;
+        // iframe.style.opacity = "1";
+        // loadingScreen.style.display = "none";
+        resolve();
+      });
+    });
   }
 
   open() {
@@ -151,19 +195,44 @@ export class IFrame<CallSender extends {}> implements Modal {
   }
 
   private resize() {
-    if (!this.iframe) return;
+    if (!this.iframe || !this.iframeContainer) return;
 
     this.iframe.style.userSelect = "none";
+    this.iframe.style.height = "100%";
+    this.iframe.style.width = "100%";
 
     if (window.innerWidth < 768) {
-      this.iframe.style.height = "100%";
-      this.iframe.style.width = "100%";
       this.iframe.style.borderRadius = "0";
+      this.iframeContainer.style.height = "100%";
+      this.iframeContainer.style.width = "100%";
+      if (this.loadingScreen) {
+        this.loadingScreen.style.borderRadius = "0";
+      }
       return;
     }
 
-    this.iframe.style.height = "600px";
-    this.iframe.style.width = "432px";
     this.iframe.style.borderRadius = "8px";
+    this.iframeContainer.style.height = "600px";
+    this.iframeContainer.style.width = "432px";
+    if (this.loadingScreen) {
+      this.loadingScreen.style.borderRadius = "8px";
+    }
+  }
+
+  async waitForLoad(timeout: number = 5000): Promise<void> {
+    if (this.isLoaded) return;
+
+    if (!this.loadPromise) {
+      throw new Error("IFrame not properly initialized");
+    }
+
+    const timeoutPromise = new Promise<void>((_, reject) => {
+      setTimeout(
+        () => reject(new Error("Timeout waiting for iframe to load")),
+        timeout,
+      );
+    });
+
+    return Promise.race([this.loadPromise, timeoutPromise]);
   }
 }

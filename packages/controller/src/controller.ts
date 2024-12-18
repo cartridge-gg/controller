@@ -18,35 +18,56 @@ import BaseProvider from "./provider";
 import { WalletAccount } from "starknet";
 import { Policy } from "@cartridge/presets";
 
+const STORAGE_KEY = "cartridge_connected";
+
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
   private profile?: AsyncMethodReturns<Profile>;
   private options: ControllerOptions;
   private iframes: IFrames;
+  private keychainPromise?: Promise<void>;
 
   constructor(options: ControllerOptions) {
     const { rpc } = options;
     super({ rpc });
 
-    this.iframes = {
-      keychain: new KeychainIFrame({
-        ...options,
-        onClose: this.keychain?.reset,
-        onConnect: (keychain) => {
-          this.keychain = keychain;
-        },
-      }),
-    };
-
+    this.iframes = {} as IFrames;
     this.options = options;
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;
+      if (localStorage.getItem(STORAGE_KEY) === "true") {
+        this.initKeychain();
+      }
     }
+  }
+
+  private initKeychain(): Promise<void> {
+    if (!this.keychainPromise) {
+      this.keychainPromise = new Promise<void>((resolve) => {
+        if (!this.iframes.keychain) {
+          this.iframes.keychain = new KeychainIFrame({
+            ...this.options,
+            onClose: this.keychain?.reset,
+            onConnect: (keychain) => {
+              this.keychain = keychain;
+              resolve();
+            },
+          });
+        } else {
+          resolve();
+        }
+      });
+    }
+    return this.keychainPromise;
   }
 
   async probe(): Promise<WalletAccount | undefined> {
     try {
+      if (localStorage.getItem(STORAGE_KEY) !== "true") {
+        return;
+      }
+
       await this.waitForKeychain();
 
       if (!this.keychain) {
@@ -97,6 +118,10 @@ export default class ControllerProvider extends BaseProvider {
       return this.account;
     }
 
+    this.iframes.keychain.open();
+
+    await this.initKeychain();
+
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -108,8 +133,6 @@ export default class ControllerProvider extends BaseProvider {
         await document.requestStorageAccess();
       }
     }
-
-    this.iframes.keychain.open();
 
     try {
       let response = await this.keychain.connect(
@@ -128,6 +151,8 @@ export default class ControllerProvider extends BaseProvider {
         this.options,
         this.iframes.keychain,
       );
+
+      localStorage.setItem(STORAGE_KEY, "true");
 
       return this.account;
     } catch (e) {
@@ -151,6 +176,7 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     this.account = undefined;
+    localStorage.removeItem(STORAGE_KEY);
     return this.keychain.disconnect();
   }
 
