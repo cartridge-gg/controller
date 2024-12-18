@@ -37,7 +37,8 @@ export function useUsernameValidation(username: string) {
         return;
       }
 
-      if (!/^[a-zA-Z0-9-]+$/.test(username)) {
+      // TEMP: allow periods for login and disabllow for signup below
+      if (!/^[a-zA-Z0-9-.]+$/.test(username)) {
         setValidation({
           status: "invalid",
           error: new Error(
@@ -74,6 +75,17 @@ export function useUsernameValidation(username: string) {
         if (controller.signal.aborted) return;
 
         if (e.message === "ent: account not found") {
+          // TEMP: disallow periods for signup
+          if (username.includes(".")) {
+            setValidation({
+              status: "invalid",
+              error: new Error(
+                "Username can only contain letters, numbers, and hyphens",
+              ),
+            });
+            return;
+          }
+
           setValidation({
             status: "valid",
             exists: false,
