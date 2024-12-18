@@ -3,8 +3,8 @@ import Controller from "utils/controller";
 import { ConnectionCtx } from "utils/connection";
 import { Prefund } from "@cartridge/controller";
 import { UpgradeInterface } from "hooks/upgrade";
-import { ControllerTheme } from "@cartridge/presets";
 import { ParsedSessionPolicies } from "hooks/session";
+import { VerifiableControllerTheme } from "hooks/theme";
 
 export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
@@ -18,7 +18,7 @@ export type ConnectionContextValue = {
   chainId?: string;
   chainName?: string;
   policies?: ParsedSessionPolicies;
-  theme: ControllerTheme;
+  theme: VerifiableControllerTheme;
   prefunds: Prefund[];
   hasPrefundRequest: boolean;
   error?: Error;
