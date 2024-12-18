@@ -46,6 +46,7 @@ export function CreateControllerView({
           : `Play ${theme.name}`
       }
       description="Connect your Controller"
+      hideNetwork
     >
       <form
         style={{ width: "100%" }}

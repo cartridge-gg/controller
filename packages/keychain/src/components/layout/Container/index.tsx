@@ -15,6 +15,7 @@ export function Container({
   onBack,
   onClose,
   hideAccount,
+  hideNetwork,
   Icon,
   icon,
   title,
@@ -31,6 +32,7 @@ export function Container({
         onBack={onBack}
         onClose={onClose}
         hideAccount={hideAccount}
+        hideNetwork={hideNetwork}
         Icon={Icon}
         icon={icon}
         title={title}
