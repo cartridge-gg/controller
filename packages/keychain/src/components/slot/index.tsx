@@ -1,11 +1,32 @@
+export { Consent } from "./consent";
+
 import { PageLoading } from "@/components/Loading";
 import { CreateController } from "@/components/connect";
 import { useMeQuery } from "@cartridge/utils/api/cartridge";
 import { useController } from "@/hooks/controller";
 import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Navigate,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 
-export function Auth() {
+export function Slot() {
+  const { pathname } = useLocation();
+  switch (pathname) {
+    case "/slot/auth":
+      return <Navigate to="/slot" replace />;
+    case "/slot/auth/success":
+      return <Navigate to="/success" replace />;
+    case "/slot/auth/failure":
+      return <Navigate to="/failure" replace />;
+    default:
+      return <Auth />;
+  }
+}
+
+function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { controller } = useController();

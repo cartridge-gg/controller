@@ -32,7 +32,7 @@ type SessionQueryParams = {
 /**
     This page is for registering session
 */
-export default function Session() {
+export function Session() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const queries: SessionQueryParams = useMemo(
