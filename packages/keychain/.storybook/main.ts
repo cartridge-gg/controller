@@ -1,5 +1,6 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 import { join, dirname } from "path";
+import { mergeConfig } from "vite";
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -19,7 +20,20 @@ const config: StorybookConfig = {
   ],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
-    options: {},
+    options: {
+      builder: {
+        viteConfigPath: "./vite.config.ts",
+      },
+    },
+  },
+  viteFinal: async (config) => {
+    return mergeConfig(config, {
+      build: {
+        rollupOptions: {
+          external: ["vite-plugin-node-polyfills/shims/global"],
+        },
+      },
+    });
   },
   staticDirs: ["../public"],
 };
