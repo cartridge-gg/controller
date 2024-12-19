@@ -26,12 +26,12 @@ export function Home() {
       typeof window !== "undefined" &&
       !window.location.hostname.includes("localhost")
     ) {
-      posthog.init(process.env.VITE_POSTHOG_KEY!, {
-        api_host: process.env.VITE_POSTHOG_HOST,
+      posthog.init(import.meta.env.VITE_POSTHOG_KEY!, {
+        api_host: import.meta.env.VITE_POSTHOG_HOST,
         person_profiles: "always",
         enable_recording_console_log: true,
         loaded: (posthog) => {
-          if (process.env.NODE_ENV === "development") posthog.debug();
+          if (import.meta.env.DEV) posthog.debug();
         },
       });
     }
