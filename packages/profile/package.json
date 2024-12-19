@@ -18,6 +18,7 @@
     "@cartridge/utils": "workspace:*",
     "@hookform/resolvers": "^3.9.1",
     "compare-versions": "^6.1.1",
+    "lodash": "^4.17.21",
     "posthog-js": "^1.181.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@types/lodash": "^4.17.13",
     "@types/node": "^20.6.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

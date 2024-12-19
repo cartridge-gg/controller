@@ -1,5 +1,5 @@
 export * from "./argent";
-export * from "./bravos";
+export * from "./braavos";
 export * from "./briq";
 export * from "./cartridge";
 export * from "./cartridge-face";
@@ -22,6 +22,7 @@ export * from "./no-game";
 export * from "./non-fungible-football"; // outdated
 export * from "./olmech";
 export * from "./opensea";
+export * from "./open-zeppelin";
 export * from "./optimism";
 export * from "./quixotic";
 export * from "./realms";
