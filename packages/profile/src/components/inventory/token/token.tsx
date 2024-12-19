@@ -135,14 +135,15 @@ function ERC20() {
           )
         } ${t.meta.symbol}`}
         description={
-          countervalue && `${formatBalance(countervalue.formatted)} (USD)`
+          countervalue && `${formatBalance(countervalue.formatted, ["~"])}`
         }
         icon={
           <img
-            className="w-8 h-8"
+            className="w-10 h-10"
             src={t.meta.logoUrl ?? "/public/placeholder.svg"}
           />
         }
+        rounded
       />
 
       <LayoutContent className="pb-4">

@@ -90,6 +90,10 @@ export const Recipient = ({
     [to, address, setSelectedName, setValue, setWarning, setTo],
   );
 
+  const handleBlur = useCallback(() => {
+    setFocus(false);
+  }, [setFocus]);
+
   const handleClick = useCallback(() => {
     setTo(address);
     setValue(address);
@@ -134,7 +138,7 @@ export const Recipient = ({
           value={value}
           onChange={handleChange}
           onFocus={() => setFocus(true)}
-          onBlur={() => setFocus(false)}
+          onBlur={handleBlur}
         />
         <div
           className={cn(
