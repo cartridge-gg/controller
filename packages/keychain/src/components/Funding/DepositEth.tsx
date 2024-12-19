@@ -20,7 +20,7 @@ import {
 } from "starknet";
 import {
   ArgentIcon,
-  BravosIcon,
+  BraavosIcon,
   CopyIcon,
   EthereumIcon,
   StarknetColorIcon,
@@ -198,7 +198,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                               <ArgentIcon fontSize={20} />
                             )}
                             {c.name === "braavos" && (
-                              <BravosIcon fontSize={20} />
+                              <BraavosIcon fontSize={20} />
                             )}
                             {c.name}
                           </Button>
