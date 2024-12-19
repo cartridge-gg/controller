@@ -1,11 +1,11 @@
 import {
   AlertIcon,
   InfoIcon,
-  WedgeDownIcon,
+  WedgeIcon,
   WarningIcon,
   CopyIcon,
   CheckIcon,
-} from "@cartridge/ui";
+} from "@cartridge/ui-next";
 import {
   Text,
   Accordion,
@@ -73,11 +73,13 @@ export function ErrorAlert({
                 {(() => {
                   switch (variant) {
                     case "info":
-                      return <InfoIcon color="info.foreground" />;
+                      return <InfoIcon size="xs" color="info.foreground" />;
                     case "warning":
-                      return <WarningIcon color="warning.foreground" />;
+                      return (
+                        <WarningIcon size="xs" color="warning.foreground" />
+                      );
                     case "error":
-                      return <AlertIcon color="error.foreground" />;
+                      return <AlertIcon size="xs" color="error.foreground" />;
                     default:
                       return null;
                   }
@@ -103,7 +105,7 @@ export function ErrorAlert({
                       rotate: itemExpanded ? 180 : 0,
                     }}
                   >
-                    <WedgeDownIcon boxSize={5} />
+                    <WedgeIcon size="sm" variant="down" />
                   </Box>
                 </HStack>
               )}
@@ -114,16 +116,16 @@ export function ErrorAlert({
                 {copyText && (
                   <IconButton
                     size="icon"
-                    w={6}
-                    h={6}
+                    w={5}
+                    h={5}
                     position="absolute"
                     right={3}
                     aria-label="Copy stacktrace"
                     icon={
                       copied ? (
-                        <CheckIcon fontSize="lg" color="black" />
+                        <CheckIcon fontSize="xs" color="black" />
                       ) : (
-                        <CopyIcon fontSize="lg" color="black" />
+                        <CopyIcon fontSize="xs" color="black" />
                       )
                     }
                     onClick={() => {
