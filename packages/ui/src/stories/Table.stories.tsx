@@ -9,7 +9,7 @@ import {
   Td,
 } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
-import { CopyText } from "src/components";
+import { CopyText } from "@/components";
 
 const meta: Meta<typeof Table> = {
   title: "Table",

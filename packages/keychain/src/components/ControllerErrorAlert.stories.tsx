@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { ControllerErrorAlert as CtrlErrAlert } from "./ErrorAlert";
 import { VStack } from "@chakra-ui/react";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { starknetTransactionExecutionErrorTestCases } from "utils/errors";
+import { starknetTransactionExecutionErrorTestCases } from "@/utils/errors";
 
 const meta = {
   component: ControllerErrorAlert,

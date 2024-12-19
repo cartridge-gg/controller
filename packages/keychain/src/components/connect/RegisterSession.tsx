@@ -1,16 +1,16 @@
-import { Content } from "components/layout";
-import { useCallback, useEffect, useState } from "react";
-import { useConnection } from "hooks/connection";
-import { SessionConsent } from "components/connect";
-import { ExecutionContainer } from "components/ExecutionContainer";
+import { Content } from "@/components/layout";
+import { useCallback, useState, useEffect } from "react";
+import { useConnection } from "@/hooks/connection";
+import { SessionConsent } from "@/components/connect";
+import { ExecutionContainer } from "@/components/ExecutionContainer";
 import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { SESSION_EXPIRATION } from "const";
-import { UnverifiedSessionSummary } from "components/session/UnverifiedSessionSummary";
-import { VerifiedSessionSummary } from "components/session/VerifiedSessionSummary";
-import { ParsedSessionPolicies } from "hooks/session";
+import { SESSION_EXPIRATION } from "@/const";
+import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
+import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
+import { ParsedSessionPolicies } from "@/hooks/session";
 
 export function RegisterSession({
   policies,

@@ -1,10 +1,10 @@
 import { AlertIcon } from "@cartridge/ui";
 import { Button, VStack, Text, HStack, Input } from "@chakra-ui/react";
-import { Container, Content, Footer } from "components/layout";
-import { useConnection } from "hooks/connection";
+import { Container, Content, Footer } from "@/components/layout";
+import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
-import { ExecuteCtx } from "utils/connection";
+import { ExecuteCtx } from "@/utils/connection";
 
 export function Delegate({ onBack }: { onBack: () => void }) {
   const { controller, context, setContext } = useConnection();
@@ -15,7 +15,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
     try {
       CallData.compile([delegateAddress]);
       setIsValid(num.isHex(delegateAddress));
-    } catch (e: any) {
+    } catch {
       setIsValid(false);
     }
   }, [delegateAddress]);

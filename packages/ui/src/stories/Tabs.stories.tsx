@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 import { Meta, StoryObj } from "@storybook/react";
 import { useCallback, useState } from "react";
-import { BoltIcon, DetailsIcon, StackShapeIcon } from "src/components";
+import { BoltIcon, DetailsIcon, StackShapeIcon } from "@/components";
 
 const meta: Meta<typeof Tabs> = {
   title: "Tabs",

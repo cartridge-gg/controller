@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
-import { useConnection } from "hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { LoginMode } from "../types";
-import { doLogin, doSignup } from "hooks/account";
+import { doLogin, doSignup } from "@/hooks/account";
 import { constants } from "starknet";
-import Controller from "utils/controller";
+import Controller from "@/utils/controller";
 import { fetchAccount } from ".";
-import { PopupCenter } from "utils/url";
+import { PopupCenter } from "@/utils/url";
 import { useAccountQuery } from "@cartridge/utils/api/cartridge";
 
 export function useCreateController({
@@ -162,7 +162,8 @@ export function useCreateController({
 
           if (!credentials?.webauthn) return;
 
-          const { id: credentialId, publicKey } = credentials.webauthn?.[0];
+          const { id: credentialId, publicKey } =
+            credentials.webauthn?.[0] ?? {};
           const controllerNode = controllers?.edges?.[0]?.node;
 
           if (!controllerNode || !finalUsername) return;

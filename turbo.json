@@ -4,20 +4,26 @@
   "tasks": {
     "build:deps": {
       "dependsOn": ["^build:deps"],
+      "outputs": ["dist/**", "**/pkg-controller/**", "**/pkg-session/**"]
+    },
+    "build": {
+      "dependsOn": ["^build:deps", "^build"],
       "outputs": [
+        ".next/**",
         "dist/**",
         "**/pkg-controller/**",
         "**/pkg-session/**"
       ]
     },
-    "build": {
-      "dependsOn": ["^build:deps", "^build"],
-      "outputs": [".next/**", "dist/**", "**/pkg-controller/**", "**/pkg-session/**"]
-    },
     "dev": {
       "persistent": true,
       "dependsOn": ["^build:deps"],
-      "outputs": [".next/**", "dist/**", "**/pkg-controller/**", "**/pkg-session/**"]
+      "outputs": [
+        ".next/**",
+        "dist/**",
+        "**/pkg-controller/**",
+        "**/pkg-session/**"
+      ]
     },
     "storybook": {
       "persistent": true,
@@ -27,6 +33,7 @@
       "dependsOn": ["^build:deps"]
     },
     "lint": {},
+    "lint:fix": {},
     "format": {},
     "format:check": {},
     "e2e": {

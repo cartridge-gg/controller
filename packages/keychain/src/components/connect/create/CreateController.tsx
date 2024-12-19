@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
-import { Container, Footer, Content } from "components/layout";
+import { Container, Footer, Content } from "@/components/layout";
 import { Field } from "@cartridge/ui";
 import { Box, Button } from "@chakra-ui/react";
-import { useControllerTheme } from "hooks/theme";
+import { useControllerTheme } from "@/hooks/theme";
 import { usePostHog } from "posthog-js/react";
-import { useDebounce } from "hooks/debounce";
+import { useDebounce } from "@/hooks/debounce";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
 import { Legal, StatusTray } from ".";
@@ -51,7 +51,7 @@ export function CreateControllerView({
       <form
         style={{ width: "100%" }}
         onKeyDown={(e) => {
-          e.key === "Enter" && e.preventDefault();
+          if (e.key === "Enter") e.preventDefault();
         }}
       >
         <Content mb="2rem">

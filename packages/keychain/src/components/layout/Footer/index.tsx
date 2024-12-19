@@ -1,8 +1,8 @@
 import { HStack, VStack, Text } from "@chakra-ui/react";
 import { CartridgeLogo } from "@cartridge/ui";
 import React, { useEffect, useRef } from "react";
-import { FOOTER_HEIGHT, useLayout } from "components/layout";
-import NextLink from "next/link";
+import { FOOTER_HEIGHT, useLayout } from "@/components/layout";
+import { Link } from "react-router-dom";
 
 export function Footer({
   children,
@@ -17,7 +17,7 @@ export function Footer({
     if (!ref.current) return;
 
     const observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         footer.setHeight(entry.contentRect.height);
       }
     });
@@ -66,8 +66,8 @@ export function Footer({
           h={FOOTER_HEIGHT / 4}
           gap={1}
           opacity={0.5}
-          as={NextLink}
-          href="https://cartridge.gg"
+          as={Link}
+          to="https://cartridge.gg"
           target="_blank"
           overflow="hidden"
           _hover={{

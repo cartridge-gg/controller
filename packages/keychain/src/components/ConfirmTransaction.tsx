@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { ResponseCodes, SessionPolicies, toArray } from "@cartridge/controller";
-import { Content, FOOTER_MIN_HEIGHT } from "components/layout";
+import { Content, FOOTER_MIN_HEIGHT } from "@/components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui";
-import { useConnection } from "hooks/connection";
-import { Policies } from "components/Policies";
-import { ExecuteCtx } from "utils/connection";
+import { useConnection } from "@/hooks/connection";
+import { Policies } from "@/components/Policies";
+import { ExecuteCtx } from "@/utils/connection";
 import { getChecksumAddress, num } from "starknet";
-import { ExecutionContainer } from "components/ExecutionContainer";
+import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { CreateSession } from "./connect";
 
 export function ConfirmTransaction() {
@@ -21,7 +21,7 @@ export function ConfirmTransaction() {
       return;
     }
 
-    let { transaction_hash } = await account.execute(
+    const { transaction_hash } = await account.execute(
       toArray(ctx.transactions),
       {
         maxFee: num.toHex(maxFee),

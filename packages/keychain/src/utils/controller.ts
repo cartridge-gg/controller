@@ -61,7 +61,7 @@ export default class Controller extends Account {
       username,
       {
         webauthn: {
-          rpId: process.env.NEXT_PUBLIC_RP_ID!,
+          rpId: process.env.VITE_RP_ID!,
           credentialId,
           publicKey,
         },
@@ -100,6 +100,7 @@ export default class Controller extends Account {
   async createSession(
     expiresAt: bigint,
     policies: SessionPolicies,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _maxFee?: BigNumberish,
   ) {
     if (!this.cartridge) {
@@ -186,6 +187,7 @@ export default class Controller extends Account {
 
   async estimateInvokeFee(
     calls: Call[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _: EstimateFeeDetails = {},
   ): Promise<EstimateFee> {
     const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
@@ -228,6 +230,7 @@ export default class Controller extends Account {
     return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-explicit-any
   async getNonce(_?: any): Promise<string> {
     return await this.cartridge.getNonce();
   }
@@ -240,6 +243,7 @@ export default class Controller extends Account {
     return this.cartridge.delegateAccount();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   revoke(_origin: string) {
     // TODO: Cartridge Account SDK to implement revoke session tokens
     console.error("revoke unimplemented");

@@ -1,20 +1,20 @@
-import dynamic from "next/dynamic";
 import { Signature } from "starknet";
-import { ResponseCodes } from "@cartridge/controller";
-import { DeployController, ConfirmTransaction, SignMessage } from "components";
-import { CreateController, CreateSession, Logout } from "components/connect";
-import { useConnection } from "hooks/connection";
-import { DeployCtx, SignMessageCtx } from "utils/connection";
-import { LoginMode } from "components/connect/types";
-import { ErrorPage } from "components/ErrorBoundary";
-import { Settings } from "components/Settings";
-import { Upgrade } from "components/connect/Upgrade";
-import { PurchaseCredits } from "components/Funding/PurchaseCredits";
 import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
-import { PageLoading } from "components/Loading";
+import { ResponseCodes } from "@cartridge/controller";
+import { useConnection } from "@/hooks/connection";
+import { DeployCtx, SignMessageCtx } from "@/utils/connection";
+import { ConfirmTransaction } from "./ConfirmTransaction";
+import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
+import { LoginMode } from "./connect/types";
+import { DeployController } from "./DeployController";
+import { ErrorPage } from "./ErrorBoundary";
+import { PurchaseCredits } from "./Funding/PurchaseCredits";
+import { Settings } from "./Settings";
+import { SignMessage } from "./SignMessage";
+import { PageLoading } from "./Loading";
 
-function Home() {
+export function Home() {
   const { context, controller, error, policies, upgrade } = useConnection();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
@@ -26,8 +26,8 @@ function Home() {
       typeof window !== "undefined" &&
       !window.location.hostname.includes("localhost")
     ) {
-      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+      posthog.init(process.env.VITE_POSTHOG_KEY!, {
+        api_host: process.env.VITE_POSTHOG_HOST,
         person_profiles: "always",
         enable_recording_console_log: true,
         loaded: (posthog) => {
@@ -108,7 +108,7 @@ function Home() {
             context.resolve({
               code: ResponseCodes.SUCCESS,
               address: controller.address,
-            } as any);
+            });
           }}
         />
       );
@@ -170,5 +170,3 @@ function Home() {
       return <>*Waves*</>;
   }
 }
-
-export default dynamic(() => Promise.resolve(Home), { ssr: false });

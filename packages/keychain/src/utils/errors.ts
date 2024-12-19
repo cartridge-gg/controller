@@ -1,6 +1,7 @@
 import { ControllerError } from "@cartridge/controller";
 
 export function parseExecutionError(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any,
   stackOffset: number = 1,
 ): {
@@ -25,7 +26,7 @@ export function parseExecutionError(
   }
 
   let summaryOveride;
-  let executionErrorRaw = executionError;
+  const executionErrorRaw = executionError;
 
   // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
   executionError = executionError.replace(/^Transaction reverted: /, "");

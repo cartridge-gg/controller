@@ -1,11 +1,11 @@
-import { Container, Content, Footer } from "components/layout";
+import { Container, Content, Footer } from "@/components/layout";
 import { Button, Divider } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
 import { CheckIcon, CoinsIcon } from "@cartridge/ui";
-import { useConnection } from "hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { CopyAddress } from "../CopyAddress";
 import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
-import { ErrorAlert } from "components/ErrorAlert";
+import { ErrorAlert } from "@/components/ErrorAlert";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { Balance } from "./Balance";
@@ -47,7 +47,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     setisLoading(true);
 
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_STRIPE_PAYMENT!, {
+      const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

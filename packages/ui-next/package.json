@@ -26,7 +26,7 @@
     "copyThemes": "cp -R src/themes dist/themes",
     "format": "prettier --write ./src",
     "format:check": "prettier --check ./src",
-    "lint": "eslint . --ext ts,tsx",
+    "lint": "eslint .",
     "storybook": "storybook dev -p 6003",
     "storybook:build": "storybook build"
   },
@@ -89,7 +89,7 @@
     "@typescript-eslint/parser": "^7.0.2",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.18",
-    "eslint": "^8.56.0",
+    "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-storybook": "^0.6.13",
     "postcss": "^8.4.35",

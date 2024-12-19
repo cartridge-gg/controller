@@ -27,6 +27,11 @@ export default defineConfig({
     }),
     dts(),
   ],
+  resolve: {
+    alias: {
+      "@": "/src",
+    },
+  },
 });
 
 function makeExternalPredicate(externalArr: string[]) {

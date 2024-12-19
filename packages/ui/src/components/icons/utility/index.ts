@@ -13,7 +13,6 @@ export * from "./Dollar";
 export * from "./Dots";
 export * from "./DoubleWedge";
 export * from "./External";
-export * from "./Fingerprint";
 export * from "./Fullscreen";
 export * from "./Gear";
 export * from "./Hamburger";

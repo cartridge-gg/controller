@@ -25,7 +25,7 @@ export function parseControllerError(
       message: controllerError.message,
       data,
     };
-  } catch (e: any) {
+  } catch {
     return {
       code: controllerError.code,
       message: controllerError.message,
@@ -44,7 +44,7 @@ export function execute({
     abis: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
-    _?: any,
+    _?: unknown,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
     const account = window.controller;
@@ -67,6 +67,7 @@ export function execute({
 
     const release = await mutex.obtain();
     return await new Promise<InvokeFunctionResponse | ConnectError>(
+      // eslint-disable-next-line no-async-promise-executor
       async (resolve, reject) => {
         if (!account) {
           return reject({
@@ -126,12 +127,12 @@ export function execute({
         }
 
         try {
-          let estimate = await account.estimateInvokeFee(calls);
+          const estimate = await account.cartridge.estimateInvokeFee(calls);
           const maxFee = num.toHex(
             num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
           );
 
-          let { transaction_hash } = await account.execute(
+          const { transaction_hash } = await account.execute(
             transactions as Call[],
             {
               maxFee,
@@ -167,7 +168,7 @@ export function execute({
 }
 
 export const normalizeCalls = (calls: AllowArray<Call>): JsCall[] => {
-  return toArray(calls).map((call) => {
+  return toArray(calls).map((call: Call) => {
     return {
       entrypoint: call.entrypoint,
       contractAddress: addAddressPadding(call.contractAddress),

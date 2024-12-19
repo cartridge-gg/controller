@@ -4,14 +4,14 @@ import {
   CreateController,
   CreateSession,
   RegisterSession,
-} from "components/connect";
+} from "@/components/connect";
 
-import { useConnection } from "hooks/connection";
-import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
-import { LoginMode } from "components/connect/types";
-import { SESSION_EXPIRATION } from "const";
-import { PageLoading } from "components/Loading";
+import { useConnection } from "@/hooks/connection";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { LoginMode } from "@/components/connect/types";
+import { SESSION_EXPIRATION } from "@/const";
+import { PageLoading } from "@/components/Loading";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 type SessionResponse = {
   username: string;
@@ -22,19 +22,28 @@ type SessionResponse = {
   alreadyRegistered?: boolean;
 };
 
-type SessionQueryParams = Record<string, string> & {
+type SessionQueryParams = {
   public_key: string;
-  callback_uri?: string;
-  redirect_uri?: string;
-  redirect_query_name?: string;
+  callback_uri: string | null;
+  redirect_uri: string | null;
+  redirect_query_name: string | null;
 };
 
 /**
     This page is for registering session
 */
-export default function Session() {
-  const router = useRouter();
-  const queries = router.query as SessionQueryParams;
+export function Session() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const queries: SessionQueryParams = useMemo(
+    () => ({
+      public_key: searchParams.get("public_key")!,
+      callback_uri: searchParams.get("callback_uri"),
+      redirect_uri: searchParams.get("redirect_uri"),
+      redirect_query_name: searchParams.get("redirect_query_name"),
+    }),
+    [searchParams],
+  );
 
   const { controller, policies, origin } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -46,7 +55,7 @@ export default function Session() {
   const onCallback = useCallback(
     async (response: SessionResponse) => {
       if (!queries.callback_uri && !queries.redirect_uri) {
-        router.replace(`/failure`);
+        navigate("/failure", { replace: true });
         return;
       }
 
@@ -70,17 +79,18 @@ export default function Session() {
           });
 
           if (res.ok) {
-            return router.replace({
-              pathname: "/success",
-              query: {
+            navigate(
+              `/success?${{
                 title: "Session Registered!",
                 description: "Return to your terminal to continue",
-              },
-            });
+              }.toString()}`,
+              { replace: true },
+            );
+            return;
           }
         } catch (e) {
           console.error("failed to call the callback url", e);
-          router.replace(`/failure`);
+          navigate("/failure", { replace: true });
         }
 
         return;
@@ -89,10 +99,10 @@ export default function Session() {
       if (queries.redirect_uri) {
         const url = decodeURIComponent(queries.redirect_uri);
         const query_name = queries.redirect_query_name ?? "session";
-        router.replace(`${url}?${query_name}=${encodedResponse}`);
+        navigate(`${url}?${query_name}=${encodedResponse}`, { replace: true });
       }
     },
-    [router, queries],
+    [navigate, queries],
   );
 
   // Handler when user clicks the Create button

@@ -1,7 +1,7 @@
 import { ConnectReply, toSessionPolicies } from "@cartridge/controller";
 import { ConnectCtx, ConnectionCtx } from "./types";
 import { Policies } from "@cartridge/presets";
-import { ParsedSessionPolicies, parseSessionPolicies } from "hooks/session";
+import { ParsedSessionPolicies, parseSessionPolicies } from "@/hooks/session";
 
 export function connect({
   setOrigin,

@@ -2,9 +2,8 @@ import React, { PropsWithChildren, useEffect } from "react";
 import { Container, Content, Footer } from "./layout";
 import { AlertIcon, ExternalIcon } from "@cartridge/ui";
 import { Button, HStack, Link, Text } from "@chakra-ui/react";
-import { useConnection } from "hooks/connection";
-import NextLink from "next/link";
-import { CARTRIDGE_DISCORD_LINK } from "const";
+import { useConnection } from "@/hooks/connection";
+import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { usePostHog } from "posthog-js/react";
 
 export class ErrorBoundary extends React.Component<
@@ -76,7 +75,7 @@ export function ErrorPage({ error }: { error: Error }) {
             Get help
           </Text>
 
-          <Link as={NextLink} href={CARTRIDGE_DISCORD_LINK} isExternal>
+          <Link href={CARTRIDGE_DISCORD_LINK} isExternal>
             <HStack>
               <Text fontSize="sm">Cartridge Discord</Text>
               <ExternalIcon fontSize="xl" />

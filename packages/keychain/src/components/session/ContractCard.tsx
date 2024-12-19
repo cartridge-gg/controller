@@ -21,7 +21,7 @@ import {
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
 import { Method } from "@cartridge/presets";
-import { useChainId } from "hooks/connection";
+import { useChainId } from "@/hooks/connection";
 
 interface ContractCardProps {
   address: string;

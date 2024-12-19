@@ -7,7 +7,7 @@ import {
   FinalizeRegistrationMutation,
 } from "@cartridge/utils/api/cartridge";
 
-import { client, ENDPOINT } from "utils/graphql";
+import { client, ENDPOINT } from "@/utils/graphql";
 import base64url from "base64url";
 
 type RawAssertion = PublicKeyCredential & {
@@ -47,7 +47,7 @@ const createCredentials = async (
     { alg: -257, type: "public-key" },
     { alg: -7, type: "public-key" },
   ];
-  beginRegistration.publicKey.rp.id = process.env.NEXT_PUBLIC_RP_ID;
+  beginRegistration.publicKey.rp.id = import.meta.env.VITE_RP_ID;
   const credentials = (await navigator.credentials.create(
     beginRegistration,
   )) as RawAttestation & {
@@ -116,7 +116,15 @@ const onLoginFinalize = (
   });
 };
 
-const beginRegistration = async (username: string): Promise<any> => {
+type BeginREgistrationTypedJson = {
+  data: {
+    beginRegistration: CredentialCreationOptions;
+  };
+};
+
+const beginRegistration = async (
+  username: string,
+): Promise<BeginREgistrationTypedJson> => {
   return doXHR(
     JSON.stringify({
       operationName: "BeginRegistration",
@@ -128,7 +136,17 @@ const beginRegistration = async (username: string): Promise<any> => {
   );
 };
 
-const beginLogin = async (username: string): Promise<any> => {
+type BeginLoginReturn = {
+  data: {
+    beginLogin: {
+      publicKey: {
+        challenge: string;
+      };
+    };
+  };
+};
+
+const beginLogin = async (username: string): Promise<BeginLoginReturn> => {
   return doXHR(
     JSON.stringify({
       operationName: "BeginLogin",
@@ -141,7 +159,7 @@ const beginLogin = async (username: string): Promise<any> => {
 };
 
 // We use XHR since fetch + webauthn causes issues with safari
-const doXHR = async (json: string): Promise<any> => {
+const doXHR = async <T>(json: string): Promise<T> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
@@ -188,7 +206,7 @@ export async function doLogin({
         beginLoginData.beginLogin.publicKey.challenge,
       ),
       timeout: 60000,
-      rpId: process.env.NEXT_PUBLIC_RP_ID,
+      rpId: import.meta.env.VITE_RP_ID,
       allowCredentials: [
         {
           type: "public-key",

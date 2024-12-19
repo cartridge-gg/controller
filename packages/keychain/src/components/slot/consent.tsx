@@ -1,32 +1,33 @@
-import Controller from "utils/controller";
+import Controller from "@/utils/controller";
 import { Button, Text } from "@chakra-ui/react";
-import { Container, Footer } from "components/layout";
-import { useRouter } from "next/router";
+import { Container, Footer } from "@/components/layout";
 import { useCallback, useEffect } from "react";
-import dynamic from "next/dynamic";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-function Consent() {
-  const router = useRouter();
+export function Consent() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const callback_uri = searchParams.get("callback_uri")!;
 
   const onSubmit = useCallback(async () => {
-    const redirect_uri = encodeURIComponent(
-      router.query.callback_uri as string,
-    );
-    const url = `${process.env.NEXT_PUBLIC_CARTRIDGE_API_URL}/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
+    const redirect_uri = encodeURIComponent(callback_uri);
+    const url = `${
+      import.meta.env.VITE_CARTRIDGE_API_URL
+    }/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
 
     window.location.href = url;
-  }, [router.query.callback_uri]);
+  }, [callback_uri]);
 
   const onDeny = useCallback(async () => {
-    const url = decodeURIComponent(router.query.callback_uri as string);
+    const url = decodeURIComponent(callback_uri);
     window.location.href = url;
-  }, [router.query.callback_uri]);
+  }, [callback_uri]);
 
   useEffect(() => {
-    if (!Controller.fromStore(process.env.NEXT_PUBLIC_ORIGIN!)) {
-      router.replace("/slot/auth");
+    if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
+      navigate("/slot", { replace: true });
     }
-  }, [router]);
+  }, [navigate]);
 
   return (
     <Container
@@ -52,5 +53,3 @@ function Consent() {
     </Container>
   );
 }
-
-export default dynamic(() => Promise.resolve(Consent), { ssr: false });

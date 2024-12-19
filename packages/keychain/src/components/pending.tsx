@@ -1,11 +1,10 @@
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { useUrlTxns } from "hooks/transaction";
-import { Transaction, TransactionState } from "components/Transaction";
+import { useUrlTxns } from "@/hooks/transaction";
+import { Transaction, TransactionState } from "@/components/Transaction";
 import { TimerDuoIcon } from "@cartridge/ui";
-import { Container, Content } from "components/layout";
+import { Container, Content } from "@/components/layout";
 
-function Pending() {
+export function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
   const [title, setTitle] = useState("Pending...");
   const [description, setDescription] = useState("This may take a second");
@@ -47,5 +46,3 @@ function Pending() {
     </Container>
   );
 }
-
-export default dynamic(() => Promise.resolve(Pending), { ssr: false });

@@ -1,5 +1,5 @@
-import { useRouter } from "next/router";
 import { useCallback } from "react";
+import { useLocation } from "react-router-dom";
 
 export interface AnalyticsEvent {
   type:
@@ -17,12 +17,12 @@ export interface AnalyticsEvent {
 }
 
 export const useAnalytics = () => {
-  const router = useRouter();
+  const { pathname } = useLocation();
   const event = useCallback(
     ({ type, payload, address }: AnalyticsEvent) => {
-      log(type, { address, path: router.pathname, ...payload });
+      log(type, { address, path: pathname, ...payload });
     },
-    [router],
+    [pathname],
   );
 
   return {

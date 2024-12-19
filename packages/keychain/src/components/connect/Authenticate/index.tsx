@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { Button } from "@chakra-ui/react";
 import { Unsupported, useIsSupported } from "./Unsupported";
-import { doSignup } from "hooks/account";
-import { Container, Content, Footer } from "components/layout";
+import { doSignup } from "@/hooks/account";
+import { Container, Content, Footer } from "@/components/layout";
 import { FaceIDDuoImage } from "./FaceID";
 
 export type AuthAction = "signup" | "login";
@@ -59,7 +59,7 @@ export function Authenticate({
     ) : (
       <>Please click continue.</>
     );
-  const cta = "signup" ? "Create Passkey" : "continue";
+  const cta = action === "signup" ? "Create Passkey" : "continue";
 
   return (
     <Container

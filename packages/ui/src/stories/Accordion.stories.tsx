@@ -9,12 +9,7 @@ import {
   Box,
   AccordionPanel,
 } from "@chakra-ui/react";
-import {
-  AlertIcon,
-  InfoIcon,
-  WarningIcon,
-  WedgeDownIcon,
-} from "src/components";
+import { AlertIcon, InfoIcon, WarningIcon, WedgeDownIcon } from "@/components";
 import { motion } from "framer-motion";
 
 const meta: Meta<typeof Accordion> = {

@@ -1,10 +1,11 @@
 import { ColorMode } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { ChakraProvider, useColorMode } from "@chakra-ui/react";
-import { useConnection } from "hooks/connection";
-import { ControllerThemeContext, useChakraTheme } from "hooks/theme";
-import { useRouter } from "next/router";
+import { useConnection } from "@/hooks/connection";
+import { useChakraTheme } from "@/hooks/theme";
 import { PropsWithChildren, useEffect, useMemo } from "react";
+import { ControllerThemeContext } from "@/context/theme";
+import { useSearchParams } from "react-router-dom";
 
 export function ControllerThemeProvider({ children }: PropsWithChildren) {
   const { theme } = useConnection();
@@ -22,10 +23,10 @@ export function ControllerThemeProvider({ children }: PropsWithChildren) {
 }
 
 function ChakraTheme({ children }: PropsWithChildren) {
-  const router = useRouter();
+  const [searchParams] = useSearchParams();
   const colorMode = useMemo(
-    () => (router.query.colorMode as ColorMode) ?? "dark",
-    [router.query.colorMode],
+    () => (searchParams.get("colorMode") as ColorMode) ?? "dark",
+    [searchParams],
   );
   const { setColorMode } = useColorMode();
 

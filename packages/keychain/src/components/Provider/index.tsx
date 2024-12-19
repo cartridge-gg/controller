@@ -1,8 +1,8 @@
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { useConnectionValue } from "hooks/connection";
+import { useConnectionValue } from "@/hooks/connection";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
-import { ENDPOINT } from "utils/graphql";
+import { ENDPOINT } from "@/utils/graphql";
 import { PostHogProvider } from "posthog-js/react";
 import posthog from "posthog-js";
 import { ConnectionContext } from "./connection";
@@ -10,6 +10,7 @@ import { ControllerThemeProvider } from "./theme";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
 import { sepolia, mainnet } from "@starknet-react/chains";
 import { constants, num } from "starknet";
+import { BrowserRouter } from "react-router-dom";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -17,10 +18,10 @@ export function Provider({ children }: PropsWithChildren) {
     let nodeUrl;
     switch (connection.chainId) {
       case constants.StarknetChainId.SN_MAIN:
-        nodeUrl = process.env.NEXT_PUBLIC_RPC_MAINNET;
+        nodeUrl = import.meta.env.VITE_RPC_MAINNET;
         break;
       case constants.StarknetChainId.SN_SEPOLIA:
-        nodeUrl = process.env.NEXT_PUBLIC_RPC_SEPOLIA;
+        nodeUrl = import.meta.env.VITE_RPC_SEPOLIA;
         break;
       default:
         nodeUrl = connection.rpcUrl;
@@ -36,16 +37,18 @@ export function Provider({ children }: PropsWithChildren) {
     <CartridgeAPIProvider url={ENDPOINT}>
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
-          <ControllerThemeProvider>
-            <StarknetConfig
-              explorer={voyager}
-              chains={[sepolia, mainnet]}
-              defaultChainId={defaultChainId}
-              provider={jsonRpcProvider({ rpc })}
-            >
-              <PostHogProvider client={posthog}>{children}</PostHogProvider>
-            </StarknetConfig>
-          </ControllerThemeProvider>
+          <BrowserRouter>
+            <ControllerThemeProvider>
+              <StarknetConfig
+                explorer={voyager}
+                chains={[sepolia, mainnet]}
+                defaultChainId={defaultChainId}
+                provider={jsonRpcProvider({ rpc })}
+              >
+                <PostHogProvider client={posthog}>{children}</PostHogProvider>
+              </StarknetConfig>
+            </ControllerThemeProvider>
+          </BrowserRouter>
         </ConnectionContext.Provider>
       </QueryClientProvider>
     </CartridgeAPIProvider>
