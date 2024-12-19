@@ -85,7 +85,7 @@ export function Amount({
             type="number"
             className="bg-quaternary pr-12 border border-quaternary focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none"
             placeholder={(0.01).toLocaleString()}
-            value={amount}
+            value={amount ?? ""}
             onChange={handleChange}
           />
           {countervalue && (
