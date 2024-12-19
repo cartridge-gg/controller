@@ -6,9 +6,9 @@ import {
   FinalizeLoginMutation,
   FinalizeRegistrationMutation,
 } from "@cartridge/utils/api/cartridge";
-
 import { client, ENDPOINT } from "@/utils/graphql";
 import base64url from "base64url";
+import { Buffer } from "buffer";
 
 type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
