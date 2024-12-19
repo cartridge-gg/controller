@@ -12,6 +12,7 @@ import { ErrorPage } from "./ErrorBoundary";
 import { PurchaseCredits } from "./Funding/PurchaseCredits";
 import { Settings } from "./Settings";
 import { SignMessage } from "./SignMessage";
+import { PageLoading } from "./Loading";
 
 export function Home() {
   const { context, controller, error, policies, upgrade } = useConnection();
@@ -25,8 +26,8 @@ export function Home() {
       typeof window !== "undefined" &&
       !window.location.hostname.includes("localhost")
     ) {
-      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-        api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+      posthog.init(process.env.VITE_POSTHOG_KEY!, {
+        api_host: process.env.VITE_POSTHOG_HOST,
         person_profiles: "always",
         enable_recording_console_log: true,
         loaded: (posthog) => {
