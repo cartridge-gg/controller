@@ -86,7 +86,7 @@ export const Recipient = ({
       setWarning("");
       setTo("");
     },
-    [to, address, setSelectedName, setValue, setWarning, setTo],
+    [setSelectedName, setValue, setWarning, setTo],
   );
 
   const handleBlur = useCallback(() => {
@@ -108,6 +108,7 @@ export const Recipient = ({
     }
     setSelectedName(formatAddress(address, { size: "xs", padding: true }));
   }, [
+    name,
     address,
     wallet,
     warning,
