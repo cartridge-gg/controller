@@ -4,7 +4,7 @@
   },
   "headers": [
     {
-      "source": "/ingest/static/:path*",
+      "source": "/ingest/static/:path(.*)",
       "headers": [
         {
           "key": "Access-Control-Allow-Credentials",
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "source": "/ingest/:path*",
+      "source": "/ingest/:path(.*)",
       "headers": [
         {
           "key": "Access-Control-Allow-Credentials",
