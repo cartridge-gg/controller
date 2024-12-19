@@ -100,14 +100,16 @@ export function LayoutHeader({
           )}
         </div>
 
-        <div className="flex flex-col gap-1 overflow-hidden">
+        <div className="flex flex-col overflow-hidden">
           {typeof title === "object" ? (
             title
           ) : (
-            <div className="text-lg font-semibold truncate">{title}</div>
+            <div className="text-lg font-semibold truncate h-6 flex items-center">
+              {title}
+            </div>
           )}
           {description && typeof description === "string" ? (
-            <div className="text-xs text-muted-foreground truncate">
+            <div className="flex items-center text-xs text-muted-foreground truncate h-5">
               {description}
             </div>
           ) : (
