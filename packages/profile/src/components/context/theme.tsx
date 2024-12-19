@@ -65,23 +65,26 @@ export function ThemeProvider({
   );
   const [theme, setTheme] = useState<ControllerTheme>(initialState.theme);
   const themeParam = searchParams.get("theme");
+  const presetParam = searchParams.get("preset");
   const { origin } = useConnection();
 
   useEffect(() => {
-    if (!themeParam) return;
-    const val = decodeURIComponent(themeParam);
-
-    if (
-      typeof val === "string" &&
-      val in controllerConfigs &&
-      controllerConfigs[val].theme
-    ) {
-      setTheme(controllerConfigs[val].theme);
-      return;
+    // Handle theme from URL param
+    if (themeParam) {
+      const decodedPreset = decodeURIComponent(themeParam);
+      try {
+        const parsedTheme = JSON.parse(decodedPreset) as ControllerTheme;
+        setTheme(parsedTheme);
+      } catch {
+        setTheme(controllerConfigs[decodedPreset].theme || defaultTheme);
+      }
     }
 
-    setTheme(JSON.parse(val));
-  }, [themeParam, origin]);
+    // Handle theme from preset param
+    if (presetParam && presetParam in controllerConfigs) {
+      setTheme(controllerConfigs[presetParam].theme || defaultTheme);
+    }
+  }, [themeParam, presetParam, origin]);
 
   useThemeEffect({ theme, assetUrl: import.meta.env.VITE_KEYCHAIN_URL });
 
