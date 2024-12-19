@@ -36,7 +36,6 @@ export default defineConfig(({ mode }) => ({
   publicDir: "public",
   build: {
     rollupOptions: {
-      external: ["vite-plugin-node-polyfills/shims/global"],
       output: {
         manualChunks(id) {
           // Chunk splitting logic
@@ -61,8 +60,14 @@ export default defineConfig(({ mode }) => ({
     modulePreload: {
       polyfill: false, // Reduces polyfill size if you don't need older browser support
     },
+    // Add a longer timeout for builds
+    timeout: 120000, // 2 minutes
   },
   optimizeDeps: {
     include: ["react", "react-dom"], // Pre-bundle common dependencies
+  },
+  // Add this to ensure polyfills are properly included
+  define: {
+    global: "globalThis",
   },
 }));
