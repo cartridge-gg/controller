@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
+import { constants } from "starknet";
 
 export function useUsername({ address }: { address: string }) {
   const { data } = useAccountNameQuery({ address });
@@ -15,14 +16,14 @@ export function useUsername({ address }: { address: string }) {
 }
 
 export function useAddress({ username }: { username: string }) {
-  const { isReady } = useIndexerAPI();
-  const { data, isFetching } = useAddressByUsernameQuery(
+  const { data, error, isFetching } = useAddressByUsernameQuery(
     { username },
-    { enabled: isReady && !!username },
+    { enabled: !!username },
   );
 
   return {
     address: data?.account?.controllers?.edges?.[0]?.node?.address ?? "",
+    error,
     isFetching,
   };
 }
@@ -41,6 +42,7 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     // If the address matches a controller name, set the controller name
     if (
       nameOrAddress.match(/^[a-z0-9]+$/) &&
+      !nameOrAddress.replace("0x", "").match(/^[0-9a-f]+$/) &&
       nameOrAddress.length >= 3 &&
       nameOrAddress.length <= 30
     ) {
@@ -54,11 +56,15 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
   }, [nameOrAddress]);
 
   // Fetch the stark address
-  const { address: starkAddress, isFetching: isFetchingStarkAddress } =
-    useStarkAddress({ name: starkName });
+  const {
+    address: starkAddress,
+    error: starkError,
+    isFetching: isFetchingStarkAddress,
+  } = useStarkAddress({ name: starkName });
   // Fetch the controller address
   const {
     address: controllerAddress,
+    error: controllerError,
     isFetching: isFetchingControllerAddress,
   } = useAddress({ username: controllerName });
 
@@ -70,7 +76,7 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
       return controllerName;
     }
     return "";
-  }, [starkName, controllerName]);
+  }, [starkName, controllerName, nameOrAddress]);
 
   const address = useMemo(() => {
     if (starkAddress) {
@@ -79,14 +85,44 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     if (controllerAddress) {
       return controllerAddress;
     }
-    if (nameOrAddress.startsWith("0x")) {
+    if (
+      nameOrAddress.startsWith("0x") &&
+      nameOrAddress.replace("0x", "").match(/^[0-9a-f]+$/)
+    ) {
       return nameOrAddress;
     }
     return "";
   }, [starkAddress, controllerAddress, nameOrAddress]);
-  
+
   // Fetch class hash
-  const { wallet, isFetching: isFetchingClassHash } = useWallet({ address });
+  const {
+    wallet,
+    error: walletError,
+    isFetching: isFetchingClassHash,
+  } = useWallet({ address });
+
+  const error = useMemo(() => {
+    if (starkName && starkError) {
+      return "Could not get address from stark name";
+    }
+    if (controllerName && controllerError) {
+      return "Could not get address from controller name";
+    }
+    if (address && !address.startsWith("0x")) {
+      return 'Starknet address must start with "0x"';
+    }
+    if (address && address.length < 62) {
+      return "Please input a valid Starknet address";
+    }
+    if (address && BigInt(address) >= constants.PRIME) {
+      return "Please input a valid Starknet address";
+    }
+    return "";
+  }, [starkError, controllerError, address, walletError]);
+
+  const warning = useMemo(() => {
+    return walletError;
+  }, [walletError]);
 
   return {
     name,
@@ -96,6 +132,8 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
       isFetchingStarkAddress ||
       isFetchingControllerAddress ||
       isFetchingClassHash,
+    error,
+    warning,
   };
 }
 

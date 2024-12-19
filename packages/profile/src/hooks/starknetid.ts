@@ -1,15 +1,29 @@
 import { useQuery } from "react-query";
-
-export const STARKNET_ID_API_URL = "https://api.starknet.id/domain_to_addr";
+import { useConnection } from "./context";
+import { Provider } from "starknet";
+import { useState } from "react";
 
 export const useStarkAddress = ({ name }: { name: string }) => {
+  const { provider } = useConnection();
+  const [error, setError] = useState<string | null>(null);
+
   const { data, isFetching } = useQuery({
     enabled: !!name && name.includes(".stark"),
-    staleTime: 5 * 60 * 1000, // 5 minutes
     queryKey: ["starknetid", name],
-    queryFn: () =>
-      fetch(`${STARKNET_ID_API_URL}?domain=${name}`).then((res) => res.json()),
+    queryFn: async () => {
+      console.log(provider);
+      setError("");
+      const custom = new Provider({
+        nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet",
+      });
+      const address = await custom.getAddressFromStarkName(name);
+      if (!address || address === "0x0") {
+        setError("Could not get address from stark name");
+        return null;
+      }
+      return address;
+    },
   });
 
-  return { address: data?.addr ?? "", isFetching };
+  return { address: data ?? "", error, isFetching };
 };
