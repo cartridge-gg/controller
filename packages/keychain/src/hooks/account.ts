@@ -6,10 +6,8 @@ import {
   FinalizeLoginMutation,
   FinalizeRegistrationMutation,
 } from "@cartridge/utils/api/cartridge";
-import { Buffer } from "buffer";
 
 import { client, ENDPOINT } from "@/utils/graphql";
-import base64url from "base64url";
 
 type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
@@ -38,8 +36,10 @@ const createCredentials = async (
         undefined;
   }
 
-  beginRegistration.publicKey.user.id = Buffer.from(name);
-  beginRegistration.publicKey.challenge = base64url.toBuffer(
+  beginRegistration.publicKey.user.id = new Uint8Array(
+    new TextEncoder().encode(name),
+  );
+  beginRegistration.publicKey.challenge = base64UrlToArrayBuffer(
     beginRegistration.publicKey.challenge as unknown as string,
   );
 
@@ -81,14 +81,14 @@ const onCreateFinalize = (
     network,
     credentials: JSON.stringify({
       id: credentials.id,
-      rawId: base64url(Buffer.from(credentials.rawId)),
+      rawId: arrayBufferToBase64Url(credentials.rawId),
       type: credentials.type,
       response: {
-        attestationObject: base64url(
-          Buffer.from(credentials.response.attestationObject),
+        attestationObject: arrayBufferToBase64Url(
+          credentials.response.attestationObject,
         ),
-        clientDataJSON: base64url(
-          Buffer.from(credentials.response.clientDataJSON),
+        clientDataJSON: arrayBufferToBase64Url(
+          credentials.response.clientDataJSON,
         ),
       },
     }),
@@ -102,16 +102,16 @@ const onLoginFinalize = (
     credentials: JSON.stringify({
       id: assertion.id,
       type: assertion.type,
-      rawId: base64url(Buffer.from(assertion.rawId)),
+      rawId: arrayBufferToBase64Url(assertion.rawId),
       clientExtensionResults: assertion.getClientExtensionResults(),
       response: {
-        authenticatorData: base64url(
-          Buffer.from(assertion.response.authenticatorData),
+        authenticatorData: arrayBufferToBase64Url(
+          assertion.response.authenticatorData,
         ),
-        clientDataJSON: base64url(
-          Buffer.from(assertion.response.clientDataJSON),
+        clientDataJSON: arrayBufferToBase64Url(
+          assertion.response.clientDataJSON,
         ),
-        signature: base64url(Buffer.from(assertion.response.signature)),
+        signature: arrayBufferToBase64Url(assertion.response.signature),
       },
     }),
   });
@@ -203,7 +203,7 @@ export async function doLogin({
   // TODO: replace with account_sdk device signer
   const assertion = (await navigator.credentials.get({
     publicKey: {
-      challenge: base64url.toBuffer(
+      challenge: base64UrlToArrayBuffer(
         beginLoginData.beginLogin.publicKey.challenge,
       ),
       timeout: 60000,
@@ -211,7 +211,7 @@ export async function doLogin({
       allowCredentials: [
         {
           type: "public-key",
-          id: base64url.toBuffer(credentialId),
+          id: base64UrlToArrayBuffer(credentialId),
         },
       ],
       userVerification: "required",
@@ -224,4 +224,23 @@ export async function doLogin({
       throw Error("login failed");
     }
   }
+}
+
+function base64UrlToArrayBuffer(base64url: string): ArrayBuffer {
+  const base64 = base64url.replace(/-/g, "+").replace(/_/g, "/");
+  const binaryStr = atob(base64);
+  const buffer = new ArrayBuffer(binaryStr.length);
+  const uint8Array = new Uint8Array(buffer);
+
+  for (let i = 0; i < binaryStr.length; i++) {
+    uint8Array[i] = binaryStr.charCodeAt(i);
+  }
+
+  return buffer;
+}
+
+function arrayBufferToBase64Url(buffer: ArrayBuffer): string {
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
