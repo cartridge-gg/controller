@@ -35,7 +35,9 @@ export function useConnectionValue() {
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>();
-  const [rpcUrl, setRpcUrl] = useState<string>();
+  const [rpcUrl, setRpcUrl] = useState<string>(
+    import.meta.env.VITE_RPC_SEPOLIA,
+  );
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [theme, setTheme] = useState<ControllerTheme>(defaultTheme);
@@ -108,7 +110,10 @@ export function useConnectionValue() {
     // Set rpc and origin if we're not embedded (eg Slot auth/session)
     if (!isIframe()) {
       setOrigin(urlParams.get("origin") || import.meta.env.VITE_ORIGIN);
-      setRpcUrl(urlParams.get("rpc_url") || import.meta.env.VITE_RPC_SEPOLIA);
+      const rpcUrl = urlParams.get("rpc_url");
+      if (rpcUrl) {
+        setRpcUrl(rpcUrl);
+      }
     }
 
     // Handle prefunds
