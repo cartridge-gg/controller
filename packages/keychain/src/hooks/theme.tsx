@@ -1,10 +1,19 @@
-import { ControllerThemeContext } from "@/context/theme";
 import { ControllerColor, ControllerTheme } from "@cartridge/presets";
 import { CartridgeTheme } from "@cartridge/ui";
-import { useContext, useMemo } from "react";
+import { useContext, createContext, useMemo } from "react";
+
+export type VerifiableControllerTheme = ControllerTheme & {
+  verified: boolean;
+};
+
+export const ControllerThemeContext = createContext<
+  VerifiableControllerTheme | undefined
+>(undefined);
 
 export function useControllerTheme() {
-  const ctx = useContext<ControllerTheme | undefined>(ControllerThemeContext);
+  const ctx = useContext<VerifiableControllerTheme | undefined>(
+    ControllerThemeContext,
+  );
   if (!ctx) {
     throw new Error("ControllerThemeProvider must be placed");
   }
@@ -12,7 +21,7 @@ export function useControllerTheme() {
   return ctx;
 }
 
-export function useChakraTheme(preset: ControllerTheme) {
+export function useChakraTheme(preset: VerifiableControllerTheme) {
   return useMemo(
     () => ({
       ...CartridgeTheme,
