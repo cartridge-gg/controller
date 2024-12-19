@@ -4,7 +4,7 @@ export const PopupCenter = (
   w: number,
   h: number,
 ) => {
-  var userAgent = navigator.userAgent,
+  const userAgent = navigator.userAgent,
     mobile = function () {
       return (
         /\b(iPhone|iP[ao]d)/.test(userAgent) ||
@@ -44,7 +44,7 @@ export const PopupCenter = (
   features.push("top=" + right);
   features.push("scrollbars=1");
 
-  var newWindow = window.open(url, title, features.join(","));
+  const newWindow = window.open(url, title, features.join(","));
 
   newWindow?.focus();
 

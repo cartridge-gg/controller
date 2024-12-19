@@ -1,11 +1,11 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import { useContext, useState, useEffect, useCallback, useMemo } from "react";
-import Controller from "utils/controller";
+import Controller from "@/utils/controller";
 import {
   connectToController,
   ConnectionCtx,
   OpenSettingsCtx,
-} from "utils/connection";
+} from "@/utils/connection";
 import { getChainName, isIframe } from "@cartridge/utils";
 import { RpcProvider } from "starknet";
 import {
@@ -13,12 +13,12 @@ import {
   ResponseCodes,
   toSessionPolicies,
 } from "@cartridge/controller";
-import { mergeDefaultETHPrefund } from "utils/token";
-import { setIsSignedUp } from "utils/cookie";
+import { mergeDefaultETHPrefund } from "@/utils/token";
+import { setIsSignedUp } from "@/utils/cookie";
 import {
   ConnectionContext,
   ConnectionContextValue,
-} from "components/Provider/connection";
+} from "@/components/Provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import posthog from "posthog-js";
 import { Policies } from "@cartridge/presets";
@@ -35,7 +35,9 @@ export function useConnectionValue() {
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>();
-  const [rpcUrl, setRpcUrl] = useState<string>();
+  const [rpcUrl, setRpcUrl] = useState<string>(
+    import.meta.env.VITE_RPC_SEPOLIA,
+  );
   const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [theme, setTheme] = useState<ControllerTheme>(defaultTheme);
@@ -62,7 +64,7 @@ export function useConnectionValue() {
       });
       setContext(undefined); // clears context
       await parent.close();
-    } catch (e) {
+    } catch {
       // Always fails for some reason
     }
   }, [context, parent, setContext]);
@@ -76,7 +78,7 @@ export function useConnectionValue() {
         message: "User interaction required",
       });
       await parent.close();
-    } catch (e) {
+    } catch {
       // Always fails for some reason
     }
   }, [context, parent]);
@@ -107,10 +109,11 @@ export function useConnectionValue() {
 
     // Set rpc and origin if we're not embedded (eg Slot auth/session)
     if (!isIframe()) {
-      setOrigin(urlParams.get("origin") || process.env.NEXT_PUBLIC_ORIGIN);
-      setRpcUrl(
-        urlParams.get("rpc_url") || process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-      );
+      setOrigin(urlParams.get("origin") || import.meta.env.VITE_ORIGIN);
+      const rpcUrl = urlParams.get("rpc_url");
+      if (rpcUrl) {
+        setRpcUrl(rpcUrl);
+      }
     }
 
     // Handle prefunds
@@ -132,7 +135,7 @@ export function useConnectionValue() {
       try {
         const parsedTheme = JSON.parse(decodedPreset) as ControllerTheme;
         setTheme(parsedTheme);
-      } catch (e) {
+      } catch {
         setTheme(controllerConfigs[decodedPreset].theme || defaultTheme);
       }
     }
@@ -198,7 +201,7 @@ export function useConnectionValue() {
     if (rpcUrl) {
       const update = async () => {
         try {
-          let provider = new RpcProvider({ nodeUrl: rpcUrl });
+          const provider = new RpcProvider({ nodeUrl: rpcUrl });
           const chainId = await provider.getChainId();
           setChainId(chainId);
         } catch (e) {

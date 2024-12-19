@@ -23,10 +23,10 @@ import {
 import { motion } from "framer-motion";
 import React, { ReactElement, useEffect, useState } from "react";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { ControllerError } from "utils/connection";
-import { useConnection } from "hooks/connection";
+import { ControllerError } from "@/utils/connection";
+import { useConnection } from "@/hooks/connection";
 import { constants } from "starknet";
-import { parseExecutionError, parseValidationError } from "utils/errors";
+import { parseExecutionError, parseValidationError } from "@/utils/errors";
 import { formatAddress } from "@cartridge/utils";
 
 export function ErrorAlert({
@@ -268,7 +268,6 @@ export function ControllerErrorAlert({
     case ErrorCode.StarknetInvalidTransactionNonce:
     case ErrorCode.StarknetInsufficientMaxFee:
     case ErrorCode.StarknetInsufficientAccountBalance:
-    case ErrorCode.StarknetValidationFailure:
     case ErrorCode.StarknetCompilationFailed:
     case ErrorCode.StarknetContractClassSizeIsTooLarge:
     case ErrorCode.StarknetNonAccount:
@@ -289,12 +288,12 @@ export function ControllerErrorAlert({
         title = parsedError.summary;
         copyText = parsedError.raw;
         description = <StackTraceDisplay stackTrace={parsedError.stack} />;
-      } catch (e) {
+      } catch {
         title = "Execution error";
         description = <Text color="inherit">{error.data}</Text>;
       }
       break;
-    case ErrorCode.StarknetValidationFailure:
+    case ErrorCode.StarknetValidationFailure: {
       const parsedError = parseValidationError(error);
       title = parsedError.summary;
       copyText = parsedError.raw;
@@ -315,8 +314,11 @@ export function ControllerErrorAlert({
       variant = "warning";
       isExpanded = true;
       break;
-    default:
+    }
+    default: {
       title = "Unknown Error";
+      break;
+    }
   }
 
   return (

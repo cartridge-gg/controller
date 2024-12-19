@@ -1,10 +1,10 @@
 import { Button } from "@chakra-ui/react";
 import { GearIcon } from "@cartridge/ui";
 import { useState } from "react";
-import { Container, Footer } from "components/layout";
+import { Container, Footer } from "@/components/layout";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
-import { useConnection } from "hooks/connection";
+import { useConnection } from "@/hooks/connection";
 
 enum State {
   SETTINGS,

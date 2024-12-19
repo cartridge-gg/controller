@@ -6,7 +6,7 @@ import {
 import { ControllerAccounts } from "@cartridge/controller";
 import pThrottle from "p-throttle";
 import { addAddressPadding, validateAndParseAddress } from "starknet";
-import { fetchData } from "utils/graphql";
+import { fetchData } from "@/utils/graphql";
 
 const MAX_ADDRESSES = 1000;
 const RATE_LIMIT = 1; // 1 requests per second
@@ -26,7 +26,7 @@ const throttledFetchData = pThrottle({
   ),
 );
 
-export function fetchControllers(_: string) {
+export function fetchControllers() {
   return async (contractAddresses: string[]): Promise<ControllerAccounts> => {
     if (contractAddresses.length > MAX_ADDRESSES) {
       throw new Error(
@@ -39,7 +39,7 @@ export function fetchControllers(_: string) {
 
     // Check cache and collect addresses that need to be fetched
     for (const addr of contractAddresses) {
-      let validatedAddr = validateAndParseAddress(addr);
+      const validatedAddr = validateAndParseAddress(addr);
       if (validatedAddr in cache) {
         result[validatedAddr] = cache[validatedAddr];
       } else {

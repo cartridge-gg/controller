@@ -8,7 +8,7 @@ import {
   useCreditBalance,
   useERC20Balance,
 } from "@cartridge/utils";
-import { useController } from "hooks/controller";
+import { useController } from "@/hooks/controller";
 
 type BalanceProps = {
   showBalances: ("credits" | "eth" | "strk")[];

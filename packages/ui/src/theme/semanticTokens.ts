@@ -1,8 +1,4 @@
 export const semanticTokens = {
-  fonts: {
-    Inter: "var(--font-inter), system-ui, sans-serif",
-    "IBM Plex Mono": "var(--font-ibm-plex-mono), ui-monospace, sans-serif",
-  },
   colors: {
     text: {
       primary: {

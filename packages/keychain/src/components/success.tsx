@@ -1,12 +1,11 @@
-"use client";
-
-import { Container } from "components/layout";
+import { Container } from "@/components/layout";
 import { SparklesDuoIcon } from "@cartridge/ui";
-import { useRouter } from "next/router";
+import { useSearchParams } from "react-router-dom";
 
-export default function Success() {
-  const router = useRouter();
-  const { title, description } = router.query;
+export function Success() {
+  const [searchParams] = useSearchParams();
+  const title = searchParams.get("title");
+  const description = searchParams.get("description");
 
   return (
     <Container

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Flex, Text } from "@chakra-ui/react";
 import { shortString, Signature, TypedData } from "starknet";
-import { Container, Footer, Content } from "components/layout";
+import { Container, Footer, Content } from "@/components/layout";
 import { TransferDuoIcon } from "@cartridge/ui";
-import { useController } from "hooks/controller";
+import { useController } from "@/hooks/controller";
 
 export function SignMessage({
   origin,
@@ -26,6 +26,7 @@ export function SignMessage({
     // Recursively decodes all nested `felt*` types
     // to their ASCII equivalents
     const convertFeltArraysToString = (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       initial: any,
       messageType: Array<{ name: string; type: string }>,
     ) => {

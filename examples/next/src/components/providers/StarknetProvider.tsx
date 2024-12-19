@@ -1,9 +1,12 @@
 "use client";
 
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
-import { StarknetConfig, starkscan } from "@starknet-react/core";
+import {
+  jsonRpcProvider,
+  StarknetConfig,
+  starkscan,
+} from "@starknet-react/core";
 import { PropsWithChildren } from "react";
-import { RpcProvider } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Policy } from "@cartridge/controller";
 
@@ -99,7 +102,17 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       chains={[sepolia]}
       connectors={[controller]}
       explorer={starkscan}
-      provider={provider}
+      provider={jsonRpcProvider({
+        rpc: (chain: Chain) => {
+          switch (chain) {
+            case mainnet:
+              return { nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET };
+            case sepolia:
+            default:
+              return { nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA };
+          }
+        },
+      })}
     >
       {children}
     </StarknetConfig>
@@ -127,17 +140,3 @@ const controller = new ControllerConnector({
     ],
   },
 });
-
-function provider(chain: Chain) {
-  switch (chain) {
-    case mainnet:
-      return new RpcProvider({
-        nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
-      });
-    case sepolia:
-    default:
-      return new RpcProvider({
-        nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
-      });
-  }
-}

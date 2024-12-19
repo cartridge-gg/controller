@@ -1,12 +1,10 @@
-"use client";
-
-import { Container } from "components/layout";
+import { Container } from "@/components/layout";
 import { AlertIcon, ExternalIcon } from "@cartridge/ui";
-import { Link, Text } from "@chakra-ui/react";
-import NextLink from "next/link";
-import { CARTRIDGE_DISCORD_LINK } from "const";
+import { Link as UILink, Text } from "@chakra-ui/react";
+import { CARTRIDGE_DISCORD_LINK } from "@/const";
+import { Link } from "react-router-dom";
 
-export default function Failure() {
+export function Failure() {
   return (
     <Container
       variant="expanded"
@@ -18,8 +16,8 @@ export default function Failure() {
           If this problem persists swing by the Cartridge
           <Text color="inherit">
             support channel on{" "}
-            <Link
-              as={NextLink}
+            <UILink
+              as={Link}
               href={CARTRIDGE_DISCORD_LINK}
               isExternal
               color="link.blue"
@@ -30,7 +28,7 @@ export default function Failure() {
             >
               Discord
               <ExternalIcon />
-            </Link>
+            </UILink>
           </Text>
         </>
       }

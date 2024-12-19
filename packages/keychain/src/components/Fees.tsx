@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 
 import { formatUnits } from "viem";
-import { useChainId } from "hooks/connection";
+import { useChainId } from "@/hooks/connection";
 import { EthereumIcon, InfoIcon, WarningIcon } from "@cartridge/ui";
 
 export function Fees({

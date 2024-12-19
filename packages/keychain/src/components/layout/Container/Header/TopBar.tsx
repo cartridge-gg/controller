@@ -3,7 +3,7 @@ import { CloseButton } from "./CloseButton";
 import { NetworkStatus } from "./NetworkStatus";
 import { SettingsButton } from "./SettingsButton";
 import { BackButton } from "./BackButton";
-import { useConnection } from "hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { useMemo } from "react";
 
 export type TopBarProps = {

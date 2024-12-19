@@ -1,7 +1,7 @@
-import { Container, Content, Footer } from "components/layout";
+import { Container, Content, Footer } from "@/components/layout";
 import { Button } from "@chakra-ui/react";
 import { useState } from "react";
-import { useConnection } from "hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { CopyAddress } from "../CopyAddress";
 import { ArrowLineDownIcon, CoinsIcon, EthereumIcon } from "@cartridge/ui";
 import { DepositEth } from "./DepositEth";

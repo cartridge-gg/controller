@@ -11,7 +11,7 @@
     "e2e": "turbo build:deps dev e2e",
     "e2e:ui": "turbo build:deps dev e2e:ui",
     "lint": "turbo lint format:check",
-    "format": "turbo format",
+    "format": "turbo format lint:fix",
     "clean": "git clean -xdf && pnpm store prune",
     "release": "pnpm build && pnpm changeset publish",
     "prerelease": "pnpm build && pnpm changeset publish --tag prerelease",
@@ -31,7 +31,7 @@
     "test:storybook": "pnpm turbo build:deps test:storybook"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#8448f10"
+    "@cartridge/presets": "github:cartridge-gg/presets#570ecfe"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.2",

@@ -1,5 +1,5 @@
 import { AlertIcon } from "@cartridge/ui";
-import { Container } from "components/layout";
+import { Container } from "@/components/layout";
 import { useEffect, useState } from "react";
 
 export function Unsupported({ message }: { message: string }) {

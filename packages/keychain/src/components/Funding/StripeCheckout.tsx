@@ -6,11 +6,11 @@ import {
 } from "@stripe/react-stripe-js";
 import { StripePaymentElementOptions } from "@stripe/stripe-js";
 import { Button } from "@chakra-ui/react";
-import { Container, Content, Footer } from "components/layout";
-import { useController } from "hooks/controller";
+import { Container, Content, Footer } from "@/components/layout";
+import { useController } from "@/hooks/controller";
 import { CoinsIcon } from "@cartridge/ui";
-import { CopyAddress } from "components/CopyAddress";
-import { ErrorAlert } from "components/ErrorAlert";
+import { CopyAddress } from "@/components/CopyAddress";
+import { ErrorAlert } from "@/components/ErrorAlert";
 
 type StripeCheckoutProps = {
   creditsAmount: number;

@@ -6,8 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/primitives/accordion";
 import { Meta, StoryObj } from "@storybook/react";
-import { CircleIcon } from "../";
-import { InfoIcon } from "../../dist";
+import { CircleIcon, InfoIcon } from "../";
 
 const meta: Meta<typeof Accordion> = {
   title: "Accordion",

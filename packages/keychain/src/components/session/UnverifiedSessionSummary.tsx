@@ -1,6 +1,6 @@
 import React from "react";
 import { toArray } from "@cartridge/controller";
-import { ParsedSessionPolicies } from "hooks/session";
+import { ParsedSessionPolicies } from "@/hooks/session";
 
 import { MessageCard } from "./MessageCard";
 import { ContractCard } from "./ContractCard";

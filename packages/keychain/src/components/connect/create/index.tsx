@@ -3,7 +3,7 @@ import {
   AccountQuery,
   AccountQueryVariables,
 } from "@cartridge/utils/api/cartridge";
-import { fetchData } from "utils/graphql";
+import { fetchData } from "@/utils/graphql";
 
 export * from "./CreateController";
 export * from "./Legal";
