@@ -93,7 +93,7 @@ function TokenCardContent({
 
         {countervalue && (
           <span className="text-muted-foreground">
-            {formatBalance(countervalue.formatted)}
+            {formatBalance(countervalue.formatted, ["~"])}
           </span>
         )}
       </div>

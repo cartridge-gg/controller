@@ -34,51 +34,6 @@ export function SendToken() {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState<number | undefined>();
 
-  // const formSchema = useMemo(() => {
-  //   // Avoid scientific notation in error message (e.g. `parseFloat(`1e-${decimals}`).toString() === "1e-18"`)
-  //   const decimals = token?.meta.decimals ?? 18;
-  //   const minAmountStr = `0.${"0".repeat(decimals - 1)}1`;
-
-  //   return z.object({
-  //     to: z
-  //       .string()
-  //       .startsWith("0x", {
-  //         message: 'Starknet address must start with "0x"',
-  //       })
-  //       .min(62, {
-  //         message: "Starknet address must be at least 61 characters long",
-  //       })
-  //       .refine(
-  //         (addr) => {
-  //           try {
-  //             return BigInt(addr) < constants.PRIME;
-  //           } catch {
-  //             return false;
-  //           }
-  //         },
-  //         {
-  //           message: "Please input a valid Starknet address",
-  //         },
-  //       ),
-  //     amount: z.coerce
-  //       .number({ message: "Amount is required" })
-  //       .gte(parseFloat(minAmountStr), {
-  //         message: `Amount must be at least ${minAmountStr} ${token?.meta.symbol}`,
-  //       })
-  //       .refine((x) => BigInt(x * 10 ** decimals) <= (token?.balance.value ?? 0n), {
-  //         message: "Amount cannot exceed balance",
-  //       }),
-  //   });
-  // }, [token]);
-
-  // const form = useForm<z.infer<typeof formSchema>>({
-  //   mode: "onBlur",
-  //   resolver: zodResolver(formSchema),
-  //   defaultValues: {
-  //     to: "",
-  //   },
-  // });
-
   const disabled = useMemo(() => {
     return (!validated && !!warning) || !to || !amount;
   }, [validated, to, amount, warning]);
@@ -103,7 +58,6 @@ export function SendToken() {
         },
       ];
       await parent.openExecute(calls);
-      // Remove 3 sub routes from the path
       navigate("../../..");
     },
     [token, parent, navigate],
@@ -125,13 +79,14 @@ export function SendToken() {
     >
       <LayoutHeader
         title={`Send ${token.meta.symbol}`}
-        description={<CopyAddress address={address} />}
+        description={<CopyAddress address={address} size="sm" />}
         icon={
           <img
-            className="w-8 h-8"
+            className="w-10 h-10"
             src={token.meta.logoUrl ?? "/public/placeholder.svg"}
           />
         }
+        rounded
       />
       <LayoutContent className="pb-4 gap-6">
         <Recipient to={to} setTo={setTo} setWarning={setWarning} />

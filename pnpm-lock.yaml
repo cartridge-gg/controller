@@ -473,6 +473,9 @@ importers:
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       posthog-js:
         specifier: ^1.181.0
         version: 1.181.0
@@ -507,6 +510,9 @@ importers:
       '@eslint/js':
         specifier: ^9.9.0
         version: 9.12.0
+      '@types/lodash':
+        specifier: ^4.17.13
+        version: 4.17.13
       '@types/node':
         specifier: ^20.6.0
         version: 20.16.11
@@ -5158,6 +5164,9 @@ packages:
 
   '@types/lodash@4.17.10':
     resolution: {integrity: sha512-YpS0zzoduEhuOWjAotS6A5AVCva7X4lVlYLF0FYHAY9sdraBfnatttHItlWeZdGhuEkf+OzMNg2ZYAx8t+52uQ==}
+
+  '@types/lodash@4.17.13':
+    resolution: {integrity: sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg==}
 
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
@@ -12473,14 +12482,6 @@ packages:
       typescript:
         optional: true
 
-  viem@2.21.22:
-    resolution: {integrity: sha512-jU+WniqIhwDXfgWWkNX7YqlGqenzTa5roLDNs2cbcUGQXxG8aQt1vlTqeezM8W1kepkaU/jvR2QSq/lGirpzrQ==}
-    peerDependencies:
-      typescript: '>=5.0.4'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
   viem@2.21.32:
     resolution: {integrity: sha512-2oXt5JNIb683oy7C8wuIJ/SeL3XtHVMEQpy1U2TA6WMnJQ4ScssRvyPwYLcaP6mKlrGXE/cR/V7ncWpvLUVPYQ==}
     peerDependencies:
@@ -17125,7 +17126,7 @@ snapshots:
       get-starknet-core: 4.0.0
       react: 18.3.1
       starknet: 6.11.0
-      viem: 2.21.22(typescript@5.5.4)(zod@3.23.8)
+      viem: 2.21.32(typescript@5.5.4)(zod@3.23.8)
       zod: 3.23.8
     transitivePeerDependencies:
       - bufferutil
@@ -18878,6 +18879,8 @@ snapshots:
       '@types/lodash': 4.17.10
 
   '@types/lodash@4.17.10': {}
+
+  '@types/lodash@4.17.13': {}
 
   '@types/mdx@2.0.13': {}
 
@@ -28026,24 +28029,6 @@ snapshots:
       abitype: 0.9.8(typescript@5.5.4)(zod@3.23.8)
       isows: 1.0.3(ws@8.13.0)
       ws: 8.13.0
-    optionalDependencies:
-      typescript: 5.5.4
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-      - zod
-
-  viem@2.21.22(typescript@5.5.4)(zod@3.23.8):
-    dependencies:
-      '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.6.0
-      '@noble/hashes': 1.5.0
-      '@scure/bip32': 1.5.0
-      '@scure/bip39': 1.4.0
-      abitype: 1.0.6(typescript@5.5.4)(zod@3.23.8)
-      isows: 1.0.6(ws@8.18.0)
-      webauthn-p256: 0.0.10
-      ws: 8.18.0
     optionalDependencies:
       typescript: 5.5.4
     transitivePeerDependencies:
