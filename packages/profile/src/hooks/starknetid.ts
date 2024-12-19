@@ -1,6 +1,5 @@
 import { useQuery } from "react-query";
 import { useConnection } from "./context";
-import { Provider } from "starknet";
 import { useState } from "react";
 
 export const useStarkAddress = ({ name }: { name: string }) => {
@@ -11,12 +10,8 @@ export const useStarkAddress = ({ name }: { name: string }) => {
     enabled: !!name && name.includes(".stark"),
     queryKey: ["starknetid", name],
     queryFn: async () => {
-      console.log(provider);
       setError("");
-      const custom = new Provider({
-        nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet",
-      });
-      const address = await custom.getAddressFromStarkName(name);
+      const address = await provider.getAddressFromStarkName(name);
       if (!address || address === "0x0") {
         setError("Could not get address from stark name");
         return null;

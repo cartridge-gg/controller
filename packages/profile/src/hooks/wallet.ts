@@ -1,7 +1,6 @@
 import { useQuery } from "react-query";
 import { useConnection } from "./context";
 import { useMemo, useState } from "react";
-import { Provider } from "starknet";
 
 const ARGENT_ACCOUNT_CLASS_HASHES: BigInt[] = [
   BigInt("0x036078334509b514626504edc9fb252328d1a240e4e948bef8d0c08dff45927f"),
@@ -35,11 +34,7 @@ export function useWallet({ address }: { address: string }) {
     queryFn: async () => {
       try {
         setError("");
-        console.log(provider);
-        const custom = new Provider({
-          nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet",
-        });
-        return await custom.getClassHashAt(BigInt(address));
+        return await provider.getClassHashAt(BigInt(address));
       } catch (error: any) {
         if (error.message.includes("Contract not found")) {
           setError(
