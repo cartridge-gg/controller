@@ -31,7 +31,7 @@ export const useAnalytics = () => {
 };
 
 const log = async (type: string, payload: object) => {
-  if (process.env.NODE_ENV === "development") {
+  if (import.meta.env.DEV) {
     return console.log(type, payload);
   }
 

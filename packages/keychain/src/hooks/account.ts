@@ -6,9 +6,7 @@ import {
   FinalizeLoginMutation,
   FinalizeRegistrationMutation,
 } from "@cartridge/utils/api/cartridge";
-
 import { client, ENDPOINT } from "@/utils/graphql";
-import base64url from "base64url";
 
 type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
@@ -37,9 +35,9 @@ const createCredentials = async (
         undefined;
   }
 
-  beginRegistration.publicKey.user.id = Buffer.from(name);
-  beginRegistration.publicKey.challenge = base64url.toBuffer(
-    beginRegistration.publicKey.challenge as unknown as string,
+  beginRegistration.publicKey.user.id = toUint8Array(name);
+  beginRegistration.publicKey.challenge = toUint8Array(
+    toBase64Url(beginRegistration.publicKey.challenge as unknown as string),
   );
 
   // https://chromium.googlesource.com/chromium/src/+/main/content/browser/webauth/pub_key_cred_params.md
@@ -80,14 +78,14 @@ const onCreateFinalize = (
     network,
     credentials: JSON.stringify({
       id: credentials.id,
-      rawId: base64url(Buffer.from(credentials.rawId)),
+      rawId: toBase64Url(toString(credentials.rawId)),
       type: credentials.type,
       response: {
-        attestationObject: base64url(
-          Buffer.from(credentials.response.attestationObject),
+        attestationObject: toBase64Url(
+          toString(credentials.response.attestationObject),
         ),
-        clientDataJSON: base64url(
-          Buffer.from(credentials.response.clientDataJSON),
+        clientDataJSON: toBase64Url(
+          toString(credentials.response.clientDataJSON),
         ),
       },
     }),
@@ -101,16 +99,16 @@ const onLoginFinalize = (
     credentials: JSON.stringify({
       id: assertion.id,
       type: assertion.type,
-      rawId: base64url(Buffer.from(assertion.rawId)),
+      rawId: toBase64Url(toString(assertion.rawId)),
       clientExtensionResults: assertion.getClientExtensionResults(),
       response: {
-        authenticatorData: base64url(
-          Buffer.from(assertion.response.authenticatorData),
+        authenticatorData: toBase64Url(
+          toString(assertion.response.authenticatorData),
         ),
-        clientDataJSON: base64url(
-          Buffer.from(assertion.response.clientDataJSON),
+        clientDataJSON: toBase64Url(
+          toString(assertion.response.clientDataJSON),
         ),
-        signature: base64url(Buffer.from(assertion.response.signature)),
+        signature: toBase64Url(toString(assertion.response.signature)),
       },
     }),
   });
@@ -202,15 +200,15 @@ export async function doLogin({
   // TODO: replace with account_sdk device signer
   const assertion = (await navigator.credentials.get({
     publicKey: {
-      challenge: base64url.toBuffer(
-        beginLoginData.beginLogin.publicKey.challenge,
+      challenge: toUint8Array(
+        toBase64Url(beginLoginData.beginLogin.publicKey.challenge),
       ),
       timeout: 60000,
       rpId: import.meta.env.VITE_RP_ID,
       allowCredentials: [
         {
           type: "public-key",
-          id: base64url.toBuffer(credentialId),
+          id: toUint8Array(toBase64Url(credentialId)),
         },
       ],
       userVerification: "required",
@@ -223,4 +221,16 @@ export async function doLogin({
       throw Error("login failed");
     }
   }
+}
+
+function toString(ab: BufferSource) {
+  return new TextDecoder().decode(ab);
+}
+
+function toBase64Url(value: string) {
+  return value.replace(/-/g, "+").replace(/_/g, "/");
+}
+
+function toUint8Array(value: string) {
+  return new TextEncoder().encode(toBase64Url(value));
 }
