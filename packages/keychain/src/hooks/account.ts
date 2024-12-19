@@ -6,6 +6,7 @@ import {
   FinalizeLoginMutation,
   FinalizeRegistrationMutation,
 } from "@cartridge/utils/api/cartridge";
+import { Buffer } from "buffer";
 
 import { client, ENDPOINT } from "@/utils/graphql";
 import base64url from "base64url";
