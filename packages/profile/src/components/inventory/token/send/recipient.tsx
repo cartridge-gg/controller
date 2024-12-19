@@ -81,7 +81,6 @@ export const Recipient = ({
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       e.preventDefault();
-      console.log("called");
       setValue(e.target.value);
       setSelectedName("");
       setWarning("");
@@ -92,7 +91,10 @@ export const Recipient = ({
 
   const handleBlur = useCallback(() => {
     setFocus(false);
-  }, [setFocus]);
+    if (!hover) {
+      handleClear();
+    }
+  }, [setFocus, hover, handleClear]);
 
   const handleClick = useCallback(() => {
     setTo(address);
