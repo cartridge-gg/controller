@@ -1,6 +1,10 @@
 import { ControllerTheme } from "@cartridge/presets";
 import { createContext } from "react";
 
+export type VerifiableControllerTheme = ControllerTheme & {
+  verified: boolean;
+};
+
 export const ControllerThemeContext = createContext<
-  ControllerTheme | undefined
+  VerifiableControllerTheme | undefined
 >(undefined);
