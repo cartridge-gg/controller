@@ -1,4 +1,3 @@
-import React from "react";
 import { toArray } from "@cartridge/controller";
 import { ParsedSessionPolicies } from "@/hooks/session";
 
@@ -28,9 +27,9 @@ export function UnverifiedSessionSummary({
         );
       })}
 
-      {policies.messages?.map((message, index) => (
-        <MessageCard key={index} message={message} />
-      ))}
+      {policies.messages?.length && (
+        <MessageCard messages={policies.messages} />
+      )}
     </div>
   );
 }
