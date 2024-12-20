@@ -71,7 +71,10 @@ export function Session() {
           const url = sanitizeCallbackUrl(
             decodeURIComponent(queries.callback_uri),
           );
-          if (!url) return;
+          if (!url) {
+            return;
+          }
+
           const res = await fetch(url, {
             body: encodedResponse,
             headers,
@@ -99,7 +102,7 @@ export function Session() {
       if (queries.redirect_uri) {
         const url = decodeURIComponent(queries.redirect_uri);
         const query_name = queries.redirect_query_name ?? "session";
-        navigate(`${url}?${query_name}=${encodedResponse}`, { replace: true });
+        window.location.href = `${url}?${query_name}=${encodedResponse}`;
       }
     },
     [navigate, queries],
