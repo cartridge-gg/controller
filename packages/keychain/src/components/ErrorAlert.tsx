@@ -1,10 +1,8 @@
 import {
-  AlertIcon,
-  InfoIcon,
   WedgeIcon,
-  WarningIcon,
   CopyIcon,
   CheckIcon,
+  ErrorAlertIcon,
 } from "@cartridge/ui-next";
 import {
   Text,
@@ -21,7 +19,12 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import React, { ReactElement, useEffect, useState } from "react";
+import React, {
+  ComponentProps,
+  ReactElement,
+  useEffect,
+  useState,
+} from "react";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { ControllerError } from "@/utils/connection";
 import { useConnection } from "@/hooks/connection";
@@ -70,20 +73,16 @@ export function ErrorAlert({
               disabled={!description || (isExpanded && !allowToggle)}
             >
               <HStack alignItems="flex-start">
-                {(() => {
-                  switch (variant) {
-                    case "info":
-                      return <InfoIcon size="xs" color="info.foreground" />;
-                    case "warning":
-                      return (
-                        <WarningIcon size="xs" color="warning.foreground" />
-                      );
-                    case "error":
-                      return <AlertIcon size="xs" color="error.foreground" />;
-                    default:
-                      return null;
-                  }
-                })()}
+                {variant && (
+                  <ErrorAlertIcon
+                    variant={
+                      variant as ComponentProps<
+                        typeof ErrorAlertIcon
+                      >["variant"]
+                    }
+                    size="xs"
+                  />
+                )}
                 <Text
                   as="b"
                   fontSize="2xs"
