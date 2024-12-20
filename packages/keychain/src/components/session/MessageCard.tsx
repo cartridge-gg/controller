@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import {
   Card,
   CardContent,
@@ -54,56 +54,59 @@ function MessageContent({ messages }: MessageContentProps) {
         >
           Approve{" "}
           <span className="text-accent-foreground font-bold">
-            {messages.length} {messages.length > 1 ? "message" : "messages"}
+            {messages.length} {messages.length > 1 ? "messages" : "message"}
           </span>
         </AccordionTrigger>
 
-        <AccordionContent className="text-xs">
-          {messages.map((m) => (
-            <>
-              {/* Domain section */}
-              {Object.values(m.domain).filter((f) => typeof f !== "undefined")
-                .length > 0 && (
-                <CollapsibleRow key="domain" title="domain">
-                  {m.domain.name && (
-                    <ValueRow
-                      values={[{ name: "name", value: m.domain.name }]}
-                    />
-                  )}
-                  {/* ... other domain fields ... */}
-                </CollapsibleRow>
-              )}
-
-              <ValueRow
-                values={[{ name: "primaryType", value: m.primaryType }]}
-              />
-
-              <CollapsibleRow title="types">
-                {Object.entries(m.types).map(([name, types]) => (
-                  <CollapsibleRow key={name} title={name}>
-                    {types.map((t) => (
+        <AccordionContent className="text-xs flex flex-col bg-background border border-background rounded-md gap-px">
+          {messages.map((m, i) => (
+            <div className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md">
+              <div className="font-bold">{m.name ?? `Message ${i + 1}`}</div>
+              <div className="flex flex-col bg-secondary gap-1 ">
+                {/* Domain section */}
+                {Object.values(m.domain).filter((f) => typeof f !== "undefined")
+                  .length > 0 && (
+                  <CollapsibleRow key="domain" title="domain">
+                    {m.domain.name && (
                       <ValueRow
-                        key={t.name}
-                        values={[
-                          { name: "name", value: t.name },
-                          { name: "type", value: t.type },
-                          ...(["enum", "merkletree"].includes(t.name)
-                            ? [
-                                {
-                                  name: "contains",
-                                  value: (
-                                    t as StarknetEnumType | StarknetMerkleType
-                                  ).contains,
-                                },
-                              ]
-                            : []),
-                        ]}
+                        values={[{ name: "name", value: m.domain.name }]}
                       />
-                    ))}
+                    )}
+                    {/* ... other domain fields ... */}
                   </CollapsibleRow>
-                ))}
-              </CollapsibleRow>
-            </>
+                )}
+
+                <ValueRow
+                  values={[{ name: "primaryType", value: m.primaryType }]}
+                />
+
+                <CollapsibleRow title="types">
+                  {Object.entries(m.types).map(([name, types]) => (
+                    <CollapsibleRow key={name} title={name}>
+                      {types.map((t) => (
+                        <ValueRow
+                          key={t.name}
+                          values={[
+                            { name: "name", value: t.name },
+                            { name: "type", value: t.type },
+                            ...(["enum", "merkletree"].includes(t.name)
+                              ? [
+                                  {
+                                    name: "contains",
+                                    value: (
+                                      t as StarknetEnumType | StarknetMerkleType
+                                    ).contains,
+                                  },
+                                ]
+                              : []),
+                          ]}
+                        />
+                      ))}
+                    </CollapsibleRow>
+                  ))}
+                </CollapsibleRow>
+              </div>
+            </div>
           ))}
         </AccordionContent>
       </AccordionItem>

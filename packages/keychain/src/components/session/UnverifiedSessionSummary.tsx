@@ -1,4 +1,3 @@
-import React from "react";
 import { toArray } from "@cartridge/controller";
 import { ParsedSessionPolicies } from "@/hooks/session";
 
