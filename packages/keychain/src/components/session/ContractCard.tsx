@@ -9,7 +9,6 @@ import {
   AccordionTrigger,
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
-import { Divider, HStack, Spacer, Stack, Text, VStack } from "@chakra-ui/react";
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
 import { Method } from "@cartridge/presets";
@@ -54,7 +53,7 @@ export function ContractCard({
 
       <CardContent>
         <Accordion type="multiple" defaultValue={["methods"]}>
-          <AccordionItem value="methods" className="flex flex-col gap-3">
+          <AccordionItem value="methods" className="flex flex-col gap-4">
             <AccordionTrigger className="text-xs text-muted-foreground">
               Approve{" "}
               <span className="text-accent-foreground font-bold">
@@ -62,41 +61,28 @@ export function ContractCard({
               </span>
             </AccordionTrigger>
             <AccordionContent>
-              <Stack
-                border="1px solid"
-                spacing={0}
-                borderColor="darkGray.800"
-                borderRadius="md"
-                divider={<Divider borderColor="solid.bg" />}
-              >
+              <div className="bg-background border border-background rounded-md flex flex-col gap-px">
                 {methods.map((method) => (
-                  <VStack
+                  <div
                     key={method.entrypoint}
-                    p={3}
-                    gap={3}
-                    align="flex-start"
+                    className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md text-xs"
                   >
-                    <HStack w="full">
-                      <Text
-                        fontSize="xs"
-                        color="text.primary"
-                        fontWeight="bold"
-                      >
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold">
                         {method.name ?? humanizeString(method.entrypoint)}
-                      </Text>
-                      <Spacer />
-                      <Text fontSize="xs" color="text.secondaryAccent">
+                      </div>
+                      <div className="text-accent-foreground">
                         {method.entrypoint}
-                      </Text>
-                    </HStack>
+                      </div>
+                    </div>
                     {method.description && (
-                      <Text fontSize="xs" color="text.secondary">
+                      <div className="text-muted-foreground">
                         {method.description}
-                      </Text>
+                      </div>
                     )}
-                  </VStack>
+                  </div>
                 ))}
-              </Stack>
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
