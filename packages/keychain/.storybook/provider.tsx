@@ -51,10 +51,10 @@ function ControllerThemeProvider({
   theme = defaultTheme,
 }: PropsWithChildren<{ theme?: ControllerTheme }>) {
   useThemeEffect({ theme, assetUrl: "" });
-  const chakraTheme = useChakraTheme(theme);
+  const chakraTheme = useChakraTheme({ ...theme, verified: false });
 
   return (
-    <ControllerThemeContext.Provider value={theme}>
+    <ControllerThemeContext.Provider value={{ ...theme, verified: false }}>
       <ChakraProvider theme={chakraTheme}>{children}</ChakraProvider>
     </ControllerThemeContext.Provider>
   );
