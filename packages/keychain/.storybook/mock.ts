@@ -39,7 +39,7 @@ export function useMockedConnection({
     chainId,
     chainName,
     policies: {},
-    theme: defaultTheme,
+    theme: { defaultTheme, verified: true },
     hasPrefundRequest: false,
     error: undefined,
     setContext: () => {},

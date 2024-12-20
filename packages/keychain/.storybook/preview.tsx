@@ -1,11 +1,12 @@
 import React from "react";
 import type { Preview, ReactRenderer } from "@storybook/react";
 import { withThemeByClassName } from "@storybook/addon-themes";
+import { SonnerToaster } from "@cartridge/ui-next";
+
 import { StoryParameters } from "./mock";
 import { Provider } from "./provider";
 
 import "../src/index.css";
-import { SonnerToaster } from "@cartridge/ui-next";
 
 const preview: Preview = {
   parameters: {

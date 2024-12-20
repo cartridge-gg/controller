@@ -1,14 +1,10 @@
-import { ControllerColor, ControllerTheme } from "@cartridge/presets";
+import {
+  ControllerThemeContext,
+  VerifiableControllerTheme,
+} from "@/context/theme";
+import { ControllerColor } from "@cartridge/presets";
 import { CartridgeTheme } from "@cartridge/ui";
-import { useContext, createContext, useMemo } from "react";
-
-export type VerifiableControllerTheme = ControllerTheme & {
-  verified: boolean;
-};
-
-export const ControllerThemeContext = createContext<
-  VerifiableControllerTheme | undefined
->(undefined);
+import { useContext, useMemo } from "react";
 
 export function useControllerTheme() {
   const ctx = useContext<VerifiableControllerTheme | undefined>(

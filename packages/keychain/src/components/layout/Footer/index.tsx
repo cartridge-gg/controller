@@ -4,9 +4,6 @@ import { FOOTER_HEIGHT, useLayout } from "@/components/layout";
 import { Link } from "react-router-dom";
 import { cn } from "@cartridge/ui-next";
 
-import { useControllerTheme } from "@/hooks/theme";
-import { ErrorAlert } from "@/components/ErrorAlert";
-
 export function Footer({
   children,
   showCatridgeLogo,
@@ -15,7 +12,6 @@ export function Footer({
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const { footer } = useLayout();
-  const theme = useControllerTheme();
 
   useEffect(() => {
     if (!ref.current) return;
@@ -56,16 +52,6 @@ export function Footer({
         p={4}
         pb={showCatridgeLogo ? 1 : 4}
       >
-        {!theme.verified && (
-          <div className="mb-5">
-            <ErrorAlert
-              title="Please proceed with caution"
-              description="Application domain does not match the configured domain."
-              variant="warning"
-              isExpanded
-            />
-          </div>
-        )}
         {children}
       </VStack>
 

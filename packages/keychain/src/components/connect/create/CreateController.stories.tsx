@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { CreateControllerView } from "./CreateController";
-import { ControllerTheme } from "@cartridge/presets";
+import { VerifiableControllerTheme } from "@/context/theme";
 
 const meta: Meta<typeof CreateControllerView> = {
   component: CreateControllerView,
@@ -17,7 +17,8 @@ export const Default: Story = {
   args: {
     theme: {
       name: "Cartridge",
-    } as ControllerTheme,
+      verified: true,
+    } as VerifiableControllerTheme,
     usernameField: {
       value: "",
       error: undefined,
@@ -41,7 +42,8 @@ export const WithLightMode: Story = {
   args: {
     theme: {
       name: "Cartridge",
-    } as ControllerTheme,
+      verified: true,
+    } as VerifiableControllerTheme,
     usernameField: {
       value: "",
       error: undefined,
@@ -65,7 +67,7 @@ export const WithTheme: Story = {
   args: {
     theme: {
       name: "Eternum",
-    } as ControllerTheme,
+    } as VerifiableControllerTheme,
     usernameField: {
       value: "",
       error: undefined,
@@ -86,7 +88,8 @@ export const WithTimeoutError: Story = {
   args: {
     theme: {
       name: "Cartridge",
-    } as ControllerTheme,
+      verified: true,
+    } as VerifiableControllerTheme,
     usernameField: {
       value: "username",
       error: undefined,
@@ -108,7 +111,8 @@ export const WithValidationError: Story = {
   args: {
     theme: {
       name: "Cartridge",
-    } as ControllerTheme,
+      verified: true,
+    } as VerifiableControllerTheme,
     usernameField: {
       value: "@#$!",
     },
@@ -129,7 +133,8 @@ export const WithGenericError: Story = {
   args: {
     theme: {
       name: "Cartridge",
-    } as ControllerTheme,
+      verified: true,
+    } as VerifiableControllerTheme,
     usernameField: {
       value: "username",
       error: undefined,

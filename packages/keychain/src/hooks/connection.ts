@@ -27,7 +27,7 @@ import {
   ControllerTheme,
 } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
-import { VerifiableControllerTheme } from "./theme";
+import { VerifiableControllerTheme } from "@/context/theme";
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
