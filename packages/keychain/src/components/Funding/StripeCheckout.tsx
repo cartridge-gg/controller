@@ -80,7 +80,7 @@ export default function StripeCheckout({
     <Container
       title={"Purchase $" + creditsAmount}
       description={controller && <CopyAddress address={controller.address} />}
-      Icon={CoinsIcon}
+      icon={<CoinsIcon variant="solid" />}
       onBack={onBack}
     >
       <Content gap={6}>
