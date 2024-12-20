@@ -60,7 +60,10 @@ function MessageContent({ messages }: MessageContentProps) {
 
         <AccordionContent className="text-xs flex flex-col bg-background border border-background rounded-md gap-px">
           {messages.map((m, i) => (
-            <div className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md">
+            <div
+              key={m.domain.name ?? i}
+              className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md"
+            >
               <div className="font-bold">{m.name ?? `Message ${i + 1}`}</div>
               <div className="flex flex-col bg-secondary gap-1 ">
                 {/* Domain section */}
