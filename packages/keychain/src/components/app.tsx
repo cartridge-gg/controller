@@ -5,7 +5,7 @@ import { Session } from "./session";
 import { Failure } from "./failure";
 import { Success } from "./success";
 import { Pending } from "./pending";
-import { Slot } from "./slot";
+import { Consent, Slot } from "./slot";
 
 export function App() {
   return (
@@ -14,6 +14,7 @@ export function App() {
       <Route path="authenticate" element={<Authenticate />} />
       <Route path="session" element={<Session />} />
       <Route path="slot" element={<Slot />} />
+      <Route path="slot/consent" element={<Consent />} />
       <Route path="success" element={<Success />} />
       <Route path="failure" element={<Failure />} />
       <Route path="pending" element={<Pending />} />
