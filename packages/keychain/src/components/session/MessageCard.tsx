@@ -69,15 +69,15 @@ function MessageContent({ messages }: MessageContentProps) {
                 {/* Domain section */}
                 {Object.values(m.domain).filter((f) => typeof f !== "undefined")
                   .length > 0 && (
-                    <CollapsibleRow key="domain" title="domain">
-                      {m.domain.name && (
-                        <ValueRow
-                          values={[{ name: "name", value: m.domain.name }]}
-                        />
-                      )}
-                      {/* ... other domain fields ... */}
-                    </CollapsibleRow>
-                  )}
+                  <CollapsibleRow key="domain" title="domain">
+                    {m.domain.name && (
+                      <ValueRow
+                        values={[{ name: "name", value: m.domain.name }]}
+                      />
+                    )}
+                    {/* ... other domain fields ... */}
+                  </CollapsibleRow>
+                )}
 
                 <ValueRow
                   values={[{ name: "primaryType", value: m.primaryType }]}
@@ -94,13 +94,13 @@ function MessageContent({ messages }: MessageContentProps) {
                             { name: "type", value: t.type },
                             ...(["enum", "merkletree"].includes(t.name)
                               ? [
-                                {
-                                  name: "contains",
-                                  value: (
-                                    t as StarknetEnumType | StarknetMerkleType
-                                  ).contains,
-                                },
-                              ]
+                                  {
+                                    name: "contains",
+                                    value: (
+                                      t as StarknetEnumType | StarknetMerkleType
+                                    ).contains,
+                                  },
+                                ]
                               : []),
                           ]}
                         />

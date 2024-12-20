@@ -1,6 +1,5 @@
-import { DotsIcon } from "@cartridge/ui-next";
+import { Button, DotsIcon } from "@cartridge/ui-next";
 import { isIframe } from "@cartridge/utils";
-import { IconButton } from "@chakra-ui/react";
 
 export function SettingsButton({ onClick }: { onClick?: () => void }) {
   if (!isIframe()) {
@@ -8,15 +7,8 @@ export function SettingsButton({ onClick }: { onClick?: () => void }) {
   }
 
   return (
-    <IconButton
-      aria-label="Open Settings"
-      bg="solid.bg"
-      _hover={{
-        bg: "solid.bg",
-        opacity: 0.75,
-      }}
-      icon={<DotsIcon />}
-      onClick={onClick}
-    />
+    <Button variant="icon" size="icon" onClick={onClick}>
+      <DotsIcon />
+    </Button>
   );
 }

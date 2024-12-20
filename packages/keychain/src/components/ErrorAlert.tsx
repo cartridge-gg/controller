@@ -4,6 +4,7 @@ import {
   CheckIcon,
   ErrorAlertIcon,
   ErrorAlertIconProps,
+  Button,
 } from "@cartridge/ui-next";
 import {
   Text,
@@ -16,7 +17,6 @@ import {
   Box,
   VStack,
   Link,
-  IconButton,
   Divider,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
@@ -105,27 +105,22 @@ export function ErrorAlert({
             {description && (
               <AccordionPanel w="full" position="relative">
                 {copyText && (
-                  <IconButton
+                  <Button
                     size="icon"
-                    w={5}
-                    h={5}
-                    position="absolute"
-                    right={3}
-                    aria-label="Copy stacktrace"
-                    icon={
-                      copied ? (
-                        <CheckIcon size="xs" className="text-[black]" />
-                      ) : (
-                        <CopyIcon size="xs" className="text-[black]" />
-                      )
-                    }
+                    variant="icon"
+                    className="absolute right-3 w-5 h-5 bg-[rgba(0,0,0,0.1)]"
                     onClick={() => {
                       setCopied(true);
                       navigator.clipboard.writeText(copyText);
                     }}
-                  />
+                  >
+                    {copied ? (
+                      <CheckIcon size="xs" className="text-[black]" />
+                    ) : (
+                      <CopyIcon size="xs" className="text-[black]" />
+                    )}
+                  </Button>
                 )}
-
                 <Box
                   h="full"
                   maxH={200}
