@@ -74,6 +74,7 @@ type LayoutHeaderProps = {
   description?: string | React.ReactElement;
   icon?: string | React.ReactElement;
   right?: React.ReactElement;
+  rounded?: boolean;
 };
 
 export function LayoutHeader({
@@ -81,11 +82,17 @@ export function LayoutHeader({
   description,
   icon,
   right,
+  rounded = false,
 }: LayoutHeaderProps) {
   return (
     <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between">
-      <div className="flex min-w-0 gap-2 items-center">
-        <div className="w-11 h-11 bg-secondary rounded flex shrink-0 items-center justify-center overflow-hidden">
+      <div className="flex min-w-0 gap-4 items-center">
+        <div
+          className={cn(
+            "w-11 h-11 bg-secondary flex shrink-0 items-center justify-center overflow-hidden",
+            rounded ? "rounded-full" : "rounded",
+          )}
+        >
           {typeof icon === "object" ? (
             icon
           ) : (
@@ -93,14 +100,16 @@ export function LayoutHeader({
           )}
         </div>
 
-        <div className="flex flex-col gap-1 overflow-hidden">
+        <div className="flex flex-col overflow-hidden">
           {typeof title === "object" ? (
             title
           ) : (
-            <div className="text-lg font-semibold truncate">{title}</div>
+            <div className="text-lg font-semibold truncate h-6 flex items-center">
+              {title}
+            </div>
           )}
           {description && typeof description === "string" ? (
-            <div className="text-xs text-muted-foreground truncate">
+            <div className="flex items-center text-xs text-muted-foreground truncate h-5">
               {description}
             </div>
           ) : (
