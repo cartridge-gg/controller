@@ -25,7 +25,7 @@ export function Consent() {
 
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
-      navigate("/slot", { replace: true });
+      navigate("/slot/auth", { replace: true });
     }
   }, [navigate]);
 
