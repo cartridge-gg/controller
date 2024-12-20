@@ -20,18 +20,18 @@ import {
 } from "starknet";
 import {
   ArgentIcon,
-  BravosIcon,
+  BraavosIcon,
   CopyIcon,
   EthereumIcon,
   StarknetColorIcon,
-} from "@cartridge/ui";
+} from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { useToast } from "@/hooks/toast";
 import { ETH_CONTRACT_ADDRESS } from "@/utils/token";
 import { ErrorAlert } from "../ErrorAlert";
 import { CopyAddress } from "@/components/CopyAddress";
 import { parseEther } from "viem";
-import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
+import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
 import { Balance } from "./Balance";
 import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
 
@@ -198,7 +198,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                               <ArgentIcon fontSize={20} />
                             )}
                             {c.name === "braavos" && (
-                              <BravosIcon fontSize={20} />
+                              <BraavosIcon fontSize={20} />
                             )}
                             {c.name}
                           </Button>

@@ -1,4 +1,4 @@
-import { TimesIcon } from "@cartridge/ui";
+import { TimesIcon } from "@cartridge/ui-next";
 import { isIframe } from "@cartridge/utils";
 import { IconButton } from "@chakra-ui/react";
 import { useConnection } from "@/hooks/connection";
@@ -30,7 +30,7 @@ export function CloseButton({ onClose }: { onClose?: () => void }) {
       _hover={{
         bg: "hsl(var(solid.primary)/0.75)",
       }}
-      icon={<TimesIcon fontSize={24} />}
+      icon={<TimesIcon />}
       onClick={handleClose}
     />
   );

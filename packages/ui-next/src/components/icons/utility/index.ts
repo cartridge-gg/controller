@@ -32,6 +32,7 @@ export * from "./mystery";
 export * from "./pacman";
 export * from "./play";
 export * from "./plus";
+export * from "./question";
 export * from "./robot";
 export * from "./scan-qr";
 export * from "./scan-self";

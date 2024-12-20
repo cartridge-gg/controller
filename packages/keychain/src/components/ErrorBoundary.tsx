@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useEffect } from "react";
 import { Container, Content, Footer } from "./layout";
-import { AlertIcon, ExternalIcon } from "@cartridge/ui";
+import { AlertIcon, ExternalIcon } from "@cartridge/ui-next";
 import { Button, HStack, Link, Text } from "@chakra-ui/react";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";

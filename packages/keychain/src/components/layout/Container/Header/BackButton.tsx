@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from "@cartridge/ui";
+import { ArrowIcon } from "@cartridge/ui-next";
 import { isIframe } from "@cartridge/utils";
 import { IconButton } from "@chakra-ui/react";
 
@@ -15,7 +15,7 @@ export function BackButton({ onClick }: { onClick?: () => void }) {
         bg: "solid.bg",
         opacity: 0.75,
       }}
-      icon={<ArrowLeftIcon fontSize={24} />}
+      icon={<ArrowIcon variant="left" />}
       onClick={onClick}
     />
   );

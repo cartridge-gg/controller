@@ -1,10 +1,10 @@
 import { Container, Content, Footer } from "@/components/layout";
 import { Button, Divider } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
-import { CheckIcon, CoinsIcon } from "@cartridge/ui";
+import { CheckIcon, CoinsIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { CopyAddress } from "../CopyAddress";
-import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
+import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
@@ -162,7 +162,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
               isLoading={isLoading}
               onClick={() => createPaymentIntent()}
             >
-              <CoinsIcon fontSize={20} />
+              <CoinsIcon variant="solid" size="sm" />
               Stripe
             </Button>
           </>

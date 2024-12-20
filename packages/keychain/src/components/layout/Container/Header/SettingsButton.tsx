@@ -1,4 +1,4 @@
-import { DotsIcon } from "@cartridge/ui";
+import { DotsIcon } from "@cartridge/ui-next";
 import { isIframe } from "@cartridge/utils";
 import { IconButton } from "@chakra-ui/react";
 
@@ -15,7 +15,7 @@ export function SettingsButton({ onClick }: { onClick?: () => void }) {
         bg: "solid.bg",
         opacity: 0.75,
       }}
-      icon={<DotsIcon fontSize={24} />}
+      icon={<DotsIcon />}
       onClick={onClick}
     />
   );

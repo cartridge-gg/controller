@@ -1,30 +1,26 @@
-import { HStack, Text, Link } from "@chakra-ui/react";
-import { LockIcon } from "@cartridge/ui";
+import { LockIcon } from "@cartridge/ui-next";
+import { Link } from "react-router-dom";
 
 export const Legal = () => (
-  <HStack spacing={2} align="flex-start" marginTop="auto" mb="0.5rem">
-    <LockIcon color="#808080" width="16px" height="16px" />
-    <Text fontSize="12px" fontWeight={500} lineHeight="16px" color="#808080">
+  <div className="flex items-center gap-1 text-muted-foreground">
+    <LockIcon />
+    <div className="text-xs">
       By continuing you are agreeing to Cartridge&apos;s{" "}
       <Link
-        href="https://cartridge.gg/legal/terms-of-service"
+        to="https://cartridge.gg/legal/terms-of-service"
         target="_blank"
-        color="#808080"
-        textDecoration="underline"
-        display="inline"
+        className="underline"
       >
         Terms of Service
       </Link>{" "}
       and{" "}
       <Link
-        href="https://cartridge.gg/legal/privacy-policy"
+        to="https://cartridge.gg/legal/privacy-policy"
         target="_blank"
-        color="#808080"
-        textDecoration="underline"
-        display="inline"
+        className="underline"
       >
         Privacy Policy
       </Link>
-    </Text>
-  </HStack>
+    </div>
+  </div>
 );

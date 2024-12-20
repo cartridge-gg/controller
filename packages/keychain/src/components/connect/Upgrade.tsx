@@ -1,4 +1,4 @@
-import { BoltIcon } from "@cartridge/ui";
+import { BoltIcon } from "@cartridge/ui-next";
 import { ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { Content } from "@/components/layout";

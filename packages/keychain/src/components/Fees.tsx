@@ -7,10 +7,9 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-
 import { formatUnits } from "viem";
 import { useChainId } from "@/hooks/connection";
-import { EthereumIcon, InfoIcon, WarningIcon } from "@cartridge/ui";
+import { EthereumIcon, InfoIcon, WarningIcon } from "@cartridge/ui-next";
 
 export function Fees({
   maxFee,

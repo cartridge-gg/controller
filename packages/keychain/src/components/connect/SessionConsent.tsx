@@ -1,5 +1,5 @@
 import { HStack, Text } from "@chakra-ui/react";
-import { VerifiedIcon } from "@cartridge/ui";
+import { VerifiedIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
@@ -37,11 +37,7 @@ export function SessionConsent({
               to="https://github.com/cartridge-gg/controller/blob/main/packages/controller/src/presets.ts"
               target="_blank"
             >
-              <VerifiedIcon
-                fontSize="3xl"
-                color="text.secondaryAccent"
-                _hover={{ color: "brand.primary" }}
-              />
+              <VerifiedIcon size="lg" className="text-accent-foreground" />
             </Link>
           )}
           <Text color="text.secondary" fontSize="xs" fontWeight="bold">

@@ -1,5 +1,5 @@
 import { Container } from "@/components/layout";
-import { SparklesDuoIcon } from "@cartridge/ui";
+import { SparklesDuoIcon } from "@cartridge/ui-next";
 import { useSearchParams } from "react-router-dom";
 
 export function Success() {
