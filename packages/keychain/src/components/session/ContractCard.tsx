@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardContent,
@@ -7,6 +6,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  CardIcon,
+  CodeIcon,
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
@@ -32,7 +33,15 @@ export function ContractCard({
 
   return (
     <Card>
-      <CardHeader icon={icon}>
+      <CardHeader
+        icon={
+          icon ?? (
+            <CardIcon>
+              <CodeIcon variant="solid" />
+            </CardIcon>
+          )
+        }
+      >
         <div className="flex items-center justify-between">
           <div className="text-xs font-bold uppercase">{title}</div>
           <a
@@ -60,29 +69,27 @@ export function ContractCard({
                 {methods.length} {methods.length > 1 ? "methods" : "method"}
               </span>
             </AccordionTrigger>
-            <AccordionContent>
-              <div className="bg-background border border-background rounded-md flex flex-col gap-px">
-                {methods.map((method) => (
-                  <div
-                    key={method.entrypoint}
-                    className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md text-xs"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="font-bold">
-                        {method.name ?? humanizeString(method.entrypoint)}
-                      </div>
-                      <div className="text-accent-foreground">
-                        {method.entrypoint}
-                      </div>
+            <AccordionContent className="bg-background border border-background rounded-md gap-px">
+              {methods.map((method) => (
+                <div
+                  key={method.entrypoint}
+                  className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md text-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold">
+                      {method.name ?? humanizeString(method.entrypoint)}
                     </div>
-                    {method.description && (
-                      <div className="text-muted-foreground">
-                        {method.description}
-                      </div>
-                    )}
+                    <div className="text-accent-foreground">
+                      {method.entrypoint}
+                    </div>
                   </div>
-                ))}
-              </div>
+                  {method.description && (
+                    <div className="text-muted-foreground">
+                      {method.description}
+                    </div>
+                  )}
+                </div>
+              ))}
             </AccordionContent>
           </AccordionItem>
         </Accordion>
