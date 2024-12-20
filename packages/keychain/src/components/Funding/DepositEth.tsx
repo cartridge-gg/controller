@@ -194,12 +194,8 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                             colorScheme="colorful"
                             onClick={() => onConnect(c)}
                           >
-                            {c.name === "argentX" && (
-                              <ArgentIcon fontSize={20} />
-                            )}
-                            {c.name === "braavos" && (
-                              <BraavosIcon fontSize={20} />
-                            )}
+                            {c.name === "argentX" && <ArgentIcon size="sm" />}
+                            {c.name === "braavos" && <BraavosIcon size="sm" />}
                             {c.name}
                           </Button>
                         ))}
@@ -214,7 +210,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                       </Text>
                     )}
                     <Button w="full" gap="5px" onClick={onCopy}>
-                      <CopyIcon fontSize={20} /> copy address
+                      <CopyIcon size="sm" /> copy address
                     </Button>
                     <HStack>
                       <Text color="text.secondary" fontSize="14px">

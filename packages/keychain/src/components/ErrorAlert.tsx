@@ -3,6 +3,7 @@ import {
   CopyIcon,
   CheckIcon,
   ErrorAlertIcon,
+  ErrorAlertIconProps,
 } from "@cartridge/ui-next";
 import {
   Text,
@@ -19,12 +20,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import React, {
-  ComponentProps,
-  ReactElement,
-  useEffect,
-  useState,
-} from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { ControllerError } from "@/utils/connection";
 import { useConnection } from "@/hooks/connection";
@@ -75,11 +71,7 @@ export function ErrorAlert({
               <HStack alignItems="flex-start">
                 {variant && (
                   <ErrorAlertIcon
-                    variant={
-                      variant as ComponentProps<
-                        typeof ErrorAlertIcon
-                      >["variant"]
-                    }
+                    variant={variant as ErrorAlertIconProps["variant"]}
                     size="xs"
                   />
                 )}
@@ -122,9 +114,9 @@ export function ErrorAlert({
                     aria-label="Copy stacktrace"
                     icon={
                       copied ? (
-                        <CheckIcon fontSize="xs" color="black" />
+                        <CheckIcon size="xs" className="text-[black]" />
                       ) : (
-                        <CopyIcon fontSize="xs" color="black" />
+                        <CopyIcon size="xs" className="text-[black]" />
                       )
                     }
                     onClick={() => {

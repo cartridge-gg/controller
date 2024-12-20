@@ -27,7 +27,7 @@ export function Failure() {
               alignItems="center"
             >
               Discord
-              <ExternalIcon />
+              <ExternalIcon size="sm" />
             </UILink>
           </Text>
         </>

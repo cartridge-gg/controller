@@ -44,7 +44,7 @@ export function ErrorPage({ error }: { error: Error }) {
       variant="expanded"
       title="Uh oh!"
       description="Something went wrong"
-      icon={<AlertIcon fontSize={48} />}
+      icon={<AlertIcon size="lg" />}
     >
       <Content gap={4}>
         <HStack
@@ -78,7 +78,7 @@ export function ErrorPage({ error }: { error: Error }) {
           <Link href={CARTRIDGE_DISCORD_LINK} isExternal>
             <HStack>
               <Text fontSize="sm">Cartridge Discord</Text>
-              <ExternalIcon fontSize="xl" />
+              <ExternalIcon size="sm" />
             </HStack>
           </Link>
         </HStack>

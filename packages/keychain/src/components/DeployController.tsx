@@ -125,7 +125,7 @@ export function DeployController({
       return (
         <Container
           variant="expanded"
-          icon={<WandIcon fontSize="5xl" variant="line" />}
+          icon={<WandIcon variant="line" size="lg" />}
           title="Deploy Controller"
           description="This will initialize your controller on the new network"
         >
@@ -199,7 +199,7 @@ export function DeployController({
       return (
         <Container
           variant="expanded"
-          icon={<CheckIcon fontSize="5xl" />}
+          icon={<CheckIcon size="lg" />}
           title="Success!"
           description={`Your controller has been deployed on ${chainName}`}
         >

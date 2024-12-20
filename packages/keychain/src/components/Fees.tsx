@@ -81,7 +81,9 @@ function LineItem({
       ) : (
         <HStack gap={0}>
           {variant && <ErrorAlertIcon variant={variant} />}
-          {value !== "FREE" && <EthereumIcon color="text.primary" />}
+          {value !== "FREE" && (
+            <EthereumIcon className="text-secondary-foreground" />
+          )}
           <Text fontSize={13}>{value}</Text>
         </HStack>
       )}

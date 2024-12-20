@@ -42,7 +42,7 @@ export function SessionConsent({
           )}
           <Text color="text.secondary" fontSize="xs" fontWeight="bold">
             Authorize{" "}
-            {/* <LockIcon fontSize="md" color="text.secondaryAccent" mr={0.5} /> */}
+            {/* <LockIcon className="text-accent-foreground mr-0.5" /> */}
             <Text as="span" color="text.secondaryAccent" fontWeight="bold">
               {origin}
             </Text>{" "}

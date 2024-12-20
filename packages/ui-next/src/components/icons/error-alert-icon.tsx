@@ -1,15 +1,17 @@
 import { cn } from "@/utils";
 import { InfoIcon, WarningIcon, AlertIcon as AlertIconRaw } from "./utility";
 
+export type ErrorAlertIconProps = {
+  variant: "info" | "warning" | "error";
+  size?: "xs" | "default";
+  className?: string;
+};
+
 export function ErrorAlertIcon({
   variant,
   size = "default",
   className,
-}: {
-  variant: "info" | "warning" | "error";
-  size?: "xs" | "default";
-  className?: string;
-}) {
+}: ErrorAlertIconProps) {
   switch (variant) {
     case "info":
       return (
