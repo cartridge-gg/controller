@@ -9,15 +9,7 @@ import {
   AccordionTrigger,
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
-import {
-  Divider,
-  HStack,
-  Link,
-  Spacer,
-  Stack,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Divider, HStack, Spacer, Stack, Text, VStack } from "@chakra-ui/react";
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
 import { Method } from "@cartridge/presets";
@@ -42,19 +34,10 @@ export function ContractCard({
   return (
     <Card>
       <CardHeader icon={icon}>
-        <HStack py={4}>
-          <Text
-            color="text.primary"
-            fontSize="xs"
-            fontWeight="bold"
-            textTransform="uppercase"
-          >
-            {title}
-          </Text>
-          <Spacer />
-          <Link
-            color="text.secondary"
-            fontSize="xs"
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-bold uppercase">{title}</div>
+          <a
+            className="text-xs text-muted-foreground cursor-pointer hover:underline"
             href={
               chainId === constants.StarknetChainId.SN_MAIN ||
               chainId === constants.StarknetChainId.SN_SEPOLIA
@@ -62,21 +45,21 @@ export function ContractCard({
                 : `#`
             }
             target="_blank"
+            rel="noreferrer"
           >
             {formatAddress(address, { first: 5, last: 5 })}
-          </Link>
-        </HStack>
+          </a>
+        </div>
       </CardHeader>
+
       <CardContent>
         <Accordion type="multiple" defaultValue={["methods"]}>
-          <AccordionItem value="methods">
-            <AccordionTrigger>
-              <Text color="text.secondary" fontSize="xs">
-                Approve{" "}
-                <Text as="span" color="text.secondaryAccent" fontWeight="bold">
-                  {methods.length} {methods.length > 1 ? "methods" : "method"}
-                </Text>
-              </Text>
+          <AccordionItem value="methods" className="flex flex-col gap-3">
+            <AccordionTrigger className="text-xs text-muted-foreground">
+              Approve{" "}
+              <span className="text-accent-foreground font-bold">
+                {methods.length} {methods.length > 1 ? "methods" : "method"}
+              </span>
             </AccordionTrigger>
             <AccordionContent>
               <Stack
@@ -84,7 +67,6 @@ export function ContractCard({
                 spacing={0}
                 borderColor="darkGray.800"
                 borderRadius="md"
-                mt="14px"
                 divider={<Divider borderColor="solid.bg" />}
               >
                 {methods.map((method) => (

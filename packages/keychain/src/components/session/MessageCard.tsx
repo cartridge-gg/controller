@@ -1,4 +1,4 @@
-import React from "react";
+import React, { PropsWithChildren, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,67 +10,17 @@ import {
   CardIcon,
   PencilIcon,
   AccordionTrigger,
+  CheckboxIcon,
 } from "@cartridge/ui-next";
 import { ArrowTurnDownIcon, Badge } from "@cartridge/ui-next";
 import { StarknetEnumType, StarknetMerkleType } from "@starknet-io/types-js";
 import { SignMessagePolicy } from "@cartridge/presets";
-import { Text } from "@chakra-ui/react";
-
-import { CollapsibleRow } from "./CollapsibleRow";
-
-interface MessageContentProps {
-  message: SignMessagePolicy;
-}
-
-function MessageContent({ message: m }: MessageContentProps) {
-  return (
-    <CardContent className="text-muted-foreground flex flex-col">
-      {/* Domain section */}
-      {Object.values(m.domain).filter((f) => typeof f !== "undefined").length >
-        0 && (
-        <CollapsibleRow key="domain" title="domain">
-          {m.domain.name && (
-            <ValueRow values={[{ name: "name", value: m.domain.name }]} />
-          )}
-          {/* ... other domain fields ... */}
-        </CollapsibleRow>
-      )}
-
-      <ValueRow values={[{ name: "primaryType", value: m.primaryType }]} />
-
-      <CollapsibleRow title="types">
-        {Object.entries(m.types).map(([name, types]) => (
-          <CollapsibleRow key={name} title={name}>
-            {types.map((t) => (
-              <ValueRow
-                key={t.name}
-                values={[
-                  { name: "name", value: t.name },
-                  { name: "type", value: t.type },
-                  ...(["enum", "merkletree"].includes(t.name)
-                    ? [
-                        {
-                          name: "contains",
-                          value: (t as StarknetEnumType | StarknetMerkleType)
-                            .contains,
-                        },
-                      ]
-                    : []),
-                ]}
-              />
-            ))}
-          </CollapsibleRow>
-        ))}
-      </CollapsibleRow>
-    </CardContent>
-  );
-}
 
 interface MessageCardProps {
-  message: SignMessagePolicy;
+  messages: SignMessagePolicy[];
 }
 
-export function MessageCard({ message }: MessageCardProps) {
+export function MessageCard({ messages }: MessageCardProps) {
   return (
     <Card>
       <CardHeader
@@ -83,23 +33,108 @@ export function MessageCard({ message }: MessageCardProps) {
         <CardTitle className="text-foreground">Sign Message</CardTitle>
       </CardHeader>
 
-      <Accordion type="single" defaultValue="message" collapsible>
-        <AccordionItem value="message">
-          <CardContent>
-            <AccordionTrigger>
-              <Text color="text.secondary" fontSize="xs">
-                The application will be able to sign the following message on
-                your behalf
-              </Text>
-            </AccordionTrigger>
-          </CardContent>
-
-          <AccordionContent>
-            <MessageContent message={message} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <CardContent>
+        <MessageContent messages={messages} />
+      </CardContent>
     </Card>
+  );
+}
+
+interface MessageContentProps {
+  messages: SignMessagePolicy[];
+}
+
+function MessageContent({ messages }: MessageContentProps) {
+  return (
+    <Accordion type="single" defaultValue="message" collapsible>
+      <AccordionItem value="message" className="flex flex-col gap-3">
+        <AccordionTrigger
+          className="text-xs text-muted-foreground"
+          color="text.secondary"
+        >
+          Approve{" "}
+          <span className="text-accent-foreground font-bold">
+            {messages.length} {messages.length > 1 ? "message" : "messages"}
+          </span>
+        </AccordionTrigger>
+
+        <AccordionContent className="text-xs">
+          {messages.map((m) => (
+            <>
+              {/* Domain section */}
+              {Object.values(m.domain).filter((f) => typeof f !== "undefined")
+                .length > 0 && (
+                <CollapsibleRow key="domain" title="domain">
+                  {m.domain.name && (
+                    <ValueRow
+                      values={[{ name: "name", value: m.domain.name }]}
+                    />
+                  )}
+                  {/* ... other domain fields ... */}
+                </CollapsibleRow>
+              )}
+
+              <ValueRow
+                values={[{ name: "primaryType", value: m.primaryType }]}
+              />
+
+              <CollapsibleRow title="types">
+                {Object.entries(m.types).map(([name, types]) => (
+                  <CollapsibleRow key={name} title={name}>
+                    {types.map((t) => (
+                      <ValueRow
+                        key={t.name}
+                        values={[
+                          { name: "name", value: t.name },
+                          { name: "type", value: t.type },
+                          ...(["enum", "merkletree"].includes(t.name)
+                            ? [
+                                {
+                                  name: "contains",
+                                  value: (
+                                    t as StarknetEnumType | StarknetMerkleType
+                                  ).contains,
+                                },
+                              ]
+                            : []),
+                        ]}
+                      />
+                    ))}
+                  </CollapsibleRow>
+                ))}
+              </CollapsibleRow>
+            </>
+          ))}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+}
+interface CollapsibleRowProps extends PropsWithChildren {
+  title: string;
+}
+
+export function CollapsibleRow({ title, children }: CollapsibleRowProps) {
+  const [value, setValue] = useState("");
+
+  return (
+    <Accordion type="single" collapsible value={value} onValueChange={setValue}>
+      <AccordionItem value={title} className="flex flex-col">
+        <AccordionTrigger hideIcon className="hover:bg-accent rounded-md">
+          <div className="flex items-center gap-1 py-1">
+            <CheckboxIcon
+              variant={value ? "minus-line" : "plus-line"}
+              size="sm"
+            />
+            <div>{title}</div>
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent className="ml-5 flex flex-col">
+          {children}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 
@@ -109,7 +144,7 @@ interface ValueRowProps {
 
 export function ValueRow({ values }: ValueRowProps) {
   return (
-    <div className="flex items-center py-2">
+    <div className="flex items-center py-1">
       <ArrowTurnDownIcon />
       <div className="flex items-center gap-2">
         {values.map((f) => (
