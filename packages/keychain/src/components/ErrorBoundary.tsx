@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useEffect } from "react";
 import { Container, Content, Footer } from "./layout";
-import { AlertIcon, ExternalIcon } from "@cartridge/ui";
+import { AlertIcon, ExternalIcon } from "@cartridge/ui-next";
 import { Button, HStack, Link, Text } from "@chakra-ui/react";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
@@ -44,7 +44,7 @@ export function ErrorPage({ error }: { error: Error }) {
       variant="expanded"
       title="Uh oh!"
       description="Something went wrong"
-      icon={<AlertIcon fontSize={48} />}
+      icon={<AlertIcon size="lg" />}
     >
       <Content gap={4}>
         <HStack
@@ -78,7 +78,7 @@ export function ErrorPage({ error }: { error: Error }) {
           <Link href={CARTRIDGE_DISCORD_LINK} isExternal>
             <HStack>
               <Text fontSize="sm">Cartridge Discord</Text>
-              <ExternalIcon fontSize="xl" />
+              <ExternalIcon size="sm" />
             </HStack>
           </Link>
         </HStack>

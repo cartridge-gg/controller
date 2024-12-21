@@ -2,7 +2,6 @@ import {
   VStack,
   Circle,
   Text,
-  IconProps,
   Center,
   Flex,
   Image,
@@ -14,6 +13,7 @@ import { useControllerTheme } from "@/hooks/theme";
 import { useMemo } from "react";
 import { useLayoutVariant } from "../";
 import { TOP_BAR_HEIGHT } from "./TopBar";
+import { IconProps } from "@cartridge/ui-next";
 
 export type BannerProps = {
   Icon?: React.ComponentType<IconProps>;
@@ -80,7 +80,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
                   >
                     {Icon ? (
                       <Circle size="100%" bg="solid.primary">
-                        <Icon boxSize="100%" />
+                        <Icon size="lg" />
                       </Circle>
                     ) : icon ? (
                       <Circle size="100%" bg="solid.primary">
@@ -130,7 +130,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
           <HStack w="full" p={4} gap={4} minW={0}>
             {Icon ? (
               <Square size="44px" bg="solid.primary" borderRadius="md">
-                <Icon boxSize={8} />
+                <Icon size="lg" />
               </Square>
             ) : icon ? (
               <Square size="44px" bg="solid.primary" borderRadius="md">

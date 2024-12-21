@@ -20,18 +20,18 @@ import {
 } from "starknet";
 import {
   ArgentIcon,
-  BravosIcon,
+  BraavosIcon,
   CopyIcon,
   EthereumIcon,
   StarknetColorIcon,
-} from "@cartridge/ui";
+} from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { useToast } from "@/hooks/toast";
 import { ETH_CONTRACT_ADDRESS } from "@/utils/token";
 import { ErrorAlert } from "../ErrorAlert";
 import { CopyAddress } from "@/components/CopyAddress";
 import { parseEther } from "viem";
-import AmountSelection, { DEFAULT_AMOUNT } from "./AmountSelection";
+import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
 import { Balance } from "./Balance";
 import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
 
@@ -194,12 +194,8 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                             colorScheme="colorful"
                             onClick={() => onConnect(c)}
                           >
-                            {c.name === "argentX" && (
-                              <ArgentIcon fontSize={20} />
-                            )}
-                            {c.name === "braavos" && (
-                              <BravosIcon fontSize={20} />
-                            )}
+                            {c.name === "argentX" && <ArgentIcon size="sm" />}
+                            {c.name === "braavos" && <BraavosIcon size="sm" />}
                             {c.name}
                           </Button>
                         ))}
@@ -214,7 +210,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                       </Text>
                     )}
                     <Button w="full" gap="5px" onClick={onCopy}>
-                      <CopyIcon fontSize={20} /> copy address
+                      <CopyIcon size="sm" /> copy address
                     </Button>
                     <HStack>
                       <Text color="text.secondary" fontSize="14px">

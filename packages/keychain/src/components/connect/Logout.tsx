@@ -1,6 +1,6 @@
 import { Button } from "@chakra-ui/react";
 import { Container, Footer } from "@/components/layout";
-import { LogoutDuoIcon } from "@cartridge/ui";
+import { LogoutDuoIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ResponseCodes } from "@cartridge/controller";
 

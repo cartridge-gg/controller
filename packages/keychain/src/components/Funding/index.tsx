@@ -3,7 +3,7 @@ import { Button } from "@chakra-ui/react";
 import { useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { CopyAddress } from "../CopyAddress";
-import { ArrowLineDownIcon, CoinsIcon, EthereumIcon } from "@cartridge/ui";
+import { ArrowIcon, CoinsIcon, EthereumIcon } from "@cartridge/ui-next";
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance } from "./Balance";
@@ -44,7 +44,7 @@ export function Funding({ onComplete, title }: FundingProps) {
     <Container
       title={title || (controller ? `Fund ${controller.username()}` : "")}
       description={controller && <CopyAddress address={controller.address} />}
-      Icon={ArrowLineDownIcon}
+      icon={<ArrowIcon variant="down" />}
     >
       <Content gap={6}>
         <Balance showBalances={["credits", "eth"]} />
@@ -55,11 +55,11 @@ export function Funding({ onComplete, title }: FundingProps) {
             colorScheme="colorful"
             onClick={() => setState(FundingState.FUND_CREDITS)}
           >
-            <CoinsIcon fontSize={20} mr="5px" /> Purchase Credits
+            <CoinsIcon variant="line" size="sm" /> Purchase Credits
           </Button>
         )}
         <Button onClick={() => setState(FundingState.FUND_ETH)}>
-          <EthereumIcon fontSize={20} mr="5px" /> Deposit Eth
+          <EthereumIcon size="sm" className="mr-1" /> Deposit Eth
         </Button>
       </Footer>
     </Container>

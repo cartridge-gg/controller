@@ -1,5 +1,5 @@
 import { Prefund } from "@cartridge/controller";
-import { EthereumIcon } from "@cartridge/ui";
+import { EthereumIcon } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { Image } from "@chakra-ui/react";
 import { formatEther } from "viem";
@@ -48,7 +48,7 @@ export async function fetchTokenInfo(prefunds: Prefund[]) {
         name: "Ether",
         symbol: "ETH",
         decimals: 18,
-        logo: <EthereumIcon fontSize={20} color="currentColor" />,
+        logo: <EthereumIcon size="sm" />,
       };
     }
 

@@ -2,6 +2,7 @@ export * from "./brand";
 export * from "./brand-color";
 export * from "./directional";
 export * from "./duotone";
+export * from "./error-alert-icon";
 export * from "./state";
 export * from "./utility";
 export * from "./types";

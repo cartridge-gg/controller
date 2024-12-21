@@ -36,15 +36,11 @@ export function Network({ chainId }: { chainId: string }) {
             {(() => {
               switch (chainId) {
                 case constants.StarknetChainId.SN_MAIN:
-                  return <StarknetColorIcon fontSize="xl" />;
+                  return <StarknetColorIcon />;
                 case constants.StarknetChainId.SN_SEPOLIA:
-                  return <StarknetIcon fontSize="xl" />;
+                  return <StarknetIcon />;
                 default:
-                  return isSlotChain(chainId) ? (
-                    <SlotIcon fontSize="xl" />
-                  ) : (
-                    <QuestionIcon fontSize="xl" />
-                  );
+                  return isSlotChain(chainId) ? <SlotIcon /> : <QuestionIcon />;
               }
             })()}
             <div>{getChainName(chainId)}</div>

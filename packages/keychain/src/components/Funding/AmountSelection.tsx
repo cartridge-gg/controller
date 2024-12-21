@@ -1,4 +1,4 @@
-import { DollarIcon } from "@cartridge/ui";
+import { DollarIcon } from "@cartridge/ui-next";
 import {
   Box,
   Button,
@@ -21,7 +21,7 @@ type AmountSelectionProps = {
   onChange?: (amount: number) => void;
 };
 
-export default function AmountSelection({
+export function AmountSelection({
   amount,
   lockSelection,
   enableCustom,
@@ -92,13 +92,7 @@ export default function AmountSelection({
                 onChange?.(amount);
               }}
             />
-            <DollarIcon
-              position="absolute"
-              color="text.secondary"
-              top="10px"
-              left="10px"
-              boxSize="20px"
-            />
+            <DollarIcon size="xs" className="absolute top-3 left-3" />
           </Box>
         )}
       </VStack>

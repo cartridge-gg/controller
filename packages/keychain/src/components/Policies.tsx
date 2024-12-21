@@ -9,7 +9,7 @@ import {
   AccordionPanel,
   Box,
 } from "@chakra-ui/react";
-import { FnIcon, WedgeRightIcon } from "@cartridge/ui";
+import { FnIcon, WedgeIcon } from "@cartridge/ui-next";
 import { SessionPolicies } from "@cartridge/presets";
 import { CopyAddress } from "./CopyAddress";
 
@@ -62,17 +62,15 @@ export function Policies({
                     }}
                   >
                     <HStack>
-                      <FnIcon boxSize={5} />
+                      <FnIcon size="sm" />
                       <Text>{m.entrypoint}</Text>
                     </HStack>
 
                     <Spacer />
 
-                    <WedgeRightIcon
-                      fontSize="2xl"
-                      transform={isExpanded ? "rotate(90deg)" : undefined}
-                      transition="all 0.2s ease"
-                      color="text.secondary"
+                    <WedgeIcon
+                      variant={isExpanded ? "down" : "right"}
+                      className="text-muted-foreground"
                     />
                   </AccordionButton>
 
@@ -114,11 +112,9 @@ export function Policies({
 
                   <Spacer />
 
-                  <WedgeRightIcon
-                    fontSize="2xl"
-                    transform={isExpanded ? "rotate(90deg)" : undefined}
-                    transition="all 0.2s ease"
-                    color="text.secondary"
+                  <WedgeIcon
+                    variant={isExpanded ? "down" : "right"}
+                    className="text-muted-foreground"
                   />
                 </AccordionButton>
 

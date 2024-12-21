@@ -1,16 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-  AlertIcon,
-  HStack,
-  Spacer,
-  Spinner,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-
+import { HStack, Spacer, Spinner, Text, VStack } from "@chakra-ui/react";
 import { formatUnits } from "viem";
 import { useChainId } from "@/hooks/connection";
-import { EthereumIcon, InfoIcon, WarningIcon } from "@cartridge/ui";
+import { ErrorAlertIcon, EthereumIcon } from "@cartridge/ui-next";
 
 export function Fees({
   maxFee,
@@ -88,19 +80,10 @@ function LineItem({
         <Spinner size="sm" />
       ) : (
         <HStack gap={0}>
-          {(() => {
-            switch (variant) {
-              case "info":
-                return <InfoIcon color="info.foreground" />;
-              case "warning":
-                return <WarningIcon color="warning.background" />;
-              case "error":
-                return <AlertIcon color="error.foreground" />;
-              default:
-                return null;
-            }
-          })()}
-          {value !== "FREE" && <EthereumIcon color="text.primary" />}
+          {variant && <ErrorAlertIcon variant={variant} />}
+          {value !== "FREE" && (
+            <EthereumIcon className="text-secondary-foreground" />
+          )}
           <Text fontSize={13}>{value}</Text>
         </HStack>
       )}

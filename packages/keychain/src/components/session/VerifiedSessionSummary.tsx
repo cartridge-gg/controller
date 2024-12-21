@@ -1,4 +1,3 @@
-import React from "react";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import { AggregateCard } from "./AggregateCard";
 import { CodeIcon } from "@cartridge/ui-next";

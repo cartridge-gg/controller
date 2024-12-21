@@ -8,7 +8,7 @@ import { StripePaymentElementOptions } from "@stripe/stripe-js";
 import { Button } from "@chakra-ui/react";
 import { Container, Content, Footer } from "@/components/layout";
 import { useController } from "@/hooks/controller";
-import { CoinsIcon } from "@cartridge/ui";
+import { CoinsIcon } from "@cartridge/ui-next";
 import { CopyAddress } from "@/components/CopyAddress";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
@@ -80,7 +80,7 @@ export default function StripeCheckout({
     <Container
       title={"Purchase $" + creditsAmount}
       description={controller && <CopyAddress address={controller.address} />}
-      Icon={CoinsIcon}
+      icon={<CoinsIcon variant="solid" />}
       onBack={onBack}
     >
       <Content gap={6}>

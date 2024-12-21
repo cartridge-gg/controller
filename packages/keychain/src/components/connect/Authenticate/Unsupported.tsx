@@ -1,4 +1,4 @@
-import { AlertIcon } from "@cartridge/ui";
+import { AlertIcon } from "@cartridge/ui-next";
 import { Container } from "@/components/layout";
 import { useEffect, useState } from "react";
 

@@ -1,4 +1,3 @@
-import { CopyIcon } from "@cartridge/ui";
 import { HStack, Text } from "@chakra-ui/react";
 import { formatAddress } from "@cartridge/utils";
 import { useToast } from "@/hooks/toast";
@@ -16,7 +15,6 @@ export function CopyAddress({ address }: { address: string }) {
       }}
     >
       <Text color="text.secondaryAccent">{formatAddress(address)}</Text>
-      <CopyIcon fontSize="md" />
     </HStack>
   );
 }

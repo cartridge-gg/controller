@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ResponseCodes, SessionPolicies, toArray } from "@cartridge/controller";
 import { Content, FOOTER_MIN_HEIGHT } from "@/components/layout";
-import { TransactionDuoIcon } from "@cartridge/ui";
+import { TransactionDuoIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { Policies } from "@/components/Policies";
 import { ExecuteCtx } from "@/utils/connection";

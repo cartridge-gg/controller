@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useUrlTxns } from "@/hooks/transaction";
 import { Transaction, TransactionState } from "@/components/Transaction";
-import { TimerDuoIcon } from "@cartridge/ui";
+import { TimerDuoIcon } from "@cartridge/ui-next";
 import { Container, Content } from "@/components/layout";
 
 export function Pending() {
@@ -24,7 +24,7 @@ export function Pending() {
       setDescription("Your transaction was successful");
     }
 
-    //pending
+    // pending
   }, [txnResults, txns]);
 
   return (
