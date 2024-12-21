@@ -72,10 +72,12 @@ export default class ControllerProvider extends BaseProvider {
 
     if (!this.iframes.profile) {
       const username = await this.keychain.username();
+      console.log("Before profile iframe");
 
       this.iframes.profile = new ProfileIFrame({
         ...this.options,
         onConnect: (profile) => {
+          console.log("On connect profile");
           this.profile = profile;
         },
         methods: {
@@ -87,6 +89,7 @@ export default class ControllerProvider extends BaseProvider {
         username,
         version: this.version,
       });
+      console.log("After profile iframe");
     }
 
     return this.account;
