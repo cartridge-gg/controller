@@ -27,7 +27,7 @@ export function UnverifiedSessionSummary({
         );
       })}
 
-      {policies.messages?.length && (
+      {policies.messages && policies.messages.length > 0 && (
         <MessageCard messages={policies.messages} />
       )}
     </div>

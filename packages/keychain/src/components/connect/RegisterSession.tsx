@@ -52,7 +52,7 @@ export function RegisterSession({
 
   const onRegisterSession = useCallback(
     async (maxFee?: bigint) => {
-      if (!maxFee || !publicKey || !controller) {
+      if (maxFee == undefined || !publicKey || !controller) {
         return;
       }
 
