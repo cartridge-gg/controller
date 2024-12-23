@@ -4,7 +4,7 @@ import { ConnectionCtx } from "@/utils/connection";
 import { Prefund } from "@cartridge/controller";
 import { UpgradeInterface } from "@/hooks/upgrade";
 import { ParsedSessionPolicies } from "@/hooks/session";
-import { VerifiableControllerTheme } from "@/hooks/theme";
+import { VerifiableControllerTheme } from "@/context/theme";
 
 export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
