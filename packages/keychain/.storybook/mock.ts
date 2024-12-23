@@ -40,7 +40,6 @@ export function useMockedConnection({
     chainName,
     policies: {},
     theme: defaultTheme,
-    prefunds: [],
     hasPrefundRequest: false,
     error: undefined,
     setContext: () => {},

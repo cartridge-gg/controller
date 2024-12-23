@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { ConfirmTransaction } from "./ConfirmTransaction";
-import { ETH_CONTRACT_ADDRESS } from "../utils/token";
+import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 
 const meta = {
   component: ConfirmTransaction,
