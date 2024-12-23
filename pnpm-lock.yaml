@@ -362,6 +362,9 @@ importers:
       react-router-dom:
         specifier: ^6.27.0
         version: 6.27.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      sonner:
+        specifier: ^1.4.41
+        version: 1.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       starknet:
         specifier: ^6.11.0
         version: 6.11.0

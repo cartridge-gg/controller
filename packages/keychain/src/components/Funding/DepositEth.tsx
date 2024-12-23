@@ -27,13 +27,13 @@ import {
   CopyAddress,
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
-import { useToast } from "@/hooks/toast";
 import { ETH_CONTRACT_ADDRESS } from "@/utils/token";
 import { ErrorAlert } from "../ErrorAlert";
 import { parseEther } from "viem";
 import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
 import { Balance } from "./Balance";
 import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
+import { toast } from "sonner";
 
 type DepositEthProps = {
   onComplete?: (deployHash?: string) => void;
@@ -52,7 +52,6 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller, chainId } = useConnection();
   const { account: extAccount } = useAccount();
-  const { toast } = useToast();
 
   const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
   const [state, setState] = useState<"connect" | "fund">("connect");
@@ -143,8 +142,8 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
     if (!controller?.address) return;
 
     navigator.clipboard.writeText(controller.address);
-    toast("Copied");
-  }, [controller?.address, toast]);
+    toast.success("Address copied");
+  }, [controller?.address]);
 
   return (
     <Container
