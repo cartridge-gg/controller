@@ -1,4 +1,4 @@
-import { Input as UIInput } from "@/components/primitives/input";
+import { Input } from "@/components/primitives/input";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Input> = {
@@ -11,8 +11,25 @@ export default meta;
 
 type Story = StoryObj<typeof Input>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    type: "email",
+    placeholder: "Email",
+  },
+};
 
-function Input() {
-  return <UIInput type="email" placeholder="Email" />;
-}
+export const Loading: Story = {
+  args: {
+    value: "Some text value",
+    isLoading: true,
+  },
+};
+
+export const Clear: Story = {
+  args: {
+    value: "Some text value",
+    onClear: () => {
+      console.log("cleared!");
+    },
+  },
+};
