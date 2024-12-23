@@ -6,14 +6,13 @@ import {
   ConnectionCtx,
   OpenSettingsCtx,
 } from "@/utils/connection";
-import { getChainName, isIframe } from "@cartridge/utils";
-import { RpcProvider } from "starknet";
+import { ETH_CONTRACT_ADDRESS, getChainName, isIframe } from "@cartridge/utils";
+import { getChecksumAddress, RpcProvider } from "starknet";
 import {
   Prefund,
   ResponseCodes,
   toSessionPolicies,
 } from "@cartridge/controller";
-import { mergeDefaultETHPrefund } from "@/utils/token";
 import { setIsSignedUp } from "@/utils/cookie";
 import {
   ConnectionContext,
@@ -122,7 +121,18 @@ export function useConnectionValue() {
       ? JSON.parse(decodeURIComponent(prefundParam))
       : [];
     setHasPrefundRequest(!!prefundParam);
-    setPrefunds(mergeDefaultETHPrefund(prefunds));
+    setPrefunds(
+      prefunds.find(
+        (p) =>
+          getChecksumAddress(p.address) ===
+          getChecksumAddress(ETH_CONTRACT_ADDRESS),
+      )
+        ? prefunds
+        : [
+            { address: ETH_CONTRACT_ADDRESS, min: "100000000000000" },
+            ...prefunds,
+          ],
+    );
 
     // Handle theme and policies
     const policiesParam = urlParams.get("policies");

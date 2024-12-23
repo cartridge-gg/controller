@@ -27,13 +27,13 @@ import {
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { useToast } from "@/hooks/toast";
-import { ETH_CONTRACT_ADDRESS } from "@/utils/token";
 import { ErrorAlert } from "../ErrorAlert";
 import { CopyAddress } from "@/components/CopyAddress";
 import { parseEther } from "viem";
 import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
 import { Balance } from "./Balance";
 import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
+import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 
 type DepositEthProps = {
   onComplete?: (deployHash?: string) => void;
