@@ -26,8 +26,8 @@ const Checkbox = React.forwardRef<
           checked === "indeterminate"
             ? "minus-line"
             : checked
-            ? "line"
-            : "unchecked-line"
+              ? "line"
+              : "unchecked-line"
         }
       />
     </CheckboxPrimitive.Root>
