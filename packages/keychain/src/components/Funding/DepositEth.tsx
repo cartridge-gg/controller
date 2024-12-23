@@ -25,11 +25,11 @@ import {
   EthereumIcon,
   StarknetColorIcon,
   Button,
+  CopyAddress,
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { useToast } from "@/hooks/toast";
 import { ErrorAlert } from "../ErrorAlert";
-import { CopyAddress } from "@/components/CopyAddress";
 import { parseEther } from "viem";
 import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
 import { Balance } from "./Balance";

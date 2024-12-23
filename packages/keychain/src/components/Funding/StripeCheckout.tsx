@@ -7,8 +7,7 @@ import {
 import { StripePaymentElementOptions } from "@stripe/stripe-js";
 import { Container, Content, Footer } from "@/components/layout";
 import { useController } from "@/hooks/controller";
-import { CoinsIcon, Button } from "@cartridge/ui-next";
-import { CopyAddress } from "@/components/CopyAddress";
+import { CoinsIcon, CopyAddress, Button } from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
 type StripeCheckoutProps = {

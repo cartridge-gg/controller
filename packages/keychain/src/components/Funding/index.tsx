@@ -1,8 +1,13 @@
 import { Container, Content, Footer } from "@/components/layout";
 import { useState } from "react";
 import { useConnection } from "@/hooks/connection";
-import { CopyAddress } from "../CopyAddress";
-import { Button, ArrowIcon, CoinsIcon, EthereumIcon } from "@cartridge/ui-next";
+import {
+  Button,
+  ArrowIcon,
+  CoinsIcon,
+  EthereumIcon,
+  CopyAddress,
+} from "@cartridge/ui-next";
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance } from "./Balance";
