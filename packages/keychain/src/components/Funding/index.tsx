@@ -2,8 +2,12 @@ import { Container, Content, Footer } from "@/components/layout";
 import { Button } from "@chakra-ui/react";
 import { useState } from "react";
 import { useConnection } from "@/hooks/connection";
-import { CopyAddress } from "../CopyAddress";
-import { ArrowIcon, CoinsIcon, EthereumIcon } from "@cartridge/ui-next";
+import {
+  ArrowIcon,
+  CoinsIcon,
+  EthereumIcon,
+  CopyAddress,
+} from "@cartridge/ui-next";
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance } from "./Balance";
