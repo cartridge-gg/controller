@@ -6,13 +6,9 @@ import {
   ConnectionCtx,
   OpenSettingsCtx,
 } from "@/utils/connection";
-import { ETH_CONTRACT_ADDRESS, getChainName, isIframe } from "@cartridge/utils";
-import { getChecksumAddress, RpcProvider } from "starknet";
-import {
-  Prefund,
-  ResponseCodes,
-  toSessionPolicies,
-} from "@cartridge/controller";
+import { getChainName, isIframe } from "@cartridge/utils";
+import { RpcProvider } from "starknet";
+import { ResponseCodes, toSessionPolicies } from "@cartridge/controller";
 import { setIsSignedUp } from "@/utils/cookie";
 import {
   ConnectionContext,
@@ -41,7 +37,6 @@ export function useConnectionValue() {
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [theme, setTheme] = useState<ControllerTheme>(defaultTheme);
   const [controller, setControllerRaw] = useState<Controller | undefined>();
-  const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const upgrade: UpgradeInterface = useUpgrade(controller);
   const [error, setError] = useState<Error>();
@@ -115,25 +110,6 @@ export function useConnectionValue() {
       }
     }
 
-    // Handle prefunds
-    const prefundParam = urlParams.get("prefunds");
-    const prefunds: Prefund[] = prefundParam
-      ? JSON.parse(decodeURIComponent(prefundParam))
-      : [];
-    setHasPrefundRequest(!!prefundParam);
-    setPrefunds(
-      prefunds.find(
-        (p) =>
-          getChecksumAddress(p.address) ===
-          getChecksumAddress(ETH_CONTRACT_ADDRESS),
-      )
-        ? prefunds
-        : [
-            { address: ETH_CONTRACT_ADDRESS, min: "100000000000000" },
-            ...prefunds,
-          ],
-    );
-
     // Handle theme and policies
     const policiesParam = urlParams.get("policies");
     const themeParam = urlParams.get("theme");
@@ -190,7 +166,7 @@ export function useConnectionValue() {
         );
       }
     }
-  }, [setTheme, setPolicies, setHasPrefundRequest, setOrigin, setPrefunds]);
+  }, [setTheme, setPolicies, setHasPrefundRequest, setOrigin]);
 
   useEffect(() => {
     const connection = connectToController<ParentMethods>({
@@ -257,7 +233,6 @@ export function useConnectionValue() {
     chainName,
     policies,
     theme,
-    prefunds,
     hasPrefundRequest,
     error,
     upgrade,
