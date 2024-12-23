@@ -12,8 +12,12 @@ const ScrollArea = React.forwardRef<
   // If the scrollbar is not hidden, it remains visible for 500ms before fading out
   const [opacity, setOpacity] = React.useState<number>(0);
   const [hidden, setHidden] = React.useState<boolean>(true);
-  const opacityTimeout = React.useRef<NodeJS.Timeout | null>(null);
-  const hiddenTimeout = React.useRef<NodeJS.Timeout | null>(null);
+  const opacityTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const hiddenTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // Set visible each time the scrollbar is used
   const onScrollCapture = React.useCallback(() => {
