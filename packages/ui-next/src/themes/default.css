@@ -37,5 +37,12 @@
     --radius: 0.5rem;
 
     --spacer: 0 0% 0%; /* solid-fills/spacer */
+
+    --info: 209 67% 75%;
+    --info-foreground: 208 100% 30%;
+    --warning: 209 67% 75%;
+    --warning-foreground: 208 100% 30%;
+    --error: 209 67% 75%;
+    --error-foreground: 208 100% 30%;
   }
 }

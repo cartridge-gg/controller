@@ -1,19 +1,15 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import {
-  Text,
-  Link,
-  HStack,
-  Circle,
-  Spacer,
-  Divider,
-  Spinner,
-} from "@chakra-ui/react";
-
 import { constants } from "starknet";
-import { CheckIcon, ExternalIcon, StarknetIcon } from "@cartridge/ui";
+import {
+  CheckIcon,
+  ExternalIcon,
+  Spinner,
+  StarknetIcon,
+} from "@cartridge/ui-next";
 import { useController } from "@/hooks/controller";
 import { useChainName } from "@/hooks/chain";
 import { StarkscanUrl } from "@cartridge/utils";
+import { Link } from "react-router-dom";
 
 export type TransactionState = "pending" | "success" | "error";
 
@@ -31,7 +27,7 @@ export function Transaction({
   finalized,
 }: TransactionProps) {
   const [state, setState] = useState<TransactionState>("pending");
-  const { color, icon } = useMemo(() => getColorIcon(state), [state]);
+  const { icon } = useMemo(() => getColorIcon(state), [state]);
   const { controller } = useController();
 
   useEffect(() => {
@@ -58,52 +54,39 @@ export function Transaction({
   const chainName = useChainName(chainId);
 
   return (
-    <HStack w="full" borderRadius="sm" bgColor="solid.primary" p={3}>
-      <HStack spacing={3} color={color}>
-        <Circle size={7.5} bgColor="solid.secondary">
-          {icon}
-        </Circle>
-        <Text fontSize="11px" color="inherit">
-          {name}
-        </Text>
-      </HStack>
+    <div className="flex items-center bg-secondary roudned p-3 text-sm justify-between">
+      <div className="flex items-center gap-1">
+        {icon}
+        <div>{name}</div>
+      </div>
 
-      <Spacer />
-
-      <HStack spacing="15px">
-        <HStack color="text.secondary" spacing="5px">
-          <StarknetIcon boxSize="14px" />
-          <Text color="inherit" fontSize="13px">
-            {chainName}
-          </Text>
-        </HStack>
-        <Divider orientation="vertical" bgColor="solid.accent" h="30px" />
-        <Link href={StarkscanUrl(chainId).transaction(hash)} isExternal>
-          <ExternalIcon boxSize="12px" color="link.blue" />
+      <div className="flex items-center gap-1">
+        <div className="flex items-center text-muted-foreground gap-1 border-r px-3">
+          <StarknetIcon size="sm" />
+          <div>{chainName}</div>
+        </div>
+        <Link to={StarkscanUrl(chainId).transaction(hash)} target="_blank">
+          <ExternalIcon size="sm" />
         </Link>
-      </HStack>
-    </HStack>
+      </div>
+    </div>
   );
 }
 
 function getColorIcon(state: TransactionState): {
-  color: string;
   icon: ReactNode;
 } {
   switch (state) {
     case "success":
       return {
-        color: "green.400",
-        icon: <CheckIcon boxSize="12px" color="green.400" />,
+        icon: <CheckIcon className="text-[#0EAD69]" size="xs" />,
       };
     case "pending":
       return {
-        color: "white",
-        icon: <Spinner size="sm" />,
+        icon: <Spinner />,
       };
     case "error":
       return {
-        color: "alert.foreground",
         icon: <></>,
       };
   }

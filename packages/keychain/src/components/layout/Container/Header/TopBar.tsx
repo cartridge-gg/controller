@@ -1,10 +1,10 @@
 import { Spacer, HStack } from "@chakra-ui/react";
 import { CloseButton } from "./CloseButton";
-import { NetworkStatus } from "./NetworkStatus";
 import { SettingsButton } from "./SettingsButton";
 import { BackButton } from "./BackButton";
 import { useConnection } from "@/hooks/connection";
 import { useMemo } from "react";
+import { Network } from "@cartridge/ui-next";
 
 export type TopBarProps = {
   onBack?: () => void;
@@ -19,7 +19,7 @@ export function TopBar({
   hideNetwork,
   onClose,
 }: TopBarProps) {
-  const { openSettings, context } = useConnection();
+  const { openSettings, context, chainId } = useConnection();
   const showSettings = useMemo(
     () => !context || !["connect", "open-settings"].includes(context.type),
     [context],
@@ -46,7 +46,7 @@ export function TopBar({
 
       <Spacer />
 
-      {!hideNetwork && <NetworkStatus />}
+      {!hideNetwork && chainId && <Network chainId={chainId} />}
 
       {!hideAccount && (
         <>

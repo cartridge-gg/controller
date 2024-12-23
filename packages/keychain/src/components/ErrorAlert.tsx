@@ -1,11 +1,11 @@
 import {
-  AlertIcon,
-  InfoIcon,
-  WedgeDownIcon,
-  WarningIcon,
+  WedgeIcon,
   CopyIcon,
   CheckIcon,
-} from "@cartridge/ui";
+  ErrorAlertIcon,
+  ErrorAlertIconProps,
+  Button,
+} from "@cartridge/ui-next";
 import {
   Text,
   Accordion,
@@ -17,7 +17,6 @@ import {
   Box,
   VStack,
   Link,
-  IconButton,
   Divider,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
@@ -70,18 +69,12 @@ export function ErrorAlert({
               disabled={!description || (isExpanded && !allowToggle)}
             >
               <HStack alignItems="flex-start">
-                {(() => {
-                  switch (variant) {
-                    case "info":
-                      return <InfoIcon color="info.foreground" />;
-                    case "warning":
-                      return <WarningIcon color="warning.foreground" />;
-                    case "error":
-                      return <AlertIcon color="error.foreground" />;
-                    default:
-                      return null;
-                  }
-                })()}
+                {variant && (
+                  <ErrorAlertIcon
+                    variant={variant as ErrorAlertIconProps["variant"]}
+                    size="xs"
+                  />
+                )}
                 <Text
                   as="b"
                   fontSize="2xs"
@@ -103,7 +96,7 @@ export function ErrorAlert({
                       rotate: itemExpanded ? 180 : 0,
                     }}
                   >
-                    <WedgeDownIcon boxSize={5} />
+                    <WedgeIcon size="sm" variant="down" />
                   </Box>
                 </HStack>
               )}
@@ -112,27 +105,22 @@ export function ErrorAlert({
             {description && (
               <AccordionPanel w="full" position="relative">
                 {copyText && (
-                  <IconButton
+                  <Button
                     size="icon"
-                    w={6}
-                    h={6}
-                    position="absolute"
-                    right={3}
-                    aria-label="Copy stacktrace"
-                    icon={
-                      copied ? (
-                        <CheckIcon fontSize="lg" color="black" />
-                      ) : (
-                        <CopyIcon fontSize="lg" color="black" />
-                      )
-                    }
+                    variant="icon"
+                    className="absolute right-3 w-5 h-5 bg-[rgba(0,0,0,0.1)]"
                     onClick={() => {
                       setCopied(true);
                       navigator.clipboard.writeText(copyText);
                     }}
-                  />
+                  >
+                    {copied ? (
+                      <CheckIcon size="xs" className="text-[black]" />
+                    ) : (
+                      <CopyIcon size="xs" className="text-[black]" />
+                    )}
+                  </Button>
                 )}
-
                 <Box
                   h="full"
                   maxH={200}
