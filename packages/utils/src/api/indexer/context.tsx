@@ -9,8 +9,8 @@ type IndexerAPIContextType = {
 };
 
 const initialState: IndexerAPIContextType = {
-  setIndexerUrl: () => { },
-  isReady: false
+  setIndexerUrl: () => {},
+  isReady: false,
 };
 
 export const IndexerAPIContext =
@@ -28,9 +28,15 @@ export function IndexerAPIProvider({
   const [indexerUrl, setIndexerUrl] = useState(initialState.indexerUrl);
 
   return (
-    <IndexerAPIContext.Provider value={{
-      indexerUrl, setIndexerUrl, credentials, headers, isReady: !!indexerUrl
-    }}>
+    <IndexerAPIContext.Provider
+      value={{
+        indexerUrl,
+        setIndexerUrl,
+        credentials,
+        headers,
+        isReady: !!indexerUrl,
+      }}
+    >
       {children}
     </IndexerAPIContext.Provider>
   );
