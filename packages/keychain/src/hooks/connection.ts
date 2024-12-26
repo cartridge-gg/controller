@@ -8,12 +8,7 @@ import {
 } from "@/utils/connection";
 import { getChainName, isIframe } from "@cartridge/utils";
 import { RpcProvider } from "starknet";
-import {
-  Prefund,
-  ResponseCodes,
-  toSessionPolicies,
-} from "@cartridge/controller";
-import { mergeDefaultETHPrefund } from "@/utils/token";
+import { ResponseCodes, toSessionPolicies } from "@cartridge/controller";
 import { setIsSignedUp } from "@/utils/cookie";
 import {
   ConnectionContext,
@@ -42,7 +37,6 @@ export function useConnectionValue() {
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [theme, setTheme] = useState<ControllerTheme>(defaultTheme);
   const [controller, setControllerRaw] = useState<Controller | undefined>();
-  const [prefunds, setPrefunds] = useState<Prefund[]>([]);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const upgrade: UpgradeInterface = useUpgrade(controller);
   const [error, setError] = useState<Error>();
@@ -116,14 +110,6 @@ export function useConnectionValue() {
       }
     }
 
-    // Handle prefunds
-    const prefundParam = urlParams.get("prefunds");
-    const prefunds: Prefund[] = prefundParam
-      ? JSON.parse(decodeURIComponent(prefundParam))
-      : [];
-    setHasPrefundRequest(!!prefundParam);
-    setPrefunds(mergeDefaultETHPrefund(prefunds));
-
     // Handle theme and policies
     const policiesParam = urlParams.get("policies");
     const themeParam = urlParams.get("theme");
@@ -180,7 +166,7 @@ export function useConnectionValue() {
         );
       }
     }
-  }, [setTheme, setPolicies, setHasPrefundRequest, setOrigin, setPrefunds]);
+  }, [setTheme, setPolicies, setHasPrefundRequest, setOrigin]);
 
   useEffect(() => {
     const connection = connectToController<ParentMethods>({
@@ -247,7 +233,6 @@ export function useConnectionValue() {
     chainName,
     policies,
     theme,
-    prefunds,
     hasPrefundRequest,
     error,
     upgrade,

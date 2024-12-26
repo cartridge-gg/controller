@@ -193,8 +193,6 @@ export type ProfileContextTypeVariant =
   | "achievements"
   | "activity";
 
-export type Prefund = { address: string; min: string };
-
 export type Tokens = {
   erc20?: string[];
 };

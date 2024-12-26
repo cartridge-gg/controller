@@ -42,7 +42,7 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     // If the address matches a controller name, set the controller name
     if (
       nameOrAddress.match(/^[a-z0-9]+$/) &&
-      !nameOrAddress.replace("0x", "").match(/^[0-9a-f]+$/) &&
+      !nameOrAddress.replace("0x", "").match(/^[0-9a-fA-F]+$/) &&
       nameOrAddress.length >= 3 &&
       nameOrAddress.length <= 30
     ) {
@@ -87,7 +87,7 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     }
     if (
       nameOrAddress.startsWith("0x") &&
-      nameOrAddress.replace("0x", "").match(/^[0-9a-f]+$/)
+      nameOrAddress.replace("0x", "").match(/^[0-9a-fA-F]+$/)
     ) {
       return nameOrAddress;
     }

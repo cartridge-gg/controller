@@ -72,7 +72,7 @@ export function ExecutionContainer({
   );
 
   useEffect(() => {
-    if (!!ctrlError || maxFee !== null || !transactions.length) {
+    if (!!ctrlError || maxFee !== null || !transactions?.length) {
       return;
     }
 
@@ -200,7 +200,9 @@ export function ExecutionContainer({
                     colorScheme="colorful"
                     onClick={handleSubmit}
                     isLoading={isLoading}
-                    isDisabled={maxFee === null && transactions.length}
+                    isDisabled={
+                      !transactions || (maxFee === null && transactions?.length)
+                    }
                   >
                     {buttonText}
                   </Button>

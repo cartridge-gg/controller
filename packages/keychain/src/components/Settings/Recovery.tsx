@@ -1,4 +1,4 @@
-import { AlertIcon } from "@cartridge/ui";
+import { AlertIcon } from "@cartridge/ui-next";
 import { Button, VStack, Text, HStack, Input } from "@chakra-ui/react";
 import { Container, Content, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";

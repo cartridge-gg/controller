@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@chakra-ui/react";
 import { Unsupported, useIsSupported } from "./Unsupported";
 import { doSignup } from "@/hooks/account";

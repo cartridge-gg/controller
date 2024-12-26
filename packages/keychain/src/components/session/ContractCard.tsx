@@ -98,7 +98,7 @@ export function ContractCard({
   );
 }
 
-export function humanizeString(str: string): string {
+function humanizeString(str: string): string {
   return (
     str
       // Convert from camelCase or snake_case

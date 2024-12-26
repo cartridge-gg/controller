@@ -1,5 +1,5 @@
 import { Button } from "@chakra-ui/react";
-import { GearIcon } from "@cartridge/ui";
+import { GearIcon } from "@cartridge/ui-next";
 import { useState } from "react";
 import { Container, Footer } from "@/components/layout";
 import { Recovery } from "./Recovery";
