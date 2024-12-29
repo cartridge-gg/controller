@@ -7,7 +7,6 @@ import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { SessionConsent } from "@/components/connect";
 import { Upgrade } from "./Upgrade";
-import { ErrorCode } from "@cartridge/account-wasm";
 import { TypedDataPolicy } from "@cartridge/presets";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
@@ -21,6 +20,7 @@ import {
   SelectValue,
 } from "@cartridge/ui-next";
 import { useSkippedPolicies } from "@/hooks/session";
+import { ErrorAlert } from "@/components/ErrorAlert";
 
 export function CreateSession({
   policies,
@@ -33,7 +33,6 @@ export function CreateSession({
 }) {
   const { controller, upgrade, chainId, theme, logout } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const { skipPolicy } = useSkippedPolicies();
@@ -43,6 +42,7 @@ export function CreateSession({
   );
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
+  const [warning, setWarning] = useState<string>();
 
   useEffect(() => {
     if (!chainId) return;
@@ -56,18 +56,15 @@ export function CreateSession({
     );
 
     if (violatingPolicy) {
-      setError({
-        code: ErrorCode.PolicyChainIdMismatch,
-        message: `Policy for ${
-          (violatingPolicy as TypedDataPolicy).domain.name
-        }.${
+      setWarning(
+        `Policy for ${(violatingPolicy as TypedDataPolicy).domain.name}.${
           (violatingPolicy as TypedDataPolicy).primaryType
         } has mismatched chain ID.`,
-      });
-      setIsDisabled(true);
-    } else {
+      );
       setError(undefined);
-      setIsDisabled(false);
+    } else {
+      setWarning(undefined);
+      setError(undefined);
     }
   }, [chainId, policies]);
 
@@ -143,6 +140,18 @@ export function CreateSession({
           </Select>
         </div>
 
+        {warning && (
+          <ErrorAlert
+            title="Chain ID Mismatch"
+            description={warning}
+            variant="warning"
+          />
+        )}
+
+        {error && isControllerError(error) && (
+          <ControllerErrorAlert error={error} />
+        )}
+
         {!policies?.verified && (
           <HStack
             p={3}
@@ -169,19 +178,13 @@ export function CreateSession({
           </HStack>
         )}
 
-        {error && isControllerError(error) && (
-          <ControllerErrorAlert error={error} />
-        )}
-
         <HStack spacing={4} width="full">
           <Button onClick={handleSkip} isDisabled={isConnecting} px={10}>
             Skip
           </Button>
           <Button
             colorScheme="colorful"
-            isDisabled={
-              isDisabled || isConnecting || (!policies?.verified && !isConsent)
-            }
+            isDisabled={isConnecting || (!policies?.verified && !isConsent)}
             isLoading={isConnecting}
             onClick={() => onCreateSession()}
             width="full"
