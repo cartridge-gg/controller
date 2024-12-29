@@ -10,7 +10,7 @@ import { PropsWithChildren } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Policy } from "@cartridge/controller";
 
-const rpc = process.env.NEXT_PUBLIC_RPC_SEPOLIA!;
+const rpc = process.env.NEXT_PUBLIC_RPC_MAINNET!;
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -99,7 +99,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      chains={[sepolia]}
+      chains={[mainnet, sepolia]}
       connectors={[controller]}
       explorer={starkscan}
       provider={jsonRpcProvider({

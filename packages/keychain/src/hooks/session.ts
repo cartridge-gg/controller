@@ -5,7 +5,7 @@ import {
   SessionPolicies,
 } from "@cartridge/presets";
 import { CoinsIcon, CartridgeIcon } from "@cartridge/ui-next";
-import React from "react";
+import React, { useCallback } from "react";
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
 
@@ -105,4 +105,38 @@ export function parseSessionPolicies({
   summary.contracts = Object.fromEntries(sortedEntries);
 
   return summary;
+}
+
+import { useLocalStorage } from "./storage";
+
+export function useSkippedPolicies() {
+  const [skippedPolicies, setSkippedPolicies] = useLocalStorage<string[]>(
+    "skipped_policies",
+    [],
+  );
+
+  const skipPolicy = useCallback(
+    (policy: ParsedSessionPolicies) => {
+      setSkippedPolicies([...skippedPolicies, JSON.stringify(policy)]);
+    },
+    [skippedPolicies, setSkippedPolicies],
+  );
+
+  const isSkipped = useCallback(
+    (policy: ParsedSessionPolicies) => {
+      return skippedPolicies.includes(JSON.stringify(policy));
+    },
+    [skippedPolicies],
+  );
+
+  const clearSkippedPolicies = useCallback(() => {
+    setSkippedPolicies([]);
+  }, [setSkippedPolicies]);
+
+  return {
+    skipPolicy,
+    isSkipped,
+    skippedPolicies,
+    clearSkippedPolicies,
+  };
 }

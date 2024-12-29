@@ -8,11 +8,13 @@ import { ExecuteCtx } from "@/utils/connection";
 import { getChecksumAddress, num } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { CreateSession } from "./connect";
+import { useSkippedPolicies } from "@/hooks/session";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, policies, setContext } = useConnection();
   const [policiesUpdated, setIsPoliciesUpdated] = useState<boolean>(false);
   const [updateSession, setUpdateSession] = useState<boolean>(false);
+  const { isSkipped } = useSkippedPolicies();
   const ctx = context as ExecuteCtx;
   const account = controller;
 
@@ -62,16 +64,19 @@ export function ConfirmTransaction() {
       );
     });
 
+    // Check if policies have been skipped
+    const isPolicySkipped = policies && isSkipped(policies);
+
     // If calls are approved by dapp specified policies but not stored session
     // then prompt user to update session. This also accounts for expired sessions.
-    if (txnsApproved && account) {
+    if (txnsApproved && account && !isPolicySkipped) {
       account.session(callPolicies).then((hasSession) => {
         setUpdateSession(!hasSession);
       });
     } else {
       setUpdateSession(false);
     }
-  }, [callPolicies, policiesUpdated, policies, account]);
+  }, [callPolicies, policiesUpdated, policies, account, isSkipped]);
 
   if (updateSession && policies) {
     return (

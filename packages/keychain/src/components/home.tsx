@@ -13,12 +13,14 @@ import { PurchaseCredits } from "./Funding/PurchaseCredits";
 import { Settings } from "./Settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
+import { useSkippedPolicies } from "@/hooks/session";
 
 export function Home() {
   const { context, controller, error, policies, upgrade } = useConnection();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
   >(undefined);
+  const { isSkipped } = useSkippedPolicies();
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -90,7 +92,7 @@ export function Home() {
       if (hasSessionForPolicies === undefined) {
         // This is likely never observable in a real application but just in case.
         return <PageLoading />;
-      } else if (hasSessionForPolicies) {
+      } else if (hasSessionForPolicies || (policies && isSkipped(policies))) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
@@ -100,7 +102,6 @@ export function Home() {
         return <></>;
       }
 
-      // TODO: show missing policies if mismatch
       return (
         <CreateSession
           policies={policies!}

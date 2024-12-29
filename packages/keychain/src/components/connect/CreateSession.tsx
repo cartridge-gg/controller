@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@cartridge/ui-next";
+import { useSkippedPolicies } from "@/hooks/session";
 
 export function CreateSession({
   policies,
@@ -35,6 +36,7 @@ export function CreateSession({
   const [isDisabled, setIsDisabled] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
+  const { skipPolicy } = useSkippedPolicies();
   const expiresAt = useMemo(
     () => duration + BigInt(Math.floor(Date.now() / 1000)),
     [duration],
@@ -81,6 +83,11 @@ export function CreateSession({
       setIsConnecting(false);
     }
   }, [controller, expiresAt, policies, maxFee, onConnect]);
+
+  const handleSkip = useCallback(() => {
+    skipPolicy(policies);
+    onConnect();
+  }, [policies, skipPolicy, onConnect]);
 
   if (!upgrade.isSynced) {
     return <></>;
@@ -167,7 +174,7 @@ export function CreateSession({
         )}
 
         <HStack spacing={4} width="full">
-          <Button onClick={() => onConnect()} isDisabled={isConnecting} px={10}>
+          <Button onClick={handleSkip} isDisabled={isConnecting} px={10}>
             Skip
           </Button>
           <Button

@@ -22,7 +22,11 @@ import {
   controllerConfigs,
   ControllerTheme,
 } from "@cartridge/presets";
-import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
+import {
+  ParsedSessionPolicies,
+  parseSessionPolicies,
+  useSkippedPolicies,
+} from "./session";
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -40,6 +44,7 @@ export function useConnectionValue() {
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const upgrade: UpgradeInterface = useUpgrade(controller);
   const [error, setError] = useState<Error>();
+  const { clearSkippedPolicies } = useSkippedPolicies();
 
   const chainName = useMemo(() => {
     if (!chainId) {
@@ -205,13 +210,14 @@ export function useConnectionValue() {
   const logout = useCallback(() => {
     window.controller?.disconnect().then(() => {
       setController(undefined);
+      clearSkippedPolicies();
 
       context?.resolve?.({
         code: ResponseCodes.NOT_CONNECTED,
         message: "User logged out",
       });
     });
-  }, [context, setController]);
+  }, [context, setController, clearSkippedPolicies]);
 
   const openSettings = useCallback(() => {
     if (!context) return;
