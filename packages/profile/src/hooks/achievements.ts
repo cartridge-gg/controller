@@ -45,6 +45,8 @@ export function useAchievements(accountAddress?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Item[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [cachedTrophies, setCachedTrophies] = useState<Trophy[]>([]);
+  const [cachedProgressions, setCachedProgressions] = useState<Progress[]>([]);
 
   const currentAddress = useMemo(() => {
     return accountAddress || address;
@@ -67,19 +69,33 @@ export function useAchievements(accountAddress?: string) {
       parser: Progress.parse,
     });
 
+  useEffect(() => {
+    if (!isFetchingTrophies && cachedTrophies.length !== rawTrophies.length) {
+      setCachedTrophies(rawTrophies);
+    }
+    if (
+      !isFetchingProgressions &&
+      Math.max(...rawProgressions.map((p) => p.timestamp)) >
+        Math.max(...cachedProgressions.map((p) => p.timestamp))
+    ) {
+      setCachedProgressions(rawProgressions);
+    }
+  }, [
+    rawTrophies,
+    rawProgressions,
+    cachedTrophies,
+    cachedProgressions,
+    isFetchingTrophies,
+    isFetchingProgressions,
+  ]);
+
   // Compute achievements and players
   useEffect(() => {
-    if (
-      isFetchingTrophies ||
-      isFetchingProgressions ||
-      !rawTrophies.length ||
-      !currentAddress
-    )
-      return;
+    if (!cachedTrophies.length || !currentAddress) return;
 
     // Merge trophies
     const trophies: { [id: string]: Trophy } = {};
-    rawTrophies.forEach((trophy) => {
+    cachedTrophies.forEach((trophy) => {
       if (Object.keys(trophies).includes(trophy.id)) {
         trophy.tasks.forEach((task) => {
           if (!trophies[trophy.id].tasks.find((t) => t.id === task.id)) {
@@ -103,7 +119,7 @@ export function useAchievements(accountAddress?: string) {
         };
       };
     } = {};
-    rawProgressions.forEach((progress: Progress) => {
+    cachedProgressions.forEach((progress: Progress) => {
       const { achievementId, playerId, taskId, taskTotal, total, timestamp } =
         progress;
 
@@ -210,8 +226,8 @@ export function useAchievements(accountAddress?: string) {
     currentAddress,
     isFetchingTrophies,
     isFetchingProgressions,
-    rawTrophies,
-    rawProgressions,
+    cachedTrophies,
+    cachedProgressions,
   ]);
 
   return { achievements, players, isLoading };

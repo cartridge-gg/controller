@@ -1,4 +1,4 @@
-import { addAddressPadding } from "starknet";
+import { addAddressPadding, getChecksumAddress } from "starknet";
 
 export type FormatAddressOptions = {
   first?: number;
@@ -13,7 +13,7 @@ export function formatAddress(
   addr: string,
   { first, last, size = "base", padding = false }: FormatAddressOptions = {},
 ) {
-  const full = padding ? addAddressPadding(addr) : addr;
+  const full = padding ? getChecksumAddress(addAddressPadding(addr)) : addr;
   const { _first, _last } =
     first !== undefined || last !== undefined
       ? { _first: first ?? 0, _last: last ?? 0 }

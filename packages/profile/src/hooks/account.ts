@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
-import { constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 
 export function useUsername({ address }: { address: string }) {
   const { data } = useAccountNameQuery({ address });
@@ -80,16 +80,18 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
 
   const address = useMemo(() => {
     if (starkAddress) {
-      return starkAddress;
+      return getChecksumAddress(starkAddress);
     }
     if (controllerAddress) {
-      return controllerAddress;
+      return getChecksumAddress(controllerAddress);
     }
     if (
       nameOrAddress.startsWith("0x") &&
-      nameOrAddress.replace("0x", "").match(/^[0-9a-fA-F]+$/)
+      nameOrAddress.replace("0x", "").match(/^[0-9a-fA-F]+$/) &&
+      BigInt(nameOrAddress) < constants.PRIME &&
+      nameOrAddress.length >= 62
     ) {
-      return nameOrAddress;
+      return getChecksumAddress(nameOrAddress);
     }
     return "";
   }, [starkAddress, controllerAddress, nameOrAddress]);
@@ -111,10 +113,10 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     if (address && !address.startsWith("0x")) {
       return 'Starknet address must start with "0x"';
     }
-    if (address && address.length < 62) {
-      return "Please input a valid Starknet address";
-    }
-    if (address && BigInt(address) >= constants.PRIME) {
+    if (
+      address &&
+      (BigInt(address) >= constants.PRIME || address.length < 62)
+    ) {
       return "Please input a valid Starknet address";
     }
     return "";
