@@ -56,6 +56,8 @@ export function ExecutionContainer({
       if (!controller) {
         return;
       }
+
+      setIsLoading(true);
       try {
         const est = await controller.estimateInvokeFee(
           transactions,
@@ -67,6 +69,8 @@ export function ExecutionContainer({
         onError?.(error);
         setCtrlError(error);
       }
+
+      setIsLoading(false);
     },
     [controller, onError, setCtrlError],
   );
