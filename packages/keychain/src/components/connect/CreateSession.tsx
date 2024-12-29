@@ -75,6 +75,37 @@ export function CreateSession({
     try {
       setError(undefined);
       setIsConnecting(true);
+      // Set all contract policies to authorized
+      if (policies.contracts) {
+        Object.keys(policies.contracts).forEach((address) => {
+          if (policies.contracts![address]) {
+            policies.contracts![address].methods.forEach((method) => {
+              method.authorized = true;
+            });
+          }
+        });
+      }
+
+      // Set all message policies to authorized
+      if (policies.messages) {
+        policies.messages.forEach((message) => {
+          message.authorized = true;
+        });
+      }
+
+      await controller.createSession(expiresAt, policies, maxFee);
+      onConnect();
+    } catch (e) {
+      setError(e as unknown as Error);
+      setIsConnecting(false);
+    }
+  }, [controller, expiresAt, policies, maxFee, onConnect]);
+
+  const onSkipSession = useCallback(async () => {
+    if (!controller || !policies) return;
+    try {
+      setError(undefined);
+      setIsConnecting(true);
       await controller.createSession(expiresAt, policies, maxFee);
       onConnect();
     } catch (e) {
@@ -163,14 +194,12 @@ export function CreateSession({
           </HStack>
         )}
 
-        {error && isControllerError(error) && (
-          <ControllerErrorAlert error={error} />
-        )}
+        {error && <ControllerErrorAlert error={error} />}
 
         <div className="flex items-center gap-4">
           <Button
             variant="secondary"
-            onClick={() => onConnect()}
+            onClick={onSkipSession}
             disabled={isConnecting}
             className="px-8"
           >
@@ -204,10 +233,4 @@ function normalizeChainId(chainId: number | string): string {
       return shortString.encodeShortString(chainId);
     }
   }
-}
-
-function isControllerError(
-  error: ControllerError | Error,
-): error is ControllerError {
-  return !!(error as ControllerError).code;
 }

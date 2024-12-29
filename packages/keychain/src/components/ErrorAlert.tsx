@@ -144,7 +144,7 @@ export function ControllerErrorAlert({
   error,
   isPaymaster = false,
 }: {
-  error: ControllerError;
+  error: ControllerError | Error;
   isPaymaster?: boolean;
 }) {
   let title = "An error occurred";
@@ -152,6 +152,21 @@ export function ControllerErrorAlert({
   let isExpanded = false;
   let variant = "error";
   let copyText: string | undefined;
+
+  if (!isControllerError(error)) {
+    title = "Unknown error";
+    description = error.message;
+
+    return (
+      <ErrorAlert
+        title={title}
+        description={description}
+        variant={variant}
+        isExpanded={isExpanded}
+        copyText={copyText}
+      />
+    );
+  }
 
   switch (error.code) {
     case ErrorCode.SignError:
@@ -412,4 +427,10 @@ function StackTraceDisplay({
       ))}
     </VStack>
   );
+}
+
+function isControllerError(
+  error: ControllerError | Error,
+): error is ControllerError {
+  return !!(error as ControllerError).code;
 }

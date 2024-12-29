@@ -287,8 +287,8 @@ impl CartridgeAccount {
             .is_some())
     }
 
-    #[wasm_bindgen(js_name = session)]
-    pub async fn session_metadata(
+    #[wasm_bindgen(js_name = getAuthorizedSessionMetadata)]
+    pub async fn authorized_session_metadata(
         &self,
         policies: Vec<Policy>,
         public_key: Option<JsFelt>,
@@ -302,8 +302,26 @@ impl CartridgeAccount {
             .controller
             .lock()
             .await
-            .session_metadata(&policies, public_key.map(|f| f.0))
+            .authorized_session_metadata(&policies, public_key.map(|f| f.0))
             .map(|(_, metadata)| SessionMetadata::from(metadata)))
+    }
+
+    #[wasm_bindgen(js_name = isRequestedSession)]
+    pub async fn is_requested_session(
+        &self,
+        policies: Vec<Policy>,
+        public_key: Option<JsFelt>,
+    ) -> std::result::Result<bool, JsControllerError> {
+        let policies = policies
+            .into_iter()
+            .map(TryFrom::try_from)
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        Ok(self
+            .controller
+            .lock()
+            .await
+            .is_requested_session(&policies, public_key.map(|f| f.0)))
     }
 
     #[wasm_bindgen(js_name = revokeSession)]

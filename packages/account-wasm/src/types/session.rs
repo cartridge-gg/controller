@@ -58,7 +58,7 @@ impl From<account_sdk::account::session::hash::Session> for Session {
     fn from(value: account_sdk::account::session::hash::Session) -> Self {
         Session {
             policies: value
-                .policies
+                .proved_policies
                 .into_iter()
                 .map(|p| p.policy.into())
                 .collect::<Vec<_>>(),

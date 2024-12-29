@@ -188,7 +188,7 @@ impl Controller {
         match est {
             Ok(mut fee_estimate) => {
                 if self
-                    .session_metadata(&Policy::from_calls(&calls), None)
+                    .authorized_session_metadata(&Policy::from_calls(&calls), None)
                     .map_or(true, |(_, metadata)| !metadata.is_registered)
                 {
                     fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
@@ -252,7 +252,7 @@ impl Controller {
 
                     // Update is_registered to true after successful execution with a session
                     if let Some((key, metadata)) =
-                        self.session_metadata(&Policy::from_calls(&calls), None)
+                        self.authorized_session_metadata(&Policy::from_calls(&calls), None)
                     {
                         if !metadata.is_registered {
                             let mut updated_metadata = metadata;
