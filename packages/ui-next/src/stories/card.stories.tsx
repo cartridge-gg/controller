@@ -103,7 +103,7 @@ function Card({
                 0.01 <span className="text-muted-foreground">ETH</span>
               </div>
 
-              <div className="text-muted-foreground">$3500</div>
+              <div className="text-muted-foreground">$3500.00</div>
             </CardListItem>
 
             <CardListItem icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo">
@@ -111,7 +111,7 @@ function Card({
                 100 <span className="text-muted-foreground">STRK</span>
               </div>
 
-              <div className="text-muted-foreground">$50</div>
+              <div className="text-muted-foreground">$50.00</div>
             </CardListItem>
           </CardListContent>
         </UICard>
