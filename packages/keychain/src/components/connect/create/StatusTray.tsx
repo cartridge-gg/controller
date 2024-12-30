@@ -1,7 +1,8 @@
-import { Text, HStack, Link, Spacer, VStack, Divider } from "@chakra-ui/react";
+import { Text, VStack, Divider } from "@chakra-ui/react";
 import { ValidationState } from "./useUsernameValidation";
 import { ExternalIcon } from "@cartridge/ui-next";
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 
 export function StatusTray({
   username,
@@ -63,25 +64,17 @@ export function StatusTray({
         )}
       </Text>
       {isTimeoutError && (
-        <HStack fontSize="xs" w="full" px="15px">
-          <Text color="darkGray.800" fontWeight="bold">
-            Having trouble signing up?
-          </Text>
-          <Spacer />
-          <HStack
-            color="darkGray.800"
-            cursor="pointer"
-            onClick={() => {
-              window.open(
-                "https://docs.cartridge.gg/controller/passkey-support",
-                "_blank",
-              );
-            }}
+        <div className="w-full flex items-center justify-between text-xs text-accent-foreground font-semibold px-4">
+          <div>Having trouble signing up?</div>
+          <Link
+            className="flex items-center gap-1.5 hover:underline"
+            to="https://docs.cartridge.gg/controller/passkey-support"
+            target="_blank"
           >
-            <Link>Controller Docs</Link>
+            <div>Controller Docs</div>
             <ExternalIcon size="sm" />
-          </HStack>
-        </HStack>
+          </Link>
+        </div>
       )}
     </VStack>
   );
