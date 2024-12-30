@@ -1,7 +1,7 @@
 import { Container, Content, Footer } from "@/components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "@/utils/connection";
-import { Button, HStack, Text, Checkbox } from "@chakra-ui/react";
+import { HStack, Text, Checkbox } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
@@ -19,6 +19,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Button,
 } from "@cartridge/ui-next";
 
 export function CreateSession({
@@ -166,22 +167,26 @@ export function CreateSession({
           <ControllerErrorAlert error={error} />
         )}
 
-        <HStack spacing={4} width="full">
-          <Button onClick={() => onConnect()} isDisabled={isConnecting} px={10}>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="secondary"
+            onClick={() => onConnect()}
+            disabled={isConnecting}
+            className="px-8"
+          >
             Skip
           </Button>
           <Button
-            colorScheme="colorful"
-            isDisabled={
+            className="flex-1"
+            disabled={
               isDisabled || isConnecting || (!policies?.verified && !isConsent)
             }
             isLoading={isConnecting}
-            onClick={() => onCreateSession()}
-            width="full"
+            onClick={onCreateSession}
           >
             {isUpdate ? "update" : "create"} session
           </Button>
-        </HStack>
+        </div>
 
         {!error && <div className="flex flex-col"></div>}
       </Footer>

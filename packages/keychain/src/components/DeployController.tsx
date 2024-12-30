@@ -5,8 +5,8 @@ import {
 } from "starknet";
 import { Container, Footer, Content } from "@/components/layout";
 import { useCallback, useEffect, useState } from "react";
-import { Button, Link, Spinner } from "@chakra-ui/react";
-import { CheckIcon, ExternalIcon, WandIcon } from "@cartridge/ui-next";
+import { Spinner } from "@chakra-ui/react";
+import { CheckIcon, ExternalIcon, WandIcon, Button } from "@cartridge/ui-next";
 import { Funding } from "./Funding";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
@@ -15,6 +15,7 @@ import { Fees } from "./Fees";
 import { ControllerError } from "@/utils/connection";
 import { Policies } from "@/components/Policies";
 import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
+import { Link } from "react-router-dom";
 
 export function DeployController({
   onClose,
@@ -150,11 +151,7 @@ export function DeployController({
             ) : (
               feeEstimate && <Fees maxFee={BigInt(feeEstimate)} />
             )}
-            <Button
-              colorScheme="colorful"
-              onClick={onDeploy}
-              isLoading={isDeploying}
-            >
+            <Button onClick={onDeploy} isLoading={isDeploying}>
               DEPLOY
             </Button>
           </Footer>
@@ -185,11 +182,7 @@ export function DeployController({
             ) : !deployHash && ctrlError ? (
               <ControllerErrorAlert error={ctrlError} />
             ) : null}
-            <Button
-              colorScheme="colorful"
-              onClick={onDeploy}
-              isLoading={isDeploying}
-            >
+            <Button onClick={onDeploy} isLoading={isDeploying}>
               continue
             </Button>
           </Footer>
@@ -220,9 +213,7 @@ export function DeployController({
             ) : !deployHash && ctrlError ? (
               <ControllerErrorAlert error={ctrlError} />
             ) : null}
-            <Button colorScheme="colorful" onClick={onClose}>
-              continue
-            </Button>
+            <Button onClick={onClose}>continue</Button>
           </Footer>
         </Container>
       );
@@ -247,22 +238,14 @@ function ExplorerLink({
 
   return (
     <Link
-      href={`https://${
+      to={`https://${
         chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
       }starkscan.co/tx/${txHash}`}
-      isExternal
+      target="_blank"
+      className="flex items-center gap-1 text-sm text-muted-foreground underline"
     >
-      <Button
-        variant="goast"
-        mt={10}
-        rightIcon={<ExternalIcon />}
-        textTransform="none"
-        fontWeight="normal"
-        fontSize="sm"
-        fontFamily="Inter"
-      >
-        View on Starkscan
-      </Button>
+      View on Starkscan
+      <ExternalIcon size="sm" />
     </Link>
   );
 }

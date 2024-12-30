@@ -93,7 +93,7 @@
   "peerDependencies": {
     "@chakra-ui/react": "^2.8.1",
     "@starknet-react/chains": "^3.0.0",
-    "@starknet-react/core": "^3.0.0",
+    "@starknet-react/core": "^3.0.2",
     "starknet": "^6.11.0"
   }
 }

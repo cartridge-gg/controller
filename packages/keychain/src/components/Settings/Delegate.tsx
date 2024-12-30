@@ -1,5 +1,5 @@
-import { AlertIcon } from "@cartridge/ui-next";
-import { Button, VStack, Text, HStack, Input } from "@chakra-ui/react";
+import { AlertIcon, Button } from "@cartridge/ui-next";
+import { VStack, Text, HStack, Input } from "@chakra-ui/react";
 import { Container, Content, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
@@ -68,15 +68,10 @@ export function Delegate({ onBack }: { onBack: () => void }) {
         </VStack>
       </Content>
       <Footer>
-        <Button
-          colorScheme="colorful"
-          w="full"
-          onClick={() => onSetDelegate()}
-          isDisabled={!isValid}
-        >
+        <Button onClick={onSetDelegate} disabled={!isValid}>
           Set delegate account
         </Button>
-        {/* <Button w="full" onClick={onClose}>
+        {/* <Button variant="secondary" onClick={onClose}>
           Setup later
         </Button> */}
       </Footer>

@@ -1,5 +1,6 @@
 import Controller from "@/utils/controller";
-import { Button, Text } from "@chakra-ui/react";
+import { Button } from "@cartridge/ui-next";
+import { Text } from "@chakra-ui/react";
 import { Container, Footer } from "@/components/layout";
 import { useCallback, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -44,11 +45,11 @@ export function Consent() {
       }
     >
       <Footer>
-        <Button colorScheme="colorful" onClick={onSubmit}>
-          approve
-        </Button>
+        <Button onClick={onSubmit}>approve</Button>
 
-        <Button onClick={onDeny}>deny</Button>
+        <Button variant="secondary" onClick={onDeny}>
+          deny
+        </Button>
       </Footer>
     </Container>
   );
