@@ -35,8 +35,10 @@ export function Inventory() {
 
       <LayoutContent className="pb-4">
         <ScrollArea>
-          <Tokens />
-          {project && <Collections />}
+          <div className="flex flex-col gap-y-4">
+            <Tokens />
+            {project && <Collections />}
+          </div>
         </ScrollArea>
       </LayoutContent>
     </LayoutContainer>
