@@ -9,7 +9,6 @@ import {
   ArrowIcon,
   Button,
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
   cn,
@@ -31,6 +30,7 @@ import {
 import { useMemo } from "react";
 import { useAccount } from "@/hooks/account";
 import { useIndexerAPI } from "@cartridge/utils";
+import { CollectionImage } from "./image";
 
 type Collection = {
   address: string;
@@ -112,7 +112,7 @@ export function Collection() {
                 <LayoutHeader
                   title={col.name}
                   description={<CopyAddress address={col.address!} size="sm" />}
-                  icon={col.imageUrl ?? "/public/placeholder.svg"}
+                  icon={<CollectionImage imageUrl={col.imageUrl} size="xs" />}
                 />
 
                 <LayoutContent className="pb-0">
@@ -145,7 +145,7 @@ export function Collection() {
                         return (
                           <Link
                             className="w-full aspect-square group"
-                            to={a.tokenId}
+                            to={`token/${a.tokenId}`}
                             state={location.state}
                             key={a.tokenId}
                           >
@@ -189,17 +189,10 @@ export function Collection() {
                                   </Button>
                                 </div>
                               </CardHeader>
-                              <CardContent
-                                className="bg-cover bg-center flex py-4 h-full place-content-center overflow-hidden"
-                                style={{
-                                  backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${a.imageUrl})`,
-                                }}
-                              >
-                                <img
-                                  className="object-contain transition group-hover:scale-110"
-                                  src={a.imageUrl}
-                                />
-                              </CardContent>
+                              <CollectionImage
+                                imageUrl={a.imageUrl}
+                                size="xl"
+                              />
                             </Card>
                           </Link>
                         );

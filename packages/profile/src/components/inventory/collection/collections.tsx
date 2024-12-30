@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@cartridge/ui-next";
+import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
 import {
   Erc721__Token,
   useErc721BalancesQuery,
@@ -7,6 +7,7 @@ import {
 import { useAccount } from "@/hooks/account";
 import { useMemo } from "react";
 import { useIndexerAPI } from "@cartridge/utils";
+import { CollectionImage } from "./image";
 
 type Collection = {
   address: string;
@@ -75,17 +76,7 @@ export function Collections() {
                   </div>
                 </CardHeader>
 
-                <CardContent
-                  className="bg-cover bg-center flex p-4 h-full place-content-center overflow-hidden"
-                  style={{
-                    backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${c.imageUrl})`,
-                  }}
-                >
-                  <img
-                    className="object-contain transition group-hover:scale-110"
-                    src={c.imageUrl}
-                  />
-                </CardContent>
+                <CollectionImage imageUrl={c.imageUrl} />
               </Card>
             </Link>
           ))}
