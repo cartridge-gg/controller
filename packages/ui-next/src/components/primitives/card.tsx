@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { cn } from "@/utils";
 
-const Card = React.forwardRef<
+export const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
@@ -17,7 +17,7 @@ const Card = React.forwardRef<
 ));
 Card.displayName = "Card";
 
-const CardHeader = React.forwardRef<
+export const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { icon?: React.ReactNode }
 >(({ className, icon, ...props }, ref) =>
@@ -44,7 +44,7 @@ const CardHeader = React.forwardRef<
 );
 CardHeader.displayName = "CardHeader";
 
-const CardHeaderRight = React.forwardRef<
+export const CardHeaderRight = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
@@ -52,7 +52,7 @@ const CardHeaderRight = React.forwardRef<
 ));
 CardHeaderRight.displayName = "CardHeaderRight";
 
-const CardIcon = React.forwardRef<
+export const CardIcon = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement> & { src?: string }
 >(
@@ -83,7 +83,7 @@ const CardIcon = React.forwardRef<
 );
 CardIcon.displayName = "CardIcon";
 
-const CardTitle = React.forwardRef<
+export const CardTitle = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
@@ -98,7 +98,7 @@ const CardTitle = React.forwardRef<
 ));
 CardTitle.displayName = "CardTitle";
 
-const CardDescription = React.forwardRef<
+export const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
@@ -110,7 +110,7 @@ const CardDescription = React.forwardRef<
 ));
 CardDescription.displayName = "CardDescription";
 
-const CardContent = React.forwardRef<
+export const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
@@ -122,25 +122,78 @@ const CardContent = React.forwardRef<
 ));
 CardContent.displayName = "CardContent";
 
-const CardFooter = React.forwardRef<
+export const CardListContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm flex items-center p-3 bg-secondary", className)}
+    className={cn("flex flex-col gap-px text-sm font-medium", className)}
     {...props}
   />
 ));
-CardFooter.displayName = "CardFooter";
+CardListContent.displayName = "CardListContent";
 
-export {
-  Card,
-  CardHeader,
-  CardHeaderRight,
-  CardIcon,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
-};
+export const CardListItem = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { icon?: React.ReactNode }
+>(({ className, icon, ...props }, ref) =>
+  icon ? (
+    <div
+      ref={ref}
+      className={cn("h-11 flex items-center gap-x-px bg-background", className)}
+    >
+      {React.isValidElement(icon) ? (
+        <CardListItemIcon>{icon}</CardListItemIcon>
+      ) : (
+        <CardListItemIcon src={icon as string} />
+      )}
+      <div
+        className={cn(
+          "px-3 flex-1 h-full flex items-center justify-between bg-secondary",
+          className,
+        )}
+        {...props}
+      />
+    </div>
+  ) : (
+    <div
+      ref={ref}
+      className={cn(
+        "flex flex-col gap-y-1 p-3 bg-secondary justify-between",
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
+CardListItem.displayName = "CardListItem";
+
+const CardListItemIcon = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { src?: string }
+>(({ className, src, ...props }, ref) => (
+  <div
+    ref={ref}
+    className="h-11 w-11 bg-secondary flex items-center justify-center"
+  >
+    {src ? (
+      <img
+        src={src}
+        className={cn("h-6 aspect-square rounded-sm", className)}
+        {...props}
+      />
+    ) : props.children ? (
+      props.children
+    ) : (
+      <div
+        className={cn(
+          "h-6 aspect-square bg-[image:var(--theme-icon-url)] bg-cover bg-center place-content-center",
+          className,
+        )}
+        {...props}
+      />
+    )}
+  </div>
+));
+CardListItemIcon.displayName = "CardListItemIcon";
