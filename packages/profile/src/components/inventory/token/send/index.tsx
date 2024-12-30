@@ -19,7 +19,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
-import { Recipient } from "./recipient";
+import { Recipient } from "@/components/modules/recipient";
 import { Amount } from "./amount";
 
 export function SendToken() {
