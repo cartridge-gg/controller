@@ -11,6 +11,7 @@ export type Collection = {
   name: string;
   type: string;
   imageUrl: string;
+  totalCount: number;
 };
 
 export type Asset = {
@@ -21,7 +22,7 @@ export type Asset = {
   attributes: Record<string, unknown>[];
 };
 
-export function useCollection({ tokenIds }: { tokenIds: string[] }) {
+export function useCollection({ tokenIds = [] }: { tokenIds?: string[] }) {
   const { address } = useAccount();
   const { isReady, indexerUrl } = useIndexerAPI();
   const { status, data } = useErc721BalancesQuery(
@@ -35,7 +36,9 @@ export function useCollection({ tokenIds }: { tokenIds: string[] }) {
   }>(() => {
     const tokens = data?.tokenBalances?.edges
       .filter((e) =>
-        tokenIds.includes((e.node.tokenMetadata as Erc721__Token).tokenId),
+        !tokenIds.length
+          ? true
+          : tokenIds.includes((e.node.tokenMetadata as Erc721__Token).tokenId),
       )
       .map((e) => e.node.tokenMetadata as Erc721__Token);
     if (!indexerUrl || !tokens) {
@@ -65,6 +68,7 @@ export function useCollection({ tokenIds }: { tokenIds: string[] }) {
       name: tokens[0].name,
       type: "ERC-721",
       imageUrl: assets[0].imageUrl,
+      totalCount: assets.length,
     };
 
     return {
@@ -74,4 +78,46 @@ export function useCollection({ tokenIds }: { tokenIds: string[] }) {
   }, [data, indexerUrl]);
 
   return { collection, assets, status };
+}
+
+export function useCollections() {
+  const { address } = useAccount();
+  const { isReady, indexerUrl } = useIndexerAPI();
+  const { status, data } = useErc721BalancesQuery(
+    { address },
+    { enabled: isReady && !!address },
+  );
+
+  const collections = useMemo(() => {
+    if (!data || !indexerUrl) return [];
+
+    const collections =
+      data.tokenBalances?.edges.reduce<Record<string, Collection>>(
+        (prev, edge) => {
+          const token = edge.node.tokenMetadata as Erc721__Token;
+          const agg = prev[token.contractAddress];
+          const collection = agg
+            ? { ...agg, totalCount: agg.totalCount + 1 }
+            : {
+                address: token.contractAddress,
+                name: token.name,
+                totalCount: 1,
+                imageUrl: `${indexerUrl.replace("/graphql", "")}/static/${
+                  token.imagePath
+                }`,
+                type: "ERC-721",
+              };
+
+          return {
+            ...prev,
+            [collection.address]: collection,
+          };
+        },
+        {},
+      ) ?? [];
+
+    return Object.values(collections);
+  }, [data, indexerUrl]);
+
+  return { collections, status };
 }
