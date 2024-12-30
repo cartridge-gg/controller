@@ -53,7 +53,7 @@ export function Balance({ showBalances }: BalanceProps) {
         {showBalances.includes("credits") && (
           <CardListItem icon={<CoinsIcon variant="solid" size="sm" />}>
             <div className="flex items-center gap-2">
-              {creditBalance.formatted ?? 0}{" "}
+              {creditBalance.formatted ?? 0}
               <span className="text-muted-foreground">CREDITS</span>
             </div>
           </CardListItem>
@@ -62,7 +62,7 @@ export function Balance({ showBalances }: BalanceProps) {
         {showBalances.includes("eth") && (
           <CardListItem icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo">
             <div className="flex items-center gap-2">
-              {eth?.balance.formatted ?? "0.00"}{" "}
+              {eth?.balance.formatted ?? "0.00"}
               <span className="text-muted-foreground">ETH</span>
             </div>
 
