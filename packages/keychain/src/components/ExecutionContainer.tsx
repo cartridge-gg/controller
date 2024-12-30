@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { Button } from "@cartridge/ui-next";
 import { Container, Footer } from "@/components/layout";
-import { Button } from "@chakra-ui/react";
 import { useConnection } from "@/hooks/connection";
 import { ControllerError } from "@/utils/connection";
 import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
@@ -151,10 +151,7 @@ export function ExecutionContainer({
               return (
                 <>
                   <ControllerErrorAlert error={ctrlError} />
-                  <Button
-                    colorScheme="colorful"
-                    onClick={() => setCTAState("deploy")}
-                  >
+                  <Button onClick={() => setCTAState("deploy")}>
                     DEPLOY ACCOUNT
                   </Button>
                 </>
@@ -167,12 +164,7 @@ export function ExecutionContainer({
                   ) : (
                     maxFee && <Fees maxFee={BigInt(maxFee)} />
                   )}
-                  <Button
-                    colorScheme="colorful"
-                    onClick={() => setCTAState("fund")}
-                  >
-                    ADD FUNDS
-                  </Button>
+                  <Button onClick={() => setCTAState("fund")}>ADD FUNDS</Button>
                 </>
               );
             case ErrorCode.SessionAlreadyRegistered:
@@ -182,11 +174,7 @@ export function ExecutionContainer({
                     variant="info"
                     title="Session Already Registered"
                   />
-                  <Button
-                    colorScheme="colorful"
-                    onClick={() => onSubmit()}
-                    isLoading={false}
-                  >
+                  <Button onClick={() => onSubmit()} isLoading={false}>
                     CONTINUE
                   </Button>
                 </>
@@ -197,10 +185,9 @@ export function ExecutionContainer({
                   {ctrlError && <ControllerErrorAlert error={ctrlError} />}
                   {maxFee !== null && <Fees maxFee={BigInt(maxFee)} />}
                   <Button
-                    colorScheme="colorful"
                     onClick={handleSubmit}
                     isLoading={isLoading}
-                    isDisabled={
+                    disabled={
                       !transactions || (maxFee === null && transactions?.length)
                     }
                   >

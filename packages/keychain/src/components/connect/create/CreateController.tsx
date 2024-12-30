@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Container, Footer, Content } from "@/components/layout";
-import { Box, Button } from "@chakra-ui/react";
+import { Button } from "@cartridge/ui-next";
+import { Box } from "@chakra-ui/react";
 import { useControllerTheme } from "@/hooks/theme";
 import { usePostHog } from "posthog-js/react";
 import { useDebounce } from "@/hooks/debounce";
@@ -87,9 +88,8 @@ export function CreateControllerView({
           <Legal />
 
           <Button
-            colorScheme="colorful"
             isLoading={isLoading}
-            isDisabled={validation.status !== "valid"}
+            disabled={validation.status !== "valid"}
             onClick={onSubmit}
           >
             {validation.exists ? "login" : "sign up"}

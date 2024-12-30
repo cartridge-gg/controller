@@ -1,5 +1,4 @@
-import { Button } from "@chakra-ui/react";
-import { GearIcon } from "@cartridge/ui-next";
+import { GearIcon, Button } from "@cartridge/ui-next";
 import { useState } from "react";
 import { Container, Footer } from "@/components/layout";
 import { Recovery } from "./Recovery";
@@ -160,7 +159,7 @@ export function Settings() {
         </VStack>
       </Content> */}
       <Footer>
-        <Button w="full" onClick={logout}>
+        <Button variant="secondary" onClick={logout}>
           Log out
         </Button>
       </Footer>

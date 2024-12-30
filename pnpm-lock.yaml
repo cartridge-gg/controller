@@ -303,7 +303,7 @@ importers:
         specifier: ^3.0.0
         version: 3.0.2
       '@starknet-react/core':
-        specifier: ^3.0.0
+        specifier: ^3.0.2
         version: 3.0.3(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.11.0)(typescript@5.5.4)
       '@stripe/react-stripe-js':
         specifier: ^2.8.1

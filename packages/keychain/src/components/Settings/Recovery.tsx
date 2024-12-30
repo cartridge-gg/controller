@@ -1,5 +1,5 @@
-import { AlertIcon } from "@cartridge/ui-next";
-import { Button, VStack, Text, HStack, Input } from "@chakra-ui/react";
+import { AlertIcon, Button } from "@cartridge/ui-next";
+import { VStack, Text, HStack, Input } from "@chakra-ui/react";
 import { Container, Content, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
@@ -66,12 +66,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
         </VStack>
       </Content>
       <Footer>
-        <Button
-          colorScheme="colorful"
-          w="full"
-          onClick={() => onSetRecovery()}
-          isDisabled={!isValid}
-        >
+        <Button onClick={onSetRecovery} disabled={!isValid}>
           Add Recovery Account
         </Button>
       </Footer>
