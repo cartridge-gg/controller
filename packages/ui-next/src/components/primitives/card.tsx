@@ -141,17 +141,16 @@ export const CardListItem = React.forwardRef<
   icon ? (
     <div
       ref={ref}
-      className={cn("h-11 flex items-center gap-x-px bg-secondary", className)}
+      className={cn("h-11 flex items-center gap-x-px bg-background", className)}
     >
       {React.isValidElement(icon) ? (
         <CardListItemIcon>{icon}</CardListItemIcon>
       ) : (
         <CardListItemIcon src={icon as string} />
       )}
-      <div className="w-px h-full bg-background" />
       <div
         className={cn(
-          "px-3 w-full flex items-center justify-between",
+          "px-3 flex-1 h-full flex items-center justify-between bg-secondary",
           className,
         )}
         {...props}
@@ -170,18 +169,18 @@ export const CardListItem = React.forwardRef<
 );
 CardListItem.displayName = "CardListItem";
 
-export const CardListItemIcon = React.forwardRef<
+const CardListItemIcon = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { src?: string }
 >(({ className, src, ...props }, ref) => (
   <div
     ref={ref}
-    className="h-11 w-11 p-2 bg-secondary flex items-center justify-center"
+    className="h-11 w-11 bg-secondary flex items-center justify-center"
   >
     {src ? (
       <img
         src={src}
-        className={cn("aspect-square rounded-sm", className)}
+        className={cn("h-6 aspect-square rounded-sm", className)}
         {...props}
       />
     ) : props.children ? (
@@ -189,7 +188,7 @@ export const CardListItemIcon = React.forwardRef<
     ) : (
       <div
         className={cn(
-          "h-9 aspect-square bg-[image:var(--theme-icon-url)] bg-cover bg-center place-content-center",
+          "h-6 aspect-square bg-[image:var(--theme-icon-url)] bg-cover bg-center place-content-center",
           className,
         )}
         {...props}

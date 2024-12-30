@@ -51,7 +51,7 @@ export function Balance({ showBalances }: BalanceProps) {
 
       <CardListContent>
         {showBalances.includes("credits") && (
-          <CardListItem icon={<CoinsIcon variant="solid" size="sm" />}>
+          <CardListItem icon={<CoinsIcon variant="solid" />}>
             <div className="flex items-center gap-2">
               {creditBalance.formatted ?? 0}
               <span className="text-muted-foreground">CREDITS</span>
