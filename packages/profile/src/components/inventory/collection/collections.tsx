@@ -28,17 +28,17 @@ export function Collections() {
 
     const cols =
       data.tokenBalances?.edges.reduce<Record<string, Collection>>(
-        (prev, e) => {
-          const a = e.node.tokenMetadata as Erc721__Token;
-          const p = prev[a.contractAddress];
-          const col = p
-            ? { ...p, totalCount: p.totalCount + 1 }
+        (prev, edge) => {
+          const token = edge.node.tokenMetadata as Erc721__Token;
+          const agg = prev[token.contractAddress];
+          const col = agg
+            ? { ...agg, totalCount: agg.totalCount + 1 }
             : {
-                address: a.contractAddress,
-                name: a.name,
+                address: token.contractAddress,
+                name: token.name,
                 totalCount: 1,
                 imageUrl: `${indexerUrl.replace("/graphql", "")}/static/${
-                  a.imagePath
+                  token.imagePath
                 }`,
               };
 
@@ -60,7 +60,7 @@ export function Collections() {
     }
     default: {
       return (
-        <div className="grid grid-cols-2 gap-2 place-items-center">
+        <div className="grid grid-cols-2 gap-4 place-items-center">
           {collections.map((c) => (
             <Link
               className="w-full aspect-square group"
