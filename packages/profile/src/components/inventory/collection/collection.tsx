@@ -8,12 +8,11 @@ import {
 import {
   ArrowIcon,
   Button,
-  Card,
-  CardHeader,
-  CardTitle,
+  CheckboxIcon,
   cn,
   CopyAddress,
   ScrollArea,
+  Separator,
 } from "@cartridge/ui-next";
 import {
   LayoutContainer,
@@ -23,62 +22,42 @@ import {
   LayoutFooter,
   LayoutHeader,
 } from "@/components/layout";
-import {
-  Erc721__Token,
-  useErc721BalancesQuery,
-} from "@cartridge/utils/api/indexer";
-import { useMemo } from "react";
-import { useAccount } from "@/hooks/account";
-import { useIndexerAPI } from "@cartridge/utils";
+import { useCallback, useMemo } from "react";
 import { CollectionImage } from "./image";
-
-type Collection = {
-  address: string;
-  name: string;
-  imageUrl: string;
-  assets: Asset[];
-};
-
-type Asset = {
-  tokenId: string;
-  name: string;
-  imageUrl: string;
-};
+import { useCollection } from "@/hooks/collection";
+import { Collectibles } from "./collectibles";
 
 export function Collection() {
-  const { address } = useAccount();
   const { tokenId } = useParams();
-  const { indexerUrl, isReady } = useIndexerAPI();
-  const { status, data } = useErc721BalancesQuery(
-    { address },
-    { enabled: isReady && !!address },
-  );
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const tokenIds = searchParams.getAll("tokenIds");
 
-  const col = useMemo<Collection | undefined>(() => {
-    if (!indexerUrl || !data?.tokenBalances) {
-      return;
-    }
+  const { collection, assets, status } = useCollection({});
 
-    const assets: Asset[] = data.tokenBalances.edges.map((e) => {
-      const a = e.node.tokenMetadata as Erc721__Token;
-      return {
-        address: a.contractAddress,
-        name: a.metadataName,
-        imageUrl: `${indexerUrl.replace("/graphql", "")}/static/${a.imagePath}`,
-        tokenId: a.tokenId,
-      };
-    });
+  const selection = useMemo(() => {
+    return tokenIds.length > 0;
+  }, [tokenIds]);
 
-    return {
-      address,
-      name: assets[0].name,
-      imageUrl: assets[0].imageUrl,
-      assets,
+  const handleSelectAll = useCallback(() => {
+    if (!assets) return;
+    const options = {
+      tokenIds: tokenIds.length ? [] : assets.map((asset) => asset.tokenId),
     };
-  }, [address, data, indexerUrl]);
+    setSearchParams(options);
+  }, [assets, tokenIds, setSearchParams]);
+
+  const handleSelect = useCallback(
+    (tokenId: string) => {
+      const isSelected = tokenIds.includes(tokenId);
+      setSearchParams({
+        tokenIds: isSelected
+          ? tokenIds.filter((id) => id !== tokenId)
+          : [...tokenIds, tokenId],
+      });
+    },
+    [tokenIds, setSearchParams],
+  );
 
   if (tokenId || location.pathname.includes("/send")) {
     return <Outlet />;
@@ -87,7 +66,7 @@ export function Collection() {
   return (
     <LayoutContainer
       left={
-        <Link to="..">
+        <Link to=".." draggable={false}>
           <Button variant="icon" size="icon">
             <ArrowIcon variant="left" />
           </Button>
@@ -103,113 +82,65 @@ export function Collection() {
             return <LayoutContentError />;
           }
           default: {
-            if (!col) {
+            if (!collection || !assets) {
               return <LayoutContentLoader />;
             }
 
             return (
               <>
                 <LayoutHeader
-                  title={col.name}
-                  description={<CopyAddress address={col.address!} size="sm" />}
-                  icon={<CollectionImage imageUrl={col.imageUrl} size="xs" />}
+                  title={collection.name}
+                  description={
+                    <CopyAddress address={collection.address!} size="sm" />
+                  }
+                  icon={
+                    <CollectionImage imageUrl={collection.imageUrl} size="xs" />
+                  }
                 />
 
-                <LayoutContent className="pb-0">
-                  <ScrollArea>
-                    {/* <div
-                      className="flex items-center gap-2 text-sm cursor-pointer self-start"
-                      onClick={() => {
-                        setSearchParams({
-                          tokenIds: tokenIds.length
-                            ? []
-                            : col.assets.map((a) => a.tokenId),
-                        });
-                      }}
-                    >
-                      <CheckboxIcon
-                        variant={
-                          tokenIds.length ? "minus-line" : "unchecked-line"
-                        }
-                      />
-                      <div className="text-muted-foreground font-semibold uppercase">
-                        {tokenIds.length
-                          ? `${tokenIds.length} selected`
-                          : "Select all"}
-                      </div>
-                    </div> */}
-
-                    <div className="grid grid-cols-2 gap-2 place-items-center pb-2">
-                      {col.assets.map((a) => {
-                        const isSelected = tokenIds.includes(a.tokenId);
-                        return (
-                          <Link
-                            className="w-full aspect-square group"
-                            to={`token/${a.tokenId}`}
-                            state={location.state}
-                            key={a.tokenId}
-                          >
-                            <Card
-                              className={cn(
-                                "w-full h-full border-2 border-solid transition overflow-hidden rounded-lg",
-                                isSelected
-                                  ? "border-foreground"
-                                  : "border-transparent",
-                              )}
-                            >
-                              <CardHeader className="flex flex-row items-center group-hover:opacity-70 p-0 justify-between">
-                                <CardTitle className="truncate p-3">
-                                  {a.name}
-                                </CardTitle>
-
-                                <div className="h-full place-content-center">
-                                  <Button
-                                    size="icon"
-                                    variant="icon"
-                                    className="h-full w-auto aspect-square bg-transparent hover:bg-transparent"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-
-                                      setSearchParams({
-                                        tokenIds: isSelected
-                                          ? tokenIds.filter(
-                                              (tokenId) =>
-                                                tokenId !== a.tokenId,
-                                            )
-                                          : [...tokenIds, a.tokenId],
-                                      });
-                                    }}
-                                  >
-                                    {/* <CheckboxIcon
-                                      variant={
-                                        isSelected ? "line" : "unchecked-line"
-                                      }
-                                    /> */}
-                                  </Button>
-                                </div>
-                              </CardHeader>
-                              <CollectionImage
-                                imageUrl={a.imageUrl}
-                                size="xl"
-                              />
-                            </Card>
-                          </Link>
-                        );
-                      })}
+                <LayoutContent
+                  className={cn(
+                    "pb-0 px-1.5 flex flex-col gap-y-4",
+                    !selection && "pb-4",
+                  )}
+                >
+                  <div
+                    className="px-2.5 flex items-center gap-x-1.5 text-[11px]/3 cursor-pointer font-semibold self-start"
+                    onClick={handleSelectAll}
+                  >
+                    <CheckboxIcon
+                      variant={selection ? "minus-line" : "unchecked-line"}
+                      size="sm"
+                    />
+                    <div className="text-muted-foreground font-semibold uppercase">
+                      {selection ? `${tokenIds.length} selected` : "Select all"}
                     </div>
+                  </div>
+
+                  <ScrollArea>
+                    <Collectibles
+                      assets={assets}
+                      tokenIds={tokenIds}
+                      selection={selection}
+                      handleSelect={handleSelect}
+                    />
                   </ScrollArea>
                 </LayoutContent>
 
-                {!!tokenIds.length && (
-                  <LayoutFooter>
-                    <Link to={`send?${searchParams.toString()}`}>
-                      <Button className="w-full">
-                        Send ({tokenIds.length})
-                      </Button>
-                    </Link>
-                  </LayoutFooter>
-                )}
+                <LayoutFooter
+                  className={cn(
+                    "relative flex flex-col items-center justify-center gap-y-4 pb-6 px-4 bg-background pt-0",
+                    !selection && "hidden",
+                  )}
+                >
+                  <Separator orientation="horizontal" className="bg-spacer" />
+                  <Link
+                    className="flex items-center justify-center gap-x-4 w-full"
+                    to={`send?${searchParams.toString()}`}
+                  >
+                    <Button className="w-full">Send</Button>
+                  </Link>
+                </LayoutFooter>
               </>
             );
           }

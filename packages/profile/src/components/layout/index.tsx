@@ -85,7 +85,10 @@ export function LayoutHeader({
   rounded = false,
 }: LayoutHeaderProps) {
   return (
-    <div className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between">
+    <div
+      className="flex gap-2 px-4 py-6 sticky top-16 bg-background justify-between select-none"
+      draggable={false}
+    >
       <div className="flex min-w-0 gap-4 items-center">
         <div
           className={cn(

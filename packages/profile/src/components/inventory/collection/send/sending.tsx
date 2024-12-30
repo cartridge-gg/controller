@@ -12,7 +12,7 @@ export function Sending({ assets }: { assets: Asset[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sending</CardTitle>
+        <CardTitle className="select-none">Sending</CardTitle>
       </CardHeader>
 
       {assets.map((asset) => (

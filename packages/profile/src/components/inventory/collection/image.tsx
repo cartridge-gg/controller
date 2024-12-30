@@ -10,7 +10,7 @@ export const CollectionImage = ({
   return (
     <div
       className={cn(
-        "bg-cover bg-center flex h-full w-full place-content-center overflow-hidden",
+        "bg-cover bg-center flex h-full w-full place-content-center overflow-hidden select-none",
         {
           "p-0.5": size === "xs",
           "p-1": size === "sm",
@@ -24,7 +24,8 @@ export const CollectionImage = ({
       }}
     >
       <img
-        className="object-contain transition group-hover:scale-110"
+        className="object-contain transition group-hover:scale-110 select-none"
+        draggable={false}
         src={imageUrl}
       />
     </div>
