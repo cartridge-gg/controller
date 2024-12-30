@@ -122,7 +122,9 @@ export const Recipient = ({
   return (
     <div className="flex flex-col gap-y-px">
       <div className="flex items-center justify-between">
-        <Label className="py-3 text-[11px]/3 uppercase font-bold">To</Label>
+        <Label className="py-3 text-[11px]/3 uppercase font-bold tracking-wide">
+          To
+        </Label>
         {selectedName && (
           <div className="flex items-center gap-x-1.5">
             <div className="w-3.5 h-3.5 flex items-center justify-center">
@@ -136,7 +138,7 @@ export const Recipient = ({
         <Input
           type="text"
           spellCheck={false}
-          className="bg-quaternary pr-12 border border-quaternary focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="bg-secondary pr-12 border border-quaternary focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder="Destination Address"
           value={value}
           onChange={handleChange}
@@ -170,7 +172,7 @@ export const Recipient = ({
           !isLoading &&
           to !== address && (
             <div
-              className="bg-spacer h-16 rounded-md flex items-center gap-x-3 px-2.5 py-3 cursor-pointer absolute top-[-8px] translate-y-full w-full z-10"
+              className="bg-spacer h-16 rounded-md flex items-center gap-x-3 px-2.5 py-3 cursor-pointer absolute top-[-8px] translate-y-full w-full z-10 shadow-md"
               onClick={handleClick}
               onMouseEnter={() => setHover(true)}
               onMouseLeave={() => setHover(false)}

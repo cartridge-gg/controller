@@ -6,7 +6,6 @@ import {
 } from "@/components/layout";
 import { useAccount } from "@/hooks/account";
 import { useConnection } from "@/hooks/context";
-import { useToken } from "@/hooks/token";
 import {
   ArrowIcon,
   Button,
@@ -14,58 +13,70 @@ import {
   CheckboxUncheckedIcon,
   cn,
   CopyAddress,
+  ScrollArea,
   Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { Call, uint256 } from "starknet";
-import { Recipient } from "@/components/modules/recipient";
-import { Amount } from "./amount";
+import { Recipient } from "../../../modules/recipient";
+import { useCollection } from "@/hooks/collection";
+import { Sending } from "./sending";
+import { CollectionImage } from "../image";
 
-export function SendToken() {
-  const { address: tokenAddress } = useParams<{ address: string }>();
+export function SendCollection() {
+  const { address: collectionAddress } = useParams<{ address: string }>();
+
+  const [searchParams] = useSearchParams();
+  const paramsTokenIds = searchParams.getAll("tokenIds");
+  const { tokenId } = useParams<{ tokenId: string }>();
+
   const { address } = useAccount();
   const { parent } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
-  const token = useToken({ tokenAddress: tokenAddress! });
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
-  const [amount, setAmount] = useState<number | undefined>();
 
   const disabled = useMemo(() => {
-    return (!validated && !!warning) || !to || !amount;
-  }, [validated, to, amount, warning]);
+    return (!validated && !!warning) || !to;
+  }, [validated, to, warning]);
+
+  const tokenIds = useMemo(() => {
+    if (!tokenId) return [...paramsTokenIds];
+    return [tokenId, ...paramsTokenIds];
+  }, [tokenId, paramsTokenIds]);
+
+  const { collection, assets } = useCollection({ tokenIds });
 
   useEffect(() => {
     setValidated(false);
   }, [warning, setValidated]);
 
   const onSubmit = useCallback(
-    async (to: string, amount: number) => {
-      if (!token) return;
-
-      const formattedAmount = uint256.bnToUint256(
-        BigInt(amount * 10 ** token.meta.decimals),
-      );
-
-      const calls: Call[] = [
-        {
-          contractAddress: token.meta.address,
-          entrypoint: "transfer",
-          calldata: [to, formattedAmount],
-        },
-      ];
+    async (to: string) => {
+      if (!collectionAddress || !tokenIds || !tokenIds.length || !to) return;
+      const calls: Call[] = (tokenIds as string[]).map((id: string) => {
+        const tokenId = uint256.bnToUint256(BigInt(id));
+        return {
+          contractAddress: collectionAddress,
+          entrypoint: "transferFrom",
+          calldata: [address, to, tokenId],
+        };
+      });
       await parent.openExecute(calls);
       navigate("../../..");
     },
-    [token, parent, navigate],
+    [tokenIds, collectionAddress, address, parent, navigate],
   );
 
-  if (!token) {
-    return null;
-  }
+  if (!collection || !assets) return null;
 
   return (
     <LayoutContainer
@@ -78,22 +89,18 @@ export function SendToken() {
       }
     >
       <LayoutHeader
-        title={`Send ${token.meta.symbol}`}
+        title={`Send (${tokenIds.length}) ${collection.name}`}
         description={<CopyAddress address={address} size="sm" />}
-        icon={
-          <img
-            className="w-10 h-10"
-            src={token.meta.logoUrl ?? "/public/placeholder.svg"}
-          />
-        }
-        rounded
+        icon={<CollectionImage imageUrl={collection.imageUrl} size="xs" />}
       />
-      <LayoutContent className="pb-4 gap-6">
+      <LayoutContent className="gap-6">
         <Recipient to={to} setTo={setTo} setWarning={setWarning} />
-        <Amount amount={amount} setAmount={setAmount} />
+        <ScrollArea className="overflow-auto">
+          <Sending assets={assets} />
+        </ScrollArea>
       </LayoutContent>
 
-      <LayoutFooter>
+      <LayoutFooter className="bg-background relative pt-0">
         <Separator className="bg-spacer" />
         <div
           className={cn(
@@ -114,7 +121,7 @@ export function SendToken() {
           disabled={disabled}
           type="submit"
           className="w-full"
-          onClick={() => onSubmit(to, amount!)}
+          onClick={() => onSubmit(to)}
         >
           Review Send
         </Button>
