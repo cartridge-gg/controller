@@ -29,16 +29,15 @@ import { useConnection } from "@/hooks/context";
 import { useMemo } from "react";
 import { Hex, hexToNumber } from "viem";
 import { Asset, Collection, useCollection } from "@/hooks/collection";
-// import { compare } from "compare-versions";
+import { compare } from "compare-versions";
 
 export function Collectible() {
   const { chainId, version } = useConnection();
   const location = useLocation();
 
   const compatibility = useMemo(() => {
-    return true;
-    // if (!version) return false;
-    // return compare(version, "0.5.6", ">=");
+    if (!version) return false;
+    return compare(version, "0.5.6", ">=");
   }, [version]);
 
   const { tokenId } = useParams<{ tokenId: string }>();
@@ -94,7 +93,7 @@ export function Collectible() {
 
                 <LayoutContent>
                   <ScrollArea>
-                    <div className="flex flex-col h-full flex-1 overflow-y-auto gap-y-4 pb-6">
+                    <div className="flex flex-col h-full flex-1 overflow-y-auto gap-y-4">
                       <Image imageUrl={asset.imageUrl} />
                       <Description description={asset.description} />
                       <Properties properties={assets} />
