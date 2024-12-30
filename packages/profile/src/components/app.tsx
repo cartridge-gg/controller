@@ -3,7 +3,7 @@ import { Account } from "@/components/account";
 import {
   Inventory,
   Collection,
-  Asset,
+  Collectible,
   SendCollection,
   SendToken,
   Token,
@@ -30,7 +30,9 @@ export function App() {
                 <Route path="send" element={<SendToken />} />
               </Route>
               <Route path="collection/:address" element={<Collection />}>
-                <Route path=":tokenId" element={<Asset />} />
+                <Route path="token/:tokenId" element={<Collectible />}>
+                  <Route path="send" element={<SendCollection />} />
+                </Route>
                 <Route path="send" element={<SendCollection />} />
               </Route>
             </Route>

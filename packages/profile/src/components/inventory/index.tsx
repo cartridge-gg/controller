@@ -1,4 +1,4 @@
-export { Asset, Collection, SendCollection } from "./collection";
+export { Collectible, Collection, SendCollection } from "./collection";
 export { Token } from "./token";
 export { SendToken } from "./token/send/index";
 
