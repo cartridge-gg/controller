@@ -1,4 +1,3 @@
-import { HStack, VStack, Text } from "@chakra-ui/react";
 import React, { forwardRef, memo, useEffect, useRef } from "react";
 import { FOOTER_HEIGHT, useLayout } from "@/components/layout";
 import { Link } from "react-router-dom";
@@ -34,54 +33,29 @@ export function Footer({
   }, [footer.isOpen]);
 
   return (
-    <VStack
-      position={["fixed", "fixed", "absolute"]}
-      bottom={0}
-      w="full"
-      zIndex={1}
-      gap={0}
-      bgColor="solid.bg"
-      overflow="hidden"
+    <div
+      className="fixed md:absolute bottom-0 w-full z-[1] flex flex-col items-center gap-0 bg-solid-bg overflow-hidden"
       ref={ref}
     >
-      <VStack
-        justifySelf="flex-end"
-        bg="solid.bg"
-        w="full"
-        align="stretch"
-        p={4}
-        pb={showCatridgeLogo ? 1 : 4}
-      >
+      <div className="w-full flex flex-col items-stretch bg-solid-bg p-4 pb-1">
         {children}
-      </VStack>
+      </div>
 
       {showCatridgeLogo && (
-        <HStack
-          justifySelf="flex-end"
-          bg="solid.bg"
-          w="full"
-          color="text.secondary"
-          alignItems="center"
-          justify="center"
-          h={FOOTER_HEIGHT / 4}
-          gap={1}
-          opacity={0.5}
-          as={Link}
+        <Link
           to="https://cartridge.gg"
           target="_blank"
-          overflow="hidden"
-          _hover={{
-            color: "brand.primary",
-          }}
+          className={cn(
+            "w-full flex items-center justify-center gap-1 h-[10px] opacity-50 text-text-secondary hover:text-brand-primary overflow-hidden",
+            "transition-colors duration-200"
+          )}
         >
           <ControllerIcon height={22} />
-          <Text fontSize="xs" fontWeight={500} color="currentColor">
-            by
-          </Text>
+          <span className="text-xs font-medium text-current">by</span>
           <CartridgeLogo />
-        </HStack>
+        </Link>
       )}
-    </VStack>
+    </div>
   );
 }
 

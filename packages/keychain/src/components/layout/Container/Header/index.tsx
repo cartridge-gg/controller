@@ -1,4 +1,3 @@
-import { Box } from "@chakra-ui/react";
 import { Banner, BannerProps } from "./Banner";
 import { TopBar, TopBarProps } from "./TopBar";
 
@@ -12,7 +11,7 @@ export function Header({
   ...bannerProps
 }: HeaderProps & { onClose?: () => void }) {
   return (
-    <Box position="sticky" top={0} w="full" zIndex={1} bg="solid.bg">
+    <div className="sticky top-0 w-full z-[1] bg-solid-bg">
       <Banner {...bannerProps} />
       <TopBar
         onBack={onBack}
@@ -20,6 +19,6 @@ export function Header({
         hideAccount={hideAccount}
         hideNetwork={hideNetwork}
       />
-    </Box>
+    </div>
   );
 }
