@@ -1,11 +1,19 @@
-import { getChecksumAddress } from "starknet";
+import {
+  getChecksumAddress,
+  hash,
+  typedData,
+  TypedDataRevision,
+} from "starknet";
 import {
   ContractPolicy,
   erc20Metadata,
+  Method,
   SessionPolicies,
+  SignMessagePolicy,
 } from "@cartridge/presets";
 import { CoinsIcon, CartridgeIcon } from "@cartridge/ui-next";
 import React from "react";
+import { Policy } from "@cartridge/account-wasm";
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
 
@@ -16,17 +24,23 @@ export type ERC20Metadata = {
   decimals: number;
 };
 
-export type ParsedSessionPolicies = Omit<SessionPolicies, "contracts"> & {
+export type ParsedSessionPolicies = {
   verified: boolean;
   contracts?: Record<
     string,
-    ContractPolicy & {
+    Omit<ContractPolicy, "methods"> & {
       meta?: Partial<ERC20Metadata> & {
         type: ContractType;
         icon?: React.ReactNode | string;
       };
+      methods: (Method & {
+        authorized?: boolean;
+      })[];
     }
   >;
+  messages?: (SignMessagePolicy & {
+    authorized?: boolean;
+  })[];
 };
 
 const VRF_ADDRESS = getChecksumAddress(
@@ -105,4 +119,37 @@ export function parseSessionPolicies({
   summary.contracts = Object.fromEntries(sortedEntries);
 
   return summary;
+}
+
+export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
+  return [
+    ...Object.entries(policies.contracts ?? {}).flatMap(
+      ([target, { methods }]) => {
+        const methodsArr = Array.isArray(methods) ? methods : [methods];
+        return methodsArr.map((m) => ({
+          target,
+          method: m.entrypoint,
+          authorized: !!m.authorized,
+        }));
+      },
+    ),
+    ...(policies.messages ?? []).map((p) => {
+      const domainHash = typedData.getStructHash(
+        p.types,
+        "StarknetDomain",
+        p.domain,
+        TypedDataRevision.ACTIVE,
+      );
+      const typeHash = typedData.getTypeHash(
+        p.types,
+        p.primaryType,
+        TypedDataRevision.ACTIVE,
+      );
+
+      return {
+        scope_hash: hash.computePoseidonHash(domainHash, typeHash),
+        authorized: !!p.authorized,
+      };
+    }),
+  ];
 }

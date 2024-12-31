@@ -26,7 +26,8 @@ use super::policy::ProvedPolicy;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Session {
     pub inner: crate::abigen::controller::Session,
-    pub policies: Vec<ProvedPolicy>,
+    pub requested_policies: Vec<Policy>,
+    pub proved_policies: Vec<ProvedPolicy>,
     pub metadata: String,
 }
 
@@ -37,23 +38,32 @@ impl Session {
         session_signer: &Signer,
         guardian_guid: Felt,
     ) -> Result<Self, SignError> {
-        if policies.is_empty() {
-            return Err(SignError::NoAllowedSessionMethods);
-        }
         let metadata = json!({ "metadata": "metadata", "max_fee": 0 });
-        let hashes = policies
+
+        // Only include authorized policies in the merkle tree
+        let authorized_policies: Vec<_> = policies.iter().filter(|&p| p.is_authorized()).collect();
+
+        let hashes = authorized_policies
             .iter()
-            .map(Policy::as_merkle_leaf)
+            .map(|&p| Policy::as_merkle_leaf(p))
             .collect::<Vec<Felt>>();
-        let policies: Vec<_> = policies
+
+        let proved_policies: Vec<_> = authorized_policies
+            .clone()
             .into_iter()
             .enumerate()
-            .map(|(i, method)| ProvedPolicy {
-                policy: method,
+            .map(|(i, policy)| ProvedPolicy {
+                policy: policy.clone(),
                 proof: MerkleTree::compute_proof(hashes.clone(), i),
             })
             .collect();
-        let root = MerkleTree::compute_root(hashes[0], policies[0].proof.clone());
+
+        let root = if authorized_policies.is_empty() {
+            Felt::ZERO
+        } else {
+            MerkleTree::compute_root(hashes[0], proved_policies[0].proof.clone())
+        };
+
         Ok(Self {
             inner: crate::abigen::controller::Session {
                 expires_at,
@@ -62,7 +72,8 @@ impl Session {
                 guardian_key_guid: guardian_guid,
                 metadata_hash: Felt::ZERO,
             },
-            policies,
+            requested_policies: policies,
+            proved_policies,
             metadata: serde_json::to_string(&metadata).unwrap(),
         })
     }
@@ -77,16 +88,16 @@ impl Session {
     }
 
     pub fn single_proof(&self, policy: &Policy) -> Option<Vec<Felt>> {
-        self.policies
+        self.proved_policies
             .iter()
-            .find(|ProvedPolicy { policy: method, .. }| method == policy)
+            .find(|ProvedPolicy { policy: p, .. }| p == policy)
             .map(|ProvedPolicy { proof, .. }| proof.clone())
     }
 
     pub fn is_authorized(&self, policy: &Policy) -> bool {
-        self.policies
-            .iter()
-            .any(|proved_policy| proved_policy.policy == *policy)
+        self.proved_policies.iter().any(|proved_policy| {
+            proved_policy.policy == *policy && proved_policy.policy.is_authorized()
+        })
     }
 
     pub fn is_expired(&self) -> bool {
@@ -102,6 +113,10 @@ impl Session {
         .into();
 
         self.inner.session_key_guid == session_key_guid
+    }
+
+    pub fn is_requested(&self, policy: &Policy) -> bool {
+        self.requested_policies.iter().any(|p| p == policy)
     }
 }
 

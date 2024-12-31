@@ -177,7 +177,7 @@ pub struct SessionMetadata {
 }
 
 impl SessionMetadata {
-    pub fn is_valid(&self, policies: &[Policy], public_key: Option<Felt>) -> bool {
+    pub fn is_authorized(&self, policies: &[Policy], public_key: Option<Felt>) -> bool {
         let public_key = if let Some(public_key) = public_key {
             let pubkey = VerifyingKey::from_scalar(public_key);
             pubkey.scalar()
@@ -193,6 +193,24 @@ impl SessionMetadata {
             && policies
                 .iter()
                 .all(|policy| self.session.is_authorized(policy))
+    }
+
+    pub fn is_requested(&self, policies: &[Policy], public_key: Option<Felt>) -> bool {
+        let public_key = if let Some(public_key) = public_key {
+            let pubkey = VerifyingKey::from_scalar(public_key);
+            pubkey.scalar()
+        } else if let Some(credentials) = &self.credentials {
+            let signer = SigningKey::from_secret_scalar(credentials.private_key);
+            signer.verifying_key().scalar()
+        } else {
+            return false;
+        };
+
+        !self.session.is_expired()
+            && self.session.is_session_key(public_key)
+            && policies
+                .iter()
+                .all(|policy| self.session.is_requested(policy))
     }
 }
 

@@ -24,22 +24,48 @@ impl Policy {
         Policy::Call(CallPolicy {
             contract_address,
             selector,
+            authorized: Some(true),
         })
     }
+
     pub fn new_typed_data(scope_hash: Felt) -> Self {
-        Policy::TypedData(TypedDataPolicy { scope_hash })
+        Policy::TypedData(TypedDataPolicy {
+            scope_hash,
+            authorized: Some(true),
+        })
+    }
+
+    pub fn is_authorized(&self) -> bool {
+        match self {
+            Policy::Call(call) => call.authorized.unwrap_or(false),
+            Policy::TypedData(typed_data) => typed_data.authorized.unwrap_or(false),
+        }
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+impl PartialEq for CallPolicy {
+    fn eq(&self, other: &Self) -> bool {
+        self.contract_address == other.contract_address && self.selector == other.selector
+    }
+}
+
+impl PartialEq for TypedDataPolicy {
+    fn eq(&self, other: &Self) -> bool {
+        self.scope_hash == other.scope_hash
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CallPolicy {
     pub contract_address: Felt,
     pub selector: Felt,
+    pub authorized: Option<bool>,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TypedDataPolicy {
     pub scope_hash: Felt,
+    pub authorized: Option<bool>,
 }
 
 impl From<&Call> for Policy {
@@ -47,6 +73,7 @@ impl From<&Call> for Policy {
         Policy::Call(CallPolicy {
             contract_address: call.to,
             selector: call.selector,
+            authorized: Some(true),
         })
     }
 }
@@ -55,6 +82,7 @@ impl From<&TypedData> for Policy {
     fn from(typed_data: &TypedData) -> Self {
         Self::TypedData(TypedDataPolicy {
             scope_hash: typed_data.scope_hash,
+            authorized: Some(true),
         })
     }
 }
@@ -90,8 +118,15 @@ pub trait MerkleLeaf {
 impl MerkleLeaf for Policy {
     fn as_merkle_leaf(&self) -> Felt {
         match self {
-            Policy::Call(call_policy) => call_policy.as_merkle_leaf(),
-            Policy::TypedData(typed_data_policy) => typed_data_policy.as_merkle_leaf(),
+            Policy::Call(call_policy) if call_policy.authorized.unwrap_or(false) => {
+                call_policy.as_merkle_leaf()
+            }
+            Policy::TypedData(typed_data_policy)
+                if typed_data_policy.authorized.unwrap_or(false) =>
+            {
+                typed_data_policy.as_merkle_leaf()
+            }
+            _ => Felt::ZERO,
         }
     }
 }

@@ -14,8 +14,6 @@ import {
   CallData,
 } from "starknet";
 
-import { toWasmPolicies } from "@cartridge/controller";
-
 import {
   CartridgeAccount,
   CartridgeAccountMeta,
@@ -24,8 +22,9 @@ import {
   JsInvocationsDetails,
   SessionMetadata,
 } from "@cartridge/account-wasm/controller";
-import { SessionPolicies } from "@cartridge/presets";
+
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
+import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
 
 export default class Controller extends Account {
   private cartridge: CartridgeAccount;
@@ -99,7 +98,7 @@ export default class Controller extends Account {
 
   async createSession(
     expiresAt: bigint,
-    policies: SessionPolicies,
+    policies: ParsedSessionPolicies,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _maxFee?: BigNumberish,
   ) {
@@ -112,7 +111,7 @@ export default class Controller extends Account {
 
   async registerSessionCalldata(
     expiresAt: bigint,
-    policies: SessionPolicies,
+    policies: ParsedSessionPolicies,
     publicKey: string,
   ): Promise<Array<string>> {
     return await this.cartridge.registerSessionCalldata(
@@ -124,7 +123,7 @@ export default class Controller extends Account {
 
   async registerSession(
     expiresAt: bigint,
-    policies: SessionPolicies,
+    policies: ParsedSessionPolicies,
     publicKey: string,
     maxFee: BigNumberish,
   ): Promise<InvokeFunctionResponse> {
@@ -178,11 +177,24 @@ export default class Controller extends Account {
     return await this.cartridge.hasSessionForMessage(JSON.stringify(typedData));
   }
 
-  async session(
-    policies: SessionPolicies,
+  async getAuthorizedSessionMetadata(
+    policies: ParsedSessionPolicies,
     public_key?: string,
   ): Promise<SessionMetadata | undefined> {
-    return await this.cartridge.session(toWasmPolicies(policies), public_key);
+    return await this.cartridge.getAuthorizedSessionMetadata(
+      toWasmPolicies(policies),
+      public_key,
+    );
+  }
+
+  async isRequestedSession(
+    policies: ParsedSessionPolicies,
+    public_key?: string,
+  ): Promise<boolean> {
+    return await this.cartridge.isRequestedSession(
+      toWasmPolicies(policies),
+      public_key,
+    );
   }
 
   async estimateInvokeFee(
