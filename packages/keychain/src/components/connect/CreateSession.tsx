@@ -1,7 +1,6 @@
 import { Container, Content, Footer } from "@/components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "@/utils/connection";
-import { HStack, Text, Checkbox } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
@@ -20,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
   Button,
+  Checkbox,
 } from "@cartridge/ui-next";
 
 export function CreateSession({
@@ -105,7 +105,7 @@ export function CreateSession({
         }
       }}
     >
-      <Content gap={6}>
+      <Content className="gap-6">
         <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
           <VerifiedSessionSummary game={theme.name} policies={policies} />
@@ -138,29 +138,20 @@ export function CreateSession({
         </div>
 
         {!policies?.verified && (
-          <HStack
-            p={3}
-            mb={1}
-            spacing={5}
-            border="1px solid"
-            borderRadius="md"
-            borderColor="solid.primary"
+          <div
+            className="flex items-center p-3 mb-1 gap-5 border border-solid-primary rounded-md cursor-pointer"
             onClick={() => !isConnecting && setIsConsent(!isConsent)}
-            cursor="pointer"
           >
             <Checkbox
-              color="red"
-              colorScheme="red"
-              borderColor="error.foreground"
-              isChecked={isConsent}
-              isDisabled={isConnecting}
-              pointerEvents="none"
+              className="text-error-foreground border-error-foreground pointer-events-none"
+              checked={isConsent}
+              disabled={isConnecting}
             />
-            <Text fontSize="xs" textColor="error.foreground">
+            <span className="text-xs text-error-foreground">
               I understand and agree to grant permission for this application to
               execute these actions.
-            </Text>
-          </HStack>
+            </span>
+          </div>
         )}
 
         {error && isControllerError(error) && (

@@ -1,19 +1,9 @@
-import {
-  VStack,
-  Circle,
-  Text,
-  Center,
-  Flex,
-  Image,
-  useColorMode,
-  Square,
-  HStack,
-} from "@chakra-ui/react";
 import { useControllerTheme } from "@/hooks/theme";
 import { useMemo } from "react";
 import { useLayoutVariant } from "../";
 import { TOP_BAR_HEIGHT } from "./TopBar";
 import { IconProps } from "@cartridge/ui-next";
+import { useColorMode } from "@chakra-ui/react";
 
 export type BannerProps = {
   Icon?: React.ComponentType<IconProps>;
@@ -21,6 +11,10 @@ export type BannerProps = {
   title: string | React.ReactElement;
   description?: string | React.ReactElement;
 };
+
+const ICON_SIZE = 80;
+const ICON_OFFSET = 40;
+
 export function Banner({ Icon, icon, title, description }: BannerProps) {
   const theme = useControllerTheme();
   const { colorMode } = useColorMode();
@@ -34,144 +28,89 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
   switch (variant) {
     case "expanded":
       return (
-        <VStack w="full" pb={6}>
-          <VStack
-            h={136}
-            w="full"
-            bg={`url('${cover}')`}
-            bgSize="cover"
-            bgPos="center"
-            position="relative"
-            mb={10}
-            _before={{
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, var(--chakra-colors-solid-bg) 100%)`,
-              pointerEvents: "none",
-            }}
+        <div className="w-full flex flex-col items-center pb-6">
+          <div
+            className="h-[136px] w-full bg-cover bg-center relative mb-10 before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-solid-bg before:pointer-events-none"
+            style={{ backgroundImage: `url('${cover}')` }}
           >
-            <Center position="absolute" bottom={-ICON_OFFSET / 4} left={4}>
-              <HStack w="full" gap={4} align="center">
-                <Flex
-                  position="relative"
-                  h={`${ICON_SIZE}px`}
-                  w={`${ICON_SIZE}px`}
-                  minW={`${ICON_SIZE}px`}
-                >
-                  <Flex
-                    position="absolute"
-                    inset={0}
-                    borderWidth={4}
-                    borderColor="solid.bg"
-                    borderRadius="lg"
-                  />
-                  <Flex
-                    bg="darkGray.700"
-                    borderRadius="lg"
-                    h="100%"
-                    w="100%"
-                    justify="center"
-                    alignItems="center"
-                    overflow="hidden"
-                  >
+            <div className="absolute -bottom-[10px] left-4">
+              <div className="w-full flex items-center gap-4">
+                <div className={`relative h-[${ICON_SIZE}px] w-[${ICON_SIZE}px] min-w-[${ICON_SIZE}px]`}>
+                  <div className="absolute inset-0 border-4 border-solid-bg rounded-lg" />
+                  <div className="bg-darkGray-700 rounded-lg h-full w-full flex justify-center items-center overflow-hidden">
                     {Icon ? (
-                      <Circle size="100%" bg="solid.primary">
+                      <div className="rounded-full w-full h-full bg-solid-primary flex items-center justify-center">
                         <Icon size="lg" />
-                      </Circle>
+                      </div>
                     ) : icon ? (
-                      <Circle size="100%" bg="solid.primary">
+                      <div className="rounded-full w-full h-full bg-solid-primary flex items-center justify-center">
                         {icon}
-                      </Circle>
+                      </div>
                     ) : (
-                      <Image
+                      <img
                         src={theme.icon}
-                        w="100%"
-                        h="100%"
+                        className="w-full h-full object-cover"
                         alt="Controller Icon"
-                        objectFit="cover"
                       />
                     )}
-                  </Flex>
-                </Flex>
+                  </div>
+                </div>
 
-                <VStack align="flex-start" spacing={1}>
-                  <Text fontSize="lg" fontWeight="semibold">
+                <div className="flex flex-col items-start gap-1">
+                  <span className="text-lg font-semibold">
                     {title}
-                  </Text>
+                  </span>
 
                   {description && (
-                    <Text fontSize="sm" color="text.secondary">
+                    <span className="text-sm text-text-secondary">
                       {description}
-                    </Text>
+                    </span>
                   )}
-                </VStack>
-              </HStack>
-            </Center>
-          </VStack>
-        </VStack>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       );
     case "compressed":
     default:
       return (
-        <VStack w="full">
-          <HStack
-            h={TOP_BAR_HEIGHT / 4}
-            w="full"
-            bg={`url('${cover}')`}
-            bgSize="cover"
-            bgPos="center"
-            pb={6}
+        <div className="w-full flex flex-col items-center">
+          <div
+            className={`h-[${TOP_BAR_HEIGHT / 4}px] w-full bg-cover bg-center pb-6`}
+            style={{ backgroundImage: `url('${cover}')` }}
           />
 
-          <HStack w="full" p={4} gap={4} minW={0}>
+          <div className="w-full p-4 flex items-center gap-4 min-w-0">
             {Icon ? (
-              <Square size="44px" bg="solid.primary" borderRadius="md">
+              <div className="w-11 h-11 bg-solid-primary rounded-md flex items-center justify-center">
                 <Icon size="lg" />
-              </Square>
+              </div>
             ) : icon ? (
-              <Square size="44px" bg="solid.primary" borderRadius="md">
+              <div className="w-11 h-11 bg-solid-primary rounded-md flex items-center justify-center">
                 {icon}
-              </Square>
+              </div>
             ) : (
-              <Image
+              <img
                 src={theme.icon}
-                boxSize="44px"
+                className="w-11 h-11 rounded-md"
                 alt="Controller Icon"
-                borderRadius="md"
               />
             )}
 
-            <VStack w="full" align="stretch" gap={1} minW={0}>
-              <Text
-                w="full"
-                fontSize="lg"
-                fontWeight="semibold"
-                noOfLines={1}
-                textOverflow="ellipsis"
-              >
+            <div className="w-full flex flex-col items-stretch gap-1 min-w-0">
+              <span className="w-full text-lg font-semibold truncate">
                 {title}
-              </Text>
+              </span>
 
               {description && (
-                <Text
-                  w="full"
-                  fontSize="xs"
-                  color="text.secondary"
-                  overflowWrap="break-word"
-                >
+                <span className="w-full text-xs text-text-secondary break-words">
                   {description}
-                </Text>
+                </span>
               )}
-            </VStack>
-          </HStack>
-        </VStack>
+            </div>
+          </div>
+        </div>
       );
   }
 }
-
-const ICON_SIZE = 80;
-const ICON_OFFSET = 40;
