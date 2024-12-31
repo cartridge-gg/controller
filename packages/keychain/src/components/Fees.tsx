@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { HStack, Spacer, Spinner, Text, VStack } from "@chakra-ui/react";
+import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
 import { formatUnits } from "viem";
 import { useChainId } from "@/hooks/connection";
-import { ErrorAlertIcon, EthereumIcon } from "@cartridge/ui-next";
+import { ErrorAlertIcon, EthereumIcon, Spinner } from "@cartridge/ui-next";
 
 export function Fees({
   maxFee,
@@ -37,14 +37,12 @@ export function Fees({
       align="flex-start"
     >
       {formattedFee ? (
-        <>
-          <LineItem
-            name="Network Fee"
-            value={formattedFee}
-            isLoading={!formattedFee}
-            variant={variant}
-          />
-        </>
+        <LineItem
+          name="Network Fee"
+          value={formattedFee}
+          isLoading={!formattedFee}
+          variant={variant}
+        />
       ) : (
         <LineItem name="Calculating Fees" isLoading />
       )}
@@ -77,7 +75,7 @@ function LineItem({
       <Spacer />
 
       {isLoading ? (
-        <Spinner size="sm" />
+        <Spinner />
       ) : (
         <HStack gap={0}>
           {variant && <ErrorAlertIcon variant={variant} />}
