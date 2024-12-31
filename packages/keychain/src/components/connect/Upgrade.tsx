@@ -1,5 +1,4 @@
-import { BoltIcon } from "@cartridge/ui-next";
-import { ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
+import { BoltIcon, CircleIcon } from "@cartridge/ui-next";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { Content } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
@@ -21,28 +20,19 @@ export const Upgrade = () => {
         <div className="text-sm text-muted-foreground pb-2">
           Install the latest to continue
         </div>
-        <VStack
-          w="full"
-          align="left"
-          border="1px"
-          borderLeft="10px solid"
-          borderColor="darkGray.600"
-          borderRadius="4px"
-          bgColor="darkGray.700"
-          py="16px"
-          px="20px"
-        >
-          <Text color="text.secondary" fontSize="sm" fontWeight="bold">
+        <div className="flex flex-col rounded p-4 border border-l-8 border-quaternary bg-secondary gap-1">
+          <div className="text-sm text-muted-foreground font-bold">
             Upgrade Details
-          </Text>
-          <UnorderedList>
+          </div>
+          <div className="flex flex-col">
             {upgrade.latest?.changes.map((item, i) => (
-              <ListItem key={i} fontSize="sm">
+              <div key={i} className="flex items-center text-sm gap-1">
+                <CircleIcon size="xs" />
                 {item}
-              </ListItem>
+              </div>
             ))}
-          </UnorderedList>
-        </VStack>
+          </div>
+        </div>
       </Content>
     </ExecutionContainer>
   );
