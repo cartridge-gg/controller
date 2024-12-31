@@ -30,6 +30,11 @@ import { Sending } from "./sending";
 import { CollectionImage } from "../image";
 import { useEntrypoints } from "@/hooks/entrypoints";
 
+const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
+const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
+const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
+const TRANSFER_FROM_SNAKE_CASE = "transfer_from";
+
 export function SendCollection() {
   const { address: collectionAddress } = useParams<{ address: string }>();
 
@@ -58,25 +63,25 @@ export function SendCollection() {
   const { collection, assets } = useCollection({ tokenIds });
 
   const entrypoint: string | null = useMemo(() => {
-    if (entrypoints.includes("safe_transfer_from")) {
+    if (entrypoints.includes(SAFE_TRANSFER_FROM_SNAKE_CASE)) {
       setEntrypointWarning("");
-      return "safe_transfer_from";
+      return SAFE_TRANSFER_FROM_SNAKE_CASE;
     }
-    if (entrypoints.includes("safeTransferFrom")) {
+    if (entrypoints.includes(SAFE_TRANSFER_FROM_CAMEL_CASE)) {
       setEntrypointWarning("");
-      return "safeTransferFrom";
+      return SAFE_TRANSFER_FROM_CAMEL_CASE;
     }
-    if (entrypoints.includes("transfer_from")) {
+    if (entrypoints.includes(TRANSFER_FROM_SNAKE_CASE)) {
       setEntrypointWarning(
         "This collection does not support a safe transfer function. I understand and agree to unsafely send assets to a contract.",
       );
-      return "transfer_from";
+      return TRANSFER_FROM_SNAKE_CASE;
     }
-    if (entrypoints.includes("transferFrom")) {
+    if (entrypoints.includes(TRANSFER_FROM_CAMEL_CASE)) {
       setEntrypointWarning(
         "This collection does not support a safe transfer function. I understand and agree to unsafely send assets to a contract.",
       );
-      return "transferFrom";
+      return TRANSFER_FROM_CAMEL_CASE;
     }
     setEntrypointWarning("");
     return null;
@@ -114,6 +119,7 @@ export function SendCollection() {
         !entrypoint
       )
         return;
+      // Fill the extra argument in case of safe transfer functions
       const calldata = entrypoint.includes("safe") ? [0] : [];
       const calls: Call[] = (tokenIds as string[]).map((id: string) => {
         const tokenId = uint256.bnToUint256(BigInt(id));
