@@ -5,12 +5,10 @@ import {
   Center,
   Flex,
   Image,
-  useColorMode,
   Square,
   HStack,
 } from "@chakra-ui/react";
 import { useControllerTheme } from "@/hooks/theme";
-import { useMemo } from "react";
 import { useLayoutVariant } from "../";
 import { TOP_BAR_HEIGHT } from "./TopBar";
 import { IconProps } from "@cartridge/ui-next";
@@ -23,12 +21,6 @@ export type BannerProps = {
 };
 export function Banner({ Icon, icon, title, description }: BannerProps) {
   const theme = useControllerTheme();
-  const { colorMode } = useColorMode();
-  const cover = useMemo(
-    () =>
-      typeof theme.cover === "string" ? theme.cover : theme.cover[colorMode],
-    [theme, colorMode],
-  );
   const variant = useLayoutVariant();
 
   switch (variant) {
@@ -38,7 +30,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
           <VStack
             h={136}
             w="full"
-            bg={`url('${cover}')`}
+            className="bg-[image:var(--theme-cover-url)]"
             bgSize="cover"
             bgPos="center"
             position="relative"
@@ -121,7 +113,7 @@ export function Banner({ Icon, icon, title, description }: BannerProps) {
           <HStack
             h={TOP_BAR_HEIGHT / 4}
             w="full"
-            bg={`url('${cover}')`}
+            className="bg-[image:var(--theme-cover-url)]"
             bgSize="cover"
             bgPos="center"
             pb={6}
