@@ -1,7 +1,6 @@
 import { Container, Content, Footer } from "@/components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "@/utils/connection";
-import { HStack, Text, Checkbox } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
@@ -20,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
   Button,
+  Checkbox,
 } from "@cartridge/ui-next";
 
 export function CreateSession({
@@ -138,29 +138,21 @@ export function CreateSession({
         </div>
 
         {!policies?.verified && (
-          <HStack
-            p={3}
-            mb={1}
-            spacing={5}
-            border="1px solid"
-            borderRadius="md"
-            borderColor="solid.primary"
+          <div
+            className="flex items-center p-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-error-icon text-error-icon"
             onClick={() => !isConnecting && setIsConsent(!isConsent)}
-            cursor="pointer"
           >
             <Checkbox
-              color="red"
-              colorScheme="red"
-              borderColor="error.foreground"
-              isChecked={isConsent}
-              isDisabled={isConnecting}
-              pointerEvents="none"
+              checked={isConsent}
+              disabled={isConnecting}
+              onCheckedChange={() => setIsConsent(!isConsent)}
+              className="pointer-events-none"
             />
-            <Text fontSize="xs" textColor="error.foreground">
+            <div className="text-xs">
               I understand and agree to grant permission for this application to
               execute these actions.
-            </Text>
-          </HStack>
+            </div>
+          </div>
         )}
 
         {error && isControllerError(error) && (
