@@ -5,6 +5,7 @@ import { StoryParameters } from "./mock";
 import { Provider } from "./provider";
 
 import "../src/index.css";
+import { SonnerToaster } from "@cartridge/ui-next";
 
 const preview: Preview = {
   parameters: {
@@ -41,6 +42,7 @@ const preview: Preview = {
     (Story, { parameters }) => (
       <Provider parameters={parameters as StoryParameters}>
         <Story />
+        <SonnerToaster />
       </Provider>
     ),
   ],

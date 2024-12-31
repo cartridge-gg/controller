@@ -9,9 +9,8 @@ import {
   AccordionPanel,
   Box,
 } from "@chakra-ui/react";
-import { FnIcon, WedgeIcon } from "@cartridge/ui-next";
+import { FnIcon, WedgeIcon, CopyAddress } from "@cartridge/ui-next";
 import { SessionPolicies } from "@cartridge/presets";
-import { CopyAddress } from "./CopyAddress";
 
 export function Policies({
   title,
