@@ -141,6 +141,7 @@ node_modules/
 *.tsbuildinfo
 
 .turbo
+.pnpm-store
 
 **/.pnpm-debug.log*
 
