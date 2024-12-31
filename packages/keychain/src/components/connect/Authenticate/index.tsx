@@ -69,7 +69,9 @@ export function Authenticate({
       description={description}
     >
       <Content>
-        <FaceIDDuoImage />
+        <div className="flex justify-center">
+          <FaceIDDuoImage />
+        </div>
       </Content>
 
       <Footer>
