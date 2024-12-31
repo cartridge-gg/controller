@@ -64,10 +64,12 @@ export function ContractCard({
         <Accordion type="multiple" defaultValue={["methods"]}>
           <AccordionItem value="methods" className="flex flex-col gap-4">
             <AccordionTrigger className="text-xs text-muted-foreground">
-              Approve{" "}
-              <span className="text-accent-foreground font-bold">
-                {methods.length} {methods.length > 1 ? "methods" : "method"}
-              </span>
+              <div>
+                Approve{" "}
+                <span className="text-accent-foreground font-bold">
+                  {methods.length} {methods.length > 1 ? "methods" : "method"}
+                </span>
+              </div>
             </AccordionTrigger>
             <AccordionContent className="bg-background border border-background rounded-md gap-px">
               {methods.map((method) => (
