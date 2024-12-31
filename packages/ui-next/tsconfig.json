@@ -11,7 +11,7 @@
   },
   "include": [
     "src/components/**/*",
-    "src/hooks.ts",
+    "src/hooks/**/*",
     "src/index.ts",
     "src/preset.ts",
     "src/utils.ts",
