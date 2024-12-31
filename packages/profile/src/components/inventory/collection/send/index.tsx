@@ -28,6 +28,7 @@ import { Recipient } from "../../../modules/recipient";
 import { useCollection } from "@/hooks/collection";
 import { Sending } from "./sending";
 import { CollectionImage } from "../image";
+import { useEntrypoints } from "@/hooks/entrypoints";
 
 export function SendCollection() {
   const { address: collectionAddress } = useParams<{ address: string }>();
@@ -36,17 +37,18 @@ export function SendCollection() {
   const paramsTokenIds = searchParams.getAll("tokenIds");
   const { tokenId } = useParams<{ tokenId: string }>();
 
+  const { entrypoints } = useEntrypoints({
+    address: collectionAddress || "0x0",
+  });
   const { address } = useAccount();
   const { parent } = useConnection();
-  const [validated, setValidated] = useState(false);
-  const [warning, setWarning] = useState<string>();
+  const [recipientValidated, setRecipientValidated] = useState(false);
+  const [entrypointValidated, setEntrypointValidated] = useState(false);
+  const [recipientWarning, setRecipientWarning] = useState<string>();
+  const [entrypointWarning, setEntrypointWarning] = useState<string>();
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
-
-  const disabled = useMemo(() => {
-    return (!validated && !!warning) || !to;
-  }, [validated, to, warning]);
 
   const tokenIds = useMemo(() => {
     if (!tokenId) return [...paramsTokenIds];
@@ -55,25 +57,76 @@ export function SendCollection() {
 
   const { collection, assets } = useCollection({ tokenIds });
 
+  const entrypoint: string | null = useMemo(() => {
+    if (entrypoints.includes("safe_transfer_from")) {
+      setEntrypointWarning("");
+      return "safe_transfer_from";
+    }
+    if (entrypoints.includes("safeTransferFrom")) {
+      setEntrypointWarning("");
+      return "safeTransferFrom";
+    }
+    if (entrypoints.includes("transfer_from")) {
+      setEntrypointWarning(
+        "This collection does not support a safe transfer function. I understand and agree to unsafely send assets to a contract.",
+      );
+      return "transfer_from";
+    }
+    if (entrypoints.includes("transferFrom")) {
+      setEntrypointWarning(
+        "This collection does not support a safe transfer function. I understand and agree to unsafely send assets to a contract.",
+      );
+      return "transferFrom";
+    }
+    setEntrypointWarning("");
+    return null;
+  }, [entrypoints, setEntrypointWarning]);
+
+  const disabled = useMemo(() => {
+    return (
+      (!recipientValidated && !!recipientWarning) ||
+      (!entrypointValidated && !!entrypointWarning) ||
+      !to
+    );
+  }, [
+    recipientValidated,
+    to,
+    recipientWarning,
+    entrypointValidated,
+    entrypointWarning,
+  ]);
+
   useEffect(() => {
-    setValidated(false);
-  }, [warning, setValidated]);
+    setRecipientValidated(false);
+  }, [recipientWarning, setRecipientValidated]);
+
+  useEffect(() => {
+    setEntrypointValidated(false);
+  }, [entrypointWarning, setEntrypointValidated]);
 
   const onSubmit = useCallback(
     async (to: string) => {
-      if (!collectionAddress || !tokenIds || !tokenIds.length || !to) return;
+      if (
+        !collectionAddress ||
+        !tokenIds ||
+        !tokenIds.length ||
+        !to ||
+        !entrypoint
+      )
+        return;
+      const calldata = entrypoint.includes("safe") ? [0] : [];
       const calls: Call[] = (tokenIds as string[]).map((id: string) => {
         const tokenId = uint256.bnToUint256(BigInt(id));
         return {
           contractAddress: collectionAddress,
-          entrypoint: "transferFrom",
-          calldata: [address, to, tokenId],
+          entrypoint,
+          calldata: [address, to, tokenId, ...calldata],
         };
       });
       await parent.openExecute(calls);
       navigate("../../..");
     },
-    [tokenIds, collectionAddress, address, parent, navigate],
+    [tokenIds, collectionAddress, address, parent, entrypoint, navigate],
   );
 
   if (!collection || !assets) return null;
@@ -94,7 +147,7 @@ export function SendCollection() {
         icon={<CollectionImage imageUrl={collection.imageUrl} size="xs" />}
       />
       <LayoutContent className="gap-6">
-        <Recipient to={to} setTo={setTo} setWarning={setWarning} />
+        <Recipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
         <ScrollArea className="overflow-auto">
           <Sending assets={assets} />
         </ScrollArea>
@@ -102,21 +155,16 @@ export function SendCollection() {
 
       <LayoutFooter className="bg-background relative pt-0">
         <Separator className="bg-spacer" />
-        <div
-          className={cn(
-            "border border-destructive rounded flex items-center gap-2 p-2 cursor-pointer select-none",
-            !warning && "hidden",
-          )}
-          onClick={() => setValidated(!validated)}
-        >
-          {validated && (
-            <CheckboxCheckedDuoIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
-          )}
-          {!validated && (
-            <CheckboxUncheckedIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
-          )}
-          <p className="text-xs text-destructive">{warning}</p>
-        </div>
+        <Warning
+          warning={recipientWarning}
+          validated={recipientValidated}
+          setValidated={setRecipientValidated}
+        />
+        <Warning
+          warning={entrypointWarning}
+          validated={entrypointValidated}
+          setValidated={setEntrypointValidated}
+        />
         <Button
           disabled={disabled}
           type="submit"
@@ -129,3 +177,31 @@ export function SendCollection() {
     </LayoutContainer>
   );
 }
+
+const Warning = ({
+  warning,
+  validated,
+  setValidated,
+}: {
+  warning: string | undefined;
+  validated: boolean;
+  setValidated: (validated: boolean) => void;
+}) => {
+  return (
+    <div
+      className={cn(
+        "border border-destructive rounded flex items-center gap-2 p-2 cursor-pointer select-none",
+        !warning && "hidden",
+      )}
+      onClick={() => setValidated(!validated)}
+    >
+      {validated && (
+        <CheckboxCheckedDuoIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
+      )}
+      {!validated && (
+        <CheckboxUncheckedIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
+      )}
+      <p className="text-xs text-destructive">{warning}</p>
+    </div>
+  );
+};
