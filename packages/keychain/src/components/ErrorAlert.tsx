@@ -19,14 +19,13 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useCallback, useEffect, useState } from "react";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { ControllerError } from "@/utils/connection";
-import { useConnection } from "@/hooks/connection";
-import { constants } from "starknet";
 import { parseExecutionError, parseValidationError } from "@/utils/errors";
 import { formatAddress } from "@cartridge/utils";
 import { Link } from "react-router-dom";
+import { useExplorer } from "@starknet-react/core";
 
 export function ErrorAlert({
   title,
@@ -325,23 +324,18 @@ function StackTraceDisplay({
 }: {
   stackTrace: ReturnType<typeof parseExecutionError>["stack"];
 }) {
-  const { chainId } = useConnection();
-
-  const getExplorerUrl = (type: "contract" | "class", value: string) => {
-    if (!chainId) return;
-
-    const baseUrl = {
-      [constants.StarknetChainId.SN_SEPOLIA]: "https://sepolia.starkscan.co",
-      [constants.StarknetChainId.SN_MAIN]: "https://starkscan.co",
-    }[chainId];
-
-    return baseUrl ? `${baseUrl}/${type}/${value}` : undefined;
-  };
-
-  const isExternalLink = [
-    constants.StarknetChainId.SN_SEPOLIA,
-    constants.StarknetChainId.SN_MAIN,
-  ].includes(chainId as constants.StarknetChainId);
+  const explorer = useExplorer();
+  const getExplorerUrl = useCallback(
+    (key: "address" | "class", value: string) => {
+      switch (key) {
+        case "address":
+          return explorer.contract(value);
+        case "class":
+          return explorer.class(value);
+      }
+    },
+    [explorer],
+  );
 
   return (
     <VStack align="start" spacing={2} w="full">
@@ -367,13 +361,8 @@ function StackTraceDisplay({
                     </Text>
                     {key === "address" || key === "class" ? (
                       <Link
-                        to={
-                          getExplorerUrl(
-                            key === "address" ? "contract" : "class",
-                            value as string,
-                          ) as string
-                        }
-                        target={isExternalLink ? "_blank" : undefined}
+                        to={getExplorerUrl(key, value as string)}
+                        target="_blank"
                         className="break-all text-left hover:underline"
                       >
                         {formatAddress(value as string, {
