@@ -63,29 +63,30 @@ export const DelegateAccount = () => {
   return (
     <div className="flex flex-col gap-2">
       <h2>Delegate account</h2>
-      {isDelegateSupported ? (
-        <>
-          <p>
-            Address: {delegateAddress}
+      <p>
+        Address:{" "}
+        {isDelegateSupported ? (
+          <>
+            {delegateAddress}
             <Button onClick={() => load()}>Load</Button>
-          </p>
+          </>
+        ) : (
+          "Not deployed"
+        )}
+      </p>
 
-          <div className="flex gap-2">
-            <Input
-              className="max-w-40"
-              type="text"
-              min-width="420px"
-              value={delegateAddressInput}
-              onChange={(e: any) => setDelegateAddressInput(e.target.value)}
-            />
-            <Button onClick={() => execute()} disabled={submitted}>
-              Set Delegate
-            </Button>
-          </div>
-        </>
-      ) : (
-        <p>Not supported!</p>
-      )}
+      <div className="flex gap-2">
+        <Input
+          className="max-w-40"
+          type="text"
+          min-width="420px"
+          value={delegateAddressInput}
+          onChange={(e: any) => setDelegateAddressInput(e.target.value)}
+        />
+        <Button onClick={() => execute()} disabled={submitted}>
+          Set Delegate
+        </Button>
+      </div>
     </div>
   );
 };

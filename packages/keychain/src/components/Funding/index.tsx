@@ -1,9 +1,13 @@
 import { Container, Content, Footer } from "@/components/layout";
-import { Button } from "@chakra-ui/react";
 import { useState } from "react";
 import { useConnection } from "@/hooks/connection";
-import { CopyAddress } from "../CopyAddress";
-import { ArrowIcon, CoinsIcon, EthereumIcon } from "@cartridge/ui-next";
+import {
+  Button,
+  ArrowIcon,
+  CoinsIcon,
+  EthereumIcon,
+  CopyAddress,
+} from "@cartridge/ui-next";
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance } from "./Balance";
@@ -51,14 +55,14 @@ export function Funding({ onComplete, title }: FundingProps) {
       </Content>
       <Footer>
         {showCredits && (
-          <Button
-            colorScheme="colorful"
-            onClick={() => setState(FundingState.FUND_CREDITS)}
-          >
+          <Button onClick={() => setState(FundingState.FUND_CREDITS)}>
             <CoinsIcon variant="line" size="sm" /> Purchase Credits
           </Button>
         )}
-        <Button onClick={() => setState(FundingState.FUND_ETH)}>
+        <Button
+          onClick={() => setState(FundingState.FUND_ETH)}
+          variant="secondary"
+        >
           <EthereumIcon size="sm" className="mr-1" /> Deposit Eth
         </Button>
       </Footer>

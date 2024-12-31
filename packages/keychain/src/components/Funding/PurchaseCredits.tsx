@@ -1,9 +1,8 @@
 import { Container, Content, Footer } from "@/components/layout";
-import { Button, Divider } from "@chakra-ui/react";
+import { Divider } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
-import { CheckIcon, CoinsIcon } from "@cartridge/ui-next";
+import { CheckIcon, CoinsIcon, Button, CopyAddress } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
-import { CopyAddress } from "../CopyAddress";
 import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { Elements } from "@stripe/react-stripe-js";
@@ -147,7 +146,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         )}
 
         {state === PurchaseState.SUCCESS && (
-          <Button w="full" onClick={closeModal}>
+          <Button variant="secondary" onClick={closeModal}>
             Close
           </Button>
         )}
@@ -161,13 +160,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
             />
             <Divider my="5px" borderColor="darkGray.900" />
 
-            <Button
-              w="full"
-              gap="5px"
-              colorScheme="colorful"
-              isLoading={isLoading}
-              onClick={() => createPaymentIntent()}
-            >
+            <Button isLoading={isLoading} onClick={createPaymentIntent}>
               <CoinsIcon variant="solid" size="sm" />
               Stripe
             </Button>

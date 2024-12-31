@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#570ecfe
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/570ecfe
+        specifier: github:cartridge-gg/presets#b0def0f
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/b0def0f
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^0.4.2
@@ -303,7 +303,7 @@ importers:
         specifier: ^3.0.0
         version: 3.0.2
       '@starknet-react/core':
-        specifier: ^3.0.0
+        specifier: ^3.0.2
         version: 3.0.3(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.11.0)(typescript@5.5.4)
       '@stripe/react-stripe-js':
         specifier: ^2.8.1
@@ -362,6 +362,9 @@ importers:
       react-router-dom:
         specifier: ^6.27.0
         version: 6.27.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      sonner:
+        specifier: ^1.4.41
+        version: 1.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       starknet:
         specifier: ^6.11.0
         version: 6.11.0
@@ -1617,8 +1620,8 @@ packages:
   '@cartridge/penpal@6.2.3':
     resolution: {integrity: sha512-K8h9VqBfFPXcAFQNnvgBnejF/dp7249pS4jXu3NhNYR6JqMQxtcrDqfnPmJvbF4ECEBs+8Z2UiwlRQiKt5nNsg==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/570ecfe':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/570ecfe}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/b0def0f':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/b0def0f}
     version: 0.0.1
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
@@ -13108,7 +13111,7 @@ snapshots:
 
   '@cartridge/penpal@6.2.3': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/570ecfe':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/b0def0f':
     dependencies:
       '@starknet-io/types-js': 0.7.7
 

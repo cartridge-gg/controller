@@ -1,7 +1,6 @@
-import { DollarIcon } from "@cartridge/ui-next";
+import { DollarIcon, Button, cn } from "@cartridge/ui-next";
 import {
   Box,
-  Button,
   HStack,
   Input,
   Spacer,
@@ -48,10 +47,14 @@ export function AmountSelection({
           {AMOUNTS.map((value) => (
             <Button
               key={value}
-              fontSize="sm"
-              fontWeight="semibold"
-              color={value === selected && !custom ? "white" : "text.secondary"}
-              isDisabled={lockSelection}
+              variant="secondary"
+              className={cn(
+                "w-18",
+                value === selected && !custom
+                  ? "text-secondary-foreground"
+                  : "text-muted-foreground",
+              )}
+              disabled={lockSelection}
               onClick={() => {
                 setCustom(false);
                 setSelected(value);
@@ -64,9 +67,11 @@ export function AmountSelection({
           ))}
           {enableCustom && (
             <Button
-              fontSize="sm"
-              color={custom ? "white" : "text.secondary"}
-              isDisabled={lockSelection}
+              variant="secondary"
+              className={
+                custom ? "text-secondary-foreground" : "text-muted-foreground"
+              }
+              disabled={lockSelection}
               onClick={() => {
                 setCustom(true);
                 onOpen();

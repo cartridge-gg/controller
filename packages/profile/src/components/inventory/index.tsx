@@ -1,4 +1,4 @@
-export { Asset, Collection, SendCollection } from "./collection";
+export { Collectible, Collection, SendCollection } from "./collection";
 export { Token } from "./token";
 export { SendToken } from "./token/send/index";
 
@@ -35,8 +35,10 @@ export function Inventory() {
 
       <LayoutContent className="pb-4">
         <ScrollArea>
-          <Tokens />
-          {project && <Collections />}
+          <div className="flex flex-col gap-y-4">
+            <Tokens />
+            {project && <Collections />}
+          </div>
         </ScrollArea>
       </LayoutContent>
     </LayoutContainer>

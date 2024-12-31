@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Flex, Text } from "@chakra-ui/react";
+import { Flex, Text } from "@chakra-ui/react";
 import { shortString, Signature, TypedData } from "starknet";
 import { Container, Footer, Content } from "@/components/layout";
-import { TransferDuoIcon } from "@cartridge/ui-next";
+import { TransferDuoIcon, Button } from "@cartridge/ui-next";
 import { useController } from "@/hooks/controller";
 
 export function SignMessage({
@@ -101,11 +101,11 @@ export function SignMessage({
       </Content>
 
       <Footer>
-        <Button colorScheme="colorful" onClick={onConfirm}>
-          sign
-        </Button>
+        <Button onClick={onConfirm}>sign</Button>
 
-        <Button onClick={onCancel}>reject</Button>
+        <Button variant="secondary" onClick={onCancel}>
+          reject
+        </Button>
       </Footer>
     </Container>
   );

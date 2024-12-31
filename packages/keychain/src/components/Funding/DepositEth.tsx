@@ -1,5 +1,5 @@
 import { Container, Content, Footer } from "@/components/layout";
-import { Button, HStack, Text, VStack, Divider } from "@chakra-ui/react";
+import { HStack, Text, VStack, Divider } from "@chakra-ui/react";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
@@ -24,16 +24,17 @@ import {
   CopyIcon,
   EthereumIcon,
   StarknetColorIcon,
+  Button,
+  CopyAddress,
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
-import { useToast } from "@/hooks/toast";
 import { ErrorAlert } from "../ErrorAlert";
-import { CopyAddress } from "@/components/CopyAddress";
 import { parseEther } from "viem";
 import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
 import { Balance } from "./Balance";
 import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
+import { toast } from "sonner";
 
 type DepositEthProps = {
   onComplete?: (deployHash?: string) => void;
@@ -52,7 +53,6 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller, chainId } = useConnection();
   const { account: extAccount } = useAccount();
-  const { toast } = useToast();
 
   const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
   const [state, setState] = useState<"connect" | "fund">("connect");
@@ -143,8 +143,8 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
     if (!controller?.address) return;
 
     navigator.clipboard.writeText(controller.address);
-    toast("Copied");
-  }, [controller?.address, toast]);
+    toast.success("Address copied");
+  }, [controller?.address]);
 
   return (
     <Container
@@ -177,7 +177,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
           switch (state) {
             case "connect":
               if (isConnecting) {
-                return <Button colorScheme="colorful" isLoading />;
+                return <Button isLoading />;
               }
 
               return (
@@ -189,13 +189,19 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                         .map((c) => (
                           <Button
                             key={c.id}
-                            gap="5px"
-                            flex="1"
-                            colorScheme="colorful"
                             onClick={() => onConnect(c)}
+                            className="flex-1"
                           >
-                            {c.name === "argentX" && <ArgentIcon size="sm" />}
-                            {c.name === "braavos" && <BraavosIcon size="sm" />}
+                            {(() => {
+                              switch (c.id) {
+                                case "argentX":
+                                  return <ArgentIcon size="sm" />;
+                                case "braavos":
+                                  return <BraavosIcon size="sm" />;
+                                default:
+                                  return null;
+                              }
+                            })()}
                             {c.name}
                           </Button>
                         ))}
@@ -209,7 +215,11 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                         OR
                       </Text>
                     )}
-                    <Button w="full" gap="5px" onClick={onCopy}>
+                    <Button
+                      className="w-full"
+                      variant="secondary"
+                      onClick={onCopy}
+                    >
                       <CopyIcon size="sm" /> copy address
                     </Button>
                     <HStack>
@@ -233,12 +243,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
               );
             case "fund":
               return (
-                <Button
-                  w="full"
-                  colorScheme="colorful"
-                  onClick={onFund}
-                  isLoading={isLoading}
-                >
+                <Button onClick={onFund} isLoading={isLoading}>
                   Send Funds
                 </Button>
               );

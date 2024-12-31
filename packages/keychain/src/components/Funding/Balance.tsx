@@ -1,5 +1,11 @@
-import { CoinsIcon, EthereumIcon } from "@cartridge/ui-next";
-import { HStack, Spacer, Text, VStack } from "@chakra-ui/react";
+import {
+  Card,
+  CardHeader,
+  CardListContent,
+  CardListItem,
+  CardTitle,
+  CoinsIcon,
+} from "@cartridge/ui-next";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { formatEther } from "viem";
 import {
@@ -32,71 +38,42 @@ export function Balance({ showBalances }: BalanceProps) {
   const { countervalue } = useCountervalue(
     {
       balance: formatEther(eth?.balance.value ?? 0n),
-      pair: "ETH_USDC" as TokenPair,
+      pair: TokenPair.EthUsdc,
     },
     { enabled: !!eth },
   );
 
   return (
-    <VStack w="full" borderRadius="base" overflow="hidden" spacing="1px">
-      <HStack
-        w="full"
-        align="center"
-        fontSize="sm"
-        p={3}
-        bg="solid.primary"
-        fontWeight="semibold"
-      >
-        <Text textTransform="uppercase" fontSize="xs" color="text.secondary">
-          Balance
-        </Text>
-      </HStack>
-      {showBalances.includes("credits") && (
-        <HStack
-          w="full"
-          align="center"
-          fontSize="sm"
-          p={3}
-          bg="solid.primary"
-          fontWeight="semibold"
-        >
-          <HStack>
-            <CoinsIcon variant="solid" size="sm" />
-            <Text>{creditBalance.formatted}</Text>
-            <Text color="text.secondary">{creditBalance.formatted}</Text>
-          </HStack>
-          <Spacer />
-          <HStack color="text.secondary">
-            <Text color="inherit" fontSize="12px">
-              CREDITS
-            </Text>
-          </HStack>
-        </HStack>
-      )}
-      {showBalances.includes("eth") && (
-        <HStack
-          w="full"
-          align="center"
-          fontSize="sm"
-          p={3}
-          bg="solid.primary"
-          fontWeight="semibold"
-        >
-          <HStack>
-            <EthereumIcon size="sm" />
-            <Text>{eth?.balance.formatted ?? "0.00"}</Text>
+    <Card>
+      <CardHeader>
+        <CardTitle>Balance</CardTitle>
+      </CardHeader>
+
+      <CardListContent>
+        {showBalances.includes("credits") && (
+          <CardListItem icon={<CoinsIcon variant="solid" />}>
+            <div className="flex items-center gap-2">
+              {creditBalance.formatted ?? 0}
+              <span className="text-muted-foreground">CREDITS</span>
+            </div>
+          </CardListItem>
+        )}
+
+        {showBalances.includes("eth") && (
+          <CardListItem icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo">
+            <div className="flex items-center gap-2">
+              {eth?.balance.formatted ?? "0.00"}
+              <span className="text-muted-foreground">ETH</span>
+            </div>
+
             {countervalue && (
-              <Text color="text.secondary">{countervalue.formatted}</Text>
+              <div className="text-muted-foreground">
+                {countervalue?.formatted}
+              </div>
             )}
-          </HStack>
-          <Spacer />
-          <HStack color="text.secondary">
-            <Text color="inherit" fontSize="12px">
-              ETH
-            </Text>
-          </HStack>
-        </HStack>
-      )}
-    </VStack>
+          </CardListItem>
+        )}
+      </CardListContent>
+    </Card>
   );
 }

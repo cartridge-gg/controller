@@ -1,16 +1,15 @@
 import {
   Card,
-  CardContent,
   CardHeader,
+  CardListContent,
+  CardListItem,
   CardTitle,
-  cn,
 } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
 import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
 import { formatEther } from "viem";
 import { useTokens } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
-import { useState } from "react";
 import { formatBalance } from "./helper";
 
 export function Tokens() {
@@ -29,29 +28,19 @@ export function Tokens() {
       </CardHeader>
 
       {/* <Link to={`${location.pathname}/token/credit`} state={{ back: location.pathname }}>
-        <CardContent className="bg-background flex items-center p-0 h-full gap-px">
-          <div className="bg-secondary flex h-full aspect-square items-center justify-center">
-            <CoinsIcon variant="solid" size="sm" />
+        <CardListItem icon={<CoinsIcon variant="solid" />} className="hover:opacity-80">
+          <div className="flex items-center gap-2">
+            {credit.balance.formatted}
+            <span className="text-muted-foreground">CREDITS</span>
           </div>
-
-          <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
-            <div className="flex items-center gap-2">
-              <div>{credit.balance.formatted}</div>
-              <div className="text-muted-foreground">CREDITS</div>
-            </div>
-
-            <div className="text-muted-foreground">
-              ${credit.balance.formatted}
-            </div>
-          </div>
-        </CardContent>
+        </CardListItem>
       </Link> */}
 
-      {erc20.data.map((t) => (
-        <Link key={t.meta.address} to={`token/${t.meta.address}`}>
-          <TokenCardContent token={t} />
-        </Link>
-      ))}
+      <CardListContent>
+        {erc20.data.map((t) => (
+          <TokenCardContent token={t} key={t.meta.address} />
+        ))}
+      </CardListContent>
     </Card>
   );
 }
@@ -61,42 +50,28 @@ function TokenCardContent({
 }: {
   token: { balance: Balance; meta: ERC20Metadata };
 }) {
-  const [hover, setHover] = useState(false);
   const { countervalue } = useCountervalue({
     balance: formatEther(token.balance.value || 0n),
     pair: `${token.meta.symbol}_USDC` as TokenPair,
   });
 
   return (
-    <CardContent
-      className={cn(
-        "bg-background flex items-center p-0 h-11 gap-px",
-        hover && "opacity-80",
-      )}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-    >
-      <div className="bg-secondary flex w-11 aspect-square items-center justify-center">
-        <div className="flex items-center justify-center rounded-full overflow-hidden h-7 w-7 bg-quaternary">
-          <img
-            src={token.meta.logoUrl ?? "/public/placeholder.svg"}
-            className="w-6 h-6"
-          />
-        </div>
-      </div>
-
-      <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
+    <Link to={`token/${token.meta.address}`}>
+      <CardListItem
+        icon={token.meta.logoUrl ?? "/public/placeholder.svg"}
+        className="hover:opacity-80"
+      >
         <div className="flex items-center gap-2">
-          <p>{formatBalance(token.balance.formatted, ["~"])}</p>
+          {formatBalance(token.balance.formatted, ["~"])}
           <span className="text-muted-foreground">{token.meta.symbol}</span>
         </div>
 
         {countervalue && (
-          <span className="text-muted-foreground">
+          <div className="text-muted-foreground">
             {formatBalance(countervalue.formatted, ["~"])}
-          </span>
+          </div>
         )}
-      </div>
-    </CardContent>
+      </CardListItem>
+    </Link>
   );
 }

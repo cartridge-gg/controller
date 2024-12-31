@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -21,82 +21,37 @@ import {
 import { addAddressPadding, constants } from "starknet";
 import {
   formatAddress,
+  isIframe,
   isPublicChain,
   StarkscanUrl,
-  useIndexerAPI,
 } from "@cartridge/utils";
 import { useConnection } from "@/hooks/context";
-import {
-  Erc721__Token,
-  useErc721BalancesQuery,
-} from "@cartridge/utils/api/indexer";
-import { useAccount } from "@/hooks/account";
 import { useMemo } from "react";
 import { Hex, hexToNumber } from "viem";
+import { Asset, Collection, useCollection } from "@/hooks/collection";
+import { compare } from "compare-versions";
 
-type Collection = {
-  address: string;
-  name: string;
-  type: string;
-};
+export function Collectible() {
+  const { chainId, version } = useConnection();
+  const location = useLocation();
 
-type Asset = {
-  tokenId: string;
-  name: string;
-  description?: string;
-  imageUrl: string;
-  attributes: Record<string, unknown>[];
-};
+  const compatibility = useMemo(() => {
+    if (!version) return false;
+    return compare(version, "0.5.6", ">=");
+  }, [version]);
 
-export function Asset() {
-  const { tokenId } = useParams<{
-    tokenId: string;
-  }>();
-  const { address } = useAccount();
-  const { chainId } = useConnection();
-  const { isReady, indexerUrl } = useIndexerAPI();
-  const { status, data } = useErc721BalancesQuery(
-    { address },
-    { enabled: isReady && !!address },
-  );
+  const { tokenId } = useParams<{ tokenId: string }>();
+  const { collection, assets, status } = useCollection({
+    tokenIds: tokenId ? [tokenId] : [],
+  });
 
-  const { collection: col, asset } = useMemo<{
-    collection?: Collection;
-    asset?: Asset;
-  }>(() => {
-    const a = data?.tokenBalances?.edges.find(
-      (e) => (e.node.tokenMetadata as Erc721__Token).tokenId === tokenId,
-    )?.node.tokenMetadata as Erc721__Token | undefined;
-    if (!indexerUrl || !a) {
-      return {};
-    }
+  const asset = useMemo(() => {
+    return assets?.[0];
+  }, [assets]);
 
-    let attributes;
-    try {
-      attributes = JSON.parse(a.metadataAttributes);
-    } catch {
-      console.log("Failed to parse attributes");
-    }
-
-    const asset = {
-      tokenId: a.tokenId,
-      name: a.metadataName,
-      description: a.metadataDescription,
-      imageUrl: `${indexerUrl.replace("/graphql", "")}/static/${a?.imagePath}`,
-      attributes,
-    };
-
-    const collection = {
-      address: a.contractAddress,
-      name: a.name,
-      type: "ERC-721",
-    };
-
-    return {
-      collection,
-      asset,
-    };
-  }, [data, tokenId, indexerUrl]);
+  if (location.pathname.includes("/send")) {
+    return <Outlet />;
+  }
 
   return (
     <LayoutContainer
@@ -117,7 +72,7 @@ export function Asset() {
             return <LayoutContentError />;
           }
           default: {
-            if (!col || !asset) {
+            if (!collection || !asset) {
               return <LayoutContentLoader />;
             }
             const assets = asset.attributes.filter(
@@ -126,11 +81,11 @@ export function Asset() {
             return (
               <>
                 <LayoutHeader
-                  title={asset.name}
+                  title={`${asset.name} #${parseInt(asset.tokenId, 16)}`}
                   description={
                     <CopyText
-                      value={col.name}
-                      copyValue={addAddressPadding(col.address)}
+                      value={collection.name}
+                      copyValue={addAddressPadding(collection.address)}
                     />
                   }
                   icon={asset.imageUrl ?? "/public/placeholder.svg"}
@@ -138,25 +93,30 @@ export function Asset() {
 
                 <LayoutContent>
                   <ScrollArea>
-                    <div className="flex flex-col h-full flex-1 overflow-y-auto gap-y-4 pb-6">
+                    <div className="flex flex-col h-full flex-1 overflow-y-auto gap-y-4">
                       <Image imageUrl={asset.imageUrl} />
                       <Description description={asset.description} />
                       <Properties properties={assets} />
                       <Details
                         chainId={chainId as constants.StarknetChainId}
-                        col={col}
+                        col={collection}
                         asset={asset}
                       />
                     </div>
                   </ScrollArea>
                 </LayoutContent>
 
-                <div className="flex flex-col items-center justify-center gap-y-4 pb-6 px-4">
-                  <Separator orientation="horizontal" className="bg-spacer" />
-                  <div className="flex items-center justify-center gap-x-4 w-full">
-                    <Button className="h-10 w-full">Send</Button>
+                {isIframe() && compatibility && (
+                  <div className="flex flex-col items-center justify-center gap-y-4 pb-6 px-4">
+                    <Separator orientation="horizontal" className="bg-spacer" />
+                    <Link
+                      className="flex items-center justify-center gap-x-4 w-full"
+                      to="send"
+                    >
+                      <Button className="h-10 w-full">Send</Button>
+                    </Link>
                   </div>
-                </div>
+                )}
               </>
             );
           }
@@ -210,6 +170,7 @@ export const Properties = ({
 }: {
   properties: Record<string, unknown>[];
 }) => {
+  if (properties.length === 0) return null;
   return (
     <Card>
       <CardHeader className="h-10 flex flex-row items-center justify-between">
@@ -218,7 +179,7 @@ export const Properties = ({
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="bg-background grid grid-cols-3 p-0 gap-x-px">
+      <CardContent className="bg-background grid grid-cols-3 p-0 gap-px">
         {properties.map((property) => {
           const trait = property.trait_type ?? property.trait;
           return typeof property.value === "string" ? (
@@ -237,12 +198,14 @@ export const Properties = ({
             </div>
           ) : null;
         })}
-        {Array.from({ length: (properties.length - 1) % 3 }).map((_, i) => (
-          <div
-            key={`fill-${i}`}
-            className="bg-secondary p-3 flex flex-col gap-1"
-          />
-        ))}
+        {Array.from({ length: 2 - ((properties.length - 1) % 3) }).map(
+          (_, i) => (
+            <div
+              key={`fill-${i}`}
+              className="bg-secondary p-3 flex flex-col gap-1"
+            />
+          ),
+        )}
       </CardContent>
     </Card>
   );

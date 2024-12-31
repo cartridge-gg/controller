@@ -3,11 +3,13 @@ import {
   Card as UICard,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
   CardIcon,
+  CardListContent,
+  CardListItem,
 } from "@/components/primitives/card";
+import { EthereumIcon } from "@/components/icons";
 import { Meta, StoryObj } from "@storybook/react";
 import { useEffect } from "react";
 
@@ -41,11 +43,20 @@ export const IconHeader: Story = {
   },
 };
 
+export const CardList: Story = {
+  args: {
+    variant: "list",
+    title: "Card List Content",
+  },
+};
+
 function Card({
+  variant = "content",
   title,
   description,
   icon,
 }: {
+  variant?: "content" | "list";
   title: string;
   description?: string;
   icon?: React.ReactNode;
@@ -58,18 +69,53 @@ function Card({
     );
   }, [icon]);
 
-  return (
-    <UICard>
-      <CardHeader icon={icon}>
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      <CardContent>
-        <p>Card Content</p>
-      </CardContent>
-      <CardFooter>
-        <p>Card Footer</p>
-      </CardFooter>
-    </UICard>
-  );
+  switch (variant) {
+    case "content": {
+      return (
+        <UICard>
+          <CardHeader icon={icon}>
+            <CardTitle>{title}</CardTitle>
+            {description && <CardDescription>{description}</CardDescription>}
+          </CardHeader>
+          <CardContent>
+            <p>Card Content</p>
+          </CardContent>
+        </UICard>
+      );
+    }
+    case "list": {
+      return (
+        <UICard>
+          <CardHeader icon={icon}>
+            <CardTitle>{title}</CardTitle>
+            {description && <CardDescription>{description}</CardDescription>}
+          </CardHeader>
+
+          <CardListContent>
+            <CardListItem>No icon item</CardListItem>
+
+            <CardListItem icon="https://profile.cartridge.gg/placeholder.svg">
+              placeholder
+            </CardListItem>
+
+            <CardListItem icon={<EthereumIcon />}>
+              <div className="flex items-center gap-2">
+                0.01 <span className="text-muted-foreground">ETH</span>
+              </div>
+
+              <div className="text-muted-foreground">$3500.00</div>
+            </CardListItem>
+
+            <CardListItem icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo">
+              <div className="flex items-center gap-2">
+                100 <span className="text-muted-foreground">STRK</span>
+              </div>
+
+              <div className="text-muted-foreground">$50.00</div>
+            </CardListItem>
+          </CardListContent>
+        </UICard>
+      );
+    }
+  }
 }

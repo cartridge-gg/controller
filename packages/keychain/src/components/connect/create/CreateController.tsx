@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Container, Footer, Content } from "@/components/layout";
-import { Field } from "@cartridge/ui";
-import { Box, Button } from "@chakra-ui/react";
+import { Button } from "@cartridge/ui-next";
+import { Box } from "@chakra-ui/react";
 import { useControllerTheme } from "@/hooks/theme";
 import { usePostHog } from "posthog-js/react";
 import { useDebounce } from "@/hooks/debounce";
@@ -10,6 +10,7 @@ import { LoginMode } from "../types";
 import { Legal, StatusTray } from ".";
 import { useCreateController } from "./useCreateController";
 import { ControllerTheme } from "@cartridge/presets";
+import { Input } from "@cartridge/ui-next";
 
 interface CreateControllerViewProps {
   theme: ControllerTheme;
@@ -62,7 +63,7 @@ export function CreateControllerView({
             borderColor="red.500"
             borderRadius="base"
           >
-            <Field
+            <Input
               {...usernameField}
               autoFocus
               placeholder="shinobi"
@@ -71,7 +72,7 @@ export function CreateControllerView({
                 onUsernameChange(e.target.value.toLowerCase());
               }}
               isLoading={validation.status === "validating"}
-              isDisabled={isLoading}
+              disabled={isLoading}
               onClear={onUsernameClear}
             />
           </Box>
@@ -87,9 +88,8 @@ export function CreateControllerView({
           <Legal />
 
           <Button
-            colorScheme="colorful"
             isLoading={isLoading}
-            isDisabled={validation.status !== "valid"}
+            disabled={validation.status !== "valid"}
             onClick={onSubmit}
           >
             {validation.exists ? "login" : "sign up"}

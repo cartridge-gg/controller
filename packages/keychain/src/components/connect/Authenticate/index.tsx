@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Button } from "@chakra-ui/react";
+import { Button } from "@cartridge/ui-next";
 import { Unsupported, useIsSupported } from "./Unsupported";
 import { doSignup } from "@/hooks/account";
 import { Container, Content, Footer } from "@/components/layout";
@@ -73,7 +73,7 @@ export function Authenticate({
       </Content>
 
       <Footer>
-        <Button colorScheme="colorful" onClick={onAuth} isLoading={isLoading}>
+        <Button onClick={onAuth} isLoading={isLoading}>
           {cta}
         </Button>
       </Footer>

@@ -96,8 +96,7 @@ function Credits() {
 
 function ERC20() {
   const { address } = useParams<{ address: string }>();
-  const { version } = useConnection();
-  const { chainId } = useConnection();
+  const { chainId, version } = useConnection();
   const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue(
     {
