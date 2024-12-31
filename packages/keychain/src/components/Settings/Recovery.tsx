@@ -1,5 +1,5 @@
-import { AlertIcon, Button } from "@cartridge/ui-next";
-import { VStack, Text, HStack, Input } from "@chakra-ui/react";
+import { AlertIcon, Button, Input } from "@cartridge/ui-next";
+import { VStack, Text, HStack } from "@chakra-ui/react";
 import { Container, Content, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
@@ -50,8 +50,6 @@ export function Recovery({ onBack }: { onBack: () => void }) {
           </Text>
           <VStack w="full">
             <Input
-              w="full"
-              // fontSize="10px"
               placeholder="0x..."
               value={externalOwnerAddress}
               onChange={(e) => setExternalOwnerAddress(e.target.value)}

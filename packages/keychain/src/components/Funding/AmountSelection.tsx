@@ -1,13 +1,5 @@
-import { DollarIcon, Button, cn } from "@cartridge/ui-next";
-import {
-  Box,
-  HStack,
-  Input,
-  Spacer,
-  Text,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react";
+import { DollarIcon, Button, Input, cn } from "@cartridge/ui-next";
+import { HStack, Spacer, Text, useDisclosure, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 
 export const DEFAULT_AMOUNT = 5;
@@ -82,23 +74,21 @@ export function AmountSelection({
           )}
         </HStack>
         {isOpen && (
-          <Box position="relative" w="full">
+          <div className="flex items-center w-full relative">
             <Input
-              pl="32px"
-              h="40px"
+              className="pl-8"
               type="number"
               step={0.01}
               min={0.01}
-              fontSize="sm"
               value={amount}
-              isDisabled={lockSelection}
+              disabled={lockSelection}
               onChange={(e) => {
                 const amount = parseInt(e.target.value);
                 onChange?.(amount);
               }}
             />
             <DollarIcon size="xs" className="absolute top-3 left-3" />
-          </Box>
+          </div>
         )}
       </VStack>
     </HStack>
