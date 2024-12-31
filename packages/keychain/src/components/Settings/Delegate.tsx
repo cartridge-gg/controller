@@ -1,5 +1,5 @@
-import { AlertIcon, Button } from "@cartridge/ui-next";
-import { VStack, Text, HStack, Input } from "@chakra-ui/react";
+import { AlertIcon, Button, Input } from "@cartridge/ui-next";
+import { VStack, Text, HStack } from "@chakra-ui/react";
 import { Container, Content, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
@@ -52,8 +52,6 @@ export function Delegate({ onBack }: { onBack: () => void }) {
           </Text>
           <VStack w="full">
             <Input
-              w="full"
-              // fontSize="10px"
               placeholder="0x..."
               value={delegateAddress}
               onChange={(e) => setDelegateAddress(e.target.value)}
