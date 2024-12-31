@@ -7,22 +7,16 @@ import {
   Card,
   CardContent,
   CardHeader,
+  CardTitle,
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
-import {
-  Divider,
-  HStack,
-  Link,
-  Spacer,
-  Stack,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Divider, HStack, Spacer, Stack, Text, VStack } from "@chakra-ui/react";
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
 import { Method } from "@cartridge/presets";
 import { useChainId } from "@/hooks/connection";
 import { ParsedSessionPolicies } from "@/hooks/session";
+import { Link } from "react-router-dom";
 
 interface AggregateCardProps {
   title: string;
@@ -45,14 +39,7 @@ export function AggregateCard({ title, icon, policies }: AggregateCardProps) {
   return (
     <Card>
       <CardHeader icon={icon}>
-        <Text
-          color="text.primary"
-          fontSize="xs"
-          fontWeight="bold"
-          textTransform="uppercase"
-        >
-          {title}
-        </Text>
+        <CardTitle className="text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <Accordion type="multiple">
@@ -88,14 +75,14 @@ export function AggregateCard({ title, icon, policies }: AggregateCardProps) {
                         </Text>
                         <Spacer />
                         <Link
-                          color="text.secondary"
-                          href={
+                          to={
                             chainId === constants.StarknetChainId.SN_MAIN ||
                             chainId === constants.StarknetChainId.SN_SEPOLIA
                               ? explorer.contract(address)
                               : `#` // TODO: Add explorer for worlds.dev
                           }
                           target="_blank"
+                          className="text-muted-foreground hover:underline"
                         >
                           {formatAddress(address, { first: 5, last: 5 })}
                         </Link>
@@ -150,7 +137,12 @@ export function AggregateCard({ title, icon, policies }: AggregateCardProps) {
                     w="full"
                     align="flex-start"
                   >
-                    <Text fontSize="sm" fontWeight="bold" mb={4}>
+                    <Text
+                      fontSize="sm"
+                      className="text-foreground"
+                      fontWeight="bold"
+                      mb={4}
+                    >
                       Messages
                     </Text>
                     <Stack

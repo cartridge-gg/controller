@@ -16,7 +16,6 @@ import {
   HStack,
   Box,
   VStack,
-  Link,
   Divider,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
@@ -27,6 +26,7 @@ import { useConnection } from "@/hooks/connection";
 import { constants } from "starknet";
 import { parseExecutionError, parseValidationError } from "@/utils/errors";
 import { formatAddress } from "@cartridge/utils";
+import { Link } from "react-router-dom";
 
 export function ErrorAlert({
   title,
@@ -367,13 +367,14 @@ function StackTraceDisplay({
                     </Text>
                     {key === "address" || key === "class" ? (
                       <Link
-                        href={getExplorerUrl(
-                          key === "address" ? "contract" : "class",
-                          value as string,
-                        )}
-                        isExternal={isExternalLink}
-                        wordBreak="break-all"
-                        textAlign="left"
+                        to={
+                          getExplorerUrl(
+                            key === "address" ? "contract" : "class",
+                            value as string,
+                          ) as string
+                        }
+                        target={isExternalLink ? "_blank" : undefined}
+                        className="break-all text-left hover:underline"
                       >
                         {formatAddress(value as string, {
                           size: "sm",
