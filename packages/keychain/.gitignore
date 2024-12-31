@@ -24,5 +24,6 @@ dist-ssr
 *.sw?
 stats.html
 .vercel
+.loki
 
 storybook-static/

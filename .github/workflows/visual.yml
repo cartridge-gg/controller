@@ -1,0 +1,133 @@
+name: visual
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  visual-tests:
+    runs-on: ubuntu-latest
+    # Add container for docker-in-docker support
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to get all history for comparison
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build & Test with Loki
+        id: loki
+        continue-on-error: true # Continue even if Loki finds differences
+        working-directory: packages/keychain
+        run: |
+          pnpm storybook:build
+          pnpm loki test --reactUri file:./storybook-static
+
+      - name: Process and Post Visual Differences
+        if: steps.loki.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const LOKI_DIR = 'packages/keychain/.loki';
+            const MAX_DIFFS = 5; // Limit number of diffs to show
+
+            function getImageData(filepath) {
+              if (!fs.existsSync(filepath)) return null;
+              const base64 = fs.readFileSync(filepath, { encoding: 'base64' });
+              return `data:image/png;base64,${base64}`;
+            }
+
+            let diffReport = '';
+            let diffCount = 0;
+
+            // Get all test directories
+            const diffDir = path.join(LOKI_DIR, 'difference');
+            if (fs.existsSync(diffDir)) {
+              const files = fs.readdirSync(diffDir);
+              
+              for (const file of files) {
+                if (!file.endsWith('.png') || diffCount >= MAX_DIFFS) continue;
+                
+                const testName = file.replace('.png', '');
+                const diffPath = path.join(diffDir, file);
+                const currentPath = path.join(LOKI_DIR, 'current', file);
+                const referencePath = path.join(LOKI_DIR, 'reference', file);
+                
+                const diffImage = getImageData(diffPath);
+                const currentImage = getImageData(currentPath);
+                const referenceImage = getImageData(referencePath);
+                
+                if (diffImage && currentImage && referenceImage) {
+                  diffReport += `
+                    <details>
+                    <summary><strong>${testName}</strong></summary>
+                    <table>
+                      <tr>
+                        <th>Reference</th>
+                        <th>Current</th>
+                        <th>Diff</th>
+                      </tr>
+                      <tr>
+                        <td><img width="200" src="${referenceImage}" /></td>
+                        <td><img width="200" src="${currentImage}" /></td>
+                        <td><img width="200" src="${diffImage}" /></td>
+                      </tr>
+                    </table>
+                    </details>
+                  `;
+                  diffCount++;
+                }
+              }
+            }
+
+            const body = `
+            ## Visual Regression Test Results
+
+            ${diffCount > 0 
+              ? `Found ${diffCount} visual differences:\n\n${diffReport}`
+              : 'No visual differences found, but the test failed. Please check the logs.'}
+
+            ${diffCount >= MAX_DIFFS 
+              ? `\n\nShowing first ${MAX_DIFFS} differences. Check the artifacts for complete results.`
+              : ''}
+            `;
+
+            // Post comment if this is a PR
+            const pr = context.payload.pull_request;
+            if (pr) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body
+              });
+            }
+
+      # Still upload artifacts for reference
+      - name: Upload test artifacts
+        if: steps.loki.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+          name: loki-visual-regression-report
+          path: |
+            packages/keychain/.loki/current
+            packages/keychain/.loki/difference
+            packages/keychain/.loki/reference

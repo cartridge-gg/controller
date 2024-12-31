@@ -15,7 +15,10 @@
     "test:ci": "vitest run",
     "storybook": "storybook dev -p 6001",
     "storybook:build": "storybook build",
-    "test:storybook": "pnpm concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"pnpm storybook:build --quiet && pnpm http-server storybook-static --port 6006 --silent\" \"pnpm wait-on tcp:6006 && pnpm test-storybook\""
+    "test:storybook": "pnpm concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"pnpm storybook:build --quiet && pnpm http-server storybook-static --port 6006 --silent\" \"pnpm wait-on tcp:6006 && pnpm test-storybook\"",
+    "loki:init": "loki init",
+    "loki:update": "npm run storybook:build && loki update --reactUri file:./storybook-static",
+    "loki:test": "npm run storybook:build && loki test --reactUri file:./storybook-static"
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
@@ -89,12 +92,32 @@
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.3.0",
     "vitest": "^2.1.8",
-    "wait-on": "^8.0.1"
+    "wait-on": "^8.0.1",
+    "loki": "^0.35.1"
   },
   "peerDependencies": {
     "@chakra-ui/react": "^2.8.1",
     "@starknet-react/chains": "^3.0.0",
     "@starknet-react/core": "^3.0.2",
     "starknet": "^6.11.0"
+  },
+  "loki": {
+    "configurations": {
+      "chrome.laptop": {
+        "target": "chrome.docker",
+        "width": 1366,
+        "height": 768,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      },
+      "chrome.iphone7": {
+        "target": "chrome.docker",
+        "preset": "iPhone 7"
+      },
+      "chrome.iphone15": {
+        "target": "chrome.docker",
+        "preset": "iPhone 15"
+      }
+    }
   }
 }
