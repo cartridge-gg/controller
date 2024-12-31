@@ -1,13 +1,5 @@
-import { DollarIcon, Button, cn } from "@cartridge/ui-next";
-import {
-  Box,
-  HStack,
-  Input,
-  Spacer,
-  Text,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react";
+import { DollarIcon, Button, cn, useDisclosure } from "@cartridge/ui-next";
+import { Box, HStack, Input, Spacer, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 
 export const DEFAULT_AMOUNT = 5;
