@@ -1,9 +1,9 @@
-import { Center, Spinner } from "@chakra-ui/react";
+import { Spinner } from "@cartridge/ui-next";
 
 export function PageLoading() {
   return (
-    <Center w="full" h="100vh">
-      <Spinner />
-    </Center>
+    <div className="h-screen flex items-center justify-center">
+      <Spinner size="xl" />
+    </div>
   );
 }

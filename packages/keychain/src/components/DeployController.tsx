@@ -5,8 +5,13 @@ import {
 } from "starknet";
 import { Container, Footer, Content } from "@/components/layout";
 import { useCallback, useEffect, useState } from "react";
-import { Spinner } from "@chakra-ui/react";
-import { CheckIcon, ExternalIcon, WandIcon, Button } from "@cartridge/ui-next";
+import {
+  CheckIcon,
+  ExternalIcon,
+  Spinner,
+  WandIcon,
+  Button,
+} from "@cartridge/ui-next";
 import { Funding } from "./Funding";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
@@ -101,7 +106,7 @@ export function DeployController({
       <Container
         variant="expanded"
         title="Checking account balance..."
-        icon={<Spinner />}
+        icon={<Spinner size="xl" />}
       />
     );
   }
@@ -161,7 +166,7 @@ export function DeployController({
       return (
         <Container
           variant="expanded"
-          icon={<Spinner />}
+          icon={<Spinner size="xl" />}
           title="Deploying Controller"
           description={`Your controller is being deployed on ${chainName}`}
         >
