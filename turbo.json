@@ -3,11 +3,20 @@
   "ui": "tui",
   "tasks": {
     "build:deps": {
-      "dependsOn": ["^build:deps"],
-      "outputs": ["dist/**", "**/pkg-controller/**", "**/pkg-session/**"]
+      "dependsOn": [
+        "^build:deps"
+      ],
+      "outputs": [
+        "dist/**",
+        "**/pkg-controller/**",
+        "**/pkg-session/**"
+      ]
     },
     "build": {
-      "dependsOn": ["^build:deps", "^build"],
+      "dependsOn": [
+        "^build:deps",
+        "^build"
+      ],
       "outputs": [
         ".next/**",
         "dist/**",
@@ -17,7 +26,9 @@
     },
     "dev": {
       "persistent": true,
-      "dependsOn": ["^build:deps"],
+      "dependsOn": [
+        "^build:deps"
+      ],
       "outputs": [
         ".next/**",
         "dist/**",
@@ -27,20 +38,41 @@
     },
     "storybook": {
       "persistent": true,
-      "dependsOn": ["^build:deps"]
+      "dependsOn": [
+        "^build:deps"
+      ]
     },
     "test:storybook": {
-      "dependsOn": ["^build:deps"]
+      "dependsOn": [
+        "^build:deps"
+      ],
+      "env": [
+        "PLAYWRIGHT_BROWSERS_PATH",
+        "DISPLAY"
+      ]
+    },
+    "test:storybook:update": {
+      "dependsOn": [
+        "^build:deps"
+      ],
+      "env": [
+        "PLAYWRIGHT_BROWSERS_PATH",
+        "DISPLAY"
+      ]
     },
     "lint": {},
     "lint:fix": {},
     "format": {},
     "format:check": {},
     "e2e": {
-      "dependsOn": ["^build:deps"]
+      "dependsOn": [
+        "^build:deps"
+      ]
     },
     "e2e:ui": {
-      "dependsOn": ["^build:deps"],
+      "dependsOn": [
+        "^build:deps"
+      ],
       "persistent": true
     }
   },

@@ -28,7 +28,10 @@
     "format:check": "prettier --check ./src",
     "lint": "eslint .",
     "storybook": "storybook dev -p 6003",
-    "storybook:build": "storybook build"
+    "storybook:build": "storybook build",
+    "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6007 --silent",
+    "test:storybook:update": "start-server-and-test 'pnpm storybook:serve' 6007 'pnpm test-storybook --url http://127.0.0.1:6007 -u'",
+    "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6007 'pnpm test-storybook --url http://127.0.0.1:6007'"
   },
   "dependencies": {
     "@cartridge/utils": "workspace:*",
@@ -82,7 +85,9 @@
     "@storybook/react": "^8.4.7",
     "@storybook/react-vite": "^8.4.7",
     "@storybook/test": "^8.4.7",
+    "@storybook/test-runner": "^0.21.0",
     "@storybook/theming": "^8.4.7",
+    "@types/jest-image-snapshot": "^6.4.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
@@ -92,7 +97,11 @@
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-storybook": "^0.6.13",
+    "http-server": "^14.1.1",
+    "jest-image-snapshot": "^6.4.0",
+    "playwright": "^1.47.1",
     "postcss": "^8.4.35",
+    "start-server-and-test": "^2.0.9",
     "storybook": "^8.4.7",
     "tailwindcss": "^3.4.3",
     "tsc-alias": "^1.8.10",

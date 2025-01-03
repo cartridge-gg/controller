@@ -15,7 +15,9 @@
     "test:ci": "vitest run",
     "storybook": "storybook dev -p 6001",
     "storybook:build": "storybook build",
-    "test:storybook": "pnpm concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"pnpm storybook:build --quiet && pnpm http-server storybook-static --port 6006 --silent\" \"pnpm wait-on tcp:6006 && pnpm test-storybook\""
+    "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6006 --silent",
+    "test:storybook:update": "start-server-and-test 'pnpm storybook:serve' 6006 'pnpm test-storybook -u'",
+    "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6006 'pnpm test-storybook'"
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
@@ -66,21 +68,23 @@
     "@storybook/test": "^8.4.7",
     "@storybook/test-runner": "^0.21.0",
     "@testing-library/react": "^13.4.0",
+    "@types/jest-image-snapshot": "^6.4.0",
     "@types/js-cookie": "^3.0.2",
     "@types/node": "^20.6.0",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "@vitest/coverage-v8": "2.1.8",
     "autoprefixer": "^10.4.18",
-    "concurrently": "^9.0.1",
     "eslint": "^9.12.0",
     "eslint-plugin-storybook": "^0.6.13",
     "http-server": "^14.1.1",
+    "jest-image-snapshot": "^6.4.0",
     "jsdom": "^25.0.1",
     "playwright": "^1.47.1",
     "postcss": "^8.4.35",
     "prettier": "^2.7.1",
     "rollup-plugin-visualizer": "^5.12.0",
+    "start-server-and-test": "^2.0.9",
     "storybook": "^8.4.7",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5",
@@ -88,8 +92,7 @@
     "vite-plugin-node-polyfills": "^0.22.0",
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.3.0",
-    "vitest": "^2.1.8",
-    "wait-on": "^8.0.1"
+    "vitest": "^2.1.8"
   },
   "peerDependencies": {
     "@chakra-ui/react": "^2.8.1",
