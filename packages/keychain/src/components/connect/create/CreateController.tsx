@@ -74,6 +74,7 @@ export function CreateControllerView({
               isLoading={validation.status === "validating"}
               disabled={isLoading}
               onClear={onUsernameClear}
+              style={{ position: "relative", zIndex: 1 }}
             />
           </Box>
 
@@ -81,6 +82,7 @@ export function CreateControllerView({
             username={usernameField.value}
             validation={validation}
             error={error}
+            style={{ position: "relative", zIndex: 0 }}
           />
         </Content>
 

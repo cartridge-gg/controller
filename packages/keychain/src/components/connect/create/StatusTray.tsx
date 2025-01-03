@@ -4,15 +4,19 @@ import { ExternalIcon } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 
+interface StatusTrayProps {
+  username: string;
+  validation: ValidationState;
+  error?: Error;
+  style?: React.CSSProperties;
+}
+
 export function StatusTray({
   username,
   validation,
   error,
-}: {
-  username: string;
-  validation: ValidationState;
-  error?: Error;
-}) {
+  style,
+}: StatusTrayProps) {
   const isError = validation.status === "invalid" || error;
   const isTimeoutError = error?.message?.includes(
     "The operation either timed out or was not allowed",
@@ -34,11 +38,12 @@ export function StatusTray({
       alignItems="flex-start"
       bg="solid.secondary"
       py="8px"
-      marginTop="-1rem"
-      paddingTop="15px"
+      marginTop="-11px"
+      paddingTop="12px"
       backgroundColor={isError ? "red.500" : "solid.secondary"}
       borderBottomRadius="4px"
       divider={<Divider borderColor="darkGray.800" opacity="0.1" />}
+      style={style}
     >
       <Text
         fontFamily="Inter"
