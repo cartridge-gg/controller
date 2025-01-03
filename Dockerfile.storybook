@@ -29,5 +29,13 @@ RUN Xvfb :99 -screen 0 1280x1024x24 2>/dev/null &
 
 WORKDIR /app
 
+# Copy package files for installation
+COPY package.json pnpm-lock.yaml ./
+COPY packages/keychain/package.json ./packages/keychain/
+COPY packages/ui-next/package.json ./packages/ui-next/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
 # Default command that can be overridden
 CMD ["bash"]
