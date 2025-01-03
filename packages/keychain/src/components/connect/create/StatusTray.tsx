@@ -69,7 +69,7 @@ export function StatusTray({
         )}
       </Text>
       {isTimeoutError && (
-        <div className="w-full flex items-center justify-between text-xs text-accent-foreground font-semibold px-4">
+        <div className="w-full flex items-center justify-between text-xs font-semibold px-4">
           <div>Having trouble signing up?</div>
           <Link
             className="flex items-center gap-1.5 hover:underline"

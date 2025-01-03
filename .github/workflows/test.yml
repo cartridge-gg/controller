@@ -17,7 +17,7 @@ jobs:
       image: ghcr.io/dojoengine/dojo-dev:v1.0.0-alpha.11
     steps:
       - uses: actions/checkout@v4
-      - run: git config --system --add safe.directory '*'
+      - run: git config --global --add safe.directory '*'
       - uses: dorny/paths-filter@v3
         id: changes
         with:

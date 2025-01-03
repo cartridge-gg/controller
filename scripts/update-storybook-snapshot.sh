@@ -4,9 +4,9 @@
 docker run \
   --rm \
   -v "$(pwd)":/app \
-  -v /app/node_modules \
+  -v "$(pwd)"/node_modules:/app/node_modules \
   --ipc=host \
-  storybook-env \
+  ghcr.io/cartridge-gg/controller/storybook-env:sha-91a2d36 \
   bash -c "
     pnpm install --frozen-lockfile && \
     pnpm test:storybook:update
