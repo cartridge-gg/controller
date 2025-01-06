@@ -73,29 +73,24 @@ export function OcclusionDetector() {
         zIndex: 1000,
       }}
     >
-      {isOccluded && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.8)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "white",
-            zIndex: 1000,
-            pointerEvents: "auto",
-          }}
-        >
-          <div style={{ textAlign: "center", padding: "20px" }}>
-            <p>This window is currently blocked by another element.</p>
-            <p>Please close or move the blocking element to continue.</p>
-          </div>
-        </div>
-      )}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(0,0,0,0.3)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          zIndex: 1000,
+          pointerEvents: isOccluded ? "auto" : "none",
+          opacity: isOccluded ? 1 : 0,
+          transition: "opacity 0.3s ease",
+        }}
+      ></div>
     </div>
   );
 }
