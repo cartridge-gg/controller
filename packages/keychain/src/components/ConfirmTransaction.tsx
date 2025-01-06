@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ResponseCodes, SessionPolicies, toArray } from "@cartridge/controller";
+import { ResponseCodes, toArray } from "@cartridge/controller";
 import { Content, FOOTER_MIN_HEIGHT } from "@/components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
@@ -8,6 +8,7 @@ import { ExecuteCtx } from "@/utils/connection";
 import { getChecksumAddress, num } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { CreateSession } from "./connect";
+import { ParsedSessionPolicies } from "@/hooks/session";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, policies, setContext } = useConnection();
@@ -35,7 +36,7 @@ export function ConfirmTransaction() {
     setContext(undefined);
   };
 
-  const callPolicies = useMemo<SessionPolicies>(
+  const callPolicies = useMemo<ParsedSessionPolicies>(
     () => ({
       contracts: Object.fromEntries(
         toArray(ctx.transactions).map((c) => [
@@ -43,6 +44,7 @@ export function ConfirmTransaction() {
           { methods: [{ entrypoint: c.entrypoint }] },
         ]),
       ),
+      verified: false,
     }),
     [ctx.transactions],
   );
@@ -65,8 +67,8 @@ export function ConfirmTransaction() {
     // If calls are approved by dapp specified policies but not stored session
     // then prompt user to update session. This also accounts for expired sessions.
     if (txnsApproved && account) {
-      account.session(callPolicies).then((hasSession) => {
-        setUpdateSession(!hasSession);
+      account.isRequestedSession(callPolicies).then((isRequestedSession) => {
+        setUpdateSession(!isRequestedSession);
       });
     } else {
       setUpdateSession(false);

@@ -39,8 +39,8 @@ export function Home() {
 
   useEffect(() => {
     if (controller && policies) {
-      controller.session(policies).then((session) => {
-        setHasSessionForPolicies(!!session);
+      controller.isRequestedSession(policies).then((isRequestedSession) => {
+        setHasSessionForPolicies(isRequestedSession);
       });
     } else {
       setHasSessionForPolicies(undefined);
