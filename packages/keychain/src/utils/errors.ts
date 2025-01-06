@@ -182,22 +182,24 @@ export function parseValidationError(error: ControllerError): {
       }
     | string;
 } {
-  const maxFeeMatch = error.data?.match(
-    /Max fee \((\d+)\) exceeds balance \((\d+)\)/,
-  );
-  if (maxFeeMatch) {
-    const maxFee = BigInt(maxFeeMatch[1]);
-    const balance = BigInt(maxFeeMatch[2]);
-    const additionalFunds = maxFee - balance;
-    return {
-      raw: error.data,
-      summary: "Insufficient balance for transaction fee",
-      details: {
-        maxFee,
-        balance,
-        additionalFunds,
-      },
-    };
+  if (typeof error.data === "string") {
+    const maxFeeMatch = error.data.match(
+      /Max fee \((\d+)\) exceeds balance \((\d+)\)/,
+    );
+    if (maxFeeMatch) {
+      const maxFee = BigInt(maxFeeMatch[1]);
+      const balance = BigInt(maxFeeMatch[2]);
+      const additionalFunds = maxFee - balance;
+      return {
+        raw: error.data,
+        summary: "Insufficient balance for transaction fee",
+        details: {
+          maxFee,
+          balance,
+          additionalFunds,
+        },
+      };
+    }
   }
 
   return {
