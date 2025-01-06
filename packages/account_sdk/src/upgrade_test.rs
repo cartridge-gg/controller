@@ -14,6 +14,11 @@ use crate::{
 async fn test_controller_upgrade() {
     let runner = KatanaRunner::load();
     let signer = Signer::new_starknet_random();
+
+    // Wait for Katana to be ready.
+    // TODO: Do this with runner.
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+
     let controller = runner
         .deploy_controller(
             "username".to_owned(),
