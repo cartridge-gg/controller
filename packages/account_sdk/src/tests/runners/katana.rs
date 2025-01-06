@@ -1,7 +1,7 @@
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::accounts::{AccountFactory, ExecutionEncoding, SingleOwnerAccount};
 use starknet::contract::ContractFactory;
-use starknet::core::types::{BlockId, BlockTag, DeclareTransactionResult};
+use starknet::core::types::{BlockId, BlockTag};
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::{JsonRpcClient, Provider};
@@ -31,11 +31,11 @@ lazy_static! {
     pub static ref PREFUNDED: (SigningKey, Felt) = (
         SigningKey::from_secret_scalar(
             felt!(
-                "0x2bbf4f9fd0bbb2e60b0316c1fe0b76cf7a4d0198bd493ced9b8df2a3a24d68a"
+                "0xc5b2fcab997346f3ea1c00b002ecf6f382c5f9c9659a3894eb783c5320f912"
             ),
         ),
         felt!(
-            "0xb3ff441a68610b30fd5e2abbf3a1548eb6ba6f3559f2862bf2dc757e5828ca"
+            "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec"
         )
     );
 
@@ -61,8 +61,8 @@ impl KatanaRunner {
         let katana_port = find_free_port();
         let child = Command::new(config.exec)
             .args(["--chain-id", &config.chain_id])
-            .args(["-p", &katana_port.to_string()])
-            .args(["--json-log"])
+            .args(["--http.port", &katana_port.to_string()])
+            .args(["--log.format", "json"])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
@@ -131,18 +131,15 @@ impl KatanaRunner {
             .unwrap();
     }
 
-    pub async fn declare_controller(&self, version: Version) -> Felt {
+    pub async fn declare_controller(&self, version: Version) {
         let prefunded = self.executor().await;
 
-        let DeclareTransactionResult { class_hash, .. } =
-            AccountDeclaration::cartridge_account(self.client(), version)
-                .declare(&prefunded)
-                .await
-                .unwrap()
-                .wait_for_completion()
-                .await;
-
-        class_hash
+        AccountDeclaration::cartridge_account(self.client(), version)
+            .declare(&prefunded)
+            .await
+            .unwrap()
+            .wait_for_completion()
+            .await;
     }
 
     pub async fn deploy_controller(
@@ -155,7 +152,15 @@ impl KatanaRunner {
             self.executor().await;
 
         let class_hash = CONTROLLERS[&version].hash;
-        self.declare_controller(version).await;
+
+        if self
+            .client()
+            .get_class(BlockId::Tag(BlockTag::Pending), class_hash)
+            .await
+            .is_err()
+        {
+            self.declare_controller(version).await;
+        }
 
         let salt = cairo_short_string_to_felt(&username).unwrap();
 
