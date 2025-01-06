@@ -48,9 +48,7 @@ export function SendCollection() {
   const { address } = useAccount();
   const { parent } = useConnection();
   const [recipientValidated, setRecipientValidated] = useState(false);
-  const [entrypointValidated, setEntrypointValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
-  const [entrypointWarning, setEntrypointWarning] = useState<string>();
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
@@ -64,50 +62,27 @@ export function SendCollection() {
 
   const entrypoint: string | null = useMemo(() => {
     if (entrypoints.includes(SAFE_TRANSFER_FROM_SNAKE_CASE)) {
-      setEntrypointWarning("");
       return SAFE_TRANSFER_FROM_SNAKE_CASE;
     }
     if (entrypoints.includes(SAFE_TRANSFER_FROM_CAMEL_CASE)) {
-      setEntrypointWarning("");
       return SAFE_TRANSFER_FROM_CAMEL_CASE;
     }
     if (entrypoints.includes(TRANSFER_FROM_SNAKE_CASE)) {
-      setEntrypointWarning(
-        "This collection does not support a safe transfer function. I understand and agree to unsafely send assets to a contract.",
-      );
       return TRANSFER_FROM_SNAKE_CASE;
     }
     if (entrypoints.includes(TRANSFER_FROM_CAMEL_CASE)) {
-      setEntrypointWarning(
-        "This collection does not support a safe transfer function. I understand and agree to unsafely send assets to a contract.",
-      );
       return TRANSFER_FROM_CAMEL_CASE;
     }
-    setEntrypointWarning("");
     return null;
-  }, [entrypoints, setEntrypointWarning]);
+  }, [entrypoints]);
 
   const disabled = useMemo(() => {
-    return (
-      (!recipientValidated && !!recipientWarning) ||
-      (!entrypointValidated && !!entrypointWarning) ||
-      !to
-    );
-  }, [
-    recipientValidated,
-    to,
-    recipientWarning,
-    entrypointValidated,
-    entrypointWarning,
-  ]);
+    return (!recipientValidated && !!recipientWarning) || !to;
+  }, [recipientValidated, to, recipientWarning]);
 
   useEffect(() => {
     setRecipientValidated(false);
   }, [recipientWarning, setRecipientValidated]);
-
-  useEffect(() => {
-    setEntrypointValidated(false);
-  }, [entrypointWarning, setEntrypointValidated]);
 
   const onSubmit = useCallback(
     async (to: string) => {
@@ -165,11 +140,6 @@ export function SendCollection() {
           warning={recipientWarning}
           validated={recipientValidated}
           setValidated={setRecipientValidated}
-        />
-        <Warning
-          warning={entrypointWarning}
-          validated={entrypointValidated}
-          setValidated={setEntrypointValidated}
         />
         <Button
           disabled={disabled}
