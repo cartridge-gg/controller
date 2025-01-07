@@ -7,7 +7,7 @@ use crate::factory::ControllerFactory;
 use crate::impl_account;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Owner;
-use crate::storage::{ControllerMetadata, Storage, StorageBackend};
+use crate::storage::{selectors, ControllerMetadata, Storage, StorageBackend};
 use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
@@ -131,7 +131,9 @@ impl Controller {
     }
 
     pub fn disconnect(&mut self) -> Result<(), ControllerError> {
-        self.storage.clear().map_err(ControllerError::from)
+        self.storage
+            .remove(&selectors::Selectors::active(&self.app_id))
+            .map_err(ControllerError::from)
     }
 
     pub fn contract(&self) -> &abigen::controller::Controller<Self> {
