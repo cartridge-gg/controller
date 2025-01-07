@@ -66,39 +66,39 @@ const policies: Policy[] = [
       "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e",
     method: "new_game",
   },
-  {
-    types: {
-      StarknetDomain: [
-        { name: "name", type: "shortstring" },
-        { name: "version", type: "shortstring" },
-        { name: "chainId", type: "shortstring" },
-        { name: "revision", type: "shortstring" },
-      ],
-      Person: [
-        { name: "name", type: "felt" },
-        { name: "wallet", type: "felt" },
-      ],
-      Mail: [
-        { name: "from", type: "Person" },
-        { name: "to", type: "Person" },
-        { name: "contents", type: "felt" },
-      ],
-    },
-    primaryType: "Mail",
-    domain: {
-      name: "StarkNet Mail",
-      version: "1",
-      revision: "1",
-      chainId: "SN_SEPOLIA",
-    },
-  },
+  // {
+  //   types: {
+  //     StarknetDomain: [
+  //       { name: "name", type: "shortstring" },
+  //       { name: "version", type: "shortstring" },
+  //       { name: "chainId", type: "shortstring" },
+  //       { name: "revision", type: "shortstring" },
+  //     ],
+  //     Person: [
+  //       { name: "name", type: "felt" },
+  //       { name: "wallet", type: "felt" },
+  //     ],
+  //     Mail: [
+  //       { name: "from", type: "Person" },
+  //       { name: "to", type: "Person" },
+  //       { name: "contents", type: "felt" },
+  //     ],
+  //   },
+  //   primaryType: "Mail",
+  //   domain: {
+  //     name: "StarkNet Mail",
+  //     version: "1",
+  //     revision: "1",
+  //     chainId: "SN_SEPOLIA",
+  //   },
+  // },
 ];
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      chains={[sepolia]}
+      chains={[mainnet, sepolia]}
       connectors={[controller]}
       explorer={starkscan}
       provider={jsonRpcProvider({

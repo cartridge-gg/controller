@@ -178,7 +178,13 @@ export default class ControllerProvider extends BaseProvider {
     }
   }
 
-  switchStarknetChain(_chainId: string): Promise<boolean> {
+  async switchStarknetChain(chainId: string): Promise<boolean> {
+    this.selectedChain = chainId;
+    this.account = await this.probe();
+    if (!this.account) {
+      this.account = await this.connect();
+    }
+
     return Promise.resolve(true);
   }
 

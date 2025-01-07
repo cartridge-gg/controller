@@ -2,8 +2,8 @@
 
 import { Button } from "@cartridge/ui-next";
 import ControllerConnector from "@cartridge/connector/controller";
-import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import { useMemo, useState } from "react";
+import { useAccount, useConnect, useDisconnect, useNetwork, useSwitchChain } from "@starknet-react/core";
+import { useEffect, useMemo, useState } from "react";
 import { constants, num } from "starknet";
 
 const Header = ({
@@ -15,21 +15,34 @@ const Header = ({
 }) => {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
+  const { chain } = useNetwork();
   const { address, connector, chainId } = useAccount();
+  const { switchChain } = useSwitchChain({
+    params: {
+      chainId: constants.StarknetChainId.SN_SEPOLIA
+    }
+  });
   const controllerConnector = connector as never as ControllerConnector;
   const chains = [
     { name: "Mainnet", id: constants.StarknetChainId.SN_MAIN },
     { name: "Sepolia", id: constants.StarknetChainId.SN_SEPOLIA },
+    { name: "Slot", id: "WP_SLOT"},
   ];
 
   const [networkOpen, setNetworkOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-    const chainName = useMemo(() => {
-      if (chainId) {
-        return chains.find((c) => c.id === num.toHex(chainId))?.name;
-      }
-    }, [chains, chainId]);
+  const chainName = useMemo(() => {
+    if (chainId) {
+      return chains.find((c) => c.id === num.toHex(chainId))?.name;
+    }
+  }, [chains, chainId]);
+
+  useEffect(() => {
+    if (chain) {
+      console.log("chain", chain);
+    }
+  }, [chain]);
 
   return (
     <div className="w-full absolute top-0 left-0 p-5 flex items-center">
@@ -69,7 +82,8 @@ const Header = ({
                 key={c.id}
                 className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
                 onClick={() => {
-                  console.log(c.id);
+                  console.log("switching to", c.id);
+                  switchChain({ chainId: c.id });
                   setNetworkOpen(false);
                 }}
               >

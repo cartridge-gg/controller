@@ -75,7 +75,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           throw {
             code: 63,
             message: "An unexpected error occurred",
-            data: "wallet_deploymentData not implemented",
+            data: "Account not initialized",
           } as Errors.UNEXPECTED_ERROR;
         }
 
@@ -93,7 +93,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           throw {
             code: 63,
             message: "An unexpected error occurred",
-            data: "wallet_deploymentData not implemented",
+            data: "Account not initialized",
           } as Errors.UNEXPECTED_ERROR;
         }
 
