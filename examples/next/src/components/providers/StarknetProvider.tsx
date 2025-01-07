@@ -9,8 +9,7 @@ import {
 import { PropsWithChildren } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Policy } from "@cartridge/controller";
-
-const rpc = process.env.NEXT_PUBLIC_RPC_SEPOLIA!;
+import { constants } from "starknet";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -121,7 +120,11 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 
 const controller = new ControllerConnector({
   policies,
-  rpcUrl: rpc,
+  chains: [
+    { rpcUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA! },
+    { rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET! },
+  ],
+  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
   url:
     process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL,
