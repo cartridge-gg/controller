@@ -9,11 +9,12 @@ import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
 import { Legal, StatusTray } from ".";
 import { useCreateController } from "./useCreateController";
-import { ControllerTheme } from "@cartridge/presets";
 import { Input } from "@cartridge/ui-next";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { VerifiableControllerTheme } from "@/context/theme";
 
 interface CreateControllerViewProps {
-  theme: ControllerTheme;
+  theme: VerifiableControllerTheme;
   usernameField: {
     value: string;
     error?: string;
@@ -87,6 +88,17 @@ export function CreateControllerView({
         </Content>
 
         <Footer showCatridgeLogo>
+          {!theme.verified && (
+            <div className="mb-5">
+              <ErrorAlert
+                title="Please proceed with caution"
+                description="Application domain does not match the configured domain."
+                variant="warning"
+                isExpanded
+              />
+            </div>
+          )}
+
           <Legal />
 
           <Button

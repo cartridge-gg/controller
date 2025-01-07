@@ -15,7 +15,7 @@ const meta = {
         session: () => true,
       },
       context: {
-        origin: "http://localhost:3002",
+        origin: "http://localhost:6001",
         type: "execute",
         transactions: [
           {
