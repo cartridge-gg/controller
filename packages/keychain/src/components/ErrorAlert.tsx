@@ -1,25 +1,23 @@
 import {
-  WedgeIcon,
   CopyIcon,
   CheckIcon,
   ErrorAlertIcon,
   ErrorAlertIconProps,
   Button,
-} from "@cartridge/ui-next";
-import {
-  Text,
   Accordion,
   AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  Spacer,
-  HStack,
-  Box,
-  VStack,
-  Divider,
-} from "@chakra-ui/react";
-import { motion } from "framer-motion";
-import React, { ReactElement, useCallback, useEffect, useState } from "react";
+  AccordionTrigger,
+  AccordionContent,
+  cn,
+} from "@cartridge/ui-next";
+import { Text, HStack, VStack, Divider } from "@chakra-ui/react";
+import React, {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { ControllerError } from "@/utils/connection";
 import { parseExecutionError, parseValidationError } from "@/utils/errors";
@@ -52,88 +50,67 @@ export function ErrorAlert({
     }, 3000);
   }, [copied]);
 
+  const collapsible = !isExpanded || allowToggle;
+  const styles = useMemo(() => {
+    switch (variant) {
+      case "info":
+        return { bg: "bg-info", text: "text-info-foreground" };
+      case "warning":
+        return { bg: "bg-warning", text: "text-warning-foreground" };
+      case "error":
+        return { bg: "bg-error", text: "text-error-foreground" };
+      default:
+        return { bg: "bg-secondary", text: "text-secondary-foreground" };
+    }
+  }, [variant]);
+
   return (
     <Accordion
-      w="full"
-      allowToggle={!isExpanded || allowToggle}
-      defaultIndex={isExpanded ? [0] : undefined}
-      variant={variant}
-      color="solid.bg"
-      fontSize="sm"
+      type="single"
+      collapsible={collapsible}
+      defaultValue={isExpanded ? "item-1" : undefined}
     >
-      <AccordionItem position="relative" border="none">
-        {({ isExpanded: itemExpanded }) => (
-          <>
-            <AccordionButton
-              disabled={!description || (isExpanded && !allowToggle)}
-            >
-              <HStack alignItems="flex-start">
-                {variant && (
-                  <ErrorAlertIcon
-                    variant={variant as ErrorAlertIconProps["variant"]}
-                    size="xs"
-                  />
-                )}
-                <Text
-                  as="b"
-                  fontSize="2xs"
-                  color="inherit"
-                  textTransform="uppercase"
-                  align="left"
-                >
-                  {title}
-                </Text>
-              </HStack>
-
-              <Spacer />
-
-              {description && !isExpanded && (
-                <HStack>
-                  <Box
-                    as={motion.div}
-                    animate={{
-                      rotate: itemExpanded ? 180 : 0,
-                    }}
-                  >
-                    <WedgeIcon size="sm" variant="down" />
-                  </Box>
-                </HStack>
-              )}
-            </AccordionButton>
-
-            {description && (
-              <AccordionPanel w="full" position="relative">
-                {copyText && (
-                  <Button
-                    size="icon"
-                    variant="icon"
-                    className="absolute right-3 w-5 h-5 bg-[rgba(0,0,0,0.1)]"
-                    onClick={() => {
-                      setCopied(true);
-                      navigator.clipboard.writeText(copyText);
-                    }}
-                  >
-                    {copied ? (
-                      <CheckIcon size="xs" className="text-[black]" />
-                    ) : (
-                      <CopyIcon size="xs" className="text-[black]" />
-                    )}
-                  </Button>
-                )}
-                <Box
-                  h="full"
-                  maxH={200}
-                  p={3}
-                  pt={0}
-                  overflowY="auto"
-                  pr={copyText ? 10 : undefined}
-                >
-                  {description}
-                </Box>
-              </AccordionPanel>
-            )}
-          </>
+      <AccordionItem
+        value="item-1"
+        className={cn(
+          "flex flex-col rounded p-3 gap-3",
+          styles.bg,
+          styles.text,
         )}
+      >
+        <AccordionTrigger hideIcon={!collapsible} className="items-start gap-1">
+          {variant && variant !== "default" && (
+            <div className="w-5">
+              <ErrorAlertIcon
+                variant={variant as ErrorAlertIconProps["variant"]}
+              />
+            </div>
+          )}
+          <div className={cn("text-2xs font-bold uppercase", styles.text)}>
+            {title}
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent>
+          {copyText && (
+            <Button
+              size="icon"
+              variant="icon"
+              className="absolute right-5 w-5 h-5 bg-[rgba(0,0,0,0.1)]"
+              onClick={() => {
+                setCopied(true);
+                navigator.clipboard.writeText(copyText);
+              }}
+            >
+              {copied ? (
+                <CheckIcon size="xs" className="text-[black]" />
+              ) : (
+                <CopyIcon size="xs" className="text-[black]" />
+              )}
+            </Button>
+          )}
+          {description && <div className="text-xs mr-7">{description}</div>}
+        </AccordionContent>
       </AccordionItem>
     </Accordion>
   );
