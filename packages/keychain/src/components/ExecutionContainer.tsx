@@ -26,7 +26,6 @@ interface ExecutionContainerProps {
 }
 
 export function ExecutionContainer({
-  Icon,
   title,
   description,
   transactions,
@@ -142,7 +141,7 @@ export function ExecutionContainer({
   }
 
   return (
-    <Container Icon={Icon} title={title} description={description}>
+    <Container title={title} description={description}>
       {children}
       <Footer>
         {(() => {

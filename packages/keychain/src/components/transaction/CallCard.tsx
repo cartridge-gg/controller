@@ -1,12 +1,10 @@
 import {
   Card,
   CardContent,
-  CardHeader,
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  CodeIcon,
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
@@ -20,13 +18,13 @@ interface CallCardProps {
   icon?: React.ReactNode;
 }
 
-export function CallCard({ address, call, title, icon }: CallCardProps) {
+export function CallCard({ address, call }: CallCardProps) {
   const chainId = useChainId();
   const explorer = useExplorer();
 
   const explorerLink = (
     <a
-      className="text-xs text-muted-foreground cursor-pointer hover:underline"
+      className="text-xs text-foreground cursor-pointer hover:underline"
       href={
         chainId === constants.StarknetChainId.SN_MAIN ||
         chainId === constants.StarknetChainId.SN_SEPOLIA
@@ -42,60 +40,58 @@ export function CallCard({ address, call, title, icon }: CallCardProps) {
 
   return (
     <Card>
-      <CardHeader icon={icon ?? <CodeIcon variant="solid" />} className="pl-0">
-        <div className="flex items-center justify-between">
-          <div className="text-xs font-bold uppercase">{title}</div>
-          {explorerLink}
-        </div>
-      </CardHeader>
+      <CardContent className="py-2">
+        <Accordion key={`${call.entrypoint}`} type="single" collapsible>
+          <AccordionItem value="item" className="bg-secondary rounded-md">
+            <AccordionTrigger className="px-1 py-2">
+              <p className=" text-foreground font-bold text-s">
+                {humanizeString(call.entrypoint)}
+              </p>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="flex flex-col gap-2 p-1">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground font-bold">
+                    Contract
+                  </div>
+                  {explorerLink}
+                </div>
 
-      <CardContent>
-        <div className="flex flex-col gap-2">
-          <Accordion key={`${call.entrypoint}`} type="single" collapsible>
-            <AccordionItem value="item" className="bg-secondary rounded-md">
-              <AccordionTrigger className="px-3 py-2 hover:no-underline">
-                <div className="flex items-center justify-between w-full">
-                  <div className="text-foreground font-bold text-xs">
-                    {humanizeString(call.entrypoint)}
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground font-bold">
+                    Entrypoint
+                  </div>
+                  <div className="text-xs text-foreground">
+                    {call.entrypoint}
                   </div>
                 </div>
-              </AccordionTrigger>
 
-              <AccordionContent className="p-3">
-                <div className="flex flex-col gap-2">
-                  {call.calldata && (
-                    <div className="flex flex-col gap-1">
-                      <div className="text-xs text-muted-foreground font-bold pb-2">
-                        Calldata
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        {Array.isArray(call.calldata)
-                          ? call.calldata.map((data, i) => (
-                              <div
-                                key={i}
-                                className="text-xs text-muted-foreground"
-                              >
-                                {String(data)}
-                              </div>
-                            ))
-                          : Object.entries(call.calldata).map(
-                              ([key, value], i) => (
-                                <div
-                                  key={i}
-                                  className="text-xs text-muted-foreground"
-                                >
-                                  {`${key}: ${String(value)}`}
-                                </div>
-                              ),
-                            )}
-                      </div>
+                {call.calldata && (
+                  <div className="flex flex-col gap-1">
+                    <div className="text-xs text-muted-foreground font-bold pb-1">
+                      Calldata
                     </div>
-                  )}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
+                    <div className="flex flex-col gap-1">
+                      {Array.isArray(call.calldata)
+                        ? call.calldata.map((data, i) => (
+                            <div key={i} className="text-xs text-foreground">
+                              {String(data)}
+                            </div>
+                          ))
+                        : Object.entries(call.calldata).map(
+                            ([key, value], i) => (
+                              <div key={i} className="text-xs text-foreground">
+                                {`${key}: ${String(value)}`}
+                              </div>
+                            ),
+                          )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </CardContent>
     </Card>
   );
