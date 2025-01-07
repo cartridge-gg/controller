@@ -36,18 +36,26 @@ export function ConfirmTransaction() {
     setContext(undefined);
   };
 
-  const callPolicies = useMemo<ParsedSessionPolicies>(
-    () => ({
-      contracts: Object.fromEntries(
-        toArray(ctx.transactions).map((c) => [
-          getChecksumAddress(c.contractAddress),
-          { methods: [{ entrypoint: c.entrypoint }] },
-        ]),
-      ),
+  const callPolicies = useMemo<ParsedSessionPolicies>(() => {
+    const contracts = new Map();
+
+    toArray(ctx.transactions).forEach((c) => {
+      const address = getChecksumAddress(c.contractAddress);
+      if (contracts.has(address)) {
+        // Extend methods if contract already exists
+        const existing = contracts.get(address);
+        existing.methods.push({ entrypoint: c.entrypoint });
+      } else {
+        // Add new contract entry
+        contracts.set(address, { methods: [{ entrypoint: c.entrypoint }] });
+      }
+    });
+
+    return {
+      contracts: Object.fromEntries(contracts),
       verified: false,
-    }),
-    [ctx.transactions],
-  );
+    };
+  }, [ctx.transactions]);
 
   useEffect(() => {
     if (policiesUpdated) {
