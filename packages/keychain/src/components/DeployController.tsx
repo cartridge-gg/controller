@@ -18,7 +18,7 @@ import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { useDeploy } from "@/hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "@/utils/connection";
-import { Policies } from "@/components/Policies";
+import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
 import { Link } from "react-router-dom";
 
@@ -136,14 +136,14 @@ export function DeployController({
           description="This will initialize your controller on the new network"
         >
           <Content>
-            <Policies
-              title="Transaction Details"
-              policies={{
-                contracts: {
-                  ["0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab"]:
-                    { methods: [{ name: "deploy", entrypoint: "deploy" }] },
+            <TransactionSummary
+              calls={[
+                {
+                  entrypoint: "deploy",
+                  contractAddress:
+                    "0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
                 },
-              }}
+              ]}
             />
           </Content>
 

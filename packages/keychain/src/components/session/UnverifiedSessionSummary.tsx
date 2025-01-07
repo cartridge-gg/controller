@@ -23,12 +23,13 @@ export function UnverifiedSessionSummary({
             title={title}
             icon={icon}
             methods={methods}
+            isExpanded
           />
         );
       })}
 
       {policies.messages && policies.messages.length > 0 && (
-        <MessageCard messages={policies.messages} />
+        <MessageCard messages={policies.messages} isExpanded />
       )}
     </div>
   );
