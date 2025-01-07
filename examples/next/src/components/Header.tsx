@@ -3,7 +3,8 @@
 import { Button } from "@cartridge/ui-next";
 import ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { constants, num } from "starknet";
 
 const Header = ({
   showBack,
@@ -14,21 +15,21 @@ const Header = ({
 }) => {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const { address, connector } = useAccount();
+  const { address, connector, chainId } = useAccount();
   const controllerConnector = connector as never as ControllerConnector;
   const chains = [
-    { name: "Mainnet", id: "mainnet" },
-    { name: "Sepolia (Testnet)", id: "sepolia" },
-    { name: "Slot (L3)", id: "slot" },
+    { name: "Mainnet", id: constants.StarknetChainId.SN_MAIN },
+    { name: "Sepolia", id: constants.StarknetChainId.SN_SEPOLIA },
   ];
 
-  const chainName = "chain name";
   const [networkOpen, setNetworkOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  //   const chainName = useMemo(() => {
-  //     return chains.find((c) => c.id === getCurrentChain())?.name;
-  //   }, [chains, getCurrentChain]);
+    const chainName = useMemo(() => {
+      if (chainId) {
+        return chains.find((c) => c.id === num.toHex(chainId))?.name;
+      }
+    }, [chains, chainId]);
 
   return (
     <div className="w-full absolute top-0 left-0 p-5 flex items-center">
@@ -43,7 +44,7 @@ const Header = ({
         </button>
       )}
       <div className="flex-1" />
-      <div className="relative">
+      {chainId && <div className="relative">
         <Button
           onClick={() => {
             setNetworkOpen(!networkOpen);
@@ -77,7 +78,7 @@ const Header = ({
             ))}
           </div>
         )}
-      </div>
+      </div>}
       {address ? (
         <div className="relative ml-2">
           <Button
