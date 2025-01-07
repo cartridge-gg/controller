@@ -17,7 +17,7 @@ import { setIsSignedUp } from "@/utils/cookie";
 import {
   ConnectionContext,
   ConnectionContextValue,
-} from "@/components/Provider/connection";
+} from "@/components/provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import posthog from "posthog-js";
 import { Policies } from "@cartridge/presets";

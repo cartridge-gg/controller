@@ -12,7 +12,7 @@ import {
   WandIcon,
   Button,
 } from "@cartridge/ui-next";
-import { Funding } from "./Funding";
+import { Funding } from "./funding";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { useDeploy } from "@/hooks/deploy";

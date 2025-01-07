@@ -9,8 +9,8 @@ import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
 import { DeployController } from "./DeployController";
 import { ErrorPage } from "./ErrorBoundary";
-import { PurchaseCredits } from "./Funding/PurchaseCredits";
-import { Settings } from "./Settings";
+import { PurchaseCredits } from "./funding/PurchaseCredits";
+import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 
