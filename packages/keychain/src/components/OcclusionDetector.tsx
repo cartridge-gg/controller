@@ -60,11 +60,24 @@ export function OcclusionDetector() {
     };
   }, [handleIntersectionChange]);
 
+  // Add this effect to handle scroll locking
+  useEffect(() => {
+    if (isOccluded) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOccluded]);
+
   return (
     <div
       ref={containerRef}
       style={{
-        position: "absolute",
+        position: "fixed",
         top: 0,
         left: 0,
         width: "100%",
