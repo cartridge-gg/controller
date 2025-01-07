@@ -1,13 +1,8 @@
 import { PropsWithChildren, useState } from "react";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
   Accordion,
   AccordionContent,
   AccordionItem,
-  CardIcon,
   PencilIcon,
   AccordionTrigger,
   CheckboxIcon,
@@ -15,107 +10,81 @@ import {
 import { ArrowTurnDownIcon, Badge } from "@cartridge/ui-next";
 import { StarknetEnumType, StarknetMerkleType } from "@starknet-io/types-js";
 import { SignMessagePolicy } from "@cartridge/presets";
+import { AccordionCard } from "./AccordionCard";
 
 interface MessageCardProps {
   messages: SignMessagePolicy[];
+  isExpanded?: boolean;
 }
 
-export function MessageCard({ messages }: MessageCardProps) {
+export function MessageCard({ messages, isExpanded }: MessageCardProps) {
   return (
-    <Card>
-      <CardHeader
-        icon={
-          <CardIcon>
-            <PencilIcon variant="solid" />
-          </CardIcon>
-        }
-      >
-        <CardTitle className="text-foreground">Sign Message</CardTitle>
-      </CardHeader>
-
-      <CardContent>
-        <MessageContent messages={messages} />
-      </CardContent>
-    </Card>
-  );
-}
-
-interface MessageContentProps {
-  messages: SignMessagePolicy[];
-}
-
-function MessageContent({ messages }: MessageContentProps) {
-  return (
-    <Accordion type="single" defaultValue="message" collapsible>
-      <AccordionItem value="message" className="flex flex-col gap-3">
-        <AccordionTrigger
-          className="text-xs text-muted-foreground"
-          color="text.secondary"
-        >
-          Approve{" "}
+    <AccordionCard
+      icon={<PencilIcon variant="solid" />}
+      title="Sign Message"
+      trigger={
+        <div className="text-xs text-muted-foreground">
+          Approve&nbsp;
           <span className="text-accent-foreground font-bold">
-            {messages.length} {messages.length > 1 ? "messages" : "message"}
+            {messages.length} {messages.length > 1 ? `messages` : "message"}
           </span>
-        </AccordionTrigger>
-
-        <AccordionContent className="text-xs flex flex-col bg-background border border-background rounded-md gap-px">
-          {messages.map((m, i) => (
-            <div
-              key={m.domain.name ?? i}
-              className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md"
-            >
-              <div className="font-bold">{m.name ?? `Message ${i + 1}`}</div>
-              <div className="flex flex-col bg-secondary gap-1 ">
-                {/* Domain section */}
-                {Object.values(m.domain).filter((f) => typeof f !== "undefined")
-                  .length > 0 && (
-                  <CollapsibleRow key="domain" title="domain">
-                    {m.domain.name && (
-                      <ValueRow
-                        values={[{ name: "name", value: m.domain.name }]}
-                      />
-                    )}
-                    {/* ... other domain fields ... */}
-                  </CollapsibleRow>
+        </div>
+      }
+      isExpanded={isExpanded}
+    >
+      {messages.map((m, i) => (
+        <div
+          key={m.domain.name ?? i}
+          className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md"
+        >
+          <div className="font-bold">{m.name ?? `Message ${i + 1}`}</div>
+          <div className="flex flex-col bg-secondary gap-1 ">
+            {/* Domain section */}
+            {Object.values(m.domain).filter((f) => typeof f !== "undefined")
+              .length > 0 && (
+              <CollapsibleRow key="domain" title="domain">
+                {m.domain.name && (
+                  <ValueRow values={[{ name: "name", value: m.domain.name }]} />
                 )}
+              </CollapsibleRow>
+            )}
 
-                <ValueRow
-                  values={[{ name: "primaryType", value: m.primaryType }]}
-                />
+            <ValueRow
+              values={[{ name: "primaryType", value: m.primaryType }]}
+            />
 
-                <CollapsibleRow title="types">
-                  {Object.entries(m.types).map(([name, types]) => (
-                    <CollapsibleRow key={name} title={name}>
-                      {types.map((t) => (
-                        <ValueRow
-                          key={t.name}
-                          values={[
-                            { name: "name", value: t.name },
-                            { name: "type", value: t.type },
-                            ...(["enum", "merkletree"].includes(t.name)
-                              ? [
-                                  {
-                                    name: "contains",
-                                    value: (
-                                      t as StarknetEnumType | StarknetMerkleType
-                                    ).contains,
-                                  },
-                                ]
-                              : []),
-                          ]}
-                        />
-                      ))}
-                    </CollapsibleRow>
+            <CollapsibleRow title="types">
+              {Object.entries(m.types).map(([name, types]) => (
+                <CollapsibleRow key={name} title={name}>
+                  {types.map((t) => (
+                    <ValueRow
+                      key={t.name}
+                      values={[
+                        { name: "name", value: t.name },
+                        { name: "type", value: t.type },
+                        ...(["enum", "merkletree"].includes(t.name)
+                          ? [
+                              {
+                                name: "contains",
+                                value: (
+                                  t as StarknetEnumType | StarknetMerkleType
+                                ).contains,
+                              },
+                            ]
+                          : []),
+                      ]}
+                    />
                   ))}
                 </CollapsibleRow>
-              </div>
-            </div>
-          ))}
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+              ))}
+            </CollapsibleRow>
+          </div>
+        </div>
+      ))}
+    </AccordionCard>
   );
 }
+
 interface CollapsibleRowProps extends PropsWithChildren {
   title: string;
 }

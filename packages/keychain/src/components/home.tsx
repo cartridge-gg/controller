@@ -4,7 +4,7 @@ import { usePostHog } from "posthog-js/react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, SignMessageCtx } from "@/utils/connection";
-import { ConfirmTransaction } from "./ConfirmTransaction";
+import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
 import { DeployController } from "./DeployController";
