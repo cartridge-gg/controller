@@ -223,6 +223,7 @@ pub struct Credentials {
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct ActiveMetadata {
     address: Felt,
+    chain_id: Felt,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -256,7 +257,10 @@ pub trait StorageBackend: Send + Sync {
         self.get(&selectors::Selectors::active(app_id))
             .and_then(|value| match value {
                 Some(StorageValue::Active(metadata)) => self
-                    .get(&selectors::Selectors::account(&metadata.address))
+                    .get(&selectors::Selectors::account(
+                        &metadata.address,
+                        &metadata.chain_id,
+                    ))
                     .and_then(|value| match value {
                         Some(StorageValue::Controller(metadata)) => Ok(Some(metadata)),
                         Some(_) => Err(StorageError::TypeMismatch),
@@ -270,15 +274,19 @@ pub trait StorageBackend: Send + Sync {
     fn set_controller(
         &mut self,
         app_id: &str,
+        chain_id: &Felt,
         address: Felt,
         metadata: ControllerMetadata,
     ) -> Result<(), StorageError> {
         self.set(
             &selectors::Selectors::active(app_id),
-            &StorageValue::Active(ActiveMetadata { address }),
+            &StorageValue::Active(ActiveMetadata {
+                address,
+                chain_id: *chain_id,
+            }),
         )?;
         self.set(
-            &selectors::Selectors::account(&address),
+            &selectors::Selectors::account(&address, chain_id),
             &StorageValue::Controller(metadata),
         )
     }
