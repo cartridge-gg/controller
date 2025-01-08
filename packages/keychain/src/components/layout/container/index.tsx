@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { PropsWithChildren, createContext, useContext, useState } from "react";
-import { Header, HeaderProps } from "./Header";
+import { Header, HeaderProps } from "./header";
 import { useDisclosure } from "@cartridge/ui-next";
 
 export function Container({

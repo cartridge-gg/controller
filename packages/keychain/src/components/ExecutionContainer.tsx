@@ -5,10 +5,10 @@ import { useConnection } from "@/hooks/connection";
 import { ControllerError } from "@/utils/connection";
 import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
 import { Fees } from "./Fees";
-import { Funding } from "./Funding";
+import { Funding } from "./funding";
 import { DeployController } from "./DeployController";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { BannerProps } from "./layout/Container/Header/Banner";
+import { BannerProps } from "./layout/container/header/Banner";
 import { parseControllerError } from "@/utils/connection/execute";
 
 interface ExecutionContainerProps {
