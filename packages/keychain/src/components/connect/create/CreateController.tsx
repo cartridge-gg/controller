@@ -132,7 +132,9 @@ function getNativeBrowserUrl() {
   }
   // Android: Open in Chrome
   if (/Android/.test(navigator.userAgent)) {
-    return `intent:${window.location.href}#Intent;scheme=https;package=com.android.chrome;end`;
+    let currentUrl = window.location.href;
+    currentUrl = currentUrl.replace(/^https?:\/\//, "");
+    return `intent://${currentUrl}#Intent;scheme=https;package=com.android.chrome;end`;
   }
   return null;
 }
@@ -176,7 +178,7 @@ export function CreateController({
         window.location.href = nativeBrowserUrl;
       }
     }
-  }, []);
+  }, [isInApp]);
 
   const handleUsernameChange = (value: string) => {
     if (!hasLoggedChange.current) {
