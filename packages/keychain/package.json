@@ -41,6 +41,7 @@
     "framer-motion": "^6",
     "graphql": "^16.3.0",
     "graphql-request": "^5.0.0",
+    "inapp-spy": "4.2.1",
     "js-cookie": "^3.0.1",
     "p-throttle": "^6.2.0",
     "posthog-js": "^1.181.0",

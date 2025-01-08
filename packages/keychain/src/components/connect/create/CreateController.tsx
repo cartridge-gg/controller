@@ -12,6 +12,7 @@ import { useCreateController } from "./useCreateController";
 import { Input } from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
+import InAppSpy from "inapp-spy";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -168,30 +169,15 @@ export function CreateController({
     loginMode,
   });
 
-  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
+  const [{ isInApp }] = useState(() => InAppSpy());
 
   useEffect(() => {
-    const ua = navigator.userAgent;
-    // Check for common in-app browser signatures
-    const isInApp =
-      ua.includes("FBAN") || // Facebook
-      ua.includes("FBAV") || // Facebook
-      ua.includes("Twitter") || // Twitter
-      ua.includes("Instagram") || // Instagram
-      ua.includes("Line") || // Line
-      /\bFB[\w_]+\//.test(ua) || // Facebook
-      /\bInstagram\b/.test(ua); // Instagram
-
-    setIsInAppBrowser(isInApp);
-
     if (isInApp) {
       const nativeBrowserUrl = getNativeBrowserUrl();
       if (nativeBrowserUrl) {
         // Try to open in native browser
         window.location.href = nativeBrowserUrl;
       }
-
-      setIsInAppBrowser(true);
     }
   }, []);
 
@@ -234,7 +220,7 @@ export function CreateController({
       validation={validation}
       isLoading={isLoading}
       error={error}
-      isInAppBrowser={isInAppBrowser}
+      isInAppBrowser={isInApp}
       onUsernameChange={handleUsernameChange}
       onUsernameFocus={handleUsernameFocus}
       onUsernameClear={handleUsernameClear}
