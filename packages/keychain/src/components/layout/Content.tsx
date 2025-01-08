@@ -1,5 +1,5 @@
 import { StackProps, VStack } from "@chakra-ui/react";
-import { useLayout } from "./Container";
+import { useLayout } from "./container";
 
 export function Content({ children, ...stackProps }: StackProps) {
   const { footer } = useLayout();

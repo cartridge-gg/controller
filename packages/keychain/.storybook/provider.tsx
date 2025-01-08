@@ -7,7 +7,7 @@ import { useThemeEffect } from "@cartridge/ui-next";
 import { ChakraProvider } from "@chakra-ui/react";
 import { BrowserRouter } from "react-router-dom";
 
-import { ConnectionContext } from "../src/components/Provider/connection";
+import { ConnectionContext } from "../src/components/provider/connection";
 import { StoryParameters, useMockedConnection } from "./mock";
 import {
   ControllerThemeContext,
