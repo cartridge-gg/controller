@@ -43,7 +43,7 @@ export function AccordionCard({
         <Accordion
           type="single"
           collapsible
-          value={isExpanded ? "item" : undefined}
+          defaultValue={isExpanded ? "item" : undefined}
         >
           <AccordionItem value="item" className="flex flex-col gap-4">
             <AccordionTrigger className="text-xs text-muted-foreground">
