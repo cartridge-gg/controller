@@ -3,7 +3,7 @@ import twAnimate from "tailwindcss-animate";
 import defaultTheme from "tailwindcss/defaultTheme";
 
 export const cartridgeTWPreset: Partial<Config> = {
-  darkMode: "class",
+  darkMode: "selector",
   theme: {
     container: {
       center: true,
