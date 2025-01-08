@@ -54,17 +54,18 @@ export function ContractCard({
           </span>
         </div>
       }
+      className="bg-background gap-px rounded overflow-auto border border-background"
     >
       {methods.map((method) => (
         <div
           key={method.entrypoint}
-          className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md text-xs"
+          className="flex flex-col bg-secondary gap-4 p-3 text-xs"
         >
           <div className="flex items-center justify-between">
-            <div className="font-bold">
+            <div className="font-bold text-accent-foreground">
               {method.name ?? humanizeString(method.entrypoint)}
             </div>
-            <div className="text-accent-foreground">{method.entrypoint}</div>
+            <div className="text-muted-foreground">{method.entrypoint}</div>
           </div>
           {method.description && (
             <div className="text-muted-foreground">{method.description}</div>

@@ -32,13 +32,26 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
       }
       isExpanded={isExpanded}
     >
+      <MessageContent messages={messages} />
+    </AccordionCard>
+  );
+}
+
+export function MessageContent({
+  messages,
+}: {
+  messages: SignMessagePolicy[];
+}) {
+  return (
+    <>
       {messages.map((m, i) => (
         <div
           key={m.domain.name ?? i}
-          className="flex flex-col bg-secondary gap-4 p-3 first:rounded-t-md last:rounded-b-md"
+          className="flex flex-col bg-secondary gap-2 text-xs"
         >
-          <div className="font-bold">{m.name ?? `Message ${i + 1}`}</div>
-          <div className="flex flex-col bg-secondary gap-1 ">
+          <div className="py-2 font-bold">{m.name ?? `Message ${i + 1}`}</div>
+
+          <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">
             {/* Domain section */}
             {Object.values(m.domain).filter((f) => typeof f !== "undefined")
               .length > 0 && (
@@ -81,7 +94,7 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
           </div>
         </div>
       ))}
-    </AccordionCard>
+    </>
   );
 }
 
@@ -101,7 +114,7 @@ export function CollapsibleRow({ title, children }: CollapsibleRowProps) {
               variant={value ? "minus-line" : "plus-line"}
               size="sm"
             />
-            <div>{title}</div>
+            <div className="text-xs">{title}</div>
           </div>
         </AccordionTrigger>
 
@@ -119,12 +132,12 @@ interface ValueRowProps {
 
 export function ValueRow({ values }: ValueRowProps) {
   return (
-    <div className="flex items-center py-1">
-      <ArrowTurnDownIcon />
+    <div className="flex items-center py-1 gap-1 text-muted-foreground">
+      <ArrowTurnDownIcon size="sm" />
       <div className="flex items-center gap-2">
         {values.map((f) => (
-          <div className="flex items-center gap-1" key={f.name}>
-            {f.name}: <Badge>{f.value}</Badge>
+          <div className="flex items-center gap-1 text-xs" key={f.name}>
+            {f.name}: <Badge className="bg-quaternary">{f.value}</Badge>
           </div>
         ))}
       </div>
