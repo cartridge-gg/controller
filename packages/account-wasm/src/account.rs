@@ -360,7 +360,7 @@ impl CartridgeAccount {
     #[wasm_bindgen(js_name = switchChain)]
     pub async fn switch_chain(&self, rpc_url: String) -> Result<()> {
         set_panic_hook();
-        
+
         let rpc_url = Url::parse(&rpc_url)?;
         self.controller.lock().await.switch_chain(rpc_url).await?;
         Ok(())

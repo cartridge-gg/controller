@@ -383,7 +383,11 @@ impl Controller {
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
         self.provider = provider;
         self.rpc_url = rpc_url;
-        self.chain_id = self.provider.chain_id().await.map_err(ControllerError::from)?;
+        self.chain_id = self
+            .provider
+            .chain_id()
+            .await
+            .map_err(ControllerError::from)?;
 
         self.storage
             .set_controller(
@@ -393,7 +397,7 @@ impl Controller {
                 ControllerMetadata::from(&self.clone()),
             )
             .expect("Should store controller");
-        
+
         Ok(())
     }
 

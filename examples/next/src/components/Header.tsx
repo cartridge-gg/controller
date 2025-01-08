@@ -2,7 +2,13 @@
 
 import { Button } from "@cartridge/ui-next";
 import ControllerConnector from "@cartridge/connector/controller";
-import { useAccount, useConnect, useDisconnect, useNetwork, useSwitchChain } from "@starknet-react/core";
+import {
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useNetwork,
+  useSwitchChain,
+} from "@starknet-react/core";
 import { useEffect, useMemo, useState } from "react";
 import { constants, num } from "starknet";
 
@@ -19,14 +25,14 @@ const Header = ({
   const { address, connector, chainId } = useAccount();
   const { switchChain } = useSwitchChain({
     params: {
-      chainId: constants.StarknetChainId.SN_SEPOLIA
-    }
+      chainId: constants.StarknetChainId.SN_SEPOLIA,
+    },
   });
   const controllerConnector = connector as never as ControllerConnector;
   const chains = [
     { name: "Mainnet", id: constants.StarknetChainId.SN_MAIN },
     { name: "Sepolia", id: constants.StarknetChainId.SN_SEPOLIA },
-    { name: "Slot", id: "WP_SLOT"},
+    { name: "Slot", id: "WP_SLOT" },
   ];
 
   const [networkOpen, setNetworkOpen] = useState(false);
@@ -57,42 +63,44 @@ const Header = ({
         </button>
       )}
       <div className="flex-1" />
-      {chainId && <div className="relative">
-        <Button
-          onClick={() => {
-            setNetworkOpen(!networkOpen);
-            setProfileOpen(false);
-          }}
-          disabled={lockChain}
-          className="flex items-center gap-2 min-w-[120px]"
-        >
-          {chainName}
-          <span
-            className={`transition-transform duration-200 ${
-              networkOpen ? "rotate-180" : ""
-            }`}
+      {chainId && (
+        <div className="relative">
+          <Button
+            onClick={() => {
+              setNetworkOpen(!networkOpen);
+              setProfileOpen(false);
+            }}
+            disabled={lockChain}
+            className="flex items-center gap-2 min-w-[120px]"
           >
-            ▼
-          </span>
-        </Button>
-        {networkOpen && (
-          <div className="absolute right-0 top-full mt-1 bg-gray-700 shadow-lg rounded-md min-w-[160px] py-1 z-10">
-            {chains.map((c) => (
-              <button
-                key={c.id}
-                className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
-                onClick={() => {
-                  console.log("switching to", c.id);
-                  switchChain({ chainId: c.id });
-                  setNetworkOpen(false);
-                }}
-              >
-                {c.name}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>}
+            {chainName}
+            <span
+              className={`transition-transform duration-200 ${
+                networkOpen ? "rotate-180" : ""
+              }`}
+            >
+              ▼
+            </span>
+          </Button>
+          {networkOpen && (
+            <div className="absolute right-0 top-full mt-1 bg-gray-700 shadow-lg rounded-md min-w-[160px] py-1 z-10">
+              {chains.map((c) => (
+                <button
+                  key={c.id}
+                  className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
+                  onClick={() => {
+                    console.log("switching to", c.id);
+                    switchChain({ chainId: c.id });
+                    setNetworkOpen(false);
+                  }}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       {address ? (
         <div className="relative ml-2">
           <Button
