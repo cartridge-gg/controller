@@ -7,6 +7,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  cn,
 } from "@cartridge/ui-next";
 
 interface AccordionCardProps {
@@ -16,6 +17,7 @@ interface AccordionCardProps {
   children: React.ReactNode;
   trigger?: React.ReactNode;
   isExpanded?: boolean;
+  className?: string;
 }
 
 export function AccordionCard({
@@ -25,10 +27,11 @@ export function AccordionCard({
   children,
   trigger,
   isExpanded,
+  className,
 }: AccordionCardProps) {
   return (
     <Card>
-      <CardHeader icon={icon} className="pl-0">
+      <CardHeader icon={icon}>
         <div className="flex items-center justify-between">
           {typeof title === "string" ? (
             <CardTitle className="text-foreground">{title}</CardTitle>
@@ -45,12 +48,12 @@ export function AccordionCard({
           collapsible
           defaultValue={isExpanded ? "item" : undefined}
         >
-          <AccordionItem value="item" className="flex flex-col gap-4">
+          <AccordionItem value="item" className="flex flex-col gap-2">
             <AccordionTrigger className="text-xs text-muted-foreground">
               {trigger}
             </AccordionTrigger>
 
-            <AccordionContent className="text-xs flex flex-col bg-background border border-background rounded-md gap-px">
+            <AccordionContent className={cn("flex flex-col", className)}>
               {children}
             </AccordionContent>
           </AccordionItem>

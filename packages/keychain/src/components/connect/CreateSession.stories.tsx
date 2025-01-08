@@ -19,6 +19,60 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+const messages = [
+  {
+    types: {
+      StarknetDomain: [
+        {
+          name: "name",
+          type: "shortstring",
+        },
+        {
+          name: "version",
+          type: "shortstring",
+        },
+        {
+          name: "chainId",
+          type: "shortstring",
+        },
+        {
+          name: "revision",
+          type: "shortstring",
+        },
+      ],
+      "eternum-Message": [
+        {
+          name: "identity",
+          type: "ContractAddress",
+        },
+        {
+          name: "channel",
+          type: "shortstring",
+        },
+        {
+          name: "content",
+          type: "string",
+        },
+        {
+          name: "timestamp",
+          type: "felt",
+        },
+        {
+          name: "salt",
+          type: "felt",
+        },
+      ],
+    },
+    primaryType: "eternum-Message",
+    domain: {
+      name: "Eternum",
+      version: "1",
+      chainId: "SN_SEPOLIA",
+      revision: "1",
+    },
+  },
+];
+
 export const Default: Story = {
   args: {
     policies: parseSessionPolicies({
@@ -113,59 +167,7 @@ export const Default: Story = {
               ],
             },
         },
-        messages: [
-          {
-            types: {
-              StarknetDomain: [
-                {
-                  name: "name",
-                  type: "shortstring",
-                },
-                {
-                  name: "version",
-                  type: "shortstring",
-                },
-                {
-                  name: "chainId",
-                  type: "shortstring",
-                },
-                {
-                  name: "revision",
-                  type: "shortstring",
-                },
-              ],
-              "eternum-Message": [
-                {
-                  name: "identity",
-                  type: "ContractAddress",
-                },
-                {
-                  name: "channel",
-                  type: "shortstring",
-                },
-                {
-                  name: "content",
-                  type: "string",
-                },
-                {
-                  name: "timestamp",
-                  type: "felt",
-                },
-                {
-                  name: "salt",
-                  type: "felt",
-                },
-              ],
-            },
-            primaryType: "eternum-Message",
-            domain: {
-              name: "Eternum",
-              version: "1",
-              chainId: "SN_SEPOLIA",
-              revision: "1",
-            },
-          },
-        ],
+        messages,
       },
     }),
     onConnect: () => {},
@@ -179,7 +181,7 @@ export const WithPreset: Story = {
   args: {
     policies: parseSessionPolicies({
       verified: true,
-      policies: controllerConfigs["dope-wars"].policies!,
+      policies: { ...controllerConfigs["dope-wars"].policies!, messages },
     }),
     onConnect: () => {},
   },
