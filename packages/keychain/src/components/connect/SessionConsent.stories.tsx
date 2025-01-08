@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { SessionConsent } from "./SessionConsent";
 
 const meta = {
-  tags: ["autodocs"],
+  // tags: ["autodocs"],
   component: SessionConsent,
   parameters: {
     connection: {

@@ -134,9 +134,9 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
       <Content gap={6}>
         <Balance showBalances={["credits"]} />
         <ErrorAlert
-          variant="info"
+          variant=""
           title="WHAT ARE CREDITS"
-          description="Credits can be debited from your account and used to pay for network activity. They are not tokens and cannot be transferred or refunded."
+          description="Credits can be used to play games. They are not tokens and cannot be transferred or refunded."
           isExpanded
         />
       </Content>
@@ -166,8 +166,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
             <Separator className="bg-spacer m-1" />
 
             <Button isLoading={isLoading} onClick={createPaymentIntent}>
-              <CoinsIcon variant="solid" size="sm" />
-              Stripe
+              Purchase
             </Button>
           </>
         )}
