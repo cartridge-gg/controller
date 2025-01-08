@@ -1,5 +1,5 @@
 import type { StorybookConfig } from "@storybook/react-vite";
-import { join, dirname } from "path";
+import { join, dirname, resolve } from "path";
 import { mergeConfig } from "vite";
 
 /**
@@ -31,6 +31,12 @@ const config: StorybookConfig = {
       build: {
         rollupOptions: {
           external: ["vite-plugin-node-polyfills/shims/global"],
+        },
+      },
+      resolve: {
+        alias: {
+          react: resolve(__dirname, "../node_modules/react"),
+          "react-dom": resolve(__dirname, "../node_modules/react-dom"),
         },
       },
     });
