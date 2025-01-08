@@ -8,7 +8,7 @@ import {
 } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Policy } from "@cartridge/controller";
+import { SessionPolicies } from "@cartridge/controller";
 
 const rpc = process.env.NEXT_PUBLIC_RPC_SEPOLIA!;
 
@@ -17,83 +17,82 @@ export const ETH_CONTRACT_ADDRESS =
 export const STRK_CONTRACT_ADDRESS =
   "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
 
-const policies: Policy[] = [
-  {
-    target: ETH_CONTRACT_ADDRESS,
-    method: "approve",
-    description:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-  },
-  {
-    target: ETH_CONTRACT_ADDRESS,
-    method: "transfer",
-  },
-  {
-    target: ETH_CONTRACT_ADDRESS,
-    method: "mint",
-  },
-  {
-    target: ETH_CONTRACT_ADDRESS,
-    method: "burn",
-  },
-  {
-    target: ETH_CONTRACT_ADDRESS,
-    method: "allowance",
-  },
-  {
-    target: STRK_CONTRACT_ADDRESS,
-    method: "approve",
-    description:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-  },
-  {
-    target: STRK_CONTRACT_ADDRESS,
-    method: "transfer",
-  },
-  {
-    target: STRK_CONTRACT_ADDRESS,
-    method: "mint",
-  },
-  {
-    target: STRK_CONTRACT_ADDRESS,
-    method: "burn",
-  },
-  {
-    target: STRK_CONTRACT_ADDRESS,
-    method: "allowance",
-  },
-  {
-    target:
-      "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e",
-    method: "new_game",
-  },
-  {
-    types: {
-      StarknetDomain: [
-        { name: "name", type: "shortstring" },
-        { name: "version", type: "shortstring" },
-        { name: "chainId", type: "shortstring" },
-        { name: "revision", type: "shortstring" },
-      ],
-      Person: [
-        { name: "name", type: "felt" },
-        { name: "wallet", type: "felt" },
-      ],
-      Mail: [
-        { name: "from", type: "Person" },
-        { name: "to", type: "Person" },
-        { name: "contents", type: "felt" },
+const policies: SessionPolicies = {
+  contracts: {
+    [ETH_CONTRACT_ADDRESS]: {
+      methods: [
+        {
+          name: "approve",
+          entrypoint: "approve",
+          description:
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+        },
+        { name: "transfer", entrypoint: "transfer" },
+        { name: "mint", entrypoint: "mint" },
+        { name: "burn", entrypoint: "burn" },
+        { name: "allowance", entrypoint: "allowance" },
       ],
     },
-    primaryType: "Mail",
-    domain: {
-      name: "StarkNet Mail",
-      version: "1",
-      revision: "1",
-      chainId: "SN_SEPOLIA",
+    [STRK_CONTRACT_ADDRESS]: {
+      methods: [
+        {
+          name: "approve",
+          entrypoint: "approve",
+          description:
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+        },
+        { name: "transfer", entrypoint: "transfer" },
+        { name: "mint", entrypoint: "mint" },
+        { name: "burn", entrypoint: "burn" },
+        { name: "allowance", entrypoint: "allowance" },
+      ],
+    },
+    "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e": {
+      methods: [{ name: "new_game", entrypoint: "new_game" }],
     },
   },
-];
+  messages: [
+    {
+      types: {
+        StarknetDomain: [
+          { name: "name", type: "shortstring" },
+          { name: "version", type: "shortstring" },
+          { name: "chainId", type: "shortstring" },
+          { name: "revision", type: "shortstring" },
+        ],
+        Person: [
+          { name: "name", type: "felt" },
+          { name: "wallet", type: "felt" },
+        ],
+        Mail: [
+          { name: "from", type: "Person" },
+          { name: "to", type: "Person" },
+          { name: "contents", type: "felt" },
+        ],
+      },
+      primaryType: "Mail",
+      domain: {
+        name: "StarkNet Mail",
+        version: "1",
+        revision: "1",
+        chainId: "SN_SEPOLIA",
+      },
+    },
+  ],
+};
+
+// Configure RPC provider
+const provider = jsonRpcProvider({
+  rpc: (chain: Chain) => {
+    switch (chain) {
+      case mainnet:
+        return { nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet" };
+      case sepolia:
+      default:
+        return { nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia" };
+    }
+  },
+});
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
@@ -102,17 +101,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       chains={[sepolia]}
       connectors={[controller]}
       explorer={starkscan}
-      provider={jsonRpcProvider({
-        rpc: (chain: Chain) => {
-          switch (chain) {
-            case mainnet:
-              return { nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET };
-            case sepolia:
-            default:
-              return { nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA };
-          }
-        },
-      })}
+      provider={provider}
     >
       {children}
     </StarknetConfig>

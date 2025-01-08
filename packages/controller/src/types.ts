@@ -11,12 +11,7 @@ import {
   TypedData,
 } from "@starknet-io/types-js";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
-import {
-  ColorMode,
-  Policies,
-  Policy,
-  SessionPolicies,
-} from "@cartridge/presets";
+import { ColorMode, Policy, SessionPolicies } from "@cartridge/presets";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -100,7 +95,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
   connect(
-    policies: Policies,
+    policies: SessionPolicies,
     rpcUrl: string,
   ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
@@ -167,7 +162,7 @@ export type ProviderOptions = {
 };
 
 export type KeychainOptions = IFrameOptions & {
-  policies?: Policies;
+  policies?: SessionPolicies;
   /** The URL of keychain */
   url?: string;
   /** The origin of keychain */

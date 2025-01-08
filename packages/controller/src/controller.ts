@@ -113,7 +113,7 @@ export default class ControllerProvider extends BaseProvider {
 
     try {
       let response = await this.keychain.connect(
-        this.options.policies || [],
+        this.options.policies || {},
         this.rpc.toString(),
       );
       if (response.code !== ResponseCodes.SUCCESS) {
