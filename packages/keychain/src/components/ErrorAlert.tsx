@@ -9,8 +9,8 @@ import {
   AccordionTrigger,
   AccordionContent,
   cn,
+  Separator,
 } from "@cartridge/ui-next";
-import { Text, HStack, VStack, Divider } from "@chakra-ui/react";
 import React, {
   ReactElement,
   useCallback,
@@ -269,27 +269,25 @@ export function ControllerErrorAlert({
         description = <StackTraceDisplay stackTrace={parsedError.stack} />;
       } catch {
         title = "Execution error";
-        description = <Text color="inherit">{error.data}</Text>;
+        description = error.data;
       }
       break;
     case ErrorCode.StarknetValidationFailure: {
       const parsedError = parseValidationError(error);
       title = parsedError.summary;
       copyText = parsedError.raw;
-      description = (
-        <VStack align="start" spacing={1} w="full">
-          {Object.entries(parsedError.details).map(([key, value]) => (
-            <Text
-              key={key}
-              wordBreak="break-all"
-              color="inherit"
-              textAlign="left"
-            >
-              {key}: {typeof value === "bigint" ? value.toString() : value}
-            </Text>
-          ))}
-        </VStack>
-      );
+      description =
+        typeof parsedError.details === "string" ? (
+          parsedError.details
+        ) : (
+          <div className="flex flex-col gap-px">
+            {Object.entries(parsedError.details).map(([key, value]) => (
+              <div key={key}>
+                {key}: {typeof value === "bigint" ? value.toString() : value}
+              </div>
+            ))}
+          </div>
+        );
       variant = "warning";
       isExpanded = true;
       break;
@@ -330,27 +328,17 @@ function StackTraceDisplay({
   );
 
   return (
-    <VStack align="start" spacing={2} w="full">
+    <div className="flex flex-col gap-2">
       {stackTrace.map((trace, i, arr) => (
         <React.Fragment key={i}>
-          <VStack align="start" spacing={1} w="full">
+          <div className="flex flex-col gap-1">
             {Object.entries(trace).map(
               ([key, value]) =>
                 value && (
-                  <HStack
-                    key={key}
-                    w="full"
-                    fontSize="xs"
-                    alignItems="flex-start"
-                  >
-                    <Text
-                      color="opacityBlack.700"
-                      textTransform="capitalize"
-                      w="80px"
-                      flexShrink={0}
-                    >
+                  <div key={key} className="flex items-center gap-2">
+                    <div className="w-20 flex-shrink-0 capitalize text-[black]/50">
                       {key}
-                    </Text>
+                    </div>
                     {key === "address" || key === "class" ? (
                       <Link
                         to={getExplorerUrl(key, value as string)}
@@ -362,37 +350,28 @@ function StackTraceDisplay({
                         })}
                       </Link>
                     ) : key === "selector" ? (
-                      <Text
-                        wordBreak="break-all"
-                        color="inherit"
-                        textAlign="left"
-                      >
+                      <div className="break-all text-left">
                         {formatAddress(value as string, {
                           size: "sm",
                         })}
-                      </Text>
+                      </div>
                     ) : (
-                      <VStack align="start" spacing={1} w="full">
-                        {(value as string[]).map((line, index) => (
-                          <Text
-                            key={index}
-                            wordBreak="break-all"
-                            color="inherit"
-                            textAlign="left"
-                          >
+                      <div className="flex flex-col gap-1">
+                        {(value as string[]).map((line, i) => (
+                          <div key={i} className="break-all text-left">
                             {line}
-                          </Text>
+                          </div>
                         ))}
-                      </VStack>
+                      </div>
                     )}
-                  </HStack>
+                  </div>
                 ),
             )}
-          </VStack>
-          {i !== arr.length - 1 && <Divider borderColor="darkGray.100" />}
+          </div>
+          {i !== arr.length - 1 && <Separator />}
         </React.Fragment>
       ))}
-    </VStack>
+    </div>
   );
 }
 

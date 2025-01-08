@@ -1,6 +1,5 @@
-import { Text, VStack, Divider } from "@chakra-ui/react";
 import { ValidationState } from "./useUsernameValidation";
-import { ExternalIcon } from "@cartridge/ui-next";
+import { cn, ExternalIcon } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 
@@ -8,15 +7,9 @@ interface StatusTrayProps {
   username: string;
   validation: ValidationState;
   error?: Error;
-  style?: React.CSSProperties;
 }
 
-export function StatusTray({
-  username,
-  validation,
-  error,
-  style,
-}: StatusTrayProps) {
+export function StatusTray({ username, validation, error }: StatusTrayProps) {
   const isError = validation.status === "invalid" || error;
   const isTimeoutError = error?.message?.includes(
     "The operation either timed out or was not allowed",
@@ -34,42 +27,34 @@ export function StatusTray({
   }, [validation, error, isTimeoutError]);
 
   return (
-    <VStack
-      alignItems="flex-start"
-      bg="solid.secondary"
-      py="8px"
-      marginTop="-11px"
-      paddingTop="12px"
-      backgroundColor={isError ? "red.500" : "solid.secondary"}
-      borderBottomRadius="4px"
-      divider={<Divider borderColor="darkGray.800" opacity="0.1" />}
-      style={style}
+    <div
+      className={cn(
+        "flex flex-col top-[-2px] rounded-b relative z-0 gap-px  overflow-hidden",
+        isError ? "bg-[#E46958]" : "bg-quaternary",
+      )}
     >
-      <Text
-        fontFamily="Inter"
-        fontSize="12px"
-        px="15px"
-        lineHeight="16px"
-        color={isError ? "darkGray.500" : "text.secondary"}
-      >
-        {isError ? (
-          errorMessage
-        ) : (
-          <>
-            {!username
-              ? "Enter a username"
-              : validation.status === "validating"
-              ? "Checking username..."
-              : validation.status === "valid"
-              ? validation.exists
-                ? "Welcome back! Select Login to play"
-                : "Welcome! Let's create a new controller!"
-              : validation.error?.message || "Enter a username"}
-          </>
+      <div
+        className={cn(
+          "text-xs px-4 py-2",
+          isError
+            ? "text-[#2A2F2A]  border-b border-[#161A17] border-opacity-10"
+            : "text-quaternary-foreground",
         )}
-      </Text>
+      >
+        {isError
+          ? errorMessage
+          : !username
+          ? "Enter a username"
+          : validation.status === "validating"
+          ? "Checking username..."
+          : validation.status === "valid"
+          ? validation.exists
+            ? "Welcome back! Select Login to play"
+            : "Welcome! Let's create a new controller!"
+          : validation.error?.message || "Enter a username"}
+      </div>
       {isTimeoutError && (
-        <div className="w-full flex items-center justify-between text-xs font-semibold px-4 text-secondary">
+        <div className="w-full flex items-center justify-between text-xs font-semibold px-4 py-2 text-secondary">
           <div>Having trouble signing up?</div>
           <Link
             className="flex items-center gap-1.5 hover:underline"
@@ -81,6 +66,6 @@ export function StatusTray({
           </Link>
         </div>
       )}
-    </VStack>
+    </div>
   );
 }

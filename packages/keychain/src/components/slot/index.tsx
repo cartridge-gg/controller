@@ -7,6 +7,7 @@ import { useController } from "@/hooks/controller";
 import { useEffect } from "react";
 import {
   Navigate,
+  Outlet,
   useLocation,
   useNavigate,
   useSearchParams,
@@ -21,6 +22,8 @@ export function Slot() {
       return <Navigate to="/success" replace />;
     case "/slot/auth/failure":
       return <Navigate to="/failure" replace />;
+    case "/slot/consent":
+      return <Outlet />;
     default:
       return <Auth />;
   }

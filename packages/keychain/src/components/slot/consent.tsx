@@ -1,6 +1,5 @@
 import Controller from "@/utils/controller";
 import { Button } from "@cartridge/ui-next";
-import { Text } from "@chakra-ui/react";
 import { Container, Footer } from "@/components/layout";
 import { useCallback, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -26,7 +25,7 @@ export function Consent() {
 
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
-      navigate("/slot/auth", { replace: true });
+      navigate("/slot", { replace: true });
     }
   }, [navigate]);
 
@@ -37,10 +36,8 @@ export function Consent() {
       title="Requesting Permission"
       description={
         <>
-          <Text as="span" fontWeight="bold" color="inherit">
-            Slot
-          </Text>{" "}
-          is requesting permission to manage your Cartridge Infrastructure
+          <span className="font-bold">Slot</span> is requesting permission to
+          manage your Cartridge Infrastructure
         </>
       }
     >

@@ -1,4 +1,3 @@
-export * from "./Animation";
 export * from "./DeployController";
 export * from "./transaction/ConfirmTransaction";
 export * from "./SignMessage";

@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Flex, Text } from "@chakra-ui/react";
 import { shortString, Signature, TypedData } from "starknet";
 import { Container, Footer, Content } from "@/components/layout";
-import { TransferDuoIcon, Button } from "@cartridge/ui-next";
+import {
+  TransferDuoIcon,
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardListContent,
+  CardListItem,
+} from "@cartridge/ui-next";
 import { useController } from "@/hooks/controller";
 
 export function SignMessage({
@@ -64,41 +71,44 @@ export function SignMessage({
       title="Signature Request"
       description={`${hostname} is asking you to sign a message`}
     >
-      <Content>
-        <Flex direction="column" align="start" gap="18px" w="full">
-          {(() => {
-            if (!messageData) return <></>;
-            const ptName = messageData.primaryType;
-            const pt = messageData.types[ptName];
-            const values = (typeName: string) => {
-              // @ts-expect-error TODO: fix type
-              const v = messageData.message[typeName];
-              if (typeof v === "object") {
-                return Object.entries(v).map(([key, value]) => {
-                  return (
-                    <Text key={key}>
-                      <Text as="span" opacity="50%" textTransform="capitalize">
-                        {key}:
-                      </Text>{" "}
-                      {value as string}
-                    </Text>
-                  );
-                });
-              } else {
-                return <Text>{v as string}</Text>;
-              }
-            };
+      {messageData && (
+        <Content>
+          <div className="flex flex-col w-full gap-4 text-sm">
+            {messageData.types[messageData.primaryType].map((typ) => (
+              <Card key={typ.name}>
+                <CardHeader>
+                  <CardTitle>{typ.name}</CardTitle>
+                </CardHeader>
 
-            return pt.map((typ) => {
-              return (
-                <DataContainer key={typ.name} title={typ.name}>
-                  {values(typ.name)}
-                </DataContainer>
-              );
-            });
-          })()}
-        </Flex>
-      </Content>
+                <CardListContent>
+                  {(() => {
+                    const v =
+                      messageData.message[
+                        typ.name as keyof typeof messageData.message
+                      ];
+                    return typeof v === "object" ? (
+                      <CardListContent>
+                        {Object.entries(v).map(([key, value]) => (
+                          <CardListItem className="flex flex-row justify-start gap-2 ">
+                            <div className="capitalize text-muted-foreground">
+                              {key}:
+                            </div>
+                            <div className="overflow-x-auto">
+                              {value as string}
+                            </div>
+                          </CardListItem>
+                        ))}
+                      </CardListContent>
+                    ) : (
+                      <CardListItem>{v as string}</CardListItem>
+                    );
+                  })()}
+                </CardListContent>
+              </Card>
+            ))}
+          </div>
+        </Content>
+      )}
 
       <Footer>
         <Button onClick={onConfirm}>sign</Button>
@@ -108,46 +118,5 @@ export function SignMessage({
         </Button>
       </Footer>
     </Container>
-  );
-}
-
-function DataContainer({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Flex
-      direction="column"
-      align="start"
-      w="full"
-      bg="solid.primary"
-      borderRadius="base"
-      css={{
-        "> p": {
-          padding: "12px",
-          fontSize: "13px",
-          lineHeight: "16px",
-        },
-        "> p:first-of-type": {
-          fontSize: "10px",
-          fontWeight: "700",
-          letterSpacing: "0.05em",
-          lineHeight: "18px",
-          textTransform: "uppercase",
-          color: "var(--chakra-colors-text-secondaryAccent)",
-        },
-        "> p:not(p:last-of-type)": {
-          borderBottom: "1px solid var(--chakra-colors-solid-bg)",
-        },
-      }}
-    >
-      <>
-        <Text>{title}</Text>
-        {children}
-      </>
-    </Flex>
   );
 }

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ControllerErrorAlert as CtrlErrAlert } from "./ErrorAlert";
-import { VStack } from "@chakra-ui/react";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { starknetTransactionExecutionErrorTestCases } from "@/utils/errors";
 
@@ -17,7 +16,7 @@ export const All: Story = {};
 
 function ControllerErrorAlert() {
   return (
-    <VStack>
+    <div className="flex flex-col gap-4">
       <CtrlErrAlert
         error={{ code: ErrorCode.SignError, message: "blah blah blah..." }}
       />
@@ -37,6 +36,28 @@ function ControllerErrorAlert() {
           }}
         />
       ))}
-    </VStack>
+
+      <CtrlErrAlert
+        error={{
+          code: ErrorCode.StarknetTransactionExecutionError,
+          data: "Invalid json format",
+          message: "",
+        }}
+      />
+      <CtrlErrAlert
+        error={{
+          code: ErrorCode.StarknetValidationFailure,
+          data: "Validation failed",
+          message: "",
+        }}
+      />
+      <CtrlErrAlert
+        error={{
+          code: ErrorCode.StarknetValidationFailure,
+          data: "Max fee (200) exceeds balance (100)",
+          message: "",
+        }}
+      />
+    </div>
   );
 }
