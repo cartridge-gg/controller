@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Container, Footer, Content } from "@/components/layout";
 import { Button } from "@cartridge/ui-next";
 import { Box } from "@chakra-ui/react";
@@ -26,6 +26,7 @@ interface CreateControllerViewProps {
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
   onSubmit: () => void;
+  isInAppBrowser?: boolean;
 }
 
 export function CreateControllerView({
@@ -34,6 +35,7 @@ export function CreateControllerView({
   validation,
   isLoading,
   error,
+  isInAppBrowser,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -88,6 +90,17 @@ export function CreateControllerView({
         </Content>
 
         <Footer showCatridgeLogo>
+          {isInAppBrowser && (
+            <div className="mb-5">
+              <ErrorAlert
+                title="Browser not supported"
+                description="Please open this page in your device's native browser (Safari/Chrome) to continue."
+                variant="warning"
+                isExpanded
+              />
+            </div>
+          )}
+
           {!theme.verified && (
             <div className="mb-5">
               <ErrorAlert
@@ -112,6 +125,18 @@ export function CreateControllerView({
       </form>
     </Container>
   );
+}
+
+function getNativeBrowserUrl() {
+  // iOS: Open in Safari
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    return `x-safari-${window.location.href}`;
+  }
+  // Android: Open in Chrome
+  if (/Android/.test(navigator.userAgent)) {
+    return `intent:${window.location.href}#Intent;scheme=https;package=com.android.chrome;end`;
+  }
+  return null;
 }
 
 export function CreateController({
@@ -142,6 +167,33 @@ export function CreateController({
     isSlot,
     loginMode,
   });
+
+  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    // Check for common in-app browser signatures
+    const isInApp =
+      ua.includes("FBAN") || // Facebook
+      ua.includes("FBAV") || // Facebook
+      ua.includes("Twitter") || // Twitter
+      ua.includes("Instagram") || // Instagram
+      ua.includes("Line") || // Line
+      /\bFB[\w_]+\//.test(ua) || // Facebook
+      /\bInstagram\b/.test(ua); // Instagram
+
+    setIsInAppBrowser(isInApp);
+
+    if (isInApp) {
+      const nativeBrowserUrl = getNativeBrowserUrl();
+      if (nativeBrowserUrl) {
+        // Try to open in native browser
+        window.location.href = nativeBrowserUrl;
+      }
+
+      setIsInAppBrowser(true);
+    }
+  }, []);
 
   const handleUsernameChange = (value: string) => {
     if (!hasLoggedChange.current) {
@@ -182,6 +234,7 @@ export function CreateController({
       validation={validation}
       isLoading={isLoading}
       error={error}
+      isInAppBrowser={isInAppBrowser}
       onUsernameChange={handleUsernameChange}
       onUsernameFocus={handleUsernameFocus}
       onUsernameClear={handleUsernameClear}
