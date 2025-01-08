@@ -99,6 +99,7 @@ impl Controller {
             .storage
             .set_controller(
                 app_id.as_str(),
+                &chain_id,
                 address,
                 ControllerMetadata::from(&controller),
             )

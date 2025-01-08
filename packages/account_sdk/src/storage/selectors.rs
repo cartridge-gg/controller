@@ -7,8 +7,8 @@ impl Selectors {
         format!("@cartridge/{}/active", app_id)
     }
 
-    pub fn account(address: &Felt) -> String {
-        format!("@cartridge/account/0x{:x}", address)
+    pub fn account(address: &Felt, chain_id: &Felt) -> String {
+        format!("@cartridge/account/0x{:x}/0x{:x}", address, chain_id)
     }
 
     pub fn deployment(address: &Felt, chain_id: &Felt) -> String {
