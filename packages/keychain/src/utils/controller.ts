@@ -91,6 +91,10 @@ export default class Controller extends Account {
     return this.cartridgeMeta.chainId();
   }
 
+  async switchChain(rpcUrl: string): Promise<void> {
+    await this.cartridge.switchChain(rpcUrl);
+  }
+
   async disconnect() {
     await this.cartridge.disconnect();
     delete window.controller;
