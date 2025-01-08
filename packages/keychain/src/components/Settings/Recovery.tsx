@@ -1,5 +1,4 @@
 import { AlertIcon, Button, Input } from "@cartridge/ui-next";
-import { VStack, Text, HStack } from "@chakra-ui/react";
 import { Container, Content, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
@@ -38,31 +37,29 @@ export function Recovery({ onBack }: { onBack: () => void }) {
   }, [controller, externalOwnerAddress, context, setContext]);
 
   return (
-    <Container
-      variant="expanded"
-      title="Recovery Account(s)"
-      onBack={() => onBack()}
-    >
+    <Container variant="expanded" title="Recovery Account(s)" onBack={onBack}>
       <Content>
-        <VStack w="full" h="full" justifyContent="space-between" gap={6}>
-          <Text color="text.secondary" fontSize="sm" align="center">
+        {/* TODO: Get rid of this div once Content is updated with TW */}
+        <div className="flex flex-col gap-4">
+          <div className="text-sm text-muted-foreground text-center">
             Your controller can be owned by an existing Starknet wallet
-          </Text>
-          <VStack w="full">
+          </div>
+          <div className="flex flex-col gap-2">
             <Input
               placeholder="0x..."
               value={externalOwnerAddress}
               onChange={(e) => setExternalOwnerAddress(e.target.value)}
             />
             {!isValid && externalOwnerAddress !== "" && (
-              <HStack w="full" color="alert.foreground">
-                <AlertIcon />{" "}
-                <Text color="alert.foreground">Invalid address!</Text>
-              </HStack>
+              <div className="flex items-center gap-2 text-error-icon">
+                <AlertIcon size="sm" />
+                <div className="text-sm">Invalid address!</div>
+              </div>
             )}
-          </VStack>
-        </VStack>
+          </div>
+        </div>
       </Content>
+
       <Footer>
         <Button onClick={onSetRecovery} disabled={!isValid}>
           Add Recovery Account

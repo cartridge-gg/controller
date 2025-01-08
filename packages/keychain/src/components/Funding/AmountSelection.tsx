@@ -1,5 +1,10 @@
-import { DollarIcon, Button, cn, useDisclosure } from "@cartridge/ui-next";
-import { HStack, Input, Spacer, Text, VStack } from "@chakra-ui/react";
+import {
+  DollarIcon,
+  Button,
+  cn,
+  useDisclosure,
+  Input,
+} from "@cartridge/ui-next";
 import { useState } from "react";
 
 export const DEFAULT_AMOUNT = 5;
@@ -24,18 +29,12 @@ export function AmountSelection({
   const [custom, setCustom] = useState<boolean>(false);
 
   return (
-    <HStack>
-      <Text
-        textTransform="uppercase"
-        fontSize="xs"
-        fontWeight="semibold"
-        color="text.secondary"
-      >
+    <div className="flex items-center justify-between">
+      <div className="text-xs font-semibold uppercase text-quaternary-foreground">
         Amount
-      </Text>
-      <Spacer />
-      <VStack>
-        <HStack spacing="8px">
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
           {AMOUNTS.map((value) => (
             <Button
               key={value}
@@ -72,7 +71,7 @@ export function AmountSelection({
               Custom
             </Button>
           )}
-        </HStack>
+        </div>
         {isOpen && (
           <div className="flex items-center w-full relative">
             <Input
@@ -90,7 +89,7 @@ export function AmountSelection({
             <DollarIcon size="xs" className="absolute top-3 left-3" />
           </div>
         )}
-      </VStack>
-    </HStack>
+      </div>
+    </div>
   );
 }

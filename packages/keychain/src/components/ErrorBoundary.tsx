@@ -1,7 +1,6 @@
 import React, { PropsWithChildren, useEffect } from "react";
 import { Container, Content, Footer } from "./layout";
 import { AlertIcon, ExternalIcon, Button } from "@cartridge/ui-next";
-import { HStack, Text } from "@chakra-ui/react";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { usePostHog } from "posthog-js/react";
@@ -48,33 +47,12 @@ export function ErrorPage({ error }: { error: Error }) {
       icon={<AlertIcon size="lg" />}
     >
       <Content gap={4}>
-        <HStack
-          bg="solid.primary"
-          borderColor="solid.secondary"
-          borderWidth={1}
-          w="full"
-          px={4}
-          py={6}
-          borderRadius="base"
-        >
-          <Text w="full" fontSize="sm">
-            {error.message}
-          </Text>
-        </HStack>
+        <div className="flex w-full px-4 py-6 bg-secondary border border-quaternary rounded">
+          <p className="w-full text-sm">{error.message}</p>
+        </div>
 
-        <HStack
-          bg="solid.primary"
-          borderColor="solid.secondary"
-          borderWidth={1}
-          w="full"
-          px={4}
-          py={6}
-          borderRadius="base"
-          justifyContent="space-between"
-        >
-          <Text fontSize="sm" fontWeight={600}>
-            Get help
-          </Text>
+        <div className="flex items-center justify-between w-full px-4 py-6 bg-secondary border border-quaternary rounded">
+          <p className="text-sm font-semibold">Get help</p>
 
           <Link
             to={CARTRIDGE_DISCORD_LINK}
@@ -84,7 +62,7 @@ export function ErrorPage({ error }: { error: Error }) {
             <div>Cartridge Discord</div>
             <ExternalIcon size="sm" />
           </Link>
-        </HStack>
+        </div>
       </Content>
 
       <Footer>

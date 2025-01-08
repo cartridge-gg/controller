@@ -1,5 +1,4 @@
 import { Container, Content, Footer } from "@/components/layout";
-import { HStack, Text, VStack, Divider } from "@chakra-ui/react";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
@@ -26,6 +25,7 @@ import {
   StarknetColorIcon,
   Button,
   CopyAddress,
+  Separator,
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
@@ -165,7 +165,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
           lockSelection={isLoading}
           onChange={onAmountChagned}
         />
-        <Divider my="5px" borderColor="darkGray.900" />
+        <Separator className="bg-spacer m-1" />
         {error && (
           <ErrorAlert
             title="Account deployment error"
@@ -181,65 +181,53 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
               }
 
               return (
-                <>
-                  <VStack spacing="20px">
-                    <HStack w="full">
-                      {connectors
-                        .filter((c) => ["argentX", "braavos"].includes(c.id))
-                        .map((c) => (
-                          <Button
-                            key={c.id}
-                            onClick={() => onConnect(c)}
-                            className="flex-1"
-                          >
-                            {(() => {
-                              switch (c.id) {
-                                case "argentX":
-                                  return <ArgentIcon size="sm" />;
-                                case "braavos":
-                                  return <BraavosIcon size="sm" />;
-                                default:
-                                  return null;
-                              }
-                            })()}
-                            {c.name}
-                          </Button>
-                        ))}
-                    </HStack>
-                    {connectors.length !== 0 && (
-                      <Text
-                        color="text.secondary"
-                        fontSize="11"
-                        fontWeight="bold"
-                      >
-                        OR
-                      </Text>
-                    )}
-                    <Button
-                      className="w-full"
-                      variant="secondary"
-                      onClick={onCopy}
-                    >
-                      <CopyIcon size="sm" /> copy address
-                    </Button>
-                    <HStack>
-                      <Text color="text.secondary" fontSize="14px">
-                        and send funds to it on
-                      </Text>
-                      <HStack
-                        border="1px"
-                        borderRadius="5px"
-                        p="5px"
-                        borderColor="darkGray.700"
-                      >
-                        <StarknetColorIcon />{" "}
-                        <Text fontSize="12px" fontWeight="bold">
-                          STARKNET MAINNET
-                        </Text>
-                      </HStack>
-                    </HStack>
-                  </VStack>
-                </>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-full flex gap-4">
+                    {connectors
+                      .filter((c) => ["argentX", "braavos"].includes(c.id))
+                      .map((c) => (
+                        <Button
+                          key={c.id}
+                          onClick={() => onConnect(c)}
+                          className="flex-1"
+                        >
+                          {(() => {
+                            switch (c.id) {
+                              case "argentX":
+                                return <ArgentIcon size="sm" />;
+                              case "braavos":
+                                return <BraavosIcon size="sm" />;
+                              default:
+                                return null;
+                            }
+                          })()}
+                          {c.name}
+                        </Button>
+                      ))}
+                  </div>
+
+                  {connectors.length !== 0 && (
+                    <div className="text-xs text-quaternary-foreground font-bold">
+                      OR
+                    </div>
+                  )}
+                  <Button
+                    className="w-full"
+                    variant="secondary"
+                    onClick={onCopy}
+                  >
+                    <CopyIcon size="sm" /> copy address
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm text-quaternary-foreground">
+                      and send funds to it on
+                    </div>
+                    <div className="flex items-center gap-2 border border-secondary rounded-md p-1">
+                      <StarknetColorIcon />{" "}
+                      <div className="text-sm font-bold">STARKNET MAINNET</div>
+                    </div>
+                  </div>
+                </div>
               );
             case "fund":
               return (

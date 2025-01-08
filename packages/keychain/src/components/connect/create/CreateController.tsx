@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Container, Footer, Content } from "@/components/layout";
-import { Button } from "@cartridge/ui-next";
-import { Box } from "@chakra-ui/react";
+import { Button, cn } from "@cartridge/ui-next";
 import { useControllerTheme } from "@/hooks/theme";
 import { usePostHog } from "posthog-js/react";
 import { useDebounce } from "@/hooks/debounce";
@@ -59,13 +58,12 @@ export function CreateControllerView({
           if (e.key === "Enter") e.preventDefault();
         }}
       >
-        <Content mb="2rem">
-          <Box
-            border={
-              validation.status === "invalid" || error ? "1px solid" : "0px"
-            }
-            borderColor="red.500"
-            borderRadius="base"
+        <Content mb="2rem" gap={0}>
+          <div
+            className={cn(
+              "border-[#E46958] rounded",
+              validation.status === "invalid" || error ? "border" : undefined,
+            )}
           >
             <Input
               {...usernameField}
@@ -80,13 +78,12 @@ export function CreateControllerView({
               onClear={onUsernameClear}
               style={{ position: "relative", zIndex: 1 }}
             />
-          </Box>
+          </div>
 
           <StatusTray
             username={usernameField.value}
             validation={validation}
             error={error}
-            style={{ position: "relative", zIndex: 0 }}
           />
         </Content>
 

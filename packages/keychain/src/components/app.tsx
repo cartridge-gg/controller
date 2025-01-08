@@ -17,8 +17,9 @@ export function App() {
           <Route path="/" element={<Home />} />
           <Route path="authenticate" element={<Authenticate />} />
           <Route path="session" element={<Session />} />
-          <Route path="slot" element={<Slot />} />
-          <Route path="slot/consent" element={<Consent />} />
+          <Route path="slot" element={<Slot />}>
+            <Route path="consent" element={<Consent />} />
+          </Route>
           <Route path="success" element={<Success />} />
           <Route path="failure" element={<Failure />} />
           <Route path="pending" element={<Pending />} />

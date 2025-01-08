@@ -1,4 +1,3 @@
-import { HStack, Text } from "@chakra-ui/react";
 import { VerifiedIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { useMemo } from "react";
@@ -20,18 +19,16 @@ export function SessionConsent({
   switch (variant) {
     case "slot":
       return (
-        <HStack align="flex-start" color="text.secondary" fontSize="xs">
-          <Text color="text.secondary" fontSize="xs" fontWeight="bold">
-            Authorize Slot to manage your Cartridge infrastructure
-          </Text>
-        </HStack>
+        <div className="text-xs text-muted-foreground font-semibold">
+          Authorize Slot to manage your Cartridge infrastructure
+        </div>
       );
     case "signup":
       return null;
     default:
     case "default":
       return hostname && origin ? (
-        <HStack color="text.secondary" fontSize="xs">
+        <div className="flex items-center gap-2">
           {isVerified && (
             <Link
               to="https://github.com/cartridge-gg/controller/blob/main/packages/controller/src/presets.ts"
@@ -40,18 +37,15 @@ export function SessionConsent({
               <VerifiedIcon size="lg" className="text-accent-foreground" />
             </Link>
           )}
-          <Text color="text.secondary" fontSize="xs" fontWeight="bold">
+          <div className="text-xs text-muted-foreground font-semibold">
             Authorize{" "}
-            {/* <LockIcon className="text-accent-foreground mr-0.5" /> */}
-            <Text as="span" color="text.secondaryAccent" fontWeight="bold">
-              {origin}
-            </Text>{" "}
+            <span className="text-accent-foreground font-bold">{origin}</span>{" "}
             and allow the game to{" "}
-            <Text as="span" color="text.secondaryAccent" fontWeight="bold">
+            <span className="text-accent-foreground font-bold">
               perform actions on your behalf
-            </Text>
-          </Text>
-        </HStack>
+            </span>
+          </div>
+        </div>
       ) : null;
   }
 }
