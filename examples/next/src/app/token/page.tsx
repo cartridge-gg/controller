@@ -78,7 +78,7 @@ function MintToken() {
     },
     [setAmount],
   );
-
+  console.log("test");
   const onMint = useCallback(() => {
     reset();
     if (account && !amountError) {
