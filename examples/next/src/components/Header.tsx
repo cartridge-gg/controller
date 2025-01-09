@@ -9,17 +9,11 @@ import {
   useNetwork,
   useSwitchChain,
 } from "@starknet-react/core";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { constants, num } from "starknet";
 import { Chain } from "@starknet-react/chains";
 
-const Header = ({
-  showBack,
-  lockChain,
-}: {
-  showBack?: boolean;
-  lockChain?: boolean;
-}) => {
+const Header = () => {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { chain, chains } = useNetwork();
@@ -32,28 +26,41 @@ const Header = ({
       chainId: constants.StarknetChainId.SN_SEPOLIA,
     },
   });
+  const networkRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        networkRef.current &&
+        !networkRef.current.contains(event.target as Node)
+      ) {
+        setNetworkOpen(false);
+      }
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="w-full absolute top-0 left-0 p-5 flex items-center">
-      {showBack && (
-        <button
-          className="absolute top-5 left-5 w-6 h-6 cursor-pointer"
-          onClick={() => {
-            window.history.back();
-          }}
-        >
-          ←
-        </button>
-      )}
       <div className="flex-1" />
       {status === "connected" && (
-        <div className="relative">
+        <div className="relative" ref={networkRef}>
           <Button
             onClick={() => {
               setNetworkOpen(!networkOpen);
               setProfileOpen(false);
             }}
-            disabled={lockChain}
             className="flex items-center gap-2 min-w-[120px]"
           >
             {chain.network}
@@ -66,7 +73,7 @@ const Header = ({
             </span>
           </Button>
           {networkOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-gray-700 shadow-lg rounded-md min-w-[160px] py-1 z-10">
+            <div className="absolute right-0 top-full mt-1 bg-background shadow-lg rounded-md min-w-[160px] py-1 z-10 border border-gray-600">
               {chains.map((c: Chain) => (
                 <button
                   key={c.id}
@@ -84,7 +91,7 @@ const Header = ({
         </div>
       )}
       {address ? (
-        <div className="relative ml-2">
+        <div className="relative ml-2" ref={profileRef}>
           <Button
             onClick={() => {
               setProfileOpen(!profileOpen);
@@ -102,7 +109,7 @@ const Header = ({
             </span>
           </Button>
           {profileOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-gray-700 shadow-lg rounded-md min-w-[160px] py-1 z-10">
+            <div className="absolute right-0 top-full mt-1 bg-background shadow-lg rounded-md min-w-[160px] py-1 z-10 border border-gray-600">
               <button
                 className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600"
                 onClick={() => controllerConnector.controller.openProfile()}
