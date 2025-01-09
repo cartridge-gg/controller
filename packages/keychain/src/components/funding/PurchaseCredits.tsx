@@ -1,7 +1,12 @@
 import { Container, Content, Footer } from "@/components/layout";
-import { Divider } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
-import { CheckIcon, CoinsIcon, Button, CopyAddress } from "@cartridge/ui-next";
+import {
+  CheckIcon,
+  CoinsIcon,
+  Button,
+  CopyAddress,
+  Separator,
+} from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
 import { ErrorAlert } from "@/components/ErrorAlert";
@@ -129,9 +134,9 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
       <Content gap={6}>
         <Balance showBalances={["credits"]} />
         <ErrorAlert
-          variant="info"
+          variant=""
           title="WHAT ARE CREDITS"
-          description="Credits can be debited from your account and used to pay for network activity. They are not tokens and cannot be transferred or refunded."
+          description="Credits can be used to play games. They are not tokens and cannot be transferred or refunded."
           isExpanded
         />
       </Content>
@@ -158,11 +163,10 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
               onChange={onAmountChanged}
               lockSelection={isLoading}
             />
-            <Divider my="5px" borderColor="darkGray.900" />
+            <Separator className="bg-spacer m-1" />
 
             <Button isLoading={isLoading} onClick={createPaymentIntent}>
-              <CoinsIcon variant="solid" size="sm" />
-              Stripe
+              Purchase
             </Button>
           </>
         )}

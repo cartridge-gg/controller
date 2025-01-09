@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { ConfirmTransaction } from "./ConfirmTransaction";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
+import { VerifiableControllerTheme } from "@/context/theme";
 
 const meta = {
   component: ConfirmTransaction,
@@ -48,3 +49,27 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const WithTheme: Story = {
+  parameters: {
+    preset: "eternum",
+  },
+  args: {
+    theme: {
+      name: "Eternum",
+    } as VerifiableControllerTheme,
+    usernameField: {
+      value: "",
+      error: undefined,
+    },
+    validation: {
+      status: "valid",
+      exists: false,
+    },
+    isLoading: false,
+    onUsernameChange: () => {},
+    onUsernameFocus: () => {},
+    onUsernameClear: () => {},
+    onSubmit: () => {},
+  },
+};

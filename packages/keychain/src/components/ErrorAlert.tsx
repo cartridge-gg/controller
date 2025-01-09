@@ -1,25 +1,23 @@
 import {
-  WedgeIcon,
   CopyIcon,
   CheckIcon,
   ErrorAlertIcon,
   ErrorAlertIconProps,
   Button,
-} from "@cartridge/ui-next";
-import {
-  Text,
   Accordion,
   AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  Spacer,
-  HStack,
-  Box,
-  VStack,
-  Divider,
-} from "@chakra-ui/react";
-import { motion } from "framer-motion";
-import React, { ReactElement, useCallback, useEffect, useState } from "react";
+  AccordionTrigger,
+  AccordionContent,
+  cn,
+  Separator,
+} from "@cartridge/ui-next";
+import React, {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { ControllerError } from "@/utils/connection";
 import { parseExecutionError, parseValidationError } from "@/utils/errors";
@@ -52,88 +50,67 @@ export function ErrorAlert({
     }, 3000);
   }, [copied]);
 
+  const collapsible = !isExpanded || allowToggle;
+  const styles = useMemo(() => {
+    switch (variant) {
+      case "info":
+        return { bg: "bg-info", text: "text-info-foreground" };
+      case "warning":
+        return { bg: "bg-warning", text: "text-warning-foreground" };
+      case "error":
+        return { bg: "bg-error", text: "text-error-foreground" };
+      default:
+        return { bg: "bg-secondary", text: "text-secondary-foreground" };
+    }
+  }, [variant]);
+
   return (
     <Accordion
-      w="full"
-      allowToggle={!isExpanded || allowToggle}
-      defaultIndex={isExpanded ? [0] : undefined}
-      variant={variant}
-      color="solid.bg"
-      fontSize="sm"
+      type="single"
+      collapsible={collapsible}
+      defaultValue={isExpanded ? "item-1" : undefined}
     >
-      <AccordionItem position="relative" border="none">
-        {({ isExpanded: itemExpanded }) => (
-          <>
-            <AccordionButton
-              disabled={!description || (isExpanded && !allowToggle)}
-            >
-              <HStack alignItems="flex-start">
-                {variant && (
-                  <ErrorAlertIcon
-                    variant={variant as ErrorAlertIconProps["variant"]}
-                    size="xs"
-                  />
-                )}
-                <Text
-                  as="b"
-                  fontSize="2xs"
-                  color="inherit"
-                  textTransform="uppercase"
-                  align="left"
-                >
-                  {title}
-                </Text>
-              </HStack>
-
-              <Spacer />
-
-              {description && !isExpanded && (
-                <HStack>
-                  <Box
-                    as={motion.div}
-                    animate={{
-                      rotate: itemExpanded ? 180 : 0,
-                    }}
-                  >
-                    <WedgeIcon size="sm" variant="down" />
-                  </Box>
-                </HStack>
-              )}
-            </AccordionButton>
-
-            {description && (
-              <AccordionPanel w="full" position="relative">
-                {copyText && (
-                  <Button
-                    size="icon"
-                    variant="icon"
-                    className="absolute right-3 w-5 h-5 bg-[rgba(0,0,0,0.1)]"
-                    onClick={() => {
-                      setCopied(true);
-                      navigator.clipboard.writeText(copyText);
-                    }}
-                  >
-                    {copied ? (
-                      <CheckIcon size="xs" className="text-[black]" />
-                    ) : (
-                      <CopyIcon size="xs" className="text-[black]" />
-                    )}
-                  </Button>
-                )}
-                <Box
-                  h="full"
-                  maxH={200}
-                  p={3}
-                  pt={0}
-                  overflowY="auto"
-                  pr={copyText ? 10 : undefined}
-                >
-                  {description}
-                </Box>
-              </AccordionPanel>
-            )}
-          </>
+      <AccordionItem
+        value="item-1"
+        className={cn(
+          "flex flex-col rounded p-3 gap-3",
+          styles.bg,
+          styles.text,
         )}
+      >
+        <AccordionTrigger hideIcon={!collapsible} className="items-start gap-1">
+          {variant && variant !== "default" && (
+            <div className="w-5">
+              <ErrorAlertIcon
+                variant={variant as ErrorAlertIconProps["variant"]}
+              />
+            </div>
+          )}
+          <div className={cn("text-2xs font-bold uppercase", styles.text)}>
+            {title}
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent>
+          {copyText && (
+            <Button
+              size="icon"
+              variant="icon"
+              className="absolute right-5 w-5 h-5 bg-[rgba(0,0,0,0.1)]"
+              onClick={() => {
+                setCopied(true);
+                navigator.clipboard.writeText(copyText);
+              }}
+            >
+              {copied ? (
+                <CheckIcon size="xs" className="text-[black]" />
+              ) : (
+                <CopyIcon size="xs" className="text-[black]" />
+              )}
+            </Button>
+          )}
+          {description && <div className="text-xs mr-7">{description}</div>}
+        </AccordionContent>
       </AccordionItem>
     </Accordion>
   );
@@ -292,27 +269,25 @@ export function ControllerErrorAlert({
         description = <StackTraceDisplay stackTrace={parsedError.stack} />;
       } catch {
         title = "Execution error";
-        description = <Text color="inherit">{error.data}</Text>;
+        description = error.data;
       }
       break;
     case ErrorCode.StarknetValidationFailure: {
       const parsedError = parseValidationError(error);
       title = parsedError.summary;
       copyText = parsedError.raw;
-      description = (
-        <VStack align="start" spacing={1} w="full">
-          {Object.entries(parsedError.details).map(([key, value]) => (
-            <Text
-              key={key}
-              wordBreak="break-all"
-              color="inherit"
-              textAlign="left"
-            >
-              {key}: {typeof value === "bigint" ? value.toString() : value}
-            </Text>
-          ))}
-        </VStack>
-      );
+      description =
+        typeof parsedError.details === "string" ? (
+          parsedError.details
+        ) : (
+          <div className="flex flex-col gap-px">
+            {Object.entries(parsedError.details).map(([key, value]) => (
+              <div key={key}>
+                {key}: {typeof value === "bigint" ? value.toString() : value}
+              </div>
+            ))}
+          </div>
+        );
       variant = "warning";
       isExpanded = true;
       break;
@@ -353,27 +328,17 @@ function StackTraceDisplay({
   );
 
   return (
-    <VStack align="start" spacing={2} w="full">
+    <div className="flex flex-col gap-2">
       {stackTrace.map((trace, i, arr) => (
         <React.Fragment key={i}>
-          <VStack align="start" spacing={1} w="full">
+          <div className="flex flex-col gap-1">
             {Object.entries(trace).map(
               ([key, value]) =>
                 value && (
-                  <HStack
-                    key={key}
-                    w="full"
-                    fontSize="xs"
-                    alignItems="flex-start"
-                  >
-                    <Text
-                      color="opacityBlack.700"
-                      textTransform="capitalize"
-                      w="80px"
-                      flexShrink={0}
-                    >
+                  <div key={key} className="flex items-center gap-2">
+                    <div className="w-20 flex-shrink-0 capitalize text-[black]/50">
                       {key}
-                    </Text>
+                    </div>
                     {key === "address" || key === "class" ? (
                       <Link
                         to={getExplorerUrl(key, value as string)}
@@ -385,37 +350,28 @@ function StackTraceDisplay({
                         })}
                       </Link>
                     ) : key === "selector" ? (
-                      <Text
-                        wordBreak="break-all"
-                        color="inherit"
-                        textAlign="left"
-                      >
+                      <div className="break-all text-left">
                         {formatAddress(value as string, {
                           size: "sm",
                         })}
-                      </Text>
+                      </div>
                     ) : (
-                      <VStack align="start" spacing={1} w="full">
-                        {(value as string[]).map((line, index) => (
-                          <Text
-                            key={index}
-                            wordBreak="break-all"
-                            color="inherit"
-                            textAlign="left"
-                          >
+                      <div className="flex flex-col gap-1">
+                        {(value as string[]).map((line, i) => (
+                          <div key={i} className="break-all text-left">
                             {line}
-                          </Text>
+                          </div>
                         ))}
-                      </VStack>
+                      </div>
                     )}
-                  </HStack>
+                  </div>
                 ),
             )}
-          </VStack>
-          {i !== arr.length - 1 && <Divider borderColor="darkGray.100" />}
+          </div>
+          {i !== arr.length - 1 && <Separator />}
         </React.Fragment>
       ))}
-    </VStack>
+    </div>
   );
 }
 

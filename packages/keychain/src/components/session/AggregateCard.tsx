@@ -1,22 +1,13 @@
-import React, { Fragment, useMemo } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@cartridge/ui-next";
+import React from "react";
 import { formatAddress } from "@cartridge/utils";
-import { Divider, HStack, Spacer, Stack, Text, VStack } from "@chakra-ui/react";
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
 import { Method } from "@cartridge/presets";
 import { useChainId } from "@/hooks/connection";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import { Link } from "react-router-dom";
+import { AccordionCard } from "./AccordionCard";
+import { MessageContent } from "./MessageCard";
 
 interface AggregateCardProps {
   title: string;
@@ -28,173 +19,76 @@ export function AggregateCard({ title, icon, policies }: AggregateCardProps) {
   const chainId = useChainId();
   const explorer = useExplorer();
 
-  const totalMethods = useMemo(() => {
-    return Object.values(policies.contracts || {}).reduce((acc, contract) => {
+  const totalMethods = Object.values(policies.contracts || {}).reduce(
+    (acc, contract) => {
       return acc + (contract.methods?.length || 0);
-    }, 0);
-  }, [policies.contracts]);
+    },
+    0,
+  );
 
   const totalMessages = policies.messages?.length ?? 0;
+  const count = totalMethods + totalMessages;
 
   return (
-    <Card>
-      <CardHeader icon={icon}>
-        <CardTitle className="text-foreground">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Accordion type="multiple">
-          <AccordionItem value="contracts">
-            <AccordionTrigger>
-              <Text color="text.secondary" fontSize="xs">
-                Approve{" "}
-                <Text as="span" color="text.secondaryAccent" fontWeight="bold">
-                  {totalMethods} methods
-                </Text>{" "}
-                {totalMessages > 0 && (
-                  <>
-                    and{" "}
-                    <Text
-                      as="span"
-                      color="text.secondaryAccent"
-                      fontWeight="bold"
-                    >
-                      {totalMessages} messages
-                    </Text>
-                  </>
-                )}
-              </Text>
-            </AccordionTrigger>
-            <AccordionContent>
-              <Card>
-                {Object.entries(policies.contracts || {}).map(
-                  ([address, { name, methods }]) => (
-                    <Fragment key={address}>
-                      <HStack py={4}>
-                        <Text color="text.primary" fontWeight="bold">
-                          {name}
-                        </Text>
-                        <Spacer />
-                        <Link
-                          to={
-                            chainId === constants.StarknetChainId.SN_MAIN ||
-                            chainId === constants.StarknetChainId.SN_SEPOLIA
-                              ? explorer.contract(address)
-                              : `#` // TODO: Add explorer for worlds.dev
-                          }
-                          target="_blank"
-                          className="text-muted-foreground hover:underline"
-                        >
-                          {formatAddress(address, { first: 5, last: 5 })}
-                        </Link>
-                      </HStack>
-                      <Stack
-                        border="1px solid"
-                        spacing={0}
-                        borderColor="darkGray.800"
-                        borderRadius="md"
-                        divider={<Divider borderColor="solid.bg" />}
-                      >
-                        {methods.map((method: Method) => (
-                          <VStack
-                            key={method.name}
-                            p={3}
-                            gap={3}
-                            align="flex-start"
-                          >
-                            <HStack w="full">
-                              <Text
-                                fontSize="xs"
-                                color="text.primary"
-                                fontWeight="bold"
-                              >
-                                {method.name}
-                              </Text>
-                              <Spacer />
-                              <Text
-                                fontSize="xs"
-                                color="text.secondaryAccent"
-                                fontWeight="bold"
-                              >
-                                {method.entrypoint}
-                              </Text>
-                            </HStack>
-                            {method.description && (
-                              <Text fontSize="xs" color="text.secondary">
-                                {method.description}
-                              </Text>
-                            )}
-                          </VStack>
-                        ))}
-                      </Stack>
-                    </Fragment>
-                  ),
-                )}
+    <AccordionCard
+      icon={icon}
+      title={title}
+      trigger={
+        <div className="text-xs text-muted-foreground">
+          Approve&nbsp;
+          <span className="text-accent-foreground font-bold">
+            {count} {count > 1 ? `items` : "item"}
+          </span>
+        </div>
+      }
+      className="gap-2"
+    >
+      {Object.entries(policies.contracts || {}).map(
+        ([address, { name, methods }]) => (
+          <div key={address} className="flex flex-col gap-2">
+            <div className="flex items-center justify-between bg-secondary text-xs">
+              <div className="py-2 font-bold">{name}</div>
+              <Link
+                to={
+                  chainId === constants.StarknetChainId.SN_MAIN ||
+                  chainId === constants.StarknetChainId.SN_SEPOLIA
+                    ? explorer.contract(address)
+                    : `#` // TODO: Add explorer for worlds.dev
+                }
+                target="_blank"
+                className="text-muted-foreground hover:underline"
+              >
+                {formatAddress(address, { first: 5, last: 5 })}
+              </Link>
+            </div>
 
-                {policies.messages?.map((message) => (
-                  <VStack
-                    key={message.primaryType}
-                    py={4}
-                    w="full"
-                    align="flex-start"
-                  >
-                    <Text
-                      fontSize="sm"
-                      className="text-foreground"
-                      fontWeight="bold"
-                      mb={4}
-                    >
-                      Messages
-                    </Text>
-                    <Stack
-                      border="1px solid"
-                      spacing={0}
-                      borderColor="darkGray.800"
-                      borderRadius="md"
-                      divider={<Divider borderColor="solid.bg" />}
-                      w="full"
-                    >
-                      {Object.entries(message.types).map(
-                        ([typeName, fields]) => (
-                          <VStack
-                            key={typeName}
-                            p={3}
-                            gap={3}
-                            align="flex-start"
-                          >
-                            <HStack w="full">
-                              <Text
-                                fontSize="xs"
-                                color="text.primary"
-                                fontWeight="bold"
-                              >
-                                {typeName}
-                              </Text>
-                            </HStack>
-                            {fields.map((field) => (
-                              <HStack key={field.name} w="full">
-                                <Text fontSize="xs" color="text.secondary">
-                                  {field.name}
-                                </Text>
-                                <Spacer />
-                                <Text
-                                  fontSize="xs"
-                                  color="text.secondaryAccent"
-                                >
-                                  {field.type}
-                                </Text>
-                              </HStack>
-                            ))}
-                          </VStack>
-                        ),
-                      )}
-                    </Stack>
-                  </VStack>
-                ))}
-              </Card>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </CardContent>
-    </Card>
+            <div className="flex flex-col gap-px rounded overflow-auto border border-background">
+              {methods.map((method: Method) => (
+                <div
+                  key={method.name}
+                  className="flex flex-col p-3 gap-3 text-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold text-accent-foreground">
+                      {method.name}
+                    </div>
+                    <div className="text-muted-foreground">
+                      {method.entrypoint}
+                    </div>
+                  </div>
+                  {method.description && (
+                    <div className="text-muted-foreground">
+                      {method.description}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ),
+      )}
+
+      {policies.messages && <MessageContent messages={policies.messages} />}
+    </AccordionCard>
   );
 }

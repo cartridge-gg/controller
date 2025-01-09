@@ -1,4 +1,4 @@
-export * from "./Authenticate";
+export * from "./authenticate";
 export * from "./create";
 export * from "./CreateSession";
 export * from "./RegisterSession";

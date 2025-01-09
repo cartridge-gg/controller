@@ -3,7 +3,7 @@ import twAnimate from "tailwindcss-animate";
 import defaultTheme from "tailwindcss/defaultTheme";
 
 export const cartridgeTWPreset: Partial<Config> = {
-  darkMode: "class",
+  darkMode: "selector",
   theme: {
     container: {
       center: true,
@@ -58,6 +58,21 @@ export const cartridgeTWPreset: Partial<Config> = {
       },
       spacer: {
         DEFAULT: "hsl(var(--spacer))",
+      },
+      info: {
+        DEFAULT: "hsl(var(--info))",
+        foreground: "hsl(var(--info-foreground))",
+        icon: "hsl(var(--info-icon))",
+      },
+      warning: {
+        DEFAULT: "hsl(var(--warning))",
+        foreground: "hsl(var(--warning-foreground))",
+        icon: "hsl(var(--warning-icon))",
+      },
+      error: {
+        DEFAULT: "hsl(var(--error))",
+        foreground: "hsl(var(--error-foreground))",
+        icon: "hsl(var(--error-icon))",
       },
     },
     extend: {

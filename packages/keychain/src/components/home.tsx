@@ -4,13 +4,13 @@ import { usePostHog } from "posthog-js/react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, SignMessageCtx } from "@/utils/connection";
-import { ConfirmTransaction } from "./ConfirmTransaction";
+import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
 import { DeployController } from "./DeployController";
 import { ErrorPage } from "./ErrorBoundary";
-import { PurchaseCredits } from "./Funding/PurchaseCredits";
-import { Settings } from "./Settings";
+import { PurchaseCredits } from "./funding/PurchaseCredits";
+import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 

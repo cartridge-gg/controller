@@ -3,11 +3,11 @@ import { ResponseCodes, toArray } from "@cartridge/controller";
 import { Content, FOOTER_MIN_HEIGHT } from "@/components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
-import { Policies } from "@/components/Policies";
+import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ExecuteCtx } from "@/utils/connection";
 import { getChecksumAddress, num } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { CreateSession } from "./connect";
+import { CreateSession } from "../connect";
 import { ParsedSessionPolicies } from "@/hooks/session";
 
 export function ConfirmTransaction() {
@@ -16,18 +16,16 @@ export function ConfirmTransaction() {
   const [updateSession, setUpdateSession] = useState<boolean>(false);
   const ctx = context as ExecuteCtx;
   const account = controller;
+  const transactions = toArray(ctx.transactions);
 
   const onSubmit = async (maxFee?: bigint) => {
     if (maxFee === undefined || !account) {
       return;
     }
 
-    const { transaction_hash } = await account.execute(
-      toArray(ctx.transactions),
-      {
-        maxFee: num.toHex(maxFee),
-      },
-    );
+    const { transaction_hash } = await account.execute(transactions, {
+      maxFee: num.toHex(maxFee),
+    });
     ctx.resolve?.({
       code: ResponseCodes.SUCCESS,
       transaction_hash,
@@ -36,18 +34,26 @@ export function ConfirmTransaction() {
     setContext(undefined);
   };
 
-  const callPolicies = useMemo<ParsedSessionPolicies>(
-    () => ({
-      contracts: Object.fromEntries(
-        toArray(ctx.transactions).map((c) => [
-          getChecksumAddress(c.contractAddress),
-          { methods: [{ entrypoint: c.entrypoint }] },
-        ]),
-      ),
+  const callPolicies = useMemo<ParsedSessionPolicies>(() => {
+    const contracts = new Map();
+
+    transactions.forEach((c) => {
+      const address = getChecksumAddress(c.contractAddress);
+      if (contracts.has(address)) {
+        // Extend methods if contract already exists
+        const existing = contracts.get(address);
+        existing.methods.push({ entrypoint: c.entrypoint });
+      } else {
+        // Add new contract entry
+        contracts.set(address, { methods: [{ entrypoint: c.entrypoint }] });
+      }
+    });
+
+    return {
+      contracts: Object.fromEntries(contracts),
       verified: false,
-    }),
-    [ctx.transactions],
-  );
+    };
+  }, [ctx.transactions]);
 
   useEffect(() => {
     if (policiesUpdated) {
@@ -73,7 +79,7 @@ export function ConfirmTransaction() {
     } else {
       setUpdateSession(false);
     }
-  }, [callPolicies, policiesUpdated, policies, account]);
+  }, [policiesUpdated, policies, account]);
 
   if (updateSession && policies) {
     return (
@@ -88,7 +94,7 @@ export function ConfirmTransaction() {
   return (
     <ExecutionContainer
       Icon={TransactionDuoIcon}
-      title="Confirm Transaction"
+      title="Review Transaction"
       description={origin}
       executionError={ctx.error}
       transactions={ctx.transactions}
@@ -96,7 +102,7 @@ export function ConfirmTransaction() {
       onSubmit={onSubmit}
     >
       <Content pb={FOOTER_MIN_HEIGHT}>
-        <Policies title="Transaction Details" policies={callPolicies} />
+        <TransactionSummary calls={transactions} />
       </Content>
     </ExecutionContainer>
   );

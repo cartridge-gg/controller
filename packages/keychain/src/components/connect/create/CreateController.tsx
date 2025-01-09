@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Container, Footer, Content } from "@/components/layout";
-import { Button } from "@cartridge/ui-next";
-import { Box } from "@chakra-ui/react";
+import { Button, cn } from "@cartridge/ui-next";
 import { useControllerTheme } from "@/hooks/theme";
 import { usePostHog } from "posthog-js/react";
 import { useDebounce } from "@/hooks/debounce";
@@ -12,6 +11,7 @@ import { useCreateController } from "./useCreateController";
 import { Input } from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
+import InAppSpy from "inapp-spy";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -26,6 +26,7 @@ interface CreateControllerViewProps {
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
   onSubmit: () => void;
+  isInAppBrowser?: boolean;
 }
 
 export function CreateControllerView({
@@ -34,6 +35,7 @@ export function CreateControllerView({
   validation,
   isLoading,
   error,
+  isInAppBrowser,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -56,13 +58,12 @@ export function CreateControllerView({
           if (e.key === "Enter") e.preventDefault();
         }}
       >
-        <Content mb="2rem">
-          <Box
-            border={
-              validation.status === "invalid" || error ? "1px solid" : "0px"
-            }
-            borderColor="red.500"
-            borderRadius="base"
+        <Content mb="2rem" gap={0}>
+          <div
+            className={cn(
+              "border-[#E46958] rounded",
+              validation.status === "invalid" || error ? "border" : undefined,
+            )}
           >
             <Input
               {...usernameField}
@@ -77,17 +78,27 @@ export function CreateControllerView({
               onClear={onUsernameClear}
               style={{ position: "relative", zIndex: 1 }}
             />
-          </Box>
+          </div>
 
           <StatusTray
             username={usernameField.value}
             validation={validation}
             error={error}
-            style={{ position: "relative", zIndex: 0 }}
           />
         </Content>
 
         <Footer showCatridgeLogo>
+          {isInAppBrowser && (
+            <div className="mb-5">
+              <ErrorAlert
+                title="Browser not supported"
+                description="Please open this page in your device's native browser (Safari/Chrome) to continue."
+                variant="warning"
+                isExpanded
+              />
+            </div>
+          )}
+
           {!theme.verified && (
             <div className="mb-5">
               <ErrorAlert
@@ -112,6 +123,20 @@ export function CreateControllerView({
       </form>
     </Container>
   );
+}
+
+function getNativeBrowserUrl() {
+  // iOS: Open in Safari
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    return `x-safari-${window.location.href}`;
+  }
+  // Android: Open in Chrome
+  if (/Android/.test(navigator.userAgent)) {
+    let currentUrl = window.location.href;
+    currentUrl = currentUrl.replace(/^https?:\/\//, "");
+    return `intent://${currentUrl}#Intent;scheme=https;package=com.android.chrome;end`;
+  }
+  return null;
 }
 
 export function CreateController({
@@ -142,6 +167,18 @@ export function CreateController({
     isSlot,
     loginMode,
   });
+
+  const [{ isInApp }] = useState(() => InAppSpy());
+
+  useEffect(() => {
+    if (isInApp) {
+      const nativeBrowserUrl = getNativeBrowserUrl();
+      if (nativeBrowserUrl) {
+        // Try to open in native browser
+        window.location.href = nativeBrowserUrl;
+      }
+    }
+  }, [isInApp]);
 
   const handleUsernameChange = (value: string) => {
     if (!hasLoggedChange.current) {
@@ -182,6 +219,7 @@ export function CreateController({
       validation={validation}
       isLoading={isLoading}
       error={error}
+      isInAppBrowser={isInApp}
       onUsernameChange={handleUsernameChange}
       onUsernameFocus={handleUsernameFocus}
       onUsernameClear={handleUsernameClear}

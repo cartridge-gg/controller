@@ -1,5 +1,4 @@
 import { AlertIcon, Button, Input } from "@cartridge/ui-next";
-import { VStack, Text, HStack } from "@chakra-ui/react";
 import { Container, Content, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
@@ -44,26 +43,26 @@ export function Delegate({ onBack }: { onBack: () => void }) {
       onBack={() => onBack()}
     >
       <Content>
-        <VStack w="full" h="full" justifyContent="space-between" gap={6}>
-          <Text color="text.secondary" fontSize="sm" align="center">
+        <div className="flex flex-col gap-4">
+          <div className="text-sm text-muted-foreground text-center">
             Your controller can be owned by an existing Starknet wallet which
             can receive the rewards you earn while playing. <br />
             (This can be updated later)
-          </Text>
-          <VStack w="full">
+          </div>
+          <div className="flex flex-col gap-2">
             <Input
               placeholder="0x..."
               value={delegateAddress}
               onChange={(e) => setDelegateAddress(e.target.value)}
             />
             {!isValid && delegateAddress !== "" && (
-              <HStack w="full" color="alert.foreground">
-                <AlertIcon />{" "}
-                <Text color="alert.foreground">Invalid address!</Text>
-              </HStack>
+              <div className="flex items-center gap-2 text-error-icon">
+                <AlertIcon size="sm" />
+                <div className="text-sm">Invalid address!</div>
+              </div>
             )}
-          </VStack>
-        </VStack>
+          </div>
+        </div>
       </Content>
       <Footer>
         <Button onClick={onSetDelegate} disabled={!isValid}>

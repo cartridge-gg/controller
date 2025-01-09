@@ -1,3 +1,3 @@
-export * from "./Container";
+export * from "./container";
 export * from "./Content";
-export * from "./Footer";
+export * from "./footer";
