@@ -11,55 +11,65 @@ export function useThemeEffect({
   useEffect(() => {
     if (!theme) return;
 
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        const appliedColorMode = (
-          mutation.target as HTMLElement
-        ).classList.contains("dark")
-          ? "dark"
-          : "light";
+    // Helper function to update theme properties
+    const updateThemeProperties = (colorMode: "light" | "dark") => {
+      // Set icon
+      document.documentElement.style.setProperty(
+        "--theme-icon-url",
+        theme.icon.startsWith("http")
+          ? `url("${theme.icon}")`
+          : `url("${assetUrl}${theme.icon}")`,
+      );
 
-        document.documentElement.style.setProperty(
-          "--theme-icon-url",
-          theme.icon.startsWith("http")
-            ? `url("${theme.icon}")`
-            : `url("${assetUrl}${theme.icon}")`,
-        );
-        const coverValue =
-          typeof theme.cover === "string"
-            ? theme.cover
-            : theme.cover[appliedColorMode];
-        const coverUrl = coverValue.startsWith("http")
-          ? `url("${coverValue}")`
-          : `url("${assetUrl}${coverValue}")`;
-        document.documentElement.style.setProperty(
-          "--theme-cover-url",
-          coverUrl,
-        );
+      // Set cover
+      const coverValue =
+        typeof theme.cover === "string" ? theme.cover : theme.cover[colorMode];
+      const coverUrl = coverValue.startsWith("http")
+        ? `url("${coverValue}")`
+        : `url("${assetUrl}${coverValue}")`;
+      document.documentElement.style.setProperty("--theme-cover-url", coverUrl);
 
-        if (!theme.colors) return;
-
-        if (theme.colors?.primary) {
+      // Set colors if they exist
+      if (theme.colors) {
+        if (theme.colors.primary) {
           const val =
             typeof theme.colors.primary === "string"
-              ? theme.colors?.primary
-              : theme.colors?.primary[appliedColorMode];
+              ? theme.colors.primary
+              : theme.colors.primary[colorMode];
           document.documentElement.style.setProperty(
             "--primary",
             hexToHsl(val),
           );
         }
 
-        if (theme.colors?.primaryForeground) {
+        if (theme.colors.primaryForeground) {
           const val =
             typeof theme.colors.primaryForeground === "string"
-              ? theme.colors?.primaryForeground
-              : theme.colors?.primaryForeground[appliedColorMode];
+              ? theme.colors.primaryForeground
+              : theme.colors.primaryForeground[colorMode];
           document.documentElement.style.setProperty(
             "--primary-foreground",
             hexToHsl(val),
           );
         }
+      }
+    };
+
+    // Set initial values based on current color mode
+    const initialColorMode = document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+    updateThemeProperties(initialColorMode);
+
+    // Watch for changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        const colorMode = (mutation.target as HTMLElement).classList.contains(
+          "dark",
+        )
+          ? "dark"
+          : "light";
+        updateThemeProperties(colorMode);
       });
     });
 
