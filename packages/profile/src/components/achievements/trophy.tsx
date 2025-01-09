@@ -6,10 +6,14 @@ import {
   CheckboxCheckedDuoIcon,
   CheckboxUncheckedIcon,
   Separator,
+  SpinnerIcon,
 } from "@cartridge/ui-next";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { useCallback } from "react";
+import { useArcade } from "@/hooks/arcade";
+import { useConnection } from "@/hooks/context";
+import { useAccount } from "@/hooks/account";
 
 export interface Task {
   id: string;
@@ -27,12 +31,10 @@ export function Trophy({
   timestamp,
   hidden,
   completed,
-  pinned,
   id,
   softview,
   enabled,
   tasks,
-  onPin,
 }: {
   icon: string;
   title: string;
@@ -42,12 +44,10 @@ export function Trophy({
   timestamp: number;
   hidden: boolean;
   completed: boolean;
-  pinned: boolean;
   id: string;
   softview: boolean;
   enabled: boolean;
   tasks: Task[];
-  onPin: (id: string) => void;
 }) {
   return (
     <div className="flex items-center gap-x-px">
@@ -83,11 +83,7 @@ export function Trophy({
           </div>
         )}
       </div>
-      {completed &&
-        !softview &&
-        !!softview && ( // TODO: Enable when we can have the pinned feature on server side, remove !!softview
-          <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />
-        )}
+      {completed && !softview && <Track enabled={enabled} id={id} />}
     </div>
   );
 }
@@ -277,43 +273,78 @@ function Progress({
   );
 }
 
-function Track({
-  pinned,
-  id,
-  enabled,
-  onPin,
-}: {
-  pinned: boolean;
-  id: string;
-  enabled: boolean;
-  onPin: (id: string) => void;
-}) {
+function Track({ id, enabled }: { id: string; enabled: boolean }) {
+  const { address } = useAccount();
+  const { parent } = useConnection();
+  const { provider, pins } = useArcade();
+
   const [hovered, setHovered] = useState(false);
-  const onClick = useCallback(() => {
-    if (!enabled && !pinned) return;
-    onPin(id);
-    toast.success(`Trophy ${pinned ? "unpinned" : "pinned"} successfully`);
-  }, [enabled, pinned, id, onPin]);
+  const [loading, setLoading] = useState(false);
+
+  const pinned = useMemo(() => {
+    return pins[BigInt(address).toString(16)]?.includes(
+      BigInt(id).toString(16),
+    );
+  }, [pins, address, id]);
+
+  const handlePin = useCallback(() => {
+    if (!enabled || pinned) return;
+    const pin = async () => {
+      setLoading(true);
+      try {
+        const calls = provider.registry.pin({ achievementId: id });
+        await parent.openExecute(Array.isArray(calls) ? calls : [calls]);
+        toast.success(`Trophy pinned successfully`);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to pin trophy");
+      } finally {
+        setLoading(false);
+      }
+    };
+    pin();
+  }, [enabled, pinned, id]);
+
+  const handleUnpin = useCallback(() => {
+    if (!pinned) return;
+    const unpin = async () => {
+      setLoading(true);
+      try {
+        const calls = provider.registry.unpin({ achievementId: id });
+        await parent.openExecute(Array.isArray(calls) ? calls : [calls]);
+        toast.success(`Trophy unpinned successfully`);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to unpin trophy");
+      } finally {
+        setLoading(false);
+      }
+    };
+    unpin();
+  }, [pinned, id]);
 
   return (
     <div
       className={cn(
-        "bg-quaternary h-full p-2 flex items-center transition-all duration-200",
-        pinned ? "bg-quaternary" : "bg-secondary",
-        hovered &&
-          (enabled || pinned) &&
-          "opacity-90 bg-secondary/50 cursor-pointer",
-        !enabled && !pinned && "cursor-not-allowed",
+        "bg-secondary h-full p-2 flex items-center transition-all duration-200",
+        hovered && (enabled || pinned) && "opacity-90 cursor-pointer",
       )}
-      onClick={onClick}
+      onClick={pinned ? handleUnpin : handlePin}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <TrackIcon
-        className={cn(!enabled && !pinned && "opacity-25")}
-        size="sm"
-        variant={pinned ? "solid" : "line"}
-      />
+      {loading ? (
+        <SpinnerIcon
+          className="text-quaternary-foreground animate-spin"
+          size="sm"
+        />
+      ) : (
+        <TrackIcon
+          className={cn(!enabled && !pinned && "opacity-25")}
+          size="sm"
+          variant={pinned ? "solid" : "line"}
+        />
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { Trophies } from "./trophies";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
 import { useData } from "@/hooks/context";
+import { useArcade } from "@/hooks/arcade";
 
 export function Achievements() {
   const { username: selfname, address: self } = useAccount();
@@ -22,6 +23,8 @@ export function Achievements() {
     trophies: { achievements, players, isLoading },
     setAccountAddress,
   } = useData();
+
+  const { pins } = useArcade();
 
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
@@ -31,14 +34,14 @@ export function Achievements() {
   );
 
   const { pinneds, completed, total } = useMemo(() => {
+    const ids = pins[BigInt(address || self || "").toString(16)] || [];
     const pinneds = achievements
-      .filter((item) => item.completed)
-      .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
-      .slice(0, 3);
+      .filter((item) => ids.includes(BigInt(item.id).toString(16)))
+      .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage));
     const completed = achievements.filter((item) => item.completed).length;
     const total = achievements.length;
     return { pinneds, completed, total };
-  }, [achievements]);
+  }, [achievements, pins]);
 
   const { rank, earnings } = useMemo(() => {
     const rank =
@@ -113,7 +116,6 @@ export function Achievements() {
                   achievements={achievements}
                   softview={!isSelf}
                   enabled={pinneds.length < 3}
-                  onPin={() => {}}
                 />
               </div>
             </ScrollArea>

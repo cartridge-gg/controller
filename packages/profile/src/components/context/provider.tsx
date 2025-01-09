@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ArcadeProvider } from "./arcade";
 import { ThemeProvider } from "./theme";
 import { ConnectionProvider } from "./connection";
 import { BrowserRouter } from "react-router-dom";
@@ -34,11 +35,13 @@ export function Provider({ children }: PropsWithChildren) {
         >
           <IndexerAPIProvider credentials="omit">
             <QueryClientProvider client={queryClient}>
-              <ConnectionProvider>
-                <ThemeProvider defaultScheme="system">
-                  <DataProvider>{children}</DataProvider>
-                </ThemeProvider>
-              </ConnectionProvider>
+              <ArcadeProvider>
+                <ConnectionProvider>
+                  <ThemeProvider defaultScheme="system">
+                    <DataProvider>{children}</DataProvider>
+                  </ThemeProvider>
+                </ConnectionProvider>
+              </ArcadeProvider>
             </QueryClientProvider>
           </IndexerAPIProvider>
         </CartridgeAPIProvider>

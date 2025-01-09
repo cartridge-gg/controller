@@ -14,12 +14,10 @@ export function Trophies({
   achievements,
   softview,
   enabled,
-  onPin,
 }: {
   achievements: Item[];
   softview: boolean;
   enabled: boolean;
-  onPin: (id: string) => void;
 }) {
   const [groups, setGroups] = useState<{ [key: string]: Item[] }>({});
 
@@ -74,7 +72,6 @@ export function Trophies({
               items={items}
               softview={softview}
               enabled={enabled}
-              onPin={onPin}
             />
           ))}
         <Group
@@ -85,7 +82,6 @@ export function Trophies({
           )}
           softview={softview}
           enabled={enabled}
-          onPin={onPin}
         />
       </div>
     </div>
@@ -97,13 +93,11 @@ function Group({
   items,
   softview,
   enabled,
-  onPin,
 }: {
   group: string;
   items: Item[];
   softview: boolean;
   enabled: boolean;
-  onPin: (id: string) => void;
 }) {
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState<number[]>([]);
@@ -172,12 +166,10 @@ function Group({
           timestamp={achievement.timestamp}
           hidden={achievement.hidden}
           completed={achievement.completed}
-          pinned={achievement.pinned}
           id={achievement.id}
           softview={softview}
           enabled={enabled}
           tasks={achievement.tasks}
-          onPin={onPin}
         />
       ))}
     </div>
