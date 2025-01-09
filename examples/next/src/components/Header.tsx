@@ -6,10 +6,12 @@ import {
   useAccount,
   useConnect,
   useDisconnect,
+  useNetwork,
   useSwitchChain,
 } from "@starknet-react/core";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { constants, num } from "starknet";
+import { Chain } from "@starknet-react/chains";
 
 const Header = ({
   showBack,
@@ -20,26 +22,16 @@ const Header = ({
 }) => {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const { address, connector, status, chainId } = useAccount();
+  const { chain, chains } = useNetwork();
+  const { address, connector, status } = useAccount();
+  const controllerConnector = connector as never as ControllerConnector;
+  const [networkOpen, setNetworkOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const { switchChain } = useSwitchChain({
     params: {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
     },
   });
-  const controllerConnector = connector as never as ControllerConnector;
-  const chains = [
-    { name: "Mainnet", id: constants.StarknetChainId.SN_MAIN },
-    { name: "Sepolia", id: constants.StarknetChainId.SN_SEPOLIA },
-  ];
-
-  const [networkOpen, setNetworkOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-
-  const chainName = useMemo(() => {
-    if (chainId) {
-      return chains.find((c) => c.id === num.toHex(chainId))?.name;
-    }
-  }, [chains, chainId]);
 
   return (
     <div className="w-full absolute top-0 left-0 p-5 flex items-center">
@@ -64,7 +56,7 @@ const Header = ({
             disabled={lockChain}
             className="flex items-center gap-2 min-w-[120px]"
           >
-            {chainName}
+            {chain.network}
             <span
               className={`transition-transform duration-200 ${
                 networkOpen ? "rotate-180" : ""
@@ -75,16 +67,16 @@ const Header = ({
           </Button>
           {networkOpen && (
             <div className="absolute right-0 top-full mt-1 bg-gray-700 shadow-lg rounded-md min-w-[160px] py-1 z-10">
-              {chains.map((c) => (
+              {chains.map((c: Chain) => (
                 <button
                   key={c.id}
                   className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
                   onClick={() => {
-                    switchChain({ chainId: c.id });
+                    switchChain({ chainId: num.toHex(c.id) });
                     setNetworkOpen(false);
                   }}
                 >
-                  {c.name}
+                  {c.network}
                 </button>
               ))}
             </div>
