@@ -25,6 +25,7 @@ mod session_component {
     use controller::account::IAssertOwner;
 
     const SESSION_MAGIC: felt252 = 'session-token';
+    const WILDCARD_MAGIC: felt252  = 'wildcard-policy';
     const AUTHORIZATION_BY_REGISTERED: felt252 = 'authorization-by-registered';
 
     #[storage]
@@ -184,7 +185,6 @@ mod session_component {
             transaction_hash: felt252,
         ) -> Option<(felt252, felt252)> {
             let contract = self.get_contract();
-            assert(signature.proofs.len() == calls.len(), 'session/length-mismatch');
 
             let now = get_block_timestamp();
             assert(signature.session.expires_at > now, 'session/expired');
@@ -253,6 +253,12 @@ mod session_component {
                     'session/invalid-guardian-sig'
                 );
             }
+
+            if (signature.session.allowed_policies_root == WILDCARD_MAGIC) {
+                return to_be_cached;
+            }
+
+            assert(signature.proofs.len() == calls.len(), 'session/length-mismatch');
 
             assert(
                 check_policy(calls, signature.session.allowed_policies_root, signature.proofs),

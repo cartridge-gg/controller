@@ -1,5 +1,6 @@
 use cainome_cairo_serde::NonZero;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 use serde_json::json;
 use starknet::core::types::Felt;
 use starknet::core::utils::NonAsciiNameError;
@@ -78,6 +79,34 @@ impl Session {
         })
     }
 
+    pub fn new_wildcard(
+        policies: Vec<Policy>,
+        expires_at: u64,
+        session_signer: &Signer,
+        guardian_guid: Felt,
+    ) -> Result<Self, SignError> {
+        let metadata = json!({ "metadata": "metadata", "max_fee": 0 });
+
+        Ok(Self {
+            inner: crate::abigen::controller::Session {
+                expires_at,
+                allowed_policies_root: short_string!("wildcard-policy"),
+                session_key_guid: session_signer.clone().into(),
+                guardian_key_guid: guardian_guid,
+                metadata_hash: Felt::ZERO,
+            },
+            requested_policies: policies.clone(),
+            proved_policies: policies
+                .into_iter()
+                .map(|policy| ProvedPolicy {
+                    policy: policy.clone(),
+                    proof: vec![],
+                })
+                .collect(),
+            metadata: serde_json::to_string(&metadata).unwrap(),
+        })
+    }
+
     pub fn message_hash(
         &self,
         tx_hash: Felt,
@@ -92,6 +121,10 @@ impl Session {
             .iter()
             .find(|ProvedPolicy { policy: p, .. }| p == policy)
             .map(|ProvedPolicy { proof, .. }| proof.clone())
+    }
+
+    pub fn is_wildcard(&self) -> bool {
+        self.inner.allowed_policies_root == short_string!("wildcard-policy")
     }
 
     pub fn is_authorized(&self, policy: &Policy) -> bool {

@@ -386,3 +386,53 @@ pub async fn test_verify_execute_with_invalid_guardian() {
         "Should return error"
     );
 }
+
+#[tokio::test]
+async fn test_verify_execute_session_wildcard() {
+    let signer = Signer::new_starknet_random();
+    let runner = KatanaRunner::load();
+    let mut controller = runner
+        .deploy_controller(
+            "username".to_owned(),
+            Owner::Signer(signer),
+            Version::LATEST,
+        )
+        .await;
+
+    let signer = SigningKey::from_random();
+    let session_signer = Signer::Starknet(signer.clone());
+    let session =
+        Session::new_wildcard(vec![], u64::MAX, &session_signer.into(), Felt::ZERO).unwrap();
+
+    let session_account = controller
+        .create_with_session(signer, session)
+        .await
+        .unwrap();
+
+    let recipient = ContractAddress(felt!("0x18301129"));
+    let contract_erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &session_account);
+
+    contract_erc20
+        .balanceOf(&recipient)
+        .block_id(BlockId::Tag(BlockTag::Latest))
+        .call()
+        .await
+        .expect("failed to call contract");
+
+    let tx = contract_erc20
+        .transfer(
+            &recipient,
+            &U256 {
+                low: 0x1_u128,
+                high: 0,
+            },
+        )
+        .send()
+        .await
+        .unwrap();
+
+    TransactionWaiter::new(tx.transaction_hash, runner.client())
+        .wait()
+        .await
+        .unwrap();
+}

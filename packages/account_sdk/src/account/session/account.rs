@@ -87,8 +87,7 @@ impl SessionAccount {
         .await
     }
 
-    async fn sign(&self, hash: Felt, policies: &[Policy]) -> Result<SessionToken, SignError> {
-        let hash = self.message_hash(hash)?;
+    fn generate_proofs(&self, policies: &[Policy]) -> Result<Vec<Vec<Felt>>, SignError> {
         let mut proofs = Vec::new();
 
         for policy in policies {
@@ -112,6 +111,17 @@ impl SessionAccount {
 
             proofs.push(proof);
         }
+
+        Ok(proofs)
+    }
+
+    async fn sign(&self, hash: Felt, policies: &[Policy]) -> Result<SessionToken, SignError> {
+        let hash = self.message_hash(hash)?;
+        let proofs = if self.session.is_wildcard() {
+            vec![]
+        } else {
+            self.generate_proofs(policies)?
+        };
 
         Ok(SessionToken {
             session: self.session.clone().into(),

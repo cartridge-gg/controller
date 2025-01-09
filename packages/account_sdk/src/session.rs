@@ -43,6 +43,33 @@ impl Controller {
             &session_signer.clone().into(),
             guardian,
         )?;
+
+        self.create_with_session(signer, session).await
+    }
+
+    pub async fn create_wildcard_session(
+        &mut self,
+        methods: Vec<Policy>,
+        expires_at: u64,
+    ) -> Result<SessionAccount, ControllerError> {
+        let signer = SigningKey::from_random();
+        let session_signer = Signer::Starknet(signer.clone());
+
+        let session = Session::new_wildcard(
+            methods,
+            expires_at,
+            &session_signer.clone().into(),
+            Felt::ZERO,
+        )?;
+
+        self.create_with_session(signer, session).await
+    }
+
+    pub async fn create_with_session(
+        &mut self,
+        session_signer: SigningKey,
+        session: Session,
+    ) -> Result<SessionAccount, ControllerError> {
         let hash = session
             .inner
             .get_message_hash_rev_1(self.chain_id, self.address);
@@ -55,7 +82,7 @@ impl Controller {
                 max_fee: None,
                 credentials: Some(Credentials {
                     authorization: authorization.clone(),
-                    private_key: signer.secret_scalar(),
+                    private_key: session_signer.secret_scalar(),
                 }),
                 is_registered: false,
             },
@@ -63,7 +90,7 @@ impl Controller {
 
         let session_account = SessionAccount::new(
             self.provider().clone(),
-            session_signer,
+            Signer::Starknet(session_signer),
             self.address,
             self.chain_id,
             authorization,
