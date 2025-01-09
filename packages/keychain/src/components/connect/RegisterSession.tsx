@@ -86,9 +86,16 @@ export function RegisterSession({
       <Content>
         <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
-          <VerifiedSessionSummary game={theme.name} policies={policies} />
+          <VerifiedSessionSummary
+            game={theme.name}
+            contracts={policies.contracts}
+            messages={policies.messages}
+          />
         ) : (
-          <UnverifiedSessionSummary policies={policies} />
+          <UnverifiedSessionSummary
+            contracts={policies.contracts}
+            messages={policies.messages}
+          />
         )}
       </Content>
     </ExecutionContainer>

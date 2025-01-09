@@ -1,13 +1,11 @@
 import { Container, Content, Footer } from "@/components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "@/utils/connection";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { SessionConsent } from "@/components/connect";
 import { Upgrade } from "./Upgrade";
-import { ErrorCode } from "@cartridge/account-wasm";
-import { TypedDataPolicy } from "@cartridge/presets";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
@@ -33,7 +31,6 @@ export function CreateSession({
 }) {
   const { controller, upgrade, chainId, theme, logout } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const expiresAt = useMemo(
@@ -43,32 +40,17 @@ export function CreateSession({
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
 
-  useEffect(() => {
-    if (!chainId) return;
-    const normalizedChainId = normalizeChainId(chainId);
-
-    const violatingPolicy = policies.messages?.find(
-      (policy: TypedDataPolicy) =>
-        "domain" in policy &&
-        (!policy.domain.chainId ||
-          normalizeChainId(policy.domain.chainId) !== normalizedChainId),
-    );
-
-    if (violatingPolicy) {
-      setError({
-        code: ErrorCode.PolicyChainIdMismatch,
-        message: `Policy for ${
-          (violatingPolicy as TypedDataPolicy).domain.name
-        }.${
-          (violatingPolicy as TypedDataPolicy).primaryType
-        } has mismatched chain ID.`,
-      });
-      setIsDisabled(true);
-    } else {
-      setError(undefined);
-      setIsDisabled(false);
-    }
-  }, [chainId, policies]);
+  const chainSpecificMessages = useMemo(() => {
+    if (!policies.messages || !chainId) return [];
+    return policies.messages.filter((message) => {
+      return (
+        !("domain" in message) ||
+        (message.domain.chainId &&
+          normalizeChainId(message.domain.chainId) ===
+            normalizeChainId(chainId))
+      );
+    });
+  }, [policies.messages, chainId]);
 
   const onCreateSession = useCallback(async () => {
     if (!controller || !policies) return;
@@ -139,9 +121,16 @@ export function CreateSession({
       <Content gap={6}>
         <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
-          <VerifiedSessionSummary game={theme.name} policies={policies} />
+          <VerifiedSessionSummary
+            game={theme.name}
+            contracts={policies.contracts}
+            messages={chainSpecificMessages}
+          />
         ) : (
-          <UnverifiedSessionSummary policies={policies} />
+          <UnverifiedSessionSummary
+            contracts={policies.contracts}
+            messages={chainSpecificMessages}
+          />
         )}
       </Content>
       <Footer>
@@ -199,9 +188,7 @@ export function CreateSession({
           </Button>
           <Button
             className="flex-1"
-            disabled={
-              isDisabled || isConnecting || (!policies?.verified && !isConsent)
-            }
+            disabled={isConnecting || (!policies?.verified && !isConsent)}
             isLoading={isConnecting}
             onClick={onCreateSession}
           >

@@ -16,6 +16,35 @@ export const ETH_CONTRACT_ADDRESS =
 export const STRK_CONTRACT_ADDRESS =
   "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
 
+const messageForChain = (chainId: constants.StarknetChainId) => {
+  return {
+    types: {
+      StarknetDomain: [
+        { name: "name", type: "shortstring" },
+        { name: "version", type: "shortstring" },
+        { name: "chainId", type: "shortstring" },
+        { name: "revision", type: "shortstring" },
+      ],
+      Person: [
+        { name: "name", type: "felt" },
+        { name: "wallet", type: "felt" },
+      ],
+      Mail: [
+        { name: "from", type: "Person" },
+        { name: "to", type: "Person" },
+        { name: "contents", type: "felt" },
+      ],
+    },
+    primaryType: "Mail",
+    domain: {
+      name: "StarkNet Mail",
+      version: "1",
+      revision: "1",
+      chainId: chainId,
+    },
+  };
+};
+
 const policies: SessionPolicies = {
   contracts: {
     [ETH_CONTRACT_ADDRESS]: {
@@ -51,32 +80,8 @@ const policies: SessionPolicies = {
     },
   },
   messages: [
-    // {
-    //   types: {
-    //     StarknetDomain: [
-    //       { name: "name", type: "shortstring" },
-    //       { name: "version", type: "shortstring" },
-    //       { name: "chainId", type: "shortstring" },
-    //       { name: "revision", type: "shortstring" },
-    //     ],
-    //     Person: [
-    //       { name: "name", type: "felt" },
-    //       { name: "wallet", type: "felt" },
-    //     ],
-    //     Mail: [
-    //       { name: "from", type: "Person" },
-    //       { name: "to", type: "Person" },
-    //       { name: "contents", type: "felt" },
-    //     ],
-    //   },
-    //   primaryType: "Mail",
-    //   domain: {
-    //     name: "StarkNet Mail",
-    //     version: "1",
-    //     revision: "1",
-    //     chainId: "SN_SEPOLIA",
-    //   },
-    // },
+    messageForChain(constants.StarknetChainId.SN_MAIN),
+    messageForChain(constants.StarknetChainId.SN_SEPOLIA),
   ],
 };
 
