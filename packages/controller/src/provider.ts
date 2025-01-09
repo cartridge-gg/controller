@@ -163,6 +163,22 @@ export default abstract class BaseProvider implements StarknetWindowObject {
     }
   };
 
+  protected emitNetworkChanged(chainId: string) {
+    this.subscriptions
+      .filter((sub) => sub.type === "networkChanged")
+      .forEach((sub) => {
+        (sub.handler as WalletEventHandlers["networkChanged"])(chainId);
+      });
+  }
+
+  protected emitAccountsChanged(accounts: string[]) {
+    this.subscriptions
+      .filter((sub) => sub.type === "accountsChanged")
+      .forEach((sub) => {
+        (sub.handler as WalletEventHandlers["accountsChanged"])(accounts);
+      });
+  }
+
   abstract probe(): Promise<WalletAccount | undefined>;
   abstract connect(): Promise<WalletAccount | undefined>;
   abstract switchStarknetChain(chainId: string): Promise<boolean>;

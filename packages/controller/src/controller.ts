@@ -179,13 +179,19 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async switchStarknetChain(chainId: string): Promise<boolean> {
-    this.selectedChain = chainId;
-    this.account = await this.probe();
-    if (!this.account) {
-      this.account = await this.connect();
+    try {
+      this.selectedChain = chainId;
+      this.account = await this.probe();
+      if (!this.account) {
+        this.account = await this.connect();
+      }
+    } catch (e) {
+      console.error(e);
+      return false;
     }
 
-    return Promise.resolve(true);
+    this.emitNetworkChanged(chainId);
+    return true;
   }
 
   addStarknetChain(_chain: AddStarknetChainParameters): Promise<boolean> {
