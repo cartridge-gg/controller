@@ -47,7 +47,8 @@ export function Achievements() {
       address || self ? pins[addAddressPadding(address || self || "")] : [];
     const pinneds = achievements
       .filter((item) => ids.includes(item.id))
-      .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage));
+      .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
+      .slice(0, 3); // There is a front-end limit of 3 pinneds
     const completed = achievements.filter((item) => item.completed).length;
     const total = achievements.length;
     return { pinneds, completed, total };
@@ -137,6 +138,7 @@ export function Achievements() {
               players={players}
               address={self}
               achievements={achievements}
+              pins={pins}
             />
           )}
         </LayoutContent>

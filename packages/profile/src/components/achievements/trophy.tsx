@@ -354,6 +354,7 @@ function Track({
       className={cn(
         "bg-secondary grow p-2 flex items-center transition-all duration-200",
         hovered && (enabled || pinned) && "opacity-90 cursor-pointer",
+        pinned && "bg-quaternary",
       )}
       onClick={pinned ? handleUnpin : handlePin}
       onMouseEnter={() => setHovered(true)}
