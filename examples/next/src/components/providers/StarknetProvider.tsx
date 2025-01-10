@@ -9,8 +9,7 @@ import {
 import { PropsWithChildren } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { SessionPolicies } from "@cartridge/controller";
-
-const rpc = process.env.NEXT_PUBLIC_RPC_SEPOLIA!;
+import { constants } from "starknet";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -52,32 +51,32 @@ const policies: SessionPolicies = {
     },
   },
   messages: [
-    {
-      types: {
-        StarknetDomain: [
-          { name: "name", type: "shortstring" },
-          { name: "version", type: "shortstring" },
-          { name: "chainId", type: "shortstring" },
-          { name: "revision", type: "shortstring" },
-        ],
-        Person: [
-          { name: "name", type: "felt" },
-          { name: "wallet", type: "felt" },
-        ],
-        Mail: [
-          { name: "from", type: "Person" },
-          { name: "to", type: "Person" },
-          { name: "contents", type: "felt" },
-        ],
-      },
-      primaryType: "Mail",
-      domain: {
-        name: "StarkNet Mail",
-        version: "1",
-        revision: "1",
-        chainId: "SN_SEPOLIA",
-      },
-    },
+    // {
+    //   types: {
+    //     StarknetDomain: [
+    //       { name: "name", type: "shortstring" },
+    //       { name: "version", type: "shortstring" },
+    //       { name: "chainId", type: "shortstring" },
+    //       { name: "revision", type: "shortstring" },
+    //     ],
+    //     Person: [
+    //       { name: "name", type: "felt" },
+    //       { name: "wallet", type: "felt" },
+    //     ],
+    //     Mail: [
+    //       { name: "from", type: "Person" },
+    //       { name: "to", type: "Person" },
+    //       { name: "contents", type: "felt" },
+    //     ],
+    //   },
+    //   primaryType: "Mail",
+    //   domain: {
+    //     name: "StarkNet Mail",
+    //     version: "1",
+    //     revision: "1",
+    //     chainId: "SN_SEPOLIA",
+    //   },
+    // },
   ],
 };
 
@@ -98,7 +97,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      chains={[sepolia]}
+      chains={[mainnet, sepolia]}
       connectors={[controller]}
       explorer={starkscan}
       provider={provider}
@@ -110,7 +109,11 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 
 const controller = new ControllerConnector({
   policies,
-  rpc,
+  chains: [
+    { rpcUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA! },
+    { rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET! },
+  ],
+  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
   url:
     process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL,

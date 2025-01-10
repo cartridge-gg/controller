@@ -379,6 +379,28 @@ impl Controller {
         }
     }
 
+    pub async fn switch_chain(&mut self, rpc_url: Url) -> Result<(), ControllerError> {
+        let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
+        self.provider = provider;
+        self.rpc_url = rpc_url;
+        self.chain_id = self
+            .provider
+            .chain_id()
+            .await
+            .map_err(ControllerError::from)?;
+
+        self.storage
+            .set_controller(
+                self.app_id.as_str(),
+                &self.chain_id,
+                self.address,
+                ControllerMetadata::from(&self.clone()),
+            )
+            .expect("Should store controller");
+
+        Ok(())
+    }
+
     async fn get_nonce(&self) -> Result<Felt, ProviderError> {
         let current_nonce = self.nonce;
 

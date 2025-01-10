@@ -11,6 +11,7 @@ import SessionAccount from "../session/account";
 import BaseProvider from "../provider";
 import { toWasmPolicies } from "../utils";
 import { SessionPolicies } from "@cartridge/presets";
+import { AddStarknetChainParameters } from "@starknet-io/types-js";
 
 interface SessionRegistration {
   username: string;
@@ -25,6 +26,7 @@ export default class TelegramProvider extends BaseProvider {
   protected _chainId: string;
   protected _username?: string;
   protected _policies: SessionPolicies;
+  private _rpcUrl: string;
 
   constructor({
     rpc,
@@ -37,10 +39,9 @@ export default class TelegramProvider extends BaseProvider {
     policies: SessionPolicies;
     tmaUrl: string;
   }) {
-    super({
-      rpc,
-    });
+    super();
 
+    this._rpcUrl = rpc;
     this._tmaUrl = tmaUrl;
     this._chainId = chainId;
     this._policies = policies;
@@ -77,13 +78,21 @@ export default class TelegramProvider extends BaseProvider {
       this._tmaUrl
     }&redirect_query_name=startapp&policies=${JSON.stringify(
       this._policies,
-    )}&rpc_url=${this.rpc}`;
+    )}&rpc_url=${this._rpcUrl}`;
 
     localStorage.setItem("lastUsedConnector", this.id);
     openLink(url);
     miniApp.close();
 
     return;
+  }
+
+  switchStarknetChain(_chainId: string): Promise<boolean> {
+    throw new Error("switchStarknetChain not implemented");
+  }
+
+  addStarknetChain(_chain: AddStarknetChainParameters): Promise<boolean> {
+    throw new Error("addStarknetChain not implemented");
   }
 
   disconnect(): Promise<void> {
@@ -118,7 +127,7 @@ export default class TelegramProvider extends BaseProvider {
 
     this._username = sessionRegistration.username;
     this.account = new SessionAccount(this, {
-      rpcUrl: this.rpc.toString(),
+      rpcUrl: this._rpcUrl,
       privateKey: signer.privKey,
       address: sessionRegistration.address,
       ownerGuid: sessionRegistration.ownerGuid,

@@ -7,6 +7,7 @@ import {
 } from "starknet";
 import {
   AddInvokeTransactionResult,
+  ChainId,
   Signature,
   TypedData,
 } from "@starknet-io/types-js";
@@ -129,6 +130,7 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
 }
+
 export interface Profile {
   navigate(path: string): void;
 }
@@ -156,9 +158,13 @@ export type IFrameOptions = {
   colorMode?: ColorMode;
 };
 
+export type Chain = {
+  rpcUrl: string;
+};
+
 export type ProviderOptions = {
-  /** The URL of the RPC */
-  rpc: string;
+  defaultChainId: ChainId;
+  chains: Chain[];
 };
 
 export type KeychainOptions = IFrameOptions & {

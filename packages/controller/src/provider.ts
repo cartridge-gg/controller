@@ -1,11 +1,13 @@
 import { WalletAccount } from "starknet";
 import {
   AddInvokeTransactionParameters,
+  AddStarknetChainParameters,
   Errors,
   Permission,
   RequestAccountsParameters,
   RequestFn,
   StarknetWindowObject,
+  SwitchStarknetChainParameters,
   TypedData,
   WalletEventHandlers,
   WalletEventListener,
@@ -14,7 +16,6 @@ import {
 import manifest from "../package.json";
 
 import { icon } from "./icon";
-import { ProviderOptions } from "./types";
 
 export default abstract class BaseProvider implements StarknetWindowObject {
   public id = "controller";
@@ -22,15 +23,8 @@ export default abstract class BaseProvider implements StarknetWindowObject {
   public version = manifest.version;
   public icon = icon;
 
-  public rpc: URL;
   public account?: WalletAccount;
   public subscriptions: WalletEvents[] = [];
-
-  constructor(options: ProviderOptions) {
-    const { rpc } = options;
-
-    this.rpc = new URL(rpc);
-  }
 
   request: RequestFn = async (call) => {
     switch (call.type) {
@@ -70,26 +64,22 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           data: "wallet_watchAsset not implemented",
         } as Errors.UNEXPECTED_ERROR;
 
-      case "wallet_addStarknetChain":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_addStarknetChain not implemented",
-        } as Errors.UNEXPECTED_ERROR;
+      case "wallet_addStarknetChain": {
+        let params = call.params as AddStarknetChainParameters;
+        return this.addStarknetChain(params);
+      }
 
-      case "wallet_switchStarknetChain":
-        throw {
-          code: 63,
-          message: "An unexpected error occurred",
-          data: "wallet_switchStarknetChain not implemented",
-        } as Errors.UNEXPECTED_ERROR;
+      case "wallet_switchStarknetChain": {
+        let params = call.params as SwitchStarknetChainParameters;
+        return this.switchStarknetChain(params.chainId);
+      }
 
       case "wallet_requestChainId":
         if (!this.account) {
           throw {
             code: 63,
             message: "An unexpected error occurred",
-            data: "wallet_deploymentData not implemented",
+            data: "Account not initialized",
           } as Errors.UNEXPECTED_ERROR;
         }
 
@@ -107,7 +97,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           throw {
             code: 63,
             message: "An unexpected error occurred",
-            data: "wallet_deploymentData not implemented",
+            data: "Account not initialized",
           } as Errors.UNEXPECTED_ERROR;
         }
 
@@ -177,6 +167,26 @@ export default abstract class BaseProvider implements StarknetWindowObject {
     }
   };
 
+  protected emitNetworkChanged(chainId: string) {
+    this.subscriptions
+      .filter((sub) => sub.type === "networkChanged")
+      .forEach((sub) => {
+        (sub.handler as WalletEventHandlers["networkChanged"])(chainId);
+      });
+  }
+
+  protected emitAccountsChanged(accounts: string[]) {
+    this.subscriptions
+      .filter((sub) => sub.type === "accountsChanged")
+      .forEach((sub) => {
+        (sub.handler as WalletEventHandlers["accountsChanged"])(accounts);
+      });
+  }
+
   abstract probe(): Promise<WalletAccount | undefined>;
   abstract connect(): Promise<WalletAccount | undefined>;
+  abstract switchStarknetChain(chainId: string): Promise<boolean>;
+  abstract addStarknetChain(
+    chain: AddStarknetChainParameters,
+  ): Promise<boolean>;
 }
