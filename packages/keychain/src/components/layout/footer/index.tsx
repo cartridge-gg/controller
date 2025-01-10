@@ -1,5 +1,4 @@
 import { forwardRef, memo, PropsWithChildren, useEffect, useRef } from "react";
-import { useLayout } from "@/components/layout";
 import { cn } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
 
@@ -9,7 +8,6 @@ export function Footer({
   showCatridgeLogo,
 }: PropsWithChildren & { className?: string; showCatridgeLogo?: boolean }) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const { footer } = useLayout();
 
   useEffect(() => {
     if (!ref.current) return;
@@ -28,11 +26,7 @@ export function Footer({
     return () => {
       observer.disconnect();
     };
-  }, [footer]);
-
-  useEffect(() => {
-    window.document.body.style.overflowY = footer.isOpen ? "hidden" : "auto";
-  }, [footer.isOpen]);
+  }, []);
 
   return (
     <div

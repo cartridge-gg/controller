@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Banner } from "./Banner";
-import { LayoutContext } from "..";
 
 const meta: Meta<typeof Banner> = {
   component: Banner,
@@ -11,23 +10,6 @@ const meta: Meta<typeof Banner> = {
       values: [{ name: "dark", value: "#161a17" }],
     },
   },
-  decorators: [
-    (Story, context) => (
-      <LayoutContext.Provider
-        value={{
-          variant: context.parameters.variant || "default",
-          footer: {
-            height: 0,
-            setHeight: () => {},
-            isOpen: false,
-            onToggle: () => {},
-          },
-        }}
-      >
-        <Story />
-      </LayoutContext.Provider>
-    ),
-  ],
 } satisfies Meta<typeof Banner>;
 
 export default meta;

@@ -9,7 +9,6 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { useControllerTheme } from "@/hooks/theme";
-import { useLayoutVariant } from "../";
 import { TOP_BAR_HEIGHT } from "./TopBar";
 import { IconProps } from "@cartridge/ui-next";
 
@@ -18,10 +17,19 @@ export type BannerProps = {
   icon?: React.ReactElement;
   title: string | React.ReactElement;
   description?: string | React.ReactElement;
+  variant?: BannerVariant;
 };
-export function Banner({ Icon, icon, title, description }: BannerProps) {
+
+export type BannerVariant = "expanded" | "compressed";
+
+export function Banner({
+  Icon,
+  icon,
+  title,
+  description,
+  variant = "compressed",
+}: BannerProps) {
   const theme = useControllerTheme();
-  const variant = useLayoutVariant();
 
   switch (variant) {
     case "expanded":

@@ -1,6 +1,5 @@
-import { PropsWithChildren, createContext, useContext, useState } from "react";
+import { PropsWithChildren } from "react";
 import { Header, HeaderProps } from "./header";
-import { useDisclosure } from "@cartridge/ui-next";
 
 export function Container({
   children,
@@ -12,38 +11,26 @@ export function Container({
   icon,
   title,
   description,
-  variant = "compressed",
   className,
-}: {
-  variant?: LayoutVariant;
-} & PropsWithChildren &
-  HeaderProps & { className?: string }) {
-  const [height, setHeight] = useState(0);
-
-  const { isOpen, onToggle } = useDisclosure();
+  variant,
+}: PropsWithChildren & HeaderProps & { className?: string }) {
   return (
-    <LayoutContext.Provider
-      value={{ variant, footer: { height, setHeight, isOpen, onToggle } }}
-    >
-      <ResponsiveWrapper>
-        <Header
-          onBack={onBack}
-          onClose={onClose}
-          hideAccount={hideAccount}
-          hideNetwork={hideNetwork}
-          Icon={Icon}
-          icon={icon}
-          title={title}
-          description={description}
-        />
-        <div className={className}>{children}</div>
-      </ResponsiveWrapper>
-    </LayoutContext.Provider>
+    <ResponsiveWrapper>
+      <Header
+        onBack={onBack}
+        onClose={onClose}
+        hideAccount={hideAccount}
+        hideNetwork={hideNetwork}
+        Icon={Icon}
+        icon={icon}
+        title={title}
+        description={description}
+        variant={variant}
+      />
+      <div className={className}>{children}</div>
+    </ResponsiveWrapper>
   );
 }
-
-export const FOOTER_HEIGHT = 40;
-export const PORTAL_WINDOW_HEIGHT = 600;
 
 function ResponsiveWrapper({ children }: PropsWithChildren) {
   return (
@@ -61,34 +48,4 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
       </div>
     </>
   );
-}
-
-export const LayoutContext = createContext<LayoutContextValue>({
-  variant: "expanded",
-  footer: {
-    height: 0,
-    setHeight: () => {},
-    isOpen: false,
-    onToggle: () => {},
-  },
-});
-
-export type LayoutContextValue = {
-  variant: LayoutVariant;
-  footer: {
-    height: number;
-    setHeight: (height: number) => void;
-    isOpen: boolean;
-    onToggle: () => void;
-  };
-};
-
-export type LayoutVariant = "expanded" | "compressed";
-
-export function useLayout() {
-  return useContext(LayoutContext);
-}
-
-export function useLayoutVariant(): LayoutVariant {
-  return useLayout().variant;
 }
