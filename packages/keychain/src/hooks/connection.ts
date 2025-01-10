@@ -13,7 +13,6 @@ import {
   toArray,
   toSessionPolicies,
 } from "@cartridge/controller";
-import { setIsSignedUp } from "@/utils/cookie";
 import {
   ConnectionContext,
   ConnectionContextValue,
@@ -97,7 +96,6 @@ export function useConnectionValue() {
     }
 
     setControllerRaw(controller);
-    setIsSignedUp();
   }, []);
 
   useEffect(() => {

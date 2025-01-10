@@ -1,7 +1,7 @@
 import { ProbeReply, ResponseCodes } from "@cartridge/controller";
 import Controller from "@/utils/controller";
 
-export function probeFactory({
+export function probe({
   setController,
   setRpcUrl,
 }: {

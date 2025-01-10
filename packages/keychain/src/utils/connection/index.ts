@@ -5,7 +5,7 @@ import Controller from "@/utils/controller";
 import { connect } from "./connect";
 import { execute } from "./execute";
 import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
-import { probeFactory } from "./probe";
+import { probe } from "./probe";
 import { signMessageFactory } from "./sign";
 import { fetchControllers } from "./fetchControllers";
 import { ConnectionCtx } from "./types";
@@ -41,7 +41,7 @@ export function connectToController<ParentMethods extends object>({
       execute: () => execute({ setContext }),
       estimateDeclareFee: () => estimateDeclareFee,
       estimateInvokeFee: () => estimateInvokeFee,
-      probe: normalize(probeFactory({ setController, setRpcUrl })),
+      probe: normalize(probe({ setController, setRpcUrl })),
       signMessage: () => signMessageFactory(setContext),
       openSettings: () => openSettingsFactory(setContext),
       reset: () => () => setContext(undefined),
