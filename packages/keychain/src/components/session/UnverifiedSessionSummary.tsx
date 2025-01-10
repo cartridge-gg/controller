@@ -1,17 +1,19 @@
 import { toArray } from "@cartridge/controller";
-import { ParsedSessionPolicies } from "@/hooks/session";
+import { SessionContracts, SessionMessages } from "@/hooks/session";
 
 import { MessageCard } from "./MessageCard";
 import { ContractCard } from "./ContractCard";
 
 export function UnverifiedSessionSummary({
-  policies,
+  contracts,
+  messages,
 }: {
-  policies: ParsedSessionPolicies;
+  contracts?: SessionContracts;
+  messages?: SessionMessages;
 }) {
   return (
     <div className="flex flex-col gap-4">
-      {Object.entries(policies.contracts ?? {}).map(([address, contract]) => {
+      {Object.entries(contracts ?? {}).map(([address, contract]) => {
         const methods = toArray(contract.methods);
         const title = !contract.meta?.name ? "Contract" : contract.meta.name;
         const icon = contract.meta?.icon;
@@ -28,8 +30,8 @@ export function UnverifiedSessionSummary({
         );
       })}
 
-      {policies.messages && policies.messages.length > 0 && (
-        <MessageCard messages={policies.messages} isExpanded />
+      {messages && messages.length > 0 && (
+        <MessageCard messages={messages} isExpanded />
       )}
     </div>
   );

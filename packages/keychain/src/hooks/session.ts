@@ -26,22 +26,24 @@ export type ERC20Metadata = {
 
 export type ParsedSessionPolicies = {
   verified: boolean;
-  contracts?: Record<
-    string,
-    Omit<ContractPolicy, "methods"> & {
-      meta?: Partial<ERC20Metadata> & {
-        type: ContractType;
-        icon?: React.ReactNode | string;
-      };
-      methods: (Method & {
-        authorized?: boolean;
-      })[];
-    }
-  >;
-  messages?: (SignMessagePolicy & {
-    authorized?: boolean;
-  })[];
+  contracts?: SessionContracts;
+  messages?: SessionMessages;
 };
+
+export type SessionContracts = Record<
+  string,
+  Omit<ContractPolicy, "methods"> & {
+    meta?: Partial<ERC20Metadata> & {
+      type: ContractType;
+      icon?: React.ReactNode | string;
+    };
+    methods: (Method & { authorized?: boolean })[];
+  }
+>;
+
+export type SessionMessages = (SignMessagePolicy & {
+  authorized?: boolean;
+})[];
 
 const VRF_ADDRESS = getChecksumAddress(
   "0x051Fea4450Da9D6aeE758BDEbA88B2f665bCbf549D2C61421AA724E9AC0Ced8F",

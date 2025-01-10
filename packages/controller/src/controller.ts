@@ -37,7 +37,6 @@ export default class ControllerProvider extends BaseProvider {
       let chainId: ChainId | undefined;
       const url = new URL(chain.rpcUrl);
       const parts = url.pathname.split("/");
-
       if (parts.includes("starknet")) {
         if (parts.includes("mainnet")) {
           chainId = constants.StarknetChainId.SN_MAIN;
@@ -58,6 +57,17 @@ export default class ControllerProvider extends BaseProvider {
       }
 
       chains.set(chainId, chain);
+    }
+
+    if (
+      options.policies?.messages?.length &&
+      options.policies.messages.length !== chains.size
+    ) {
+      console.warn(
+        "Each message policy is associated with a specific chain. " +
+          "The number of message policies does not match the number of chains specified - " +
+          "session message signing may not work on some chains.",
+      );
     }
 
     this.chains = chains;

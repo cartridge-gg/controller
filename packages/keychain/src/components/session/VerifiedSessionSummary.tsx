@@ -1,30 +1,30 @@
-import { ParsedSessionPolicies } from "@/hooks/session";
+import { SessionContracts, SessionMessages } from "@/hooks/session";
 import { AggregateCard } from "./AggregateCard";
 import { CodeIcon } from "@cartridge/ui-next";
 import { ContractCard } from "./ContractCard";
 
 export function VerifiedSessionSummary({
   game,
-  policies,
+  contracts,
+  messages,
 }: {
   game: string;
-  policies: ParsedSessionPolicies;
+  contracts?: SessionContracts;
+  messages?: SessionMessages;
 }) {
   // Extract token and VRF contracts
-  const individual = Object.entries(policies.contracts ?? {}).filter(
-    ([, contract]) => {
-      return contract.meta?.type === "ERC20" || contract.meta?.type === "VRF";
-    },
-  );
+  const individual = Object.entries(contracts ?? {}).filter(([, contract]) => {
+    return contract.meta?.type === "ERC20" || contract.meta?.type === "VRF";
+  });
 
   // Create new policies object without token/VRF contracts
   const aggregate = {
-    ...policies,
     contracts: Object.fromEntries(
-      Object.entries(policies.contracts ?? {}).filter(([, contract]) => {
+      Object.entries(contracts ?? {}).filter(([, contract]) => {
         return contract.meta?.type !== "ERC20" && contract.meta?.type !== "VRF";
       }),
     ),
+    messages,
   };
 
   return (
@@ -32,7 +32,8 @@ export function VerifiedSessionSummary({
       <AggregateCard
         title={`PLAY ${game}`}
         icon={<CodeIcon variant="solid" />}
-        policies={aggregate}
+        contracts={aggregate.contracts}
+        messages={messages}
       />
 
       {individual.map(([address, contract]) => (
