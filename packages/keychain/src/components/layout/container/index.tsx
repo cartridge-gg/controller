@@ -1,6 +1,5 @@
 import { PropsWithChildren } from "react";
 import { Header, HeaderProps } from "./header";
-
 export function Container({
   children,
   onBack,
@@ -36,14 +35,14 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
   return (
     <>
       {/* for desktop */}
-      <div className="hidden h-screen md:flex flex-col items-center justify-center">
+      <div className="hidden md:flex flex-col items-center justify-center">
         <div className="w-desktop border border-muted rounded-xl overflow-hidden flex flex-col relative">
           {children}
         </div>
       </div>
 
       {/* device smaller than desktop width */}
-      <div className="md:hidden w-screen h-screen relative flex flex-col bg-background">
+      <div className="md:hidden w-screen h-screen max-w-desktop relative flex flex-col bg-background">
         {children}
       </div>
     </>

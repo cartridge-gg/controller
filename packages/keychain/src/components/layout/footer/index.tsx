@@ -12,13 +12,13 @@ export function Footer({
   useEffect(() => {
     if (!ref.current) return;
 
-    const observer = new ResizeObserver(() => {
-      if (ref.current && ref.current?.offsetHeight > 0) {
-        document.documentElement.style.setProperty(
-          "--footer-height",
-          `${ref.current.offsetHeight}px`,
-        );
-      }
+    const observer = new ResizeObserver((entries) => {
+      const rect = entries[0].contentRect;
+      if (!rect.height) return;
+      document.documentElement.style.setProperty(
+        "--footer-height",
+        `${rect.height + 16 * 2}px`,
+      );
     });
 
     observer.observe(ref.current);
@@ -37,7 +37,7 @@ export function Footer({
       )}
       ref={ref}
     >
-      <div className="flex flex-col px-8 gap-2">{children}</div>
+      <div className="flex flex-col px-4 gap-2">{children}</div>
 
       {showCatridgeLogo && (
         <Link
