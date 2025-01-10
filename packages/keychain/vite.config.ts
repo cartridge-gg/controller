@@ -28,6 +28,7 @@ export default defineConfig(({ mode }) => ({
     port: mode === "development" ? 3001 : undefined,
   },
   resolve: {
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".mdx"],
     alias: {
       "@": "/src",
     },

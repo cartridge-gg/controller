@@ -1,6 +1,13 @@
 import { useRef, useState, useEffect } from "react";
 import { Container, Footer, Content } from "@/components/layout";
-import { Button, cn } from "@cartridge/ui-next";
+import {
+  Button,
+  cn,
+  LayoutContainer,
+  LayoutContent,
+  Input,
+  LayoutHeader,
+} from "@cartridge/ui-next";
 import { useControllerTheme } from "@/hooks/theme";
 import { usePostHog } from "posthog-js/react";
 import { useDebounce } from "@/hooks/debounce";
@@ -8,12 +15,14 @@ import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
 import { Legal, StatusTray } from ".";
 import { useCreateController } from "./useCreateController";
-import { Input } from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
 import InAppSpy from "inapp-spy";
+import { constants } from "starknet";
+// import { constants } from "starknet";
 
 interface CreateControllerViewProps {
+  variant?: "legacy" | "next";
   theme: VerifiableControllerTheme;
   usernameField: {
     value: string;
@@ -30,6 +39,7 @@ interface CreateControllerViewProps {
 }
 
 export function CreateControllerView({
+  variant = "next",
   theme,
   usernameField,
   validation,
@@ -41,6 +51,28 @@ export function CreateControllerView({
   onUsernameClear,
   onSubmit,
 }: CreateControllerViewProps) {
+  if (variant === "next") {
+    return (
+      <LayoutContainer>
+        <LayoutHeader
+          variant="expanded"
+          // hideNetwork
+          title={
+            theme.name === "cartridge"
+              ? "Play with Controller"
+              : `Play ${theme.name}`
+          }
+          description="Connect your Controller"
+          chainId={constants.StarknetChainId.SN_SEPOLIA}
+          onClose={() => {}}
+        />
+        <LayoutContent>
+          <div>Hello</div>
+        </LayoutContent>
+      </LayoutContainer>
+    );
+  }
+
   return (
     <Container
       variant="expanded"
@@ -144,6 +176,7 @@ export function CreateController({
   loginMode = LoginMode.Webauthn,
   onCreated,
 }: {
+  variant?: "legacy" | "next";
   isSlot?: boolean;
   loginMode?: LoginMode;
   onCreated?: () => void;
@@ -214,6 +247,7 @@ export function CreateController({
 
   return (
     <CreateControllerView
+      variant="legacy"
       theme={theme}
       usernameField={usernameField}
       validation={validation}
