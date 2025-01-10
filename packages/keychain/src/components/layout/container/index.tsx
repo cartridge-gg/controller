@@ -1,11 +1,3 @@
-import {
-  Container as ChakraContainer,
-  VStack,
-  StyleProps,
-  Flex,
-  Show,
-} from "@chakra-ui/react";
-import { motion } from "framer-motion";
 import { PropsWithChildren, createContext, useContext, useState } from "react";
 import { Header, HeaderProps } from "./header";
 import { useDisclosure } from "@cartridge/ui-next";
@@ -20,88 +12,54 @@ export function Container({
   icon,
   title,
   description,
-  variant,
+  variant = "compressed",
+  className,
 }: {
   variant?: LayoutVariant;
 } & PropsWithChildren &
-  StyleProps &
-  HeaderProps) {
-  return (
-    <Wrapper variant={variant}>
-      <Header
-        onBack={onBack}
-        onClose={onClose}
-        hideAccount={hideAccount}
-        hideNetwork={hideNetwork}
-        Icon={Icon}
-        icon={icon}
-        title={title}
-        description={description}
-      />
+  HeaderProps & { className?: string }) {
+  const [height, setHeight] = useState(0);
 
-      <VStack w="full">{children}</VStack>
-    </Wrapper>
+  const { isOpen, onToggle } = useDisclosure();
+  return (
+    <LayoutContext.Provider
+      value={{ variant, footer: { height, setHeight, isOpen, onToggle } }}
+    >
+      <ResponsiveWrapper>
+        <Header
+          onBack={onBack}
+          onClose={onClose}
+          hideAccount={hideAccount}
+          hideNetwork={hideNetwork}
+          Icon={Icon}
+          icon={icon}
+          title={title}
+          description={description}
+        />
+        <div className={className}>{children}</div>
+      </ResponsiveWrapper>
+    </LayoutContext.Provider>
   );
 }
 
 export const FOOTER_HEIGHT = 40;
 export const PORTAL_WINDOW_HEIGHT = 600;
 
-function Wrapper({
-  variant = "compressed",
-  children,
-  ...rest
-}: React.PropsWithChildren & { variant?: LayoutVariant }) {
-  const [height, setHeight] = useState(0);
-  const { isOpen, onToggle } = useDisclosure();
-
+function ResponsiveWrapper({ children }: PropsWithChildren) {
   return (
-    <LayoutContext.Provider
-      value={{ variant, footer: { height, setHeight, isOpen, onToggle } }}
-    >
-      {/** Show as full page  */}
-      <Show below="md">
-        <ChakraContainer
-          w="100vw"
-          h="100vh"
-          bg="solid.bg"
-          p={0}
-          as={motion.div}
-          animate={{ opacity: 1 }}
-          initial={{ opacity: 0 }}
-          centerContent
-          position="relative"
-          {...rest}
-        >
+    <>
+      {/* for desktop */}
+      <div className="hidden md:flex flex-col items-center justify-center">
+        <div className="w-desktop border border-muted rounded-xl overflow-hidden flex flex-col relative">
           {children}
-        </ChakraContainer>
-      </Show>
+        </div>
+      </div>
 
-      {/** Show as modal  */}
-      <Show above="md">
-        <Flex w="100vw" h="100vh" p={0} align="center">
-          <ChakraContainer
-            w="432px"
-            // h={`${PORTAL_WINDOW_HEIGHT}px`}
-            borderWidth={1}
-            borderColor="solid.primaryAccent"
-            verticalAlign="middle"
-            bg="solid.bg"
-            p={0}
-            as={motion.div}
-            animate={{ opacity: 1 }}
-            initial={{ opacity: 0 }}
-            centerContent
-            borderRadius="lg"
-            overflow="hidden"
-            position="relative"
-            {...rest}
-          >
-            {children}
-          </ChakraContainer>
-        </Flex>
-      </Show>
-    </LayoutContext.Provider>
+      {/* device smaller than desktop width */}
+      <div className="md:hidden h-screen relative flex flex-col bg-background">
+        {children}
+      </div>
+    </>
   );
 }
 
