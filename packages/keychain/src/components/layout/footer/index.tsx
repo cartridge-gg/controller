@@ -1,24 +1,22 @@
-import { HStack, VStack, Text } from "@chakra-ui/react";
-import React, { forwardRef, memo, useEffect, useRef } from "react";
-import { FOOTER_HEIGHT, useLayout } from "@/components/layout";
-import { Link } from "react-router-dom";
+import { forwardRef, memo, PropsWithChildren, useEffect, useRef } from "react";
+import { useLayout } from "@/components/layout";
 import { cn } from "@cartridge/ui-next";
+import { Link } from "react-router-dom";
 
 export function Footer({
   children,
+  className,
   showCatridgeLogo,
-}: React.PropsWithChildren & {
-  showCatridgeLogo?: boolean;
-}) {
+}: PropsWithChildren & { className?: string; showCatridgeLogo?: boolean }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const { footer } = useLayout();
 
   useEffect(() => {
     if (!ref.current) return;
 
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        footer.setHeight(entry.contentRect.height);
+    const observer = new ResizeObserver(() => {
+      if (ref.current && ref.current?.offsetHeight > 0) {
+        footer.setHeight(ref.current?.offsetHeight);
       }
     });
 
@@ -34,54 +32,28 @@ export function Footer({
   }, [footer.isOpen]);
 
   return (
-    <VStack
-      position={["fixed", "fixed", "absolute"]}
-      bottom={0}
-      w="full"
-      zIndex={1}
-      gap={0}
-      bgColor="solid.bg"
-      overflow="hidden"
+    <div
+      className={cn(
+        "flex flex-col gap-2 w-full pt-4 fixed md:absolute left-0 bottom-0 bg-background",
+        !showCatridgeLogo && "pb-4",
+        className,
+      )}
       ref={ref}
     >
-      <VStack
-        justifySelf="flex-end"
-        bg="solid.bg"
-        w="full"
-        align="stretch"
-        p={4}
-        pb={showCatridgeLogo ? 1 : 4}
-      >
-        {children}
-      </VStack>
+      <div className="flex flex-col px-4 gap-2">{children}</div>
 
       {showCatridgeLogo && (
-        <HStack
-          justifySelf="flex-end"
-          bg="solid.bg"
-          w="full"
-          color="text.secondary"
-          alignItems="center"
-          justify="center"
-          h={FOOTER_HEIGHT / 4}
-          gap={1}
-          opacity={0.5}
-          as={Link}
+        <Link
           to="https://cartridge.gg"
           target="_blank"
-          overflow="hidden"
-          _hover={{
-            color: "brand.primary",
-          }}
+          className="h-10 flex items-center justify-center gap-1 text-muted hover:text-primary"
         >
-          <ControllerIcon height={22} />
-          <Text fontSize="xs" fontWeight={500} color="currentColor">
-            by
-          </Text>
+          <ControllerIcon />
+          <div className="text-xs font-medium">by</div>
           <CartridgeLogo />
-        </HStack>
+        </Link>
       )}
-    </VStack>
+    </div>
   );
 }
 
@@ -135,12 +107,12 @@ export const CartridgeLogo = memo(
   ),
 );
 
-const ControllerIcon = ({ height = 16 }: { height?: number }) => (
+const ControllerIcon = () => (
   <svg
-    height={height}
     viewBox="0 0 64 64"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className="h-6"
   >
     <path
       d="M29.9624 15.6199H34.0374V20.3101H29.9624V15.6199Z"
@@ -156,5 +128,3 @@ const ControllerIcon = ({ height = 16 }: { height?: number }) => (
     />
   </svg>
 );
-
-export const FOOTER_MIN_HEIGHT = 252;
