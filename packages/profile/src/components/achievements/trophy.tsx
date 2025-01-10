@@ -16,7 +16,6 @@ import { useArcade } from "@/hooks/arcade";
 import { useConnection } from "@/hooks/context";
 import { useAccount } from "@/hooks/account";
 import { addAddressPadding } from "starknet";
-import { TwitterShareButton } from "react-share";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 
 export interface Task {
@@ -407,30 +406,35 @@ function Share({
     });
   }, [timestamp]);
 
-  if (!url || !xhandle) return null;
-
-  return (
-    <TwitterShareButton
-      className="grow"
-      url={url}
-      title={`I got a new achievement in @${xhandle} game 🧩
-
+  const handleShare = useCallback(() => {
+    if (!url || !xhandle) return;
+    const content = `I got a new achievement in @${xhandle} game 🏆
+  
 ${title}
 Points: ${earning}
 At: ${date}
 
 Think you can get it as well? Join the game ${url}
 
-Play now 👇
-`}
+Play now 👇`;
+
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
+      content,
+    )}&url=${encodeURIComponent(url)}`;
+
+    window.open(twitterUrl, "_blank", "noopener,noreferrer");
+  }, [url, xhandle, title, earning, date]);
+
+  if (!url || !xhandle) return null;
+
+  return (
+    <div
+      className={cn(
+        "grow bg-secondary p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
+      )}
+      onClick={handleShare}
     >
-      <div
-        className={cn(
-          "bg-secondary h-full p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
-        )}
-      >
-        <XIcon size="sm" />
-      </div>
-    </TwitterShareButton>
+      <XIcon size="sm" />
+    </div>
   );
 }
