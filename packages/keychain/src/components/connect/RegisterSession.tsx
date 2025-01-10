@@ -7,7 +7,7 @@ import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { SESSION_EXPIRATION } from "@/const";
+import { DEFAULT_SESSION_DURATION } from "@/const";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { ParsedSessionPolicies } from "@/hooks/session";
@@ -22,7 +22,7 @@ export function RegisterSession({
   publicKey?: string;
 }) {
   const { controller, theme } = useConnection();
-  const [expiresAt] = useState<bigint>(SESSION_EXPIRATION);
+  const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const [transactions, setTransactions] = useState<
     | {
         contractAddress: string;
@@ -37,7 +37,7 @@ export function RegisterSession({
       setTransactions(undefined);
     } else {
       controller
-        .registerSessionCalldata(expiresAt, policies, publicKey)
+        .registerSessionCalldata(duration, policies, publicKey)
         .then((calldata) => {
           setTransactions([
             {
@@ -48,7 +48,7 @@ export function RegisterSession({
           ]);
         });
     }
-  }, [controller, expiresAt, policies, publicKey]);
+  }, [controller, duration, policies, publicKey]);
 
   const onRegisterSession = useCallback(
     async (maxFee?: bigint) => {
@@ -75,7 +75,7 @@ export function RegisterSession({
       }
 
       const { transaction_hash } = await controller.registerSession(
-        expiresAt,
+        duration,
         policies,
         publicKey,
         maxFee,
@@ -91,7 +91,7 @@ export function RegisterSession({
 
       onConnect(transaction_hash);
     },
-    [controller, expiresAt, policies, publicKey, onConnect],
+    [controller, duration, policies, publicKey, onConnect],
   );
 
   return (
@@ -108,11 +108,15 @@ export function RegisterSession({
             game={theme.name}
             contracts={policies.contracts}
             messages={policies.messages}
+            duration={duration}
+            onDurationChange={setDuration}
           />
         ) : (
           <UnverifiedSessionSummary
             contracts={policies.contracts}
             messages={policies.messages}
+            duration={duration}
+            onDurationChange={setDuration}
           />
         )}
       </Content>
