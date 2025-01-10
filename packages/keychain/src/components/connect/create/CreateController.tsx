@@ -57,7 +57,7 @@ export function CreateControllerView({
           if (e.key === "Enter") e.preventDefault();
         }}
       >
-        <Content mb="2rem" gap={0}>
+        <Content className="gap-0">
           <div
             className={cn(
               "border-[#E46958] rounded",

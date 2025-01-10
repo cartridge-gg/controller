@@ -155,7 +155,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
       Icon={EthereumIcon}
       onBack={onBack}
     >
-      <Content gap={6}>
+      <Content className="gap-6">
         <Balance showBalances={["eth"]} />
       </Content>
 

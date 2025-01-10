@@ -16,7 +16,10 @@ export function Footer({
 
     const observer = new ResizeObserver(() => {
       if (ref.current && ref.current?.offsetHeight > 0) {
-        footer.setHeight(ref.current?.offsetHeight);
+        document.documentElement.style.setProperty(
+          "--footer-height",
+          `${ref.current.offsetHeight}px`,
+        );
       }
     });
 
@@ -40,7 +43,7 @@ export function Footer({
       )}
       ref={ref}
     >
-      <div className="flex flex-col px-4 gap-2">{children}</div>
+      <div className="flex flex-col px-8 gap-2">{children}</div>
 
       {showCatridgeLogo && (
         <Link

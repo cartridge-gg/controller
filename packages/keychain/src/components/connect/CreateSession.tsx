@@ -118,7 +118,7 @@ export function CreateSession({
         }
       }}
     >
-      <Content gap={6}>
+      <Content className="gap-6">
         <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
           <VerifiedSessionSummary
