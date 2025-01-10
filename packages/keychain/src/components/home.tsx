@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { DeployCtx, SignMessageCtx } from "@/utils/connection";
+import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
@@ -13,9 +13,11 @@ import { PurchaseCredits } from "./funding/PurchaseCredits";
 import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
+import { execute } from "@/utils/connection/execute";
 
 export function Home() {
-  const { context, controller, error, policies, upgrade } = useConnection();
+  const { context, setContext, controller, error, policies, upgrade } =
+    useConnection();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
   >(undefined);
@@ -60,8 +62,9 @@ export function Home() {
     return <CreateController loginMode={LoginMode.Controller} />;
   }
 
-  if (!upgrade.isSynced) {
-    return <></>;
+  if (!upgrade.isSynced || hasSessionForPolicies === undefined) {
+    // This is likely never observable in a real application but just in case.
+    return <PageLoading />;
   }
 
   if (upgrade.available) {
@@ -87,10 +90,7 @@ export function Home() {
         return <></>;
       }
 
-      if (hasSessionForPolicies === undefined) {
-        // This is likely never observable in a real application but just in case.
-        return <PageLoading />;
-      } else if (hasSessionForPolicies) {
+      if (hasSessionForPolicies) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
@@ -113,6 +113,7 @@ export function Home() {
         />
       );
     }
+
     case "logout": {
       posthog?.capture("Call Logout");
 
@@ -136,11 +137,46 @@ export function Home() {
         />
       );
     }
+
     case "execute": {
       posthog?.capture("Call Execute");
 
+      const ctx = context as ExecuteCtx;
+      if (!hasSessionForPolicies) {
+        return (
+          <CreateSession
+            isUpdate
+            policies={policies!}
+            onConnect={async () => {
+              const res = await execute({
+                setContext: (nextCtx) => {
+                  setContext(nextCtx);
+                },
+              })(
+                ctx.transactions,
+                ctx.abis || [],
+                ctx.transactionsDetail,
+                false,
+              );
+
+              setHasSessionForPolicies(true);
+
+              if ("transaction_hash" in res) {
+                // resets execute ui
+                setContext(undefined);
+                return ctx.resolve?.({
+                  code: ResponseCodes.SUCCESS,
+                  transaction_hash: res.transaction_hash,
+                });
+              }
+            }}
+          />
+        );
+      }
+
       return <ConfirmTransaction />;
     }
+
     case "deploy": {
       posthog?.capture("Call Deploy");
 
