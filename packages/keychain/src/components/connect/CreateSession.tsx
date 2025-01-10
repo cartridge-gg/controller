@@ -1,7 +1,7 @@
 import { Container, Content, Footer } from "@/components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "@/utils/connection";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { SessionConsent } from "@/components/connect";
@@ -12,15 +12,7 @@ import { ParsedSessionPolicies } from "@/hooks/session";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { DEFAULT_SESSION_DURATION } from "@/const";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Button,
-  Checkbox,
-} from "@cartridge/ui-next";
+import { Button, Checkbox } from "@cartridge/ui-next";
 
 export function CreateSession({
   policies,
@@ -36,10 +28,6 @@ export function CreateSession({
   const [isDisabled, setIsDisabled] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
-  const expiresAt = useMemo(
-    () => duration + BigInt(Math.floor(Date.now() / 1000)),
-    [duration],
-  );
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
 
@@ -93,26 +81,26 @@ export function CreateSession({
         });
       }
 
-      await controller.createSession(expiresAt, policies, maxFee);
+      await controller.createSession(duration, policies, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
       setIsConnecting(false);
     }
-  }, [controller, expiresAt, policies, maxFee, onConnect]);
+  }, [controller, duration, policies, maxFee, onConnect]);
 
   const onSkipSession = useCallback(async () => {
     if (!controller || !policies) return;
     try {
       setError(undefined);
       setIsConnecting(true);
-      await controller.createSession(expiresAt, policies, maxFee);
+      await controller.createSession(duration, policies, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
       setIsConnecting(false);
     }
-  }, [controller, expiresAt, policies, maxFee, onConnect]);
+  }, [controller, duration, policies, maxFee, onConnect]);
 
   if (!upgrade.isSynced) {
     return <></>;
@@ -139,35 +127,21 @@ export function CreateSession({
       <Content gap={6}>
         <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
-          <VerifiedSessionSummary game={theme.name} policies={policies} />
+          <VerifiedSessionSummary
+            game={theme.name}
+            policies={policies}
+            duration={duration}
+            onDurationChange={setDuration}
+          />
         ) : (
-          <UnverifiedSessionSummary policies={policies} />
+          <UnverifiedSessionSummary
+            policies={policies}
+            duration={duration}
+            onDurationChange={setDuration}
+          />
         )}
       </Content>
       <Footer>
-        <div className="flex items-center text-sm text-muted-foreground py-4 gap-2">
-          <div className="font-medium">Expires in </div>
-          <Select
-            value={duration.toString()}
-            onValueChange={(val) => setDuration(BigInt(val))}
-          >
-            <SelectTrigger className="w-28">
-              <SelectValue
-                defaultValue={(60 * 60 * 24).toString()}
-                placeholder="1 HR"
-              />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value={(60 * 60).toString()}>1 HR</SelectItem>
-              <SelectItem value={(60 * 60 * 24).toString()}>24 HRS</SelectItem>
-              <SelectItem value={(60 * 60 * 24 * 7).toString()}>
-                1 WEEK
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         {!policies?.verified && (
           <div
             className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-error-icon text-error-icon"
