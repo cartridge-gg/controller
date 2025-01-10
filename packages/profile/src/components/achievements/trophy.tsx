@@ -7,6 +7,7 @@ import {
   CheckboxUncheckedIcon,
   Separator,
   SpinnerIcon,
+  XIcon,
 } from "@cartridge/ui-next";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
@@ -14,6 +15,9 @@ import { useCallback } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { useConnection } from "@/hooks/context";
 import { useAccount } from "@/hooks/account";
+import { addAddressPadding } from "starknet";
+import { TwitterShareButton } from "react-share";
+import { GameModel } from "@bal7hazar/arcade-sdk";
 
 export interface Task {
   id: string;
@@ -35,6 +39,8 @@ export function Trophy({
   softview,
   enabled,
   tasks,
+  game,
+  pins,
 }: {
   icon: string;
   title: string;
@@ -48,6 +54,8 @@ export function Trophy({
   softview: boolean;
   enabled: boolean;
   tasks: Task[];
+  game: GameModel | undefined;
+  pins: { [playerId: string]: string[] };
 }) {
   return (
     <div className="flex items-center gap-x-px">
@@ -83,7 +91,19 @@ export function Trophy({
           </div>
         )}
       </div>
-      {completed && !softview && <Track enabled={enabled} id={id} />}
+      <div className="flex flex-col gap-y-px h-full">
+        {completed && !softview && (
+          <Track enabled={enabled} id={id} pins={pins} />
+        )}
+        {completed && !softview && !!game && (
+          <Share
+            title={title}
+            game={game}
+            earning={earning}
+            timestamp={timestamp}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -273,18 +293,24 @@ function Progress({
   );
 }
 
-function Track({ id, enabled }: { id: string; enabled: boolean }) {
+function Track({
+  id,
+  enabled,
+  pins,
+}: {
+  id: string;
+  enabled: boolean;
+  pins: { [playerId: string]: string[] };
+}) {
   const { address } = useAccount();
   const { parent } = useConnection();
-  const { provider, pins } = useArcade();
+  const { provider } = useArcade();
 
   const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const pinned = useMemo(() => {
-    return pins[BigInt(address).toString(16)]?.includes(
-      BigInt(id).toString(16),
-    );
+    return pins[addAddressPadding(address)]?.includes(id);
   }, [pins, address, id]);
 
   const handlePin = useCallback(() => {
@@ -326,7 +352,7 @@ function Track({ id, enabled }: { id: string; enabled: boolean }) {
   return (
     <div
       className={cn(
-        "bg-secondary h-full p-2 flex items-center transition-all duration-200",
+        "bg-secondary grow p-2 flex items-center transition-all duration-200",
         hovered && (enabled || pinned) && "opacity-90 cursor-pointer",
       )}
       onClick={pinned ? handleUnpin : handlePin}
@@ -346,5 +372,64 @@ function Track({ id, enabled }: { id: string; enabled: boolean }) {
         />
       )}
     </div>
+  );
+}
+
+function Share({
+  game,
+  title,
+  earning,
+  timestamp,
+}: {
+  game: GameModel;
+  title: string;
+  earning: number;
+  timestamp: number;
+}) {
+  const url: string | null = useMemo(() => {
+    if (!game.socials.website) return null;
+    return game.socials.website;
+  }, [game]);
+
+  const xhandle = useMemo(() => {
+    if (!game.socials.twitter) return null;
+    // Take the last part of the url
+    return game.socials.twitter.split("/").pop();
+  }, [game]);
+
+  const date = useMemo(() => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }, [timestamp]);
+
+  if (!url || !xhandle) return null;
+
+  return (
+    <TwitterShareButton
+      className="grow"
+      url={url}
+      title={`I got a new achievement in @${xhandle} game 🧩
+
+${title}
+Points: ${earning}
+At: ${date}
+
+Think you can get it as well? Join the game ${url}
+
+Play now 👇
+`}
+    >
+      <div
+        className={cn(
+          "bg-secondary h-full p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
+        )}
+      >
+        <XIcon size="sm" />
+      </div>
+    </TwitterShareButton>
   );
 }

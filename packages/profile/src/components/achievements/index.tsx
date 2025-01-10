@@ -14,8 +14,10 @@ import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
-import { useData } from "@/hooks/context";
+import { useConnection, useData } from "@/hooks/context";
 import { useArcade } from "@/hooks/arcade";
+import { GameModel } from "@bal7hazar/arcade-sdk";
+import { addAddressPadding } from "starknet";
 
 export function Achievements() {
   const { username: selfname, address: self } = useAccount();
@@ -24,24 +26,32 @@ export function Achievements() {
     setAccountAddress,
   } = useData();
 
-  const { pins } = useArcade();
+  const { pins, games } = useArcade();
 
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
+  const { project, namespace } = useConnection();
 
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
   );
 
+  const game: GameModel | undefined = useMemo(() => {
+    return Object.values(games).find(
+      (game) => game.namespace === namespace && game.project === project,
+    );
+  }, [games, project, namespace]);
+
   const { pinneds, completed, total } = useMemo(() => {
-    const ids = pins[BigInt(address || self || "").toString(16)] || [];
+    const ids =
+      address || self ? pins[addAddressPadding(address || self || "")] : [];
     const pinneds = achievements
-      .filter((item) => ids.includes(BigInt(item.id).toString(16)))
+      .filter((item) => ids.includes(item.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage));
     const completed = achievements.filter((item) => item.completed).length;
     const total = achievements.length;
     return { pinneds, completed, total };
-  }, [achievements, pins]);
+  }, [achievements, pins, address, self]);
 
   const { rank, earnings } = useMemo(() => {
     const rank =
@@ -116,6 +126,8 @@ export function Achievements() {
                   achievements={achievements}
                   softview={!isSelf}
                   enabled={pinneds.length < 3}
+                  game={game}
+                  pins={pins}
                 />
               </div>
             </ScrollArea>

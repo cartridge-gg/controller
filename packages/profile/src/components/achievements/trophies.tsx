@@ -7,6 +7,7 @@ import {
 import { Trophy } from "./trophy";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { GameModel } from "@bal7hazar/arcade-sdk";
 
 const HIDDEN_GROUP = "HIDDEN";
 
@@ -14,10 +15,14 @@ export function Trophies({
   achievements,
   softview,
   enabled,
+  game,
+  pins,
 }: {
   achievements: Item[];
   softview: boolean;
   enabled: boolean;
+  game: GameModel | undefined;
+  pins: { [playerId: string]: string[] };
 }) {
   const [groups, setGroups] = useState<{ [key: string]: Item[] }>({});
 
@@ -72,6 +77,8 @@ export function Trophies({
               items={items}
               softview={softview}
               enabled={enabled}
+              game={game}
+              pins={pins}
             />
           ))}
         <Group
@@ -82,6 +89,8 @@ export function Trophies({
           )}
           softview={softview}
           enabled={enabled}
+          game={game}
+          pins={pins}
         />
       </div>
     </div>
@@ -93,11 +102,15 @@ function Group({
   items,
   softview,
   enabled,
+  game,
+  pins,
 }: {
   group: string;
   items: Item[];
   softview: boolean;
   enabled: boolean;
+  game: GameModel | undefined;
+  pins: { [playerId: string]: string[] };
 }) {
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState<number[]>([]);
@@ -170,6 +183,8 @@ function Group({
           softview={softview}
           enabled={enabled}
           tasks={achievement.tasks}
+          game={game}
+          pins={pins}
         />
       ))}
     </div>
