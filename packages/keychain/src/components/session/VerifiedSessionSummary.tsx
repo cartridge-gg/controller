@@ -2,13 +2,18 @@ import { ParsedSessionPolicies } from "@/hooks/session";
 import { AggregateCard } from "./AggregateCard";
 import { CodeIcon } from "@cartridge/ui-next";
 import { ContractCard } from "./ContractCard";
+import { ExpirationCard } from "./ExpirationCard";
 
 export function VerifiedSessionSummary({
   game,
   policies,
+  duration,
+  onDurationChange,
 }: {
   game: string;
   policies: ParsedSessionPolicies;
+  duration: bigint;
+  onDurationChange: (duration: bigint) => void;
 }) {
   // Extract token and VRF contracts
   const individual = Object.entries(policies.contracts ?? {}).filter(
@@ -44,6 +49,8 @@ export function VerifiedSessionSummary({
           methods={contract.methods}
         />
       ))}
+
+      <ExpirationCard duration={duration} onDurationChange={onDurationChange} />
     </div>
   );
 }

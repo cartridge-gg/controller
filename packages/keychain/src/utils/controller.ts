@@ -97,7 +97,7 @@ export default class Controller extends Account {
   }
 
   async createSession(
-    expiresAt: bigint,
+    duration: bigint,
     policies: ParsedSessionPolicies,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _maxFee?: BigNumberish,
@@ -106,6 +106,7 @@ export default class Controller extends Account {
       throw new Error("Account not found");
     }
 
+    const expiresAt = duration + BigInt(Math.floor(Date.now() / 1000));
     await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
   }
 
@@ -122,7 +123,7 @@ export default class Controller extends Account {
   }
 
   async registerSession(
-    expiresAt: bigint,
+    duration: bigint,
     policies: ParsedSessionPolicies,
     publicKey: string,
     maxFee: BigNumberish,
@@ -130,6 +131,8 @@ export default class Controller extends Account {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
+
+    const expiresAt = duration + BigInt(Math.floor(Date.now() / 1000));
 
     return await this.cartridge.registerSession(
       toWasmPolicies(policies),

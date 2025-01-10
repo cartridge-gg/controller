@@ -3,11 +3,16 @@ import { ParsedSessionPolicies } from "@/hooks/session";
 
 import { MessageCard } from "./MessageCard";
 import { ContractCard } from "./ContractCard";
+import { ExpirationCard } from "./ExpirationCard";
 
 export function UnverifiedSessionSummary({
   policies,
+  duration,
+  onDurationChange,
 }: {
   policies: ParsedSessionPolicies;
+  duration: bigint;
+  onDurationChange: (duration: bigint) => void;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -31,6 +36,8 @@ export function UnverifiedSessionSummary({
       {policies.messages && policies.messages.length > 0 && (
         <MessageCard messages={policies.messages} isExpanded />
       )}
+
+      <ExpirationCard duration={duration} onDurationChange={onDurationChange} />
     </div>
   );
 }
