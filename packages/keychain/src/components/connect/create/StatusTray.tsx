@@ -30,7 +30,7 @@ export function StatusTray({ username, validation, error }: StatusTrayProps) {
     <div
       className={cn(
         "flex flex-col top-[-2px] rounded-b relative z-0 gap-px  overflow-hidden",
-        isError ? "bg-[#E46958]" : "bg-quaternary",
+        isError ? "bg-[#E46958]" : "bg-background-200",
       )}
     >
       <div

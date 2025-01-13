@@ -2,15 +2,14 @@
   :root {
     --background: 220 60% 99%;
     --background-100: 210 22% 96%;
+    --background-200: 210 2.48% 94.9%;
+    --background-300: 214 3% 91%;
 
     --foreground: 0 0% 0%;
 
     --primary: 255 73% 61%;
     --primary-foreground: 0 0% 0%;
     --secondary: 255 73% 61%;
-
-    --quaternary: 210 2.48% 94.9%; /* bg.secondary */
-    --quinary: 214 3% 91%; /* bg.tertiary */
 
     --muted: 207 15% 85%;
     --muted-foreground: 0 0% 50%;

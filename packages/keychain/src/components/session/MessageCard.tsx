@@ -137,7 +137,7 @@ export function ValueRow({ values }: ValueRowProps) {
       <div className="flex items-center gap-2">
         {values.map((f) => (
           <div className="flex items-center gap-1 text-xs" key={f.name}>
-            {f.name}: <Badge className="bg-quaternary">{f.value}</Badge>
+            {f.name}: <Badge className="bg-background-200">{f.value}</Badge>
           </div>
         ))}
       </div>

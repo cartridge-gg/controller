@@ -52,7 +52,7 @@ export function Trophies({
         <p className="uppercase text-xs text-muted-foreground font-semibold tracking-wider">
           Total
         </p>
-        <div className="h-4 grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
+        <div className="h-4 grow flex flex-col justify-center items-start bg-background-200 rounded-xl p-1">
           <div
             style={{ width: `${Math.floor((100 * completed) / total)}%` }}
             className={cn("grow bg-primary rounded-xl")}
@@ -230,7 +230,7 @@ function Header({
             disabled={page === pages[pages.length - 1]}
           />
           <div className="flex items-center justify-center h-full p-3 bg-background-100 gap-2">
-            <div className="flex items-center justify-center rounded-xl bg-quaternary p-[3px]">
+            <div className="flex items-center justify-center rounded-xl bg-background-200 p-[3px]">
               <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
                 {pages.map((current) => (
                   <Page

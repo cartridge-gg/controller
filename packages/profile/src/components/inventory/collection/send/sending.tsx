@@ -43,7 +43,7 @@ function Item({
       )}
     >
       <div className="bg-background-100 flex w-11 aspect-square items-center justify-center">
-        <div className="flex items-center justify-center overflow-hidden h-7 w-7 bg-quaternary p-0.5">
+        <div className="flex items-center justify-center overflow-hidden h-7 w-7 bg-background-200 p-0.5">
           <CollectionImage imageUrl={imageUrl} size="xs" />
         </div>
       </div>

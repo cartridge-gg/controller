@@ -48,11 +48,11 @@ export function ErrorPage({ error }: { error: Error }) {
       Icon={AlertIcon}
     >
       <Content className="gap-4">
-        <div className="flex w-full px-4 py-6 bg-background-100 border border-quaternary rounded">
+        <div className="flex w-full px-4 py-6 bg-background-100 border border-background-200 rounded">
           <p className="w-full text-sm">{error.message}</p>
         </div>
 
-        <div className="flex items-center justify-between w-full px-4 py-6 bg-background-100 border border-quaternary rounded">
+        <div className="flex items-center justify-between w-full px-4 py-6 bg-background-100 border border-background-200 rounded">
           <p className="text-sm font-semibold">Get help</p>
 
           <Link
