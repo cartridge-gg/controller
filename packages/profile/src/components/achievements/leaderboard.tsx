@@ -90,7 +90,7 @@ function Row({
     >
       <div
         className={cn(
-          "grow flex justify-between items-center px-3 py-2 text-sm gap-x-3 sticky top-0 bg-secondary hover:bg-quaternary",
+          "grow flex justify-between items-center px-3 py-2 text-sm gap-x-3 sticky top-0 bg-background-100 hover:bg-quaternary",
           self && "bg-quaternary text-primary",
         )}
       >

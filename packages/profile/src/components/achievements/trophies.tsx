@@ -48,7 +48,7 @@ export function Trophies({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-8 bg-secondary py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
+      <div className="h-8 bg-background-100 py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
         <p className="uppercase text-xs text-muted-foreground font-semibold tracking-wider">
           Total
         </p>
@@ -205,7 +205,7 @@ function Header({
 }) {
   return (
     <div className="flex gap-x-px items-center h-8">
-      <div className="grow h-full p-3 bg-secondary flex items-center">
+      <div className="grow h-full p-3 bg-background-100 flex items-center">
         <p className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
           {group}
         </p>
@@ -229,7 +229,7 @@ function Header({
             onClick={handleNext}
             disabled={page === pages[pages.length - 1]}
           />
-          <div className="flex items-center justify-center h-full p-3 bg-secondary gap-2">
+          <div className="flex items-center justify-center h-full p-3 bg-background-100 gap-2">
             <div className="flex items-center justify-center rounded-xl bg-quaternary p-[3px]">
               <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
                 {pages.map((current) => (
@@ -264,7 +264,7 @@ function Pagination({
   return (
     <div
       className={cn(
-        "flex items-center justify-center h-8 w-8 bg-secondary",
+        "flex items-center justify-center h-8 w-8 bg-background-100",
         !disabled && "cursor-pointer hover:opacity-70",
       )}
       onClick={onClick}

@@ -47,7 +47,7 @@ export function MessageContent({
       {messages.map((m, i) => (
         <div
           key={`${m.domain.name}-${i}`}
-          className="flex flex-col bg-secondary gap-2 text-xs"
+          className="flex flex-col bg-background-100 gap-2 text-xs"
         >
           <div className="py-2 font-bold">{m.name ?? `Message ${i + 1}`}</div>
 

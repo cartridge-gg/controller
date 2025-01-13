@@ -62,7 +62,7 @@ export function ErrorAlert({
       case "error":
         return { bg: "bg-[#f9b9b9]", text: "text-[black]" };
       default:
-        return { bg: "bg-secondary", text: "text-secondary-foreground" };
+        return { bg: "bg-background-100", text: "text-foreground" };
     }
   }, [variant]);
 

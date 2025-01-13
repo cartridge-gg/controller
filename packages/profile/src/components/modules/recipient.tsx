@@ -138,7 +138,7 @@ export const Recipient = ({
         <Input
           type="text"
           spellCheck={false}
-          className="bg-secondary pr-12 border border-quaternary focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="bg-background-100 pr-12 border border-quaternary focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder="Destination Address"
           value={value}
           onChange={handleChange}
@@ -177,7 +177,7 @@ export const Recipient = ({
               onMouseEnter={() => setHover(true)}
               onMouseLeave={() => setHover(false)}
             >
-              <div className="h-10 w-10 rounded-full overflow-hidden bg-secondary flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full overflow-hidden bg-background-100 flex items-center justify-center">
                 {TooltipIcon}
               </div>
               {name ? (

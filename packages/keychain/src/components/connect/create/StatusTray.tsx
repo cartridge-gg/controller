@@ -54,7 +54,7 @@ export function StatusTray({ username, validation, error }: StatusTrayProps) {
                 : validation.error?.message || "Enter a username"}
       </div>
       {isTimeoutError && (
-        <div className="w-full flex items-center justify-between text-xs font-semibold px-4 py-2 text-secondary">
+        <div className="w-full flex items-center justify-between text-xs font-semibold px-4 py-2 text-background-100">
           <div>Having trouble signing up?</div>
           <Link
             className="flex items-center gap-1.5 hover:underline"
