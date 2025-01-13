@@ -3,11 +3,10 @@
     --background: 135 8% 9%; /* bg.background */
     --foreground: 0 0% 100%; /* text.primary */
 
+    --background-100: 135 6% 13%; /* bg.primary */
+
     --primary: 44 96% 61%; /* brand.primary */
     --primary-foreground: 135 15% 10%; /* bg.primary */
-
-    --secondary: 135 6% 13%; /* bg.primary */
-    --secondary-foreground: 0 0% 100%; /* text.primary */
 
     --tertiary: 120 57% 78%;
     --tertiary-foreground: 0 0% 0%;

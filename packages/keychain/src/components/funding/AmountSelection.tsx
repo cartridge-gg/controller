@@ -42,7 +42,7 @@ export function AmountSelection({
               className={cn(
                 "w-18",
                 value === selected && !custom
-                  ? "text-secondary-foreground"
+                  ? "text-foreground"
                   : "text-muted-foreground",
               )}
               disabled={lockSelection}
@@ -59,9 +59,7 @@ export function AmountSelection({
           {enableCustom && (
             <Button
               variant="secondary"
-              className={
-                custom ? "text-secondary-foreground" : "text-muted-foreground"
-              }
+              className={custom ? "text-foreground" : "text-muted-foreground"}
               disabled={lockSelection}
               onClick={() => {
                 setCustom(true);

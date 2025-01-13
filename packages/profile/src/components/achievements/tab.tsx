@@ -60,14 +60,14 @@ export function Scoreboard({
 }) {
   return (
     <div className="flex gap-3 select-none">
-      <div className="flex items-center border border-secondary rounded-md py-2 px-3">
+      <div className="flex items-center border border-background-100 rounded-md py-2 px-3">
         <Item
           Icon={LeaderboardIcon}
           active={true}
           label={!rank ? "---" : `#${rank}`}
         />
       </div>
-      <div className="flex items-center border border-secondary rounded-md py-2 px-3">
+      <div className="flex items-center border border-background-100 rounded-md py-2 px-3">
         <Item Icon={SparklesIcon} active={true} label={`${earnings}`} />
       </div>
     </div>
@@ -90,10 +90,10 @@ export function Tab({
   return (
     <div
       className={cn(
-        "h-10 grow w-1/2 flex justify-between items-center gap-2 border border-secondary rounded-md p-3 cursor-pointer",
+        "h-10 grow w-1/2 flex justify-between items-center gap-2 border border-background-100 rounded-md p-3 cursor-pointer",
         priority && "min-w-1/2",
-        active ? "opacity-100 bg-secondary" : "opacity-50 bg-background",
-        hovered && (active ? "opacity-90" : "bg-secondary/50"),
+        active ? "opacity-100 bg-background-100" : "opacity-50 bg-background",
+        hovered && (active ? "opacity-90" : "bg-background-100/50"),
       )}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}

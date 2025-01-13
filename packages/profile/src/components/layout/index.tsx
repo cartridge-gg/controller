@@ -92,7 +92,7 @@ export function LayoutHeader({
       <div className="flex min-w-0 gap-4 items-center">
         <div
           className={cn(
-            "w-11 h-11 bg-secondary flex shrink-0 items-center justify-center overflow-hidden",
+            "w-11 h-11 bg-background-100 flex shrink-0 items-center justify-center overflow-hidden",
             rounded ? "rounded-full" : "rounded",
           )}
         >

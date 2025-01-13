@@ -12,12 +12,21 @@ export default meta;
 
 type Story = StoryObj<typeof Colors>;
 
-export const Default: Story = {
+export const BackgroundForeground: Story = {
   args: {
     children: (
       <>
-        <Sample color="bg-background border" legacyName="bg" />
-        <Sample color="bg-foreground" legacyName="text.primary" />
+        <div className="size-40 flex flex-col items-center justify-center bg-background border border-muted/40 text-xs">
+          <div>bg-background</div>
+          <div>text-foreground</div>
+        </div>
+
+        <div className="size-40 flex flex-col items-center justify-center bg-background-100 text-xs">
+          <div>bg-background-100</div>
+          <div>text-foreground</div>
+        </div>
+        {/* <Sample color="bg-background border" legacyName="bg" />
+        <Sample color="bg-foreground" legacyName="text.primary" /> */}
       </>
     ),
   },
@@ -29,20 +38,6 @@ export const Primary: Story = {
       <>
         <Sample color="bg-primary" legacyName="brand.primary" />
         <Sample color="bg-primary-foreground border" legacyName="bg" />
-      </>
-    ),
-  },
-};
-
-export const Secondary: Story = {
-  args: {
-    children: (
-      <>
-        <Sample color="bg-secondary" legacyName="solid.primary" />
-        <Sample
-          color="bg-secondary-foreground border"
-          legacyName="text.primary"
-        />
       </>
     ),
   },
