@@ -43,8 +43,7 @@ export function Achievements() {
   }, [games, project, namespace]);
 
   const { pinneds, completed, total } = useMemo(() => {
-    const ids =
-      address || self ? pins[addAddressPadding(address || self || "")] : [];
+    const ids = pins[addAddressPadding(address || self || "0x0")] || [];
     const pinneds = achievements
       .filter((item) => ids.includes(item.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
