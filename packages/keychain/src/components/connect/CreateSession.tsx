@@ -132,7 +132,7 @@ export function CreateSession({
       <Footer>
         {!policies?.verified && (
           <div
-            className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-error-icon text-error-icon"
+            className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive text-destructive"
             onClick={() => !isConnecting && setIsConsent(!isConsent)}
           >
             <Checkbox

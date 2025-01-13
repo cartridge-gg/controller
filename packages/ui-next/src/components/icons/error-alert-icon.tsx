@@ -15,20 +15,17 @@ export function ErrorAlertIcon({
   switch (variant) {
     case "info":
       return (
-        <InfoIcon size={size} className={cn("text-info-icon", className)} />
+        <InfoIcon size={size} className={cn("text-[#005299]", className)} />
       );
     case "warning":
       return (
-        <WarningIcon
-          size={size}
-          className={cn("text-warning-icon", className)}
-        />
+        <WarningIcon size={size} className={cn("text-[#fac400]", className)} />
       );
     case "error":
       return (
         <AlertIconRaw
           size={size}
-          className={cn("text-error-icon", className)}
+          className={cn("text-destructive", className)}
         />
       );
   }

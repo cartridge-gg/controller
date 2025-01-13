@@ -56,11 +56,11 @@ export function ErrorAlert({
   const styles = useMemo(() => {
     switch (variant) {
       case "info":
-        return { bg: "bg-info", text: "text-info-foreground" };
+        return { bg: "bg-[#95c1ea]", text: "text-[black]" };
       case "warning":
-        return { bg: "bg-warning", text: "text-warning-foreground" };
+        return { bg: "bg-[#1f2320]", text: "text-[white]" };
       case "error":
-        return { bg: "bg-error", text: "text-error-foreground" };
+        return { bg: "bg-[#f9b9b9]", text: "text-[black]" };
       default:
         return { bg: "bg-secondary", text: "text-secondary-foreground" };
     }
