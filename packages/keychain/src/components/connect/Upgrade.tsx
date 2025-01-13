@@ -20,7 +20,7 @@ export const Upgrade = () => {
         <div className="text-sm text-muted-foreground pb-2">
           Install the latest to continue
         </div>
-        <div className="flex flex-col rounded p-4 border border-l-8 border-quaternary bg-secondary gap-1">
+        <div className="flex flex-col rounded p-4 border border-l-8 border-background-200 bg-background-100 gap-1">
           <div className="text-sm text-muted-foreground font-bold">
             Upgrade Details
           </div>

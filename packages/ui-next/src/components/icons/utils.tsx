@@ -20,7 +20,7 @@ export const iconVariants = cva(base, {
 });
 
 export const duotoneVariant = {
-  default: "[&_*.accentColor]:fill-tertiary",
+  default: "[&_*.accentColor]:fill-secondary",
   destructive:
     "[&_*.accentColor]:fill-destructive [&_*.color]:fill-destructive",
 };

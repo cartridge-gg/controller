@@ -12,7 +12,7 @@ export const LogoutDuoIcon = memo(
         {...props}
       >
         <path
-          className="accentColor fill-tertiary"
+          className="accentColor fill-secondary"
           d="M25.0495 15.9466L26.0002 15.0001L25.0537 14.0536L19.693 8.69288L18.7423 7.74219L16.8451 9.63939L17.7916 10.5859L20.8657 13.6599H12.0414H10.7012V16.3403H12.0414H20.8657L17.7916 19.4144L16.8451 20.3609L18.7423 22.2581L19.6888 21.3116L25.0495 15.9508V15.9466Z"
         />
         <path

@@ -12,7 +12,7 @@ export const AlertDuoIcon = memo(
         {...props}
       >
         <path
-          className="accentColor fill-tertiary"
+          className="accentColor fill-secondary"
           d="M16.125 10.125C16.125 9.502 15.623 9 15 9s-1.125.502-1.125 1.125v5.25c0 .623.502 1.125 1.125 1.125s1.125-.502 1.125-1.125v-5.25zM15 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"
         />
         <path

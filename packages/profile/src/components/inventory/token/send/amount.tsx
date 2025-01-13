@@ -65,7 +65,7 @@ export function Amount({
       <div className="flex items-center justify-between">
         <Label className="py-3 text-[11px]/3 uppercase font-bold">Amount</Label>
         <div className="flex items-center gap-2">
-          <p className="text-[11px]/3 uppercase font-bold text-quaternary-foreground">
+          <p className="text-[11px]/3 uppercase font-bold text-muted-foreground">
             Balance:
           </p>
           <div
@@ -83,7 +83,7 @@ export function Amount({
         <div className="relative">
           <Input
             type="number"
-            className="bg-quaternary pr-12 border border-quaternary focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none"
+            className="bg-background-200 pr-12 border border-background-200 focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none"
             placeholder={(0.01).toLocaleString()}
             value={amount ?? ""}
             onChange={handleChange}
@@ -94,7 +94,7 @@ export function Amount({
             </span>
           )}
           <Button
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-xs/3 font-bold uppercase px-2 py-1.5 h-7 bg-muted text-secondary-foreground hover:opacity-70"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-xs/3 font-bold uppercase px-2 py-1.5 h-7 bg-muted text-foreground hover:opacity-70"
             variant="ghost"
             onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleMax(e)}
           >
