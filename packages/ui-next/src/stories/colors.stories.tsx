@@ -23,17 +23,6 @@ export const Default: Story = {
   },
 };
 
-export const Popover: Story = {
-  args: {
-    children: (
-      <>
-        <Sample color="bg-popover border" legacyName="bg" />
-        <Sample color="bg-popover-foreground" legacyName="text.primary" />
-      </>
-    ),
-  },
-};
-
 export const Primary: Story = {
   args: {
     children: (
