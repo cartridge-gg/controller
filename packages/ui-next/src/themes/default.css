@@ -16,10 +16,7 @@
     --tertiary-foreground: 220 60% 99%;
 
     --quaternary: 210 2.48% 94.9%; /* bg.secondary */
-    --quaternary-foreground: 0 0% 50%; /* text.secondary */
-
     --quinary: 214 3% 91%; /* bg.tertiary */
-    --quinary-foreground: 0 0% 0%; /* TBD */
 
     --muted: 207 15% 85%;
     --muted-foreground: 0 0% 50%;
