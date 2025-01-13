@@ -1,15 +1,13 @@
 @layer base {
   .dark {
     --background: 135 8% 9%; /* bg.background */
-    --foreground: 0 0% 100%; /* text.primary */
-
     --background-100: 135 6% 13%; /* bg.primary */
 
-    --primary: 44 96% 61%; /* brand.primary */
-    --primary-foreground: 135 15% 10%; /* bg.primary */
+    --foreground: 0 0% 100%; /* text.primary */
 
-    --tertiary: 120 57% 78%;
-    --tertiary-foreground: 0 0% 0%;
+    --primary: 44 96% 61%; /* brand.primary */
+    --primary-foreground: 0 0% 100%; /* default to foreground, overridden by preset */
+    --secondary: 120 57% 78%; /* Mainly for Duotone icons */
 
     --quaternary: 120 7.5% 15.69%; /* bg.secondary */
     --quinary: 120 11% 18%; /* bg.tertiary */

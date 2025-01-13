@@ -32,19 +32,19 @@ export const QRCodeDuoIcon = memo(
           d="M10.5442 26.0697H4.87335C4.32135 26.0697 3.8927 25.6369 3.8927 25.0796V19.3242C3.8927 18.767 3.4329 18.3342 2.91205 18.3342L0.980654 18.333C0.428653 18.333 0 18.7972 0 19.323V25.0797C0 27.7717 2.17686 29.9995 4.87323 29.9995H10.5753C11.1273 29.9995 11.556 29.5353 11.556 29.0095V27.091C11.556 26.5036 11.0962 26.0697 10.5442 26.0697Z"
         />
         <path
-          className="accentColor fill-tertiary"
+          className="accentColor fill-secondary"
           d="M13 13L17.0003 12.9999V16.9999H13.0003L13 13Z"
         />
         <path
-          className="accentColor fill-tertiary"
+          className="accentColor fill-secondary"
           d="M16.9997 9H20.9997V13L17.0003 12.9999L16.9997 9Z"
         />
         <path
-          className="accentColor fill-tertiary"
+          className="accentColor fill-secondary"
           d="M17.0003 16.9999L20.9997 17.0001V21.0001H16.9997L17.0003 16.9999Z"
         />
         <path
-          className="accentColor fill-tertiary"
+          className="accentColor fill-secondary"
           d="M9 17.0001L13.0003 16.9999L13 21.0001H9V17.0001Z"
         />
       </svg>

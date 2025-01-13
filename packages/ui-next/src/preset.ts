@@ -26,10 +26,7 @@ export const cartridgeTWPreset: Partial<Config> = {
         DEFAULT: "hsl(var(--primary))",
         foreground: "hsl(var(--primary-foreground))",
       },
-      tertiary: {
-        DEFAULT: "hsl(var(--tertiary))",
-        foreground: "hsl(var(--tertiary-foreground))",
-      },
+      secondary: "hsl(var(--secondary))",
       quaternary: {
         DEFAULT: "hsl(var(--quaternary))",
       },
