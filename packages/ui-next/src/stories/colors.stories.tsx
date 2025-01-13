@@ -101,7 +101,6 @@ export const Others: Story = {
       <>
         <Sample color="bg-border" legacyName="black" />
         <Sample color="bg-input" legacyName="black" />
-        <Sample color="bg-ring" legacyName="text.primary" />
       </>
     ),
   },

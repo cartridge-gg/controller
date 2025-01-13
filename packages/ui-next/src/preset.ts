@@ -17,7 +17,6 @@ export const cartridgeTWPreset: Partial<Config> = {
       current: "currentColor",
       border: "hsl(var(--border)/0.12)",
       input: "hsl(var(--input)/0.12)",
-      ring: "hsl(var(--ring))",
       background: "hsl(var(--background))",
       foreground: "hsl(var(--foreground))",
       primary: {
