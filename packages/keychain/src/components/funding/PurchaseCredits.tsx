@@ -82,24 +82,6 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     },
   } as Appearance;
 
-  // For when we need to support Payment Links
-  // useStripePaymentQuery(
-  //   { referenceId },
-  //   {
-  //     enabled: !!referenceId && !error,
-  //     refetchInterval: REFETCH_INTERVAL,
-  //     retry: MAX_RETRIES,
-  //     onSuccess: () => setState(PurchaseState.SUCCESS),
-  //     onError: () => {
-  //       setError(
-  //         new Error(
-  //           `Payment not received. Please try again. Reference ID: ${referenceId}`,
-  //         ),
-  //       );
-  //     },
-  //   },
-  // );
-
   if (state === PurchaseState.STRIPE_CHECKOUT) {
     return (
       <Elements
@@ -130,13 +112,14 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         )
       }
       onBack={state === PurchaseState.SELECTION ? onBack : undefined}
+      hideNetwork
     >
       <Content gap={6}>
         <Balance showBalances={["credits"]} />
         <ErrorAlert
           variant=""
           title="WHAT ARE CREDITS"
-          description="Credits can be used to play games. They are not tokens and cannot be transferred or refunded."
+          description="Credits can be used to play games or pay for slot deployments. They are not tokens and cannot be transferred or refunded."
           isExpanded
         />
       </Content>

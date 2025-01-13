@@ -2,10 +2,11 @@ import Controller from "@/utils/controller";
 import { Button } from "@cartridge/ui-next";
 import { Container, Footer } from "@/components/layout";
 import { useCallback, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 export function Consent() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const callback_uri = searchParams.get("callback_uri")!;
 
@@ -25,9 +26,18 @@ export function Consent() {
 
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
-      navigate("/slot", { replace: true });
+      navigate(
+        `/slot?returnTo=${encodeURIComponent(pathname)}${
+          callback_uri
+            ? `&callback_uri=${encodeURIComponent(callback_uri)}`
+            : ""
+        }`,
+        {
+          replace: true,
+        },
+      );
     }
-  }, [navigate]);
+  }, [navigate, callback_uri, pathname]);
 
   return (
     <Container

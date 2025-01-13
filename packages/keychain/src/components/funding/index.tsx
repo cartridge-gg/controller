@@ -10,7 +10,7 @@ import {
 } from "@cartridge/ui-next";
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
-import { Balance } from "./Balance";
+import { Balance, BalanceType } from "./Balance";
 
 const enum FundingState {
   SHOW_OPTIONS,
@@ -19,15 +19,20 @@ const enum FundingState {
 }
 
 export type FundingProps = {
-  title?: React.ReactElement;
+  title?: React.ReactElement | string;
+  creditsOnly?: boolean;
   onComplete?: (deployHash?: string) => void;
 };
 
-export function Funding({ onComplete, title }: FundingProps) {
+export function Funding({ title, creditsOnly, onComplete }: FundingProps) {
   const { controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
+  const showBalances: BalanceType[] = creditsOnly
+    ? ["credits"]
+    : ["credits", "eth"];
   const showCredits =
-    typeof document !== "undefined" && document.cookie.includes("credits=");
+    (typeof document !== "undefined" && document.cookie.includes("credits=")) ||
+    creditsOnly;
 
   if (state === FundingState.FUND_ETH) {
     return (
@@ -49,9 +54,10 @@ export function Funding({ onComplete, title }: FundingProps) {
       title={title || (controller ? `Fund ${controller.username()}` : "")}
       description={controller && <CopyAddress address={controller.address} />}
       icon={<ArrowIcon variant="down" />}
+      hideNetwork
     >
       <Content gap={6}>
-        <Balance showBalances={["credits", "eth"]} />
+        <Balance showBalances={showBalances} />
       </Content>
       <Footer>
         {showCredits && (
@@ -59,12 +65,14 @@ export function Funding({ onComplete, title }: FundingProps) {
             <CoinsIcon variant="line" size="sm" /> Purchase Credits
           </Button>
         )}
-        <Button
-          onClick={() => setState(FundingState.FUND_ETH)}
-          variant="secondary"
-        >
-          <EthereumIcon size="sm" className="mr-1" /> Deposit Eth
-        </Button>
+        {!creditsOnly && (
+          <Button
+            onClick={() => setState(FundingState.FUND_ETH)}
+            variant="secondary"
+          >
+            <EthereumIcon size="sm" className="mr-1" /> Deposit Eth
+          </Button>
+        )}
       </Footer>
     </Container>
   );
