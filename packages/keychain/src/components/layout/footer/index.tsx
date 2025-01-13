@@ -10,7 +10,10 @@ export function Footer({
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      document.documentElement.style.setProperty("--footer-height", "0px");
+      return;
+    }
 
     const observer = new ResizeObserver((entries) => {
       const rect = entries[0].contentRect;

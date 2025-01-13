@@ -35,8 +35,8 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
   return (
     <>
       {/* for desktop */}
-      <div className="hidden md:flex flex-col items-center justify-center">
-        <div className="w-desktop border border-muted rounded-xl overflow-hidden flex flex-col relative">
+      <div className="hidden md:flex w-screen h-screen items-center justify-center">
+        <div className="w-desktop border border-muted rounded-xl flex flex-col relative overflow-hidden align-middle">
           {children}
         </div>
       </div>

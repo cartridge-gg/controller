@@ -1,5 +1,6 @@
 import { cn } from "@cartridge/ui-next";
 import { PropsWithChildren } from "react";
+
 export function Content({
   children,
   className,
