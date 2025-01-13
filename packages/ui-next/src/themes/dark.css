@@ -1,25 +1,22 @@
 @layer base {
   .dark {
-    --background: 135 8% 9%; /* bg.background */
-    --background-100: 135 6% 13%; /* bg.primary */
-    --background-200: 120 7.5% 15.69%; /* bg.secondary */
-    --background-300: 120 11% 18%; /* bg.tertiary */
+    --background: 135 8% 9%;
+    --background-100: 135 6% 13%;
+    --background-200: 120 7.5% 15.69%;
+    --background-300: 120 11% 18%;
 
-    --foreground: 0 0% 100%; /* text.primary */
+    --foreground: 0 0% 100%;
 
-    --primary: 44 96% 61%; /* brand.primary */
-    --primary-foreground: 0 0% 100%; /* default to foreground, overridden by preset */
-    --secondary: 120 57% 78%; /* Mainly for Duotone icons */
+    --primary: 44 96% 61%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 120 57% 78%;
 
-    --muted: 132 8% 24%; /* bg.muted */
-    --muted-foreground: 0 0% 50%; /* text.secondary */
+    --muted: 132 8% 24%;
+    --muted-foreground: 0 0% 50%;
 
-    --accent: 132 4% 23%; /* bg.accent */
-    --accent-foreground: 0 0% 61%; /* text.secondary-accent */
+    --accent: 132 4% 23%;
+    --accent-foreground: 0 0% 61%;
 
-    --border: 135 8% 9%; /* bg.background */
-    --input: 120 7.5% 15.69%; /* bg.secondary */
-
-    --spacer: 132 14% 7%; /* solid-fills/spacer */
+    --spacer: 132 14% 7%;
   }
 }

@@ -8,7 +8,7 @@
     --foreground: 0 0% 0%;
 
     --primary: 255 73% 61%;
-    --primary-foreground: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 255 73% 61%;
 
     --muted: 207 15% 85%;
@@ -20,9 +20,7 @@
     --destructive: 0 72% 65%;
     --destructive-foreground: 0 72% 65%;
 
-    --border: 220 60% 99%;
-    --input: 210 2.48% 94.9%; /* bg.secondary */
-    --spacer: 0 0% 0%; /* solid-fills/spacer */
+    --spacer: 0 0% 0%;
 
     --radius: 0.5rem;
   }

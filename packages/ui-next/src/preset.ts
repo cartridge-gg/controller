@@ -15,35 +15,46 @@ export const cartridgeTWPreset: Partial<Config> = {
     colors: {
       transparent: "transparent",
       current: "currentColor",
-      border: "hsl(var(--border)/0.12)",
-      input: "hsl(var(--input)/0.12)",
       background: {
+        // bg-background
         DEFAULT: "hsl(var(--background))",
+        // solid-fills/bg-primary
         100: "hsl(var(--background-100))",
+        // solid-fills/bg-secondary
         200: "hsl(var(--background-200))",
-        300: "hsl(var(--background-200))",
+        // solid-fills/bg-tertiary
+        300: "hsl(var(--background-300))",
       },
+      // text-primary
       foreground: "hsl(var(--foreground))",
       primary: {
+        // Overwritten by theme.colors.primary
         DEFAULT: "hsl(var(--primary))",
+        // Overwritten by theme.colors.primaryForeground
         foreground: "hsl(var(--primary-foreground))",
       },
+      // Mainly for Duotone icons
       secondary: "hsl(var(--secondary))",
       destructive: {
         DEFAULT: "hsl(var(--destructive))",
         foreground: "hsl(var(--destructive-foreground))",
       },
       muted: {
+        // TODO: bg.muted
         DEFAULT: "hsl(var(--muted))",
+        // TODO: text.secondary
         foreground: "hsl(var(--muted-foreground))",
       },
       accent: {
+        // TODO: bg.accent
         DEFAULT: "hsl(var(--accent))",
+        // TODO: text.secondary-accent
         foreground: "hsl(var(--accent-foreground))",
       },
-      spacer: {
-        DEFAULT: "hsl(var(--spacer))",
-      },
+      border: "hsl(var(--background)/0.12)",
+      input: "hsl(var(--background-200)/0.12)",
+      // solid-fills/spacer
+      spacer: "hsl(var(--spacer))",
     },
     extend: {
       fontFamily: {
