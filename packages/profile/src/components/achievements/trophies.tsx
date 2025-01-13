@@ -49,7 +49,7 @@ export function Trophies({
   return (
     <div className="flex flex-col gap-4">
       <div className="h-8 bg-secondary py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
-        <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
+        <p className="uppercase text-xs text-muted-foreground font-semibold tracking-wider">
           Total
         </p>
         <div className="h-4 grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
@@ -58,7 +58,7 @@ export function Trophies({
             className={cn("grow bg-primary rounded-xl")}
           />
         </div>
-        <p className="text-xs text-quaternary-foreground">
+        <p className="text-xs text-muted-foreground">
           {`${completed} of ${total}`}
         </p>
       </div>
@@ -206,7 +206,7 @@ function Header({
   return (
     <div className="flex gap-x-px items-center h-8">
       <div className="grow h-full p-3 bg-secondary flex items-center">
-        <p className="uppercase text-xs text-quaternary-foreground font-bold tracking-wider">
+        <p className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
           {group}
         </p>
       </div>
@@ -269,7 +269,7 @@ function Pagination({
       )}
       onClick={onClick}
     >
-      <div className="text-quaternary-foreground">{icon}</div>
+      <div className="text-muted-foreground">{icon}</div>
     </div>
   );
 }

@@ -76,7 +76,7 @@ export function Trophy({
                 {completed && <Timestamp timestamp={timestamp} />}
                 {completed && (
                   <Separator
-                    className="text-quaternary-foreground h-2"
+                    className="text-muted-foreground h-2"
                     orientation="vertical"
                   />
                 )}
@@ -127,10 +127,10 @@ function Task({ task, completed }: { task: Task; completed: boolean }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-x-2">
-        <TaskIcon className="text-quaternary-foreground" size="xs" />
+        <TaskIcon className="text-muted-foreground" size="xs" />
         <p
           className={cn(
-            "text-xs text-quaternary-foreground",
+            "text-xs text-muted-foreground",
             task.count >= task.total && "line-through opacity-50",
           )}
         >
@@ -147,7 +147,7 @@ function Icon({ icon, completed }: { icon: string; completed: boolean }) {
     <div
       className={cn(
         "w-8 h-8 flex items-center justify-center",
-        completed ? "text-primary" : "text-quaternary-foreground",
+        completed ? "text-primary" : "text-muted-foreground",
       )}
     >
       <div className={cn("w-6 h-6", icon, "fa-solid")} />
@@ -193,7 +193,7 @@ function Description({ description }: { description: string }) {
       {visible && (
         <span
           className={cn(
-            "text-quaternary-foreground cursor-pointer",
+            "text-muted-foreground cursor-pointer",
             full && "block",
             bright ? "brightness-150" : "brightness-100",
           )}
@@ -210,7 +210,7 @@ function Description({ description }: { description: string }) {
 
 function Details({ percentage }: { percentage: string }) {
   return (
-    <p className="text-[0.65rem] text-quaternary-foreground">{`${percentage}% of players earned`}</p>
+    <p className="text-[0.65rem] text-muted-foreground">{`${percentage}% of players earned`}</p>
   );
 }
 
@@ -224,7 +224,7 @@ function Earning({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 text-quaternary-foreground font-medium",
+        "flex items-center gap-1 text-muted-foreground font-medium",
         completed && "opacity-50",
       )}
     >
@@ -252,7 +252,7 @@ function Timestamp({ timestamp }: { timestamp: number }) {
   }, [timestamp]);
 
   return (
-    <div className="flex items-center gap-1 text-quaternary-foreground">
+    <div className="flex items-center gap-1 text-muted-foreground">
       <CalendarIcon size="xs" variant="line" />
       <p className="text-xs">{date}</p>
     </div>
@@ -277,19 +277,19 @@ function Progress({
           }}
           className={cn(
             "grow bg-accent-foreground rounded-xl",
-            completed ? "bg-primary" : "text-quaternary-foreground",
+            completed ? "bg-primary" : "text-muted-foreground",
           )}
         />
       </div>
       {count >= total ? (
         <div className="flex items-center gap-x-2">
-          <div className="fa-solid fa-check text-xs text-quaternary-foreground" />
-          <p className="text-xs text-quaternary-foreground font-medium">
+          <div className="fa-solid fa-check text-xs text-muted-foreground" />
+          <p className="text-xs text-muted-foreground font-medium">
             {total > 1 ? `${count.toLocaleString()}` : "Completed"}
           </p>
         </div>
       ) : (
-        <p className="text-xs text-quaternary-foreground font-medium">
+        <p className="text-xs text-muted-foreground font-medium">
           {`${count.toLocaleString()} of ${total.toLocaleString()}`}
         </p>
       )}

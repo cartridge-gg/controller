@@ -155,7 +155,7 @@ export const Description = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="uppercase text-[11px] text-quaternary-foreground font-bold tracking-wider">
+        <CardTitle className="uppercase text-[11px] text-muted-foreground font-bold tracking-wider">
           Description
         </CardTitle>
       </CardHeader>
@@ -174,7 +174,7 @@ export const Properties = ({
   return (
     <Card>
       <CardHeader className="h-10 flex flex-row items-center justify-between">
-        <CardTitle className="uppercase text-[11px] text-quaternary-foreground font-bold tracking-wider">
+        <CardTitle className="uppercase text-[11px] text-muted-foreground font-bold tracking-wider">
           Properties
         </CardTitle>
       </CardHeader>
@@ -223,7 +223,7 @@ export const Details = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="uppercase text-[11px] text-quaternary-foreground font-bold tracking-wider">
+        <CardTitle className="uppercase text-[11px] text-muted-foreground font-bold tracking-wider">
           details
         </CardTitle>
       </CardHeader>

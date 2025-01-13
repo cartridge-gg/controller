@@ -65,7 +65,7 @@ export function Amount({
       <div className="flex items-center justify-between">
         <Label className="py-3 text-[11px]/3 uppercase font-bold">Amount</Label>
         <div className="flex items-center gap-2">
-          <p className="text-[11px]/3 uppercase font-bold text-quaternary-foreground">
+          <p className="text-[11px]/3 uppercase font-bold text-muted-foreground">
             Balance:
           </p>
           <div

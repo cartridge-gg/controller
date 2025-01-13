@@ -160,9 +160,9 @@ export const Recipient = ({
         >
           <div className="h-9 w-9 p-1.5 flex items-center justify-center">
             {isFetching || isLoading ? (
-              <SpinnerIcon className="text-quaternary-foreground animate-spin" />
+              <SpinnerIcon className="text-muted-foreground animate-spin" />
             ) : (
-              <TimesCircleIcon className="text-quaternary-foreground" />
+              <TimesCircleIcon className="text-muted-foreground" />
             )}
           </div>
         </div>
@@ -183,7 +183,7 @@ export const Recipient = ({
               {name ? (
                 <div className="flex flex-col items-start gap-x-2">
                   <p className="font-medium text-sm">{name}</p>
-                  <p className="font-normal text-xs text-quaternary-foreground">
+                  <p className="font-normal text-xs text-muted-foreground">
                     {formatAddress(address, { size: "xs", padding: true })}
                   </p>
                 </div>

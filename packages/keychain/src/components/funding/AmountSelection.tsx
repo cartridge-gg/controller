@@ -28,7 +28,7 @@ export function AmountSelection({
 
   return (
     <div className="flex items-center justify-between">
-      <div className="text-xs font-semibold uppercase text-quaternary-foreground">
+      <div className="text-xs font-semibold uppercase text-muted-foreground">
         Amount
       </div>
       <div className="flex flex-col gap-2">

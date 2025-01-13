@@ -38,7 +38,7 @@ export function StatusTray({ username, validation, error }: StatusTrayProps) {
           "text-xs px-4 py-2 pt-3",
           isError
             ? "text-[#2A2F2A]  border-b border-[#161A17] border-opacity-10"
-            : "text-quaternary-foreground",
+            : "text-muted-foreground",
         )}
       >
         {isError
