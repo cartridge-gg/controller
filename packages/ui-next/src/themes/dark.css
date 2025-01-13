@@ -2,15 +2,14 @@
   .dark {
     --background: 135 8% 9%; /* bg.background */
     --background-100: 135 6% 13%; /* bg.primary */
+    --background-200: 120 7.5% 15.69%; /* bg.secondary */
+    --background-300: 120 11% 18%; /* bg.tertiary */
 
     --foreground: 0 0% 100%; /* text.primary */
 
     --primary: 44 96% 61%; /* brand.primary */
     --primary-foreground: 0 0% 100%; /* default to foreground, overridden by preset */
     --secondary: 120 57% 78%; /* Mainly for Duotone icons */
-
-    --quaternary: 120 7.5% 15.69%; /* bg.secondary */
-    --quinary: 120 11% 18%; /* bg.tertiary */
 
     --muted: 132 8% 24%; /* bg.muted */
     --muted-foreground: 0 0% 50%; /* text.secondary */

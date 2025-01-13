@@ -138,7 +138,7 @@ export const Recipient = ({
         <Input
           type="text"
           spellCheck={false}
-          className="bg-background-100 pr-12 border border-quaternary focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="bg-background-100 pr-12 border border-background-200 focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder="Destination Address"
           value={value}
           onChange={handleChange}

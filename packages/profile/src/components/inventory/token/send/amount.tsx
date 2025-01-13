@@ -83,7 +83,7 @@ export function Amount({
         <div className="relative">
           <Input
             type="number"
-            className="bg-quaternary pr-12 border border-quaternary focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none"
+            className="bg-background-200 pr-12 border border-background-200 focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none"
             placeholder={(0.01).toLocaleString()}
             value={amount ?? ""}
             onChange={handleChange}

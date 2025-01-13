@@ -250,7 +250,7 @@ function Progress({
 }) {
   return (
     <div className="flex gap-4">
-      <div className="grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
+      <div className="grow flex flex-col justify-center items-start bg-background-200 rounded-xl p-1">
         <div
           style={{
             width: `${Math.floor((100 * Math.min(count, total)) / total)}%`,
@@ -298,8 +298,8 @@ function Track({
   return (
     <div
       className={cn(
-        "bg-quaternary h-full p-2 flex items-center transition-all duration-200",
-        pinned ? "bg-quaternary" : "bg-background-100",
+        "bg-background-200 h-full p-2 flex items-center transition-all duration-200",
+        pinned ? "bg-background-200" : "bg-background-100",
         hovered &&
           (enabled || pinned) &&
           "opacity-90 bg-background-100/50 cursor-pointer",
