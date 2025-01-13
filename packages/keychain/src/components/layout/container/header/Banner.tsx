@@ -1,4 +1,3 @@
-import { useControllerTheme } from "@/hooks/theme";
 import { cn, IconProps } from "@cartridge/ui-next";
 
 export type BannerProps = {
@@ -55,8 +54,6 @@ function HeaderIcon({
   Icon,
   icon,
 }: Pick<BannerProps, "variant" | "Icon" | "icon">) {
-  const theme = useControllerTheme();
-
   return (
     <IconWrapper variant={variant}>
       {(() => {
@@ -69,11 +66,7 @@ function HeaderIcon({
         }
 
         return (
-          <img
-            src={theme.icon}
-            className="size-full rounded"
-            alt="Controller Header Icon"
-          />
+          <div className="size-full rounded bg-[image:var(--theme-icon-url)] bg-cover bg-center" />
         );
       })()}
     </IconWrapper>
