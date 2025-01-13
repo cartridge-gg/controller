@@ -1,16 +1,5 @@
-import {
-  VStack,
-  Circle,
-  Text,
-  Center,
-  Flex,
-  Image,
-  Square,
-  HStack,
-} from "@chakra-ui/react";
 import { useControllerTheme } from "@/hooks/theme";
-import { TOP_BAR_HEIGHT } from "./TopBar";
-import { IconProps } from "@cartridge/ui-next";
+import { cn, IconProps } from "@cartridge/ui-next";
 
 export type BannerProps = {
   Icon?: React.ComponentType<IconProps>;
@@ -29,149 +18,115 @@ export function Banner({
   description,
   variant = "compressed",
 }: BannerProps) {
-  const theme = useControllerTheme();
-
   switch (variant) {
     case "expanded":
       return (
-        <VStack w="full" pb={6}>
-          <VStack
-            h={136}
-            w="full"
-            className="bg-[image:var(--theme-cover-url)]"
-            bgSize="cover"
-            bgPos="center"
-            position="relative"
-            mb={10}
-            _before={{
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: `linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, var(--chakra-colors-solid-bg) 100%)`,
-              pointerEvents: "none",
-            }}
-          >
-            <Center position="absolute" bottom={-ICON_OFFSET / 4} left={4}>
-              <HStack w="full" gap={4} align="center">
-                <Flex
-                  position="relative"
-                  h={`${ICON_SIZE}px`}
-                  w={`${ICON_SIZE}px`}
-                  minW={`${ICON_SIZE}px`}
-                >
-                  <Flex
-                    position="absolute"
-                    inset={0}
-                    borderWidth={4}
-                    borderColor="solid.bg"
-                    borderRadius="lg"
-                  />
-                  <Flex
-                    bg="darkGray.700"
-                    borderRadius="lg"
-                    h="100%"
-                    w="100%"
-                    justify="center"
-                    alignItems="center"
-                    overflow="hidden"
-                  >
-                    {Icon ? (
-                      <Circle size="100%" bg="solid.primary">
-                        <Icon size="lg" />
-                      </Circle>
-                    ) : icon ? (
-                      <Circle size="100%" bg="solid.primary">
-                        {icon}
-                      </Circle>
-                    ) : (
-                      <Image
-                        src={theme.icon}
-                        w="100%"
-                        h="100%"
-                        alt="Controller Icon"
-                        objectFit="cover"
-                      />
-                    )}
-                  </Flex>
-                </Flex>
-
-                <VStack align="flex-start" spacing={1}>
-                  <Text fontSize="lg" fontWeight="semibold">
-                    {title}
-                  </Text>
-
-                  {description && (
-                    <Text fontSize="sm" color="text.secondary">
-                      {description}
-                    </Text>
-                  )}
-                </VStack>
-              </HStack>
-            </Center>
-          </VStack>
-        </VStack>
+        <div className="flex flex-col w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative mb-16 before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-[var(--chakra-colors-solid-bg)] before:pointer-events-none">
+          <div className="p-4 flex items-center gap-4 absolute -bottom-10 left-1">
+            <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
+            <Headline
+              variant={variant}
+              title={title}
+              description={description}
+            />
+          </div>
+        </div>
       );
     case "compressed":
     default:
       return (
-        <VStack w="full">
-          <HStack
-            h={TOP_BAR_HEIGHT / 4}
-            w="full"
-            className="bg-[image:var(--theme-cover-url)]"
-            bgSize="cover"
-            bgPos="center"
-            pb={6}
-          />
-
-          <HStack w="full" p={4} gap={4} minW={0}>
-            {Icon ? (
-              <Square size="44px" bg="solid.primary" borderRadius="md">
-                <Icon size="lg" />
-              </Square>
-            ) : icon ? (
-              <Square size="44px" bg="solid.primary" borderRadius="md">
-                {icon}
-              </Square>
-            ) : (
-              <Image
-                src={theme.icon}
-                boxSize="44px"
-                alt="Controller Icon"
-                borderRadius="md"
-              />
-            )}
-
-            <VStack w="full" align="stretch" gap={1} minW={0}>
-              <Text
-                w="full"
-                fontSize="lg"
-                fontWeight="semibold"
-                noOfLines={1}
-                textOverflow="ellipsis"
-              >
-                {title}
-              </Text>
-
-              {description && (
-                <Text
-                  w="full"
-                  fontSize="xs"
-                  color="text.secondary"
-                  overflowWrap="break-word"
-                >
-                  {description}
-                </Text>
-              )}
-            </VStack>
-          </HStack>
-        </VStack>
+        <div className="flex flex-col">
+          <div className="w-full bg-[image:var(--theme-cover-url)] bg-cover bg-center h-14 pb-6" />
+          <div className="p-4 flex items-center gap-4">
+            <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
+            <Headline
+              variant={variant}
+              title={title}
+              description={description}
+            />
+          </div>
+        </div>
       );
   }
 }
 
-const ICON_SIZE = 80;
-const ICON_OFFSET = 40;
+function HeaderIcon({
+  variant,
+  Icon,
+  icon,
+}: Pick<BannerProps, "variant" | "Icon" | "icon">) {
+  const theme = useControllerTheme();
+
+  return (
+    <IconWrapper variant={variant}>
+      {(() => {
+        if (Icon) {
+          return <Icon />;
+        }
+
+        if (icon) {
+          return icon;
+        }
+
+        return (
+          <img
+            src={theme.icon}
+            className="size-full rounded"
+            alt="Controller Header Icon"
+          />
+        );
+      })()}
+    </IconWrapper>
+  );
+}
+
+function IconWrapper({
+  variant,
+  children,
+}: {
+  variant?: BannerVariant;
+  children: React.ReactNode;
+}) {
+  switch (variant) {
+    case "expanded":
+      return (
+        <div className="rounded size-20 bg-background flex items-center justify-center">
+          <div className="rounded bg-secondary size-[calc(100%-8px)] flex items-center justify-center">
+            {children}
+          </div>
+        </div>
+      );
+    default:
+    case "compressed":
+      return (
+        <div className="rounded size-11 flex items-center justify-center bg-secondary">
+          {children}
+        </div>
+      );
+  }
+}
+
+function Headline({
+  variant,
+  title,
+  description,
+}: Pick<BannerProps, "variant" | "title" | "description">) {
+  return (
+    <div className="flex-1 flex flex-col gap-1">
+      <div className="text-lg font-semibold line-clamp-1 text-ellipsis">
+        {title}
+      </div>
+
+      {description && (
+        <div
+          className={cn(
+            "text-muted-foreground break-words",
+            variant === "compressed" ? "text-xs" : "text-sm",
+          )}
+        >
+          {description}
+        </div>
+      )}
+    </div>
+  );
+}
