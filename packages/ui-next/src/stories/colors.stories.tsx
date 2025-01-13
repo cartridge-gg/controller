@@ -12,43 +12,34 @@ export default meta;
 
 type Story = StoryObj<typeof Colors>;
 
-export const BackgroundForeground: Story = {
+export const Surface: Story = {
   args: {
     children: (
       <>
         <div className="size-40 flex flex-col items-center justify-center bg-background border border-muted/40 text-xs">
           <div>bg-background</div>
-          <div>text-foreground</div>
         </div>
 
         <div className="size-40 flex flex-col items-center justify-center bg-background-100 text-xs">
           <div>bg-background-100</div>
-          <div>text-foreground</div>
         </div>
-        {/* <Sample color="bg-background border" legacyName="bg" />
-        <Sample color="bg-foreground" legacyName="text.primary" /> */}
       </>
     ),
   },
 };
 
-export const Primary: Story = {
+export const Accent: Story = {
   args: {
     children: (
       <>
-        <Sample color="bg-primary" legacyName="brand.primary" />
-        <Sample color="bg-primary-foreground border" legacyName="bg" />
-      </>
-    ),
-  },
-};
+        <div className="size-40 flex flex-col items-center justify-center bg-primary text-primary-foreground text-xs">
+          <div>bg-primary</div>
+          <div>text-primary-foreground</div>
+        </div>
 
-export const Tertiary: Story = {
-  args: {
-    children: (
-      <>
-        <Sample color="bg-tertiary" legacyName="solid.accent" />
-        <Sample color="bg-tertiary-foreground border" legacyName="bg" />
+        <div className="size-40 flex flex-col items-center justify-center bg-secondary text-xs">
+          <div>bg-secondary</div>
+        </div>
       </>
     ),
   },
@@ -60,20 +51,6 @@ export const Muted: Story = {
       <>
         <Sample color="bg-muted" legacyName="solid.accent" />
         <Sample color="bg-muted-foreground" legacyName="text.secondary" />
-      </>
-    ),
-  },
-};
-
-export const Accent: Story = {
-  args: {
-    children: (
-      <>
-        <Sample color="bg-accent" legacyName="solid.accent" />
-        <Sample
-          color="bg-accent-foreground"
-          legacyName="solid.secondaryAccent"
-        />
       </>
     ),
   },
