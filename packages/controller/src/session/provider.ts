@@ -20,6 +20,7 @@ export type SessionOptions = {
   chainId: string;
   policies: SessionPolicies;
   redirectUrl: string;
+  keychainUrl?: string;
 };
 
 export default class SessionProvider extends BaseProvider {
@@ -31,14 +32,21 @@ export default class SessionProvider extends BaseProvider {
   protected _username?: string;
   protected _redirectUrl: string;
   protected _policies: SessionPolicies;
+  protected _keychainUrl: string;
 
-  constructor({ rpc, chainId, policies, redirectUrl }: SessionOptions) {
+  constructor({
+    rpc,
+    chainId,
+    policies,
+    redirectUrl,
+    keychainUrl,
+  }: SessionOptions) {
     super();
-
     this._rpcUrl = rpc;
     this._chainId = chainId;
     this._redirectUrl = redirectUrl;
     this._policies = policies;
+    this._keychainUrl = keychainUrl || KEYCHAIN_URL;
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller_session = this;
@@ -51,18 +59,21 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async probe(): Promise<WalletAccount | undefined> {
-    await this.tryRetrieveFromQueryOrStorage();
-    return;
+    if (this.account) {
+      return this.account;
+    }
+
+    this.account = await this.tryRetrieveFromQueryOrStorage();
+    return this.account;
   }
 
   async connect(): Promise<WalletAccount | undefined> {
-    await this.tryRetrieveFromQueryOrStorage();
-
     if (this.account) {
-      return;
+      return this.account;
     }
 
-    // Generate a random local key pair
+    await this.tryRetrieveFromQueryOrStorage();
+
     const pk = stark.randomAddress();
     const publicKey = ec.starkCurve.getStarkKey(pk);
 
@@ -74,7 +85,9 @@ export default class SessionProvider extends BaseProvider {
       }),
     );
 
-    const url = `${KEYCHAIN_URL}/session?public_key=${publicKey}&redirect_uri=${
+    const url = `${
+      this._keychainUrl
+    }/session?public_key=${publicKey}&redirect_uri=${
       this._redirectUrl
     }&redirect_query_name=startapp&policies=${JSON.stringify(
       this._policies,
@@ -83,7 +96,7 @@ export default class SessionProvider extends BaseProvider {
     localStorage.setItem("lastUsedConnector", this.id);
     window.open(url, "_blank");
 
-    return;
+    return this.account;
   }
 
   switchStarknetChain(_chainId: string): Promise<boolean> {
@@ -103,6 +116,10 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async tryRetrieveFromQueryOrStorage() {
+    if (this.account) {
+      return this.account;
+    }
+
     const signerString = localStorage.getItem("sessionSigner");
     const signer = signerString ? JSON.parse(signerString) : null;
     let sessionRegistration: SessionRegistration | null = null;

@@ -6,29 +6,45 @@ const nextConfig = {
     externalDir: true,
   },
   webpack: (config, { isServer, dev }) => {
-    // Use the client static directory in the server bundle and prod mode
-    // Fixes `Error occurred prerendering page "/"`
-    config.output.webassemblyModuleFilename =
-      isServer && !dev
-        ? "../static/wasm/[modulehash].wasm"
-        : "static/wasm/[modulehash].wasm";
+    config.output.environment = {
+      ...config.output.environment,
+      asyncFunction: true,
+    };
 
     // Since Webpack 5 doesn't enable WebAssembly by default, we should do it manually
     config.experiments = {
       ...config.experiments,
       asyncWebAssembly: true,
-      layers: true,
+      topLevelAwait: true,
     };
 
-    // Add WASM file handling
-    config.module.rules.push({
-      test: /\.wasm$/,
-      type: "webassembly/async",
-    });
+    // https://github.com/vercel/next.js/issues/29362#issuecomment-971377869
+    if (!dev && isServer) {
+      config.output.webassemblyModuleFilename = "chunks/[id].wasm";
+      config.plugins.push(new WasmChunksFixPlugin());
+    }
 
     return config;
   },
-  output: "standalone",
 };
+
+class WasmChunksFixPlugin {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap("WasmChunksFixPlugin", (compilation) => {
+      compilation.hooks.processAssets.tap(
+        { name: "WasmChunksFixPlugin" },
+        (assets) =>
+          Object.entries(assets).forEach(([pathname, source]) => {
+            if (!pathname.match(/\.wasm$/)) return;
+            compilation.deleteAsset(pathname);
+
+            const name = pathname.split("/")[1];
+            const info = compilation.assetsInfo.get(pathname);
+            compilation.emitAsset(name, source, info);
+          }),
+      );
+    });
+  }
+}
 
 module.exports = nextConfig;

@@ -17,7 +17,7 @@ export default class SessionConnector extends InjectedConnector {
     this.controller = controller;
   }
 
-  fromConnectors(connectors: Connector[]): SessionConnector {
+  static fromConnectors(connectors: Connector[]): SessionConnector {
     const connector = connectors.find((c) => c.id === "controller_session");
     if (!connector) {
       throw new Error("Session connector not found");

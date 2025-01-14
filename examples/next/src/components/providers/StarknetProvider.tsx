@@ -99,25 +99,19 @@ const provider = jsonRpcProvider({
   },
 });
 
-export function StarknetProvider({ children }: PropsWithChildren) {
-  return (
-    <StarknetConfig
-      autoConnect
-      chains={[mainnet, sepolia]}
-      connectors={[controller, session]}
-      explorer={starkscan}
-      provider={provider}
-    >
-      {children}
-    </StarknetConfig>
-  );
-}
-
 const controller = new ControllerConnector({
   policies,
   chains: [
-    { rpcUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA! },
-    { rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET! },
+    {
+      rpcUrl:
+        process.env.NEXT_PUBLIC_RPC_SEPOLIA ??
+        "https://api.cartridge.gg/x/starknet/sepolia",
+    },
+    {
+      rpcUrl:
+        process.env.NEXT_PUBLIC_RPC_MAINNET ??
+        "https://api.cartridge.gg/x/starknet/mainnet",
+    },
   ],
   defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
   url:
@@ -139,17 +133,31 @@ const controller = new ControllerConnector({
   // namespace: "darkshuffle_s0",
   tokens: {
     erc20: [
-      // $LORDS
       "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
-      // $FLIP
-      // "0x01bfe97d729138fc7c2d93c77d6d1d8a24708d5060608017d9b384adf38f04c7",
     ],
   },
 });
 
 const session = new SessionConnector({
   policies,
-  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA!,
+  rpc:
+    process.env.NEXT_PUBLIC_RPC_SEPOLIA ??
+    "https://api.cartridge.gg/x/starknet/sepolia",
   chainId: constants.StarknetChainId.SN_SEPOLIA,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
+  keychainUrl: "http://localhost:3001",
 });
+
+export function StarknetProvider({ children }: PropsWithChildren) {
+  return (
+    <StarknetConfig
+      autoConnect
+      chains={[mainnet, sepolia]}
+      connectors={[controller, session]}
+      explorer={starkscan}
+      provider={provider}
+    >
+      {children}
+    </StarknetConfig>
+  );
+}
