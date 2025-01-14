@@ -25,12 +25,14 @@ export function TopBar({
   );
 
   return (
-    <div className="flex items-center justify-between absolute top-0 left-0 right-0 h-14 p-0.5 z-50 p-2">
-      {onBack ? (
-        <BackButton onClick={onBack} />
-      ) : (
-        <CloseButton onClose={onClose} />
-      )}
+    <div className="flex items-center justify-between absolute top-0 left-0 right-0 h-14 p-2 z-50">
+      <div>
+        {onBack ? (
+          <BackButton onClick={onBack} />
+        ) : (
+          <CloseButton onClose={onClose} />
+        )}
+      </div>
 
       <div className="flex items-center gap-2">
         {!hideNetwork && chainId && <Network chainId={chainId} />}
