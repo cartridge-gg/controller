@@ -17,6 +17,7 @@ import { useConnection } from "@/hooks/context";
 import { useAccount } from "@/hooks/account";
 import { addAddressPadding } from "starknet";
 import { GameModel } from "@bal7hazar/arcade-sdk";
+import { compare } from "compare-versions";
 
 export interface Task {
   id: string;
@@ -56,6 +57,13 @@ export function Trophy({
   game: GameModel | undefined;
   pins: { [playerId: string]: string[] };
 }) {
+  const { version } = useConnection();
+
+  const compatibility = useMemo(() => {
+    if (!version) return false;
+    return compare(version, "0.5.9", ">=");
+  }, [version]);
+
   return (
     <div className="flex items-center gap-x-px">
       <div className="grow flex flex-col items-stretch gap-y-3 bg-secondary p-3">
@@ -91,7 +99,7 @@ export function Trophy({
         )}
       </div>
       <div className="flex flex-col gap-y-px h-full">
-        {completed && !softview && (
+        {compatibility && completed && !softview && (
           <Track enabled={enabled} id={id} pins={pins} />
         )}
         {completed && !softview && !!game && (
@@ -303,7 +311,7 @@ function Track({
 }) {
   const { address } = useAccount();
   const { parent } = useConnection();
-  const { provider } = useArcade();
+  const { chainId, provider } = useArcade();
 
   const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -318,8 +326,13 @@ function Track({
       setLoading(true);
       try {
         const calls = provider.registry.pin({ achievementId: id });
-        await parent.openExecute(Array.isArray(calls) ? calls : [calls]);
-        toast.success(`Trophy pinned successfully`);
+        const res = await parent.openExecute(
+          Array.isArray(calls) ? calls : [calls],
+          chainId,
+        );
+        if (res) {
+          toast.success(`Trophy pinned successfully`);
+        }
       } catch (error) {
         console.error(error);
         toast.error("Failed to pin trophy");
@@ -328,7 +341,7 @@ function Track({
       }
     };
     pin();
-  }, [enabled, pinned, id]);
+  }, [enabled, pinned, id, chainId, provider]);
 
   const handleUnpin = useCallback(() => {
     if (!pinned) return;
@@ -336,8 +349,13 @@ function Track({
       setLoading(true);
       try {
         const calls = provider.registry.unpin({ achievementId: id });
-        await parent.openExecute(Array.isArray(calls) ? calls : [calls]);
-        toast.success(`Trophy unpinned successfully`);
+        const res = await parent.openExecute(
+          Array.isArray(calls) ? calls : [calls],
+          chainId,
+        );
+        if (res) {
+          toast.success(`Trophy unpinned successfully`);
+        }
       } catch (error) {
         console.error(error);
         toast.error("Failed to unpin trophy");
@@ -346,7 +364,7 @@ function Track({
       }
     };
     unpin();
-  }, [pinned, id]);
+  }, [pinned, id, chainId, provider]);
 
   return (
     <div

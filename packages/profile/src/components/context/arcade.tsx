@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import {
@@ -11,16 +12,17 @@ import {
   Registry,
   PinningEvent,
   GameModel,
-  sepolia as manifest,
 } from "@bal7hazar/arcade-sdk";
+import { constants } from "starknet";
 
-const RPC_URL = "https://api.cartridge.gg/x/starknet/sepolia";
+const CHAIN_ID = constants.StarknetChainId.SN_SEPOLIA;
 
 /**
  * Interface defining the shape of the Arcade context.
  */
 interface ArcadeContextType {
   /** The Arcade client instance */
+  chainId: string;
   provider: ExternalProvider;
   pins: { [playerId: string]: string[] };
   games: { [gameId: string]: GameModel };
@@ -47,7 +49,11 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     throw new Error("ArcadeProvider can only be used once");
   }
 
-  const provider = new ExternalProvider(manifest, RPC_URL);
+  const provider = useMemo(
+    // TODO: Update here to select either Mainnet or Sepolia
+    () => new ExternalProvider(CHAIN_ID),
+    [],
+  );
 
   const handlePinningEvents = useCallback(
     (events: PinningEvent | PinningEvent[]) => {
@@ -92,7 +98,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (initialized) return;
     const initialize = async () => {
-      await Registry.init();
+      await Registry.init(CHAIN_ID);
       setInitialized(true);
     };
     initialize();
@@ -119,6 +125,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ArcadeContext.Provider
       value={{
+        chainId: CHAIN_ID,
         provider,
         pins,
         games,
