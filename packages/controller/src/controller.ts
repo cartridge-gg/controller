@@ -46,9 +46,13 @@ export default class ControllerProvider extends BaseProvider {
       } else if (parts.length >= 3) {
         const projectName = parts[2];
         if (parts.includes("katana")) {
-          chainId = `WP_${projectName.toUpperCase()}` as ChainId;
+          chainId = `WP_${projectName
+            .toUpperCase()
+            .replace(/-/g, "_")}` as ChainId;
         } else if (parts.includes("mainnet")) {
-          chainId = `GG_${projectName.toUpperCase()}` as ChainId;
+          chainId = `GG_${projectName
+            .toUpperCase()
+            .replace(/-/g, "_")}` as ChainId;
         }
       }
 
