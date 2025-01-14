@@ -29,7 +29,7 @@ export default class ControllerConnector extends InjectedConnector {
     return await this.controller.delegateAccount();
   }
 
-  fromConnectors(connectors: Connector[]): ControllerConnector {
+  static fromConnectors(connectors: Connector[]): ControllerConnector {
     const connector = connectors.find((c) => c.id === "controller");
     if (!connector) {
       throw new Error("Controller connector not found");

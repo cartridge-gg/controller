@@ -9,16 +9,16 @@ import {
   useNetwork,
   useSwitchChain,
 } from "@starknet-react/core";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { constants, num } from "starknet";
 import { Chain } from "@starknet-react/chains";
+import SessionConnector from "@cartridge/connector/session";
 
 const Header = () => {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { chain, chains } = useNetwork();
-  const { address, connector, status } = useAccount();
-  const controllerConnector = connector as never as ControllerConnector;
+  const { address, status } = useAccount();
   const [networkOpen, setNetworkOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const { switchChain } = useSwitchChain({
@@ -28,9 +28,14 @@ const Header = () => {
   });
   const networkRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const controllerConnector = useMemo(
+    () => ControllerConnector.fromConnectors(connectors),
+    [connectors],
+  );
 
-  const sessionConnector = connectors.find(
-    (c) => c.id === "controller_session",
+  const sessionConnector = useMemo(
+    () => SessionConnector.fromConnectors(connectors),
+    [connectors],
   );
 
   useEffect(() => {
@@ -139,7 +144,7 @@ const Header = () => {
         <div className="flex gap-2">
           <Button
             onClick={() => {
-              connect({ connector: connectors[0] });
+              connect({ connector: controllerConnector });
             }}
           >
             Connect

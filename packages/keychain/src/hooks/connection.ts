@@ -91,6 +91,7 @@ export function useConnectionValue() {
         class: controller.classHash(),
         chainId: controller.chainId,
       });
+      console.log(controller.address);
     } else {
       posthog.reset();
     }
