@@ -10,14 +10,11 @@ import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { formatEther } from "viem";
 import {
   ETH_CONTRACT_ADDRESS,
-  isIframe,
   useCountervalue,
   useCreditBalance,
   useERC20Balance,
 } from "@cartridge/utils";
 import { useController } from "@/hooks/controller";
-import { useEffect, useState } from "react";
-import Controller from "@/utils/controller";
 
 export type BalanceType = "credits" | "eth" | "strk";
 
@@ -26,18 +23,16 @@ type BalanceProps = {
 };
 
 export function Balance({ showBalances }: BalanceProps) {
-  const [username, setUsername] = useState<string>();
-  const [address, setAddress] = useState<string>();
   const { controller } = useController();
   const { balance: creditBalance } = useCreditBalance({
-    username: username,
+    username: controller?.username(),
     interval: 3000,
   });
 
   const {
     data: [eth],
   } = useERC20Balance({
-    address: address,
+    address: controller?.address,
     contractAddress: ETH_CONTRACT_ADDRESS,
     provider: controller,
     interval: 3000,
@@ -50,17 +45,6 @@ export function Balance({ showBalances }: BalanceProps) {
     },
     { enabled: !!eth },
   );
-
-  useEffect(() => {
-    const activeController = isIframe()
-      ? controller
-      : Controller.fromStore(import.meta.env.VITE_ORIGIN!);
-
-    if (activeController) {
-      setUsername(activeController.username());
-      setAddress(activeController.address);
-    }
-  }, [controller]);
 
   return (
     <Card>

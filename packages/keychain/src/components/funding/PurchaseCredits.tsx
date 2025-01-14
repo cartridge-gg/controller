@@ -14,6 +14,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { Balance } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
+import { isIframe } from "@cartridge/utils";
 
 const STRIPE_API_PUBKEY =
   "pk_test_51Kr6IXIS6lliDpf33KnwWDtIjRPWt3eAI9CuSLR6Vvc3GxHEwmSU0iszYbUlgUadSRluGKAFphe3JzltyjPAKiBK00al4RAFQu";
@@ -133,7 +134,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
           />
         )}
 
-        {state === PurchaseState.SUCCESS && (
+        {state === PurchaseState.SUCCESS && isIframe() && (
           <Button variant="secondary" onClick={closeModal}>
             Close
           </Button>

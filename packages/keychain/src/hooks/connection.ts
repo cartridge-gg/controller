@@ -107,8 +107,13 @@ export function useConnectionValue() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
 
-    // Set rpc and origin if we're not embedded (eg Slot auth/session)
+    // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
     if (!isIframe()) {
+      const controller = Controller.fromStore(import.meta.env.VITE_ORIGIN!);
+      if (controller) {
+        setController(controller);
+      }
+
       setOrigin(urlParams.get("origin") || import.meta.env.VITE_ORIGIN);
       const rpcUrl = urlParams.get("rpc_url");
       if (rpcUrl) {
