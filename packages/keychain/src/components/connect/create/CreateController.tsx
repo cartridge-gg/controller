@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Container, Footer, Content } from "@/components/layout";
-import { Button, cn } from "@cartridge/ui-next";
+import { Button, cn, Input } from "@cartridge/ui-next";
 import { useControllerTheme } from "@/hooks/theme";
 import { usePostHog } from "posthog-js/react";
 import { useDebounce } from "@/hooks/debounce";
@@ -8,7 +8,6 @@ import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
 import { Legal, StatusTray } from ".";
 import { useCreateController } from "./useCreateController";
-import { Input } from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
 import InAppSpy from "inapp-spy";
@@ -58,7 +57,7 @@ export function CreateControllerView({
           if (e.key === "Enter") e.preventDefault();
         }}
       >
-        <Content mb="2rem" gap={0}>
+        <Content className="gap-0">
           <div
             className={cn(
               "border-[#E46958] rounded",

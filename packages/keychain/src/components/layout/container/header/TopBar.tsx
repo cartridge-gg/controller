@@ -1,4 +1,3 @@
-import { Spacer, HStack } from "@chakra-ui/react";
 import { CloseButton } from "./CloseButton";
 import { SettingsButton } from "./SettingsButton";
 import { BackButton } from "./BackButton";
@@ -26,42 +25,31 @@ export function TopBar({
   );
 
   return (
-    <HStack
-      w="full"
-      zIndex="overlay"
-      align="center"
-      justify="flex-start"
-      flexShrink={0}
-      bg="transparent"
-      position="absolute"
-      top={0}
-      h={TOP_BAR_HEIGHT / 4}
-      p={2}
-    >
-      {onBack ? (
-        <BackButton onClick={onBack} />
-      ) : (
-        <CloseButton onClose={onClose} />
-      )}
+    <div className="flex items-center justify-between absolute top-0 left-0 right-0 h-14 p-2 z-50">
+      <div>
+        {onBack ? (
+          <BackButton onClick={onBack} />
+        ) : (
+          <CloseButton onClose={onClose} />
+        )}
+      </div>
 
-      <Spacer />
+      <div className="flex items-center gap-2">
+        {!hideNetwork && chainId && <Network chainId={chainId} />}
 
-      {!hideNetwork && chainId && <Network chainId={chainId} />}
-
-      {!hideAccount && (
-        <>
-          {/* {!!address && (
+        {!hideAccount && (
+          <>
+            {/* {!!address && (
             <>
               <EthBalance chainId={chainId} address={address} />
               {chainId && <AccountMenu onLogout={onLogout} address={address} />}
             </>
           )} */}
-        </>
-      )}
+          </>
+        )}
 
-      {showSettings && <SettingsButton onClick={() => openSettings()} />}
-    </HStack>
+        {showSettings && <SettingsButton onClick={() => openSettings()} />}
+      </div>
+    </div>
   );
 }
-
-export const TOP_BAR_HEIGHT = 56;

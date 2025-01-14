@@ -50,7 +50,7 @@ export function Funding({ onComplete, title }: FundingProps) {
       description={controller && <CopyAddress address={controller.address} />}
       icon={<ArrowIcon variant="down" />}
     >
-      <Content gap={6}>
+      <Content className="gap-6">
         <Balance showBalances={["credits", "eth"]} />
       </Content>
       <Footer>

@@ -1,12 +1,18 @@
-import { StackProps, VStack } from "@chakra-ui/react";
-import { useLayout } from "./container";
+import { cn } from "@cartridge/ui-next";
+import { PropsWithChildren } from "react";
 
-export function Content({ children, ...stackProps }: StackProps) {
-  const { footer } = useLayout();
-
+export function Content({
+  children,
+  className,
+}: PropsWithChildren & { className?: string }) {
   return (
-    <VStack w="full" px={4} pb={footer.height} align="stretch" {...stackProps}>
+    <div
+      className={cn(
+        "w-full px-4 pb-[var(--footer-height)] flex flex-col items-stretch gap-2",
+        className,
+      )}
+    >
       {children}
-    </VStack>
+    </div>
   );
 }

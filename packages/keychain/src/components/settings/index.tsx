@@ -1,6 +1,6 @@
 import { GearIcon, Button } from "@cartridge/ui-next";
 import { useState } from "react";
-import { Container, Footer } from "@/components/layout";
+import { Container, Content, Footer } from "@/components/layout";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
@@ -71,6 +71,7 @@ export function Settings() {
 
   return (
     <Container variant="compressed" title="Controller Settings" Icon={GearIcon}>
+      <Content />
       {/* <Content>
         <VStack gap="30px" w="full">
           <VStack>
@@ -158,6 +159,7 @@ export function Settings() {
           </VStack>
         </VStack>
       </Content> */}
+
       <Footer>
         <Button variant="secondary" onClick={logout}>
           Log out

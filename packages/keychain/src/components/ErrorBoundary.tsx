@@ -46,7 +46,7 @@ export function ErrorPage({ error }: { error: Error }) {
       description="Something went wrong"
       icon={<AlertIcon size="lg" />}
     >
-      <Content gap={4}>
+      <Content className="gap-4">
         <div className="flex w-full px-4 py-6 bg-secondary border border-quaternary rounded">
           <p className="w-full text-sm">{error.message}</p>
         </div>
