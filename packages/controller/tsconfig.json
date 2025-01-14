@@ -5,8 +5,7 @@
     "rootDir": ".",
     "outDir": "./dist",
     "composite": false,
-    "incremental": false,
-    "moduleResolution": "node"
+    "incremental": false
   },
   "include": ["src/**/*", "package.json"]
 }

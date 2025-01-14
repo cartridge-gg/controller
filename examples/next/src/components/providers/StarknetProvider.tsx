@@ -10,6 +10,7 @@ import { PropsWithChildren } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { SessionPolicies } from "@cartridge/controller";
 import { constants } from "starknet";
+import SessionConnector from "@cartridge/connector/session";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -103,7 +104,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
     <StarknetConfig
       autoConnect
       chains={[mainnet, sepolia]}
-      connectors={[controller]}
+      connectors={[controller, session]}
       explorer={starkscan}
       provider={provider}
     >
@@ -144,4 +145,11 @@ const controller = new ControllerConnector({
       // "0x01bfe97d729138fc7c2d93c77d6d1d8a24708d5060608017d9b384adf38f04c7",
     ],
   },
+});
+
+const session = new SessionConnector({
+  policies,
+  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA!,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
+  redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
 });

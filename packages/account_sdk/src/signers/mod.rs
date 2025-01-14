@@ -137,7 +137,7 @@ pub enum SignError {
     #[error("No allowed session methods error")]
     NoAllowedSessionMethods,
 
-    #[error("Session policy not allowed error{0}")]
+    #[error("Session policy not allowed error: {0}")]
     SessionPolicyNotAllowed(SessionPolicyError),
 
     #[error("Invalid message provided: {0}")]

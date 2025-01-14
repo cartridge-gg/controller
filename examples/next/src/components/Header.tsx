@@ -29,6 +29,10 @@ const Header = () => {
   const networkRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
+  const sessionConnector = connectors.find(
+    (c) => c.id === "controller_session",
+  );
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -132,13 +136,20 @@ const Header = () => {
           )}
         </div>
       ) : (
-        <Button
-          onClick={() => {
-            connect({ connector: connectors[0] });
-          }}
-        >
-          Connect
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => {
+              connect({ connector: connectors[0] });
+            }}
+          >
+            Connect
+          </Button>
+          {sessionConnector && (
+            <Button onClick={() => connect({ connector: sessionConnector })}>
+              Register Session
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

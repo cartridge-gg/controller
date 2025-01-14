@@ -14,10 +14,22 @@
     "version": "pnpm pkg get version"
   },
   "exports": {
-    ".": "./dist/index.js",
-    "./session": "./dist/session/index.js",
-    "./provider": "./dist/provider/index.js",
-    "./types": "./dist/types/index.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./session": {
+      "types": "./dist/session/index.d.ts",
+      "default": "./dist/session/index.js"
+    },
+    "./provider": {
+      "types": "./dist/provider/index.d.ts",
+      "default": "./dist/provider/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/types/index.js"
+    }
   },
   "tsup": {
     "entry": [
