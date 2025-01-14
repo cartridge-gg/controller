@@ -1,5 +1,5 @@
 import ControllerProvider, { ControllerOptions } from "@cartridge/controller";
-import { InjectedConnector } from "@starknet-react/core";
+import { Connector, InjectedConnector } from "@starknet-react/core";
 
 export default class ControllerConnector extends InjectedConnector {
   public controller: ControllerProvider;
@@ -27,5 +27,13 @@ export default class ControllerConnector extends InjectedConnector {
 
   async delegateAccount() {
     return await this.controller.delegateAccount();
+  }
+
+  fromConnectors(connectors: Connector[]): ControllerConnector {
+    const connector = connectors.find((c) => c.id === "controller");
+    if (!connector) {
+      throw new Error("Controller connector not found");
+    }
+    return connector as ControllerConnector;
   }
 }

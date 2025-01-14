@@ -3,15 +3,15 @@
 import {
   useAccount,
   useReadContract,
-  useSendTransaction,
+  // useSendTransaction,
 } from "@starknet-react/core";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { cairo, uint256 } from "starknet";
 import { ConnectWallet } from "components/ConnectWallet";
-import { useTokenContract } from "hooks/token";
+// import { useTokenContract } from "hooks/token";
 import { Abi } from "starknet";
 import Erc20Abi from "abi/erc20.json";
-import { Button, Input } from "@cartridge/ui-next";
+// import { Button, Input } from "@cartridge/ui-next";
 
 function UserBalance() {
   const { account } = useAccount();
@@ -46,72 +46,72 @@ function UserBalance() {
   );
 }
 
-function MintToken() {
-  const { account, address } = useAccount();
-  const [amount, setAmount] = useState("");
-  const [amountError, setAmountError] = useState<string | undefined>();
+// function MintToken() {
+//   const { account, address } = useAccount();
+//   const [amount, setAmount] = useState("");
+//   const [amountError, setAmountError] = useState<string | undefined>();
 
-  const { contract } = useTokenContract();
+//   const { contract } = useTokenContract();
 
-  const calls = useMemo(() => {
-    if (!address || !contract) return [];
+//   const calls = useMemo(() => {
+//     if (!address || !contract) return [];
 
-    const amountBn = cairo.uint256(amount);
-    return contract.populateTransaction["mint"]!(address, [address, amountBn]);
-  }, [address, contract, amount]);
+//     const amountBn = cairo.uint256(amount);
+//     return [contract.populateTransaction["mint"](address, [address, amountBn])];
+//   }, [address, contract, amount]);
 
-  const { sendAsync, isPending, error, reset } = useSendTransaction({
-    calls,
-  });
+//   const { sendAsync, isPending, error, reset } = useSendTransaction({
+//     calls,
+//   });
 
-  const updateAmount = useCallback(
-    (newAmount: string) => {
-      // soft-validate amount
-      setAmount(newAmount);
-      try {
-        BigInt(newAmount);
-        setAmountError(undefined);
-      } catch (err) {
-        console.error(err);
-        setAmountError("Please input a valid number");
-      }
-    },
-    [setAmount],
-  );
+//   const updateAmount = useCallback(
+//     (newAmount: string) => {
+//       // soft-validate amount
+//       setAmount(newAmount);
+//       try {
+//         BigInt(newAmount);
+//         setAmountError(undefined);
+//       } catch (err) {
+//         console.error(err);
+//         setAmountError("Please input a valid number");
+//       }
+//     },
+//     [setAmount],
+//   );
 
-  const onMint = useCallback(() => {
-    reset();
-    if (account && !amountError) {
-      sendAsync();
-    }
-  }, [account, amountError, reset, sendAsync]);
+//   const onMint = useCallback(() => {
+//     reset();
+//     if (account && !amountError) {
+//       sendAsync();
+//     }
+//   }, [account, amountError, reset, sendAsync]);
 
-  const mintButtonDisabled = useMemo(() => {
-    if (isPending) return true;
-    return !account || !!amountError;
-  }, [isPending, account, amountError]);
+//   const mintButtonDisabled = useMemo(() => {
+//     if (isPending) return true;
+//     return !account || !!amountError;
+//   }, [isPending, account, amountError]);
 
-  return (
-    <div>
-      <h2>Mint token</h2>
-      <p>
-        <span>Amount: </span>
-        <Input
-          type="number"
-          onChange={(evt) => updateAmount(evt.target.value)}
-        />
-      </p>
-      <Button disabled={mintButtonDisabled} onClick={onMint}>
-        {isPending ? "Submitting" : "Mint"}
-      </Button>
-      {error && (
-        <p>
-          <>Error: {error}</>
-        </p>
-      )}
-    </div>
-  );
-}
+//   return (
+//     <div>
+//       <h2>Mint token</h2>
+//       <p>
+//         <span>Amount: </span>
+//         <Input
+//           type="number"
+//           onChange={(evt) => updateAmount(evt.target.value)}
+//         />
+//       </p>
+//       <Button disabled={mintButtonDisabled} onClick={onMint}>
+//         {isPending ? "Submitting" : "Mint"}
+//       </Button>
+//       {error && (
+//         <p>
+//           <>Error: {error}</>
+//         </p>
+//       )}
+//     </div>
+//   );
+// }
 
 export default function TokenPage() {
   const { address } = useAccount();
@@ -128,7 +128,7 @@ export default function TokenPage() {
     <div>
       <p>Connected: {address}</p>
       <UserBalance />
-      <MintToken />
+      {/* <MintToken /> */}
     </div>
   );
 }
