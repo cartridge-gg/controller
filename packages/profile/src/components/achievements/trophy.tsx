@@ -341,7 +341,7 @@ function Track({
       }
     };
     pin();
-  }, [enabled, pinned, id, chainId, provider]);
+  }, [enabled, pinned, id, chainId, provider, parent]);
 
   const handleUnpin = useCallback(() => {
     if (!pinned) return;
@@ -364,7 +364,7 @@ function Track({
       }
     };
     unpin();
-  }, [pinned, id, chainId, provider]);
+  }, [pinned, id, chainId, provider, parent]);
 
   return (
     <div
