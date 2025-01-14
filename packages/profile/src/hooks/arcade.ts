@@ -6,7 +6,7 @@ import { ArcadeContext } from "../components/context/arcade";
  * Must be used within a ArcadeProvider component.
  *
  * @returns An object containing:
- * - client: The Arcade client instance
+ * - chainId: The chain id
  * - provider: The Arcade provider instance
  * - pins: The pins for the current player
  * - games: The games for the current player
