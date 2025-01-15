@@ -9,15 +9,18 @@ import { Link, useLocation } from "react-router-dom";
 import { Item, Player } from "@/hooks/achievements";
 import { useUsername } from "@/hooks/account";
 import { useMemo } from "react";
+import { addAddressPadding } from "starknet";
 
 export function Leaderboard({
   players,
   address,
   achievements,
+  pins,
 }: {
   players: Player[];
   address: string;
   achievements: Item[];
+  pins: { [playerId: string]: string[] };
 }) {
   return (
     <div className="flex flex-col gap-y-px rounded-md overflow-hidden relative">
@@ -31,6 +34,7 @@ export function Leaderboard({
             completeds={player.completeds}
             achievements={achievements}
             rank={index + 1}
+            pins={pins}
           />
         ))}
       </ScrollArea>
@@ -45,6 +49,7 @@ function Row({
   rank,
   completeds,
   achievements,
+  pins,
 }: {
   self: boolean;
   address: string;
@@ -52,6 +57,7 @@ function Row({
   rank: number;
   completeds: string[];
   achievements: Item[];
+  pins: { [playerId: string]: string[] };
 }) {
   const { username } = useUsername({ address });
   const location = useLocation();
@@ -62,20 +68,20 @@ function Row({
   }, [location.pathname, address, self]);
 
   const trophies = useMemo(() => {
-    const data = achievements.filter((achievement) =>
-      completeds.includes(achievement.id),
-    );
-    const tops = data
+    const ids = (address ? pins[addAddressPadding(address)] : []) || [];
+    const pinneds = achievements
+      .filter((achievement) => completeds.includes(achievement.id))
+      .filter((item) => ids.includes(item.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
-      .slice(0, 3);
-    return tops
+      .slice(0, 3); // There is a front-end limit of 3 pinneds
+    return pinneds
       .filter((achievement) => achievement)
       .map((achievement) => ({
         address,
         id: achievement.id,
         icon: achievement.icon,
       }));
-  }, [achievements, completeds, address]);
+  }, [achievements, completeds, address, pins]);
 
   return (
     <Link
