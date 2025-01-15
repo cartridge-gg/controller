@@ -33,22 +33,6 @@
       content="{CartridgeTheme.semanticTokens.colors.brand}"
     />
     <script src="/noflash.js"></script>
-
-    <script>
-      // This script sets the initial color mode
-      (function () {
-        function setColorMode() {
-          const colorMode = localStorage.getItem("chakra-ui-color-mode");
-          if (colorMode) {
-            document.documentElement.style.setProperty(
-              "--chakra-ui-color-mode",
-              colorMode,
-            );
-          }
-        }
-        setColorMode();
-      })();
-    </script>
   </head>
   <body class="h-screen bg-background text-foreground overflow-y-auto">
     <div id="root"></div>

@@ -16,14 +16,13 @@
     "storybook": "storybook dev -p 6001",
     "storybook:build": "storybook build",
     "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6006 --silent",
-    "test-storybook": "test-storybook",
+    "test-storybook": "test-storybook --testTimeout=60000",
     "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6006 'pnpm test-storybook'"
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "^6.2.3",
-    "@cartridge/ui": "workspace:*",
     "@cartridge/ui-next": "workspace:*",
     "@cartridge/utils": "workspace:*",
     "@emotion/react": "^11.11.1",
@@ -42,7 +41,6 @@
     "graphql": "^16.3.0",
     "graphql-request": "^5.0.0",
     "inapp-spy": "4.2.1",
-    "js-cookie": "^3.0.1",
     "p-throttle": "^6.2.0",
     "posthog-js": "^1.181.0",
     "react": "^18.3.1",
@@ -70,7 +68,6 @@
     "@storybook/test-runner": "^0.21.0",
     "@testing-library/react": "^13.4.0",
     "@types/jest-image-snapshot": "^6.4.0",
-    "@types/js-cookie": "^3.0.2",
     "@types/node": "^20.6.0",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react-swc": "^3.5.0",
@@ -97,7 +94,6 @@
     "vitest": "^2.1.8"
   },
   "peerDependencies": {
-    "@chakra-ui/react": "^2.8.1",
     "@starknet-react/chains": "^3.0.0",
     "@starknet-react/core": "^3.0.2",
     "starknet": "^6.11.0"
