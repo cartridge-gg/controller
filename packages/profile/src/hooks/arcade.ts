@@ -8,8 +8,8 @@ import { ArcadeContext } from "../components/context/arcade";
  * @returns An object containing:
  * - chainId: The chain id
  * - provider: The Arcade provider instance
- * - pins: The pins for the current player
- * - games: The games for the current player
+ * - pins: All the existing pins
+ * - games: The registered games
  * @throws {Error} If used outside of a ArcadeProvider context
  */
 export const useArcade = () => {
