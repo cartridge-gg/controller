@@ -15,5 +15,5 @@ export function Fund() {
     }
   }, [navigate, pathname]);
 
-  return <Funding title="Fund Credits for Slot" creditsOnly={true} />;
+  return <Funding title="Fund Credits for Slot" isSlot />;
 }

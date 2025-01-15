@@ -26,10 +26,11 @@ enum PurchaseState {
 }
 
 type PurchaseCreditsProps = {
+  isSlot?: boolean;
   onBack?: () => void;
 };
 
-export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
+export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
   const { controller, closeModal } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
@@ -120,7 +121,11 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         <ErrorAlert
           variant=""
           title="WHAT ARE CREDITS"
-          description="Credits can be used to play games or pay for slot deployments. They are not tokens and cannot be transferred or refunded."
+          description={
+            "Credits can be used " +
+            (isSlot ? "for slot deployments" : "to play games") +
+            ". They are not tokens and cannot be transferred or refunded."
+          }
           isExpanded
         />
       </Content>

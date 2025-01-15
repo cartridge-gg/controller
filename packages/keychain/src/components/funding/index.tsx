@@ -20,19 +20,17 @@ const enum FundingState {
 
 export type FundingProps = {
   title?: React.ReactElement | string;
-  creditsOnly?: boolean;
+  isSlot?: boolean;
   onComplete?: (deployHash?: string) => void;
 };
 
-export function Funding({ title, creditsOnly, onComplete }: FundingProps) {
+export function Funding({ title, isSlot, onComplete }: FundingProps) {
   const { controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
-  const showBalances: BalanceType[] = creditsOnly
-    ? ["credits"]
-    : ["credits", "eth"];
+  const showBalances: BalanceType[] = isSlot ? ["credits"] : ["credits", "eth"];
   const showCredits =
     (typeof document !== "undefined" && document.cookie.includes("credits=")) ||
-    creditsOnly;
+    isSlot;
 
   if (state === FundingState.FUND_ETH) {
     return (
@@ -45,7 +43,10 @@ export function Funding({ title, creditsOnly, onComplete }: FundingProps) {
 
   if (state === FundingState.FUND_CREDITS) {
     return (
-      <PurchaseCredits onBack={() => setState(FundingState.SHOW_OPTIONS)} />
+      <PurchaseCredits
+        isSlot={isSlot}
+        onBack={() => setState(FundingState.SHOW_OPTIONS)}
+      />
     );
   }
 
@@ -65,7 +66,7 @@ export function Funding({ title, creditsOnly, onComplete }: FundingProps) {
             <CoinsIcon variant="line" size="sm" /> Purchase Credits
           </Button>
         )}
-        {!creditsOnly && (
+        {!isSlot && (
           <Button
             onClick={() => setState(FundingState.FUND_ETH)}
             variant="secondary"
