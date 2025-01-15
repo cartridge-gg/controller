@@ -47,7 +47,9 @@ function Auth() {
           "",
         );
 
-      const target = returnTo ? `${returnTo}${otherParams}` : "/slot";
+      const target = returnTo
+        ? `${returnTo}${otherParams}`
+        : `/slot/consent${otherParams}`;
       navigate(target, { replace: true });
     }
   }, [user, controller, navigate, searchParams]);
