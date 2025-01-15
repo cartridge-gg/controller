@@ -10,6 +10,7 @@
     "build": "pnpm build:deps",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
+    "test": "jest",
     "version": "pnpm pkg get version"
   },
   "exports": {
@@ -42,7 +43,10 @@
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.6.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
     "typescript": "^5.4.5"
   }
 }
