@@ -333,6 +333,7 @@ export default class ControllerProvider extends BaseProvider {
           reject(new Error("Timeout waiting for keychain"));
           return;
         }
+
         if (!this.keychain) return;
 
         clearInterval(id);

@@ -46,7 +46,7 @@ export function MessageContent({
     <>
       {messages.map((m, i) => (
         <div
-          key={m.domain.name ?? i}
+          key={`${m.domain.name}-${i}`}
           className="flex flex-col bg-secondary gap-2 text-xs"
         >
           <div className="py-2 font-bold">{m.name ?? `Message ${i + 1}`}</div>
@@ -69,9 +69,9 @@ export function MessageContent({
             <CollapsibleRow title="types">
               {Object.entries(m.types).map(([name, types]) => (
                 <CollapsibleRow key={name} title={name}>
-                  {types.map((t) => (
+                  {types.map((t, typeIndex) => (
                     <ValueRow
-                      key={t.name}
+                      key={`${t.name}-${typeIndex}`}
                       values={[
                         { name: "name", value: t.name },
                         { name: "type", value: t.type },
