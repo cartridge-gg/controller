@@ -7,6 +7,7 @@ import { Success } from "./success";
 import { Pending } from "./pending";
 import { Consent, Slot } from "./slot";
 import { OcclusionDetector } from "./OcclusionDetector";
+import { Fund } from "./slot/fund";
 
 export function App() {
   return (
@@ -19,6 +20,7 @@ export function App() {
           <Route path="session" element={<Session />} />
           <Route path="slot" element={<Slot />}>
             <Route path="consent" element={<Consent />} />
+            <Route path="fund" element={<Fund />} />
           </Route>
           <Route path="success" element={<Success />} />
           <Route path="failure" element={<Failure />} />
