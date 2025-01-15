@@ -2,13 +2,16 @@ import {
   addAddressPadding,
   Call,
   CallData,
+  constants,
   getChecksumAddress,
   hash,
+  shortString,
   typedData,
   TypedDataRevision,
 } from "starknet";
 import wasm from "@cartridge/account-wasm/controller";
 import { Policies, SessionPolicies } from "@cartridge/presets";
+import { ChainId } from "@starknet-io/types-js";
 
 // Whitelist of allowed property names to prevent prototype pollution
 const ALLOWED_PROPERTIES = new Set([
@@ -128,4 +131,29 @@ export function humanizeString(str: string): string {
       // Capitalize first letter
       .replace(/^\w/, (c) => c.toUpperCase())
   );
+}
+
+export function parseChainId(url: URL): ChainId {
+  const parts = url.pathname.split("/");
+
+  if (parts.includes("starknet")) {
+    if (parts.includes("mainnet")) {
+      return constants.StarknetChainId.SN_MAIN;
+    } else if (parts.includes("sepolia")) {
+      return constants.StarknetChainId.SN_SEPOLIA;
+    }
+  } else if (parts.length >= 3) {
+    const projectName = parts[2];
+    if (parts.includes("katana")) {
+      return shortString.encodeShortString(
+        `WP_${projectName.toUpperCase().replace(/-/g, "_")}`,
+      ) as ChainId;
+    } else if (parts.includes("mainnet")) {
+      return shortString.encodeShortString(
+        `GG_${projectName.toUpperCase().replace(/-/g, "_")}`,
+      ) as ChainId;
+    }
+  }
+
+  throw new Error(`Chain ${url.toString()} not supported`);
 }

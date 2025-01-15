@@ -16,9 +16,10 @@ import {
   Chain,
 } from "./types";
 import BaseProvider from "./provider";
-import { constants, WalletAccount } from "starknet";
+import { WalletAccount } from "starknet";
 import { Policy } from "@cartridge/presets";
 import { AddStarknetChainParameters, ChainId } from "@starknet-io/types-js";
+import { parseChainId } from "./utils";
 
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
@@ -34,28 +35,8 @@ export default class ControllerProvider extends BaseProvider {
     const chains = new Map<ChainId, Chain>();
 
     for (const chain of options.chains) {
-      let chainId: ChainId | undefined;
       const url = new URL(chain.rpcUrl);
-      const parts = url.pathname.split("/");
-      if (parts.includes("starknet")) {
-        if (parts.includes("mainnet")) {
-          chainId = constants.StarknetChainId.SN_MAIN;
-        } else if (parts.includes("sepolia")) {
-          chainId = constants.StarknetChainId.SN_SEPOLIA;
-        }
-      } else if (parts.length >= 3) {
-        const projectName = parts[2];
-        if (parts.includes("katana")) {
-          chainId = `WP_${projectName.toUpperCase()}` as ChainId;
-        } else if (parts.includes("mainnet")) {
-          chainId = `GG_${projectName.toUpperCase()}` as ChainId;
-        }
-      }
-
-      if (!chainId) {
-        throw new Error(`Chain ${chain.rpcUrl} not supported`);
-      }
-
+      const chainId = parseChainId(url);
       chains.set(chainId, chain);
     }
 
