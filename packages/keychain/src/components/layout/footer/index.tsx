@@ -1,4 +1,4 @@
-import { forwardRef, memo, PropsWithChildren, useEffect, useRef } from "react";
+import { forwardRef, memo, PropsWithChildren, useRef } from "react";
 import { cn } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
 
@@ -9,32 +9,10 @@ export function Footer({
 }: PropsWithChildren & { className?: string; showCatridgeLogo?: boolean }) {
   const ref = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!ref.current) {
-      document.documentElement.style.setProperty("--footer-height", "0px");
-      return;
-    }
-
-    const observer = new ResizeObserver((entries) => {
-      const rect = entries[0].contentRect;
-      if (!rect.height) return;
-      document.documentElement.style.setProperty(
-        "--footer-height",
-        `${rect.height + 16 * 2}px`,
-      );
-    });
-
-    observer.observe(ref.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 w-full pt-4 fixed md:absolute left-0 bottom-0 bg-background",
+        "flex flex-col gap-2 w-full pt-4 left-0 bottom-0 bg-background",
         !showCatridgeLogo && "pb-4",
         className,
       )}

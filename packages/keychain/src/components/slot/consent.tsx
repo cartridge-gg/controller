@@ -43,7 +43,6 @@ export function Consent() {
     >
       <Footer>
         <Button onClick={onSubmit}>approve</Button>
-
         <Button variant="secondary" onClick={onDeny}>
           deny
         </Button>
