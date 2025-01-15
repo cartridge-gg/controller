@@ -93,7 +93,7 @@ export function SignMessage({
                             <div className="capitalize text-muted-foreground">
                               {key}:
                             </div>
-                            <div className="overflow-x-auto">
+                            <div className="break-words break-all">
                               {value as string}
                             </div>
                           </CardListItem>

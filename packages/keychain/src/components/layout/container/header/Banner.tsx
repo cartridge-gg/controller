@@ -20,7 +20,7 @@ export function Banner({
   switch (variant) {
     case "expanded":
       return (
-        <div className="flex flex-col w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative mb-16 before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-[var(--chakra-colors-solid-bg)] before:pointer-events-none">
+        <div className="flex flex-col w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative mb-16 before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none">
           <div className="p-4 flex items-center gap-4 absolute -bottom-10 left-1">
             <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
             <Headline
