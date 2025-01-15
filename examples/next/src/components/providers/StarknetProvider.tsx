@@ -10,7 +10,7 @@ import { PropsWithChildren } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { SessionPolicies } from "@cartridge/controller";
 import { constants } from "starknet";
-import { getSocialPolicies } from "@bal7hazar/arcade-sdk";
+// import { getSocialPolicies } from "@bal7hazar/arcade-sdk";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -46,9 +46,9 @@ const messageForChain = (chainId: constants.StarknetChainId) => {
   };
 };
 
-const socialPolicies = (chainId: constants.StarknetChainId) => {
-  return getSocialPolicies(chainId, { pin: true }).contracts;
-};
+// const socialPolicies = (chainId: constants.StarknetChainId) => {
+//   return getSocialPolicies(chainId, { pin: true }).contracts;
+// };
 
 const policies: SessionPolicies = {
   contracts: {
@@ -83,7 +83,7 @@ const policies: SessionPolicies = {
     "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e": {
       methods: [{ name: "new_game", entrypoint: "new_game" }],
     },
-    ...socialPolicies(constants.StarknetChainId.SN_SEPOLIA),
+    // ...socialPolicies(constants.StarknetChainId.SN_SEPOLIA),
   },
   messages: [
     messageForChain(constants.StarknetChainId.SN_MAIN),
@@ -131,13 +131,13 @@ const controller = new ControllerConnector({
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
-  slot: "profile-example",
-  // slot: "ryomainnet",
-  // preset: "dope-wars",
+  // slot: "profile-example",
+  slot: "ryomainnet",
+  preset: "dope-wars",
   namespace: "dopewars",
   // namespace: "dopewars",
   // slot: "eternum-prod",
-  preset: "eternum",
+  // preset: "eternum",
   // namespace: "s0_eternum",
   // slot: "darkshuffle-mainnet",
   // preset: "dark-shuffle",

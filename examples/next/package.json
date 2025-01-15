@@ -19,7 +19,7 @@
     "@cartridge/ui-next": "workspace:*",
     "@starknet-react/chains": "^0.1.3",
     "@starknet-react/core": "^3.0.2",
-    "next": "^15.1.4",
+    "next": "^14.2.5",
     "next-themes": "^0.3.0",
     "prettier": "^2.7.1",
     "react": "^18.3.1",
