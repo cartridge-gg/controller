@@ -10,8 +10,9 @@ import {
 import {
   ArcadeProvider as ExternalProvider,
   Registry,
-  PinningEvent,
+  Social,
   GameModel,
+  PinEvent,
 } from "@bal7hazar/arcade-sdk";
 import { constants } from "starknet";
 
@@ -55,35 +56,32 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
-  const handlePinningEvents = useCallback(
-    (events: PinningEvent | PinningEvent[]) => {
-      const data = Array.isArray(events) ? events : [events];
-      data.forEach((event: PinningEvent) => {
-        if (event.time == 0) {
-          // Remove the achievement from the player's list
-          setPins((prevPins) => {
-            const achievementIds = prevPins[event.playerId] || [];
-            return {
-              ...prevPins,
-              [event.playerId]: achievementIds.filter(
-                (id: string) => id !== event.achievementId,
-              ),
-            };
-          });
-        } else {
-          // Otherwise, add the achievement to the player's list
-          setPins((prevPins) => {
-            const achievementIds = prevPins[event.playerId] || [];
-            return {
-              ...prevPins,
-              [event.playerId]: [...achievementIds, event.achievementId],
-            };
-          });
-        }
-      });
-    },
-    [],
-  );
+  const handlePinEvents = useCallback((events: PinEvent | PinEvent[]) => {
+    const data = Array.isArray(events) ? events : [events];
+    data.forEach((event: PinEvent) => {
+      if (event.time == 0) {
+        // Remove the achievement from the player's list
+        setPins((prevPins) => {
+          const achievementIds = prevPins[event.playerId] || [];
+          return {
+            ...prevPins,
+            [event.playerId]: achievementIds.filter(
+              (id: string) => id !== event.achievementId,
+            ),
+          };
+        });
+      } else {
+        // Otherwise, add the achievement to the player's list
+        setPins((prevPins) => {
+          const achievementIds = prevPins[event.playerId] || [];
+          return {
+            ...prevPins,
+            [event.playerId]: [...achievementIds, event.achievementId],
+          };
+        });
+      }
+    });
+  }, []);
 
   const handleGameModels = useCallback((models: GameModel | GameModel[]) => {
     const data = Array.isArray(models) ? models : [models];
@@ -98,7 +96,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (initialized) return;
     const initialize = async () => {
-      await Registry.init(CHAIN_ID);
+      await Social.init(CHAIN_ID);
       setInitialized(true);
     };
     initialize();
@@ -106,12 +104,12 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!initialized) return;
-    Registry.Pinning.fetch(handlePinningEvents);
-    Registry.Pinning.sub(handlePinningEvents);
+    Social.Pin.fetch(handlePinEvents);
+    Social.Pin.sub(handlePinEvents);
     return () => {
-      Registry.Pinning.unsub();
+      Social.Pin.unsub();
     };
-  }, [initialized, handlePinningEvents]);
+  }, [initialized, handlePinEvents]);
 
   useEffect(() => {
     if (!initialized) return;

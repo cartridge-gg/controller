@@ -325,7 +325,7 @@ function Track({
     const pin = async () => {
       setLoading(true);
       try {
-        const calls = provider.registry.pin({ achievementId: id });
+        const calls = provider.social.pin({ achievementId: id });
         const res = await parent.openExecute(
           Array.isArray(calls) ? calls : [calls],
           chainId,
@@ -348,7 +348,7 @@ function Track({
     const unpin = async () => {
       setLoading(true);
       try {
-        const calls = provider.registry.unpin({ achievementId: id });
+        const calls = provider.social.unpin({ achievementId: id });
         const res = await parent.openExecute(
           Array.isArray(calls) ? calls : [calls],
           chainId,
