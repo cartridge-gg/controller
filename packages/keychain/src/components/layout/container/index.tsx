@@ -1,15 +1,5 @@
-import {
-  Container as ChakraContainer,
-  VStack,
-  StyleProps,
-  Flex,
-  Show,
-} from "@chakra-ui/react";
-import { motion } from "framer-motion";
-import { PropsWithChildren, createContext, useContext, useState } from "react";
+import { PropsWithChildren } from "react";
 import { Header, HeaderProps } from "./header";
-import { useDisclosure } from "@cartridge/ui-next";
-
 export function Container({
   children,
   onBack,
@@ -20,14 +10,11 @@ export function Container({
   icon,
   title,
   description,
+  className,
   variant,
-}: {
-  variant?: LayoutVariant;
-} & PropsWithChildren &
-  StyleProps &
-  HeaderProps) {
+}: PropsWithChildren & HeaderProps & { className?: string }) {
   return (
-    <Wrapper variant={variant}>
+    <ResponsiveWrapper>
       <Header
         onBack={onBack}
         onClose={onClose}
@@ -37,100 +24,27 @@ export function Container({
         icon={icon}
         title={title}
         description={description}
+        variant={variant}
       />
-
-      <VStack w="full">{children}</VStack>
-    </Wrapper>
+      <div className={className}>{children}</div>
+    </ResponsiveWrapper>
   );
 }
 
-export const FOOTER_HEIGHT = 40;
-export const PORTAL_WINDOW_HEIGHT = 600;
-
-function Wrapper({
-  variant = "compressed",
-  children,
-  ...rest
-}: React.PropsWithChildren & { variant?: LayoutVariant }) {
-  const [height, setHeight] = useState(0);
-  const { isOpen, onToggle } = useDisclosure();
-
+function ResponsiveWrapper({ children }: PropsWithChildren) {
   return (
-    <LayoutContext.Provider
-      value={{ variant, footer: { height, setHeight, isOpen, onToggle } }}
-    >
-      {/** Show as full page  */}
-      <Show below="md">
-        <ChakraContainer
-          w="100vw"
-          h="100vh"
-          bg="solid.bg"
-          p={0}
-          as={motion.div}
-          animate={{ opacity: 1 }}
-          initial={{ opacity: 0 }}
-          centerContent
-          position="relative"
-          {...rest}
-        >
+    <>
+      {/* for desktop */}
+      <div className="hidden md:flex w-screen h-screen items-center justify-center">
+        <div className="w-desktop border border-muted rounded-xl flex flex-col relative overflow-hidden align-middle">
           {children}
-        </ChakraContainer>
-      </Show>
+        </div>
+      </div>
 
-      {/** Show as modal  */}
-      <Show above="md">
-        <Flex w="100vw" h="100vh" p={0} align="center">
-          <ChakraContainer
-            w="432px"
-            // h={`${PORTAL_WINDOW_HEIGHT}px`}
-            borderWidth={1}
-            borderColor="solid.primaryAccent"
-            verticalAlign="middle"
-            bg="solid.bg"
-            p={0}
-            as={motion.div}
-            animate={{ opacity: 1 }}
-            initial={{ opacity: 0 }}
-            centerContent
-            borderRadius="lg"
-            overflow="hidden"
-            position="relative"
-            {...rest}
-          >
-            {children}
-          </ChakraContainer>
-        </Flex>
-      </Show>
-    </LayoutContext.Provider>
+      {/* device smaller than desktop width */}
+      <div className="md:hidden w-screen h-screen max-w-desktop relative flex flex-col bg-background">
+        {children}
+      </div>
+    </>
   );
-}
-
-export const LayoutContext = createContext<LayoutContextValue>({
-  variant: "expanded",
-  footer: {
-    height: 0,
-    setHeight: () => {},
-    isOpen: false,
-    onToggle: () => {},
-  },
-});
-
-export type LayoutContextValue = {
-  variant: LayoutVariant;
-  footer: {
-    height: number;
-    setHeight: (height: number) => void;
-    isOpen: boolean;
-    onToggle: () => void;
-  };
-};
-
-export type LayoutVariant = "expanded" | "compressed";
-
-export function useLayout() {
-  return useContext(LayoutContext);
-}
-
-export function useLayoutVariant(): LayoutVariant {
-  return useLayout().variant;
 }

@@ -56,7 +56,7 @@ export function Funding({ title, creditsOnly, onComplete }: FundingProps) {
       icon={<ArrowIcon variant="down" />}
       hideNetwork
     >
-      <Content gap={6}>
+      <Content className="gap-6">
         <Balance showBalances={showBalances} />
       </Content>
       <Footer>

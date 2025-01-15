@@ -81,7 +81,7 @@ export default function StripeCheckout({
       icon={<CoinsIcon variant="solid" />}
       onBack={onBack}
     >
-      <Content gap={6}>
+      <Content className="gap-6">
         <form id="payment-form">
           <PaymentElement
             id="payment-element"

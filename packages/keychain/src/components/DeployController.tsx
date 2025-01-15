@@ -170,7 +170,7 @@ export function DeployController({
           title="Deploying Controller"
           description={`Your controller is being deployed on ${chainName}`}
         >
-          <Content alignItems="center">
+          <Content className="items-center">
             {deployHash && controller && (
               <ExplorerLink
                 chainId={controller.chainId()}
@@ -201,7 +201,7 @@ export function DeployController({
           title="Success!"
           description={`Your controller has been deployed on ${chainName}`}
         >
-          <Content alignItems="center">
+          <Content className="items-center">
             {deployHash && controller && (
               <ExplorerLink
                 chainId={controller.chainId()}

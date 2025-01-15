@@ -1,5 +1,5 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
-import { Content, FOOTER_MIN_HEIGHT } from "@/components/layout";
+import { Content } from "@/components/layout";
 import { TransactionDuoIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
@@ -39,7 +39,7 @@ export function ConfirmTransaction() {
       transactionsDetail={ctx.transactionsDetail}
       onSubmit={onSubmit}
     >
-      <Content pb={FOOTER_MIN_HEIGHT}>
+      <Content>
         <TransactionSummary calls={transactions} />
       </Content>
     </ExecutionContainer>

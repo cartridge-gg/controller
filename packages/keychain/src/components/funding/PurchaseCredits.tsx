@@ -115,7 +115,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
       onBack={state === PurchaseState.SELECTION ? onBack : undefined}
       hideNetwork
     >
-      <Content gap={6}>
+      <Content className="gap-6">
         <Balance showBalances={["credits"]} />
         <ErrorAlert
           variant=""
