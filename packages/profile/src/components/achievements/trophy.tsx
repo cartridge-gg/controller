@@ -65,7 +65,7 @@ export function Trophy({
   }, [version]);
 
   return (
-    <div className="flex items-center gap-x-px">
+    <div className="flex items-stretch gap-x-px">
       <div className="grow flex flex-col items-stretch gap-y-3 bg-secondary p-3">
         <div className="flex items-center gap-3">
           <Icon icon={icon} completed={completed} />
@@ -98,7 +98,7 @@ export function Trophy({
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-y-px h-full">
+      <div className="flex flex-col gap-y-px">
         {compatibility && completed && !softview && (
           <Track enabled={enabled} id={id} pins={pins} />
         )}

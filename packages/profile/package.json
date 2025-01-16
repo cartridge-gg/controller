@@ -12,13 +12,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@bal7hazar/arcade-sdk": "^0.0.52",
+    "@bal7hazar/arcade-sdk": "^0.0.72",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/ui-next": "workspace:*",
     "@cartridge/utils": "workspace:*",
-    "@dojoengine/core": "^1.0.8",
-    "@dojoengine/torii-client": "^1.0.8",
     "@hookform/resolvers": "^3.9.1",
     "compare-versions": "^6.1.1",
     "lodash": "^4.17.21",

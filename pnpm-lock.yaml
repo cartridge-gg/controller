@@ -505,8 +505,8 @@ importers:
   packages/profile:
     dependencies:
       '@bal7hazar/arcade-sdk':
-        specifier: ^0.0.52
-        version: 0.0.52(@tanstack/react-query@5.64.1(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
+        specifier: ^0.0.72
+        version: 0.0.72(@tanstack/react-query@5.64.1(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)
       '@cartridge/controller':
         specifier: workspace:*
         version: link:../controller
@@ -519,12 +519,6 @@ importers:
       '@cartridge/utils':
         specifier: workspace:*
         version: link:../utils
-      '@dojoengine/core':
-        specifier: ^1.0.8
-        version: 1.0.10(typescript@5.7.3)
-      '@dojoengine/torii-client':
-        specifier: ^1.0.8
-        version: 1.0.10
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.54.2(react@18.3.1))
@@ -1259,8 +1253,8 @@ packages:
     resolution: {integrity: sha512-L6mZmwFDK6Cjh1nRCLXpa6no13ZIioJDz7mdkzHv399pThrTa/k0nUlNaenOeh2kWu/iaOQYElEpKPUswUa9Vg==}
     engines: {node: '>=6.9.0'}
 
-  '@bal7hazar/arcade-sdk@0.0.52':
-    resolution: {integrity: sha512-gDNMDRJlqpjpJ4hms+4r5V43kLGWExD7B3rTZNcHosx4DOuSy+UkP5NMbN348flK/pRhQMxyd1ujKgvVs1aL9Q==}
+  '@bal7hazar/arcade-sdk@0.0.72':
+    resolution: {integrity: sha512-xllhhZrZhJaxBAtRgAapxNeLv1ldy8adfQ/+CjwneyBv1+xvEhAxDJtHdpSVTuwkwGpyJNPtkLxIjd28SNWcuA==}
 
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
@@ -10499,13 +10493,13 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@bal7hazar/arcade-sdk@0.0.52(@tanstack/react-query@5.64.1(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
+  '@bal7hazar/arcade-sdk@0.0.72(@tanstack/react-query@5.64.1(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)':
     dependencies:
       '@dojoengine/core': 1.0.10(typescript@5.7.3)
-      '@dojoengine/sdk': 1.0.10(@tanstack/react-query@5.64.1(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.11.0)(typescript@5.7.3)
+      '@dojoengine/sdk': 1.0.10(@tanstack/react-query@5.64.1(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.21.0)(typescript@5.7.3)
       '@dojoengine/torii-client': 1.0.10
       eventemitter3: 5.0.1
-      starknet: 6.11.0
+      starknet: 6.21.0
     transitivePeerDependencies:
       - '@tanstack/react-query'
       - '@types/react'
@@ -10775,7 +10769,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/sdk@1.0.10(@tanstack/react-query@5.64.1(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.11.0)(typescript@5.7.3)':
+  '@dojoengine/sdk@1.0.10(@tanstack/react-query@5.64.1(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.21.0)(typescript@5.7.3)':
     dependencies:
       '@dojoengine/core': 1.0.10(typescript@5.7.3)
       '@dojoengine/torii-client': 1.0.10
@@ -10785,7 +10779,7 @@ snapshots:
       immer: 10.1.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      starknet: 6.11.0
+      starknet: 6.21.0
       zustand: 4.5.6(@types/react@18.3.18)(immer@10.1.1)(react@18.3.1)
     transitivePeerDependencies:
       - bufferutil
@@ -12942,7 +12936,7 @@ snapshots:
   '@scure/starknet@1.1.0':
     dependencies:
       '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.0
+      '@noble/hashes': 1.6.1
 
   '@sideway/address@4.1.5':
     dependencies:
@@ -16563,7 +16557,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 2.7.1(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-typescript@2.7.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-typescript@2.7.1(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.4(eslint@8.57.1)
       eslint-plugin-react-hooks: 4.6.2(eslint@8.57.1)
@@ -16589,7 +16583,7 @@ snapshots:
     dependencies:
       debug: 4.4.0
       eslint: 8.57.1
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-typescript@2.7.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-typescript@2.7.1(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       glob: 7.2.3
       is-glob: 4.0.3
       resolve: 1.22.10
@@ -16608,7 +16602,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-typescript@2.7.1)(eslint@8.57.1):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-typescript@2.7.1(eslint-plugin-import@2.31.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
