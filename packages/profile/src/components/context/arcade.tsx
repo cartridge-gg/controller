@@ -11,8 +11,12 @@ import {
   ArcadeProvider as ExternalProvider,
   Registry,
   Social,
-  GameModel,
   PinEvent,
+  GameModel,
+  RegistryModel,
+  SocialModel,
+  SocialOptions,
+  RegistryOptions,
 } from "@bal7hazar/arcade-sdk";
 import { constants } from "starknet";
 
@@ -56,9 +60,12 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
-  const handlePinEvents = useCallback((events: PinEvent | PinEvent[]) => {
-    const data = Array.isArray(events) ? events : [events];
-    data.forEach((event: PinEvent) => {
+  const handlePinEvents = useCallback((models: SocialModel[]) => {
+    models.forEach((model: SocialModel) => {
+      // Return if the model is not a PinEvent
+      if (!PinEvent.isType(model as PinEvent)) return;
+      const event = model as PinEvent;
+      // Return if the event is not a PinEvent
       if (event.time == 0) {
         // Remove the achievement from the player's list
         setPins((prevPins) => {
@@ -83,12 +90,13 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  const handleGameModels = useCallback((models: GameModel | GameModel[]) => {
-    const data = Array.isArray(models) ? models : [models];
-    data.forEach((model: GameModel) => {
+  const handleGameModels = useCallback((models: RegistryModel[]) => {
+    models.forEach((model: RegistryModel) => {
+      if (!GameModel.isType(model as GameModel)) return;
+      const game = model as GameModel;
       setGames((prevGames) => ({
         ...prevGames,
-        [`${model.worldAddress}-${model.namespace}`]: model,
+        [`${game.worldAddress}-${game.namespace}`]: game,
       }));
     });
   }, []);
@@ -97,6 +105,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     if (initialized) return;
     const initialize = async () => {
       await Social.init(CHAIN_ID);
+      await Registry.init(CHAIN_ID);
       setInitialized(true);
     };
     initialize();
@@ -104,19 +113,21 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!initialized) return;
-    Social.Pin.fetch(handlePinEvents);
-    Social.Pin.sub(handlePinEvents);
+    const options: SocialOptions = { pin: true };
+    Social.fetch(handlePinEvents, options);
+    Social.sub(handlePinEvents, options);
     return () => {
-      Social.Pin.unsub();
+      Social.unsub();
     };
   }, [initialized, handlePinEvents]);
 
   useEffect(() => {
     if (!initialized) return;
-    Registry.Game.fetch(handleGameModels);
-    Registry.Game.sub(handleGameModels);
+    const options: RegistryOptions = { game: true };
+    Registry.fetch(handleGameModels, options);
+    Registry.sub(handleGameModels, options);
     return () => {
-      Registry.Game.unsub();
+      Registry.unsub();
     };
   }, [initialized, handleGameModels]);
 
