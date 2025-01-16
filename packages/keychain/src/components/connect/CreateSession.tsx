@@ -57,6 +57,7 @@ export function CreateSession({
     try {
       setError(undefined);
       setIsConnecting(true);
+
       // Set all contract policies to authorized
       if (policies.contracts) {
         Object.keys(policies.contracts).forEach((address) => {

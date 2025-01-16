@@ -12,6 +12,7 @@ import {
 import wasm from "@cartridge/account-wasm/controller";
 import { Policies, SessionPolicies } from "@cartridge/presets";
 import { ChainId } from "@starknet-io/types-js";
+import { ParsedSessionPolicies } from "./policies";
 
 // Whitelist of allowed property names to prevent prototype pollution
 const ALLOWED_PROPERTIES = new Set([
@@ -88,13 +89,14 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
     : policies;
 }
 
-export function toWasmPolicies(policies: SessionPolicies): wasm.Policy[] {
+export function toWasmPolicies(policies: ParsedSessionPolicies): wasm.Policy[] {
   return [
     ...Object.entries(policies.contracts ?? {}).flatMap(
       ([target, { methods }]) =>
         toArray(methods).map((m) => ({
           target,
           method: m.entrypoint,
+          authorized: m.authorized,
         })),
     ),
     ...(policies.messages ?? []).map((p) => {
@@ -112,6 +114,7 @@ export function toWasmPolicies(policies: SessionPolicies): wasm.Policy[] {
 
       return {
         scope_hash: hash.computePoseidonHash(domainHash, typeHash),
+        authorized: p.authorized,
       };
     }),
   ];
