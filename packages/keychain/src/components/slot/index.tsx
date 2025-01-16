@@ -23,6 +23,7 @@ export function Slot() {
     case "/slot/auth/failure":
       return <Navigate to="/failure" replace />;
     case "/slot/consent":
+    case "/slot/fund":
       return <Outlet />;
     default:
       return <Auth />;
@@ -37,13 +38,19 @@ function Auth() {
 
   useEffect(() => {
     if (user && controller) {
-      const query = Array.from(searchParams.entries()).reduce(
-        (prev, [key, val], i) =>
-          i === 0 ? `?${key}=${val}` : `${prev}&${key}=${val}`,
-        "",
-      );
+      const returnTo = searchParams.get("returnTo");
+      const otherParams = Array.from(searchParams.entries())
+        .filter(([key]) => key !== "returnTo")
+        .reduce(
+          (prev, [key, val], i) =>
+            i === 0 ? `?${key}=${val}` : `${prev}&${key}=${val}`,
+          "",
+        );
 
-      navigate(`/slot/consent${query}`, { replace: true });
+      const target = returnTo
+        ? `${returnTo}${otherParams}`
+        : `/slot/consent${otherParams}`;
+      navigate(target, { replace: true });
     }
   }, [user, controller, navigate, searchParams]);
 

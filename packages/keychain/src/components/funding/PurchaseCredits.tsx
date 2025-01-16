@@ -14,6 +14,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { Balance } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
+import { isIframe } from "@cartridge/utils";
 
 const STRIPE_API_PUBKEY =
   "pk_test_51Kr6IXIS6lliDpf33KnwWDtIjRPWt3eAI9CuSLR6Vvc3GxHEwmSU0iszYbUlgUadSRluGKAFphe3JzltyjPAKiBK00al4RAFQu";
@@ -25,10 +26,11 @@ enum PurchaseState {
 }
 
 type PurchaseCreditsProps = {
+  isSlot?: boolean;
   onBack?: () => void;
 };
 
-export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
+export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
   const { controller, closeModal } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
@@ -82,24 +84,6 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     },
   } as Appearance;
 
-  // For when we need to support Payment Links
-  // useStripePaymentQuery(
-  //   { referenceId },
-  //   {
-  //     enabled: !!referenceId && !error,
-  //     refetchInterval: REFETCH_INTERVAL,
-  //     retry: MAX_RETRIES,
-  //     onSuccess: () => setState(PurchaseState.SUCCESS),
-  //     onError: () => {
-  //       setError(
-  //         new Error(
-  //           `Payment not received. Please try again. Reference ID: ${referenceId}`,
-  //         ),
-  //       );
-  //     },
-  //   },
-  // );
-
   if (state === PurchaseState.STRIPE_CHECKOUT) {
     return (
       <Elements
@@ -130,13 +114,18 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         )
       }
       onBack={state === PurchaseState.SELECTION ? onBack : undefined}
+      hideNetwork
     >
       <Content className="gap-6">
         <Balance showBalances={["credits"]} />
         <ErrorAlert
           variant=""
           title="WHAT ARE CREDITS"
-          description="Credits can be used to play games. They are not tokens and cannot be transferred or refunded."
+          description={
+            "Credits can be used " +
+            (isSlot ? "for slot deployments" : "to play games") +
+            ". They are not tokens and cannot be transferred or refunded."
+          }
           isExpanded
         />
       </Content>
@@ -150,7 +139,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
           />
         )}
 
-        {state === PurchaseState.SUCCESS && (
+        {state === PurchaseState.SUCCESS && isIframe() && (
           <Button variant="secondary" onClick={closeModal}>
             Close
           </Button>

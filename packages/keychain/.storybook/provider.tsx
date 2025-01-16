@@ -4,7 +4,6 @@ import { controllerConfigs } from "@cartridge/presets";
 import { mainnet } from "@starknet-react/chains";
 import { StarknetConfig, publicProvider, voyager } from "@starknet-react/core";
 import { useThemeEffect } from "@cartridge/ui-next";
-import { ChakraProvider } from "@chakra-ui/react";
 import { BrowserRouter } from "react-router-dom";
 
 import { ConnectionContext } from "../src/components/provider/connection";
@@ -13,7 +12,6 @@ import {
   ControllerThemeContext,
   VerifiableControllerTheme,
 } from "../src/context/theme";
-import { useChakraTheme } from "../src/hooks/theme";
 
 export function Provider({
   children,
@@ -56,11 +54,10 @@ function ControllerThemeProvider({
   theme,
 }: PropsWithChildren<{ theme: VerifiableControllerTheme }>) {
   useThemeEffect({ theme, assetUrl: "" });
-  const chakraTheme = useChakraTheme({ ...theme });
 
   return (
     <ControllerThemeContext.Provider value={{ ...theme }}>
-      <ChakraProvider theme={chakraTheme}>{children}</ChakraProvider>
+      {children}
     </ControllerThemeContext.Provider>
   );
 }

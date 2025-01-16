@@ -8,7 +8,7 @@ export function Content({
   return (
     <div
       className={cn(
-        "w-full px-4 pb-[var(--footer-height)] flex flex-col items-stretch gap-2",
+        "w-full px-4 flex flex-col items-stretch gap-2 max-h-[400px] overflow-y-auto",
         className,
       )}
     >

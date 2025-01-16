@@ -16,8 +16,10 @@ import {
 } from "@cartridge/utils";
 import { useController } from "@/hooks/controller";
 
+export type BalanceType = "credits" | "eth" | "strk";
+
 type BalanceProps = {
-  showBalances: ("credits" | "eth" | "strk")[];
+  showBalances: BalanceType[];
 };
 
 export function Balance({ showBalances }: BalanceProps) {
@@ -26,6 +28,7 @@ export function Balance({ showBalances }: BalanceProps) {
     username: controller?.username(),
     interval: 3000,
   });
+
   const {
     data: [eth],
   } = useERC20Balance({
