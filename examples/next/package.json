@@ -13,7 +13,7 @@
     "format:check": "prettier --check ./src"
   },
   "dependencies": {
-    "@bal7hazar/arcade-sdk": "^0.0.38",
+    "@bal7hazar/arcade-sdk": "^0.0.52",
     "@cartridge/connector": "workspace:*",
     "@cartridge/controller": "workspace:*",
     "@cartridge/ui-next": "workspace:*",

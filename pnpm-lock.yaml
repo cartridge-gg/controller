@@ -40,8 +40,8 @@ importers:
   examples/next:
     dependencies:
       '@bal7hazar/arcade-sdk':
-        specifier: ^0.0.39
-        version: 0.0.39(@types/react@18.3.12)(react@18.3.1)(typescript@5.5.4)
+        specifier: ^0.0.52
+        version: 0.0.52(@types/react@18.3.12)(react@18.3.1)(typescript@5.5.4)
       '@cartridge/connector':
         specifier: workspace:*
         version: link:../../packages/connector
@@ -1658,9 +1658,6 @@ packages:
   '@babel/types@7.25.8':
     resolution: {integrity: sha512-JWtuCu8VQsMladxVz/P4HzHUGCAwpuqacmowgXFs5XjxIgKuNjnLokQzuVjlTvIzODaDmpjT3oxcC48vyk9EWg==}
     engines: {node: '>=6.9.0'}
-
-  '@bal7hazar/arcade-sdk@0.0.39':
-    resolution: {integrity: sha512-A1O3/0I8zwycDUh95u+ZQxeR94PMfE0WeIPFCOvJ0/qIgj5Qdt4UbDCTFpt3QNXHHOQf7hxG/4fxD5asLLJFJA==}
 
   '@bal7hazar/arcade-sdk@0.0.52':
     resolution: {integrity: sha512-gDNMDRJlqpjpJ4hms+4r5V43kLGWExD7B3rTZNcHosx4DOuSy+UkP5NMbN348flK/pRhQMxyd1ujKgvVs1aL9Q==}
@@ -13318,21 +13315,6 @@ snapshots:
       '@babel/helper-string-parser': 7.25.7
       '@babel/helper-validator-identifier': 7.25.7
       to-fast-properties: 2.0.0
-
-  '@bal7hazar/arcade-sdk@0.0.39(@types/react@18.3.12)(react@18.3.1)(typescript@5.5.4)':
-    dependencies:
-      '@dojoengine/core': 1.0.8(starknet@6.11.0)(typescript@5.5.4)
-      '@dojoengine/sdk': 1.0.8(@types/react@18.3.12)(react@18.3.1)(starknet@6.11.0)
-      '@dojoengine/torii-client': 1.0.8
-      eventemitter3: 5.0.1
-      starknet: 6.11.0
-    transitivePeerDependencies:
-      - '@types/react'
-      - bufferutil
-      - encoding
-      - react
-      - typescript
-      - utf-8-validate
 
   '@bal7hazar/arcade-sdk@0.0.52(@types/react@18.3.12)(react@18.3.1)(typescript@5.5.4)':
     dependencies:
