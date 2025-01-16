@@ -286,7 +286,7 @@ export default class ControllerProvider extends BaseProvider {
     this.keychain.openPurchaseCredits();
   }
 
-  async openExecute(calls: any) {
+  async openExecute(calls: any, chainId?: string) {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -295,16 +295,30 @@ export default class ControllerProvider extends BaseProvider {
       console.error("Profile is not ready");
       return;
     }
-    if (this.iframes.profile?.sendBackward) {
-      this.iframes.profile?.sendBackward();
-    } else {
-      this.iframes.profile?.close();
+    // Switch to the chain if provided
+    let currentChainId = this.selectedChain;
+    if (chainId) {
+      this.switchStarknetChain(chainId);
     }
+    // Switch iframes
+    this.iframes.profile?.sendBackward();
     this.iframes.keychain.open();
+    this.iframes.profile?.close();
+    // Invoke execute
     const res = await this.keychain.execute(calls, undefined, undefined, true);
+    // Switch back iframes
+    this.iframes.profile?.open();
     this.iframes.keychain.close();
-    this.iframes.profile?.sendForward?.();
-    return !(res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED);
+    this.iframes.profile?.sendForward();
+    // Switch back to the original chain
+    if (chainId) {
+      this.switchStarknetChain(currentChainId);
+    }
+    return !(
+      res &&
+      ((res as ConnectError).code === ResponseCodes.NOT_CONNECTED ||
+        (res as ConnectError).code === ResponseCodes.CANCELED)
+    );
   }
 
   async delegateAccount() {

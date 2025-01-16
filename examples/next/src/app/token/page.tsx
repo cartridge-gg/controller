@@ -6,7 +6,7 @@ import {
   useSendTransaction,
 } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
-import { cairo, uint256 } from "starknet";
+import { cairo, Call, CallData, uint256 } from "starknet";
 import { ConnectWallet } from "components/ConnectWallet";
 import { useTokenContract } from "hooks/token";
 import { Abi } from "starknet";
@@ -53,15 +53,21 @@ function MintToken() {
 
   const { contract } = useTokenContract();
 
-  const calls = useMemo(() => {
+  const calls: Call[] = useMemo(() => {
     if (!address || !contract) return [];
 
     const amountBn = cairo.uint256(amount);
-    return contract.populateTransaction["mint"]!(address, [address, amountBn]);
+    return [
+      {
+        contractAddress: contract.address,
+        entrypoint: "mint",
+        calldata: CallData.compile([address, amountBn]),
+      },
+    ];
   }, [address, contract, amount]);
 
   const { sendAsync, isPending, error, reset } = useSendTransaction({
-    calls,
+    calls: calls,
   });
 
   const updateAmount = useCallback(

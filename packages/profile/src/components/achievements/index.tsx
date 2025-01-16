@@ -14,7 +14,10 @@ import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
 import { Pinneds } from "./pinneds";
 import { Leaderboard } from "./leaderboard";
-import { useData } from "@/hooks/context";
+import { useConnection, useData } from "@/hooks/context";
+import { useArcade } from "@/hooks/arcade";
+import { GameModel } from "@bal7hazar/arcade-sdk";
+import { addAddressPadding } from "starknet";
 
 export function Achievements() {
   const { username: selfname, address: self } = useAccount();
@@ -23,22 +26,32 @@ export function Achievements() {
     setAccountAddress,
   } = useData();
 
+  const { pins, games } = useArcade();
+
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
+  const { project, namespace } = useConnection();
 
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
   );
 
+  const game: GameModel | undefined = useMemo(() => {
+    return Object.values(games).find(
+      (game) => game.namespace === namespace && game.project === project,
+    );
+  }, [games, project, namespace]);
+
   const { pinneds, completed, total } = useMemo(() => {
+    const ids = pins[addAddressPadding(address || self || "0x0")] || [];
     const pinneds = achievements
-      .filter((item) => item.completed)
+      .filter((item) => ids.includes(item.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
-      .slice(0, 3);
+      .slice(0, 3); // There is a front-end limit of 3 pinneds
     const completed = achievements.filter((item) => item.completed).length;
     const total = achievements.length;
     return { pinneds, completed, total };
-  }, [achievements]);
+  }, [achievements, pins, address, self]);
 
   const { rank, earnings } = useMemo(() => {
     const rank =
@@ -113,7 +126,8 @@ export function Achievements() {
                   achievements={achievements}
                   softview={!isSelf}
                   enabled={pinneds.length < 3}
-                  onPin={() => {}}
+                  game={game}
+                  pins={pins}
                 />
               </div>
             </ScrollArea>
@@ -123,6 +137,7 @@ export function Achievements() {
               players={players}
               address={self}
               achievements={achievements}
+              pins={pins}
             />
           )}
         </LayoutContent>

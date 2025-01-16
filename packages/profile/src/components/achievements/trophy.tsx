@@ -6,10 +6,18 @@ import {
   CheckboxCheckedDuoIcon,
   CheckboxUncheckedIcon,
   Separator,
+  SpinnerIcon,
+  XIcon,
 } from "@cartridge/ui-next";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { useCallback } from "react";
+import { useArcade } from "@/hooks/arcade";
+import { useConnection } from "@/hooks/context";
+import { useAccount } from "@/hooks/account";
+import { addAddressPadding } from "starknet";
+import { GameModel } from "@bal7hazar/arcade-sdk";
+import { compare } from "compare-versions";
 
 export interface Task {
   id: string;
@@ -27,12 +35,12 @@ export function Trophy({
   timestamp,
   hidden,
   completed,
-  pinned,
   id,
   softview,
   enabled,
   tasks,
-  onPin,
+  game,
+  pins,
 }: {
   icon: string;
   title: string;
@@ -42,15 +50,22 @@ export function Trophy({
   timestamp: number;
   hidden: boolean;
   completed: boolean;
-  pinned: boolean;
   id: string;
   softview: boolean;
   enabled: boolean;
   tasks: Task[];
-  onPin: (id: string) => void;
+  game: GameModel | undefined;
+  pins: { [playerId: string]: string[] };
 }) {
+  const { version } = useConnection();
+
+  const compatibility = useMemo(() => {
+    if (!version) return false;
+    return compare(version, "0.5.9", ">=");
+  }, [version]);
+
   return (
-    <div className="flex items-center gap-x-px">
+    <div className="flex items-stretch gap-x-px">
       <div className="grow flex flex-col items-stretch gap-y-3 bg-secondary p-3">
         <div className="flex items-center gap-3">
           <Icon icon={icon} completed={completed} />
@@ -83,11 +98,19 @@ export function Trophy({
           </div>
         )}
       </div>
-      {completed &&
-        !softview &&
-        !!softview && ( // TODO: Enable when we can have the pinned feature on server side, remove !!softview
-          <Track enabled={enabled} pinned={pinned} id={id} onPin={onPin} />
+      <div className="flex flex-col gap-y-px">
+        {compatibility && completed && !softview && (
+          <Track enabled={enabled} id={id} pins={pins} />
         )}
+        {completed && !softview && !!game && (
+          <Share
+            title={title}
+            game={game}
+            earning={earning}
+            timestamp={timestamp}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -278,42 +301,158 @@ function Progress({
 }
 
 function Track({
-  pinned,
   id,
   enabled,
-  onPin,
+  pins,
 }: {
-  pinned: boolean;
   id: string;
   enabled: boolean;
-  onPin: (id: string) => void;
+  pins: { [playerId: string]: string[] };
 }) {
+  const { address } = useAccount();
+  const { parent } = useConnection();
+  const { chainId, provider } = useArcade();
+
   const [hovered, setHovered] = useState(false);
-  const onClick = useCallback(() => {
-    if (!enabled && !pinned) return;
-    onPin(id);
-    toast.success(`Trophy ${pinned ? "unpinned" : "pinned"} successfully`);
-  }, [enabled, pinned, id, onPin]);
+  const [loading, setLoading] = useState(false);
+
+  const pinned = useMemo(() => {
+    return pins[addAddressPadding(address)]?.includes(id);
+  }, [pins, address, id]);
+
+  const handlePin = useCallback(() => {
+    if (!enabled || pinned) return;
+    const pin = async () => {
+      setLoading(true);
+      try {
+        const calls = provider.social.pin({ achievementId: id });
+        const res = await parent.openExecute(
+          Array.isArray(calls) ? calls : [calls],
+          chainId,
+        );
+        if (res) {
+          toast.success(`Trophy pinned successfully`);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to pin trophy");
+      } finally {
+        setLoading(false);
+      }
+    };
+    pin();
+  }, [enabled, pinned, id, chainId, provider, parent]);
+
+  const handleUnpin = useCallback(() => {
+    if (!pinned) return;
+    const unpin = async () => {
+      setLoading(true);
+      try {
+        const calls = provider.social.unpin({ achievementId: id });
+        const res = await parent.openExecute(
+          Array.isArray(calls) ? calls : [calls],
+          chainId,
+        );
+        if (res) {
+          toast.success(`Trophy unpinned successfully`);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to unpin trophy");
+      } finally {
+        setLoading(false);
+      }
+    };
+    unpin();
+  }, [pinned, id, chainId, provider, parent]);
 
   return (
     <div
       className={cn(
-        "bg-quaternary h-full p-2 flex items-center transition-all duration-200",
-        pinned ? "bg-quaternary" : "bg-secondary",
-        hovered &&
-          (enabled || pinned) &&
-          "opacity-90 bg-secondary/50 cursor-pointer",
-        !enabled && !pinned && "cursor-not-allowed",
+        "bg-secondary grow p-2 flex items-center transition-all duration-200",
+        hovered && (enabled || pinned) && "opacity-90 cursor-pointer",
+        pinned && "bg-quaternary",
       )}
-      onClick={onClick}
+      onClick={pinned ? handleUnpin : handlePin}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <TrackIcon
-        className={cn(!enabled && !pinned && "opacity-25")}
-        size="sm"
-        variant={pinned ? "solid" : "line"}
-      />
+      {loading ? (
+        <SpinnerIcon
+          className="text-quaternary-foreground animate-spin"
+          size="sm"
+        />
+      ) : (
+        <TrackIcon
+          className={cn(!enabled && !pinned && "opacity-25")}
+          size="sm"
+          variant={pinned ? "solid" : "line"}
+        />
+      )}
+    </div>
+  );
+}
+
+function Share({
+  game,
+  title,
+  earning,
+  timestamp,
+}: {
+  game: GameModel;
+  title: string;
+  earning: number;
+  timestamp: number;
+}) {
+  const url: string | null = useMemo(() => {
+    if (!game.socials.website) return null;
+    return game.socials.website;
+  }, [game]);
+
+  const xhandle = useMemo(() => {
+    if (!game.socials.twitter) return null;
+    // Take the last part of the url
+    return game.socials.twitter.split("/").pop();
+  }, [game]);
+
+  const date = useMemo(() => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }, [timestamp]);
+
+  const handleShare = useCallback(() => {
+    if (!url || !xhandle) return;
+    const content = `I got a new achievement in @${xhandle} game 🏆
+  
+${title}
+Points: ${earning}
+At: ${date}
+
+Think you can get it as well? Join the game ${url}
+
+Play now 👇`;
+
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
+      content,
+    )}&url=${encodeURIComponent(url)}`;
+
+    window.open(twitterUrl, "_blank", "noopener,noreferrer");
+  }, [url, xhandle, title, earning, date]);
+
+  if (!url || !xhandle) return null;
+
+  return (
+    <div
+      className={cn(
+        "grow bg-secondary p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
+      )}
+      onClick={handleShare}
+    >
+      <XIcon size="sm" />
     </div>
   );
 }
