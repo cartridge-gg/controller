@@ -87,8 +87,8 @@ export function Achievements() {
           isSelf
             ? selfname
             : username
-            ? username
-            : (address || self).slice(0, 9)
+              ? username
+              : (address || self).slice(0, 9)
         }
         description={<CopyAddress address={address || self} size="sm" />}
         right={
