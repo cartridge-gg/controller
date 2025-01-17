@@ -265,7 +265,7 @@ export default class SessionProvider extends BaseProvider {
       address: sessionRegistration.address,
       ownerGuid: sessionRegistration.ownerGuid,
       chainId: this._chainId,
-      expiresAt: expirationTime,
+      expiresAt: parseInt(sessionRegistration.expiresAt),
       policies: toWasmPolicies(this._policies),
     });
 
