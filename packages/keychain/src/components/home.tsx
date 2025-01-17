@@ -1,6 +1,5 @@
 import { Signature } from "starknet";
 import { useEffect, useState } from "react";
-import { usePostHog } from "posthog-js/react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
@@ -14,6 +13,7 @@ import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 import { execute } from "@/utils/connection/execute";
+import { usePostHog } from "@/context/posthog";
 
 export function Home() {
   const { context, setContext, controller, error, policies, upgrade } =
@@ -28,16 +28,11 @@ export function Home() {
       typeof window !== "undefined" &&
       !window.location.hostname.includes("localhost")
     ) {
-      posthog.init(import.meta.env.VITE_POSTHOG_KEY!, {
-        api_host: import.meta.env.VITE_POSTHOG_HOST,
-        person_profiles: "always",
-        enable_recording_console_log: true,
-        loaded: (posthog) => {
-          if (import.meta.env.DEV) posthog.debug();
-        },
-      });
+      if (import.meta.env.DEV) {
+        posthog.debug();
+      }
     }
-  }, [context?.origin, posthog]);
+  }, [context?.origin]);
 
   useEffect(() => {
     if (controller && policies) {
@@ -73,7 +68,7 @@ export function Home() {
 
   switch (context.type) {
     case "connect": {
-      posthog?.capture("Call Connect");
+      posthog.capture("Call Connect");
 
       // if no policies, we can connect immediately
       if (
@@ -115,12 +110,12 @@ export function Home() {
     }
 
     case "logout": {
-      posthog?.capture("Call Logout");
+      posthog.capture("Call Logout");
 
       return <Logout />;
     }
     case "sign-message": {
-      posthog?.capture("Call Sign Message");
+      posthog.capture("Call Sign Message");
 
       const ctx = context as SignMessageCtx;
       return (
@@ -139,7 +134,7 @@ export function Home() {
     }
 
     case "execute": {
-      posthog?.capture("Call Execute");
+      posthog.capture("Call Execute");
 
       const ctx = context as ExecuteCtx;
       if (!hasSessionForPolicies) {
@@ -178,7 +173,7 @@ export function Home() {
     }
 
     case "deploy": {
-      posthog?.capture("Call Deploy");
+      posthog.capture("Call Deploy");
 
       const ctx = context as DeployCtx;
       return (
@@ -193,12 +188,12 @@ export function Home() {
       );
     }
     case "open-settings": {
-      posthog?.capture("Call Open Settings");
+      posthog.capture("Call Open Settings");
 
       return <Settings />;
     }
     case "open-purchase-credits": {
-      posthog?.capture("Call Purchase Credits");
+      posthog.capture("Call Purchase Credits");
 
       return <PurchaseCredits />;
     }

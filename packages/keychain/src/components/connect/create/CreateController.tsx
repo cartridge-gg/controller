@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from "react";
 import { Container, Footer, Content } from "@/components/layout";
 import { Button, cn, Input } from "@cartridge/ui-next";
 import { useControllerTheme } from "@/hooks/theme";
-import { usePostHog } from "posthog-js/react";
 import { useDebounce } from "@/hooks/debounce";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
@@ -11,6 +10,7 @@ import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
 import InAppSpy from "inapp-spy";
+import { usePostHog } from "@/context/posthog";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;

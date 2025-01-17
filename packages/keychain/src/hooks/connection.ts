@@ -18,7 +18,7 @@ import {
   ConnectionContextValue,
 } from "@/components/provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
-import posthog from "posthog-js";
+import { usePostHog } from "@/context/posthog";
 import { Policies } from "@cartridge/presets";
 import {
   defaultTheme,
@@ -47,6 +47,7 @@ export function useConnectionValue() {
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const upgrade: UpgradeInterface = useUpgrade(controller);
   const [error, setError] = useState<Error>();
+  const posthog = usePostHog();
 
   const chainName = useMemo(() => {
     if (!chainId) {
@@ -84,25 +85,28 @@ export function useConnectionValue() {
     }
   }, [context, parent]);
 
-  const setController = useCallback((controller?: Controller) => {
-    if (controller) {
-      posthog.identify(controller.username(), {
-        address: controller.address,
-        class: controller.classHash(),
-        chainId: controller.chainId,
-      });
-    } else {
-      posthog.reset();
-    }
+  const setController = useCallback(
+    (controller?: Controller) => {
+      if (controller) {
+        posthog.identify(controller.username(), {
+          address: controller.address,
+          class: controller.classHash(),
+          chainId: controller.chainId,
+        });
+      } else {
+        posthog.reset();
+      }
 
-    setControllerRaw(controller);
-  }, []);
+      setControllerRaw(controller);
+    },
+    [posthog],
+  );
 
   useEffect(() => {
     if (origin) {
       posthog.group("company", origin);
     }
-  }, [origin]);
+  }, [origin, posthog]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);

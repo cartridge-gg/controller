@@ -353,9 +353,9 @@ importers:
       p-throttle:
         specifier: ^6.2.0
         version: 6.2.0
-      posthog-js:
-        specifier: ^1.181.0
-        version: 1.206.1
+      posthog-js-lite:
+        specifier: 3.2.1
+        version: 3.2.1
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -8090,6 +8090,9 @@ packages:
   postcss@8.5.1:
     resolution: {integrity: sha512-6oz2beyjc5VMn/KV1pPw8fliQkhBXrVn1Z3TVyqZxU8kZpzEKhBdmCFqI6ZbmGtamQvQGuU1sgPTk8ZrXDD7jQ==}
     engines: {node: ^10 || ^12 || >=14}
+
+  posthog-js-lite@3.2.1:
+    resolution: {integrity: sha512-F+S+T9XiQr2rOkD0UFTr8yu8qScm4aM2lR5PmyknxxqlkC5gpRKS+Hi8cq5CYda7Q3BODh0h7pdW1P2XfZjEag==}
 
   posthog-js@1.206.1:
     resolution: {integrity: sha512-Ov/aGKORlukofKB9+cHQs1bRM5BXwALPVr8e4eOO7gLm2kSnQ32ZhYaP3kGGt6ClUyQxAPbFiS7v1R/BW5j8tQ==}
@@ -19473,6 +19476,8 @@ snapshots:
       nanoid: 3.3.8
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  posthog-js-lite@3.2.1: {}
 
   posthog-js@1.206.1:
     dependencies:
