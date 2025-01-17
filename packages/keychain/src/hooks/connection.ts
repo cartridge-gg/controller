@@ -88,13 +88,13 @@ export function useConnectionValue() {
   const setController = useCallback(
     (controller?: Controller) => {
       if (controller) {
-        posthog.identify(controller.username(), {
+        posthog?.identify(controller.username(), {
           address: controller.address,
           class: controller.classHash(),
           chainId: controller.chainId,
         });
       } else {
-        posthog.reset();
+        posthog?.reset();
       }
 
       setControllerRaw(controller);
@@ -104,7 +104,7 @@ export function useConnectionValue() {
 
   useEffect(() => {
     if (origin) {
-      posthog.group("company", origin);
+      posthog?.group("company", origin);
     }
   }, [origin, posthog]);
 
