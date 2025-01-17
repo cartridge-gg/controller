@@ -8,7 +8,7 @@ export function Failure() {
     <Container
       variant="expanded"
       hideAccount
-      icon={<AlertIcon size="lg" />}
+      Icon={AlertIcon}
       title="Uh-oh something went wrong"
       description={
         <>

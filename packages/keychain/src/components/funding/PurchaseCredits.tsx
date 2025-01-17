@@ -109,9 +109,9 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
       description={controller && <CopyAddress address={controller.address} />}
       icon={
         state === PurchaseState.SELECTION ? (
-          <CoinsIcon variant="solid" />
+          <CoinsIcon variant="solid" size="lg" />
         ) : (
-          <CheckIcon />
+          <CheckIcon size="lg" />
         )
       }
       onBack={state === PurchaseState.SELECTION ? onBack : undefined}

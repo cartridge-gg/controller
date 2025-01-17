@@ -28,6 +28,7 @@ interface ExecutionContainerProps {
 export function ExecutionContainer({
   title,
   description,
+  icon,
   transactions,
   transactionsDetail,
   executionError,
@@ -37,7 +38,8 @@ export function ExecutionContainer({
   onError,
   buttonText = "SUBMIT",
   children,
-}: ExecutionContainerProps & BannerProps) {
+}: ExecutionContainerProps &
+  Pick<BannerProps, "title" | "description" | "icon">) {
   const { controller } = useConnection();
   const [maxFee, setMaxFee] = useState<bigint | null>(null);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
@@ -141,7 +143,7 @@ export function ExecutionContainer({
   }
 
   return (
-    <Container title={title} description={description}>
+    <Container title={title} description={description} icon={icon}>
       {children}
       <Footer>
         {(() => {

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { shortString, Signature, TypedData } from "starknet";
 import { Container, Footer, Content } from "@/components/layout";
 import {
-  TransferDuoIcon,
   Button,
   Card,
   CardHeader,
@@ -67,7 +66,6 @@ export function SignMessage({
 
   return (
     <Container
-      Icon={TransferDuoIcon}
       title="Signature Request"
       description={`${hostname} is asking you to sign a message`}
     >

@@ -45,7 +45,7 @@ export function ErrorPage({ error }: { error: Error }) {
       variant="expanded"
       title="Uh oh!"
       description="Something went wrong"
-      icon={<AlertIcon size="lg" />}
+      Icon={AlertIcon}
     >
       <Content className="gap-4">
         <div className="flex w-full px-4 py-6 bg-secondary border border-quaternary rounded">

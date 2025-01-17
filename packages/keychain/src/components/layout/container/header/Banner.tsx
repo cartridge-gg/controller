@@ -58,7 +58,7 @@ function HeaderIcon({
     <IconWrapper variant={variant}>
       {(() => {
         if (Icon) {
-          return <Icon />;
+          return <Icon size="lg" />;
         }
 
         if (icon) {

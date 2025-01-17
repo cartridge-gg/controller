@@ -10,7 +10,7 @@ import { useToken } from "@/hooks/token";
 import {
   ArrowIcon,
   Button,
-  CheckboxCheckedDuoIcon,
+  CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
   CopyAddress,
@@ -103,7 +103,7 @@ export function SendToken() {
           onClick={() => setValidated(!validated)}
         >
           {validated && (
-            <CheckboxCheckedDuoIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
+            <CheckboxCheckedIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
           )}
           {!validated && (
             <CheckboxUncheckedIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />

@@ -1,6 +1,5 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
 import { Content } from "@/components/layout";
-import { TransactionDuoIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ExecuteCtx } from "@/utils/connection";
@@ -31,7 +30,6 @@ export function ConfirmTransaction() {
 
   return (
     <ExecutionContainer
-      Icon={TransactionDuoIcon}
       title={`Review Transaction${transactions.length > 1 ? "s" : ""}`}
       description={origin}
       executionError={ctx.error}
