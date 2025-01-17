@@ -10,7 +10,7 @@ import {
   AccordionContent,
   cn,
   Separator,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import React, {
   ReactElement,
   useCallback,

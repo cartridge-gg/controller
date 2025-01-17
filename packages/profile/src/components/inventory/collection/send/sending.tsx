@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  cn,
-} from "@cartridge/ui-next";
+import { Card, CardContent, CardHeader, CardTitle, cn } from "@cartridge/ui";
 import { Asset } from "@/hooks/collection";
 import { CollectionImage } from "../image";
 

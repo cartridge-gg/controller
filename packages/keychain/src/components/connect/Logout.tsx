@@ -4,7 +4,7 @@ import {
   Button,
   SignOutIcon,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { ResponseCodes } from "@cartridge/controller";
 

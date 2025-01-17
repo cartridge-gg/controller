@@ -8,7 +8,7 @@ import {
   Separator,
   SpinnerIcon,
   XIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { useCallback } from "react";

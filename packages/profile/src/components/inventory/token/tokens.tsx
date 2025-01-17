@@ -4,7 +4,7 @@ import {
   CardListContent,
   CardListItem,
   CardTitle,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { Link } from "react-router-dom";
 import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
 import { formatEther } from "viem";

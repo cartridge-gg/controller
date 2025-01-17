@@ -10,7 +10,7 @@ import {
   EthereumIcon,
   CopyAddress,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance, BalanceType } from "./Balance";

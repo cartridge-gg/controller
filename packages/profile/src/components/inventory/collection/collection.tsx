@@ -18,7 +18,7 @@ import {
   cn,
   CopyAddress,
   Separator,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useCallback, useMemo } from "react";
 import { CollectionImage } from "./image";
 import { useCollection } from "@/hooks/collection";

@@ -18,7 +18,7 @@ import {
   CoinsIcon,
   ExternalIcon,
   Skeleton,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useConnection } from "@/hooks/context";
 import {
   formatAddress,

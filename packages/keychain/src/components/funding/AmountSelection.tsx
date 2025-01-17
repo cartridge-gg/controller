@@ -1,10 +1,4 @@
-import {
-  DollarIcon,
-  Button,
-  cn,
-  useDisclosure,
-  Input,
-} from "@cartridge/ui-next";
+import { DollarIcon, Button, cn, useDisclosure, Input } from "@cartridge/ui";
 import { useState } from "react";
 import { AMOUNTS } from "./constants";
 

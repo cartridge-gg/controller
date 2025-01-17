@@ -13,7 +13,7 @@ import {
   CopyAddress,
   Button,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 

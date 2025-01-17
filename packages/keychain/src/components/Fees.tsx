@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatUnits } from "viem";
 import { useChainId } from "@/hooks/connection";
-import { ErrorAlertIcon, EthereumIcon, Spinner } from "@cartridge/ui-next";
+import { ErrorAlertIcon, EthereumIcon, Spinner } from "@cartridge/ui";
 
 export function Fees({
   maxFee,

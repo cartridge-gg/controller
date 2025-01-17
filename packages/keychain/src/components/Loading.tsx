@@ -1,4 +1,4 @@
-import { Spinner } from "@cartridge/ui-next";
+import { Spinner } from "@cartridge/ui";
 
 export function PageLoading() {
   return (

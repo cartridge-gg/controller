@@ -1,5 +1,5 @@
 import { useToken } from "@/hooks/token";
-import { AlertIcon, Button, cn, Input, Label } from "@cartridge/ui-next";
+import { AlertIcon, Button, cn, Input, Label } from "@cartridge/ui";
 import { useCountervalue } from "@cartridge/utils";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { useCallback, useMemo } from "react";

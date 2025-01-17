@@ -6,8 +6,8 @@ import {
   PencilIcon,
   AccordionTrigger,
   CheckboxIcon,
-} from "@cartridge/ui-next";
-import { ArrowTurnDownIcon, Badge } from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { ArrowTurnDownIcon, Badge } from "@cartridge/ui";
 import { StarknetEnumType, StarknetMerkleType } from "@starknet-io/types-js";
 import { SignMessagePolicy } from "@cartridge/presets";
 import { AccordionCard } from "./AccordionCard";

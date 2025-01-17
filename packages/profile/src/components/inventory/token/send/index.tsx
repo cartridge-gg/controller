@@ -12,7 +12,7 @@ import {
   cn,
   CopyAddress,
   Separator,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";

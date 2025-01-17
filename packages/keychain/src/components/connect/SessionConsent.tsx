@@ -1,4 +1,4 @@
-import { VerifiedIcon } from "@cartridge/ui-next";
+import { VerifiedIcon } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";

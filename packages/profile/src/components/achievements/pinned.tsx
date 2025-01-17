@@ -1,5 +1,5 @@
-import { cn } from "@cartridge/ui-next";
-import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui";
+import { Card, CardHeader, CardTitle } from "@cartridge/ui";
 
 export function Pinned({
   icon,

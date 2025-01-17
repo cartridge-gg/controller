@@ -11,7 +11,7 @@ import {
   SessionPolicies,
   SignMessagePolicy,
 } from "@cartridge/presets";
-import { CoinsIcon, CartridgeIcon } from "@cartridge/ui-next";
+import { CoinsIcon, CartridgeIcon } from "@cartridge/ui";
 import React from "react";
 import { Policy } from "@cartridge/account-wasm";
 

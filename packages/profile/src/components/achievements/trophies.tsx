@@ -1,4 +1,4 @@
-import { WedgeIcon, cn } from "@cartridge/ui-next";
+import { WedgeIcon, cn } from "@cartridge/ui";
 import { Trophy } from "./trophy";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";

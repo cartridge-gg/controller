@@ -4,10 +4,10 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount, useUsername } from "@/hooks/account";
-import { CopyAddress } from "@cartridge/ui-next";
+import { CopyAddress } from "@cartridge/ui";
 import { Navigation } from "../navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";

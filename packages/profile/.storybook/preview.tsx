@@ -1,7 +1,7 @@
 import React from "react";
 import type { Decorator, Preview, ReactRenderer } from "@storybook/react";
 import { withThemeByClassName } from "@storybook/addon-themes";
-import { SonnerToaster } from "@cartridge/ui-next";
+import { SonnerToaster } from "@cartridge/ui";
 import { Provider } from "../src/components/provider";
 
 import "../src/index.css";

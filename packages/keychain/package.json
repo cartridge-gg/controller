@@ -23,7 +23,7 @@
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "catalog:",
-    "@cartridge/ui-next": "workspace:*",
+    "@cartridge/ui": "workspace:*",
     "@cartridge/utils": "workspace:*",
     "@starknet-io/types-js": "catalog:",
     "@stripe/react-stripe-js": "^2.8.1",

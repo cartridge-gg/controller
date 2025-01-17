@@ -1,6 +1,6 @@
 import { SessionContracts, SessionMessages } from "@/hooks/session";
 import { AggregateCard } from "./AggregateCard";
-import { CodeIcon } from "@cartridge/ui-next";
+import { CodeIcon } from "@cartridge/ui";
 import { ContractCard } from "./ContractCard";
 import { ExpirationCard } from "./ExpirationCard";
 

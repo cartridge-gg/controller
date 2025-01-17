@@ -2,7 +2,7 @@
 
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button } from "@cartridge/ui-next";
+import { Button } from "@cartridge/ui";
 
 export function Settings() {
   const { account, connector } = useAccount();

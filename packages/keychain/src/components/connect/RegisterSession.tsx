@@ -1,4 +1,4 @@
-import { LayoutContent } from "@cartridge/ui-next";
+import { LayoutContent } from "@cartridge/ui";
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { SessionConsent } from "@/components/connect";

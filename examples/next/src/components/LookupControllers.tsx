@@ -4,7 +4,7 @@ import { useAccount } from "@starknet-react/core";
 import { useCallback, useState } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { lookupAddresses, lookupUsernames } from "@cartridge/controller";
-import { Button } from "@cartridge/ui-next";
+import { Button } from "@cartridge/ui";
 
 export function LookupControllers() {
   const { address, connector } = useAccount();

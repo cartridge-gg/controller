@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
+import { Card, CardHeader, CardTitle } from "@cartridge/ui";
 import { CollectionImage } from "./image";
 import { useCollections } from "@/hooks/collection";
 
