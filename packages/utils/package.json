@@ -21,7 +21,7 @@
   "dependencies": {
     "react": "^18.3.1",
     "react-query": "^3.39.2",
-    "starknet": "^6.11.0",
+    "starknet": "^6.21.0",
     "swr": "^2.2.5",
     "viem": "^1.21.4"
   },

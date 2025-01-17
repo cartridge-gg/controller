@@ -96,6 +96,6 @@
   "peerDependencies": {
     "@starknet-react/chains": "^3.1",
     "@starknet-react/core": "3.7",
-    "starknet": "^6.11.0"
+    "starknet": "^6.21.0"
   }
 }
