@@ -23,7 +23,7 @@
   },
   "scripts": {
     "build:deps": "tsc && tsc-alias && pnpm copyThemes",
-    "copyThemes": "cp -R src/themes dist/themes",
+    "copyThemes": "rm -rf dist/themes && cp -R src/themes dist/themes",
     "format": "prettier --write ./src",
     "format:check": "prettier --check ./src",
     "lint": "eslint .",
