@@ -6,9 +6,7 @@ import {
   Input,
 } from "@cartridge/ui-next";
 import { useState } from "react";
-
-export const DEFAULT_AMOUNT = 5;
-export const AMOUNTS = [1, 5, 10];
+import { AMOUNTS } from "./constants";
 
 type AmountSelectionProps = {
   amount: number;

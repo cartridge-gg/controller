@@ -1,10 +1,8 @@
-import {
-  AuthAction,
-  Authenticate as AuthComponent,
-} from "@/components/connect";
+import { Authenticate as AuthComponent } from "@/components/connect";
 import { constants } from "starknet";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { AuthAction } from "./connect/authenticate";
 
 // auth page used for externally embedded keychain
 export function Authenticate() {

@@ -4,7 +4,7 @@ import { LoginMode } from "../types";
 import { doLogin, doSignup } from "@/hooks/account";
 import { constants } from "starknet";
 import Controller from "@/utils/controller";
-import { fetchAccount } from ".";
+import { fetchAccount } from "./utils";
 import { PopupCenter } from "@/utils/url";
 import { useAccountQuery } from "@cartridge/utils/api/cartridge";
 
@@ -192,7 +192,7 @@ export function useCreateController({
 
       setIsLoading(false);
     },
-    [loginMode, policies, isSlot, initController],
+    [loginMode, policies, isSlot, initController, doPopupFlow],
   );
 
   return {

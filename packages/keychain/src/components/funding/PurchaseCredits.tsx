@@ -8,13 +8,14 @@ import {
   Separator,
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
-import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
+import { AmountSelection } from "./AmountSelection";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { Balance } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
 import { isIframe } from "@cartridge/utils";
+import { DEFAULT_AMOUNT } from "./constants";
 
 const STRIPE_API_PUBKEY =
   "pk_test_51Kr6IXIS6lliDpf33KnwWDtIjRPWt3eAI9CuSLR6Vvc3GxHEwmSU0iszYbUlgUadSRluGKAFphe3JzltyjPAKiBK00al4RAFQu";
