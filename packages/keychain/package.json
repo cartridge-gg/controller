@@ -13,7 +13,7 @@
     "format:check": "prettier --check --ignore-path .gitignore .",
     "test": "vitest",
     "test:ci": "vitest run",
-    "storybook": "storybook dev -p 6001",
+    "storybook": "storybook dev -p 6001 --no-open",
     "storybook:build": "storybook build",
     "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6006 --silent",
     "test-storybook": "test-storybook --testTimeout=60000",
