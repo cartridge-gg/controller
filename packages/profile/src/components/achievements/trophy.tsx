@@ -370,17 +370,14 @@ function Track({
         hovered &&
           (enabled || pinned) &&
           "opacity-90 bg-background-100/50 cursor-pointer",
-        pinned && "bg-quaternary",
+        pinned && "bg-background-200",
       )}
       onClick={pinned ? handleUnpin : handlePin}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {loading ? (
-        <SpinnerIcon
-          className="text-quaternary-foreground animate-spin"
-          size="sm"
-        />
+        <SpinnerIcon className="text-muted-foreground animate-spin" size="sm" />
       ) : (
         <TrackIcon
           className={cn(!enabled && !pinned && "opacity-25")}
@@ -451,7 +448,7 @@ Do you have what it takes to carve your name into history?
   return (
     <div
       className={cn(
-        "grow bg-secondary p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
+        "grow bg-background-100 p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
       )}
       onClick={handleShare}
     >
