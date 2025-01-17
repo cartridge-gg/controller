@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
 import { Header, HeaderProps } from "./header";
+
 export function Container({
   children,
   onBack,
@@ -26,7 +27,9 @@ export function Container({
         description={description}
         variant={variant}
       />
-      <div className={className}>{children}</div>
+      <div className={`flex flex-col flex-1 min-h-0 ${className}`}>
+        {children}
+      </div>
     </ResponsiveWrapper>
   );
 }

@@ -52,7 +52,7 @@ export function CreateControllerView({
       hideNetwork
     >
       <form
-        style={{ width: "100%" }}
+        className="flex flex-col flex-1"
         onKeyDown={(e) => {
           if (e.key === "Enter") e.preventDefault();
         }}
