@@ -30,11 +30,12 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { parseEther } from "viem";
-import { AmountSelection, DEFAULT_AMOUNT } from "./AmountSelection";
+import { AmountSelection } from "./AmountSelection";
 import { Balance } from "./Balance";
 import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { toast } from "sonner";
+import { DEFAULT_AMOUNT } from "./constants";
 
 type DepositEthProps = {
   onComplete?: (deployHash?: string) => void;

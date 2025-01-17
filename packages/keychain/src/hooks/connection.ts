@@ -192,7 +192,14 @@ export function useConnectionValue() {
         );
       }
     }
-  }, [origin, setTheme, setPolicies, setHasPrefundRequest, setOrigin]);
+  }, [
+    origin,
+    setTheme,
+    setPolicies,
+    setHasPrefundRequest,
+    setOrigin,
+    setController,
+  ]);
 
   useEffect(() => {
     const connection = connectToController<ParentMethods>({
@@ -207,7 +214,7 @@ export function useConnectionValue() {
     return () => {
       connection.destroy();
     };
-  }, []); // Empty dependency array to run only once
+  }, [setOrigin, setRpcUrl, setPolicies, setContext, setController]);
 
   useEffect(() => {
     if (rpcUrl) {

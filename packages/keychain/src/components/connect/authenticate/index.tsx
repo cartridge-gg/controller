@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
 import { Button } from "@cartridge/ui-next";
-import { Unsupported, useIsSupported } from "./Unsupported";
+import { Unsupported } from "./Unsupported";
 import { doSignup } from "@/hooks/account";
 import { Container, Content, Footer } from "@/components/layout";
 import { FaceIDDuoImage } from "./FaceID";
+import { useIsSupported } from "./useIsSupported";
 
 export type AuthAction = "signup" | "login";
 

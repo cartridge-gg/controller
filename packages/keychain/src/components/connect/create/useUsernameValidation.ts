@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { fetchAccount } from ".";
+import { fetchAccount } from "./utils";
 
 export type ValidationState = {
   status: "idle" | "validating" | "valid" | "invalid";
