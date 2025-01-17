@@ -18,20 +18,3 @@ export const iconVariants = cva(base, {
     size: "default",
   },
 });
-
-export const duotoneVariant = {
-  default: "[&_*.accentColor]:fill-tertiary",
-  destructive:
-    "[&_*.accentColor]:fill-destructive [&_*.color]:fill-destructive",
-};
-
-export const duotoneIconVariants = cva(base, {
-  variants: {
-    size,
-    variant: duotoneVariant,
-  },
-  defaultVariants: {
-    size: "default",
-    variant: "default",
-  },
-});
