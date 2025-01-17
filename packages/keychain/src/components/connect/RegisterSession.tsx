@@ -56,6 +56,24 @@ export function RegisterSession({
         return;
       }
 
+      // Set all contract policies to authorized
+      if (policies.contracts) {
+        Object.keys(policies.contracts).forEach((address) => {
+          if (policies.contracts![address]) {
+            policies.contracts![address].methods.forEach((method) => {
+              method.authorized = true;
+            });
+          }
+        });
+      }
+
+      // Set all message policies to authorized
+      if (policies.messages) {
+        policies.messages.forEach((message) => {
+          message.authorized = true;
+        });
+      }
+
       const { transaction_hash } = await controller.registerSession(
         expiresAt,
         policies,

@@ -1,22 +1,20 @@
-import { Providers } from "components/providers";
+import { ReactNode } from "react";
 import { Metadata } from "next";
-import { PropsWithChildren } from "react";
 
 import "./globals.css";
+import { Providers } from "components/providers";
 
-export default function RootLayout({ children }: PropsWithChildren) {
+export const metadata: Metadata = {
+  title: "Cartridge Controller",
+  description: "Cartridge Controller Example",
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-background text-foreground">
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
-
-export const metadata: Metadata = {
-  title: "Cartridge Controller - Example (Next.js)",
-  icons: {
-    icon: "favicon.ico",
-  },
-};

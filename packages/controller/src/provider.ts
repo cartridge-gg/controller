@@ -16,6 +16,9 @@ import {
 import manifest from "../package.json";
 
 import { icon } from "./icon";
+import { Mutex } from "./mutex";
+
+const mutex = new Mutex();
 
 export default abstract class BaseProvider implements StarknetWindowObject {
   public id = "controller";
@@ -26,10 +29,37 @@ export default abstract class BaseProvider implements StarknetWindowObject {
   public account?: WalletAccount;
   public subscriptions: WalletEvents[] = [];
 
+  private _probePromise: Promise<WalletAccount | undefined> | null = null;
+
+  protected async safeProbe(): Promise<WalletAccount | undefined> {
+    // If we already have an account, return it
+    if (this.account) {
+      return this.account;
+    }
+
+    // If we're already probing, wait for the existing probe
+    if (this._probePromise) {
+      return this._probePromise;
+    }
+
+    const release = await mutex.obtain();
+    return await new Promise<WalletAccount | undefined>(async (resolve) => {
+      try {
+        this._probePromise = this.probe();
+        const result = await this._probePromise;
+        resolve(result);
+      } finally {
+        this._probePromise = null;
+      }
+    }).finally(() => {
+      release();
+    });
+  }
+
   request: RequestFn = async (call) => {
     switch (call.type) {
       case "wallet_getPermissions":
-        await this.probe();
+        await this.safeProbe();
 
         if (this.account) {
           return [Permission.ACCOUNTS];
@@ -45,7 +75,8 @@ export default abstract class BaseProvider implements StarknetWindowObject {
         const silentMode =
           call.params && (call.params as RequestAccountsParameters).silent_mode;
 
-        this.account = await this.probe();
+        this.account = await this.safeProbe();
+
         if (!this.account && !silentMode) {
           this.account = await this.connect();
         }

@@ -12,6 +12,7 @@ import BaseProvider from "../provider";
 import { toWasmPolicies } from "../utils";
 import { SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
+import { ParsedSessionPolicies, parsePolicies } from "../policies";
 
 interface SessionRegistration {
   username: string;
@@ -25,7 +26,7 @@ export default class TelegramProvider extends BaseProvider {
   private _tmaUrl: string;
   protected _chainId: string;
   protected _username?: string;
-  protected _policies: SessionPolicies;
+  protected _policies: ParsedSessionPolicies;
   private _rpcUrl: string;
 
   constructor({
@@ -44,7 +45,7 @@ export default class TelegramProvider extends BaseProvider {
     this._rpcUrl = rpc;
     this._tmaUrl = tmaUrl;
     this._chainId = chainId;
-    this._policies = policies;
+    this._policies = parsePolicies(policies);
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;

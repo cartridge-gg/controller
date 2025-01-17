@@ -94,8 +94,8 @@
     "vitest": "^2.1.8"
   },
   "peerDependencies": {
-    "@starknet-react/chains": "^3.0.0",
-    "@starknet-react/core": "^3.0.2",
-    "starknet": "^6.11.0"
+    "@starknet-react/chains": "^3.1",
+    "@starknet-react/core": "3.7",
+    "starknet": "^6.21.0"
   }
 }

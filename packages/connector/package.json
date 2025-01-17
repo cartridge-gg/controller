@@ -34,6 +34,7 @@
   "tsup": {
     "entry": [
       "src/controller.ts",
+      "src/session.ts",
       "src/index.ts"
     ],
     "format": [
@@ -44,10 +45,11 @@
     "clean": true,
     "dts": "resolve"
   },
+  "peerDependencies": {
+    "@starknet-react/core": "^3.7"
+  },
   "dependencies": {
-    "@cartridge/controller": "workspace:*",
-    "@starknet-react/core": "^3.0.2",
-    "starknet": "^6.11.0"
+    "@cartridge/controller": "workspace:*"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",

@@ -6,6 +6,7 @@ import BaseProvider from "../provider";
 import { toWasmPolicies } from "../utils";
 import { SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
+import { ParsedSessionPolicies } from "../policies";
 
 interface SessionRegistration {
   username: string;
@@ -20,6 +21,7 @@ export type SessionOptions = {
   chainId: string;
   policies: SessionPolicies;
   redirectUrl: string;
+  keychainUrl?: string;
 };
 
 export default class SessionProvider extends BaseProvider {
@@ -30,19 +32,84 @@ export default class SessionProvider extends BaseProvider {
   protected _rpcUrl: string;
   protected _username?: string;
   protected _redirectUrl: string;
-  protected _policies: SessionPolicies;
+  protected _policies: ParsedSessionPolicies;
+  protected _keychainUrl: string;
 
-  constructor({ rpc, chainId, policies, redirectUrl }: SessionOptions) {
+  constructor({
+    rpc,
+    chainId,
+    policies,
+    redirectUrl,
+    keychainUrl,
+  }: SessionOptions) {
     super();
+
+    this._policies = {
+      verified: false,
+      contracts: policies.contracts
+        ? Object.fromEntries(
+            Object.entries(policies.contracts).map(([address, contract]) => [
+              address,
+              {
+                ...contract,
+                methods: contract.methods.map((method) => ({
+                  ...method,
+                  authorized: true,
+                })),
+              },
+            ]),
+          )
+        : undefined,
+      messages: policies.messages?.map((message) => ({
+        ...message,
+        authorized: true,
+      })),
+    };
 
     this._rpcUrl = rpc;
     this._chainId = chainId;
     this._redirectUrl = redirectUrl;
-    this._policies = policies;
+    this._keychainUrl = keychainUrl || KEYCHAIN_URL;
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller_session = this;
     }
+  }
+
+  private validatePoliciesSubset(
+    newPolicies: ParsedSessionPolicies,
+    existingPolicies: ParsedSessionPolicies,
+  ): boolean {
+    if (newPolicies.contracts) {
+      if (!existingPolicies.contracts) return false;
+
+      for (const [address, contract] of Object.entries(newPolicies.contracts)) {
+        const existingContract = existingPolicies.contracts[address];
+        if (!existingContract) return false;
+
+        for (const method of contract.methods) {
+          const existingMethod = existingContract.methods.find(
+            (m) => m.entrypoint === method.entrypoint,
+          );
+          if (!existingMethod || !existingMethod.authorized) return false;
+        }
+      }
+    }
+
+    if (newPolicies.messages) {
+      if (!existingPolicies.messages) return false;
+
+      for (const message of newPolicies.messages) {
+        const existingMessage = existingPolicies.messages.find(
+          (m) =>
+            JSON.stringify(m.domain) === JSON.stringify(message.domain) &&
+            JSON.stringify(m.types) === JSON.stringify(message.types),
+        );
+        if (!existingMessage || !existingMessage.authorized) return false;
+      }
+    }
+
+    return true;
   }
 
   async username() {
@@ -51,18 +118,24 @@ export default class SessionProvider extends BaseProvider {
   }
 
   async probe(): Promise<WalletAccount | undefined> {
-    await this.tryRetrieveFromQueryOrStorage();
-    return;
+    if (this.account) {
+      return this.account;
+    }
+
+    this.account = await this.tryRetrieveFromQueryOrStorage();
+    return this.account;
   }
 
   async connect(): Promise<WalletAccount | undefined> {
-    await this.tryRetrieveFromQueryOrStorage();
-
     if (this.account) {
-      return;
+      return this.account;
     }
 
-    // Generate a random local key pair
+    this.account = await this.tryRetrieveFromQueryOrStorage();
+    if (this.account) {
+      return this.account;
+    }
+
     const pk = stark.randomAddress();
     const publicKey = ec.starkCurve.getStarkKey(pk);
 
@@ -74,7 +147,11 @@ export default class SessionProvider extends BaseProvider {
       }),
     );
 
-    const url = `${KEYCHAIN_URL}/session?public_key=${publicKey}&redirect_uri=${
+    localStorage.setItem("sessionPolicies", JSON.stringify(this._policies));
+
+    const url = `${
+      this._keychainUrl
+    }/session?public_key=${publicKey}&redirect_uri=${
       this._redirectUrl
     }&redirect_query_name=startapp&policies=${JSON.stringify(
       this._policies,
@@ -83,7 +160,7 @@ export default class SessionProvider extends BaseProvider {
     localStorage.setItem("lastUsedConnector", this.id);
     window.open(url, "_blank");
 
-    return;
+    return this.account;
   }
 
   switchStarknetChain(_chainId: string): Promise<boolean> {
@@ -97,12 +174,17 @@ export default class SessionProvider extends BaseProvider {
   disconnect(): Promise<void> {
     localStorage.removeItem("sessionSigner");
     localStorage.removeItem("session");
+    localStorage.removeItem("sessionPolicies");
     this.account = undefined;
     this._username = undefined;
     return Promise.resolve();
   }
 
   async tryRetrieveFromQueryOrStorage() {
+    if (this.account) {
+      return this.account;
+    }
+
     const signerString = localStorage.getItem("sessionSigner");
     const signer = signerString ? JSON.parse(signerString) : null;
     let sessionRegistration: SessionRegistration | null = null;
@@ -135,6 +217,47 @@ export default class SessionProvider extends BaseProvider {
       return;
     }
 
+    // Check expiration
+    const expirationTime = parseInt(sessionRegistration.expiresAt) * 1000;
+    console.log("Session expiration check:", {
+      expirationTime,
+      currentTime: Date.now(),
+      expired: Date.now() >= expirationTime,
+    });
+    if (Date.now() >= expirationTime) {
+      console.log("Session expired, clearing stored session");
+      this.clearStoredSession();
+      return;
+    }
+
+    // Check stored policies
+    const storedPoliciesStr = localStorage.getItem("sessionPolicies");
+    console.log("Checking stored policies:", {
+      storedPoliciesStr,
+      currentPolicies: this._policies,
+    });
+    if (storedPoliciesStr) {
+      const storedPolicies = JSON.parse(
+        storedPoliciesStr,
+      ) as ParsedSessionPolicies;
+
+      const isValid = this.validatePoliciesSubset(
+        this._policies,
+        storedPolicies,
+      );
+      console.log("Policy validation result:", {
+        isValid,
+        storedPolicies,
+        requestedPolicies: this._policies,
+      });
+
+      if (!isValid) {
+        console.log("Policy validation failed, clearing stored session");
+        this.clearStoredSession();
+        return;
+      }
+    }
+
     this._username = sessionRegistration.username;
     this.account = new SessionAccount(this, {
       rpcUrl: this._rpcUrl,
@@ -147,5 +270,11 @@ export default class SessionProvider extends BaseProvider {
     });
 
     return this.account;
+  }
+
+  private clearStoredSession(): void {
+    localStorage.removeItem("sessionSigner");
+    localStorage.removeItem("session");
+    localStorage.removeItem("sessionPolicies");
   }
 }

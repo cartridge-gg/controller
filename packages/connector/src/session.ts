@@ -1,7 +1,7 @@
 import SessionProvider, { SessionOptions } from "@cartridge/controller/session";
-import { InjectedConnector } from "@starknet-react/core";
+import { Connector, InjectedConnector } from "@starknet-react/core";
 
-export default class ControllerConnector extends InjectedConnector {
+export default class SessionConnector extends InjectedConnector {
   public controller: SessionProvider;
 
   constructor(options: SessionOptions) {
@@ -15,5 +15,13 @@ export default class ControllerConnector extends InjectedConnector {
     });
 
     this.controller = controller;
+  }
+
+  static fromConnectors(connectors: Connector[]): SessionConnector {
+    const connector = connectors.find((c) => c.id === "controller_session");
+    if (!connector) {
+      throw new Error("Session connector not found");
+    }
+    return connector as SessionConnector;
   }
 }
