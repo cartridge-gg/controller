@@ -27,7 +27,7 @@
     "format": "prettier --write ./src",
     "format:check": "prettier --check ./src",
     "lint": "eslint .",
-    "storybook": "storybook dev -p 6003",
+    "storybook": "storybook dev -p 6003 --no-open",
     "storybook:build": "storybook build",
     "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6007 --silent",
     "test-storybook": "test-storybook",
