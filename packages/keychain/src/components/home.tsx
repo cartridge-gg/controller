@@ -24,17 +24,6 @@ export function Home() {
   const posthog = usePostHog();
 
   useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      !window.location.hostname.includes("localhost")
-    ) {
-      if (import.meta.env.DEV) {
-        posthog.debug();
-      }
-    }
-  }, [context?.origin]);
-
-  useEffect(() => {
     if (controller && policies) {
       controller.isRequestedSession(policies).then((isRequestedSession) => {
         setHasSessionForPolicies(isRequestedSession);
@@ -68,7 +57,7 @@ export function Home() {
 
   switch (context.type) {
     case "connect": {
-      posthog.capture("Call Connect");
+      posthog?.capture("Call Connect");
 
       // if no policies, we can connect immediately
       if (
@@ -110,12 +99,12 @@ export function Home() {
     }
 
     case "logout": {
-      posthog.capture("Call Logout");
+      posthog?.capture("Call Logout");
 
       return <Logout />;
     }
     case "sign-message": {
-      posthog.capture("Call Sign Message");
+      posthog?.capture("Call Sign Message");
 
       const ctx = context as SignMessageCtx;
       return (
@@ -134,7 +123,7 @@ export function Home() {
     }
 
     case "execute": {
-      posthog.capture("Call Execute");
+      posthog?.capture("Call Execute");
 
       const ctx = context as ExecuteCtx;
       if (!hasSessionForPolicies) {
@@ -173,7 +162,7 @@ export function Home() {
     }
 
     case "deploy": {
-      posthog.capture("Call Deploy");
+      posthog?.capture("Call Deploy");
 
       const ctx = context as DeployCtx;
       return (
@@ -188,12 +177,12 @@ export function Home() {
       );
     }
     case "open-settings": {
-      posthog.capture("Call Open Settings");
+      posthog?.capture("Call Open Settings");
 
       return <Settings />;
     }
     case "open-purchase-credits": {
-      posthog.capture("Call Purchase Credits");
+      posthog?.capture("Call Purchase Credits");
 
       return <PurchaseCredits />;
     }

@@ -1,10 +1,68 @@
-import { createContext, useContext, PropsWithChildren, useEffect } from "react";
+import { createContext, useContext, PropsWithChildren } from "react";
 import PostHog from "posthog-js-lite";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Properties = Record<string, any>;
 
 class PostHogWrapper extends PostHog {
+  isLocal =
+    typeof window !== "undefined" &&
+    window.location.hostname.includes("localhost");
+
+  override capture(eventName: string, properties?: Properties): void {
+    if (this.isLocal) {
+      console.log("[PostHog Event]", {
+        event: eventName,
+        properties,
+      });
+      return;
+    }
+    super.capture(eventName, properties);
+  }
+
+  override identify(distinctId: string, properties?: Properties): void {
+    if (this.isLocal) {
+      console.log("[PostHog Identify]", {
+        distinctId,
+        properties,
+      });
+      return;
+    }
+    super.identify(distinctId, properties);
+  }
+
+  override group(
+    groupType: string,
+    groupKey: string,
+    properties?: Properties,
+  ): void {
+    if (this.isLocal) {
+      console.log("[PostHog Group]", {
+        groupType,
+        groupKey,
+        properties,
+      });
+      return;
+    }
+    super.group(groupType, groupKey, properties);
+  }
+
+  override reset(): void {
+    if (this.isLocal) {
+      console.log("[PostHog Reset]");
+      return;
+    }
+    super.reset();
+  }
+
+  override debug(): void {
+    if (this.isLocal) {
+      console.log("[PostHog Debug Mode Enabled]");
+      return;
+    }
+    super.debug();
+  }
+
   captureException(error: Error, additionalProperties?: Properties): void {
     const properties: Properties = {
       $exception_level: "error",
@@ -38,17 +96,6 @@ export function PostHogProvider({ children }: PropsWithChildren) {
     autocapture: false,
   });
 
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      !window.location.hostname.includes("localhost")
-    ) {
-      if (import.meta.env.DEV) {
-        posthog.debug();
-      }
-    }
-  }, []);
-
   return (
     <PostHogContext.Provider value={{ posthog }}>
       {children}
@@ -59,7 +106,7 @@ export function PostHogProvider({ children }: PropsWithChildren) {
 export function usePostHog() {
   const context = useContext(PostHogContext);
   if (!context) {
-    throw new Error("usePostHog must be used within a PostHogProvider");
+    return undefined;
   }
   return context.posthog;
 }
