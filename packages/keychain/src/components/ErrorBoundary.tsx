@@ -1,10 +1,11 @@
-import React, { PropsWithChildren, useEffect } from "react";
+import React, { PropsWithChildren } from "react";
 import { Container, Content, Footer } from "./layout";
 import { AlertIcon, ExternalIcon, Button } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
-import { usePostHog } from "posthog-js/react";
 import { Link } from "react-router-dom";
+import { usePostHog } from "@/context/posthog";
+import { useEffect } from "react";
 
 export class ErrorBoundary extends React.Component<
   PropsWithChildren,
