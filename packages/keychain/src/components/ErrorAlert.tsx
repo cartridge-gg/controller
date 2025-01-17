@@ -60,7 +60,7 @@ export function ErrorAlert({
       case "warning":
         return { bg: "bg-[#1f2320]", text: "text-[white]" };
       case "error":
-        return { bg: "bg-[#f9b9b9]", text: "text-[black]" };
+        return { bg: "bg-destructive", text: "text-[black]" };
       default:
         return { bg: "bg-background-100", text: "text-foreground" };
     }

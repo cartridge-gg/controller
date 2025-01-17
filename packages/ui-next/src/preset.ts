@@ -37,6 +37,7 @@ export const cartridgeTWPreset: Partial<Config> = {
       secondary: "hsl(var(--secondary))",
       destructive: {
         DEFAULT: "hsl(var(--destructive))",
+        100: "hsl(var(--destructive-100))",
         foreground: "hsl(var(--destructive-foreground))",
       },
       muted: {

@@ -25,7 +25,7 @@ export function ErrorAlertIcon({
       return (
         <AlertIconRaw
           size={size}
-          className={cn("text-destructive", className)}
+          className={cn("text-destructive-100", className)}
         />
       );
   }

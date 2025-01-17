@@ -1,4 +1,3 @@
-import { cn } from "@/utils";
 import { Meta, StoryObj } from "@storybook/react";
 import { PropsWithChildren } from "react";
 
@@ -16,7 +15,7 @@ export const Surface: Story = {
   args: {
     children: (
       <>
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-background border border-muted/40 text-xs">
+        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-background text-xs">
           <div>bg-background</div>
         </div>
 
@@ -56,10 +55,10 @@ export const Accent: Story = {
 export const Muted: Story = {
   args: {
     children: (
-      <>
-        <Sample color="bg-muted" legacyName="solid.accent" />
-        <Sample color="bg-muted-foreground" legacyName="text.secondary" />
-      </>
+      <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-muted text-muted-foreground text-xs">
+        <div>bg-muted</div>
+        <div>text-muted-foreground</div>
+      </div>
     ),
   },
 };
@@ -68,34 +67,20 @@ export const Destructive: Story = {
   args: {
     children: (
       <>
-        <Sample color="bg-destructive" legacyName="text.error" />
-        <Sample color="bg-destructive-foreground" legacyName="text.error" />
+        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-destructive text-xs">
+          <div>bg-destructive</div>
+        </div>
+        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-destructive-100 text-xs">
+          <div>bg-destructive-100</div>
+        </div>
+        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-destructive-foreground text-xs">
+          <div>bg-destructive-foreground</div>
+        </div>
       </>
     ),
   },
 };
 
-export const Others: Story = {
-  args: {
-    children: (
-      <>
-        <Sample color="bg-border" legacyName="black" />
-        <Sample color="bg-input" legacyName="black" />
-      </>
-    ),
-  },
-};
-
-function Colors({ children }: PropsWithChildren) {
-  return <div className="flex gap-4 bg-background">{children}</div>;
-}
-
-function Sample({ color, legacyName }: { color: string; legacyName: string }) {
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className={cn("h-40 w-40", color)} />
-      <p className="text-sm">{color.replace(" border", "")}</p>
-      <p className="text-sm text-muted-foreground">(v0.2: {legacyName})</p>
-    </div>
-  );
+function Colors(props: PropsWithChildren) {
+  return <div className="flex gap-4" {...props} />;
 }
