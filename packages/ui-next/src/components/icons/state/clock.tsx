@@ -6,7 +6,7 @@ export const ClockIcon = memo(
   forwardRef<SVGSVGElement, StateIconProps>(
     ({ className, size, variant, ...props }, forwardedRef) => (
       <svg
-        viewBox="0 0 24 24"
+        viewBox="0 0 20 20"
         className={iconVariants({ size, className })}
         ref={forwardedRef}
         {...props}

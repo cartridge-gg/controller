@@ -32,7 +32,7 @@ export function ConfirmTransaction() {
   return (
     <ExecutionContainer
       Icon={TransactionDuoIcon}
-      title="Review Transaction"
+      title={`Review Transaction${transactions.length > 1 ? "s" : ""}`}
       description={origin}
       executionError={ctx.error}
       transactions={ctx.transactions}
