@@ -108,6 +108,7 @@ export function Trophy({
             game={game}
             earning={earning}
             timestamp={timestamp}
+            percentage={percentage}
           />
         )}
       </div>
@@ -398,11 +399,13 @@ function Share({
   title,
   earning,
   timestamp,
+  percentage,
 }: {
   game: GameModel;
   title: string;
   earning: number;
   timestamp: number;
+  percentage: string;
 }) {
   const url: string | null = useMemo(() => {
     if (!game.socials.website) return null;
@@ -426,15 +429,17 @@ function Share({
 
   const handleShare = useCallback(() => {
     if (!url || !xhandle) return;
-    const content = `I got a new achievement in @${xhandle} game 🏆
-  
-${title}
-Points: ${earning}
-At: ${date}
+    const content = `🚨 THIS ISN’T JUST AN ACHIEVEMENT. IT’S HISTORY.
 
-Think you can get it as well? Join the game ${url}
+🏆 ${title} Unlocked in @${xhandle}
 
-Play now 👇`;
+✨ +${earning} Points | 📅 ${date}
+
+Only ${percentage}% of players have earned this rare badge.
+
+Do you have what it takes to carve your name into history?
+
+💥 Prove it. Play now 👇`;
 
     const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
       content,
