@@ -184,7 +184,9 @@ export function ExecutionContainer({
                     onClick={handleSubmit}
                     isLoading={isLoading}
                     disabled={
-                      !transactions || (maxFee === null && transactions?.length)
+                      ctrlError ||
+                      !transactions ||
+                      (maxFee === null && transactions?.length)
                     }
                   >
                     {buttonText}
