@@ -86,7 +86,7 @@
     "start-server-and-test": "^2.0.9",
     "storybook": "^8.4.7",
     "tailwindcss": "^3.4.3",
-    "typescript": "^5.4.5",
+    "typescript": "catalog:",
     "vite": "^6.0.3",
     "vite-plugin-node-polyfills": "^0.22.0",
     "vite-plugin-top-level-await": "^1.4.4",

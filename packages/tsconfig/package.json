@@ -5,5 +5,8 @@
   "files": [
     "base.json",
     "react.json"
-  ]
+  ],
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
 }
