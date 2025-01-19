@@ -2,3 +2,6 @@ packages:
   - examples/next
   - examples/svelte
   - packages/*
+
+catalog:
+  prettier: "^3.4.2"

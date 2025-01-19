@@ -47,6 +47,7 @@
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
     "postcss": "^8.4.35",
+    "prettier": "catalog:",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",

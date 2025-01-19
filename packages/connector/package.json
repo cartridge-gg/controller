@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
+    "prettier": "catalog:",
     "typescript": "^5.4.5"
   }
 }

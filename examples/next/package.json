@@ -20,7 +20,7 @@
     "@starknet-react/core": "^3.7",
     "next": "^14.0.0",
     "next-themes": "^0.3.0",
-    "prettier": "^2.7.1",
+    "prettier": "catalog:",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "starknet": "^6.21.0"
