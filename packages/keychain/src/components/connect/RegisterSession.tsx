@@ -7,7 +7,7 @@ import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { DEFAULT_SESSION_DURATION } from "@/const";
+import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { ParsedSessionPolicies } from "@/hooks/session";
@@ -32,12 +32,14 @@ export function RegisterSession({
     | undefined
   >(undefined);
 
+  const expiresAt = NOW + duration;
+
   useEffect(() => {
     if (!publicKey || !controller) {
       setTransactions(undefined);
     } else {
       controller
-        .registerSessionCalldata(duration, policies, publicKey)
+        .registerSessionCalldata(expiresAt, policies, publicKey)
         .then((calldata) => {
           setTransactions([
             {
@@ -48,7 +50,7 @@ export function RegisterSession({
           ]);
         });
     }
-  }, [controller, duration, policies, publicKey]);
+  }, [controller, expiresAt, policies, publicKey]);
 
   const onRegisterSession = useCallback(
     async (maxFee?: bigint) => {
@@ -75,7 +77,7 @@ export function RegisterSession({
       }
 
       const { transaction_hash } = await controller.registerSession(
-        duration,
+        expiresAt,
         policies,
         publicKey,
         maxFee,
@@ -91,7 +93,7 @@ export function RegisterSession({
 
       onConnect(transaction_hash);
     },
-    [controller, duration, policies, publicKey, onConnect],
+    [controller, expiresAt, policies, publicKey, onConnect],
   );
 
   return (
