@@ -1,6 +1,6 @@
 import type { StorybookConfig } from "@storybook/react-vite";
-import { join, dirname, resolve } from "path";
-import { mergeConfig } from "vite";
+
+import { join, dirname } from "path";
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -19,21 +19,5 @@ const config: StorybookConfig = {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
   },
-  viteFinal: async (config) => {
-    return mergeConfig(config, {
-      build: {
-        rollupOptions: {
-          external: ["vite-plugin-node-polyfills/shims/global"],
-        },
-      },
-      resolve: {
-        alias: {
-          react: resolve(__dirname, "../node_modules/react"),
-          "react-dom": resolve(__dirname, "../node_modules/react-dom"),
-        },
-      },
-    });
-  },
-  staticDirs: ["../public"],
 };
 export default config;

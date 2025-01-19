@@ -22,38 +22,35 @@ catalogs:
       specifier: ^3.7
       version: 3.7.1
     '@storybook/addon-essentials':
-      specifier: ^8.4.7
-      version: 8.5.0
-    '@storybook/addon-interactions':
-      specifier: ^8.4.7
-      version: 8.5.0
-    '@storybook/addon-links':
-      specifier: ^8.4.7
+      specifier: ^8.5.0
       version: 8.5.0
     '@storybook/addon-themes':
-      specifier: ^8.4.7
+      specifier: ^8.5.0
       version: 8.5.0
     '@storybook/blocks':
-      specifier: ^8.4.7
+      specifier: ^8.5.0
       version: 8.5.0
     '@storybook/react':
-      specifier: ^8.4.7
+      specifier: ^8.5.0
       version: 8.5.0
     '@storybook/react-vite':
-      specifier: ^8.4.7
+      specifier: ^8.5.0
       version: 8.5.0
     '@storybook/test':
-      specifier: ^8.4.7
+      specifier: ^8.5.0
       version: 8.5.0
     '@storybook/test-runner':
       specifier: ^0.21.0
       version: 0.21.0
     '@storybook/theming':
-      specifier: ^8.4.7
+      specifier: ^8.5.0
       version: 8.5.0
     '@types/jest-image-snapshot':
       specifier: ^6.4.0
       version: 6.4.0
+    '@types/lodash':
+      specifier: ^4.17.14
+      version: 4.17.14
     '@types/node':
       specifier: ^20.16.11
       version: 20.17.14
@@ -87,6 +84,9 @@ catalogs:
     jest-image-snapshot:
       specifier: ^6.4.0
       version: 6.4.0
+    lodash:
+      specifier: ^4.17.21
+      version: 4.17.21
     playwright:
       specifier: ^1.49.1
       version: 1.49.1
@@ -121,7 +121,7 @@ catalogs:
       specifier: ^2.0.9
       version: 2.0.10
     storybook:
-      specifier: ^8.4.7
+      specifier: ^8.5.0
       version: 8.5.0
     swr:
       specifier: ^2.2.5
@@ -489,7 +489,7 @@ importers:
         specifier: 4.2.1
         version: 4.2.1
       lodash:
-        specifier: ^4.17.21
+        specifier: 'catalog:'
         version: 4.17.21
       p-throttle:
         specifier: ^6.2.0
@@ -528,18 +528,9 @@ importers:
       '@cartridge/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
-      '@chromatic-com/storybook':
-        specifier: ^1.9.0
-        version: 1.9.0(react@19.0.0)
       '@storybook/addon-essentials':
         specifier: 'catalog:'
         version: 8.5.0(@types/react@19.0.7)(storybook@8.5.0(prettier@3.4.2))
-      '@storybook/addon-interactions':
-        specifier: 'catalog:'
-        version: 8.5.0(storybook@8.5.0(prettier@3.4.2))
-      '@storybook/addon-links':
-        specifier: 'catalog:'
-        version: 8.5.0(react@19.0.0)(storybook@8.5.0(prettier@3.4.2))
       '@storybook/addon-themes':
         specifier: 'catalog:'
         version: 8.5.0(storybook@8.5.0(prettier@3.4.2))
@@ -568,7 +559,7 @@ importers:
         specifier: 'catalog:'
         version: 6.4.0
       '@types/lodash':
-        specifier: ^4.14.202
+        specifier: 'catalog:'
         version: 4.17.14
       '@types/node':
         specifier: 'catalog:'
@@ -664,7 +655,7 @@ importers:
         specifier: ^6.1.1
         version: 6.1.1
       lodash:
-        specifier: ^4.17.21
+        specifier: 'catalog:'
         version: 4.17.21
       posthog-js:
         specifier: ^1.181.0
@@ -700,8 +691,29 @@ importers:
       '@cartridge/eslint':
         specifier: workspace:*
         version: link:../eslint
+      '@storybook/addon-essentials':
+        specifier: 'catalog:'
+        version: 8.5.0(@types/react@19.0.7)(storybook@8.5.0(prettier@3.4.2))
+      '@storybook/addon-themes':
+        specifier: 'catalog:'
+        version: 8.5.0(storybook@8.5.0(prettier@3.4.2))
+      '@storybook/blocks':
+        specifier: 'catalog:'
+        version: 8.5.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.5.0(prettier@3.4.2))
+      '@storybook/react':
+        specifier: 'catalog:'
+        version: 8.5.0(@storybook/test@8.5.0(storybook@8.5.0(prettier@3.4.2)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.5.0(prettier@3.4.2))(typescript@5.7.3)
+      '@storybook/react-vite':
+        specifier: 'catalog:'
+        version: 8.5.0(@storybook/test@8.5.0(storybook@8.5.0(prettier@3.4.2)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(rollup@4.30.1)(storybook@8.5.0(prettier@3.4.2))(typescript@5.7.3)(vite@6.0.7(@types/node@20.17.14)(jiti@1.21.7)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))
+      '@storybook/test':
+        specifier: 'catalog:'
+        version: 8.5.0(storybook@8.5.0(prettier@3.4.2))
+      '@storybook/test-runner':
+        specifier: 'catalog:'
+        version: 0.21.0(@swc/helpers@0.5.15)(@types/node@20.17.14)(babel-plugin-macros@3.1.0)(storybook@8.5.0(prettier@3.4.2))(ts-node@10.9.2(@swc/core@1.10.7(@swc/helpers@0.5.15))(@types/node@20.17.14)(typescript@5.7.3))
       '@types/lodash':
-        specifier: ^4.17.13
+        specifier: 'catalog:'
         version: 4.17.14
       '@types/node':
         specifier: 'catalog:'
@@ -733,6 +745,9 @@ importers:
       prettier:
         specifier: 'catalog:'
         version: 3.4.2
+      storybook:
+        specifier: 'catalog:'
+        version: 8.5.0(prettier@3.4.2)
       tailwindcss:
         specifier: 'catalog:'
         version: 3.4.17(ts-node@10.9.2(@swc/core@1.10.7(@swc/helpers@0.5.15))(@types/node@20.17.14)(typescript@5.7.3))
@@ -866,12 +881,6 @@ importers:
       '@storybook/addon-essentials':
         specifier: 'catalog:'
         version: 8.5.0(@types/react@19.0.7)(storybook@8.5.0(prettier@3.4.2))
-      '@storybook/addon-interactions':
-        specifier: 'catalog:'
-        version: 8.5.0(storybook@8.5.0(prettier@3.4.2))
-      '@storybook/addon-links':
-        specifier: 'catalog:'
-        version: 8.5.0(react@19.0.0)(storybook@8.5.0(prettier@3.4.2))
       '@storybook/addon-themes':
         specifier: 'catalog:'
         version: 8.5.0(storybook@8.5.0(prettier@3.4.2))
@@ -1471,10 +1480,6 @@ packages:
 
   '@changesets/write@0.3.2':
     resolution: {integrity: sha512-kDxDrPNpUgsjDbWBvUo27PzKX4gqeKOlhibaOXDJA6kuBisGqNHv/HwGJrAu8U/dSf8ZEFIeHIPtvSlZI1kULw==}
-
-  '@chromatic-com/storybook@1.9.0':
-    resolution: {integrity: sha512-vYQ+TcfktEE3GHnLZXHCzXF/sN9dw+KivH8a5cmPyd9YtQs7fZtHrEgsIjWpYycXiweKMo1Lm1RZsjxk8DH3rA==}
-    engines: {node: '>=16.0.0', yarn: '>=1.22.18'}
 
   '@coinbase/wallet-sdk@3.9.3':
     resolution: {integrity: sha512-N/A2DRIf0Y3PHc1XAMvbBUu4zisna6qAdqABMZwBMNEfWrXpAwx16pZGkYCLGE+Rvv1edbcB2LYDRnACNcmCiw==}
@@ -3550,20 +3555,6 @@ packages:
     peerDependencies:
       storybook: ^8.5.0
 
-  '@storybook/addon-interactions@8.5.0':
-    resolution: {integrity: sha512-vX1a8qS7o/W3kEzfL/CqOj/Rr6UlGLT/n0KXMpfIhx63tzxe1a1qGpFLL0h0zqAVPHZIOu9humWMKri5Iny6oA==}
-    peerDependencies:
-      storybook: ^8.5.0
-
-  '@storybook/addon-links@8.5.0':
-    resolution: {integrity: sha512-Y11GIByAYqn0TibI/xsy0vCe+ZxJS9PVAAoHngLxkf9J4WodAXcJABr8ZPlWDNdaEhSS/FF7UQUmNag0UC2/pw==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
-      storybook: ^8.5.0
-    peerDependenciesMeta:
-      react:
-        optional: true
-
   '@storybook/addon-measure@8.5.0':
     resolution: {integrity: sha512-e8pJy2sICyj0Ff0W1PFc6HPE6PqcjnnHtfuDaO3M9uSKJLYkpTWJ8i1VSP178f8seq44r5/PdQCHqs5q5l3zgw==}
     peerDependencies:
@@ -4961,18 +4952,6 @@ packages:
     resolution: {integrity: sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==}
     engines: {node: '>=10'}
 
-  chromatic@11.24.0:
-    resolution: {integrity: sha512-IocIxnxera27bRA51HHtfV9/Daqgj0E4BWYV12/nlf7qPJW1T82raQ5ypxZDJA4bXQywxOzpG2e6WWYvz/AwHA==}
-    hasBin: true
-    peerDependencies:
-      '@chromatic-com/cypress': ^0.*.* || ^1.0.0
-      '@chromatic-com/playwright': ^0.*.* || ^1.0.0
-    peerDependenciesMeta:
-      '@chromatic-com/cypress':
-        optional: true
-      '@chromatic-com/playwright':
-        optional: true
-
   ci-info@3.9.0:
     resolution: {integrity: sha512-NIxF55hv4nSqQswkAeiOi1r83xy8JldOFDTWiug55KBu9Jnblncd2U6ViHmYgHf01TPZS77NJBhBMKdWj9HQMQ==}
     engines: {node: '>=8'}
@@ -6086,10 +6065,6 @@ packages:
 
   filelist@1.0.4:
     resolution: {integrity: sha512-w1cEuf3S+DrLCQL7ET6kz+gmlJdbq9J7yXCSjK/OZCPA+qEN1WyF4ZAf0YYJa4/shHJra2t/d/r8SV4Ji+x+8Q==}
-
-  filesize@10.1.6:
-    resolution: {integrity: sha512-sJslQKU2uM33qH5nqewAwVB2QgR6w1aMNsYUp3aN5rMRyXEwJGmZvaWzeJFNTOXWlHQyBFCWrdj3fV/fsTOX8w==}
-    engines: {node: '>= 10.4.0'}
 
   fill-range@7.1.1:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
@@ -8232,12 +8207,6 @@ packages:
     resolution: {integrity: sha512-9WmIKF6mkvA0SLmA2Knm9+qj89e+j1zqgyn8aXGd7+nAduPoqgI9lO57SAZNn/Byzo5P7JhXTyg9PzaJbH73bA==}
     engines: {node: '>= 0.8'}
 
-  react-confetti@6.2.2:
-    resolution: {integrity: sha512-K+kTyOPgX+ZujMZ+Rmb7pZdHBvg+DzinG/w4Eh52WOB8/pfO38efnnrtEZNJmjTvLxc16RBYO+tPM68Fg8viBA==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      react: ^16.3.0 || ^17.0.1 || ^18.0.0 || ^19.0.0
-
   react-docgen-typescript@2.2.2:
     resolution: {integrity: sha512-tvg2ZtOpOi6QDwsb3GZhOjDkkX0h8Z2gipvTg6OVMUyoYoURhEiRNePT8NZItTVCDh39JJHnLdfCOkzoLbFnTg==}
     peerDependencies:
@@ -9261,9 +9230,6 @@ packages:
   turbo@2.3.3:
     resolution: {integrity: sha512-DUHWQAcC8BTiUZDRzAYGvpSpGLiaOQPfYXlCieQbwUvmml/LRGIe3raKdrOPOoiX0DYlzxs2nH6BoWJoZrj8hA==}
     hasBin: true
-
-  tween-functions@1.2.0:
-    resolution: {integrity: sha512-PZBtLYcCLtEcjL14Fzb1gSxPBeL7nWvGhO5ZFPGqziCcr8uvHp0NDmdjBchp6KHL+tExcg0m3NISmKxhU394dA==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -10651,18 +10617,6 @@ snapshots:
       fs-extra: 7.0.1
       human-id: 1.0.2
       prettier: 2.8.8
-
-  '@chromatic-com/storybook@1.9.0(react@19.0.0)':
-    dependencies:
-      chromatic: 11.24.0
-      filesize: 10.1.6
-      jsonfile: 6.1.0
-      react-confetti: 6.2.2(react@19.0.0)
-      strip-ansi: 7.1.0
-    transitivePeerDependencies:
-      - '@chromatic-com/cypress'
-      - '@chromatic-com/playwright'
-      - react
 
   '@coinbase/wallet-sdk@3.9.3':
     dependencies:
@@ -13001,24 +12955,6 @@ snapshots:
       '@storybook/global': 5.0.0
       storybook: 8.5.0(prettier@3.4.2)
 
-  '@storybook/addon-interactions@8.5.0(storybook@8.5.0(prettier@3.4.2))':
-    dependencies:
-      '@storybook/global': 5.0.0
-      '@storybook/instrumenter': 8.5.0(storybook@8.5.0(prettier@3.4.2))
-      '@storybook/test': 8.5.0(storybook@8.5.0(prettier@3.4.2))
-      polished: 4.3.1
-      storybook: 8.5.0(prettier@3.4.2)
-      ts-dedent: 2.2.0
-
-  '@storybook/addon-links@8.5.0(react@19.0.0)(storybook@8.5.0(prettier@3.4.2))':
-    dependencies:
-      '@storybook/csf': 0.1.12
-      '@storybook/global': 5.0.0
-      storybook: 8.5.0(prettier@3.4.2)
-      ts-dedent: 2.2.0
-    optionalDependencies:
-      react: 19.0.0
-
   '@storybook/addon-measure@8.5.0(storybook@8.5.0(prettier@3.4.2))':
     dependencies:
       '@storybook/global': 5.0.0
@@ -15199,8 +15135,6 @@ snapshots:
 
   chownr@2.0.0: {}
 
-  chromatic@11.24.0: {}
-
   ci-info@3.9.0: {}
 
   cipher-base@1.0.6:
@@ -16526,8 +16460,6 @@ snapshots:
   filelist@1.0.4:
     dependencies:
       minimatch: 5.1.6
-
-  filesize@10.1.6: {}
 
   fill-range@7.1.1:
     dependencies:
@@ -19008,11 +18940,6 @@ snapshots:
       iconv-lite: 0.4.24
       unpipe: 1.0.0
 
-  react-confetti@6.2.2(react@19.0.0):
-    dependencies:
-      react: 19.0.0
-      tween-functions: 1.2.0
-
   react-docgen-typescript@2.2.2(typescript@5.7.3):
     dependencies:
       typescript: 5.7.3
@@ -20202,8 +20129,6 @@ snapshots:
       turbo-linux-arm64: 2.3.3
       turbo-windows-64: 2.3.3
       turbo-windows-arm64: 2.3.3
-
-  tween-functions@1.2.0: {}
 
   type-check@0.4.0:
     dependencies:
