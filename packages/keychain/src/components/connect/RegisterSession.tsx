@@ -7,7 +7,7 @@ import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { DEFAULT_SESSION_DURATION } from "@/const";
+import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { ParsedSessionPolicies } from "@/hooks/session";
@@ -22,7 +22,9 @@ export function RegisterSession({
   publicKey?: string;
 }) {
   const { controller, theme } = useConnection();
-  const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
+  const [duration, setDuration] = useState<bigint>(
+    () => NOW + DEFAULT_SESSION_DURATION,
+  );
   const [transactions, setTransactions] = useState<
     | {
         contractAddress: string;
@@ -31,6 +33,10 @@ export function RegisterSession({
       }[]
     | undefined
   >(undefined);
+
+  const setExpiresAtDuration = useCallback((duration: bigint) => {
+    setDuration(NOW + duration);
+  }, []);
 
   useEffect(() => {
     if (!publicKey || !controller) {
@@ -109,14 +115,14 @@ export function RegisterSession({
             contracts={policies.contracts}
             messages={policies.messages}
             duration={duration}
-            onDurationChange={setDuration}
+            onDurationChange={setExpiresAtDuration}
           />
         ) : (
           <UnverifiedSessionSummary
             contracts={policies.contracts}
             messages={policies.messages}
             duration={duration}
-            onDurationChange={setDuration}
+            onDurationChange={setExpiresAtDuration}
           />
         )}
       </Content>
