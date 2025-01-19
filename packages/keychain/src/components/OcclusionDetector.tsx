@@ -5,7 +5,7 @@ export function OcclusionDetector() {
   const { context } = useConnection();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOccluded, setIsOccluded] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout>(null);
 
   const handleIntersectionChange = useCallback(
     (changes: IntersectionObserverEntry[]) => {

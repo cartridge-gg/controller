@@ -43,22 +43,21 @@
     "clean": true
   },
   "peerDependencies": {
-    "starknet": "^6.21.0"
+    "starknet": "catalog:"
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
-    "@cartridge/penpal": "^6.2.3",
-    "@starknet-io/types-js": "^0.7.7",
+    "@cartridge/penpal": "catalog:",
+    "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
-    "base64url": "^3.0.1",
+    "base64url": "catalog:",
     "cbor-x": "^1.5.0",
-    "fast-deep-equal": "^3.1.3",
-    "query-string": "^7.1.1"
+    "fast-deep-equal": "catalog:"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
     "@types/jest": "^29.5.14",
-    "@types/node": "^20.6.0",
+    "@types/node": "catalog:",
     "jest": "^29.7.0",
     "prettier": "catalog:",
     "ts-jest": "^29.2.5",

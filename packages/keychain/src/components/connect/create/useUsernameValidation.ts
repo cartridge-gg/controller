@@ -11,7 +11,7 @@ export function useUsernameValidation(username: string) {
   const [validation, setValidation] = useState<ValidationState>({
     status: "idle",
   });
-  const validationController = useRef<AbortController>();
+  const validationController = useRef<AbortController>(undefined);
 
   useEffect(() => {
     if (!username) {

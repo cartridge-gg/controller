@@ -36,7 +36,7 @@ const Header = () => {
   const sessionConnector = useMemo(() => {
     try {
       return SessionConnector.fromConnectors(connectors);
-    } catch (error) {
+    } catch {
       return undefined;
     }
   }, [connectors]);
