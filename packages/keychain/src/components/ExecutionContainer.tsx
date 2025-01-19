@@ -42,14 +42,13 @@ export function ExecutionContainer({
   Pick<BannerProps, "title" | "description" | "icon">) {
   const { controller } = useConnection();
   const [maxFee, setMaxFee] = useState<bigint | null>(null);
-  const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
+  const [ctrlError, setCtrlError] = useState<ControllerError | null>(
     executionError,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
   );
-  const isEstimated = useRef(false);
 
   const estimateFees = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,6 +61,7 @@ export function ExecutionContainer({
           transactions,
           transactionsDetail,
         );
+        setCtrlError(null);
         setMaxFee(est.suggestedMaxFee);
       } catch (e) {
         const error = parseControllerError(e as unknown as ControllerError);
@@ -73,21 +73,16 @@ export function ExecutionContainer({
   );
 
   useEffect(() => {
-    if (!!ctrlError || maxFee !== null || !transactions?.length) {
+    if (!transactions?.length) {
       return;
     }
 
     const estimateFeesAsync = async () => {
-      if (isEstimated.current) {
-        return;
-      }
-
-      isEstimated.current = true;
       await estimateFees(transactions, transactionsDetail);
     };
 
     estimateFeesAsync();
-  }, [ctrlError, maxFee, transactions, transactionsDetail, estimateFees]);
+  }, [transactions, transactionsDetail, estimateFees]);
 
   useEffect(() => {
     setCtrlError(executionError);
