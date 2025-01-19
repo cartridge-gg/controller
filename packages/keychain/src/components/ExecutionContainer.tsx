@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@cartridge/ui-next";
 import { Container, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
@@ -42,7 +42,7 @@ export function ExecutionContainer({
   Pick<BannerProps, "title" | "description" | "icon">) {
   const { controller } = useConnection();
   const [maxFee, setMaxFee] = useState<bigint | null>(null);
-  const [ctrlError, setCtrlError] = useState<ControllerError | null>(
+  const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
   );
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +61,7 @@ export function ExecutionContainer({
           transactions,
           transactionsDetail,
         );
-        setCtrlError(null);
+        setCtrlError(undefined);
         setMaxFee(est.suggestedMaxFee);
       } catch (e) {
         const error = parseControllerError(e as unknown as ControllerError);

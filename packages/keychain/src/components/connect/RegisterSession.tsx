@@ -4,7 +4,6 @@ import { useConnection } from "@/hooks/connection";
 import { SessionConsent } from "@/components/connect";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import {
-  transaction,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";

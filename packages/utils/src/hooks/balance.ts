@@ -22,8 +22,9 @@ export function useERC20Balance({
   interval: number | undefined;
   decimals?: number;
 }) {
-  const { data: chainId } = useSWR(address && provider ? "chainId" : null, () =>
-    provider?.getChainId(),
+  const { data: chainId } = useSWR(
+    address && provider ? "chainId" : null,
+    () => provider?.getChainId(),
   );
   const ekuboMeta = useEkuboMetadata();
   const { data: meta } = useSWR(
