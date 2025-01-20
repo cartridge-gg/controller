@@ -35,7 +35,6 @@ catalog:
   postcss: "^8.4.35"
   postcss-import: "^16.1.0"
   prettier: "^3.4.2"
-  query-string: "^71.1"
   react: "^19.0.0"
   react-dom: "^19.0.0"
   react-query: "^3.39.2"
