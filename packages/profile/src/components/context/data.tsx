@@ -1,21 +1,7 @@
-import { createContext, useState, ReactNode } from "react";
+import { useState, ReactNode } from "react";
 import { useAchievements } from "@/hooks/achievements";
+import { DataContext } from "@/context/data";
 
-type DataContextType = {
-  trophies: ReturnType<typeof useAchievements>;
-  setAccountAddress: (address: string | undefined) => void;
-};
-
-const initialState: DataContextType = {
-  trophies: {
-    achievements: [],
-    players: [],
-    isLoading: false,
-  },
-  setAccountAddress: () => {},
-};
-
-export const DataContext = createContext<DataContextType>(initialState);
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [accountAddress, setAccountAddress] = useState<string | undefined>(
