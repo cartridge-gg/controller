@@ -17,6 +17,10 @@ export default class SessionConnector extends InjectedConnector {
     this.controller = controller;
   }
 
+  async disconnect() {
+    this.controller.disconnect();
+  }
+
   static fromConnectors(connectors: Connector[]): SessionConnector {
     const connector = connectors.find((c) => c.id === "controller_session");
     if (!connector) {

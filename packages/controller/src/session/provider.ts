@@ -219,23 +219,13 @@ export default class SessionProvider extends BaseProvider {
 
     // Check expiration
     const expirationTime = parseInt(sessionRegistration.expiresAt) * 1000;
-    console.log("Session expiration check:", {
-      expirationTime,
-      currentTime: Date.now(),
-      expired: Date.now() >= expirationTime,
-    });
     if (Date.now() >= expirationTime) {
-      console.log("Session expired, clearing stored session");
       this.clearStoredSession();
       return;
     }
 
     // Check stored policies
     const storedPoliciesStr = localStorage.getItem("sessionPolicies");
-    console.log("Checking stored policies:", {
-      storedPoliciesStr,
-      currentPolicies: this._policies,
-    });
     if (storedPoliciesStr) {
       const storedPolicies = JSON.parse(
         storedPoliciesStr,
@@ -245,14 +235,8 @@ export default class SessionProvider extends BaseProvider {
         this._policies,
         storedPolicies,
       );
-      console.log("Policy validation result:", {
-        isValid,
-        storedPolicies,
-        requestedPolicies: this._policies,
-      });
 
       if (!isValid) {
-        console.log("Policy validation failed, clearing stored session");
         this.clearStoredSession();
         return;
       }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@cartridge/ui-next";
 import { Container, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
@@ -10,6 +10,7 @@ import { DeployController } from "./DeployController";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { BannerProps } from "./layout/container/header/Banner";
 import { parseControllerError } from "@/utils/connection/execute";
+import isEqual from "lodash/isEqual";
 
 interface ExecutionContainerProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,6 +51,12 @@ export function ExecutionContainer({
     "execute",
   );
 
+  // Prevent unnecessary estimate fee calls.
+  const prevTransactionsRef = useRef({
+    transactions: undefined,
+    transactionsDetail: undefined,
+  });
+
   const estimateFees = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (transactions: any, transactionsDetail?: any) => {
@@ -76,6 +83,20 @@ export function ExecutionContainer({
     if (!transactions?.length) {
       return;
     }
+
+    // Only estimate if transactions or details have changed
+    if (
+      isEqual(prevTransactionsRef.current.transactions, transactions) &&
+      isEqual(
+        prevTransactionsRef.current.transactionsDetail,
+        transactionsDetail,
+      )
+    ) {
+      return;
+    }
+
+    // Update ref with current values
+    prevTransactionsRef.current = { transactions, transactionsDetail };
 
     const estimateFeesAsync = async () => {
       await estimateFees(transactions, transactionsDetail);

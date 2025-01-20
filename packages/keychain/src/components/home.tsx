@@ -33,6 +33,14 @@ export function Home() {
     }
   }, [controller, policies]);
 
+  useEffect(() => {
+    if (context?.type) {
+      posthog?.capture(
+        `Call ${context.type.charAt(0).toUpperCase() + context.type.slice(1)}`,
+      );
+    }
+  }, [context?.type, posthog]);
+
   if (window.self === window.top || !context?.origin) {
     return <></>;
   }
@@ -57,8 +65,6 @@ export function Home() {
 
   switch (context.type) {
     case "connect": {
-      posthog?.capture("Call Connect");
-
       // if no policies, we can connect immediately
       if (
         !policies ||
@@ -99,13 +105,9 @@ export function Home() {
     }
 
     case "logout": {
-      posthog?.capture("Call Logout");
-
       return <Logout />;
     }
     case "sign-message": {
-      posthog?.capture("Call Sign Message");
-
       const ctx = context as SignMessageCtx;
       return (
         <SignMessage
@@ -123,8 +125,6 @@ export function Home() {
     }
 
     case "execute": {
-      posthog?.capture("Call Execute");
-
       const ctx = context as ExecuteCtx;
       if (!hasSessionForPolicies) {
         return (
@@ -162,8 +162,6 @@ export function Home() {
     }
 
     case "deploy": {
-      posthog?.capture("Call Deploy");
-
       const ctx = context as DeployCtx;
       return (
         <DeployController
@@ -177,13 +175,9 @@ export function Home() {
       );
     }
     case "open-settings": {
-      posthog?.capture("Call Open Settings");
-
       return <Settings />;
     }
     case "open-purchase-credits": {
-      posthog?.capture("Call Purchase Credits");
-
       return <PurchaseCredits />;
     }
     default:

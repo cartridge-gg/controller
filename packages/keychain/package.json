@@ -45,11 +45,13 @@
     "react-router-dom": "catalog:",
     "sonner": "catalog:",
     "viem": "catalog:",
-    "wagmi": "^1.4.12"
+    "wagmi": "^1.4.12",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",
     "@cartridge/tsconfig": "workspace:*",
+    "@types/lodash": "^4.14.202",
     "@chromatic-com/storybook": "^1.9.0",
     "@storybook/addon-essentials": "catalog:",
     "@storybook/addon-interactions": "catalog:",
