@@ -1,10 +1,5 @@
 import { connectToParent } from "@cartridge/penpal";
-import {
-  useState,
-  ReactNode,
-  useEffect,
-  useCallback,
-} from "react";
+import { useState, ReactNode, useEffect, useCallback } from "react";
 import {
   ETH_CONTRACT_ADDRESS,
   normalize,
@@ -12,7 +7,11 @@ import {
 } from "@cartridge/utils";
 import { constants, getChecksumAddress, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ConnectionContext, initialState, ParentMethods } from "@/context/connection";
+import {
+  ConnectionContext,
+  initialState,
+  ParentMethods,
+} from "@/context/connection";
 
 import { ConnectionContextType } from "@/context/connection";
 export function ConnectionProvider({ children }: { children: ReactNode }) {
@@ -52,13 +51,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           STRK_CONTRACT_ADDRESS,
           ...(erc20Param
             ? decodeURIComponent(erc20Param)
-              .split(",")
-              .filter(
-                (address) =>
-                  ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
-                    getChecksumAddress(address),
-                  ),
-              )
+                .split(",")
+                .filter(
+                  (address) =>
+                    ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
+                      getChecksumAddress(address),
+                    ),
+                )
             : []),
         ];
       }
