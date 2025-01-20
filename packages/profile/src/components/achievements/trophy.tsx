@@ -442,7 +442,7 @@ Do you have what it takes to carve your name into history?
     )}&url=${encodeURIComponent(url)}`;
 
     window.open(twitterUrl, "_blank", "noopener,noreferrer");
-  }, [url, xhandle, title, earning, date]);
+  }, [url, xhandle, title, earning, date, percentage]);
 
   if (!url || !xhandle) return null;
 
