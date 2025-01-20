@@ -60,6 +60,8 @@
     "@storybook/react-vite": "catalog:",
     "@storybook/test": "catalog:",
     "@storybook/test-runner": "catalog:",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^13.4.0",
     "@types/jest-image-snapshot": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

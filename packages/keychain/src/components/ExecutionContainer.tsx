@@ -170,7 +170,7 @@ export function ExecutionContainer({
                     variant="info"
                     title="Session Already Registered"
                   />
-                  <Button onClick={() => onSubmit()} isLoading={false}>
+                  <Button onClick={() => onSubmit()} isLoading={false} data-testid="continue-button">
                     CONTINUE
                   </Button>
                 </>

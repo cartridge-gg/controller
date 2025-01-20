@@ -1,5 +1,23 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { Header, HeaderProps } from "./header";
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    setMatches(media.matches);
+
+    const listener = (e: MediaQueryListEvent) => {
+      setMatches(e.matches);
+    };
+
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, [query]);
+
+  return matches;
+}
 
 export function Container({
   children,
@@ -35,19 +53,21 @@ export function Container({
 }
 
 function ResponsiveWrapper({ children }: PropsWithChildren) {
-  return (
-    <>
-      {/* for desktop */}
-      <div className="hidden md:flex w-screen h-screen items-center justify-center">
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  if (isDesktop) {
+    return (
+      <div className="flex w-screen h-screen items-center justify-center">
         <div className="w-desktop border border-muted rounded-xl flex flex-col relative overflow-hidden align-middle">
           {children}
         </div>
       </div>
+    );
+  }
 
-      {/* device smaller than desktop width */}
-      <div className="md:hidden w-screen h-screen max-w-desktop relative flex flex-col bg-background">
-        {children}
-      </div>
-    </>
+  return (
+    <div className="w-screen h-screen max-w-desktop relative flex flex-col bg-background">
+      {children}
+    </div>
   );
 }
