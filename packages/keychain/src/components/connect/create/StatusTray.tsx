@@ -44,14 +44,14 @@ export function StatusTray({ username, validation, error }: StatusTrayProps) {
         {isError
           ? errorMessage
           : !username
-          ? "Enter a username"
-          : validation.status === "validating"
-          ? "Checking username..."
-          : validation.status === "valid"
-          ? validation.exists
-            ? "Welcome back! Select Login to play"
-            : "Welcome! Let's create a new controller!"
-          : validation.error?.message || "Enter a username"}
+            ? "Enter a username"
+            : validation.status === "validating"
+              ? "Checking username..."
+              : validation.status === "valid"
+                ? validation.exists
+                  ? "Welcome back! Select Login to play"
+                  : "Welcome! Let's create a new controller!"
+                : validation.error?.message || "Enter a username"}
       </div>
       {isTimeoutError && (
         <div className="w-full flex items-center justify-between text-xs font-semibold px-4 py-2 text-secondary">

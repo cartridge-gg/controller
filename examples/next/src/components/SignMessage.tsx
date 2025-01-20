@@ -110,8 +110,8 @@ export function SignMessage() {
             {isValid === null
               ? "not validated"
               : isValid
-              ? "is valid"
-              : "is invalid"}
+                ? "is valid"
+                : "is invalid"}
           </p>
           <pre>
             <code>{JSON.stringify(signature, null, 2)}</code>

@@ -18,6 +18,7 @@ export default defineConfig({
   root: "./",
   build: {
     outDir: "dist",
+    target: "esnext",
     // Ref: https://github.com/vitejs/vite/issues/15012#issuecomment-1948550039
     rollupOptions: {
       onwarn(warning, defaultHandler) {

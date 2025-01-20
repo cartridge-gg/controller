@@ -96,9 +96,8 @@ export function execute({
 
         // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
         try {
-          const { transaction_hash } = await account.executeFromOutsideV3(
-            calls,
-          );
+          const { transaction_hash } =
+            await account.executeFromOutsideV3(calls);
 
           return resolve({
             code: ResponseCodes.SUCCESS,

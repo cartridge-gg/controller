@@ -28,7 +28,7 @@ export const DelegateAccount = () => {
       const delegate = await controller.delegateAccount();
       setDelegateAddress(delegate?.toString() || "");
       setIsDelegateSupported(true);
-    } catch (e: any) {
+    } catch (e) {
       console.log(e);
       // controller doesnt support delegateAccount, ignore
     }
@@ -81,7 +81,7 @@ export const DelegateAccount = () => {
           type="text"
           min-width="420px"
           value={delegateAddressInput}
-          onChange={(e: any) => setDelegateAddressInput(e.target.value)}
+          onChange={(e) => setDelegateAddressInput(e.target.value)}
         />
         <Button onClick={() => execute()} disabled={submitted}>
           Set Delegate

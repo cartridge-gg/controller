@@ -1,12 +1,15 @@
 "use client";
 
-import { useTheme } from "next-themes";
+import { useMemo } from "react";
 import { Toaster as Sonner } from "sonner";
 
 type SonnerToasterProps = React.ComponentProps<typeof Sonner>;
 
 const SonnerToaster = ({ ...props }: SonnerToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const theme = useMemo(
+    () => localStorage.getItem("vite-ui-colorScheme") ?? "system",
+    [],
+  );
 
   return (
     <Sonner

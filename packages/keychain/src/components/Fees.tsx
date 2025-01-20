@@ -22,8 +22,8 @@ export function Fees({
       maxFee === 0n
         ? "FREE"
         : maxFee > 10000000000000n
-        ? `~${parseFloat(formatUnits(maxFee, 18)).toFixed(5)}`
-        : "<0.00001",
+          ? `~${parseFloat(formatUnits(maxFee, 18)).toFixed(5)}`
+          : "<0.00001",
     );
   }, [chainId, maxFee]);
 
