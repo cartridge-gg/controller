@@ -172,6 +172,7 @@ export default class SessionProvider extends BaseProvider {
   }
 
   disconnect(): Promise<void> {
+    console.log("disconnect")
     localStorage.removeItem("sessionSigner");
     localStorage.removeItem("session");
     localStorage.removeItem("sessionPolicies");
