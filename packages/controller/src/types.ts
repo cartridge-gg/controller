@@ -62,6 +62,7 @@ export type ExecuteReply =
 export type ProbeReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
+  rpcUrl: string;
 };
 
 export type DeployReply = {
@@ -94,7 +95,7 @@ type CartridgeID = string;
 export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
-  probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
+  probe(): Promise<ProbeReply | ConnectError>;
   connect(
     policies: SessionPolicies,
     rpcUrl: string,
@@ -129,6 +130,7 @@ export interface Keychain {
   fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
+  switchChain(rpcUrl: string): Promise<void>;
 }
 
 export interface Profile {

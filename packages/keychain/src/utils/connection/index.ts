@@ -13,6 +13,7 @@ import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
 import { normalize } from "@cartridge/utils";
 import { ParsedSessionPolicies } from "@/hooks/session";
+import { switchChain } from "./switchChain";
 
 export function connectToController<ParentMethods extends object>({
   setOrigin,
@@ -41,7 +42,7 @@ export function connectToController<ParentMethods extends object>({
       execute: () => execute({ setContext }),
       estimateDeclareFee: () => estimateDeclareFee,
       estimateInvokeFee: () => estimateInvokeFee,
-      probe: normalize(probe({ setController, setRpcUrl })),
+      probe: normalize(probe({ setController })),
       signMessage: () => signMessageFactory(setContext),
       openSettings: () => openSettingsFactory(setContext),
       reset: () => () => setContext(undefined),
@@ -66,6 +67,7 @@ export function connectToController<ParentMethods extends object>({
           reject: () => Promise.reject(),
         });
       },
+      switchChain: () => switchChain({ setRpcUrl }),
     },
   });
 }
