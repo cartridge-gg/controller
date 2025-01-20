@@ -18,7 +18,7 @@ import {
   ConnectionContextValue,
 } from "@/components/provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
-import { usePostHog } from "@/context/posthog";
+import { usePostHog } from "@/hooks/posthog";
 import { Policies } from "@cartridge/presets";
 import {
   defaultTheme,
