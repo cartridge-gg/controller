@@ -1,15 +1,9 @@
 "use client";
 
 import * as React from "react";
-import {
-  CheckCircledIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@radix-ui/react-icons";
 import * as SelectPrimitive from "@radix-ui/react-select";
-
+import { CaratIcon, CircleCheckIcon, WedgeIcon } from "@/components/icons";
 import { cn } from "@/utils";
-import { CaratIcon } from "../icons";
 
 const Select = SelectPrimitive.Root;
 
@@ -49,7 +43,7 @@ const SelectScrollUpButton = React.forwardRef<
     )}
     {...props}
   >
-    <ChevronUpIcon />
+    <WedgeIcon variant="up" />
   </SelectPrimitive.ScrollUpButton>
 ));
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
@@ -66,7 +60,7 @@ const SelectScrollDownButton = React.forwardRef<
     )}
     {...props}
   >
-    <ChevronDownIcon />
+    <WedgeIcon variant="down" />
   </SelectPrimitive.ScrollDownButton>
 ));
 SelectScrollDownButton.displayName =
@@ -130,7 +124,7 @@ const SelectItem = React.forwardRef<
   >
     <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <CheckCircledIcon />
+        <CircleCheckIcon size="sm" />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

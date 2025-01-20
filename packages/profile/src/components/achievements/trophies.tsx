@@ -1,9 +1,4 @@
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  StateIconProps,
-  cn,
-} from "@cartridge/ui-next";
+import { WedgeIcon, cn } from "@cartridge/ui-next";
 import { Trophy } from "./trophy";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -217,13 +212,20 @@ function Header({
       </div>
       {pages.length > 1 && (
         <>
+          {/* <Icon
+        className={cn(
+          "text-quaternary-foreground h-4 w-4",
+          disabled && "opacity-50",
+        )}
+        variant="solid"
+      /> */}
           <Pagination
-            Icon={ChevronLeftIcon}
+            icon={<WedgeIcon variant="left" size="xs" />}
             onClick={handlePrevious}
             disabled={page === pages[0]}
           />
           <Pagination
-            Icon={ChevronRightIcon}
+            icon={<WedgeIcon variant="right" size="xs" />}
             onClick={handleNext}
             disabled={page === pages[pages.length - 1]}
           />
@@ -251,11 +253,11 @@ function Header({
 }
 
 function Pagination({
-  Icon,
+  icon,
   onClick,
   disabled,
 }: {
-  Icon: React.ComponentType<StateIconProps>;
+  icon: React.ReactNode;
   onClick: () => void;
   disabled: boolean;
 }) {
@@ -267,13 +269,7 @@ function Pagination({
       )}
       onClick={onClick}
     >
-      <Icon
-        className={cn(
-          "text-quaternary-foreground h-4 w-4",
-          disabled && "opacity-50",
-        )}
-        variant="solid"
-      />
+      <div className="text-quaternary-foreground">{icon}</div>
     </div>
   );
 }
