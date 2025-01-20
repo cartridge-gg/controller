@@ -1,6 +1,5 @@
 import { connectToParent } from "@cartridge/penpal";
 import {
-  createContext,
   useState,
   ReactNode,
   useEffect,
@@ -8,51 +7,14 @@ import {
 } from "react";
 import {
   ETH_CONTRACT_ADDRESS,
-  isIframe,
   normalize,
   STRK_CONTRACT_ADDRESS,
 } from "@cartridge/utils";
-import { Call, constants, getChecksumAddress, RpcProvider } from "starknet";
+import { constants, getChecksumAddress, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { ConnectionContext, initialState, ParentMethods } from "@/context/connection";
 
-type ConnectionContextType = {
-  origin: string;
-  parent: ParentMethods;
-  provider: RpcProvider;
-  chainId: string;
-  erc20: string[];
-  project?: string;
-  namespace?: string;
-  version?: string;
-  isVisible: boolean;
-  setIsVisible: (isVisible: boolean) => void;
-};
-
-type ParentMethods = {
-  close: () => void;
-  openSettings: () => void;
-  openPurchaseCredits: () => void;
-  openExecute: (calls: Call[], chain?: string) => Promise<boolean>;
-};
-
-const initialState: ConnectionContextType = {
-  origin: location.origin,
-  parent: {
-    close: () => {},
-    openSettings: () => {},
-    openPurchaseCredits: () => {},
-    openExecute: async () => false,
-  },
-  provider: new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_SEPOLIA }),
-  chainId: "",
-  erc20: [],
-  isVisible: !isIframe(),
-  setIsVisible: () => {},
-};
-
-export const ConnectionContext =
-  createContext<ConnectionContextType>(initialState);
-
+import { ConnectionContextType } from "@/context/connection";
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
 
@@ -90,13 +52,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           STRK_CONTRACT_ADDRESS,
           ...(erc20Param
             ? decodeURIComponent(erc20Param)
-                .split(",")
-                .filter(
-                  (address) =>
-                    ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
-                      getChecksumAddress(address),
-                    ),
-                )
+              .split(",")
+              .filter(
+                (address) =>
+                  ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
+                    getChecksumAddress(address),
+                  ),
+              )
             : []),
         ];
       }
