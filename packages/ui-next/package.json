@@ -62,7 +62,6 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^1.2.1",
     "cmdk": "^1.0.0",
-    "lucide-react": "^0.364.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "sonner": "catalog:",

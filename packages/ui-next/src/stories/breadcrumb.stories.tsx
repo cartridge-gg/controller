@@ -6,8 +6,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/primitives/breadcrumb";
+import { SlashIcon } from "@/components/icons";
 import { Meta, StoryObj } from "@storybook/react";
-import { Slash } from "lucide-react";
 
 const meta: Meta<typeof Breadcrumb> = {
   title: "Breadcrumb",
@@ -49,13 +49,13 @@ export function CustomSeparator() {
           <BreadcrumbLink href="/">Home</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator>
-          <Slash size={14} />
+          <SlashIcon />
         </BreadcrumbSeparator>
         <BreadcrumbItem>
           <BreadcrumbLink href="/components">Components</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator>
-          <Slash size={14} />
+          <SlashIcon className="p-0" />
         </BreadcrumbSeparator>
         <BreadcrumbItem>
           <BreadcrumbPage>Breadcrumb</BreadcrumbPage>

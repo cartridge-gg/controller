@@ -39,6 +39,7 @@ export * from "./scan-qr";
 export * from "./scan-self";
 export * from "./search";
 export * from "./sign-out";
+export * from "./slash";
 export * from "./spider-web";
 export * from "./spinner-pixel";
 export * from "./spinner";
