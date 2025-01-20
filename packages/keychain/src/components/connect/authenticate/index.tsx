@@ -3,8 +3,8 @@ import { Button } from "@cartridge/ui-next";
 import { Unsupported } from "./Unsupported";
 import { doSignup } from "@/hooks/account";
 import { Container, Content, Footer } from "@/components/layout";
-import { FaceIDDuoImage } from "./FaceID";
 import { useIsSupported } from "./useIsSupported";
+import { FaceIDImage } from "./FaceID";
 
 export type AuthAction = "signup" | "login";
 
@@ -69,10 +69,8 @@ export function Authenticate({
       title={title}
       description={description}
     >
-      <Content>
-        <div className="flex justify-center">
-          <FaceIDDuoImage />
-        </div>
+      <Content className="items-center pb-10">
+        <FaceIDImage />
       </Content>
 
       <Footer>

@@ -197,7 +197,7 @@ export function DeployController({
       return (
         <Container
           variant="expanded"
-          icon={<CheckIcon size="lg" />}
+          Icon={CheckIcon}
           title="Success!"
           description={`Your controller has been deployed on ${chainName}`}
         >

@@ -3,7 +3,7 @@ import {
   TrackIcon,
   CalendarIcon,
   SparklesIcon,
-  CheckboxCheckedDuoIcon,
+  CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   Separator,
   SpinnerIcon,
@@ -119,7 +119,7 @@ export function Trophy({
 function Task({ task, completed }: { task: Task; completed: boolean }) {
   const TaskIcon = useMemo(() => {
     if (task.count >= task.total) {
-      return CheckboxCheckedDuoIcon;
+      return CheckboxCheckedIcon;
     }
     return CheckboxUncheckedIcon;
   }, [task.count, task.total]);
@@ -127,11 +127,7 @@ function Task({ task, completed }: { task: Task; completed: boolean }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-x-2">
-        <TaskIcon
-          className="text-quaternary-foreground"
-          size="xs"
-          variant={"default"}
-        />
+        <TaskIcon className="text-quaternary-foreground" size="xs" />
         <p
           className={cn(
             "text-xs text-quaternary-foreground",

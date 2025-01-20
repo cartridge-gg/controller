@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useUrlTxns } from "@/hooks/transaction";
 import { Transaction, TransactionState } from "@/components/Transaction";
-import { TimerDuoIcon } from "@cartridge/ui-next";
+import { ClockIcon } from "@cartridge/ui-next";
 import { Container, Content } from "@/components/layout";
 
 export function Pending() {
@@ -28,7 +28,11 @@ export function Pending() {
   }, [txnResults, txns]);
 
   return (
-    <Container Icon={TimerDuoIcon} title={title} description={description}>
+    <Container
+      icon={<ClockIcon variant="solid" size="lg" />}
+      title={title}
+      description={description}
+    >
       <Content>
         {chainId &&
           [...txns, { name: "name", hash: "hash" }].map((txn, idx) => (

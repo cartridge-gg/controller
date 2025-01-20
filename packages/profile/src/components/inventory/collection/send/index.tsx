@@ -9,7 +9,7 @@ import { useConnection } from "@/hooks/context";
 import {
   ArrowIcon,
   Button,
-  CheckboxCheckedDuoIcon,
+  CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
   CopyAddress,
@@ -172,7 +172,7 @@ const Warning = ({
       onClick={() => setValidated(!validated)}
     >
       {validated && (
-        <CheckboxCheckedDuoIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
+        <CheckboxCheckedIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
       )}
       {!validated && (
         <CheckboxUncheckedIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />

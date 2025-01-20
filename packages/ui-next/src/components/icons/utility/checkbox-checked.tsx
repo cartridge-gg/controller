@@ -1,13 +1,13 @@
 import { forwardRef, memo } from "react";
-import { duotoneIconVariants } from "../utils";
-import { DuotoneIconProps } from "../types";
+import { iconVariants } from "../utils";
+import { IconProps } from "../types";
 
-export const CheckboxCheckedDuoIcon = memo(
-  forwardRef<SVGSVGElement, DuotoneIconProps>(
-    ({ className, variant, size, ...props }, forwardedRef) => (
+export const CheckboxCheckedIcon = memo(
+  forwardRef<SVGSVGElement, IconProps>(
+    ({ className, size, ...props }, forwardedRef) => (
       <svg
         viewBox="0 0 24 24"
-        className={duotoneIconVariants({ variant, size, className })}
+        className={iconVariants({ size, className })}
         ref={forwardedRef}
         {...props}
       >
@@ -24,4 +24,4 @@ export const CheckboxCheckedDuoIcon = memo(
   ),
 );
 
-CheckboxCheckedDuoIcon.displayName = "CheckboxCheckedDuoIcon";
+CheckboxCheckedIcon.displayName = "CheckboxCheckedIcon";

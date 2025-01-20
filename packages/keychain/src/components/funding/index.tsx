@@ -54,7 +54,7 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
     <Container
       title={title || (controller ? `Fund ${controller.username()}` : "")}
       description={controller && <CopyAddress address={controller.address} />}
-      icon={<ArrowIcon variant="down" />}
+      icon={<ArrowIcon variant="down" size="lg" />}
       hideNetwork
     >
       <Content className="gap-6">

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Banner } from "./Banner";
-import { EthereumIcon, TransferDuoIcon } from "@cartridge/ui-next";
+import { EthereumIcon, TransferIcon } from "@cartridge/ui-next";
 
 const meta: Meta<typeof Banner> = {
   component: Banner,
@@ -32,13 +32,13 @@ export const Compressed: Story = {};
 
 export const IconComponentProp: Story = {
   args: {
-    Icon: TransferDuoIcon,
+    Icon: TransferIcon,
   },
 };
 
 export const IconElementProp: Story = {
   args: {
-    icon: <EthereumIcon />,
+    icon: <EthereumIcon size="lg" />,
   },
 };
 

@@ -1,5 +1,5 @@
 import { Container } from "@/components/layout";
-import { SparklesDuoIcon } from "@cartridge/ui-next";
+import { CheckIcon } from "@cartridge/ui-next";
 import { useSearchParams } from "react-router-dom";
 
 export function Success() {
@@ -11,7 +11,7 @@ export function Success() {
     <Container
       variant="expanded"
       hideAccount
-      Icon={SparklesDuoIcon}
+      Icon={CheckIcon}
       title={title ? (title as string) : "Success!"}
       description={description ? (description as string) : ""}
     />
