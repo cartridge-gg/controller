@@ -7,13 +7,14 @@
     "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"]
-    },
+    }
   },
   "include": [
     "src/components/**/*",
     "src/hooks/**/*",
+    "src/stories/**/*",
     "src/index.ts",
     "src/preset.ts",
-    "src/utils.ts",
+    "src/utils.ts"
   ]
 }

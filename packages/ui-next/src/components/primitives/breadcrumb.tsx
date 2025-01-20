@@ -1,8 +1,8 @@
 import * as React from "react";
-import { ChevronRightIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Slot } from "@radix-ui/react-slot";
 
 import { cn } from "@/utils";
+import { DotsIcon, WedgeIcon } from "../icons";
 
 const Breadcrumb = React.forwardRef<
   HTMLElement,
@@ -19,7 +19,7 @@ const BreadcrumbList = React.forwardRef<
   <ol
     ref={ref}
     className={cn(
-      "flex flex-wrap items-center gap-2 break-words text-sm text-muted-foreground sm:gap-2.5",
+      "flex flex-wrap items-center gap-0 break-words text-sm text-muted-foreground",
       className,
     )}
     {...props}
@@ -80,10 +80,10 @@ const BreadcrumbSeparator = ({
   <li
     role="presentation"
     aria-hidden="true"
-    className={cn("[&>svg]:size-3.5", className)}
+    className={cn("[&>svg]:size-6", className)}
     {...props}
   >
-    {children ?? <ChevronRightIcon />}
+    {children ?? <WedgeIcon variant="right" />}
   </li>
 );
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator";
@@ -98,7 +98,7 @@ const BreadcrumbEllipsis = ({
     className={cn("flex h-9 w-9 items-center justify-center", className)}
     {...props}
   >
-    <DotsHorizontalIcon className="h-4 w-4" />
+    <DotsIcon size="sm" />
     <span className="sr-only">More</span>
   </span>
 );

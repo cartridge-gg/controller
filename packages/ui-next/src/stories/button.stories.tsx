@@ -1,4 +1,3 @@
-import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { Button } from "@/components/primitives/button";
 import { EthereumIcon } from "@/components/icons";

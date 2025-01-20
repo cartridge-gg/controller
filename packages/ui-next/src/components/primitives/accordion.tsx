@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { cn } from "@/utils";
-import { ChevronRightIcon } from "@radix-ui/react-icons";
+import { WedgeIcon } from "../icons";
 
 const Accordion = AccordionPrimitive.Root;
 
@@ -29,7 +29,10 @@ const AccordionTrigger = React.forwardRef<
     >
       <div className={cn("flex items-center", className)}>{children}</div>
       {!hideIcon && (
-        <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+        <WedgeIcon
+          variant="right"
+          className="transition-transform duration-200"
+        />
       )}
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>

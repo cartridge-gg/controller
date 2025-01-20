@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Accordion as UIAccordion,
   AccordionContent,
@@ -26,7 +25,7 @@ function Accordion() {
   return (
     <UIAccordion type="single" collapsible>
       <AccordionItem value="item-1">
-        <AccordionTrigger>
+        <AccordionTrigger className="gap-1">
           Approve{" "}
           <span className="text-accent-foreground font-bold">2 methods</span>
         </AccordionTrigger>
