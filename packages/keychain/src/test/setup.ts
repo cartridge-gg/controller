@@ -1,6 +1,6 @@
-import '@testing-library/jest-dom';
-import { afterEach } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import "@testing-library/jest-dom";
+import { afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
 
 // Add any global test setup here
 

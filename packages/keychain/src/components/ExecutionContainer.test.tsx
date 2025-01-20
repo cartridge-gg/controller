@@ -1,10 +1,9 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ExecutionContainer } from "./ExecutionContainer";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { describe, expect, beforeEach, it, vi } from "vitest";
 
 const mockEstimateFee = vi.fn().mockImplementation(async () => ({
-  suggestedMaxFee: BigInt(1000)
+  suggestedMaxFee: BigInt(1000),
 }));
 
 vi.mock("@/hooks/connection", () => ({
@@ -103,7 +102,7 @@ describe("ExecutionContainer", () => {
   it("handles submit error correctly", async () => {
     const onError = vi.fn();
     const onSubmit = vi.fn().mockRejectedValue({
-      code: ErrorCode.InsufficientBalance,
+      code: 113, // ErrorCode.InsufficientBalance,
       message: "Insufficient balance",
     });
 
@@ -140,7 +139,7 @@ describe("ExecutionContainer", () => {
       <ExecutionContainer
         {...defaultProps}
         executionError={{
-          code: ErrorCode.CartridgeControllerNotDeployed,
+          code: 112, // ErrorCode.CartridgeControllerNotDeployed,
           message: "Controller not deployed",
         }}
       />,
@@ -154,7 +153,7 @@ describe("ExecutionContainer", () => {
       <ExecutionContainer
         {...defaultProps}
         executionError={{
-          code: ErrorCode.InsufficientBalance,
+          code: 113, // ErrorCode.InsufficientBalance,
           message: "Insufficient balance",
         }}
       />,
@@ -168,7 +167,7 @@ describe("ExecutionContainer", () => {
       <ExecutionContainer
         {...defaultProps}
         executionError={{
-          code: ErrorCode.SessionAlreadyRegistered,
+          code: 132, // ErrorCode.SessionAlreadyRegistered,
           message: "Session already registered",
         }}
       />,
