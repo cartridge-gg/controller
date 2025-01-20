@@ -5,13 +5,13 @@
 ### Storybook
 
 ```sh
-pnpm ui:next storybook
+pnpm ui storybook
 ```
 
 ### Generate shadcn component
 
 ```sh
-cd packages/ui-next
+cd packages/ui
 pnpm dlx shadcn-ui@latest add <component-name>
 pnpm format
 ```
