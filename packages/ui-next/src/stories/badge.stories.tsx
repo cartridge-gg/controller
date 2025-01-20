@@ -35,6 +35,6 @@ export const Tab: Story = {
   args: {
     children: "100",
     className: "rounded-full",
-    vairant: "primary",
+    variant: "primary",
   },
 };
