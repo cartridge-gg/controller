@@ -70,4 +70,8 @@ export default defineConfig(({ mode }) => ({
   define: {
     global: "globalThis",
   },
+  test: {
+    environment: "jsdom",
+    globals: true,
+  },
 }));

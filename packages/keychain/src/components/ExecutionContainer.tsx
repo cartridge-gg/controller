@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@cartridge/ui-next";
 import { Container, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
@@ -49,7 +49,6 @@ export function ExecutionContainer({
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
   );
-  const isEstimated = useRef(false);
 
   const estimateFees = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,6 +61,7 @@ export function ExecutionContainer({
           transactions,
           transactionsDetail,
         );
+        setCtrlError(undefined);
         setMaxFee(est.suggestedMaxFee);
       } catch (e) {
         const error = parseControllerError(e as unknown as ControllerError);
@@ -73,21 +73,16 @@ export function ExecutionContainer({
   );
 
   useEffect(() => {
-    if (!!ctrlError || maxFee !== null || !transactions?.length) {
+    if (!transactions?.length) {
       return;
     }
 
     const estimateFeesAsync = async () => {
-      if (isEstimated.current) {
-        return;
-      }
-
-      isEstimated.current = true;
       await estimateFees(transactions, transactionsDetail);
     };
 
     estimateFeesAsync();
-  }, [ctrlError, maxFee, transactions, transactionsDetail, estimateFees]);
+  }, [transactions, transactionsDetail, estimateFees]);
 
   useEffect(() => {
     setCtrlError(executionError);
@@ -175,7 +170,11 @@ export function ExecutionContainer({
                     variant="info"
                     title="Session Already Registered"
                   />
-                  <Button onClick={() => onSubmit()} isLoading={false}>
+                  <Button
+                    onClick={() => onSubmit()}
+                    isLoading={false}
+                    data-testid="continue-button"
+                  >
                     CONTINUE
                   </Button>
                 </>
@@ -189,7 +188,9 @@ export function ExecutionContainer({
                     onClick={handleSubmit}
                     isLoading={isLoading}
                     disabled={
-                      !transactions || (maxFee === null && transactions?.length)
+                      ctrlError ||
+                      !transactions ||
+                      (maxFee === null && transactions?.length)
                     }
                   >
                     {buttonText}

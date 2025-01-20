@@ -63,6 +63,7 @@ jobs:
         with:
           run_install: false
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build
       - run: pnpm test:ci --coverage
       - uses: codecov/codecov-action@v3
         with:
