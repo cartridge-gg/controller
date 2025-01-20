@@ -61,14 +61,9 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^1.2.1",
     "cmdk": "^1.0.0",
-    "react": "catalog:",
-    "react-dom": "catalog:",
-    "sonner": "catalog:",
-    "starknet": "catalog:",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "^0.9.0",
-    "viem": "catalog:"
+    "vaul": "^0.9.0"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
@@ -100,5 +95,12 @@
     "tsc-alias": "^1.8.10",
     "typescript": "catalog:",
     "vite": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sonner": "catalog:",
+    "starknet": "catalog:",
+    "viem": "catalog:"
   }
 }
