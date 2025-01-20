@@ -36,7 +36,6 @@
   },
   "dependencies": {
     "@cartridge/utils": "workspace:*",
-    "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-aspect-ratio": "^1.0.3",
@@ -66,14 +65,12 @@
     "lucide-react": "^0.364.0",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-hook-form": "^7.53.2",
     "sonner": "catalog:",
     "starknet": "catalog:",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.0",
-    "viem": "catalog:",
-    "zod": "^3.23.8"
+    "viem": "catalog:"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
