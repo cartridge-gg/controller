@@ -1,5 +1,4 @@
 import {
-  createContext,
   ReactNode,
   useCallback,
   useContext,
@@ -19,24 +18,9 @@ import {
   RegistryOptions,
 } from "@bal7hazar/arcade-sdk";
 import { constants } from "starknet";
+import { ArcadeContext } from "@/context/arcade";
 
 const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
-
-/**
- * Interface defining the shape of the Arcade context.
- */
-interface ArcadeContextType {
-  /** The Arcade client instance */
-  chainId: string;
-  provider: ExternalProvider;
-  pins: { [playerId: string]: string[] };
-  games: { [gameId: string]: GameModel };
-}
-
-/**
- * React context for sharing Arcade-related data throughout the application.
- */
-export const ArcadeContext = createContext<ArcadeContextType | null>(null);
 
 /**
  * Provider component that makes Arcade context available to child components.
