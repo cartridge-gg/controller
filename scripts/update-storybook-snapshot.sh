@@ -18,5 +18,5 @@ docker run \
   -v /app/node_modules \
   --ipc=host \
   -ti \
-  ghcr.io/cartridge-gg/controller/storybook-env:sha-91a2d36 \
+  ghcr.io/cartridge-gg/controller/storybook-env:sha-6d7b370 \
   bash -c "pnpm i && pnpm --filter $PACKAGE test-storybook -u --url http://host.docker.internal:$PORT"
