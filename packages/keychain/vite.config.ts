@@ -30,8 +30,12 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": "/src",
-      "fetch-cookie": "/src/shims/fetch-cookie.ts",
-      pako: "/src/shims/pako.ts",
+      ...(mode === "production"
+        ? {
+            "fetch-cookie": "/src/shims/fetch-cookie.ts",
+            pako: "/src/shims/pako.ts",
+          }
+        : {}),
     },
   },
   root: "./",
