@@ -20,7 +20,7 @@ import {
 } from "@bal7hazar/arcade-sdk";
 import { constants } from "starknet";
 
-const CHAIN_ID = constants.StarknetChainId.SN_SEPOLIA;
+const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
 
 /**
  * Interface defining the shape of the Arcade context.
