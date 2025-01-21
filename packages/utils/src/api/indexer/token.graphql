@@ -1,5 +1,5 @@
-query ERC721Balances($address: String!) {
-  tokenBalances(accountAddress: $address) {
+query ERC721Balances($address: String!, $limit: Int!, $offset: Int!) {
+  tokenBalances(accountAddress: $address, limit: $limit, offset: $offset) {
     edges {
       node {
         tokenMetadata {

@@ -18,9 +18,9 @@ export function Sending({ assets }: { assets: Asset[] }) {
       {assets.map((asset) => (
         <Item
           key={asset.tokenId}
-          name={asset.name}
+          name={asset.name || ""}
           tokenId={asset.tokenId}
-          imageUrl={asset.imageUrl}
+          imageUrl={asset.imageUrl || undefined}
         />
       ))}
     </Card>
@@ -30,11 +30,11 @@ export function Sending({ assets }: { assets: Asset[] }) {
 function Item({
   name,
   tokenId,
-  imageUrl,
+  imageUrl = "/public/placeholder.svg",
 }: {
   name: string;
   tokenId: string;
-  imageUrl: string;
+  imageUrl?: string;
 }) {
   return (
     <CardContent
