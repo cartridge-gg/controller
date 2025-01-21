@@ -75,13 +75,13 @@ export function Collectible() {
             if (!collection || !asset) {
               return <LayoutContentLoader />;
             }
-            const assets = asset.attributes.filter(
+            const assets = (asset.attributes || []).filter(
               (a) => !!(a.trait_type || a.trait) && !!a.value,
             );
             return (
               <>
                 <LayoutHeader
-                  title={`${asset.name} #${parseInt(asset.tokenId, 16)}`}
+                  title={`${asset.name || ""} #${parseInt(asset.tokenId, 16)}`}
                   description={
                     <CopyText
                       value={collection.name}
@@ -133,13 +133,13 @@ export const Image = ({ imageUrl }: { imageUrl: string | undefined }) => {
         className="w-[60%] aspect-square rounded-lg bg-cover bg-center flex py-4 place-content-center overflow-hidden p-4"
         style={{
           backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${
-            imageUrl ?? "/public/placeholder.svg"
+            imageUrl || "/public/placeholder.svg"
           })`,
         }}
       >
         <img
           className="object-contain"
-          src={imageUrl ?? "/public/placeholder.svg"}
+          src={imageUrl || "/public/placeholder.svg"}
         />
       </div>
     </div>

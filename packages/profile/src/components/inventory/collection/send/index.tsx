@@ -125,7 +125,12 @@ export function SendCollection() {
       <LayoutHeader
         title={`Send (${tokenIds.length}) ${collection.name}`}
         description={<CopyAddress address={address} size="sm" />}
-        icon={<CollectionImage imageUrl={collection.imageUrl} size="xs" />}
+        icon={
+          <CollectionImage
+            imageUrl={collection.imageUrl || undefined}
+            size="xs"
+          />
+        }
       />
       <LayoutContent className="gap-6">
         <Recipient to={to} setTo={setTo} setWarning={setRecipientWarning} />

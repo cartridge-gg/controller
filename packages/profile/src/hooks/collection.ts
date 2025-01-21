@@ -86,9 +86,9 @@ export function useCollection({
         tokenId: token.tokenId,
         name: token.metadataName,
         description: token.metadataDescription,
-        imageUrl: `${indexerUrl.replace("/graphql", "")}/static/${
-          token?.imagePath
-        }`,
+        imageUrl: token.imagePath
+          ? `${indexerUrl.replace("/graphql", "")}/static/${token.imagePath}`
+          : "",
         attributes,
       };
     });
@@ -148,9 +148,9 @@ export function useCollections() {
                 address: token.contractAddress,
                 name: token.name,
                 totalCount: 1,
-                imageUrl: `${indexerUrl.replace("/graphql", "")}/static/${
-                  token.imagePath
-                }`,
+                imageUrl: token.imagePath
+                  ? `${indexerUrl.replace("/graphql", "")}/static/${token.imagePath}`
+                  : "",
                 type: "ERC-721",
               };
 

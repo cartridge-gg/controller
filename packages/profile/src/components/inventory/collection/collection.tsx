@@ -94,7 +94,10 @@ export function Collection() {
                     <CopyAddress address={collection.address!} size="sm" />
                   }
                   icon={
-                    <CollectionImage imageUrl={collection.imageUrl} size="xs" />
+                    <CollectionImage
+                      imageUrl={collection.imageUrl || undefined}
+                      size="xs"
+                    />
                   }
                 />
 
