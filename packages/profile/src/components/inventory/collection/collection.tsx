@@ -28,12 +28,12 @@ import { useCollection } from "@/hooks/collection";
 import { Collectibles } from "./collectibles";
 
 export function Collection() {
-  const { tokenId } = useParams();
+  const { address: contractAddress, tokenId } = useParams();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const tokenIds = searchParams.getAll("tokenIds");
 
-  const { collection, assets, status } = useCollection({});
+  const { collection, assets, status } = useCollection({ contractAddress });
 
   const selection = useMemo(() => {
     return tokenIds.length > 0;

@@ -4,7 +4,9 @@ import {
   Erc721__Token,
   useErc721BalancesQuery,
 } from "@cartridge/utils/api/indexer";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+
+const LIMIT = 1000;
 
 export type Collection = {
   address: string;
@@ -22,30 +24,58 @@ export type Asset = {
   attributes: Record<string, unknown>[];
 };
 
-export function useCollection({ tokenIds = [] }: { tokenIds?: string[] }) {
+export function useCollection({
+  contractAddress,
+  tokenIds = [],
+}: {
+  contractAddress?: string;
+  tokenIds?: string[];
+}) {
   const { address } = useAccount();
   const { isReady, indexerUrl } = useIndexerAPI();
-  const { status, data } = useErc721BalancesQuery(
-    { address },
-    { enabled: isReady && !!address },
+  const [offset, setOffset] = useState(0);
+  const [tokens, setTokens] = useState<{ [key: string]: Erc721__Token }>({});
+
+  const { status } = useErc721BalancesQuery(
+    { address, limit: LIMIT, offset: offset },
+    {
+      queryKey: ["tokenBalances", offset],
+      enabled: isReady && !!address,
+      onSuccess: ({ tokenBalances }) => {
+        const newTokens: { [key: string]: Erc721__Token } = {};
+        tokenBalances?.edges
+          .filter(
+            (e) =>
+              !contractAddress ||
+              (e.node.tokenMetadata as Erc721__Token).contractAddress ===
+                contractAddress,
+          )
+          .filter(
+            (e) =>
+              !tokenIds.length ||
+              tokenIds.includes(
+                (e.node.tokenMetadata as Erc721__Token).tokenId,
+              ),
+          )
+          .forEach((e) => {
+            const token = e.node.tokenMetadata as Erc721__Token;
+            newTokens[`${token.contractAddress}-${token.tokenId}`] = token;
+          });
+        if (tokenBalances?.edges.length === LIMIT) {
+          setOffset(offset + LIMIT);
+        }
+        setTokens((prev) => ({ ...prev, ...newTokens }));
+      },
+    },
   );
 
   const { collection, assets } = useMemo<{
     collection?: Collection;
     assets?: Asset[];
   }>(() => {
-    const tokens = data?.tokenBalances?.edges
-      .filter((e) =>
-        !tokenIds.length
-          ? true
-          : tokenIds.includes((e.node.tokenMetadata as Erc721__Token).tokenId),
-      )
-      .map((e) => e.node.tokenMetadata as Erc721__Token);
-    if (!indexerUrl || !tokens) {
-      return {};
-    }
+    if (!indexerUrl || !Object.values(tokens).length) return {};
 
-    const assets = tokens.map((token) => {
+    const assets = Object.values(tokens).map((token) => {
       let attributes;
       try {
         attributes = JSON.parse(token.metadataAttributes);
@@ -64,8 +94,8 @@ export function useCollection({ tokenIds = [] }: { tokenIds?: string[] }) {
     });
 
     const collection = {
-      address: tokens[0].contractAddress,
-      name: tokens[0].name,
+      address: Object.values(tokens)[0].contractAddress,
+      name: Object.values(tokens)[0].name,
       type: "ERC-721",
       imageUrl: assets[0].imageUrl,
       totalCount: assets.length,
@@ -75,7 +105,7 @@ export function useCollection({ tokenIds = [] }: { tokenIds?: string[] }) {
       collection,
       assets,
     };
-  }, [data, indexerUrl]);
+  }, [tokens, indexerUrl]);
 
   return { collection, assets, status };
 }
@@ -83,18 +113,34 @@ export function useCollection({ tokenIds = [] }: { tokenIds?: string[] }) {
 export function useCollections() {
   const { address } = useAccount();
   const { isReady, indexerUrl } = useIndexerAPI();
-  const { status, data } = useErc721BalancesQuery(
-    { address },
-    { enabled: isReady && !!address },
+
+  const [offset, setOffset] = useState(0);
+  const [tokens, setTokens] = useState<{ [key: string]: Erc721__Token }>({});
+  const { status } = useErc721BalancesQuery(
+    { address, limit: LIMIT, offset: offset },
+    {
+      queryKey: ["tokenBalances", offset],
+      enabled: isReady && !!address,
+      onSuccess: ({ tokenBalances }) => {
+        const newTokens: { [key: string]: Erc721__Token } = {};
+        tokenBalances?.edges.forEach((e) => {
+          const token = e.node.tokenMetadata as Erc721__Token;
+          newTokens[`${token.contractAddress}-${token.tokenId}`] = token;
+        });
+        if (tokenBalances?.edges.length === LIMIT) {
+          setOffset(offset + LIMIT);
+        }
+        setTokens((prev) => ({ ...prev, ...newTokens }));
+      },
+    },
   );
 
   const collections = useMemo(() => {
-    if (!data || !indexerUrl) return [];
+    if (!indexerUrl || !Object.values(tokens).length) return [];
 
     const collections =
-      data.tokenBalances?.edges.reduce<Record<string, Collection>>(
-        (prev, edge) => {
-          const token = edge.node.tokenMetadata as Erc721__Token;
+      Object.values(tokens).reduce<Record<string, Collection>>(
+        (prev, token) => {
           const agg = prev[token.contractAddress];
           const collection = agg
             ? { ...agg, totalCount: agg.totalCount + 1 }
@@ -117,7 +163,7 @@ export function useCollections() {
       ) ?? [];
 
     return Object.values(collections);
-  }, [data, indexerUrl]);
+  }, [tokens, indexerUrl]);
 
   return { collections, status };
 }
