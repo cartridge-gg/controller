@@ -736,6 +736,9 @@ importers:
       globals:
         specifier: 'catalog:'
         version: 15.14.0
+      http-server:
+        specifier: 'catalog:'
+        version: 14.1.1
       postcss:
         specifier: 'catalog:'
         version: 8.5.1
@@ -745,6 +748,9 @@ importers:
       prettier:
         specifier: 'catalog:'
         version: 3.4.2
+      start-server-and-test:
+        specifier: 'catalog:'
+        version: 2.0.10
       storybook:
         specifier: 'catalog:'
         version: 8.5.0(prettier@3.4.2)
