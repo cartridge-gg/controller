@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Project, useProgressionsQuery } from "@cartridge/utils/api/cartridge";
 import { Progress, RawProgress, getSelectorFromTag } from "@/models";
 
@@ -17,20 +17,26 @@ export function useProgressions({
   project: string;
   parser: (node: RawProgress) => Progress;
 }) {
+  const [rawProgressions, setRawProgressions] = useState<{
+    [key: string]: Progress;
+  }>({});
   const [progressions, setProgressions] = useState<{ [key: string]: Progress }>(
     {},
   );
 
   // Fetch achievement creations from raw events
-  const projects: Project[] = [
-    { model: getSelectorFromTag(namespace, name), namespace, project },
-  ];
+  const projects: Project[] = useMemo(
+    () => [{ model: getSelectorFromTag(namespace, name), namespace, project }],
+    [namespace, name, project],
+  );
+
   const { refetch: fetchProgressions, isFetching } = useProgressionsQuery(
     {
       projects,
     },
     {
       enabled: !!namespace && !!project,
+      queryKey: ["progressions", namespace, name, project],
       refetchInterval: 600_000, // Refetch every 10 minutes
       onSuccess: ({ playerAchievements }: { playerAchievements: Response }) => {
         const progressions = playerAchievements.items[0].achievements
@@ -39,7 +45,7 @@ export function useProgressions({
             acc[achievement.key] = achievement;
             return acc;
           }, {});
-        setProgressions((previous) => ({ ...previous, ...progressions }));
+        setRawProgressions(progressions);
       },
     },
   );
@@ -54,5 +60,10 @@ export function useProgressions({
     }
   }, [namespace, project, fetchProgressions]);
 
-  return { progressions: Object.values(progressions), isFetching };
+  useEffect(() => {
+    if (isFetching) return;
+    setProgressions(rawProgressions);
+  }, [rawProgressions, isFetching]);
+
+  return { progressions };
 }

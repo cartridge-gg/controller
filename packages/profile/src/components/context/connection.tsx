@@ -73,12 +73,12 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       }
 
       const psParam = searchParams.get("ps");
-      if (psParam && !state.project) {
+      if (psParam) {
         state.project = decodeURIComponent(psParam);
       }
 
       const nsParam = searchParams.get("ns");
-      if (nsParam && !state.namespace) {
+      if (nsParam) {
         state.namespace = decodeURIComponent(nsParam);
       }
 
