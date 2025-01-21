@@ -42,10 +42,10 @@ const config: TestRunnerConfig = {
       customSnapshotsDir,
       customSnapshotIdentifier: `${context.id}-${browserName}`,
       // Increased threshold to handle font rendering differences
-      failureThreshold: 0.1,
+      failureThreshold: 0.01,
       failureThresholdType: "percent",
       // Add blur to reduce impact of anti-aliasing differences
-      blur: 3,
+      blur: 1,
       customDiffConfig: {
         threshold: 0.4,
       },
