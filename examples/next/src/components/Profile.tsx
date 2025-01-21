@@ -54,24 +54,40 @@ export function Profile() {
         </div>
         <div className="flex gap-1">
           <Button
-            onClick={() => ctrlConnector.controller.openProfileTo(`inventory/token/${ETH_CONTRACT_ADDRESS}?preset=cartridge`)}
+            onClick={() =>
+              ctrlConnector.controller.openProfileTo(
+                `inventory/token/${ETH_CONTRACT_ADDRESS}?preset=cartridge`,
+              )
+            }
           >
             Open to Token ETH
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfileTo(`inventory/token/${ETH_CONTRACT_ADDRESS}/send?preset=cartridge`)}
+            onClick={() =>
+              ctrlConnector.controller.openProfileTo(
+                `inventory/token/${ETH_CONTRACT_ADDRESS}/send?preset=cartridge`,
+              )
+            }
           >
             Open to Token ETH Send
           </Button>
         </div>
         <div className="flex gap-1">
           <Button
-            onClick={() => ctrlConnector.controller.openProfileAt(`account/${username}/slot/ryomainnet/achievements?ps=ryomainnet&ns=dopewars&preset=dope-wars`)}
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                `account/${username}/slot/ryomainnet/achievements?ps=ryomainnet&ns=dopewars&preset=dope-wars`,
+              )
+            }
           >
             Open at Dopewars Achievements
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfileAt(`account/${username}/slot/darkshuffle-mainnet-3/achievements?ps=darkshuffle-mainnet-3&ns=darkshuffle_s0&preset=dark-shuffle`)}
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                `account/${username}/slot/darkshuffle-mainnet-3/achievements?ps=darkshuffle-mainnet-3&ns=darkshuffle_s0&preset=dark-shuffle`,
+              )
+            }
           >
             Open at Dark Shuffle Achievements
           </Button>
