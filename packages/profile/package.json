@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@bal7hazar/arcade-sdk": "^0.0.72",
+    "@bal7hazar/arcade-sdk": "^0.0.73",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui-next": "workspace:*",
