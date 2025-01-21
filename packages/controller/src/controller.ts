@@ -262,16 +262,6 @@ export default class ControllerProvider extends BaseProvider {
     return this.keychain.username();
   }
 
-  fetchControllers(
-    contractAddresses: string[],
-  ): Promise<Record<string, string>> {
-    if (!this.keychain) {
-      throw new NotReadyToConnect().message;
-    }
-
-    return this.keychain.fetchControllers(contractAddresses);
-  }
-
   openPurchaseCredits() {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);

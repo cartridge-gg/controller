@@ -7,7 +7,6 @@ import { execute } from "./execute";
 import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
 import { probe } from "./probe";
 import { signMessageFactory } from "./sign";
-import { fetchControllers } from "./fetchControllers";
 import { ConnectionCtx } from "./types";
 import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
@@ -45,7 +44,6 @@ export function connectToController<ParentMethods extends object>({
       signMessage: () => signMessageFactory(setContext),
       openSettings: () => openSettingsFactory(setContext),
       reset: () => () => setContext(undefined),
-      fetchControllers,
       disconnect: () => () => {
         window.controller?.disconnect().then(() => {
           setController(undefined);
