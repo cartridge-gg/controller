@@ -36,6 +36,8 @@ export default defineConfig(({ mode }) => ({
   publicDir: "public",
   build: {
     rollupOptions: {
+      // These are large deps imported by starknet.js but not used in keychain
+      external: ["fetch-cookie", "pako"],
       output: {
         manualChunks(id) {
           // Chunk splitting logic
