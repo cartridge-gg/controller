@@ -17,6 +17,7 @@ export function useTrophies({
   project: string;
   parser: (node: RawTrophy) => Trophy;
 }) {
+  const [rawTrophies, setRawTrophies] = useState<{ [key: string]: Trophy }>({});
   const [trophies, setTrophies] = useState<{ [key: string]: Trophy }>({});
 
   // Fetch achievement creations from raw events
@@ -29,6 +30,7 @@ export function useTrophies({
     },
     {
       enabled: !!namespace && !!project,
+      queryKey: ["achievements", namespace, name, project],
       refetchInterval: 600_000, // Refetch every 10 minutes
       onSuccess: ({ achievements }: { achievements: Response }) => {
         const trophies = achievements.items[0].achievements
@@ -37,7 +39,7 @@ export function useTrophies({
             acc[achievement.key] = achievement;
             return acc;
           }, {});
-        setTrophies((previous) => ({ ...trophies, ...previous }));
+        setRawTrophies({ ...trophies });
       },
     },
   );
@@ -52,5 +54,23 @@ export function useTrophies({
     }
   }, [namespace, project, fetchAchievements]);
 
-  return { trophies: Object.values(trophies), isFetching };
+  useEffect(() => {
+    if (isFetching) return;
+    // Merge trophies
+    const trophies: { [id: string]: Trophy } = {};
+    Object.values(rawTrophies).forEach((trophy) => {
+      if (Object.keys(trophies).includes(trophy.id)) {
+        trophy.tasks.forEach((task) => {
+          if (!trophies[trophy.id].tasks.find((t) => t.id === task.id)) {
+            trophies[trophy.id].tasks.push(task);
+          }
+        });
+      } else {
+        trophies[trophy.id] = trophy;
+      }
+    });
+    setTrophies(trophies);
+  }, [rawTrophies, isFetching, setTrophies]);
+
+  return { trophies };
 }
