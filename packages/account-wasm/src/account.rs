@@ -153,7 +153,11 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = createSession)]
-    pub async fn create_session(&self, policies: Vec<Policy>, expires_at: u64) -> Result<()> {
+    pub async fn create_session(
+        &self,
+        policies: Vec<Policy>,
+        expires_at: u64,
+    ) -> std::result::Result<(), JsControllerError> {
         set_panic_hook();
 
         let methods = policies

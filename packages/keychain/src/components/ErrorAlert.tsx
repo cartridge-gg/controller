@@ -148,10 +148,11 @@ export function ControllerErrorAlert({
     case ErrorCode.SignError:
       title = "Signing Error";
       if (error.message.includes("Get assertion error")) {
+        title = "Authentication Error";
         description =
           "The authentication request timed out or was cancelled. Please try again.";
+        isExpanded = true;
       }
-
       break;
     case ErrorCode.StorageError:
       title = "Storage Error";
@@ -189,7 +190,30 @@ export function ControllerErrorAlert({
       title = "Cairo String Conversion Error";
       break;
     case ErrorCode.DeviceCreateCredential:
+      title = "Device Registration Error";
+      description = "Failed to register your device. Please try again.";
+      isExpanded = true;
+      break;
     case ErrorCode.DeviceGetAssertion:
+      title = "Authentication Error";
+      description = "The authentication request timed out or was cancelled. Please try again.";
+      isExpanded = true;
+      break;
+    case ErrorCode.DeviceBadAssertion:
+      title = "Authentication Error";
+      description = "Invalid authentication response. Please try again.";
+      isExpanded = true;
+      break;
+    case ErrorCode.DeviceChannel:
+      title = "Communication Error";
+      description = "Failed to communicate with your device. Please try again.";
+      isExpanded = true;
+      break;
+    case ErrorCode.DeviceOrigin:
+      title = "Security Error";
+      description = "Invalid security origin. Please ensure you're using a secure connection.";
+      isExpanded = true;
+      break;
     case ErrorCode.PaymasterExecutionTimeNotReached:
       title = "Paymaster Execution Time Not Reached";
       break;
@@ -213,11 +237,6 @@ export function ControllerErrorAlert({
       break;
     case ErrorCode.PaymasterSerialization:
       title = "Paymaster Serialization Error";
-      break;
-    case ErrorCode.DeviceBadAssertion:
-    case ErrorCode.DeviceChannel:
-    case ErrorCode.DeviceOrigin:
-      title = "Device Error";
       break;
     case ErrorCode.AccountSigning:
     case ErrorCode.AccountProvider:
