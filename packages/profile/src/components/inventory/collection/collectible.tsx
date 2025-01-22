@@ -1,13 +1,16 @@
-import { Link, Outlet, useLocation, useParams } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutContentError,
   LayoutContentLoader,
   LayoutHeader,
-} from "@/components/layout";
-import {
-  ArrowIcon,
   Button,
   Card,
   CardContent,
@@ -32,8 +35,9 @@ import { Asset, Collection, useCollection } from "@/hooks/collection";
 import { compare } from "compare-versions";
 
 export function Collectible() {
-  const { chainId, version } = useConnection();
+  const { chainId, openSettings, version } = useConnection();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const compatibility = useMemo(() => {
     if (!version) return false;
@@ -54,15 +58,7 @@ export function Collectible() {
   }
 
   return (
-    <LayoutContainer
-      left={
-        <Link to="..">
-          <Button variant="icon" size="icon">
-            <ArrowIcon variant="left" />
-          </Button>
-        </Link>
-      }
-    >
+    <LayoutContainer>
       {(() => {
         switch (status) {
           case "loading": {
@@ -88,7 +84,17 @@ export function Collectible() {
                       copyValue={addAddressPadding(collection.address)}
                     />
                   }
-                  icon={asset.imageUrl ?? "/public/placeholder.svg"}
+                  icon={
+                    <img
+                      className="w-10 h-10"
+                      src={asset.imageUrl ?? "/public/placeholder.svg"}
+                    />
+                  }
+                  onBack={() => {
+                    navigate("..");
+                  }}
+                  chainId={chainId}
+                  openSettings={openSettings}
                 />
 
                 <LayoutContent>
