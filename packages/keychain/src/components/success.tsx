@@ -1,14 +1,18 @@
-import { Container } from "@/components/layout";
-import { CheckIcon } from "@cartridge/ui-next";
+import { useConnection } from "@/hooks/connection";
+import { LayoutContainer, CheckIcon, LayoutHeader } from "@cartridge/ui-next";
 
 export function Success() {
+  const { chainId, closeModal } = useConnection();
   return (
-    <Container
-      variant="expanded"
-      hideAccount
-      Icon={CheckIcon}
-      title="Success!"
-      description=""
-    />
+    <LayoutContainer>
+      <LayoutHeader
+        variant="expanded"
+        Icon={CheckIcon}
+        title="Success!"
+        description=""
+        chainId={chainId}
+        onClose={closeModal}
+      />
+    </LayoutContainer>
   );
 }

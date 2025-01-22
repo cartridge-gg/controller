@@ -1,12 +1,19 @@
-import { AlertIcon, Button, Input } from "@cartridge/ui-next";
-import { Container, Content, Footer } from "@/components/layout";
+import {
+  LayoutContainer,
+  LayoutContent,
+  LayoutFooter,
+  AlertIcon,
+  Button,
+  Input,
+  LayoutHeader,
+} from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
 
 export function Recovery({ onBack }: { onBack: () => void }) {
-  const { controller, context, setContext } = useConnection();
+  const { chainId, controller, context, setContext } = useConnection();
   const [externalOwnerAddress, setExternalOwnerAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -37,8 +44,14 @@ export function Recovery({ onBack }: { onBack: () => void }) {
   }, [controller, externalOwnerAddress, context, setContext]);
 
   return (
-    <Container variant="expanded" title="Recovery Account(s)" onBack={onBack}>
-      <Content>
+    <LayoutContainer>
+      <LayoutHeader
+        variant="expanded"
+        title="Recovery Account(s)"
+        onBack={onBack}
+        chainId={chainId}
+      />
+      <LayoutContent>
         {/* TODO: Get rid of this div once Content is updated with TW */}
         <div className="flex flex-col gap-4">
           <div className="text-sm text-muted-foreground text-center">
@@ -58,13 +71,13 @@ export function Recovery({ onBack }: { onBack: () => void }) {
             )}
           </div>
         </div>
-      </Content>
+      </LayoutContent>
 
-      <Footer>
+      <LayoutFooter>
         <Button onClick={onSetRecovery} disabled={!isValid}>
           Add Recovery Account
         </Button>
-      </Footer>
-    </Container>
+      </LayoutFooter>
+    </LayoutContainer>
   );
 }

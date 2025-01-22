@@ -1,6 +1,5 @@
-import { BoltIcon, CircleIcon } from "@cartridge/ui-next";
+import { LayoutContent, BoltIcon, CircleIcon } from "@cartridge/ui-next";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { Content } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
 
 export const Upgrade = () => {
@@ -16,7 +15,7 @@ export const Upgrade = () => {
       onSubmit={upgrade.onUpgrade}
       executionError={upgrade.error}
     >
-      <Content>
+      <LayoutContent>
         <div className="text-sm text-muted-foreground pb-2">
           Install the latest to continue
         </div>
@@ -33,7 +32,7 @@ export const Upgrade = () => {
             ))}
           </div>
         </div>
-      </Content>
+      </LayoutContent>
     </ExecutionContainer>
   );
 };

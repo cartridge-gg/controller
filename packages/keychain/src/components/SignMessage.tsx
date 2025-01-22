@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { shortString, Signature, TypedData } from "starknet";
-import { Container, Footer, Content } from "@/components/layout";
 import {
+  LayoutContainer,
+  LayoutFooter,
+  LayoutContent,
   Button,
   Card,
   CardHeader,
   CardTitle,
   CardListContent,
   CardListItem,
+  LayoutHeader,
 } from "@cartridge/ui-next";
-import { useController } from "@/hooks/controller";
+import { useConnection } from "@/hooks/connection";
 
 export function SignMessage({
   origin,
@@ -22,7 +25,7 @@ export function SignMessage({
   onSign: (sig: Signature) => void;
   onCancel: () => void;
 }) {
-  const { controller } = useController();
+  const { closeModal, chainId, openSettings, controller } = useConnection();
   const [messageData, setMessageData] = useState<TypedData>();
 
   useEffect(() => {
@@ -65,12 +68,16 @@ export function SignMessage({
   }, [controller, onSign, typedData]);
 
   return (
-    <Container
-      title="Signature Request"
-      description={`${hostname} is asking you to sign a message`}
-    >
-      {messageData && (
-        <Content>
+    <LayoutContainer>
+      <LayoutHeader
+        title="Signature Request"
+        description={`${hostname} is asking you to sign a message`}
+        chainId={chainId}
+        onClose={closeModal}
+        openSettings={openSettings}
+      />
+      <LayoutContent>
+        {messageData && (
           <div className="flex flex-col w-full gap-4 text-sm">
             {messageData.types[messageData.primaryType].map((typ) => (
               <Card key={typ.name}>
@@ -105,16 +112,16 @@ export function SignMessage({
               </Card>
             ))}
           </div>
-        </Content>
-      )}
+        )}
+      </LayoutContent>
 
-      <Footer>
+      <LayoutFooter>
         <Button onClick={onConfirm}>sign</Button>
 
         <Button variant="secondary" onClick={onCancel}>
           reject
         </Button>
-      </Footer>
-    </Container>
+      </LayoutFooter>
+    </LayoutContainer>
   );
 }
