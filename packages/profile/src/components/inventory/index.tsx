@@ -2,12 +2,13 @@ export { Collectible, Collection, SendCollection } from "./collection";
 export { Token } from "./token";
 export { SendToken } from "./token/send";
 
-import { CopyAddress, ScrollArea } from "@cartridge/ui-next";
 import {
+  CopyAddress,
+  ScrollArea,
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-} from "@/components/layout";
+} from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
 import { Tokens } from "./token";
 import { useAccount } from "@/hooks/account";
