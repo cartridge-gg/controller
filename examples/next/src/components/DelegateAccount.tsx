@@ -63,7 +63,8 @@ export const DelegateAccount = () => {
   return (
     <div className="flex flex-col gap-2">
       <h2>Delegate account</h2>
-      <p>
+
+      <div className="flex items-center gap-2">
         Address:{" "}
         {isDelegateSupported ? (
           <>
@@ -73,9 +74,9 @@ export const DelegateAccount = () => {
         ) : (
           "Not deployed"
         )}
-      </p>
+      </div>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <Input
           className="max-w-40"
           type="text"
