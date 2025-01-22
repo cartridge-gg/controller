@@ -29,10 +29,11 @@ export function Profile() {
   }
 
   return (
-    <div>
+    <div className="">
       <h2>Open Profile</h2>
+
       <div className="flex flex-col gap-1">
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           <Button onClick={() => ctrlConnector.controller.openProfile()}>
             Inventory
           </Button>
@@ -52,7 +53,7 @@ export function Profile() {
             Activity
           </Button>
         </div>
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileTo(
@@ -72,7 +73,7 @@ export function Profile() {
             Open to Token ETH Send
           </Button>
         </div>
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileAt(

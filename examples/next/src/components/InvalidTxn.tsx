@@ -26,7 +26,8 @@ export function InvalidTxn() {
   return (
     <div>
       <h2>Invalid Entry Point</h2>
-      <div>
+
+      <div className="flex flex-wrap gap-1">
         <Button
           onClick={() =>
             account.execute([

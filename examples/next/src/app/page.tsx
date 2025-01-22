@@ -14,7 +14,7 @@ import { Transfer } from "components/Transfer";
 
 const Home: FC = () => {
   return (
-    <main className="flex flex-col p-4 gap-4">
+    <main className="w-screen overflow-x-hidden flex flex-col p-4 gap-4">
       <div className="flex justify-between">
         <h2 className="text-3xl font-bold underline text-primary">
           Controller Example (Next.js)
