@@ -22,7 +22,7 @@ export function Inventory() {
     project?: string;
     address?: string;
   }>();
-  const { chainId, openSettings, closeModal } = useConnection();
+  const { closeModal, chainId, openSettings } = useConnection();
 
   if (tokenContractAddress) {
     return <Outlet />;
@@ -34,9 +34,9 @@ export function Inventory() {
         title={username}
         description={<CopyAddress address={address} size="sm" />}
         right={project ? <Navigation /> : undefined}
+        onClose={closeModal}
         chainId={chainId}
         openSettings={openSettings}
-        onClose={closeModal}
       />
 
       <LayoutContent className="pb-4">

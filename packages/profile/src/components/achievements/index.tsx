@@ -1,10 +1,11 @@
+import { useNavigate } from "react-router-dom";
 import {
+  ScrollArea,
+  Spinner,
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-} from "@/components/layout";
-import { Link } from "react-router-dom";
-import { ScrollArea, Button, ArrowIcon, Spinner } from "@cartridge/ui-next";
+} from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount, useUsername } from "@/hooks/account";
 import { CopyAddress } from "@cartridge/ui-next";
@@ -25,12 +26,13 @@ export function Achievements() {
     trophies: { achievements, players, isLoading },
     setAccountAddress,
   } = useData();
+  const navigate = useNavigate();
 
   const { pins, games } = useArcade();
 
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
-  const { project, namespace } = useConnection();
+  const { project, namespace, chainId, openSettings } = useConnection();
 
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
@@ -71,17 +73,7 @@ export function Achievements() {
   }, [address, self, setAccountAddress]);
 
   return (
-    <LayoutContainer
-      left={
-        !isSelf ? (
-          <Link to=".">
-            <Button variant="icon" size="icon">
-              <ArrowIcon variant="left" />
-            </Button>
-          </Link>
-        ) : undefined
-      }
-    >
+    <LayoutContainer>
       <LayoutHeader
         title={
           isSelf
@@ -98,6 +90,11 @@ export function Achievements() {
             <Scoreboard rank={rank} earnings={earnings} />
           )
         }
+        chainId={chainId}
+        openSettings={openSettings}
+        onBack={() => {
+          navigate(".");
+        }}
       />
 
       {achievements.length ? (
