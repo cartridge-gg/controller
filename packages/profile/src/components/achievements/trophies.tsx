@@ -214,7 +214,7 @@ function Header({
         <>
           {/* <Icon
         className={cn(
-          "text-quaternary-foreground h-4 w-4",
+          "text-background-200 h-4 w-4",
           disabled && "opacity-50",
         )}
         variant="solid"
