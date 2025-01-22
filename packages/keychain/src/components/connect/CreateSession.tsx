@@ -145,7 +145,7 @@ export function CreateSession({
           </div>
         )}
 
-        {error && <ControllerErrorAlert error={error} />}
+        {error && <ControllerErrorAlert className="mb-3" error={error} />}
 
         <div className="flex items-center gap-4">
           <Button

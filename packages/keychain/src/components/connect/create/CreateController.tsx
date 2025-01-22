@@ -25,6 +25,7 @@ interface CreateControllerViewProps {
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
   onSubmit: () => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
 }
 
@@ -39,6 +40,7 @@ export function CreateControllerView({
   onUsernameFocus,
   onUsernameClear,
   onSubmit,
+  onKeyDown,
 }: CreateControllerViewProps) {
   return (
     <Container
@@ -53,8 +55,9 @@ export function CreateControllerView({
     >
       <form
         className="flex flex-col flex-1"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") e.preventDefault();
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
         }}
       >
         <Content className="gap-0">
@@ -72,6 +75,7 @@ export function CreateControllerView({
               onChange={(e) => {
                 onUsernameChange(e.target.value.toLowerCase());
               }}
+              onKeyDown={onKeyDown}
               isLoading={validation.status === "validating"}
               disabled={isLoading}
               onClear={onUsernameClear}
@@ -112,9 +116,9 @@ export function CreateControllerView({
           <Legal />
 
           <Button
+            type="submit"
             isLoading={isLoading}
             disabled={validation.status !== "valid"}
-            onClick={onSubmit}
           >
             {validation.exists ? "login" : "sign up"}
           </Button>
@@ -152,14 +156,29 @@ export function CreateController({
   const hasLoggedFocus = useRef(false);
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
+  const pendingSubmitRef = useRef(false);
 
   const [usernameField, setUsernameField] = useState({
     value: "",
     error: undefined,
   });
 
-  const { debouncedValue: username } = useDebounce(usernameField.value, 100);
-  const validation = useUsernameValidation(username);
+  // Debounce validation quickly to reduce latency
+  const { debouncedValue: validationUsername } = useDebounce(
+    usernameField.value,
+    25,
+  );
+
+  const validation = useUsernameValidation(validationUsername);
+  // Debounce the validation result rather than the input value
+  const { debouncedValue: debouncedValidation } = useDebounce(validation, 200);
+
+  useEffect(() => {
+    if (pendingSubmitRef.current && debouncedValidation.status === "valid") {
+      pendingSubmitRef.current = false;
+      handleFormSubmit();
+    }
+  }, [debouncedValidation.status]);
 
   const { isLoading, error, setError, handleSubmit } = useCreateController({
     onCreated,
@@ -208,14 +227,29 @@ export function CreateController({
     if (!usernameField.value) {
       return;
     }
-    handleSubmit(usernameField.value, !!validation.exists);
+
+    if (validation.status === "validating") {
+      pendingSubmitRef.current = true;
+      return;
+    }
+
+    if (validation.status === "valid") {
+      handleSubmit(usernameField.value, !!validation.exists);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleFormSubmit();
+    }
   };
 
   return (
     <CreateControllerView
       theme={theme}
       usernameField={usernameField}
-      validation={validation}
+      validation={debouncedValidation}
       isLoading={isLoading}
       error={error}
       isInAppBrowser={isInApp}
@@ -223,6 +257,7 @@ export function CreateController({
       onUsernameFocus={handleUsernameFocus}
       onUsernameClear={handleUsernameClear}
       onSubmit={handleFormSubmit}
+      onKeyDown={handleKeyDown}
     />
   );
 }

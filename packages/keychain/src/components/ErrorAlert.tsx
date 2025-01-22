@@ -32,6 +32,7 @@ export function ErrorAlert({
   isExpanded = false,
   allowToggle = false,
   copyText,
+  className,
 }: {
   title: string;
   description?: string | ReactElement;
@@ -39,6 +40,7 @@ export function ErrorAlert({
   isExpanded?: boolean;
   allowToggle?: boolean;
   copyText?: string;
+  className?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -69,6 +71,7 @@ export function ErrorAlert({
       type="single"
       collapsible={collapsible}
       defaultValue={isExpanded ? "item-1" : undefined}
+      className={className}
     >
       <AccordionItem
         value="item-1"
@@ -119,9 +122,11 @@ export function ErrorAlert({
 export function ControllerErrorAlert({
   error,
   isPaymaster = false,
+  className,
 }: {
   error: ControllerError | Error;
   isPaymaster?: boolean;
+  className?: string;
 }) {
   let title = "An error occurred";
   let description: string | React.ReactElement = error.message;
@@ -140,6 +145,7 @@ export function ControllerErrorAlert({
         variant={variant}
         isExpanded={isExpanded}
         copyText={copyText}
+        className={className}
       />
     );
   }
@@ -196,7 +202,8 @@ export function ControllerErrorAlert({
       break;
     case ErrorCode.DeviceGetAssertion:
       title = "Authentication Error";
-      description = "The authentication request timed out or was cancelled. Please try again.";
+      description =
+        "The authentication request timed out or was cancelled. Please try again.";
       isExpanded = true;
       break;
     case ErrorCode.DeviceBadAssertion:
@@ -211,7 +218,8 @@ export function ControllerErrorAlert({
       break;
     case ErrorCode.DeviceOrigin:
       title = "Security Error";
-      description = "Invalid security origin. Please ensure you're using a secure connection.";
+      description =
+        "Invalid security origin. Please ensure you're using a secure connection.";
       isExpanded = true;
       break;
     case ErrorCode.PaymasterExecutionTimeNotReached:
@@ -324,6 +332,7 @@ export function ControllerErrorAlert({
       variant={variant}
       isExpanded={isExpanded}
       copyText={copyText}
+      className={className}
     />
   );
 }
