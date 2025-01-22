@@ -170,21 +170,35 @@ export function CreateController({
   );
 
   const validation = useUsernameValidation(validationUsername);
-  // Debounce the validation result rather than the input value
   const { debouncedValue: debouncedValidation } = useDebounce(validation, 200);
-
-  useEffect(() => {
-    if (pendingSubmitRef.current && debouncedValidation.status === "valid") {
-      pendingSubmitRef.current = false;
-      handleFormSubmit();
-    }
-  }, [debouncedValidation.status]);
 
   const { isLoading, error, setError, handleSubmit } = useCreateController({
     onCreated,
     isSlot,
     loginMode,
   });
+
+  const handleFormSubmit = () => {
+    if (!usernameField.value) {
+      return;
+    }
+
+    if (validation.status === "validating") {
+      pendingSubmitRef.current = true;
+      return;
+    }
+
+    if (validation.status === "valid") {
+      handleSubmit(usernameField.value, !!validation.exists);
+    }
+  };
+
+  useEffect(() => {
+    if (pendingSubmitRef.current && debouncedValidation.status === "valid") {
+      pendingSubmitRef.current = false;
+      handleFormSubmit();
+    }
+  }, [debouncedValidation.status, handleFormSubmit]);
 
   const [{ isInApp }] = useState(() => InAppSpy());
 
@@ -221,21 +235,6 @@ export function CreateController({
   const handleUsernameClear = () => {
     setError(undefined);
     setUsernameField((u) => ({ ...u, value: "" }));
-  };
-
-  const handleFormSubmit = () => {
-    if (!usernameField.value) {
-      return;
-    }
-
-    if (validation.status === "validating") {
-      pendingSubmitRef.current = true;
-      return;
-    }
-
-    if (validation.status === "valid") {
-      handleSubmit(usernameField.value, !!validation.exists);
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
