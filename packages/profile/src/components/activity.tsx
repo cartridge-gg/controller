@@ -7,15 +7,13 @@ import {
   CopyAddress,
   ExternalIcon,
   ScrollArea,
-} from "@cartridge/ui-next";
-import { useInfiniteTokenTransfersQuery } from "@cartridge/utils/api/indexer";
-import {
   LayoutContainer,
   LayoutContent,
   LayoutContentError,
   LayoutContentLoader,
   LayoutHeader,
-} from "@/components/layout";
+} from "@cartridge/ui-next";
+import { useInfiniteTokenTransfersQuery } from "@cartridge/utils/api/indexer";
 import { Navigation } from "@/components/navigation";
 import { useAccount } from "@/hooks/account";
 import { Link } from "react-router-dom";
