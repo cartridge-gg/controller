@@ -1,11 +1,14 @@
-import { Container, Content, Footer } from "@/components/layout";
 import { useCallback, useMemo, useState } from "react";
 import {
+  LayoutContainer,
+  LayoutContent,
+  LayoutFooter,
   CheckIcon,
   CoinsIcon,
   Button,
   CopyAddress,
   Separator,
+  LayoutHeader,
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { AmountSelection } from "./AmountSelection";
@@ -32,7 +35,7 @@ type PurchaseCreditsProps = {
 };
 
 export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
-  const { controller, closeModal } = useConnection();
+  const { closeModal, chainId, controller } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setisLoading] = useState<boolean>(false);
@@ -101,23 +104,25 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
   }
 
   return (
-    <Container
-      title={
-        "Purchase " +
-        (state === PurchaseState.SELECTION ? "Credits" : "Complete")
-      }
-      description={controller && <CopyAddress address={controller.address} />}
-      icon={
-        state === PurchaseState.SELECTION ? (
-          <CoinsIcon variant="solid" size="lg" />
-        ) : (
-          <CheckIcon size="lg" />
-        )
-      }
-      onBack={state === PurchaseState.SELECTION ? onBack : undefined}
-      hideNetwork
-    >
-      <Content className="gap-6">
+    <LayoutContainer>
+      <LayoutHeader
+        title={
+          "Purchase " +
+          (state === PurchaseState.SELECTION ? "Credits" : "Complete")
+        }
+        description={controller && <CopyAddress address={controller.address} />}
+        icon={
+          state === PurchaseState.SELECTION ? (
+            <CoinsIcon variant="solid" size="lg" />
+          ) : (
+            <CheckIcon size="lg" />
+          )
+        }
+        onBack={state === PurchaseState.SELECTION ? onBack : undefined}
+        chainId={chainId}
+        onClose={closeModal}
+      />
+      <LayoutContent className="gap-6">
         <Balance showBalances={["credits"]} />
         <ErrorAlert
           variant=""
@@ -129,9 +134,9 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           }
           isExpanded
         />
-      </Content>
+      </LayoutContent>
 
-      <Footer>
+      <LayoutFooter>
         {error && (
           <ErrorAlert
             variant="warning"
@@ -160,7 +165,7 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
             </Button>
           </>
         )}
-      </Footer>
-    </Container>
+      </LayoutFooter>
+    </LayoutContainer>
   );
 }

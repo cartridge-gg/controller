@@ -5,10 +5,17 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { StripePaymentElementOptions } from "@stripe/stripe-js";
-import { Container, Content, Footer } from "@/components/layout";
-import { useController } from "@/hooks/controller";
-import { CoinsIcon, CopyAddress, Button } from "@cartridge/ui-next";
+import {
+  LayoutContainer,
+  LayoutContent,
+  LayoutFooter,
+  CoinsIcon,
+  CopyAddress,
+  Button,
+  LayoutHeader,
+} from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { useConnection } from "@/hooks/connection";
 
 type StripeCheckoutProps = {
   creditsAmount: number;
@@ -23,7 +30,7 @@ export default function StripeCheckout({
 }: StripeCheckoutProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const { controller } = useController();
+  const { closeModal, chainId, controller } = useConnection();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -75,13 +82,16 @@ export default function StripeCheckout({
   };
 
   return (
-    <Container
-      title={"Purchase $" + creditsAmount}
-      description={controller && <CopyAddress address={controller.address} />}
-      icon={<CoinsIcon variant="solid" size="lg" />}
-      onBack={onBack}
-    >
-      <Content className="gap-6">
+    <LayoutContainer>
+      <LayoutHeader
+        title={"Purchase $" + creditsAmount}
+        description={controller && <CopyAddress address={controller.address} />}
+        icon={<CoinsIcon variant="solid" size="lg" />}
+        onBack={onBack}
+        chainId={chainId}
+        onClose={closeModal}
+      />
+      <LayoutContent className="gap-6">
         <form id="payment-form">
           <PaymentElement
             id="payment-element"
@@ -90,8 +100,8 @@ export default function StripeCheckout({
             onChange={() => setError(undefined)}
           />
         </form>
-      </Content>
-      <Footer>
+      </LayoutContent>
+      <LayoutFooter>
         {error && (
           <ErrorAlert
             variant="expanded"
@@ -107,7 +117,7 @@ export default function StripeCheckout({
         >
           Purchase
         </Button>
-      </Footer>
-    </Container>
+      </LayoutFooter>
+    </LayoutContainer>
   );
 }

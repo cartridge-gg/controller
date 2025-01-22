@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
   Button,
+  HeaderProps,
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
@@ -12,7 +13,6 @@ import { Fees } from "./Fees";
 import { Funding } from "./funding";
 import { DeployController } from "./DeployController";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { BannerProps } from "./layout/container/header/Banner";
 import { parseControllerError } from "@/utils/connection/execute";
 import isEqual from "lodash/isEqual";
 
@@ -44,7 +44,7 @@ export function ExecutionContainer({
   buttonText = "SUBMIT",
   children,
 }: ExecutionContainerProps &
-  Pick<BannerProps, "title" | "description" | "icon">) {
+  Pick<HeaderProps, "title" | "description" | "icon">) {
   const { controller, closeModal, chainId, openSettings } = useConnection();
   const [maxFee, setMaxFee] = useState<bigint | null>(null);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
