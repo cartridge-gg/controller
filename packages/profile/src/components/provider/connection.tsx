@@ -9,11 +9,11 @@ import { constants, getChecksumAddress, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ConnectionContext,
-  initialState,
+  ConnectionContextType,
   ParentMethods,
+  initialState,
 } from "@/context/connection";
 
-import { ConnectionContextType } from "@/context/connection";
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
 
@@ -51,13 +51,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           STRK_CONTRACT_ADDRESS,
           ...(erc20Param
             ? decodeURIComponent(erc20Param)
-                .split(",")
-                .filter(
-                  (address) =>
-                    ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
-                      getChecksumAddress(address),
-                    ),
-                )
+              .split(",")
+              .filter(
+                (address) =>
+                  ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
+                    getChecksumAddress(address),
+                  ),
+              )
             : []),
         ];
       }
@@ -90,6 +90,15 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     setState((state) => ({ ...state, isVisible }));
   }, []);
 
+  const closeModal = useCallback(() => {
+    setIsVisible(false);
+    state.parent.close();
+  }, [state.parent, setIsVisible]);
+
+  const openSettings = useCallback(() => {
+    state.parent.openSettings();
+  }, [state.parent]);
+
   useEffect(() => {
     const connection = connectToParent<ParentMethods>({
       methods: {
@@ -109,7 +118,9 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   }, [navigate, setIsVisible, searchParams]);
 
   return (
-    <ConnectionContext.Provider value={{ ...state, setIsVisible }}>
+    <ConnectionContext.Provider
+      value={{ ...state, setIsVisible, closeModal, openSettings }}
+    >
       {children}
     </ConnectionContext.Provider>
   );

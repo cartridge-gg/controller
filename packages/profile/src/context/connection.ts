@@ -13,6 +13,8 @@ export type ConnectionContextType = {
   version?: string;
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
+  closeModal: () => void;
+  openSettings: () => void;
 };
 
 export type ParentMethods = {
@@ -35,6 +37,8 @@ export const initialState: ConnectionContextType = {
   erc20: [],
   isVisible: !isIframe(),
   setIsVisible: () => {},
+  closeModal: () => {},
+  openSettings: () => {},
 };
 
 export const ConnectionContext =
