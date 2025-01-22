@@ -10,7 +10,7 @@ import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
 import InAppSpy from "inapp-spy";
-import { usePostHog } from "@/context/posthog";
+import { usePostHog } from "@/hooks/posthog";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;

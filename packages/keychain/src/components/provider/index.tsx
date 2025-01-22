@@ -4,12 +4,12 @@ import { useConnectionValue } from "@/hooks/connection";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { ENDPOINT } from "@/utils/graphql";
 import { ConnectionContext } from "./connection";
+import { PostHogProvider } from "./posthog";
 import { ControllerThemeProvider } from "./theme";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
 import { sepolia, mainnet } from "@starknet-react/chains";
 import { constants, num } from "starknet";
 import { BrowserRouter } from "react-router-dom";
-import { PostHogProvider } from "@/context/posthog";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();

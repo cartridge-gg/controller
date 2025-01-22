@@ -1,9 +1,7 @@
 import { useContext } from "react";
-import {
-  ThemeContext,
-  ConnectionContext,
-  DataContext,
-} from "@/components/context";
+import { ThemeContext } from "@/context/theme";
+import { ConnectionContext } from "@/context/connection";
+import { DataContext } from "@/context/data";
 
 export function useTheme() {
   return useContext(ThemeContext);

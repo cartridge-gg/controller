@@ -4,32 +4,16 @@ import {
   ControllerTheme,
 } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
-import { createContext, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useConnection } from "@/hooks/context";
+import { ColorScheme, ThemeContext, initialState } from "@/context/theme";
 
-type ColorScheme = "dark" | "light" | "system";
-
-type ThemeProviderProps = {
+export type ThemeProviderProps = {
   children: React.ReactNode;
   defaultScheme?: ColorScheme;
   storageKey?: string;
 };
-
-type ThemeProviderContextType = {
-  colorScheme: ColorScheme;
-  setColorScheme: (colorMode: ColorScheme) => void;
-  theme: ControllerTheme;
-};
-
-const initialState: ThemeProviderContextType = {
-  colorScheme: "system",
-  setColorScheme: () => null,
-  theme: defaultTheme,
-};
-
-export const ThemeContext =
-  createContext<ThemeProviderContextType>(initialState);
 
 export function ThemeProvider({
   children,
