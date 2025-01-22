@@ -1,7 +1,7 @@
 import { forwardRef, memo, PropsWithChildren, useRef } from "react";
 import { cn } from "@cartridge/ui-next";
 
-export function Footer({
+export function LayoutFooter({
   children,
   className,
   showCatridgeLogo,
