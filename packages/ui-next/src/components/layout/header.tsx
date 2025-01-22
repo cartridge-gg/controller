@@ -1,13 +1,12 @@
 import { Network } from "@/components/network";
-import { BackButton } from "./BackButton";
-import { CloseButton } from "./CloseButton";
-import { SettingsButton } from "./SettingsButton";
-import { IconProps } from "@/components/icons";
+import { ArrowIcon, GearIcon, IconProps, TimesIcon } from "@/components/icons";
 import { cn } from "@/utils";
+import { Button } from "@/components/primitives/button";
+import { isIframe } from "@cartridge/utils";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
-  onClose?: () => void;
+  closeModal?: () => void;
   chainId?: string;
   openSettings?: () => void;
 };
@@ -167,5 +166,37 @@ function Headline({
         </div>
       )}
     </div>
+  );
+}
+
+function CloseButton({ onClose }: { onClose?: () => void }) {
+  return (
+    <Button variant="icon" size="icon" onClick={onClose}>
+      <TimesIcon />
+    </Button>
+  );
+}
+
+function BackButton({ onClick }: { onClick?: () => void }) {
+  if (!isIframe()) {
+    return null;
+  }
+
+  return (
+    <Button variant="icon" size="icon" onClick={onClick}>
+      <ArrowIcon variant="left" />
+    </Button>
+  );
+}
+
+function SettingsButton({ onClick }: { onClick?: () => void }) {
+  if (!isIframe()) {
+    return null;
+  }
+
+  return (
+    <Button variant="icon" size="icon" onClick={onClick}>
+      <GearIcon />
+    </Button>
   );
 }
