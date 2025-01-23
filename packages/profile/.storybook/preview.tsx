@@ -12,7 +12,8 @@ const routerDecorator: Decorator = (Story, { parameters: { router } }) => {
   const path = Object.keys(params).length
     ? `/:${Object.keys(params).join("/:")}`
     : "/"
-  const url = `/${Object.values(params).join("/")}`
+  const searchParams = new URLSearchParams(router?.searchParams || {});
+  const url = `/${Object.values(params).join("/")}?${searchParams.toString()}`;
 
   return (
     <MemoryRouter initialEntries={[url]}>
