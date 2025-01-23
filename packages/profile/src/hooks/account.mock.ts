@@ -1,4 +1,4 @@
-import { accounts } from "@cartridge/utils/mock";
+import { accounts } from "@cartridge/utils/mock/data";
 import { Decorator } from "@storybook/react";
 
 let account = accounts["test-0"];

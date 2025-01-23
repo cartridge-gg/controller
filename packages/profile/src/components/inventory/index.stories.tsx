@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react";
 import { Inventory } from ".";
-import { accounts } from "@cartridge/utils/mock";
+import { accounts } from "@cartridge/utils/mock/data";
 import { decorator } from "@/hooks/account.mock";
 
 const meta = {
