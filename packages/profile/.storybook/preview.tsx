@@ -1,11 +1,33 @@
 import React from "react";
-import type { Preview, ReactRenderer } from "@storybook/react";
+import type { Decorator, Preview, ReactRenderer } from "@storybook/react";
 import { withThemeByClassName } from "@storybook/addon-themes";
 import { SonnerToaster } from "@cartridge/ui-next";
 import { Provider } from "../src/components/provider";
 
 import "../src/index.css";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+
+const routerDecorator: Decorator = (Story, { parameters: { router } }) => {
+  const params = router?.params || {}
+  const path = Object.keys(params).length
+    ? `/:${Object.keys(params).join("/:")}`
+    : "/"
+  const url = `/${Object.values(params).join("/")}`
+
+  return (
+    <MemoryRouter initialEntries={[url]}>
+      <Provider>
+        <Routes>
+          <Route
+            path={path}
+            element={<Story />}
+          />
+        </Routes>
+        <SonnerToaster />
+      </Provider>
+    </MemoryRouter>
+  );
+};
 
 const preview: Preview = {
   parameters: {
@@ -39,18 +61,7 @@ const preview: Preview = {
       },
       defaultTheme: "dark",
     }),
-    (Story,
-      // { parameters }
-    ) => (
-      <MemoryRouter initialEntries={["/project-1"]}>
-        <Provider>
-          <Routes>
-            <Route path="/:project" element={<Story />} />
-          </Routes>
-          <SonnerToaster />
-        </Provider>
-      </MemoryRouter>
-    ),
+    routerDecorator,
   ],
 };
 

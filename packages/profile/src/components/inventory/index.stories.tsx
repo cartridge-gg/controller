@@ -5,6 +5,13 @@ import { decorator } from "@/hooks/account.mock";
 
 const meta = {
   component: Inventory,
+  parameters: {
+    router: {
+      params: {
+        project: "test-0",
+      },
+    },
+  },
 } satisfies Meta<typeof Inventory>;
 
 export default meta;
