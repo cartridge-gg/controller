@@ -19,5 +19,5 @@ docker run \
   -v "$(pwd)/packages/ui-next/__image_snapshots__":/app/packages/ui-next/__image_snapshots__ \
   --ipc=host \
   -ti \
-  ghcr.io/cartridge-gg/controller/storybook-env:sha-6d7b370 \
+  ghcr.io/cartridge-gg/controller/storybook-env:sha-9f94a90 \
   bash -c "pnpm i && pnpm --filter $PACKAGE test-storybook -u --url http://host.docker.internal:$PORT"
