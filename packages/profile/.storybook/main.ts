@@ -1,14 +1,15 @@
 import type { StorybookConfig } from "@storybook/react-vite";
-
-import { join, dirname } from "path";
+import { mergeConfig } from "vite";
+import path from "path";
 
 /**
  * This function is used to resolve the absolute path of a package.
  * It is needed in projects that use Yarn PnP or are set up within a monorepo.
  */
 function getAbsolutePath(value: string) {
-  return dirname(require.resolve(join(value, "package.json")));
+  return path.dirname(require.resolve(path.join(value, "package.json")));
 }
+
 const config: StorybookConfig = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx)"],
   addons: [
@@ -18,6 +19,15 @@ const config: StorybookConfig = {
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
+  },
+  viteFinal: (config) => {
+    return mergeConfig(config, {
+      resolve: {
+        alias: {
+          "@/hooks/account": require.resolve("../src/hooks/account.mock.ts"),
+        },
+      },
+    });
   },
 };
 export default config;

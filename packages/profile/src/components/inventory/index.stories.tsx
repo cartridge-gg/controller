@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Inventory } from "./index";
+import { Inventory } from ".";
 
 const meta = {
   component: Inventory,

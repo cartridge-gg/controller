@@ -52,4 +52,5 @@ catalog:
   vite: "^6.0.7"
   vite-plugin-top-level-await: "^1.4.4"
   vite-plugin-wasm: "^3.4.1"
+  vite-tsconfig-paths: "^5.1.4"
   wasm-pack: "^0.13.0"

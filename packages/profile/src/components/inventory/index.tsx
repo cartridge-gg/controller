@@ -1,6 +1,6 @@
 export { Collectible, Collection, SendCollection } from "./collection";
 export { Token } from "./token";
-export { SendToken } from "./token/send/index";
+export { SendToken } from "./token/send";
 
 import { CopyAddress, ScrollArea } from "@cartridge/ui-next";
 import {
