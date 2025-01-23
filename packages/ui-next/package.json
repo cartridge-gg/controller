@@ -27,12 +27,12 @@
     "format": "prettier --write ./src",
     "format:check": "prettier --check ./src",
     "lint": "eslint .",
-    "storybook": "storybook dev -p 6003 --no-open",
+    "storybook": "storybook dev -p 6002 --no-open",
     "storybook:build": "storybook build",
-    "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6007 --silent",
+    "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6002 --silent",
     "test-storybook": "test-storybook",
-    "test:storybook:update": "start-server-and-test 'pnpm storybook:serve' 6007 'pnpm test-storybook --url http://127.0.0.1:6007 -u'",
-    "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6007 'pnpm test-storybook --url http://127.0.0.1:6007'"
+    "test:storybook:update": "start-server-and-test 'pnpm storybook:serve' 6002 'pnpm test-storybook --url http://127.0.0.1:6002 -u'",
+    "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6002 'pnpm test-storybook --url http://127.0.0.1:6002'"
   },
   "dependencies": {
     "@cartridge/utils": "workspace:*",
@@ -69,8 +69,6 @@
     "@cartridge/eslint": "workspace:^",
     "@cartridge/tsconfig": "workspace:*",
     "@storybook/addon-essentials": "catalog:",
-    "@storybook/addon-interactions": "catalog:",
-    "@storybook/addon-links": "catalog:",
     "@storybook/addon-themes": "catalog:",
     "@storybook/blocks": "catalog:",
     "@storybook/react": "catalog:",

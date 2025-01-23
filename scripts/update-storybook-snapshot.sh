@@ -14,8 +14,9 @@ PORT=$2
 docker run \
   --rm \
   --network="host" \
-  -v "$(pwd)":/app \
-  -v /app/node_modules \
+  -v "$(pwd)/packages/keychain/__image_snapshots__":/app/packages/keychain/__image_snapshots__ \
+  -v "$(pwd)/packages/profile/__image_snapshots__":/app/packages/profile/__image_snapshots__ \
+  -v "$(pwd)/packages/ui-next/__image_snapshots__":/app/packages/ui-next/__image_snapshots__ \
   --ipc=host \
   -ti \
   ghcr.io/cartridge-gg/controller/storybook-env:sha-6d7b370 \

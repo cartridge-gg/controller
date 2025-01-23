@@ -88,6 +88,7 @@ jobs:
             ui:
               - 'packages/ui-next/**'
               - 'packages/keychain/**'
+              - 'packages/profile/**'
               - '**/package.json'
               - '**/pnpm-lock.yaml'
 
@@ -146,6 +147,7 @@ jobs:
 
           # Check both packages
           check_snapshots "keychain" "packages/keychain/__image_snapshots__"
+          check_snapshots "profile" "packages/profile/__image_snapshots__"
           check_snapshots "ui-next" "packages/ui-next/__image_snapshots__"
 
           # Set environment variables
