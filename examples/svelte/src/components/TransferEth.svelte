@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { AccountInterface } from 'starknet';
-	import { ETH_CONTRACT } from '../constants';
+	import { ETH_CONTRACT_ADDRESS } from '../constants';
 	export let account: AccountInterface | undefined;
 
 	let txnHash: string | undefined;
@@ -17,12 +17,12 @@
 		account
 			.execute([
 				{
-					contractAddress: ETH_CONTRACT,
+					contractAddress: ETH_CONTRACT_ADDRESS,
 					entrypoint: manual ? 'increaseAllowance' : 'approve', // increaseAllowance is not part of policies so controller will prompt confirmation
 					calldata: [account.address, amount, '0x0']
 				},
 				{
-					contractAddress: ETH_CONTRACT,
+					contractAddress: ETH_CONTRACT_ADDRESS,
 					entrypoint: 'transfer',
 					calldata: [account.address, amount, '0x0']
 				}
@@ -38,7 +38,7 @@
 </script>
 
 <h2>Transfer Eth</h2>
-<p>Address: {ETH_CONTRACT}</p>
+<p>Address: {ETH_CONTRACT_ADDRESS}</p>
 <div>
 	<h4>Session</h4>
 	<button on:click={() => execute('0x0', false)} disabled={isSubmitted}>

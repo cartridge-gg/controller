@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { AccountInterface } from 'starknet';
+import type { WalletAccount } from 'starknet';
 
-export const account = writable<AccountInterface | undefined>(undefined);
+export const account = writable<WalletAccount | undefined>(undefined);
 export const username = writable<string | undefined>(undefined);
