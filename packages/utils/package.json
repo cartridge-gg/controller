@@ -7,7 +7,8 @@
   "exports": {
     ".": "./dist/index.js",
     "./api/cartridge": "./dist/api/cartridge/index.js",
-    "./api/indexer": "./dist/api/indexer/index.js"
+    "./api/indexer": "./dist/api/indexer/index.js",
+    "./mock": "./dist/mock/index.js"
   },
   "scripts": {
     "build:deps": "pnpm graphql:gen && tsc",

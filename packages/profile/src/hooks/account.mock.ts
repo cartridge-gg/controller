@@ -1,16 +1,18 @@
+import { accounts } from "@cartridge/utils/mock";
+
 export function useAccount() {
+  const account = accounts[0];
   return {
-    username: "test-0",
-    address:
-      "0x0000000000000000000000000000000000000000000000000000000000000000",
+    username: account.username,
+    address: account.address,
   };
 }
 
 export function useAccountInfo() {
+  const account = accounts[0];
   return {
-    name: "test-0",
-    address:
-      "0x0000000000000000000000000000000000000000000000000000000000000000",
+    name: account.username,
+    address: account.address,
     wallet: null,
     isFetching: false,
     error: "",

@@ -20,14 +20,13 @@ const config: StorybookConfig = {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
   },
-  viteFinal: (config) => {
-    return mergeConfig(config, {
+  viteFinal: (config) => 
+    mergeConfig(config, {
       resolve: {
         alias: {
           "@/hooks/account": require.resolve("../src/hooks/account.mock.ts"),
         },
       },
-    });
-  },
+    })
 };
 export default config;
