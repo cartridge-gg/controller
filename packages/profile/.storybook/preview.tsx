@@ -5,6 +5,7 @@ import { SonnerToaster } from "@cartridge/ui-next";
 import { Provider } from "../src/components/provider";
 
 import "../src/index.css";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 const preview: Preview = {
   parameters: {
@@ -41,10 +42,14 @@ const preview: Preview = {
     (Story,
       // { parameters }
     ) => (
-      <Provider>
-        <Story />
-        <SonnerToaster />
-      </Provider>
+      <MemoryRouter initialEntries={["/project-1"]}>
+        <Provider>
+          <Routes>
+            <Route path="/:project" element={<Story />} />
+          </Routes>
+          <SonnerToaster />
+        </Provider>
+      </MemoryRouter>
     ),
   ],
 };
