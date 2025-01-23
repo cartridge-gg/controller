@@ -1,7 +1,19 @@
 import { accounts } from "@cartridge/utils/mock";
+import { Decorator } from "@storybook/react";
+
+let account = accounts["test-0"];
+export const decorator: Decorator = (story, { parameters }) => {
+  if (parameters?.account) {
+    account = {
+      ...account,
+      ...parameters.account,
+    };
+  }
+
+  return story();
+};
 
 export function useAccount() {
-  const account = accounts[0];
   return {
     username: account.username,
     address: account.address,
@@ -9,7 +21,6 @@ export function useAccount() {
 }
 
 export function useAccountInfo() {
-  const account = accounts[0];
   return {
     name: account.username,
     address: account.address,
