@@ -93,7 +93,6 @@ export function useConnectionValue() {
         setController(controller);
       }
 
-      setOrigin(urlParams.get("origin") || import.meta.env.VITE_ORIGIN);
       const rpcUrl = urlParams.get("rpc_url");
       if (rpcUrl) {
         setRpcUrl(rpcUrl);
