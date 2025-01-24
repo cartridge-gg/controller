@@ -2,14 +2,13 @@ import { PropsWithChildren, useEffect, useState } from "react";
 import { PostHogContext, PostHogWrapper } from "@/context/posthog";
 import { useConnectionValue } from "@/hooks/connection";
 
+const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
+  host: import.meta.env.VITE_POSTHOG_HOST,
+  autocapture: true,
+});
+
 export function PostHogProvider({ children }: PropsWithChildren) {
   const { controller, origin } = useConnectionValue();
-
-  const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
-    host: import.meta.env.VITE_POSTHOG_HOST,
-    persistence: "memory",
-    autocapture: false,
-  });
 
   // Track the last identified address
   const [lastIdentifiedAddress, setLastIdentifiedAddress] = useState<string>();
@@ -29,13 +28,13 @@ export function PostHogProvider({ children }: PropsWithChildren) {
       posthog.reset();
       setLastIdentifiedAddress(undefined);
     }
-  }, [posthog, controller, lastIdentifiedAddress]);
+  }, [controller, lastIdentifiedAddress]);
 
   useEffect(() => {
     if (origin) {
       posthog.group("company", origin);
     }
-  }, [posthog, origin]);
+  }, [origin]);
 
   return (
     <PostHogContext.Provider value={{ posthog }}>
