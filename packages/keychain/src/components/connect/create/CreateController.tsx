@@ -63,7 +63,7 @@ export function CreateControllerView({
         <Content className="gap-0">
           <div
             className={cn(
-              "border-[#E46958] rounded",
+              "border-destructive-100 rounded",
               validation.status === "invalid" || error ? "border" : undefined,
             )}
           >

@@ -138,7 +138,7 @@ export const Recipient = ({
         <Input
           type="text"
           spellCheck={false}
-          className="bg-secondary pr-12 border border-quaternary focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="bg-background-100 pr-12 border border-background-200 focus-visible:border-muted focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder="Destination Address"
           value={value}
           onChange={handleChange}
@@ -160,9 +160,9 @@ export const Recipient = ({
         >
           <div className="h-9 w-9 p-1.5 flex items-center justify-center">
             {isFetching || isLoading ? (
-              <SpinnerIcon className="text-quaternary-foreground animate-spin" />
+              <SpinnerIcon className="text-muted-foreground animate-spin" />
             ) : (
-              <TimesCircleIcon className="text-quaternary-foreground" />
+              <TimesCircleIcon className="text-muted-foreground" />
             )}
           </div>
         </div>
@@ -177,13 +177,13 @@ export const Recipient = ({
               onMouseEnter={() => setHover(true)}
               onMouseLeave={() => setHover(false)}
             >
-              <div className="h-10 w-10 rounded-full overflow-hidden bg-secondary flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full overflow-hidden bg-background-100 flex items-center justify-center">
                 {TooltipIcon}
               </div>
               {name ? (
                 <div className="flex flex-col items-start gap-x-2">
                   <p className="font-medium text-sm">{name}</p>
-                  <p className="font-normal text-xs text-quaternary-foreground">
+                  <p className="font-normal text-xs text-muted-foreground">
                     {formatAddress(address, { size: "xs", padding: true })}
                   </p>
                 </div>

@@ -15,7 +15,7 @@ export function Pinned({
       <CardHeader
         className={cn(
           "flex flex-col justify-between items-center h-36 py-6",
-          empty && "bg-background border border-dashed border-secondary",
+          empty && "bg-background border border-dashed border-background-100",
         )}
       >
         <div className="flex justify-center items-center w-12 h-12">
@@ -39,7 +39,7 @@ function Title({ title, empty }: { title: string; empty?: boolean }) {
     <CardTitle
       className={cn(
         "grow flex flex-col justify-center items-center capitalize font-normal text-sm",
-        empty ? "opacity-50" : "text-secondary-foreground",
+        empty ? "opacity-50" : "text-foreground",
       )}
     >
       <p className="capitalize break-words text-center text-ellipsis line-clamp-2">

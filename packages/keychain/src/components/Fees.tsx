@@ -56,7 +56,7 @@ function LineItem({
   variant?: Variant;
 }) {
   return (
-    <div className="flex items-center w-full h-10 p-4 bg-secondary text-muted-foreground">
+    <div className="flex items-center w-full h-10 p-4 bg-background-100 text-muted-foreground">
       <p className="text-xs uppercase font-bold">{name}</p>
       <div className="flex-1" />
 

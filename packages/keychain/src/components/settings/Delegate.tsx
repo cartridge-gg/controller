@@ -56,7 +56,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
               onChange={(e) => setDelegateAddress(e.target.value)}
             />
             {!isValid && delegateAddress !== "" && (
-              <div className="flex items-center gap-2 text-error-icon">
+              <div className="flex items-center gap-2 text-destructive-foreground">
                 <AlertIcon size="sm" />
                 <div className="text-sm">Invalid address!</div>
               </div>

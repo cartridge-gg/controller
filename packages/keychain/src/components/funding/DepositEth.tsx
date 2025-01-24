@@ -208,7 +208,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                   </div>
 
                   {connectors.length !== 0 && (
-                    <div className="text-xs text-quaternary-foreground font-bold">
+                    <div className="text-xs text-muted-foreground font-bold">
                       OR
                     </div>
                   )}
@@ -220,10 +220,10 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                     <CopyIcon size="sm" /> copy address
                   </Button>
                   <div className="flex items-center gap-2">
-                    <div className="text-sm text-quaternary-foreground">
+                    <div className="text-sm text-muted-foreground">
                       and send funds to it on
                     </div>
-                    <div className="flex items-center gap-2 border border-secondary rounded-md p-1">
+                    <div className="flex items-center gap-2 border border-background-100 rounded-md p-2">
                       <StarknetColorIcon />{" "}
                       <div className="text-sm font-bold">STARKNET MAINNET</div>
                     </div>

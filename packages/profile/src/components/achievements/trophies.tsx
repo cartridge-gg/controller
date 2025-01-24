@@ -48,17 +48,17 @@ export function Trophies({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-8 bg-secondary py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
-        <p className="uppercase text-xs text-quaternary-foreground font-semibold tracking-wider">
+      <div className="h-8 bg-background-100 py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
+        <p className="uppercase text-xs text-muted-foreground font-semibold tracking-wider">
           Total
         </p>
-        <div className="h-4 grow flex flex-col justify-center items-start bg-quaternary rounded-xl p-1">
+        <div className="h-4 grow flex flex-col justify-center items-start bg-background-200 rounded-xl p-1">
           <div
             style={{ width: `${Math.floor((100 * completed) / total)}%` }}
             className={cn("grow bg-primary rounded-xl")}
           />
         </div>
-        <p className="text-xs text-quaternary-foreground">
+        <p className="text-xs text-muted-foreground">
           {`${completed} of ${total}`}
         </p>
       </div>
@@ -205,8 +205,8 @@ function Header({
 }) {
   return (
     <div className="flex gap-x-px items-center h-8">
-      <div className="grow h-full p-3 bg-secondary flex items-center">
-        <p className="uppercase text-xs text-quaternary-foreground font-bold tracking-wider">
+      <div className="grow h-full p-3 bg-background-100 flex items-center">
+        <p className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
           {group}
         </p>
       </div>
@@ -214,7 +214,7 @@ function Header({
         <>
           {/* <Icon
         className={cn(
-          "text-quaternary-foreground h-4 w-4",
+          "text-background-200 h-4 w-4",
           disabled && "opacity-50",
         )}
         variant="solid"
@@ -229,8 +229,8 @@ function Header({
             onClick={handleNext}
             disabled={page === pages[pages.length - 1]}
           />
-          <div className="flex items-center justify-center h-full p-3 bg-secondary gap-2">
-            <div className="flex items-center justify-center rounded-xl bg-quaternary p-[3px]">
+          <div className="flex items-center justify-center h-full p-3 bg-background-100 gap-2">
+            <div className="flex items-center justify-center rounded-xl bg-background-200 p-[3px]">
               <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
                 {pages.map((current) => (
                   <Page
@@ -264,12 +264,12 @@ function Pagination({
   return (
     <div
       className={cn(
-        "flex items-center justify-center h-8 w-8 bg-secondary",
+        "flex items-center justify-center h-8 w-8 bg-background-100",
         !disabled && "cursor-pointer hover:opacity-70",
       )}
       onClick={onClick}
     >
-      <div className="text-quaternary-foreground">{icon}</div>
+      <div className="text-muted-foreground">{icon}</div>
     </div>
   );
 }
