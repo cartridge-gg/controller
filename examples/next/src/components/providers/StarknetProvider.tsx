@@ -123,7 +123,6 @@ const controller = new ControllerConnector({
   // slot: "profile-example",
   slot: "ryomainnet",
   preset: "dope-wars",
-  namespace: "dopewars",
   // namespace: "dopewars",
   // slot: "eternum-prod",
   // preset: "eternum",
