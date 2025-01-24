@@ -17,7 +17,6 @@ import {
   CheckboxIcon,
   cn,
   CopyAddress,
-  ScrollArea,
   Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useMemo } from "react";
@@ -117,14 +116,12 @@ export function Collection() {
                     </div>
                   </div>
 
-                  <ScrollArea>
-                    <Collectibles
-                      assets={assets}
-                      tokenIds={tokenIds}
-                      selection={selection}
-                      handleSelect={handleSelect}
-                    />
-                  </ScrollArea>
+                  <Collectibles
+                    assets={assets}
+                    tokenIds={tokenIds}
+                    selection={selection}
+                    handleSelect={handleSelect}
+                  />
                 </LayoutContent>
 
                 <LayoutFooter

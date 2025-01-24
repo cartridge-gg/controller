@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import {
-  ScrollArea,
   Spinner,
   LayoutContainer,
   LayoutContent,
@@ -116,18 +115,16 @@ export function Achievements() {
             </div>
           )}
           {(!isSelf || activeTab === "trophies") && (
-            <ScrollArea className="overflow-auto">
-              <div className="flex flex-col h-full flex-1 overflow-y-auto gap-4">
-                <Pinneds achievements={pinneds} />
-                <Trophies
-                  achievements={achievements}
-                  softview={!isSelf}
-                  enabled={pinneds.length < 3}
-                  game={game}
-                  pins={pins}
-                />
-              </div>
-            </ScrollArea>
+            <div className="flex flex-col gap-4">
+              <Pinneds achievements={pinneds} />
+              <Trophies
+                achievements={achievements}
+                softview={!isSelf}
+                enabled={pinneds.length < 3}
+                game={game}
+                pins={pins}
+              />
+            </div>
           )}
           {isSelf && activeTab === "leaderboard" && (
             <Leaderboard

@@ -6,7 +6,6 @@ import {
   CardContent,
   CopyAddress,
   ExternalIcon,
-  ScrollArea,
   LayoutContainer,
   LayoutContent,
   LayoutContentError,
@@ -60,66 +59,64 @@ export function Activity() {
           case "success": {
             return (
               <LayoutContent>
-                <ScrollArea>
-                  <Card>
-                    {data.pages.map((p) =>
-                      p.tokenTransfers?.edges.length ? (
-                        p.tokenTransfers.edges.map(({ node: t }) => {
-                          switch (t.tokenMetadata.__typename) {
-                            case "ERC20__Token": {
-                              const isSend = t.from === address;
-                              return (
-                                <Link
-                                  to={StarkscanUrl(
-                                    chainId as constants.StarknetChainId,
-                                  ).transaction(t.transactionHash)}
-                                  target="_blank"
-                                  key={t.transactionHash}
-                                >
-                                  <CardContent className="flex items-center justify-between text-accent-foreground">
-                                    <div className="flex items-center gap-1">
-                                      {isSend ? (
-                                        <ArrowFromLineIcon variant="up" />
-                                      ) : (
-                                        <ArrowToLineIcon variant="down" />
-                                      )}
-                                      <div>
-                                        {isSend ? "Send" : "Receive"}{" "}
-                                        {Number(t.tokenMetadata.amount) /
-                                          10 **
-                                            Number(
-                                              t.tokenMetadata?.decimals,
-                                            )}{" "}
-                                        {t.tokenMetadata?.symbol}
-                                      </div>
+                <Card>
+                  {data.pages.map((p) =>
+                    p.tokenTransfers?.edges.length ? (
+                      p.tokenTransfers.edges.map(({ node: t }) => {
+                        switch (t.tokenMetadata.__typename) {
+                          case "ERC20__Token": {
+                            const isSend = t.from === address;
+                            return (
+                              <Link
+                                to={StarkscanUrl(
+                                  chainId as constants.StarknetChainId,
+                                ).transaction(t.transactionHash)}
+                                target="_blank"
+                                key={t.transactionHash}
+                              >
+                                <CardContent className="flex items-center justify-between text-accent-foreground">
+                                  <div className="flex items-center gap-1">
+                                    {isSend ? (
+                                      <ArrowFromLineIcon variant="up" />
+                                    ) : (
+                                      <ArrowToLineIcon variant="down" />
+                                    )}
+                                    <div>
+                                      {isSend ? "Send" : "Receive"}{" "}
+                                      {Number(t.tokenMetadata.amount) /
+                                        10 **
+                                          Number(
+                                            t.tokenMetadata?.decimals,
+                                          )}{" "}
+                                      {t.tokenMetadata?.symbol}
                                     </div>
+                                  </div>
 
-                                    <ExternalIcon />
-                                  </CardContent>
-                                </Link>
-                              );
-                            }
-                            case "ERC721__Token":
-                              return null;
+                                  <ExternalIcon />
+                                </CardContent>
+                              </Link>
+                            );
                           }
-                        })
-                      ) : (
-                        <CardContent>No data</CardContent>
-                      ),
-                    )}
-                  </Card>
-
-                  {hasNextPage && (
-                    <Button
-                      className="w-full my-2"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => fetchNextPage()}
-                    >
-                      See More
-                    </Button>
+                          case "ERC721__Token":
+                            return null;
+                        }
+                      })
+                    ) : (
+                      <CardContent>No data</CardContent>
+                    ),
                   )}
-                </ScrollArea>
+                </Card>
+
+                {hasNextPage && (
+                  <Button
+                    className="w-full my-2"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => fetchNextPage()}
+                  >
+                    See More
+                  </Button>
+                )}
               </LayoutContent>
             );
           }
