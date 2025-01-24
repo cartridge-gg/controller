@@ -2,9 +2,11 @@ import { TimesIcon, Button } from "@cartridge/ui-next";
 import { isIframe } from "@cartridge/utils";
 import { useConnection } from "@/hooks/connection";
 import { useCallback } from "react";
+import { useUpgrade } from "@/hooks/upgrade";
 
 export function CloseButton({ onClose }: { onClose?: () => void }) {
-  const { upgrade, logout, closeModal } = useConnection();
+  const { logout, closeModal } = useConnection();
+  const upgrade = useUpgrade();
 
   const handleClose = useCallback(() => {
     if (upgrade.available) {

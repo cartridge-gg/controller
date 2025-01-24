@@ -21,6 +21,7 @@ import { ControllerError } from "@/utils/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
 import { Link } from "react-router-dom";
+import { useController } from "@/hooks/controller";
 
 export function DeployController({
   onClose,
@@ -29,7 +30,8 @@ export function DeployController({
   onClose: () => void;
   ctrlError?: ControllerError;
 }) {
-  const { controller, chainName, hasPrefundRequest } = useConnection();
+  const { chainName, hasPrefundRequest } = useConnection();
+  const { controller } = useController();
   const { deploySelf, isDeploying } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();

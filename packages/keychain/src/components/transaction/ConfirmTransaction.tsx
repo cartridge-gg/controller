@@ -5,9 +5,11 @@ import { TransactionSummary } from "@/components/transaction/TransactionSummary"
 import { ExecuteCtx } from "@/utils/connection";
 import { num } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { useController } from "@/hooks/controller";
 
 export function ConfirmTransaction() {
-  const { controller, context, origin, setContext } = useConnection();
+  const { context, origin, setContext } = useConnection();
+  const { controller } = useController();
   const ctx = context as ExecuteCtx;
   const account = controller;
   const transactions = toArray(ctx.transactions);

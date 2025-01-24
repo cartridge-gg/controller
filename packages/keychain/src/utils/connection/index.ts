@@ -4,7 +4,6 @@ import { connectToParent } from "@cartridge/penpal";
 import Controller from "@/utils/controller";
 import { connect } from "./connect";
 import { execute } from "./execute";
-import { estimateDeclareFee, estimateInvokeFee } from "./estimate";
 import { probe } from "./probe";
 import { signMessageFactory } from "./sign";
 import { ConnectionCtx } from "./types";
@@ -23,49 +22,48 @@ export function connectToController<ParentMethods extends object>({
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller?: Controller) => void;
 }) {
-  return connectToParent<ParentMethods>({
-    methods: {
-      connect: normalize(
-        connect({
-          setOrigin,
-          setRpcUrl,
-          setContext,
-        }),
-      ),
-      deploy: () => deployFactory(setContext),
-      execute: () => execute({ setContext }),
-      estimateDeclareFee: () => estimateDeclareFee,
-      estimateInvokeFee: () => estimateInvokeFee,
-      probe: normalize(probe({ setController, setRpcUrl })),
-      signMessage: () => signMessageFactory(setContext),
-      openSettings: () => openSettingsFactory(setContext),
-      reset: () => () => {
-        setContext(undefined);
-      },
-      disconnect: () => async () => {
-        // First clear the React state
-        setContext(undefined);
-        setController(undefined);
-        // Then cleanup the controller
-        await window.controller?.disconnect();
-      },
-      logout: () => async () => {
-        // First clear the React state
-        setContext(undefined);
-        setController(undefined);
-        // Then cleanup the controller
-        await window.controller?.disconnect();
-      },
-      username: () => () => window.controller?.username(),
-      delegateAccount: () => () => window.controller?.delegateAccount(),
-      openPurchaseCredits: () => () => {
-        setContext({
-          origin,
-          type: "open-purchase-credits",
-          resolve: () => Promise.resolve(),
-          reject: () => Promise.reject(),
-        });
-      },
+  const controller = window.controller as Controller | undefined;
+
+  // Create base methods object
+  const methods = {
+    connect: normalize(
+      connect({
+        setOrigin,
+        setRpcUrl,
+        setContext,
+      }),
+    ),
+    deploy: () => deployFactory(setContext),
+    execute: () => execute({ setContext }),
+    estimateDeclareFee: () => controller?.estimateDeclareFee,
+    estimateInvokeFee: () => controller?.estimateInvokeFee,
+    probe: normalize(probe({ setController, setOrigin, setRpcUrl })),
+    signMessage: () => signMessageFactory(setContext),
+    openSettings: () => openSettingsFactory(setContext),
+    reset: () => () => {
+      setContext(undefined);
     },
+    disconnect: () => async () => {
+      setContext(undefined);
+      setController(undefined);
+    },
+    logout: () => async () => {
+      setContext(undefined);
+      setController(undefined);
+    },
+    username: () => () => controller?.username(),
+    delegateAccount: () => () => controller?.delegateAccount(),
+    openPurchaseCredits: () => () => {
+      setContext({
+        origin,
+        type: "open-purchase-credits",
+        resolve: () => Promise.resolve(),
+        reject: () => Promise.reject(),
+      });
+    },
+  };
+
+  return connectToParent<ParentMethods>({
+    methods,
   });
 }

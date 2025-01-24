@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { hash, num } from "starknet";
-import { useConnection } from "./connection";
+import { useController } from "./controller";
 
 export function useExternalOwners() {
-  const { controller } = useConnection();
+  const { controller } = useController();
 
   const [externalOwners, setExternalOwners] = useState<Array<string>>([]);
 

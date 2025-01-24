@@ -12,6 +12,7 @@ import {
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
 import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
 import { mutex } from "./sync";
+import Controller from "../controller";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -47,7 +48,7 @@ export function execute({
     _?: unknown,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
-    const account = window.controller;
+    const controller = window.controller as Controller;
     const calls = normalizeCalls(transactions);
 
     if (sync) {
@@ -69,7 +70,7 @@ export function execute({
     return await new Promise<InvokeFunctionResponse | ConnectError>(
       // eslint-disable-next-line no-async-promise-executor
       async (resolve, reject) => {
-        if (!account) {
+        if (!controller) {
           return reject({
             message: "Controller context not available",
           });
@@ -77,7 +78,7 @@ export function execute({
 
         // If a session call and there is no session available
         // fallback to manual apporval flow
-        if (!(await account.hasSession(calls))) {
+        if (!(await controller.hasSession(calls))) {
           setContext({
             type: "execute",
             origin,
@@ -97,7 +98,7 @@ export function execute({
         // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
         try {
           const { transaction_hash } =
-            await account.executeFromOutsideV3(calls);
+            await controller.executeFromOutsideV3(calls);
 
           return resolve({
             code: ResponseCodes.SUCCESS,
@@ -126,12 +127,12 @@ export function execute({
         }
 
         try {
-          const estimate = await account.cartridge.estimateInvokeFee(calls);
+          const estimate = await controller.estimateInvokeFee(calls);
           const maxFee = num.toHex(
             num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
           );
 
-          const { transaction_hash } = await account.execute(
+          const { transaction_hash } = await controller.execute(
             transactions as Call[],
             {
               maxFee,

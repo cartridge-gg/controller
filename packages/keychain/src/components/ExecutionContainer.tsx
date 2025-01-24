@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@cartridge/ui-next";
 import { Container, Footer } from "@/components/layout";
-import { useConnection } from "@/hooks/connection";
 import { ControllerError } from "@/utils/connection";
 import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
 import { Fees } from "./Fees";
@@ -11,6 +10,7 @@ import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { BannerProps } from "./layout/container/header/Banner";
 import { parseControllerError } from "@/utils/connection/execute";
 import isEqual from "lodash/isEqual";
+import { useController } from "@/hooks/controller";
 
 interface ExecutionContainerProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,7 +41,7 @@ export function ExecutionContainer({
   children,
 }: ExecutionContainerProps &
   Pick<BannerProps, "title" | "description" | "icon">) {
-  const { controller } = useConnection();
+  const { controller } = useController();
   const [maxFee, setMaxFee] = useState<bigint | null>(null);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,

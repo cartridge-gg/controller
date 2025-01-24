@@ -17,7 +17,6 @@ import {
   ConnectionContext,
   ConnectionContextValue,
 } from "@/components/provider/connection";
-import { UpgradeInterface, useUpgrade } from "./upgrade";
 import { Policies } from "@cartridge/presets";
 import {
   defaultTheme,
@@ -26,6 +25,7 @@ import {
 } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { VerifiableControllerTheme } from "@/context/theme";
+import { useController } from "./controller";
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -42,10 +42,9 @@ export function useConnectionValue() {
     verified: true,
     ...defaultTheme,
   });
-  const [controller, setController] = useState<Controller | undefined>();
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
-  const upgrade: UpgradeInterface = useUpgrade(controller);
   const [error, setError] = useState<Error>();
+  const { setController } = useController();
 
   const chainName = useMemo(() => {
     if (!chainId) {
@@ -86,14 +85,13 @@ export function useConnectionValue() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
 
-    // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
+    // if we're not embedded (eg Slot auth/session) load controller from store and set rpcUrl
     if (!isIframe()) {
       const controller = Controller.fromStore(import.meta.env.VITE_ORIGIN!);
       if (controller) {
         setController(controller);
       }
 
-      setOrigin(urlParams.get("origin") || import.meta.env.VITE_ORIGIN);
       const rpcUrl = urlParams.get("rpc_url");
       if (rpcUrl) {
         setRpcUrl(rpcUrl);
@@ -211,16 +209,14 @@ export function useConnectionValue() {
 
       update();
     }
-  }, [rpcUrl, controller]);
+  }, [rpcUrl]);
 
   const logout = useCallback(() => {
-    window.controller?.disconnect().then(() => {
-      setController(undefined);
+    setController(undefined);
 
-      context?.resolve?.({
-        code: ResponseCodes.NOT_CONNECTED,
-        message: "User logged out",
-      });
+    context?.resolve?.({
+      code: ResponseCodes.NOT_CONNECTED,
+      message: "User logged out",
     });
   }, [context, setController]);
 
@@ -237,7 +233,6 @@ export function useConnectionValue() {
 
   return {
     context,
-    controller,
     origin,
     rpcUrl,
     chainId,
@@ -246,7 +241,6 @@ export function useConnectionValue() {
     theme,
     hasPrefundRequest,
     error,
-    upgrade,
     setController,
     setContext,
     closeModal,
