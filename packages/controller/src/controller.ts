@@ -86,11 +86,13 @@ export default class ControllerProvider extends BaseProvider {
         return;
       }
 
-      const response = (await this.keychain.probe()) as ProbeReply;
+      const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
 
+      // For backwards compat with controller <0.6.1, we need to use rpcUrl from the probe response if available
+      let rpcUrl = response?.rpcUrl || this.rpcUrl();
       this.account = new ControllerAccount(
         this,
-        response.rpcUrl,
+        rpcUrl,
         response.address,
         this.keychain,
         this.options,
@@ -177,7 +179,7 @@ export default class ControllerProvider extends BaseProvider {
 
     try {
       this.selectedChain = chainId;
-      const response = (await this.keychain.probe()) as ProbeReply;
+      const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
 
       if (response.rpcUrl === this.rpcUrl()) {
         return true;

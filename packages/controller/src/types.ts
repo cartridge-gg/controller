@@ -62,7 +62,7 @@ export type ExecuteReply =
 export type ProbeReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
-  rpcUrl: string;
+  rpcUrl?: string;
 };
 
 export type DeployReply = {
@@ -95,7 +95,7 @@ type CartridgeID = string;
 export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
-  probe(): Promise<ProbeReply | ConnectError>;
+  probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
   connect(
     policies: SessionPolicies,
     rpcUrl: string,
