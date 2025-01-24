@@ -18,7 +18,6 @@ import {
   CardTitle,
   CopyText,
   ExternalIcon,
-  ScrollArea,
   Separator,
 } from "@cartridge/ui-next";
 import { addAddressPadding, constants } from "starknet";
@@ -97,19 +96,15 @@ export function Collectible() {
                   openSettings={openSettings}
                 />
 
-                <LayoutContent>
-                  <ScrollArea>
-                    <div className="flex flex-col h-full flex-1 overflow-y-auto gap-y-4">
-                      <Image imageUrl={asset.imageUrl} />
-                      <Description description={asset.description} />
-                      <Properties properties={assets} />
-                      <Details
-                        chainId={chainId as constants.StarknetChainId}
-                        col={collection}
-                        asset={asset}
-                      />
-                    </div>
-                  </ScrollArea>
+                <LayoutContent className="pb-4">
+                  <Image imageUrl={asset.imageUrl} />
+                  <Description description={asset.description} />
+                  <Properties properties={assets} />
+                  <Details
+                    chainId={chainId as constants.StarknetChainId}
+                    col={collection}
+                    asset={asset}
+                  />
                 </LayoutContent>
 
                 {isIframe() && compatibility && (

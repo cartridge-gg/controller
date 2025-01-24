@@ -10,7 +10,6 @@ import {
   CheckboxUncheckedIcon,
   cn,
   CopyAddress,
-  ScrollArea,
   Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -123,9 +122,7 @@ export function SendCollection() {
       />
       <LayoutContent className="gap-6">
         <Recipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
-        <ScrollArea className="overflow-auto">
-          <Sending assets={assets} />
-        </ScrollArea>
+        <Sending assets={assets} />
       </LayoutContent>
 
       <LayoutFooter className="bg-background relative pt-0">

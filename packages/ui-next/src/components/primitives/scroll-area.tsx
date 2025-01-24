@@ -50,10 +50,12 @@ const ScrollArea = React.forwardRef<
     <ScrollAreaPrimitive.Root
       ref={ref}
       onScrollCapture={onScrollCapture}
-      className={cn("relative overflow-hidden", className)}
+      className={"relative overflow-auto"}
       {...props}
     >
-      <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+      <ScrollAreaPrimitive.Viewport
+        className={cn("h-full w-full rounded-[inherit]", className)}
+      >
         {children}
       </ScrollAreaPrimitive.Viewport>
       <ScrollBar className={cn(`opacity-${opacity}`, hidden && "hidden")} />

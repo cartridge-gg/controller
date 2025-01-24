@@ -4,7 +4,6 @@ export { SendToken } from "./token/send";
 
 import {
   CopyAddress,
-  ScrollArea,
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
@@ -40,12 +39,10 @@ export function Inventory() {
       />
 
       <LayoutContent className="pb-4">
-        <ScrollArea>
-          <div className="flex flex-col gap-y-4">
-            <Tokens />
-            {project && <Collections />}
-          </div>
-        </ScrollArea>
+        <div className="flex flex-col gap-y-4">
+          <Tokens />
+          {project && <Collections />}
+        </div>
       </LayoutContent>
     </LayoutContainer>
   );
