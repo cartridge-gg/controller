@@ -131,7 +131,7 @@ function ERC20() {
           countervalue && `${formatBalance(countervalue.formatted, ["~"])}`
         }
         icon={
-          <div className="rounded-full size-11 bg-secondary flex items-center justify-center">
+          <div className="rounded-full size-11 bg-foreground-100 flex items-center justify-center">
             <img
               className="w-10 h-10"
               src={t.meta.logoUrl ?? "/public/placeholder.svg"}
