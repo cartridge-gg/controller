@@ -43,16 +43,22 @@ export function connectToController<ParentMethods extends object>({
       probe: normalize(probe({ setController, setRpcUrl })),
       signMessage: () => signMessageFactory(setContext),
       openSettings: () => openSettingsFactory(setContext),
-      reset: () => () => setContext(undefined),
-      disconnect: () => () => {
-        window.controller?.disconnect().then(() => {
-          setController(undefined);
-        });
+      reset: () => () => {
+        setContext(undefined);
       },
-      logout: () => () => {
-        window.controller?.disconnect().then(() => {
-          setController(undefined);
-        });
+      disconnect: () => async () => {
+        // First clear the React state
+        setContext(undefined);
+        setController(undefined);
+        // Then cleanup the controller
+        await window.controller?.disconnect();
+      },
+      logout: () => async () => {
+        // First clear the React state
+        setContext(undefined);
+        setController(undefined);
+        // Then cleanup the controller
+        await window.controller?.disconnect();
       },
       username: () => () => window.controller?.username(),
       delegateAccount: () => () => window.controller?.delegateAccount(),
