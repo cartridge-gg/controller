@@ -1,5 +1,5 @@
 import { Content } from "@/components/layout";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { SessionConsent } from "@/components/connect";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
@@ -18,7 +18,7 @@ export function RegisterSession({
   publicKey,
 }: {
   policies: ParsedSessionPolicies;
-  onConnect: (transaction_hash?: string) => void;
+  onConnect: (transaction_hash: string, expiresAt: bigint) => void;
   publicKey?: string;
 }) {
   const { controller, theme } = useConnection();
@@ -32,7 +32,9 @@ export function RegisterSession({
     | undefined
   >(undefined);
 
-  const expiresAt = NOW + duration;
+  const expiresAt = useMemo(() => {
+    return duration + NOW;
+  }, [duration]);
 
   useEffect(() => {
     if (!publicKey || !controller) {
@@ -91,7 +93,7 @@ export function RegisterSession({
         ],
       });
 
-      onConnect(transaction_hash);
+      onConnect(transaction_hash, expiresAt);
     },
     [controller, expiresAt, policies, publicKey, onConnect],
   );

@@ -9,7 +9,7 @@ import { Upgrade } from "./Upgrade";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { DEFAULT_SESSION_DURATION } from "@/const";
+import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
 import { Button, Checkbox } from "@cartridge/ui-next";
 
 export function CreateSession({
@@ -18,7 +18,7 @@ export function CreateSession({
   isUpdate,
 }: {
   policies: ParsedSessionPolicies;
-  onConnect: (transaction_hash?: string) => void;
+  onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
   isUpdate?: boolean;
 }) {
   const { controller, upgrade, chainId, theme, logout } = useConnection();
@@ -27,6 +27,9 @@ export function CreateSession({
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
+  const expiresAt = useMemo(() => {
+    return duration + NOW;
+  }, [duration]);
 
   const chainSpecificMessages = useMemo(() => {
     if (!policies.messages || !chainId) return [];
@@ -64,7 +67,7 @@ export function CreateSession({
         });
       }
 
-      await controller.createSession(duration, policies, maxFee);
+      await controller.createSession(expiresAt, policies, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
