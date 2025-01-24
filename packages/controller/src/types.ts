@@ -12,7 +12,7 @@ import {
   TypedData,
 } from "@starknet-io/types-js";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
-import { ColorMode, Policy, SessionPolicies } from "@cartridge/presets";
+import { Policy, SessionPolicies } from "@cartridge/presets";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -149,12 +149,8 @@ export type ControllerOptions = ProviderOptions &
 export type IFrameOptions = {
   /** The ID of the starter pack to use */
   starterPackId?: string;
-  /** The theme to use */
-  theme?: string;
   /** The preset to use */
   preset?: string;
-  /** The color mode to use */
-  colorMode?: ColorMode;
 };
 
 export type Chain = {
