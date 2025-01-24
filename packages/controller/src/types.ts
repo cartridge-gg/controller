@@ -62,6 +62,7 @@ export type ExecuteReply =
 export type ProbeReply = {
   code: ResponseCodes.SUCCESS;
   address: string;
+  rpcUrl?: string;
 };
 
 export type DeployReply = {
@@ -128,6 +129,7 @@ export interface Keychain {
   username(): string;
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
+  switchChain(rpcUrl: string): Promise<void>;
 }
 
 export interface Profile {

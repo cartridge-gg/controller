@@ -3,13 +3,13 @@ import Controller from "@/utils/controller";
 
 export function probe({
   setController,
-  setRpcUrl,
 }: {
   setController: (controller?: Controller) => void;
-  setRpcUrl: (rpcUrl: string) => void;
 }) {
   return (origin: string) =>
-    async (rpcUrl: string): Promise<ProbeReply> => {
+    // The ignored param is rpcUrl which is no longer needed but have to be kept for compatibility
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async (_: string): Promise<ProbeReply> => {
       const controller = Controller.fromStore(origin);
       if (!controller) {
         return Promise.reject({
@@ -17,16 +17,12 @@ export function probe({
         });
       }
 
-      if (rpcUrl !== controller.rpcUrl()) {
-        await controller.switchChain(rpcUrl);
-      }
-
-      setRpcUrl(rpcUrl);
       setController(controller);
       window.controller = controller;
       return Promise.resolve({
         code: ResponseCodes.SUCCESS,
         address: controller.address,
+        rpcUrl: controller.rpcUrl(),
       });
     };
 }

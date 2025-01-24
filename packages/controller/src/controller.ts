@@ -88,9 +88,11 @@ export default class ControllerProvider extends BaseProvider {
 
       const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
 
+      // For backwards compat with controller <=0.6.0
+      let rpcUrl = response?.rpcUrl || this.rpcUrl();
       this.account = new ControllerAccount(
         this,
-        this.rpcUrl(),
+        rpcUrl,
         response.address,
         this.keychain,
         this.options,
@@ -170,12 +172,20 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async switchStarknetChain(chainId: string): Promise<boolean> {
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return false;
+    }
+
     try {
       this.selectedChain = chainId;
-      this.account = await this.probe();
-      if (!this.account) {
-        this.account = await this.connect();
+      const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
+
+      if (response.rpcUrl === this.rpcUrl()) {
+        return true;
       }
+
+      await this.keychain.switchChain(this.rpcUrl());
     } catch (e) {
       console.error(e);
       return false;
