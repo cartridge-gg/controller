@@ -18,7 +18,6 @@ import {
   ConnectionContextValue,
 } from "@/components/provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
-import { usePostHog } from "@/hooks/posthog";
 import { Policies } from "@cartridge/presets";
 import {
   defaultTheme,
@@ -43,11 +42,10 @@ export function useConnectionValue() {
     verified: true,
     ...defaultTheme,
   });
-  const [controller, setControllerRaw] = useState<Controller | undefined>();
+  const [controller, setController] = useState<Controller | undefined>();
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const upgrade: UpgradeInterface = useUpgrade(controller);
   const [error, setError] = useState<Error>();
-  const posthog = usePostHog();
 
   const chainName = useMemo(() => {
     if (!chainId) {
@@ -84,29 +82,6 @@ export function useConnectionValue() {
       // Always fails for some reason
     }
   }, [context, parent]);
-
-  const setController = useCallback(
-    (controller?: Controller) => {
-      if (controller) {
-        posthog?.identify(controller.username(), {
-          address: controller.address,
-          class: controller.classHash(),
-          chainId: controller.chainId,
-        });
-      } else {
-        posthog?.reset();
-      }
-
-      setControllerRaw(controller);
-    },
-    [posthog],
-  );
-
-  useEffect(() => {
-    if (origin) {
-      posthog?.group("company", origin);
-    }
-  }, [origin, posthog]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
