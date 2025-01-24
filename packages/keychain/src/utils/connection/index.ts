@@ -11,18 +11,15 @@ import { ConnectionCtx } from "./types";
 import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
 import { normalize } from "@cartridge/utils";
-import { ParsedSessionPolicies } from "@/hooks/session";
 
 export function connectToController<ParentMethods extends object>({
   setOrigin,
   setRpcUrl,
-  setPolicies,
   setContext,
   setController,
 }: {
   setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
-  setPolicies: (policies: ParsedSessionPolicies) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller?: Controller) => void;
 }) {
@@ -32,7 +29,6 @@ export function connectToController<ParentMethods extends object>({
         connect({
           setOrigin,
           setRpcUrl,
-          setPolicies,
           setContext,
         }),
       ),
