@@ -15,33 +15,21 @@ export const cartridgeTWPreset: Partial<Config> = {
     colors: {
       transparent: "transparent",
       current: "currentColor",
-      border: "hsl(var(--border)/0.12)",
-      input: "hsl(var(--input)/0.12)",
-      ring: "hsl(var(--ring))",
-      background: "hsl(var(--background))",
+      background: {
+        DEFAULT: "hsl(var(--background))",
+        100: "hsl(var(--background-100))",
+        200: "hsl(var(--background-200))",
+        300: "hsl(var(--background-300))",
+      },
       foreground: "hsl(var(--foreground))",
       primary: {
         DEFAULT: "hsl(var(--primary))",
         foreground: "hsl(var(--primary-foreground))",
       },
-      secondary: {
-        DEFAULT: "hsl(var(--secondary))",
-        foreground: "hsl(var(--secondary-foreground))",
-      },
-      tertiary: {
-        DEFAULT: "hsl(var(--tertiary))",
-        foreground: "hsl(var(--tertiary-foreground))",
-      },
-      quaternary: {
-        DEFAULT: "hsl(var(--quaternary))",
-        foreground: "hsl(var(--quaternary-foreground))",
-      },
-      quinary: {
-        DEFAULT: "hsl(var(--quinary))",
-        foreground: "hsl(var(--quinary-foreground))",
-      },
+      secondary: "hsl(var(--secondary))",
       destructive: {
         DEFAULT: "hsl(var(--destructive))",
+        100: "hsl(var(--destructive-100))",
         foreground: "hsl(var(--destructive-foreground))",
       },
       muted: {
@@ -52,28 +40,9 @@ export const cartridgeTWPreset: Partial<Config> = {
         DEFAULT: "hsl(var(--accent))",
         foreground: "hsl(var(--accent-foreground))",
       },
-      popover: {
-        DEFAULT: "hsl(var(--popover))",
-        foreground: "hsl(var(--popover-foreground))",
-      },
-      spacer: {
-        DEFAULT: "hsl(var(--spacer))",
-      },
-      info: {
-        DEFAULT: "hsl(var(--info))",
-        foreground: "hsl(var(--info-foreground))",
-        icon: "hsl(var(--info-icon))",
-      },
-      warning: {
-        DEFAULT: "hsl(var(--warning))",
-        foreground: "hsl(var(--warning-foreground))",
-        icon: "hsl(var(--warning-icon))",
-      },
-      error: {
-        DEFAULT: "hsl(var(--error))",
-        foreground: "hsl(var(--error-foreground))",
-        icon: "hsl(var(--error-icon))",
-      },
+      border: "hsl(var(--background)/0.12)",
+      input: "hsl(var(--background-200)/0.12)",
+      spacer: "hsl(var(--spacer))",
     },
     extend: {
       fontFamily: {

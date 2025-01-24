@@ -50,22 +50,25 @@ export const Transfer = () => {
   return (
     <div>
       <h2>Session Transfer STRK</h2>
-      <Button onClick={() => execute("0x0")}>Transfer 0 STRK to self</Button>
-      <Button onClick={() => execute("0x1C6BF52634000")} disabled={submitted}>
-        Transfer 0.005 STRK to self
-      </Button>
-      <Button
-        onClick={() => execute("1B1AE4D6E2EF500000")}
-        disabled={submitted}
-      >
-        Transfer 500 STRK to self
-      </Button>
-      {txnHash && (
-        <>
-          <p>Transaction: {txnHash}</p>
-          <p>Chain: {network}</p>
-        </>
-      )}
+
+      <div className="flex flex-wrap gap-1">
+        <Button onClick={() => execute("0x0")}>Transfer 0 STRK to self</Button>
+        <Button onClick={() => execute("0x1C6BF52634000")} disabled={submitted}>
+          Transfer 0.005 STRK to self
+        </Button>
+        <Button
+          onClick={() => execute("1B1AE4D6E2EF500000")}
+          disabled={submitted}
+        >
+          Transfer 500 STRK to self
+        </Button>
+        {txnHash && (
+          <>
+            <p>Transaction: {txnHash}</p>
+            <p>Chain: {network}</p>
+          </>
+        )}
+      </div>
     </div>
   );
 };

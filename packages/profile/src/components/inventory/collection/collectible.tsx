@@ -75,13 +75,13 @@ export function Collectible() {
             if (!collection || !asset) {
               return <LayoutContentLoader />;
             }
-            const assets = asset.attributes.filter(
+            const assets = (asset.attributes || []).filter(
               (a) => !!(a.trait_type || a.trait) && !!a.value,
             );
             return (
               <>
                 <LayoutHeader
-                  title={`${asset.name} #${parseInt(asset.tokenId, 16)}`}
+                  title={`${asset.name || ""} #${parseInt(asset.tokenId, 16)}`}
                   description={
                     <CopyText
                       value={collection.name}
@@ -133,13 +133,13 @@ export const Image = ({ imageUrl }: { imageUrl: string | undefined }) => {
         className="w-[60%] aspect-square rounded-lg bg-cover bg-center flex py-4 place-content-center overflow-hidden p-4"
         style={{
           backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${
-            imageUrl ?? "/public/placeholder.svg"
+            imageUrl || "/public/placeholder.svg"
           })`,
         }}
       >
         <img
           className="object-contain"
-          src={imageUrl ?? "/public/placeholder.svg"}
+          src={imageUrl || "/public/placeholder.svg"}
         />
       </div>
     </div>
@@ -155,7 +155,7 @@ export const Description = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="uppercase text-[11px] text-quaternary-foreground font-bold tracking-wider">
+        <CardTitle className="uppercase text-[11px] text-muted-foreground font-bold tracking-wider">
           Description
         </CardTitle>
       </CardHeader>
@@ -174,7 +174,7 @@ export const Properties = ({
   return (
     <Card>
       <CardHeader className="h-10 flex flex-row items-center justify-between">
-        <CardTitle className="uppercase text-[11px] text-quaternary-foreground font-bold tracking-wider">
+        <CardTitle className="uppercase text-[11px] text-muted-foreground font-bold tracking-wider">
           Properties
         </CardTitle>
       </CardHeader>
@@ -185,7 +185,7 @@ export const Properties = ({
           return typeof property.value === "string" ? (
             <div
               key={`${trait}-${property.value}`}
-              className="bg-secondary p-3 flex flex-col gap-1"
+              className="bg-background-100 p-3 flex flex-col gap-1"
             >
               {typeof trait === "string" ? (
                 <div className="uppercase text-muted-foreground text-2xs font-bold">
@@ -202,7 +202,7 @@ export const Properties = ({
           (_, i) => (
             <div
               key={`fill-${i}`}
-              className="bg-secondary p-3 flex flex-col gap-1"
+              className="bg-background-100 p-3 flex flex-col gap-1"
             />
           ),
         )}
@@ -223,7 +223,7 @@ export const Details = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="uppercase text-[11px] text-quaternary-foreground font-bold tracking-wider">
+        <CardTitle className="uppercase text-[11px] text-muted-foreground font-bold tracking-wider">
           details
         </CardTitle>
       </CardHeader>

@@ -9,7 +9,7 @@ export const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "flex flex-col rounded overflow-hidden text-secondary-foreground gap-y-px shrink-0",
+      "flex flex-col rounded overflow-hidden text-foreground gap-y-px shrink-0",
       className,
     )}
     {...props}
@@ -24,7 +24,10 @@ export const CardHeader = React.forwardRef<
   icon ? (
     <div
       ref={ref}
-      className={cn("h-9 flex items-center gap-x-px bg-secondary", className)}
+      className={cn(
+        "h-9 flex items-center gap-x-px bg-background-100",
+        className,
+      )}
     >
       {React.isValidElement(icon) ? (
         <CardIcon>{icon}</CardIcon>
@@ -37,7 +40,7 @@ export const CardHeader = React.forwardRef<
   ) : (
     <div
       ref={ref}
-      className={cn("flex flex-col gap-y-1 p-3 bg-secondary", className)}
+      className={cn("flex flex-col gap-y-1 p-3 bg-background-100", className)}
       {...props}
     />
   ),
@@ -59,7 +62,7 @@ export const CardIcon = React.forwardRef<
   ({ className, src, ...props }, ref): React.ReactNode => (
     <div
       ref={ref}
-      className="h-9 w-9 p-2 bg-secondary flex items-center justify-center"
+      className="h-9 w-9 p-2 bg-background-100 flex items-center justify-center"
     >
       {src ? (
         <img
@@ -116,7 +119,7 @@ export const CardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm p-3 bg-secondary", className)}
+    className={cn("text-sm p-3 bg-background-100", className)}
     {...props}
   />
 ));
@@ -150,7 +153,7 @@ export const CardListItem = React.forwardRef<
       )}
       <div
         className={cn(
-          "px-3 flex-1 h-full flex items-center justify-between bg-secondary",
+          "px-3 flex-1 h-full flex items-center justify-between bg-background-100",
           className,
         )}
         {...props}
@@ -160,7 +163,7 @@ export const CardListItem = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "flex flex-col gap-y-1 p-3 bg-secondary justify-between",
+        "flex flex-col gap-y-1 p-3 bg-background-100 justify-between",
         className,
       )}
       {...props}
@@ -175,7 +178,7 @@ const CardListItemIcon = React.forwardRef<
 >(({ className, src, ...props }, ref) => (
   <div
     ref={ref}
-    className="h-11 w-11 bg-secondary flex items-center justify-center"
+    className="h-11 w-11 bg-background-100 flex items-center justify-center"
   >
     {src ? (
       <img

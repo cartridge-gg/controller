@@ -125,7 +125,12 @@ export function SendCollection() {
       <LayoutHeader
         title={`Send (${tokenIds.length}) ${collection.name}`}
         description={<CopyAddress address={address} size="sm" />}
-        icon={<CollectionImage imageUrl={collection.imageUrl} size="xs" />}
+        icon={
+          <CollectionImage
+            imageUrl={collection.imageUrl || undefined}
+            size="xs"
+          />
+        }
       />
       <LayoutContent className="gap-6">
         <Recipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
@@ -166,18 +171,18 @@ const Warning = ({
   return (
     <div
       className={cn(
-        "border border-destructive rounded flex items-center gap-2 p-2 cursor-pointer select-none",
+        "border border-destructive-foreground rounded flex items-center gap-2 p-2 cursor-pointer select-none",
         !warning && "hidden",
       )}
       onClick={() => setValidated(!validated)}
     >
       {validated && (
-        <CheckboxCheckedIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
+        <CheckboxCheckedIcon className="text-destructive-foreground min-h-5 min-w-5 hover:opacity-80" />
       )}
       {!validated && (
-        <CheckboxUncheckedIcon className="text-destructive min-h-5 min-w-5 hover:opacity-80" />
+        <CheckboxUncheckedIcon className="text-destructive-foreground min-h-5 min-w-5 hover:opacity-80" />
       )}
-      <p className="text-xs text-destructive">{warning}</p>
+      <p className="text-xs text-destructive-foreground">{warning}</p>
     </div>
   );
 };

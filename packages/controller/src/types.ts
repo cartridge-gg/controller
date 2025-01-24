@@ -127,7 +127,6 @@ export interface Keychain {
   }>;
   delegateAccount(): string;
   username(): string;
-  fetchControllers(contractAddresses: string[]): Promise<ControllerAccounts>;
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;

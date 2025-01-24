@@ -10,7 +10,7 @@ import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
 import InAppSpy from "inapp-spy";
-import { usePostHog } from "@/context/posthog";
+import { usePostHog } from "@/hooks/posthog";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -25,6 +25,7 @@ interface CreateControllerViewProps {
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
   onSubmit: () => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
 }
 
@@ -39,6 +40,7 @@ export function CreateControllerView({
   onUsernameFocus,
   onUsernameClear,
   onSubmit,
+  onKeyDown,
 }: CreateControllerViewProps) {
   return (
     <Container
@@ -53,14 +55,15 @@ export function CreateControllerView({
     >
       <form
         className="flex flex-col flex-1"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") e.preventDefault();
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
         }}
       >
         <Content className="gap-0">
           <div
             className={cn(
-              "border-[#E46958] rounded",
+              "border-destructive-100 rounded",
               validation.status === "invalid" || error ? "border" : undefined,
             )}
           >
@@ -72,6 +75,7 @@ export function CreateControllerView({
               onChange={(e) => {
                 onUsernameChange(e.target.value.toLowerCase());
               }}
+              onKeyDown={onKeyDown}
               isLoading={validation.status === "validating"}
               disabled={isLoading}
               onClear={onUsernameClear}
@@ -112,9 +116,9 @@ export function CreateControllerView({
           <Legal />
 
           <Button
+            type="submit"
             isLoading={isLoading}
             disabled={validation.status !== "valid"}
-            onClick={onSubmit}
           >
             {validation.exists ? "login" : "sign up"}
           </Button>
@@ -152,20 +156,49 @@ export function CreateController({
   const hasLoggedFocus = useRef(false);
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
+  const pendingSubmitRef = useRef(false);
 
   const [usernameField, setUsernameField] = useState({
     value: "",
     error: undefined,
   });
 
-  const { debouncedValue: username } = useDebounce(usernameField.value, 100);
-  const validation = useUsernameValidation(username);
+  // Debounce validation quickly to reduce latency
+  const { debouncedValue: validationUsername } = useDebounce(
+    usernameField.value,
+    25,
+  );
+
+  const validation = useUsernameValidation(validationUsername);
+  const { debouncedValue: debouncedValidation } = useDebounce(validation, 200);
 
   const { isLoading, error, setError, handleSubmit } = useCreateController({
     onCreated,
     isSlot,
     loginMode,
   });
+
+  const handleFormSubmit = () => {
+    if (!usernameField.value) {
+      return;
+    }
+
+    if (validation.status === "validating") {
+      pendingSubmitRef.current = true;
+      return;
+    }
+
+    if (validation.status === "valid") {
+      handleSubmit(usernameField.value, !!validation.exists);
+    }
+  };
+
+  useEffect(() => {
+    if (pendingSubmitRef.current && debouncedValidation.status === "valid") {
+      pendingSubmitRef.current = false;
+      handleFormSubmit();
+    }
+  }, [debouncedValidation.status, handleFormSubmit]);
 
   const [{ isInApp }] = useState(() => InAppSpy());
 
@@ -204,18 +237,18 @@ export function CreateController({
     setUsernameField((u) => ({ ...u, value: "" }));
   };
 
-  const handleFormSubmit = () => {
-    if (!usernameField.value) {
-      return;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleFormSubmit();
     }
-    handleSubmit(usernameField.value, !!validation.exists);
   };
 
   return (
     <CreateControllerView
       theme={theme}
       usernameField={usernameField}
-      validation={validation}
+      validation={debouncedValidation}
       isLoading={isLoading}
       error={error}
       isInAppBrowser={isInApp}
@@ -223,6 +256,7 @@ export function CreateController({
       onUsernameFocus={handleUsernameFocus}
       onUsernameClear={handleUsernameClear}
       onSubmit={handleFormSubmit}
+      onKeyDown={handleKeyDown}
     />
   );
 }

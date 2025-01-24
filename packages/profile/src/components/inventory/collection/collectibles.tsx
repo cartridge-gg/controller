@@ -67,7 +67,10 @@ export const Collectibles = ({
                   </Button>
                 </div>
               </CardHeader>
-              <CollectionImage imageUrl={asset.imageUrl} size="xl" />
+              <CollectionImage
+                imageUrl={asset.imageUrl || undefined}
+                size="xl"
+              />
             </Card>
           </Link>
         );

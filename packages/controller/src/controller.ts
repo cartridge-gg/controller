@@ -228,6 +228,34 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.profile.open();
   }
 
+  async openProfileTo(to: string) {
+    if (!this.profile || !this.iframes.profile?.url) {
+      console.error("Profile is not ready");
+      return;
+    }
+    if (!this.account) {
+      console.error("Account is not ready");
+      return;
+    }
+
+    this.profile.navigate(`${this.iframes.profile.url?.pathname}/${to}`);
+    this.iframes.profile.open();
+  }
+
+  async openProfileAt(at: string) {
+    if (!this.profile || !this.iframes.profile?.url) {
+      console.error("Profile is not ready");
+      return;
+    }
+    if (!this.account) {
+      console.error("Account is not ready");
+      return;
+    }
+
+    this.profile.navigate(at);
+    this.iframes.profile.open();
+  }
+
   async openSettings() {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
@@ -268,16 +296,6 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return this.keychain.username();
-  }
-
-  fetchControllers(
-    contractAddresses: string[],
-  ): Promise<Record<string, string>> {
-    if (!this.keychain) {
-      throw new NotReadyToConnect().message;
-    }
-
-    return this.keychain.fetchControllers(contractAddresses);
   }
 
   openPurchaseCredits() {

@@ -90,8 +90,8 @@ function Row({
     >
       <div
         className={cn(
-          "grow flex justify-between items-center px-3 py-2 text-sm gap-x-3 sticky top-0 bg-secondary hover:bg-quaternary",
-          self && "bg-quaternary text-primary",
+          "grow flex justify-between items-center px-3 py-2 text-sm gap-x-3 sticky top-0 bg-background-100 hover:bg-background-200",
+          self && "bg-background-200 text-primary",
         )}
       >
         <div className="flex items-center justify-between grow sticky top-0 gap-x-3">
@@ -139,7 +139,7 @@ function Trophies({
           key={`${trophy.address}-${trophy.id}`}
           className={cn(
             "w-6 h-6 border rounded-md flex items-center justify-center",
-            self ? "border-quinary" : "border-quaternary",
+            self ? "border-background-300" : "border-background-200",
           )}
         >
           <div className={cn("w-4 h-4", trophy.icon, "fa-solid")} />

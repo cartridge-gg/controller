@@ -9,7 +9,6 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LoginMode } from "@/components/connect/types";
-import { SESSION_EXPIRATION } from "@/const";
 import { PageLoading } from "@/components/Loading";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -110,7 +109,7 @@ export function Session() {
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
-    async (transaction_hash?: string) => {
+    async (transaction_hash?: string, expiresAt?: bigint) => {
       if (!queries.callback_uri && !queries.redirect_uri) {
         throw new Error("Expected either callback_uri or redirect_uri");
       }
@@ -122,7 +121,7 @@ export function Session() {
         address: controller.address,
         ownerGuid: controller.ownerGuid(),
         transactionHash: transaction_hash,
-        expiresAt: String(SESSION_EXPIRATION),
+        expiresAt: String(expiresAt),
       });
     },
     [queries.callback_uri, queries.redirect_uri, controller, onCallback],

@@ -4,42 +4,66 @@
 	import { account, username } from '../stores/account';
 	import UserInfo from '../components/UserInfo.svelte';
 	import TransferEth from '../components/TransferEth.svelte';
-	import { ETH_CONTRACT } from '../constants';
+	import { ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS } from '../constants';
+	import { constants } from 'starknet';
+
+	const policies = {
+		contracts: {
+			[ETH_CONTRACT_ADDRESS]: {
+				methods: [
+					{
+						name: 'approve',
+						entrypoint: 'approve',
+						description:
+							'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'
+					},
+					{ name: 'transfer', entrypoint: 'transfer' },
+					{ name: 'mint', entrypoint: 'mint' },
+					{ name: 'burn', entrypoint: 'burn' },
+					{ name: 'allowance', entrypoint: 'allowance' }
+				]
+			},
+			[STRK_CONTRACT_ADDRESS]: {
+				methods: [
+					{
+						name: 'approve',
+						entrypoint: 'approve',
+						description:
+							'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'
+					},
+					{ name: 'transfer', entrypoint: 'transfer' },
+					{ name: 'mint', entrypoint: 'mint' },
+					{ name: 'burn', entrypoint: 'burn' },
+					{ name: 'allowance', entrypoint: 'allowance' }
+				]
+			},
+			'0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e': {
+				methods: [{ name: 'new_game', entrypoint: 'new_game' }]
+			}
+		},
+		messages: []
+	};
 
 	let controller = new Controller({
-		policies: [
+		policies,
+		defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+		chains: [
 			{
-				target: ETH_CONTRACT,
-				method: 'approve',
-				description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'
+				rpcUrl: 'https://api.cartridge.gg/x/starknet/sepolia'
 			},
 			{
-				target: ETH_CONTRACT,
-				method: 'transfer'
-			},
-			{
-				target: ETH_CONTRACT,
-				method: 'mint'
-			},
-			{
-				target: ETH_CONTRACT,
-				method: 'burn'
-			},
-			{
-				target: ETH_CONTRACT,
-				method: 'allowance'
+				rpcUrl: 'https://api.cartridge.gg/x/starknet/mainnet'
 			}
-		],
-		rpc: 'https://api.cartridge.gg/x/starknet/sepolia' // sepolia, mainnet, or slot
+		]
 	});
 
 	let loading: boolean = true;
 
 	async function connect() {
 		try {
-			const res = await controller.connect();
-			if (res) {
-				account.set(controller);
+			const acc = await controller.connect();
+			if (acc) {
+				account.set(acc);
 				username.set(await controller.username());
 			}
 		} catch (e) {

@@ -15,9 +15,9 @@
     "test:ci": "vitest run",
     "storybook": "storybook dev -p 6001 --no-open",
     "storybook:build": "storybook build",
-    "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6006 --silent",
+    "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6001 --silent",
     "test-storybook": "test-storybook --testTimeout=60000",
-    "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6006 'pnpm test-storybook'"
+    "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6001 'pnpm test-storybook'"
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
@@ -37,6 +37,7 @@
     "fast-deep-equal": "catalog:",
     "graphql-request": "^5.0.0",
     "inapp-spy": "4.2.1",
+    "lodash": "catalog:",
     "p-throttle": "^6.2.0",
     "posthog-js-lite": "3.2.1",
     "react": "catalog:",
@@ -45,17 +46,13 @@
     "react-router-dom": "catalog:",
     "sonner": "catalog:",
     "viem": "catalog:",
-    "wagmi": "^1.4.12",
-    "lodash": "^4.17.21"
+    "wagmi": "^1.4.12"
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",
     "@cartridge/tsconfig": "workspace:*",
-    "@types/lodash": "^4.14.202",
-    "@chromatic-com/storybook": "^1.9.0",
+    "@types/lodash": "catalog:",
     "@storybook/addon-essentials": "catalog:",
-    "@storybook/addon-interactions": "catalog:",
-    "@storybook/addon-links": "catalog:",
     "@storybook/addon-themes": "catalog:",
     "@storybook/blocks": "catalog:",
     "@storybook/react": "catalog:",

@@ -13,7 +13,7 @@ import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 import { execute } from "@/utils/connection/execute";
-import { usePostHog } from "@/context/posthog";
+import { usePostHog } from "@/hooks/posthog";
 
 export function Home() {
   const { context, setContext, controller, error, policies, upgrade } =
@@ -28,8 +28,8 @@ export function Home() {
       controller.isRequestedSession(policies).then((isRequestedSession) => {
         setHasSessionForPolicies(isRequestedSession);
       });
-    } else {
-      setHasSessionForPolicies(undefined);
+    } else if (controller && !policies) {
+      setHasSessionForPolicies(true);
     }
   }, [controller, policies]);
 
@@ -75,16 +75,6 @@ export function Home() {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
-        });
-
-        return <></>;
-      }
-
-      if (hasSessionForPolicies) {
-        context.resolve({
-          code: ResponseCodes.SUCCESS,
-          address: controller.address,
-          policies: policies,
         });
 
         return <></>;

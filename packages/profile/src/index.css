@@ -5,3 +5,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply bg-background text-foreground ring-foreground;
+  }
+}

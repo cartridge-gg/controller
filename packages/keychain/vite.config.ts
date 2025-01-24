@@ -30,12 +30,19 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": "/src",
+      ...(mode === "production"
+        ? {
+            "fetch-cookie": "/src/shims/fetch-cookie.ts",
+            pako: "/src/shims/pako.ts",
+          }
+        : {}),
     },
   },
   root: "./",
   publicDir: "public",
   build: {
     rollupOptions: {
+      external: [],
       output: {
         manualChunks(id) {
           // Chunk splitting logic

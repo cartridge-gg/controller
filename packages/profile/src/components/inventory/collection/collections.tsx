@@ -29,7 +29,7 @@ export function Collections() {
                   </div>
                 </CardHeader>
 
-                <CollectionImage imageUrl={collection.imageUrl} />
+                <CollectionImage imageUrl={collection.imageUrl || undefined} />
               </Card>
             </Link>
           ))}

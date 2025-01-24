@@ -73,11 +73,19 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
   const [isUpgrading, setIsUpgrading] = useState<boolean>(false);
   const [current, setCurrent] = useState<ControllerVersionInfo>();
   const [calls, setCalls] = useState<JsCall[]>([]);
+  const [syncedControllerAddress, setSyncedControllerAddress] =
+    useState<string>();
 
   useEffect(() => {
     if (!controller) {
       return;
     }
+
+    // Skip if we already synced this controller
+    if (syncedControllerAddress === controller.address) {
+      return;
+    }
+
     setIsSynced(false);
 
     controller
@@ -89,6 +97,7 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
 
         setCurrent(current);
         setAvailable(current?.version !== LATEST_CONTROLLER.version);
+        setSyncedControllerAddress(controller.address);
       })
       .catch((e) => {
         if (e.message.includes("Contract not found")) {
@@ -104,8 +113,11 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
           setError(e);
         }
       })
-      .finally(() => setIsSynced(true));
-  }, [controller]);
+      .finally(() => {
+        setSyncedControllerAddress(controller.address);
+        setIsSynced(true);
+      });
+  }, [controller, syncedControllerAddress]);
 
   useEffect(() => {
     if (!controller || !LATEST_CONTROLLER) {

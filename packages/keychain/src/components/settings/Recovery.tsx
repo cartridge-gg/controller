@@ -51,7 +51,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
               onChange={(e) => setExternalOwnerAddress(e.target.value)}
             />
             {!isValid && externalOwnerAddress !== "" && (
-              <div className="flex items-center gap-2 text-error-icon">
+              <div className="flex items-center gap-2 text-destructive-foreground">
                 <AlertIcon size="sm" />
                 <div className="text-sm">Invalid address!</div>
               </div>

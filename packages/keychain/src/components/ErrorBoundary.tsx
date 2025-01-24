@@ -4,7 +4,7 @@ import { AlertIcon, ExternalIcon, Button } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { Link } from "react-router-dom";
-import { usePostHog } from "@/context/posthog";
+import { usePostHog } from "@/hooks/posthog";
 import { useEffect } from "react";
 
 export class ErrorBoundary extends React.Component<
@@ -48,11 +48,11 @@ export function ErrorPage({ error }: { error: Error }) {
       Icon={AlertIcon}
     >
       <Content className="gap-4">
-        <div className="flex w-full px-4 py-6 bg-secondary border border-quaternary rounded">
+        <div className="flex w-full px-4 py-6 bg-background-100 border border-background-200 rounded">
           <p className="w-full text-sm">{error.message}</p>
         </div>
 
-        <div className="flex items-center justify-between w-full px-4 py-6 bg-secondary border border-quaternary rounded">
+        <div className="flex items-center justify-between w-full px-4 py-6 bg-background-100 border border-background-200 rounded">
           <p className="text-sm font-semibold">Get help</p>
 
           <Link

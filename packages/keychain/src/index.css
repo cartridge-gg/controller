@@ -6,18 +6,16 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-}
+@layer base {
+  html,
+  body {
+    @apply bg-background text-foreground ring-foreground;
 
-html,
-body {
-  background: hsl(var(--background));
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
 
-  &::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
+    &::-webkit-scrollbar {
+      display: none; /* Safari and Chrome */
+    }
   }
 }

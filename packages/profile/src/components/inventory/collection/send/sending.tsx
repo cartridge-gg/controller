@@ -18,9 +18,9 @@ export function Sending({ assets }: { assets: Asset[] }) {
       {assets.map((asset) => (
         <Item
           key={asset.tokenId}
-          name={asset.name}
+          name={asset.name || ""}
           tokenId={asset.tokenId}
-          imageUrl={asset.imageUrl}
+          imageUrl={asset.imageUrl || undefined}
         />
       ))}
     </Card>
@@ -30,11 +30,11 @@ export function Sending({ assets }: { assets: Asset[] }) {
 function Item({
   name,
   tokenId,
-  imageUrl,
+  imageUrl = "/public/placeholder.svg",
 }: {
   name: string;
   tokenId: string;
-  imageUrl: string;
+  imageUrl?: string;
 }) {
   return (
     <CardContent
@@ -42,13 +42,13 @@ function Item({
         "bg-background flex items-center p-0 h-11 gap-px hover:opacity-80",
       )}
     >
-      <div className="bg-secondary flex w-11 aspect-square items-center justify-center">
-        <div className="flex items-center justify-center overflow-hidden h-7 w-7 bg-quaternary p-0.5">
+      <div className="bg-background-100 flex w-11 aspect-square items-center justify-center">
+        <div className="flex items-center justify-center overflow-hidden h-7 w-7 bg-background-200 p-0.5">
           <CollectionImage imageUrl={imageUrl} size="xs" />
         </div>
       </div>
 
-      <div className="bg-secondary flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
+      <div className="bg-background-100 flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
         <p>{`${name} #${parseInt(tokenId, 16)}`}</p>
       </div>
     </CardContent>

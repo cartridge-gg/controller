@@ -32,6 +32,7 @@ export function ErrorAlert({
   isExpanded = false,
   allowToggle = false,
   copyText,
+  className,
 }: {
   title: string;
   description?: string | ReactElement;
@@ -39,6 +40,7 @@ export function ErrorAlert({
   isExpanded?: boolean;
   allowToggle?: boolean;
   copyText?: string;
+  className?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -54,13 +56,13 @@ export function ErrorAlert({
   const styles = useMemo(() => {
     switch (variant) {
       case "info":
-        return { bg: "bg-info", text: "text-info-foreground" };
+        return { bg: "bg-[#95c1ea]", text: "text-[black]" };
       case "warning":
-        return { bg: "bg-warning", text: "text-warning-foreground" };
+        return { bg: "bg-[#1f2320]", text: "text-[white]" };
       case "error":
-        return { bg: "bg-error", text: "text-error-foreground" };
+        return { bg: "bg-destructive", text: "text-[black]" };
       default:
-        return { bg: "bg-secondary", text: "text-secondary-foreground" };
+        return { bg: "bg-background-100", text: "text-foreground" };
     }
   }, [variant]);
 
@@ -69,6 +71,7 @@ export function ErrorAlert({
       type="single"
       collapsible={collapsible}
       defaultValue={isExpanded ? "item-1" : undefined}
+      className={className}
     >
       <AccordionItem
         value="item-1"
@@ -119,9 +122,11 @@ export function ErrorAlert({
 export function ControllerErrorAlert({
   error,
   isPaymaster = false,
+  className,
 }: {
   error: ControllerError | Error;
   isPaymaster?: boolean;
+  className?: string;
 }) {
   let title = "An error occurred";
   let description: string | React.ReactElement = error.message;
@@ -140,6 +145,7 @@ export function ControllerErrorAlert({
         variant={variant}
         isExpanded={isExpanded}
         copyText={copyText}
+        className={className}
       />
     );
   }
@@ -148,10 +154,11 @@ export function ControllerErrorAlert({
     case ErrorCode.SignError:
       title = "Signing Error";
       if (error.message.includes("Get assertion error")) {
+        title = "Authentication Error";
         description =
           "The authentication request timed out or was cancelled. Please try again.";
+        isExpanded = true;
       }
-
       break;
     case ErrorCode.StorageError:
       title = "Storage Error";
@@ -189,7 +196,32 @@ export function ControllerErrorAlert({
       title = "Cairo String Conversion Error";
       break;
     case ErrorCode.DeviceCreateCredential:
+      title = "Device Registration Error";
+      description = "Failed to register your device. Please try again.";
+      isExpanded = true;
+      break;
     case ErrorCode.DeviceGetAssertion:
+      title = "Authentication Error";
+      description =
+        "The authentication request timed out or was cancelled. Please try again.";
+      isExpanded = true;
+      break;
+    case ErrorCode.DeviceBadAssertion:
+      title = "Authentication Error";
+      description = "Invalid authentication response. Please try again.";
+      isExpanded = true;
+      break;
+    case ErrorCode.DeviceChannel:
+      title = "Communication Error";
+      description = "Failed to communicate with your device. Please try again.";
+      isExpanded = true;
+      break;
+    case ErrorCode.DeviceOrigin:
+      title = "Security Error";
+      description =
+        "Invalid security origin. Please ensure you're using a secure connection.";
+      isExpanded = true;
+      break;
     case ErrorCode.PaymasterExecutionTimeNotReached:
       title = "Paymaster Execution Time Not Reached";
       break;
@@ -213,11 +245,6 @@ export function ControllerErrorAlert({
       break;
     case ErrorCode.PaymasterSerialization:
       title = "Paymaster Serialization Error";
-      break;
-    case ErrorCode.DeviceBadAssertion:
-    case ErrorCode.DeviceChannel:
-    case ErrorCode.DeviceOrigin:
-      title = "Device Error";
       break;
     case ErrorCode.AccountSigning:
     case ErrorCode.AccountProvider:
@@ -305,6 +332,7 @@ export function ControllerErrorAlert({
       variant={variant}
       isExpanded={isExpanded}
       copyText={copyText}
+      className={className}
     />
   );
 }

@@ -1,10 +1,10 @@
-import { createContext, useContext, PropsWithChildren } from "react";
+import { createContext } from "react";
 import PostHog from "posthog-js-lite";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Properties = Record<string, any>;
 
-class PostHogWrapper extends PostHog {
+export class PostHogWrapper extends PostHog {
   isLocal =
     typeof window !== "undefined" &&
     window.location.hostname.includes("localhost");
@@ -87,26 +87,6 @@ interface PostHogContextType {
   posthog: PostHogWrapper;
 }
 
-const PostHogContext = createContext<PostHogContextType | undefined>(undefined);
-
-export function PostHogProvider({ children }: PropsWithChildren) {
-  const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
-    host: import.meta.env.VITE_POSTHOG_HOST,
-    persistence: "memory",
-    autocapture: false,
-  });
-
-  return (
-    <PostHogContext.Provider value={{ posthog }}>
-      {children}
-    </PostHogContext.Provider>
-  );
-}
-
-export function usePostHog() {
-  const context = useContext(PostHogContext);
-  if (!context) {
-    return undefined;
-  }
-  return context.posthog;
-}
+export const PostHogContext = createContext<PostHogContextType | undefined>(
+  undefined,
+);
