@@ -19,11 +19,7 @@ import {
 } from "@/components/provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import { Policies } from "@cartridge/presets";
-import {
-  defaultTheme,
-  controllerConfigs,
-  ControllerTheme,
-} from "@cartridge/presets";
+import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { VerifiableControllerTheme } from "@/context/theme";
 
@@ -104,24 +100,15 @@ export function useConnectionValue() {
     const themeParam = urlParams.get("theme");
     const presetParam = urlParams.get("preset");
 
-    // Provides backward compatability for Controler <= v0.5.1
     if (themeParam) {
       const decodedPreset = decodeURIComponent(themeParam);
-      try {
-        const parsedTheme = JSON.parse(decodedPreset) as ControllerTheme;
+      if (controllerConfigs[decodedPreset].theme) {
         setTheme({
-          ...parsedTheme,
+          ...controllerConfigs[decodedPreset].theme,
           verified: true,
         });
-      } catch (e) {
-        if (controllerConfigs[decodedPreset].theme) {
-          setTheme({
-            ...controllerConfigs[decodedPreset].theme,
-            verified: true,
-          });
-        } else {
-          console.error(e);
-        }
+      } else {
+        console.error("Theme preset not valid");
       }
     }
 
