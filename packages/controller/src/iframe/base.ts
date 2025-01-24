@@ -19,12 +19,10 @@ export class IFrame<CallSender extends {}> implements Modal {
     id,
     url,
     preset,
-    theme,
-    colorMode,
     onClose,
     onConnect,
     methods = {},
-  }: Pick<ControllerOptions, "theme" | "preset" | "colorMode"> & {
+  }: Pick<ControllerOptions, "preset"> & {
     id: string;
     url: URL;
     onClose?: () => void;
@@ -35,16 +33,8 @@ export class IFrame<CallSender extends {}> implements Modal {
       return;
     }
 
-    if (theme) {
-      url.searchParams.set("theme", theme);
-    }
-
     if (preset) {
       url.searchParams.set("preset", preset);
-    }
-
-    if (colorMode) {
-      url.searchParams.set("colorMode", colorMode);
     }
 
     this.url = url;
