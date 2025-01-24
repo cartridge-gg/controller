@@ -88,7 +88,7 @@ export default class ControllerProvider extends BaseProvider {
 
       const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
 
-      // For backwards compat with controller <0.6.1, we need to use rpcUrl from the probe response if available
+      // For backwards compat with controller <=0.6.0
       let rpcUrl = response?.rpcUrl || this.rpcUrl();
       this.account = new ControllerAccount(
         this,
