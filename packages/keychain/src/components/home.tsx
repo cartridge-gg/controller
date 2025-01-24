@@ -28,8 +28,8 @@ export function Home() {
       controller.isRequestedSession(policies).then((isRequestedSession) => {
         setHasSessionForPolicies(isRequestedSession);
       });
-    } else {
-      setHasSessionForPolicies(undefined);
+    } else if (controller && !policies) {
+      setHasSessionForPolicies(true);
     }
   }, [controller, policies]);
 
@@ -75,16 +75,6 @@ export function Home() {
         context.resolve({
           code: ResponseCodes.SUCCESS,
           address: controller.address,
-        });
-
-        return <></>;
-      }
-
-      if (hasSessionForPolicies) {
-        context.resolve({
-          code: ResponseCodes.SUCCESS,
-          address: controller.address,
-          policies: policies,
         });
 
         return <></>;

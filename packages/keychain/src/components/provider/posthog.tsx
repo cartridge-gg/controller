@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { PostHogContext, PostHogWrapper } from "@/context/posthog";
 import { useConnectionValue } from "@/hooks/connection";
 
@@ -11,17 +11,25 @@ export function PostHogProvider({ children }: PropsWithChildren) {
     autocapture: false,
   });
 
+  // Track the last identified address
+  const [lastIdentifiedAddress, setLastIdentifiedAddress] = useState<string>();
+
   useEffect(() => {
     if (controller) {
-      posthog.identify(controller.username(), {
-        address: controller.address,
-        class: controller.classHash(),
-        chainId: controller.chainId,
-      });
+      // Only identify if this is a new address
+      if (lastIdentifiedAddress !== controller.address) {
+        posthog.identify(controller.username(), {
+          address: controller.address,
+          class: controller.classHash(),
+          chainId: controller.chainId,
+        });
+        setLastIdentifiedAddress(controller.address);
+      }
     } else {
       posthog.reset();
+      setLastIdentifiedAddress(undefined);
     }
-  }, [posthog, controller]);
+  }, [posthog, controller, lastIdentifiedAddress]);
 
   useEffect(() => {
     if (origin) {
