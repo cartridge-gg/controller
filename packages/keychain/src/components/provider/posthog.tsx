@@ -1,15 +1,17 @@
 import { PropsWithChildren, useEffect } from "react";
 import { PostHogContext, PostHogWrapper } from "@/context/posthog";
 import { useConnectionValue } from "@/hooks/connection";
+import { useController } from "@/hooks/controller";
+
+export const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
+  host: import.meta.env.VITE_POSTHOG_HOST,
+  persistence: "memory",
+  autocapture: false,
+});
 
 export function PostHogProvider({ children }: PropsWithChildren) {
-  const { controller, origin } = useConnectionValue();
-
-  const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
-    host: import.meta.env.VITE_POSTHOG_HOST,
-    persistence: "memory",
-    autocapture: false,
-  });
+  const { origin } = useConnectionValue();
+  const { controller } = useController();
 
   useEffect(() => {
     if (controller) {
@@ -21,13 +23,13 @@ export function PostHogProvider({ children }: PropsWithChildren) {
     } else {
       posthog.reset();
     }
-  }, [posthog, controller]);
+  }, [controller]);
 
   useEffect(() => {
     if (origin) {
       posthog.group("company", origin);
     }
-  }, [posthog, origin]);
+  }, [origin]);
 
   return (
     <PostHogContext.Provider value={{ posthog }}>

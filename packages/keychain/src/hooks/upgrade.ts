@@ -2,7 +2,7 @@ import { JsCall } from "@cartridge/account-wasm";
 import { useCallback, useEffect, useState } from "react";
 import { addAddressPadding, Call } from "starknet";
 import { ControllerError } from "@/utils/connection";
-import Controller from "@/utils/controller";
+import { useController } from "./controller";
 
 enum OutsideExecutionVersion {
   V2,
@@ -66,7 +66,8 @@ export interface UpgradeInterface {
   onUpgrade: () => Promise<void>;
 }
 
-export const useUpgrade = (controller?: Controller): UpgradeInterface => {
+export const useUpgrade = (): UpgradeInterface => {
+  const { controller } = useController();
   const [available, setAvailable] = useState<boolean>(false);
   const [error, setError] = useState<ControllerError>();
   const [isSynced, setIsSynced] = useState<boolean>(false);

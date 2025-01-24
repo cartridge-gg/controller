@@ -36,6 +36,7 @@ import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { toast } from "sonner";
 import { DEFAULT_AMOUNT } from "./constants";
+import { useController } from "@/hooks/controller";
 
 type DepositEthProps = {
   onComplete?: (deployHash?: string) => void;
@@ -52,7 +53,8 @@ export function DepositEth(innerProps: DepositEthProps) {
 
 function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { controller, chainId } = useConnection();
+  const { chainId } = useConnection();
+  const { controller } = useController();
   const { account: extAccount } = useAccount();
 
   const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
@@ -245,7 +247,7 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
 
 function ExternalWalletProvider({ children }: PropsWithChildren) {
   const { connectors } = useInjectedConnectors({});
-  const { controller } = useConnection();
+  const { controller } = useController();
 
   if (!controller) {
     return children;

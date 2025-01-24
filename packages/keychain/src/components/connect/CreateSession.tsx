@@ -11,6 +11,8 @@ import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSession
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
 import { Button, Checkbox } from "@cartridge/ui-next";
+import { useController } from "@/hooks/controller";
+import { useUpgrade } from "@/hooks/upgrade";
 
 export function CreateSession({
   policies,
@@ -21,7 +23,9 @@ export function CreateSession({
   onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
   isUpdate?: boolean;
 }) {
-  const { controller, upgrade, chainId, theme, logout } = useConnection();
+  const { chainId, theme, logout } = useConnection();
+  const upgrade = useUpgrade();
+  const { controller } = useController();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);

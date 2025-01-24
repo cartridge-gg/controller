@@ -4,8 +4,7 @@ import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
-import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
-import { LoginMode } from "./connect/types";
+import { CreateSession, Logout, Upgrade } from "./connect";
 import { DeployController } from "./DeployController";
 import { ErrorPage } from "./ErrorBoundary";
 import { PurchaseCredits } from "./funding/PurchaseCredits";
@@ -13,16 +12,16 @@ import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 import { execute } from "@/utils/connection/execute";
-import { usePostHog } from "@/hooks/posthog";
+import Controller from "@/utils/controller";
+import { useUpgrade } from "@/hooks/upgrade";
 
-export function Home() {
-  const { context, setContext, controller, error, policies, upgrade } =
-    useConnection();
+export function Home({ controller }: { controller: Controller }) {
+  const { context, setContext, error, policies } = useConnection();
+  const upgrade = useUpgrade();
+
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
   >(undefined);
-  const posthog = usePostHog();
-
   useEffect(() => {
     if (controller && policies) {
       controller.isRequestedSession(policies).then((isRequestedSession) => {
@@ -33,29 +32,15 @@ export function Home() {
     }
   }, [controller, policies]);
 
-  useEffect(() => {
-    if (context?.type) {
-      posthog?.capture(
-        `Call ${context.type.charAt(0).toUpperCase() + context.type.slice(1)}`,
-      );
-    }
-  }, [context?.type, posthog]);
-
-  if (window.self === window.top || !context?.origin) {
-    return <></>;
-  }
-
   if (error) {
     return <ErrorPage error={error} />;
   }
 
-  // No controller, send to login
-  if (!controller) {
-    return <CreateController loginMode={LoginMode.Controller} />;
+  if (!context) {
+    return <></>;
   }
 
   if (!upgrade.isSynced || hasSessionForPolicies === undefined) {
-    // This is likely never observable in a real application but just in case.
     return <PageLoading />;
   }
 

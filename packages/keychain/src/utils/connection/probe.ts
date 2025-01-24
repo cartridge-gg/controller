@@ -4,12 +4,16 @@ import Controller from "@/utils/controller";
 export function probe({
   setController,
   setRpcUrl,
+  setOrigin,
 }: {
   setController: (controller?: Controller) => void;
+  setOrigin: (origin: string) => void;
   setRpcUrl: (rpcUrl: string) => void;
 }) {
-  return (origin: string) =>
-    async (rpcUrl: string): Promise<ProbeReply> => {
+  return (origin: string) => {
+    setOrigin(origin);
+
+    return async (rpcUrl: string): Promise<ProbeReply> => {
       const controller = Controller.fromStore(origin);
       if (!controller) {
         return Promise.reject({
@@ -23,10 +27,11 @@ export function probe({
 
       setRpcUrl(rpcUrl);
       setController(controller);
-      window.controller = controller;
+
       return Promise.resolve({
         code: ResponseCodes.SUCCESS,
         address: controller.address,
       });
     };
+  };
 }

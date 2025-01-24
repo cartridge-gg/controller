@@ -16,6 +16,7 @@ import { Balance } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
 import { isIframe } from "@cartridge/utils";
 import { DEFAULT_AMOUNT } from "./constants";
+import { useController } from "@/hooks/controller";
 
 const STRIPE_API_PUBKEY =
   "pk_test_51Kr6IXIS6lliDpf33KnwWDtIjRPWt3eAI9CuSLR6Vvc3GxHEwmSU0iszYbUlgUadSRluGKAFphe3JzltyjPAKiBK00al4RAFQu";
@@ -32,7 +33,8 @@ type PurchaseCreditsProps = {
 };
 
 export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
-  const { controller, closeModal } = useConnection();
+  const { closeModal } = useConnection();
+  const { controller } = useController();
 
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setisLoading] = useState<boolean>(false);

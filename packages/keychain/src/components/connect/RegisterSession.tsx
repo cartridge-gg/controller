@@ -11,6 +11,7 @@ import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { ParsedSessionPolicies } from "@/hooks/session";
+import { useController } from "@/hooks/controller";
 
 export function RegisterSession({
   policies,
@@ -21,7 +22,8 @@ export function RegisterSession({
   onConnect: (transaction_hash: string, expiresAt: bigint) => void;
   publicKey?: string;
 }) {
-  const { controller, theme } = useConnection();
+  const { theme } = useConnection();
+  const { controller } = useController();
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const [transactions, setTransactions] = useState<
     | {

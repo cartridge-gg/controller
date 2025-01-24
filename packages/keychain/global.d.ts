@@ -1,4 +1,4 @@
-import { Controller } from "@/utils/controller";
+import Controller from "./src/utils/controller";
 
 declare global {
   interface Window {

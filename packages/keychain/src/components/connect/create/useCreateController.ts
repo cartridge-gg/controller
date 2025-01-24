@@ -7,6 +7,7 @@ import Controller from "@/utils/controller";
 import { fetchAccount } from "./utils";
 import { PopupCenter } from "@/utils/url";
 import { useAccountQuery } from "@cartridge/utils/api/cartridge";
+import { useController } from "@/hooks/controller";
 
 export function useCreateController({
   onCreated,
@@ -20,7 +21,8 @@ export function useCreateController({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
-  const { origin, policies, chainId, rpcUrl, setController } = useConnection();
+  const { origin, policies, chainId, rpcUrl } = useConnection();
+  const { setController } = useController();
 
   useAccountQuery(
     { username: pendingUsername || "" },
@@ -77,7 +79,6 @@ export function useCreateController({
         credentialId,
       });
 
-      window.controller = controller;
       setController(controller);
       onCreated?.();
     },

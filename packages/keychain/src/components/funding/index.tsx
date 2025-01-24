@@ -1,6 +1,5 @@
 import { Container, Content, Footer } from "@/components/layout";
 import { useState } from "react";
-import { useConnection } from "@/hooks/connection";
 import {
   Button,
   ArrowIcon,
@@ -11,6 +10,7 @@ import {
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance, BalanceType } from "./Balance";
+import { useController } from "@/hooks/controller";
 
 const enum FundingState {
   SHOW_OPTIONS,
@@ -25,7 +25,7 @@ export type FundingProps = {
 };
 
 export function Funding({ title, isSlot, onComplete }: FundingProps) {
-  const { controller } = useConnection();
+  const { controller } = useController();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
   const showBalances: BalanceType[] = isSlot ? ["credits"] : ["credits", "eth"];
   const showCredits =

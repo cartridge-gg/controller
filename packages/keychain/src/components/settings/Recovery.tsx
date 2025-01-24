@@ -4,9 +4,11 @@ import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
+import { useController } from "@/hooks/controller";
 
 export function Recovery({ onBack }: { onBack: () => void }) {
-  const { controller, context, setContext } = useConnection();
+  const { context, setContext } = useConnection();
+  const { controller } = useController();
   const [externalOwnerAddress, setExternalOwnerAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 

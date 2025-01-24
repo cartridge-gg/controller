@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { LoginMode } from "@/components/connect/types";
 import { PageLoading } from "@/components/Loading";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useController } from "@/hooks/controller";
 
 type SessionResponse = {
   username: string;
@@ -44,7 +45,8 @@ export function Session() {
     [searchParams],
   );
 
-  const { controller, policies, origin } = useConnection();
+  const { policies, origin } = useConnection();
+  const { controller } = useController();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Handler for calling the callback uri.

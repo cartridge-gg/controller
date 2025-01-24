@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useConnection } from "./connection";
+import { useController } from "./controller";
 
 type TransactionHash = string;
 
@@ -9,7 +9,7 @@ interface DeployInterface {
 }
 
 export const useDeploy = (): DeployInterface => {
-  const { controller } = useConnection();
+  const { controller } = useController();
   const [isDeploying, setIsDeploying] = useState(false);
 
   const deploySelf = useCallback(

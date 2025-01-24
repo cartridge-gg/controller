@@ -1,10 +1,12 @@
 import { BoltIcon, CircleIcon } from "@cartridge/ui-next";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { Content } from "@/components/layout";
-import { useConnection } from "@/hooks/connection";
+import { useController } from "@/hooks/controller";
+import { useUpgrade } from "@/hooks/upgrade";
 
 export const Upgrade = () => {
-  const { upgrade, controller } = useConnection();
+  const upgrade = useUpgrade();
+  const { controller } = useController();
 
   return (
     <ExecutionContainer

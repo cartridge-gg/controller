@@ -8,14 +8,31 @@ import { Pending } from "./pending";
 import { Consent, Slot } from "./slot";
 import { OcclusionDetector } from "./OcclusionDetector";
 import { Fund } from "./slot/fund";
+import { useConnection } from "@/hooks/connection";
+import { useController } from "@/hooks/controller";
+import { CreateController } from "./connect";
+import { LoginMode } from "./connect/types";
 
 export function App() {
+  const { origin } = useConnection();
+  const { controller } = useController();
+
+  // Only render in iframe with valid origin
+  if (window.self === window.top || !origin) {
+    return <></>;
+  }
+
+  // If no controller is set up, show the create controller screen
+  if (!controller) {
+    return <CreateController loginMode={LoginMode.Controller} />;
+  }
+
   return (
     <>
       <OcclusionDetector />
       <div style={{ position: "relative" }}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home controller={controller} />} />
           <Route path="authenticate" element={<Authenticate />} />
           <Route path="session" element={<Session />} />
           <Route path="slot" element={<Slot />}>
