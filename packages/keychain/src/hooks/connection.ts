@@ -28,7 +28,7 @@ type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 export function useConnectionValue() {
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
-  const [origin, setOrigin] = useState<string>();
+  const [origin, setOrigin] = useState<string>(window.location.origin);
   const [rpcUrl, setRpcUrl] = useState<string>(
     import.meta.env.VITE_RPC_SEPOLIA,
   );
