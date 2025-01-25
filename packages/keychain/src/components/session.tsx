@@ -44,7 +44,7 @@ export function Session() {
     [searchParams],
   );
 
-  const { controller, policies, origin } = useConnection();
+  const { controller, policies } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Handler for calling the callback uri.
@@ -131,7 +131,7 @@ export function Session() {
   // If yes, check if the policies of the session are the same as the ones that are
   // currently being requested. Return existing session to the callback uri if policies match.
   useEffect(() => {
-    if (!controller || !origin || !policies) {
+    if (!controller || !policies) {
       return;
     }
 
@@ -154,7 +154,7 @@ export function Session() {
 
         setIsLoading(false);
       });
-  }, [controller, origin, policies, queries.public_key, onCallback]);
+  }, [controller, policies, queries.public_key, onCallback]);
 
   if (!controller) {
     return <CreateController loginMode={LoginMode.Controller} />;
