@@ -14,12 +14,10 @@ import { normalize } from "@cartridge/utils";
 import { switchChain } from "./switchChain";
 
 export function connectToController<ParentMethods extends object>({
-  setOrigin,
   setRpcUrl,
   setContext,
   setController,
 }: {
-  setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller?: Controller) => void;
@@ -28,7 +26,6 @@ export function connectToController<ParentMethods extends object>({
     methods: {
       connect: normalize(
         connect({
-          setOrigin,
           setRpcUrl,
           setContext,
         }),

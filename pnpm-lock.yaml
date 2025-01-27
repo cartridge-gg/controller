@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@cartridge/penpal':
-      specifier: ^6.2.3
-      version: 6.2.3
+      specifier: ^6.2.4
+      version: 6.2.4
     '@eslint/js':
       specifier: ^9.18.0
       version: 9.18.0
@@ -359,7 +359,7 @@ importers:
         version: link:../account-wasm
       '@cartridge/penpal':
         specifier: 'catalog:'
-        version: 6.2.3
+        version: 6.2.4
       '@starknet-io/types-js':
         specifier: 'catalog:'
         version: 0.7.10
@@ -442,7 +442,7 @@ importers:
         version: link:../controller
       '@cartridge/penpal':
         specifier: 'catalog:'
-        version: 6.2.3
+        version: 6.2.4
       '@cartridge/ui-next':
         specifier: workspace:*
         version: link:../ui-next
@@ -647,7 +647,7 @@ importers:
         version: link:../controller
       '@cartridge/penpal':
         specifier: 'catalog:'
-        version: 6.2.3
+        version: 6.2.4
       '@cartridge/ui-next':
         specifier: workspace:*
         version: link:../ui-next
@@ -1398,8 +1398,8 @@ packages:
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
 
-  '@cartridge/penpal@6.2.3':
-    resolution: {integrity: sha512-K8h9VqBfFPXcAFQNnvgBnejF/dp7249pS4jXu3NhNYR6JqMQxtcrDqfnPmJvbF4ECEBs+8Z2UiwlRQiKt5nNsg==}
+  '@cartridge/penpal@6.2.4':
+    resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
   '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/aa3a218':
     resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/aa3a218}
@@ -10445,7 +10445,7 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@cartridge/penpal@6.2.3': {}
+  '@cartridge/penpal@6.2.4': {}
 
   '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/aa3a218':
     dependencies:

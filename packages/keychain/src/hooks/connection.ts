@@ -157,23 +157,18 @@ export function useConnectionValue() {
         );
       }
     }
-  }, [
-    origin,
-    setTheme,
-    setPolicies,
-    setHasPrefundRequest,
-    setOrigin,
-    setController,
-  ]);
+  }, [origin, setTheme, setPolicies, setHasPrefundRequest, setController]);
 
   useEffect(() => {
     const connection = connectToController<ParentMethods>({
-      setOrigin,
       setRpcUrl,
       setContext,
       setController,
     });
-    connection.promise.then(setParent);
+    connection.promise.then((parent) => {
+      setOrigin(parent.origin);
+      setParent(parent);
+    });
 
     return () => {
       connection.destroy();
@@ -259,9 +254,4 @@ export function useChainId() {
 export function useRpcUrl() {
   const { rpcUrl } = useConnection();
   return rpcUrl;
-}
-
-export function useOrigin() {
-  const { context } = useConnection();
-  return context?.origin;
 }

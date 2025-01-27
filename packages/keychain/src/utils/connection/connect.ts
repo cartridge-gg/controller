@@ -3,17 +3,13 @@ import { ConnectCtx, ConnectionCtx } from "./types";
 import { Policies } from "@cartridge/presets";
 
 export function connect({
-  setOrigin,
   setRpcUrl,
   setContext,
 }: {
-  setOrigin: (origin: string) => void;
   setRpcUrl: (url: string) => void;
   setContext: (context: ConnectionCtx) => void;
 }) {
   return (origin: string) => {
-    setOrigin(origin);
-
     return (policies: Policies, rpcUrl: string): Promise<ConnectReply> => {
       setRpcUrl(rpcUrl);
 
