@@ -1,40 +1,7 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { ExecutionContainer } from "./ExecutionContainer";
 import { describe, expect, beforeEach, it, vi } from "vitest";
-
-const mockEstimateFee = vi.fn().mockImplementation(async () => ({
-  suggestedMaxFee: BigInt(1000),
-}));
-
-vi.mock("@/hooks/connection", () => ({
-  useConnection: () => ({
-    controller: {
-      estimateInvokeFee: mockEstimateFee,
-    },
-    upgrade: {
-      available: false,
-      inProgress: false,
-      error: null,
-      start: vi.fn(),
-    },
-    closeModal: vi.fn(),
-    openModal: vi.fn(),
-    logout: vi.fn(),
-    context: {},
-    origin: "https://test.com",
-    rpcUrl: "https://test.rpc.com",
-    chainId: "1",
-    chainName: "testnet",
-    policies: {},
-    theme: {},
-    hasPrefundRequest: false,
-    error: null,
-    setController: vi.fn(),
-    setContext: vi.fn(),
-    openSettings: vi.fn(),
-  }),
-  useChainId: () => "1",
-}));
+import { renderWithConnection } from "@/test/mocks/connection";
 
 describe("ExecutionContainer", () => {
   const defaultProps = {
@@ -51,38 +18,58 @@ describe("ExecutionContainer", () => {
   });
 
   it("renders basic content correctly", () => {
-    render(<ExecutionContainer {...defaultProps} />);
+    renderWithConnection(<ExecutionContainer {...defaultProps} />);
     expect(screen.getByText("Test Content")).toBeInTheDocument();
     expect(screen.getByText("SUBMIT")).toBeInTheDocument();
   });
 
   it("estimates fees when transactions are provided", async () => {
-    render(
+    const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
+      suggestedMaxFee: BigInt(1000),
+    }));
+
+    renderWithConnection(
       <ExecutionContainer
         {...defaultProps}
         transactions={[{ some: "transaction" }]}
       />,
+      {
+        controller: {
+          estimateInvokeFee,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      },
     );
 
     await waitFor(() => {
-      expect(mockEstimateFee).toHaveBeenCalled();
+      expect(estimateInvokeFee).toHaveBeenCalled();
     });
   });
 
   it("handles submit action correctly", async () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
 
-    render(
+    const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
+      suggestedMaxFee: BigInt(1000),
+    }));
+
+    renderWithConnection(
       <ExecutionContainer
         {...defaultProps}
         transactions={[{ some: "transaction" }]}
         onSubmit={onSubmit}
       />,
+      {
+        controller: {
+          estimateInvokeFee,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      },
     );
 
     // Wait for fee estimation to complete
     await waitFor(() => {
-      expect(mockEstimateFee).toHaveBeenCalled();
+      expect(estimateInvokeFee).toHaveBeenCalled();
     });
 
     // Wait for the fee to be displayed
@@ -105,19 +92,28 @@ describe("ExecutionContainer", () => {
       code: 113, // ErrorCode.InsufficientBalance,
       message: "Insufficient balance",
     });
+    const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
+      suggestedMaxFee: BigInt(1000),
+    }));
 
-    render(
+    renderWithConnection(
       <ExecutionContainer
         {...defaultProps}
         transactions={[{ some: "transaction" }]}
         onSubmit={onSubmit}
         onError={onError}
       />,
+      {
+        controller: {
+          estimateInvokeFee,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      },
     );
 
     // Wait for fee estimation to complete
     await waitFor(() => {
-      expect(mockEstimateFee).toHaveBeenCalled();
+      expect(estimateInvokeFee).toHaveBeenCalled();
     });
 
     // Wait for the fee to be displayed
@@ -135,7 +131,7 @@ describe("ExecutionContainer", () => {
   });
 
   it("shows deploy view when controller is not deployed", () => {
-    render(
+    renderWithConnection(
       <ExecutionContainer
         {...defaultProps}
         executionError={{
@@ -149,7 +145,7 @@ describe("ExecutionContainer", () => {
   });
 
   it("shows funding view when balance is insufficient", () => {
-    render(
+    renderWithConnection(
       <ExecutionContainer
         {...defaultProps}
         executionError={{
@@ -163,7 +159,7 @@ describe("ExecutionContainer", () => {
   });
 
   it("shows continue button for already registered session", () => {
-    render(
+    renderWithConnection(
       <ExecutionContainer
         {...defaultProps}
         executionError={{

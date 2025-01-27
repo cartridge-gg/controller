@@ -1,11 +1,17 @@
 import { vi } from "vitest";
 
-export const mockController = {
-  estimateInvokeFee: vi.fn(),
+export const mockPosthog = {
+  usePostHog: () => ({
+    capture: vi.fn(),
+  }),
 };
 
 export const mockConnection = {
-  controller: mockController,
+  controller: {
+    estimateInvokeFee: vi.fn().mockImplementation(async () => ({
+      suggestedMaxFee: BigInt(1000),
+    })),
+  },
   upgrade: {
     available: false,
     inProgress: false,
@@ -27,4 +33,19 @@ export const mockConnection = {
   setController: vi.fn(),
   setContext: vi.fn(),
   openSettings: vi.fn(),
+};
+
+export const mockTheme = {
+  useControllerTheme: () => ({
+    name: "cartridge",
+    verified: true,
+    icon: "icon-url",
+    cover: "cover-url",
+  }),
+};
+
+export const mockInAppSpy = {
+  default: () => ({
+    isInApp: false,
+  }),
 };
