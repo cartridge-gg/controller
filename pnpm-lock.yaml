@@ -159,8 +159,8 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#83360aa
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/83360aa
+        specifier: github:cartridge-gg/presets#aa3a218
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/aa3a218
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^0.4.2
@@ -1401,8 +1401,8 @@ packages:
   '@cartridge/penpal@6.2.3':
     resolution: {integrity: sha512-K8h9VqBfFPXcAFQNnvgBnejF/dp7249pS4jXu3NhNYR6JqMQxtcrDqfnPmJvbF4ECEBs+8Z2UiwlRQiKt5nNsg==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/83360aa':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/83360aa}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/aa3a218':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/aa3a218}
     version: 0.0.1
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
@@ -10459,7 +10459,7 @@ snapshots:
 
   '@cartridge/penpal@6.2.3': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/83360aa':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/aa3a218':
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
