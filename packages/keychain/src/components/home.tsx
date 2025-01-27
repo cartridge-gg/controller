@@ -13,7 +13,7 @@ import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 import { execute } from "@/utils/connection/execute";
-import { usePostHog } from "@/hooks/posthog";
+import { usePostHog } from "@cartridge/utils";
 
 export function Home() {
   const { context, setContext, controller, error, policies, upgrade } =

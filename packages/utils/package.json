@@ -21,6 +21,7 @@
     "dist"
   ],
   "dependencies": {
+    "posthog-js-lite": "3.2.1",
     "react": "catalog:",
     "react-query": "catalog:",
     "starknet": "catalog:",

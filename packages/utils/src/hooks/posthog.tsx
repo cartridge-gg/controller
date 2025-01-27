@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { PostHogContext } from "@/context/posthog";
+import { PostHogContext } from "../context/posthog";
 
 export function usePostHog() {
   const context = useContext(PostHogContext);
