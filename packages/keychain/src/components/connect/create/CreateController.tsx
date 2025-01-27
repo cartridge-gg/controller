@@ -11,7 +11,7 @@ import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
 import InAppSpy from "inapp-spy";
-import { usePostHog } from "@/hooks/posthog";
+import { usePostHog } from "@cartridge/utils";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;

@@ -6,28 +6,18 @@ import { ConnectionProvider } from "./connection";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { IndexerAPIProvider } from "@cartridge/utils/api/indexer";
 import { DataProvider } from "./data";
-import posthog from "posthog-js";
-import { PostHogProvider } from "posthog-js/react";
+import { PostHogContext, PostHogWrapper } from "@cartridge/utils";
 
-if (
-  typeof window !== "undefined" &&
-  !window.location.hostname.includes("localhost")
-) {
-  posthog.init(import.meta.env.VITE_POSTHOG_KEY!, {
-    api_host: import.meta.env.VITE_POSTHOG_HOST,
-    person_profiles: "always",
-    enable_recording_console_log: true,
-    loaded: (posthog) => {
-      if (import.meta.env.NODE_ENV === "development") posthog.debug();
-    },
-  });
-}
+const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
+  host: import.meta.env.VITE_POSTHOG_HOST,
+  autocapture: true,
+});
 
 export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
 
   return (
-    <PostHogProvider client={posthog}>
+    <PostHogContext.Provider value={{ posthog }}>
       <CartridgeAPIProvider
         url={`${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`}
       >
@@ -43,6 +33,6 @@ export function Provider({ children }: PropsWithChildren) {
           </QueryClientProvider>
         </IndexerAPIProvider>
       </CartridgeAPIProvider>
-    </PostHogProvider>
+    </PostHogContext.Provider>
   );
 }

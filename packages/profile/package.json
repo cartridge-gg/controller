@@ -25,7 +25,6 @@
     "@cartridge/utils": "workspace:*",
     "compare-versions": "^6.1.1",
     "lodash": "catalog:",
-    "posthog-js": "^1.181.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-query": "catalog:",
