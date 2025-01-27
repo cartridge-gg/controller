@@ -1,6 +1,6 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import { PostHogContext, PostHogWrapper } from "@cartridge/utils";
-import { useConnectionValue } from "@/hooks/connection";
+import { useConnection } from "@/hooks/connection";
 
 const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
   host: import.meta.env.VITE_POSTHOG_HOST,
@@ -8,7 +8,7 @@ const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
 });
 
 export function PostHogProvider({ children }: PropsWithChildren) {
-  const { controller, origin } = useConnectionValue();
+  const { controller, origin } = useConnection();
 
   // Track the last identified address
   const [lastIdentifiedAddress, setLastIdentifiedAddress] = useState<string>();

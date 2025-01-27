@@ -6,7 +6,7 @@ import {
   ConnectionCtx,
   OpenSettingsCtx,
 } from "@/utils/connection";
-import { getChainName, isIframe } from "@cartridge/utils";
+import { getChainName, isIframe, normalizeOrigin } from "@cartridge/utils";
 import { RpcProvider } from "starknet";
 import {
   ResponseCodes,
@@ -166,14 +166,14 @@ export function useConnectionValue() {
       setController,
     });
     connection.promise.then((parent) => {
-      setOrigin(parent.origin);
+      setOrigin(normalizeOrigin(parent.origin));
       setParent(parent);
     });
 
     return () => {
       connection.destroy();
     };
-  }, [setOrigin, setRpcUrl, setPolicies, setContext, setController]);
+  }, [setOrigin, setRpcUrl, setContext, setController]);
 
   useEffect(() => {
     if (rpcUrl) {
