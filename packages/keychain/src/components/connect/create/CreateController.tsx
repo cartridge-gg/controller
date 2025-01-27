@@ -5,7 +5,8 @@ import { useControllerTheme } from "@/hooks/theme";
 import { useDebounce } from "@/hooks/debounce";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
-import { Legal, StatusTray } from ".";
+import { Legal } from "./Legal";
+import { StatusTray } from "./StatusTray";
 import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
@@ -119,6 +120,7 @@ export function CreateControllerView({
             type="submit"
             isLoading={isLoading}
             disabled={validation.status !== "valid"}
+            data-testid="submit-button"
           >
             {validation.exists ? "login" : "sign up"}
           </Button>
