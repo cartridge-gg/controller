@@ -1,11 +1,7 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import { useContext, useState, useEffect, useCallback, useMemo } from "react";
 import Controller from "@/utils/controller";
-import {
-  connectToController,
-  ConnectionCtx,
-  OpenSettingsCtx,
-} from "@/utils/connection";
+import { ConnectionCtx, OpenSettingsCtx } from "@/utils/connection";
 import { getChainName, isIframe } from "@cartridge/utils";
 import { RpcProvider } from "starknet";
 import {
@@ -22,6 +18,7 @@ import { Policies } from "@cartridge/presets";
 import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { VerifiableControllerTheme } from "@/context/theme";
+import { connectionManager } from "@/utils/connection/manager";
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -42,6 +39,20 @@ export function useConnectionValue() {
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const upgrade: UpgradeInterface = useUpgrade(controller);
   const [error, setError] = useState<Error>();
+
+  useEffect(() => {
+    connectionManager.initialize({
+      setOrigin,
+      setRpcUrl,
+      setContext,
+      setController,
+      setParent,
+    });
+
+    return () => {
+      connectionManager.destroy();
+    };
+  }, []); // Empty dependency array since these setState functions are stable
 
   const chainName = useMemo(() => {
     if (!chainId) {
@@ -165,20 +176,6 @@ export function useConnectionValue() {
     setOrigin,
     setController,
   ]);
-
-  useEffect(() => {
-    const connection = connectToController<ParentMethods>({
-      setOrigin,
-      setRpcUrl,
-      setContext,
-      setController,
-    });
-    connection.promise.then(setParent);
-
-    return () => {
-      connection.destroy();
-    };
-  }, [setOrigin, setRpcUrl, setPolicies, setContext, setController]);
 
   useEffect(() => {
     if (rpcUrl) {
