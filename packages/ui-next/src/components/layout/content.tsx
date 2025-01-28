@@ -29,9 +29,9 @@ export function LayoutContentError({
   children = "Oops! Something went wrong.",
 }: PropsWithChildren) {
   return (
-    <div className="h-full items-center gap-8 p-8">
+    <LayoutContent className="h-full items-center gap-8 p-8">
       <div className="text-semibold">{children}</div>
       <ErrorImage />
-    </div>
+    </LayoutContent>
   );
 }

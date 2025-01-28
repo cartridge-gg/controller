@@ -50,10 +50,11 @@ const ScrollArea = React.forwardRef<
     <ScrollAreaPrimitive.Root
       ref={ref}
       onScrollCapture={onScrollCapture}
-      className={"relative overflow-auto"}
+      className={"h-fullrelative overflow-auto"}
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
+        asChild
         className={cn("h-full w-full rounded-[inherit]", className)}
       >
         {children}

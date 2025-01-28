@@ -85,9 +85,9 @@ export function Activity() {
                                       {isSend ? "Send" : "Receive"}{" "}
                                       {Number(t.tokenMetadata.amount) /
                                         10 **
-                                          Number(
-                                            t.tokenMetadata?.decimals,
-                                          )}{" "}
+                                        Number(
+                                          t.tokenMetadata?.decimals,
+                                        )}{" "}
                                       {t.tokenMetadata?.symbol}
                                     </div>
                                   </div>

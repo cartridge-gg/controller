@@ -1,6 +1,7 @@
 @import "@cartridge/ui-next/themes/default.css";
 @import "@cartridge/ui-next/themes/dark.css";
 @import "@cartridge/ui-next/themes/fonts.css";
+@import "@cartridge/ui-next/themes/scrollbar.css";
 
 @tailwind base;
 @tailwind components;
@@ -10,12 +11,5 @@
   html,
   body {
     @apply bg-background text-foreground ring-foreground;
-
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
-    scrollbar-width: none; /* Firefox */
-
-    &::-webkit-scrollbar {
-      display: none; /* Safari and Chrome */
-    }
   }
 }
