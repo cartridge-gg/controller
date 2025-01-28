@@ -44,12 +44,16 @@ impl FileSystemBackend {
 #[async_trait]
 impl StorageBackend for FileSystemBackend {
     fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError> {
+        let serialized = serde_json::to_string(value)?;
+        self.set_serialized(key, &serialized)
+    }
+
+    fn set_serialized(&mut self, key: &str, value: &str) -> Result<(), StorageError> {
         let path = self.file_path(key);
         if let Some(parent) = path.parent() {
             self.ensure_path_exists(parent.to_path_buf())?;
         }
-        let serialized = serde_json::to_string(value)?;
-        fs::write(&path, &serialized)
+        fs::write(&path, value)
             .map_err(|e| StorageError::OperationFailed(format!("Failed to write file: {}", e)))?;
         Ok(())
     }
