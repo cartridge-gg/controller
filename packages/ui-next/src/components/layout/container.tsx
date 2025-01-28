@@ -1,4 +1,5 @@
 import { PropsWithChildren, useEffect, useState } from "react";
+import { LayoutContext } from "./context";
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
@@ -22,12 +23,16 @@ export function LayoutContainer({
   children,
   className,
 }: PropsWithChildren & { className?: string }) {
+  const [withFooter, setWithFooter] = useState(false);
+
   return (
-    <ResponsiveWrapper>
-      <div className={`flex flex-col flex-1 min-h-0 ${className}`}>
-        {children}
-      </div>
-    </ResponsiveWrapper>
+    <LayoutContext.Provider value={{ withFooter, setWithFooter }}>
+      <ResponsiveWrapper>
+        <div className={`flex flex-col flex-1 min-h-0 ${className}`}>
+          {children}
+        </div>
+      </ResponsiveWrapper>
+    </LayoutContext.Provider>
   );
 }
 
