@@ -84,7 +84,7 @@ function HeaderInner({
 }: HeaderInnerProps) {
   return (
     <div className={cn("p-4 flex items-center justify-between", className)}>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-shrink min-w-0">
         <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
         <Headline variant={variant} title={title} description={description} />
       </div>
@@ -128,7 +128,7 @@ function IconWrapper({
   switch (variant) {
     case "expanded":
       return (
-        <div className="rounded size-20 bg-background flex items-center justify-center">
+        <div className="flex-shrink-0 rounded size-20 bg-background flex items-center justify-center">
           <div className="rounded bg-background-100 size-[calc(100%-8px)] flex items-center justify-center">
             {children}
           </div>
@@ -137,7 +137,7 @@ function IconWrapper({
     default:
     case "compressed":
       return (
-        <div className="rounded size-11 flex items-center justify-center bg-background-100">
+        <div className="flex-shrink-0 rounded size-11 flex items-center justify-center bg-background-100">
           {children}
         </div>
       );
@@ -150,7 +150,7 @@ function Headline({
   description,
 }: Pick<HeaderInnerProps, "variant" | "title" | "description">) {
   return (
-    <div className="flex-1 flex flex-col gap-1">
+    <div className="flex flex-col gap-1">
       <div className="text-lg font-semibold line-clamp-1 text-ellipsis">
         {title}
       </div>
