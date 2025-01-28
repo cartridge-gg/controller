@@ -24,6 +24,11 @@ impl StorageBackend for InMemoryBackend {
         Ok(())
     }
 
+    fn set_serialized(&mut self, key: &str, value: &str) -> Result<(), StorageError> {
+        self.storage.insert(key.to_string(), value.to_string());
+        Ok(())
+    }
+
     fn get(&self, key: &str) -> Result<Option<StorageValue>, StorageError> {
         if let Some(value) = self.storage.get(key) {
             let deserialized = serde_json::from_str(value)?;
