@@ -1,0 +1,21 @@
+{
+  "name": "cartridge-node-example",
+  "version": "1.0.0",
+  "description": "Example of using Cartridge session controller with Node.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node --experimental-wasm-modules dist/session.js",
+    "dev": "node --experimental-wasm-modules --import tsx src/session.ts"
+  },
+  "dependencies": {
+    "@cartridge/account-wasm": "workspace:*",
+    "@cartridge/controller": "workspace:*",
+    "starknet": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0",
+    "@types/node": "^22.12.0"
+  }
+}

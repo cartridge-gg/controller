@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build:deps": "tsup --dts-resolve",
+    "build:deps": "tsup",
     "build": "pnpm build:deps",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
@@ -16,34 +16,52 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./session": {
       "types": "./dist/session/index.d.ts",
-      "default": "./dist/session/index.js"
+      "import": "./dist/session/index.js",
+      "require": "./dist/session/index.cjs"
+    },
+    "./session/node": {
+      "types": "./dist/node/index.d.ts",
+      "import": "./dist/node/index.js",
+      "require": "./dist/node/index.cjs"
     },
     "./provider": {
       "types": "./dist/provider/index.d.ts",
-      "default": "./dist/provider/index.js"
+      "import": "./dist/provider/index.js"
     },
     "./types": {
       "types": "./dist/types/index.d.ts",
-      "default": "./dist/types/index.js"
+      "import": "./dist/types/index.js"
     }
   },
   "tsup": {
     "entry": [
-      "src/**"
+      "src/index.ts",
+      "src/controller.ts",
+      "src/lookup.ts",
+      "src/session/index.ts",
+      "src/node/index.ts"
     ],
     "format": [
-      "esm"
+      "esm",
+      "cjs"
     ],
     "splitting": false,
     "sourcemap": true,
-    "clean": true
+    "clean": true,
+    "dts": true,
+    "treeshake": {
+      "preset": "recommended"
+    },
+    "exports": "named"
   },
   "peerDependencies": {
-    "starknet": "catalog:"
+    "starknet": "catalog:",
+    "open": "^10.1.0"
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",

@@ -2,55 +2,40 @@
   "name": "@cartridge/account-wasm",
   "version": "0.6.0",
   "description": "Wasm bindings for Cartridge Controller and Session Account",
-  "main": "./pkg-controller/account_wasm.js",
   "type": "module",
+  "main": "./pkg-controller/account_wasm.js",
+  "module": "./pkg-controller/account_wasm.js",
+  "types": "./pkg-controller/account_wasm.d.ts",
   "scripts": {
     "build:deps": "./build.sh"
   },
   "files": [
-    "./pkg-controller/account_wasm_bg.wasm",
-    "./pkg-controller/account_wasm.js",
-    "./pkg-controller/account_wasm_bg.js",
-    "./pkg-controller/account_wasm.d.ts",
-    "./pkg-session/account_wasm_bg.wasm",
-    "./pkg-session/account_wasm.js",
-    "./pkg-session/account_wasm_bg.js",
-    "./pkg-session/account_wasm.d.ts"
+    "pkg-controller",
+    "pkg-session"
   ],
   "exports": {
     ".": {
       "types": "./pkg-controller/account_wasm.d.ts",
-      "default": "./pkg-controller/account_wasm.js"
+      "import": "./pkg-controller/account_wasm.js",
+      "require": "./pkg-controller/account_wasm.js"
     },
     "./controller": {
       "types": "./pkg-controller/account_wasm.d.ts",
-      "default": "./pkg-controller/account_wasm.js"
+      "import": "./pkg-controller/account_wasm.js",
+      "require": "./pkg-controller/account_wasm.js"
     },
     "./session": {
       "types": "./pkg-session/account_wasm.d.ts",
-      "default": "./pkg-session/account_wasm.js"
+      "import": "./pkg-session/account_wasm.js",
+      "require": "./pkg-session/account_wasm.js"
     }
   },
   "sideEffects": [
+    "**/*.wasm",
     "./pkg-controller/account_wasm.js",
-    "./pkg-session/account_wasm.js",
-    "./pkg-controller/snippets/*",
-    "./pkg-session/snippets/*"
+    "./pkg-session/account_wasm.js"
   ],
-  "typesVersions": {
-    "*": {
-      "controller": [
-        "./pkg-controller/account_wasm.d.ts"
-      ],
-      "session": [
-        "./pkg-session/account_wasm.d.ts"
-      ]
-    }
-  },
   "devDependencies": {
-    "@cartridge/tsconfig": "workspace:*",
-    "tsup": "catalog:",
-    "typescript": "catalog:",
     "wasm-pack": "^0.13.0"
   }
 }
