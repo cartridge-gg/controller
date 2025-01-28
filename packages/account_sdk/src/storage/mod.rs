@@ -262,7 +262,7 @@ pub trait StorageBackend: Send + Sync {
                     &metadata.address,
                     &metadata.chain_id,
                 ))?;
-                
+
                 match account_value {
                     Some(StorageValue::Controller(metadata)) => Ok(Some(metadata)),
                     Some(_) => Err(StorageError::TypeMismatch),

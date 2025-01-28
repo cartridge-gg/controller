@@ -120,7 +120,7 @@ impl Controller {
                 return Err(ControllerError::from(e));
             }
         };
-                
+
         if let Some(m) = metadata {
             let rpc_url = Url::parse(&m.rpc_url).map_err(ControllerError::from)?;
             Ok(Some(Controller::new(
