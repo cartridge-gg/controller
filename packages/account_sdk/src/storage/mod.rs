@@ -25,6 +25,10 @@ pub mod inmemory;
 pub mod localstorage;
 pub mod selectors;
 
+#[cfg(all(test, not(target_arch = "wasm32")))]
+#[path = "storage_test.rs"]
+mod storage_test;
+
 #[derive(Debug, thiserror::Error)]
 pub enum StorageError {
     #[error("Serialization error: {0}")]

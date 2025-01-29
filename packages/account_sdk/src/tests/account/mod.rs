@@ -4,7 +4,6 @@ use starknet::macros::felt;
 
 pub(crate) mod declare;
 mod pending;
-mod storage;
 
 pub use declare::AccountDeclaration;
 
