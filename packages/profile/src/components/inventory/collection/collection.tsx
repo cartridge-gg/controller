@@ -2,10 +2,18 @@ import {
   Link,
   Outlet,
   useLocation,
-  useNavigate,
   useParams,
   useSearchParams,
 } from "react-router-dom";
+import {
+  ArrowIcon,
+  Button,
+  CheckboxIcon,
+  cn,
+  CopyAddress,
+  ScrollArea,
+  Separator,
+} from "@cartridge/ui-next";
 import {
   LayoutContainer,
   LayoutContent,
@@ -13,26 +21,19 @@ import {
   LayoutContentLoader,
   LayoutFooter,
   LayoutHeader,
-  Button,
-  CheckboxIcon,
-  cn,
-  CopyAddress,
-  Separator,
-} from "@cartridge/ui-next";
+} from "@/components/layout";
 import { useCallback, useMemo } from "react";
 import { CollectionImage } from "./image";
 import { useCollection } from "@/hooks/collection";
 import { Collectibles } from "./collectibles";
-import { useConnection } from "@/hooks/context";
 
 export function Collection() {
   const { address: contractAddress, tokenId } = useParams();
   const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tokenIds = searchParams.getAll("tokenIds");
+
   const { collection, assets, status } = useCollection({ contractAddress });
-  const { chainId, openSettings } = useConnection();
 
   const selection = useMemo(() => {
     return tokenIds.length > 0;
@@ -63,7 +64,15 @@ export function Collection() {
   }
 
   return (
-    <LayoutContainer>
+    <LayoutContainer
+      left={
+        <Link to=".." draggable={false}>
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
+      }
+    >
       {(() => {
         switch (status) {
           case "loading": {
@@ -90,11 +99,6 @@ export function Collection() {
                       size="xs"
                     />
                   }
-                  onBack={() => {
-                    navigate("..");
-                  }}
-                  chainId={chainId}
-                  openSettings={openSettings}
                 />
 
                 <LayoutContent
@@ -116,12 +120,14 @@ export function Collection() {
                     </div>
                   </div>
 
-                  <Collectibles
-                    assets={assets}
-                    tokenIds={tokenIds}
-                    selection={selection}
-                    handleSelect={handleSelect}
-                  />
+                  <ScrollArea>
+                    <Collectibles
+                      assets={assets}
+                      tokenIds={tokenIds}
+                      selection={selection}
+                      handleSelect={handleSelect}
+                    />
+                  </ScrollArea>
                 </LayoutContent>
 
                 <LayoutFooter

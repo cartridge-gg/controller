@@ -1,15 +1,12 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
+} from "@/components/layout";
+import {
+  ArrowIcon,
   Button,
   Card,
   CardContent,
@@ -54,8 +51,7 @@ export function Token() {
 }
 
 function Credits() {
-  const navigate = useNavigate();
-  const { chainId, openSettings, parent, isVisible } = useConnection();
+  const { parent, isVisible } = useConnection();
   const { username } = useAccount();
   const credit = useCreditBalance({
     username,
@@ -63,16 +59,19 @@ function Credits() {
   });
 
   return (
-    <LayoutContainer>
+    <LayoutContainer
+      left={
+        <Link to="..">
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
+      }
+    >
       <LayoutHeader
         title={`${credit.balance.formatted} CREDITS`}
         description={`$${credit.balance.formatted}`}
         icon={<CoinsIcon variant="solid" size="lg" />}
-        onBack={() => {
-          navigate("..");
-        }}
-        chainId={chainId}
-        openSettings={openSettings}
       />
 
       <LayoutContent className="pb-4">
@@ -96,9 +95,8 @@ function Credits() {
 }
 
 function ERC20() {
-  const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
-  const { chainId, openSettings, version } = useConnection();
+  const { chainId, version } = useConnection();
   const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue(
     {
@@ -118,7 +116,15 @@ function ERC20() {
   }
 
   return (
-    <LayoutContainer>
+    <LayoutContainer
+      left={
+        <Link to="..">
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
+      }
+    >
       <LayoutHeader
         title={`${
           t.balance === undefined ? (
@@ -131,18 +137,12 @@ function ERC20() {
           countervalue && `${formatBalance(countervalue.formatted, ["~"])}`
         }
         icon={
-          <div className="rounded-full size-11 bg-foreground-100 flex items-center justify-center">
-            <img
-              className="w-10 h-10"
-              src={t.meta.logoUrl ?? "/public/placeholder.svg"}
-            />
-          </div>
+          <img
+            className="w-10 h-10"
+            src={t.meta.logoUrl ?? "/public/placeholder.svg"}
+          />
         }
-        onBack={() => {
-          navigate("..");
-        }}
-        chainId={chainId}
-        openSettings={openSettings}
+        rounded
       />
 
       <LayoutContent className="pb-4">

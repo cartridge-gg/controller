@@ -1,17 +1,13 @@
-import { forwardRef, memo, PropsWithChildren, useEffect } from "react";
+import { forwardRef, memo, PropsWithChildren, useRef } from "react";
 import { cn } from "@cartridge/ui-next";
-import { useLayoutContext } from "./context";
+import { Link } from "react-router-dom";
 
-export function LayoutFooter({
+export function Footer({
   children,
   className,
   showCatridgeLogo,
 }: PropsWithChildren & { className?: string; showCatridgeLogo?: boolean }) {
-  const { setWithFooter } = useLayoutContext();
-
-  useEffect(() => {
-    setWithFooter(true);
-  }, [setWithFooter]);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   return (
     <div
@@ -20,19 +16,20 @@ export function LayoutFooter({
         !showCatridgeLogo && "pb-4",
         className,
       )}
+      ref={ref}
     >
       <div className="flex flex-col px-4 gap-2">{children}</div>
 
       {showCatridgeLogo && (
-        <a
-          href="https://cartridge.gg"
+        <Link
+          to="https://cartridge.gg"
           target="_blank"
           className="h-10 flex items-center justify-center gap-1 text-muted hover:text-primary"
         >
           <ControllerIcon />
           <div className="text-xs font-medium">by</div>
           <CartridgeLogo />
-        </a>
+        </Link>
       )}
     </div>
   );

@@ -1,16 +1,13 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutContentError,
   LayoutContentLoader,
   LayoutHeader,
+} from "@/components/layout";
+import {
+  ArrowIcon,
   Button,
   Card,
   CardContent,
@@ -18,6 +15,7 @@ import {
   CardTitle,
   CopyText,
   ExternalIcon,
+  ScrollArea,
   Separator,
 } from "@cartridge/ui-next";
 import { addAddressPadding, constants } from "starknet";
@@ -34,9 +32,8 @@ import { Asset, Collection, useCollection } from "@/hooks/collection";
 import { compare } from "compare-versions";
 
 export function Collectible() {
-  const { chainId, openSettings, version } = useConnection();
+  const { chainId, version } = useConnection();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const compatibility = useMemo(() => {
     if (!version) return false;
@@ -57,7 +54,15 @@ export function Collectible() {
   }
 
   return (
-    <LayoutContainer>
+    <LayoutContainer
+      left={
+        <Link to="..">
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
+      }
+    >
       {(() => {
         switch (status) {
           case "loading": {
@@ -83,28 +88,22 @@ export function Collectible() {
                       copyValue={addAddressPadding(collection.address)}
                     />
                   }
-                  icon={
-                    <img
-                      className="w-10 h-10"
-                      src={asset.imageUrl ?? "/public/placeholder.svg"}
-                    />
-                  }
-                  onBack={() => {
-                    navigate("..");
-                  }}
-                  chainId={chainId}
-                  openSettings={openSettings}
+                  icon={asset.imageUrl ?? "/public/placeholder.svg"}
                 />
 
-                <LayoutContent className="pb-4">
-                  <Image imageUrl={asset.imageUrl} />
-                  <Description description={asset.description} />
-                  <Properties properties={assets} />
-                  <Details
-                    chainId={chainId as constants.StarknetChainId}
-                    col={collection}
-                    asset={asset}
-                  />
+                <LayoutContent>
+                  <ScrollArea>
+                    <div className="flex flex-col h-full flex-1 overflow-y-auto gap-y-4">
+                      <Image imageUrl={asset.imageUrl} />
+                      <Description description={asset.description} />
+                      <Properties properties={assets} />
+                      <Details
+                        chainId={chainId as constants.StarknetChainId}
+                        col={collection}
+                        asset={asset}
+                      />
+                    </div>
+                  </ScrollArea>
                 </LayoutContent>
 
                 {isIframe() && compatibility && (

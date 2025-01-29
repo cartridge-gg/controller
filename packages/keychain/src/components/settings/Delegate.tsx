@@ -1,19 +1,12 @@
-import {
-  LayoutContainer,
-  LayoutContent,
-  LayoutFooter,
-  AlertIcon,
-  Button,
-  Input,
-  LayoutHeader,
-} from "@cartridge/ui-next";
+import { AlertIcon, Button, Input } from "@cartridge/ui-next";
+import { Container, Content, Footer } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
 
 export function Delegate({ onBack }: { onBack: () => void }) {
-  const { chainId, controller, context, setContext } = useConnection();
+  const { controller, context, setContext } = useConnection();
   const [delegateAddress, setDelegateAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -44,14 +37,12 @@ export function Delegate({ onBack }: { onBack: () => void }) {
   }, [controller, delegateAddress, context, setContext]);
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        variant="expanded"
-        title="Delegate account"
-        onBack={() => onBack()}
-        chainId={chainId}
-      />
-      <LayoutContent className="gap-6">
+    <Container
+      variant="expanded"
+      title="Delegate account"
+      onBack={() => onBack()}
+    >
+      <Content>
         <div className="flex flex-col gap-4">
           <div className="text-sm text-muted-foreground text-center">
             Your controller can be owned by an existing Starknet wallet which
@@ -72,15 +63,15 @@ export function Delegate({ onBack }: { onBack: () => void }) {
             )}
           </div>
         </div>
-      </LayoutContent>
-      <LayoutFooter>
+      </Content>
+      <Footer>
         <Button onClick={onSetDelegate} disabled={!isValid}>
           Set delegate account
         </Button>
         {/* <Button variant="secondary" onClick={onClose}>
           Setup later
         </Button> */}
-      </LayoutFooter>
-    </LayoutContainer>
+      </Footer>
+    </Container>
   );
 }

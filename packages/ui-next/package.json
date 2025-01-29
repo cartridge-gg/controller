@@ -19,8 +19,7 @@
     },
     "./themes/default.css": "./dist/themes/default.css",
     "./themes/dark.css": "./dist/themes/dark.css",
-    "./themes/fonts.css": "./dist/themes/fonts.css",
-    "./themes/scrollbar.css": "./dist/themes/scrollbar.css"
+    "./themes/fonts.css": "./dist/themes/fonts.css"
   },
   "scripts": {
     "build:deps": "tsc && tsc-alias && pnpm copyThemes",

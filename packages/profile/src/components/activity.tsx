@@ -6,13 +6,16 @@ import {
   CardContent,
   CopyAddress,
   ExternalIcon,
+  ScrollArea,
+} from "@cartridge/ui-next";
+import { useInfiniteTokenTransfersQuery } from "@cartridge/utils/api/indexer";
+import {
   LayoutContainer,
   LayoutContent,
   LayoutContentError,
   LayoutContentLoader,
   LayoutHeader,
-} from "@cartridge/ui-next";
-import { useInfiniteTokenTransfersQuery } from "@cartridge/utils/api/indexer";
+} from "@/components/layout";
 import { Navigation } from "@/components/navigation";
 import { useAccount } from "@/hooks/account";
 import { Link } from "react-router-dom";
@@ -22,7 +25,7 @@ import { constants } from "starknet";
 
 export function Activity() {
   const { address, username } = useAccount();
-  const { closeModal, chainId, openSettings } = useConnection();
+  const { chainId } = useConnection();
   const { isReady } = useIndexerAPI();
   const { status, data, hasNextPage, fetchNextPage } =
     useInfiniteTokenTransfersQuery(
@@ -43,9 +46,6 @@ export function Activity() {
         title={username}
         description={<CopyAddress address={address} size="sm" />}
         right={<Navigation />}
-        onClose={closeModal}
-        chainId={chainId}
-        openSettings={openSettings}
       />
 
       {(() => {
@@ -59,64 +59,66 @@ export function Activity() {
           case "success": {
             return (
               <LayoutContent>
-                <Card>
-                  {data.pages.map((p) =>
-                    p.tokenTransfers?.edges.length ? (
-                      p.tokenTransfers.edges.map(({ node: t }) => {
-                        switch (t.tokenMetadata.__typename) {
-                          case "ERC20__Token": {
-                            const isSend = t.from === address;
-                            return (
-                              <Link
-                                to={StarkscanUrl(
-                                  chainId as constants.StarknetChainId,
-                                ).transaction(t.transactionHash)}
-                                target="_blank"
-                                key={t.transactionHash}
-                              >
-                                <CardContent className="flex items-center justify-between text-accent-foreground">
-                                  <div className="flex items-center gap-1">
-                                    {isSend ? (
-                                      <ArrowFromLineIcon variant="up" />
-                                    ) : (
-                                      <ArrowToLineIcon variant="down" />
-                                    )}
-                                    <div>
-                                      {isSend ? "Send" : "Receive"}{" "}
-                                      {Number(t.tokenMetadata.amount) /
-                                        10 **
-                                          Number(
-                                            t.tokenMetadata?.decimals,
-                                          )}{" "}
-                                      {t.tokenMetadata?.symbol}
+                <ScrollArea>
+                  <Card>
+                    {data.pages.map((p) =>
+                      p.tokenTransfers?.edges.length ? (
+                        p.tokenTransfers.edges.map(({ node: t }) => {
+                          switch (t.tokenMetadata.__typename) {
+                            case "ERC20__Token": {
+                              const isSend = t.from === address;
+                              return (
+                                <Link
+                                  to={StarkscanUrl(
+                                    chainId as constants.StarknetChainId,
+                                  ).transaction(t.transactionHash)}
+                                  target="_blank"
+                                  key={t.transactionHash}
+                                >
+                                  <CardContent className="flex items-center justify-between text-accent-foreground">
+                                    <div className="flex items-center gap-1">
+                                      {isSend ? (
+                                        <ArrowFromLineIcon variant="up" />
+                                      ) : (
+                                        <ArrowToLineIcon variant="down" />
+                                      )}
+                                      <div>
+                                        {isSend ? "Send" : "Receive"}{" "}
+                                        {Number(t.tokenMetadata.amount) /
+                                          10 **
+                                            Number(
+                                              t.tokenMetadata?.decimals,
+                                            )}{" "}
+                                        {t.tokenMetadata?.symbol}
+                                      </div>
                                     </div>
-                                  </div>
 
-                                  <ExternalIcon />
-                                </CardContent>
-                              </Link>
-                            );
+                                    <ExternalIcon />
+                                  </CardContent>
+                                </Link>
+                              );
+                            }
+                            case "ERC721__Token":
+                              return null;
                           }
-                          case "ERC721__Token":
-                            return null;
-                        }
-                      })
-                    ) : (
-                      <CardContent>No data</CardContent>
-                    ),
-                  )}
-                </Card>
+                        })
+                      ) : (
+                        <CardContent>No data</CardContent>
+                      ),
+                    )}
+                  </Card>
 
-                {hasNextPage && (
-                  <Button
-                    className="w-full my-2"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => fetchNextPage()}
-                  >
-                    See More
-                  </Button>
-                )}
+                  {hasNextPage && (
+                    <Button
+                      className="w-full my-2"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => fetchNextPage()}
+                    >
+                      See More
+                    </Button>
+                  )}
+                </ScrollArea>
               </LayoutContent>
             );
           }

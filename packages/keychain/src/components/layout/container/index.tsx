@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect, useState } from "react";
-import { LayoutContext } from "./context";
+import { Header, HeaderProps } from "./header";
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
@@ -19,20 +19,36 @@ function useMediaQuery(query: string) {
   return matches;
 }
 
-export function LayoutContainer({
+export function Container({
   children,
+  onBack,
+  onClose,
+  hideAccount,
+  hideNetwork,
+  Icon,
+  icon,
+  title,
+  description,
   className,
-}: PropsWithChildren & { className?: string }) {
-  const [withFooter, setWithFooter] = useState(false);
-
+  variant,
+}: PropsWithChildren & HeaderProps & { className?: string }) {
   return (
-    <LayoutContext.Provider value={{ withFooter, setWithFooter }}>
-      <ResponsiveWrapper>
-        <div className={`flex flex-col flex-1 min-h-0 ${className}`}>
-          {children}
-        </div>
-      </ResponsiveWrapper>
-    </LayoutContext.Provider>
+    <ResponsiveWrapper>
+      <Header
+        onBack={onBack}
+        onClose={onClose}
+        hideAccount={hideAccount}
+        hideNetwork={hideNetwork}
+        Icon={Icon}
+        icon={icon}
+        title={title}
+        description={description}
+        variant={variant}
+      />
+      <div className={`flex flex-col flex-1 min-h-0 ${className}`}>
+        {children}
+      </div>
+    </ResponsiveWrapper>
   );
 }
 

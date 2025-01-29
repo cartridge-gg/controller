@@ -1,4 +1,4 @@
-import { LayoutContent } from "@cartridge/ui-next";
+import { Content } from "@/components/layout";
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { SessionConsent } from "@/components/connect";
@@ -105,7 +105,7 @@ export function RegisterSession({
       onSubmit={onRegisterSession}
       buttonText="Register Session"
     >
-      <LayoutContent>
+      <Content>
         <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
           <VerifiedSessionSummary
@@ -123,7 +123,7 @@ export function RegisterSession({
             onDurationChange={setDuration}
           />
         )}
-      </LayoutContent>
+      </Content>
     </ExecutionContainer>
   );
 }

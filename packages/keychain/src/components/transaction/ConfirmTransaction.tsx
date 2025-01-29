@@ -1,5 +1,5 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
-import { LayoutContent } from "@cartridge/ui-next";
+import { Content } from "@/components/layout";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ExecuteCtx } from "@/utils/connection";
@@ -37,9 +37,9 @@ export function ConfirmTransaction() {
       transactionsDetail={ctx.transactionsDetail}
       onSubmit={onSubmit}
     >
-      <LayoutContent>
+      <Content>
         <TransactionSummary calls={transactions} />
-      </LayoutContent>
+      </Content>
     </ExecutionContainer>
   );
 }

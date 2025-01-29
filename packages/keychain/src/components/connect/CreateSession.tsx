@@ -1,3 +1,4 @@
+import { Container, Content, Footer } from "@/components/layout";
 import { BigNumberish, shortString } from "starknet";
 import { ControllerError } from "@/utils/connection";
 import { useCallback, useMemo, useState } from "react";
@@ -9,14 +10,7 @@ import { ParsedSessionPolicies } from "@/hooks/session";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
-import {
-  LayoutContainer,
-  LayoutContent,
-  LayoutFooter,
-  Button,
-  Checkbox,
-  LayoutHeader,
-} from "@cartridge/ui-next";
+import { Button, Checkbox } from "@cartridge/ui-next";
 
 export function CreateSession({
   policies,
@@ -27,7 +21,7 @@ export function CreateSession({
   onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
   isUpdate?: boolean;
 }) {
-  const { closeModal, controller, upgrade, chainId, theme } = useConnection();
+  const { controller, upgrade, chainId, theme, logout } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
@@ -103,18 +97,20 @@ export function CreateSession({
   }
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        title={!isUpdate ? "Create Session" : "Update Session"}
-        description={
-          isUpdate
-            ? "The policies were updated, please update existing session"
-            : undefined
+    <Container
+      title={!isUpdate ? "Create Session" : "Update Session"}
+      description={
+        isUpdate
+          ? "The policies were updated, please update existing session"
+          : undefined
+      }
+      onClose={() => {
+        if (!isUpdate) {
+          logout();
         }
-        onClose={closeModal}
-        chainId={chainId}
-      />
-      <LayoutContent className="gap-6">
+      }}
+    >
+      <Content className="gap-6">
         <SessionConsent isVerified={policies?.verified} />
         {policies?.verified ? (
           <VerifiedSessionSummary
@@ -132,8 +128,8 @@ export function CreateSession({
             onDurationChange={setDuration}
           />
         )}
-      </LayoutContent>
-      <LayoutFooter>
+      </Content>
+      <Footer>
         {!policies?.verified && (
           <div
             className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-foreground"
@@ -174,8 +170,8 @@ export function CreateSession({
         </div>
 
         {!error && <div className="flex flex-col"></div>}
-      </LayoutFooter>
-    </LayoutContainer>
+      </Footer>
+    </Container>
   );
 }
 
