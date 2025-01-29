@@ -1,9 +1,9 @@
 export * from "../account";
-export * from "../color";
 export * from "../api";
-export * from "../iframe";
+export * from "../color";
+export * from "../context";
 export * from "../erc20";
 export * from "../explorer";
-export * from "../network";
-
 export * from "../hooks/index.mock";
+export * from "../iframe";
+export * from "../network";

@@ -1,6 +1,13 @@
 import React, { PropsWithChildren } from "react";
-import { Container, Content, Footer } from "./layout";
-import { AlertIcon, ExternalIcon, Button } from "@cartridge/ui-next";
+import {
+  LayoutContainer,
+  LayoutContent,
+  LayoutFooter,
+  AlertIcon,
+  ExternalIcon,
+  Button,
+  LayoutHeader,
+} from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { Link } from "react-router-dom";
@@ -30,7 +37,7 @@ export class ErrorBoundary extends React.Component<
 }
 
 export function ErrorPage({ error }: { error: Error }) {
-  const { closeModal } = useConnection();
+  const { closeModal, chainId } = useConnection();
 
   const posthog = usePostHog();
 
@@ -41,14 +48,17 @@ export function ErrorPage({ error }: { error: Error }) {
   }, [error, posthog]);
 
   return (
-    <Container
-      variant="expanded"
-      title="Uh oh!"
-      description="Something went wrong"
-      Icon={AlertIcon}
-    >
-      <Content className="gap-4">
-        <div className="flex w-full px-4 py-6 bg-background-100 border border-background-200 rounded">
+    <LayoutContainer>
+      <LayoutHeader
+        variant="expanded"
+        title="Uh oh!"
+        description="Something went wrong"
+        Icon={AlertIcon}
+        onClose={closeModal}
+        chainId={chainId}
+      />
+      <LayoutContent className="gap-4">
+        <div className="flex w-full px-4 py-6 bg-secondary border border-background-200 rounded">
           <p className="w-full text-sm">{error.message}</p>
         </div>
 
@@ -64,13 +74,13 @@ export function ErrorPage({ error }: { error: Error }) {
             <ExternalIcon size="sm" />
           </Link>
         </div>
-      </Content>
+      </LayoutContent>
 
-      <Footer>
+      <LayoutFooter>
         <Button variant="secondary" onClick={closeModal}>
           close
         </Button>
-      </Footer>
-    </Container>
+      </LayoutFooter>
+    </LayoutContainer>
   );
 }

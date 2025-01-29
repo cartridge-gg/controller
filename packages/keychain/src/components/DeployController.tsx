@@ -3,14 +3,17 @@ import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { Container, Footer, Content } from "@/components/layout";
 import { useCallback, useEffect, useState } from "react";
 import {
+  LayoutContainer,
+  LayoutFooter,
+  LayoutContent,
   CheckIcon,
   ExternalIcon,
   Spinner,
   WandIcon,
   Button,
+  LayoutHeader,
 } from "@cartridge/ui-next";
 import { Funding } from "./funding";
 import { useConnection } from "@/hooks/connection";
@@ -29,7 +32,8 @@ export function DeployController({
   onClose: () => void;
   ctrlError?: ControllerError;
 }) {
-  const { controller, chainName, hasPrefundRequest } = useConnection();
+  const { closeModal, chainId, controller, chainName, hasPrefundRequest } =
+    useConnection();
   const { deploySelf, isDeploying } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
@@ -103,11 +107,15 @@ export function DeployController({
 
   if (isLoading) {
     return (
-      <Container
-        variant="expanded"
-        title="Checking account balance..."
-        icon={<Spinner size="xl" />}
-      />
+      <LayoutContainer>
+        <LayoutHeader
+          variant="expanded"
+          title="Checking account balance..."
+          icon={<Spinner size="xl" />}
+          closeModal={closeModal}
+          chainId={chainId}
+        />
+      </LayoutContainer>
     );
   }
 
@@ -129,13 +137,16 @@ export function DeployController({
       );
     case "deploy":
       return (
-        <Container
-          variant="expanded"
-          icon={<WandIcon variant="line" size="lg" />}
-          title="Deploy Controller"
-          description="This will initialize your controller on the new network"
-        >
-          <Content>
+        <LayoutContainer>
+          <LayoutHeader
+            variant="expanded"
+            icon={<WandIcon variant="line" size="lg" />}
+            title="Deploy Controller"
+            description="This will initialize your controller on the new network"
+            closeModal={closeModal}
+            chainId={chainId}
+          />
+          <LayoutContent>
             <TransactionSummary
               calls={[
                 {
@@ -145,9 +156,9 @@ export function DeployController({
                 },
               ]}
             />
-          </Content>
+          </LayoutContent>
 
-          <Footer>
+          <LayoutFooter>
             {error ? (
               <ErrorAlert
                 title="Something went wrong"
@@ -159,26 +170,29 @@ export function DeployController({
             <Button onClick={onDeploy} isLoading={isDeploying}>
               DEPLOY
             </Button>
-          </Footer>
-        </Container>
+          </LayoutFooter>
+        </LayoutContainer>
       );
     case "deploying":
       return (
-        <Container
-          variant="expanded"
-          icon={<Spinner size="xl" />}
-          title="Deploying Controller"
-          description={`Your controller is being deployed on ${chainName}`}
-        >
-          <Content className="items-center">
+        <LayoutContainer>
+          <LayoutHeader
+            variant="expanded"
+            icon={<Spinner size="xl" />}
+            title="Deploying Controller"
+            description={`Your controller is being deployed on ${chainName}`}
+            closeModal={closeModal}
+            chainId={chainId}
+          />
+          <LayoutContent>
             {deployHash && controller && (
               <ExplorerLink
                 chainId={controller.chainId()}
                 txHash={deployHash}
               />
             )}
-          </Content>
-          <Footer>
+          </LayoutContent>
+          <LayoutFooter>
             {error ? (
               <ErrorAlert
                 title="Something went wrong"
@@ -190,26 +204,29 @@ export function DeployController({
             <Button onClick={onDeploy} isLoading={isDeploying}>
               continue
             </Button>
-          </Footer>
-        </Container>
+          </LayoutFooter>
+        </LayoutContainer>
       );
     case "deployed":
       return (
-        <Container
-          variant="expanded"
-          Icon={CheckIcon}
-          title="Success!"
-          description={`Your controller has been deployed on ${chainName}`}
-        >
-          <Content className="items-center">
+        <LayoutContainer>
+          <LayoutHeader
+            variant="expanded"
+            Icon={CheckIcon}
+            title="Success!"
+            description={`Your controller has been deployed on ${chainName}`}
+            closeModal={closeModal}
+            chainId={chainId}
+          />
+          <LayoutContent className="items-center">
             {deployHash && controller && (
               <ExplorerLink
                 chainId={controller.chainId()}
                 txHash={deployHash}
               />
             )}
-          </Content>
-          <Footer>
+          </LayoutContent>
+          <LayoutFooter>
             {error ? (
               <ErrorAlert
                 title="Something went wrong"
@@ -219,8 +236,8 @@ export function DeployController({
               <ControllerErrorAlert error={ctrlError} />
             ) : null}
             <Button onClick={onClose}>continue</Button>
-          </Footer>
-        </Container>
+          </LayoutFooter>
+        </LayoutContainer>
       );
   }
 }

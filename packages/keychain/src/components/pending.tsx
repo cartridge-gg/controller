@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
 import { useUrlTxns } from "@/hooks/transaction";
 import { Transaction, TransactionState } from "@/components/Transaction";
-import { ClockIcon } from "@cartridge/ui-next";
-import { Container, Content } from "@/components/layout";
+import {
+  LayoutContainer,
+  LayoutContent,
+  ClockIcon,
+  LayoutHeader,
+} from "@cartridge/ui-next";
+import { useConnection } from "@/hooks/connection";
 
 export function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
   const [title, setTitle] = useState("Pending...");
   const [description, setDescription] = useState("This may take a second");
-
+  const { closeModal } = useConnection();
   const { chainId, txns } = useUrlTxns();
 
   useEffect(() => {
@@ -28,12 +33,15 @@ export function Pending() {
   }, [txnResults, txns]);
 
   return (
-    <Container
-      icon={<ClockIcon variant="solid" size="lg" />}
-      title={title}
-      description={description}
-    >
-      <Content>
+    <LayoutContainer>
+      <LayoutHeader
+        icon={<ClockIcon variant="solid" size="lg" />}
+        title={title}
+        description={description}
+        chainId={chainId}
+        onClose={closeModal}
+      />
+      <LayoutContent>
         {chainId &&
           [...txns, { name: "name", hash: "hash" }].map((txn, idx) => (
             <Transaction
@@ -46,7 +54,7 @@ export function Pending() {
               }}
             />
           ))}
-      </Content>
-    </Container>
+      </LayoutContent>
+    </LayoutContainer>
   );
 }

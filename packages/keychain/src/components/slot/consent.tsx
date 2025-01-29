@@ -1,6 +1,10 @@
 import Controller from "@/utils/controller";
-import { Button } from "@cartridge/ui-next";
-import { Container, Footer } from "@/components/layout";
+import {
+  LayoutContainer,
+  LayoutFooter,
+  LayoutHeader,
+  Button,
+} from "@cartridge/ui-next";
 import { useCallback, useEffect } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -40,23 +44,23 @@ export function Consent() {
   }, [navigate, callback_uri, pathname]);
 
   return (
-    <Container
-      variant="expanded"
-      hideAccount
-      title="Requesting Permission"
-      description={
-        <>
-          <span className="font-bold">Slot</span> is requesting permission to
-          manage your Cartridge Infrastructure
-        </>
-      }
-    >
-      <Footer>
+    <LayoutContainer>
+      <LayoutHeader
+        variant="expanded"
+        title="Requesting Permission"
+        description={
+          <>
+            <span className="font-bold">Slot</span> is requesting permission to
+            manage your Cartridge Infrastructure
+          </>
+        }
+      />
+      <LayoutFooter>
         <Button onClick={onSubmit}>approve</Button>
         <Button variant="secondary" onClick={onDeny}>
           deny
         </Button>
-      </Footer>
-    </Container>
+      </LayoutFooter>
+    </LayoutContainer>
   );
 }

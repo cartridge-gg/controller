@@ -1,14 +1,11 @@
+import { useAccount } from "@/hooks/account";
+import { useConnection } from "@/hooks/context";
+import { useToken } from "@/hooks/token";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-} from "@/components/layout";
-import { useAccount } from "@/hooks/account";
-import { useConnection } from "@/hooks/context";
-import { useToken } from "@/hooks/token";
-import {
-  ArrowIcon,
   Button,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
@@ -17,7 +14,7 @@ import {
   Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
 import { Recipient } from "@/components/modules/recipient";
 import { Amount } from "./amount";
@@ -25,7 +22,7 @@ import { Amount } from "./amount";
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
   const { address } = useAccount();
-  const { parent } = useConnection();
+  const { chainId, openSettings, parent } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
   const token = useToken({ tokenAddress: tokenAddress! });
@@ -68,25 +65,23 @@ export function SendToken() {
   }
 
   return (
-    <LayoutContainer
-      left={
-        <Link to="..">
-          <Button variant="icon" size="icon">
-            <ArrowIcon variant="left" />
-          </Button>
-        </Link>
-      }
-    >
+    <LayoutContainer>
       <LayoutHeader
         title={`Send ${token.meta.symbol}`}
         description={<CopyAddress address={address} size="sm" />}
         icon={
-          <img
-            className="w-10 h-10"
-            src={token.meta.logoUrl ?? "/public/placeholder.svg"}
-          />
+          <div className="rounded-full size-11 bg-foreground-100 flex items-center justify-center">
+            <img
+              className="w-10 h-10"
+              src={token.meta.logoUrl ?? "/public/placeholder.svg"}
+            />
+          </div>
         }
-        rounded
+        onBack={() => {
+          navigate("..");
+        }}
+        chainId={chainId}
+        openSettings={openSettings}
       />
       <LayoutContent className="pb-4 gap-6">
         <Recipient to={to} setTo={setTo} setWarning={setWarning} />
