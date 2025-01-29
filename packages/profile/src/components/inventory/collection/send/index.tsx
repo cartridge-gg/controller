@@ -1,19 +1,28 @@
-import { useAccount } from "@/hooks/account";
-import { useConnection } from "@/hooks/context";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
+} from "@/components/layout";
+import { useAccount } from "@/hooks/account";
+import { useConnection } from "@/hooks/context";
+import {
+  ArrowIcon,
   Button,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
   CopyAddress,
+  ScrollArea,
   Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { Call, uint256 } from "starknet";
 import { Recipient } from "../../../modules/recipient";
 import { useCollection } from "@/hooks/collection";
@@ -37,7 +46,7 @@ export function SendCollection() {
     address: collectionAddress || "0x0",
   });
   const { address } = useAccount();
-  const { chainId, openSettings, parent } = useConnection();
+  const { parent } = useConnection();
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
   const navigate = useNavigate();
@@ -104,7 +113,15 @@ export function SendCollection() {
   if (!collection || !assets) return null;
 
   return (
-    <LayoutContainer>
+    <LayoutContainer
+      left={
+        <Link to="..">
+          <Button variant="icon" size="icon">
+            <ArrowIcon variant="left" />
+          </Button>
+        </Link>
+      }
+    >
       <LayoutHeader
         title={`Send (${tokenIds.length}) ${collection.name}`}
         description={<CopyAddress address={address} size="sm" />}
@@ -114,15 +131,12 @@ export function SendCollection() {
             size="xs"
           />
         }
-        onBack={() => {
-          navigate("..");
-        }}
-        chainId={chainId}
-        openSettings={openSettings}
       />
       <LayoutContent className="gap-6">
         <Recipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
-        <Sending assets={assets} />
+        <ScrollArea className="overflow-auto">
+          <Sending assets={assets} />
+        </ScrollArea>
       </LayoutContent>
 
       <LayoutFooter className="bg-background relative pt-0">

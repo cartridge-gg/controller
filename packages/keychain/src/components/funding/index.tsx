@@ -1,15 +1,12 @@
+import { Container, Content, Footer } from "@/components/layout";
 import { useState } from "react";
 import { useConnection } from "@/hooks/connection";
 import {
-  LayoutContainer,
-  LayoutContent,
-  LayoutFooter,
   Button,
   ArrowIcon,
   CoinsIcon,
   EthereumIcon,
   CopyAddress,
-  LayoutHeader,
 } from "@cartridge/ui-next";
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
@@ -28,7 +25,7 @@ export type FundingProps = {
 };
 
 export function Funding({ title, isSlot, onComplete }: FundingProps) {
-  const { closeModal, chainId, controller } = useConnection();
+  const { controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
   const showBalances: BalanceType[] = isSlot ? ["credits"] : ["credits", "eth"];
   const showCredits =
@@ -54,18 +51,16 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
   }
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        title={title || (controller ? `Fund ${controller.username()}` : "")}
-        description={controller && <CopyAddress address={controller.address} />}
-        icon={<ArrowIcon variant="down" size="lg" />}
-        chainId={chainId}
-        onClose={closeModal}
-      />
-      <LayoutContent className="gap-6">
+    <Container
+      title={title || (controller ? `Fund ${controller.username()}` : "")}
+      description={controller && <CopyAddress address={controller.address} />}
+      icon={<ArrowIcon variant="down" size="lg" />}
+      hideNetwork
+    >
+      <Content className="gap-6">
         <Balance showBalances={showBalances} />
-      </LayoutContent>
-      <LayoutFooter>
+      </Content>
+      <Footer>
         {showCredits && (
           <Button onClick={() => setState(FundingState.FUND_CREDITS)}>
             <CoinsIcon variant="line" size="sm" /> Purchase Credits
@@ -79,7 +74,7 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
             <EthereumIcon size="sm" className="mr-1" /> Deposit Eth
           </Button>
         )}
-      </LayoutFooter>
-    </LayoutContainer>
+      </Footer>
+    </Container>
   );
 }

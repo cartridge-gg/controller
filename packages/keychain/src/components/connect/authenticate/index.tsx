@@ -1,16 +1,10 @@
 import { useState, useCallback } from "react";
-import {
-  LayoutContainer,
-  LayoutContent,
-  LayoutFooter,
-  Button,
-  LayoutHeader,
-} from "@cartridge/ui-next";
+import { Button } from "@cartridge/ui-next";
 import { Unsupported } from "./Unsupported";
 import { doSignup } from "@/hooks/account";
+import { Container, Content, Footer } from "@/components/layout";
 import { useIsSupported } from "./useIsSupported";
 import { FaceIDImage } from "./FaceID";
-import { useConnection } from "@/hooks/connection";
 
 export type AuthAction = "signup" | "login";
 
@@ -27,7 +21,6 @@ export function Authenticate({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const { isSupported, message } = useIsSupported();
-  const { closeModal, chainId } = useConnection();
 
   const onAuth = useCallback(async () => {
     setIsLoading(true);
@@ -70,23 +63,21 @@ export function Authenticate({
   const cta = action === "signup" ? "Create Passkey" : "continue";
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        variant="expanded"
-        title={title}
-        description={description}
-        onClose={closeModal}
-        chainId={chainId}
-      />
-      <LayoutContent className="items-center pb-10">
+    <Container
+      variant="expanded"
+      hideAccount
+      title={title}
+      description={description}
+    >
+      <Content className="items-center pb-10">
         <FaceIDImage />
-      </LayoutContent>
+      </Content>
 
-      <LayoutFooter>
+      <Footer>
         <Button onClick={onAuth} isLoading={isLoading}>
           {cta}
         </Button>
-      </LayoutFooter>
-    </LayoutContainer>
+      </Footer>
+    </Container>
   );
 }

@@ -50,6 +50,35 @@ export function useConnectionValue() {
     return getChainName(chainId);
   }, [chainId]);
 
+  const closeModal = useCallback(async () => {
+    if (!parent || !context?.resolve) return;
+
+    try {
+      context.resolve({
+        code: ResponseCodes.CANCELED,
+        message: "User aborted",
+      });
+      setContext(undefined); // clears context
+      await parent.close();
+    } catch {
+      // Always fails for some reason
+    }
+  }, [context, parent, setContext]);
+
+  const openModal = useCallback(async () => {
+    if (!parent || !context?.resolve) return;
+
+    try {
+      context.resolve({
+        code: ResponseCodes.USER_INTERACTION_REQUIRED,
+        message: "User interaction required",
+      });
+      await parent.close();
+    } catch {
+      // Always fails for some reason
+    }
+  }, [context, parent]);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const rpcUrl = urlParams.get("rpc_url");
@@ -190,39 +219,6 @@ export function useConnectionValue() {
       reject: context.reject,
     } as OpenSettingsCtx);
   }, [origin, context]);
-
-  const closeModal = useCallback(async () => {
-    if (!parent || !context?.resolve) return;
-
-    if (upgrade.available) {
-      logout();
-    }
-
-    try {
-      context.resolve({
-        code: ResponseCodes.CANCELED,
-        message: "User aborted",
-      });
-      setContext(undefined); // clears context
-      await parent.close();
-    } catch {
-      // Always fails for some reason
-    }
-  }, [context, parent, setContext, upgrade.available, logout]);
-
-  const openModal = useCallback(async () => {
-    if (!parent || !context?.resolve) return;
-
-    try {
-      context.resolve({
-        code: ResponseCodes.USER_INTERACTION_REQUIRED,
-        message: "User interaction required",
-      });
-      await parent.close();
-    } catch {
-      // Always fails for some reason
-    }
-  }, [context, parent]);
 
   return {
     context,

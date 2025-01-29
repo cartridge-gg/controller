@@ -1,13 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import {
-  LayoutContainer,
-  LayoutFooter,
-  LayoutContent,
-  Button,
-  cn,
-  Input,
-  LayoutHeader,
-} from "@cartridge/ui-next";
+import { Container, Footer, Content } from "@/components/layout";
+import { Button, cn, Input } from "@cartridge/ui-next";
 import { useControllerTheme } from "@/hooks/theme";
 import { useDebounce } from "@/hooks/debounce";
 import { useUsernameValidation } from "./useUsernameValidation";
@@ -19,7 +12,6 @@ import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
 import InAppSpy from "inapp-spy";
 import { usePostHog } from "@cartridge/utils";
-import { useConnection } from "@/hooks/connection";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -51,22 +43,17 @@ export function CreateControllerView({
   onSubmit,
   onKeyDown,
 }: CreateControllerViewProps) {
-  const { closeModal, chainId } = useConnection();
-
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        variant="expanded"
-        title={
-          theme.name === "cartridge"
-            ? "Play with Controller"
-            : `Play ${theme.name}`
-        }
-        description="Connect your Controller"
-        chainId={chainId}
-        onClose={closeModal}
-      />
-
+    <Container
+      variant="expanded"
+      title={
+        theme.name === "cartridge"
+          ? "Play with Controller"
+          : `Play ${theme.name}`
+      }
+      description="Connect your Controller"
+      hideNetwork
+    >
       <form
         className="flex flex-col flex-1"
         onSubmit={(e) => {
@@ -74,7 +61,7 @@ export function CreateControllerView({
           onSubmit();
         }}
       >
-        <LayoutContent className="gap-0">
+        <Content className="gap-0">
           <div
             className={cn(
               "border-destructive-100 rounded",
@@ -102,9 +89,9 @@ export function CreateControllerView({
             validation={validation}
             error={error}
           />
-        </LayoutContent>
+        </Content>
 
-        <LayoutFooter showCatridgeLogo>
+        <Footer showCatridgeLogo>
           {isInAppBrowser && (
             <div className="mb-5">
               <ErrorAlert
@@ -137,9 +124,9 @@ export function CreateControllerView({
           >
             {validation.exists ? "login" : "sign up"}
           </Button>
-        </LayoutFooter>
+        </Footer>
       </form>
-    </LayoutContainer>
+    </Container>
   );
 }
 

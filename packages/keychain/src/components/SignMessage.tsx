@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { shortString, Signature, TypedData } from "starknet";
+import { Container, Footer, Content } from "@/components/layout";
 import {
-  LayoutContainer,
-  LayoutFooter,
-  LayoutContent,
   Button,
   Card,
   CardHeader,
   CardTitle,
   CardListContent,
   CardListItem,
-  LayoutHeader,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
+import { useController } from "@/hooks/controller";
 
 export function SignMessage({
   origin,
@@ -25,7 +22,7 @@ export function SignMessage({
   onSign: (sig: Signature) => void;
   onCancel: () => void;
 }) {
-  const { closeModal, chainId, openSettings, controller } = useConnection();
+  const { controller } = useController();
   const [messageData, setMessageData] = useState<TypedData>();
 
   useEffect(() => {
@@ -68,16 +65,12 @@ export function SignMessage({
   }, [controller, onSign, typedData]);
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        title="Signature Request"
-        description={`${hostname} is asking you to sign a message`}
-        chainId={chainId}
-        onClose={closeModal}
-        openSettings={openSettings}
-      />
-      <LayoutContent>
-        {messageData && (
+    <Container
+      title="Signature Request"
+      description={`${hostname} is asking you to sign a message`}
+    >
+      {messageData && (
+        <Content>
           <div className="flex flex-col w-full gap-4 text-sm">
             {messageData.types[messageData.primaryType].map((typ) => (
               <Card key={typ.name}>
@@ -112,16 +105,16 @@ export function SignMessage({
               </Card>
             ))}
           </div>
-        )}
-      </LayoutContent>
+        </Content>
+      )}
 
-      <LayoutFooter>
+      <Footer>
         <Button onClick={onConfirm}>sign</Button>
 
         <Button variant="secondary" onClick={onCancel}>
           reject
         </Button>
-      </LayoutFooter>
-    </LayoutContainer>
+      </Footer>
+    </Container>
   );
 }

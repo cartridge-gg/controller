@@ -1,3 +1,4 @@
+import { Container, Content, Footer } from "@/components/layout";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
@@ -17,9 +18,6 @@ import {
   wallet,
 } from "starknet";
 import {
-  LayoutContainer,
-  LayoutContent,
-  LayoutFooter,
   ArgentIcon,
   BraavosIcon,
   CopyIcon,
@@ -28,7 +26,6 @@ import {
   Button,
   CopyAddress,
   Separator,
-  LayoutHeader,
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
@@ -55,7 +52,7 @@ export function DepositEth(innerProps: DepositEthProps) {
 
 function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { closeModal, controller, chainId } = useConnection();
+  const { controller, chainId } = useConnection();
   const { account: extAccount } = useAccount();
 
   const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
@@ -151,23 +148,19 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
   }, [controller?.address]);
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        title="Deposit ETH"
-        description={
-          controller ? <CopyAddress address={controller.address} /> : undefined
-        }
-        Icon={EthereumIcon}
-        onBack={onBack}
-        chainId={chainId}
-        onClose={closeModal}
-      />
-
-      <LayoutContent className="gap-6">
+    <Container
+      title="Deposit ETH"
+      description={
+        controller ? <CopyAddress address={controller.address} /> : undefined
+      }
+      Icon={EthereumIcon}
+      onBack={onBack}
+    >
+      <Content className="gap-6">
         <Balance showBalances={["eth"]} />
-      </LayoutContent>
+      </Content>
 
-      <LayoutFooter>
+      <Footer>
         <AmountSelection
           amount={dollarAmount}
           lockSelection={isLoading}
@@ -245,8 +238,8 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
               );
           }
         })()}
-      </LayoutFooter>
-    </LayoutContainer>
+      </Footer>
+    </Container>
   );
 }
 
