@@ -24,7 +24,6 @@ import { Network } from "@/components/network";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
-  closeModal?: () => void;
   account?: {
     address: string;
     username: string;
