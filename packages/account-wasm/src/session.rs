@@ -161,8 +161,19 @@ impl CartridgeSessionAccount {
             .collect::<Result<Vec<_>, _>>()?;
 
         let session = self.0.lock().await;
+        let max_fee = session
+            .execute_v1(calls.clone())
+            .nonce(Felt::from(u64::MAX))
+            .estimate_fee()
+            .await?;
+
         let nonce = session.get_nonce().await?;
-        let result = session.execute_v1(calls).nonce(nonce).send().await?;
+        let result = session
+            .execute_v1(calls)
+            .nonce(nonce)
+            .max_fee(max_fee.overall_fee)
+            .send()
+            .await?;
 
         Ok(to_value(&result)?)
     }
