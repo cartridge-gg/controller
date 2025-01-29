@@ -359,7 +359,7 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   private waitForKeychain({
-    timeout = 5000,
+    timeout = 50000,
     interval = 100,
   }:
     | {
