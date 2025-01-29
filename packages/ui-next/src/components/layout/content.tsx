@@ -12,7 +12,7 @@ export function LayoutContent({
     <div
       className={cn(
         "w-full px-4 flex flex-col items-stretch gap-2 overflow-y-auto",
-        withFooter && "[@media(max-height:600px)]:max-h-[400px]",
+        withFooter && "mb-[200px]",
         className,
       )}
     >
