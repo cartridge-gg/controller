@@ -52,7 +52,7 @@ export function LayoutHeader({
           default:
             return (
               <div className="flex flex-col">
-                <div className="w-full bg-[image:var(--theme-cover-url)] bg-cover bg-center h-14 pb-6" />
+                <div className="w-full bg-cover bg-center h-14 pb-6 bg-[linear-gradient(transparent,hsl(var(--background))),var(--theme-cover-url)]" />
                 <HeaderInner {...innerProps} />
               </div>
             );
