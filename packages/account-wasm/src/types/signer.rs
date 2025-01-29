@@ -69,7 +69,9 @@ impl TryFrom<StarknetSigner> for SigningKey {
     type Error = EncodingError;
 
     fn try_from(starknet: StarknetSigner) -> Result<Self, Self::Error> {
-        Ok(SigningKey::from_secret_scalar(starknet.private_key.0))
+        Ok(SigningKey::from_secret_scalar(
+            starknet.private_key.try_into()?,
+        ))
     }
 }
 

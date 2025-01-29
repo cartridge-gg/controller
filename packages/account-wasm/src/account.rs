@@ -1,7 +1,7 @@
 use std::borrow::BorrowMut;
 
 use account_sdk::account::session::policy::Policy as SdkPolicy;
-use account_sdk::controller::Controller;
+use account_sdk::controller::{compute_gas_and_price, Controller};
 use account_sdk::errors::ControllerError;
 use account_sdk::signers::Owner;
 use account_sdk::typed_data::{encode_type, TypedData};
@@ -17,7 +17,7 @@ use wasm_bindgen::prelude::*;
 use crate::errors::JsControllerError;
 use crate::sync::WasmMutex;
 use crate::types::call::JsCall;
-use crate::types::invocation::JsInvocationsDetails;
+use crate::types::estimate::JsFeeEstimate;
 use crate::types::policy::Policy;
 use crate::types::session::SessionMetadata;
 use crate::types::signer::Signer;
@@ -62,11 +62,11 @@ impl CartridgeAccount {
         let controller = Controller::new(
             app_id,
             username.clone(),
-            class_hash.0,
+            class_hash.try_into()?,
             rpc_url,
             Owner::Signer(signer.try_into()?),
-            address.0,
-            chain_id.0,
+            address.try_into()?,
+            chain_id.try_into()?,
         );
 
         Ok(CartridgeAccountWithMeta::new(controller))
@@ -100,7 +100,7 @@ impl CartridgeAccount {
         policies: Vec<Policy>,
         expires_at: u64,
         public_key: JsFelt,
-        max_fee: JsFelt,
+        max_fee: Option<JsFeeEstimate>,
     ) -> std::result::Result<JsValue, JsControllerError> {
         let methods = policies
             .into_iter()
@@ -111,7 +111,13 @@ impl CartridgeAccount {
             .controller
             .lock()
             .await
-            .register_session(methods, expires_at, public_key.0, Felt::ZERO, max_fee.0)
+            .register_session(
+                methods,
+                expires_at,
+                public_key.try_into()?,
+                Felt::ZERO,
+                max_fee.map(|fee| fee.try_into()).transpose()?,
+            )
             .await
             .map_err(JsControllerError::from)?;
 
@@ -132,7 +138,7 @@ impl CartridgeAccount {
         let call = self.controller.lock().await.register_session_call(
             methods,
             expires_at,
-            public_key.0,
+            public_key.try_into()?,
             Felt::ZERO,
         )?;
 
@@ -144,11 +150,12 @@ impl CartridgeAccount {
         &self,
         new_class_hash: JsFelt,
     ) -> std::result::Result<JsCall, JsControllerError> {
-        let call = self.controller.lock().await.upgrade(new_class_hash.0);
+        let felt: Felt = new_class_hash.try_into()?;
+        let call = self.controller.lock().await.upgrade(felt);
         Ok(JsCall {
-            contract_address: call.to,
+            contract_address: call.to.into(),
             entrypoint: "upgrade".to_string(),
-            calldata: call.calldata,
+            calldata: call.calldata.into_iter().map(Into::into).collect(),
         })
     }
 
@@ -178,7 +185,7 @@ impl CartridgeAccount {
     pub async fn estimate_invoke_fee(
         &self,
         calls: Vec<JsCall>,
-    ) -> std::result::Result<JsValue, JsControllerError> {
+    ) -> std::result::Result<JsFeeEstimate, JsControllerError> {
         set_panic_hook();
 
         let calls = calls
@@ -192,14 +199,15 @@ impl CartridgeAccount {
             .await
             .estimate_invoke_fee(calls)
             .await?;
-        Ok(to_value(&fee_estimate)?)
+
+        Ok(fee_estimate.into())
     }
 
     #[wasm_bindgen(js_name = execute)]
     pub async fn execute(
         &self,
         calls: Vec<JsCall>,
-        details: JsInvocationsDetails,
+        max_fee: Option<JsFeeEstimate>,
     ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
@@ -211,7 +219,7 @@ impl CartridgeAccount {
         let result = Controller::execute(
             self.controller.lock().await.borrow_mut(),
             calls,
-            details.max_fee,
+            max_fee.map(|fee| fee.try_into()).transpose()?,
         )
         .await?;
 
@@ -306,7 +314,7 @@ impl CartridgeAccount {
             .controller
             .lock()
             .await
-            .authorized_session_metadata(&policies, public_key.map(|f| f.0))
+            .authorized_session_metadata(&policies, public_key.map(|f| f.try_into()).transpose()?)
             .map(|(_, metadata)| SessionMetadata::from(metadata)))
     }
 
@@ -325,7 +333,7 @@ impl CartridgeAccount {
             .controller
             .lock()
             .await
-            .is_requested_session(&policies, public_key.map(|f| f.0)))
+            .is_requested_session(&policies, public_key.map(|f| f.try_into()).transpose()?))
     }
 
     #[wasm_bindgen(js_name = revokeSession)]
@@ -345,7 +353,7 @@ impl CartridgeAccount {
             .await
             .map_err(|e| JsControllerError::from(ControllerError::SignError(e)))?;
 
-        Ok(Felts(signature.into_iter().map(JsFelt).collect()))
+        Ok(Felts(signature.into_iter().map(Into::into).collect()))
     }
 
     #[wasm_bindgen(js_name = getNonce)]
@@ -371,15 +379,20 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = deploySelf)]
-    pub async fn deploy_self(&self, max_fee: JsFelt) -> Result<JsValue> {
+    pub async fn deploy_self(&self, max_fee: Option<JsFeeEstimate>) -> Result<JsValue> {
         set_panic_hook();
 
-        let res = self
-            .controller
-            .lock()
-            .await
-            .deploy()
-            .max_fee(max_fee.0)
+        let controller = self.controller.lock().await;
+        let mut deployment = controller.deploy();
+
+        if let Some(max_fee) = max_fee {
+            let gas_estimate_multiplier = 1.5;
+            let (gas, gas_price) =
+                compute_gas_and_price(&max_fee.try_into()?, gas_estimate_multiplier)?;
+            deployment = deployment.gas(gas).gas_price(gas_price);
+        }
+
+        let res = deployment
             .send()
             .await
             .map_err(|e| JsControllerError::from(ControllerError::AccountFactoryError(e)))?;
@@ -399,7 +412,7 @@ impl CartridgeAccount {
             .await
             .map_err(JsControllerError::from)?;
 
-        Ok(JsFelt(res))
+        Ok(res.try_into()?)
     }
 }
 
@@ -433,7 +446,7 @@ impl CartridgeAccountMeta {
             class_hash: controller.class_hash.to_hex_string(),
             rpc_url: controller.rpc_url.to_string(),
             chain_id: controller.chain_id.to_string(),
-            owner_guid: JsFelt(controller.owner_guid()),
+            owner_guid: controller.owner_guid().into(),
         }
     }
 }

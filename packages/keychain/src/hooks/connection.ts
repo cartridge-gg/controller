@@ -184,7 +184,6 @@ export function useConnectionValue() {
     if (!context) return;
 
     setContext({
-      origin: context.origin || origin,
       type: "open-settings",
       resolve: context.resolve,
       reject: context.reject,

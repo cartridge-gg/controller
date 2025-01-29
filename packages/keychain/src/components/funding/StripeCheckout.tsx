@@ -85,7 +85,9 @@ export default function StripeCheckout({
     <LayoutContainer>
       <LayoutHeader
         title={"Purchase $" + creditsAmount}
-        description={controller && <CopyAddress address={controller.address} />}
+        description={
+          controller && <CopyAddress address={controller.address()} />
+        }
         icon={<CoinsIcon variant="solid" size="lg" />}
         onBack={onBack}
         chainId={chainId}

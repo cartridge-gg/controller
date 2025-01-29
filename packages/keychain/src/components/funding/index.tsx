@@ -11,7 +11,7 @@ import {
   CopyAddress,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { DepositEth } from "./DepositEth";
+import { Deposit } from "./Deposit";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance, BalanceType } from "./Balance";
 
@@ -37,7 +37,7 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
 
   if (state === FundingState.FUND_ETH) {
     return (
-      <DepositEth
+      <Deposit
         onComplete={onComplete}
         onBack={() => setState(FundingState.SHOW_OPTIONS)}
       />
@@ -57,7 +57,9 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
     <LayoutContainer>
       <LayoutHeader
         title={title || (controller ? `Fund ${controller.username()}` : "")}
-        description={controller && <CopyAddress address={controller.address} />}
+        description={
+          controller && <CopyAddress address={controller.address()} />
+        }
         icon={<ArrowIcon variant="down" size="lg" />}
         chainId={chainId}
         onClose={closeModal}
@@ -76,7 +78,7 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
             onClick={() => setState(FundingState.FUND_ETH)}
             variant="secondary"
           >
-            <EthereumIcon size="sm" className="mr-1" /> Deposit Eth
+            Deposit
           </Button>
         )}
       </LayoutFooter>

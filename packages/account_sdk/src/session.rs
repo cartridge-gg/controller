@@ -1,6 +1,6 @@
 use cainome::cairo_serde::{CairoSerde, NonZero};
 use starknet::accounts::ConnectedAccount;
-use starknet::core::types::{Call, Felt, InvokeTransactionResult};
+use starknet::core::types::{Call, FeeEstimate, Felt, InvokeTransactionResult};
 use starknet::signers::{SigningKey, VerifyingKey};
 
 use crate::abigen::controller::{Signer as AbigenSigner, SignerSignature, StarknetSigner};
@@ -125,7 +125,7 @@ impl Controller {
         expires_at: u64,
         public_key: Felt,
         guardian: Felt,
-        max_fee: Felt,
+        max_fee: Option<FeeEstimate>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
         let session = Session::new(
             policies,

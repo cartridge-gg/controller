@@ -32,9 +32,9 @@ export function Balance({ showBalances }: BalanceProps) {
   const {
     data: [eth],
   } = useERC20Balance({
-    address: controller?.address,
+    address: controller?.address(),
     contractAddress: ETH_CONTRACT_ADDRESS,
-    provider: controller,
+    provider: controller?.provider,
     interval: 3000,
     decimals: 2,
   });

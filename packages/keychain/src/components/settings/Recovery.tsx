@@ -29,10 +29,9 @@ export function Recovery({ onBack }: { onBack: () => void }) {
   const onSetRecovery = useCallback(() => {
     if (!context || !controller) return;
     setContext({
-      origin: context.origin,
       transactions: [
         {
-          contractAddress: controller.address,
+          contractAddress: controller.address(),
           entrypoint: "register_external_owner",
           calldata: CallData.compile([externalOwnerAddress]),
         },

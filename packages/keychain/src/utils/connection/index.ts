@@ -58,7 +58,6 @@ export function connectToController<ParentMethods extends object>({
       delegateAccount: () => () => window.controller?.delegateAccount(),
       openPurchaseCredits: () => () => {
         setContext({
-          origin,
           type: "open-purchase-credits",
           resolve: () => Promise.resolve(),
           reject: () => Promise.reject(),

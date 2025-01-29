@@ -3,7 +3,7 @@ import { LayoutContent } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ExecuteCtx } from "@/utils/connection";
-import { num } from "starknet";
+import { EstimateFee } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 
 export function ConfirmTransaction() {
@@ -12,14 +12,12 @@ export function ConfirmTransaction() {
   const account = controller;
   const transactions = toArray(ctx.transactions);
 
-  const onSubmit = async (maxFee?: bigint) => {
+  const onSubmit = async (maxFee?: EstimateFee) => {
     if (maxFee === undefined || !account) {
       return;
     }
 
-    const { transaction_hash } = await account.execute(transactions, {
-      maxFee: num.toHex(maxFee),
-    });
+    const { transaction_hash } = await account.execute(transactions, maxFee);
     ctx.resolve?.({
       code: ResponseCodes.SUCCESS,
       transaction_hash,
@@ -33,8 +31,8 @@ export function ConfirmTransaction() {
       title={`Review Transaction${transactions.length > 1 ? "s" : ""}`}
       description={origin}
       executionError={ctx.error}
-      transactions={ctx.transactions}
-      transactionsDetail={ctx.transactionsDetail}
+      transactions={transactions}
+      feeEstimate={ctx.feeEstimate}
       onSubmit={onSubmit}
     >
       <LayoutContent>
