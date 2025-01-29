@@ -7,7 +7,7 @@ use crate::factory::ControllerFactory;
 use crate::impl_account;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Owner;
-use crate::storage::{ControllerMetadata, Storage, StorageBackend};
+use crate::storage::{ControllerMetadata, Storage, StorageBackend, StorageError};
 use crate::typed_data::TypedData;
 use crate::{
     abigen::{self},
@@ -109,8 +109,18 @@ impl Controller {
     }
 
     pub fn from_storage(app_id: String) -> Result<Option<Self>, ControllerError> {
-        let storage = Storage::default();
-        let metadata = storage.controller(&app_id).map_err(ControllerError::from)?;
+        let mut storage = Storage::default();
+        let metadata = match storage.controller(&app_id) {
+            Ok(metadata) => metadata,
+            Err(StorageError::Serialization(_)) => {
+                storage.clear().ok();
+                return Ok(None);
+            }
+            Err(e) => {
+                return Err(ControllerError::from(e));
+            }
+        };
+
         if let Some(m) = metadata {
             let rpc_url = Url::parse(&m.rpc_url).map_err(ControllerError::from)?;
             Ok(Some(Controller::new(

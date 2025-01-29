@@ -25,6 +25,10 @@ pub mod inmemory;
 pub mod localstorage;
 pub mod selectors;
 
+#[cfg(all(test, not(target_arch = "wasm32")))]
+#[path = "storage_test.rs"]
+mod storage_test;
+
 #[derive(Debug, thiserror::Error)]
 pub enum StorageError {
     #[error("Serialization error: {0}")]
@@ -236,6 +240,7 @@ pub enum StorageValue {
 #[async_trait]
 pub trait StorageBackend: Send + Sync {
     fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError>;
+    fn set_serialized(&mut self, key: &str, value: &str) -> Result<(), StorageError>;
     fn get(&self, key: &str) -> Result<Option<StorageValue>, StorageError>;
     fn remove(&mut self, key: &str) -> Result<(), StorageError>;
     fn clear(&mut self) -> Result<(), StorageError>;
@@ -254,21 +259,23 @@ pub trait StorageBackend: Send + Sync {
     }
 
     fn controller(&self, app_id: &str) -> Result<Option<ControllerMetadata>, StorageError> {
-        self.get(&selectors::Selectors::active(app_id))
-            .and_then(|value| match value {
-                Some(StorageValue::Active(metadata)) => self
-                    .get(&selectors::Selectors::account(
-                        &metadata.address,
-                        &metadata.chain_id,
-                    ))
-                    .and_then(|value| match value {
-                        Some(StorageValue::Controller(metadata)) => Ok(Some(metadata)),
-                        Some(_) => Err(StorageError::TypeMismatch),
-                        None => Ok(None),
-                    }),
-                Some(_) => Err(StorageError::TypeMismatch),
-                None => Ok(None),
-            })
+        let active_value = self.get(&selectors::Selectors::active(app_id))?;
+        match active_value {
+            Some(StorageValue::Active(metadata)) => {
+                let account_value = self.get(&selectors::Selectors::account(
+                    &metadata.address,
+                    &metadata.chain_id,
+                ))?;
+
+                match account_value {
+                    Some(StorageValue::Controller(metadata)) => Ok(Some(metadata)),
+                    Some(_) => Err(StorageError::TypeMismatch),
+                    None => Ok(None),
+                }
+            }
+            Some(_) => Err(StorageError::TypeMismatch),
+            None => Ok(None),
+        }
     }
 
     fn set_controller(

@@ -9,11 +9,14 @@ pub struct LocalStorage;
 #[cfg_attr(target_arch = "wasm32", async_trait)]
 impl StorageBackend for LocalStorage {
     fn set(&mut self, key: &str, value: &StorageValue) -> Result<(), StorageError> {
-        let local_storage = Self::local_storage()?;
-
         let serialized = serde_json::to_string(value)?;
+        self.set_serialized(key, &serialized)
+    }
+
+    fn set_serialized(&mut self, key: &str, value: &str) -> Result<(), StorageError> {
+        let local_storage = Self::local_storage()?;
         local_storage
-            .set_item(key, &serialized)
+            .set_item(key, value)
             .map_err(|_| StorageError::OperationFailed("setting item in localStorage".into()))?;
         Ok(())
     }
