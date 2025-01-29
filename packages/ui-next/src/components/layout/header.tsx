@@ -1,8 +1,25 @@
-import { Network } from "@/components/network";
-import { ArrowIcon, GearIcon, IconProps, TimesIcon } from "@/components/icons";
+import {
+  ArrowIcon,
+  ControllerIcon,
+  GearIcon,
+  IconProps,
+  QuestionIcon,
+  SlotIcon,
+  StarknetColorIcon,
+  StarknetIcon,
+  TimesIcon,
+} from "@/components/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/primitives/tooltip";
 import { cn } from "@/utils";
 import { Button } from "@/components/primitives/button";
-import { isIframe } from "@cartridge/utils";
+import { getChainName, isIframe, isSlotChain } from "@cartridge/utils";
+import { constants } from "starknet";
+import { CopyAddress } from "../copy-address";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
@@ -52,7 +69,41 @@ export function LayoutHeader({
         </div>
 
         <div className="flex items-center gap-2">
-          {chainId && <Network chainId={chainId} />}
+          {chainId && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="flex items-center gap-1.5 bg-background-100 rounded px-3 py-2.5">
+                  {/* TODO: Replace with avatar */}
+                  <ControllerIcon size="sm" />
+                  <div className="text-sm font-semibold">test-1</div>
+                </TooltipTrigger>
+                <TooltipContent className="flex items-center gap-8 px-3 py-2.5">
+                  <div className="flex items-center gap-1.5">
+                    {(() => {
+                      switch (chainId) {
+                        case constants.StarknetChainId.SN_MAIN:
+                          return <StarknetColorIcon />;
+                        case constants.StarknetChainId.SN_SEPOLIA:
+                          return <StarknetIcon />;
+                        default:
+                          return isSlotChain(chainId) ? (
+                            <SlotIcon />
+                          ) : (
+                            <QuestionIcon />
+                          );
+                      }
+                    })()}
+                    <div className="text-sm">{getChainName(chainId)}</div>
+                  </div>
+                  <CopyAddress
+                    size="xs"
+                    className="text-sm"
+                    address={"0x000000000000000000000000"}
+                  />
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
 
           {openSettings && <SettingsButton onClick={openSettings} />}
         </div>
