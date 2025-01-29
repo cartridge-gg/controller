@@ -11,17 +11,19 @@ use serde_wasm_bindgen::to_value;
 use starknet::accounts::{Account, ConnectedAccount};
 use starknet::signers::SigningKey;
 use starknet_types_core::felt::Felt;
+
+use std::result::Result;
 use url::Url;
 use wasm_bindgen::prelude::*;
 
+use crate::errors::JsControllerError;
+use crate::sync::WasmMutex;
 use crate::types::call::JsCall;
 use crate::types::session::Session;
 use crate::types::{Felts, JsFelt};
 
-type Result<T> = std::result::Result<T, JsError>;
-
 #[wasm_bindgen]
-pub struct CartridgeSessionAccount(SessionAccount);
+pub struct CartridgeSessionAccount(WasmMutex<SessionAccount>);
 
 #[wasm_bindgen]
 impl CartridgeSessionAccount {
@@ -32,7 +34,7 @@ impl CartridgeSessionAccount {
         chain_id: JsFelt,
         session_authorization: Vec<JsFelt>,
         session: Session,
-    ) -> Result<CartridgeSessionAccount> {
+    ) -> Result<CartridgeSessionAccount, JsControllerError> {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
@@ -48,7 +50,7 @@ impl CartridgeSessionAccount {
             .policies
             .into_iter()
             .map(TryFrom::try_from)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
         let session = account_sdk::account::session::hash::Session::new(
             policies,
@@ -57,16 +59,19 @@ impl CartridgeSessionAccount {
             Felt::ZERO,
         )?;
 
-        Ok(CartridgeSessionAccount(SessionAccount::new(
-            provider,
-            signer,
-            address,
-            chain_id,
-            session_authorization,
-            session,
+        Ok(CartridgeSessionAccount(WasmMutex::new(
+            SessionAccount::new(
+                provider,
+                signer,
+                address,
+                chain_id,
+                session_authorization,
+                session,
+            ),
         )))
     }
 
+    #[wasm_bindgen(js_name = newAsRegistered)]
     pub fn new_as_registered(
         rpc_url: String,
         signer: JsFelt,
@@ -74,7 +79,7 @@ impl CartridgeSessionAccount {
         owner_guid: JsFelt,
         chain_id: JsFelt,
         session: Session,
-    ) -> Result<CartridgeSessionAccount> {
+    ) -> Result<CartridgeSessionAccount, JsControllerError> {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
@@ -86,7 +91,7 @@ impl CartridgeSessionAccount {
             .policies
             .into_iter()
             .map(TryFrom::try_from)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
         let session = account_sdk::account::session::hash::Session::new(
             policies,
@@ -95,65 +100,83 @@ impl CartridgeSessionAccount {
             Felt::ZERO,
         )?;
 
-        Ok(CartridgeSessionAccount(SessionAccount::new_as_registered(
-            provider,
-            signer,
-            address,
-            chain_id,
-            owner_guid.0,
-            session,
+        Ok(CartridgeSessionAccount(WasmMutex::new(
+            SessionAccount::new_as_registered(
+                provider,
+                signer,
+                address,
+                chain_id,
+                owner_guid.0,
+                session,
+            ),
         )))
     }
 
-    pub async fn sign(&self, hash: JsFelt, calls: Vec<JsCall>) -> Result<Felts> {
+    pub async fn sign(&self, hash: JsFelt, calls: Vec<JsCall>) -> Result<Felts, JsControllerError> {
         let hash = hash.0;
         let calls = calls
             .into_iter()
             .map(TryInto::try_into)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
-        let res = self.0.sign_hash_and_calls(hash, &calls).await?;
+        let res = self
+            .0
+            .lock()
+            .await
+            .sign_hash_and_calls(hash, &calls)
+            .await?;
 
         Ok(Felts(res.into_iter().map(JsFelt).collect()))
     }
 
-    pub async fn sign_transaction(&self, calls: Vec<JsCall>, max_fee: JsFelt) -> Result<Felts> {
+    #[wasm_bindgen(js_name = signTransaction)]
+    pub async fn sign_transaction(
+        &self,
+        calls: Vec<JsCall>,
+        max_fee: JsFelt,
+    ) -> Result<Felts, JsControllerError> {
         let calls = calls
             .into_iter()
             .map(TryInto::try_into)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
-        let nonce = self.0.get_nonce().await?;
-        let tx_hash = self
-            .0
+        let session = self.0.lock().await;
+        let nonce = session.get_nonce().await?;
+        let tx_hash = session
             .execute_v1(calls.clone())
             .nonce(nonce)
             .max_fee(max_fee.0)
             .prepared()?
             .transaction_hash(false);
 
-        let signature = self.0.sign_hash_and_calls(tx_hash, &calls).await?;
+        let signature = session.sign_hash_and_calls(tx_hash, &calls).await?;
 
         Ok(Felts(signature.into_iter().map(JsFelt).collect()))
     }
 
-    pub async fn execute(&self, calls: Vec<JsCall>) -> Result<JsValue> {
+    pub async fn execute(&self, calls: Vec<JsCall>) -> Result<JsValue, JsControllerError> {
         let calls = calls
             .into_iter()
             .map(TryInto::try_into)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
-        let res = self.0.execute_v1(calls).send().await?;
+        let session = self.0.lock().await;
+        let nonce = session.get_nonce().await?;
+        let result = session.execute_v1(calls).nonce(nonce).send().await?;
 
-        Ok(to_value(&res)?)
+        Ok(to_value(&result)?)
     }
 
-    pub async fn execute_from_outside(&self, calls: Vec<JsCall>) -> Result<JsValue> {
+    #[wasm_bindgen(js_name = executeFromOutside)]
+    pub async fn execute_from_outside(
+        &self,
+        calls: Vec<JsCall>,
+    ) -> Result<JsValue, JsControllerError> {
         let caller = OutsideExecutionCaller::Any;
         let calls = calls
             .into_iter()
             .map(TryInto::try_into)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
         let now = get_current_timestamp();
         let outside_execution = OutsideExecutionV3 {
@@ -164,17 +187,16 @@ impl CartridgeSessionAccount {
             nonce: (SigningKey::from_random().secret_scalar(), 1),
         };
 
-        let signed = self
-            .0
+        let session = self.0.lock().await;
+        let signed = session
             .sign_outside_execution(OutsideExecution::V3(outside_execution.clone()))
             .await?;
 
-        let res = self
-            .0
+        let res = session
             .provider()
             .add_execute_outside_transaction(
                 OutsideExecution::V3(outside_execution),
-                self.0.address(),
+                session.address(),
                 signed.signature,
             )
             .await?;

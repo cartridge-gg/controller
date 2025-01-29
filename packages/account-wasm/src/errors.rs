@@ -451,6 +451,36 @@ impl From<FromStrError> for JsControllerError {
     }
 }
 
+impl From<account_sdk::signers::SignError> for JsControllerError {
+    fn from(error: account_sdk::signers::SignError) -> Self {
+        JsControllerError {
+            code: ErrorCode::SignError,
+            message: error.to_string(),
+            data: None,
+        }
+    }
+}
+
+impl From<url::ParseError> for JsControllerError {
+    fn from(error: url::ParseError) -> Self {
+        JsControllerError {
+            code: ErrorCode::UrlParseError,
+            message: error.to_string(),
+            data: None,
+        }
+    }
+}
+
+impl From<starknet::accounts::NotPreparedError> for JsControllerError {
+    fn from(error: starknet::accounts::NotPreparedError) -> Self {
+        JsControllerError {
+            code: ErrorCode::StarknetUnexpectedError,
+            message: error.to_string(),
+            data: None,
+        }
+    }
+}
+
 impl fmt::Display for JsControllerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let json = serde_json::json!({

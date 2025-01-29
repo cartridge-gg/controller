@@ -55,11 +55,18 @@ export default class SessionAccount extends WalletAccount {
    * - entrypoint - the entrypoint of the contract
    * - calldata - (defaults to []) the calldata
    * - signature - (defaults to []) the signature
-   * @param abis (optional) the abi of the contract for better displaying
    *
    * @returns response from addTransaction
    */
   async execute(calls: Call | Call[]): Promise<InvokeFunctionResponse> {
-    return this.controller.execute(normalizeCalls(calls));
+    try {
+      const res = await this.controller.executeFromOutside(
+        normalizeCalls(calls),
+      );
+
+      return res;
+    } catch (e) {
+      return this.controller.execute(normalizeCalls(calls));
+    }
   }
 }
