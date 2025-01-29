@@ -10,6 +10,8 @@ import { Buffer } from "buffer";
 
 import { client, ENDPOINT } from "@/utils/graphql";
 import base64url from "base64url";
+import { useConnection } from "./connection";
+import { useMemo } from "react";
 
 type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
@@ -224,4 +226,15 @@ export async function doLogin({
       throw Error("login failed");
     }
   }
+}
+
+export function useAccount() {
+  const { controller } = useConnection();
+  return useMemo(() => {
+    if (!controller) return;
+    return {
+      address: controller.address,
+      username: controller.username(),
+    };
+  }, [controller]);
 }
