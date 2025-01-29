@@ -52,6 +52,7 @@ export function useConnectionValue() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const rpcUrl = urlParams.get("rpc_url");
 
     // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
     if (!isIframe()) {
@@ -60,9 +61,12 @@ export function useConnectionValue() {
         setController(controller);
       }
 
-      const rpcUrl = urlParams.get("rpc_url");
       if (rpcUrl) {
         setRpcUrl(rpcUrl);
+      }
+
+      if (controller && rpcUrl) {
+        controller.switchChain(rpcUrl);
       }
     }
 
