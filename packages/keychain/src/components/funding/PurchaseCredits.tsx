@@ -110,7 +110,9 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           "Purchase " +
           (state === PurchaseState.SELECTION ? "Credits" : "Complete")
         }
-        description={controller && <CopyAddress address={controller.address} />}
+        description={
+          controller && <CopyAddress address={controller.address()} />
+        }
         icon={
           state === PurchaseState.SELECTION ? (
             <CoinsIcon variant="solid" size="lg" />

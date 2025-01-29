@@ -31,7 +31,13 @@ describe("ExecutionContainer", () => {
     renderWithConnection(
       <ExecutionContainer
         {...defaultProps}
-        transactions={[{ some: "transaction" }]}
+        transactions={[
+          {
+            contractAddress: "0x123",
+            entrypoint: "transfer",
+            calldata: ["0x456"],
+          },
+        ]}
       />,
       {
         controller: {
@@ -56,7 +62,13 @@ describe("ExecutionContainer", () => {
     renderWithConnection(
       <ExecutionContainer
         {...defaultProps}
-        transactions={[{ some: "transaction" }]}
+        transactions={[
+          {
+            contractAddress: "0x123",
+            entrypoint: "transfer",
+            calldata: ["0x456"],
+          },
+        ]}
         onSubmit={onSubmit}
       />,
       {
@@ -99,7 +111,13 @@ describe("ExecutionContainer", () => {
     renderWithConnection(
       <ExecutionContainer
         {...defaultProps}
-        transactions={[{ some: "transaction" }]}
+        transactions={[
+          {
+            contractAddress: "0x123",
+            entrypoint: "transfer",
+            calldata: ["0x456"],
+          },
+        ]}
         onSubmit={onSubmit}
         onError={onError}
       />,

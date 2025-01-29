@@ -29,10 +29,9 @@ export function Delegate({ onBack }: { onBack: () => void }) {
   const onSetDelegate = useCallback(() => {
     if (!context || !controller) return;
     setContext({
-      origin: context.origin,
       transactions: [
         {
-          contractAddress: controller.address,
+          contractAddress: controller.address(),
           entrypoint: "set_delegate_account",
           calldata: CallData.compile([delegateAddress]),
         },

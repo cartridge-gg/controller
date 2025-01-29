@@ -176,7 +176,7 @@ export function ControllerErrorAlert({
     case ErrorCode.InsufficientBalance:
       title = "Insufficient funds";
       description =
-        "Your controller does not have enough gas to complete this transaction";
+        "Your controller does not have enough funds to complete this transaction";
       isExpanded = true;
       variant = "warning";
       break;
@@ -403,7 +403,7 @@ function StackTraceDisplay({
   );
 }
 
-function isControllerError(
+export function isControllerError(
   error: ControllerError | Error,
 ): error is ControllerError {
   return !!(error as ControllerError).code;

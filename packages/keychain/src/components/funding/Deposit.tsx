@@ -40,20 +40,20 @@ import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { toast } from "sonner";
 import { DEFAULT_AMOUNT } from "./constants";
 
-type DepositEthProps = {
+type DepositProps = {
   onComplete?: (deployHash?: string) => void;
   onBack: () => void;
 };
 
-export function DepositEth(innerProps: DepositEthProps) {
+export function Deposit(innerProps: DepositProps) {
   return (
     <ExternalWalletProvider>
-      <DepositEthInner {...innerProps} />
+      <DepositInner {...innerProps} />
     </ExternalWalletProvider>
   );
 }
 
-function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
+function DepositInner({ onComplete, onBack }: DepositProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { closeModal, controller, chainId } = useConnection();
   const { account: extAccount } = useAccount();
@@ -146,16 +146,18 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
   const onCopy = useCallback(() => {
     if (!controller?.address) return;
 
-    navigator.clipboard.writeText(controller.address);
+    navigator.clipboard.writeText(controller.address());
     toast.success("Address copied");
   }, [controller?.address]);
 
   return (
     <LayoutContainer>
       <LayoutHeader
-        title="Deposit ETH"
+        title="Deposit"
         description={
-          controller ? <CopyAddress address={controller.address} /> : undefined
+          controller ? (
+            <CopyAddress address={controller.address()} />
+          ) : undefined
         }
         Icon={EthereumIcon}
         onBack={onBack}
@@ -261,7 +263,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       chains={[sepolia, mainnet]}
-      provider={() => controller}
+      provider={() => controller.provider}
       connectors={connectors}
       explorer={voyager}
     >

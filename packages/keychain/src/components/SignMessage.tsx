@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { shortString, Signature, TypedData } from "starknet";
 import {
   LayoutContainer,
@@ -15,17 +15,16 @@ import {
 import { useConnection } from "@/hooks/connection";
 
 export function SignMessage({
-  origin,
   typedData,
   onSign,
   onCancel,
 }: {
-  origin: string;
   typedData: TypedData;
   onSign: (sig: Signature) => void;
   onCancel: () => void;
 }) {
-  const { closeModal, chainId, openSettings, controller } = useConnection();
+  const { closeModal, chainId, openSettings, controller, origin } =
+    useConnection();
   const [messageData, setMessageData] = useState<TypedData>();
 
   useEffect(() => {
@@ -58,8 +57,6 @@ export function SignMessage({
     setMessageData(typedData);
   }, [typedData]);
 
-  const hostname = useMemo(() => new URL(origin).hostname, [origin]);
-
   const onConfirm = useCallback(async () => {
     const account = controller;
     if (!account) return;
@@ -71,7 +68,7 @@ export function SignMessage({
     <LayoutContainer>
       <LayoutHeader
         title="Signature Request"
-        description={`${hostname} is asking you to sign a message`}
+        description={`${origin} is asking you to sign a message`}
         chainId={chainId}
         onClose={closeModal}
         openSettings={openSettings}

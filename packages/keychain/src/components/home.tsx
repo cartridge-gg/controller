@@ -16,7 +16,7 @@ import { execute } from "@/utils/connection/execute";
 import { usePostHog } from "@cartridge/utils";
 
 export function Home() {
-  const { context, setContext, controller, error, policies, upgrade } =
+  const { context, setContext, controller, error, policies, origin, upgrade } =
     useConnection();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
@@ -41,7 +41,7 @@ export function Home() {
     }
   }, [context?.type, posthog]);
 
-  if (window.self === window.top || !context?.origin) {
+  if (window.self === window.top || !context || !origin) {
     return <></>;
   }
 
@@ -74,7 +74,7 @@ export function Home() {
       ) {
         context.resolve({
           code: ResponseCodes.SUCCESS,
-          address: controller.address,
+          address: controller.address(),
         });
 
         return <></>;
@@ -87,7 +87,7 @@ export function Home() {
           onConnect={() => {
             context.resolve({
               code: ResponseCodes.SUCCESS,
-              address: controller.address,
+              address: controller.address(),
             });
           }}
         />
@@ -101,7 +101,6 @@ export function Home() {
       const ctx = context as SignMessageCtx;
       return (
         <SignMessage
-          origin={ctx.origin}
           typedData={ctx.typedData}
           onSign={(sig: Signature) => context.resolve(sig)}
           onCancel={() =>
@@ -126,12 +125,7 @@ export function Home() {
                 setContext: (nextCtx) => {
                   setContext(nextCtx);
                 },
-              })(
-                ctx.transactions,
-                ctx.abis || [],
-                ctx.transactionsDetail,
-                false,
-              );
+              })(ctx.transactions, undefined, undefined, false);
 
               setHasSessionForPolicies(true);
 

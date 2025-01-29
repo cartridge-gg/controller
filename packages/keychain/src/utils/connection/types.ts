@@ -6,14 +6,7 @@ import {
   DeployReply,
 } from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
-import {
-  Abi,
-  Call,
-  InvocationsDetails,
-  Signature,
-  TypedData,
-  constants,
-} from "starknet";
+import { Call, EstimateFee, Signature, TypedData } from "starknet";
 
 export type ConnectionCtx =
   | ConnectCtx
@@ -48,21 +41,16 @@ export type ControllerError = {
 };
 
 export type ExecuteCtx = {
-  origin: string;
   type: "execute";
-  transactions: Call | Call[];
-  abis?: Abi[];
-  transactionsDetail?: InvocationsDetails & {
-    chainId?: constants.StarknetChainId;
-  };
+  transactions: Call[];
+  feeEstimate?: EstimateFee;
   error?: ControllerError;
   resolve?: (res: ExecuteReply | ConnectError) => void;
   reject?: (reason?: unknown) => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 };
 
 export type SignMessageCtx = {
-  origin: string;
   type: "sign-message";
   typedData: TypedData;
   account: string;
@@ -71,7 +59,6 @@ export type SignMessageCtx = {
 };
 
 export type OpenSettingsCtx = {
-  origin: string;
   type: "open-settings";
   account: string;
   resolve: (res: ConnectError) => void;
@@ -79,7 +66,6 @@ export type OpenSettingsCtx = {
 };
 
 export type DeployCtx = {
-  origin: string;
   type: "deploy";
   account: string;
   resolve: (res: DeployReply | ConnectError) => void;
@@ -87,7 +73,6 @@ export type DeployCtx = {
 };
 
 export type OpenPurchaseCreditsCtx = {
-  origin: string;
   type: "open-purchase-credits";
   resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;

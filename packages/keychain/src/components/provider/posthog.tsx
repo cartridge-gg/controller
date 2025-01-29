@@ -16,13 +16,13 @@ export function PostHogProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (controller) {
       // Only identify if this is a new address
-      if (lastIdentifiedAddress !== controller.address) {
+      if (lastIdentifiedAddress !== controller.address()) {
         posthog.identify(controller.username(), {
-          address: controller.address,
+          address: controller.address(),
           class: controller.classHash(),
           chainId: controller.chainId,
         });
-        setLastIdentifiedAddress(controller.address);
+        setLastIdentifiedAddress(controller.address());
       }
     } else {
       posthog.reset();

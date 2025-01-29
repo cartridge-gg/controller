@@ -93,11 +93,7 @@ export const Medium: Story = {
 
 export const WithIcon: Story = {
   args: {
-    children: (
-      <>
-        <EthereumIcon /> Deposit ETH
-      </>
-    ),
+    children: <>Deposit</>,
   },
 };
 
