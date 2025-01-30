@@ -19,7 +19,7 @@ export function LayoutHeader({
   ...innerProps
 }: HeaderProps & { onClose?: () => void }) {
   return (
-    <div className="sticky top-0 w-full z-[1] bg-background">
+    <div className="sticky top-0 w-full z-10 bg-background">
       {(() => {
         switch (innerProps.variant) {
           case "expanded":
