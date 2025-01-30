@@ -1,0 +1,11 @@
+{
+  "origin": "https://dominion.fun",
+  "theme": {
+    "colors": {
+      "primary": "#19cfff"
+    },
+    "cover": "/whitelabel/dominion/cover.png",
+    "icon": "/whitelabel/dominion/icon.svg",
+    "name": "Dominion"
+  }
+}
