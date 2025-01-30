@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Banner } from "./Banner";
 import { EthereumIcon, TransferIcon } from "@cartridge/ui-next";
+import { LayoutHeader } from "./index";
 
-const meta: Meta<typeof Banner> = {
-  component: Banner,
+const meta: Meta<typeof LayoutHeader> = {
+  component: LayoutHeader,
   tags: ["autodocs"],
   parameters: {
     backgrounds: {
@@ -16,7 +16,7 @@ const meta: Meta<typeof Banner> = {
     title: "Welcome to Keychain",
     description: "Secure your digital assets",
   },
-} satisfies Meta<typeof Banner>;
+} satisfies Meta<typeof LayoutHeader>;
 
 export default meta;
 

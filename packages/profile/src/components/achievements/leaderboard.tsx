@@ -1,6 +1,5 @@
 import {
   cn,
-  ScrollArea,
   SpaceInvaderIcon,
   SparklesIcon,
   StateIconProps,
@@ -23,22 +22,20 @@ export function Leaderboard({
   pins: { [playerId: string]: string[] };
 }) {
   return (
-    <div className="flex flex-col gap-y-px rounded-md overflow-hidden relative">
-      <ScrollArea className="overflow-auto">
-        {players.map((player, index) => (
-          <Row
-            key={player.address}
-            self={BigInt(player.address || 0) === BigInt(address || 1)}
-            address={player.address}
-            earnings={player.earnings}
-            completeds={player.completeds}
-            achievements={achievements}
-            rank={index + 1}
-            pins={pins}
-          />
-        ))}
-      </ScrollArea>
-    </div>
+    <>
+      {players.map((player, index) => (
+        <Row
+          key={player.address}
+          self={BigInt(player.address || 0) === BigInt(address || 1)}
+          address={player.address}
+          earnings={player.earnings}
+          completeds={player.completeds}
+          achievements={achievements}
+          rank={index + 1}
+          pins={pins}
+        />
+      ))}
+    </>
   );
 }
 

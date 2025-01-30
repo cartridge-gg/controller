@@ -1,6 +1,12 @@
-import { GearIcon, Button } from "@cartridge/ui-next";
+import {
+  LayoutContainer,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+  Button,
+  GearIcon,
+} from "@cartridge/ui-next";
 import { useState } from "react";
-import { Container, Content, Footer } from "@/components/layout";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
@@ -12,7 +18,7 @@ enum State {
 }
 
 export function Settings() {
-  const { logout } = useConnection();
+  const { closeModal, chainId, logout } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
   // const [delegateAccount, setDelegateAccount] = useState("");
 
@@ -70,10 +76,16 @@ export function Settings() {
   }
 
   return (
-    <Container variant="compressed" title="Controller Settings" Icon={GearIcon}>
-      <Content />
-      {/* <Content>
-        <VStack gap="30px" w="full">
+    <LayoutContainer>
+      <LayoutHeader
+        variant="compressed"
+        title="Controller Settings"
+        Icon={GearIcon}
+        chainId={chainId}
+        onClose={closeModal}
+      />
+      <LayoutContent className="gap-6">
+        {/* <VStack gap="30px" w="full">
           <VStack>
             {controller.cartridge.hasSession(
               controller.cartridge.session(),
@@ -157,14 +169,14 @@ export function Settings() {
               </Button>
             )}
           </VStack>
-        </VStack>
-      </Content> */}
+        </VStack> */}
+      </LayoutContent>
 
-      <Footer>
+      <LayoutFooter>
         <Button variant="secondary" onClick={logout}>
           Log out
         </Button>
-      </Footer>
-    </Container>
+      </LayoutFooter>
+    </LayoutContainer>
   );
 }

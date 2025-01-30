@@ -1,6 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Button } from "@cartridge/ui-next";
-import { Container, Footer } from "@/components/layout";
+import {
+  Button,
+  HeaderProps,
+  LayoutContainer,
+  LayoutFooter,
+  LayoutHeader,
+} from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ControllerError } from "@/utils/connection";
 import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
@@ -8,7 +13,6 @@ import { Fees } from "./Fees";
 import { Funding } from "./funding";
 import { DeployController } from "./DeployController";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { BannerProps } from "./layout/container/header/Banner";
 import { parseControllerError } from "@/utils/connection/execute";
 import isEqual from "lodash/isEqual";
 
@@ -40,8 +44,8 @@ export function ExecutionContainer({
   buttonText = "SUBMIT",
   children,
 }: ExecutionContainerProps &
-  Pick<BannerProps, "title" | "description" | "icon">) {
-  const { controller } = useConnection();
+  Pick<HeaderProps, "title" | "description" | "icon">) {
+  const { controller, closeModal, chainId, openSettings } = useConnection();
   const [maxFee, setMaxFee] = useState<bigint | null>(null);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
@@ -159,9 +163,17 @@ export function ExecutionContainer({
   }
 
   return (
-    <Container title={title} description={description} icon={icon}>
+    <LayoutContainer>
+      <LayoutHeader
+        title={title}
+        description={description}
+        icon={icon}
+        onClose={closeModal}
+        chainId={chainId}
+        openSettings={openSettings}
+      />
       {children}
-      <Footer>
+      <LayoutFooter>
         {(() => {
           switch (ctrlError?.code) {
             case ErrorCode.CartridgeControllerNotDeployed:
@@ -220,7 +232,7 @@ export function ExecutionContainer({
               );
           }
         })()}
-      </Footer>
-    </Container>
+      </LayoutFooter>
+    </LayoutContainer>
   );
 }

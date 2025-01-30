@@ -2,17 +2,18 @@ export { Collectible, Collection, SendCollection } from "./collection";
 export { Token } from "./token";
 export { SendToken } from "./token/send";
 
-import { CopyAddress, ScrollArea } from "@cartridge/ui-next";
 import {
+  CopyAddress,
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-} from "@/components/layout";
+} from "@cartridge/ui-next";
 import { Navigation } from "../navigation";
 import { Tokens } from "./token";
 import { useAccount } from "@/hooks/account";
 import { Outlet, useParams } from "react-router-dom";
 import { Collections } from "./collection";
+import { useConnection } from "@/hooks/context";
 
 export function Inventory() {
   const { username, address } = useAccount();
@@ -20,6 +21,7 @@ export function Inventory() {
     project?: string;
     address?: string;
   }>();
+  const { closeModal, chainId, openSettings } = useConnection();
 
   if (tokenContractAddress) {
     return <Outlet />;
@@ -31,15 +33,16 @@ export function Inventory() {
         title={username}
         description={<CopyAddress address={address} size="sm" />}
         right={project ? <Navigation /> : undefined}
+        onClose={closeModal}
+        chainId={chainId}
+        openSettings={openSettings}
       />
 
       <LayoutContent className="pb-4">
-        <ScrollArea>
-          <div className="flex flex-col gap-y-4">
-            <Tokens />
-            {project && <Collections />}
-          </div>
-        </ScrollArea>
+        <div className="flex flex-col gap-y-4">
+          <Tokens />
+          {project && <Collections />}
+        </div>
       </LayoutContent>
     </LayoutContainer>
   );
