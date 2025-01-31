@@ -31,7 +31,8 @@ export function Achievements() {
 
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
-  const { project, namespace, chainId, openSettings } = useConnection();
+  const { closeModal, project, namespace, chainId, openSettings } =
+    useConnection();
 
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
@@ -91,9 +92,8 @@ export function Achievements() {
         }
         chainId={chainId}
         openSettings={openSettings}
-        onBack={() => {
-          navigate(".");
-        }}
+        onClose={isSelf ? closeModal : undefined}
+        onBack={isSelf ? undefined : () => navigate(".")}
       />
 
       {achievements.length ? (
