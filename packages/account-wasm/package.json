@@ -10,8 +10,14 @@
     "build:deps": "./build.sh"
   },
   "files": [
-    "pkg-controller",
-    "pkg-session"
+    "./pkg-controller/account_wasm_bg.wasm",
+    "./pkg-controller/account_wasm.js",
+    "./pkg-controller/account_wasm_bg.js",
+    "./pkg-controller/account_wasm.d.ts",
+    "./pkg-session/account_wasm_bg.wasm",
+    "./pkg-session/account_wasm.js",
+    "./pkg-session/account_wasm_bg.js",
+    "./pkg-session/account_wasm.d.ts"
   ],
   "exports": {
     ".": {
