@@ -6,7 +6,7 @@ import {
   CardTitle,
   CheckboxIcon,
   cn,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { Link, useLocation } from "react-router-dom";
 import { CollectionImage } from "./image";
 

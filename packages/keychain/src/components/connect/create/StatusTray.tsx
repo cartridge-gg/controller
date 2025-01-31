@@ -1,5 +1,5 @@
 import { ValidationState } from "./useUsernameValidation";
-import { cn, ExternalIcon } from "@cartridge/ui-next";
+import { cn, ExternalIcon } from "@cartridge/ui";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 

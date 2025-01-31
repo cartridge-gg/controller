@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { controllerConfigs } from "@cartridge/presets";
 import { mainnet } from "@starknet-react/chains";
 import { StarknetConfig, publicProvider, voyager } from "@starknet-react/core";
-import { useThemeEffect } from "@cartridge/ui-next";
+import { useThemeEffect } from "@cartridge/ui";
 import { BrowserRouter } from "react-router-dom";
 
 import { ConnectionContext } from "../src/components/provider/connection";

@@ -1,5 +1,5 @@
 import { useConnection } from "@/hooks/connection";
-import { LayoutContainer, CheckIcon, LayoutHeader } from "@cartridge/ui-next";
+import { LayoutContainer, CheckIcon, LayoutHeader } from "@cartridge/ui";
 
 export function Success() {
   const { chainId, closeModal } = useConnection();

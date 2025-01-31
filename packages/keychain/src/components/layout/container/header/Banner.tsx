@@ -1,4 +1,4 @@
-import { cn, IconProps } from "@cartridge/ui-next";
+import { cn, IconProps } from "@cartridge/ui";
 
 export type BannerProps = {
   Icon?: React.ComponentType<IconProps>;

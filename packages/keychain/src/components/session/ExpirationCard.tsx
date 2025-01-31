@@ -1,12 +1,12 @@
-import { ClockIcon } from "@cartridge/ui-next";
 import { AccordionCard } from "./AccordionCard";
 import {
+  ClockIcon,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 
 interface ExpirationCardProps {
   duration: bigint;

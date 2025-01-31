@@ -7,7 +7,7 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { Navigation } from "../navigation";
 import { Tokens } from "./token";
 import { useAccount } from "@/hooks/account";

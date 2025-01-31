@@ -1,4 +1,4 @@
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui";
 
 export const CollectionImage = ({
   imageUrl = "/public/placeholder.svg",

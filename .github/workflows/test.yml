@@ -86,7 +86,7 @@ jobs:
         with:
           filters: |
             ui:
-              - 'packages/ui-next/**'
+              - 'packages/ui/**'
               - 'packages/keychain/**'
               - 'packages/profile/**'
               - '**/package.json'
@@ -148,7 +148,7 @@ jobs:
           # Check both packages
           check_snapshots "keychain" "packages/keychain/__image_snapshots__"
           check_snapshots "profile" "packages/profile/__image_snapshots__"
-          check_snapshots "ui-next" "packages/ui-next/__image_snapshots__"
+          check_snapshots "ui" "packages/ui/__image_snapshots__"
 
           # Set environment variables
           if [ -s diff_info.txt ]; then
@@ -196,7 +196,7 @@ jobs:
               
               // Group changes by package and type
               const changes = {
-                'ui-next': { diffs: [], updates: [] },
+                'ui': { diffs: [], updates: [] },
                 'keychain': { diffs: [], updates: [] }
               };
               

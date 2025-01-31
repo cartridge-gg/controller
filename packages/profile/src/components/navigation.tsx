@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
   TrophyIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { ProfileContextTypeVariant } from "@cartridge/controller";
 import { Link, useMatch, useParams } from "react-router-dom";
 import { useAccount } from "@/hooks/account";

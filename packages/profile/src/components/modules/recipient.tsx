@@ -11,7 +11,7 @@ import {
   WalletIcon,
   AlertIcon,
   cn,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { formatAddress } from "@cartridge/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash";

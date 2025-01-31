@@ -7,7 +7,7 @@ import {
   cn,
   Input,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useControllerTheme } from "@/hooks/theme";
 import { useDebounce } from "@/hooks/debounce";
 import { useUsernameValidation } from "./useUsernameValidation";

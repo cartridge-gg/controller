@@ -19,7 +19,7 @@ import {
   CopyText,
   ExternalIcon,
   Separator,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { addAddressPadding, constants } from "starknet";
 import {
   formatAddress,

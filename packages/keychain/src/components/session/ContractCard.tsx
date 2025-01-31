@@ -1,4 +1,4 @@
-import { CodeIcon } from "@cartridge/ui-next";
+import { CodeIcon } from "@cartridge/ui";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";

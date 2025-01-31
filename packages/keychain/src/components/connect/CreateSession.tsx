@@ -16,7 +16,7 @@ import {
   Button,
   Checkbox,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 
 export function CreateSession({
   policies,

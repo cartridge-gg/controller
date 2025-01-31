@@ -5,7 +5,7 @@ import {
   LayoutHeader,
   Button,
   GearIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useState } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";

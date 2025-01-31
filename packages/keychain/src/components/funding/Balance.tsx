@@ -5,7 +5,7 @@ import {
   CardListItem,
   CardTitle,
   CoinsIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { formatEther } from "viem";
 import {

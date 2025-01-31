@@ -1,4 +1,4 @@
-import { useThemeEffect } from "@cartridge/ui-next";
+import { useThemeEffect } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { PropsWithChildren } from "react";
 import { ControllerThemeContext } from "@/context/theme";

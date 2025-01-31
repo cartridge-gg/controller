@@ -4,7 +4,7 @@ import {
   SparklesIcon,
   StateIconProps,
   TrophyIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useState } from "react";
 
 export function TrophiesTab({

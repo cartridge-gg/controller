@@ -10,7 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 
 export function ColorModeToggle() {
   const { setTheme } = useTheme();

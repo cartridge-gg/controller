@@ -3,7 +3,7 @@ import {
   SpaceInvaderIcon,
   SparklesIcon,
   StateIconProps,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { Link, useLocation } from "react-router-dom";
 import { Item, Player } from "@/hooks/achievements";
 import { useUsername } from "@/hooks/account";

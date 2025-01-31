@@ -11,7 +11,7 @@ import {
   LayoutContentError,
   LayoutContentLoader,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useInfiniteTokenTransfersQuery } from "@cartridge/utils/api/indexer";
 import { Navigation } from "@/components/navigation";
 import { useAccount } from "@/hooks/account";

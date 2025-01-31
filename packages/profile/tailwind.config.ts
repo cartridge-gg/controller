@@ -1,10 +1,10 @@
-import { cartridgeTWPreset } from "@cartridge/ui-next/preset";
+import { cartridgeTWPreset } from "@cartridge/ui/preset";
 import { Config } from "tailwindcss";
 
 const config = {
   content: [
     "./src/**/*.{html,ts,tsx}",
-    "./node_modules/@cartridge/ui-next/dist/**/*.{js,jsx}",
+    "./node_modules/@cartridge/ui/dist/**/*.{js,jsx}",
   ],
   presets: [cartridgeTWPreset],
   theme: {
