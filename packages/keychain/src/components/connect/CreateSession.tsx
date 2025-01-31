@@ -116,22 +116,22 @@ export function CreateSession({
       />
       <LayoutContent className="gap-6">
         <SessionConsent isVerified={policies?.verified} />
-        {policies?.verified ? (
-          <VerifiedSessionSummary
-            game={theme.name}
-            contracts={policies.contracts}
-            messages={chainSpecificMessages}
-            duration={duration}
-            onDurationChange={setDuration}
-          />
-        ) : (
-          <UnverifiedSessionSummary
-            contracts={policies.contracts}
-            messages={chainSpecificMessages}
-            duration={duration}
-            onDurationChange={setDuration}
-          />
-        )}
+        {/* {policies?.verified ? ( */}
+        {/*   <VerifiedSessionSummary */}
+        {/*     game={theme.name} */}
+        {/*     contracts={policies.contracts} */}
+        {/*     messages={chainSpecificMessages} */}
+        {/*     duration={duration} */}
+        {/*     onDurationChange={setDuration} */}
+        {/*   /> */}
+        {/* ) : ( */}
+        {/*   <UnverifiedSessionSummary */}
+        {/*     contracts={policies.contracts} */}
+        {/*     messages={chainSpecificMessages} */}
+        {/*     duration={duration} */}
+        {/*     onDurationChange={setDuration} */}
+        {/*   /> */}
+        {/* )} */}
       </LayoutContent>
       <LayoutFooter>
         {!policies?.verified && (
@@ -161,7 +161,7 @@ export function CreateSession({
             disabled={isConnecting}
             className="px-8"
           >
-            Skip
+            Skipp
           </Button>
           <Button
             className="flex-1"
