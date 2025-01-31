@@ -22,7 +22,7 @@ export function Amount({
     ) => {
       e.preventDefault();
       if (!token) return;
-      setAmount(parseFloat(token.balance.formatted));
+      setAmount(parseFloat(token.balance.formatted.replace("~", "")));
     },
     [token, setAmount],
   );

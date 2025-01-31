@@ -65,7 +65,7 @@ export function Trophy({
   }, [version]);
 
   return (
-    <div className="flex items-center gap-x-px">
+    <div className="flex items-stretch gap-x-px">
       <div className="grow flex flex-col items-stretch gap-y-3 bg-background-100 p-3">
         <div className="flex items-center gap-3">
           <Icon icon={icon} completed={completed} />
