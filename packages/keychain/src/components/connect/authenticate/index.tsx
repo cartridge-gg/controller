@@ -10,7 +10,6 @@ import { Unsupported } from "./Unsupported";
 import { doSignup } from "@/hooks/account";
 import { useIsSupported } from "./useIsSupported";
 import { FaceIDImage } from "./FaceID";
-import { useConnection } from "@/hooks/connection";
 
 export type AuthAction = "signup" | "login";
 
@@ -27,7 +26,6 @@ export function Authenticate({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const { isSupported, message } = useIsSupported();
-  const { closeModal, controller } = useConnection();
 
   const onAuth = useCallback(async () => {
     setIsLoading(true);
@@ -75,8 +73,6 @@ export function Authenticate({
         variant="expanded"
         title={title}
         description={description}
-        onClose={closeModal}
-        chainId={controller?.chainId()}
       />
       <LayoutContent className="items-center pb-10">
         <FaceIDImage />

@@ -34,7 +34,7 @@ import { Asset, Collection, useCollection } from "@/hooks/collection";
 import { compare } from "compare-versions";
 
 export function Collectible() {
-  const { chainId, openSettings, version } = useConnection();
+  const { chainId, version } = useConnection();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -95,8 +95,6 @@ export function Collectible() {
                   onBack={() => {
                     navigate("..");
                   }}
-                  chainId={chainId}
-                  openSettings={openSettings}
                 />
 
                 <LayoutContent className="pb-4">
