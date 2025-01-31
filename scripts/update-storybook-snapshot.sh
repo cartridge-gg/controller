@@ -16,7 +16,7 @@ docker run \
   --network="host" \
   -v "$(pwd)/packages/keychain/__image_snapshots__":/app/packages/keychain/__image_snapshots__ \
   -v "$(pwd)/packages/profile/__image_snapshots__":/app/packages/profile/__image_snapshots__ \
-  -v "$(pwd)/packages/ui-next/__image_snapshots__":/app/packages/ui-next/__image_snapshots__ \
+  -v "$(pwd)/packages/ui/__image_snapshots__":/app/packages/ui/__image_snapshots__ \
   --ipc=host \
   -ti \
   ghcr.io/cartridge-gg/controller/storybook-env:sha-9f94a90 \
