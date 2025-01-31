@@ -37,9 +37,10 @@
     }
   },
   "sideEffects": [
-    "**/*.wasm",
     "./pkg-controller/account_wasm.js",
-    "./pkg-session/account_wasm.js"
+    "./pkg-session/account_wasm.js",
+    "./pkg-controller/snippets/*",
+    "./pkg-session/snippets/*"
   ],
   "devDependencies": {
     "wasm-pack": "^0.13.0"
