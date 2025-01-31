@@ -10,7 +10,7 @@ import {
   useSwitchChain,
 } from "@starknet-react/core";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { constants, num } from "starknet";
+import { constants, num, shortString } from "starknet";
 import { Chain } from "@starknet-react/chains";
 import SessionConnector from "@cartridge/connector/session";
 
@@ -98,6 +98,17 @@ const Header = () => {
                   {c.network}
                 </button>
               ))}
+              <button
+                className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
+                onClick={() => {
+                  switchChain({
+                    chainId: shortString.encodeShortString("UNSUPPORTED"),
+                  });
+                  setNetworkOpen(false);
+                }}
+              >
+                unsupported
+              </button>
             </div>
           )}
         </div>

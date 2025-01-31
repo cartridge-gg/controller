@@ -16,7 +16,7 @@ import {
   Chain,
 } from "./types";
 import BaseProvider from "./provider";
-import { WalletAccount } from "starknet";
+import { shortString, WalletAccount } from "starknet";
 import { Policy } from "@cartridge/presets";
 import { AddStarknetChainParameters, ChainId } from "@starknet-io/types-js";
 import { parseChainId } from "./utils";
@@ -288,7 +288,16 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   rpcUrl(): string {
-    return this.chains.get(this.selectedChain)!.rpcUrl;
+    const chain = this.chains.get(this.selectedChain);
+    if (!chain) {
+      const availableChains = Array.from(this.chains.keys()).map((chain) =>
+        shortString.decodeShortString(chain),
+      );
+      throw new Error(
+        `Chain not found: ${shortString.decodeShortString(this.selectedChain)}. Available chains: ${availableChains.join(", ")}`,
+      );
+    }
+    return chain.rpcUrl;
   }
 
   username() {
