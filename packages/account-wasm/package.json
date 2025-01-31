@@ -14,10 +14,12 @@
     "./pkg-controller/account_wasm.js",
     "./pkg-controller/account_wasm_bg.js",
     "./pkg-controller/account_wasm.d.ts",
+    "./pkg-controller/snippets/**/*",
     "./pkg-session/account_wasm_bg.wasm",
     "./pkg-session/account_wasm.js",
     "./pkg-session/account_wasm_bg.js",
-    "./pkg-session/account_wasm.d.ts"
+    "./pkg-session/account_wasm.d.ts",
+    "./pkg-session/snippets/**/*"
   ],
   "exports": {
     ".": {
