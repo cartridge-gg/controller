@@ -21,25 +21,22 @@ import { getChainName, isIframe, isSlotChain } from "@cartridge/utils";
 import { constants } from "starknet";
 import { CopyAddress } from "../copy-address";
 import { Network } from "@/components/network";
+import { useUI } from "@/hooks";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
-  account?: {
-    address: string;
-    username: string;
-  };
-  chainId?: string;
-  openSettings?: () => void;
+  hideNetwork?: boolean;
+  hideSettings?: boolean;
 };
 
 export function LayoutHeader({
   onBack,
-  onClose,
-  account,
-  chainId,
-  openSettings,
+  hideNetwork,
+  hideSettings,
   ...innerProps
-}: HeaderProps & { onClose?: () => void }) {
+}: HeaderProps) {
+  const { account, chainId, closeModal, openSettings } = useUI();
+
   return (
     <div className="sticky top-0 w-full z-10 bg-background">
       {(() => {
@@ -68,14 +65,14 @@ export function LayoutHeader({
         <div>
           {onBack ? (
             <BackButton onClick={onBack} />
-          ) : onClose ? (
-            <CloseButton onClose={onClose} />
+          ) : closeModal ? (
+            <CloseButton onClose={closeModal} />
           ) : null}
         </div>
 
         <div className="flex items-center gap-2">
-          {chainId ? (
-            account ? (
+          {!!chainId &&
+            (account ? (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger className="flex items-center gap-1.5 bg-background-100 rounded px-3 py-2.5">
@@ -86,23 +83,25 @@ export function LayoutHeader({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="flex items-center gap-8 px-3 py-2.5 bg-spacer">
-                    <div className="flex items-center gap-1.5">
-                      {(() => {
-                        switch (chainId) {
-                          case constants.StarknetChainId.SN_MAIN:
-                            return <StarknetColorIcon />;
-                          case constants.StarknetChainId.SN_SEPOLIA:
-                            return <StarknetIcon />;
-                          default:
-                            return isSlotChain(chainId) ? (
-                              <SlotIcon />
-                            ) : (
-                              <QuestionIcon />
-                            );
-                        }
-                      })()}
-                      <div className="text-sm">{getChainName(chainId)}</div>
-                    </div>
+                    {!hideNetwork && (
+                      <div className="flex items-center gap-1.5">
+                        {(() => {
+                          switch (chainId) {
+                            case constants.StarknetChainId.SN_MAIN:
+                              return <StarknetColorIcon />;
+                            case constants.StarknetChainId.SN_SEPOLIA:
+                              return <StarknetIcon />;
+                            default:
+                              return isSlotChain(chainId) ? (
+                                <SlotIcon />
+                              ) : (
+                                <QuestionIcon />
+                              );
+                          }
+                        })()}
+                        <div className="text-sm">{getChainName(chainId)}</div>
+                      </div>
+                    )}
                     <CopyAddress
                       size="xs"
                       className="text-sm"
@@ -112,11 +111,12 @@ export function LayoutHeader({
                 </Tooltip>
               </TooltipProvider>
             ) : (
-              <Network chainId={chainId} />
-            )
-          ) : null}
+              !hideNetwork && <Network chainId={chainId} />
+            ))}
 
-          {openSettings && <SettingsButton onClick={openSettings} />}
+          {openSettings && !hideSettings && (
+            <SettingsButton onClick={openSettings} />
+          )}
         </div>
       </div>
     </div>

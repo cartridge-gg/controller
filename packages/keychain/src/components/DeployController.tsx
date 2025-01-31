@@ -24,7 +24,6 @@ import { ControllerError } from "@/utils/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
 import { Link } from "react-router-dom";
-import { useAccount } from "@/hooks/account";
 
 export function DeployController({
   onClose,
@@ -33,14 +32,7 @@ export function DeployController({
   onClose: () => void;
   ctrlError?: ControllerError;
 }) {
-  const {
-    closeModal,
-    chainId,
-    controller,
-    chainName,
-    hasPrefundRequest,
-    openSettings,
-  } = useConnection();
+  const { controller, chainName, hasPrefundRequest } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
@@ -77,8 +69,6 @@ export function DeployController({
         .catch((e) => setError(e));
     }
   }, [deployHash, controller]);
-
-  const account = useAccount();
 
   const {
     data: [eth],
@@ -121,10 +111,6 @@ export function DeployController({
           variant="expanded"
           title="Checking account balance..."
           icon={<Spinner size="xl" />}
-          onClose={closeModal}
-          openSettings={openSettings}
-          chainId={chainId}
-          account={account}
         />
       </LayoutContainer>
     );
@@ -154,10 +140,6 @@ export function DeployController({
             icon={<WandIcon variant="line" size="lg" />}
             title="Deploy Controller"
             description="This will initialize your controller on the new network"
-            onClose={closeModal}
-            openSettings={openSettings}
-            chainId={chainId}
-            account={account}
           />
           <LayoutContent>
             <TransactionSummary
@@ -194,10 +176,6 @@ export function DeployController({
             icon={<Spinner size="xl" />}
             title="Deploying Controller"
             description={`Your controller is being deployed on ${chainName}`}
-            onClose={closeModal}
-            openSettings={openSettings}
-            chainId={chainId}
-            account={account}
           />
           <LayoutContent>
             {deployHash && controller && (
@@ -230,10 +208,6 @@ export function DeployController({
             Icon={CheckIcon}
             title="Success!"
             description={`Your controller has been deployed on ${chainName}`}
-            onClose={closeModal}
-            openSettings={openSettings}
-            chainId={chainId}
-            account={account}
           />
           <LayoutContent className="items-center">
             {deployHash && controller && (

@@ -25,7 +25,7 @@ export function SignMessage({
   onSign: (sig: Signature) => void;
   onCancel: () => void;
 }) {
-  const { closeModal, chainId, openSettings, controller } = useConnection();
+  const { controller } = useConnection();
   const [messageData, setMessageData] = useState<TypedData>();
 
   useEffect(() => {
@@ -72,9 +72,6 @@ export function SignMessage({
       <LayoutHeader
         title="Signature Request"
         description={`${hostname} is asking you to sign a message`}
-        chainId={chainId}
-        onClose={closeModal}
-        openSettings={openSettings}
       />
       <LayoutContent>
         {messageData && (

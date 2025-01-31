@@ -55,7 +55,7 @@ export function Token() {
 
 function Credits() {
   const navigate = useNavigate();
-  const { chainId, openSettings, parent, isVisible } = useConnection();
+  const { parent, isVisible } = useConnection();
   const { username } = useAccount();
   const credit = useCreditBalance({
     username,
@@ -71,8 +71,6 @@ function Credits() {
         onBack={() => {
           navigate("..");
         }}
-        chainId={chainId}
-        openSettings={openSettings}
       />
 
       <LayoutContent className="pb-4">
@@ -98,7 +96,7 @@ function Credits() {
 function ERC20() {
   const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
-  const { chainId, openSettings, version } = useConnection();
+  const { chainId, version } = useConnection();
   const t = useToken({ tokenAddress: address! });
   const { countervalue } = useCountervalue(
     {
@@ -141,8 +139,6 @@ function ERC20() {
         onBack={() => {
           navigate("..");
         }}
-        chainId={chainId}
-        openSettings={openSettings}
       />
 
       <LayoutContent className="pb-4">

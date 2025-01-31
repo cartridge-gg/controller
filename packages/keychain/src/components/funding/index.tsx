@@ -14,7 +14,6 @@ import {
 import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance, BalanceType } from "./Balance";
-import { useAccount } from "@/hooks/account";
 
 const enum FundingState {
   SHOW_OPTIONS,
@@ -29,13 +28,12 @@ export type FundingProps = {
 };
 
 export function Funding({ title, isSlot, onComplete }: FundingProps) {
-  const { closeModal, chainId, controller, openSettings } = useConnection();
+  const { controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
   const showBalances: BalanceType[] = isSlot ? ["credits"] : ["credits", "eth"];
   const showCredits =
     (typeof document !== "undefined" && document.cookie.includes("credits=")) ||
     isSlot;
-  const account = useAccount();
 
   if (state === FundingState.FUND_ETH) {
     return (
@@ -61,10 +59,6 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
         title={title || (controller ? `Fund ${controller.username()}` : "")}
         description={controller && <CopyAddress address={controller.address} />}
         icon={<ArrowIcon variant="down" size="lg" />}
-        onClose={closeModal}
-        openSettings={openSettings}
-        chainId={chainId}
-        account={account}
       />
       <LayoutContent className="gap-6">
         <Balance showBalances={showBalances} />

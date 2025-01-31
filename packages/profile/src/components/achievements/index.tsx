@@ -31,7 +31,7 @@ export function Achievements() {
 
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
-  const { project, namespace, chainId, openSettings } = useConnection();
+  const { project, namespace } = useConnection();
 
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
@@ -89,8 +89,6 @@ export function Achievements() {
             <Scoreboard rank={rank} earnings={earnings} />
           )
         }
-        chainId={chainId}
-        openSettings={openSettings}
         onBack={() => {
           navigate(".");
         }}

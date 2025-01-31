@@ -35,7 +35,7 @@ type PurchaseCreditsProps = {
 };
 
 export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
-  const { closeModal, chainId, controller } = useConnection();
+  const { closeModal, controller } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setisLoading] = useState<boolean>(false);
@@ -119,8 +119,6 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           )
         }
         onBack={state === PurchaseState.SELECTION ? onBack : undefined}
-        chainId={chainId}
-        onClose={closeModal}
       />
       <LayoutContent className="gap-6">
         <Balance showBalances={["credits"]} />

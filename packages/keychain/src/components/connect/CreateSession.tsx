@@ -27,7 +27,7 @@ export function CreateSession({
   onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
   isUpdate?: boolean;
 }) {
-  const { closeModal, controller, upgrade, chainId, theme } = useConnection();
+  const { controller, upgrade, chainId, theme } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
@@ -111,8 +111,6 @@ export function CreateSession({
             ? "The policies were updated, please update existing session"
             : undefined
         }
-        onClose={closeModal}
-        chainId={chainId}
       />
       <LayoutContent className="gap-6">
         <SessionConsent isVerified={policies?.verified} />

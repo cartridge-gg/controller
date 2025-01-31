@@ -55,7 +55,7 @@ export function DepositEth(innerProps: DepositEthProps) {
 
 function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { closeModal, controller, chainId } = useConnection();
+  const { controller, chainId } = useConnection();
   const { account: extAccount } = useAccount();
 
   const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
@@ -159,8 +159,6 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
         }
         Icon={EthereumIcon}
         onBack={onBack}
-        chainId={chainId}
-        onClose={closeModal}
       />
 
       <LayoutContent className="gap-6">
