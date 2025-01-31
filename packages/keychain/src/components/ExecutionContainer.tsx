@@ -45,7 +45,7 @@ export function ExecutionContainer({
   children,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
-  const { controller, closeModal, chainId, openSettings } = useConnection();
+  const { controller } = useConnection();
   const [maxFee, setMaxFee] = useState<bigint | null>(null);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
@@ -164,14 +164,7 @@ export function ExecutionContainer({
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        title={title}
-        description={description}
-        icon={icon}
-        onClose={closeModal}
-        chainId={chainId}
-        openSettings={openSettings}
-      />
+      <LayoutHeader title={title} description={description} icon={icon} />
       {children}
       <LayoutFooter>
         {(() => {

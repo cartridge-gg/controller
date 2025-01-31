@@ -41,15 +41,15 @@ export const Recipient = ({
   const getIcon = useCallback((wallet: Wallet | null) => {
     switch (wallet) {
       case Wallet.Controller:
-        return <ControllerIcon className="h-8 w-8" />;
+        return <ControllerIcon size="lg" className="text-[#FBCB4A]" />;
       case Wallet.ArgentX:
-        return <ArgentIcon className="h-8 w-8" />;
+        return <ArgentIcon size="lg" />;
       case Wallet.Braavos:
-        return <BraavosIcon className="h-8 w-8" />;
+        return <BraavosIcon size="lg" />;
       case Wallet.OpenZeppelin:
-        return <OpenZeppelinIcon className="h-8 w-8" />;
+        return <OpenZeppelinIcon size="lg" />;
       default:
-        return <WalletIcon variant="solid" className="h-8 w-8" />;
+        return <WalletIcon variant="solid" size="lg" />;
     }
   }, []);
 

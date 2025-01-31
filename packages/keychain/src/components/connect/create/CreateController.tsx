@@ -19,7 +19,6 @@ import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
 import InAppSpy from "inapp-spy";
 import { usePostHog } from "@cartridge/utils";
-import { useConnection } from "@/hooks/connection";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -36,6 +35,7 @@ interface CreateControllerViewProps {
   onSubmit: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
+  isSlot?: boolean;
 }
 
 export function CreateControllerView({
@@ -45,14 +45,13 @@ export function CreateControllerView({
   isLoading,
   error,
   isInAppBrowser,
+  isSlot,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
   onSubmit,
   onKeyDown,
 }: CreateControllerViewProps) {
-  const { closeModal, chainId } = useConnection();
-
   return (
     <LayoutContainer>
       <LayoutHeader
@@ -63,8 +62,8 @@ export function CreateControllerView({
             : `Play ${theme.name}`
         }
         description="Connect your Controller"
-        chainId={chainId}
-        onClose={closeModal}
+        hideNetwork={isSlot}
+        hideSettings
       />
 
       <form
@@ -267,6 +266,7 @@ export function CreateController({
       isLoading={isLoading}
       error={error}
       isInAppBrowser={isInApp}
+      isSlot={isSlot}
       onUsernameChange={handleUsernameChange}
       onUsernameFocus={handleUsernameFocus}
       onUsernameClear={handleUsernameClear}

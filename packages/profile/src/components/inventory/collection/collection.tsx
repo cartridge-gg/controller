@@ -23,7 +23,6 @@ import { useCallback, useMemo } from "react";
 import { CollectionImage } from "./image";
 import { useCollection } from "@/hooks/collection";
 import { Collectibles } from "./collectibles";
-import { useConnection } from "@/hooks/context";
 
 export function Collection() {
   const { address: contractAddress, tokenId } = useParams();
@@ -32,7 +31,6 @@ export function Collection() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tokenIds = searchParams.getAll("tokenIds");
   const { collection, assets, status } = useCollection({ contractAddress });
-  const { chainId, openSettings } = useConnection();
 
   const selection = useMemo(() => {
     return tokenIds.length > 0;
@@ -93,8 +91,6 @@ export function Collection() {
                   onBack={() => {
                     navigate("..");
                   }}
-                  chainId={chainId}
-                  openSettings={openSettings}
                 />
 
                 <LayoutContent

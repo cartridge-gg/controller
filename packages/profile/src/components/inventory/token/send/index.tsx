@@ -22,7 +22,7 @@ import { Amount } from "./amount";
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
   const { address } = useAccount();
-  const { chainId, openSettings, parent } = useConnection();
+  const { parent } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
   const token = useToken({ tokenAddress: tokenAddress! });
@@ -80,8 +80,6 @@ export function SendToken() {
         onBack={() => {
           navigate("..");
         }}
-        chainId={chainId}
-        openSettings={openSettings}
       />
       <LayoutContent className="pb-4 gap-6">
         <Recipient to={to} setTo={setTo} setWarning={setWarning} />

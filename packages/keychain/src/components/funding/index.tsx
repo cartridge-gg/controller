@@ -28,7 +28,7 @@ export type FundingProps = {
 };
 
 export function Funding({ title, isSlot, onComplete }: FundingProps) {
-  const { closeModal, chainId, controller } = useConnection();
+  const { controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
   const showBalances: BalanceType[] = isSlot ? ["credits"] : ["credits", "eth"];
   const showCredits =
@@ -59,8 +59,6 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
         title={title || (controller ? `Fund ${controller.username()}` : "")}
         description={controller && <CopyAddress address={controller.address} />}
         icon={<ArrowIcon variant="down" size="lg" />}
-        chainId={chainId}
-        onClose={closeModal}
       />
       <LayoutContent className="gap-6">
         <Balance showBalances={showBalances} />

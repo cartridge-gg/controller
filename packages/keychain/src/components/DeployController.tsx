@@ -32,8 +32,7 @@ export function DeployController({
   onClose: () => void;
   ctrlError?: ControllerError;
 }) {
-  const { closeModal, chainId, controller, chainName, hasPrefundRequest } =
-    useConnection();
+  const { controller, chainName, hasPrefundRequest } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
@@ -112,8 +111,6 @@ export function DeployController({
           variant="expanded"
           title="Checking account balance..."
           icon={<Spinner size="xl" />}
-          closeModal={closeModal}
-          chainId={chainId}
         />
       </LayoutContainer>
     );
@@ -143,8 +140,6 @@ export function DeployController({
             icon={<WandIcon variant="line" size="lg" />}
             title="Deploy Controller"
             description="This will initialize your controller on the new network"
-            closeModal={closeModal}
-            chainId={chainId}
           />
           <LayoutContent>
             <TransactionSummary
@@ -181,8 +176,6 @@ export function DeployController({
             icon={<Spinner size="xl" />}
             title="Deploying Controller"
             description={`Your controller is being deployed on ${chainName}`}
-            closeModal={closeModal}
-            chainId={chainId}
           />
           <LayoutContent>
             {deployHash && controller && (
@@ -215,8 +208,6 @@ export function DeployController({
             Icon={CheckIcon}
             title="Success!"
             description={`Your controller has been deployed on ${chainName}`}
-            closeModal={closeModal}
-            chainId={chainId}
           />
           <LayoutContent className="items-center">
             {deployHash && controller && (

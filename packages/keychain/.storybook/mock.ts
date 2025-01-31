@@ -48,7 +48,11 @@ export function useMockedConnection({
     openModal: () => {},
     logout: () => {},
     openSettings: () => {},
-    controller: {},
+    controller: {
+      username: () => "test-account",
+      address:
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+    },
     upgrade: {},
     ...rest,
   };
