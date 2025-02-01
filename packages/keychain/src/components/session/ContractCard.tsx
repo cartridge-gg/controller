@@ -1,9 +1,18 @@
-import { CodeIcon } from "@cartridge/ui-next";
+import { useChainId } from "@/hooks/connection";
+import type { Method } from "@cartridge/presets";
+import {
+  CodeIcon,
+  InfoIcon,
+  Switch,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
+import { useCallback, useState } from "react";
 import { constants } from "starknet";
-import { Method } from "@cartridge/presets";
-import { useChainId } from "@/hooks/connection";
 import { AccordionCard } from "./AccordionCard";
 
 interface ContractCardProps {
@@ -21,6 +30,13 @@ export function ContractCard({
   icon,
   isExpanded,
 }: ContractCardProps) {
+  const [tweakedMethod, setTweakedMethod] = useState(() =>
+    methods.map((method) => ({
+      ...method,
+      enabled: true,
+    })),
+  );
+
   const chainId = useChainId();
   const explorer = useExplorer();
 
@@ -40,6 +56,17 @@ export function ContractCard({
     </a>
   );
 
+  const handleMethodToggle = useCallback(
+    (entrypoint: string, enabled: boolean) => {
+      setTweakedMethod((prev) =>
+        prev.map((method) =>
+          method.entrypoint === entrypoint ? { ...method, enabled } : method,
+        ),
+      );
+    },
+    [],
+  );
+
   return (
     <AccordionCard
       icon={icon ?? <CodeIcon variant="solid" />}
@@ -56,20 +83,38 @@ export function ContractCard({
       }
       className="bg-background gap-px rounded overflow-auto border border-background"
     >
-      {methods.map((method) => (
+      {tweakedMethod.map((method) => (
         <div
           key={method.entrypoint}
           className="flex flex-col bg-background-100 gap-4 p-3 text-xs"
         >
           <div className="flex items-center justify-between">
-            <div className="font-bold text-accent-foreground">
-              {method.name ?? humanizeString(method.entrypoint)}
+            <div className="flex flex-row items-center text-accent-foreground gap-2">
+              <p className="font-bold">
+                {method.name ?? humanizeString(method.entrypoint)}
+              </p>
+              {method.description && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon size="sm" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{method.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
-            <div className="text-muted-foreground">{method.entrypoint}</div>
+            <Switch
+              color="accent"
+              checked={method.enabled}
+              onCheckedChange={(enabled) =>
+                handleMethodToggle(method.entrypoint, enabled)
+              }
+            />
+            {/* <div className="text-muted-foreground">{method.entrypoint}</div> */}
           </div>
-          {method.description && (
-            <div className="text-muted-foreground">{method.description}</div>
-          )}
         </div>
       ))}
     </AccordionCard>

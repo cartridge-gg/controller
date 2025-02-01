@@ -116,41 +116,41 @@ export function CreateSession({
       />
       <LayoutContent className="gap-6">
         <SessionConsent isVerified={policies?.verified} />
-        {/* {policies?.verified ? ( */}
-        {/*   <VerifiedSessionSummary */}
-        {/*     game={theme.name} */}
-        {/*     contracts={policies.contracts} */}
-        {/*     messages={chainSpecificMessages} */}
-        {/*     duration={duration} */}
-        {/*     onDurationChange={setDuration} */}
-        {/*   /> */}
-        {/* ) : ( */}
-        {/*   <UnverifiedSessionSummary */}
-        {/*     contracts={policies.contracts} */}
-        {/*     messages={chainSpecificMessages} */}
-        {/*     duration={duration} */}
-        {/*     onDurationChange={setDuration} */}
-        {/*   /> */}
-        {/* )} */}
+        {policies?.verified ? (
+          <VerifiedSessionSummary
+            game={theme.name}
+            contracts={policies.contracts}
+            messages={chainSpecificMessages}
+            duration={duration}
+            onDurationChange={setDuration}
+          />
+        ) : (
+          <UnverifiedSessionSummary
+            contracts={policies.contracts}
+            messages={chainSpecificMessages}
+            duration={duration}
+            onDurationChange={setDuration}
+          />
+        )}
       </LayoutContent>
       <LayoutFooter>
-        {!policies?.verified && (
-          <div
-            className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-foreground"
-            onClick={() => !isConnecting && setIsConsent(!isConsent)}
-          >
-            <Checkbox
-              checked={isConsent}
-              disabled={isConnecting}
-              onCheckedChange={() => setIsConsent(!isConsent)}
-              className="pointer-events-none"
-            />
-            <div className="text-xs">
-              I understand and agree to grant permission for this application to
-              execute these actions.
-            </div>
-          </div>
-        )}
+        {/* {!policies?.verified && ( */}
+        {/*   <div */}
+        {/*     className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-foreground" */}
+        {/*     onClick={() => !isConnecting && setIsConsent(!isConsent)} */}
+        {/*   > */}
+        {/*     <Checkbox */}
+        {/*       checked={isConsent} */}
+        {/*       disabled={isConnecting} */}
+        {/*       onCheckedChange={() => setIsConsent(!isConsent)} */}
+        {/*       className="pointer-events-none" */}
+        {/*     /> */}
+        {/*     <div className="text-xs"> */}
+        {/*       I understand and agree to grant permission for this application to */}
+        {/*       execute these actions. */}
+        {/*     </div> */}
+        {/*   </div> */}
+        {/* )} */}
 
         {error && <ControllerErrorAlert className="mb-3" error={error} />}
 
@@ -161,7 +161,7 @@ export function CreateSession({
             disabled={isConnecting}
             className="px-8"
           >
-            Skipp
+            Skip
           </Button>
           <Button
             className="flex-1"

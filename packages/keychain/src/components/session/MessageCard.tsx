@@ -1,15 +1,19 @@
-import { PropsWithChildren, useState } from "react";
+import type { SignMessagePolicy } from "@cartridge/presets";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  PencilIcon,
   AccordionTrigger,
   CheckboxIcon,
+  PencilIcon,
+  Switch,
 } from "@cartridge/ui-next";
 import { ArrowTurnDownIcon, Badge } from "@cartridge/ui-next";
-import { StarknetEnumType, StarknetMerkleType } from "@starknet-io/types-js";
-import { SignMessagePolicy } from "@cartridge/presets";
+import type {
+  StarknetEnumType,
+  StarknetMerkleType,
+} from "@starknet-io/types-js";
+import { type PropsWithChildren, useState } from "react";
 import { AccordionCard } from "./AccordionCard";
 
 interface MessageCardProps {
@@ -49,7 +53,10 @@ export function MessageContent({
           key={`${m.domain.name}-${i}`}
           className="flex flex-col bg-background-100 gap-2 text-xs"
         >
-          <div className="py-2 font-bold">{m.name ?? `Message ${i + 1}`}</div>
+          <div className="flex flex-row items-center justify-between">
+            <div className="py-2 font-bold">{m.name ?? `Message ${i + 1}`}</div>
+            <Switch />
+          </div>
 
           <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">
             {/* Domain section */}
