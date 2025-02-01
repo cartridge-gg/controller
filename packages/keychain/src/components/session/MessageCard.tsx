@@ -13,7 +13,7 @@ import type {
   StarknetEnumType,
   StarknetMerkleType,
 } from "@starknet-io/types-js";
-import { type PropsWithChildren, useState } from "react";
+import { type PropsWithChildren, useCallback, useState } from "react";
 import { AccordionCard } from "./AccordionCard";
 
 interface MessageCardProps {
@@ -22,6 +22,22 @@ interface MessageCardProps {
 }
 
 export function MessageCard({ messages, isExpanded }: MessageCardProps) {
+  const [tweakedMessages, setTweakedMessages] = useState(() =>
+    messages.map((message) => ({
+      ...message,
+      enabled: true,
+    })),
+  );
+
+  const handleToggle = useCallback(
+    (index: number, enabled: boolean) => {
+      setTweakedMessages((prev) =>
+        prev.map((m, i) => (i === index ? { ...m, enabled } : m)),
+      );
+    },
+    [setTweakedMessages],
+  );
+
   return (
     <AccordionCard
       icon={<PencilIcon variant="solid" />}
@@ -36,15 +52,19 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
       }
       isExpanded={isExpanded}
     >
-      <MessageContent messages={messages} />
+      <MessageContent messages={tweakedMessages} onToggle={handleToggle} />
     </AccordionCard>
   );
 }
 
+type MessagePolicyWithEnabled = SignMessagePolicy & { enabled: boolean };
+
 export function MessageContent({
   messages,
+  onToggle,
 }: {
-  messages: SignMessagePolicy[];
+  messages: MessagePolicyWithEnabled[];
+  onToggle: (index: number, enabled: boolean) => void;
 }) {
   return (
     <>
@@ -55,7 +75,10 @@ export function MessageContent({
         >
           <div className="flex flex-row items-center justify-between">
             <div className="py-2 font-bold">{m.name ?? `Message ${i + 1}`}</div>
-            <Switch />
+            <Switch
+              checked={m.enabled}
+              onCheckedChange={(enabled) => onToggle(i, enabled)}
+            />
           </div>
 
           <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">

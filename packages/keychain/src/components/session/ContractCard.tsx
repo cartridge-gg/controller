@@ -56,7 +56,7 @@ export function ContractCard({
     </a>
   );
 
-  const handleMethodToggle = useCallback(
+  const handleToggle = useCallback(
     (entrypoint: string, enabled: boolean) => {
       setTweakedMethod((prev) =>
         prev.map((method) =>
@@ -64,7 +64,7 @@ export function ContractCard({
         ),
       );
     },
-    [],
+    [setTweakedMethod],
   );
 
   return (
@@ -110,7 +110,7 @@ export function ContractCard({
               color="accent"
               checked={method.enabled}
               onCheckedChange={(enabled) =>
-                handleMethodToggle(method.entrypoint, enabled)
+                handleToggle(method.entrypoint, enabled)
               }
             />
             {/* <div className="text-muted-foreground">{method.entrypoint}</div> */}
