@@ -8,6 +8,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  cn,
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
@@ -89,7 +90,12 @@ export function ContractCard({
           className="flex flex-col bg-background-100 gap-4 p-3 text-xs"
         >
           <div className="flex items-center justify-between">
-            <div className="flex flex-row items-center text-accent-foreground gap-2">
+            <div
+              className={cn(
+                "flex flex-row items-center gap-2",
+                method.enabled ? "text-accent-foreground " : "text-accent",
+              )}
+            >
               <p className="font-bold">
                 {method.name ?? humanizeString(method.entrypoint)}
               </p>

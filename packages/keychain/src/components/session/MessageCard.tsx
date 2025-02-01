@@ -7,6 +7,7 @@ import {
   CheckboxIcon,
   PencilIcon,
   Switch,
+  cn,
 } from "@cartridge/ui-next";
 import { ArrowTurnDownIcon, Badge } from "@cartridge/ui-next";
 import type {
@@ -74,7 +75,14 @@ export function MessageContent({
           className="flex flex-col bg-background-100 gap-2 text-xs"
         >
           <div className="flex flex-row items-center justify-between">
-            <div className="py-2 font-bold">{m.name ?? `Message ${i + 1}`}</div>
+            <p
+              className={cn(
+                "py-2 font-bold",
+                m.enabled ? "text-foreground" : "text-accent",
+              )}
+            >
+              {m.name ?? `Message ${i + 1}`}
+            </p>
             <Switch
               checked={m.enabled}
               onCheckedChange={(enabled) => onToggle(i, enabled)}
@@ -85,20 +93,34 @@ export function MessageContent({
             {/* Domain section */}
             {Object.values(m.domain).filter((f) => typeof f !== "undefined")
               .length > 0 && (
-              <CollapsibleRow key="domain" title="domain">
+              <CollapsibleRow key="domain" title="domain" enabled={m.enabled}>
                 {m.domain.name && (
-                  <ValueRow values={[{ name: "name", value: m.domain.name }]} />
+                  <ValueRow
+                    values={[
+                      {
+                        name: "name",
+                        value: m.domain.name,
+                      },
+                    ]}
+                    enabled={m.enabled}
+                  />
                 )}
               </CollapsibleRow>
             )}
 
             <ValueRow
-              values={[{ name: "primaryType", value: m.primaryType }]}
+              values={[
+                {
+                  name: "primaryType",
+                  value: m.primaryType,
+                },
+              ]}
+              enabled={m.enabled}
             />
 
-            <CollapsibleRow title="types">
+            <CollapsibleRow title="types" enabled={m.enabled}>
               {Object.entries(m.types).map(([name, types]) => (
-                <CollapsibleRow key={name} title={name}>
+                <CollapsibleRow key={name} title={name} enabled={m.enabled}>
                   {types.map((t, typeIndex) => (
                     <ValueRow
                       key={`${t.name}-${typeIndex}`}
@@ -116,6 +138,7 @@ export function MessageContent({
                             ]
                           : []),
                       ]}
+                      enabled={m.enabled}
                     />
                   ))}
                 </CollapsibleRow>
@@ -130,15 +153,26 @@ export function MessageContent({
 
 interface CollapsibleRowProps extends PropsWithChildren {
   title: string;
+  enabled: boolean;
 }
 
-export function CollapsibleRow({ title, children }: CollapsibleRowProps) {
+export function CollapsibleRow({
+  title,
+  children,
+  enabled,
+}: CollapsibleRowProps) {
   const [value, setValue] = useState("");
 
   return (
     <Accordion type="single" collapsible value={value} onValueChange={setValue}>
       <AccordionItem value={title} className="flex flex-col">
-        <AccordionTrigger hideIcon className="hover:bg-accent rounded-md">
+        <AccordionTrigger
+          hideIcon
+          className={cn(
+            "hover:bg-accent rounded-md",
+            enabled ? "text-muted-foreground" : "text-accent",
+          )}
+        >
           <div className="flex items-center gap-1 py-1">
             <CheckboxIcon
               variant={value ? "minus-line" : "plus-line"}
@@ -158,16 +192,30 @@ export function CollapsibleRow({ title, children }: CollapsibleRowProps) {
 
 interface ValueRowProps {
   values: { name: string; value: string | number }[];
+  enabled: boolean;
 }
 
-export function ValueRow({ values }: ValueRowProps) {
+export function ValueRow({ values, enabled }: ValueRowProps) {
   return (
-    <div className="flex items-center py-1 gap-1 text-muted-foreground">
+    <div
+      className={cn(
+        "flex items-center py-1 gap-1 ",
+        enabled ? "text-muted-foreground" : "text-accent",
+      )}
+    >
       <ArrowTurnDownIcon size="sm" />
       <div className="flex items-center gap-2">
         {values.map((f) => (
           <div className="flex items-center gap-1 text-xs" key={f.name}>
-            {f.name}: <Badge className="bg-background-200">{f.value}</Badge>
+            {f.name}:{" "}
+            <Badge
+              className={cn(
+                "bg-background-200",
+                enabled ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              {f.value}
+            </Badge>
           </div>
         ))}
       </div>
