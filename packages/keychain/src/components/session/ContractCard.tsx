@@ -12,16 +12,22 @@ import {
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
-import { useCallback, useMemo, useState } from "react";
 import { constants } from "starknet";
 import { AccordionCard } from "./AccordionCard";
 
+type MethodWithEnabled = Method & { authorized?: boolean };
+
 interface ContractCardProps {
   address: string;
-  methods: Method[];
+  methods: MethodWithEnabled[];
   title: string;
   icon: React.ReactNode;
   isExpanded?: boolean;
+  onToggleMethod: (
+    address: string,
+    entrypoint: string,
+    enabled: boolean,
+  ) => void;
 }
 
 export function ContractCard({
@@ -30,14 +36,8 @@ export function ContractCard({
   title,
   icon,
   isExpanded,
+  onToggleMethod,
 }: ContractCardProps) {
-  const [tweakedMethod, setTweakedMethod] = useState(() =>
-    methods.map((method) => ({
-      ...method,
-      enabled: true,
-    })),
-  );
-
   const chainId = useChainId();
   const explorer = useExplorer();
 
@@ -57,21 +57,9 @@ export function ContractCard({
     </a>
   );
 
-  const handleToggle = useCallback(
-    (entrypoint: string, enabled: boolean) => {
-      setTweakedMethod((prev) =>
-        prev.map((method) =>
-          method.entrypoint === entrypoint ? { ...method, enabled } : method,
-        ),
-      );
-    },
-    [setTweakedMethod],
-  );
-
-  const totalEnabledMethod = useMemo(
-    () => tweakedMethod.filter((method) => method.enabled).length,
-    [tweakedMethod],
-  );
+  const totalEnabledMethod = methods.filter(
+    (method) => method.authorized,
+  ).length;
 
   return (
     <AccordionCard
@@ -89,7 +77,7 @@ export function ContractCard({
       }
       className="bg-background gap-px rounded overflow-auto border border-background"
     >
-      {tweakedMethod.map((method) => (
+      {methods.map((method) => (
         <div
           key={method.entrypoint}
           className="flex flex-col bg-background-100 gap-4 p-3 text-xs"
@@ -98,7 +86,7 @@ export function ContractCard({
             <div
               className={cn(
                 "flex flex-row items-center gap-2",
-                method.enabled ? "text-accent-foreground " : "text-accent",
+                method.authorized ? "text-accent-foreground " : "text-accent",
               )}
             >
               <p className="font-bold">
@@ -119,9 +107,9 @@ export function ContractCard({
             </div>
             <Switch
               color="accent"
-              checked={method.enabled}
+              checked={method.authorized ?? true}
               onCheckedChange={(enabled) =>
-                handleToggle(method.entrypoint, enabled)
+                onToggleMethod(address, method.entrypoint, enabled)
               }
             />
           </div>

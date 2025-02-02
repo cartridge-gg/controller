@@ -11,12 +11,20 @@ export function VerifiedSessionSummary({
   messages,
   duration,
   onDurationChange,
+  onToggleMethod,
+  onToggleMessage,
 }: {
   game: string;
   contracts?: SessionContracts;
   messages?: SessionMessages;
   duration: bigint;
   onDurationChange: (duration: bigint) => void;
+  onToggleMethod: (
+    address: string,
+    entrypoint: string,
+    authorized: boolean,
+  ) => void;
+  onToggleMessage: (id: string, authorized: boolean) => void;
 }) {
   // Extract token and VRF contracts
   const individual = useMemo(
@@ -28,27 +36,6 @@ export function VerifiedSessionSummary({
   );
 
   // Create new policies object without token/VRF contracts
-  // const aggregate = useMemo(() => {
-  //   const filteredContracts = Object.entries(contracts ?? {})
-  //     .filter(([, contract]) => {
-  //       return contract.meta?.type !== "ERC20" && contract.meta?.type !== "VRF";
-  //     })
-  //     .map(([address, contract]) => ({
-  //       address,
-  //       name: contract.meta?.name || "Contract",
-  //       description: contract?.description,
-  //       methods: contract.methods.map((method) => ({
-  //         name: method.name,
-  //         description: method.description,
-  //         entrypoint: method.entrypoint,
-  //       })),
-  //     }));
-  //
-  //   return {
-  //     contracts: filteredContracts,
-  //     messages,
-  //   };
-  // }, [contracts, messages]);
   const aggregate = useMemo(() => {
     return {
       contracts: Object.fromEntries(
@@ -69,6 +56,8 @@ export function VerifiedSessionSummary({
         icon={<CodeIcon variant="solid" />}
         contracts={aggregate.contracts}
         messages={messages}
+        onToggleMethod={onToggleMethod}
+        onToggleMessage={onToggleMessage}
       />
 
       {individual.map(([address, contract]) => (
@@ -78,6 +67,7 @@ export function VerifiedSessionSummary({
           title={contract.meta?.name || "Contract"}
           icon={contract.meta?.icon}
           methods={contract.methods}
+          onToggleMethod={onToggleMethod}
         />
       ))}
 

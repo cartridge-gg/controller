@@ -33,13 +33,63 @@ export function CreateSession({
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
+  const [policyState, setPolicyState] = useState<ParsedSessionPolicies>(() => {
+    // Set all contract policyState to authorized
+    if (policies.contracts) {
+      Object.keys(policies.contracts).forEach((address) => {
+        if (policies.contracts![address]) {
+          policies.contracts![address].methods.forEach((method) => {
+            method.authorized = true;
+          });
+        }
+      });
+    }
+
+    // Set all message policyState to authorized
+    if (policies.messages) {
+      policies.messages.forEach((message) => {
+        message.authorized = true;
+      });
+    }
+
+    return policies;
+  });
+
+  const handleToggleMethod = useCallback(
+    (address: string, entrypoint: string, authorized: boolean) => {
+      if (!policyState.contracts) return;
+      const contract = policyState.contracts[address];
+      if (!contract) return;
+      const method = contract.methods.find(
+        (method) => method.entrypoint === entrypoint,
+      );
+      if (!method) return;
+      method.authorized = authorized;
+      setPolicyState({ ...policyState });
+    },
+    [policyState],
+  );
+
+  const handleToggleMessage = useCallback(
+    (name: string, authorized: boolean) => {
+      if (!policyState.messages) return;
+      const message = policyState.messages.find(
+        (message) => message.name === name,
+      );
+      if (!message) return;
+      message.authorized = authorized;
+      setPolicyState({ ...policyState });
+    },
+    [policyState],
+  );
+
   const expiresAt = useMemo(() => {
     return duration + NOW;
   }, [duration]);
 
   const chainSpecificMessages = useMemo(() => {
-    if (!policies.messages || !chainId) return [];
-    return policies.messages.filter((message) => {
+    if (!policyState.messages || !chainId) return [];
+    return policyState.messages.filter((message) => {
       return (
         !("domain" in message) ||
         (message.domain.chainId &&
@@ -47,52 +97,34 @@ export function CreateSession({
             normalizeChainId(chainId))
       );
     });
-  }, [policies.messages, chainId]);
+  }, [policyState.messages, chainId]);
 
   const onCreateSession = useCallback(async () => {
-    if (!controller || !policies) return;
+    if (!controller || !policyState) return;
     try {
       setError(undefined);
       setIsConnecting(true);
 
-      // Set all contract policies to authorized
-      if (policies.contracts) {
-        Object.keys(policies.contracts).forEach((address) => {
-          if (policies.contracts![address]) {
-            policies.contracts![address].methods.forEach((method) => {
-              method.authorized = true;
-            });
-          }
-        });
-      }
-
-      // Set all message policies to authorized
-      if (policies.messages) {
-        policies.messages.forEach((message) => {
-          message.authorized = true;
-        });
-      }
-
-      await controller.createSession(expiresAt, policies, maxFee);
+      await controller.createSession(expiresAt, policyState, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
       setIsConnecting(false);
     }
-  }, [controller, duration, policies, maxFee, onConnect]);
+  }, [controller, duration, policyState, maxFee, onConnect]);
 
   const onSkipSession = useCallback(async () => {
-    if (!controller || !policies) return;
+    if (!controller || !policyState) return;
     try {
       setError(undefined);
       setIsConnecting(true);
-      await controller.createSession(duration, policies, maxFee);
+      await controller.createSession(duration, policyState, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
       setIsConnecting(false);
     }
-  }, [controller, duration, policies, maxFee, onConnect]);
+  }, [controller, duration, policyState, maxFee, onConnect]);
 
   if (!upgrade.isSynced) {
     return <></>;
@@ -108,33 +140,37 @@ export function CreateSession({
         title={!isUpdate ? "Create Session" : "Update Session"}
         description={
           isUpdate
-            ? "The policies were updated, please update existing session"
+            ? "The policyState were updated, please update existing session"
             : undefined
         }
         onClose={closeModal}
         chainId={chainId}
       />
       <LayoutContent className="gap-6">
-        <SessionConsent isVerified={policies?.verified} />
-        {policies?.verified ? (
+        <SessionConsent isVerified={policyState?.verified} />
+        {policyState?.verified ? (
           <VerifiedSessionSummary
             game={theme.name}
-            contracts={policies.contracts}
+            contracts={policyState.contracts}
             messages={chainSpecificMessages}
             duration={duration}
             onDurationChange={setDuration}
+            onToggleMethod={handleToggleMethod}
+            onToggleMessage={handleToggleMessage}
           />
         ) : (
           <UnverifiedSessionSummary
-            contracts={policies.contracts}
+            contracts={policyState.contracts}
             messages={chainSpecificMessages}
             duration={duration}
             onDurationChange={setDuration}
+            onToggleMethod={handleToggleMethod}
+            onToggleMessage={handleToggleMessage}
           />
         )}
       </LayoutContent>
       <LayoutFooter>
-        {!policies?.verified && (
+        {!policyState?.verified && (
           <div
             className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-foreground"
             onClick={() => !isConnecting && setIsConsent(!isConsent)}
@@ -165,7 +201,7 @@ export function CreateSession({
           </Button>
           <Button
             className="flex-1"
-            disabled={isConnecting || (!policies?.verified && !isConsent)}
+            disabled={isConnecting || (!policyState?.verified && !isConsent)}
             isLoading={isConnecting}
             onClick={onCreateSession}
           >

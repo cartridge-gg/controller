@@ -14,35 +14,21 @@ import type {
   StarknetEnumType,
   StarknetMerkleType,
 } from "@starknet-io/types-js";
-import { type PropsWithChildren, useCallback, useMemo, useState } from "react";
+import { type PropsWithChildren, useState } from "react";
 import { AccordionCard } from "./AccordionCard";
 
 interface MessageCardProps {
-  messages: SignMessagePolicy[];
+  messages: SignMessagePolicyWithEnabled[];
+  onToggleMessage: (name: string, authorized: boolean) => void;
   isExpanded?: boolean;
 }
 
-export function MessageCard({ messages, isExpanded }: MessageCardProps) {
-  const [tweakedMessages, setTweakedMessages] = useState(() =>
-    messages.map((message) => ({
-      ...message,
-      enabled: true,
-    })),
-  );
-
-  const handleToggle = useCallback(
-    (index: number, enabled: boolean) => {
-      setTweakedMessages((prev) =>
-        prev.map((m, i) => (i === index ? { ...m, enabled } : m)),
-      );
-    },
-    [setTweakedMessages],
-  );
-
-  const totalEnabledMessages = useMemo(
-    () => tweakedMessages.filter((m) => m.enabled).length,
-    [tweakedMessages],
-  );
+export function MessageCard({
+  messages,
+  isExpanded,
+  onToggleMessage,
+}: MessageCardProps) {
+  const totalEnabledMessages = messages.filter((m) => m.authorized).length;
 
   return (
     <AccordionCard
@@ -52,25 +38,28 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
         <div className="text-xs text-muted-foreground">
           Approve&nbsp;
           <span className="text-accent-foreground font-bold">
-            {totalEnabledMessages} {totalEnabledMessages > 1 ? `messages` : "message"}
+            {totalEnabledMessages}{" "}
+            {totalEnabledMessages > 1 ? `messages` : "message"}
           </span>
         </div>
       }
       isExpanded={isExpanded}
     >
-      <MessageContent messages={tweakedMessages} onToggle={handleToggle} />
+      <MessageContent messages={messages} onToggleMessage={onToggleMessage} />
     </AccordionCard>
   );
 }
 
-type MessagePolicyWithEnabled = SignMessagePolicy & { enabled: boolean };
+type SignMessagePolicyWithEnabled = SignMessagePolicy & {
+  authorized?: boolean;
+};
 
 export function MessageContent({
   messages,
-  onToggle,
+  onToggleMessage,
 }: {
-  messages: MessagePolicyWithEnabled[];
-  onToggle: (index: number, enabled: boolean) => void;
+  messages: SignMessagePolicyWithEnabled[];
+  onToggleMessage: (name: string, authorized: boolean) => void;
 }) {
   return (
     <>
@@ -83,14 +72,14 @@ export function MessageContent({
             <p
               className={cn(
                 "py-2 font-bold",
-                m.enabled ? "text-foreground" : "text-accent",
+                m.authorized ? "text-foreground" : "text-accent",
               )}
             >
               {m.name ?? `Message ${i + 1}`}
             </p>
             <Switch
-              checked={m.enabled}
-              onCheckedChange={(enabled) => onToggle(i, enabled)}
+              checked={m.authorized}
+              onCheckedChange={(enabled) => onToggleMessage(m.name!, enabled)}
             />
           </div>
 
@@ -98,7 +87,11 @@ export function MessageContent({
             {/* Domain section */}
             {Object.values(m.domain).filter((f) => typeof f !== "undefined")
               .length > 0 && (
-              <CollapsibleRow key="domain" title="domain" enabled={m.enabled}>
+              <CollapsibleRow
+                key="domain"
+                title="domain"
+                enabled={m.authorized ?? true}
+              >
                 {m.domain.name && (
                   <ValueRow
                     values={[
@@ -107,7 +100,7 @@ export function MessageContent({
                         value: m.domain.name,
                       },
                     ]}
-                    enabled={m.enabled}
+                    enabled={m.authorized ?? true}
                   />
                 )}
               </CollapsibleRow>
@@ -120,12 +113,16 @@ export function MessageContent({
                   value: m.primaryType,
                 },
               ]}
-              enabled={m.enabled}
+              enabled={m.authorized ?? true}
             />
 
-            <CollapsibleRow title="types" enabled={m.enabled}>
+            <CollapsibleRow title="types" enabled={m.authorized ?? true}>
               {Object.entries(m.types).map(([name, types]) => (
-                <CollapsibleRow key={name} title={name} enabled={m.enabled}>
+                <CollapsibleRow
+                  key={name}
+                  title={name}
+                  enabled={m.authorized ?? true}
+                >
                   {types.map((t, typeIndex) => (
                     <ValueRow
                       key={`${t.name}-${typeIndex}`}
@@ -143,7 +140,7 @@ export function MessageContent({
                             ]
                           : []),
                       ]}
-                      enabled={m.enabled}
+                      enabled={m.authorized ?? true}
                     />
                   ))}
                 </CollapsibleRow>
