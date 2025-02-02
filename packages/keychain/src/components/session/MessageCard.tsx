@@ -14,7 +14,7 @@ import type {
   StarknetEnumType,
   StarknetMerkleType,
 } from "@starknet-io/types-js";
-import { type PropsWithChildren, useCallback, useState } from "react";
+import { type PropsWithChildren, useCallback, useMemo, useState } from "react";
 import { AccordionCard } from "./AccordionCard";
 
 interface MessageCardProps {
@@ -39,6 +39,11 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
     [setTweakedMessages],
   );
 
+  const totalEnabledMessages = useMemo(
+    () => tweakedMessages.filter((m) => m.enabled).length,
+    [tweakedMessages],
+  );
+
   return (
     <AccordionCard
       icon={<PencilIcon variant="solid" />}
@@ -47,7 +52,7 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
         <div className="text-xs text-muted-foreground">
           Approve&nbsp;
           <span className="text-accent-foreground font-bold">
-            {messages.length} {messages.length > 1 ? `messages` : "message"}
+            {totalEnabledMessages} {totalEnabledMessages > 1 ? `messages` : "message"}
           </span>
         </div>
       }

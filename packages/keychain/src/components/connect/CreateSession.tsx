@@ -1,22 +1,22 @@
-import { BigNumberish, shortString } from "starknet";
-import { ControllerError } from "@/utils/connection";
-import { useCallback, useMemo, useState } from "react";
-import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { SessionConsent } from "@/components/connect";
-import { Upgrade } from "./Upgrade";
-import { ParsedSessionPolicies } from "@/hooks/session";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
+import { useConnection } from "@/hooks/connection";
+import type { ParsedSessionPolicies } from "@/hooks/session";
+import type { ControllerError } from "@/utils/connection";
 import {
+  Button,
+  Checkbox,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  Button,
-  Checkbox,
   LayoutHeader,
 } from "@cartridge/ui-next";
+import { useCallback, useMemo, useState } from "react";
+import { type BigNumberish, shortString } from "starknet";
+import { Upgrade } from "./Upgrade";
 
 export function CreateSession({
   policies,
@@ -134,23 +134,23 @@ export function CreateSession({
         )}
       </LayoutContent>
       <LayoutFooter>
-        {/* {!policies?.verified && ( */}
-        {/*   <div */}
-        {/*     className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-foreground" */}
-        {/*     onClick={() => !isConnecting && setIsConsent(!isConsent)} */}
-        {/*   > */}
-        {/*     <Checkbox */}
-        {/*       checked={isConsent} */}
-        {/*       disabled={isConnecting} */}
-        {/*       onCheckedChange={() => setIsConsent(!isConsent)} */}
-        {/*       className="pointer-events-none" */}
-        {/*     /> */}
-        {/*     <div className="text-xs"> */}
-        {/*       I understand and agree to grant permission for this application to */}
-        {/*       execute these actions. */}
-        {/*     </div> */}
-        {/*   </div> */}
-        {/* )} */}
+        {!policies?.verified && (
+          <div
+            className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-foreground"
+            onClick={() => !isConnecting && setIsConsent(!isConsent)}
+          >
+            <Checkbox
+              checked={isConsent}
+              disabled={isConnecting}
+              onCheckedChange={() => setIsConsent(!isConsent)}
+              className="pointer-events-none"
+            />
+            <div className="text-xs">
+              I understand and agree to grant permission for this application to
+              execute these actions.
+            </div>
+          </div>
+        )}
 
         {error && <ControllerErrorAlert className="mb-3" error={error} />}
 

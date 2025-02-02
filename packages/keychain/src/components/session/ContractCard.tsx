@@ -12,7 +12,7 @@ import {
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { constants } from "starknet";
 import { AccordionCard } from "./AccordionCard";
 
@@ -68,6 +68,11 @@ export function ContractCard({
     [setTweakedMethod],
   );
 
+  const totalEnabledMethod = useMemo(
+    () => tweakedMethod.filter((method) => method.enabled).length,
+    [tweakedMethod],
+  );
+
   return (
     <AccordionCard
       icon={icon ?? <CodeIcon variant="solid" />}
@@ -78,7 +83,7 @@ export function ContractCard({
         <div className="text-xs text-muted-foreground">
           Approve&nbsp;
           <span className="text-accent-foreground font-bold">
-            {methods.length} {methods.length > 1 ? `methods` : "method"}
+            {totalEnabledMethod} {totalEnabledMethod > 1 ? `methods` : "method"}
           </span>
         </div>
       }
@@ -119,7 +124,6 @@ export function ContractCard({
                 handleToggle(method.entrypoint, enabled)
               }
             />
-            {/* <div className="text-muted-foreground">{method.entrypoint}</div> */}
           </div>
         </div>
       ))}

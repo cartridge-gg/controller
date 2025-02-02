@@ -1,6 +1,7 @@
-import { SessionContracts, SessionMessages } from "@/hooks/session";
-import { AggregateCard } from "./AggregateCard";
+import type { SessionContracts, SessionMessages } from "@/hooks/session";
 import { CodeIcon } from "@cartridge/ui-next";
+import { useMemo } from "react";
+import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";
 import { ExpirationCard } from "./ExpirationCard";
 
@@ -18,19 +19,48 @@ export function VerifiedSessionSummary({
   onDurationChange: (duration: bigint) => void;
 }) {
   // Extract token and VRF contracts
-  const individual = Object.entries(contracts ?? {}).filter(([, contract]) => {
-    return contract.meta?.type === "ERC20" || contract.meta?.type === "VRF";
-  });
+  const individual = useMemo(
+    () =>
+      Object.entries(contracts ?? {}).filter(([, contract]) => {
+        return contract.meta?.type === "ERC20" || contract.meta?.type === "VRF";
+      }),
+    [contracts],
+  );
 
   // Create new policies object without token/VRF contracts
-  const aggregate = {
-    contracts: Object.fromEntries(
-      Object.entries(contracts ?? {}).filter(([, contract]) => {
-        return contract.meta?.type !== "ERC20" && contract.meta?.type !== "VRF";
-      }),
-    ),
-    messages,
-  };
+  // const aggregate = useMemo(() => {
+  //   const filteredContracts = Object.entries(contracts ?? {})
+  //     .filter(([, contract]) => {
+  //       return contract.meta?.type !== "ERC20" && contract.meta?.type !== "VRF";
+  //     })
+  //     .map(([address, contract]) => ({
+  //       address,
+  //       name: contract.meta?.name || "Contract",
+  //       description: contract?.description,
+  //       methods: contract.methods.map((method) => ({
+  //         name: method.name,
+  //         description: method.description,
+  //         entrypoint: method.entrypoint,
+  //       })),
+  //     }));
+  //
+  //   return {
+  //     contracts: filteredContracts,
+  //     messages,
+  //   };
+  // }, [contracts, messages]);
+  const aggregate = useMemo(() => {
+    return {
+      contracts: Object.fromEntries(
+        Object.entries(contracts ?? {}).filter(([, contract]) => {
+          return (
+            contract.meta?.type !== "ERC20" && contract.meta?.type !== "VRF"
+          );
+        }),
+      ),
+      messages,
+    };
+  }, [contracts, messages]);
 
   return (
     <div className="flex flex-col gap-4">
