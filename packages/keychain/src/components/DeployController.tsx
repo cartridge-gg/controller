@@ -24,8 +24,8 @@ import { useDeploy } from "@/hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "@/utils/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
-import { STRK_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
 import { Link } from "react-router-dom";
+import { useFeeToken } from "@/hooks/tokens";
 
 export function DeployController({
   onClose,
@@ -37,6 +37,7 @@ export function DeployController({
   const { closeModal, chainId, controller, chainName, hasPrefundRequest } =
     useConnection();
   const { deploySelf, isDeploying } = useDeploy();
+  const { token: feeToken, isLoading } = useFeeToken();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [accountState, setAccountState] = useState<
@@ -99,25 +100,15 @@ export function DeployController({
     }
   }, [deployHash, controller]);
 
-  const {
-    data: [strk],
-    isLoading,
-  } = useERC20Balance({
-    address: controller?.address(),
-    contractAddress: STRK_CONTRACT_ADDRESS,
-    provider: controller?.provider,
-    interval: 3000,
-    decimals: 2,
-  });
   useEffect(() => {
-    if (!estimateFee || accountState != "fund" || !strk?.balance.value) return;
+    if (!estimateFee || accountState != "fund" || !feeToken?.balance) return;
 
-    if (strk.balance.value >= estimateFee.overall_fee) {
+    if (feeToken.balance >= estimateFee.overall_fee) {
       setAccountState("deploy");
     } else {
       setAccountState("fund");
     }
-  }, [strk?.balance.value, estimateFee, accountState]);
+  }, [feeToken?.balance, estimateFee, accountState]);
 
   const onDeploy = useCallback(async () => {
     if (!estimateFee) return;
@@ -153,9 +144,8 @@ export function DeployController({
         <Funding
           title={
             <>
-              Fund{" "}
-              <b style={{ color: "brand.primary" }}>{controller?.username()}</b>{" "}
-              for deployment
+              Fund <b className="text-primary">{controller?.username()}</b> for
+              deployment
             </>
           }
           onComplete={() => {
