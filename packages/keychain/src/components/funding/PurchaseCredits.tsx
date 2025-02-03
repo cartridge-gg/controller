@@ -15,7 +15,7 @@ import { AmountSelection } from "./AmountSelection";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
-import { Balance } from "./Balance";
+import { Balance, BalanceType } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
 import { isIframe } from "@cartridge/utils";
 import { DEFAULT_AMOUNT } from "./constants";
@@ -125,7 +125,7 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
         onClose={closeModal}
       />
       <LayoutContent className="gap-6">
-        <Balance showBalances={["credits"]} />
+        <Balance types={[BalanceType.CREDITS]} />
         <ErrorAlert
           variant=""
           title="WHAT ARE CREDITS"

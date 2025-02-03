@@ -169,7 +169,7 @@ export function ControllerErrorAlert({
     case ErrorCode.CartridgeControllerNotDeployed:
       title = "Your Controller is not deployed";
       description =
-        "Lets fund your Controller and deploy it before we can start executing transactions.";
+        "Lets fund your Controller and deploy it so we can start executing transactions.";
       isExpanded = true;
       variant = "warning";
       break;

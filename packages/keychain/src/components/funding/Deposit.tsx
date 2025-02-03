@@ -23,7 +23,7 @@ import {
   ArgentIcon,
   BraavosIcon,
   CopyIcon,
-  EthereumIcon,
+  DepositIcon,
   StarknetColorIcon,
   Button,
   CopyAddress,
@@ -34,11 +34,11 @@ import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { parseEther } from "viem";
 import { AmountSelection } from "./AmountSelection";
-import { Balance } from "./Balance";
+import { Balance, BalanceType } from "./Balance";
 import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
-import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { toast } from "sonner";
 import { DEFAULT_AMOUNT } from "./constants";
+import { useFeeToken } from "@/hooks/tokens";
 
 type DepositProps = {
   onComplete?: (deployHash?: string) => void;
@@ -57,22 +57,23 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { closeModal, controller, chainId } = useConnection();
   const { account: extAccount } = useAccount();
+  const { token: feeToken } = useFeeToken();
 
   const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
   const [state, setState] = useState<"connect" | "fund">("connect");
-  const [ethAmount, setEthAmount] = useState<string>();
+  const [tokenAmount, setTokenAmount] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
   const priceQuery = usePriceQuery({ pairs: TokenPair.EthUsdc });
   const price = priceQuery.data?.price?.[0];
 
-  const onAmountChagned = useCallback(
+  const onAmountChanged = useCallback(
     (amount: number) => {
       if (!price) return;
 
-      const ethAmount = amount / parseFloat(price?.amount);
-      setEthAmount(ethAmount.toString());
+      const tokenAmount = amount / parseFloat(price?.amount);
+      setTokenAmount(tokenAmount.toString());
       setDollarAmount(amount);
     },
     [price],
@@ -102,7 +103,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
     if (!extAccount) {
       throw new Error("External account is not connected");
     }
-    if (!ethAmount || !controller) {
+    if (!tokenAmount || !controller) {
       return;
     }
 
@@ -110,19 +111,19 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
       setIsLoading(true);
       const calls = [
         {
-          contractAddress: ETH_CONTRACT_ADDRESS,
+          contractAddress: feeToken.address,
           entrypoint: "approve",
           calldata: CallData.compile({
             recipient: controller.address,
-            amount: cairo.uint256(parseEther(ethAmount)),
+            amount: cairo.uint256(parseEther(tokenAmount)),
           }),
         },
         {
-          contractAddress: ETH_CONTRACT_ADDRESS,
+          contractAddress: feeToken.address,
           entrypoint: "transfer",
           calldata: CallData.compile({
             recipient: controller.address,
-            amount: cairo.uint256(parseEther(ethAmount)),
+            amount: cairo.uint256(parseEther(tokenAmount)),
           }),
         },
       ];
@@ -141,14 +142,14 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [extAccount, controller, ethAmount, onComplete]);
+  }, [extAccount, controller, tokenAmount, onComplete]);
 
   const onCopy = useCallback(() => {
-    if (!controller?.address) return;
+    if (!controller) return;
 
     navigator.clipboard.writeText(controller.address());
     toast.success("Address copied");
-  }, [controller?.address]);
+  }, [controller]);
 
   return (
     <LayoutContainer>
@@ -159,21 +160,21 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
             <CopyAddress address={controller.address()} />
           ) : undefined
         }
-        Icon={EthereumIcon}
+        icon={<DepositIcon size="lg" />}
         onBack={onBack}
         chainId={chainId}
         onClose={closeModal}
       />
 
       <LayoutContent className="gap-6">
-        <Balance showBalances={["eth"]} />
+        <Balance types={[BalanceType.FEE_TOKEN]} />
       </LayoutContent>
 
       <LayoutFooter>
         <AmountSelection
           amount={dollarAmount}
           lockSelection={isLoading}
-          onChange={onAmountChagned}
+          onChange={onAmountChanged}
         />
         <Separator className="bg-spacer m-1" />
         {error && (
@@ -234,7 +235,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
                     </div>
                     <div className="flex items-center gap-2 border border-background-100 rounded-md p-2">
                       <StarknetColorIcon />{" "}
-                      <div className="text-sm font-bold">STARKNET MAINNET</div>
+                      <div className="text-sm font-bold">Starknet</div>
                     </div>
                   </div>
                 </div>

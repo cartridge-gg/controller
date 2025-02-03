@@ -5,11 +5,10 @@ import {
   LayoutContent,
   LayoutFooter,
   Button,
-  ArrowIcon,
   CoinsIcon,
-  EthereumIcon,
   CopyAddress,
   LayoutHeader,
+  DepositIcon,
 } from "@cartridge/ui-next";
 import { Deposit } from "./Deposit";
 import { PurchaseCredits } from "./PurchaseCredits";
@@ -30,7 +29,9 @@ export type FundingProps = {
 export function Funding({ title, isSlot, onComplete }: FundingProps) {
   const { closeModal, chainId, controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
-  const showBalances: BalanceType[] = isSlot ? ["credits"] : ["credits", "eth"];
+  const balances: BalanceType[] = isSlot
+    ? [BalanceType.CREDITS]
+    : [BalanceType.CREDITS, BalanceType.FEE_TOKEN];
   const showCredits =
     (typeof document !== "undefined" && document.cookie.includes("credits=")) ||
     isSlot;
@@ -60,12 +61,12 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
         description={
           controller && <CopyAddress address={controller.address()} />
         }
-        icon={<ArrowIcon variant="down" size="lg" />}
+        icon={<DepositIcon size="lg" />}
         chainId={chainId}
         onClose={closeModal}
       />
       <LayoutContent className="gap-6">
-        <Balance showBalances={showBalances} />
+        <Balance types={balances} />
       </LayoutContent>
       <LayoutFooter>
         {showCredits && (

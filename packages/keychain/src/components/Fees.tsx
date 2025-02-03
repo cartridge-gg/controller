@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { formatUnits } from "viem";
 import { useChainId } from "@/hooks/connection";
 import { ErrorAlertIcon, Spinner, StarknetIcon } from "@cartridge/ui-next";
 import { EstimateFee } from "starknet";
-import { usePrice } from "@/hooks/price";
-import { TokenPair } from "@cartridge/utils/api/cartridge";
+import { formatUSDBalance, useFeeToken } from "@/hooks/tokens";
 import { ErrorAlert } from "./ErrorAlert";
 
 export function Fees({
@@ -17,32 +15,17 @@ export function Fees({
   variant?: Variant;
 }) {
   const chainId = useChainId();
-  const {
-    isLoading: isPriceLoading,
-    price,
-    error,
-  } = usePrice(TokenPair.StrkUsdc);
+  const { isLoading: isPriceLoading, token, error } = useFeeToken();
   const [formattedFee, setFormattedFee] = useState<string>();
   const isLoading = isEstimating || isPriceLoading;
 
   useEffect(() => {
-    if (isLoading || error) {
+    if (isLoading || error || !token) {
       return;
     }
 
-    if (maxFee && maxFee.overall_fee) {
-      // Convert overall_fee from FRI to STRK
-      const feeInStrk = parseFloat(formatUnits(maxFee.overall_fee, 18));
-
-      // Convert price amount to dollars using decimals
-      const priceInUsd = parseFloat(price.amount) / 10 ** price.decimals;
-
-      // Calculate fee value in USD
-      const feeInUsd = feeInStrk * priceInUsd;
-
-      // Round to 2 decimal places
-      const rounded = parseFloat(feeInUsd.toFixed(2));
-      const formatted = feeInUsd === rounded ? `$${rounded}` : `~$${rounded}`;
+    if (maxFee && maxFee.overall_fee && token.price) {
+      const formatted = formatUSDBalance(maxFee.overall_fee, 18, token.price);
       setFormattedFee(formatted);
     } else {
       setFormattedFee("FREE");
@@ -50,11 +33,13 @@ export function Fees({
   }, [chainId, maxFee]);
 
   if (error) {
-    <ErrorAlert
-      title="Error fetching fee token price"
-      description="error"
-      variant="error"
-    />;
+    return (
+      <ErrorAlert
+        title="Error fetching fee token price"
+        description="error"
+        variant="error"
+      />
+    );
   }
 
   return (
