@@ -56,7 +56,7 @@ async fn test_set_delegate_account_from_non_owner() {
     // non owner set_delegate_account
     let tx = account_interface_external_account
         .set_delegate_account(&delegate_address.into())
-        .fee_estimate_multiplier(1.5)
+        .gas_estimate_multiplier(1.5)
         .send()
         .await;
     assert!(tx.is_err(), "should panic")

@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use starknet::{
-    accounts::{Account, AccountError, ConnectedAccount, ExecutionV1},
+    accounts::{Account, AccountError, ConnectedAccount, ExecutionV3},
     providers::Provider,
 };
 use starknet_crypto::Felt;
@@ -29,7 +29,7 @@ pub enum EnsureTxnError<S> {
 }
 
 pub async fn ensure_txn<A, P>(
-    execution: ExecutionV1<'_, A>,
+    execution: ExecutionV3<'_, A>,
     provider: &P,
 ) -> Result<Felt, EnsureTxnError<A::SignError>>
 where
@@ -37,7 +37,7 @@ where
     P: Provider + Sync + Send,
 {
     let tx = execution
-        .fee_estimate_multiplier(1.6)
+        .gas_price_estimate_multiplier(1.6)
         .send()
         .await
         .map_err(EnsureTxnError::from)?;

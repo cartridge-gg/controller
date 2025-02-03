@@ -74,8 +74,8 @@ impl<'a> AccountDeclaration<'a> {
             .map_err(|e| e.to_string())?;
 
         let declaration_result = account
-            .declare_v2(Arc::new(flattened_class), self.compiled_class_hash)
-            .fee_estimate_multiplier(1.5)
+            .declare_v3(Arc::new(flattened_class), self.compiled_class_hash)
+            .gas_estimate_multiplier(1.5)
             .send()
             .await
             .unwrap();

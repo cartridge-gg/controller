@@ -2447,7 +2447,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn __execute__(&self, calls: &Vec<Call>) -> starknet::accounts::ExecutionV1<A> {
+    pub fn __execute__(&self, calls: &Vec<Call>) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(Vec::<Call>::cairo_serialize(calls));
@@ -2456,7 +2456,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("__execute__"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2472,7 +2472,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn __validate__(&self, calls: &Vec<Call>) -> starknet::accounts::ExecutionV1<A> {
+    pub fn __validate__(&self, calls: &Vec<Call>) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(Vec::<Call>::cairo_serialize(calls));
@@ -2481,7 +2481,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("__validate__"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2503,7 +2503,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     pub fn __validate_declare__(
         &self,
         class_hash: &starknet::core::types::Felt,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(starknet::core::types::Felt::cairo_serialize(class_hash));
@@ -2512,7 +2512,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("__validate_declare__"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2545,7 +2545,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         contract_address_salt: &starknet::core::types::Felt,
         owner: &Owner,
         guardian: &Option<Signer>,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(starknet::core::types::Felt::cairo_serialize(class_hash));
@@ -2559,7 +2559,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("__validate_deploy__"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2584,7 +2584,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         &self,
         owner: &Signer,
         signature: &SignerSignature,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(Signer::cairo_serialize(owner));
@@ -2594,7 +2594,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("add_owner"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2621,7 +2621,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         &self,
         outside_execution: &OutsideExecutionV3,
         signature: &Vec<starknet::core::types::Felt>,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(OutsideExecutionV3::cairo_serialize(outside_execution));
@@ -2633,7 +2633,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("execute_from_outside_v3"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2657,7 +2657,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     pub fn register_external_owner(
         &self,
         external_owner_address: &cainome::cairo_serde::ContractAddress,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
@@ -2668,7 +2668,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("register_external_owner"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2695,7 +2695,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
         &self,
         session: &Session,
         guid_or_address: &starknet::core::types::Felt,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(Session::cairo_serialize(session));
@@ -2707,7 +2707,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("register_session"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2731,7 +2731,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     pub fn remove_external_owner(
         &self,
         external_owner_address: &cainome::cairo_serde::ContractAddress,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
@@ -2742,7 +2742,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("remove_external_owner"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2758,7 +2758,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn remove_owner(&self, owner: &Signer) -> starknet::accounts::ExecutionV1<A> {
+    pub fn remove_owner(&self, owner: &Signer) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(Signer::cairo_serialize(owner));
@@ -2767,7 +2767,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("remove_owner"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2789,7 +2789,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     pub fn revoke_session(
         &self,
         session_hash: &starknet::core::types::Felt,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(starknet::core::types::Felt::cairo_serialize(session_hash));
@@ -2798,7 +2798,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("revoke_session"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2822,7 +2822,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     pub fn set_delegate_account(
         &self,
         delegate_address: &cainome::cairo_serde::ContractAddress,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(cainome::cairo_serde::ContractAddress::cairo_serialize(
@@ -2833,7 +2833,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("set_delegate_account"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -2857,7 +2857,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
     pub fn upgrade(
         &self,
         new_class_hash: &cainome::cairo_serde::ClassHash,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata.extend(cainome::cairo_serde::ClassHash::cairo_serialize(
@@ -2868,7 +2868,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Controller<A> {
             selector: starknet::macros::selector!("upgrade"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
 }
 impl<P: starknet::providers::Provider + Sync> ControllerReader<P> {

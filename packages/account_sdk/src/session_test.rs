@@ -232,8 +232,8 @@ async fn test_create_and_use_registered_session() {
     let expires_at = u64::MAX;
     let max_fee = FeeEstimate {
         gas_consumed: Felt::ZERO,
-        gas_price: Felt::from(100),
-        overall_fee: Felt::from(2778000000000_u128),
+        gas_price: Felt::from(20000000000_u128),
+        overall_fee: Felt::from(57780000000000_u128),
         data_gas_consumed: Felt::ZERO,
         data_gas_price: Felt::ZERO,
         unit: PriceUnit::Fri,

@@ -174,7 +174,7 @@ async fn test_verify_execute_paymaster_should_fail() {
         .unwrap();
 
     paymaster
-        .execute_v1(vec![outside_execution.into()])
+        .execute_v3(vec![outside_execution.into()])
         .send()
         .await
         .unwrap();
@@ -230,7 +230,7 @@ async fn test_verify_execute_paymaster_session() {
         .unwrap();
 
     let tx = paymaster
-        .execute_v1(vec![outside_execution.into()])
+        .execute_v3(vec![outside_execution.into()])
         .send()
         .await
         .unwrap();

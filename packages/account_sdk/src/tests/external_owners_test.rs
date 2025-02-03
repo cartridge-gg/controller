@@ -47,7 +47,7 @@ async fn test_verify_external_owner() {
     .unwrap();
 
     ensure_txn(
-        external_account.execute_v1(vec![Call {
+        external_account.execute_v3(vec![Call {
             to: controller.address(),
             selector: selector!("register_session"),
             calldata: [
@@ -110,7 +110,7 @@ async fn test_verify_constructor_external_owner() {
     .unwrap();
 
     ensure_txn(
-        external_account.execute_v1(vec![Call {
+        external_account.execute_v3(vec![Call {
             to: controller.address(),
             selector: selector!("register_session"),
             calldata: [

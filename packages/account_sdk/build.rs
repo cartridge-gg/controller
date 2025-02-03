@@ -1,4 +1,4 @@
-use cainome::rs::Abigen;
+use cainome::rs::{Abigen, ExecutionVersion};
 use starknet::core::types::Felt;
 use std::{collections::HashMap, fs, path::PathBuf, process::Command};
 
@@ -171,6 +171,7 @@ fn generate_controller_bindings() {
         "Controller",
         "./artifacts/classes/controller.latest.contract_class.json",
     )
+    .with_execution_version(ExecutionVersion::V3)
     .with_types_aliases(HashMap::from([
         (
             String::from(
@@ -247,6 +248,7 @@ fn generate_controller_bindings() {
 
 fn generate_erc20_bindings() {
     let abigen = Abigen::new("Erc20", "./artifacts/classes/erc20.contract_class.json")
+        .with_execution_version(ExecutionVersion::V3)
         .with_types_aliases(HashMap::from([
             (
                 String::from("openzeppelin::token::erc20::erc20::ERC20Component::Event"),
