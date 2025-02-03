@@ -140,7 +140,7 @@ export function CreateSession({
         title={!isUpdate ? "Create Session" : "Update Session"}
         description={
           isUpdate
-            ? "The policyState were updated, please update existing session"
+            ? "The policies were updated, please update existing session"
             : undefined
         }
         onClose={closeModal}
