@@ -6,3 +6,12 @@ query Price($pairs: [TokenPair!]!) {
     quote
   }
 }
+
+query PriceByAddresses($addresses: [String!]!) {
+  priceByAddresses(addresses: $addresses) {
+    amount
+    base
+    decimals
+    quote
+  }
+}
