@@ -58,7 +58,7 @@ export function ErrorPage({ error }: { error: Error }) {
         chainId={chainId}
       />
       <LayoutContent className="gap-4">
-        <div className="flex w-full px-4 py-6 bg-secondary border border-background-200 rounded">
+        <div className="flex w-full px-4 py-6 bg-background-100 border border-background-200 rounded">
           <p className="w-full text-sm">{error.message}</p>
         </div>
 
