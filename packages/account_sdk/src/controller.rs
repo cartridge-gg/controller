@@ -15,7 +15,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, U256};
-use starknet::accounts::{AccountDeploymentV3, AccountError, AccountFactory, ExecutionV1};
+use starknet::accounts::{AccountDeploymentV3, AccountError, AccountFactory, ExecutionV3};
 use starknet::core::types::{
     BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
 };
@@ -338,7 +338,7 @@ impl Controller {
             .map_err(ControllerError::CairoSerde)
     }
 
-    pub fn set_delegate_account(&self, delegate_address: Felt) -> ExecutionV1<Self> {
+    pub fn set_delegate_account(&self, delegate_address: Felt) -> ExecutionV3<Self> {
         self.contract()
             .set_delegate_account(&delegate_address.into())
     }

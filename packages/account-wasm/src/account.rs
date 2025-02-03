@@ -412,7 +412,7 @@ impl CartridgeAccount {
             .await
             .map_err(JsControllerError::from)?;
 
-        Ok(res.try_into()?)
+        Ok(res.into())
     }
 }
 
