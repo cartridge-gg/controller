@@ -55,22 +55,26 @@ export function useTrophies({
   }, [namespace, project, fetchAchievements]);
 
   useEffect(() => {
-    if (isFetching) return;
+    if (
+      isFetching ||
+      Object.values(rawTrophies).length === Object.values(trophies).length
+    )
+      return;
     // Merge trophies
-    const trophies: { [id: string]: Trophy } = {};
+    const values: { [id: string]: Trophy } = {};
     Object.values(rawTrophies).forEach((trophy) => {
-      if (Object.keys(trophies).includes(trophy.id)) {
+      if (Object.keys(values).includes(trophy.id)) {
         trophy.tasks.forEach((task) => {
-          if (!trophies[trophy.id].tasks.find((t) => t.id === task.id)) {
-            trophies[trophy.id].tasks.push(task);
+          if (!values[trophy.id].tasks.find((t) => t.id === task.id)) {
+            values[trophy.id].tasks.push(task);
           }
         });
       } else {
-        trophies[trophy.id] = trophy;
+        values[trophy.id] = trophy;
       }
     });
-    setTrophies(trophies);
-  }, [rawTrophies, isFetching, setTrophies]);
+    setTrophies(values);
+  }, [rawTrophies, trophies, isFetching, setTrophies]);
 
   return { trophies };
 }
