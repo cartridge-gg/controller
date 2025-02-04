@@ -63,7 +63,7 @@ export function connectToController<ParentMethods extends object>({
           reject: () => Promise.reject(),
         });
       },
-      switchChain: () => switchChain({ setRpcUrl }),
+      switchChain: () => switchChain({ setController, setRpcUrl }),
     },
   });
 }

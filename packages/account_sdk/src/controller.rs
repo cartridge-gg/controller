@@ -38,7 +38,7 @@ const SESSION_TYPED_DATA_MAGIC: Felt = short_string!("session-typed-data");
 
 #[derive(Clone)]
 pub struct Controller {
-    pub(crate) app_id: String,
+    pub app_id: String,
     pub address: Felt,
     pub chain_id: Felt,
     pub class_hash: Felt,
@@ -46,7 +46,7 @@ pub struct Controller {
     pub username: String,
     pub(crate) salt: Felt,
     pub provider: CartridgeJsonRpcProvider,
-    pub(crate) owner: Owner,
+    pub owner: Owner,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
     factory: ControllerFactory,
     pub storage: Storage,

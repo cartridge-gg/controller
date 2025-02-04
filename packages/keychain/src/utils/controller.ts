@@ -16,6 +16,7 @@ import {
   CartridgeAccountMeta,
   JsCall,
   JsFelt,
+  Owner,
   SessionMetadata,
 } from "@cartridge/account-wasm/controller";
 
@@ -35,8 +36,7 @@ export default class Controller {
     rpcUrl,
     address,
     username,
-    publicKey,
-    credentialId,
+    owner,
   }: {
     appId: string;
     classHash: string;
@@ -44,8 +44,7 @@ export default class Controller {
     rpcUrl: string;
     address: string;
     username: string;
-    publicKey: string;
-    credentialId: string;
+    owner: Owner;
   }) {
     const accountWithMeta = CartridgeAccount.new(
       appId,
@@ -54,18 +53,16 @@ export default class Controller {
       chainId,
       address,
       username,
-      {
-        webauthn: {
-          rpId: import.meta.env.VITE_RP_ID!,
-          credentialId,
-          publicKey,
-        },
-      },
+      owner,
     );
 
     this.provider = new RpcProvider({ nodeUrl: rpcUrl });
     this.cartridgeMeta = accountWithMeta.meta();
     this.cartridge = accountWithMeta.intoAccount();
+  }
+
+  appId() {
+    return this.cartridgeMeta.appId();
   }
 
   address() {
@@ -80,6 +77,10 @@ export default class Controller {
     return this.cartridgeMeta.classHash();
   }
 
+  owner() {
+    return this.cartridgeMeta.owner();
+  }
+
   ownerGuid() {
     return this.cartridgeMeta.ownerGuid();
   }
@@ -90,10 +91,6 @@ export default class Controller {
 
   chainId() {
     return this.cartridgeMeta.chainId();
-  }
-
-  async switchChain(rpcUrl: string): Promise<void> {
-    await this.cartridge.switchChain(rpcUrl);
   }
 
   async disconnect() {

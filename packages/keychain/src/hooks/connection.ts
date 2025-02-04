@@ -55,9 +55,9 @@ export function useConnectionValue() {
         setRpcUrl(rpcUrl);
       }
 
-      if (controller && rpcUrl) {
-        controller.switchChain(rpcUrl);
-      }
+      // if (controller && rpcUrl) {
+      //   controller.switchChain(rpcUrl);
+      // }
     }
 
     // Handle theme and policies
