@@ -1,12 +1,9 @@
-import { isPolicyRequired } from "@/components/connect/create/utils";
 import type { SessionContracts, SessionMessages } from "@/hooks/session";
 import { CodeIcon } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";
 import { ExpirationCard } from "./ExpirationCard";
-
-const requiredPolicyTypes = ["VRF"];
 
 export function VerifiedSessionSummary({
   game,
@@ -60,10 +57,6 @@ export function VerifiedSessionSummary({
           title={contract.name || contract.meta?.name || "Contract"}
           icon={contract.meta?.icon}
           methods={contract.methods}
-          isDisabled={isPolicyRequired({
-            requiredPolicyTypes,
-            type: contract.meta?.type,
-          })}
         />
       ))}
 

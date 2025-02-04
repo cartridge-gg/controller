@@ -120,6 +120,7 @@ export function AggregateCard({
                         onCheckedChange={(enabled) =>
                           onToggleMethod(address, method.entrypoint, enabled)
                         }
+                        disabled={method.isRequired}
                       />
                     )}
                   </div>
