@@ -1,9 +1,4 @@
-import {
-  cn,
-  LeaderboardIcon,
-  SparklesIcon,
-  StateIconProps,
-} from "@cartridge/ui-next";
+import { cn, LeaderboardIcon, StateIconProps } from "@cartridge/ui-next";
 import { useState } from "react";
 
 export function TrophiesTab({
@@ -36,7 +31,7 @@ export function LeaderboardTab({
 }) {
   return (
     <Tab priority={false} active={active} onClick={onClick}>
-      <Item active={active} label="Rank" />
+      <Item active={active} label="Leaderboard" />
       <Item
         Icon={LeaderboardIcon}
         active={active}
@@ -47,25 +42,16 @@ export function LeaderboardTab({
   );
 }
 
-export function Scoreboard({
-  rank,
-  earnings,
-}: {
-  rank: number;
-  earnings: number;
-}) {
+export function Scoreboard({ rank }: { rank: number }) {
   return (
     <div className="flex gap-3 select-none">
-      <div className="flex items-center border border-background-100 rounded-md py-2 px-3">
-        <Item
-          Icon={LeaderboardIcon}
-          active={true}
-          label={!rank ? "---" : `#${rank}`}
-        />
-      </div>
-      <div className="flex items-center border border-background-100 rounded-md py-2 px-3">
-        <Item Icon={SparklesIcon} active={true} label={`${earnings}`} />
-      </div>
+      <Item
+        Icon={LeaderboardIcon}
+        active={false}
+        label={!rank ? "-" : `${rank}`}
+        highlighted
+        forced
+      />
     </div>
   );
 }
@@ -105,11 +91,13 @@ export function Item({
   active,
   label,
   highlighted,
+  forced,
 }: {
   Icon?: React.ComponentType<StateIconProps>;
   active: boolean;
   label: string;
   highlighted?: boolean;
+  forced?: boolean;
 }) {
   return (
     <div
@@ -119,7 +107,7 @@ export function Item({
           `${active ? "bg-background-200" : "bg-background-100"} min-w-5 h-6 text-xs rounded-2xl px-2 py-1 font-semibold`,
       )}
     >
-      {Icon && <Icon size="sm" variant={active ? "solid" : "line"} />}
+      {Icon && <Icon size="sm" variant={active || forced ? "solid" : "line"} />}
       <p className={highlighted ? "text-xs" : "text-sm"}>{label}</p>
     </div>
   );
