@@ -24,7 +24,7 @@ interface ContractCardProps {
   title: string;
   icon: React.ReactNode;
   isExpanded?: boolean;
-  isDisabled: boolean;
+  isDisabled?: boolean;
 }
 
 export function ContractCard({
