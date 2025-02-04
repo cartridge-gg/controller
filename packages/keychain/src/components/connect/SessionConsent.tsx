@@ -40,7 +40,7 @@ export function SessionConsent({
           <p className="text-xs text-muted-foreground font-semibold">
             Create a session for{" "}
             <span className="text-accent-foreground font-bold inline-flex items-baseline gap-1 leading-none">
-              {!hostname.includes("localhost") && <LockIcon size="xs" />}
+              {isVerified && <LockIcon size="xs" />}
               {origin}
             </span>{" "}
             and allow the game to{" "}
