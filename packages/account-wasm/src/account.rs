@@ -63,7 +63,7 @@ impl CartridgeAccount {
             username.clone(),
             class_hash.try_into()?,
             rpc_url,
-            owner.try_into()?,
+            owner.into(),
             address.try_into()?,
             chain_id.try_into()?,
         );

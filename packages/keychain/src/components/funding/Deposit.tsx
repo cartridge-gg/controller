@@ -24,7 +24,6 @@ import {
   BraavosIcon,
   CopyIcon,
   DepositIcon,
-  StarknetColorIcon,
   Button,
   CopyAddress,
   Separator,
@@ -145,7 +144,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [extAccount, controller, tokenAmount, onComplete]);
+  }, [feeToken.address, extAccount, controller, tokenAmount, onComplete]);
 
   const onCopy = useCallback(() => {
     if (!controller) return;
@@ -232,15 +231,6 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
                   >
                     <CopyIcon size="sm" /> copy address
                   </Button>
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm text-muted-foreground">
-                      and send funds to it on
-                    </div>
-                    <div className="flex items-center gap-2 border border-background-100 rounded-md p-2">
-                      <StarknetColorIcon />{" "}
-                      <div className="text-sm font-bold">Starknet</div>
-                    </div>
-                  </div>
                 </div>
               );
             case "fund":

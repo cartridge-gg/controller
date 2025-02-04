@@ -27,11 +27,11 @@ export function Provider({ children }: PropsWithChildren) {
         nodeUrl = connection.rpcUrl;
     }
     return { nodeUrl };
-  }, [connection.rpcUrl, connection.controller?.chainId()]);
+  }, [connection.rpcUrl, connection.controller]);
 
   const defaultChainId = useMemo(() => {
     return num.toBigInt(connection.controller?.chainId() || 0);
-  }, [connection.controller?.chainId()]);
+  }, [connection.controller]);
 
   return (
     <CartridgeAPIProvider url={ENDPOINT}>

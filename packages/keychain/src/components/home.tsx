@@ -7,7 +7,6 @@ import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
 import { DeployController } from "./DeployController";
-import { ErrorPage } from "./ErrorBoundary";
 import { PurchaseCredits } from "./funding/PurchaseCredits";
 import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
@@ -16,7 +15,7 @@ import { execute } from "@/utils/connection/execute";
 import { usePostHog } from "@cartridge/utils";
 
 export function Home() {
-  const { context, setContext, controller, error, policies, origin, upgrade } =
+  const { context, setContext, controller, policies, origin, upgrade } =
     useConnection();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
@@ -43,10 +42,6 @@ export function Home() {
 
   if (window.self === window.top || !context || !origin) {
     return <></>;
-  }
-
-  if (error) {
-    return <ErrorPage error={error} />;
   }
 
   // No controller, send to login
