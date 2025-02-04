@@ -1,31 +1,19 @@
 import { cn, ErrorImage, Spinner } from "@cartridge/ui-next";
-import { PropsWithChildren, useMemo } from "react";
+import { PropsWithChildren } from "react";
 import { useLayoutContext } from "./context";
 
 export function LayoutContent({
   children,
   className,
 }: PropsWithChildren & { className?: string }) {
-  const { withBottomTabs, withFooter } = useLayoutContext();
-  const mbCompensation = useMemo(() => {
-    if (withBottomTabs && withFooter) {
-      throw new Error("BottomTabs and Footer cannot be used at the same time");
-    }
-
-    if (withBottomTabs && !withFooter) {
-      return "[@media(min-width:768px)_and_(min-height:528px)]:mb-[72px]";
-    }
-
-    if (!withBottomTabs && withFooter) {
-      return "[@media(min-width:768px)_and_(min-height:400px)]:mb-[200px]";
-    }
-  }, [withBottomTabs, withFooter]);
+  const { withFooter } = useLayoutContext();
 
   return (
     <div
       className={cn(
         "w-full px-4 flex flex-col items-stretch gap-2 overflow-y-auto",
-        mbCompensation,
+        withFooter &&
+          "[@media(min-width:768px)_and_(min-height:400px)]:mb-[200px]",
         className,
       )}
     >

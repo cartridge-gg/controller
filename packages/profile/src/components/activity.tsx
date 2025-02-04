@@ -13,12 +13,12 @@ import {
   LayoutHeader,
 } from "@cartridge/ui-next";
 import { useInfiniteTokenTransfersQuery } from "@cartridge/utils/api/indexer";
+import { Navigation } from "@/components/navigation";
 import { useAccount } from "@/hooks/account";
 import { Link } from "react-router-dom";
 import { StarkscanUrl, useIndexerAPI } from "@cartridge/utils";
 import { useConnection } from "@/hooks/context";
 import { constants } from "starknet";
-import { LayoutBottomNav } from "@/components/bottom-nav";
 
 export function Activity() {
   const { address, username } = useAccount();
@@ -42,6 +42,7 @@ export function Activity() {
       <LayoutHeader
         title={username}
         description={<CopyAddress address={address} size="sm" />}
+        right={<Navigation />}
         onClose={closeModal}
         chainId={chainId}
         openSettings={openSettings}
@@ -121,8 +122,6 @@ export function Activity() {
           }
         }
       })()}
-
-      <LayoutBottomNav />
     </LayoutContainer>
   );
 }
