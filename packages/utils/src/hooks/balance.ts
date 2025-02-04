@@ -5,10 +5,6 @@ import { ERC20, ERC20Metadata } from "../erc20";
 import { CreditQuery, useCreditQuery } from "../api/cartridge";
 import { erc20Metadata } from "@cartridge/presets";
 
-export function useEkuboMetadata() {
-  return erc20Metadata;
-}
-
 export function useERC20Balance({
   address,
   contractAddress,
@@ -25,9 +21,8 @@ export function useERC20Balance({
   const { data: chainId } = useSWR(address && provider ? "chainId" : null, () =>
     provider?.getChainId(),
   );
-  const ekuboMeta = useEkuboMetadata();
   const { data: meta } = useSWR(
-    chainId && ekuboMeta.length
+    chainId && erc20Metadata.length
       ? `erc20:metadata:${chainId}:${address}:${contractAddress}`
       : null,
     async () => {
@@ -40,7 +35,7 @@ export function useERC20Balance({
           new ERC20({
             address,
             provider,
-            logoUrl: ekuboMeta.find(
+            logoUrl: erc20Metadata.find(
               (m) =>
                 getChecksumAddress(m.l2_token_address) ===
                 getChecksumAddress(address),
