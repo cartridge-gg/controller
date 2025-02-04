@@ -1,14 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import {
-  Spinner,
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
+  LayoutContentLoader,
 } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount, useUsername } from "@/hooks/account";
 import { CopyAddress } from "@cartridge/ui-next";
-import { Navigation } from "../navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
@@ -18,6 +17,7 @@ import { useConnection, useData } from "@/hooks/context";
 import { useArcade } from "@/hooks/arcade";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 import { addAddressPadding } from "starknet";
+import { LayoutBottomNav } from "@/components/bottom-nav";
 
 export function Achievements() {
   const { username: selfname, address: self } = useAccount();
@@ -84,11 +84,7 @@ export function Achievements() {
         }
         description={<CopyAddress address={address || self} size="sm" />}
         right={
-          isSelf ? (
-            <Navigation />
-          ) : (
-            <Scoreboard rank={rank} earnings={earnings} />
-          )
+          !isSelf ? <Scoreboard rank={rank} earnings={earnings} /> : undefined
         }
         chainId={chainId}
         openSettings={openSettings}
@@ -136,11 +132,7 @@ export function Achievements() {
           )}
         </LayoutContent>
       ) : isLoading ? (
-        <LayoutContent className="pb-4 select-none">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
-            <Spinner className="text-muted-foreground/30" size="lg" />
-          </div>
-        </LayoutContent>
+        <LayoutContentLoader />
       ) : (
         <LayoutContent className="pb-4 select-none">
           <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
@@ -148,6 +140,8 @@ export function Achievements() {
           </div>
         </LayoutContent>
       )}
+
+      {isSelf && <LayoutBottomNav />}
     </LayoutContainer>
   );
 }
