@@ -10,19 +10,11 @@ export function UnverifiedSessionSummary({
   messages,
   duration,
   onDurationChange,
-  onToggleMethod,
-  onToggleMessage,
 }: {
   contracts?: SessionContracts;
   messages?: SessionMessages;
   duration: bigint;
   onDurationChange: (duration: bigint) => void;
-  onToggleMethod: (
-    address: string,
-    entrypoint: string,
-    authorized: boolean,
-  ) => void;
-  onToggleMessage: (name: string, authorized: boolean) => void;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -39,7 +31,6 @@ export function UnverifiedSessionSummary({
             icon={icon}
             methods={methods}
             isExpanded
-            onToggleMethod={onToggleMethod}
           />
         );
       })}
@@ -48,7 +39,6 @@ export function UnverifiedSessionSummary({
         <MessageCard
           messages={messages}
           isExpanded
-          onToggleMessage={onToggleMessage}
         />
       )}
 

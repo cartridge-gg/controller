@@ -1,19 +1,20 @@
 import {
+  type ContractPolicy,
+  type Method,
+  type SessionPolicies,
+  type SignMessagePolicy,
+  erc20Metadata,
+} from "@cartridge/presets";
+import { CartridgeIcon, CoinsIcon } from "@cartridge/ui-next";
+import React, { createContext, useContext } from "react";
+import {
+  TypedDataRevision,
   getChecksumAddress,
   hash,
   typedData,
-  TypedDataRevision,
 } from "starknet";
-import {
-  ContractPolicy,
-  erc20Metadata,
-  Method,
-  SessionPolicies,
-  SignMessagePolicy,
-} from "@cartridge/presets";
-import { CoinsIcon, CartridgeIcon } from "@cartridge/ui-next";
-import React from "react";
-import { Policy } from "@cartridge/account-wasm";
+
+import type { Policy } from "@cartridge/account-wasm";
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
 
@@ -155,3 +156,26 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
     }),
   ];
 }
+
+interface ICreateSessionContext {
+  policies: ParsedSessionPolicies;
+  onToggleMethod: (
+    address: string,
+    entrypoint: string,
+    authorized: boolean,
+  ) => void;
+  onToggleMessage: (id: string, authorized: boolean) => void;
+  isEditable: boolean;
+}
+
+const CreateSessionContext = createContext<ICreateSessionContext>({
+  policies: {} as ParsedSessionPolicies,
+  onToggleMethod: () => {},
+  onToggleMessage: () => {},
+  isEditable: true,
+});
+
+export const CreateSessionProvider = CreateSessionContext.Provider;
+// export default CreateSessionContext;
+
+export const useCreateSession = () => useContext(CreateSessionContext);

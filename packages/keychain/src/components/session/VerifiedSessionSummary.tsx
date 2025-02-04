@@ -11,26 +11,18 @@ export function VerifiedSessionSummary({
   messages,
   duration,
   onDurationChange,
-  onToggleMethod,
-  onToggleMessage,
 }: {
   game: string;
   contracts?: SessionContracts;
   messages?: SessionMessages;
   duration: bigint;
   onDurationChange: (duration: bigint) => void;
-  onToggleMethod: (
-    address: string,
-    entrypoint: string,
-    authorized: boolean,
-  ) => void;
-  onToggleMessage: (id: string, authorized: boolean) => void;
 }) {
   // Extract token and VRF contracts
   const individual = useMemo(
     () =>
       Object.entries(contracts ?? {}).filter(([, contract]) => {
-        return contract.meta?.type === "ERC20" || contract.meta?.type === "VRF";
+        return contract.meta?.type === "ERC20" || contract.meta?.type !== "VRF";
       }),
     [contracts],
   );
@@ -56,18 +48,15 @@ export function VerifiedSessionSummary({
         icon={<CodeIcon variant="solid" />}
         contracts={aggregate.contracts}
         messages={messages}
-        onToggleMethod={onToggleMethod}
-        onToggleMessage={onToggleMessage}
       />
 
       {individual.map(([address, contract]) => (
         <ContractCard
           key={address}
           address={address}
-          title={contract.meta?.name || "Contract"}
+          title={contract.name || "Contract"}
           icon={contract.meta?.icon}
           methods={contract.methods}
-          onToggleMethod={onToggleMethod}
         />
       ))}
 
