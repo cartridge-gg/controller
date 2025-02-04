@@ -8,12 +8,12 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { LayoutBottomNav } from "@/components/bottom-nav";
+import { Navigation } from "../navigation";
+import { Tokens } from "./token";
 import { useAccount } from "@/hooks/account";
-import { useConnection } from "@/hooks/context";
 import { Outlet, useParams } from "react-router-dom";
 import { Collections } from "./collection";
-import { Tokens } from "./token";
+import { useConnection } from "@/hooks/context";
 
 export function Inventory() {
   const { username, address } = useAccount();
@@ -32,6 +32,7 @@ export function Inventory() {
       <LayoutHeader
         title={username}
         description={<CopyAddress address={address} size="sm" />}
+        right={project ? <Navigation /> : undefined}
         onClose={closeModal}
         chainId={chainId}
         openSettings={openSettings}
@@ -43,8 +44,6 @@ export function Inventory() {
           {project && <Collections />}
         </div>
       </LayoutContent>
-
-      {project && <LayoutBottomNav />}
     </LayoutContainer>
   );
 }
