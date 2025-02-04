@@ -55,7 +55,7 @@ export function Deposit(innerProps: DepositProps) {
 
 function DepositInner({ onComplete, onBack }: DepositProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { closeModal, controller, chainId } = useConnection();
+  const { closeModal, controller } = useConnection();
   const { account: extAccount } = useAccount();
   const { token: feeToken } = useFeeToken();
 
@@ -81,13 +81,16 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
 
   const onConnect = useCallback(
     (c: Connector) => {
-      if (!chainId) return;
+      if (!controller) return;
 
       connectAsync({ connector: c })
         .then(async () => {
           const connectedChain = await c.chainId();
-          if (num.toHex(connectedChain) !== chainId) {
-            await wallet.switchStarknetChain(window.starknet, chainId);
+          if (num.toHex(connectedChain) !== controller.chainId()) {
+            await wallet.switchStarknetChain(
+              window.starknet,
+              controller.chainId(),
+            );
           }
 
           setState("fund");
@@ -96,7 +99,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
           /* user abort */
         });
     },
-    [connectAsync, chainId],
+    [connectAsync, controller],
   );
 
   const onFund = useCallback(async () => {
@@ -162,7 +165,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
         }
         icon={<DepositIcon size="lg" />}
         onBack={onBack}
-        chainId={chainId}
+        chainId={controller?.chainId()}
         onClose={closeModal}
       />
 

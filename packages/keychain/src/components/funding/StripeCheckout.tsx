@@ -30,7 +30,7 @@ export default function StripeCheckout({
 }: StripeCheckoutProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const { closeModal, chainId, controller } = useConnection();
+  const { closeModal, controller } = useConnection();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -90,7 +90,7 @@ export default function StripeCheckout({
         }
         icon={<CoinsIcon variant="solid" size="lg" />}
         onBack={onBack}
-        chainId={chainId}
+        chainId={controller?.chainId()}
         onClose={closeModal}
       />
       <LayoutContent className="gap-6">

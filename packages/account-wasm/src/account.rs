@@ -445,7 +445,7 @@ impl CartridgeAccountMeta {
             address: controller.address.to_hex_string(),
             class_hash: controller.class_hash.to_hex_string(),
             rpc_url: controller.rpc_url.to_string(),
-            chain_id: controller.chain_id.to_string(),
+            chain_id: controller.chain_id.to_hex_string(),
             owner_guid: controller.owner_guid().into(),
         }
     }

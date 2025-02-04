@@ -26,6 +26,7 @@ import { ControllerError } from "@/utils/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { Link } from "react-router-dom";
 import { useFeeToken } from "@/hooks/tokens";
+import { getChainName } from "@cartridge/utils";
 
 export function DeployController({
   onClose,
@@ -34,8 +35,7 @@ export function DeployController({
   onClose: () => void;
   ctrlError?: ControllerError;
 }) {
-  const { closeModal, chainId, controller, chainName, hasPrefundRequest } =
-    useConnection();
+  const { closeModal, controller, hasPrefundRequest } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
   const { token: feeToken, isLoading } = useFeeToken();
   const [deployHash, setDeployHash] = useState<string>();
@@ -43,6 +43,9 @@ export function DeployController({
   const [accountState, setAccountState] = useState<
     "fund" | "deploy" | "deploying" | "deployed"
   >("fund");
+
+  const chainId = controller?.chainId();
+  const chainName = chainId ? getChainName(chainId) : "Unknown";
 
   // What is this cancer
   const feeEstimate: FeeEstimate | undefined = ctrlError?.data?.fee_estimate;

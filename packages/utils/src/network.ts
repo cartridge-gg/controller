@@ -8,7 +8,7 @@ export function getChainName(chainId: string) {
     case constants.StarknetChainId.SN_SEPOLIA:
       return "Sepolia";
     default:
-      return isSlotChain(chainId) ? "Slot" : "Unknown";
+      return isSlotChain(chainId) ? "Slot" : "Unknown2";
   }
 }
 

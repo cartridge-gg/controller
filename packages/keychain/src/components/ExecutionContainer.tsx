@@ -45,7 +45,7 @@ export function ExecutionContainer({
   children,
 }: ExecutionContainerProps &
   Pick<BannerProps, "title" | "description" | "icon">) {
-  const { controller, closeModal, chainId, openSettings } = useConnection();
+  const { controller, closeModal, openSettings } = useConnection();
   const [maxFee, setMaxFee] = useState<EstimateFee | undefined>(feeEstimate);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
@@ -168,7 +168,7 @@ export function ExecutionContainer({
         description={description}
         icon={icon}
         onClose={closeModal}
-        chainId={chainId}
+        chainId={controller?.chainId()}
         openSettings={openSettings}
       />
       {children}
