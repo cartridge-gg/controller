@@ -3,7 +3,6 @@ use std::borrow::BorrowMut;
 use account_sdk::account::session::policy::Policy as SdkPolicy;
 use account_sdk::controller::{compute_gas_and_price, Controller};
 use account_sdk::errors::ControllerError;
-use account_sdk::signers::Owner;
 use account_sdk::typed_data::{encode_type, TypedData};
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::ConnectedAccount;
@@ -18,9 +17,9 @@ use crate::errors::JsControllerError;
 use crate::sync::WasmMutex;
 use crate::types::call::JsCall;
 use crate::types::estimate::JsFeeEstimate;
+use crate::types::owner::Owner;
 use crate::types::policy::Policy;
 use crate::types::session::SessionMetadata;
-use crate::types::signer::Signer;
 use crate::types::{Felts, JsFelt};
 use crate::utils::set_panic_hook;
 
@@ -41,7 +40,7 @@ impl CartridgeAccount {
     /// - `chain_id`: Identifier of the blockchain network to interact with.
     /// - `address`: The blockchain address associated with the account.
     /// - `username`: Username associated with the account.
-    /// - `signer`: A Signer struct containing the signer type and associated data.
+    /// - `owner`: A Owner struct containing the owner signer and associated data.
     ///
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
@@ -51,7 +50,7 @@ impl CartridgeAccount {
         chain_id: JsFelt,
         address: JsFelt,
         username: String,
-        signer: Signer,
+        owner: Owner,
     ) -> Result<CartridgeAccountWithMeta> {
         set_panic_hook();
 
@@ -64,7 +63,7 @@ impl CartridgeAccount {
             username.clone(),
             class_hash.try_into()?,
             rpc_url,
-            Owner::Signer(signer.try_into()?),
+            owner.try_into()?,
             address.try_into()?,
             chain_id.try_into()?,
         );
@@ -369,15 +368,6 @@ impl CartridgeAccount {
         Ok(to_value(&nonce)?)
     }
 
-    #[wasm_bindgen(js_name = switchChain)]
-    pub async fn switch_chain(&self, rpc_url: String) -> Result<()> {
-        set_panic_hook();
-
-        let rpc_url = Url::parse(&rpc_url)?;
-        self.controller.lock().await.switch_chain(rpc_url).await?;
-        Ok(())
-    }
-
     #[wasm_bindgen(js_name = deploySelf)]
     pub async fn deploy_self(&self, max_fee: Option<JsFeeEstimate>) -> Result<JsValue> {
         set_panic_hook();
@@ -430,29 +420,38 @@ impl CartridgeAccount {
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct CartridgeAccountMeta {
+    app_id: String,
     username: String,
     address: String,
     class_hash: String,
     rpc_url: String,
     chain_id: String,
     owner_guid: JsFelt,
+    owner: Owner,
 }
 
 impl CartridgeAccountMeta {
     fn new(controller: &Controller) -> Self {
         Self {
+            app_id: controller.app_id.clone(),
             username: controller.username.clone(),
             address: controller.address.to_hex_string(),
             class_hash: controller.class_hash.to_hex_string(),
             rpc_url: controller.rpc_url.to_string(),
             chain_id: controller.chain_id.to_hex_string(),
             owner_guid: controller.owner_guid().into(),
+            owner: controller.owner.clone().into(),
         }
     }
 }
 
 #[wasm_bindgen]
 impl CartridgeAccountMeta {
+    #[wasm_bindgen(js_name = appId)]
+    pub fn app_id(&self) -> String {
+        self.app_id.clone()
+    }
+
     #[wasm_bindgen(js_name = username)]
     pub fn username(&self) -> String {
         self.username.clone()
@@ -481,6 +480,11 @@ impl CartridgeAccountMeta {
     #[wasm_bindgen(js_name = ownerGuid)]
     pub fn owner_guid(&self) -> JsFelt {
         self.owner_guid.clone()
+    }
+
+    #[wasm_bindgen(js_name = owner)]
+    pub fn owner(&self) -> Owner {
+        self.owner.clone()
     }
 }
 

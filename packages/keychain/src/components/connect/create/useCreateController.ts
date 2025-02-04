@@ -76,8 +76,15 @@ export function useCreateController({
         rpcUrl,
         address,
         username,
-        publicKey,
-        credentialId,
+        owner: {
+          signer: {
+            webauthn: {
+              rpId: import.meta.env.VITE_RP_ID!,
+              credentialId,
+              publicKey,
+            },
+          },
+        },
       });
 
       window.controller = controller;
