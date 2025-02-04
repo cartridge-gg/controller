@@ -2,7 +2,7 @@ import { useConnection } from "@/hooks/connection";
 import { LayoutContainer, CheckIcon, LayoutHeader } from "@cartridge/ui-next";
 
 export function Success() {
-  const { chainId, closeModal } = useConnection();
+  const { controller, closeModal } = useConnection();
   return (
     <LayoutContainer>
       <LayoutHeader
@@ -10,7 +10,7 @@ export function Success() {
         Icon={CheckIcon}
         title="Success!"
         description=""
-        chainId={chainId}
+        chainId={controller?.chainId()}
         onClose={closeModal}
       />
     </LayoutContainer>

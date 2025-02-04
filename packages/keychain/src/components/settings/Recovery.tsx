@@ -13,7 +13,7 @@ import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
 
 export function Recovery({ onBack }: { onBack: () => void }) {
-  const { chainId, controller, context, setContext } = useConnection();
+  const { controller, context, setContext } = useConnection();
   const [externalOwnerAddress, setExternalOwnerAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -48,7 +48,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
         variant="expanded"
         title="Recovery Account(s)"
         onBack={onBack}
-        chainId={chainId}
+        chainId={controller?.chainId()}
       />
       <LayoutContent>
         {/* TODO: Get rid of this div once Content is updated with TW */}

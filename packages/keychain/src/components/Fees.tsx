@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useChainId } from "@/hooks/connection";
 import { Spinner } from "@cartridge/ui-next";
 import { EstimateFee } from "starknet";
 
@@ -14,7 +13,6 @@ export function Fees({
   isLoading: boolean;
   maxFee?: EstimateFee;
 }) {
-  const chainId = useChainId();
   const { isLoading: isPriceLoading, token, error } = useFeeToken();
   const [formattedFee, setFormattedFee] = useState<string>();
   const isLoading = isEstimating || isPriceLoading;
@@ -30,7 +28,7 @@ export function Fees({
     } else {
       setFormattedFee("FREE");
     }
-  }, [chainId, maxFee]);
+  }, [maxFee]);
 
   if (error) {
     return (

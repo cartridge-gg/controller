@@ -51,7 +51,7 @@ export function CreateControllerView({
   onSubmit,
   onKeyDown,
 }: CreateControllerViewProps) {
-  const { closeModal, chainId } = useConnection();
+  const { closeModal, controller } = useConnection();
 
   return (
     <LayoutContainer>
@@ -63,7 +63,7 @@ export function CreateControllerView({
             : `Play ${theme.name}`
         }
         description="Connect your Controller"
-        chainId={chainId}
+        chainId={controller?.chainId()}
         onClose={closeModal}
       />
 

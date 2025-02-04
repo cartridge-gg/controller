@@ -2,7 +2,7 @@ import { LayoutContainer, LayoutHeader, AlertIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 
 export function Unsupported({ message }: { message: string }) {
-  const { closeModal, chainId } = useConnection();
+  const { closeModal, controller } = useConnection();
 
   return (
     <LayoutContainer>
@@ -11,7 +11,7 @@ export function Unsupported({ message }: { message: string }) {
         title="Device is not supported"
         description={message}
         onClose={closeModal}
-        chainId={chainId}
+        chainId={controller?.chainId()}
       />
     </LayoutContainer>
   );

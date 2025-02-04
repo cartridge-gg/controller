@@ -13,7 +13,7 @@ import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
 
 export function Delegate({ onBack }: { onBack: () => void }) {
-  const { chainId, controller, context, setContext } = useConnection();
+  const { controller, context, setContext } = useConnection();
   const [delegateAddress, setDelegateAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -48,7 +48,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
         variant="expanded"
         title="Delegate account"
         onBack={() => onBack()}
-        chainId={chainId}
+        chainId={controller?.chainId()}
       />
       <LayoutContent className="gap-6">
         <div className="flex flex-col gap-4">

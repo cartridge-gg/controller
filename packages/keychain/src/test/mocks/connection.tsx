@@ -30,8 +30,6 @@ export const defaultMockConnection: ConnectionContextValue = {
   context: undefined,
   origin: "https://test.com",
   rpcUrl: "https://test.rpc.com",
-  chainId: "1",
-  chainName: "testnet",
   theme: {
     verified: true,
     name: "name",
@@ -79,7 +77,6 @@ export function mockUseConnection(overrides?: Partial<ConnectionContextValue>) {
 
   vi.mock("@/hooks/connection", () => ({
     useConnection: () => mockConnection,
-    useChainId: () => mockConnection.chainId,
   }));
 
   return mockConnection;
