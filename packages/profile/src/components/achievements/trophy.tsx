@@ -5,7 +5,6 @@ import {
   SparklesIcon,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
-  Separator,
   SpinnerIcon,
   XIcon,
 } from "@cartridge/ui-next";
@@ -73,17 +72,11 @@ export function Trophy({
             <div className="flex justify-between items-center">
               <Title title={title} completed={completed} />
               <div className="flex items-center gap-2">
-                {completed && <Timestamp timestamp={timestamp} />}
-                {completed && (
-                  <Separator
-                    className="text-muted-foreground h-2"
-                    orientation="vertical"
-                  />
-                )}
                 <Earning
                   amount={earning.toLocaleString()}
                   completed={completed}
                 />
+                {completed && <Timestamp timestamp={timestamp} />}
               </div>
             </div>
             <Details percentage={percentage} />
@@ -224,11 +217,11 @@ function Earning({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 text-muted-foreground font-medium",
+        "flex items-center gap-1 text-muted-foreground",
         completed && "opacity-50",
       )}
     >
-      <SparklesIcon size="xs" variant={completed ? "solid" : "line"} />
+      <SparklesIcon size="xs" variant={completed ? "line" : "solid"} />
       <p className={cn("text-sm", completed && "line-through")}>{amount}</p>
     </div>
   );
@@ -252,7 +245,7 @@ function Timestamp({ timestamp }: { timestamp: number }) {
   }, [timestamp]);
 
   return (
-    <div className="flex items-center gap-1 text-muted-foreground">
+    <div className="flex items-center gap-1 text-muted-foreground opacity-50">
       <CalendarIcon size="xs" variant="line" />
       <p className="text-xs">{date}</p>
     </div>

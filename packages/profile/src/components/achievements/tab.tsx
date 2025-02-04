@@ -3,7 +3,6 @@ import {
   LeaderboardIcon,
   SparklesIcon,
   StateIconProps,
-  TrophyIcon,
 } from "@cartridge/ui-next";
 import { useState } from "react";
 
@@ -20,10 +19,8 @@ export function TrophiesTab({
 }) {
   return (
     <Tab priority={true} active={active} onClick={onClick}>
-      <Item Icon={TrophyIcon} active={active} label={"Achievements"} />
-      <p className="bg-background-300 text-xs rounded-2xl px-1.5 py-0.5 font-bold">
-        {`${completed}/${total}`}
-      </p>
+      <Item active={active} label={"Achievements"} />
+      <Item active={active} label={`${completed}/${total}`} highlighted />
     </Tab>
   );
 }
@@ -31,22 +28,21 @@ export function TrophiesTab({
 export function LeaderboardTab({
   active,
   rank,
-  earnings,
   onClick,
 }: {
   active: boolean;
   rank: number;
-  earnings: number;
   onClick: () => void;
 }) {
   return (
     <Tab priority={false} active={active} onClick={onClick}>
+      <Item active={active} label="Rank" />
       <Item
         Icon={LeaderboardIcon}
         active={active}
-        label={!rank ? "---" : `#${rank}`}
+        label={rank ? `${rank}` : "-"}
+        highlighted
       />
-      <Item Icon={SparklesIcon} active={active} label={`${earnings}`} />
     </Tab>
   );
 }
@@ -108,15 +104,23 @@ export function Item({
   Icon,
   active,
   label,
+  highlighted,
 }: {
-  Icon: React.ComponentType<StateIconProps>;
+  Icon?: React.ComponentType<StateIconProps>;
   active: boolean;
   label: string;
+  highlighted?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-1">
-      <Icon size="sm" variant={active ? "solid" : "line"} />
-      <p className="text-sm">{label}</p>
+    <div
+      className={cn(
+        "flex items-center gap-1",
+        highlighted &&
+          `${active ? "bg-background-200" : "bg-background-100"} min-w-5 h-6 text-xs rounded-2xl px-2 py-1 font-semibold`,
+      )}
+    >
+      {Icon && <Icon size="sm" variant={active ? "solid" : "line"} />}
+      <p className={highlighted ? "text-xs" : "text-sm"}>{label}</p>
     </div>
   );
 }
