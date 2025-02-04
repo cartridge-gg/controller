@@ -11,14 +11,14 @@ export function Pinned({
   empty?: boolean;
 }) {
   return (
-    <Card className="shadow-none overflow-visible">
+    <Card className="shadow-none overflow-visible relative">
+      {!empty && <Banner />}
       <CardHeader
         className={cn(
-          "relative flex flex-col justify-between items-center h-36 py-6",
+          "flex flex-col justify-between items-center h-36 py-6 overflow-hidden rounded",
           empty && "bg-background border border-dashed border-background-100",
         )}
       >
-        {!empty && <Banner />}
         <div className="flex justify-center items-center w-12 h-12">
           <div
             className={cn(
