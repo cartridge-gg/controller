@@ -4,6 +4,7 @@ import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSession
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
 import { useConnection } from "@/hooks/connection";
+import { CreateSessionProvider } from "@/hooks/session";
 import type { ParsedSessionPolicies } from "@/hooks/session";
 import type { ControllerError } from "@/utils/connection";
 import {
@@ -13,6 +14,7 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
+  PencilIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish, shortString } from "starknet";
@@ -29,10 +31,12 @@ export function CreateSession({
 }) {
   const { closeModal, controller, upgrade, chainId, theme } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isEditable, setIsEditable] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const [maxFee] = useState<BigNumberish>();
   const [error, setError] = useState<ControllerError | Error>();
+
   const [policyState, setPolicyState] = useState<ParsedSessionPolicies>(() => {
     // Set all contract policyState to authorized
     if (policies.contracts) {
@@ -135,83 +139,107 @@ export function CreateSession({
   }
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        title={!isUpdate ? "Create Session" : "Update Session"}
-        description={
-          isUpdate
-            ? "The policies were updated, please update existing session"
-            : undefined
-        }
-        onClose={closeModal}
-        chainId={chainId}
-      />
-      <LayoutContent className="gap-6">
-        <SessionConsent isVerified={policyState?.verified} />
-        {policyState?.verified ? (
-          <VerifiedSessionSummary
-            game={theme.name}
-            contracts={policyState.contracts}
-            messages={chainSpecificMessages}
-            duration={duration}
-            onDurationChange={setDuration}
-            onToggleMethod={handleToggleMethod}
-            onToggleMessage={handleToggleMessage}
-          />
-        ) : (
-          <UnverifiedSessionSummary
-            contracts={policyState.contracts}
-            messages={chainSpecificMessages}
-            duration={duration}
-            onDurationChange={setDuration}
-            onToggleMethod={handleToggleMethod}
-            onToggleMessage={handleToggleMessage}
-          />
-        )}
-      </LayoutContent>
-      <LayoutFooter>
-        {!policyState?.verified && (
-          <div
-            className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-foreground"
-            onClick={() => !isConnecting && setIsConsent(!isConsent)}
-          >
-            <Checkbox
-              checked={isConsent}
-              disabled={isConnecting}
-              onCheckedChange={() => setIsConsent(!isConsent)}
-              className="pointer-events-none"
+    <CreateSessionProvider
+      value={{
+        policies: policyState,
+        onToggleMethod: handleToggleMethod,
+        onToggleMessage: handleToggleMessage,
+        isEditable: isEditable,
+      }}
+    >
+      <LayoutContainer>
+        <LayoutHeader
+          title={!isUpdate ? "Create Session" : "Update Session"}
+          description={
+            isUpdate
+              ? "The policies were updated, please update existing session"
+              : undefined
+          }
+          onClose={closeModal}
+          chainId={chainId}
+          right={
+            !isEditable ? (
+              <Button variant="icon" onClick={() => setIsEditable(!isEditable)}>
+                <PencilIcon variant="solid" />
+              </Button>
+            ) : undefined
+          }
+        />
+        <LayoutContent className="gap-6">
+          <SessionConsent isVerified={policyState?.verified} />
+          {policyState?.verified ? (
+            <VerifiedSessionSummary
+              game={theme.name}
+              contracts={policyState.contracts}
+              messages={chainSpecificMessages}
+              duration={duration}
+              onDurationChange={setDuration}
             />
-            <div className="text-xs">
-              I understand and agree to grant permission for this application to
-              execute these actions.
+          ) : (
+            <UnverifiedSessionSummary
+              contracts={policyState.contracts}
+              messages={chainSpecificMessages}
+              duration={duration}
+              onDurationChange={setDuration}
+            />
+          )}
+        </LayoutContent>
+        <LayoutFooter>
+          {!policyState?.verified && (
+            <div
+              className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-foreground"
+              onClick={() => !isConnecting && setIsConsent(!isConsent)}
+            >
+              <Checkbox
+                checked={isConsent}
+                disabled={isConnecting}
+                onCheckedChange={() => setIsConsent(!isConsent)}
+                className="pointer-events-none"
+              />
+              <div className="text-xs">
+                I understand and agree to grant permission for this application
+                to execute these actions.
+              </div>
             </div>
+          )}
+
+          {error && <ControllerErrorAlert className="mb-3" error={error} />}
+
+          <div className="flex items-center gap-4">
+            <Button
+              variant="secondary"
+              onClick={onSkipSession}
+              disabled={isConnecting}
+              className="px-8"
+            >
+              Skip
+            </Button>
+            {!isEditable ? (
+              <Button
+                className="flex-1"
+                disabled={
+                  isConnecting || (!policyState?.verified && !isConsent)
+                }
+                isLoading={isConnecting}
+                onClick={onCreateSession}
+              >
+                {isUpdate ? "update" : "create"} session
+              </Button>
+            ) : (
+              <Button
+                className="flex-1"
+                onClick={() => setIsEditable(false)}
+                disabled={isConnecting}
+              >
+                Save
+              </Button>
+            )}
           </div>
-        )}
 
-        {error && <ControllerErrorAlert className="mb-3" error={error} />}
-
-        <div className="flex items-center gap-4">
-          <Button
-            variant="secondary"
-            onClick={onSkipSession}
-            disabled={isConnecting}
-            className="px-8"
-          >
-            Skip
-          </Button>
-          <Button
-            className="flex-1"
-            disabled={isConnecting || (!policyState?.verified && !isConsent)}
-            isLoading={isConnecting}
-            onClick={onCreateSession}
-          >
-            {isUpdate ? "update" : "create"} session
-          </Button>
-        </div>
-
-        {!error && <div className="flex flex-col"></div>}
-      </LayoutFooter>
-    </LayoutContainer>
+          {!error && <div className="flex flex-col"></div>}
+        </LayoutFooter>
+      </LayoutContainer>
+    </CreateSessionProvider>
   );
 }
 

@@ -1,3 +1,4 @@
+import { useCreateSession } from "@/hooks/session";
 import type { SignMessagePolicy } from "@cartridge/presets";
 import {
   Accordion,
@@ -19,15 +20,10 @@ import { AccordionCard } from "./AccordionCard";
 
 interface MessageCardProps {
   messages: SignMessagePolicyWithEnabled[];
-  onToggleMessage: (name: string, authorized: boolean) => void;
   isExpanded?: boolean;
 }
 
-export function MessageCard({
-  messages,
-  isExpanded,
-  onToggleMessage,
-}: MessageCardProps) {
+export function MessageCard({ messages, isExpanded }: MessageCardProps) {
   const totalEnabledMessages = messages.filter((m) => m.authorized).length;
 
   return (
@@ -45,7 +41,7 @@ export function MessageCard({
       }
       isExpanded={isExpanded}
     >
-      <MessageContent messages={messages} onToggleMessage={onToggleMessage} />
+      <MessageContent messages={messages} />
     </AccordionCard>
   );
 }
@@ -56,99 +52,105 @@ type SignMessagePolicyWithEnabled = SignMessagePolicy & {
 
 export function MessageContent({
   messages,
-  onToggleMessage,
 }: {
   messages: SignMessagePolicyWithEnabled[];
-  onToggleMessage: (name: string, authorized: boolean) => void;
 }) {
+  const { isEditable, onToggleMessage } = useCreateSession();
+
   return (
     <>
-      {messages.map((m, i) => (
-        <div
-          key={`${m.domain.name}-${i}`}
-          className="flex flex-col bg-background-100 gap-2 text-xs"
-        >
-          <div className="flex flex-row items-center justify-between">
-            <p
-              className={cn(
-                "py-2 font-bold",
-                m.authorized ? "text-foreground" : "text-accent",
-              )}
-            >
-              {m.name ?? `Message ${i + 1}`}
-            </p>
-            <Switch
-              checked={m.authorized}
-              onCheckedChange={(enabled) => onToggleMessage(m.name!, enabled)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">
-            {/* Domain section */}
-            {Object.values(m.domain).filter((f) => typeof f !== "undefined")
-              .length > 0 && (
-              <CollapsibleRow
-                key="domain"
-                title="domain"
-                enabled={m.authorized ?? true}
-              >
-                {m.domain.name && (
-                  <ValueRow
-                    values={[
-                      {
-                        name: "name",
-                        value: m.domain.name,
-                      },
-                    ]}
-                    enabled={m.authorized ?? true}
-                  />
+      {messages
+        .filter((m) => (!isEditable ? m.authorized : m))
+        .map((m, i) => (
+          <div
+            key={`${m.domain.name}-${i}`}
+            className="flex flex-col bg-background-100 gap-2 text-xs"
+          >
+            <div className="flex flex-row items-center justify-between">
+              <p
+                className={cn(
+                  "py-2 font-bold",
+                  m.authorized ? "text-foreground" : "text-accent",
                 )}
-              </CollapsibleRow>
-            )}
+              >
+                {m.name ?? `Message ${i + 1}`}
+              </p>
+              {isEditable && (
+                <Switch
+                  checked={m.authorized}
+                  onCheckedChange={(enabled) =>
+                    onToggleMessage(m.name!, enabled)
+                  }
+                />
+              )}
+            </div>
 
-            <ValueRow
-              values={[
-                {
-                  name: "primaryType",
-                  value: m.primaryType,
-                },
-              ]}
-              enabled={m.authorized ?? true}
-            />
-
-            <CollapsibleRow title="types" enabled={m.authorized ?? true}>
-              {Object.entries(m.types).map(([name, types]) => (
+            <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">
+              {/* Domain section */}
+              {Object.values(m.domain).filter((f) => typeof f !== "undefined")
+                .length > 0 && (
                 <CollapsibleRow
-                  key={name}
-                  title={name}
+                  key="domain"
+                  title="domain"
                   enabled={m.authorized ?? true}
                 >
-                  {types.map((t, typeIndex) => (
+                  {m.domain.name && (
                     <ValueRow
-                      key={`${t.name}-${typeIndex}`}
                       values={[
-                        { name: "name", value: t.name },
-                        { name: "type", value: t.type },
-                        ...(["enum", "merkletree"].includes(t.name)
-                          ? [
-                              {
-                                name: "contains",
-                                value: (
-                                  t as StarknetEnumType | StarknetMerkleType
-                                ).contains,
-                              },
-                            ]
-                          : []),
+                        {
+                          name: "name",
+                          value: m.domain.name,
+                        },
                       ]}
                       enabled={m.authorized ?? true}
                     />
-                  ))}
+                  )}
                 </CollapsibleRow>
-              ))}
-            </CollapsibleRow>
+              )}
+
+              <ValueRow
+                values={[
+                  {
+                    name: "primaryType",
+                    value: m.primaryType,
+                  },
+                ]}
+                enabled={m.authorized ?? true}
+              />
+
+              <CollapsibleRow title="types" enabled={m.authorized ?? true}>
+                {Object.entries(m.types).map(([name, types]) => (
+                  <CollapsibleRow
+                    key={name}
+                    title={name}
+                    enabled={m.authorized ?? true}
+                  >
+                    {types.map((t, typeIndex) => (
+                      <ValueRow
+                        key={`${t.name}-${typeIndex}`}
+                        values={[
+                          { name: "name", value: t.name },
+                          { name: "type", value: t.type },
+                          ...(["enum", "merkletree"].includes(t.name)
+                            ? [
+                                {
+                                  name: "contains",
+                                  value: (
+                                    t as StarknetEnumType | StarknetMerkleType
+                                  ).contains,
+                                },
+                              ]
+                            : []),
+                        ]}
+                        enabled={m.authorized ?? true}
+                      />
+                    ))}
+                  </CollapsibleRow>
+                ))}
+              </CollapsibleRow>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
     </>
   );
 }

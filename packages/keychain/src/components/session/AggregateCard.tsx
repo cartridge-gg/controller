@@ -1,5 +1,9 @@
 import { useChainId } from "@/hooks/connection";
-import type { SessionContracts, SessionMessages } from "@/hooks/session";
+import {
+  type SessionContracts,
+  type SessionMessages,
+  useCreateSession,
+} from "@/hooks/session";
 
 import {
   InfoIcon,
@@ -23,12 +27,6 @@ interface AggregateCardProps {
   icon: React.ReactNode;
   contracts?: SessionContracts;
   messages?: SessionMessages;
-  onToggleMethod: (
-    address: string,
-    entrypoint: string,
-    authorized: boolean,
-  ) => void;
-  onToggleMessage: (id: string, authorized: boolean) => void;
 }
 
 export function AggregateCard({
@@ -36,11 +34,10 @@ export function AggregateCard({
   icon,
   contracts,
   messages,
-  onToggleMethod,
-  onToggleMessage,
 }: AggregateCardProps) {
   const chainId = useChainId();
   const explorer = useExplorer();
+  const { isEditable, onToggleMethod } = useCreateSession();
 
   const totalEnabledMessages =
     messages?.filter((message) => message.authorized)?.length ?? 0;
@@ -87,50 +84,52 @@ export function AggregateCard({
           </div>
 
           <div className="flex flex-col gap-px rounded overflow-auto border border-background">
-            {methods.map((method) => (
-              <div
-                key={method.name}
-                className="flex flex-col p-3 gap-3 text-xs"
-              >
-                <div className="flex items-center justify-between">
-                  <div
-                    className={cn(
-                      "flex flex-row items-center gap-2",
-                      method.authorized
-                        ? "text-accent-foreground "
-                        : "text-accent",
-                    )}
-                  >
-                    <p className="font-bold">{method.name}</p>
-                    {method.description && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <InfoIcon size="sm" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{method.description}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+            {methods
+              .filter((m) => (!isEditable ? m.authorized : m))
+              .map((method) => (
+                <div
+                  key={method.name}
+                  className="flex flex-col p-3 gap-3 text-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={cn(
+                        "flex flex-row items-center gap-2",
+                        method.authorized
+                          ? "text-accent-foreground "
+                          : "text-accent",
+                      )}
+                    >
+                      <p className="font-bold">{method.name}</p>
+                      {method.description && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <InfoIcon size="sm" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{method.description}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
+                    {isEditable && (
+                      <Switch
+                        checked={method.authorized ?? true}
+                        onCheckedChange={(enabled) =>
+                          onToggleMethod(address, method.entrypoint, enabled)
+                        }
+                      />
                     )}
                   </div>
-                  <Switch
-                    checked={method.authorized ?? true}
-                    onCheckedChange={(enabled) =>
-                      onToggleMethod(address, method.entrypoint, enabled)
-                    }
-                  />
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       ))}
 
-      {messages && (
-        <MessageContent messages={messages} onToggleMessage={onToggleMessage} />
-      )}
+      {messages && <MessageContent messages={messages} />}
     </AccordionCard>
   );
 }
