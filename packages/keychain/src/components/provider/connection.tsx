@@ -17,7 +17,6 @@ export type ConnectionContextValue = {
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
   hasPrefundRequest: boolean;
-  error?: Error;
   upgrade: UpgradeInterface;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;

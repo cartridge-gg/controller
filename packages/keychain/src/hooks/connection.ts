@@ -1,6 +1,5 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import { useContext, useState, useEffect, useCallback } from "react";
-import Controller from "@/utils/controller";
 import {
   connectToController,
   ConnectionCtx,
@@ -36,7 +35,7 @@ export function useConnectionValue() {
     verified: true,
     ...defaultTheme,
   });
-  const [controller, setController] = useState<Controller | undefined>();
+  const [controller, setController] = useState(window.controller);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const upgrade: UpgradeInterface = useUpgrade(controller);
 
@@ -46,7 +45,6 @@ export function useConnectionValue() {
 
     // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
     if (!isIframe()) {
-      const controller = Controller.fromStore(import.meta.env.VITE_ORIGIN!);
       if (controller) {
         setController(controller);
       }
@@ -122,7 +120,14 @@ export function useConnectionValue() {
         );
       }
     }
-  }, [origin, setTheme, setPolicies, setHasPrefundRequest, setController]);
+  }, [
+    origin,
+    controller,
+    setTheme,
+    setPolicies,
+    setHasPrefundRequest,
+    setController,
+  ]);
 
   useEffect(() => {
     const connection = connectToController<ParentMethods>({
@@ -159,7 +164,7 @@ export function useConnectionValue() {
       resolve: context.resolve,
       reject: context.reject,
     } as OpenSettingsCtx);
-  }, [origin, context]);
+  }, [context]);
 
   const closeModal = useCallback(async () => {
     if (!parent || !context?.resolve) return;
@@ -219,9 +224,4 @@ export function useConnection() {
   }
 
   return ctx;
-}
-
-export function useRpcUrl() {
-  const { rpcUrl } = useConnection();
-  return rpcUrl;
 }

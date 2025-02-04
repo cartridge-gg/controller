@@ -6,12 +6,14 @@ import {
 } from "@/components/provider/connection";
 import { LATEST_CONTROLLER } from "@/hooks/upgrade";
 import { render, RenderResult } from "@testing-library/react";
+import { constants } from "starknet";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const defaultMockController: any = {
   estimateInvokeFee: vi.fn().mockImplementation(async () => ({
     suggestedMaxFee: BigInt(1000),
   })),
+  chainId: vi.fn().mockImplementation(() => constants.StarknetChainId.SN_MAIN),
 } as const;
 
 export const defaultMockConnection: ConnectionContextValue = {
@@ -49,6 +51,15 @@ export function createMockConnection(
   return {
     ...defaultMockConnection,
     ...overrides,
+    controller: overrides?.controller
+      ? { ...defaultMockController, ...overrides.controller }
+      : defaultMockController,
+    upgrade: overrides?.upgrade
+      ? { ...defaultMockConnection.upgrade, ...overrides.upgrade }
+      : defaultMockConnection.upgrade,
+    theme: overrides?.theme
+      ? { ...defaultMockConnection.theme, ...overrides.theme }
+      : defaultMockConnection.theme,
   };
 }
 
