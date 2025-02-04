@@ -35,7 +35,7 @@ const DEFAULT_TOKENS = [
   },
 ];
 
-export type ERC20 = {
+export type ERC20Metadata = {
   address: string;
   name: string;
   symbol: string;
@@ -43,7 +43,7 @@ export type ERC20 = {
   icon: string;
 };
 
-type ERC20Inner = {
+export type ERC20 = {
   name: string;
   icon?: string;
   symbol: string;
@@ -55,8 +55,8 @@ type ERC20Inner = {
 };
 
 export interface TokensContextValue {
-  tokens: Record<string, ERC20Inner>;
-  feeToken?: ERC20Inner;
+  tokens: Record<string, ERC20>;
+  feeToken?: ERC20;
   isLoading: boolean;
   error?: Error;
   registerPair: (pair: TokenPair) => void;
@@ -69,7 +69,7 @@ export const TokensContext = createContext<TokensContextValue>({
 });
 
 interface TokensProviderProps extends PropsWithChildren {
-  tokens?: ERC20[];
+  tokens?: ERC20Metadata[];
   refetchInterval?: number;
   feeToken?: string;
 }
@@ -81,7 +81,7 @@ export function TokensProvider({
   refetchInterval = 30000,
 }: TokensProviderProps) {
   const { controller } = useConnection();
-  const [tokens, setTokens] = useState<Record<string, ERC20Inner>>({});
+  const [tokens, setTokens] = useState<Record<string, ERC20>>({});
   const [addresses, setAdresses] = useState<string[]>([]);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
@@ -151,7 +151,7 @@ export function TokensProvider({
       const tokenEntries = await Promise.all(tokenPromises);
       const newTokens = Object.fromEntries(tokenEntries) as Record<
         string,
-        ERC20Inner
+        ERC20
       >;
 
       setTokens(newTokens);

@@ -13,9 +13,9 @@ import {
   CheckIcon,
   ExternalIcon,
   Spinner,
-  WandIcon,
   Button,
   LayoutHeader,
+  ControllerIcon,
 } from "@cartridge/ui-next";
 import { Funding } from "./funding";
 import { useConnection } from "@/hooks/connection";
@@ -158,9 +158,9 @@ export function DeployController({
         <LayoutContainer>
           <LayoutHeader
             variant="expanded"
-            icon={<WandIcon variant="line" size="lg" />}
+            icon={<ControllerIcon size="lg" />}
             title="Deploy Controller"
-            description="This will initialize your controller on the new network"
+            description="This will deploy your Controller"
             closeModal={closeModal}
             chainId={chainId}
           />

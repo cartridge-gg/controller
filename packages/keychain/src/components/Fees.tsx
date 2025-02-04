@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import { useChainId } from "@/hooks/connection";
-import { ErrorAlertIcon, Spinner, StarknetIcon } from "@cartridge/ui-next";
+import { Spinner } from "@cartridge/ui-next";
 import { EstimateFee } from "starknet";
+
 import { formatUSDBalance, useFeeToken } from "@/hooks/tokens";
 import { ErrorAlert } from "./ErrorAlert";
+import { ERC20 } from "./provider/tokens";
 
 export function Fees({
   isLoading: isEstimating,
   maxFee,
-  variant,
 }: {
   isLoading: boolean;
   maxFee?: EstimateFee;
-  variant?: Variant;
 }) {
   const chainId = useChainId();
   const { isLoading: isPriceLoading, token, error } = useFeeToken();
@@ -47,9 +47,9 @@ export function Fees({
       {formattedFee ? (
         <LineItem
           name="Network Fee"
-          value={formattedFee}
+          amount={formattedFee}
+          token={token}
           isLoading={isLoading}
-          variant={variant}
         />
       ) : (
         <LineItem name="Calculating Fees" isLoading />
@@ -60,37 +60,30 @@ export function Fees({
 
 function LineItem({
   name,
-  value,
+  token,
+  amount,
   isLoading = false,
-  variant,
 }: {
   name: string;
-  description?: string;
-  value?: string;
+  token?: ERC20;
+  amount?: string;
   isLoading?: boolean;
-  variant?: Variant;
 }) {
   return (
     <div className="flex items-center w-full h-10 p-4 bg-background-100 text-muted-foreground">
       <p className="text-xs">{name}</p>
       <div className="flex-1" />
 
-      {isLoading ? (
+      {isLoading || !token ? (
         <Spinner />
       ) : (
         <div className="flex items-center justify-center gap-0">
-          {variant && <ErrorAlertIcon variant={variant} />}
-          <p className="text-sm text-foreground">{value}</p>
-          {value !== "FREE" && (
-            <div className="flex pl-1">
-              <StarknetIcon size="sm" className="text-foreground" />
-              <p className="text-sm text-foreground">STRK</p>
-            </div>
+          <p className="text-sm text-foreground">{amount}</p>
+          {amount !== "FREE" && (
+            <p className="text-sm text-foreground pl-1">{token.symbol}</p>
           )}
         </div>
       )}
     </div>
   );
 }
-
-type Variant = "info" | "warning" | "error";
