@@ -1,9 +1,12 @@
 import type { SessionContracts, SessionMessages } from "@/hooks/session";
 import { toArray } from "@cartridge/controller";
 
+import { isPolicyRequired } from "@/components/connect/create/utils";
 import { ContractCard } from "./ContractCard";
 import { ExpirationCard } from "./ExpirationCard";
 import { MessageCard } from "./MessageCard";
+
+const requiredPolicyTypes = ["VRF"];
 
 export function UnverifiedSessionSummary({
   contracts,
@@ -31,15 +34,16 @@ export function UnverifiedSessionSummary({
             icon={icon}
             methods={methods}
             isExpanded
+            isDisabled={isPolicyRequired({
+              requiredPolicyTypes,
+              type: contract.meta?.type,
+            })}
           />
         );
       })}
 
       {messages && messages.length > 0 && (
-        <MessageCard
-          messages={messages}
-          isExpanded
-        />
+        <MessageCard messages={messages} isExpanded />
       )}
 
       <ExpirationCard duration={duration} onDurationChange={onDurationChange} />

@@ -24,6 +24,7 @@ interface ContractCardProps {
   title: string;
   icon: React.ReactNode;
   isExpanded?: boolean;
+  isDisabled: boolean;
 }
 
 export function ContractCard({
@@ -32,6 +33,7 @@ export function ContractCard({
   title,
   icon,
   isExpanded,
+  isDisabled = false,
 }: ContractCardProps) {
   const chainId = useChainId();
   const explorer = useExplorer();
@@ -110,6 +112,7 @@ export function ContractCard({
                   onCheckedChange={(enabled) =>
                     onToggleMethod(address, method.entrypoint, enabled)
                   }
+                  disabled={isDisabled}
                 />
               )}
             </div>
