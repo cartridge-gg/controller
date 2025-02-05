@@ -21,7 +21,7 @@ docker run \
   -e DEBUG=true \
   --ipc=host \
   -ti \
-  ghcr.io/cartridge-gg/controller/storybook-env:sha-9f94a90 \
+  ghcr.io/cartridge-gg/controller/storybook-env:sha-db7f70d \
   bash -c "pnpm i && pnpm --filter $PACKAGE test-storybook -u --url http://host.docker.internal:$PORT"
 
 status=$?
