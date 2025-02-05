@@ -1,4 +1,4 @@
-import { WedgeIcon, cn } from "@cartridge/ui-next";
+import { SparklesIcon, TrophyIcon, WedgeIcon, cn } from "@cartridge/ui-next";
 import { Trophy } from "./trophy";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -12,12 +12,14 @@ export function Trophies({
   enabled,
   game,
   pins,
+  earnings,
 }: {
   achievements: Item[];
   softview: boolean;
   enabled: boolean;
   game: GameModel | undefined;
   pins: { [playerId: string]: string[] };
+  earnings: number;
 }) {
   const [groups, setGroups] = useState<{ [key: string]: Item[] }>({});
 
@@ -48,20 +50,7 @@ export function Trophies({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-8 bg-background-100 py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
-        <p className="uppercase text-xs text-muted-foreground font-semibold tracking-wider">
-          Total
-        </p>
-        <div className="h-4 grow flex flex-col justify-center items-start bg-background-200 rounded-xl p-1">
-          <div
-            style={{ width: `${Math.floor((100 * completed) / total)}%` }}
-            className={cn("grow bg-primary rounded-xl")}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {`${completed} of ${total}`}
-        </p>
-      </div>
+      <Total completed={completed} total={total} earnings={earnings} />
       <div className="flex flex-col gap-3">
         {Object.entries(groups)
           .filter(([group]) => group !== HIDDEN_GROUP)
@@ -204,28 +193,21 @@ function Header({
   handlePrevious: () => void;
 }) {
   return (
-    <div className="flex gap-x-px items-center h-8">
+    <div className="flex gap-x-px items-center h-10">
       <div className="grow h-full p-3 bg-background-100 flex items-center">
-        <p className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
+        <p className="text-xs text-muted-foreground font-semibold tracking-wider">
           {group}
         </p>
       </div>
       {pages.length > 1 && (
         <>
-          {/* <Icon
-        className={cn(
-          "text-background-200 h-4 w-4",
-          disabled && "opacity-50",
-        )}
-        variant="solid"
-      /> */}
           <Pagination
-            icon={<WedgeIcon variant="left" size="xs" />}
+            icon={<WedgeIcon variant="left" size="sm" />}
             onClick={handlePrevious}
             disabled={page === pages[0]}
           />
           <Pagination
-            icon={<WedgeIcon variant="right" size="xs" />}
+            icon={<WedgeIcon variant="right" size="sm" />}
             onClick={handleNext}
             disabled={page === pages[pages.length - 1]}
           />
@@ -264,7 +246,7 @@ function Pagination({
   return (
     <div
       className={cn(
-        "flex items-center justify-center h-8 w-8 bg-background-100",
+        "flex items-center justify-center h-full w-10 bg-background-100",
         !disabled && "cursor-pointer hover:opacity-70",
       )}
       onClick={onClick}
@@ -294,5 +276,44 @@ function Page({
       )}
       onClick={() => setPage(index)}
     />
+  );
+}
+
+function Total({
+  completed,
+  total,
+  earnings,
+}: {
+  completed: number;
+  total: number;
+  earnings: number;
+}) {
+  return (
+    <div className="h-8 py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
+      <div className="flex items-center gap-1">
+        <TrophyIcon
+          className="text-muted-foreground"
+          size="xs"
+          variant="solid"
+        />
+        <p className="text-xs text-muted-foreground font-medium">
+          {`${completed} of ${total}`}
+        </p>
+      </div>
+      <div className="h-4 grow flex flex-col justify-center items-start bg-background-200 rounded-xl p-1">
+        <div
+          style={{ width: `${Math.floor((100 * completed) / total)}%` }}
+          className={cn("grow bg-primary rounded-xl")}
+        />
+      </div>
+      <div className="flex items-center gap-1">
+        <SparklesIcon
+          className="text-muted-foreground"
+          size="xs"
+          variant="solid"
+        />
+        <p className="text-xs text-muted-foreground font-medium">{earnings}</p>
+      </div>
+    </div>
   );
 }

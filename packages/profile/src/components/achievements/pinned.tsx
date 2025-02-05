@@ -11,10 +11,11 @@ export function Pinned({
   empty?: boolean;
 }) {
   return (
-    <Card className="shadow-none">
+    <Card className="shadow-none overflow-visible relative">
+      {!empty && <Banner />}
       <CardHeader
         className={cn(
-          "flex flex-col justify-between items-center h-36 py-6",
+          "flex flex-col justify-between items-center h-36 py-6 overflow-hidden rounded",
           empty && "bg-background border border-dashed border-background-100",
         )}
       >
@@ -51,4 +52,16 @@ function Title({ title, empty }: { title: string; empty?: boolean }) {
 
 export function Empty() {
   return <Pinned icon={"fa-spider-web"} title="Empty" empty={true} />;
+}
+
+export function Banner() {
+  return (
+    <div className="absolute top-[-2px] right-2 h-7 w-6 rounded-t-sm rounded-b overflow-hidden flex flex-col">
+      <div className="h-5 w-6 bg-muted" />
+      <div className="flex justify-between">
+        <div className="h-0 w-0 border-t-[6px] border-t-muted border-r-[12px] border-r-transparent" />
+        <div className="h-0 w-0 border-t-[6px] border-t-muted border-l-[12px] border-l-transparent" />
+      </div>
+    </div>
+  );
 }

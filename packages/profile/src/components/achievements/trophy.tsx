@@ -65,7 +65,12 @@ export function Trophy({
   }, [version]);
 
   return (
-    <div className="flex items-stretch gap-x-px">
+    <div
+      className={cn(
+        "flex items-stretch",
+        completed && !softview && (compatibility || !!game) && "gap-x-px",
+      )}
+    >
       <div className="grow flex flex-col items-stretch gap-y-3 bg-background-100 p-3">
         <div className="flex items-center gap-3">
           <Icon icon={icon} completed={completed} />
@@ -73,17 +78,17 @@ export function Trophy({
             <div className="flex justify-between items-center">
               <Title title={title} completed={completed} />
               <div className="flex items-center gap-2">
-                {completed && <Timestamp timestamp={timestamp} />}
-                {completed && (
-                  <Separator
-                    className="text-muted-foreground h-2"
-                    orientation="vertical"
-                  />
-                )}
                 <Earning
                   amount={earning.toLocaleString()}
                   completed={completed}
                 />
+                {completed && (
+                  <Separator
+                    className="bg-accent h-2 ml-0.5"
+                    orientation="vertical"
+                  />
+                )}
+                {completed && <Timestamp timestamp={timestamp} />}
               </div>
             </div>
             <Details percentage={percentage} />
@@ -224,11 +229,11 @@ function Earning({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 text-muted-foreground font-medium",
+        "flex items-center gap-1 text-muted-foreground",
         completed && "opacity-50",
       )}
     >
-      <SparklesIcon size="xs" variant={completed ? "solid" : "line"} />
+      <SparklesIcon size="xs" variant={completed ? "line" : "solid"} />
       <p className={cn("text-sm", completed && "line-through")}>{amount}</p>
     </div>
   );
@@ -252,7 +257,7 @@ function Timestamp({ timestamp }: { timestamp: number }) {
   }, [timestamp]);
 
   return (
-    <div className="flex items-center gap-1 text-muted-foreground">
+    <div className="flex items-center gap-1 text-muted-foreground opacity-50">
       <CalendarIcon size="xs" variant="line" />
       <p className="text-xs">{date}</p>
     </div>

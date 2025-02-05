@@ -22,7 +22,7 @@ export function Leaderboard({
   pins: { [playerId: string]: string[] };
 }) {
   return (
-    <>
+    <div className="flex flex-col gap-y-px">
       {players.map((player, index) => (
         <Row
           key={player.address}
@@ -35,7 +35,7 @@ export function Leaderboard({
           pins={pins}
         />
       ))}
-    </>
+    </div>
   );
 }
 
@@ -82,7 +82,7 @@ function Row({
 
   return (
     <Link
-      className={cn("flex", self && "sticky top-0 bottom-0 z-10")}
+      className={cn("flex w-full", self && "sticky top-0 bottom-0 z-10")}
       to={path}
     >
       <div
@@ -142,6 +142,22 @@ function Trophies({
           <div className={cn("w-4 h-4", trophy.icon, "fa-solid")} />
         </div>
       ))}
+      {Array.from({ length: 3 - trophies.length }).map((_, index) => (
+        <Empty key={index} />
+      ))}
+    </div>
+  );
+}
+
+function Empty() {
+  return (
+    <div
+      className={cn(
+        "w-6 h-6 border rounded-md flex items-center justify-center text-accent",
+        self ? "border-background-300" : "border-background-200",
+      )}
+    >
+      <div className="w-4 h-4 fa-spider-web fa-thin" />
     </div>
   );
 }

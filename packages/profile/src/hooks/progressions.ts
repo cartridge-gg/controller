@@ -61,9 +61,14 @@ export function useProgressions({
   }, [namespace, project, fetchProgressions]);
 
   useEffect(() => {
-    if (isFetching) return;
+    if (
+      isFetching ||
+      Object.values(rawProgressions).length ===
+        Object.values(progressions).length
+    )
+      return;
     setProgressions(rawProgressions);
-  }, [rawProgressions, isFetching]);
+  }, [rawProgressions, progressions, isFetching]);
 
   return { progressions };
 }
