@@ -71,7 +71,7 @@ jobs:
   storybook:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/cartridge-gg/controller/storybook-env:sha-b6d96629787539de6f5e464aafedafd4eb3ffcc7
+      image: ghcr.io/cartridge-gg/controller/storybook-env:sha-db7f70d
     permissions:
       contents: "read"
       id-token: "write"
