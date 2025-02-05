@@ -82,14 +82,8 @@ export function Achievements() {
               ? username
               : (address || self).slice(0, 9)
         }
-        description={<CopyAddress address={address || self} size="sm" />}
-        right={
-          isSelf ? (
-            <Navigation />
-          ) : (
-            <Scoreboard rank={rank} earnings={earnings} />
-          )
-        }
+        description={<CopyAddress address={address || self} size="xs" />}
+        right={isSelf ? <Navigation /> : <Scoreboard rank={rank} />}
         chainId={chainId}
         openSettings={openSettings}
         onClose={isSelf ? closeModal : undefined}
@@ -97,7 +91,7 @@ export function Achievements() {
       />
 
       {achievements.length ? (
-        <LayoutContent className="pb-4 select-none">
+        <LayoutContent className="mt-2 pb-6 gap-y-6 select-none">
           {isSelf && (
             <div className="flex justify-between gap-x-3 gap-y-4">
               <TrophiesTab
@@ -109,7 +103,6 @@ export function Achievements() {
               <LeaderboardTab
                 active={activeTab === "leaderboard"}
                 rank={rank}
-                earnings={earnings}
                 onClick={() => setActiveTab("leaderboard")}
               />
             </div>
@@ -123,6 +116,7 @@ export function Achievements() {
                 enabled={pinneds.length < 3}
                 game={game}
                 pins={pins}
+                earnings={earnings}
               />
             </div>
           )}
