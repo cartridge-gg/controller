@@ -37,7 +37,7 @@ export function AggregateCard({
 }: AggregateCardProps) {
   const chainId = useChainId();
   const explorer = useExplorer();
-  const { isEditable, onToggleMethod } = useCreateSession();
+  const { onToggleMethod } = useCreateSession();
 
   const totalEnabledMessages =
     messages?.filter((message) => message.authorized)?.length ?? 0;
@@ -84,48 +84,44 @@ export function AggregateCard({
           </div>
 
           <div className="flex flex-col gap-px rounded overflow-auto border border-background">
-            {methods
-              .filter((m) => (!isEditable ? m.authorized : m))
-              .map((method) => (
-                <div
-                  key={method.name}
-                  className="flex flex-col p-3 gap-3 text-xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <div
-                      className={cn(
-                        "flex flex-row items-center gap-2",
-                        method.authorized
-                          ? "text-accent-foreground "
-                          : "text-accent",
-                      )}
-                    >
-                      <p className="font-bold">{method.name}</p>
-                      {method.description && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <InfoIcon size="sm" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{method.description}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </div>
-                    {isEditable && (
-                      <Switch
-                        checked={method.authorized ?? true}
-                        onCheckedChange={(enabled) =>
-                          onToggleMethod(address, method.entrypoint, enabled)
-                        }
-                        disabled={method.isRequired}
-                      />
+            {methods.map((method) => (
+              <div
+                key={method.name}
+                className="flex flex-col p-3 gap-3 text-xs"
+              >
+                <div className="flex items-center justify-between">
+                  <div
+                    className={cn(
+                      "flex flex-row items-center gap-2",
+                      method.authorized
+                        ? "text-accent-foreground "
+                        : "text-accent",
+                    )}
+                  >
+                    <p className="font-bold">{method.name}</p>
+                    {method.description && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon size="sm" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{method.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
                   </div>
+                  <Switch
+                    checked={method.authorized ?? true}
+                    onCheckedChange={(enabled) =>
+                      onToggleMethod(address, method.entrypoint, enabled)
+                    }
+                    disabled={method.isRequired}
+                  />
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
         </div>
       ))}

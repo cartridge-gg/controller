@@ -55,102 +55,96 @@ export function MessageContent({
 }: {
   messages: SignMessagePolicyWithEnabled[];
 }) {
-  const { isEditable, onToggleMessage } = useCreateSession();
+  const { onToggleMessage } = useCreateSession();
 
   return (
     <>
-      {messages
-        .filter((m) => (!isEditable ? m.authorized : m))
-        .map((m, i) => (
-          <div
-            key={`${m.domain.name}-${i}`}
-            className="flex flex-col bg-background-100 gap-2 text-xs"
-          >
-            <div className="flex flex-row items-center justify-between">
-              <p
-                className={cn(
-                  "py-2 font-bold",
-                  m.authorized ? "text-foreground" : "text-accent",
-                )}
-              >
-                {m.name ?? `Message ${i + 1}`}
-              </p>
-              {isEditable && (
-                <Switch
-                  checked={m.authorized}
-                  onCheckedChange={(enabled) =>
-                    onToggleMessage(m.name!, enabled)
-                  }
-                />
+      {messages.map((m, i) => (
+        <div
+          key={`${m.domain.name}-${i}`}
+          className="flex flex-col bg-background-100 gap-2 text-xs"
+        >
+          <div className="flex flex-row items-center justify-between">
+            <p
+              className={cn(
+                "py-2 font-bold",
+                m.authorized ? "text-foreground" : "text-accent",
               )}
-            </div>
+            >
+              {m.name ?? `Message ${i + 1}`}
+            </p>
+            <Switch
+              checked={m.authorized}
+              onCheckedChange={(enabled) => onToggleMessage(m.name!, enabled)}
+            />
+          </div>
 
-            <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">
-              {/* Domain section */}
-              {Object.values(m.domain).filter((f) => typeof f !== "undefined")
-                .length > 0 && (
+          <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">
+            {/* Domain section */}
+            {Object.values(m.domain).filter((f) => typeof f !== "undefined")
+              .length > 0 && (
+              <CollapsibleRow
+                key="domain"
+                title="domain"
+                enabled={m.authorized ?? true}
+              >
+                {m.domain.name && (
+                  <ValueRow
+                    values={[
+                      {
+                        name: "name",
+                        value: m.domain.name,
+                      },
+                    ]}
+                    enabled={m.authorized ?? true}
+                  />
+                )}
+              </CollapsibleRow>
+            )}
+
+            <ValueRow
+              values={[
+                {
+                  name: "primaryType",
+                  value: m.primaryType,
+                },
+              ]}
+              enabled={m.authorized ?? true}
+            />
+
+            <CollapsibleRow title="types" enabled={m.authorized ?? true}>
+              {Object.entries(m.types).map(([name, types]) => (
                 <CollapsibleRow
-                  key="domain"
-                  title="domain"
+                  key={name}
+                  title={name}
                   enabled={m.authorized ?? true}
                 >
-                  {m.domain.name && (
+                  {types.map((t, typeIndex) => (
                     <ValueRow
+                      key={`${t.name}-${typeIndex}`}
                       values={[
-                        {
-                          name: "name",
-                          value: m.domain.name,
-                        },
+                        { name: "name", value: t.name },
+                        { name: "type", value: t.type },
+                        ...(["enum", "merkletree"].includes(t.name)
+                          ? [
+                              {
+                                name: "contains",
+                                value: (
+                                  t as StarknetEnumType | StarknetMerkleType
+                                ).contains,
+                              },
+                            ]
+                          : []),
                       ]}
                       enabled={m.authorized ?? true}
                     />
-                  )}
+                  ))}
                 </CollapsibleRow>
-              )}
-
-              <ValueRow
-                values={[
-                  {
-                    name: "primaryType",
-                    value: m.primaryType,
-                  },
-                ]}
-                enabled={m.authorized ?? true}
-              />
-
-              <CollapsibleRow title="types" enabled={m.authorized ?? true}>
-                {Object.entries(m.types).map(([name, types]) => (
-                  <CollapsibleRow
-                    key={name}
-                    title={name}
-                    enabled={m.authorized ?? true}
-                  >
-                    {types.map((t, typeIndex) => (
-                      <ValueRow
-                        key={`${t.name}-${typeIndex}`}
-                        values={[
-                          { name: "name", value: t.name },
-                          { name: "type", value: t.type },
-                          ...(["enum", "merkletree"].includes(t.name)
-                            ? [
-                                {
-                                  name: "contains",
-                                  value: (
-                                    t as StarknetEnumType | StarknetMerkleType
-                                  ).contains,
-                                },
-                              ]
-                            : []),
-                        ]}
-                        enabled={m.authorized ?? true}
-                      />
-                    ))}
-                  </CollapsibleRow>
-                ))}
-              </CollapsibleRow>
-            </div>
+              ))}
+            </CollapsibleRow>
           </div>
-        ))}
+        </div>
+      ))}
     </>
   );
 }
