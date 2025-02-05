@@ -176,6 +176,5 @@ const CreateSessionContext = createContext<ICreateSessionContext>({
 });
 
 export const CreateSessionProvider = CreateSessionContext.Provider;
-// export default CreateSessionContext;
 
 export const useCreateSession = () => useContext(CreateSessionContext);
