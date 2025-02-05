@@ -144,7 +144,6 @@ export function CreateSession({
         policies: policyState,
         onToggleMethod: handleToggleMethod,
         onToggleMessage: handleToggleMessage,
-        isEditable: isEditable,
       }}
     >
       <LayoutContainer>
@@ -214,26 +213,14 @@ export function CreateSession({
             >
               Skip
             </Button>
-            {!isEditable ? (
-              <Button
-                className="flex-1"
-                disabled={
-                  isConnecting || (!policyState?.verified && !isConsent)
-                }
-                isLoading={isConnecting}
-                onClick={onCreateSession}
-              >
-                {isUpdate ? "update" : "create"} session
-              </Button>
-            ) : (
-              <Button
-                className="flex-1"
-                onClick={() => setIsEditable(false)}
-                disabled={isConnecting}
-              >
-                Save
-              </Button>
-            )}
+            <Button
+              className="flex-1"
+              disabled={isConnecting || (!policyState?.verified && !isConsent)}
+              isLoading={isConnecting}
+              onClick={onCreateSession}
+            >
+              {isUpdate ? "update" : "create"} session
+            </Button>
           </div>
 
           {!error && <div className="flex flex-col"></div>}
