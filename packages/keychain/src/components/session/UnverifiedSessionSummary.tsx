@@ -1,9 +1,9 @@
+import type { SessionContracts, SessionMessages } from "@/hooks/session";
 import { toArray } from "@cartridge/controller";
-import { SessionContracts, SessionMessages } from "@/hooks/session";
 
-import { MessageCard } from "./MessageCard";
 import { ContractCard } from "./ContractCard";
 import { ExpirationCard } from "./ExpirationCard";
+import { MessageCard } from "./MessageCard";
 
 export function UnverifiedSessionSummary({
   contracts,

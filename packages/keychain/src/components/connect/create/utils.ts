@@ -1,9 +1,9 @@
+import { fetchData } from "@/utils/graphql";
 import {
   AccountDocument,
-  AccountQuery,
-  AccountQueryVariables,
+  type AccountQuery,
+  type AccountQueryVariables,
 } from "@cartridge/utils/api/cartridge";
-import { fetchData } from "@/utils/graphql";
 
 export function fetchAccount(username: string, signal?: AbortSignal) {
   return fetchData<AccountQuery, AccountQueryVariables>(
