@@ -201,7 +201,8 @@ jobs:
               // Group changes by package and type
               const changes = {
                 'ui-next': { diffs: [], updates: [] },
-                'keychain': { diffs: [], updates: [] }
+                'keychain': { diffs: [], updates: [] },
+                'profile': { diffs: [], updates: [] }
               };
               
               // Process all files

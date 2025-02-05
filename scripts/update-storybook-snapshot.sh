@@ -10,14 +10,20 @@ fi
 PACKAGE=$1
 PORT=$2
 
+# Extract the package name without @cartridge/ prefix
+PACKAGE_NAME=$(echo $PACKAGE | sed 's/@cartridge\///')
+
 # Run the test updates in container
 docker run \
   --rm \
   --network="host" \
-  -v "$(pwd)/packages/keychain/__image_snapshots__":/app/packages/keychain/__image_snapshots__ \
-  -v "$(pwd)/packages/profile/__image_snapshots__":/app/packages/profile/__image_snapshots__ \
-  -v "$(pwd)/packages/ui-next/__image_snapshots__":/app/packages/ui-next/__image_snapshots__ \
+  -v "$(pwd)/packages/$PACKAGE_NAME/__image_snapshots__":/app/packages/$PACKAGE_NAME/__image_snapshots__ \
+  -e DEBUG=true \
   --ipc=host \
   -ti \
   ghcr.io/cartridge-gg/controller/storybook-env:sha-9f94a90 \
   bash -c "pnpm i && pnpm --filter $PACKAGE test-storybook -u --url http://host.docker.internal:$PORT"
+
+status=$?
+
+exit $status
