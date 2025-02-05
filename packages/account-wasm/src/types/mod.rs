@@ -7,7 +7,7 @@ use tsify_next::Tsify;
 
 pub(crate) mod call;
 pub(crate) mod estimate;
-pub(crate) mod invocation;
+pub(crate) mod owner;
 pub(crate) mod policy;
 pub(crate) mod session;
 pub(crate) mod signer;
@@ -15,7 +15,21 @@ pub(crate) mod signer;
 #[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct JsFelt(#[serde(deserialize_with = "deserialize_felt")] pub Felt);
+pub struct JsFelt(pub String);
+
+impl TryFrom<JsFelt> for Felt {
+    type Error = FromStrError;
+
+    fn try_from(jsfelt: JsFelt) -> Result<Self, Self::Error> {
+        Felt::from_str(&jsfelt.0)
+    }
+}
+
+impl From<Felt> for JsFelt {
+    fn from(felt: Felt) -> Self {
+        JsFelt(felt.to_string())
+    }
+}
 
 #[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
@@ -35,13 +49,6 @@ pub enum EncodingError {
 
     #[error("Unexpected option: {0}")]
     UnexpectedOption(String),
-}
-
-// need this in order to be able to deserialize from BOTH decimal and hex (0x-prefixed) string.
-// the default Deserialize implementation of Felt only supports deserializing from hex strings.
-fn deserialize_felt<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Felt, D::Error> {
-    let s = String::deserialize(deserializer)?;
-    Felt::from_str(&s).map_err(serde::de::Error::custom)
 }
 
 #[cfg(all(test, target_arch = "wasm32"))]

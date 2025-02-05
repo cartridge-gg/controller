@@ -1,7 +1,7 @@
 use crate::abigen::controller::SignerSignature;
 use crate::account::session::policy::Policy;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
-use crate::constants::{ETH_CONTRACT_ADDRESS, WEBAUTHN_GAS};
+use crate::constants::{STRK_CONTRACT_ADDRESS, WEBAUTHN_GAS};
 use crate::errors::ControllerError;
 use crate::factory::ControllerFactory;
 use crate::impl_account;
@@ -15,7 +15,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, U256};
-use starknet::accounts::{AccountDeploymentV1, AccountError, AccountFactory, ExecutionV1};
+use starknet::accounts::{AccountDeploymentV3, AccountError, AccountFactory, ExecutionV3};
 use starknet::core::types::{
     BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
 };
@@ -38,7 +38,7 @@ const SESSION_TYPED_DATA_MAGIC: Felt = short_string!("session-typed-data");
 
 #[derive(Clone)]
 pub struct Controller {
-    pub(crate) app_id: String,
+    pub app_id: String,
     pub address: Felt,
     pub chain_id: Felt,
     pub class_hash: Felt,
@@ -46,7 +46,7 @@ pub struct Controller {
     pub username: String,
     pub(crate) salt: Felt,
     pub provider: CartridgeJsonRpcProvider,
-    pub(crate) owner: Owner,
+    pub owner: Owner,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
     factory: ControllerFactory,
     pub storage: Storage,
@@ -137,8 +137,8 @@ impl Controller {
         }
     }
 
-    pub fn deploy(&self) -> AccountDeploymentV1<'_, ControllerFactory> {
-        self.factory.deploy_v1(self.salt)
+    pub fn deploy(&self) -> AccountDeploymentV3<'_, ControllerFactory> {
+        self.factory.deploy_v3(self.salt)
     }
 
     pub fn disconnect(&mut self) -> Result<(), ControllerError> {
@@ -158,7 +158,7 @@ impl Controller {
     }
 
     async fn build_not_deployed_err(&self) -> ControllerError {
-        let balance = match self.eth_balance().await {
+        let balance = match self.fee_balance().await {
             Ok(balance) => balance,
             Err(e) => return e,
         };
@@ -169,7 +169,7 @@ impl Controller {
             self.owner.clone(),
             self.provider.clone(),
         )
-        .deploy_v1(self.salt)
+        .deploy_v3(self.salt)
         .estimate_fee()
         .await
         {
@@ -189,12 +189,12 @@ impl Controller {
         calls: Vec<Call>,
     ) -> Result<FeeEstimate, ControllerError> {
         let est = self
-            .execute_v1(calls.clone())
+            .execute_v3(calls.clone())
             .nonce(Felt::from(u64::MAX))
             .estimate_fee()
             .await;
 
-        let balance = self.eth_balance().await?;
+        let balance = self.fee_balance().await?;
 
         match est {
             Ok(mut fee_estimate) => {
@@ -238,21 +238,26 @@ impl Controller {
     pub async fn execute(
         &mut self,
         calls: Vec<Call>,
-        max_fee: Felt,
+        max_fee: Option<FeeEstimate>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        if max_fee == Felt::ZERO {
+        if max_fee.is_none() {
             return self.execute_from_outside_v3(calls).await;
         }
 
+        let gas_estimate_multiplier = 1.5;
+        let max_fee = max_fee.unwrap();
         let mut retry_count = 0;
         let max_retries = 1;
+
+        let (gas, gas_price) = compute_gas_and_price(&max_fee, gas_estimate_multiplier)?;
 
         loop {
             let nonce = self.get_nonce().await?;
             let result = self
-                .execute_v1(calls.clone())
+                .execute_v3(calls.clone())
                 .nonce(nonce)
-                .max_fee(max_fee)
+                .gas(gas)
+                .gas_price(gas_price)
                 .send()
                 .await;
 
@@ -333,18 +338,18 @@ impl Controller {
             .map_err(ControllerError::CairoSerde)
     }
 
-    pub fn set_delegate_account(&self, delegate_address: Felt) -> ExecutionV1<Self> {
+    pub fn set_delegate_account(&self, delegate_address: Felt) -> ExecutionV3<Self> {
         self.contract()
             .set_delegate_account(&delegate_address.into())
     }
 
-    pub async fn eth_balance(&self) -> Result<u128, ControllerError> {
+    pub async fn fee_balance(&self) -> Result<u128, ControllerError> {
         let address = self.address;
         let result = self
             .provider
             .call(
                 FunctionCall {
-                    contract_address: ETH_CONTRACT_ADDRESS,
+                    contract_address: STRK_CONTRACT_ADDRESS,
                     entry_point_selector: selector!("balanceOf"),
                     calldata: vec![address],
                 },
@@ -506,4 +511,26 @@ impl CairoSerde for DetailedTypedData {
     ) -> cainome_cairo_serde::Result<Self::RustType> {
         unimplemented!()
     }
+}
+
+pub fn compute_gas_and_price(
+    max_fee: &FeeEstimate,
+    gas_estimate_multiplier: f64,
+) -> Result<(u64, u128), ControllerError> {
+    let overall_fee_bytes = max_fee.overall_fee.to_bytes_le();
+    if overall_fee_bytes.iter().skip(8).any(|&x| x != 0) {
+        return Err(ControllerError::AccountError(AccountError::FeeOutOfRange));
+    }
+    let overall_fee = u64::from_le_bytes(overall_fee_bytes[..8].try_into().unwrap());
+
+    let gas_price_bytes = max_fee.gas_price.to_bytes_le();
+    if gas_price_bytes.iter().skip(8).any(|&x| x != 0) {
+        return Err(ControllerError::AccountError(AccountError::FeeOutOfRange));
+    }
+    let gas_price = u64::from_le_bytes(gas_price_bytes[..8].try_into().unwrap());
+
+    Ok((
+        ((overall_fee.div_ceil(gas_price) as f64) * gas_estimate_multiplier) as u64,
+        gas_price as u128,
+    ))
 }

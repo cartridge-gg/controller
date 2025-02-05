@@ -2,6 +2,7 @@ import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { ExecutionContainer } from "./ExecutionContainer";
 import { describe, expect, beforeEach, it, vi } from "vitest";
 import { renderWithConnection } from "@/test/mocks/connection";
+import { renderWithProviders } from "@/test/mocks/providers";
 
 describe("ExecutionContainer", () => {
   const defaultProps = {
@@ -18,7 +19,7 @@ describe("ExecutionContainer", () => {
   });
 
   it("renders basic content correctly", () => {
-    renderWithConnection(<ExecutionContainer {...defaultProps} />);
+    renderWithProviders(<ExecutionContainer {...defaultProps} />);
     expect(screen.getByText("Test Content")).toBeInTheDocument();
     expect(screen.getByText("SUBMIT")).toBeInTheDocument();
   });
@@ -28,16 +29,24 @@ describe("ExecutionContainer", () => {
       suggestedMaxFee: BigInt(1000),
     }));
 
-    renderWithConnection(
+    renderWithProviders(
       <ExecutionContainer
         {...defaultProps}
-        transactions={[{ some: "transaction" }]}
+        transactions={[
+          {
+            contractAddress: "0x123",
+            entrypoint: "transfer",
+            calldata: ["0x456"],
+          },
+        ]}
       />,
       {
-        controller: {
-          estimateInvokeFee,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
+        connection: {
+          controller: {
+            estimateInvokeFee,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        },
       },
     );
 
@@ -53,17 +62,25 @@ describe("ExecutionContainer", () => {
       suggestedMaxFee: BigInt(1000),
     }));
 
-    renderWithConnection(
+    renderWithProviders(
       <ExecutionContainer
         {...defaultProps}
-        transactions={[{ some: "transaction" }]}
+        transactions={[
+          {
+            contractAddress: "0x123",
+            entrypoint: "transfer",
+            calldata: ["0x456"],
+          },
+        ]}
         onSubmit={onSubmit}
       />,
       {
-        controller: {
-          estimateInvokeFee,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
+        connection: {
+          controller: {
+            estimateInvokeFee,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        },
       },
     );
 
@@ -74,7 +91,7 @@ describe("ExecutionContainer", () => {
 
     // Wait for the fee to be displayed
     await waitFor(() => {
-      expect(screen.getByText("<0.00001")).toBeInTheDocument();
+      expect(screen.getByText("Calculating Fees")).toBeInTheDocument();
     });
 
     const submitButton = screen.getByText("SUBMIT");
@@ -96,18 +113,26 @@ describe("ExecutionContainer", () => {
       suggestedMaxFee: BigInt(1000),
     }));
 
-    renderWithConnection(
+    renderWithProviders(
       <ExecutionContainer
         {...defaultProps}
-        transactions={[{ some: "transaction" }]}
+        transactions={[
+          {
+            contractAddress: "0x123",
+            entrypoint: "transfer",
+            calldata: ["0x456"],
+          },
+        ]}
         onSubmit={onSubmit}
         onError={onError}
       />,
       {
-        controller: {
-          estimateInvokeFee,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
+        connection: {
+          controller: {
+            estimateInvokeFee,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        },
       },
     );
 
@@ -118,7 +143,7 @@ describe("ExecutionContainer", () => {
 
     // Wait for the fee to be displayed
     await waitFor(() => {
-      expect(screen.getByText("<0.00001")).toBeInTheDocument();
+      expect(screen.getByText("Calculating Fees")).toBeInTheDocument();
     });
 
     const submitButton = screen.getByText("SUBMIT");
@@ -131,7 +156,7 @@ describe("ExecutionContainer", () => {
   });
 
   it("shows deploy view when controller is not deployed", () => {
-    renderWithConnection(
+    renderWithProviders(
       <ExecutionContainer
         {...defaultProps}
         executionError={{

@@ -1,40 +1,53 @@
 import { useEffect, useState } from "react";
-import { formatUnits } from "viem";
-import { useChainId } from "@/hooks/connection";
-import { ErrorAlertIcon, EthereumIcon, Spinner } from "@cartridge/ui-next";
+import { Spinner } from "@cartridge/ui-next";
+import { EstimateFee } from "starknet";
+
+import { formatUSDBalance, useFeeToken } from "@/hooks/tokens";
+import { ErrorAlert } from "./ErrorAlert";
+import { ERC20 } from "./provider/tokens";
 
 export function Fees({
+  isLoading: isEstimating,
   maxFee,
-  variant,
 }: {
-  maxFee?: bigint;
-  variant?: Variant;
+  isLoading: boolean;
+  maxFee?: EstimateFee;
 }) {
-  const chainId = useChainId();
+  const { isLoading: isPriceLoading, token, error } = useFeeToken();
   const [formattedFee, setFormattedFee] = useState<string>();
+  const isLoading = isEstimating || isPriceLoading;
 
   useEffect(() => {
-    if (maxFee === undefined) {
+    if (isLoading || error || !token) {
       return;
     }
 
-    setFormattedFee(
-      maxFee === 0n
-        ? "FREE"
-        : maxFee > 10000000000000n
-          ? `~${parseFloat(formatUnits(maxFee, 18)).toFixed(5)}`
-          : "<0.00001",
+    if (maxFee && maxFee.overall_fee && token.price) {
+      const formatted = formatUSDBalance(maxFee.overall_fee, 18, token.price);
+      setFormattedFee(formatted);
+    } else {
+      setFormattedFee("FREE");
+    }
+  }, [maxFee]);
+
+  if (error) {
+    return (
+      <ErrorAlert
+        title="Error fetching fee token price"
+        description="error"
+        variant="error"
+      />
     );
-  }, [chainId, maxFee]);
+  }
 
   return (
     <div className="w-full overflow-hidden rounded">
       {formattedFee ? (
         <LineItem
           name="Network Fee"
-          value={formattedFee}
-          isLoading={!formattedFee}
-          variant={variant}
+          amount={formattedFee}
+          token={token}
+          isLoading={isLoading}
         />
       ) : (
         <LineItem name="Calculating Fees" isLoading />
@@ -45,32 +58,30 @@ export function Fees({
 
 function LineItem({
   name,
-  value,
+  token,
+  amount,
   isLoading = false,
-  variant,
 }: {
   name: string;
-  description?: string;
-  value?: string;
+  token?: ERC20;
+  amount?: string;
   isLoading?: boolean;
-  variant?: Variant;
 }) {
   return (
     <div className="flex items-center w-full h-10 p-4 bg-background-100 text-muted-foreground">
-      <p className="text-xs uppercase font-bold">{name}</p>
+      <p className="text-xs">{name}</p>
       <div className="flex-1" />
 
-      {isLoading ? (
+      {isLoading || !token ? (
         <Spinner />
       ) : (
-        <div className="flex items-center gap-0">
-          {variant && <ErrorAlertIcon variant={variant} />}
-          {value !== "FREE" && <EthereumIcon className="text-foreground" />}
-          <p className="text-sm">{value}</p>
+        <div className="flex items-center justify-center gap-0">
+          <p className="text-sm text-foreground">{amount}</p>
+          {amount !== "FREE" && (
+            <p className="text-sm text-foreground pl-1">{token.symbol}</p>
+          )}
         </div>
       )}
     </div>
   );
 }
-
-type Variant = "info" | "warning" | "error";

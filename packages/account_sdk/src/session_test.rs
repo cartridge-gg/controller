@@ -1,7 +1,9 @@
 use cainome::cairo_serde::{ContractAddress, U256};
 use starknet::{
     accounts::{Account, AccountError, ConnectedAccount},
-    core::types::{BlockId, BlockTag, StarknetError, TransactionExecutionErrorData},
+    core::types::{
+        BlockId, BlockTag, FeeEstimate, PriceUnit, StarknetError, TransactionExecutionErrorData,
+    },
     macros::{felt, selector},
     providers::{Provider, ProviderError},
     signers::SigningKey,
@@ -228,14 +230,21 @@ async fn test_create_and_use_registered_session() {
 
     // Register the session
     let expires_at = u64::MAX;
-    let max_fee = Felt::from(277800000000000_u128);
+    let max_fee = FeeEstimate {
+        gas_consumed: Felt::ZERO,
+        gas_price: Felt::from(20000000000_u128),
+        overall_fee: Felt::from(57780000000000_u128),
+        data_gas_consumed: Felt::ZERO,
+        data_gas_price: Felt::ZERO,
+        unit: PriceUnit::Fri,
+    };
     let txn = controller
         .register_session(
             policies.clone(),
             expires_at,
             public_key,
             Felt::ZERO,
-            max_fee,
+            Some(max_fee),
         )
         .await
         .expect("Failed to register session");

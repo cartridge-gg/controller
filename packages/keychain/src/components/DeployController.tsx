@@ -1,5 +1,7 @@
 import {
   constants,
+  EstimateFee,
+  FeeEstimate,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
@@ -11,9 +13,9 @@ import {
   CheckIcon,
   ExternalIcon,
   Spinner,
-  WandIcon,
   Button,
   LayoutHeader,
+  ControllerIcon,
 } from "@cartridge/ui-next";
 import { Funding } from "./funding";
 import { useConnection } from "@/hooks/connection";
@@ -22,8 +24,9 @@ import { useDeploy } from "@/hooks/deploy";
 import { Fees } from "./Fees";
 import { ControllerError } from "@/utils/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
-import { ETH_CONTRACT_ADDRESS, useERC20Balance } from "@cartridge/utils";
 import { Link } from "react-router-dom";
+import { useFeeToken } from "@/hooks/tokens";
+import { getChainName } from "@cartridge/utils";
 
 export function DeployController({
   onClose,
@@ -32,16 +35,45 @@ export function DeployController({
   onClose: () => void;
   ctrlError?: ControllerError;
 }) {
-  const { closeModal, chainId, controller, chainName, hasPrefundRequest } =
-    useConnection();
+  const { closeModal, controller, hasPrefundRequest } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
+  const { token: feeToken, isLoading } = useFeeToken();
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [accountState, setAccountState] = useState<
     "fund" | "deploy" | "deploying" | "deployed"
   >("fund");
-  const feeEstimate: string | undefined =
-    ctrlError?.data?.fee_estimate.overall_fee;
+
+  const chainId = controller?.chainId();
+  const chainName = chainId ? getChainName(chainId) : "Unknown";
+
+  // What is this cancer
+  const feeEstimate: FeeEstimate | undefined = ctrlError?.data?.fee_estimate;
+  const estimateFee: EstimateFee | undefined = feeEstimate
+    ? {
+        gas_consumed: BigInt(feeEstimate.gas_consumed),
+        overall_fee: BigInt(feeEstimate.overall_fee),
+        gas_price: BigInt(feeEstimate.gas_price),
+        unit: feeEstimate.unit,
+        suggestedMaxFee: BigInt(feeEstimate.overall_fee),
+        data_gas_consumed: BigInt(
+          feeEstimate.data_gas_consumed ? feeEstimate.data_gas_consumed : "0x0",
+        ),
+        data_gas_price: BigInt(
+          feeEstimate.data_gas_price ? feeEstimate.data_gas_price : "0x0",
+        ),
+        resourceBounds: {
+          l1_gas: {
+            max_amount: feeEstimate.overall_fee,
+            max_price_per_unit: feeEstimate.gas_price,
+          },
+          l2_gas: {
+            max_amount: feeEstimate.overall_fee,
+            max_price_per_unit: feeEstimate.gas_price,
+          },
+        },
+      }
+    : undefined;
 
   useEffect(() => {
     if (
@@ -58,7 +90,7 @@ export function DeployController({
 
   useEffect(() => {
     if (deployHash && controller) {
-      controller
+      controller.provider
         .waitForTransaction(deployHash, {
           retryInterval: 1000,
           successStates: [
@@ -71,31 +103,21 @@ export function DeployController({
     }
   }, [deployHash, controller]);
 
-  const {
-    data: [eth],
-    isLoading,
-  } = useERC20Balance({
-    address: controller?.address,
-    contractAddress: ETH_CONTRACT_ADDRESS,
-    provider: controller,
-    interval: 3000,
-    decimals: 2,
-  });
   useEffect(() => {
-    if (!feeEstimate || accountState != "fund" || !eth?.balance.value) return;
+    if (!estimateFee || accountState != "fund" || !feeToken?.balance) return;
 
-    if (eth.balance.value >= BigInt(feeEstimate)) {
+    if (feeToken.balance >= estimateFee.overall_fee) {
       setAccountState("deploy");
     } else {
       setAccountState("fund");
     }
-  }, [eth?.balance.value, feeEstimate, accountState]);
+  }, [feeToken?.balance, estimateFee, accountState]);
 
   const onDeploy = useCallback(async () => {
-    if (!feeEstimate) return;
+    if (!estimateFee) return;
 
     try {
-      const hash = await deploySelf(feeEstimate);
+      const hash = await deploySelf(estimateFee);
       setDeployHash(hash);
     } catch (e) {
       if (e instanceof Error && e.message.includes("DuplicateTx")) {
@@ -103,7 +125,7 @@ export function DeployController({
       }
       setError(e as Error);
     }
-  }, [deploySelf, feeEstimate]);
+  }, [deploySelf, estimateFee]);
 
   if (isLoading) {
     return (
@@ -125,9 +147,8 @@ export function DeployController({
         <Funding
           title={
             <>
-              Fund{" "}
-              <b style={{ color: "brand.primary" }}>{controller?.username()}</b>{" "}
-              for deployment
+              Fund <b className="text-primary">{controller?.username()}</b> for
+              deployment
             </>
           }
           onComplete={() => {
@@ -140,9 +161,9 @@ export function DeployController({
         <LayoutContainer>
           <LayoutHeader
             variant="expanded"
-            icon={<WandIcon variant="line" size="lg" />}
+            icon={<ControllerIcon size="lg" />}
             title="Deploy Controller"
-            description="This will initialize your controller on the new network"
+            description="This will deploy your Controller"
             closeModal={closeModal}
             chainId={chainId}
           />
@@ -165,7 +186,7 @@ export function DeployController({
                 description={error.message}
               />
             ) : (
-              feeEstimate && <Fees maxFee={BigInt(feeEstimate)} />
+              <Fees isLoading={false} maxFee={estimateFee} />
             )}
             <Button onClick={onDeploy} isLoading={isDeploying}>
               DEPLOY

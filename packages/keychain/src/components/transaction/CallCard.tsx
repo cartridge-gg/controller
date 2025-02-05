@@ -1,3 +1,4 @@
+import { useConnection } from "@/hooks/connection";
 import {
   Card,
   CardContent,
@@ -9,7 +10,6 @@ import {
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
 import { constants, Call } from "starknet";
-import { useChainId } from "@/hooks/connection";
 
 interface CallCardProps {
   address: string;
@@ -19,15 +19,15 @@ interface CallCardProps {
 }
 
 export function CallCard({ address, call }: CallCardProps) {
-  const chainId = useChainId();
+  const { controller } = useConnection();
   const explorer = useExplorer();
 
   const explorerLink = (
     <a
       className="text-xs text-foreground cursor-pointer hover:underline"
       href={
-        chainId === constants.StarknetChainId.SN_MAIN ||
-        chainId === constants.StarknetChainId.SN_SEPOLIA
+        controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
+        controller?.chainId() === constants.StarknetChainId.SN_SEPOLIA
           ? explorer.contract(address)
           : `#`
       }

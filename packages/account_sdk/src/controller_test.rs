@@ -57,8 +57,8 @@ async fn test_deploy_controller() {
 
     // Deploy the controller
     let deploy_result = factory
-        .deploy_v1(salt)
-        .fee_estimate_multiplier(1.5)
+        .deploy_v3(salt)
+        .gas_estimate_multiplier(1.5)
         .send()
         .await
         .unwrap();
@@ -154,7 +154,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         .estimate_invoke_fee(vec![tx1.clone()])
         .await
         .unwrap();
-    let res = Controller::execute(&mut controller1, vec![tx1.clone()], max_fee.overall_fee)
+    let res = Controller::execute(&mut controller1, vec![tx1.clone()], Some(max_fee.clone()))
         .await
         .unwrap();
 
@@ -168,7 +168,7 @@ async fn test_controller_nonce_mismatch_recovery() {
     let tx2 = erc20.transfer_getcall(&recipient, &amount);
 
     let tx2_result =
-        Controller::execute(&mut controller2, vec![tx2.clone()], max_fee.overall_fee).await;
+        Controller::execute(&mut controller2, vec![tx2.clone()], Some(max_fee.clone())).await;
 
     // Verify that it succeeds after recovering from nonce mismatch
     assert!(
@@ -182,7 +182,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         .await
         .unwrap();
 
-    let res = Controller::execute(&mut controller1, vec![tx1], max_fee.overall_fee)
+    let res = Controller::execute(&mut controller1, vec![tx1], Some(max_fee.clone()))
         .await
         .unwrap();
 
@@ -191,7 +191,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         .await
         .unwrap();
 
-    let tx2_result = Controller::execute(&mut controller2, vec![tx2], max_fee.overall_fee).await;
+    let tx2_result = Controller::execute(&mut controller2, vec![tx2], Some(max_fee)).await;
 
     // Verify that it succeeds after recovering from nonce mismatch
     assert!(

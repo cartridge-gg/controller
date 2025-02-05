@@ -109,25 +109,8 @@ macro_rules! impl_account {
                 unimplemented!("sign_legacy_declaration")
             }
 
-            fn execute_v1(&self, calls: Vec<starknet::core::types::Call>) -> starknet::accounts::ExecutionV1<Self> {
-                starknet::accounts::ExecutionV1::new(calls, self)
-            }
-
             fn execute_v3(&self, calls: Vec<starknet::core::types::Call>) -> starknet::accounts::ExecutionV3<Self> {
                 starknet::accounts::ExecutionV3::new(calls, self)
-            }
-
-
-            fn execute(&self, calls: Vec<starknet::core::types::Call>) -> starknet::accounts::ExecutionV1<Self> {
-                self.execute_v1(calls)
-            }
-
-            fn declare_v2(
-                &self,
-                contract_class: std::sync::Arc<starknet::core::types::FlattenedSierraClass>,
-                compiled_class_hash: starknet::core::types::Felt,
-            ) -> starknet::accounts::DeclarationV2<Self> {
-                starknet::accounts::DeclarationV2::new(contract_class, compiled_class_hash, self)
             }
 
             fn declare_v3(
@@ -136,21 +119,6 @@ macro_rules! impl_account {
                 compiled_class_hash: starknet::core::types::Felt,
             ) -> starknet::accounts::DeclarationV3<Self> {
                 starknet::accounts::DeclarationV3::new(contract_class, compiled_class_hash, self)
-            }
-
-            fn declare(
-                &self,
-                contract_class: std::sync::Arc<starknet::core::types::FlattenedSierraClass>,
-                compiled_class_hash: starknet::core::types::Felt,
-            ) -> starknet::accounts::DeclarationV2<Self> {
-                self.declare_v2(contract_class, compiled_class_hash)
-            }
-
-            fn declare_legacy(
-                &self,
-                contract_class: std::sync::Arc<starknet::core::types::contract::legacy::LegacyContractClass>,
-            ) -> starknet::accounts::LegacyDeclaration<Self> {
-                starknet::accounts::LegacyDeclaration::new(contract_class, self)
             }
         }
     };

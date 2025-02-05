@@ -173,7 +173,7 @@ impl KatanaRunner {
         );
 
         let tx = contract_factory
-            .deploy_v1(factory.calldata(), salt, false)
+            .deploy_v3(factory.calldata(), salt, false)
             .send()
             .await
             .expect("Unable to deploy contract");

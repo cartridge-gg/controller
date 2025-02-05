@@ -69,7 +69,9 @@ impl TryFrom<StarknetSigner> for SigningKey {
     type Error = EncodingError;
 
     fn try_from(starknet: StarknetSigner) -> Result<Self, Self::Error> {
-        Ok(SigningKey::from_secret_scalar(starknet.private_key.0))
+        Ok(SigningKey::from_secret_scalar(
+            starknet.private_key.try_into()?,
+        ))
     }
 }
 
@@ -86,5 +88,69 @@ impl TryFrom<Signer> for account_sdk::signers::Signer {
                 serde_wasm_bindgen::Error::new("Missing signer data"),
             ))
         }
+    }
+}
+
+impl From<account_sdk::signers::Signer> for Signer {
+    fn from(signer: account_sdk::signers::Signer) -> Self {
+        match signer {
+            account_sdk::signers::Signer::Webauthn(s) => Self {
+                webauthn: Some(s.into()),
+                starknet: None,
+            },
+            account_sdk::signers::Signer::Starknet(s) => Self {
+                webauthn: None,
+                starknet: Some(s.into()),
+            },
+        }
+    }
+}
+
+impl From<account_sdk::signers::webauthn::WebauthnSigner> for WebauthnSigner {
+    fn from(signer: account_sdk::signers::webauthn::WebauthnSigner) -> Self {
+        Self {
+            rp_id: signer.rp_id,
+            credential_id: general_purpose::URL_SAFE_NO_PAD.encode(signer.credential_id),
+            public_key: general_purpose::URL_SAFE_NO_PAD.encode(
+                signer
+                    .pub_key
+                    .to_vec()
+                    .expect("Failed to serialize CoseKey"),
+            ),
+        }
+    }
+}
+
+impl From<SigningKey> for StarknetSigner {
+    fn from(key: SigningKey) -> Self {
+        Self {
+            private_key: key.secret_scalar().into(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_webauthn_signer_conversion() {
+        let test_signer = WebauthnSigner {
+            rp_id: "test.com".to_string(),
+            credential_id: "AAAA".to_string(),
+            public_key: "pQECAyYgASFYIJV5jMYfVzTzGFNhtxKQ_BqYgqmqM0FT-B_vXE-fYZlIIlgg4that9Bxz0nL7KhQJqRxh3Tn6zqvyGG_QH9Z8-Jgz8g".to_string(),
+        };
+
+        // Convert to SDK type
+        let sdk_signer: account_sdk::signers::webauthn::WebauthnSigner =
+            test_signer.clone().try_into().unwrap();
+
+        // Convert back to WASM type
+        let wasm_signer: WebauthnSigner = sdk_signer.into();
+
+        // Verify fields match
+        assert_eq!(test_signer.rp_id, wasm_signer.rp_id);
+        assert_eq!(test_signer.credential_id, wasm_signer.credential_id);
+        assert_eq!(test_signer.public_key, wasm_signer.public_key);
     }
 }

@@ -38,14 +38,15 @@ impl CartridgeSessionAccount {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
-        let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
-        let address = address.0;
-        let chain_id = chain_id.0;
+        let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.try_into()?));
+        let address = address.try_into()?;
+        let chain_id = chain_id.try_into()?;
 
-        let session_authorization = session_authorization
+        let session_authorization: Result<Vec<Felt>, _> = session_authorization
             .into_iter()
-            .map(|felt| felt.0)
-            .collect::<Vec<_>>();
+            .map(TryInto::try_into)
+            .collect();
+        let session_authorization = session_authorization?;
         let policies = session
             .policies
             .into_iter()
@@ -83,9 +84,9 @@ impl CartridgeSessionAccount {
         let rpc_url = Url::parse(&rpc_url)?;
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
-        let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.0));
-        let address = address.0;
-        let chain_id = chain_id.0;
+        let signer = Signer::Starknet(SigningKey::from_secret_scalar(signer.try_into()?));
+        let address = address.try_into()?;
+        let chain_id = chain_id.try_into()?;
 
         let policies = session
             .policies
@@ -106,14 +107,14 @@ impl CartridgeSessionAccount {
                 signer,
                 address,
                 chain_id,
-                owner_guid.0,
+                owner_guid.try_into()?,
                 session,
             ),
         )))
     }
 
     pub async fn sign(&self, hash: JsFelt, calls: Vec<JsCall>) -> Result<Felts, JsControllerError> {
-        let hash = hash.0;
+        let hash = hash.try_into()?;
         let calls = calls
             .into_iter()
             .map(TryInto::try_into)
@@ -126,32 +127,7 @@ impl CartridgeSessionAccount {
             .sign_hash_and_calls(hash, &calls)
             .await?;
 
-        Ok(Felts(res.into_iter().map(JsFelt).collect()))
-    }
-
-    #[wasm_bindgen(js_name = signTransaction)]
-    pub async fn sign_transaction(
-        &self,
-        calls: Vec<JsCall>,
-        max_fee: JsFelt,
-    ) -> Result<Felts, JsControllerError> {
-        let calls = calls
-            .into_iter()
-            .map(TryInto::try_into)
-            .collect::<Result<Vec<_>, _>>()?;
-
-        let session = self.0.lock().await;
-        let nonce = session.get_nonce().await?;
-        let tx_hash = session
-            .execute_v1(calls.clone())
-            .nonce(nonce)
-            .max_fee(max_fee.0)
-            .prepared()?
-            .transaction_hash(false);
-
-        let signature = session.sign_hash_and_calls(tx_hash, &calls).await?;
-
-        Ok(Felts(signature.into_iter().map(JsFelt).collect()))
+        Ok(Felts(res.into_iter().map(Into::into).collect()))
     }
 
     pub async fn execute(&self, calls: Vec<JsCall>) -> Result<JsValue, JsControllerError> {
@@ -161,19 +137,7 @@ impl CartridgeSessionAccount {
             .collect::<Result<Vec<_>, _>>()?;
 
         let session = self.0.lock().await;
-        let max_fee = session
-            .execute_v1(calls.clone())
-            .nonce(Felt::from(u64::MAX))
-            .estimate_fee()
-            .await?;
-
-        let nonce = session.get_nonce().await?;
-        let result = session
-            .execute_v1(calls)
-            .nonce(nonce)
-            .max_fee(max_fee.overall_fee)
-            .send()
-            .await?;
+        let result = session.execute_v3(calls.clone()).send().await?;
 
         Ok(to_value(&result)?)
     }
