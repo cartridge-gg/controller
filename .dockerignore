@@ -1,0 +1,61 @@
+# Node.js
+node_modules/
+.pnpm-store/
+.turbo/
+.next/
+dist/
+build/
+*.tsbuildinfo
+.pnpm-debug.log*
+
+# Environment
+.env.local
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# Build outputs
+storybook-static/
+vite.config.*.timestamp-*
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Rust/Cargo
+debug/
+target/
+abi/
+Cargo.lock
+*.rs.bk
+*.pdb
+.snfoundry_cache/
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs and temp files
+*.log
+.cache/
+log/
+
+# Test artifacts
+lcov.info
+__image_snapshots__/
+
+# Secrets and keys
+account.json
+keystore.json
+
+packages/account_sdk
+packages/account-wasm
+examples
