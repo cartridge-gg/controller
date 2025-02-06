@@ -170,7 +170,7 @@ export function useAccount() {
 
   const address = useMemo(
     () =>
-      import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS ??
+      (import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS as string) ??
       data?.account?.controllers.edges?.[0]?.node?.address ??
       "",
     [data],

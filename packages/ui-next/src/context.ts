@@ -6,8 +6,6 @@ type UIContextValue = {
     address: string;
   };
   chainId?: string;
-  closeModal?: () => void;
-  openSettings?: () => void;
 };
 
 export const UIContext = createContext<UIContextValue>({});

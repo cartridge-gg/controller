@@ -4,7 +4,7 @@ import { useConnection } from "@/hooks/connection";
 import { useAccount } from "@/hooks/account";
 
 export function UIProvider({ children }: PropsWithChildren) {
-  const { chainId, closeModal, openSettings } = useConnection();
+  const { controller, closeModal, openSettings } = useConnection();
   const account = useAccount();
 
   return (
@@ -13,10 +13,10 @@ export function UIProvider({ children }: PropsWithChildren) {
         account: account
           ? {
               username: account.username,
-              address: account.address,
+              address: account.address(),
             }
           : undefined,
-        chainId,
+        chainId: controller?.chainId(),
         closeModal,
         openSettings,
       }}
