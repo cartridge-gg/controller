@@ -21,8 +21,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
 # Add cargo to PATH
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Install pnpm
-RUN corepack enable pnpm
+RUN npm i -g pnpm
 
 # Setup display with consistent resolution
 RUN Xvfb :99 -screen 0 1280x1024x24 2>/dev/null & 

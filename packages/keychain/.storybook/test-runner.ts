@@ -1,4 +1,4 @@
-import { TestRunnerConfig, waitForPageReady } from "@storybook/test-runner";
+import { TestRunnerConfig } from "@storybook/test-runner";
 import { toMatchImageSnapshot } from "jest-image-snapshot";
 import path from "path";
 
@@ -10,10 +10,10 @@ const config: TestRunnerConfig = {
   },
   async postVisit(page, context) {
     // Wait for the page to be ready before taking a screenshot
-    await waitForPageReady(page);
-
-    // Wait an extra second for transitions to complete
-    await page.waitForTimeout(1000);
+    await page.waitForSelector("#storybook-root", {
+      state: "visible",
+      timeout: 45000,
+    });
 
     // Get the story's container element - selecting the nested content div
     const storyContainer = await page.$("#storybook-root > div > div");
