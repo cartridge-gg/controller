@@ -7,12 +7,7 @@ export type ConversionProps = {
 
 export function Conversion({ value, className }: ConversionProps) {
   return (
-    <span
-      className={cn(
-        "absolute right-14 top-3.5 text-sm text-muted-foreground",
-        className,
-      )}
-    >
+    <span className={cn("text-sm text-foreground-300", className)}>
       {value}
     </span>
   );

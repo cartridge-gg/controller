@@ -16,12 +16,13 @@ export function Balance({
   return (
     <div
       className={cn(
-        "text-xs uppercase font-medium cursor-pointer hover:opacity-90",
+        "text-xs uppercase font-medium text-foreground-100 cursor-pointer",
+        "hover:underline",
         className,
       )}
       onClick={onClick}
     >
-      {`${value.toLocaleString("en-US")} ${symbol}`}
+      {`${value.toLocaleString()} ${symbol}`}
     </div>
   );
 }
