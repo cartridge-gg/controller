@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Project, useProgressionsQuery } from "@cartridge/utils/api/cartridge";
 import { Progress, RawProgress, getSelectorFromTag } from "@/models";
 
@@ -17,9 +17,6 @@ export function useProgressions({
   project: string;
   parser: (node: RawProgress) => Progress;
 }) {
-  const [rawProgressions, setRawProgressions] = useState<{
-    [key: string]: Progress;
-  }>({});
   const [progressions, setProgressions] = useState<{ [key: string]: Progress }>(
     {},
   );
@@ -30,7 +27,7 @@ export function useProgressions({
     [namespace, name, project],
   );
 
-  const { refetch: fetchProgressions, isFetching } = useProgressionsQuery(
+  useProgressionsQuery(
     {
       projects,
     },
@@ -45,30 +42,10 @@ export function useProgressions({
             acc[achievement.key] = achievement;
             return acc;
           }, {});
-        setRawProgressions(progressions);
+        setProgressions(progressions);
       },
     },
   );
-
-  useEffect(() => {
-    if (!namespace || !project) return;
-    try {
-      fetchProgressions();
-    } catch (error) {
-      // Could happen if the indexer is down or wrong url
-      console.error(error);
-    }
-  }, [namespace, project, fetchProgressions]);
-
-  useEffect(() => {
-    if (
-      isFetching ||
-      Object.values(rawProgressions).length ===
-        Object.values(progressions).length
-    )
-      return;
-    setProgressions(rawProgressions);
-  }, [rawProgressions, progressions, isFetching]);
 
   return { progressions };
 }
