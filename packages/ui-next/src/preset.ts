@@ -20,8 +20,15 @@ export const cartridgeTWPreset: Partial<Config> = {
         100: "hsl(var(--background-100))",
         200: "hsl(var(--background-200))",
         300: "hsl(var(--background-300))",
+        400: "hsl(var(--background-400))",
       },
-      foreground: "hsl(var(--foreground))",
+      foreground: {
+        DEFAULT: "hsl(var(--foreground))",
+        100: "hsl(var(--foreground-100))",
+        200: "hsl(var(--foreground-200))",
+        300: "hsl(var(--foreground-300))",
+        400: "hsl(var(--foreground-400))",
+      },
       primary: {
         DEFAULT: "hsl(var(--primary))",
         foreground: "hsl(var(--primary-foreground))",
