@@ -27,6 +27,9 @@ const config: TestRunnerConfig = {
       timeout: 45000,
     });
 
+    // Wait for any animations to complete
+    await page.waitForTimeout(1000);
+
     // Get the story's container element - selecting the nested content div
     const storyContainer = await page.$("#storybook-root > div > div");
     if (!storyContainer) {

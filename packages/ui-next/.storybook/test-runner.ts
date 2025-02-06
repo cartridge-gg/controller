@@ -5,9 +5,16 @@ import path from "path";
 const customSnapshotsDir = path.join(process.cwd(), "__image_snapshots__");
 
 // Configure thresholds via environment variables with defaults
-const FAILURE_THRESHOLD = parseFloat(process.env.STORYBOOK_IMAGE_SNAPSHOT_FAILURE_THRESHOLD ?? "0.001");
-const DIFF_THRESHOLD = parseFloat(process.env.STORYBOOK_IMAGE_SNAPSHOT_DIFF_THRESHOLD ?? "0.1");
-const FAILURE_THRESHOLD_TYPE = (process.env.STORYBOOK_IMAGE_SNAPSHOT_FAILURE_THRESHOLD_TYPE ?? "percent") as "percent" | "pixel";
+const FAILURE_THRESHOLD = parseFloat(
+  process.env.STORYBOOK_IMAGE_SNAPSHOT_FAILURE_THRESHOLD ?? "0.001",
+);
+const DIFF_THRESHOLD = parseFloat(
+  process.env.STORYBOOK_IMAGE_SNAPSHOT_DIFF_THRESHOLD ?? "0.1",
+);
+const FAILURE_THRESHOLD_TYPE = (process.env
+  .STORYBOOK_IMAGE_SNAPSHOT_FAILURE_THRESHOLD_TYPE ?? "percent") as
+  | "percent"
+  | "pixel";
 
 const config: TestRunnerConfig = {
   setup() {
@@ -19,6 +26,9 @@ const config: TestRunnerConfig = {
       state: "visible",
       timeout: 45000,
     });
+
+    // Wait for any animations to complete
+    await page.waitForTimeout(1000);
 
     // Enhanced font loading wait
     await page.evaluate(() => document.fonts.ready);
