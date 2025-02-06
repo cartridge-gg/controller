@@ -6,7 +6,7 @@ import { Header } from "./header";
 import { Balance } from "./balance";
 import { useMemo } from "react";
 
-export type AmountProps = {
+type AmountProps = {
   amount: number | undefined;
   conversion: string | undefined;
   balance: number;

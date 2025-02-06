@@ -1,6 +1,6 @@
 import { cn, Input } from "@cartridge/ui-next";
 
-export type FieldProps = {
+type FieldProps = {
   value?: number;
   isError?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;

@@ -1,6 +1,6 @@
 import { AlertIcon, cn } from "@cartridge/ui-next";
 
-export type ErrorProps = {
+type ErrorProps = {
   label?: string;
   className?: string;
 };

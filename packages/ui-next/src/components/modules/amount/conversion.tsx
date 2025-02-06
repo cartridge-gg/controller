@@ -1,6 +1,6 @@
 import { cn } from "@cartridge/ui-next";
 
-export type ConversionProps = {
+type ConversionProps = {
   value?: string;
   className?: string;
 };

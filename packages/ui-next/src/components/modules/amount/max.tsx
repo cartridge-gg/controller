@@ -1,6 +1,6 @@
 import { Button, cn } from "@cartridge/ui-next";
 
-export type MaxProps = {
+type MaxProps = {
   label?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;

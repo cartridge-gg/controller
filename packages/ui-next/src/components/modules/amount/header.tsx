@@ -1,6 +1,6 @@
 import { Label, cn } from "@cartridge/ui-next";
 
-export type HeaderProps = {
+type HeaderProps = {
   label?: string;
   className?: string;
 };

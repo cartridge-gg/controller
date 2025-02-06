@@ -1,6 +1,6 @@
 import { cn } from "@cartridge/ui-next";
 
-export type BalanceProps = {
+type BalanceProps = {
   value: number;
   symbol: string;
   className?: string;
