@@ -2,20 +2,23 @@
   "name": "@cartridge/ui-next",
   "version": "0.7.3",
   "description": "Catridge UI component library",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "files": [
     "dist"
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.js"
+      "default": "./dist/index.js"
     },
     "./preset": {
-      "require": "./dist/preset.js",
-      "types": "./dist/preset.d.js"
+      "types": "./dist/preset.d.ts",
+      "import": "./dist/preset.js",
+      "require": "./dist/preset.js"
     },
     "./themes/default.css": "./dist/themes/default.css",
     "./themes/dark.css": "./dist/themes/dark.css",
@@ -102,5 +105,6 @@
     "sonner": "catalog:",
     "starknet": "catalog:",
     "viem": "catalog:"
-  }
+  },
+  "sideEffects": false
 }
