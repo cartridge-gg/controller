@@ -78,9 +78,6 @@ jobs:
       pull-requests: "write"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
       - run: git config --global --add safe.directory '*'
       - uses: dorny/paths-filter@v3
         id: changes
@@ -106,20 +103,30 @@ jobs:
             ${{ runner.os }}-storybook-${{ hashFiles('**/pnpm-lock.yaml') }}-
             ${{ runner.os }}-storybook-
 
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: |
-            - args: [--frozen-lockfile]
+      - run: pnpm i --frozen-lockfile
 
       # Run regular storybook tests first to detect diffs
-      - run: pnpm test:storybook
+      - run: |
+          set -e  # Make sure failures are caught
+          pnpm test:storybook 2>&1 | tee test-storybook.log || {
+            exit_code=$?
+            if [ $exit_code -eq 99 ]; then
+              # If it's our special snapshot failure code, pass it through
+              exit 99
+            else
+              # For any other error, fail immediately
+              echo "Storybook test failed with exit code $exit_code"
+              exit 1
+            fi
+          }
         id: test-storybook
-        continue-on-error: true
 
       # Check for visual differences and collect info
       - name: Check for visual differences
         id: check-diffs
-        if: always() # Run even if previous step failed
+        if:
+          always() && (success() || steps.test-storybook.outcome == 'failure' &&
+          steps.test-storybook.conclusion == 'success')
         run: |
           # Configure git safety
           git config --global --add safe.directory '*'
