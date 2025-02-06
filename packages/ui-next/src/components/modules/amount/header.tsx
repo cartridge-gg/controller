@@ -7,7 +7,12 @@ export type HeaderProps = {
 
 export function Header({ label = "Amount", className }: HeaderProps) {
   return (
-    <Label className={cn("py-3 text-[11px]/3 uppercase font-bold", className)}>
+    <Label
+      className={cn(
+        "py-3 text-xs font-semibold normal-case tracking-wider",
+        className,
+      )}
+    >
       {label}
     </Label>
   );

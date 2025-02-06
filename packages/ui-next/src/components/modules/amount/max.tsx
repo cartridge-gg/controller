@@ -14,10 +14,10 @@ export function Max({
   return (
     <Button
       className={cn(
-        "absolute right-2 top-1/2 -translate-y-1/2 text-xs/3 font-bold uppercase px-2 py-1.5 h-7 bg-muted text-foreground hover:opacity-70",
+        "px-2.5 py-1.5 h-7 rounded-full bg-background-300 text-foreground text-xs font-semibold tracking-wider normal-case hover:bg-background-400 shadow-none",
         className,
       )}
-      variant="ghost"
+      variant="default"
       onClick={onClick}
     >
       {label}
