@@ -41,13 +41,12 @@ const config: TestRunnerConfig = {
     expect(image).toMatchImageSnapshot({
       customSnapshotsDir,
       customSnapshotIdentifier: `${context.id}-${browserName}`,
-      // Increased threshold to handle font rendering differences
-      failureThreshold: 0.01,
+      // Reduce threshold to catch color changes
+      failureThreshold: 0.001,
       failureThresholdType: "percent",
-      // Add blur to reduce impact of anti-aliasing differences
-      blur: 1,
+      // Remove blur to catch color differences more accurately
       customDiffConfig: {
-        threshold: 0.4,
+        threshold: 0.1, // More strict threshold
       },
     });
   },
