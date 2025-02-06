@@ -45,35 +45,79 @@ export default defineConfig(({ mode }) => ({
       external: [],
       output: {
         manualChunks(id) {
-          // Chunk splitting logic
           if (id.includes("node_modules")) {
-            if (id.includes("react")) {
-              return "react-vendor";
+            // React and related packages
+            if (id.includes("react/") || id.includes("react-dom/")) {
+              return "react-core";
             }
-            // Split other large dependencies into separate chunks
+            // React ecosystem packages
+            if (id.includes("react-router") || id.includes("react-query")) {
+              return "react-libs";
+            }
+            // Stripe related code
+            if (id.includes("@stripe")) {
+              return "stripe";
+            }
+            // Web3 and crypto related code
+            if (
+              id.includes("wagmi") ||
+              id.includes("viem") ||
+              id.includes("starknet") ||
+              id.includes("@noble/") ||
+              id.includes("caip") ||
+              id.includes("@starknet-react") ||
+              id.includes("@cartridge/account-wasm") ||
+              id.includes("@cartridge/controller") ||
+              id.includes("cbor")
+            ) {
+              return "web3";
+            }
+            // UI components and styling
+            if (
+              id.includes("@cartridge/ui-next") ||
+              id.includes("embla-carousel")
+            ) {
+              return "ui";
+            }
             return "vendor";
           }
         },
       },
     },
     target: "esnext",
-    minify: "esbuild", // esbuild is faster than terser and almost as effective
+    minify: "esbuild",
     sourcemap: mode === "development",
-    // Reduce chunk size warnings and enable compression reporting
     chunkSizeWarningLimit: 1000,
     reportCompressedSize: true,
-    // Optimize build speed and output
     cssCodeSplit: true,
     modulePreload: {
-      polyfill: false, // Reduces polyfill size if you don't need older browser support
+      polyfill: false,
     },
-    // Add a longer timeout for builds
-    timeout: 120000, // 2 minutes
+    timeout: 120000,
+    assetsInlineLimit: 4096,
+    commonjsOptions: {
+      include: [/node_modules/],
+      extensions: [".js", ".cjs"],
+      strictRequires: true,
+      transformMixedEsModules: true,
+    },
   },
   optimizeDeps: {
-    include: ["react", "react-dom"], // Pre-bundle common dependencies
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "react-query",
+      "@cartridge/ui-next",
+    ],
+    exclude: ["@cartridge/account-wasm"],
+    esbuildOptions: {
+      target: "esnext",
+      supported: {
+        "top-level-await": true,
+      },
+    },
   },
-  // Add this to ensure polyfills are properly included
   define: {
     global: "globalThis",
   },

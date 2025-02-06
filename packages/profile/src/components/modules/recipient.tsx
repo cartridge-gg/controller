@@ -13,9 +13,35 @@ import {
   cn,
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { debounce } from "lodash";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Wallet } from "@/hooks/wallet";
+
+function useDebounce<T extends (...args: any[]) => any>(
+  callback: T,
+  delay: number,
+): (...args: Parameters<T>) => void {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  return useCallback(
+    (...args: Parameters<T>) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        callback(...args);
+      }, delay);
+    },
+    [callback, delay],
+  );
+}
 
 export const Recipient = ({
   to,
@@ -61,15 +87,10 @@ export const Recipient = ({
     return getIcon(selectedWallet);
   }, [selectedWallet, getIcon]);
 
-  useEffect(() => {
+  const handleDebounce = useDebounce((value: string) => {
     setIsLoading(true);
-    const handler = debounce(() => {
-      setIsLoading(false);
-      setNameOrAddress(value);
-    }, 500);
-    handler();
-    return () => handler.cancel();
-  }, [value, setNameOrAddress]);
+    setNameOrAddress(value);
+  }, 500);
 
   const handleClear = useCallback(() => {
     setValue("");
@@ -118,6 +139,13 @@ export const Recipient = ({
     setFocus,
     setWarning,
   ]);
+
+  useEffect(() => {
+    handleDebounce(value);
+    return () => {
+      // Cleanup handled by useDebounce hook
+    };
+  }, [value, handleDebounce]);
 
   return (
     <div className="flex flex-col gap-y-px">
