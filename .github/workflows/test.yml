@@ -76,6 +76,10 @@ jobs:
           files: coverage/lcov.info
 
   storybook:
+    # On push events, skip the job if the head commit message contains the snapshot update indicator.
+    if: >
+      github.event_name != 'push' || !contains(github.event.head_commit.message,
+      'chore: update storybook snapshots [skip ci]')
     runs-on: ubuntu-22.04
     container:
       image: ghcr.io/cartridge-gg/controller/storybook-env:sha-a808942
