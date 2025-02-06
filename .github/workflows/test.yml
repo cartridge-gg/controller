@@ -79,7 +79,7 @@ jobs:
     # On push events, skip the job if the head commit message contains the snapshot update indicator.
     if: >
       github.event_name != 'push' || !contains(github.event.head_commit.message,
-      'chore: update storybook snapshots [skip ci]')
+      'chore: update storybook snapshots')
     runs-on: ubuntu-22.04
     container:
       image: ghcr.io/cartridge-gg/controller/storybook-env:sha-86b05b2
@@ -133,7 +133,7 @@ jobs:
           if ! git diff --quiet packages/*/__image_snapshots__/; then
             # Stage and commit changes
             git add packages/*/__image_snapshots__/
-            git commit -m "chore: update storybook snapshots [skip ci]"
+            git commit -m "chore: update storybook snapshots"
 
             # Push to the PR branch
             git push origin HEAD:${{ github.head_ref }}
@@ -244,21 +244,29 @@ jobs:
               });
               
               // Generate comment sections for each package
+              let hasAnyChanges = false;
+              let allImages = '';
+              
               for (const [pkg, pkgChanges] of Object.entries(changes)) {
                 if (pkgChanges.updates.length > 0) {
+                  hasAnyChanges = true;
                   comment += `\n#### 📦 ${pkg}\n\n`;
+                  comment += '##### 🔄 Snapshot Updates in PR\n\n';
+                  comment += 'The following snapshots have been updated in this PR:\n\n';
                   
-                  if (pkgChanges.updates.length > 0) {
-                    comment += '##### 🔄 Snapshot Updates in PR\n\n';
-                    comment += 'The following snapshots have been updated in this PR:\n\n';
-                    pkgChanges.updates.forEach(({ storyName, imageUrl }) => {
-                      comment += `<details><summary><code>${storyName}</code></summary>\n\n`;
-                      comment += `![${storyName}](${imageUrl})\n\n`;
-                      comment += '</details>\n\n';
-                    });
-                  }
+                  pkgChanges.updates.forEach(({ storyName, imageUrl }) => {
+                    comment += `- \`${storyName}\`\n`;
+                    allImages += `### ${pkg} - ${storyName}\n\n`;
+                    allImages += `![${storyName}](${imageUrl})\n\n`;
+                  });
                 }
-              }              
+              }
+              
+              if (hasAnyChanges) {
+                comment += '\n<details><summary>🖼️ View All Image Changes</summary>\n\n';
+                comment += allImages;
+                comment += '</details>\n\n';
+              }
             }
 
             await github.rest.issues.createComment({
