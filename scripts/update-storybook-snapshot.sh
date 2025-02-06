@@ -31,14 +31,14 @@ docker run \
   -e DEBUG=true \
   --ipc=host \
   -ti \
-  ghcr.io/cartridge-gg/controller/storybook-env:sha-db7f70d \
+  ghcr.io/cartridge-gg/controller/storybook-env:sha-a808942 \
   bash -c "pnpm i && pnpm --filter $PACKAGE test-storybook -u --url http://host.docker.internal:$PORT"
 
 status=$?
 
-# Kill storybook process if we started it
-if [ -n "$STORYBOOK_PID" ]; then
-  kill $STORYBOOK_PID
+# Kill storybook process by finding PID using port
+if pid=$(lsof -ti:$PORT); then
+  kill $pid || true
 fi
 
 exit $status
