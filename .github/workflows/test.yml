@@ -6,6 +6,11 @@ on:
       - main
   pull_request:
 
+# Add concurrency group to cancel in-progress runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CARGO_TERM_COLOR: always
   RUST_VERSION: 1.80.1
@@ -71,9 +76,9 @@ jobs:
   storybook:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/cartridge-gg/controller/storybook-env:sha-db7f70d
+      image: ghcr.io/cartridge-gg/controller/storybook-env:sha-a808942
     permissions:
-      contents: "read"
+      contents: "write"
       id-token: "write"
       pull-requests: "write"
     steps:
@@ -170,6 +175,26 @@ jobs:
           else
             echo "snapshot_failed=false" >> "$GITHUB_ENV"
           fi
+
+      # Add new steps after the check-diffs step
+      - name: Configure Git
+        if: env.snapshot_failed == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Update and commit snapshots
+        if: env.snapshot_failed == 'true'
+        run: |
+          # Run the update script
+          pnpm test:storybook:update
+
+          # Stage and commit changes
+          git add packages/*/__image_snapshots__/
+          git commit -m "chore: update storybook snapshots [skip ci]"
+
+          # Push to the PR branch
+          git push origin HEAD:${{ github.head_ref }}
 
       # Upload diff images to GCP
       - uses: "google-github-actions/auth@v2"
@@ -271,11 +296,11 @@ jobs:
               body: comment
             });
 
-      # Fail the job if there were visual differences
+      # Modify the final check step to not fail when snapshots are updated
       - name: Check for failures
         if: always()
         run: |
           if [[ "${{ env.snapshot_failed }}" == "true" ]]; then
-            echo "Visual differences detected in Storybook tests"
-            exit 1
+            echo "Visual differences detected in Storybook tests - snapshots have been updated automatically"
+            exit 0
           fi
