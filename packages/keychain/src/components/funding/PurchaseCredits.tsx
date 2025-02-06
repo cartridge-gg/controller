@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, lazy, Suspense } from "react";
+import type { Appearance } from "@stripe/stripe-js";
 import {
   LayoutContainer,
   LayoutContent,
@@ -13,8 +14,6 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { AmountSelection } from "./AmountSelection";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { Elements } from "@stripe/react-stripe-js";
-import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { Balance } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
 import { isIframe } from "@cartridge/utils";
@@ -34,6 +33,18 @@ type PurchaseCreditsProps = {
   onBack?: () => void;
 };
 
+// Lazy load stripe components
+const StripeElements = lazy(() =>
+  import("@stripe/react-stripe-js").then((mod) => ({
+    default: mod.Elements,
+  })),
+);
+
+const loadStripeAsync = async () => {
+  const { loadStripe } = await import("@stripe/stripe-js");
+  return loadStripe;
+};
+
 export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
   const { closeModal, chainId, controller } = useConnection();
 
@@ -41,8 +52,22 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
   const [isLoading, setisLoading] = useState<boolean>(false);
   const [state, setState] = useState<PurchaseState>(PurchaseState.SELECTION);
   const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
-  const stripePromise = useMemo(() => loadStripe(STRIPE_API_PUBKEY), []);
+  const [stripePromise] = useState(() =>
+    loadStripeAsync().then((load) => load(STRIPE_API_PUBKEY)),
+  );
   const [error, setError] = useState<Error>();
+
+  const appearance = useMemo(
+    (): Appearance => ({
+      theme: "night" as const,
+      variables: {
+        colorPrimary: "#FBCB4A",
+        colorBackground: "#161A17",
+        focusBoxShadow: "none",
+      },
+    }),
+    [],
+  );
 
   const onAmountChanged = useCallback(
     (amount: number) => setCreditsAmount(amount),
@@ -79,27 +104,20 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
     }
   }, [controller, creditsAmount]);
 
-  const appearance = {
-    theme: "night",
-    variables: {
-      colorPrimary: "#FBCB4A",
-      colorBackground: "#161A17",
-      focusBoxShadow: "none",
-    },
-  } as Appearance;
-
   if (state === PurchaseState.STRIPE_CHECKOUT) {
     return (
-      <Elements
-        options={{ clientSecret, appearance, loader: "auto" }}
-        stripe={stripePromise}
-      >
-        <CheckoutForm
-          onBack={() => setState(PurchaseState.SELECTION)}
-          onComplete={() => setState(PurchaseState.SUCCESS)}
-          creditsAmount={creditsAmount}
-        />
-      </Elements>
+      <Suspense fallback={<div>Loading payment system...</div>}>
+        <StripeElements
+          options={{ clientSecret, appearance, loader: "auto" }}
+          stripe={stripePromise}
+        >
+          <CheckoutForm
+            onBack={() => setState(PurchaseState.SELECTION)}
+            onComplete={() => setState(PurchaseState.SUCCESS)}
+            creditsAmount={creditsAmount}
+          />
+        </StripeElements>
+      </Suspense>
     );
   }
 

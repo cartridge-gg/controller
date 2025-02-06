@@ -23,8 +23,10 @@
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui-next": "workspace:*",
     "@cartridge/utils": "workspace:*",
+    "@starknet-io/types-js": "catalog:",
+    "@wagmi/core": "^1.4.12",
     "compare-versions": "^6.1.1",
-    "lodash": "catalog:",
+    "graphql-request": "^5.0.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-query": "catalog:",
@@ -33,19 +35,14 @@
     "starknet": "catalog:",
     "viem": "catalog:",
     "vite-plugin-top-level-await": "catalog:",
-    "vite-plugin-wasm": "catalog:"
+    "vite-plugin-wasm": "catalog:",
+    "wagmi": "^1.4.12"
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",
-    "@storybook/addon-essentials": "catalog:",
-    "@storybook/addon-themes": "catalog:",
-    "@storybook/blocks": "catalog:",
-    "@storybook/react": "catalog:",
-    "@storybook/react-vite": "catalog:",
-    "@storybook/test": "catalog:",
-    "@storybook/test-runner": "catalog:",
-    "@types/lodash": "catalog:",
-    "@types/jest-image-snapshot": "catalog:",
+    "@cartridge/tsconfig": "workspace:*",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^13.4.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -55,8 +52,8 @@
     "globals": "catalog:",
     "http-server": "catalog:",
     "jest-image-snapshot": "catalog:",
+    "jsdom": "^25.0.1",
     "postcss": "catalog:",
-    "postcss-import": "catalog:",
     "prettier": "catalog:",
     "start-server-and-test": "catalog:",
     "storybook": "catalog:",
@@ -64,6 +61,7 @@
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
     "vite": "catalog:",
-    "vite-tsconfig-paths": "catalog:"
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "^2.1.8"
   }
 }

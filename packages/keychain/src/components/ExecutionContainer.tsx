@@ -14,7 +14,6 @@ import { Funding } from "./funding";
 import { DeployController } from "./DeployController";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { parseControllerError } from "@/utils/connection/execute";
-import isEqual from "lodash/isEqual";
 
 interface ExecutionContainerProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -90,8 +89,8 @@ export function ExecutionContainer({
 
     // Only estimate if transactions or details have changed
     if (
-      isEqual(prevTransactionsRef.current.transactions, transactions) &&
-      isEqual(
+      isDeepEqual(prevTransactionsRef.current.transactions, transactions) &&
+      isDeepEqual(
         prevTransactionsRef.current.transactionsDetail,
         transactionsDetail,
       )
@@ -235,4 +234,27 @@ export function ExecutionContainer({
       </LayoutFooter>
     </LayoutContainer>
   );
+}
+
+// Add native deep equality function
+function isDeepEqual<T extends Record<string, unknown>>(
+  obj1: T,
+  obj2: T,
+): boolean {
+  if (obj1 === obj2) return true;
+  if (typeof obj1 !== "object" || typeof obj2 !== "object") return false;
+  if (obj1 === null || obj2 === null) return false;
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) return false;
+
+  return keys1.every((key) => {
+    if (!Object.prototype.hasOwnProperty.call(obj2, key)) return false;
+    return isDeepEqual(
+      obj1[key] as Record<string, unknown>,
+      obj2[key] as Record<string, unknown>,
+    );
+  });
 }
