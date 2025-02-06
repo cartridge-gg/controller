@@ -4,6 +4,11 @@ import path from "path";
 
 const customSnapshotsDir = path.join(process.cwd(), "__image_snapshots__");
 
+// Configure thresholds via environment variables with defaults
+const FAILURE_THRESHOLD = parseFloat(process.env.STORYBOOK_IMAGE_SNAPSHOT_FAILURE_THRESHOLD ?? "0.001");
+const DIFF_THRESHOLD = parseFloat(process.env.STORYBOOK_IMAGE_SNAPSHOT_DIFF_THRESHOLD ?? "0.1");
+const FAILURE_THRESHOLD_TYPE = (process.env.STORYBOOK_IMAGE_SNAPSHOT_FAILURE_THRESHOLD_TYPE ?? "percent") as "percent" | "pixel";
+
 const config: TestRunnerConfig = {
   setup() {
     expect.extend({ toMatchImageSnapshot });
@@ -41,12 +46,10 @@ const config: TestRunnerConfig = {
     expect(image).toMatchImageSnapshot({
       customSnapshotsDir,
       customSnapshotIdentifier: `${context.id}-${browserName}`,
-      // Reduce threshold to catch color changes
-      failureThreshold: 0.001,
-      failureThresholdType: "percent",
-      // Remove blur to catch color differences more accurately
+      failureThreshold: FAILURE_THRESHOLD,
+      failureThresholdType: FAILURE_THRESHOLD_TYPE,
       customDiffConfig: {
-        threshold: 0.1, // More strict threshold
+        threshold: DIFF_THRESHOLD,
       },
     });
   },
