@@ -4,8 +4,13 @@
     --background-100: 135 6% 13%;
     --background-200: 120 5% 15%;
     --background-300: 120 6% 17%;
+    --background-400: 132 4% 23%;
 
     --foreground: 0 0% 100%;
+    --foreground-100: 0 0% 100%;
+    --foreground-200: 0 0% 61%;
+    --foreground-300: 0 0% 50%;
+    --foreground-400: 150 1% 31%;
 
     --primary: 44 96% 61%;
     --primary-foreground: 0 0% 0%;
