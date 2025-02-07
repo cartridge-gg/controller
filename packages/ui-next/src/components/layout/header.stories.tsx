@@ -3,6 +3,7 @@ import { EthereumIcon, TransferIcon } from "@cartridge/ui-next";
 import { LayoutHeader } from "./index";
 
 const meta: Meta<typeof LayoutHeader> = {
+  title: "Layout/Header",
   component: LayoutHeader,
   tags: ["autodocs"],
   parameters: {

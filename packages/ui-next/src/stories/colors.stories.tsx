@@ -2,7 +2,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { PropsWithChildren } from "react";
 
 const meta: Meta<typeof Colors> = {
-  title: "Colors",
+  title: "Primitives/Colors",
   component: Colors,
   tags: ["autodocs"],
 };

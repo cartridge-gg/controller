@@ -8,7 +8,7 @@ import {
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Select> = {
-  title: "Select",
+  title: "Primitives/Select",
   component: Select,
   tags: ["autodocs"],
 };

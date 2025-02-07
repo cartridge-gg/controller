@@ -48,7 +48,7 @@ export const Preview = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className="h-10 w-10 rounded-full overflow-hidden bg-background-100 flex items-center justify-center">
+      <div className="h-10 w-10 rounded-full overflow-hidden bg-background flex items-center justify-center">
         {getIcon(wallet)}
       </div>
       {name ? (

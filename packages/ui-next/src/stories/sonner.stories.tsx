@@ -3,7 +3,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { toast } from "sonner";
 
 const meta: Meta<typeof Sonner> = {
-  title: "Sonner",
+  title: "Primitives/Sonner",
   component: Sonner,
   tags: ["autodocs"],
 };

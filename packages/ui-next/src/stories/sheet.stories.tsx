@@ -9,7 +9,7 @@ import {
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Sheet> = {
-  title: "Sheet",
+  title: "Primitives/Sheet",
   component: Sheet,
   tags: ["autodocs"],
 };

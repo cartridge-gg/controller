@@ -14,7 +14,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { useEffect } from "react";
 
 const meta: Meta<typeof Card> = {
-  title: "Card",
+  title: "Primitives/Card",
   component: Card,
   tags: ["autodocs"],
 };

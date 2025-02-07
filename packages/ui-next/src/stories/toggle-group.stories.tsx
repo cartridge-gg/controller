@@ -5,7 +5,7 @@ import {
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof ToggleGroup> = {
-  title: "Toggle Group",
+  title: "Primitives/Toggle Group",
   component: ToggleGroup,
   tags: ["autodocs"],
 };

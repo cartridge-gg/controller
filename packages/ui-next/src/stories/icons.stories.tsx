@@ -24,7 +24,7 @@ const iconsByCategory = {
 };
 
 const meta: Meta<typeof Icons> = {
-  title: "Icons",
+  title: "Primitives/Icons",
   component: Icons,
   tags: ["autodocs"],
   argTypes: {

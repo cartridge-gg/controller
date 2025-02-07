@@ -8,7 +8,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { CircleIcon, InfoIcon } from "../";
 
 const meta: Meta<typeof Accordion> = {
-  title: "Accordion",
+  title: "Primitives/Accordion",
   component: Accordion,
   tags: ["autodocs"],
 };

@@ -13,7 +13,7 @@ import {
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Drawer> = {
-  title: "Drawer",
+  title: "Primitives/Drawer",
   component: Drawer,
   tags: ["autodocs"],
 };
