@@ -74,6 +74,7 @@ export function CreateSession({
       }
 
       await controller.createSession(expiresAt, policies, maxFee);
+
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
