@@ -34,6 +34,7 @@ const meta: Meta<typeof Recipient> = {
 };
 
 export default meta;
+
 type Story = StoryObj<typeof Recipient>;
 
 export const Default: Story = {};
