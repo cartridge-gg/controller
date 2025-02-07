@@ -27,7 +27,7 @@ export function Field({
     <Textarea
       spellCheck={false}
       className={cn(
-        "resize-none min-h-12 min-w-[384px] bg-background-100 py-3 pl-4 pr-12 border border-background-200 text-base/5 font-mono font-medium",
+        "resize-none min-h-12 min-w-[384px] bg-background-100 py-3 pl-4 pr-12 border border-background-200 text-base/5 font-mono font-medium overflow-hidden",
         "hover:border-background-300",
         "focus-visible:bg-background-200 focus-visible:border-background-300 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none",
         isError &&
