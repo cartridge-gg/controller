@@ -1,4 +1,3 @@
-import { useChainId } from "@/hooks/connection";
 import {
   type SessionContracts,
   type SessionMessages,
@@ -16,7 +15,7 @@ import {
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
-import type React from "react";
+import { useConnection } from "@/hooks/connection";
 import { Link } from "react-router-dom";
 import { constants } from "starknet";
 import { AccordionCard } from "./AccordionCard";
@@ -35,7 +34,7 @@ export function AggregateCard({
   contracts,
   messages,
 }: AggregateCardProps) {
-  const chainId = useChainId();
+  const { controller } = useConnection();
   const explorer = useExplorer();
   const { onToggleMethod } = useCreateSession();
 
@@ -71,8 +70,8 @@ export function AggregateCard({
             <div className="py-2 font-bold">{name}</div>
             <Link
               to={
-                chainId === constants.StarknetChainId.SN_MAIN ||
-                chainId === constants.StarknetChainId.SN_SEPOLIA
+                controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
+                controller?.chainId() === constants.StarknetChainId.SN_SEPOLIA
                   ? explorer.contract(address)
                   : `#` // TODO: Add explorer for worlds.dev
               }

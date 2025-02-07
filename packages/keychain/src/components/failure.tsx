@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { useConnection } from "@/hooks/connection";
 
 export function Failure() {
-  const { closeModal, chainId } = useConnection();
+  const { controller, closeModal } = useConnection();
   return (
     <LayoutContainer>
       <LayoutHeader
@@ -29,7 +29,7 @@ export function Failure() {
             </Link>
           </>
         }
-        chainId={chainId}
+        chainId={controller?.chainId()}
         onClose={closeModal}
       />
     </LayoutContainer>

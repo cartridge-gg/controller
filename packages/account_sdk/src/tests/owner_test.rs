@@ -47,7 +47,7 @@ async fn test_change_owner() {
     let remove_owner = controller.contract().remove_owner_getcall(&signer.into());
 
     ensure_txn(
-        controller.execute_v1(vec![add_owner, remove_owner]),
+        controller.execute_v3(vec![add_owner, remove_owner]),
         runner.client(),
     )
     .await
@@ -186,7 +186,7 @@ async fn test_change_owner_wrong_signature() {
     controller
         .contract()
         .add_owner(&new_signer.into(), &new_signer_signature)
-        .fee_estimate_multiplier(1.5)
+        .gas_estimate_multiplier(1.5)
         .send()
         .await
         .unwrap();
@@ -216,7 +216,7 @@ async fn test_change_owner_execute_after() {
     let remove_owner = controller.contract().remove_owner_getcall(&signer.into());
 
     ensure_txn(
-        controller.execute_v1(vec![add_owner, remove_owner]),
+        controller.execute_v3(vec![add_owner, remove_owner]),
         runner.client(),
     )
     .await
@@ -290,7 +290,7 @@ async fn test_change_owner_invalidate_old_sessions() {
     let remove_owner = controller.contract().remove_owner_getcall(&signer.into());
 
     ensure_txn(
-        controller.execute_v1(vec![add_owner, remove_owner]),
+        controller.execute_v3(vec![add_owner, remove_owner]),
         runner.client(),
     )
     .await
@@ -385,7 +385,7 @@ async fn test_call_unallowed_methods() {
     // calling allowed method should succeed
     assert!(contract
         .transfer(&address, &amount)
-        .fee_estimate_multiplier(1.5)
+        .gas_estimate_multiplier(1.5)
         .send()
         .await
         .is_ok());
@@ -393,7 +393,7 @@ async fn test_call_unallowed_methods() {
     // Perform contract invocation that is not part of the allowed methods
     let error = contract
         .approve(&address, &amount)
-        .fee_estimate_multiplier(1.5)
+        .gas_estimate_multiplier(1.5)
         .send()
         .await
         .unwrap_err();

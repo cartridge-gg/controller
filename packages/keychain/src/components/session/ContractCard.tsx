@@ -1,4 +1,4 @@
-import { useChainId } from "@/hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { useCreateSession } from "@/hooks/session";
 import type { Method } from "@cartridge/presets";
 import {
@@ -33,7 +33,7 @@ export function ContractCard({
   icon,
   isExpanded,
 }: ContractCardProps) {
-  const chainId = useChainId();
+  const { controller } = useConnection();
   const explorer = useExplorer();
   const { onToggleMethod } = useCreateSession();
 
@@ -41,8 +41,8 @@ export function ContractCard({
     <a
       className="text-xs text-muted-foreground cursor-pointer hover:underline"
       href={
-        chainId === constants.StarknetChainId.SN_MAIN ||
-        chainId === constants.StarknetChainId.SN_SEPOLIA
+        controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
+        controller?.chainId() === constants.StarknetChainId.SN_SEPOLIA
           ? explorer.contract(address)
           : `#`
       }

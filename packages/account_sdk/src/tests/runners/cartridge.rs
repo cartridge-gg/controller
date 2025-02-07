@@ -298,7 +298,7 @@ impl CartridgeProxy {
             ExecutionEncoding::New,
         );
 
-        executor.execute_v1(vec![call]).send().await
+        executor.execute_v3(vec![call]).send().await
     }
 
     pub fn transaction_hash(&self, tx: &BroadcastedInvokeTransactionV1) -> Felt {

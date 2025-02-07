@@ -82,14 +82,14 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
     }
 
     // Skip if we already synced this controller
-    if (syncedControllerAddress === controller.address) {
+    if (syncedControllerAddress === controller.address()) {
       return;
     }
 
     setIsSynced(false);
 
-    controller
-      .getClassHashAt(controller.address)
+    controller.provider
+      .getClassHashAt(controller.address())
       .then((classHash) => {
         const current = CONTROLLER_VERSIONS.find(
           (v) => addAddressPadding(v.hash) === addAddressPadding(classHash),
@@ -97,7 +97,7 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
 
         setCurrent(current);
         setAvailable(current?.version !== LATEST_CONTROLLER.version);
-        setSyncedControllerAddress(controller.address);
+        setSyncedControllerAddress(controller.address());
       })
       .catch((e) => {
         if (e.message.includes("Contract not found")) {
@@ -114,7 +114,7 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
         }
       })
       .finally(() => {
-        setSyncedControllerAddress(controller.address);
+        setSyncedControllerAddress(controller.address());
         setIsSynced(true);
       });
   }, [controller, syncedControllerAddress]);
@@ -146,7 +146,7 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
           .transaction_hash;
       }
 
-      await controller.waitForTransaction(transaction_hash, {
+      await controller.provider.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
       });
 

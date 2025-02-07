@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { DepositEth } from "./DepositEth";
+import { Deposit } from "./Deposit";
 
 const meta = {
-  component: DepositEth,
+  component: Deposit,
   parameters: {
     connection: {
       controller: {
@@ -18,7 +18,7 @@ const meta = {
       console.log("onBack");
     },
   },
-} satisfies Meta<typeof DepositEth>;
+} satisfies Meta<typeof Deposit>;
 
 export default meta;
 

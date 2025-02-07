@@ -14,7 +14,6 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-  PencilIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish, shortString } from "starknet";
@@ -29,9 +28,8 @@ export function CreateSession({
   onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
   isUpdate?: boolean;
 }) {
-  const { closeModal, controller, upgrade, chainId, theme } = useConnection();
+  const { closeModal, controller, upgrade, theme } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isEditable, setIsEditable] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const [maxFee] = useState<BigNumberish>();
@@ -58,6 +56,8 @@ export function CreateSession({
 
     return policies;
   });
+
+  console.log("controller: ", controller);
 
   const handleToggleMethod = useCallback(
     (address: string, entrypoint: string, authorized: boolean) => {
@@ -92,16 +92,16 @@ export function CreateSession({
   }, [duration]);
 
   const chainSpecificMessages = useMemo(() => {
-    if (!policyState.messages || !chainId) return [];
+    if (!policyState.messages || !controller) return [];
     return policyState.messages.filter((message) => {
       return (
         !("domain" in message) ||
         (message.domain.chainId &&
           normalizeChainId(message.domain.chainId) ===
-            normalizeChainId(chainId))
+            normalizeChainId(controller.chainId()))
       );
     });
-  }, [policyState.messages, chainId]);
+  }, [policyState.messages, controller]);
 
   const onCreateSession = useCallback(async () => {
     if (!controller || !policyState) return;
@@ -155,14 +155,7 @@ export function CreateSession({
               : undefined
           }
           onClose={closeModal}
-          chainId={chainId}
-          right={
-            !isEditable ? (
-              <Button variant="icon" onClick={() => setIsEditable(!isEditable)}>
-                <PencilIcon variant="solid" />
-              </Button>
-            ) : undefined
-          }
+          chainId={controller?.chainId()}
         />
         <LayoutContent className="gap-6">
           <SessionConsent isVerified={policyState?.verified} />

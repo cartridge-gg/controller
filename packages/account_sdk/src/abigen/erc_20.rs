@@ -1314,7 +1314,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
         &self,
         spender: &cainome::cairo_serde::ContractAddress,
         amount: &cainome::cairo_serde::U256,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata
@@ -1325,7 +1325,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("approve"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1340,7 +1340,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn renounceOwnership(&self) -> starknet::accounts::ExecutionV1<A> {
+    pub fn renounceOwnership(&self) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         let __call = starknet::core::types::Call {
@@ -1348,7 +1348,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("renounceOwnership"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1363,7 +1363,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
-    pub fn renounce_ownership(&self) -> starknet::accounts::ExecutionV1<A> {
+    pub fn renounce_ownership(&self) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         let __call = starknet::core::types::Call {
@@ -1371,7 +1371,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("renounce_ownership"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1397,7 +1397,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
         &self,
         recipient: &cainome::cairo_serde::ContractAddress,
         amount: &cainome::cairo_serde::U256,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata
@@ -1408,7 +1408,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("transfer"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1438,7 +1438,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
         sender: &cainome::cairo_serde::ContractAddress,
         recipient: &cainome::cairo_serde::ContractAddress,
         amount: &cainome::cairo_serde::U256,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata
@@ -1451,7 +1451,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("transferFrom"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1474,7 +1474,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
     pub fn transferOwnership(
         &self,
         newOwner: &cainome::cairo_serde::ContractAddress,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata
@@ -1484,7 +1484,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("transferOwnership"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1514,7 +1514,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
         sender: &cainome::cairo_serde::ContractAddress,
         recipient: &cainome::cairo_serde::ContractAddress,
         amount: &cainome::cairo_serde::U256,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata
@@ -1527,7 +1527,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("transfer_from"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1550,7 +1550,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
     pub fn transfer_ownership(
         &self,
         new_owner: &cainome::cairo_serde::ContractAddress,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata
@@ -1560,7 +1560,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("transfer_ownership"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
     #[allow(clippy::ptr_arg)]
     #[allow(clippy::too_many_arguments)]
@@ -1583,7 +1583,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
     pub fn upgrade(
         &self,
         new_class_hash: &cainome::cairo_serde::ClassHash,
-    ) -> starknet::accounts::ExecutionV1<A> {
+    ) -> starknet::accounts::ExecutionV3<A> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata
@@ -1593,7 +1593,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Erc20<A> {
             selector: starknet::macros::selector!("upgrade"),
             calldata: __calldata,
         };
-        self.account.execute_v1(vec![__call])
+        self.account.execute_v3(vec![__call])
     }
 }
 impl<P: starknet::providers::Provider + Sync> Erc20Reader<P> {

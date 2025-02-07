@@ -1,12 +1,10 @@
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use starknet::core::serde::unsigned_field_element::UfeHex;
-use starknet::core::types::Felt;
 use tsify_next::Tsify;
 use wasm_bindgen::JsValue;
 
 use super::policy::Policy;
-use super::EncodingError;
+use super::{EncodingError, JsFelt};
 
 #[allow(non_snake_case)]
 #[serde_as]
@@ -14,10 +12,8 @@ use super::EncodingError;
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(rename_all = "camelCase")]
 pub struct Credentials {
-    #[serde_as(as = "Vec<UfeHex>")]
-    pub authorization: Vec<Felt>,
-    #[serde_as(as = "UfeHex")]
-    pub private_key: Felt,
+    pub authorization: Vec<JsFelt>,
+    pub private_key: JsFelt,
 }
 
 impl TryFrom<JsValue> for Credentials {
@@ -31,8 +27,8 @@ impl TryFrom<JsValue> for Credentials {
 impl From<account_sdk::storage::Credentials> for Credentials {
     fn from(value: account_sdk::storage::Credentials) -> Self {
         Self {
-            authorization: value.authorization,
-            private_key: value.private_key,
+            authorization: value.authorization.into_iter().map(Into::into).collect(),
+            private_key: value.private_key.into(),
         }
     }
 }
@@ -72,7 +68,7 @@ impl From<account_sdk::account::session::hash::Session> for Session {
 #[serde(rename_all = "camelCase")]
 pub struct SessionMetadata {
     pub session: Session,
-    pub max_fee: Option<Felt>,
+    pub max_fee: Option<JsFelt>,
     pub credentials: Option<Credentials>,
     pub is_registered: bool,
 }
@@ -89,7 +85,7 @@ impl From<account_sdk::storage::SessionMetadata> for SessionMetadata {
     fn from(value: account_sdk::storage::SessionMetadata) -> Self {
         SessionMetadata {
             session: value.session.into(),
-            max_fee: value.max_fee,
+            max_fee: value.max_fee.map(Into::into),
             credentials: value.credentials.map(Into::into),
             is_registered: value.is_registered,
         }
