@@ -144,6 +144,7 @@ export function execute({
         }
       },
     ).finally(() => {
+      setContext(undefined);
       release();
     });
   };
