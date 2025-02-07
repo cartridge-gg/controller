@@ -70,7 +70,7 @@ export const Recipient = ({
             onBlur={onBlur}
           />
           <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
-            <Clear isLoading={isLoading} onClear={onClear} />
+            {value && <Clear isLoading={isLoading} onClear={onClear} />}
           </div>
         </div>
         <Error label={error} />

@@ -20,15 +20,14 @@ export function Field({
   className,
 }: FieldProps) {
   const height = useMemo(() => {
-    const count = value?.toString().length || 0;
-    return Math.floor(count / 34) * 20 + 48;
+    const count = value?.toString().length || 1;
+    return Math.floor((count - 1) / 33) * 20 + 48;
   }, [value]);
-
   return (
     <Textarea
       spellCheck={false}
       className={cn(
-        "resize-none min-h-12 min-w-[384px] bg-background-100 py-3 pl-4 pr-12 border border-background-200 text-base/5 tracking-[0.01em]",
+        "resize-none min-h-12 min-w-[384px] bg-background-100 py-3 pl-4 pr-12 border border-background-200 text-base/5 font-mono font-medium",
         "hover:border-background-300",
         "focus-visible:bg-background-200 focus-visible:border-background-300 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none",
         isError &&
@@ -36,7 +35,7 @@ export function Field({
         className,
       )}
       style={{ height }}
-      placeholder={"Destination"}
+      placeholder={"Recipient Address or Username"}
       value={value}
       onChange={onChange}
       onFocus={onFocus}
