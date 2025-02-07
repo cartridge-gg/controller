@@ -1,14 +1,17 @@
 import {
+  Account,
   BigNumberish,
   num,
   InvokeFunctionResponse,
   Signature,
+  EstimateFeeDetails,
   EstimateFee,
+  ec,
   TypedData,
+  UniversalDetails,
+  Abi,
   Call,
   CallData,
-  Provider,
-  RpcProvider,
 } from "starknet";
 
 import {
@@ -16,18 +19,16 @@ import {
   CartridgeAccountMeta,
   JsCall,
   JsFelt,
-  Owner,
+  JsInvocationsDetails,
   SessionMetadata,
 } from "@cartridge/account-wasm/controller";
 
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
-import { toJsFeeEstimate, fromJsFeeEstimate } from "./fee";
 
-export default class Controller {
+export default class Controller extends Account {
   private cartridge: CartridgeAccount;
   private cartridgeMeta: CartridgeAccountMeta;
-  provider: Provider;
 
   constructor({
     appId,
@@ -36,7 +37,8 @@ export default class Controller {
     rpcUrl,
     address,
     username,
-    owner,
+    publicKey,
+    credentialId,
   }: {
     appId: string;
     classHash: string;
@@ -44,8 +46,11 @@ export default class Controller {
     rpcUrl: string;
     address: string;
     username: string;
-    owner: Owner;
+    publicKey: string;
+    credentialId: string;
   }) {
+    super({ nodeUrl: rpcUrl }, address, "");
+
     const accountWithMeta = CartridgeAccount.new(
       appId,
       classHash,
@@ -53,20 +58,17 @@ export default class Controller {
       chainId,
       address,
       username,
-      owner,
+      {
+        webauthn: {
+          rpId: import.meta.env.VITE_RP_ID!,
+          credentialId,
+          publicKey,
+        },
+      },
     );
 
-    this.provider = new RpcProvider({ nodeUrl: rpcUrl });
     this.cartridgeMeta = accountWithMeta.meta();
     this.cartridge = accountWithMeta.intoAccount();
-  }
-
-  appId() {
-    return this.cartridgeMeta.appId();
-  }
-
-  address() {
-    return this.cartridgeMeta.address();
   }
 
   username() {
@@ -75,10 +77,6 @@ export default class Controller {
 
   classHash() {
     return this.cartridgeMeta.classHash();
-  }
-
-  owner() {
-    return this.cartridgeMeta.owner();
   }
 
   ownerGuid() {
@@ -91,6 +89,10 @@ export default class Controller {
 
   chainId() {
     return this.cartridgeMeta.chainId();
+  }
+
+  async switchChain(rpcUrl: string): Promise<void> {
+    await this.cartridge.switchChain(rpcUrl);
   }
 
   async disconnect() {
@@ -127,7 +129,7 @@ export default class Controller {
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
     publicKey: string,
-    maxFee?: EstimateFee,
+    maxFee: BigNumberish,
   ): Promise<InvokeFunctionResponse> {
     if (!this.cartridge) {
       throw new Error("Account not found");
@@ -137,7 +139,7 @@ export default class Controller {
       toWasmPolicies(policies),
       expiresAt,
       publicKey,
-      maxFee ? toJsFeeEstimate(maxFee) : undefined,
+      num.toHex(maxFee),
     );
   }
 
@@ -155,11 +157,19 @@ export default class Controller {
 
   async execute(
     calls: Call[],
-    maxFee?: EstimateFee,
+    abisOrDetails?: Abi[] | UniversalDetails,
+    details?: UniversalDetails,
   ): Promise<InvokeFunctionResponse> {
+    const executionDetails =
+      (Array.isArray(abisOrDetails) ? details : abisOrDetails) || {};
+
+    if (executionDetails.maxFee !== undefined) {
+      executionDetails.maxFee = num.toHex(executionDetails.maxFee);
+    }
+
     return await this.cartridge.execute(
       toJsCalls(calls),
-      maxFee ? toJsFeeEstimate(maxFee) : undefined,
+      executionDetails as JsInvocationsDetails,
     );
   }
 
@@ -191,7 +201,11 @@ export default class Controller {
     );
   }
 
-  async estimateInvokeFee(calls: Call[]): Promise<EstimateFee> {
+  async estimateInvokeFee(
+    calls: Call[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _: EstimateFeeDetails = {},
+  ): Promise<EstimateFee> {
     const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
 
     // The reason why we set the multiplier unseemingly high is to account
@@ -207,18 +221,38 @@ export default class Controller {
       MULTIPLIER_PERCENTAGE,
     );
 
-    const estimate = fromJsFeeEstimate(res);
-    return { ...estimate, suggestedMaxFee };
+    return { suggestedMaxFee, ...res };
+  }
+
+  async verifyMessageHash(
+    hash: BigNumberish,
+    signature: Signature,
+  ): Promise<boolean> {
+    // @ts-expect-error TODO: fix overload type mismatch
+    if (BigInt(signature[0]) === 0n) {
+      return ec.starkCurve.verify(
+        // @ts-expect-error TODO: fix overload type mismatch
+        signature,
+        BigInt(hash).toString(),
+        // @ts-expect-error TODO: fix overload type mismatch
+        signature[0],
+      );
+    }
+
+    return super.verifyMessageHash(hash, signature);
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
     return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
-  async selfDeploy(maxFee?: EstimateFee): Promise<DeployedAccountTransaction> {
-    return await this.cartridge.deploySelf(
-      maxFee ? toJsFeeEstimate(maxFee) : undefined,
-    );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-explicit-any
+  async getNonce(_?: any): Promise<string> {
+    return await this.cartridge.getNonce();
+  }
+
+  async selfDeploy(maxFee: BigNumberish): Promise<DeployedAccountTransaction> {
+    return await this.cartridge.deploySelf(num.toHex(maxFee));
   }
 
   async delegateAccount(): Promise<string> {
@@ -238,8 +272,14 @@ export default class Controller {
     }
 
     const meta = cartridgeWithMeta.meta();
-    const controller = Object.create(Controller.prototype) as Controller;
-    controller.provider = new RpcProvider({ nodeUrl: meta.rpcUrl() });
+
+    const controller = new Account(
+      { nodeUrl: meta.rpcUrl() },
+      meta.address(),
+      "",
+    ) as Controller;
+
+    Object.setPrototypeOf(controller, Controller.prototype);
     controller.cartridge = cartridgeWithMeta.intoAccount();
     controller.cartridgeMeta = meta;
     return controller;

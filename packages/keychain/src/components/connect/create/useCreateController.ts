@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useConnection } from "@/hooks/connection";
 import { LoginMode } from "../types";
 import { doLogin, doSignup } from "@/hooks/account";
-import { constants, RpcProvider } from "starknet";
+import { constants } from "starknet";
 import Controller from "@/utils/controller";
 import { fetchAccount } from "./utils";
 import { PopupCenter } from "@/utils/url";
@@ -20,7 +20,7 @@ export function useCreateController({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
-  const { origin, policies, rpcUrl, setController } = useConnection();
+  const { origin, policies, chainId, rpcUrl, setController } = useConnection();
 
   useAccountQuery(
     { username: pendingUsername || "" },
@@ -64,10 +64,7 @@ export function useCreateController({
       credentialId: string,
       publicKey: string,
     ) => {
-      if (!origin || !rpcUrl) return;
-
-      const provider = new RpcProvider({ nodeUrl: rpcUrl });
-      const chainId = await provider.getChainId();
+      if (!origin || !chainId || !rpcUrl) return;
 
       const controller = new Controller({
         appId: origin,
@@ -76,22 +73,15 @@ export function useCreateController({
         rpcUrl,
         address,
         username,
-        owner: {
-          signer: {
-            webauthn: {
-              rpId: import.meta.env.VITE_RP_ID!,
-              credentialId,
-              publicKey,
-            },
-          },
-        },
+        publicKey,
+        credentialId,
       });
 
       window.controller = controller;
       setController(controller);
       onCreated?.();
     },
-    [origin, rpcUrl, setController, onCreated],
+    [origin, chainId, rpcUrl, setController, onCreated],
   );
 
   const doPopupFlow = useCallback(

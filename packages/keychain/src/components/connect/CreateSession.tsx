@@ -27,7 +27,7 @@ export function CreateSession({
   onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
   isUpdate?: boolean;
 }) {
-  const { closeModal, controller, upgrade, theme } = useConnection();
+  const { closeModal, controller, upgrade, chainId, theme } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
@@ -38,16 +38,16 @@ export function CreateSession({
   }, [duration]);
 
   const chainSpecificMessages = useMemo(() => {
-    if (!policies.messages || !controller) return [];
+    if (!policies.messages || !chainId) return [];
     return policies.messages.filter((message) => {
       return (
         !("domain" in message) ||
         (message.domain.chainId &&
           normalizeChainId(message.domain.chainId) ===
-            normalizeChainId(controller.chainId()))
+            normalizeChainId(chainId))
       );
     });
-  }, [policies.messages, controller]);
+  }, [policies.messages, chainId]);
 
   const onCreateSession = useCallback(async () => {
     if (!controller || !policies) return;
@@ -74,7 +74,6 @@ export function CreateSession({
       }
 
       await controller.createSession(expiresAt, policies, maxFee);
-
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
@@ -113,7 +112,7 @@ export function CreateSession({
             : undefined
         }
         onClose={closeModal}
-        chainId={controller?.chainId()}
+        chainId={chainId}
       />
       <LayoutContent className="gap-6">
         <SessionConsent isVerified={policies?.verified} />

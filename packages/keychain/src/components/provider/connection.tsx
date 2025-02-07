@@ -14,9 +14,12 @@ export type ConnectionContextValue = {
   controller?: Controller;
   origin?: string;
   rpcUrl?: string;
+  chainId?: string;
+  chainName?: string;
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
   hasPrefundRequest: boolean;
+  error?: Error;
   upgrade: UpgradeInterface;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;

@@ -14,7 +14,6 @@ import {
   usePriceByAddressesQuery,
 } from "@cartridge/utils/api/cartridge";
 import { useQuery } from "react-query";
-import { getChecksumAddress } from "starknet";
 
 const DEFAULT_TOKENS = [
   {
@@ -23,7 +22,7 @@ const DEFAULT_TOKENS = [
     name: "Ether",
     symbol: "ETH",
     decimals: 18,
-    icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
+    icon: "",
   },
   {
     address:
@@ -31,11 +30,11 @@ const DEFAULT_TOKENS = [
     name: "Starknet Token",
     symbol: "STRK",
     decimals: 18,
-    icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
+    icon: "",
   },
 ];
 
-export type ERC20Metadata = {
+export type ERC20 = {
   address: string;
   name: string;
   symbol: string;
@@ -43,7 +42,7 @@ export type ERC20Metadata = {
   icon: string;
 };
 
-export type ERC20 = {
+type ERC20Inner = {
   name: string;
   icon?: string;
   symbol: string;
@@ -55,8 +54,7 @@ export type ERC20 = {
 };
 
 export interface TokensContextValue {
-  tokens: Record<string, ERC20>;
-  feeToken?: ERC20;
+  tokens: Record<string, ERC20Inner>;
   isLoading: boolean;
   error?: Error;
   registerPair: (pair: TokenPair) => void;
@@ -69,31 +67,28 @@ export const TokensContext = createContext<TokensContextValue>({
 });
 
 interface TokensProviderProps extends PropsWithChildren {
-  tokens?: ERC20Metadata[];
+  tokens?: ERC20[];
   refetchInterval?: number;
-  feeToken?: string;
 }
 
 export function TokensProvider({
   children,
   tokens: tokensArg,
-  feeToken = "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
   refetchInterval = 30000,
 }: TokensProviderProps) {
   const { controller } = useConnection();
-  const [tokens, setTokens] = useState<Record<string, ERC20>>({});
+  const [tokens, setTokens] = useState<Record<string, ERC20Inner>>({});
   const [addresses, setAdresses] = useState<string[]>([]);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const { error: balanceError, isLoading: isLoadingBalances } = useQuery(
-    ["token-balances", controller?.address(), Object.keys(tokens)],
+    ["token-balances", controller?.address, Object.keys(tokens)],
     async () => {
       if (!controller) return;
 
       const updatedTokens = { ...tokens };
       await Promise.all(
         Object.values(updatedTokens).map(async (token) => {
-          const balance = await token.contract.balanceOf(controller.address());
+          const balance = await token.contract.balanceOf(controller.address);
           updatedTokens[token.address] = {
             ...token,
             balance,
@@ -102,9 +97,6 @@ export function TokensProvider({
       );
 
       setTokens(updatedTokens);
-      if (!initialLoadComplete) {
-        setInitialLoadComplete(true);
-      }
     },
     {
       enabled: !!controller && Object.keys(tokens).length > 0,
@@ -126,21 +118,20 @@ export function TokensProvider({
 
       const tokenPromises = tokens.map(async (token) => {
         const { icon, address, name, symbol, decimals } = token;
-        const normalizedAddress = getChecksumAddress(address);
         const contract = new ERC20Contract({
-          address: normalizedAddress,
-          provider: controller.provider,
+          address,
+          provider: controller,
         });
 
-        const balance = await contract.balanceOf(controller.address());
+        const balance = await contract.balanceOf(controller.address);
 
         return [
-          normalizedAddress,
+          address,
           {
             name,
             symbol,
             decimals,
-            address: normalizedAddress,
+            address,
             icon,
             contract,
             balance,
@@ -151,7 +142,7 @@ export function TokensProvider({
       const tokenEntries = await Promise.all(tokenPromises);
       const newTokens = Object.fromEntries(tokenEntries) as Record<
         string,
-        ERC20
+        ERC20Inner
       >;
 
       setTokens(newTokens);
@@ -195,27 +186,24 @@ export function TokensProvider({
 
   const registerPair = useCallback(
     async (address: string) => {
-      if (!controller) return;
-
-      const normalizedAddress = getChecksumAddress(address);
-      if (tokens[normalizedAddress]) return;
+      if (!controller || tokens[address]) return;
 
       const newTokens = { ...tokens };
       const contract = new ERC20Contract({
-        address: normalizedAddress,
-        provider: controller.provider,
+        address,
+        provider: controller,
       });
 
       try {
-        const balance = await contract.balanceOf(controller.address());
+        const balance = await contract.balanceOf(controller.address);
         await contract.init();
         const metadata = contract.metadata();
 
-        newTokens[normalizedAddress] = {
+        newTokens[address] = {
           name: metadata.name,
           symbol: metadata.symbol,
           decimals: metadata.decimals,
-          address: normalizedAddress,
+          address,
           icon: "",
           contract,
           balance,
@@ -224,7 +212,7 @@ export function TokensProvider({
         setTokens(newTokens);
         setAdresses(Object.keys(newTokens));
       } catch (error) {
-        console.error(`Failed to load token ${normalizedAddress}:`, error);
+        console.error(`Failed to load token ${address}:`, error);
       }
     },
     [controller, tokens],
@@ -233,15 +221,12 @@ export function TokensProvider({
   const value = useMemo(
     () => ({
       tokens,
-      feeToken: tokens[getChecksumAddress(feeToken)],
-      isLoading: !initialLoadComplete && (isLoadingBalances || isPriceLoading),
+      isLoading: isLoadingBalances || isPriceLoading,
       error: (balanceError || priceError) as Error | undefined,
       registerPair,
     }),
     [
       tokens,
-      feeToken,
-      initialLoadComplete,
       isLoadingBalances,
       isPriceLoading,
       balanceError,

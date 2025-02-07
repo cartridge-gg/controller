@@ -30,7 +30,7 @@ export default function StripeCheckout({
 }: StripeCheckoutProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const { closeModal, controller } = useConnection();
+  const { closeModal, chainId, controller } = useConnection();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -85,12 +85,10 @@ export default function StripeCheckout({
     <LayoutContainer>
       <LayoutHeader
         title={"Purchase $" + creditsAmount}
-        description={
-          controller && <CopyAddress address={controller.address()} />
-        }
+        description={controller && <CopyAddress address={controller.address} />}
         icon={<CoinsIcon variant="solid" size="lg" />}
         onBack={onBack}
-        chainId={controller?.chainId()}
+        chainId={chainId}
         onClose={closeModal}
       />
       <LayoutContent className="gap-6">

@@ -1,4 +1,3 @@
-import { constants } from "starknet";
 import { vi } from "vitest";
 
 export const mockPosthog = {
@@ -9,9 +8,6 @@ export const mockPosthog = {
 
 export const mockConnection = {
   controller: {
-    chainId: vi
-      .fn()
-      .mockImplementation(() => constants.StarknetChainId.SN_MAIN),
     estimateInvokeFee: vi.fn().mockImplementation(async () => ({
       suggestedMaxFee: BigInt(1000),
     })),

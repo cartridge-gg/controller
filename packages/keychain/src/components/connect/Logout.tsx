@@ -9,7 +9,7 @@ import { useConnection } from "@/hooks/connection";
 import { ResponseCodes } from "@cartridge/controller";
 
 export function Logout() {
-  const { closeModal, controller, openSettings, context, logout } =
+  const { closeModal, chainId, openSettings, context, logout } =
     useConnection();
   return (
     <LayoutContainer>
@@ -18,7 +18,7 @@ export function Logout() {
         title="Log Out"
         description="Are you sure?"
         onClose={closeModal}
-        chainId={controller?.chainId()}
+        chainId={chainId}
         openSettings={openSettings}
       />
       <LayoutFooter>

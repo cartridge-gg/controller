@@ -18,7 +18,7 @@ enum State {
 }
 
 export function Settings() {
-  const { closeModal, controller, logout } = useConnection();
+  const { closeModal, chainId, logout } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
   // const [delegateAccount, setDelegateAccount] = useState("");
 
@@ -81,7 +81,7 @@ export function Settings() {
         variant="compressed"
         title="Controller Settings"
         Icon={GearIcon}
-        chainId={controller?.chainId()}
+        chainId={chainId}
         onClose={closeModal}
       />
       <LayoutContent className="gap-6">

@@ -5,12 +5,13 @@ import {
   LayoutContent,
   LayoutFooter,
   Button,
+  ArrowIcon,
   CoinsIcon,
+  EthereumIcon,
   CopyAddress,
   LayoutHeader,
-  DepositIcon,
 } from "@cartridge/ui-next";
-import { Deposit } from "./Deposit";
+import { DepositEth } from "./DepositEth";
 import { PurchaseCredits } from "./PurchaseCredits";
 import { Balance, BalanceType } from "./Balance";
 
@@ -27,18 +28,16 @@ export type FundingProps = {
 };
 
 export function Funding({ title, isSlot, onComplete }: FundingProps) {
-  const { closeModal, controller } = useConnection();
+  const { closeModal, chainId, controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
-  const balances: BalanceType[] = isSlot
-    ? [BalanceType.CREDITS]
-    : [BalanceType.CREDITS, BalanceType.FEE_TOKEN];
+  const showBalances: BalanceType[] = isSlot ? ["credits"] : ["credits", "eth"];
   const showCredits =
     (typeof document !== "undefined" && document.cookie.includes("credits=")) ||
     isSlot;
 
   if (state === FundingState.FUND_ETH) {
     return (
-      <Deposit
+      <DepositEth
         onComplete={onComplete}
         onBack={() => setState(FundingState.SHOW_OPTIONS)}
       />
@@ -58,15 +57,13 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
     <LayoutContainer>
       <LayoutHeader
         title={title || (controller ? `Fund ${controller.username()}` : "")}
-        description={
-          controller && <CopyAddress address={controller.address()} />
-        }
-        icon={<DepositIcon size="lg" />}
-        chainId={controller?.chainId()}
+        description={controller && <CopyAddress address={controller.address} />}
+        icon={<ArrowIcon variant="down" size="lg" />}
+        chainId={chainId}
         onClose={closeModal}
       />
       <LayoutContent className="gap-6">
-        <Balance types={balances} />
+        <Balance showBalances={showBalances} />
       </LayoutContent>
       <LayoutFooter>
         {showCredits && (
@@ -79,7 +76,7 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
             onClick={() => setState(FundingState.FUND_ETH)}
             variant="secondary"
           >
-            Deposit
+            <EthereumIcon size="sm" className="mr-1" /> Deposit Eth
           </Button>
         )}
       </LayoutFooter>

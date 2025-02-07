@@ -1,36 +1,36 @@
 use account_sdk::abigen::controller::Call;
 use serde::{Deserialize, Serialize};
+use serde_with::serde_as;
+use starknet::core::serde::unsigned_field_element::UfeHex;
 use starknet::core::types;
 use starknet::core::utils::get_selector_from_name;
-use starknet_crypto::Felt;
+use starknet_types_core::felt::Felt;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
-use super::{EncodingError, JsFelt};
+use super::EncodingError;
 
 #[allow(non_snake_case)]
+#[serde_as]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(rename_all = "camelCase")]
 pub struct JsCall {
-    pub contract_address: JsFelt,
+    #[serde_as(as = "UfeHex")]
+    pub contract_address: Felt,
     pub entrypoint: String,
-    pub calldata: Vec<JsFelt>,
+    #[serde_as(as = "Vec<UfeHex>")]
+    pub calldata: Vec<Felt>,
 }
 
 impl TryFrom<JsCall> for Call {
     type Error = EncodingError;
 
     fn try_from(value: JsCall) -> Result<Self, Self::Error> {
-        let felt: Felt = value.contract_address.try_into()?;
         Ok(Call {
-            to: felt.into(),
+            to: value.contract_address.into(),
             selector: get_selector_from_name(&value.entrypoint)?,
-            calldata: value
-                .calldata
-                .into_iter()
-                .map(TryInto::try_into)
-                .collect::<Result<Vec<_>, _>>()?,
+            calldata: value.calldata,
         })
     }
 }
@@ -40,13 +40,9 @@ impl TryFrom<JsCall> for types::Call {
 
     fn try_from(value: JsCall) -> Result<Self, Self::Error> {
         Ok(types::Call {
-            to: value.contract_address.try_into()?,
+            to: value.contract_address,
             selector: get_selector_from_name(&value.entrypoint)?,
-            calldata: value
-                .calldata
-                .into_iter()
-                .map(TryInto::try_into)
-                .collect::<Result<Vec<_>, _>>()?,
+            calldata: value.calldata,
         })
     }
 }

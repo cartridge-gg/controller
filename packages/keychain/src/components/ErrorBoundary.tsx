@@ -37,7 +37,7 @@ export class ErrorBoundary extends React.Component<
 }
 
 export function ErrorPage({ error }: { error: Error }) {
-  const { closeModal, controller } = useConnection();
+  const { closeModal, chainId } = useConnection();
 
   const posthog = usePostHog();
 
@@ -55,7 +55,7 @@ export function ErrorPage({ error }: { error: Error }) {
         description="Something went wrong"
         Icon={AlertIcon}
         onClose={closeModal}
-        chainId={controller?.chainId()}
+        chainId={chainId}
       />
       <LayoutContent className="gap-4">
         <div className="flex w-full px-4 py-6 bg-background-100 border border-background-200 rounded">

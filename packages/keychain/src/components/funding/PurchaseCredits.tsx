@@ -15,7 +15,7 @@ import { AmountSelection } from "./AmountSelection";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
-import { Balance, BalanceType } from "./Balance";
+import { Balance } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
 import { isIframe } from "@cartridge/utils";
 import { DEFAULT_AMOUNT } from "./constants";
@@ -35,7 +35,7 @@ type PurchaseCreditsProps = {
 };
 
 export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
-  const { closeModal, controller } = useConnection();
+  const { closeModal, chainId, controller } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setisLoading] = useState<boolean>(false);
@@ -110,9 +110,7 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           "Purchase " +
           (state === PurchaseState.SELECTION ? "Credits" : "Complete")
         }
-        description={
-          controller && <CopyAddress address={controller.address()} />
-        }
+        description={controller && <CopyAddress address={controller.address} />}
         icon={
           state === PurchaseState.SELECTION ? (
             <CoinsIcon variant="solid" size="lg" />
@@ -121,11 +119,11 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           )
         }
         onBack={state === PurchaseState.SELECTION ? onBack : undefined}
-        chainId={controller?.chainId()}
+        chainId={chainId}
         onClose={closeModal}
       />
       <LayoutContent className="gap-6">
-        <Balance types={[BalanceType.CREDITS]} />
+        <Balance showBalances={["credits"]} />
         <ErrorAlert
           variant=""
           title="WHAT ARE CREDITS"

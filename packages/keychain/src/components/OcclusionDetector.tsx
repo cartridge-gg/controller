@@ -5,7 +5,8 @@ export function OcclusionDetector() {
   const { context } = useConnection();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOccluded, setIsOccluded] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>(null);
+
   const handleIntersectionChange = useCallback(
     (changes: IntersectionObserverEntry[]) => {
       // Clear any existing timeout
@@ -14,7 +15,7 @@ export function OcclusionDetector() {
       }
 
       // Set a new timeout
-      const timeout = setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         const change = changes[changes.length - 1]; // Get the most recent change
         if (!change) return;
 
@@ -36,8 +37,6 @@ export function OcclusionDetector() {
           setIsOccluded(false);
         }
       }, 250);
-
-      timeoutRef.current = timeout;
     },
     [context],
   );

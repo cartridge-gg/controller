@@ -16,7 +16,7 @@ export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
   const rpc = useCallback(() => {
     let nodeUrl;
-    switch (connection.controller?.chainId()) {
+    switch (connection.chainId) {
       case constants.StarknetChainId.SN_MAIN:
         nodeUrl = import.meta.env.VITE_RPC_MAINNET;
         break;
@@ -27,11 +27,11 @@ export function Provider({ children }: PropsWithChildren) {
         nodeUrl = connection.rpcUrl;
     }
     return { nodeUrl };
-  }, [connection.rpcUrl, connection.controller]);
+  }, [connection.rpcUrl, connection.chainId]);
 
   const defaultChainId = useMemo(() => {
-    return num.toBigInt(connection.controller?.chainId() || 0);
-  }, [connection.controller]);
+    return num.toBigInt(connection.chainId || 0);
+  }, [connection.chainId]);
 
   return (
     <CartridgeAPIProvider url={ENDPOINT}>

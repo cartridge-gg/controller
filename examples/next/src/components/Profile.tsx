@@ -3,7 +3,7 @@
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button } from "@cartridge/ui-next";
-import { STRK_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
+import { ETH_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
 import { useEffect, useState } from "react";
 
 export function Profile() {
@@ -57,20 +57,20 @@ export function Profile() {
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileTo(
-                `inventory/token/${STRK_CONTRACT_ADDRESS}?preset=cartridge`,
+                `inventory/token/${ETH_CONTRACT_ADDRESS}?preset=cartridge`,
               )
             }
           >
-            Open to Token STRK
+            Open to Token ETH
           </Button>
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileTo(
-                `inventory/token/${STRK_CONTRACT_ADDRESS}/send?preset=cartridge`,
+                `inventory/token/${ETH_CONTRACT_ADDRESS}/send?preset=cartridge`,
               )
             }
           >
-            Open to Token STRK Send
+            Open to Token ETH Send
           </Button>
         </div>
         <div className="flex flex-wrap gap-1">

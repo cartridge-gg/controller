@@ -21,9 +21,7 @@
         ".next/**",
         "dist/**",
         "**/pkg-controller/**",
-        "**/pkg-session/**",
-        "build/**",
-        ".svelte-kit/**"
+        "**/pkg-session/**"
       ]
     },
     "dev": {

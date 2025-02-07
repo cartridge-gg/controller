@@ -1,11 +1,24 @@
-import { Call, EstimateFee, EstimateFeeDetails } from "starknet";
+import {
+  Call,
+  DeclareContractPayload,
+  EstimateFee,
+  EstimateFeeDetails,
+} from "starknet";
 
 export function estimateInvokeFee() {
   return async (
     transactions: Call[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _details?: EstimateFeeDetails,
+    details?: EstimateFeeDetails,
   ): Promise<EstimateFee | undefined> => {
-    return await window.controller?.estimateInvokeFee(transactions);
+    return await window.controller?.estimateInvokeFee(transactions, details);
+  };
+}
+
+export function estimateDeclareFee() {
+  return async (
+    payload: DeclareContractPayload,
+    details?: EstimateFeeDetails,
+  ): Promise<EstimateFee | undefined> => {
+    return await window.controller?.estimateDeclareFee(payload, details);
   };
 }

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
   Button,
+  HeaderProps,
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
@@ -8,21 +9,20 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { ControllerError } from "@/utils/connection";
 import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
+import { Fees } from "./Fees";
+import { Funding } from "./funding";
+import { DeployController } from "./DeployController";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import { parseControllerError } from "@/utils/connection/execute";
 import isEqual from "lodash/isEqual";
 
-import { Fees } from "./Fees";
-import { Funding } from "./funding";
-import { DeployController } from "./DeployController";
-import { Call, EstimateFee } from "starknet";
-import { BannerProps } from "./layout/container/header/Banner";
-
 interface ExecutionContainerProps {
-  transactions: Call[];
-  feeEstimate?: EstimateFee;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transactions: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transactionsDetail?: any;
   executionError?: ControllerError;
-  onSubmit: (maxFee?: EstimateFee) => Promise<void>;
+  onSubmit: (maxFee?: bigint) => Promise<void>;
   onDeploy?: () => void;
   onFund?: () => void;
   onError?: (error: ControllerError) => void;
@@ -35,7 +35,7 @@ export function ExecutionContainer({
   description,
   icon,
   transactions,
-  feeEstimate,
+  transactionsDetail,
   executionError,
   onSubmit,
   onDeploy,
@@ -44,38 +44,36 @@ export function ExecutionContainer({
   buttonText = "SUBMIT",
   children,
 }: ExecutionContainerProps &
-  Pick<BannerProps, "title" | "description" | "icon">) {
-  const { controller, closeModal, openSettings } = useConnection();
-  const [maxFee, setMaxFee] = useState<EstimateFee | undefined>(feeEstimate);
+  Pick<HeaderProps, "title" | "description" | "icon">) {
+  const { controller, closeModal, chainId, openSettings } = useConnection();
+  const [maxFee, setMaxFee] = useState<bigint | null>(null);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [isEstimating, setIsEstimating] = useState(true);
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
   );
 
   // Prevent unnecessary estimate fee calls.
-  const prevTransactionsRef = useRef<{
-    transactions: Call[] | undefined;
-    feeEstimate: EstimateFee | undefined;
-  }>({
+  const prevTransactionsRef = useRef({
     transactions: undefined,
-    feeEstimate: undefined,
+    transactionsDetail: undefined,
   });
 
   const estimateFees = useCallback(
-    async (transactions: Call[]) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async (transactions: any, transactionsDetail?: any) => {
       if (!controller) {
         return;
       }
-
       try {
-        const est = await controller.estimateInvokeFee(transactions);
+        const est = await controller.estimateInvokeFee(
+          transactions,
+          transactionsDetail,
+        );
         setCtrlError(undefined);
-        setMaxFee(est);
-        setIsEstimating(false);
+        setMaxFee(est.suggestedMaxFee);
       } catch (e) {
         const error = parseControllerError(e as unknown as ControllerError);
         onError?.(error);
@@ -93,20 +91,23 @@ export function ExecutionContainer({
     // Only estimate if transactions or details have changed
     if (
       isEqual(prevTransactionsRef.current.transactions, transactions) &&
-      isEqual(prevTransactionsRef.current.feeEstimate, feeEstimate)
+      isEqual(
+        prevTransactionsRef.current.transactionsDetail,
+        transactionsDetail,
+      )
     ) {
       return;
     }
 
     // Update ref with current values
-    prevTransactionsRef.current = { transactions, feeEstimate };
+    prevTransactionsRef.current = { transactions, transactionsDetail };
 
     const estimateFeesAsync = async () => {
-      await estimateFees(transactions);
+      await estimateFees(transactions, transactionsDetail);
     };
 
     estimateFeesAsync();
-  }, [transactions, estimateFees]);
+  }, [transactions, transactionsDetail, estimateFees]);
 
   useEffect(() => {
     setCtrlError(executionError);
@@ -115,7 +116,7 @@ export function ExecutionContainer({
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      await onSubmit(maxFee);
+      await onSubmit(maxFee === null ? undefined : maxFee);
     } catch (e) {
       const error = parseControllerError(e as unknown as ControllerError);
       onError?.(error);
@@ -129,7 +130,7 @@ export function ExecutionContainer({
     setCTAState("execute");
     setCtrlError(undefined);
     setIsLoading(false);
-    estimateFees(transactions);
+    estimateFees(transactions, transactionsDetail);
   };
 
   if (
@@ -168,7 +169,7 @@ export function ExecutionContainer({
         description={description}
         icon={icon}
         onClose={closeModal}
-        chainId={controller?.chainId()}
+        chainId={chainId}
         openSettings={openSettings}
       />
       {children}
@@ -190,7 +191,7 @@ export function ExecutionContainer({
                   {ctrlError ? (
                     <ControllerErrorAlert error={ctrlError} />
                   ) : (
-                    <Fees isLoading={isEstimating} maxFee={maxFee} />
+                    maxFee && <Fees maxFee={BigInt(maxFee)} />
                   )}
                   <Button onClick={() => setCTAState("fund")}>ADD FUNDS</Button>
                 </>
@@ -215,16 +216,14 @@ export function ExecutionContainer({
               return (
                 <>
                   {ctrlError && <ControllerErrorAlert error={ctrlError} />}
-                  {!ctrlError && (
-                    <Fees isLoading={isEstimating} maxFee={maxFee} />
-                  )}
+                  {maxFee !== null && <Fees maxFee={BigInt(maxFee)} />}
                   <Button
                     onClick={handleSubmit}
                     isLoading={isLoading}
                     disabled={
-                      !!ctrlError ||
+                      ctrlError ||
                       !transactions ||
-                      !!(maxFee === null && transactions?.length)
+                      (maxFee === null && transactions?.length)
                     }
                   >
                     {buttonText}

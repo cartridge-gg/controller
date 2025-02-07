@@ -13,7 +13,7 @@ import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
 
 export function Recovery({ onBack }: { onBack: () => void }) {
-  const { controller, context, setContext } = useConnection();
+  const { chainId, controller, context, setContext } = useConnection();
   const [externalOwnerAddress, setExternalOwnerAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -29,9 +29,10 @@ export function Recovery({ onBack }: { onBack: () => void }) {
   const onSetRecovery = useCallback(() => {
     if (!context || !controller) return;
     setContext({
+      origin: context.origin,
       transactions: [
         {
-          contractAddress: controller.address(),
+          contractAddress: controller.address,
           entrypoint: "register_external_owner",
           calldata: CallData.compile([externalOwnerAddress]),
         },
@@ -48,7 +49,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
         variant="expanded"
         title="Recovery Account(s)"
         onBack={onBack}
-        chainId={controller?.chainId()}
+        chainId={chainId}
       />
       <LayoutContent>
         {/* TODO: Get rid of this div once Content is updated with TW */}

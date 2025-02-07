@@ -118,7 +118,7 @@ export function Session() {
 
       onCallback({
         username: controller.username(),
-        address: controller.address(),
+        address: controller.address,
         ownerGuid: controller.ownerGuid(),
         transactionHash: transaction_hash,
         expiresAt: String(expiresAt),
@@ -143,7 +143,7 @@ export function Session() {
         if (session) {
           onCallback({
             username: controller.username(),
-            address: controller.address(),
+            address: controller.address,
             ownerGuid: controller.ownerGuid(),
             alreadyRegistered: true,
             expiresAt: String(session.session.expiresAt),

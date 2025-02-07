@@ -3,8 +3,8 @@ import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
 import { Method } from "@cartridge/presets";
+import { useChainId } from "@/hooks/connection";
 import { AccordionCard } from "./AccordionCard";
-import { useConnection } from "@/hooks/connection";
 
 interface ContractCardProps {
   address: string;
@@ -21,15 +21,15 @@ export function ContractCard({
   icon,
   isExpanded,
 }: ContractCardProps) {
-  const { controller } = useConnection();
+  const chainId = useChainId();
   const explorer = useExplorer();
 
   const explorerLink = (
     <a
       className="text-xs text-muted-foreground cursor-pointer hover:underline"
       href={
-        controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
-        controller?.chainId() === constants.StarknetChainId.SN_SEPOLIA
+        chainId === constants.StarknetChainId.SN_MAIN ||
+        chainId === constants.StarknetChainId.SN_SEPOLIA
           ? explorer.contract(address)
           : `#`
       }

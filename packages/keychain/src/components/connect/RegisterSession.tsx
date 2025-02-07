@@ -4,8 +4,6 @@ import { useConnection } from "@/hooks/connection";
 import { SessionConsent } from "@/components/connect";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import {
-  Call,
-  EstimateFee,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
@@ -25,9 +23,14 @@ export function RegisterSession({
 }) {
   const { controller, theme } = useConnection();
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
-  const [transactions, setTransactions] = useState<Call[] | undefined>(
-    undefined,
-  );
+  const [transactions, setTransactions] = useState<
+    | {
+        contractAddress: string;
+        entrypoint: string;
+        calldata: string[];
+      }[]
+    | undefined
+  >(undefined);
 
   const expiresAt = useMemo(() => {
     return duration + NOW;
@@ -42,7 +45,7 @@ export function RegisterSession({
         .then((calldata) => {
           setTransactions([
             {
-              contractAddress: controller.address(),
+              contractAddress: controller.address,
               entrypoint: "register_session",
               calldata,
             },
@@ -52,7 +55,7 @@ export function RegisterSession({
   }, [controller, expiresAt, policies, publicKey]);
 
   const onRegisterSession = useCallback(
-    async (maxFee?: EstimateFee) => {
+    async (maxFee?: bigint) => {
       if (maxFee == undefined || !publicKey || !controller) {
         return;
       }
@@ -82,7 +85,7 @@ export function RegisterSession({
         maxFee,
       );
 
-      await controller.provider.waitForTransaction(transaction_hash, {
+      await controller.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
         successStates: [
           TransactionExecutionStatus.SUCCEEDED,
@@ -94,10 +97,6 @@ export function RegisterSession({
     },
     [controller, expiresAt, policies, publicKey, onConnect],
   );
-
-  if (!transactions) {
-    return <div>Loading</div>;
-  }
 
   return (
     <ExecutionContainer

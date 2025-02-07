@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react";
 import { Button } from "@/components/primitives/button";
+import { EthereumIcon } from "@/components/icons";
 import { TimesIcon } from "@/components/icons/utility/times";
 
 const meta: Meta<typeof Button> = {
@@ -92,7 +93,11 @@ export const Medium: Story = {
 
 export const WithIcon: Story = {
   args: {
-    children: <>Deposit</>,
+    children: (
+      <>
+        <EthereumIcon /> Deposit ETH
+      </>
+    ),
   },
 };
 

@@ -6,14 +6,12 @@ import {
 } from "@/components/provider/connection";
 import { LATEST_CONTROLLER } from "@/hooks/upgrade";
 import { render, RenderResult } from "@testing-library/react";
-import { constants } from "starknet";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const defaultMockController: any = {
   estimateInvokeFee: vi.fn().mockImplementation(async () => ({
     suggestedMaxFee: BigInt(1000),
   })),
-  chainId: vi.fn().mockImplementation(() => constants.StarknetChainId.SN_MAIN),
 } as const;
 
 export const defaultMockConnection: ConnectionContextValue = {
@@ -32,6 +30,8 @@ export const defaultMockConnection: ConnectionContextValue = {
   context: undefined,
   origin: "https://test.com",
   rpcUrl: "https://test.rpc.com",
+  chainId: "1",
+  chainName: "testnet",
   theme: {
     verified: true,
     name: "name",
@@ -51,15 +51,6 @@ export function createMockConnection(
   return {
     ...defaultMockConnection,
     ...overrides,
-    controller: overrides?.controller
-      ? { ...defaultMockController, ...overrides.controller }
-      : defaultMockController,
-    upgrade: overrides?.upgrade
-      ? { ...defaultMockConnection.upgrade, ...overrides.upgrade }
-      : defaultMockConnection.upgrade,
-    theme: overrides?.theme
-      ? { ...defaultMockConnection.theme, ...overrides.theme }
-      : defaultMockConnection.theme,
   };
 }
 
@@ -88,6 +79,7 @@ export function mockUseConnection(overrides?: Partial<ConnectionContextValue>) {
 
   vi.mock("@/hooks/connection", () => ({
     useConnection: () => mockConnection,
+    useChainId: () => mockConnection.chainId,
   }));
 
   return mockConnection;
