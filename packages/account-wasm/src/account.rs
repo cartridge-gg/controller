@@ -161,21 +161,30 @@ impl CartridgeAccount {
     #[wasm_bindgen(js_name = createSession)]
     pub async fn create_session(
         &self,
-        policies: Vec<Policy>,
+        policies: Option<Vec<Policy>>,
         expires_at: u64,
     ) -> std::result::Result<(), JsControllerError> {
         set_panic_hook();
 
-        let methods = policies
-            .into_iter()
-            .map(TryFrom::try_from)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+        if policies.is_none() {
+            self.controller
+                .lock()
+                .await
+                .create_wildcard_session(vec![], expires_at)
+                .await?;
+        } else {
+            let methods = policies
+                .unwrap()
+                .into_iter()
+                .map(TryFrom::try_from)
+                .collect::<std::result::Result<Vec<_>, _>>()?;
 
-        self.controller
-            .lock()
-            .await
-            .create_session(methods, expires_at)
-            .await?;
+            self.controller
+                .lock()
+                .await
+                .create_session(methods, expires_at)
+                .await?;
+        }
 
         Ok(())
     }

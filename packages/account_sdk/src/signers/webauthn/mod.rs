@@ -22,6 +22,7 @@ use starknet_crypto::PoseidonHasher;
 use std::collections::BTreeMap;
 use std::ops::Neg;
 use std::result::Result;
+use url::Url;
 use webauthn_rs_proto::{
     AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
     CredentialProtectionPolicy, PubKeyCredParams, PublicKeyCredential,
@@ -498,6 +499,49 @@ impl WebauthnSigner {
 
     pub fn pub_key_bytes(&self) -> Result<[u8; 64], DeviceError> {
         extract_pub_key(&self.pub_key)
+    }
+
+    pub async fn signup(username: String, network: String) -> Result<Self, DeviceError> {
+        let rp_id: Url = OPERATIONS.origin()?.parse().map_err(|e| DeviceError::Origin(format!("{:?}", e)))?;
+        let challenge = Sha256::new().chain(username.as_bytes()).finalize();
+        
+        let signer = Self::register(rp_id.to_string(), username, challenge.as_slice()).await?;
+        Ok(signer)
+    }
+
+    pub async fn login(username: String, credential_id: Vec<u8>) -> Result<Self, DeviceError> {
+        let rp_id: Url = OPERATIONS.origin()?.parse().map_err(|e| DeviceError::Origin(format!("{:?}", e)))?;
+        let challenge = Sha256::new().chain(username.as_bytes()).finalize();
+
+        let options = PublicKeyCredentialRequestOptions {
+            challenge: Base64UrlSafeData::from(challenge.to_vec()),
+            timeout: Some(60000),
+            rp_id: rp_id.to_string(),
+            allow_credentials: vec![AllowCredentials {
+                type_: "public-key".to_string(),
+                id: Base64UrlSafeData::from(credential_id.clone()),
+                transports: None,
+            }],
+            user_verification: UserVerificationPolicy::Required,
+            hints: None,
+            extensions: None,
+        };
+
+        let assertion = OPERATIONS.get_assertion(options).await?;
+        
+        // Extract public key from the assertion response
+        let auth_data: AuthenticatorData<Authentication> = AuthenticatorData::<Authentication>::try_from(
+            assertion.response.authenticator_data.as_slice()
+        ).map_err(|e| DeviceError::GetAssertion(format!("Failed to parse auth data: {:?}", e)))?;
+
+        // Create WebauthnSigner instance
+        Ok(Self {
+            rp_id: rp_id.to_string(),
+            credential_id: HumanBinaryData::from(credential_id),
+            pub_key: auth_data.acd.ok_or(DeviceError::GetAssertion(
+                "No public key in auth data".to_string(),
+            ))?.credential_pk,
+        })
     }
 }
 

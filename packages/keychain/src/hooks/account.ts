@@ -223,5 +223,16 @@ export async function doLogin({
     if (!res.finalizeLogin) {
       throw Error("login failed");
     }
+
+    // Create wildcard session after successful login
+    const controller = window.controller;
+    if (controller) {
+      const wildcardPolicy: ParsedSessionPolicies = {
+        contracts: {},
+        messages: [],
+        verified: true
+      };
+      await controller.createSession(BigInt(Date.now()) + BigInt(365 * 24 * 60 * 60 * 1000), wildcardPolicy, undefined);
+    }
   }
 }
