@@ -16,7 +16,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
-import { Recipient } from "@/components/modules/recipient";
+import { SendRecipient } from "@/components/modules/recipient";
 import { SendAmount } from "./amount";
 
 export function SendToken() {
@@ -84,7 +84,7 @@ export function SendToken() {
         openSettings={openSettings}
       />
       <LayoutContent className="pb-4 gap-6">
-        <Recipient to={to} setTo={setTo} setWarning={setWarning} />
+        <SendRecipient to={to} setTo={setTo} setWarning={setWarning} />
         <SendAmount amount={amount} setAmount={setAmount} />
       </LayoutContent>
 

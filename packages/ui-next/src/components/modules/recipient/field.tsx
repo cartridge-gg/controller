@@ -24,8 +24,6 @@ export function Field({
     return Math.floor(count / 34) * 20 + 48;
   }, [value]);
 
-  console.log({ height });
-
   return (
     <Textarea
       spellCheck={false}

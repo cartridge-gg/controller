@@ -15,7 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
-import { Recipient } from "../../../modules/recipient";
+import { SendRecipient } from "../../../modules/recipient";
 import { useCollection } from "@/hooks/collection";
 import { Sending } from "./sending";
 import { CollectionImage } from "../image";
@@ -121,7 +121,7 @@ export function SendCollection() {
         openSettings={openSettings}
       />
       <LayoutContent className="gap-6">
-        <Recipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
+        <SendRecipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
         <Sending assets={assets} />
       </LayoutContent>
 
