@@ -115,7 +115,7 @@ export function CreateSession({
       setError(e as unknown as Error);
       setIsConnecting(false);
     }
-  }, [controller, duration, policyState, maxFee, onConnect]);
+  }, [controller, policyState, maxFee, onConnect, expiresAt]);
 
   const onSkipSession = useCallback(async () => {
     if (!controller || !policyState) return;
