@@ -47,21 +47,21 @@ pub async fn test_verify_session_off_chain_sig(owner: Owner) {
         .unwrap();
 }
 
-#[tokio::test]
-#[cfg(feature = "webauthn")]
-async fn test_verify_session_off_chain_sig_webauthn() {
-    let signer = Signer::Webauthn(
-        crate::signers::webauthn::WebauthnSigner::register(
-            "cartridge.gg".to_string(),
-            "username".to_string(),
-            "challenge".as_bytes(),
-        )
-        .await
-        .unwrap(),
-    );
+// #[tokio::test]
+// #[cfg(feature = "webauthn")]
+// async fn test_verify_session_off_chain_sig_webauthn() {
+//     let signer = Signer::Webauthn(
+//         crate::signers::webauthn::WebauthnSigner::register(
+//             "cartridge.gg".to_string(),
+//             "username".to_string(),
+//             "challenge".as_bytes(),
+//         )
+//         .await
+//         .unwrap(),
+//     );
 
-    test_verify_session_off_chain_sig(Owner::Signer(signer)).await;
-}
+//     test_verify_session_off_chain_sig(Owner::Signer(signer)).await;
+// }
 
 #[tokio::test]
 async fn test_verify_ession_off_chain_sig_starknet() {

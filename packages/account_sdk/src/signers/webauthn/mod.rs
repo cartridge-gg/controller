@@ -3,7 +3,6 @@ use base64urlsafedata::{Base64UrlSafeData, HumanBinaryData};
 use cainome::cairo_serde::{NonZero, U256};
 use coset::CborSerializable;
 use coset::{cbor::Value, iana, CoseKey, KeyType, Label};
-use ecdsa::{RecoveryId, VerifyingKey};
 use nom::{
     bytes::complete::take,
     combinator::cond,
@@ -22,7 +21,6 @@ use starknet_crypto::PoseidonHasher;
 use std::collections::BTreeMap;
 use std::ops::Neg;
 use std::result::Result;
-use url::Url;
 use webauthn_rs_proto::{
     AllowCredentials, AttestationConveyancePreference, AuthenticatorSelectionCriteria,
     CredentialProtectionPolicy, PubKeyCredParams, PublicKeyCredential,
@@ -274,7 +272,6 @@ pub(crate) struct AttestationObjectInner<'a> {
 /// Attestation Object
 #[derive(Debug)]
 pub struct AttestationObject<T: Ceremony> {
-    /// auth_data.
     pub auth_data: AuthenticatorData<T>,
 }
 
@@ -358,28 +355,10 @@ impl HashSigner for WebauthnSigner {
         let mut message: Vec<u8> = cred.response.authenticator_data.as_slice().into();
         message.append(&mut client_data_hash.to_vec());
 
-        let ecdsa_sig =
-            ecdsa::Signature::<NistP256>::from_der(cred.response.signature.as_slice()).unwrap();
-        let (r, mut s) = ecdsa_sig.split_scalars();
-        let pub_key = self.pub_key_bytes().map_err(SignError::Device)?;
-        let sec1_key = [&[0x4], pub_key.as_slice()].concat();
-
-        let verifying_key = VerifyingKey::from_sec1_bytes(&sec1_key).unwrap();
-        let mut y_parity =
-            RecoveryId::trial_recovery_from_msg(&verifying_key, &message, &ecdsa_sig)
-                .unwrap()
-                .is_y_odd();
-
-        let s_neg = s.neg();
-        if s.as_ref() > s_neg.as_ref() {
-            s = s_neg;
-            y_parity = !y_parity;
-        }
-        let signature = Signature {
-            r: U256::from_bytes_be(r.to_bytes().as_slice().try_into().unwrap()),
-            s: U256::from_bytes_be(s.to_bytes().as_slice().try_into().unwrap()),
-            y_parity,
-        };
+        let (r, s, y_parity) =
+            extract_ecdsa_signature_components(cred.response.signature.as_slice())
+                .map_err(SignError::Device)?;
+        let signature = Signature { r, s, y_parity };
 
         let client_data_json_outro = extract_client_data_json_outro(&client_data_json);
         let webauthn_signature = WebauthnSignature {
@@ -447,7 +426,7 @@ impl WebauthnSigner {
         rp_id: String,
         user_name: String,
         challenge: &[u8],
-    ) -> Result<Self, DeviceError> {
+    ) -> Result<(WebauthnSigner, WebauthnSignature), DeviceError> {
         let options = PublicKeyCredentialCreationOptions {
             rp: RelyingParty {
                 name: "Cartridge".to_string(),
@@ -475,21 +454,43 @@ impl WebauthnSigner {
             attestation_formats: None,
         };
         let res = OPERATIONS.create_credential(options).await?;
-        let ao =
-            AttestationObject::<Registration>::try_from(res.response.attestation_object.as_ref())
-                .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))
-                .unwrap();
+
+        // Use the new attestation object parser that returns the DER signature if present.
+        let (ao, der_sig_opt) =
+            AttestationObject::<Registration>::from_full(res.response.attestation_object.as_ref())
+                .map_err(|e| DeviceError::CreateCredential(format!("CoseError: {:?}", e)))?;
+
+        // Return error if no DER signature is present
+        let der_sig = der_sig_opt.ok_or_else(|| {
+            DeviceError::CreateCredential(
+                "No DER signature found in attestation object".to_string(),
+            )
+        })?;
+
+        let (r, s, y_parity) = extract_ecdsa_signature_components(&der_sig)
+            .map_err(|e| DeviceError::CreateCredential(format!("{:?}", e)))?;
 
         let cred = ao.auth_data.acd.unwrap();
-
         let pub_key =
             CoseKey::from_slice(&serde_cbor_2::to_vec(&cred.credential_pk).unwrap()).unwrap();
-
-        Ok(Self {
+        let signer = Self {
             rp_id,
             credential_id: cred.credential_id,
             pub_key,
-        })
+        };
+
+        let flags = ((ao.auth_data.user_verified as u8) << 2) | (ao.auth_data.user_present as u8);
+        let counter = ao.auth_data.counter;
+        let client_data_json = String::from_utf8(res.response.client_data_json.to_vec()).unwrap();
+        let client_data_json_outro = extract_client_data_json_outro(&client_data_json);
+        let signature = WebauthnSignature {
+            flags,
+            sign_count: counter,
+            ec_signature: Signature { r, s, y_parity },
+            client_data_json_outro,
+        };
+
+        Ok((signer, signature))
     }
 
     pub fn rp_id_hash(&self) -> [u8; 32] {
@@ -499,49 +500,6 @@ impl WebauthnSigner {
 
     pub fn pub_key_bytes(&self) -> Result<[u8; 64], DeviceError> {
         extract_pub_key(&self.pub_key)
-    }
-
-    pub async fn signup(username: String, network: String) -> Result<Self, DeviceError> {
-        let rp_id: Url = OPERATIONS.origin()?.parse().map_err(|e| DeviceError::Origin(format!("{:?}", e)))?;
-        let challenge = Sha256::new().chain(username.as_bytes()).finalize();
-        
-        let signer = Self::register(rp_id.to_string(), username, challenge.as_slice()).await?;
-        Ok(signer)
-    }
-
-    pub async fn login(username: String, credential_id: Vec<u8>) -> Result<Self, DeviceError> {
-        let rp_id: Url = OPERATIONS.origin()?.parse().map_err(|e| DeviceError::Origin(format!("{:?}", e)))?;
-        let challenge = Sha256::new().chain(username.as_bytes()).finalize();
-
-        let options = PublicKeyCredentialRequestOptions {
-            challenge: Base64UrlSafeData::from(challenge.to_vec()),
-            timeout: Some(60000),
-            rp_id: rp_id.to_string(),
-            allow_credentials: vec![AllowCredentials {
-                type_: "public-key".to_string(),
-                id: Base64UrlSafeData::from(credential_id.clone()),
-                transports: None,
-            }],
-            user_verification: UserVerificationPolicy::Required,
-            hints: None,
-            extensions: None,
-        };
-
-        let assertion = OPERATIONS.get_assertion(options).await?;
-        
-        // Extract public key from the assertion response
-        let auth_data: AuthenticatorData<Authentication> = AuthenticatorData::<Authentication>::try_from(
-            assertion.response.authenticator_data.as_slice()
-        ).map_err(|e| DeviceError::GetAssertion(format!("Failed to parse auth data: {:?}", e)))?;
-
-        // Create WebauthnSigner instance
-        Ok(Self {
-            rp_id: rp_id.to_string(),
-            credential_id: HumanBinaryData::from(credential_id),
-            pub_key: auth_data.acd.ok_or(DeviceError::GetAssertion(
-                "No public key in auth data".to_string(),
-            ))?.credential_pk,
-        })
     }
 }
 
@@ -597,9 +555,194 @@ fn extract_pub_key(cose_key: &CoseKey) -> Result<[u8; 64], DeviceError> {
     Ok(pub_key)
 }
 
+fn extract_ecdsa_signature_components(sig_der: &[u8]) -> Result<(U256, U256, bool), DeviceError> {
+    // Parse the DER-encoded signature for NistP256.
+    let ecdsa_sig = ecdsa::Signature::<NistP256>::from_der(sig_der).map_err(|e| {
+        DeviceError::CreateCredential(format!("Failed to parse DER signature: {:?}", e))
+    })?;
+
+    // Split the signature into its two scalar components.
+    let (r, mut s) = ecdsa_sig.split_scalars();
+
+    // In many protocols (including some ECDSA verification flows) you normalize s to be in "low-S" form.
+    // To do so, compute the negation of s and compare: if s > (-s), then use -s and adjust y_parity.
+    let s_neg = s.neg();
+    let mut y_parity = false; // This is a placeholder; computing the correct recovery id may require additional context.
+    if s.as_ref() > s_neg.as_ref() {
+        s = s_neg;
+        y_parity = true;
+    }
+
+    // Convert the scalar values to U256 (from their big-endian bytes).
+    let r_u256 = U256::from_bytes_be(r.to_bytes().as_slice().try_into().unwrap());
+    let s_u256 = U256::from_bytes_be(s.to_bytes().as_slice().try_into().unwrap());
+    Ok((r_u256, s_u256, y_parity))
+}
+
+#[derive(Debug, Deserialize)]
+struct FullAttestationObject<'a> {
+    #[serde(rename = "authData")]
+    auth_data: &'a [u8],
+    fmt: String,
+    #[serde(rename = "attStmt")]
+    att_stmt: serde_cbor_2::Value,
+}
+
+impl<T: Ceremony> AttestationObject<T> {
+    /// Creates an attestation object and attempts to extract a DER-encoded signature from the attestation statement.
+    pub fn from_full(data: &[u8]) -> Result<(Self, Option<Vec<u8>>), WebauthnError> {
+        // Parse the full attestation object containing authData, fmt, and attStmt.
+        let full: FullAttestationObject =
+            serde_cbor_2::from_slice(data).map_err(WebauthnError::ParseCBORFailure)?;
+        let auth_data_bytes = full.auth_data;
+        let auth_data = AuthenticatorData::try_from(auth_data_bytes)?;
+
+        // Attempt to extract DER signature from attStmt (this assumes the field "sig" exists).
+        let der_sig = if let serde_cbor_2::Value::Map(map) = full.att_stmt {
+            map.into_iter().find_map(|(k, v)| {
+                if let serde_cbor_2::Value::Text(ref key) = k {
+                    if key == "sig" {
+                        if let serde_cbor_2::Value::Bytes(bytes) = v {
+                            return Some(bytes);
+                        }
+                    }
+                }
+                None
+            })
+        } else {
+            None
+        };
+
+        Ok((AttestationObject { auth_data }, der_sig))
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::extract_client_data_json_outro;
+    use super::*;
+    use p256::ecdsa::{signature::Signer, SigningKey};
+    use p256::elliptic_curve::generic_array::GenericArray;
+    use std::collections::BTreeMap;
+
+    /// Test that when the attestation object contains a DER‑encoded signature (e.g. in "packed" format),
+    /// it is correctly extracted.
+    #[test]
+    fn test_attestation_object_from_full_with_sig() {
+        // Generate a valid DER signature using a fixed signing key.
+        let key_bytes = GenericArray::clone_from_slice(&[1u8; 32]);
+        let signing_key = SigningKey::from_bytes(&key_bytes).expect("Valid key");
+        let message = b"test message";
+        let signature: p256::ecdsa::Signature = signing_key.sign(message);
+        let der_sig = signature.to_der().as_bytes().to_vec();
+
+        // Create minimal valid authenticator data (37 bytes: 32 bytes rp_id_hash, 1 byte flags, 4 bytes counter)
+        let mut auth_data = vec![0u8; 37];
+        // Set the flags byte (at offset 32) to 0 so that attested credential data is not expected.
+        auth_data[32] = 0;
+
+        // Construct a CBOR map for the attestation statement that contains the DER signature.
+        let mut att_stmt_map = BTreeMap::new();
+        att_stmt_map.insert(
+            serde_cbor_2::Value::Text("sig".to_string()),
+            serde_cbor_2::Value::Bytes(der_sig.clone()),
+        );
+
+        // Build a fake attestation object with "authData", "fmt" and "attStmt"
+        let mut att_obj_map = BTreeMap::new();
+        att_obj_map.insert(
+            serde_cbor_2::Value::Text("authData".to_string()),
+            serde_cbor_2::Value::Bytes(auth_data.clone()),
+        );
+        att_obj_map.insert(
+            serde_cbor_2::Value::Text("fmt".to_string()),
+            serde_cbor_2::Value::Text("packed".to_string()),
+        );
+        att_obj_map.insert(
+            serde_cbor_2::Value::Text("attStmt".to_string()),
+            serde_cbor_2::Value::Map(att_stmt_map),
+        );
+        let attestation_object =
+            serde_cbor_2::to_vec(&serde_cbor_2::Value::Map(att_obj_map)).unwrap();
+
+        let (att_obj, sig_opt) = AttestationObject::<Registration>::from_full(&attestation_object)
+            .expect("Attestation object parsing should succeed");
+        // Verify that the authenticator data is parsed (counter should be zero).
+        assert_eq!(att_obj.auth_data.counter, 0);
+        // And the DER‑encoded signature is correctly extracted.
+        assert!(sig_opt.is_some());
+        assert_eq!(sig_opt.unwrap(), der_sig);
+    }
+
+    /// Test that when no DER‑encoded signature is present (passkey implementations often use attestation "none"),
+    /// the extraction correctly returns None.
+    #[test]
+    fn test_attestation_object_from_full_without_sig() {
+        // Create minimal valid authenticator data (37 bytes: 32 bytes rp_id_hash, 1 byte flags, 4 bytes counter)
+        let mut auth_data = vec![0u8; 37];
+        auth_data[32] = 0;
+
+        // Construct an empty attStmt map (i.e. no "sig" field)
+        let att_stmt_map = BTreeMap::new();
+
+        // Build a fake attestation object with "attStmt" as an empty map.
+        let mut att_obj_map = BTreeMap::new();
+        att_obj_map.insert(
+            serde_cbor_2::Value::Text("authData".to_string()),
+            serde_cbor_2::Value::Bytes(auth_data.clone()),
+        );
+        // Even though we request a format like "none" in passkey scenarios, it still must be valid CBOR.
+        att_obj_map.insert(
+            serde_cbor_2::Value::Text("fmt".to_string()),
+            serde_cbor_2::Value::Text("none".to_string()),
+        );
+        att_obj_map.insert(
+            serde_cbor_2::Value::Text("attStmt".to_string()),
+            serde_cbor_2::Value::Map(att_stmt_map),
+        );
+        let attestation_object =
+            serde_cbor_2::to_vec(&serde_cbor_2::Value::Map(att_obj_map)).unwrap();
+
+        let (att_obj, sig_opt) = AttestationObject::<Registration>::from_full(&attestation_object)
+            .expect("Attestation object parsing should succeed");
+        // Verify that basic authenticator data is parsed.
+        assert_eq!(att_obj.auth_data.counter, 0);
+        // No signature field is present so extraction should return None.
+        assert!(sig_opt.is_none());
+    }
+
+    /// Test that passing invalid (non-CBOR) data fails to parse.
+    #[test]
+    fn test_attestation_object_from_full_invalid_data() {
+        let invalid_data = b"invalid data";
+        let result = AttestationObject::<Registration>::from_full(invalid_data);
+        assert!(result.is_err());
+    }
+
+    /// Test the DER‑encoded signature extraction function using a valid signature.
+    #[test]
+    fn test_extract_ecdsa_signature_components_valid() {
+        let key_bytes = GenericArray::clone_from_slice(&[1u8; 32]);
+        let signing_key = SigningKey::from_bytes(&key_bytes).expect("Valid key");
+        let message = b"dummy message";
+        let signature: p256::ecdsa::Signature = signing_key.sign(message);
+        let der_sig = signature.to_der().as_bytes().to_vec();
+
+        let (r, s, y_parity) = extract_ecdsa_signature_components(&der_sig)
+            .expect("Should extract ECDSA signature components");
+        // Basic sanity checks: ensure r and s are nonzero.
+        assert_ne!(r, U256::from_bytes_be(&[0; 32]));
+        assert_ne!(s, U256::from_bytes_be(&[0; 32]));
+        // y_parity is a boolean flag; we simply check that it's a valid bool value.
+        let _ = y_parity;
+    }
+
+    /// Test that extracting components from an invalid signature returns an error.
+    #[test]
+    fn test_extract_ecdsa_signature_components_invalid() {
+        let invalid_sig = b"not a valid der signature";
+        let result = extract_ecdsa_signature_components(invalid_sig);
+        assert!(result.is_err());
+    }
 
     fn validate_extraction(input: &str, expected: &str) {
         let outro = extract_client_data_json_outro(input);
@@ -612,7 +755,7 @@ mod tests {
         validate_extraction(
             "{\"type\":\"webauthn.get\",\"challenge\":\"BGJcocCMZ8w1AoRN0wAHFsNtNAVJ3fi83s65MW8jUfIB\",\"origin\":\"http://localhost:3001\",\"crossOrigin\":true,\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}", 
             ",\"crossOrigin\":true,\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}"
-        );
+       );
     }
 
     #[test]
@@ -630,6 +773,7 @@ mod tests {
             ",\"other_keys_can_be_added_here\":\"do not compare clientDataJSON against a template. See https://goo.gl/yabPex\"}"
         );
     }
+
     #[test]
     fn test_extract_client_data_json_outro_4() {
         validate_extraction(

@@ -49,18 +49,11 @@ impl Controller {
 
     pub async fn create_wildcard_session(
         &mut self,
-        methods: Vec<Policy>,
         expires_at: u64,
     ) -> Result<SessionAccount, ControllerError> {
         let signer = SigningKey::from_random();
         let session_signer = Signer::Starknet(signer.clone());
-
-        let session = Session::new_wildcard(
-            methods,
-            expires_at,
-            &session_signer.clone().into(),
-            Felt::ZERO,
-        )?;
+        let session = Session::new_wildcard(expires_at, &session_signer.into(), Felt::ZERO)?;
 
         self.create_with_session(signer, session).await
     }
@@ -75,17 +68,15 @@ impl Controller {
             .get_message_hash_rev_1(self.chain_id, self.address);
         let authorization = self.owner.sign(&hash).await?;
         let authorization = Vec::<SignerSignature>::cairo_serialize(&vec![authorization.clone()]);
-        self.storage.set_session(
-            &Selectors::session(&self.address, &self.app_id, &self.chain_id),
-            SessionMetadata {
-                session: session.clone(),
-                max_fee: None,
-                credentials: Some(Credentials {
-                    authorization: authorization.clone(),
-                    private_key: session_signer.secret_scalar(),
-                }),
-                is_registered: false,
-            },
+
+        self.set_session_metadata(
+            &session,
+            Some(Credentials {
+                authorization: authorization.clone(),
+                private_key: session_signer.secret_scalar(),
+            }),
+            false,
+            None,
         )?;
 
         let session_account = SessionAccount::new(
@@ -98,6 +89,26 @@ impl Controller {
         );
 
         Ok(session_account)
+    }
+
+    pub fn set_session_metadata(
+        &mut self,
+        session: &Session,
+        credentials: Option<Credentials>,
+        is_registered: bool,
+        max_fee: Option<FeeEstimate>,
+    ) -> Result<(), ControllerError> {
+        self.storage
+            .set_session(
+                &Selectors::session(&self.address, &self.app_id, &self.chain_id),
+                SessionMetadata {
+                    session: session.clone(),
+                    max_fee: max_fee.map(|fee| fee.overall_fee.into()),
+                    credentials,
+                    is_registered,
+                },
+            )
+            .map_err(ControllerError::from)
     }
 
     pub fn register_session_call(

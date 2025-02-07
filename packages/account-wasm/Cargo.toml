@@ -18,12 +18,14 @@ coset.workspace = true
 futures.workspace = true
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4.3"
+js-sys = "0.3"
 num-traits.workspace = true
 rand = { version = "0.8", features = ["getrandom"] }
 serde.workspace = true
 serde_json.workspace = true
 serde-wasm-bindgen.workspace = true
 serde_with.workspace = true
+sha2.workspace = true
 starknet.workspace = true
 starknet-crypto.workspace = true
 starknet-types-core.workspace = true
@@ -51,6 +53,7 @@ tsify-next = "0.5.4"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"
+tokio = { version = "1.0", features = ["macros", "rt"] }
 
 [features]
 console-error-panic = ["dep:console_error_panic_hook"]

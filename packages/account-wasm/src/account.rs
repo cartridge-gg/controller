@@ -1,13 +1,23 @@
 use std::borrow::BorrowMut;
 
+use account_sdk::abigen::controller::SignerSignature;
+use account_sdk::account::session::hash::Session;
 use account_sdk::account::session::policy::Policy as SdkPolicy;
 use account_sdk::controller::{compute_gas_and_price, Controller};
 use account_sdk::errors::ControllerError;
+use account_sdk::hash::MessageHashRev1;
+use account_sdk::signers::{webauthn::WebauthnSigner, Owner as SdkOwner, Signer};
+use account_sdk::storage::Credentials;
 use account_sdk::typed_data::{encode_type, TypedData};
+use account_sdk::utils::time::get_current_timestamp;
+use cainome::cairo_serde::CairoSerde;
+use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
+use sha2::{Digest, Sha256};
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::Call;
 use starknet::core::utils::starknet_keccak;
+use starknet::signers::SigningKey;
 use starknet_crypto::poseidon_hash;
 use starknet_types_core::felt::Felt;
 use url::Url;
@@ -24,6 +34,12 @@ use crate::types::{Felts, JsFelt};
 use crate::utils::set_panic_hook;
 
 type Result<T> = std::result::Result<T, JsError>;
+
+#[derive(Serialize, Deserialize)]
+struct LoginResponse {
+    rp_id: String,
+    credential_id: String,
+}
 
 #[wasm_bindgen]
 pub struct CartridgeAccount {
@@ -170,7 +186,7 @@ impl CartridgeAccount {
             self.controller
                 .lock()
                 .await
-                .create_wildcard_session(vec![], expires_at)
+                .create_wildcard_session(expires_at)
                 .await?;
         } else {
             let methods = policies
@@ -413,6 +429,78 @@ impl CartridgeAccount {
 
         Ok(res.into())
     }
+
+    #[wasm_bindgen(js_name = signup)]
+    pub async fn signup(
+        rp_id: String,
+        app_id: String,
+        class_hash: JsFelt,
+        rpc_url: String,
+        chain_id: JsFelt,
+        address: JsFelt,
+        username: String,
+    ) -> Result<CartridgeAccountWithMeta> {
+        set_panic_hook();
+
+        let rpc_url = Url::parse(&rpc_url)?;
+
+        let expires_at = get_current_timestamp() + 7 * 24 * 60 * 60; // 1 week in seconds
+        let guardian_guid = Felt::ZERO;
+        let signer = SigningKey::from_random();
+        let session_signer = Signer::Starknet(signer.clone());
+        let session = Session::new_wildcard(expires_at, &session_signer.into(), guardian_guid)?;
+
+        let challenge = session
+            .inner
+            .get_message_hash_rev_1(chain_id.clone().try_into()?, address.clone().try_into()?)
+            .to_bytes_be();
+
+        let signer = WebauthnSigner::register(rp_id.clone(), username.clone(), &challenge)
+            .await
+            .map_err(|e| JsError::new(&e.to_string()))?;
+
+        let controller = Controller::new(
+            app_id,
+            username,
+            class_hash.try_into()?,
+            rpc_url,
+            SdkOwner::Signer(Signer::Webauthn(signer)),
+            address.try_into()?,
+            chain_id.try_into()?,
+        );
+        SignerSignature::Webauthn((signer, ))
+        let authorization = Vec::<SignerSignature>::cairo_serialize(&vec![authorization.clone()]);
+        controller.set_session_metadata(
+            &session,
+            Some(Credentials {
+                authorization: authorization.clone(),
+                private_key: session_signer.into().secret_scalar(),
+            }),
+            false,
+            None,
+        )?;
+
+        Ok(CartridgeAccountWithMeta::new(controller))
+    }
+
+    #[wasm_bindgen(js_name = login)]
+    pub async fn login(username: String, credential_id: Vec<u8>, rp_id: String) -> Result<JsValue> {
+        set_panic_hook();
+
+        let challenge = Sha256::new().chain_update(username.as_bytes()).finalize();
+
+        let signer =
+            WebauthnSigner::register(rp_id.clone(), username.clone(), credential_id.as_slice())
+                .await
+                .map_err(|e| JsError::new(&e.to_string()))?;
+
+        let response = LoginResponse {
+            rp_id,
+            credential_id: hex::encode(&credential_id),
+        };
+
+        Ok(to_value(&response)?)
+    }
 }
 
 /// A type for accessing fixed attributes of `CartridgeAccount`.
@@ -530,5 +618,63 @@ impl CartridgeAccountWithMeta {
     #[wasm_bindgen(js_name = intoAccount)]
     pub fn into_account(self) -> CartridgeAccount {
         self.account
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use starknet_crypto::Felt;
+    use wasm_bindgen_test::*;
+
+    wasm_bindgen_test_configure!(run_in_browser);
+
+    const TEST_USERNAME: &str = "test_user";
+    const TEST_RP_ID: &str = "https://cartridge.gg";
+    const TEST_APP_ID: &str = "test_app";
+    const TEST_RPC_URL: &str = "https://starknet-testnet.public.blastapi.io";
+
+    #[tokio::test]
+    async fn test_signup() {
+        let username = TEST_USERNAME.to_string();
+        let rp_id = TEST_RP_ID.to_string();
+        let app_id = TEST_APP_ID.to_string();
+        let rpc_url = TEST_RPC_URL.to_string();
+
+        // Using dummy values for testing
+        let class_hash = JsFelt::from(Felt::from(1));
+        let chain_id = JsFelt::from(Felt::from(1));
+        let address = JsFelt::from(Felt::from(1));
+
+        let result = CartridgeAccount::signup(
+            rp_id,
+            app_id,
+            class_hash,
+            rpc_url,
+            chain_id,
+            address,
+            username.clone(),
+        )
+        .await;
+
+        assert!(result.is_ok(), "Signup should succeed");
+        let account = result.unwrap();
+        assert_eq!(account.meta.username(), username);
+    }
+
+    #[tokio::test]
+    async fn test_login() {
+        let username = TEST_USERNAME.to_string();
+        let rp_id = TEST_RP_ID.to_string();
+
+        // Using a dummy credential ID for testing
+        let credential_id = vec![1, 2, 3, 4];
+
+        let result = CartridgeAccount::login(username, credential_id.clone(), rp_id.clone()).await;
+
+        assert!(result.is_ok(), "Login should succeed");
+        let response: LoginResponse = serde_wasm_bindgen::from_value(result.unwrap()).unwrap();
+        assert_eq!(response.rp_id, rp_id);
+        assert_eq!(response.credential_id, hex::encode(&credential_id));
     }
 }

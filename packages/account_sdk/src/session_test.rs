@@ -73,7 +73,8 @@ async fn test_verify_execute_session_webauthn_starknet_starknet() {
             "challenge".as_bytes(),
         )
         .await
-        .unwrap(),
+        .unwrap()
+        .0,
     );
 
     test_verify_execute(Owner::Signer(signer)).await;
@@ -410,8 +411,7 @@ async fn test_verify_execute_session_wildcard() {
 
     let signer = SigningKey::from_random();
     let session_signer = Signer::Starknet(signer.clone());
-    let session =
-        Session::new_wildcard(vec![], u64::MAX, &session_signer.into(), Felt::ZERO).unwrap();
+    let session = Session::new_wildcard(u64::MAX, &session_signer.into(), Felt::ZERO).unwrap();
 
     let session_account = controller
         .create_with_session(signer, session)

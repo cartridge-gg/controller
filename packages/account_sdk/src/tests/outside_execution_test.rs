@@ -89,7 +89,8 @@ async fn test_verify_execute_webauthn_paymaster_starknet() {
             "challenge".as_bytes(),
         )
         .await
-        .unwrap(),
+        .unwrap()
+        .0,
     );
 
     test_verify_paymaster_execute(signer, false).await;
@@ -110,7 +111,8 @@ async fn test_verify_execute_webauthn_paymaster_starknet_session() {
             "challenge".as_bytes(),
         )
         .await
-        .unwrap(),
+        .unwrap()
+        .0,
     );
 
     test_verify_paymaster_execute(signer, true).await;

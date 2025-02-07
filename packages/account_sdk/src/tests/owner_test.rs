@@ -354,7 +354,7 @@ async fn test_call_unallowed_methods() {
             "challenge".as_bytes(),
         )
         .await
-        .unwrap(),
+        .unwrap().0,
     );
 
     let runner = KatanaRunner::load();

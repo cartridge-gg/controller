@@ -49,7 +49,7 @@ async fn test_verify_execute_webautn() {
     .await
     .unwrap();
 
-    test_verify_execute(Owner::Signer(Signer::Webauthn(signer))).await;
+    test_verify_execute(Owner::Signer(Signer::Webauthn(signer.0))).await;
 }
 
 #[tokio::test]
