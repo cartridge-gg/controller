@@ -7,11 +7,11 @@ import {
   InvocationsDetails,
   InvokeFunctionResponse,
   addAddressPadding,
-  num,
 } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
 import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
 import { mutex } from "./sync";
+import Controller from "../controller";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -41,23 +41,20 @@ export function execute({
 }) {
   return async (
     transactions: AllowArray<Call>,
-    abis: Abi[],
-    transactionsDetail?: InvocationsDetails,
+    __?: Abi[],
+    ___?: InvocationsDetails,
     sync?: boolean,
     _?: unknown,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
-    const account = window.controller;
+    const controller: Controller | undefined = window.controller;
     const calls = normalizeCalls(transactions);
 
     if (sync) {
       return await new Promise((resolve, reject) => {
         setContext({
           type: "execute",
-          origin,
           transactions,
-          abis,
-          transactionsDetail,
           error,
           resolve,
           reject,
@@ -69,7 +66,7 @@ export function execute({
     return await new Promise<InvokeFunctionResponse | ConnectError>(
       // eslint-disable-next-line no-async-promise-executor
       async (resolve, reject) => {
-        if (!account) {
+        if (!controller) {
           return reject({
             message: "Controller context not available",
           });
@@ -77,13 +74,10 @@ export function execute({
 
         // If a session call and there is no session available
         // fallback to manual apporval flow
-        if (!(await account.hasSession(calls))) {
+        if (!(await controller.hasSession(calls))) {
           setContext({
             type: "execute",
-            origin,
             transactions,
-            abis,
-            transactionsDetail,
             resolve,
             reject,
           } as ExecuteCtx);
@@ -97,7 +91,7 @@ export function execute({
         // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
         try {
           const { transaction_hash } =
-            await account.executeFromOutsideV3(calls);
+            await controller.executeFromOutsideV3(calls);
 
           return resolve({
             code: ResponseCodes.SUCCESS,
@@ -109,10 +103,7 @@ export function execute({
           if (error.code !== ErrorCode.PaymasterNotSupported) {
             setContext({
               type: "execute",
-              origin,
               transactions,
-              abis,
-              transactionsDetail,
               error: parseControllerError(error),
               resolve,
               reject,
@@ -126,17 +117,12 @@ export function execute({
         }
 
         try {
-          const estimate = await account.cartridge.estimateInvokeFee(calls);
-          const maxFee = num.toHex(
-            num.addPercent(estimate.overall_fee, ESTIMATE_FEE_PERCENTAGE),
+          const estimate = await controller.estimateInvokeFee(calls);
+          const { transaction_hash } = await controller.execute(
+            transactions as Call[],
+            estimate,
           );
 
-          const { transaction_hash } = await account.execute(
-            transactions as Call[],
-            {
-              maxFee,
-            },
-          );
           return resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,
@@ -145,10 +131,7 @@ export function execute({
           console.log(e);
           setContext({
             type: "execute",
-            origin,
             transactions,
-            abis,
-            transactionsDetail,
             error: parseControllerError(e as ControllerError),
             resolve,
             reject,
@@ -161,6 +144,7 @@ export function execute({
         }
       },
     ).finally(() => {
+      setContext(undefined);
       release();
     });
   };

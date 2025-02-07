@@ -6,7 +6,6 @@ import {
 import { Signature, TypedData } from "starknet";
 import { ConnectionCtx, SignMessageCtx } from "./types";
 import { mutex } from "./sync";
-import Controller from "@/utils/controller";
 import { parseControllerError } from "./execute";
 
 export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
@@ -15,7 +14,7 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
     account: string,
     async?: boolean,
   ): Promise<Signature | ConnectError> => {
-    const controller = window.controller as Controller;
+    const controller = window.controller;
 
     if (!async) {
       return new Promise((resolve, reject) => {
@@ -34,6 +33,10 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
     return await new Promise<Signature | ConnectError>(
       // eslint-disable-next-line no-async-promise-executor
       async (resolve, reject) => {
+        if (!controller) {
+          return reject("Controller not connected");
+        }
+
         // If a session call and there is no session available
         // fallback to manual apporval flow
         if (!(await controller.hasSessionForMessage(typedData))) {

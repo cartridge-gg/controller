@@ -169,14 +169,14 @@ export function ControllerErrorAlert({
     case ErrorCode.CartridgeControllerNotDeployed:
       title = "Your Controller is not deployed";
       description =
-        "Lets fund your Controller and deploy it before we can start executing transactions.";
+        "Let's fund your Controller and deploy it so we can start executing transactions.";
       isExpanded = true;
       variant = "warning";
       break;
     case ErrorCode.InsufficientBalance:
       title = "Insufficient funds";
       description =
-        "Your controller does not have enough gas to complete this transaction";
+        "Your controller does not have enough funds to complete this transaction";
       isExpanded = true;
       variant = "warning";
       break;
@@ -403,7 +403,7 @@ function StackTraceDisplay({
   );
 }
 
-function isControllerError(
+export function isControllerError(
   error: ControllerError | Error,
 ): error is ControllerError {
   return !!(error as ControllerError).code;

@@ -1,13 +1,11 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { useContext, useState, useEffect, useCallback, useMemo } from "react";
-import Controller from "@/utils/controller";
+import { useContext, useState, useEffect, useCallback } from "react";
 import {
   connectToController,
   ConnectionCtx,
   OpenSettingsCtx,
 } from "@/utils/connection";
-import { getChainName, isIframe, normalizeOrigin } from "@cartridge/utils";
-import { RpcProvider } from "starknet";
+import { isIframe, normalizeOrigin } from "@cartridge/utils";
 import {
   ResponseCodes,
   toArray,
@@ -32,23 +30,14 @@ export function useConnectionValue() {
   const [rpcUrl, setRpcUrl] = useState<string>(
     import.meta.env.VITE_RPC_SEPOLIA,
   );
-  const [chainId, setChainId] = useState<string>();
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [theme, setTheme] = useState<VerifiableControllerTheme>({
     verified: true,
     ...defaultTheme,
   });
-  const [controller, setController] = useState<Controller | undefined>();
+  const [controller, setController] = useState(window.controller);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
   const upgrade: UpgradeInterface = useUpgrade(controller);
-  const [error, setError] = useState<Error>();
-
-  const chainName = useMemo(() => {
-    if (!chainId) {
-      return;
-    }
-    return getChainName(chainId);
-  }, [chainId]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -56,7 +45,6 @@ export function useConnectionValue() {
 
     // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
     if (!isIframe()) {
-      const controller = Controller.fromStore(import.meta.env.VITE_ORIGIN!);
       if (controller) {
         setController(controller);
       }
@@ -65,9 +53,9 @@ export function useConnectionValue() {
         setRpcUrl(rpcUrl);
       }
 
-      if (controller && rpcUrl) {
-        controller.switchChain(rpcUrl);
-      }
+      // if (controller && rpcUrl) {
+      //   controller.switchChain(rpcUrl);
+      // }
     }
 
     // Handle theme and policies
@@ -132,7 +120,14 @@ export function useConnectionValue() {
         );
       }
     }
-  }, [origin, setTheme, setPolicies, setHasPrefundRequest, setController]);
+  }, [
+    origin,
+    controller,
+    setTheme,
+    setPolicies,
+    setHasPrefundRequest,
+    setController,
+  ]);
 
   useEffect(() => {
     const connection = connectToController<ParentMethods>({
@@ -150,25 +145,6 @@ export function useConnectionValue() {
     };
   }, [setOrigin, setRpcUrl, setContext, setController]);
 
-  useEffect(() => {
-    if (rpcUrl) {
-      const update = async () => {
-        try {
-          const provider = new RpcProvider({ nodeUrl: rpcUrl });
-          const chainId = await provider.getChainId();
-          setChainId(chainId);
-        } catch (e) {
-          console.error(e);
-          setError(
-            new Error(`Unable to fetch Chain ID from provided RPC URL: ${e}`),
-          );
-        }
-      };
-
-      update();
-    }
-  }, [rpcUrl, controller]);
-
   const logout = useCallback(() => {
     window.controller?.disconnect().then(() => {
       setController(undefined);
@@ -184,12 +160,11 @@ export function useConnectionValue() {
     if (!context) return;
 
     setContext({
-      origin: context.origin || origin,
       type: "open-settings",
       resolve: context.resolve,
       reject: context.reject,
     } as OpenSettingsCtx);
-  }, [origin, context]);
+  }, [context]);
 
   const closeModal = useCallback(async () => {
     if (!parent || !context?.resolve) return;
@@ -229,12 +204,9 @@ export function useConnectionValue() {
     controller,
     origin,
     rpcUrl,
-    chainId,
-    chainName,
     policies,
     theme,
     hasPrefundRequest,
-    error,
     upgrade,
     setController,
     setContext,
@@ -252,14 +224,4 @@ export function useConnection() {
   }
 
   return ctx;
-}
-
-export function useChainId() {
-  const { chainId } = useConnection();
-  return chainId;
-}
-
-export function useRpcUrl() {
-  const { rpcUrl } = useConnection();
-  return rpcUrl;
 }

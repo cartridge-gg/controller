@@ -21,7 +21,7 @@ export function probe({
       window.controller = controller;
       return Promise.resolve({
         code: ResponseCodes.SUCCESS,
-        address: controller.address,
+        address: controller.address(),
         rpcUrl: controller.rpcUrl(),
       });
     };

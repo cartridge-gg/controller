@@ -6,46 +6,27 @@ import {
   CardTitle,
   CoinsIcon,
 } from "@cartridge/ui-next";
-import { TokenPair } from "@cartridge/utils/api/cartridge";
-import { formatEther } from "viem";
-import {
-  ETH_CONTRACT_ADDRESS,
-  useCountervalue,
-  useCreditBalance,
-  useERC20Balance,
-} from "@cartridge/utils";
+import { useCreditBalance } from "@cartridge/utils";
 import { useController } from "@/hooks/controller";
+import { formatBalance, formatUSDBalance, useFeeToken } from "@/hooks/tokens";
 
-export type BalanceType = "credits" | "eth" | "strk";
+export enum BalanceType {
+  CREDITS = "credits",
+  FEE_TOKEN = "fee-token",
+}
 
 type BalanceProps = {
-  showBalances: BalanceType[];
+  types: BalanceType[];
 };
 
-export function Balance({ showBalances }: BalanceProps) {
+export function Balance({ types }: BalanceProps) {
   const { controller } = useController();
   const { balance: creditBalance } = useCreditBalance({
     username: controller?.username(),
     interval: 3000,
   });
 
-  const {
-    data: [eth],
-  } = useERC20Balance({
-    address: controller?.address,
-    contractAddress: ETH_CONTRACT_ADDRESS,
-    provider: controller,
-    interval: 3000,
-    decimals: 2,
-  });
-  const { countervalue } = useCountervalue(
-    {
-      balance: formatEther(eth?.balance.value ?? 0n),
-      pair: TokenPair.EthUsdc,
-    },
-    { enabled: !!eth },
-  );
-
+  const { token } = useFeeToken();
   return (
     <Card>
       <CardHeader>
@@ -53,27 +34,29 @@ export function Balance({ showBalances }: BalanceProps) {
       </CardHeader>
 
       <CardListContent>
-        {showBalances.includes("credits") && (
+        {types.includes(BalanceType.CREDITS) && (
           <CardListItem icon={<CoinsIcon variant="solid" />}>
             <div className="flex items-center gap-2">
-              {creditBalance.formatted ?? 0}
+              {creditBalance.formatted ? 0 : "Loading"}
               <span className="text-muted-foreground">CREDITS</span>
             </div>
           </CardListItem>
         )}
 
-        {showBalances.includes("eth") && (
-          <CardListItem icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo">
+        {types.includes(BalanceType.FEE_TOKEN) && token && (
+          <CardListItem icon={token.icon}>
             <div className="flex items-center gap-2">
-              {eth?.balance.formatted ?? "0.00"}
-              <span className="text-muted-foreground">ETH</span>
+              {token?.balance !== undefined
+                ? formatBalance(token.balance)
+                : "Loading"}
+              <span className="text-muted-foreground">{token.symbol}</span>
             </div>
 
-            {countervalue && (
+            {token && token.balance !== undefined && token.price ? (
               <div className="text-muted-foreground">
-                {countervalue?.formatted}
+                {formatUSDBalance(token.balance, 18, token.price)}
               </div>
-            )}
+            ) : null}
           </CardListItem>
         )}
       </CardListContent>

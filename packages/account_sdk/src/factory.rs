@@ -40,7 +40,7 @@ impl ControllerFactory {
     }
 
     pub fn address(&self, salt: Felt) -> Felt {
-        self.deploy_v1(salt).address()
+        self.deploy_v3(salt).address()
     }
 }
 

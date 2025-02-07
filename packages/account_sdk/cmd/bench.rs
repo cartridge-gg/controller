@@ -66,8 +66,8 @@ async fn main() {
     );
 
     match factory
-        .deploy_v1(salt)
-        .fee_estimate_multiplier(1.5)
+        .deploy_v3(salt)
+        .gas_estimate_multiplier(1.5)
         .send()
         .await
     {

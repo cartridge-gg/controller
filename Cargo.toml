@@ -62,7 +62,7 @@ cainome = { git = "https://github.com/cartridge-gg/cainome", tag = "v0.4.5", fea
 ] }
 cainome-cairo-serde = { git = "https://github.com/cartridge-gg/cainome", tag = "v0.4.5" }
 
-starknet = "0.12.0"
+starknet = "0.13.0"
 starknet-crypto = { version = "0.7.3", features = ["pedersen_no_lookup"] }
 starknet-types-core = { version = "0.1", features = ["curve", "hash"] }
 

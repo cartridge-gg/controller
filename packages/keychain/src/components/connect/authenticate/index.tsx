@@ -27,7 +27,7 @@ export function Authenticate({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const { isSupported, message } = useIsSupported();
-  const { closeModal, chainId } = useConnection();
+  const { closeModal, controller } = useConnection();
 
   const onAuth = useCallback(async () => {
     setIsLoading(true);
@@ -76,7 +76,7 @@ export function Authenticate({
         title={title}
         description={description}
         onClose={closeModal}
-        chainId={chainId}
+        chainId={controller?.chainId()}
       />
       <LayoutContent className="items-center pb-10">
         <FaceIDImage />

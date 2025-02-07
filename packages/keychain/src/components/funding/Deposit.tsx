@@ -23,8 +23,7 @@ import {
   ArgentIcon,
   BraavosIcon,
   CopyIcon,
-  EthereumIcon,
-  StarknetColorIcon,
+  DepositIcon,
   Button,
   CopyAddress,
   Separator,
@@ -34,45 +33,46 @@ import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { parseEther } from "viem";
 import { AmountSelection } from "./AmountSelection";
-import { Balance } from "./Balance";
+import { Balance, BalanceType } from "./Balance";
 import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
-import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { toast } from "sonner";
 import { DEFAULT_AMOUNT } from "./constants";
+import { useFeeToken } from "@/hooks/tokens";
 
-type DepositEthProps = {
+type DepositProps = {
   onComplete?: (deployHash?: string) => void;
   onBack: () => void;
 };
 
-export function DepositEth(innerProps: DepositEthProps) {
+export function Deposit(innerProps: DepositProps) {
   return (
     <ExternalWalletProvider>
-      <DepositEthInner {...innerProps} />
+      <DepositInner {...innerProps} />
     </ExternalWalletProvider>
   );
 }
 
-function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
+function DepositInner({ onComplete, onBack }: DepositProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { closeModal, controller, chainId } = useConnection();
+  const { closeModal, controller } = useConnection();
   const { account: extAccount } = useAccount();
+  const { token: feeToken } = useFeeToken();
 
   const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
   const [state, setState] = useState<"connect" | "fund">("connect");
-  const [ethAmount, setEthAmount] = useState<string>();
+  const [tokenAmount, setTokenAmount] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
   const priceQuery = usePriceQuery({ pairs: TokenPair.EthUsdc });
   const price = priceQuery.data?.price?.[0];
 
-  const onAmountChagned = useCallback(
+  const onAmountChanged = useCallback(
     (amount: number) => {
       if (!price) return;
 
-      const ethAmount = amount / parseFloat(price?.amount);
-      setEthAmount(ethAmount.toString());
+      const tokenAmount = amount / parseFloat(price?.amount);
+      setTokenAmount(tokenAmount.toString());
       setDollarAmount(amount);
     },
     [price],
@@ -80,13 +80,16 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
 
   const onConnect = useCallback(
     (c: Connector) => {
-      if (!chainId) return;
+      if (!controller) return;
 
       connectAsync({ connector: c })
         .then(async () => {
           const connectedChain = await c.chainId();
-          if (num.toHex(connectedChain) !== chainId) {
-            await wallet.switchStarknetChain(window.starknet, chainId);
+          if (num.toHex(connectedChain) !== controller.chainId()) {
+            await wallet.switchStarknetChain(
+              window.starknet,
+              controller.chainId(),
+            );
           }
 
           setState("fund");
@@ -95,14 +98,14 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
           /* user abort */
         });
     },
-    [connectAsync, chainId],
+    [connectAsync, controller],
   );
 
   const onFund = useCallback(async () => {
     if (!extAccount) {
       throw new Error("External account is not connected");
     }
-    if (!ethAmount || !controller) {
+    if (!tokenAmount || !controller) {
       return;
     }
 
@@ -110,19 +113,19 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
       setIsLoading(true);
       const calls = [
         {
-          contractAddress: ETH_CONTRACT_ADDRESS,
+          contractAddress: feeToken.address,
           entrypoint: "approve",
           calldata: CallData.compile({
             recipient: controller.address,
-            amount: cairo.uint256(parseEther(ethAmount)),
+            amount: cairo.uint256(parseEther(tokenAmount)),
           }),
         },
         {
-          contractAddress: ETH_CONTRACT_ADDRESS,
+          contractAddress: feeToken.address,
           entrypoint: "transfer",
           calldata: CallData.compile({
             recipient: controller.address,
-            amount: cairo.uint256(parseEther(ethAmount)),
+            amount: cairo.uint256(parseEther(tokenAmount)),
           }),
         },
       ];
@@ -141,37 +144,39 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [extAccount, controller, ethAmount, onComplete]);
+  }, [feeToken.address, extAccount, controller, tokenAmount, onComplete]);
 
   const onCopy = useCallback(() => {
-    if (!controller?.address) return;
+    if (!controller) return;
 
-    navigator.clipboard.writeText(controller.address);
+    navigator.clipboard.writeText(controller.address());
     toast.success("Address copied");
-  }, [controller?.address]);
+  }, [controller]);
 
   return (
     <LayoutContainer>
       <LayoutHeader
-        title="Deposit ETH"
+        title="Deposit"
         description={
-          controller ? <CopyAddress address={controller.address} /> : undefined
+          controller ? (
+            <CopyAddress address={controller.address()} />
+          ) : undefined
         }
-        Icon={EthereumIcon}
+        icon={<DepositIcon size="lg" />}
         onBack={onBack}
-        chainId={chainId}
+        chainId={controller?.chainId()}
         onClose={closeModal}
       />
 
       <LayoutContent className="gap-6">
-        <Balance showBalances={["eth"]} />
+        <Balance types={[BalanceType.FEE_TOKEN]} />
       </LayoutContent>
 
       <LayoutFooter>
         <AmountSelection
           amount={dollarAmount}
           lockSelection={isLoading}
-          onChange={onAmountChagned}
+          onChange={onAmountChanged}
         />
         <Separator className="bg-spacer m-1" />
         {error && (
@@ -226,15 +231,6 @@ function DepositEthInner({ onComplete, onBack }: DepositEthProps) {
                   >
                     <CopyIcon size="sm" /> copy address
                   </Button>
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm text-muted-foreground">
-                      and send funds to it on
-                    </div>
-                    <div className="flex items-center gap-2 border border-background-100 rounded-md p-2">
-                      <StarknetColorIcon />{" "}
-                      <div className="text-sm font-bold">STARKNET MAINNET</div>
-                    </div>
-                  </div>
                 </div>
               );
             case "fund":
@@ -261,7 +257,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       chains={[sepolia, mainnet]}
-      provider={() => controller}
+      provider={() => controller.provider}
       connectors={connectors}
       explorer={voyager}
     >
