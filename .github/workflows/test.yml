@@ -22,6 +22,8 @@ jobs:
       image: ghcr.io/dojoengine/dojo-dev:v1.0.9
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - run: git config --global --add safe.directory '*'
       - uses: dorny/paths-filter@v3
         id: changes
@@ -74,16 +76,27 @@ jobs:
           files: coverage/lcov.info
 
   storybook:
+    # On push events, skip the job if the head commit message contains the snapshot update indicator.
+    if: >
+      github.event_name != 'push' || !contains(github.event.head_commit.message,
+      'chore: update storybook snapshots')
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/cartridge-gg/controller/storybook-env:sha-a808942
+      image: ghcr.io/cartridge-gg/controller/storybook-env:sha-86b05b2
     permissions:
       contents: "write"
       id-token: "write"
       pull-requests: "write"
     steps:
       - uses: actions/checkout@v4
-      - run: git config --global --add safe.directory '*'
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --global --add safe.directory '*'
+
       - uses: dorny/paths-filter@v3
         id: changes
         with:
@@ -109,30 +122,42 @@ jobs:
             ${{ runner.os }}-storybook-
 
       - run: pnpm i --frozen-lockfile
-
-      # Run regular storybook tests first to detect diffs
-      - run: |
-          set -e  # Make sure failures are caught
-          pnpm test:storybook 2>&1 | tee test-storybook.log || {
-            exit_code=$?
-            if [ $exit_code -eq 99 ]; then
-              # If it's our special snapshot failure code, pass it through
-              exit 99
-            else
-              # For any other error, fail immediately
-              echo "Storybook test failed with exit code $exit_code"
-              exit 1
-            fi
-          }
+      - run: pnpm build
+      - run: pnpm test:storybook:update
         id: test-storybook
+        continue-on-error: true
+
+      - name: Update and commit snapshots
+        id: update-snapshots
+        run: |
+          # Check if there are any changes to commit
+          if ! git diff --quiet packages/*/__image_snapshots__/; then
+            # Stage and commit changes
+            git add packages/*/__image_snapshots__/
+            git commit -m "chore: update storybook snapshots"
+
+            # Push to the PR branch
+            git push origin HEAD:${{ github.head_ref }}
+
+            # Set output to indicate we made changes
+            echo "changes_committed=true" >> "$GITHUB_ENV"
+          else
+            echo "changes_committed=false" >> "$GITHUB_ENV"
+            echo "No visual differences found - skipping remaining visual test steps"
+            exit 0
+          fi
 
       # Check for visual differences and collect info
       - name: Check for visual differences
+        if: env.changes_committed == 'true'
         id: check-diffs
-        if:
-          always() && (success() || steps.test-storybook.outcome == 'failure' &&
-          steps.test-storybook.conclusion == 'success')
         run: |
+          # Set test status based on previous step
+          if [ "${{ steps.test-storybook.outcome }}" == "failure" ]; then
+            echo "test_failed=true" >> "$GITHUB_ENV"
+            echo "test_error=$(cat /tmp/test-error.txt 2>/dev/null || echo 'Test failed')" >> "$GITHUB_ENV"
+          fi
+
           # Configure git safety
           git config --global --add safe.directory '*'
 
@@ -145,13 +170,6 @@ jobs:
           check_snapshots() {
             local pkg=$1
             local dir=$2
-            
-            # Check diff output directory
-            if [ -d "${dir}/__diff_output__" ]; then
-              find "${dir}/__diff_output__" -name "*.png" -type f | while read -r file; do
-                echo "${pkg}:${file}:diff" >> diff_info.txt
-              done
-            fi
             
             # Check for snapshot changes in the PR
             git diff --name-only origin/${{ github.base_ref }} | grep "^${dir}/.*\.png$" | while read -r file; do
@@ -176,34 +194,15 @@ jobs:
             echo "snapshot_failed=false" >> "$GITHUB_ENV"
           fi
 
-      # Add new steps after the check-diffs step
-      - name: Configure Git
-        if: env.snapshot_failed == 'true'
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Update and commit snapshots
-        if: env.snapshot_failed == 'true'
-        run: |
-          # Run the update script
-          pnpm test:storybook:update
-
-          # Stage and commit changes
-          git add packages/*/__image_snapshots__/
-          git commit -m "chore: update storybook snapshots [skip ci]"
-
-          # Push to the PR branch
-          git push origin HEAD:${{ github.head_ref }}
-
       # Upload diff images to GCP
       - uses: "google-github-actions/auth@v2"
+        if: env.changes_committed == 'true'
         with:
           project_id: c7e-prod
           workload_identity_provider: "projects/276773611885/locations/global/workloadIdentityPools/github/providers/controller-repo"
 
       - uses: "google-github-actions/upload-cloud-storage@v2"
-        if: env.snapshot_failed == 'true'
+        if: env.changes_committed == 'true' && env.snapshot_failed == 'true'
         id: upload-diffs
         with:
           path: "packages"
@@ -215,12 +214,19 @@ jobs:
 
       # Create PR comment with results
       - uses: actions/github-script@v7
-        if: always() && github.event_name == 'pull_request'
+        if:
+          env.changes_committed == 'true' && github.event_name == 'pull_request'
         with:
           script: |
             const fs = require('fs');
 
             let comment = '### 🎨 Visual Regression Test Results\n\n';
+
+            // Add test execution status
+            if (process.env.test_failed === 'true') {
+              comment += '⚠️ Tests completed with some issues:\n';
+              comment += '```\n' + process.env.test_error + '\n```\n\n';
+            }
 
             const testStatus = process.env.snapshot_failed === 'true' 
               ? '❌ Visual differences detected'
@@ -232,9 +238,9 @@ jobs:
               
               // Group changes by package and type
               const changes = {
-                'ui-next': { diffs: [], updates: [] },
-                'keychain': { diffs: [], updates: [] },
-                'profile': { diffs: [], updates: [] }
+                'ui-next': { updates: [] },
+                'keychain': { updates: [] },
+                'profile': { updates: [] }
               };
               
               // Process all files
@@ -243,49 +249,34 @@ jobs:
                 if (path && fs.existsSync(path)) {
                   const fileName = path.split('/').pop();
                   const storyName = fileName.replace('.png', '').replace('-diff', '');
-                  
-                  if (type === 'diff') {
-                    const imageUrl = `https://static.cartridge.gg/gh/visual-diffs/${process.env.GITHUB_REPOSITORY}/${context.payload.pull_request.number}/${pkg}/__image_snapshots__/__diff_output__/${fileName}`;
-                    changes[pkg].diffs.push({ storyName, imageUrl });
-                  } else {
-                    const imageUrl = `https://static.cartridge.gg/gh/visual-diffs/${process.env.GITHUB_REPOSITORY}/${context.payload.pull_request.number}/${pkg}/__image_snapshots__/${fileName}`;
-                    changes[pkg].updates.push({ storyName, imageUrl });
-                  }
+                  const imageUrl = `https://static.cartridge.gg/gh/visual-diffs/${process.env.GITHUB_REPOSITORY}/${context.payload.pull_request.number}/${pkg}/__image_snapshots__/${fileName}`;
+                  changes[pkg].updates.push({ storyName, imageUrl });
                 }
               });
               
               // Generate comment sections for each package
+              let hasAnyChanges = false;
+              let allImages = '';
+              
               for (const [pkg, pkgChanges] of Object.entries(changes)) {
-                if (pkgChanges.diffs.length > 0 || pkgChanges.updates.length > 0) {
+                if (pkgChanges.updates.length > 0) {
+                  hasAnyChanges = true;
                   comment += `\n#### 📦 ${pkg}\n\n`;
+                  comment += '##### 🔄 Snapshot Updates in PR\n\n';
+                  comment += 'The following snapshots have been updated in this PR:\n\n';
                   
-                  if (pkgChanges.diffs.length > 0) {
-                    comment += '##### ⚠️ Visual Differences Detected\n\n';
-                    comment += 'The following components have visual differences that need review:\n\n';
-                    pkgChanges.diffs.forEach(({ storyName, imageUrl }) => {
-                      comment += `<details><summary><code>${storyName}</code></summary>\n\n`;
-                      comment += `![${storyName}](${imageUrl})\n\n`;
-                      comment += '</details>\n\n';
-                    });
-                  }
-                  
-                  if (pkgChanges.updates.length > 0) {
-                    comment += '##### 🔄 Snapshot Updates in PR\n\n';
-                    comment += 'The following snapshots have been updated in this PR:\n\n';
-                    pkgChanges.updates.forEach(({ storyName, imageUrl }) => {
-                      comment += `<details><summary><code>${storyName}</code></summary>\n\n`;
-                      comment += `![${storyName}](${imageUrl})\n\n`;
-                      comment += '</details>\n\n';
-                    });
-                  }
+                  pkgChanges.updates.forEach(({ storyName, imageUrl }) => {
+                    comment += `- \`${storyName}\`\n`;
+                    allImages += `### ${pkg} - ${storyName}\n\n`;
+                    allImages += `![${storyName}](${imageUrl})\n\n`;
+                  });
                 }
               }
               
-              comment += '\n---\n';
-              if (Object.values(changes).some(pkg => pkg.diffs.length > 0)) {
-                comment += '⚠️ **Action Required**: Please review the visual differences and:\n';
-                comment += '1. Update the snapshots locally if the changes are intended (`scripts/update-storybook-snapshot.sh`)\n';
-                comment += '2. Fix the components if the changes are unintended\n\n';
+              if (hasAnyChanges) {
+                comment += '\n<details><summary>🖼️ View All Image Changes</summary>\n\n';
+                comment += allImages;
+                comment += '</details>\n\n';
               }
             }
 

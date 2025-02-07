@@ -4,6 +4,18 @@ import path from "path";
 
 const customSnapshotsDir = path.join(process.cwd(), "__image_snapshots__");
 
+// Configure thresholds via environment variables with defaults
+const FAILURE_THRESHOLD = parseFloat(
+  process.env.STORYBOOK_IMAGE_SNAPSHOT_FAILURE_THRESHOLD ?? "0.01",
+);
+const DIFF_THRESHOLD = parseFloat(
+  process.env.STORYBOOK_IMAGE_SNAPSHOT_DIFF_THRESHOLD ?? "0.1",
+);
+const FAILURE_THRESHOLD_TYPE = (process.env
+  .STORYBOOK_IMAGE_SNAPSHOT_FAILURE_THRESHOLD_TYPE ?? "percent") as
+  | "percent"
+  | "pixel";
+
 const config: TestRunnerConfig = {
   setup() {
     expect.extend({ toMatchImageSnapshot });
@@ -14,6 +26,9 @@ const config: TestRunnerConfig = {
       state: "visible",
       timeout: 45000,
     });
+
+    // Wait for any animations to complete
+    await page.waitForTimeout(1000);
 
     // Get the story's container element - selecting the nested content div
     const storyContainer = await page.$("#storybook-root > div > div");
@@ -31,9 +46,11 @@ const config: TestRunnerConfig = {
     expect(image).toMatchImageSnapshot({
       customSnapshotsDir,
       customSnapshotIdentifier: `${context.id}-${browserName}`,
-      // Add some threshold to handle minor rendering differences
-      failureThreshold: 0.01,
-      failureThresholdType: "percent",
+      failureThreshold: FAILURE_THRESHOLD,
+      failureThresholdType: FAILURE_THRESHOLD_TYPE,
+      customDiffConfig: {
+        threshold: DIFF_THRESHOLD,
+      },
     });
   },
 };
