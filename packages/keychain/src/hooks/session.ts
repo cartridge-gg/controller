@@ -160,11 +160,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
 
 interface ICreateSessionContext {
   policies: ParsedSessionPolicies;
-  onToggleMethod: (
-    address: string,
-    id: string,
-    authorized: boolean,
-  ) => void;
+  onToggleMethod: (address: string, id: string, authorized: boolean) => void;
   onToggleMessage: (id: string, authorized: boolean) => void;
 }
 
