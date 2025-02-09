@@ -1,5 +1,6 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { SessionConsent } from "@/components/connect";
+import { isPolicyRequired } from "@/components/connect/create/utils";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
@@ -19,6 +20,8 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish, shortString } from "starknet";
 import { Upgrade } from "./Upgrade";
+
+const requiredPolicies = ["VRF"];
 
 export function CreateSession({
   policies,
@@ -41,9 +44,19 @@ export function CreateSession({
     if (policies.contracts) {
       Object.keys(policies.contracts).forEach((address) => {
         if (policies.contracts![address]) {
-          policies.contracts![address].methods.forEach((method) => {
-            method.id = crypto.randomUUID();
+          policies.contracts![address].methods.forEach((method, i) => {
+            method.id = `${i}-${address}-${method.name}`;
             method.authorized = true;
+
+            // If policy type is required, set the method as required(always true)
+            if (
+              isPolicyRequired({
+                requiredPolicyTypes: requiredPolicies,
+                type: policies.contracts![address].meta?.type,
+              })
+            ) {
+              method.isRequired = true;
+            }
           });
         }
       });
@@ -51,8 +64,8 @@ export function CreateSession({
 
     // Set all message policyState to authorized
     if (policies.messages) {
-      policies.messages.forEach((message) => {
-        message.id = crypto.randomUUID();
+      policies.messages.forEach((message, i) => {
+        message.id = `${i}-${message.domain.name}-${message.name}`;
         message.authorized = true;
       });
     }
