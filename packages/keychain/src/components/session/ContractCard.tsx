@@ -16,7 +16,7 @@ import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
 import { AccordionCard } from "./AccordionCard";
 
-type MethodWithEnabled = Method & { authorized?: boolean };
+type MethodWithEnabled = Method & { authorized?: boolean; id?: string };
 
 interface ContractCardProps {
   address: string;
@@ -104,7 +104,7 @@ export function ContractCard({
             <Switch
               checked={method.authorized ?? true}
               onCheckedChange={(enabled) =>
-                onToggleMethod(address, method.entrypoint, enabled)
+                method.id ? onToggleMethod(address, method.id, enabled) : null
               }
               disabled={method.isRequired}
             />

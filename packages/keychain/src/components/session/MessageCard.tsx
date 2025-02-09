@@ -48,6 +48,7 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
 
 type SignMessagePolicyWithEnabled = SignMessagePolicy & {
   authorized?: boolean;
+  id?: string;
 };
 
 export function MessageContent({
@@ -75,7 +76,9 @@ export function MessageContent({
             </p>
             <Switch
               checked={m.authorized}
-              onCheckedChange={(enabled) => onToggleMessage(m.name!, enabled)}
+              onCheckedChange={(enabled) =>
+                m.id ? onToggleMessage(m.id, enabled) : null
+              }
             />
           </div>
 

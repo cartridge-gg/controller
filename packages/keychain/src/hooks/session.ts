@@ -38,12 +38,13 @@ export type SessionContracts = Record<
       type: ContractType;
       icon?: React.ReactNode | string;
     };
-    methods: (Method & { authorized?: boolean })[];
+    methods: (Method & { authorized?: boolean; id?: string })[];
   }
 >;
 
 export type SessionMessages = (SignMessagePolicy & {
   authorized?: boolean;
+  id?: string;
 })[];
 
 const VRF_ADDRESS = getChecksumAddress(
@@ -161,7 +162,7 @@ interface ICreateSessionContext {
   policies: ParsedSessionPolicies;
   onToggleMethod: (
     address: string,
-    entrypoint: string,
+    id: string,
     authorized: boolean,
   ) => void;
   onToggleMessage: (id: string, authorized: boolean) => void;

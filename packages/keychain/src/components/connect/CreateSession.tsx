@@ -14,6 +14,7 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
+  PencilIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish, shortString } from "starknet";
@@ -41,6 +42,7 @@ export function CreateSession({
       Object.keys(policies.contracts).forEach((address) => {
         if (policies.contracts![address]) {
           policies.contracts![address].methods.forEach((method) => {
+            method.id = crypto.randomUUID();
             method.authorized = true;
           });
         }
@@ -50,6 +52,7 @@ export function CreateSession({
     // Set all message policyState to authorized
     if (policies.messages) {
       policies.messages.forEach((message) => {
+        message.id = crypto.randomUUID();
         message.authorized = true;
       });
     }
@@ -57,16 +60,12 @@ export function CreateSession({
     return policies;
   });
 
-  console.log("controller: ", controller);
-
   const handleToggleMethod = useCallback(
-    (address: string, entrypoint: string, authorized: boolean) => {
+    (address: string, id: string, authorized: boolean) => {
       if (!policyState.contracts) return;
       const contract = policyState.contracts[address];
       if (!contract) return;
-      const method = contract.methods.find(
-        (method) => method.entrypoint === entrypoint,
-      );
+      const method = contract.methods.find((method) => method.id === id);
       if (!method) return;
       method.authorized = authorized;
       setPolicyState({ ...policyState });
@@ -75,11 +74,9 @@ export function CreateSession({
   );
 
   const handleToggleMessage = useCallback(
-    (name: string, authorized: boolean) => {
+    (id: string, authorized: boolean) => {
       if (!policyState.messages) return;
-      const message = policyState.messages.find(
-        (message) => message.name === name,
-      );
+      const message = policyState.messages.find((message) => message.id === id);
       if (!message) return;
       message.authorized = authorized;
       setPolicyState({ ...policyState });
@@ -109,7 +106,9 @@ export function CreateSession({
       setError(undefined);
       setIsConnecting(true);
 
-      await controller.createSession(expiresAt, policyState, maxFee);
+      const cleanedPolicies = cleanPolicies(policyState);
+
+      await controller.createSession(expiresAt, cleanedPolicies, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
@@ -122,7 +121,10 @@ export function CreateSession({
     try {
       setError(undefined);
       setIsConnecting(true);
-      await controller.createSession(duration, policyState, maxFee);
+
+      const cleanedPolicies = cleanPolicies(policyState);
+
+      await controller.createSession(duration, cleanedPolicies, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
@@ -156,6 +158,7 @@ export function CreateSession({
           }
           onClose={closeModal}
           chainId={controller?.chainId()}
+          right={<PencilIcon variant="solid" />}
         />
         <LayoutContent className="gap-6">
           <SessionConsent isVerified={policyState?.verified} />
@@ -234,3 +237,34 @@ function normalizeChainId(chainId: number | string): string {
     }
   }
 }
+
+/**
+ * Deep copy the policies and remove the id fields
+ */
+const cleanPolicies = (
+  _policies: ParsedSessionPolicies,
+): ParsedSessionPolicies => {
+  // Deep copy the policies
+  const cleanPolicies: ParsedSessionPolicies = JSON.parse(
+    JSON.stringify(_policies),
+  );
+
+  // Remove the id fields from the methods
+  if (cleanPolicies.contracts) {
+    Object.values(cleanPolicies.contracts).forEach((contract) => {
+      contract.methods.forEach((method) => {
+        delete method.id;
+      });
+    });
+  }
+
+  // Remove the id fields from the messages
+  if (cleanPolicies.messages) {
+    cleanPolicies.messages.forEach((message) => {
+      delete message.id;
+    });
+  }
+
+  // Return the cleaned policies
+  return cleanPolicies;
+};

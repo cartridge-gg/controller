@@ -4,6 +4,7 @@ import {
   useCreateSession,
 } from "@/hooks/session";
 
+import { useConnection } from "@/hooks/connection";
 import {
   InfoIcon,
   Switch,
@@ -15,7 +16,6 @@ import {
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
-import { useConnection } from "@/hooks/connection";
 import { Link } from "react-router-dom";
 import { constants } from "starknet";
 import { AccordionCard } from "./AccordionCard";
@@ -114,7 +114,9 @@ export function AggregateCard({
                   <Switch
                     checked={method.authorized ?? true}
                     onCheckedChange={(enabled) =>
-                      onToggleMethod(address, method.entrypoint, enabled)
+                      method.id
+                        ? onToggleMethod(address, method.id, enabled)
+                        : null
                     }
                     disabled={method.isRequired}
                   />
