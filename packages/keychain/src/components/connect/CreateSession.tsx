@@ -52,7 +52,7 @@ export function CreateSession({
             if (
               isPolicyRequired({
                 requiredPolicyTypes: requiredPolicies,
-                type: policies.contracts![address].meta?.type,
+                policyType: policies.contracts![address].meta?.type,
               })
             ) {
               method.isRequired = true;
@@ -72,8 +72,6 @@ export function CreateSession({
 
     return policies;
   });
-
-  console.log("policyState: ", policyState);
 
   const handleToggleMethod = useCallback(
     (address: string, id: string, authorized: boolean) => {

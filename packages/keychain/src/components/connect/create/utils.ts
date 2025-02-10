@@ -1,4 +1,4 @@
-import { ContractType } from "@/hooks/session";
+import type { ContractType } from "@/hooks/session";
 import { fetchData } from "@/utils/graphql";
 import {
   AccountDocument,
@@ -24,7 +24,7 @@ export function fetchAccount(username: string, signal?: AbortSignal) {
  */
 export const isPolicyRequired = ({
   requiredPolicyTypes,
-  type,
+  policyType,
 }: {
   /**
    * The required policy types.
@@ -34,10 +34,10 @@ export const isPolicyRequired = ({
   /**
    * The policy type to check.
    */
-  type: Nullable<ContractType>;
+  policyType: Nullable<ContractType>;
 }): boolean => {
-  if (!type) return false;
-  return requiredPolicyTypes.includes(type);
+  if (!policyType) return false;
+  return requiredPolicyTypes.includes(policyType);
 };
 
 type Nullable<T> = T | null | undefined;
