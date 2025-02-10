@@ -22,10 +22,12 @@ export function Leaderboard({
   pins: { [playerId: string]: string[] };
 }) {
   return (
-    <div className="flex flex-col gap-y-px">
+    <div className="flex flex-col gap-y-px rounded">
       {players.map((player, index) => (
         <Row
           key={player.address}
+          first={index === 0}
+          last={index === players.length - 1}
           self={BigInt(player.address || 0) === BigInt(address || 1)}
           address={player.address}
           earnings={player.earnings}
@@ -41,6 +43,8 @@ export function Leaderboard({
 
 function Row({
   self,
+  first,
+  last,
   address,
   earnings,
   rank,
@@ -49,6 +53,8 @@ function Row({
   pins,
 }: {
   self: boolean;
+  first: boolean;
+  last: boolean;
   address: string;
   earnings: number;
   rank: number;
@@ -82,18 +88,23 @@ function Row({
 
   return (
     <Link
-      className={cn("flex w-full", self && "sticky top-0 bottom-0 z-10")}
+      className={cn(
+        "flex w-full overflow-hidden",
+        self && "sticky top-[-8px] bottom-[-26px] z-10",
+        first && "rounded-t-md",
+        last && "rounded-b-md",
+      )}
       to={path}
     >
       <div
         className={cn(
-          "grow flex justify-between items-center px-3 py-2 text-sm gap-x-3 sticky top-0 bg-background-200 hover:bg-background-300",
+          "grow flex justify-between items-center px-3 py-2 text-sm gap-x-3 bg-background-200 hover:bg-background-300",
           self && "bg-background-300 text-primary",
         )}
       >
-        <div className="flex items-center justify-between grow sticky top-0 gap-x-3">
-          <div className="flex items-center gap-x-4 sticky top-0">
-            <p className="text-foreground-400 min-w-6 sticky top-0">{`${rank}.`}</p>
+        <div className="flex items-center justify-between grow gap-x-3">
+          <div className="flex items-center gap-x-4">
+            <p className="text-foreground-400 min-w-6">{`${rank}.`}</p>
             <User
               username={!username ? address.slice(0, 9) : username}
               Icon={SpaceInvaderIcon}

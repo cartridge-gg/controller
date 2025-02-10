@@ -91,7 +91,7 @@ export function Achievements() {
       />
 
       {achievements.length ? (
-        <LayoutContent className="mt-2 pb-6 gap-y-6 select-none">
+        <LayoutContent className="pt-2 pb-6 gap-y-6 select-none">
           {isSelf && (
             <div className="flex justify-between gap-x-3 gap-y-4">
               <TrophiesTab

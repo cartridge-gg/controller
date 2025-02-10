@@ -132,10 +132,10 @@ function Task({ task, completed }: { task: Task; completed: boolean }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-x-2">
-        <TaskIcon className="text-foreground-400" size="xs" />
+        <TaskIcon className="text-foreground-300" size="xs" />
         <p
           className={cn(
-            "text-xs text-foreground-400",
+            "text-xs text-foreground-300",
             task.count >= task.total && "line-through opacity-50",
           )}
         >
@@ -152,7 +152,7 @@ function Icon({ icon, completed }: { icon: string; completed: boolean }) {
     <div
       className={cn(
         "w-8 h-8 flex items-center justify-center",
-        completed ? "text-primary" : "text-foreground-400",
+        completed ? "text-primary" : "text-foreground-300",
       )}
     >
       <div className={cn("w-6 h-6", icon, "fa-solid")} />
@@ -215,7 +215,7 @@ function Description({ description }: { description: string }) {
 
 function Details({ percentage }: { percentage: string }) {
   return (
-    <p className="text-[0.65rem] text-foreground-400">{`${percentage}% of players earned`}</p>
+    <p className="text-[0.65rem] text-foreground-300">{`${percentage}% of players earned`}</p>
   );
 }
 
@@ -229,12 +229,12 @@ function Earning({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 text-foreground-400",
-        completed && "opacity-50",
+        "flex items-center gap-1 text-foreground-300",
+        completed && "text-foreground-400",
       )}
     >
       <SparklesIcon size="xs" variant={completed ? "line" : "solid"} />
-      <p className={cn("text-sm", completed && "line-through")}>{amount}</p>
+      <p className={cn("text-xs", completed && "line-through")}>{amount}</p>
     </div>
   );
 }
@@ -257,7 +257,7 @@ function Timestamp({ timestamp }: { timestamp: number }) {
   }, [timestamp]);
 
   return (
-    <div className="flex items-center gap-1 text-foreground-400 opacity-50">
+    <div className="flex items-center gap-1 text-foreground-400">
       <CalendarIcon size="xs" variant="line" />
       <p className="text-xs">{date}</p>
     </div>
@@ -288,13 +288,13 @@ function Progress({
       </div>
       {count >= total ? (
         <div className="flex items-center gap-x-2">
-          <div className="fa-solid fa-check text-xs text-foreground-400" />
-          <p className="text-xs text-foreground-400 font-medium">
+          <div className="fa-solid fa-check text-xs text-foreground-300" />
+          <p className="text-xs text-foreground-300">
             {total > 1 ? `${count.toLocaleString()}` : "Completed"}
           </p>
         </div>
       ) : (
-        <p className="text-xs text-foreground-400 font-medium">
+        <p className="text-xs text-foreground-300">
           {`${count.toLocaleString()} of ${total.toLocaleString()}`}
         </p>
       )}

@@ -4,7 +4,7 @@ import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 
-const HIDDEN_GROUP = "HIDDEN";
+const HIDDEN_GROUP = "Hidden";
 
 export function Trophies({
   achievements,
@@ -251,7 +251,7 @@ function Pagination({
       )}
       onClick={onClick}
     >
-      <div className="text-foreground-400">{icon}</div>
+      <div className="text-foreground-300">{icon}</div>
     </div>
   );
 }
@@ -270,8 +270,8 @@ function Page({
   return (
     <div
       className={cn(
-        "bg-primary h-[10px] w-[10px] opacity-50 hover:cursor-pointer hover:opacity-100",
-        completed ? "bg-primary" : "bg-background-200",
+        "h-[10px] w-[10px] opacity-50 hover:cursor-pointer hover:opacity-100",
+        completed ? "bg-primary" : "bg-foreground-400",
         highlighted && "opacity-100",
       )}
       onClick={() => setPage(index)}
