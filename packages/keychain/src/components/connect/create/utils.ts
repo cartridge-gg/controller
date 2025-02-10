@@ -1,3 +1,4 @@
+import { ContractType } from "@/hooks/session";
 import { fetchData } from "@/utils/graphql";
 import {
   AccountDocument,
@@ -29,11 +30,11 @@ export const isPolicyRequired = ({
    * The required policy types.
    * @example ["policyType1", "policyType2"]
    */
-  requiredPolicyTypes: Array<string>;
+  requiredPolicyTypes: Array<ContractType>;
   /**
    * The policy type to check.
    */
-  type: Nullable<string>;
+  type: Nullable<ContractType>;
 }): boolean => {
   if (!type) return false;
   return requiredPolicyTypes.includes(type);

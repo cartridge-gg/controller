@@ -6,7 +6,7 @@ import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSumm
 import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
 import { useConnection } from "@/hooks/connection";
 import { CreateSessionProvider } from "@/hooks/session";
-import type { ParsedSessionPolicies } from "@/hooks/session";
+import type { ContractType, ParsedSessionPolicies } from "@/hooks/session";
 import type { ControllerError } from "@/utils/connection";
 import {
   Button,
@@ -21,7 +21,7 @@ import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish, shortString } from "starknet";
 import { Upgrade } from "./Upgrade";
 
-const requiredPolicies = ["VRF"];
+const requiredPolicies: Array<ContractType> = ["VRF"];
 
 export function CreateSession({
   policies,
@@ -72,6 +72,8 @@ export function CreateSession({
 
     return policies;
   });
+
+  console.log("policyState: ", policyState);
 
   const handleToggleMethod = useCallback(
     (address: string, id: string, authorized: boolean) => {
