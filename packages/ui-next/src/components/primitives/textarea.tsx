@@ -21,7 +21,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           {...props}
         />
-        {!!onClear && (
+        {!!props.value && !!onClear && (
           <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
             <Clear isLoading={!!isLoading} onClear={onClear} />
           </div>
