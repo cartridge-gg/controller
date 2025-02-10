@@ -1,27 +1,29 @@
 @layer base {
   .dark {
-    --background: 135 8% 9%;
-    --background-100: 135 6% 13%;
-    --background-200: 120 5% 15%;
-    --background-300: 120 6% 17%;
-    --background-400: 132 4% 23%;
+    --background-100: #161A17;
+    --background-200: #1E221F;
+    --background-300: #242824;
+    --background-400: #2A2F2A;
+    --background-500: #373C38;
 
-    --foreground: 0 0% 100%;
-    --foreground-100: 0 0% 100%;
-    --foreground-200: 0 0% 61%;
-    --foreground-300: 0 0% 50%;
-    --foreground-400: 150 1% 31%;
+    --translucent-100: #00000014;
+    --translucent-200: #0000007A;
+    --translucent-300: #000000A3;
 
-    --primary: 44 96% 61%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 120 57% 78%;
+    --spacer-100: #0F1410;
+    
+    --foreground: #FFFFFF;
+    --foreground-100: #FFFFFF;
+    --foreground-200: #9C9C9C;
+    --foreground-300: #808080;
+    --foreground-400: #505050;
+
+    /* TODO: Should not be used */
 
     --muted: 132 8% 24%;
     --muted-foreground: 0 0% 50%;
 
     --accent: 132 4% 23%;
     --accent-foreground: 0 0% 61%;
-
-    --spacer: 132 14% 7%;
   }
 }

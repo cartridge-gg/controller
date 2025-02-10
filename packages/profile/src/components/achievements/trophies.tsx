@@ -194,7 +194,7 @@ function Header({
 }) {
   return (
     <div className="flex gap-x-px items-center h-10">
-      <div className="grow h-full p-3 bg-background-100 flex items-center">
+      <div className="grow h-full p-3 bg-background-200 flex items-center">
         <p className="text-xs text-muted-foreground font-semibold tracking-wider">
           {group}
         </p>
@@ -211,8 +211,8 @@ function Header({
             onClick={handleNext}
             disabled={page === pages[pages.length - 1]}
           />
-          <div className="flex items-center justify-center h-full p-3 bg-background-100 gap-2">
-            <div className="flex items-center justify-center rounded-xl bg-background-200 p-[3px]">
+          <div className="flex items-center justify-center h-full p-3 bg-background-200 gap-2">
+            <div className="flex items-center justify-center rounded-xl bg-background-300 p-[3px]">
               <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
                 {pages.map((current) => (
                   <Page
@@ -246,7 +246,7 @@ function Pagination({
   return (
     <div
       className={cn(
-        "flex items-center justify-center h-full w-10 bg-background-100",
+        "flex items-center justify-center h-full w-10 bg-background-200",
         !disabled && "cursor-pointer hover:opacity-70",
       )}
       onClick={onClick}
@@ -300,7 +300,7 @@ function Total({
           {`${completed} of ${total}`}
         </p>
       </div>
-      <div className="h-4 grow flex flex-col justify-center items-start bg-background-200 rounded-xl p-1">
+      <div className="h-4 grow flex flex-col justify-center items-start bg-background-300 rounded-xl p-1">
         <div
           style={{ width: `${Math.floor((100 * completed) / total)}%` }}
           className={cn("grow bg-primary rounded-xl")}

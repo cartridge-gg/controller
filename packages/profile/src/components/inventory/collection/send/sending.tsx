@@ -42,13 +42,13 @@ function Item({
         "bg-background flex items-center p-0 h-11 gap-px hover:opacity-80",
       )}
     >
-      <div className="bg-background-100 flex w-11 aspect-square items-center justify-center">
-        <div className="flex items-center justify-center overflow-hidden h-7 w-7 bg-background-200 p-0.5">
+      <div className="bg-background-200 flex w-11 aspect-square items-center justify-center">
+        <div className="flex items-center justify-center overflow-hidden h-7 w-7 bg-background-300 p-0.5">
           <CollectionImage imageUrl={imageUrl} size="xs" />
         </div>
       </div>
 
-      <div className="bg-background-100 flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
+      <div className="bg-background-200 flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
         <p>{`${name} #${parseInt(tokenId, 16)}`}</p>
       </div>
     </CardContent>

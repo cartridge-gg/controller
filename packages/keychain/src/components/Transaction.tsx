@@ -54,7 +54,7 @@ export function Transaction({
   const chainName = useChainName(chainId);
 
   return (
-    <div className="flex items-center bg-background-100 roudned p-3 text-sm justify-between">
+    <div className="flex items-center bg-background-200 roudned p-3 text-sm justify-between">
       <div className="flex items-center gap-1">
         {icon}
         <div>{name}</div>

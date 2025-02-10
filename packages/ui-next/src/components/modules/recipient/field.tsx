@@ -28,9 +28,9 @@ export function Field({
     <Textarea
       spellCheck={false}
       className={cn(
-        "resize-none min-h-12 min-w-[384px] bg-background-100 py-3 pl-4 pr-12 border border-background-200 text-base/5 font-mono font-normal overflow-hidden",
-        "hover:border-background-300",
-        "focus-visible:bg-background-200 focus-visible:border-background-300 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none",
+        "resize-none min-h-12 min-w-[384px] bg-background-200 py-3 pl-4 pr-12 border border-background-300 text-base/5 font-mono font-normal overflow-hidden",
+        "hover:border-background-400",
+        "focus-visible:bg-background-300 focus-visible:border-background-400 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none",
         isError &&
           "border-destructive-foreground hover:border-destructive-foreground focus-visible:border-destructive-foreground",
         className,

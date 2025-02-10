@@ -186,7 +186,7 @@ export const Properties = ({
           return typeof property.value === "string" ? (
             <div
               key={`${trait}-${property.value}`}
-              className="bg-background-100 p-3 flex flex-col gap-1"
+              className="bg-background-200 p-3 flex flex-col gap-1"
             >
               {typeof trait === "string" ? (
                 <div className="uppercase text-muted-foreground text-2xs font-bold">
@@ -203,7 +203,7 @@ export const Properties = ({
           (_, i) => (
             <div
               key={`fill-${i}`}
-              className="bg-background-100 p-3 flex flex-col gap-1"
+              className="bg-background-200 p-3 flex flex-col gap-1"
             />
           ),
         )}

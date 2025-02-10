@@ -1,64 +1,48 @@
 import { Meta, StoryObj } from "@storybook/react";
 import { PropsWithChildren } from "react";
 
+function Colors(props: PropsWithChildren) {
+  return <div className="flex gap-4" {...props} />;
+}
+
+function Palette({ color, label }: { color: string; label: string; }) {
+  return (
+    <div className="size-36 flex flex-shrink-0 flex-col text-xs rounded-lg overflow-hidden">
+      <div className={`${color} h-2/3 flex justify-center items-center`}>
+        {window.getComputedStyle(document.documentElement).getPropertyValue(color.replace('bg', '-'))}
+      </div>
+      <div className="bg-spacer-100 flex justify-center items-center h-1/3">{label}</div>
+    </div>
+  );
+}
+
 const meta: Meta<typeof Colors> = {
-  title: "Primitives/Colors",
+  title: "Colors/Palette",
   component: Colors,
   tags: ["autodocs"],
+  parameters: {
+    backgrounds: {
+      default: "dark",
+      values: [{ name: "dark", value: "#0F1410" }],
+    },
+  },
 };
 
 export default meta;
 
 type Story = StoryObj<typeof Colors>;
 
-export const Surface: Story = {
+export const Background: Story = {
   args: {
     children: (
       <>
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-background text-xs">
-          <div>bg-background</div>
-          <div>(bg-background)</div>
-        </div>
-
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-background-100 text-xs">
-          <div>bg-background-100</div>
-          <div>(solid-fills/bg-primary)</div>
-        </div>
-
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-background-200 text-xs">
-          <div>bg-background-200</div>
-          <div>(solid-fills/bg-secondary)</div>
-        </div>
-
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-background-300 text-xs">
-          <div>bg-background-300</div>
-          <div>(solid-fills/bg-tertiary)</div>
-        </div>
+        <Palette color="bg-background" label="bg-background" />
+        <Palette color="bg-background-100" label="bg-background-100" />
+        <Palette color="bg-background-200" label="bg-background-200" />
+        <Palette color="bg-background-300" label="bg-background-300" />
+        <Palette color="bg-background-400" label="bg-background-400" />
+        <Palette color="bg-background-500" label="bg-background-500" />
       </>
-    ),
-  },
-};
-
-export const Text: Story = {
-  args: {
-    children: (
-      <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-foreground text-xs text-background">
-        <div>bg-foreground</div>
-        <div>(text-primary)</div>
-        <div>text-background</div>
-      </div>
-    ),
-  },
-};
-
-export const Muted: Story = {
-  args: {
-    children: (
-      <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-muted text-muted-foreground text-xs">
-        <div>bg-muted</div>
-        <div>text-muted-foreground</div>
-        <div>(text.secondary)</div>
-      </div>
     ),
   },
 };
@@ -67,66 +51,135 @@ export const Destructive: Story = {
   args: {
     children: (
       <>
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-destructive text-xs">
-          <div>bg-destructive</div>
-        </div>
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-destructive-100 text-xs">
-          <div>bg-destructive-100</div>
-          <div>(Red/500)</div>
-        </div>
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-destructive-foreground text-xs">
-          <div>bg-destructive-foreground</div>
-        </div>
+        <Palette color="bg-destructive" label="bg-destructive" />
+        <Palette color="bg-destructive-100" label="bg-destructive-100" />
       </>
     ),
   },
 };
 
-export const Accent: Story = {
+export const Constructive: Story = {
   args: {
     children: (
       <>
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-primary text-primary-foreground text-xs">
-          <div>bg-primary</div>
-          <div className="mb-2">(theme.colors.primary)</div>
-          <div className="flex flex-col items-center w-full overflow-x-auto">
-            <div>text-primary-foreground</div>
-            <div>(theme.colors.primaryForeground)</div>
-          </div>
-        </div>
-
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-secondary text-xs">
-          <div>bg-secondary</div>
-          <div>(Used in Duotone)</div>
-        </div>
+        <Palette color="bg-constructive" label="bg-constructive" />
+        <Palette color="bg-constructive-100" label="bg-constructive-100" />
       </>
     ),
   },
 };
 
-export const Others: Story = {
+export const Spacer: Story = {
   args: {
     children: (
       <>
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-border text-xs">
-          <div>bg-border</div>
-          <div>(--background/0.12)</div>
-        </div>
-
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-input text-xs">
-          <div>bg-input</div>
-          <div>(--background-200/0.12)</div>
-        </div>
-
-        <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-spacer text-xs">
-          <div>bg-spacer</div>
-          <div>(spacer)</div>
-        </div>
+        <Palette color="bg-spacer" label="bg-spacer" />
+        <Palette color="bg-spacer-100" label="bg-spacer-100" />
       </>
     ),
   },
 };
 
-function Colors(props: PropsWithChildren) {
-  return <div className="flex gap-4" {...props} />;
-}
+export const Foreground: Story = {
+  args: {
+    children: (
+      <>
+        <Palette color="bg-foreground" label="text-foreground" />
+        <Palette color="bg-foreground-100" label="text-foreground-100" />
+        <Palette color="bg-foreground-200" label="text-foreground-200" />
+        <Palette color="bg-foreground-300" label="text-foreground-300" />
+        <Palette color="bg-foreground-400" label="text-foreground-400" />
+      </>
+    ),
+  },
+};
+
+export const Primary: Story = {
+  args: {
+    children: (
+      <>
+        <Palette color="bg-primary" label="bg-primary" />
+        <Palette color="bg-primary-100" label="bg-primary-100" />
+        <Palette color="bg-primary-200" label="bg-primary-200" />
+      </>
+    ),
+  },
+};
+
+export const Secondary: Story = {
+  args: {
+    children: (
+      <>
+        <Palette color="bg-secondary" label="bg-secondary" />
+        <Palette color="bg-secondary-100" label="bg-secondary-100" />
+      </>
+    ),
+  },
+};
+
+export const Translucent: Story = {
+  args: {
+    children: (
+      <>
+        <Palette color="bg-translucent" label="bg-translucent" />
+        <Palette color="bg-translucent-100" label="bg-translucent-100" />
+        <Palette color="bg-translucent-200" label="bg-translucent-200" />
+        <Palette color="bg-translucent-300" label="bg-translucent-300" />
+      </>
+    ),
+  },
+};
+
+
+// export const Muted: Story = {
+//   args: {
+//     children: (
+//       <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-muted text-muted-foreground text-xs">
+//         <div>bg-muted</div>
+//         <div>text-muted-foreground</div>
+//         <div>(text.secondary)</div>
+//       </div>
+//     ),
+//   },
+// };
+
+// export const Destructive: Story = {
+//   args: {
+//     children: (
+//       <>
+//         <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-destructive text-xs">
+//           <div>bg-destructive</div>
+//         </div>
+//         <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-destructive-100 text-xs">
+//           <div>bg-destructive-100</div>
+//           <div>(Red/500)</div>
+//         </div>
+//         <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-destructive-foreground text-xs">
+//           <div>bg-destructive-foreground</div>
+//         </div>
+//       </>
+//     ),
+//   },
+// };
+
+// export const Accent: Story = {
+//   args: {
+//     children: (
+//       <>
+//         <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-primary text-primary-foreground text-xs">
+//           <div>bg-primary</div>
+//           <div className="mb-2">(theme.colors.primary)</div>
+//           <div className="flex flex-col items-center w-full overflow-x-auto">
+//             <div>text-primary-foreground</div>
+//             <div>(theme.colors.primaryForeground)</div>
+//           </div>
+//         </div>
+
+//         <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-secondary text-xs">
+//           <div>bg-secondary</div>
+//           <div>(Used in Duotone)</div>
+//         </div>
+//       </>
+//     ),
+//   },
+// };

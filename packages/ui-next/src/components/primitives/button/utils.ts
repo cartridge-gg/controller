@@ -12,7 +12,7 @@ export const buttonVariants = cva(
         outline:
           "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-background-100 text-foreground shadow-sm hover:bg-background-100/80",
+          "bg-background-200 text-foreground shadow-sm hover:bg-background-200/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         icon: "bg-background text-foreground hover:bg-background/60",

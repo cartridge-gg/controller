@@ -129,7 +129,7 @@ function IconWrapper({
     case "expanded":
       return (
         <div className="flex-shrink-0 rounded size-20 bg-background flex items-center justify-center">
-          <div className="rounded bg-background-100 size-[calc(100%-8px)] flex items-center justify-center">
+          <div className="rounded bg-background-200 size-[calc(100%-8px)] flex items-center justify-center">
             {children}
           </div>
         </div>
@@ -137,7 +137,7 @@ function IconWrapper({
     default:
     case "compressed":
       return (
-        <div className="flex-shrink-0 rounded size-11 flex items-center justify-center bg-background-100">
+        <div className="flex-shrink-0 rounded size-11 flex items-center justify-center bg-background-200">
           {children}
         </div>
       );

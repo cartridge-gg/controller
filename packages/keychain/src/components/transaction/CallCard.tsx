@@ -42,7 +42,7 @@ export function CallCard({ address, call }: CallCardProps) {
     <Card>
       <CardContent className="py-2">
         <Accordion key={`${call.entrypoint}`} type="single" collapsible>
-          <AccordionItem value="item" className="bg-background-100 rounded-md">
+          <AccordionItem value="item" className="bg-background-200 rounded-md">
             <AccordionTrigger className="px-1 py-2">
               <p className=" text-foreground font-bold text-s">
                 {humanizeString(call.entrypoint)}

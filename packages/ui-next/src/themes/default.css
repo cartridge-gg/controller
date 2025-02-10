@@ -1,32 +1,38 @@
 @layer base {
   :root {
-    --background: 220 60% 99%;
-    --background-100: 210 22% 96%;
-    --background-200: 210 2.48% 94.9%;
-    --background-300: 214 3% 91%;
-    --background-400: 207 15% 85%;
+    --background-100: #161A17;
+    --background-200: #1E221F;
+    --background-300: #242824;
+    --background-400: #2A2F2A;
+    --background-500: #373C38;
 
-    --foreground: 0 0% 0%;
-    --foreground-100: 0 0% 0%;
-    --foreground-200: 0 0% 0%;
-    --foreground-300: 0 0% 0%;
-    --foreground-400: 0 0% 0%;
+    --translucent-100: #00000014;
+    --translucent-200: #0000007A;
+    --translucent-300: #000000A3;
 
-    --primary: 255 73% 61%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 255 73% 61%;
+    --spacer-100: #0F1410;
+    
+    --foreground-100: #FFFFFF;
+    --foreground-200: #9C9C9C;
+    --foreground-300: #808080;
+    --foreground-400: #505050;
+
+    --primary-100: #FBCB4A;
+    --primary-200: #CCA63E;
+
+    --secondary-100: #A7E7A7;
+
+    --destructive-100: #E66666;
+
+    --constructive-100: #0EAD69;
+
+    /* TODO: Should not be used */
 
     --muted: 207 15% 85%;
     --muted-foreground: 0 0% 50%;
 
     --accent: 207 15% 85%;
     --accent-foreground: 132 6% 30%;
-
-    --destructive: 0 85% 85%;
-    --destructive-100: 7 72% 62%;
-    --destructive-foreground: 0 72% 65%;
-
-    --spacer: 0 0% 0%;
 
     --radius: 0.5rem;
   }

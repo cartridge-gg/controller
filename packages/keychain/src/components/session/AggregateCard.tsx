@@ -51,7 +51,7 @@ export function AggregateCard({
     >
       {Object.entries(contracts || {}).map(([address, { name, methods }]) => (
         <div key={address} className="flex flex-col gap-2">
-          <div className="flex items-center justify-between bg-background-100 text-xs">
+          <div className="flex items-center justify-between bg-background-200 text-xs">
             <div className="py-2 font-bold">{name}</div>
             <Link
               to={

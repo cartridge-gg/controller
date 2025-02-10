@@ -16,7 +16,7 @@ export function Pinned({
       <CardHeader
         className={cn(
           "flex flex-col justify-between items-center h-36 py-6 overflow-hidden rounded",
-          empty && "bg-background border border-dashed border-background-100",
+          empty && "bg-background border border-dashed border-background-200",
         )}
       >
         <div className="flex justify-center items-center w-12 h-12">

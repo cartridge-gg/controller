@@ -30,7 +30,7 @@ export function StatusTray({ username, validation, error }: StatusTrayProps) {
     <div
       className={cn(
         "flex flex-col top-[-2px] rounded-b relative z-0 gap-px  overflow-hidden",
-        isError ? "bg-destructive" : "bg-background-200",
+        isError ? "bg-destructive" : "bg-background-300",
       )}
     >
       <div
@@ -54,7 +54,7 @@ export function StatusTray({ username, validation, error }: StatusTrayProps) {
                 : validation.error?.message || "Enter a username"}
       </div>
       {isTimeoutError && (
-        <div className="w-full flex items-center justify-between text-xs font-semibold px-4 py-2 text-background-100">
+        <div className="w-full flex items-center justify-between text-xs font-semibold px-4 py-2 text-background-200">
           <div>Having trouble signing up?</div>
           <Link
             className="flex items-center gap-1.5 hover:underline"

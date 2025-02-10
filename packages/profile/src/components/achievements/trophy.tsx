@@ -71,7 +71,7 @@ export function Trophy({
         completed && !softview && (compatibility || !!game) && "gap-x-px",
       )}
     >
-      <div className="grow flex flex-col items-stretch gap-y-3 bg-background-100 p-3">
+      <div className="grow flex flex-col items-stretch gap-y-3 bg-background-200 p-3">
         <div className="flex items-center gap-3">
           <Icon icon={icon} completed={completed} />
           <div className="grow flex flex-col">
@@ -275,7 +275,7 @@ function Progress({
 }) {
   return (
     <div className="flex gap-4">
-      <div className="grow flex flex-col justify-center items-start bg-background-200 rounded-xl p-1">
+      <div className="grow flex flex-col justify-center items-start bg-background-300 rounded-xl p-1">
         <div
           style={{
             width: `${Math.floor((100 * Math.min(count, total)) / total)}%`,
@@ -371,11 +371,11 @@ function Track({
   return (
     <div
       className={cn(
-        "bg-background-100 grow p-2 flex items-center transition-all duration-200",
+        "bg-background-200 grow p-2 flex items-center transition-all duration-200",
         hovered &&
           (enabled || pinned) &&
-          "opacity-90 bg-background-100/50 cursor-pointer",
-        pinned && "bg-background-200",
+          "opacity-90 bg-background-200/50 cursor-pointer",
+        pinned && "bg-background-300",
       )}
       onClick={pinned ? handleUnpin : handlePin}
       onMouseEnter={() => setHovered(true)}
@@ -453,7 +453,7 @@ Do you have what it takes to carve your name into history?
   return (
     <div
       className={cn(
-        "grow bg-background-100 p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
+        "grow bg-background-200 p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
       )}
       onClick={handleShare}
     >
