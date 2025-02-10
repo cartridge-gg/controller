@@ -1,5 +1,4 @@
 import { Header, Error, WalletType } from "@/components";
-import { Clear } from "./clear";
 import { Field } from "./field";
 import { Selection } from "./selection";
 import { Preview } from "./preview";
@@ -62,17 +61,14 @@ export const Recipient = ({
         )}
       </div>
       <div className="relative flex flex-col gap-y-3">
-        <div className="relative">
-          <Field
-            value={value}
-            onChange={onChange}
-            onFocus={onFocus}
-            onBlur={onBlur}
-          />
-          <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
-            {value && <Clear isLoading={isLoading} onClear={onClear} />}
-          </div>
-        </div>
+        <Field
+          value={value}
+          onChange={onChange}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          isLoading={isLoading}
+          onClear={onClear}
+        />
         <Error label={error} />
 
         {(isFocused || isHovered) &&

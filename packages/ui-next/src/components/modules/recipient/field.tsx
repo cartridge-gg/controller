@@ -4,19 +4,23 @@ import { useMemo } from "react";
 
 type FieldProps = {
   value?: string | number;
+  isLoading?: boolean;
   isError?: boolean;
+  className?: string;
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onFocus?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
-  className?: string;
+  onClear?: () => void;
 };
 
 export function Field({
   value,
+  isLoading,
   isError,
   onChange,
   onFocus,
   onBlur,
+  onClear,
   className,
 }: FieldProps) {
   const height = useMemo(() => {
@@ -41,6 +45,8 @@ export function Field({
       onChange={onChange}
       onFocus={onFocus}
       onBlur={onBlur}
+      isLoading={isLoading}
+      onClear={onClear}
     />
   );
 }

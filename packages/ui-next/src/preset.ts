@@ -61,8 +61,8 @@ export const cartridgeTWPreset: Partial<Config> = {
         foreground: "var(--spacer-100)",
       },
       // TODO: Should not be used
-      border: "var(--background-100)/0.12",
-      input: "var(--background-300)/0.12",
+      border: "var(--background-100)",
+      input: "var(--background-300)",
     },
     extend: {
       fontFamily: {
