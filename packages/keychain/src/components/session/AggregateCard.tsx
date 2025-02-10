@@ -1,11 +1,23 @@
-import React from "react";
+import {
+  type SessionContracts,
+  type SessionMessages,
+  useCreateSession,
+} from "@/hooks/session";
+
+import { useConnection } from "@/hooks/connection";
+import {
+  InfoIcon,
+  Switch,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  cn,
+} from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
-import { constants } from "starknet";
-import { Method } from "@cartridge/presets";
-import { useConnection } from "@/hooks/connection";
-import { SessionContracts, SessionMessages } from "@/hooks/session";
 import { Link } from "react-router-dom";
+import { constants } from "starknet";
 import { AccordionCard } from "./AccordionCard";
 import { MessageContent } from "./MessageCard";
 
@@ -24,16 +36,19 @@ export function AggregateCard({
 }: AggregateCardProps) {
   const { controller } = useConnection();
   const explorer = useExplorer();
+  const { onToggleMethod } = useCreateSession();
 
-  const totalMethods = Object.values(contracts || {}).reduce(
-    (acc, contract) => {
-      return acc + (contract.methods?.length || 0);
-    },
+  const totalEnabledMessages =
+    messages?.filter((message) => message.authorized)?.length ?? 0;
+
+  // const count = totalEnabledMethods + totalEnabledMessages;
+  const totalEnabledMethods = Object.values(contracts ?? {}).reduce(
+    (acc, contract) =>
+      acc + contract.methods.filter((method) => method.authorized).length,
     0,
   );
 
-  const totalMessages = messages?.length ?? 0;
-  const count = totalMethods + totalMessages;
+  const count = totalEnabledMethods + totalEnabledMessages;
 
   return (
     <AccordionCard
@@ -68,24 +83,44 @@ export function AggregateCard({
           </div>
 
           <div className="flex flex-col gap-px rounded overflow-auto border border-background">
-            {methods.map((method: Method) => (
+            {methods.map((method) => (
               <div
                 key={method.name}
                 className="flex flex-col p-3 gap-3 text-xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-accent-foreground">
-                    {method.name}
+                  <div
+                    className={cn(
+                      "flex flex-row items-center gap-2",
+                      method.authorized
+                        ? "text-accent-foreground "
+                        : "text-accent",
+                    )}
+                  >
+                    <p className="font-bold">{method.name}</p>
+                    {method.description && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon size="sm" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{method.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                   </div>
-                  <div className="text-muted-foreground">
-                    {method.entrypoint}
-                  </div>
+                  <Switch
+                    checked={method.authorized ?? true}
+                    onCheckedChange={(enabled) =>
+                      method.id
+                        ? onToggleMethod(address, method.id, enabled)
+                        : null
+                    }
+                    disabled={method.isRequired}
+                  />
                 </div>
-                {method.description && (
-                  <div className="text-muted-foreground">
-                    {method.description}
-                  </div>
-                )}
               </div>
             ))}
           </div>

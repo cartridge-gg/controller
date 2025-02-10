@@ -126,6 +126,7 @@ export const Default: Story = {
                   name: "Battle Start",
                   description: "Start a battle",
                   entrypoint: "battle_start",
+                  isRequired: true,
                 },
                 {
                   name: "Battle Force Start",

@@ -1,5 +1,5 @@
-import { VerifiedIcon } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
+import { LockIcon, VerifiedIcon } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 
@@ -34,17 +34,20 @@ export function SessionConsent({
               to="https://github.com/cartridge-gg/controller/blob/main/packages/controller/src/presets.ts"
               target="_blank"
             >
-              <VerifiedIcon size="lg" className="text-accent-foreground" />
+              <VerifiedIcon size="lg" className="text-foreground" />
             </Link>
           )}
-          <div className="text-xs text-muted-foreground font-semibold">
-            Authorize{" "}
-            <span className="text-accent-foreground font-bold">{origin}</span>{" "}
+          <p className="text-xs text-muted-foreground font-semibold">
+            Create a session for{" "}
+            <span className="text-accent-foreground font-bold inline-flex items-baseline gap-1 leading-none">
+              {isVerified && <LockIcon size="xs" />}
+              {origin}
+            </span>{" "}
             and allow the game to{" "}
             <span className="text-accent-foreground font-bold">
               perform actions on your behalf
             </span>
-          </div>
+          </p>
         </div>
       ) : null;
   }
