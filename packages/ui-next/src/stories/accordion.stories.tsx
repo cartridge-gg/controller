@@ -27,7 +27,7 @@ function Accordion() {
       <AccordionItem value="item-1">
         <AccordionTrigger className="gap-1">
           Approve{" "}
-          <span className="text-accent-foreground font-bold">2 methods</span>
+          <span className="text-foreground-200 font-bold">2 methods</span>
         </AccordionTrigger>
         <AccordionContent className="gap-px">
           {Array.from({ length: 3 }).map((_, i) => (

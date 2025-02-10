@@ -74,7 +74,7 @@ export function Activity() {
                                 target="_blank"
                                 key={t.transactionHash}
                               >
-                                <CardContent className="flex items-center justify-between text-accent-foreground">
+                                <CardContent className="flex items-center justify-between text-foreground-200">
                                   <div className="flex items-center gap-1">
                                     {isSend ? (
                                       <ArrowFromLineIcon variant="up" />

@@ -5,13 +5,17 @@ function Colors(props: PropsWithChildren) {
   return <div className="flex gap-4" {...props} />;
 }
 
-function Palette({ color, label }: { color: string; label: string; }) {
+function Palette({ color, label }: { color: string; label: string }) {
   return (
     <div className="size-36 flex flex-shrink-0 flex-col text-xs rounded-lg overflow-hidden">
       <div className={`${color} h-2/3 flex justify-center items-center`}>
-        {window.getComputedStyle(document.documentElement).getPropertyValue(color.replace('bg', '-'))}
+        {window
+          .getComputedStyle(document.documentElement)
+          .getPropertyValue(color.replace("bg", "-"))}
       </div>
-      <div className="bg-spacer-100 flex justify-center items-center h-1/3">{label}</div>
+      <div className="bg-spacer-100 flex justify-center items-center h-1/3">
+        {label}
+      </div>
     </div>
   );
 }
@@ -129,7 +133,6 @@ export const Translucent: Story = {
     ),
   },
 };
-
 
 // export const Muted: Story = {
 //   args: {

@@ -49,7 +49,7 @@ export function ContractCard({
       trigger={
         <div className="text-xs text-foreground-400">
           Approve&nbsp;
-          <span className="text-accent-foreground font-bold">
+          <span className="text-foreground-200 font-bold">
             {methods.length} {methods.length > 1 ? `methods` : "method"}
           </span>
         </div>
@@ -62,7 +62,7 @@ export function ContractCard({
           className="flex flex-col bg-background-200 gap-4 p-3 text-xs"
         >
           <div className="flex items-center justify-between">
-            <div className="font-bold text-accent-foreground">
+            <div className="font-bold text-foreground-200">
               {method.name ?? humanizeString(method.entrypoint)}
             </div>
             <div className="text-foreground-400">{method.entrypoint}</div>

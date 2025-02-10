@@ -26,7 +26,7 @@ export function ExpirationCard({
       trigger={
         <div className="text-xs text-foreground-400">
           Expires in&nbsp;
-          <span className="text-accent-foreground font-bold">
+          <span className="text-foreground-200 font-bold">
             {formatDuration(duration)}
           </span>
         </div>

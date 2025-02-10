@@ -143,18 +143,20 @@ function Trophies({
         </div>
       ))}
       {Array.from({ length: 3 - trophies.length }).map((_, index) => (
-        <Empty key={index} />
+        <Empty self={self} key={index} />
       ))}
     </div>
   );
 }
 
-function Empty() {
+function Empty({ self }: { self: boolean }) {
   return (
     <div
       className={cn(
-        "w-6 h-6 border rounded-md flex items-center justify-center text-accent",
-        self ? "border-background-400" : "border-background-300",
+        "w-6 h-6 border rounded-md flex items-center justify-center text-background-500",
+        self
+          ? "border-background-400 text-foreground-400"
+          : "border-background-300 text-background-500",
       )}
     >
       <div className="w-4 h-4 fa-spider-web fa-thin" />

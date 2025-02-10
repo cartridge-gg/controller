@@ -25,7 +25,7 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
       trigger={
         <div className="text-xs text-foreground-400">
           Approve&nbsp;
-          <span className="text-accent-foreground font-bold">
+          <span className="text-foreground-200 font-bold">
             {messages.length} {messages.length > 1 ? `messages` : "message"}
           </span>
         </div>
@@ -108,7 +108,10 @@ export function CollapsibleRow({ title, children }: CollapsibleRowProps) {
   return (
     <Accordion type="single" collapsible value={value} onValueChange={setValue}>
       <AccordionItem value={title} className="flex flex-col">
-        <AccordionTrigger hideIcon className="hover:bg-accent rounded-md">
+        <AccordionTrigger
+          hideIcon
+          className="hover:bg-background-500 rounded-md"
+        >
           <div className="flex items-center gap-1 py-1">
             <CheckboxIcon
               variant={value ? "minus-line" : "plus-line"}

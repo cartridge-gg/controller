@@ -42,7 +42,7 @@ export function AggregateCard({
       trigger={
         <div className="text-xs text-foreground-400">
           Approve&nbsp;
-          <span className="text-accent-foreground font-bold">
+          <span className="text-foreground-200 font-bold">
             {count} {count > 1 ? `items` : "item"}
           </span>
         </div>
@@ -74,12 +74,10 @@ export function AggregateCard({
                 className="flex flex-col p-3 gap-3 text-xs"
               >
                 <div className="flex items-center justify-between">
-                  <div className="font-bold text-accent-foreground">
+                  <div className="font-bold text-foreground-200">
                     {method.name}
                   </div>
-                  <div className="text-foreground-400">
-                    {method.entrypoint}
-                  </div>
+                  <div className="text-foreground-400">{method.entrypoint}</div>
                 </div>
                 {method.description && (
                   <div className="text-foreground-400">

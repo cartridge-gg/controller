@@ -84,7 +84,7 @@ export function Trophy({
                 />
                 {completed && (
                   <Separator
-                    className="bg-accent h-2 ml-0.5"
+                    className="bg-background-500 h-2 ml-0.5"
                     orientation="vertical"
                   />
                 )}
@@ -169,7 +169,7 @@ function Title({ title, completed }: { title: string; completed: boolean }) {
   return (
     <p
       className={cn(
-        "text-sm text-accent-foreground capitalize font-medium",
+        "text-sm text-foreground-200 capitalize font-medium",
         completed && "text-foreground",
       )}
     >
@@ -193,7 +193,7 @@ function Description({ description }: { description: string }) {
 
   if (description.length === 0) return null;
   return (
-    <p className="block text-xs text-accent-foreground">
+    <p className="block text-xs text-foreground-200">
       {content}
       {visible && (
         <span
@@ -281,7 +281,7 @@ function Progress({
             width: `${Math.floor((100 * Math.min(count, total)) / total)}%`,
           }}
           className={cn(
-            "grow bg-accent-foreground rounded-xl",
+            "grow bg-background-500-foreground rounded-xl",
             completed ? "bg-primary" : "text-foreground-400",
           )}
         />
@@ -315,7 +315,6 @@ function Track({
   const { parent } = useConnection();
   const { chainId, provider } = useArcade();
 
-  const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const pinned = useMemo(() => {
@@ -371,15 +370,10 @@ function Track({
   return (
     <div
       className={cn(
-        "bg-background-200 grow p-2 flex items-center transition-all duration-200",
-        hovered &&
-          (enabled || pinned) &&
-          "opacity-90 bg-background-200/50 cursor-pointer",
-        pinned && "bg-background-300",
+        "bg-background-200 grow p-2 flex items-center transition-all duration-200 text-foreground-300 hover:opacity-80 hover:cursor-pointer",
+        pinned && "bg-background-300 text-foreground-100",
       )}
       onClick={pinned ? handleUnpin : handlePin}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       {loading ? (
         <SpinnerIcon className="text-foreground-400 animate-spin" size="sm" />
@@ -453,7 +447,7 @@ Do you have what it takes to carve your name into history?
   return (
     <div
       className={cn(
-        "grow bg-background-200 p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
+        "grow bg-background-200 text-foreground-300 p-2 flex items-center transition-all duration-200 hover:opacity-80 hover:cursor-pointer",
       )}
       onClick={handleShare}
     >

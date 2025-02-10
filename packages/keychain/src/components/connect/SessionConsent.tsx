@@ -34,14 +34,14 @@ export function SessionConsent({
               to="https://github.com/cartridge-gg/controller/blob/main/packages/controller/src/presets.ts"
               target="_blank"
             >
-              <VerifiedIcon size="lg" className="text-accent-foreground" />
+              <VerifiedIcon size="lg" className="text-foreground-200" />
             </Link>
           )}
           <div className="text-xs text-foreground-400 font-semibold">
             Authorize{" "}
-            <span className="text-accent-foreground font-bold">{origin}</span>{" "}
-            and allow the game to{" "}
-            <span className="text-accent-foreground font-bold">
+            <span className="text-foreground-200 font-bold">{origin}</span> and
+            allow the game to{" "}
+            <span className="text-foreground-200 font-bold">
               perform actions on your behalf
             </span>
           </div>
