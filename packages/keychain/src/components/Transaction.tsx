@@ -61,7 +61,7 @@ export function Transaction({
       </div>
 
       <div className="flex items-center gap-1">
-        <div className="flex items-center text-muted-foreground gap-1 border-r px-3">
+        <div className="flex items-center text-foreground-400 gap-1 border-r px-3">
           <StarknetIcon size="sm" />
           <div>{chainName}</div>
         </div>

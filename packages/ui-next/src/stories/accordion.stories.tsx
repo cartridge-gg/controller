@@ -32,10 +32,10 @@ function Accordion() {
         <AccordionContent className="gap-px">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i + 1} className="flex items-center gap-1">
-              <CircleIcon size="sm" className="text-muted-foreground" />
+              <CircleIcon size="sm" className="text-foreground-400" />
               <div className="flex items-center gap-2">
                 <div>Method {i + 1}</div>
-                <InfoIcon size="sm" className="text-muted-foreground" />
+                <InfoIcon size="sm" className="text-foreground-400" />
               </div>
             </div>
           ))}

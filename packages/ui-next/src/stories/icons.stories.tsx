@@ -146,7 +146,7 @@ function Icons({
               }
             }
           })()}
-          <p className="text-[10px] md:text-xs text-muted-foreground">
+          <p className="text-[10px] md:text-xs text-foreground-400">
             {icon.displayName}
           </p>
         </div>

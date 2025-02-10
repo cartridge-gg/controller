@@ -42,7 +42,7 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
   if (isDesktop) {
     return (
       <div className="flex w-screen h-dvh items-center justify-center">
-        <div className="w-desktop border border-muted rounded-xl flex flex-col relative overflow-hidden align-middle">
+        <div className="w-desktop border border-background-200 rounded-xl flex flex-col relative overflow-hidden align-middle">
           {children}
         </div>
       </div>

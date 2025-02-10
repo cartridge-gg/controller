@@ -20,9 +20,6 @@
 
     /* TODO: Should not be used */
 
-    --muted: 132 8% 24%;
-    --muted-foreground: 0 0% 50%;
-
     --accent: 132 4% 23%;
     --accent-foreground: 0 0% 61%;
   }

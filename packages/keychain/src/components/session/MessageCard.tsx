@@ -23,7 +23,7 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
       icon={<PencilIcon variant="solid" />}
       title="Sign Message"
       trigger={
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-foreground-400">
           Approve&nbsp;
           <span className="text-accent-foreground font-bold">
             {messages.length} {messages.length > 1 ? `messages` : "message"}
@@ -132,7 +132,7 @@ interface ValueRowProps {
 
 export function ValueRow({ values }: ValueRowProps) {
   return (
-    <div className="flex items-center py-1 gap-1 text-muted-foreground">
+    <div className="flex items-center py-1 gap-1 text-foreground-400">
       <ArrowTurnDownIcon size="sm" />
       <div className="flex items-center gap-2">
         {values.map((f) => (

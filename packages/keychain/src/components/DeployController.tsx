@@ -285,7 +285,7 @@ function ExplorerLink({
         chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
       }starkscan.co/tx/${txHash}`}
       target="_blank"
-      className="flex items-center gap-1 text-sm text-muted-foreground underline"
+      className="flex items-center gap-1 text-sm text-foreground-400 underline"
     >
       View on Starkscan
       <ExternalIcon size="sm" />

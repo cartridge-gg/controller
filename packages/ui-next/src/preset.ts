@@ -61,10 +61,6 @@ export const cartridgeTWPreset: Partial<Config> = {
         foreground: "var(--spacer-100)",
       },
       // TODO: Should not be used
-      muted: {
-        DEFAULT: "var(--muted)",
-        foreground: "var(--muted-foreground)",
-      },
       accent: {
         DEFAULT: "var(--accent)",
         foreground: "var(--accent-foreground)",

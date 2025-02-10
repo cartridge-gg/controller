@@ -31,7 +31,7 @@ export function Tokens() {
         <CardListItem icon={<CoinsIcon variant="solid" />} className="hover:opacity-80">
           <div className="flex items-center gap-2">
             {credit.balance.formatted}
-            <span className="text-muted-foreground">CREDITS</span>
+            <span className="text-foreground-400">CREDITS</span>
           </div>
         </CardListItem>
       </Link> */}
@@ -63,11 +63,11 @@ function TokenCardContent({
       >
         <div className="flex items-center gap-2">
           {formatBalance(token.balance.formatted, ["~"])}
-          <span className="text-muted-foreground">{token.meta.symbol}</span>
+          <span className="text-foreground-400">{token.meta.symbol}</span>
         </div>
 
         {countervalue && (
-          <div className="text-muted-foreground">
+          <div className="text-foreground-400">
             {formatBalance(countervalue.formatted, ["~"])}
           </div>
         )}

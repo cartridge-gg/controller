@@ -16,11 +16,11 @@ export const Upgrade = () => {
       executionError={upgrade.error}
     >
       <LayoutContent>
-        <div className="text-sm text-muted-foreground pb-2">
+        <div className="text-sm text-foreground-400 pb-2">
           Install the latest to continue
         </div>
         <div className="flex flex-col rounded p-4 border border-l-8 border-background-300 bg-background-200 gap-1">
-          <div className="text-sm text-muted-foreground font-bold">
+          <div className="text-sm text-foreground-400 font-bold">
             Upgrade Details
           </div>
           <div className="flex flex-col">

@@ -53,7 +53,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
       <LayoutContent>
         {/* TODO: Get rid of this div once Content is updated with TW */}
         <div className="flex flex-col gap-4">
-          <div className="text-sm text-muted-foreground text-center">
+          <div className="text-sm text-foreground-400 text-center">
             Your controller can be owned by an existing Starknet wallet
           </div>
           <div className="flex flex-col gap-2">

@@ -57,10 +57,10 @@ export function Empty() {
 export function Banner() {
   return (
     <div className="absolute top-[-2px] right-2 h-7 w-6 rounded-t-sm rounded-b overflow-hidden flex flex-col">
-      <div className="h-5 w-6 bg-muted" />
+      <div className="h-5 w-6 bg-background-500" />
       <div className="flex justify-between">
-        <div className="h-0 w-0 border-t-[6px] border-t-muted border-r-[12px] border-r-transparent" />
-        <div className="h-0 w-0 border-t-[6px] border-t-muted border-l-[12px] border-l-transparent" />
+        <div className="h-0 w-0 border-t-[6px] border-t-background-500 border-r-[12px] border-r-transparent" />
+        <div className="h-0 w-0 border-t-[6px] border-t-background-500 border-l-[12px] border-l-transparent" />
       </div>
     </div>
   );

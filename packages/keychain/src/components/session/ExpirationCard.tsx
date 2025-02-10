@@ -24,7 +24,7 @@ export function ExpirationCard({
       icon={<ClockIcon variant="solid" />}
       title="Session Expiration"
       trigger={
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-foreground-400">
           Expires in&nbsp;
           <span className="text-accent-foreground font-bold">
             {formatDuration(duration)}
@@ -35,7 +35,7 @@ export function ExpirationCard({
     >
       <div className="flex flex-col gap-4 p-3 text-xs">
         <div className="flex items-center justify-between">
-          <div className="text-muted-foreground">Duration</div>
+          <div className="text-foreground-400">Duration</div>
           <Select
             value={duration.toString()}
             onValueChange={(val) => onDurationChange(BigInt(val))}

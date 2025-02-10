@@ -40,7 +40,7 @@ export function AggregateCard({
       icon={icon}
       title={title}
       trigger={
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-foreground-400">
           Approve&nbsp;
           <span className="text-accent-foreground font-bold">
             {count} {count > 1 ? `items` : "item"}
@@ -61,7 +61,7 @@ export function AggregateCard({
                   : `#` // TODO: Add explorer for worlds.dev
               }
               target="_blank"
-              className="text-muted-foreground hover:underline"
+              className="text-foreground-400 hover:underline"
             >
               {formatAddress(address, { first: 5, last: 5 })}
             </Link>
@@ -77,12 +77,12 @@ export function AggregateCard({
                   <div className="font-bold text-accent-foreground">
                     {method.name}
                   </div>
-                  <div className="text-muted-foreground">
+                  <div className="text-foreground-400">
                     {method.entrypoint}
                   </div>
                 </div>
                 {method.description && (
-                  <div className="text-muted-foreground">
+                  <div className="text-foreground-400">
                     {method.description}
                   </div>
                 )}

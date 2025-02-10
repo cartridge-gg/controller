@@ -26,7 +26,7 @@ export function ContractCard({
 
   const explorerLink = (
     <a
-      className="text-xs text-muted-foreground cursor-pointer hover:underline"
+      className="text-xs text-foreground-400 cursor-pointer hover:underline"
       href={
         controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
         controller?.chainId() === constants.StarknetChainId.SN_SEPOLIA
@@ -47,7 +47,7 @@ export function ContractCard({
       subtitle={explorerLink}
       isExpanded={isExpanded}
       trigger={
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-foreground-400">
           Approve&nbsp;
           <span className="text-accent-foreground font-bold">
             {methods.length} {methods.length > 1 ? `methods` : "method"}
@@ -65,10 +65,10 @@ export function ContractCard({
             <div className="font-bold text-accent-foreground">
               {method.name ?? humanizeString(method.entrypoint)}
             </div>
-            <div className="text-muted-foreground">{method.entrypoint}</div>
+            <div className="text-foreground-400">{method.entrypoint}</div>
           </div>
           {method.description && (
-            <div className="text-muted-foreground">{method.description}</div>
+            <div className="text-foreground-400">{method.description}</div>
           )}
         </div>
       ))}

@@ -19,7 +19,7 @@ export function SessionConsent({
   switch (variant) {
     case "slot":
       return (
-        <div className="text-xs text-muted-foreground font-semibold">
+        <div className="text-xs text-foreground-400 font-semibold">
           Authorize Slot to manage your Cartridge infrastructure
         </div>
       );
@@ -37,7 +37,7 @@ export function SessionConsent({
               <VerifiedIcon size="lg" className="text-accent-foreground" />
             </Link>
           )}
-          <div className="text-xs text-muted-foreground font-semibold">
+          <div className="text-xs text-foreground-400 font-semibold">
             Authorize{" "}
             <span className="text-accent-foreground font-bold">{origin}</span>{" "}
             and allow the game to{" "}

@@ -195,7 +195,7 @@ function Header({
   return (
     <div className="flex gap-x-px items-center h-10">
       <div className="grow h-full p-3 bg-background-200 flex items-center">
-        <p className="text-xs text-muted-foreground font-semibold tracking-wider">
+        <p className="text-xs text-foreground-400 font-semibold tracking-wider">
           {group}
         </p>
       </div>
@@ -251,7 +251,7 @@ function Pagination({
       )}
       onClick={onClick}
     >
-      <div className="text-muted-foreground">{icon}</div>
+      <div className="text-foreground-400">{icon}</div>
     </div>
   );
 }
@@ -271,7 +271,7 @@ function Page({
     <div
       className={cn(
         "bg-primary h-[10px] w-[10px] opacity-50 hover:cursor-pointer hover:opacity-100",
-        completed ? "bg-primary" : "bg-muted",
+        completed ? "bg-primary" : "bg-background-200",
         highlighted && "opacity-100",
       )}
       onClick={() => setPage(index)}
@@ -292,11 +292,11 @@ function Total({
     <div className="h-8 py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
       <div className="flex items-center gap-1">
         <TrophyIcon
-          className="text-muted-foreground"
+          className="text-foreground-400"
           size="xs"
           variant="solid"
         />
-        <p className="text-xs text-muted-foreground font-medium">
+        <p className="text-xs text-foreground-400 font-medium">
           {`${completed} of ${total}`}
         </p>
       </div>
@@ -308,11 +308,11 @@ function Total({
       </div>
       <div className="flex items-center gap-1">
         <SparklesIcon
-          className="text-muted-foreground"
+          className="text-foreground-400"
           size="xs"
           variant="solid"
         />
-        <p className="text-xs text-muted-foreground font-medium">{earnings}</p>
+        <p className="text-xs text-foreground-400 font-medium">{earnings}</p>
       </div>
     </div>
   );

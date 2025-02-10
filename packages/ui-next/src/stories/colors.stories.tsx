@@ -134,9 +134,9 @@ export const Translucent: Story = {
 // export const Muted: Story = {
 //   args: {
 //     children: (
-//       <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-muted text-muted-foreground text-xs">
-//         <div>bg-muted</div>
-//         <div>text-muted-foreground</div>
+//       <div className="size-40 flex flex-shrink-0 flex-col items-center justify-center bg-background-200 text-foreground-400 text-xs">
+//         <div>bg-background-200</div>
+//         <div>text-foreground-400</div>
 //         <div>(text.secondary)</div>
 //       </div>
 //     ),

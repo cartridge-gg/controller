@@ -93,7 +93,7 @@ function Row({
       >
         <div className="flex items-center justify-between grow sticky top-0 gap-x-3">
           <div className="flex items-center gap-x-4 sticky top-0">
-            <p className="text-muted-foreground min-w-6 sticky top-0">{`${rank}.`}</p>
+            <p className="text-foreground-400 min-w-6 sticky top-0">{`${rank}.`}</p>
             <User
               username={!username ? address.slice(0, 9) : username}
               Icon={SpaceInvaderIcon}

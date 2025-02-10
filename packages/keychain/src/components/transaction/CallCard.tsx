@@ -51,14 +51,14 @@ export function CallCard({ address, call }: CallCardProps) {
             <AccordionContent>
               <div className="flex flex-col gap-2 p-1">
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground font-bold">
+                  <div className="text-xs text-foreground-400 font-bold">
                     Contract
                   </div>
                   {explorerLink}
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground font-bold">
+                  <div className="text-xs text-foreground-400 font-bold">
                     Entrypoint
                   </div>
                   <div className="text-xs text-foreground">
@@ -68,7 +68,7 @@ export function CallCard({ address, call }: CallCardProps) {
 
                 {call.calldata && (
                   <div className="flex flex-col gap-1">
-                    <div className="text-xs text-muted-foreground font-bold pb-1">
+                    <div className="text-xs text-foreground-400 font-bold pb-1">
                       Calldata
                     </div>
                     <div className="flex flex-col gap-1">

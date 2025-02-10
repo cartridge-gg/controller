@@ -158,7 +158,7 @@ function Headline({
       {description && (
         <div
           className={cn(
-            "text-muted-foreground break-words",
+            "text-foreground-400 break-words",
             variant === "compressed" ? "text-xs" : "text-sm",
           )}
         >

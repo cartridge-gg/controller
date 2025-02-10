@@ -111,7 +111,7 @@ export function Collection() {
                       variant={selection ? "minus-line" : "unchecked-line"}
                       size="sm"
                     />
-                    <div className="text-muted-foreground font-semibold uppercase">
+                    <div className="text-foreground-400 font-semibold uppercase">
                       {selection ? `${tokenIds.length} selected` : "Select all"}
                     </div>
                   </div>

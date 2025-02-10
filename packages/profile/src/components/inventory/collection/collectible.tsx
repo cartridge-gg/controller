@@ -156,7 +156,7 @@ export const Description = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="uppercase text-[11px] text-muted-foreground font-bold tracking-wider">
+        <CardTitle className="uppercase text-[11px] text-foreground-400 font-bold tracking-wider">
           Description
         </CardTitle>
       </CardHeader>
@@ -175,7 +175,7 @@ export const Properties = ({
   return (
     <Card>
       <CardHeader className="h-10 flex flex-row items-center justify-between">
-        <CardTitle className="uppercase text-[11px] text-muted-foreground font-bold tracking-wider">
+        <CardTitle className="uppercase text-[11px] text-foreground-400 font-bold tracking-wider">
           Properties
         </CardTitle>
       </CardHeader>
@@ -189,7 +189,7 @@ export const Properties = ({
               className="bg-background-200 p-3 flex flex-col gap-1"
             >
               {typeof trait === "string" ? (
-                <div className="uppercase text-muted-foreground text-2xs font-bold">
+                <div className="uppercase text-foreground-400 text-2xs font-bold">
                   {trait}
                 </div>
               ) : null}
@@ -224,12 +224,12 @@ export const Details = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="uppercase text-[11px] text-muted-foreground font-bold tracking-wider">
+        <CardTitle className="uppercase text-[11px] text-foreground-400 font-bold tracking-wider">
           details
         </CardTitle>
       </CardHeader>
       <CardContent className="flex items-center justify-between">
-        <div className="text-muted-foreground">Contract Address</div>
+        <div className="text-foreground-400">Contract Address</div>
         {isPublicChain(chainId) ? (
           <Link
             to={StarkscanUrl(chainId).contract(col.address)}
@@ -247,7 +247,7 @@ export const Details = ({
       </CardContent>
 
       <CardContent className="flex items-center justify-between gap-4">
-        <div className="text-muted-foreground whitespace-nowrap">Token ID</div>
+        <div className="text-foreground-400 whitespace-nowrap">Token ID</div>
         <div className="font-medium truncate">
           {asset.tokenId.startsWith("0x")
             ? hexToNumber(asset.tokenId as Hex)
@@ -256,7 +256,7 @@ export const Details = ({
       </CardContent>
 
       <CardContent className="flex items-center justify-between">
-        <div className="text-muted-foreground">Token Standard</div>
+        <div className="text-foreground-400">Token Standard</div>
         <div className="font-medium">{col.type}</div>
       </CardContent>
     </Card>

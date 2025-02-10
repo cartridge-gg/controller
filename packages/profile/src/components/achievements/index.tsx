@@ -131,14 +131,14 @@ export function Achievements() {
         </LayoutContent>
       ) : isLoading ? (
         <LayoutContent className="pb-4 select-none">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
-            <Spinner className="text-muted-foreground/30" size="lg" />
+          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-foreground-400/10 mb-4">
+            <Spinner className="text-foreground-400/30" size="lg" />
           </div>
         </LayoutContent>
       ) : (
         <LayoutContent className="pb-4 select-none">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
-            <p className="text-muted-foreground/30">No trophies available</p>
+          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-foreground-400/10 mb-4">
+            <p className="text-foreground-400/30">No trophies available</p>
           </div>
         </LayoutContent>
       )}
