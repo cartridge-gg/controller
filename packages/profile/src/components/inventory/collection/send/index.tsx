@@ -163,12 +163,12 @@ const Warning = ({
       onClick={() => setValidated(!validated)}
     >
       {validated && (
-        <CheckboxCheckedIcon className="text-destructive-foreground min-h-5 min-w-5 hover:opacity-80" />
+        <CheckboxCheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
       )}
       {!validated && (
-        <CheckboxUncheckedIcon className="text-destructive-foreground min-h-5 min-w-5 hover:opacity-80" />
+        <CheckboxUncheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
       )}
-      <p className="text-xs text-destructive-foreground">{warning}</p>
+      <p className="text-xs text-destructive-100">{warning}</p>
     </div>
   );
 };

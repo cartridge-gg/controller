@@ -137,7 +137,7 @@ export function CreateSession({
       <LayoutFooter>
         {!policies?.verified && (
           <div
-            className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-foreground"
+            className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-foreground text-destructive-100"
             onClick={() => !isConnecting && setIsConsent(!isConsent)}
           >
             <Checkbox

@@ -9,7 +9,7 @@ export function Error({ label, className }: ErrorProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-x-1 text-destructive-foreground select-none",
+        "flex items-center gap-x-1 text-destructive-100 select-none",
         !label && "hidden",
         className,
       )}
