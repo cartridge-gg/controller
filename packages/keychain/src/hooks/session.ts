@@ -1,19 +1,20 @@
 import {
+  type ContractPolicy,
+  type Method,
+  type SessionPolicies,
+  type SignMessagePolicy,
+  erc20Metadata,
+} from "@cartridge/presets";
+import { CartridgeIcon, CoinsIcon } from "@cartridge/ui-next";
+import React, { createContext, useContext } from "react";
+import {
+  TypedDataRevision,
   getChecksumAddress,
   hash,
   typedData,
-  TypedDataRevision,
 } from "starknet";
-import {
-  ContractPolicy,
-  erc20Metadata,
-  Method,
-  SessionPolicies,
-  SignMessagePolicy,
-} from "@cartridge/presets";
-import { CoinsIcon, CartridgeIcon } from "@cartridge/ui-next";
-import React from "react";
-import { Policy } from "@cartridge/account-wasm";
+
+import type { Policy } from "@cartridge/account-wasm";
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
 
@@ -37,12 +38,13 @@ export type SessionContracts = Record<
       type: ContractType;
       icon?: React.ReactNode | string;
     };
-    methods: (Method & { authorized?: boolean })[];
+    methods: (Method & { authorized?: boolean; id?: string })[];
   }
 >;
 
 export type SessionMessages = (SignMessagePolicy & {
   authorized?: boolean;
+  id?: string;
 })[];
 
 const VRF_ADDRESS = getChecksumAddress(
@@ -155,3 +157,19 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
     }),
   ];
 }
+
+interface ICreateSessionContext {
+  policies: ParsedSessionPolicies;
+  onToggleMethod: (address: string, id: string, authorized: boolean) => void;
+  onToggleMessage: (id: string, authorized: boolean) => void;
+}
+
+const CreateSessionContext = createContext<ICreateSessionContext>({
+  policies: {} as ParsedSessionPolicies,
+  onToggleMethod: () => {},
+  onToggleMessage: () => {},
+});
+
+export const CreateSessionProvider = CreateSessionContext.Provider;
+
+export const useCreateSession = () => useContext(CreateSessionContext);

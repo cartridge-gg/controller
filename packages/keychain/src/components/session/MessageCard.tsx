@@ -1,23 +1,31 @@
-import { PropsWithChildren, useState } from "react";
+import { useCreateSession } from "@/hooks/session";
+import type { SignMessagePolicy } from "@cartridge/presets";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  PencilIcon,
   AccordionTrigger,
   CheckboxIcon,
+  PencilIcon,
+  Switch,
+  cn,
 } from "@cartridge/ui-next";
 import { ArrowTurnDownIcon, Badge } from "@cartridge/ui-next";
-import { StarknetEnumType, StarknetMerkleType } from "@starknet-io/types-js";
-import { SignMessagePolicy } from "@cartridge/presets";
+import type {
+  StarknetEnumType,
+  StarknetMerkleType,
+} from "@starknet-io/types-js";
+import { type PropsWithChildren, useState } from "react";
 import { AccordionCard } from "./AccordionCard";
 
 interface MessageCardProps {
-  messages: SignMessagePolicy[];
+  messages: SignMessagePolicyWithEnabled[];
   isExpanded?: boolean;
 }
 
 export function MessageCard({ messages, isExpanded }: MessageCardProps) {
+  const totalEnabledMessages = messages.filter((m) => m.authorized).length;
+
   return (
     <AccordionCard
       icon={<PencilIcon variant="solid" />}
@@ -25,8 +33,9 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
       trigger={
         <div className="text-xs text-foreground-400">
           Approve&nbsp;
-          <span className="text-foreground-200 font-bold">
-            {messages.length} {messages.length > 1 ? `messages` : "message"}
+          <span className="text-accent-foreground font-bold">
+            {totalEnabledMessages}{" "}
+            {totalEnabledMessages > 1 ? `messages` : "message"}
           </span>
         </div>
       }
@@ -37,11 +46,18 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
   );
 }
 
+type SignMessagePolicyWithEnabled = SignMessagePolicy & {
+  authorized?: boolean;
+  id?: string;
+};
+
 export function MessageContent({
   messages,
 }: {
-  messages: SignMessagePolicy[];
+  messages: SignMessagePolicyWithEnabled[];
 }) {
+  const { onToggleMessage } = useCreateSession();
+
   return (
     <>
       {messages.map((m, i) => (
@@ -49,26 +65,63 @@ export function MessageContent({
           key={`${m.domain.name}-${i}`}
           className="flex flex-col bg-background-200 gap-2 text-xs"
         >
-          <div className="py-2 font-bold">{m.name ?? `Message ${i + 1}`}</div>
+          <div className="flex flex-row items-center justify-between">
+            <p
+              className={cn(
+                "py-2 font-bold",
+                m.authorized ? "text-foreground" : "text-accent",
+              )}
+            >
+              {m.name ?? `Message ${i + 1}`}
+            </p>
+            <Switch
+              checked={m.authorized}
+              onCheckedChange={(enabled) =>
+                m.id ? onToggleMessage(m.id, enabled) : null
+              }
+            />
+          </div>
 
           <div className="flex flex-col gap-px rounded overflow-auto border border-background p-3">
             {/* Domain section */}
             {Object.values(m.domain).filter((f) => typeof f !== "undefined")
               .length > 0 && (
-              <CollapsibleRow key="domain" title="domain">
+              <CollapsibleRow
+                key="domain"
+                title="domain"
+                enabled={m.authorized ?? true}
+              >
                 {m.domain.name && (
-                  <ValueRow values={[{ name: "name", value: m.domain.name }]} />
+                  <ValueRow
+                    values={[
+                      {
+                        name: "name",
+                        value: m.domain.name,
+                      },
+                    ]}
+                    enabled={m.authorized ?? true}
+                  />
                 )}
               </CollapsibleRow>
             )}
 
             <ValueRow
-              values={[{ name: "primaryType", value: m.primaryType }]}
+              values={[
+                {
+                  name: "primaryType",
+                  value: m.primaryType,
+                },
+              ]}
+              enabled={m.authorized ?? true}
             />
 
-            <CollapsibleRow title="types">
+            <CollapsibleRow title="types" enabled={m.authorized ?? true}>
               {Object.entries(m.types).map(([name, types]) => (
-                <CollapsibleRow key={name} title={name}>
+                <CollapsibleRow
+                  key={name}
+                  title={name}
+                  enabled={m.authorized ?? true}
+                >
                   {types.map((t, typeIndex) => (
                     <ValueRow
                       key={`${t.name}-${typeIndex}`}
@@ -86,6 +139,7 @@ export function MessageContent({
                             ]
                           : []),
                       ]}
+                      enabled={m.authorized ?? true}
                     />
                   ))}
                 </CollapsibleRow>
@@ -100,9 +154,14 @@ export function MessageContent({
 
 interface CollapsibleRowProps extends PropsWithChildren {
   title: string;
+  enabled: boolean;
 }
 
-export function CollapsibleRow({ title, children }: CollapsibleRowProps) {
+export function CollapsibleRow({
+  title,
+  children,
+  enabled,
+}: CollapsibleRowProps) {
   const [value, setValue] = useState("");
 
   return (
@@ -110,7 +169,10 @@ export function CollapsibleRow({ title, children }: CollapsibleRowProps) {
       <AccordionItem value={title} className="flex flex-col">
         <AccordionTrigger
           hideIcon
-          className="hover:bg-background-500 rounded-md"
+          className={cn(
+            "hover:bg-accent rounded-md",
+            enabled ? "text-muted-foreground" : "text-accent",
+          )}
         >
           <div className="flex items-center gap-1 py-1">
             <CheckboxIcon
@@ -131,16 +193,30 @@ export function CollapsibleRow({ title, children }: CollapsibleRowProps) {
 
 interface ValueRowProps {
   values: { name: string; value: string | number }[];
+  enabled: boolean;
 }
 
-export function ValueRow({ values }: ValueRowProps) {
+export function ValueRow({ values, enabled }: ValueRowProps) {
   return (
-    <div className="flex items-center py-1 gap-1 text-foreground-400">
+    <div
+      className={cn(
+        "flex items-center py-1 gap-1 ",
+        enabled ? "text-muted-foreground" : "text-accent",
+      )}
+    >
       <ArrowTurnDownIcon size="sm" />
       <div className="flex items-center gap-2">
         {values.map((f) => (
           <div className="flex items-center gap-1 text-xs" key={f.name}>
-            {f.name}: <Badge className="bg-background-300">{f.value}</Badge>
+            {f.name}:{" "}
+            <Badge
+              className={cn(
+                "bg-background-200",
+                enabled ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              {f.value}
+            </Badge>
           </div>
         ))}
       </div>

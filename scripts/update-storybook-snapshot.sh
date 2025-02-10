@@ -13,16 +13,6 @@ PORT=$2
 # Extract the package name without @cartridge/ prefix
 PACKAGE_NAME=$(echo $PACKAGE | sed 's/@cartridge\///')
 
-# Check if storybook is running on the specified port
-if ! nc -z localhost $PORT; then
-  echo "Starting Storybook on port $PORT..."
-  pnpm --filter $PACKAGE storybook -p $PORT &
-  # Wait for storybook to start
-  while ! nc -z localhost $PORT; do
-    sleep 1
-  done
-fi
-
 # Run the test updates in container
 docker run \
   --rm \

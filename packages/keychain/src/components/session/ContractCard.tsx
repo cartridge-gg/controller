@@ -1,14 +1,26 @@
-import { CodeIcon } from "@cartridge/ui-next";
+import { useConnection } from "@/hooks/connection";
+import { useCreateSession } from "@/hooks/session";
+import type { Method } from "@cartridge/presets";
+import {
+  CodeIcon,
+  InfoIcon,
+  Switch,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  cn,
+} from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
-import { Method } from "@cartridge/presets";
 import { AccordionCard } from "./AccordionCard";
-import { useConnection } from "@/hooks/connection";
+
+type MethodWithEnabled = Method & { authorized?: boolean; id?: string };
 
 interface ContractCardProps {
   address: string;
-  methods: Method[];
+  methods: MethodWithEnabled[];
   title: string;
   icon: React.ReactNode;
   isExpanded?: boolean;
@@ -23,6 +35,7 @@ export function ContractCard({
 }: ContractCardProps) {
   const { controller } = useConnection();
   const explorer = useExplorer();
+  const { onToggleMethod } = useCreateSession();
 
   const explorerLink = (
     <a
@@ -40,6 +53,10 @@ export function ContractCard({
     </a>
   );
 
+  const totalEnabledMethod = methods.filter(
+    (method) => method.authorized,
+  ).length;
+
   return (
     <AccordionCard
       icon={icon ?? <CodeIcon variant="solid" />}
@@ -49,8 +66,8 @@ export function ContractCard({
       trigger={
         <div className="text-xs text-foreground-400">
           Approve&nbsp;
-          <span className="text-foreground-200 font-bold">
-            {methods.length} {methods.length > 1 ? `methods` : "method"}
+          <span className="text-accent-foreground font-bold">
+            {totalEnabledMethod} {totalEnabledMethod > 1 ? `methods` : "method"}
           </span>
         </div>
       }
@@ -62,14 +79,36 @@ export function ContractCard({
           className="flex flex-col bg-background-200 gap-4 p-3 text-xs"
         >
           <div className="flex items-center justify-between">
-            <div className="font-bold text-foreground-200">
-              {method.name ?? humanizeString(method.entrypoint)}
+            <div
+              className={cn(
+                "flex flex-row items-center gap-2",
+                method.authorized ? "text-accent-foreground " : "text-accent",
+              )}
+            >
+              <p className="font-bold">
+                {method.name ?? humanizeString(method.entrypoint)}
+              </p>
+              {method.description && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon size="sm" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{method.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
-            <div className="text-foreground-400">{method.entrypoint}</div>
+            <Switch
+              checked={method.authorized ?? true}
+              onCheckedChange={(enabled) =>
+                method.id ? onToggleMethod(address, method.id, enabled) : null
+              }
+              disabled={method.isRequired}
+            />
           </div>
-          {method.description && (
-            <div className="text-foreground-400">{method.description}</div>
-          )}
         </div>
       ))}
     </AccordionCard>
