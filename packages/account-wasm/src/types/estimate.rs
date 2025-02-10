@@ -80,3 +80,53 @@ impl From<PriceUnit> for JsPriceUnit {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use starknet::core::types::PriceUnit;
+    use starknet_crypto::Felt;
+
+    #[test]
+    fn test_fee_estimate_conversion() {
+        // Create a JsFeeEstimate that matches the JS structure
+        let js_estimate = JsFeeEstimate {
+            gas_consumed: JsFelt("0x0".to_string()),
+            gas_price: JsFelt("0x0".to_string()),
+            overall_fee: JsFelt("0x0".to_string()),
+            unit: JsPriceUnit::Fri,
+            data_gas_consumed: JsFelt("0x0".to_string()),
+            data_gas_price: JsFelt("0x0".to_string()),
+        };
+
+        // Test conversion to FeeEstimate
+        let fee_estimate: FeeEstimate =
+            js_estimate.try_into().expect("Should convert successfully");
+
+        assert_eq!(fee_estimate.gas_consumed, Felt::ZERO);
+        assert_eq!(fee_estimate.gas_price, Felt::ZERO);
+        assert_eq!(fee_estimate.overall_fee, Felt::ZERO);
+        assert_eq!(fee_estimate.unit, PriceUnit::Fri);
+        assert_eq!(fee_estimate.data_gas_consumed, Felt::ZERO);
+        assert_eq!(fee_estimate.data_gas_price, Felt::ZERO);
+
+        // Test conversion back to JsFeeEstimate
+        let converted_back: JsFeeEstimate = fee_estimate.into();
+
+        assert_eq!(converted_back.gas_consumed.0, "0x0");
+        assert_eq!(converted_back.gas_price.0, "0x0");
+        assert_eq!(converted_back.overall_fee.0, "0x0");
+        assert_eq!(converted_back.unit, JsPriceUnit::Fri);
+        assert_eq!(converted_back.data_gas_consumed.0, "0x0");
+        assert_eq!(converted_back.data_gas_price.0, "0x0");
+    }
+
+    #[test]
+    fn test_price_unit_conversion() {
+        assert_eq!(PriceUnit::from(JsPriceUnit::Wei), PriceUnit::Wei);
+        assert_eq!(PriceUnit::from(JsPriceUnit::Fri), PriceUnit::Fri);
+
+        assert_eq!(JsPriceUnit::from(PriceUnit::Wei), JsPriceUnit::Wei);
+        assert_eq!(JsPriceUnit::from(PriceUnit::Fri), JsPriceUnit::Fri);
+    }
+}
