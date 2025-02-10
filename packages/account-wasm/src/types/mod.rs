@@ -27,7 +27,7 @@ impl TryFrom<JsFelt> for Felt {
 
 impl From<Felt> for JsFelt {
     fn from(felt: Felt) -> Self {
-        JsFelt(felt.to_string())
+        JsFelt(felt.to_hex_string())
     }
 }
 

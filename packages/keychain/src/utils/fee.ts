@@ -5,12 +5,16 @@ export function toJsFeeEstimate(fee?: EstimateFee): JsFeeEstimate | undefined {
   if (!fee) return undefined;
 
   return {
-    gas_consumed: fee.gas_consumed.toString(),
-    gas_price: fee.gas_price.toString(),
-    overall_fee: fee.overall_fee.toString(),
+    gas_consumed: `0x${fee.gas_consumed.toString(16)}`,
+    gas_price: `0x${fee.gas_price.toString(16)}`,
+    overall_fee: `0x${fee.overall_fee.toString(16)}`,
     unit: fee.unit,
-    data_gas_consumed: fee.data_gas_consumed?.toString(),
-    data_gas_price: fee.data_gas_price?.toString(),
+    data_gas_consumed: fee.data_gas_consumed
+      ? `0x${fee.data_gas_consumed.toString(16)}`
+      : "0x0",
+    data_gas_price: fee.data_gas_price
+      ? `0x${fee.data_gas_price.toString(16)}`
+      : "0x0",
   };
 }
 

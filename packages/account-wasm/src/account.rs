@@ -106,6 +106,7 @@ impl CartridgeAccount {
             .map(TryFrom::try_from)
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
+        let max_fee = max_fee.map(|fee| fee.try_into()).transpose()?;
         let res = self
             .controller
             .lock()
@@ -115,7 +116,7 @@ impl CartridgeAccount {
                 expires_at,
                 public_key.try_into()?,
                 Felt::ZERO,
-                max_fee.map(|fee| fee.try_into()).transpose()?,
+                max_fee,
             )
             .await
             .map_err(JsControllerError::from)?;
