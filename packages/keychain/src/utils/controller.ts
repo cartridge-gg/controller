@@ -133,14 +133,11 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    // If the overall_fee is 0n then it is a free txn
-    const jsMaxFee =
-      maxFee && maxFee.overall_fee != 0n ? toJsFeeEstimate(maxFee) : undefined;
     return await this.cartridge.registerSession(
       toWasmPolicies(policies),
       expiresAt,
       publicKey,
-      jsMaxFee,
+      toJsFeeEstimate(maxFee),
     );
   }
 
@@ -162,7 +159,7 @@ export default class Controller {
   ): Promise<InvokeFunctionResponse> {
     return await this.cartridge.execute(
       toJsCalls(calls),
-      maxFee ? toJsFeeEstimate(maxFee) : undefined,
+      toJsFeeEstimate(maxFee),
     );
   }
 
@@ -219,9 +216,7 @@ export default class Controller {
   }
 
   async selfDeploy(maxFee?: EstimateFee): Promise<DeployedAccountTransaction> {
-    return await this.cartridge.deploySelf(
-      maxFee ? toJsFeeEstimate(maxFee) : undefined,
-    );
+    return await this.cartridge.deploySelf(toJsFeeEstimate(maxFee));
   }
 
   async delegateAccount(): Promise<string> {
