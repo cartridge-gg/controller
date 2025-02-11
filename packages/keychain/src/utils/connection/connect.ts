@@ -21,7 +21,9 @@ export function connect({
           resolve,
           reject,
         } as ConnectCtx);
-      });
+      }).finally(() => {
+        setContext(undefined);
+      }) as Promise<ConnectReply>;
     };
   };
 }

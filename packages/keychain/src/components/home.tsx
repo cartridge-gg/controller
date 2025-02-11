@@ -4,7 +4,7 @@ import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
-import { CreateController, CreateSession, Logout, Upgrade } from "./connect";
+import { CreateController, CreateSession, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
 import { DeployController } from "./DeployController";
 import { PurchaseCredits } from "./funding/PurchaseCredits";
@@ -89,9 +89,6 @@ export function Home() {
       );
     }
 
-    case "logout": {
-      return <Logout />;
-    }
     case "sign-message": {
       const ctx = context as SignMessageCtx;
       return (
