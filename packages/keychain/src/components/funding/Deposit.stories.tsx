@@ -4,15 +4,6 @@ import { Deposit } from "./Deposit";
 
 const meta = {
   component: Deposit,
-  parameters: {
-    connection: {
-      controller: {
-        address:
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-        username: () => "user",
-      },
-    },
-  },
   args: {
     onBack: () => {
       console.log("onBack");

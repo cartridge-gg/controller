@@ -105,7 +105,8 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
     if (!extAccount) {
       throw new Error("External account is not connected");
     }
-    if (!tokenAmount || !controller) {
+
+    if (!feeToken || !tokenAmount || !controller) {
       return;
     }
 
@@ -116,7 +117,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
           contractAddress: feeToken.address,
           entrypoint: "approve",
           calldata: CallData.compile({
-            recipient: controller.address,
+            recipient: controller.address(),
             amount: cairo.uint256(parseEther(tokenAmount)),
           }),
         },
@@ -124,7 +125,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
           contractAddress: feeToken.address,
           entrypoint: "transfer",
           calldata: CallData.compile({
-            recipient: controller.address,
+            recipient: controller.address(),
             amount: cairo.uint256(parseEther(tokenAmount)),
           }),
         },
@@ -144,7 +145,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [feeToken.address, extAccount, controller, tokenAmount, onComplete]);
+  }, [feeToken?.address, extAccount, controller, tokenAmount, onComplete]);
 
   const onCopy = useCallback(() => {
     if (!controller) return;

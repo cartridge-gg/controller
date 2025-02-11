@@ -1,4 +1,4 @@
-import { TestRunnerConfig } from "@storybook/test-runner";
+import { TestRunnerConfig, waitForPageReady } from "@storybook/test-runner";
 import { toMatchImageSnapshot } from "jest-image-snapshot";
 import path from "path";
 
@@ -22,10 +22,7 @@ const config: TestRunnerConfig = {
   },
   async postVisit(page, context) {
     // Wait for the page to be ready before taking a screenshot
-    await page.waitForSelector("#storybook-root", {
-      state: "visible",
-      timeout: 45000,
-    });
+    await waitForPageReady(page);
 
     // Wait for any animations to complete
     await page.waitForTimeout(1000);

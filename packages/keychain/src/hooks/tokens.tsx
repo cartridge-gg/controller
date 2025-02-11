@@ -27,7 +27,7 @@ export function useToken(address: string) {
 export function useFeeToken() {
   const { feeToken, isLoading, error } = useTokens();
   return {
-    token: feeToken!,
+    token: feeToken,
     isLoading,
     error,
   };

@@ -35,6 +35,9 @@ const DEFAULT_TOKENS = [
   },
 ];
 
+const DEFAULT_FEE_TOKEN =
+  "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
+
 export type ERC20Metadata = {
   address: string;
   name: string;
@@ -76,14 +79,70 @@ interface TokensProviderProps extends PropsWithChildren {
 
 export function TokensProvider({
   children,
-  tokens: tokensArg,
-  feeToken = "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
+  tokens: tokensArg = DEFAULT_TOKENS,
+  feeToken = DEFAULT_FEE_TOKEN,
   refetchInterval = 30000,
 }: TokensProviderProps) {
   const { controller } = useConnection();
   const [tokens, setTokens] = useState<Record<string, ERC20>>({});
   const [addresses, setAdresses] = useState<string[]>([]);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  useEffect(() => {
+    if (!controller) {
+      return;
+    }
+
+    // Create synchronous token initialization
+    const tokens = [...DEFAULT_TOKENS];
+    if (tokensArg) {
+      tokens.push(...tokensArg);
+    }
+
+    const initialTokens = tokens.reduce(
+      (acc, token) => {
+        const { icon, address, name, symbol, decimals } = token;
+        const normalizedAddress = getChecksumAddress(address);
+        const contract = new ERC20Contract({
+          address: normalizedAddress,
+          provider: controller.provider,
+        });
+
+        acc[normalizedAddress] = {
+          name,
+          symbol,
+          decimals,
+          address: normalizedAddress,
+          icon,
+          contract,
+        };
+        return acc;
+      },
+      {} as Record<string, ERC20>,
+    );
+
+    setTokens(initialTokens);
+    setAdresses(Object.keys(initialTokens));
+
+    // Then update balances asynchronously
+    Object.keys(initialTokens).forEach(async (address) => {
+      try {
+        const balance = await initialTokens[address].contract.balanceOf(
+          controller.address(),
+        );
+
+        setTokens((prev) => ({
+          ...prev,
+          [address]: {
+            ...prev[address],
+            balance,
+          },
+        }));
+      } catch (error) {
+        console.error("Error getting balance for:", address, error);
+      }
+    });
+  }, [controller, tokensArg]);
 
   const { error: balanceError, isLoading: isLoadingBalances } = useQuery(
     ["token-balances", controller?.address(), Object.keys(tokens)],
@@ -112,54 +171,6 @@ export function TokensProvider({
       retry: false,
     },
   );
-
-  useEffect(() => {
-    if (!controller) {
-      return;
-    }
-
-    const initializeTokens = async () => {
-      const tokens = [...DEFAULT_TOKENS];
-      if (tokensArg) {
-        tokens.push(...tokensArg);
-      }
-
-      const tokenPromises = tokens.map(async (token) => {
-        const { icon, address, name, symbol, decimals } = token;
-        const normalizedAddress = getChecksumAddress(address);
-        const contract = new ERC20Contract({
-          address: normalizedAddress,
-          provider: controller.provider,
-        });
-
-        const balance = await contract.balanceOf(controller.address());
-
-        return [
-          normalizedAddress,
-          {
-            name,
-            symbol,
-            decimals,
-            address: normalizedAddress,
-            icon,
-            contract,
-            balance,
-          },
-        ] as const;
-      });
-
-      const tokenEntries = await Promise.all(tokenPromises);
-      const newTokens = Object.fromEntries(tokenEntries) as Record<
-        string,
-        ERC20
-      >;
-
-      setTokens(newTokens);
-      setAdresses(Object.keys(newTokens));
-    };
-
-    initializeTokens();
-  }, [controller, tokensArg]);
 
   const {
     data: priceData,

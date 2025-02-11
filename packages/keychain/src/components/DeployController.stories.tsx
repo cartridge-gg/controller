@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { DeployController } from "./DeployController";
-import { constants, num, RpcProvider } from "starknet";
+import { constants, num } from "starknet";
 import { JsControllerError } from "@cartridge/account-wasm/controller";
+import Controller from "@/utils/controller";
 
 const meta = {
   component: DeployController,
@@ -12,11 +13,10 @@ const meta = {
         chainId: () => constants.StarknetChainId.SN_SEPOLIA as string,
         callContract: () =>
           Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
-        rpc: new RpcProvider({ nodeUrl: "https://api.cartridge/x/sepolia" }),
         username: () => "test-account",
-        address:
+        address: () =>
           "0x0000000000000000000000000000000000000000000000000000000000000000",
-      },
+      } as Partial<Controller>,
     },
   },
 } satisfies Meta<typeof DeployController>;
@@ -31,7 +31,12 @@ export const Default: Story = {
     ctrlError: {
       data: {
         fee_estimate: {
-          overall_fee: "1000000000000000000",
+          gas_consumed: "0x1",
+          gas_price: "0x1",
+          overall_fee: "0xde0b6b3a7640000",
+          unit: "WEI",
+          data_gas_consumed: "0x0",
+          data_gas_price: "0x0",
         },
       },
     } as unknown as JsControllerError,

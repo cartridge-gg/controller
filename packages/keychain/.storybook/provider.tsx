@@ -12,6 +12,7 @@ import {
   ControllerThemeContext,
   VerifiableControllerTheme,
 } from "../src/context/theme";
+import { TokensProvider } from "../src/components/provider/tokens";
 
 export function Provider({
   children,
@@ -38,9 +39,11 @@ export function Provider({
     >
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
-          <ControllerThemeProvider theme={connection.theme}>
-            <BrowserRouter>{children}</BrowserRouter>
-          </ControllerThemeProvider>
+          <TokensProvider>
+            <ControllerThemeProvider theme={connection.theme}>
+              <BrowserRouter>{children}</BrowserRouter>
+            </ControllerThemeProvider>
+          </TokensProvider>
         </ConnectionContext.Provider>
       </QueryClientProvider>
     </StarknetConfig>

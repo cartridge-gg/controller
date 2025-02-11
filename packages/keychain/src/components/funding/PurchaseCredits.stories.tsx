@@ -3,15 +3,6 @@ import { PurchaseCredits } from "./PurchaseCredits";
 
 const meta = {
   component: PurchaseCredits,
-  parameters: {
-    connection: {
-      controller: {
-        address:
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-        username: () => "user",
-      },
-    },
-  },
 } satisfies Meta<typeof PurchaseCredits>;
 
 export default meta;
