@@ -162,12 +162,14 @@ interface ICreateSessionContext {
   policies: ParsedSessionPolicies;
   onToggleMethod: (address: string, id: string, authorized: boolean) => void;
   onToggleMessage: (id: string, authorized: boolean) => void;
+  isEditable: boolean;
 }
 
 const CreateSessionContext = createContext<ICreateSessionContext>({
   policies: {} as ParsedSessionPolicies,
   onToggleMethod: () => {},
   onToggleMessage: () => {},
+  isEditable: false,
 });
 
 export const CreateSessionProvider = CreateSessionContext.Provider;
