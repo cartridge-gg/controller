@@ -5,17 +5,16 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground shadow hover:bg-primary",
         destructive:
-          "bg-destructive-foreground text-destructive-100 shadow-sm hover:bg-destructive-foreground/90",
+          "bg-destructive-100 text-destructive-foreground shadow-sm hover:bg-destructive-100",
         outline:
           "border border-input bg-background shadow-sm hover:bg-background-500 hover:text-foreground-200",
         secondary:
-          "bg-background-200 text-foreground shadow-sm hover:bg-background-200/80",
+          "bg-background-200 text-foreground shadow-sm hover:bg-background-200",
         ghost: "hover:bg-background-500 hover:text-foreground-200",
         link: "text-primary underline-offset-4 hover:underline",
-        icon: "bg-background text-foreground hover:bg-background/60",
+        icon: "bg-background text-foreground hover:bg-background-100",
       },
       size: {
         default: "h-10 px-4 tracking-wide text-base",

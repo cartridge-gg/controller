@@ -36,7 +36,7 @@ export function Field({
         "hover:border-background-400",
         "focus-visible:bg-background-300 focus-visible:border-background-400 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none",
         isError &&
-          "border-destructive-foreground hover:border-destructive-foreground focus-visible:border-destructive-foreground",
+          "border-destructive-100 hover:border-destructive-100 focus-visible:border-destructive-100",
         className,
       )}
       style={{ height }}
