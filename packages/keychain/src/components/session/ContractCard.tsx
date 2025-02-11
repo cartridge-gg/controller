@@ -39,7 +39,7 @@ export function ContractCard({
 
   const explorerLink = (
     <a
-      className="text-xs text-muted-foreground cursor-pointer hover:underline"
+      className="text-xs text-foreground-400 cursor-pointer hover:underline"
       href={
         controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
         controller?.chainId() === constants.StarknetChainId.SN_SEPOLIA
@@ -64,9 +64,9 @@ export function ContractCard({
       subtitle={explorerLink}
       isExpanded={isExpanded}
       trigger={
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-foreground-400">
           Approve&nbsp;
-          <span className="text-accent-foreground font-bold">
+          <span className="text-foreground-200 font-bold">
             {totalEnabledMethod} {totalEnabledMethod > 1 ? `methods` : "method"}
           </span>
         </div>
@@ -76,13 +76,15 @@ export function ContractCard({
       {methods.map((method) => (
         <div
           key={method.entrypoint}
-          className="flex flex-col bg-background-100 gap-4 p-3 text-xs"
+          className="flex flex-col bg-background-200 gap-4 p-3 text-xs"
         >
           <div className="flex items-center justify-between">
             <div
               className={cn(
                 "flex flex-row items-center gap-2",
-                method.authorized ? "text-accent-foreground " : "text-accent",
+                method.authorized
+                  ? "text-foreground-200 "
+                  : "text-foreground-400",
               )}
             >
               <p className="font-bold">

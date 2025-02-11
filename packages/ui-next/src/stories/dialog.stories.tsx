@@ -20,7 +20,7 @@ import {
 } from "@/components/primitives/dialog";
 
 const meta: Meta<typeof Dialog> = {
-  title: "Dialog",
+  title: "Primitives/Dialog",
   component: Dialog,
   tags: ["autodocs"],
 };

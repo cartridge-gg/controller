@@ -42,7 +42,7 @@ export function CallCard({ address, call }: CallCardProps) {
     <Card>
       <CardContent className="py-2">
         <Accordion key={`${call.entrypoint}`} type="single" collapsible>
-          <AccordionItem value="item" className="bg-background-100 rounded-md">
+          <AccordionItem value="item" className="bg-background-200 rounded-md">
             <AccordionTrigger className="px-1 py-2">
               <p className=" text-foreground font-bold text-s">
                 {humanizeString(call.entrypoint)}
@@ -51,14 +51,14 @@ export function CallCard({ address, call }: CallCardProps) {
             <AccordionContent>
               <div className="flex flex-col gap-2 p-1">
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground font-bold">
+                  <div className="text-xs text-foreground-400 font-bold">
                     Contract
                   </div>
                   {explorerLink}
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground font-bold">
+                  <div className="text-xs text-foreground-400 font-bold">
                     Entrypoint
                   </div>
                   <div className="text-xs text-foreground">
@@ -68,7 +68,7 @@ export function CallCard({ address, call }: CallCardProps) {
 
                 {call.calldata && (
                   <div className="flex flex-col gap-1">
-                    <div className="text-xs text-muted-foreground font-bold pb-1">
+                    <div className="text-xs text-foreground-400 font-bold pb-1">
                       Calldata
                     </div>
                     <div className="flex flex-col gap-1">

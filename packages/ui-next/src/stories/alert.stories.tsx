@@ -8,7 +8,7 @@ import {
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Alert> = {
-  title: "Alert",
+  title: "Primitives/Alert",
   component: Alert,
   tags: ["autodocs"],
 };

@@ -1,8 +1,7 @@
-import { Error } from "./error";
+import { Header, Error } from "@/components";
 import { Max } from "./max";
 import { Conversion } from "./conversion";
 import { Field } from "./field";
-import { Header } from "./header";
 import { Balance } from "./balance";
 import { useMemo } from "react";
 

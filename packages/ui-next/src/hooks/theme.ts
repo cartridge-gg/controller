@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { hexToHsl } from "@cartridge/utils";
 
 export function useThemeEffect({
   theme,
@@ -36,10 +35,7 @@ export function useThemeEffect({
             typeof theme.colors.primary === "string"
               ? theme.colors.primary
               : theme.colors.primary[colorMode];
-          document.documentElement.style.setProperty(
-            "--primary",
-            hexToHsl(val),
-          );
+          document.documentElement.style.setProperty("--primary-100", val);
         }
 
         if (theme.colors.primaryForeground) {
@@ -48,8 +44,8 @@ export function useThemeEffect({
               ? theme.colors.primaryForeground
               : theme.colors.primaryForeground[colorMode];
           document.documentElement.style.setProperty(
-            "--primary-foreground",
-            hexToHsl(val),
+            "--primary-foreground-100",
+            val,
           );
         }
       }

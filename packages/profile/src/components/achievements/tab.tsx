@@ -72,10 +72,10 @@ export function Tab({
   return (
     <div
       className={cn(
-        "h-10 grow w-1/2 flex justify-between items-center gap-2 border border-background-100 rounded-md p-3 cursor-pointer",
+        "h-10 grow w-1/2 flex justify-between items-center gap-2 border border-background-200 rounded-md p-3 cursor-pointer",
         priority && "min-w-1/2",
-        active ? "opacity-100 bg-background-100" : "opacity-50 bg-background",
-        hovered && (active ? "opacity-90" : "bg-background-100/50"),
+        active ? "opacity-100 bg-background-200" : "opacity-50 bg-background",
+        hovered && (active ? "opacity-90" : "bg-background-200/50"),
       )}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
@@ -104,7 +104,7 @@ export function Item({
       className={cn(
         "flex items-center gap-1",
         highlighted &&
-          `${active ? "bg-background-200" : "bg-background-100"} min-w-5 h-6 text-xs rounded-2xl px-2 py-1 font-semibold`,
+          `${active ? "bg-background-300" : "bg-background-200"} min-w-5 h-6 text-xs rounded-2xl px-2 py-1 font-semibold`,
       )}
     >
       {Icon && <Icon size="sm" variant={active || forced ? "solid" : "line"} />}

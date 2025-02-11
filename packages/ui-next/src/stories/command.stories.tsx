@@ -10,7 +10,7 @@ import {
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Command> = {
-  title: "Command",
+  title: "Primitives/Command",
   component: Command,
   tags: ["autodocs"],
 };

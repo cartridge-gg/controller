@@ -220,7 +220,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
                   </div>
 
                   {connectors.length !== 0 && (
-                    <div className="text-xs text-muted-foreground font-bold">
+                    <div className="text-xs text-foreground-400 font-bold">
                       OR
                     </div>
                   )}

@@ -6,7 +6,7 @@ import {
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof RadioGroup> = {
-  title: "Radio Group",
+  title: "Primitives/Radio Group",
   component: RadioGroup,
   tags: ["autodocs"],
 };

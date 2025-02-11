@@ -24,7 +24,7 @@ export function Collections() {
               <Card className="w-full h-full">
                 <CardHeader className="flex flex-row gap-1 group-hover:opacity-70 items-center justify-between">
                   <CardTitle className="truncate">{collection.name}</CardTitle>
-                  <div className="truncate rounded-full min-w-5 h-5 flex justify-center items-center text-xs font-bold bg-accent px-1.5">
+                  <div className="truncate rounded-full min-w-5 h-5 flex justify-center items-center text-xs font-bold bg-background-500 px-1.5">
                     {collection.totalCount}
                   </div>
                 </CardHeader>

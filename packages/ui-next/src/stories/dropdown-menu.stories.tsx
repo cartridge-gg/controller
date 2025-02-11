@@ -14,7 +14,7 @@ import {
 } from "@/components/primitives/dropdown-menu";
 
 const meta: Meta<typeof DropdownMenu> = {
-  title: "Dropdown Menu",
+  title: "Primitives/Dropdown Menu",
   component: DropdownMenu,
   tags: ["autodocs"],
 };

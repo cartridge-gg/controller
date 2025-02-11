@@ -16,7 +16,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
-import { Recipient } from "@/components/modules/recipient";
+import { SendRecipient } from "@/components/modules/recipient";
 import { SendAmount } from "./amount";
 
 export function SendToken() {
@@ -84,7 +84,7 @@ export function SendToken() {
         openSettings={openSettings}
       />
       <LayoutContent className="pb-4 gap-6">
-        <Recipient to={to} setTo={setTo} setWarning={setWarning} />
+        <SendRecipient to={to} setTo={setTo} setWarning={setWarning} />
         <SendAmount amount={amount} setAmount={setAmount} />
       </LayoutContent>
 
@@ -98,12 +98,12 @@ export function SendToken() {
           onClick={() => setValidated(!validated)}
         >
           {validated && (
-            <CheckboxCheckedIcon className="text-destructive-foreground min-h-5 min-w-5 hover:opacity-80" />
+            <CheckboxCheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
           )}
           {!validated && (
-            <CheckboxUncheckedIcon className="text-destructive-foreground min-h-5 min-w-5 hover:opacity-80" />
+            <CheckboxUncheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
           )}
-          <p className="text-xs text-destructive-foreground">{warning}</p>
+          <p className="text-xs text-destructive-100">{warning}</p>
         </div>
         <Button
           disabled={disabled}

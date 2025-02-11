@@ -3,7 +3,7 @@ import { useToast } from "@/components/primitives/use-toast";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Toast> = {
-  title: "Toast",
+  title: "Primitives/Toast",
   component: Toast,
   tags: ["autodocs"],
 };

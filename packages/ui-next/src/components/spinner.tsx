@@ -4,7 +4,7 @@ import { IconProps, SpinnerIcon } from "./icons";
 export function Spinner({ className, ...props }: IconProps) {
   return (
     <SpinnerIcon
-      className={cn("animate-spin text-muted-foreground", className)}
+      className={cn("animate-spin text-foreground-400", className)}
       {...props}
     />
   );

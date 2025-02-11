@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { useConnection } from "./context";
 import { useMemo, useState } from "react";
 import { BigNumberish } from "starknet";
+import { WalletType } from "@cartridge/ui-next";
 
 const ARGENT_ACCOUNT_CLASS_HASHES: BigNumberish[] = [
   BigInt("0x036078334509b514626504edc9fb252328d1a240e4e948bef8d0c08dff45927f"),
@@ -17,13 +18,6 @@ const OZ_ACCOUNT_CLASS_HASHES: BigNumberish[] = [
 const CONTROLLER_CLASS_HASHES: BigNumberish[] = [
   BigInt("0x511dd75da368f5311134dee2356356ac4da1538d2ad18aa66d57c47e3757d59"),
 ];
-
-export enum Wallet {
-  Controller = "Controller",
-  ArgentX = "ArgentX",
-  Braavos = "Braavos",
-  OpenZeppelin = "OpenZeppelin",
-}
 
 export function useWallet({ address }: { address: string }) {
   const { provider } = useConnection();
@@ -49,25 +43,25 @@ export function useWallet({ address }: { address: string }) {
     },
   });
 
-  const wallet: Wallet | null = useMemo(() => {
-    if (!data) return null;
+  const wallet: WalletType = useMemo(() => {
+    if (!data) return WalletType.None;
     const classHash = BigInt(data);
     if (ARGENT_ACCOUNT_CLASS_HASHES.includes(classHash)) {
-      return Wallet.ArgentX;
+      return WalletType.ArgentX;
     }
     if (BRAAVOS_ACCOUNT_CLASS_HASHES.includes(classHash)) {
-      return Wallet.Braavos;
+      return WalletType.Braavos;
     }
     if (OZ_ACCOUNT_CLASS_HASHES.includes(classHash)) {
-      return Wallet.OpenZeppelin;
+      return WalletType.OpenZeppelin;
     }
     if (CONTROLLER_CLASS_HASHES.includes(classHash)) {
-      return Wallet.Controller;
+      return WalletType.Controller;
     }
     setError(
       "No account detected at this address. I understand and agree to send funds to a non-Account contract.",
     );
-    return null;
+    return WalletType.None;
   }, [data]);
 
   return { wallet, error, isFetching };

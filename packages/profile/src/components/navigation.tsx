@@ -18,7 +18,7 @@ export function Navigation() {
   const { project } = useParams<{ project?: string }>();
   const { namespace } = useConnection();
   return (
-    <div className="flex rounded border border-1 border-background-100 overflow-hidden shrink-0 gap-px bg-background-100">
+    <div className="flex rounded border border-1 border-background-200 overflow-hidden shrink-0 gap-px bg-background-200">
       <Item Icon={CoinsIcon} variant="inventory" />
       {project && namespace && (
         <Item Icon={TrophyIcon} variant="achievements" />
@@ -48,7 +48,7 @@ function Item({
           <Link
             className={cn(
               "px-4 py-3 cursor-pointer hover:opacity-[0.8]",
-              isActive ? "bg-background-100" : "bg-background",
+              isActive ? "bg-background-200" : "bg-background",
             )}
             to={
               project

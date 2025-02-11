@@ -55,9 +55,9 @@ export function AggregateCard({
       icon={icon}
       title={title}
       trigger={
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-foreground-400">
           Approve&nbsp;
-          <span className="text-accent-foreground font-bold">
+          <span className="text-foreground-200 font-bold">
             {count} {count > 1 ? `items` : "item"}
           </span>
         </div>
@@ -66,7 +66,7 @@ export function AggregateCard({
     >
       {Object.entries(contracts || {}).map(([address, { name, methods }]) => (
         <div key={address} className="flex flex-col gap-2">
-          <div className="flex items-center justify-between bg-background-100 text-xs">
+          <div className="flex items-center justify-between bg-background-200 text-xs">
             <div className="py-2 font-bold">{name}</div>
             <Link
               to={
@@ -76,7 +76,7 @@ export function AggregateCard({
                   : `#` // TODO: Add explorer for worlds.dev
               }
               target="_blank"
-              className="text-muted-foreground hover:underline"
+              className="text-foreground-400 hover:underline"
             >
               {formatAddress(address, { first: 5, last: 5 })}
             </Link>
@@ -93,8 +93,8 @@ export function AggregateCard({
                     className={cn(
                       "flex flex-row items-center gap-2",
                       method.authorized
-                        ? "text-accent-foreground "
-                        : "text-accent",
+                        ? "text-foreground-200 "
+                        : "text-foreground-400",
                     )}
                   >
                     <p className="font-bold">{method.name}</p>
