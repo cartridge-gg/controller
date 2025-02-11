@@ -11,7 +11,7 @@ import { SlashIcon } from "@/components/icons";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Breadcrumb> = {
-  title: "Breadcrumb",
+  title: "Primitives/Breadcrumb",
   component: Breadcrumb,
   tags: ["autodocs"],
 };

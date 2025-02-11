@@ -49,7 +49,7 @@ export function AccordionCard({
           defaultValue={isExpanded ? "item" : undefined}
         >
           <AccordionItem value="item" className="flex flex-col gap-2">
-            <AccordionTrigger className="text-xs text-muted-foreground">
+            <AccordionTrigger className="text-xs text-foreground-400">
               {trigger}
             </AccordionTrigger>
 

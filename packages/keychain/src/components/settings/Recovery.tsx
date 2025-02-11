@@ -53,7 +53,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
       <LayoutContent>
         {/* TODO: Get rid of this div once Content is updated with TW */}
         <div className="flex flex-col gap-4">
-          <div className="text-sm text-muted-foreground text-center">
+          <div className="text-sm text-foreground-400 text-center">
             Your controller can be owned by an existing Starknet wallet
           </div>
           <div className="flex flex-col gap-2">
@@ -63,7 +63,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
               onChange={(e) => setExternalOwnerAddress(e.target.value)}
             />
             {!isValid && externalOwnerAddress !== "" && (
-              <div className="flex items-center gap-2 text-destructive-foreground">
+              <div className="flex items-center gap-2 text-destructive-100">
                 <AlertIcon size="sm" />
                 <div className="text-sm">Invalid address!</div>
               </div>

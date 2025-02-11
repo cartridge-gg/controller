@@ -91,7 +91,7 @@ export function SignMessage({
                       <CardListContent>
                         {Object.entries(v).map(([key, value]) => (
                           <CardListItem className="flex flex-row justify-start gap-2 ">
-                            <div className="capitalize text-muted-foreground">
+                            <div className="capitalize text-foreground-400">
                               {key}:
                             </div>
                             <div className="break-words break-all">

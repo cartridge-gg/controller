@@ -7,7 +7,7 @@ export const ErrorImage = memo(
     ({ className, ...props }, forwardedRef) => (
       <svg
         viewBox="0 0 120 140"
-        className={cn("w-[120px] h-[140px] text-muted", className)}
+        className={cn("w-[120px] h-[140px] text-foreground-400", className)}
         ref={forwardedRef}
         {...props}
       >

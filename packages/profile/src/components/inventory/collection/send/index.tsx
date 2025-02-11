@@ -15,7 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
-import { Recipient } from "../../../modules/recipient";
+import { SendRecipient } from "../../../modules/recipient";
 import { useCollection } from "@/hooks/collection";
 import { Sending } from "./sending";
 import { CollectionImage } from "../image";
@@ -121,7 +121,7 @@ export function SendCollection() {
         openSettings={openSettings}
       />
       <LayoutContent className="gap-6">
-        <Recipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
+        <SendRecipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
         <Sending assets={assets} />
       </LayoutContent>
 
@@ -163,12 +163,12 @@ const Warning = ({
       onClick={() => setValidated(!validated)}
     >
       {validated && (
-        <CheckboxCheckedIcon className="text-destructive-foreground min-h-5 min-w-5 hover:opacity-80" />
+        <CheckboxCheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
       )}
       {!validated && (
-        <CheckboxUncheckedIcon className="text-destructive-foreground min-h-5 min-w-5 hover:opacity-80" />
+        <CheckboxUncheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
       )}
-      <p className="text-xs text-destructive-foreground">{warning}</p>
+      <p className="text-xs text-destructive-100">{warning}</p>
     </div>
   );
 };

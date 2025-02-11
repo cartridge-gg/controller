@@ -10,7 +10,7 @@ import {
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Menubar> = {
-  title: "Menubar",
+  title: "Primitives/Menubar",
   component: Menubar,
   tags: ["autodocs"],
 };

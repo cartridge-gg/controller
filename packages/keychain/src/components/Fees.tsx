@@ -68,7 +68,7 @@ function LineItem({
   isLoading?: boolean;
 }) {
   return (
-    <div className="flex items-center w-full h-10 p-4 bg-background-100 text-muted-foreground">
+    <div className="flex items-center w-full h-10 p-4 bg-background-200 text-foreground-400">
       <p className="text-xs">{name}</p>
       <div className="flex-1" />
 

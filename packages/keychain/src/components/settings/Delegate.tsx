@@ -52,7 +52,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
       />
       <LayoutContent className="gap-6">
         <div className="flex flex-col gap-4">
-          <div className="text-sm text-muted-foreground text-center">
+          <div className="text-sm text-foreground-400 text-center">
             Your controller can be owned by an existing Starknet wallet which
             can receive the rewards you earn while playing. <br />
             (This can be updated later)
@@ -64,7 +64,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
               onChange={(e) => setDelegateAddress(e.target.value)}
             />
             {!isValid && delegateAddress !== "" && (
-              <div className="flex items-center gap-2 text-destructive-foreground">
+              <div className="flex items-center gap-2 text-destructive-100">
                 <AlertIcon size="sm" />
                 <div className="text-sm">Invalid address!</div>
               </div>

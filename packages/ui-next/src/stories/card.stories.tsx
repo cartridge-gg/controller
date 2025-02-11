@@ -14,7 +14,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { useEffect } from "react";
 
 const meta: Meta<typeof Card> = {
-  title: "Card",
+  title: "Primitives/Card",
   component: Card,
   tags: ["autodocs"],
 };
@@ -100,18 +100,18 @@ function Card({
 
             <CardListItem icon={<EthereumIcon />}>
               <div className="flex items-center gap-2">
-                0.01 <span className="text-muted-foreground">ETH</span>
+                0.01 <span className="text-foreground-400">ETH</span>
               </div>
 
-              <div className="text-muted-foreground">$3500.00</div>
+              <div className="text-foreground-400">$3500.00</div>
             </CardListItem>
 
             <CardListItem icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo">
               <div className="flex items-center gap-2">
-                100 <span className="text-muted-foreground">STRK</span>
+                100 <span className="text-foreground-400">STRK</span>
               </div>
 
-              <div className="text-muted-foreground">$50.00</div>
+              <div className="text-foreground-400">$50.00</div>
             </CardListItem>
           </CardListContent>
         </UICard>

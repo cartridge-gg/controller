@@ -4,7 +4,7 @@ import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 
-const HIDDEN_GROUP = "HIDDEN";
+const HIDDEN_GROUP = "Hidden";
 
 export function Trophies({
   achievements,
@@ -194,8 +194,8 @@ function Header({
 }) {
   return (
     <div className="flex gap-x-px items-center h-10">
-      <div className="grow h-full p-3 bg-background-100 flex items-center">
-        <p className="text-xs text-muted-foreground font-semibold tracking-wider">
+      <div className="grow h-full p-3 bg-background-200 flex items-center">
+        <p className="text-xs text-foreground-400 font-semibold tracking-wider">
           {group}
         </p>
       </div>
@@ -211,8 +211,8 @@ function Header({
             onClick={handleNext}
             disabled={page === pages[pages.length - 1]}
           />
-          <div className="flex items-center justify-center h-full p-3 bg-background-100 gap-2">
-            <div className="flex items-center justify-center rounded-xl bg-background-200 p-[3px]">
+          <div className="flex items-center justify-center h-full p-3 bg-background-200 gap-2">
+            <div className="flex items-center justify-center rounded-xl bg-background-300 p-[3px]">
               <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
                 {pages.map((current) => (
                   <Page
@@ -246,12 +246,12 @@ function Pagination({
   return (
     <div
       className={cn(
-        "flex items-center justify-center h-full w-10 bg-background-100",
+        "flex items-center justify-center h-full w-10 bg-background-200",
         !disabled && "cursor-pointer hover:opacity-70",
       )}
       onClick={onClick}
     >
-      <div className="text-muted-foreground">{icon}</div>
+      <div className="text-foreground-300">{icon}</div>
     </div>
   );
 }
@@ -270,8 +270,8 @@ function Page({
   return (
     <div
       className={cn(
-        "bg-primary h-[10px] w-[10px] opacity-50 hover:cursor-pointer hover:opacity-100",
-        completed ? "bg-primary" : "bg-muted",
+        "h-[10px] w-[10px] opacity-50 hover:cursor-pointer hover:opacity-100",
+        completed ? "bg-primary" : "bg-foreground-400",
         highlighted && "opacity-100",
       )}
       onClick={() => setPage(index)}
@@ -291,16 +291,12 @@ function Total({
   return (
     <div className="h-8 py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
       <div className="flex items-center gap-1">
-        <TrophyIcon
-          className="text-muted-foreground"
-          size="xs"
-          variant="solid"
-        />
-        <p className="text-xs text-muted-foreground font-medium">
+        <TrophyIcon className="text-foreground-300" size="xs" variant="solid" />
+        <p className="text-xs text-foreground-300 font-medium">
           {`${completed} of ${total}`}
         </p>
       </div>
-      <div className="h-4 grow flex flex-col justify-center items-start bg-background-200 rounded-xl p-1">
+      <div className="h-4 grow flex flex-col justify-center items-start bg-background-300 rounded-xl p-1">
         <div
           style={{ width: `${Math.floor((100 * completed) / total)}%` }}
           className={cn("grow bg-primary rounded-xl")}
@@ -308,11 +304,11 @@ function Total({
       </div>
       <div className="flex items-center gap-1">
         <SparklesIcon
-          className="text-muted-foreground"
+          className="text-foreground-300"
           size="xs"
           variant="solid"
         />
-        <p className="text-xs text-muted-foreground font-medium">{earnings}</p>
+        <p className="text-xs text-foreground-300 font-medium">{earnings}</p>
       </div>
     </div>
   );

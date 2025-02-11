@@ -71,7 +71,7 @@ export function Trophy({
         completed && !softview && (compatibility || !!game) && "gap-x-px",
       )}
     >
-      <div className="grow flex flex-col items-stretch gap-y-3 bg-background-100 p-3">
+      <div className="grow flex flex-col items-stretch gap-y-3 bg-background-200 p-3">
         <div className="flex items-center gap-3">
           <Icon icon={icon} completed={completed} />
           <div className="grow flex flex-col">
@@ -84,7 +84,7 @@ export function Trophy({
                 />
                 {completed && (
                   <Separator
-                    className="bg-accent h-2 ml-0.5"
+                    className="bg-background-500 h-2 ml-0.5"
                     orientation="vertical"
                   />
                 )}
@@ -132,10 +132,10 @@ function Task({ task, completed }: { task: Task; completed: boolean }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-x-2">
-        <TaskIcon className="text-muted-foreground" size="xs" />
+        <TaskIcon className="text-foreground-300" size="xs" />
         <p
           className={cn(
-            "text-xs text-muted-foreground",
+            "text-xs text-foreground-300",
             task.count >= task.total && "line-through opacity-50",
           )}
         >
@@ -152,7 +152,7 @@ function Icon({ icon, completed }: { icon: string; completed: boolean }) {
     <div
       className={cn(
         "w-8 h-8 flex items-center justify-center",
-        completed ? "text-primary" : "text-muted-foreground",
+        completed ? "text-primary" : "text-foreground-300",
       )}
     >
       <div className={cn("w-6 h-6", icon, "fa-solid")} />
@@ -169,7 +169,7 @@ function Title({ title, completed }: { title: string; completed: boolean }) {
   return (
     <p
       className={cn(
-        "text-sm text-accent-foreground capitalize font-medium",
+        "text-sm text-foreground-200 capitalize font-medium",
         completed && "text-foreground",
       )}
     >
@@ -193,12 +193,12 @@ function Description({ description }: { description: string }) {
 
   if (description.length === 0) return null;
   return (
-    <p className="block text-xs text-accent-foreground">
+    <p className="block text-xs text-foreground-200">
       {content}
       {visible && (
         <span
           className={cn(
-            "text-muted-foreground cursor-pointer",
+            "text-foreground-400 cursor-pointer",
             full && "block",
             bright ? "brightness-150" : "brightness-100",
           )}
@@ -215,7 +215,7 @@ function Description({ description }: { description: string }) {
 
 function Details({ percentage }: { percentage: string }) {
   return (
-    <p className="text-[0.65rem] text-muted-foreground">{`${percentage}% of players earned`}</p>
+    <p className="text-[0.65rem] text-foreground-300">{`${percentage}% of players earned`}</p>
   );
 }
 
@@ -229,12 +229,12 @@ function Earning({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 text-muted-foreground",
-        completed && "opacity-50",
+        "flex items-center gap-1 text-foreground-300",
+        completed && "text-foreground-400",
       )}
     >
       <SparklesIcon size="xs" variant={completed ? "line" : "solid"} />
-      <p className={cn("text-sm", completed && "line-through")}>{amount}</p>
+      <p className={cn("text-xs", completed && "line-through")}>{amount}</p>
     </div>
   );
 }
@@ -257,7 +257,7 @@ function Timestamp({ timestamp }: { timestamp: number }) {
   }, [timestamp]);
 
   return (
-    <div className="flex items-center gap-1 text-muted-foreground opacity-50">
+    <div className="flex items-center gap-1 text-foreground-400">
       <CalendarIcon size="xs" variant="line" />
       <p className="text-xs">{date}</p>
     </div>
@@ -275,26 +275,26 @@ function Progress({
 }) {
   return (
     <div className="flex gap-4">
-      <div className="grow flex flex-col justify-center items-start bg-background-200 rounded-xl p-1">
+      <div className="grow flex flex-col justify-center items-start bg-background-300 rounded-xl p-1">
         <div
           style={{
             width: `${Math.floor((100 * Math.min(count, total)) / total)}%`,
           }}
           className={cn(
-            "grow bg-accent-foreground rounded-xl",
-            completed ? "bg-primary" : "text-muted-foreground",
+            "grow bg-background-500-foreground rounded-xl",
+            completed ? "bg-primary" : "text-foreground-400",
           )}
         />
       </div>
       {count >= total ? (
         <div className="flex items-center gap-x-2">
-          <div className="fa-solid fa-check text-xs text-muted-foreground" />
-          <p className="text-xs text-muted-foreground font-medium">
+          <div className="fa-solid fa-check text-xs text-foreground-300" />
+          <p className="text-xs text-foreground-300">
             {total > 1 ? `${count.toLocaleString()}` : "Completed"}
           </p>
         </div>
       ) : (
-        <p className="text-xs text-muted-foreground font-medium">
+        <p className="text-xs text-foreground-300">
           {`${count.toLocaleString()} of ${total.toLocaleString()}`}
         </p>
       )}
@@ -315,7 +315,6 @@ function Track({
   const { parent } = useConnection();
   const { chainId, provider } = useArcade();
 
-  const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const pinned = useMemo(() => {
@@ -371,18 +370,13 @@ function Track({
   return (
     <div
       className={cn(
-        "bg-background-100 grow p-2 flex items-center transition-all duration-200",
-        hovered &&
-          (enabled || pinned) &&
-          "opacity-90 bg-background-100/50 cursor-pointer",
-        pinned && "bg-background-200",
+        "bg-background-200 grow p-2 flex items-center transition-all duration-200 text-foreground-300 hover:opacity-80 hover:cursor-pointer",
+        pinned && "bg-background-300 text-foreground-100",
       )}
       onClick={pinned ? handleUnpin : handlePin}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       {loading ? (
-        <SpinnerIcon className="text-muted-foreground animate-spin" size="sm" />
+        <SpinnerIcon className="text-foreground-400 animate-spin" size="sm" />
       ) : (
         <TrackIcon
           className={cn(!enabled && !pinned && "opacity-25")}
@@ -453,7 +447,7 @@ Do you have what it takes to carve your name into history?
   return (
     <div
       className={cn(
-        "grow bg-background-100 p-2 flex items-center transition-all duration-200 hover:opacity-90 hover:cursor-pointer",
+        "grow bg-background-200 text-foreground-300 p-2 flex items-center transition-all duration-200 hover:opacity-80 hover:cursor-pointer",
       )}
       onClick={handleShare}
     >

@@ -1,9 +1,7 @@
 import * as React from "react";
 
 import { cn } from "@/utils";
-import { TimesCircleIcon } from "../icons";
-import { Button } from "./button";
-import { Spinner } from "../spinner";
+import { Clear } from "./clear";
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   isLoading?: boolean;
@@ -13,30 +11,22 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ isLoading, onClear, className, type, ...props }, ref) => {
     return (
-      <>
+      <div className="relative">
         <input
           type={type}
           className={cn(
-            "flex h-10 w-full rounded-md border border-input bg-background-200 px-4 py-3.5 text-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-10 w-full rounded-md border border-input bg-background-200 px-4 py-3.5 font-mono text-md ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
             className,
           )}
           ref={ref}
           {...props}
         />
-        {isLoading && (
-          <Spinner size="lg" className="absolute top-[18px] right-4" />
+        {!!props.value && !!onClear && (
+          <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
+            <Clear isLoading={!!isLoading} onClear={onClear} />
+          </div>
         )}
-        {!isLoading && onClear && (
-          <Button
-            variant="icon"
-            size="icon"
-            className="absolute top-3.5 right-3 bg-transparent hover:bg-transparent text-muted-foreground"
-            onClick={onClear}
-          >
-            <TimesCircleIcon />
-          </Button>
-        )}
-      </>
+      </div>
     );
   },
 );

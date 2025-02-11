@@ -27,7 +27,7 @@ export function LayoutFooter({
         <a
           href="https://cartridge.gg"
           target="_blank"
-          className="h-10 flex items-center justify-center gap-1 text-muted hover:text-primary"
+          className="h-10 flex items-center justify-center gap-1 text-foreground-400 hover:text-primary"
         >
           <ControllerIcon />
           <div className="text-xs font-medium">by</div>

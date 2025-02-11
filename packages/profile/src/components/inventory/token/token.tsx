@@ -78,7 +78,7 @@ function Credits() {
       <LayoutContent className="pb-4">
         <Card>
           <CardContent className="flex items-center justify-between">
-            <div className="text-muted-foreground">
+            <div className="text-foreground-400">
               Credits are used to pay for network activity. They are not tokens
               and cannot be transferred or refunded.
             </div>
@@ -131,7 +131,7 @@ function ERC20() {
           countervalue && `${formatBalance(countervalue.formatted, ["~"])}`
         }
         icon={
-          <div className="rounded-full size-11 bg-foreground-100 flex items-center justify-center">
+          <div className="rounded-full size-11 bg-background-300 flex items-center justify-center">
             <img
               className="w-10 h-10"
               src={t.meta.logoUrl ?? "/public/placeholder.svg"}
@@ -151,7 +151,7 @@ function ERC20() {
             <CardTitle>details</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
-            <div className="text-muted-foreground">Contract</div>
+            <div className="text-foreground-400">Contract</div>
             {isPublicChain(chainId) ? (
               <Link
                 to={`${StarkscanUrl(
@@ -171,7 +171,7 @@ function ERC20() {
           </CardContent>
 
           <CardContent className="flex items-center justify-between">
-            <div className="text-muted-foreground">Token Standard</div>
+            <div className="text-foreground-400">Token Standard</div>
             <div className="font-medium">ERC-20</div>
           </CardContent>
         </Card>

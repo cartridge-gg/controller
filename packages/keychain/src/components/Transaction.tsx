@@ -54,14 +54,14 @@ export function Transaction({
   const chainName = useChainName(chainId);
 
   return (
-    <div className="flex items-center bg-background-100 roudned p-3 text-sm justify-between">
+    <div className="flex items-center bg-background-200 roudned p-3 text-sm justify-between">
       <div className="flex items-center gap-1">
         {icon}
         <div>{name}</div>
       </div>
 
       <div className="flex items-center gap-1">
-        <div className="flex items-center text-muted-foreground gap-1 border-r px-3">
+        <div className="flex items-center text-foreground-400 gap-1 border-r px-3">
           <StarknetIcon size="sm" />
           <div>{chainName}</div>
         </div>

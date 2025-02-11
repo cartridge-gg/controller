@@ -22,7 +22,7 @@ export function Failure() {
             <Link
               to={CARTRIDGE_DISCORD_LINK}
               target="_blank"
-              className="inline-flex items-center gap-1 hover:underline text-accent-foreground font-semibold"
+              className="inline-flex items-center gap-1 hover:underline text-foreground-200 font-semibold"
             >
               Discord
               <ExternalIcon size="sm" />

@@ -24,7 +24,7 @@ const iconsByCategory = {
 };
 
 const meta: Meta<typeof Icons> = {
-  title: "Icons",
+  title: "Primitives/Icons",
   component: Icons,
   tags: ["autodocs"],
   argTypes: {
@@ -146,7 +146,7 @@ function Icons({
               }
             }
           })()}
-          <p className="text-[10px] md:text-xs text-muted-foreground">
+          <p className="text-[10px] md:text-xs text-foreground-400">
             {icon.displayName}
           </p>
         </div>

@@ -28,7 +28,7 @@ export function AmountSelection({
 
   return (
     <div className="flex items-center justify-between">
-      <div className="text-xs font-semibold uppercase text-muted-foreground">
+      <div className="text-xs font-semibold text-foreground-400 tracking-wide select-none">
         Amount
       </div>
       <div className="flex flex-col gap-2">
@@ -38,10 +38,10 @@ export function AmountSelection({
               key={value}
               variant="secondary"
               className={cn(
-                "w-18",
+                "w-18 text-sm font-sans font-medium hover:bg-background-300 hover:text-foreground-200",
                 value === selected && !custom
-                  ? "text-foreground"
-                  : "text-muted-foreground",
+                  ? "bg-background-400 text-foreground-100"
+                  : "bg-background-200 text-foreground-300",
               )}
               disabled={lockSelection}
               onClick={() => {
@@ -57,7 +57,12 @@ export function AmountSelection({
           {enableCustom && (
             <Button
               variant="secondary"
-              className={custom ? "text-foreground" : "text-muted-foreground"}
+              className={cn(
+                "text-sm font-sans font-medium hover:bg-background-300 hover:text-foreground-200 normal-case",
+                custom
+                  ? "bg-background-400 text-foreground-100"
+                  : "bg-background-200 text-foreground-300",
+              )}
               disabled={lockSelection}
               onClick={() => {
                 setCustom(true);

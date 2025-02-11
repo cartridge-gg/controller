@@ -38,7 +38,7 @@ export function Balance({ types }: BalanceProps) {
           <CardListItem icon={<CoinsIcon variant="solid" />}>
             <div className="flex items-center gap-2">
               {creditBalance.formatted ? 0 : "Loading"}
-              <span className="text-muted-foreground">CREDITS</span>
+              <span className="text-foreground-400">CREDITS</span>
             </div>
           </CardListItem>
         )}
@@ -49,11 +49,11 @@ export function Balance({ types }: BalanceProps) {
               {token?.balance !== undefined
                 ? formatBalance(token.balance)
                 : "Loading"}
-              <span className="text-muted-foreground">{token.symbol}</span>
+              <span className="text-foreground-400">{token.symbol}</span>
             </div>
 
             {token && token.balance !== undefined && token.price ? (
-              <div className="text-muted-foreground">
+              <div className="text-foreground-400">
                 {formatUSDBalance(token.balance, 18, token.price)}
               </div>
             ) : null}

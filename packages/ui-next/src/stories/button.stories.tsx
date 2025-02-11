@@ -3,7 +3,7 @@ import { Button } from "@/components/primitives/button";
 import { TimesIcon } from "@/components/icons/utility/times";
 
 const meta: Meta<typeof Button> = {
-  title: "Button",
+  title: "Primitives/Button",
   component: Button,
   parameters: {
     layout: "centered",

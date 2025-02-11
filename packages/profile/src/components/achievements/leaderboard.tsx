@@ -22,10 +22,12 @@ export function Leaderboard({
   pins: { [playerId: string]: string[] };
 }) {
   return (
-    <div className="flex flex-col gap-y-px">
+    <div className="flex flex-col gap-y-px rounded">
       {players.map((player, index) => (
         <Row
           key={player.address}
+          first={index === 0}
+          last={index === players.length - 1}
           self={BigInt(player.address || 0) === BigInt(address || 1)}
           address={player.address}
           earnings={player.earnings}
@@ -41,6 +43,8 @@ export function Leaderboard({
 
 function Row({
   self,
+  first,
+  last,
   address,
   earnings,
   rank,
@@ -49,6 +53,8 @@ function Row({
   pins,
 }: {
   self: boolean;
+  first: boolean;
+  last: boolean;
   address: string;
   earnings: number;
   rank: number;
@@ -82,18 +88,23 @@ function Row({
 
   return (
     <Link
-      className={cn("flex w-full", self && "sticky top-0 bottom-0 z-10")}
+      className={cn(
+        "flex w-full overflow-hidden",
+        self && "sticky top-[-8px] bottom-[-26px] z-10",
+        first && "rounded-t-md",
+        last && "rounded-b-md",
+      )}
       to={path}
     >
       <div
         className={cn(
-          "grow flex justify-between items-center px-3 py-2 text-sm gap-x-3 sticky top-0 bg-background-100 hover:bg-background-200",
-          self && "bg-background-200 text-primary",
+          "grow flex justify-between items-center px-3 py-2 text-sm gap-x-3 bg-background-200 hover:bg-background-300",
+          self && "bg-background-300 text-primary",
         )}
       >
-        <div className="flex items-center justify-between grow sticky top-0 gap-x-3">
-          <div className="flex items-center gap-x-4 sticky top-0">
-            <p className="text-muted-foreground min-w-6 sticky top-0">{`${rank}.`}</p>
+        <div className="flex items-center justify-between grow gap-x-3">
+          <div className="flex items-center gap-x-4">
+            <p className="text-foreground-400 min-w-6">{`${rank}.`}</p>
             <User
               username={!username ? address.slice(0, 9) : username}
               Icon={SpaceInvaderIcon}
@@ -136,25 +147,27 @@ function Trophies({
           key={`${trophy.address}-${trophy.id}`}
           className={cn(
             "w-6 h-6 border rounded-md flex items-center justify-center",
-            self ? "border-background-300" : "border-background-200",
+            self ? "border-background-400" : "border-background-300",
           )}
         >
           <div className={cn("w-4 h-4", trophy.icon, "fa-solid")} />
         </div>
       ))}
       {Array.from({ length: 3 - trophies.length }).map((_, index) => (
-        <Empty key={index} />
+        <Empty self={self} key={index} />
       ))}
     </div>
   );
 }
 
-function Empty() {
+function Empty({ self }: { self: boolean }) {
   return (
     <div
       className={cn(
-        "w-6 h-6 border rounded-md flex items-center justify-center text-accent",
-        self ? "border-background-300" : "border-background-200",
+        "w-6 h-6 border rounded-md flex items-center justify-center text-background-500",
+        self
+          ? "border-background-400 text-foreground-400"
+          : "border-background-300 text-background-500",
       )}
     >
       <div className="w-4 h-4 fa-spider-web fa-thin" />

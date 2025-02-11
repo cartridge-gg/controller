@@ -91,7 +91,7 @@ export function Achievements() {
       />
 
       {achievements.length ? (
-        <LayoutContent className="mt-2 pb-6 gap-y-6 select-none">
+        <LayoutContent className="pt-2 pb-6 gap-y-6 select-none">
           {isSelf && (
             <div className="flex justify-between gap-x-3 gap-y-4">
               <TrophiesTab
@@ -130,15 +130,15 @@ export function Achievements() {
           )}
         </LayoutContent>
       ) : isLoading ? (
-        <LayoutContent className="pb-4 select-none">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
-            <Spinner className="text-muted-foreground/30" size="lg" />
+        <LayoutContent className="pb-4 select-none h-full">
+          <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
+            <Spinner className="text-foreground-400" size="lg" />
           </div>
         </LayoutContent>
       ) : (
-        <LayoutContent className="pb-4 select-none">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md text-muted-foreground/10 mb-4">
-            <p className="text-muted-foreground/30">No trophies available</p>
+        <LayoutContent className="pb-4 select-none h-full">
+          <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400/10 mb-4">
+            <p className="text-foreground-400/30">No trophies available</p>
           </div>
         </LayoutContent>
       )}
