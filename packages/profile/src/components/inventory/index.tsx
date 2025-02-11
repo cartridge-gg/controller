@@ -31,7 +31,7 @@ export function Inventory() {
     <LayoutContainer>
       <LayoutHeader
         title={username}
-        description={<CopyAddress address={address} size="sm" />}
+        description={<CopyAddress address={address} size="xs" />}
         right={project ? <Navigation /> : undefined}
         onClose={closeModal}
         chainId={chainId}

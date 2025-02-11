@@ -66,7 +66,7 @@ export function ContractCard({
       trigger={
         <div className="text-xs text-foreground-400">
           Approve&nbsp;
-          <span className="text-accent-foreground font-bold">
+          <span className="text-foreground-200 font-bold">
             {totalEnabledMethod} {totalEnabledMethod > 1 ? `methods` : "method"}
           </span>
         </div>
@@ -82,7 +82,7 @@ export function ContractCard({
             <div
               className={cn(
                 "flex flex-row items-center gap-2",
-                method.authorized ? "text-accent-foreground " : "text-accent",
+                method.authorized ? "text-foreground-200 " : "text-foreground-400",
               )}
             >
               <p className="font-bold">

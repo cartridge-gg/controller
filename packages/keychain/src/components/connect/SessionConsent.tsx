@@ -37,14 +37,14 @@ export function SessionConsent({
               <VerifiedIcon size="lg" className="text-foreground" />
             </Link>
           )}
-          <p className="text-xs text-muted-foreground font-semibold">
+          <p className="text-xs text-foreground-400 font-semibold">
             Create a session for{" "}
-            <span className="text-accent-foreground font-bold inline-flex items-baseline gap-1 leading-none">
+            <span className="text-foreground-200 font-bold inline-flex items-baseline gap-1 leading-none">
               {isVerified && <LockIcon size="xs" />}
               {origin}
             </span>{" "}
             and allow the game to{" "}
-            <span className="text-accent-foreground font-bold">
+            <span className="text-foreground-200 font-bold">
               perform actions on your behalf
             </span>
           </p>

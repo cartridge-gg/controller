@@ -41,7 +41,7 @@ export function Activity() {
     <LayoutContainer>
       <LayoutHeader
         title={username}
-        description={<CopyAddress address={address} size="sm" />}
+        description={<CopyAddress address={address} size="xs" />}
         right={<Navigation />}
         onClose={closeModal}
         chainId={chainId}

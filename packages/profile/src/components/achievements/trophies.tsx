@@ -291,8 +291,8 @@ function Total({
   return (
     <div className="h-8 py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
       <div className="flex items-center gap-1">
-        <TrophyIcon className="text-foreground-400" size="xs" variant="solid" />
-        <p className="text-xs text-foreground-400 font-medium">
+        <TrophyIcon className="text-foreground-300" size="xs" variant="solid" />
+        <p className="text-xs text-foreground-300 font-medium">
           {`${completed} of ${total}`}
         </p>
       </div>
@@ -304,11 +304,11 @@ function Total({
       </div>
       <div className="flex items-center gap-1">
         <SparklesIcon
-          className="text-foreground-400"
+          className="text-foreground-300"
           size="xs"
           variant="solid"
         />
-        <p className="text-xs text-foreground-400 font-medium">{earnings}</p>
+        <p className="text-xs text-foreground-300 font-medium">{earnings}</p>
       </div>
     </div>
   );

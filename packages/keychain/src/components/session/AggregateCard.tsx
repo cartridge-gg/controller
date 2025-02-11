@@ -93,8 +93,8 @@ export function AggregateCard({
                     className={cn(
                       "flex flex-row items-center gap-2",
                       method.authorized
-                        ? "text-accent-foreground "
-                        : "text-accent",
+                        ? "text-foreground-200 "
+                        : "text-foreground-400",
                     )}
                   >
                     <p className="font-bold">{method.name}</p>

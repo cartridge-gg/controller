@@ -33,7 +33,7 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
       trigger={
         <div className="text-xs text-foreground-400">
           Approve&nbsp;
-          <span className="text-accent-foreground font-bold">
+          <span className="text-foreground-200 font-bold">
             {totalEnabledMessages}{" "}
             {totalEnabledMessages > 1 ? `messages` : "message"}
           </span>
@@ -69,7 +69,7 @@ export function MessageContent({
             <p
               className={cn(
                 "py-2 font-bold",
-                m.authorized ? "text-foreground" : "text-accent",
+                m.authorized ? "text-foreground-200" : "text-foreground-400",
               )}
             >
               {m.name ?? `Message ${i + 1}`}
@@ -170,8 +170,8 @@ export function CollapsibleRow({
         <AccordionTrigger
           hideIcon
           className={cn(
-            "hover:bg-accent rounded-md",
-            enabled ? "text-muted-foreground" : "text-accent",
+            "hover:bg-background-300 rounded-md",
+            enabled ? "text-foreground-400" : "text-foreground-200",
           )}
         >
           <div className="flex items-center gap-1 py-1">
@@ -201,7 +201,7 @@ export function ValueRow({ values, enabled }: ValueRowProps) {
     <div
       className={cn(
         "flex items-center py-1 gap-1 ",
-        enabled ? "text-muted-foreground" : "text-accent",
+        enabled ? "text-foreground-400" : "text-foreground-400",
       )}
     >
       <ArrowTurnDownIcon size="sm" />
@@ -212,7 +212,7 @@ export function ValueRow({ values, enabled }: ValueRowProps) {
             <Badge
               className={cn(
                 "bg-background-200",
-                enabled ? "text-foreground" : "text-muted-foreground",
+                enabled ? "text-foreground" : "text-foreground-400",
               )}
             >
               {f.value}
