@@ -12,6 +12,7 @@ const meta: Meta<typeof Input> = {
     size: "default",
     placeholder: "Label",
     onClear: fn(),
+    onChange: fn(),
   },
 };
 

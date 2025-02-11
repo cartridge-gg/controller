@@ -80,7 +80,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
           {(isFocused || isHovered) && !!props.value && !!onClear && (
             <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
-              <Clear isLoading={!!isLoading} onClear={onClear} />
+              <Clear
+                isLoading={!!isLoading}
+                onClear={onClear}
+                onMouseEnter={() => setIsHovered(true)}
+              />
             </div>
           )}
         </div>
