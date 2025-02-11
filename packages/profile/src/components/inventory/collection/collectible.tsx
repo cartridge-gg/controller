@@ -87,6 +87,9 @@ export function Collectible() {
                     <img
                       className="w-10 h-10"
                       src={asset.imageUrl ?? "/public/placeholder.svg"}
+                      onError={(e) => {
+                        e.currentTarget.src = "/public/placeholder.svg";
+                      }}
                     />
                   }
                   onBack={() => {
@@ -135,12 +138,15 @@ export const Image = ({ imageUrl }: { imageUrl: string | undefined }) => {
         style={{
           backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${
             imageUrl || "/public/placeholder.svg"
-          })`,
+          }), url("/public/placeholder.svg")`,
         }}
       >
         <img
           className="object-contain"
           src={imageUrl || "/public/placeholder.svg"}
+          onError={(e) => {
+            e.currentTarget.src = "/public/placeholder.svg";
+          }}
         />
       </div>
     </div>

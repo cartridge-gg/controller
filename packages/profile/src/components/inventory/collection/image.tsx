@@ -20,13 +20,16 @@ export const CollectionImage = ({
         },
       )}
       style={{
-        backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${imageUrl})`,
+        backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${imageUrl}), url("/public/placeholder.svg")`,
       }}
     >
       <img
         className="object-contain transition group-hover:scale-110 select-none"
         draggable={false}
         src={imageUrl}
+        onError={(e) => {
+          e.currentTarget.src = "/public/placeholder.svg";
+        }}
       />
     </div>
   );
