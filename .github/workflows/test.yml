@@ -82,7 +82,7 @@ jobs:
       'chore: update storybook snapshots')
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/cartridge-gg/controller/storybook-env:sha-86b05b2
+      image: ghcr.io/cartridge-gg/controller/storybook-env:sha-f1c10ea
     permissions:
       contents: "write"
       id-token: "write"
