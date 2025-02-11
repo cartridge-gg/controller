@@ -175,8 +175,12 @@ export function CreateSession({
           chainId={controller?.chainId()}
           right={
             !isEditable ? (
-              <Button variant="icon" onClick={() => setIsEditable(!isEditable)}>
-                <SliderIcon />
+              <Button
+                variant="icon"
+                onClick={() => setIsEditable(!isEditable)}
+                className="bg-accent/20 hover:bg-accent/50 size-10 relative"
+              >
+                <SliderIcon size="default" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
               </Button>
             ) : undefined
           }
