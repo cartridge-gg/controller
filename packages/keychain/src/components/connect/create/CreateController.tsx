@@ -4,16 +4,14 @@ import {
   LayoutFooter,
   LayoutContent,
   Button,
-  cn,
-  Input,
   LayoutHeader,
+  CreateAccount,
 } from "@cartridge/ui-next";
 import { useControllerTheme } from "@/hooks/theme";
 import { useDebounce } from "@/hooks/debounce";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
 import { Legal } from "./Legal";
-import { StatusTray } from "./StatusTray";
 import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/context/theme";
@@ -25,7 +23,7 @@ interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
   usernameField: {
     value: string;
-    error?: string;
+    error?: Error;
   };
   validation: ReturnType<typeof useUsernameValidation>;
   isLoading: boolean;
@@ -75,32 +73,15 @@ export function CreateControllerView({
         }}
       >
         <LayoutContent className="gap-0">
-          <div
-            className={cn(
-              "border-destructive-100 rounded",
-              validation.status === "invalid" || error ? "border" : undefined,
-            )}
-          >
-            <Input
-              {...usernameField}
-              autoFocus
-              placeholder="shinobi"
-              onFocus={onUsernameFocus}
-              onChange={(e) => {
-                onUsernameChange(e.target.value.toLowerCase());
-              }}
-              onKeyDown={onKeyDown}
-              isLoading={validation.status === "validating"}
-              disabled={isLoading}
-              onClear={onUsernameClear}
-              style={{ position: "relative", zIndex: 1 }}
-            />
-          </div>
-
-          <StatusTray
-            username={usernameField.value}
+          <CreateAccount
+            usernameField={usernameField}
             validation={validation}
             error={error}
+            isLoading={isLoading}
+            onUsernameChange={onUsernameChange}
+            onUsernameFocus={onUsernameFocus}
+            onUsernameClear={onUsernameClear}
+            onKeyDown={onKeyDown}
           />
         </LayoutContent>
 

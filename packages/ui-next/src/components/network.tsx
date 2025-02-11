@@ -30,7 +30,7 @@ export function Network({ chainId }: { chainId: string }) {
         <TooltipTrigger asChild>
           <Button
             variant="secondary"
-            className="flex items-center gap-2 font-inter bg-background hover:bg-background/90 text-xs"
+            className="flex items-center gap-2 font-inter bg-background hover:bg-background text-xs"
             onClick={onCopy}
           >
             {(() => {

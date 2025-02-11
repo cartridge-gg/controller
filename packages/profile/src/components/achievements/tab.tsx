@@ -74,8 +74,10 @@ export function Tab({
       className={cn(
         "h-10 grow w-1/2 flex justify-between items-center gap-2 border border-background-200 rounded-md p-3 cursor-pointer",
         priority && "min-w-1/2",
-        active ? "opacity-100 bg-background-200" : "opacity-50 bg-background",
-        hovered && (active ? "opacity-90" : "bg-background-200/50"),
+        active
+          ? "opacity-100 bg-background-200"
+          : "opacity-50 bg-background-100",
+        hovered && (active ? "opacity-90" : "bg-background-100"),
       )}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}

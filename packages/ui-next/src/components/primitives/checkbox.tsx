@@ -7,12 +7,25 @@ import { cn } from "@/utils";
 import { CheckboxIcon } from "../icons";
 import { iconVariants, size } from "../icons/utils";
 
+type CheckboxProps = React.ComponentPropsWithoutRef<
+  typeof CheckboxPrimitive.Root
+> & {
+  variant?:
+    | "line"
+    | "solid"
+    | "minus-solid"
+    | "minus-line"
+    | "plus-solid"
+    | "plus-line"
+    | "unchecked-solid"
+    | "unchecked-line";
+  size?: keyof typeof size;
+};
+
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> & {
-    size?: keyof typeof size;
-  }
->(({ className, checked, size, ...props }, ref) => {
+  CheckboxProps
+>(({ variant, className, checked, size, ...props }, ref) => {
   const iconStyle = iconVariants({ size });
   return (
     <CheckboxPrimitive.Root
@@ -30,7 +43,7 @@ const Checkbox = React.forwardRef<
           checked === "indeterminate"
             ? "minus-line"
             : checked
-              ? "line"
+              ? variant || "line"
               : "unchecked-line"
         }
       />

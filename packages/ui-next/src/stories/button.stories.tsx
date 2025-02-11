@@ -34,6 +34,13 @@ export const Default: Story = {
   },
 };
 
+export const Destructive: Story = {
+  args: {
+    children: "continue",
+    variant: "destructive",
+  },
+};
+
 export const Secondary: Story = {
   args: {
     children: "continue",

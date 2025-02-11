@@ -137,8 +137,8 @@ export function Achievements() {
         </LayoutContent>
       ) : (
         <LayoutContent className="pb-4 select-none h-full">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400/10 mb-4">
-            <p className="text-foreground-400/30">No trophies available</p>
+          <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
+            <p className="text-foreground-400">No trophies available</p>
           </div>
         </LayoutContent>
       )}

@@ -157,7 +157,7 @@ const Warning = ({
   return (
     <div
       className={cn(
-        "border border-destructive-foreground rounded flex items-center gap-2 p-2 cursor-pointer select-none",
+        "border border-destructive-100 rounded flex items-center gap-2 p-2 cursor-pointer select-none",
         !warning && "hidden",
       )}
       onClick={() => setValidated(!validated)}
