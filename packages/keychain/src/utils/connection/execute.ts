@@ -67,6 +67,8 @@ export function execute({
       // eslint-disable-next-line no-async-promise-executor
       async (resolve, reject) => {
         if (!controller) {
+          setContext(undefined);
+
           return reject({
             message: "Controller context not available",
           });
@@ -93,6 +95,8 @@ export function execute({
           const { transaction_hash } =
             await controller.executeFromOutsideV3(calls);
 
+          setContext(undefined);
+
           return resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,
@@ -108,6 +112,7 @@ export function execute({
               resolve,
               reject,
             } as ExecuteCtx);
+
             return resolve({
               code: ResponseCodes.ERROR,
               message: error.message,
@@ -123,6 +128,8 @@ export function execute({
             estimate,
           );
 
+          setContext(undefined);
+
           return resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,
@@ -136,6 +143,7 @@ export function execute({
             resolve,
             reject,
           } as ExecuteCtx);
+
           return resolve({
             code: ResponseCodes.ERROR,
             message: (e as Error).message,
@@ -144,7 +152,6 @@ export function execute({
         }
       },
     ).finally(() => {
-      setContext(undefined);
       release();
     });
   };
