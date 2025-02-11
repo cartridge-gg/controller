@@ -82,7 +82,9 @@ export function ContractCard({
             <div
               className={cn(
                 "flex flex-row items-center gap-2",
-                method.authorized ? "text-foreground-200 " : "text-foreground-400",
+                method.authorized
+                  ? "text-foreground-200 "
+                  : "text-foreground-400",
               )}
             >
               <p className="font-bold">
