@@ -1,5 +1,5 @@
 import { Authenticate } from "./authenticate";
-import { CreateController, Legal, StatusTray } from "./create";
+import { CreateController, Legal } from "./create";
 import { CreateSession } from "./CreateSession";
 import { RegisterSession } from "./RegisterSession";
 import { Logout } from "./Logout";
@@ -14,6 +14,5 @@ export {
   Logout,
   RegisterSession,
   SessionConsent,
-  StatusTray,
   Upgrade,
 };
