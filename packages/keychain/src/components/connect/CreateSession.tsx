@@ -180,7 +180,8 @@ export function CreateSession({
           right={
             !isEditable ? (
               <Button
-                className="size-10 relative bg-accent/20 hover:bg-accent/50"
+                variant="icon"
+                className="size-10 relative"
                 onClick={handleToggleEditable}
               >
                 <SliderIcon

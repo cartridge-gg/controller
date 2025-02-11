@@ -65,7 +65,7 @@ export function MessageContent({
         .map((m, i) => (
           <div
             key={`${m.domain.name}-${i}`}
-            className="flex flex-col bg-background-100 gap-2 text-xs"
+            className="flex flex-col bg-background-200 gap-2 text-xs"
           >
             <div className="flex flex-row items-center justify-between">
               <p

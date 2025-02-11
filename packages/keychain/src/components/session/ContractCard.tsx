@@ -78,7 +78,7 @@ export function ContractCard({
         .map((method) => (
           <div
             key={method.entrypoint}
-            className="flex flex-col bg-background-100 gap-4 p-3 text-xs"
+            className="flex flex-col bg-background-200 gap-4 p-3 text-xs"
           >
             <div className="flex items-center justify-between">
               <div
