@@ -1,6 +1,6 @@
 import { cn } from "@/utils";
 import { Textarea } from "@/components/primitives";
-import { useMemo } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 type FieldProps = {
   value?: string | number;
@@ -23,23 +23,32 @@ export function Field({
   onClear,
   className,
 }: FieldProps) {
-  const height = useMemo(() => {
-    const count = value?.toString().length || 1;
-    return Math.floor((count - 1) / 33) * 20 + 48;
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  const resize = useCallback(() => {
+    if (ref.current) {
+      ref.current.style.height = "1px";
+      ref.current.style.height = `${ref.current.scrollHeight}px`;
+    }
+  }, []);
+
+  useEffect(() => {
+    resize();
   }, [value]);
 
   return (
     <Textarea
+      ref={ref}
       spellCheck={false}
       className={cn(
-        "resize-none min-h-12 min-w-[384px] bg-background-200 py-3 pl-4 pr-12 border border-background-300 text-base/5 font-mono font-normal overflow-hidden",
+        "resize-none min-w-[320px] w-full min-h-12 bg-background-200 py-3 px-4 border border-background-300 text-base/5 font-mono font-normal overflow-hidden",
         "hover:border-background-400",
         "focus-visible:bg-background-300 focus-visible:border-background-400 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none",
         isError &&
           "border-destructive-100 hover:border-destructive-100 focus-visible:border-destructive-100",
+        !!value && "pr-12",
         className,
       )}
-      style={{ height }}
       placeholder={"Recipient Address or Username"}
       value={value}
       onChange={onChange}
