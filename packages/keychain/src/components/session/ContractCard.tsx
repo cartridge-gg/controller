@@ -35,7 +35,7 @@ export function ContractCard({
 }: ContractCardProps) {
   const { controller } = useConnection();
   const explorer = useExplorer();
-  const { onToggleMethod } = useCreateSession();
+  const { onToggleMethod, isEditable } = useCreateSession();
 
   const explorerLink = (
     <a
@@ -73,44 +73,49 @@ export function ContractCard({
       }
       className="bg-background gap-px rounded overflow-auto border border-background"
     >
-      {methods.map((method) => (
-        <div
-          key={method.entrypoint}
-          className="flex flex-col bg-background-100 gap-4 p-3 text-xs"
-        >
-          <div className="flex items-center justify-between">
-            <div
-              className={cn(
-                "flex flex-row items-center gap-2",
-                method.authorized ? "text-accent-foreground " : "text-accent",
-              )}
-            >
-              <p className="font-bold">
-                {method.name ?? humanizeString(method.entrypoint)}
-              </p>
-              {method.description && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <InfoIcon size="sm" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{method.description}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
+      {methods
+        .filter((method) => (isEditable ? true : method.authorized))
+        .map((method) => (
+          <div
+            key={method.entrypoint}
+            className="flex flex-col bg-background-100 gap-4 p-3 text-xs"
+          >
+            <div className="flex items-center justify-between">
+              <div
+                className={cn(
+                  "flex flex-row items-center gap-2",
+                  method.authorized ? "text-accent-foreground " : "text-accent",
+                )}
+              >
+                <p className="font-bold">
+                  {method.name ?? humanizeString(method.entrypoint)}
+                </p>
+                {method.description && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon size="sm" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{method.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
+              <Switch
+                checked={method.authorized ?? true}
+                onCheckedChange={(enabled) =>
+                  method.id ? onToggleMethod(address, method.id, enabled) : null
+                }
+                disabled={method.isRequired}
+                className={cn(
+                  isEditable ? "visible" : "invisible pointer-events-none", // use visible class to prevent layout shift
+                )}
+              />
             </div>
-            <Switch
-              checked={method.authorized ?? true}
-              onCheckedChange={(enabled) =>
-                method.id ? onToggleMethod(address, method.id, enabled) : null
-              }
-              disabled={method.isRequired}
-            />
           </div>
-        </div>
-      ))}
+        ))}
     </AccordionCard>
   );
 }
