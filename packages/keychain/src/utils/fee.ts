@@ -2,7 +2,8 @@ import { EstimateFee } from "starknet";
 import { JsFeeEstimate } from "@cartridge/account-wasm/controller";
 
 export function toJsFeeEstimate(fee?: EstimateFee): JsFeeEstimate | undefined {
-  if (!fee) return undefined;
+  // If the overall_fee is 0n then it is a free txn
+  if (!fee || fee.overall_fee == 0n) return undefined;
 
   return {
     gas_consumed: `0x${fee.gas_consumed.toString(16)}`,
