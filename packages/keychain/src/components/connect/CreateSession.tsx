@@ -15,7 +15,7 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-  PencilIcon,
+  SliderIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish, shortString } from "starknet";
@@ -34,6 +34,7 @@ export function CreateSession({
 }) {
   const { closeModal, controller, upgrade, theme } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isEditable, setIsEditable] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const [maxFee] = useState<BigNumberish>();
@@ -97,6 +98,10 @@ export function CreateSession({
     [policyState],
   );
 
+  const handleToggleEditable = useCallback(() => {
+    setIsEditable(!isEditable);
+  }, [isEditable]);
+
   const expiresAt = useMemo(() => {
     return duration + NOW;
   }, [duration]);
@@ -159,6 +164,7 @@ export function CreateSession({
         policies: policyState,
         onToggleMethod: handleToggleMethod,
         onToggleMessage: handleToggleMessage,
+        isEditable,
       }}
     >
       <LayoutContainer>
@@ -171,7 +177,21 @@ export function CreateSession({
           }
           onClose={closeModal}
           chainId={controller?.chainId()}
-          right={<PencilIcon variant="solid" />}
+          right={
+            !isEditable ? (
+              <Button
+                variant="icon"
+                className="size-10 relative"
+                onClick={handleToggleEditable}
+              >
+                <SliderIcon
+                  size="lg"
+                  color="white"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                />
+              </Button>
+            ) : undefined
+          }
         />
         <LayoutContent className="gap-6">
           <SessionConsent isVerified={policyState?.verified} />

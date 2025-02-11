@@ -36,7 +36,7 @@ export function AggregateCard({
 }: AggregateCardProps) {
   const { controller } = useConnection();
   const explorer = useExplorer();
-  const { onToggleMethod } = useCreateSession();
+  const { onToggleMethod, isEditable } = useCreateSession();
 
   const totalEnabledMessages =
     messages?.filter((message) => message.authorized)?.length ?? 0;
@@ -83,46 +83,53 @@ export function AggregateCard({
           </div>
 
           <div className="flex flex-col gap-px rounded overflow-auto border border-background">
-            {methods.map((method) => (
-              <div
-                key={method.name}
-                className="flex flex-col p-3 gap-3 text-xs"
-              >
-                <div className="flex items-center justify-between">
-                  <div
-                    className={cn(
-                      "flex flex-row items-center gap-2",
-                      method.authorized
-                        ? "text-foreground-200 "
-                        : "text-foreground-400",
-                    )}
-                  >
-                    <p className="font-bold">{method.name}</p>
-                    {method.description && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <InfoIcon size="sm" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{method.description}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
+            {methods
+              .filter((method) => (isEditable ? true : method.authorized))
+              .map((method) => (
+                <div
+                  key={method.name}
+                  className="flex flex-col p-3 gap-3 text-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={cn(
+                        "flex flex-row items-center gap-2",
+                        method.authorized
+                          ? "text-foreground-200"
+                          : "text-foreground-400",
+                      )}
+                    >
+                      <p className="font-bold">{method.name}</p>
+                      {method.description && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <InfoIcon size="sm" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{method.description}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
+                    <Switch
+                      checked={method.authorized ?? true}
+                      onCheckedChange={(enabled) =>
+                        method.id
+                          ? onToggleMethod(address, method.id, enabled)
+                          : null
+                      }
+                      disabled={method.isRequired}
+                      className={cn(
+                        isEditable
+                          ? "visible"
+                          : "invisible pointer-events-none", // use visible class to prevent layout shift
+                      )}
+                    />
                   </div>
-                  <Switch
-                    checked={method.authorized ?? true}
-                    onCheckedChange={(enabled) =>
-                      method.id
-                        ? onToggleMethod(address, method.id, enabled)
-                        : null
-                    }
-                    disabled={method.isRequired}
-                  />
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       ))}
