@@ -70,12 +70,12 @@ describe("CreateController", () => {
   it("renders basic content correctly", () => {
     renderComponent();
     expect(screen.getByText("Play with Controller")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("shinobi")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Username")).toBeInTheDocument();
   });
 
   it("handles username input correctly", async () => {
     renderComponent();
-    const input = screen.getByPlaceholderText("shinobi");
+    const input = screen.getByPlaceholderText("Username");
 
     fireEvent.change(input, { target: { value: "testuser" } });
     await waitFor(() => {
@@ -94,7 +94,7 @@ describe("CreateController", () => {
 
     renderComponent();
 
-    const input = screen.getByPlaceholderText("shinobi");
+    const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "validuser" } });
 
     const submitButton = screen.getByText("sign up");
@@ -127,7 +127,7 @@ describe("CreateController", () => {
     });
 
     renderComponent();
-    const input = screen.getByPlaceholderText("shinobi");
+    const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "invalid@user" } });
 
     await waitFor(() => {
@@ -170,7 +170,7 @@ describe("CreateController", () => {
       <CreateController {...defaultProps} onCreated={onCreated} />,
     );
 
-    const input = screen.getByPlaceholderText("shinobi");
+    const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "validuser" } });
 
     const submitButton = screen.getByText("sign up");
