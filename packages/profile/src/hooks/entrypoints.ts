@@ -13,15 +13,24 @@ export const useEntrypoints = ({ address }: { address: string }) => {
     queryFn: async () => {
       try {
         const code = await provider.getClassAt(address);
-        return code.abi
-          .filter((element) => element.type === "interface")
-          .flatMap((element: InterfaceAbi) =>
+        const interfaces = code.abi.filter(
+          (element) => element.type === "interface",
+        );
+        if (interfaces.length > 0) {
+          return interfaces.flatMap((element: InterfaceAbi) =>
             element.items
               .filter(
                 (item: FunctionAbi) => item.state_mutability === "external",
               )
               .map((item: FunctionAbi) => item.name),
           );
+        }
+        const functions = code.abi.filter(
+          (element) => element.type === "function",
+        );
+        return functions
+          .filter((item: FunctionAbi) => item.state_mutability === "external")
+          .map((item: FunctionAbi) => item.name);
       } catch (error) {
         console.error(error);
       }
