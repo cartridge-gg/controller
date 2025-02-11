@@ -37,7 +37,7 @@ export function SessionConsent({
               <VerifiedIcon size="lg" className="text-foreground" />
             </Link>
           )}
-          <p className="text-xs text-foreground-300 font-medium inline-flex items-center gap-1">
+          <p className="text-xs text-foreground-300 font-medium inline-flex items-center flex-wrap gap-1">
             Create a session for{" "}
             <span className="text-foreground-200 font-semibold inline-flex gap-1 leading-none">
               {isVerified && <LockIcon size="2xs" />}
