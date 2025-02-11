@@ -1,5 +1,4 @@
-import { constants } from "starknet";
-import { getChainName } from "@cartridge/utils";
+import { constants, RpcProvider } from "starknet";
 import Controller from "@cartridge/controller";
 import { SessionPolicies } from "@cartridge/presets";
 import { Parameters } from "@storybook/react";
@@ -20,7 +19,7 @@ export interface StoryParameters extends Parameters {
 }
 
 export function useMockedConnection({
-  chainId = constants.StarknetChainId.SN_SEPOLIA,
+  chainId = constants.StarknetChainId.SN_MAIN,
   context = {
     type: "connect",
     origin: "http://localhost:3002",
@@ -28,27 +27,32 @@ export function useMockedConnection({
     resolve: () => {},
     reject: () => {},
   } as ConnectCtx,
+  controller,
   ...rest
 }: StoryParameters["connection"] = {}): ConnectionContextValue {
-  const chainName = getChainName(chainId);
-
   return {
     context,
+    controller: {
+      address: () =>
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+      username: () => "user",
+      chainId: () => chainId,
+      provider: new RpcProvider({
+        nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia",
+      }),
+      ...controller,
+    },
     origin: "http://localhost:3002",
-    rpcUrl: "http://api.cartridge.gg/x/sepolia",
-    chainId,
-    chainName,
+    rpcUrl: "http://api.cartridge.gg/x/starknet/mainnet",
     policies: {},
     theme: { defaultTheme, verified: true },
     hasPrefundRequest: false,
-    error: undefined,
     setContext: () => {},
     setController: () => {},
     closeModal: () => {},
     openModal: () => {},
     logout: () => {},
     openSettings: () => {},
-    controller: {},
     upgrade: {},
     ...rest,
   };

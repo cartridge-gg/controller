@@ -10,6 +10,9 @@ fi
 PACKAGE=$1
 PORT=$2
 
+# Get host IP address (for Linux/MacOS)
+HOST_IP=$(ipconfig getifaddr en0 2>/dev/null || hostname -I | awk '{print $1}')
+
 # Extract the package name without @cartridge/ prefix
 PACKAGE_NAME=$(echo $PACKAGE | sed 's/@cartridge\///')
 
@@ -22,13 +25,8 @@ docker run \
   --ipc=host \
   -ti \
   ghcr.io/cartridge-gg/controller/storybook-env:sha-86b05b2 \
-  bash -c "pnpm i && pnpm --filter $PACKAGE test-storybook -u --url http://host.docker.internal:$PORT"
+  bash -c "pnpm i && pnpm --filter $PACKAGE test-storybook -u --url http://$HOST_IP:$PORT"
 
 status=$?
-
-# Kill storybook process by finding PID using port
-if pid=$(lsof -ti:$PORT); then
-  kill $pid || true
-fi
 
 exit $status
