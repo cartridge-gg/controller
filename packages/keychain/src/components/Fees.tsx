@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Spinner } from "@cartridge/ui-next";
 import { EstimateFee } from "starknet";
 
-import { formatUSDBalance, useFeeToken } from "@/hooks/tokens";
+import { convertTokenAmountToUSD, useFeeToken } from "@/hooks/tokens";
 import { ErrorAlert } from "./ErrorAlert";
 import { ERC20 } from "./provider/tokens";
 
@@ -23,18 +23,22 @@ export function Fees({
     }
 
     if (maxFee && maxFee.overall_fee && token.price) {
-      const formatted = formatUSDBalance(maxFee.overall_fee, 18, token.price);
+      const formatted = convertTokenAmountToUSD(
+        maxFee.overall_fee,
+        18,
+        token.price,
+      );
       setFormattedFee(formatted);
     } else {
       setFormattedFee("FREE");
     }
-  }, [maxFee]);
+  }, [maxFee, token, error, isLoading]);
 
   if (error) {
     return (
       <ErrorAlert
-        title="Error fetching fee token price"
-        description="error"
+        title="Fee estimation error"
+        description="Unable to retrieve fee token price"
         variant="error"
       />
     );

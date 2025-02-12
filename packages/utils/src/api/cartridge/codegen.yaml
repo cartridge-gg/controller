@@ -11,3 +11,12 @@ generates:
       fetcher:
         func: ./fetcher#useFetchData
         isReactHook: true
+      scalars:
+        BigInt: string
+        ChainID: string
+        Cursor: string
+        Felt: string
+        JSON: any
+        Long: string
+        Time: string
+        Upload: File

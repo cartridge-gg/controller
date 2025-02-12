@@ -1,6 +1,5 @@
 import { getChecksumAddress, Provider } from "starknet";
 import useSWR from "swr";
-import { formatEther } from "viem";
 import { ERC20, ERC20Metadata } from "../erc20";
 import { CreditQuery, useCreditQuery } from "../api/cartridge";
 import { erc20Metadata } from "@cartridge/presets";
@@ -131,11 +130,18 @@ export function useCreditBalance({
       enabled: !!username,
     },
   );
-  const value = data?.account?.credits ?? 0n;
-  const adjusted = parseFloat(formatEther(value));
-  // Round and remove insignificant trailing zeros
-  const rounded = parseFloat(adjusted.toFixed(2));
-  const formatted = adjusted === rounded ? `$${adjusted}` : `~$${rounded}`;
+
+  const credits = data?.account?.credits;
+  const value = credits ? BigInt(credits) : 0n;
+
+  // Do division in bigint space
+  const decimals = 18n;
+  const divisor = 10n ** decimals;
+  const wholePart = value / divisor;
+  const fractionalPart = ((value * 100n) / divisor) % 100n;
+
+  // Only convert to string at the very end for display
+  const formatted = `$${wholePart}.${fractionalPart.toString().padStart(2, "0")}`;
 
   return {
     balance: {
