@@ -70,3 +70,27 @@ export const BigError: Story = {
     error: { name: "error", message: "Error" },
   },
 };
+
+export const UsernameDefault: Story = {
+  args: {
+    variant: "username",
+    size: "lg",
+  },
+};
+
+export const UsernameValue: Story = {
+  args: {
+    variant: "username",
+    size: "lg",
+    value: "Value",
+  },
+};
+
+export const UsernameError: Story = {
+  args: {
+    variant: "username",
+    size: "lg",
+    value: "Value*",
+    error: { name: "error", message: "" },
+  },
+};
