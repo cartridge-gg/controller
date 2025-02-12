@@ -8,7 +8,11 @@ import {
 } from "@cartridge/ui-next";
 import { useCreditBalance } from "@cartridge/utils";
 import { useController } from "@/hooks/controller";
-import { formatBalance, formatUSDBalance, useFeeToken } from "@/hooks/tokens";
+import {
+  formatBalance,
+  convertTokenAmountToUSD,
+  useFeeToken,
+} from "@/hooks/tokens";
 
 export enum BalanceType {
   CREDITS = "credits",
@@ -54,7 +58,7 @@ export function Balance({ types }: BalanceProps) {
 
             {token && token.balance !== undefined && token.price ? (
               <div className="text-foreground-400">
-                {formatUSDBalance(token.balance, 18, token.price)}
+                {convertTokenAmountToUSD(token.balance, 18, token.price)}
               </div>
             ) : null}
           </CardListItem>

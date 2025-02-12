@@ -79,19 +79,20 @@ export function formatBalance(
   return fixed2;
 }
 
-export function formatUSDBalance(
+export function convertTokenAmountToUSD(
   amount: bigint,
   decimals: number,
   price: { amount: string; decimals: number },
 ) {
-  // Convert amount to decimal value
-  const value = parseFloat(formatBalance(amount, decimals, 3)); // Show 3 significant digits for USD values
+  // Convert price to BigInt
+  const priceAmount = BigInt(price.amount);
 
-  // Convert price amount to dollars using decimals
-  const priceInUsd = parseFloat(price.amount) / 10 ** price.decimals;
+  // Calculate USD value entirely in BigInt
+  // Formula: (amount * priceAmount) / (10 ** decimals)
+  const valueInBaseUnits = (amount * priceAmount) / BigInt(10 ** decimals);
 
-  // Calculate USD value
-  const valueInUsd = value * priceInUsd;
+  // Convert to decimal for display, handling the price decimals
+  const valueInUsd = Number(valueInBaseUnits) / 10 ** price.decimals;
 
   // Handle zero amount
   if (valueInUsd === 0) {
@@ -119,4 +120,28 @@ export function formatUSDBalance(
 
   // Return whole numbers without decimals, otherwise show exactly 2 decimal places
   return "$" + (isWhole ? Math.floor(valueInUsd).toString() : formatted);
+}
+
+export function convertUSDToTokenAmount(
+  usdAmount: number,
+  decimals: number,
+  price: { amount: string; decimals: number },
+): bigint {
+  // Convert price to BigInt
+  const priceAmount = BigInt(price.amount);
+
+  // Convert USD amount to base units (considering price decimals)
+  const usdInBaseUnits = BigInt(
+    // Use string to maintain precision
+    (usdAmount * 10 ** price.decimals).toLocaleString("fullwide", {
+      useGrouping: false,
+      maximumFractionDigits: 0,
+    }),
+  );
+
+  // Calculate token amount using BigInt arithmetic
+  // Formula: (usdInBaseUnits * (10 ** decimals)) / priceAmount
+  const tokenAmount = (usdInBaseUnits * BigInt(10 ** decimals)) / priceAmount;
+
+  return tokenAmount;
 }

@@ -72,9 +72,9 @@ export function ExecutionContainer({
       }
 
       try {
-        const est = await controller.estimateInvokeFee(transactions);
+        const maxFee = await controller.estimateInvokeFee(transactions);
         setCtrlError(undefined);
-        setMaxFee(est);
+        setMaxFee(maxFee);
         setIsEstimating(false);
       } catch (e) {
         const error = parseControllerError(e as unknown as ControllerError);

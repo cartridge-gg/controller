@@ -31,13 +31,11 @@ import {
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
-import { parseEther } from "viem";
 import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "./Balance";
-import { TokenPair, usePriceQuery } from "@cartridge/utils/api/cartridge";
 import { toast } from "sonner";
 import { DEFAULT_AMOUNT } from "./constants";
-import { useFeeToken } from "@/hooks/tokens";
+import { convertUSDToTokenAmount, useFeeToken } from "@/hooks/tokens";
 
 type DepositProps = {
   onComplete?: (deployHash?: string) => void;
@@ -60,22 +58,22 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
 
   const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
   const [state, setState] = useState<"connect" | "fund">("connect");
-  const [tokenAmount, setTokenAmount] = useState<string>();
+  const [tokenAmount, setTokenAmount] = useState<bigint>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
-  const priceQuery = usePriceQuery({ pairs: TokenPair.EthUsdc });
-  const price = priceQuery.data?.price?.[0];
-
   const onAmountChanged = useCallback(
     (amount: number) => {
-      if (!price) return;
-
-      const tokenAmount = amount / parseFloat(price?.amount);
-      setTokenAmount(tokenAmount.toString());
+      if (!feeToken?.price) return;
+      const tokenAmount = convertUSDToTokenAmount(
+        amount,
+        feeToken?.decimals,
+        feeToken?.price,
+      );
+      setTokenAmount(tokenAmount);
       setDollarAmount(amount);
     },
-    [price],
+    [feeToken?.price, feeToken?.decimals],
   );
 
   const onConnect = useCallback(
@@ -118,7 +116,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
           entrypoint: "approve",
           calldata: CallData.compile({
             recipient: controller.address(),
-            amount: cairo.uint256(parseEther(tokenAmount)),
+            amount: cairo.uint256(tokenAmount),
           }),
         },
         {
@@ -126,7 +124,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
           entrypoint: "transfer",
           calldata: CallData.compile({
             recipient: controller.address(),
-            amount: cairo.uint256(parseEther(tokenAmount)),
+            amount: cairo.uint256(tokenAmount),
           }),
         },
       ];
@@ -145,7 +143,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [feeToken?.address, extAccount, controller, tokenAmount, onComplete]);
+  }, [feeToken, extAccount, controller, tokenAmount, onComplete]);
 
   const onCopy = useCallback(() => {
     if (!controller) return;
@@ -182,8 +180,8 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
         <Separator className="bg-spacer m-1" />
         {error && (
           <ErrorAlert
-            title="Account deployment error"
-            description={error.message}
+            title="Account deposit error"
+            description={getHumanReadableError(error)}
           />
         )}
 
@@ -266,6 +264,14 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
     </StarknetConfig>
   );
 }
+
+const getHumanReadableError = (error: Error): string => {
+  const message = error.message;
+  if (message.includes("USER_REFUSED_OP")) {
+    return "Transaction approval refused in wallet";
+  }
+  return message;
+};
 
 declare global {
   interface Window {

@@ -1,4 +1,8 @@
-import { formatBalance, formatUSDBalance } from "./tokens";
+import {
+  formatBalance,
+  convertTokenAmountToUSD,
+  convertUSDToTokenAmount,
+} from "./tokens";
 
 describe("formatBalance", () => {
   const testCases = [
@@ -168,7 +172,7 @@ describe("formatUSDBalance", () => {
 
   testCases.forEach(({ description, input, expected }) => {
     it(description, () => {
-      const result = formatUSDBalance(
+      const result = convertTokenAmountToUSD(
         input.amount,
         input.decimals,
         input.price,
@@ -179,10 +183,105 @@ describe("formatUSDBalance", () => {
 
   it("handles invalid price data gracefully", () => {
     expect(() =>
-      formatUSDBalance(BigInt("1000000000000000000"), 18, {
+      convertTokenAmountToUSD(BigInt("1000000000000000000"), 18, {
         amount: "0",
         decimals: 18,
       }),
     ).not.toThrow();
+  });
+});
+
+describe("convertUSDToAmount", () => {
+  const testCases = [
+    {
+      description: "converts whole dollar amounts",
+      input: {
+        usdAmount: 1,
+        decimals: 18,
+        price: { amount: "1000000000000000000", decimals: 18 },
+      },
+      expected: BigInt("1000000000000000000"),
+    },
+    {
+      description: "converts decimal dollar amounts",
+      input: {
+        usdAmount: 1.23,
+        decimals: 18,
+        price: { amount: "1000000000000000000", decimals: 18 },
+      },
+      expected: BigInt("1230000000000000000"),
+    },
+    {
+      description: "handles different token and price decimals",
+      input: {
+        usdAmount: 0.5,
+        decimals: 6,
+        price: { amount: "500000", decimals: 5 },
+      },
+      expected: BigInt("100000"),
+    },
+    {
+      description: "handles very small dollar amounts",
+      input: {
+        usdAmount: 0.001,
+        decimals: 18,
+        price: { amount: "1000000000000000000", decimals: 18 },
+      },
+      expected: BigInt("1000000000000000"),
+    },
+    {
+      description: "handles large token amounts and prices",
+      input: {
+        usdAmount: 1000000, // $1M
+        decimals: 18,
+        price: { amount: "1000000000000000000000", decimals: 18 }, // $1000 per token
+      },
+      expected: BigInt("1000000000000000000000"), // 1M * 10^18 / 1000
+    },
+    {
+      description:
+        "handles very large prices without scientific notation issues",
+      input: {
+        usdAmount: 1,
+        decimals: 18,
+        price: { amount: "100000000000000000000000000000", decimals: 18 }, // $100B per token
+      },
+      expected: BigInt("10000000"), // 1 * 10^18 / 100B
+    },
+  ];
+
+  testCases.forEach(({ description, input, expected }) => {
+    it(description, () => {
+      const result = convertUSDToTokenAmount(
+        input.usdAmount,
+        input.decimals,
+        input.price,
+      );
+      expect(result).toBe(expected);
+    });
+  });
+
+  it("maintains inverse relationship with convertAmountToUSD", () => {
+    const testAmount = 1.23; // USD
+    const decimals = 18;
+    const price = { amount: "1000000000000000000", decimals: 18 };
+
+    const tokenAmount = convertUSDToTokenAmount(testAmount, decimals, price);
+    const backToUSD = convertTokenAmountToUSD(tokenAmount, decimals, price);
+
+    expect(backToUSD).toBe("$1.23");
+  });
+
+  it("maintains precision with large numbers", () => {
+    const largePrice = "123456789123456789123456789"; // A very large price
+    const testAmount = 9999999.99; // A large USD amount
+    const decimals = 18;
+    const price = { amount: largePrice, decimals: 18 };
+
+    const tokenAmount = convertUSDToTokenAmount(testAmount, decimals, price);
+    const backToUSD = convertTokenAmountToUSD(tokenAmount, decimals, price);
+
+    // Should maintain precision and round to nearest cent
+    expect(backToUSD).toBe("$9999999.99");
   });
 });
