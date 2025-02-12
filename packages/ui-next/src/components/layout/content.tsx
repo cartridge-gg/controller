@@ -54,6 +54,7 @@ export function LayoutContent({
       <style>
         {`
           ::-webkit-scrollbar-thumb {
+            display: none;
             background: rgba(100, 100, 100, ${scrollbarOpacity});
             transition: background ${transitionDuration}ms ease-in-out;
           }
