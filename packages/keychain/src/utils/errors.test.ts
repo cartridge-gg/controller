@@ -48,7 +48,7 @@ describe("parseValidationError", () => {
 
     expect(result).toEqual({
       raw: "Max L1 gas price (69174664530264) is lower than the actual gas price: 71824602546140.",
-      summary: "Gas price too high",
+      summary: "Estimated gas price too low",
       details: {
         maxGasPrice: BigInt("69174664530264"),
         actualGasPrice: BigInt("71824602546140"),
