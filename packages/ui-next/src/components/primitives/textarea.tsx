@@ -11,9 +11,9 @@ export const textareaVariants = cva(
     variants: {
       variant: {
         default:
-          "border bg-background-200 border-background-300 text-foreground-100 hover:border-background-400 focus-visible:border-background-400 focus-visible:bg-background-300 placeholder:text-foreground-300",
+          "border bg-background-200 border-background-300 text-foreground-100 hover:border-background-400 focus-visible:border-background-400 focus-visible:bg-background-300 placeholder:text-foreground-400",
         username:
-          "border bg-background-200 border-background-300 text-foreground-100 placeholder:text-foreground-300",
+          "border bg-background-200 border-background-300 text-foreground-100 placeholder:text-foreground-400",
       },
       size: {
         default: "py-2.5 min-h-10 h-10 text-sm/[18px]",

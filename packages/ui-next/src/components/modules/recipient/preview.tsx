@@ -54,7 +54,7 @@ export const Preview = ({
       {name ? (
         <div className="flex flex-col items-start gap-y-0.5">
           <p className="font-medium text-sm">{name}</p>
-          <p className="font-normal text-xs text-foreground-300">
+          <p className="font-normal text-xs text-foreground-400">
             {formatAddress(address, { size: "xs", padding: true })}
           </p>
         </div>
