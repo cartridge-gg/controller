@@ -22,6 +22,7 @@ export function Field({
 }: FieldProps) {
   return (
     <Input
+      size="lg"
       value={value}
       autoFocus
       spellCheck={false}
