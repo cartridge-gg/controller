@@ -71,7 +71,10 @@ class ControllerAccount extends WalletAccount {
       }
 
       // Propagates session txn error back to caller
-      if (this.options?.propagateSessionErrors) {
+      if (
+        this.options?.propagateSessionErrors &&
+        sessionExecute.code !== ResponseCodes.USER_INTERACTION_REQUIRED
+      ) {
         reject((sessionExecute as ConnectError).error);
         return;
       }
