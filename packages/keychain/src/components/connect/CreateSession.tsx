@@ -181,11 +181,10 @@ export function CreateSession({
             !isEditable ? (
               <Button
                 variant="icon"
-                className="size-10 relative"
+                className="size-10 relative bg-background-200"
                 onClick={handleToggleEditable}
               >
                 <SliderIcon
-                  size="lg"
                   color="white"
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                 />

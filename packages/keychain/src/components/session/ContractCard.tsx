@@ -60,7 +60,7 @@ export function ContractCard({
   return (
     <AccordionCard
       icon={icon ?? <CodeIcon variant="solid" />}
-      title={<div className="text-xs font-bold uppercase">{title}</div>}
+      title={<div className="text-xs font-semibold uppercase">{title}</div>}
       subtitle={explorerLink}
       isExpanded={isExpanded}
       trigger={
@@ -89,7 +89,7 @@ export function ContractCard({
                     : "text-foreground-400",
                 )}
               >
-                <p className="font-bold">
+                <p className="font-medium text-xs">
                   {method.name ?? humanizeString(method.entrypoint)}
                 </p>
                 {method.description && (
