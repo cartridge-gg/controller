@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ControllerErrorAlert as CtrlErrAlert } from "./ErrorAlert";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { starknetTransactionExecutionErrorTestCases } from "@/utils/errors";
+import {
+  starknetTransactionExecutionErrorTestCases,
+  starknetTransactionValidationErrorTestCases,
+} from "@/utils/errors";
 
 const meta = {
   component: ControllerErrorAlert,
@@ -32,6 +35,16 @@ function ControllerErrorAlert() {
           key={i}
           error={{
             code: ErrorCode.StarknetTransactionExecutionError,
+            ...input,
+          }}
+        />
+      ))}
+
+      {starknetTransactionValidationErrorTestCases.map(({ input }, i) => (
+        <CtrlErrAlert
+          key={i}
+          error={{
+            code: ErrorCode.StarknetValidationFailure,
             ...input,
           }}
         />

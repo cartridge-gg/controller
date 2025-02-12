@@ -60,7 +60,7 @@ export function ErrorAlert({
       case "warning":
         return { bg: "bg-[#1f2320]", text: "text-[white]" };
       case "error":
-        return { bg: "bg-destructive", text: "text-[black]" };
+        return { bg: "border border-destructive", text: "text-destructive" };
       default:
         return { bg: "bg-background-200", text: "text-foreground" };
     }
@@ -310,12 +310,13 @@ export function ControllerErrorAlert({
           <div className="flex flex-col gap-px">
             {Object.entries(parsedError.details).map(([key, value]) => (
               <div key={key}>
-                {key}: {typeof value === "bigint" ? value.toString() : value}
+                <span className="opacity-50">{humanizeString(key)}</span>:{" "}
+                {typeof value === "bigint" ? value.toString() : value}
               </div>
             ))}
           </div>
         );
-      variant = "warning";
+      variant = "error";
       isExpanded = true;
       break;
     }
@@ -364,7 +365,7 @@ function StackTraceDisplay({
               ([key, value]) =>
                 value && (
                   <div key={key} className="flex items-center gap-2">
-                    <div className="w-20 flex-shrink-0 capitalize text-[black]/50">
+                    <div className="w-20 flex-shrink-0 capitalize opacity-50">
                       {key}
                     </div>
                     {key === "address" || key === "class" ? (
@@ -407,4 +408,16 @@ export function isControllerError(
   error: ControllerError | Error,
 ): error is ControllerError {
   return !!(error as ControllerError).code;
+}
+
+export function humanizeString(str: string): string {
+  return (
+    str
+      // Convert from camelCase or snake_case
+      .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase to spaces
+      .replace(/_/g, " ") // snake_case to spaces
+      .toLowerCase()
+      // Capitalize first letter
+      .replace(/^\w/, (c) => c.toUpperCase())
+  );
 }

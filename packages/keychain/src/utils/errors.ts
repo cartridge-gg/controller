@@ -213,7 +213,7 @@ export function parseValidationError(error: ControllerError): {
       const actualGasPrice = BigInt(maxGasPriceMatch[2]);
       return {
         raw: error.data,
-        summary: "Gas price too high",
+        summary: "Estimated gas price too low",
         details: {
           maxGasPrice,
           actualGasPrice,
@@ -639,6 +639,23 @@ export const starknetTransactionExecutionErrorTestCases = [
             "0x28ffe4ff0f226a9107253e17a904099aa4f63a02a5621de0576e5aa71bc5194",
         },
       ],
+    },
+  },
+];
+
+export const starknetTransactionValidationErrorTestCases = [
+  {
+    input: {
+      message: "Account validation failed",
+      data: "Max L1 gas price (69174664530264) is lower than the actual gas price: 71824602546140.",
+    },
+    expected: {
+      raw: "Max L1 gas price (69174664530264) is lower than the actual gas price: 71824602546140.",
+      summary: "Estimated gas price too low",
+      details: {
+        maxGasPrice: 69174664530264n,
+        actualGasPrice: 71824602546140n,
+      },
     },
   },
 ];
