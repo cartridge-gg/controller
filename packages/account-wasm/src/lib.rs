@@ -1,3 +1,5 @@
+mod alloc;
+
 #[cfg(feature = "controller_account")]
 pub mod account;
 

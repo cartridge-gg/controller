@@ -8,7 +8,17 @@ version.workspace = true
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = 'abort'
+strip = true
+debug = false
+incremental = false
+
 [dependencies]
+wee_alloc = { version = "0.4.5", optional = true }
 account_sdk = { workspace = true, features = ["webauthn"] }
 async-trait.workspace = true
 base64.workspace = true
@@ -20,8 +30,8 @@ getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4.3"
 num-traits.workspace = true
 rand = { version = "0.8", features = ["getrandom"] }
-serde.workspace = true
-serde_json.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["alloc"] }
 serde-wasm-bindgen.workspace = true
 serde_with.workspace = true
 starknet.workspace = true
@@ -32,7 +42,7 @@ url = { workspace = true, default-features = false }
 wasm-bindgen = { workspace = true, features = ["serde-serialize"] }
 wasm-bindgen-futures.workspace = true
 webauthn-rs-proto = { workspace = true, features = ["wasm"] }
-web-sys = { version = "0.3", features = [
+web-sys = { version = "0.3", default-features = false, features = [
     "CredentialCreationOptions",
     "CredentialRequestOptions",
     "CredentialsContainer",
@@ -57,3 +67,4 @@ console-error-panic = ["dep:console_error_panic_hook"]
 console_error_panic_hook = []
 controller_account = []
 session_account = []
+wee_alloc = ["dep:wee_alloc"]
