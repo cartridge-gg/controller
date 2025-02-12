@@ -35,6 +35,13 @@ export const Error: Story = {
   },
 };
 
+export const AutoFocus: Story = {
+  args: {
+    value: "Value",
+    autoFocus: true,
+  },
+};
+
 export const BigDefault: Story = {
   args: {
     size: "lg",
