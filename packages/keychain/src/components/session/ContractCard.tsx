@@ -71,7 +71,7 @@ export function ContractCard({
           </span>
         </div>
       }
-      className="bg-background gap-px rounded overflow-auto border border-background"
+      className="bg-background gap-px rounded overflow-auto border border-background divide-y-[1px] divide-solid divide-background"
     >
       {methods
         .filter((method) => (isEditable ? true : method.authorized))

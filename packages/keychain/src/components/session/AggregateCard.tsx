@@ -82,7 +82,7 @@ export function AggregateCard({
             </Link>
           </div>
 
-          <div className="flex flex-col gap-px rounded overflow-auto border border-background">
+          <div className="flex flex-col gap-px rounded overflow-auto border border-background divide-y-[1px] divide-solid divide-background">
             {methods
               .filter((method) => (isEditable ? true : method.authorized))
               .map((method) => (
@@ -99,7 +99,7 @@ export function AggregateCard({
                           : "text-foreground-400",
                       )}
                     >
-                      <p className="font-bold">{method.name}</p>
+                      <p className="font-medium text-xs">{method.name}</p>
                       {method.description && (
                         <TooltipProvider>
                           <Tooltip>
