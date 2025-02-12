@@ -80,8 +80,10 @@ export function LayoutContent({
 
 export function LayoutContentLoader() {
   return (
-    <LayoutContent className="h-full items-center justify-center">
-      <Spinner size="lg" />
+    <LayoutContent className="h-full items-center justify-center pb-4 select-none">
+      <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
+        <Spinner className="text-foreground-400" size="lg" />
+      </div>
     </LayoutContent>
   );
 }

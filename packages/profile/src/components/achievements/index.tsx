@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import {
-  Spinner,
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
+  LayoutContentLoader,
 } from "@cartridge/ui-next";
 import { TrophiesTab, LeaderboardTab, Scoreboard } from "./tab";
 import { useAccount, useUsername } from "@/hooks/account";
@@ -126,11 +126,7 @@ export function Achievements() {
           )}
         </LayoutContent>
       ) : isLoading ? (
-        <LayoutContent className="pb-4 select-none h-full">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
-            <Spinner className="text-foreground-400" size="lg" />
-          </div>
-        </LayoutContent>
+        <LayoutContentLoader />
       ) : (
         <LayoutContent className="pb-4 select-none h-full">
           <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
