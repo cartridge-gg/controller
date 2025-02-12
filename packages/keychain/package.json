@@ -29,7 +29,6 @@
     "@starknet-io/types-js": "catalog:",
     "@stripe/react-stripe-js": "^2.8.1",
     "@stripe/stripe-js": "^4.8.0",
-    "@wagmi/core": "^1.4.12",
     "base64url": "catalog:",
     "caip": "^1.1.0",
     "cbor": "^8.1.0",
@@ -45,9 +44,7 @@
     "react-dom": "catalog:",
     "react-query": "catalog:",
     "react-router-dom": "catalog:",
-    "sonner": "catalog:",
-    "viem": "catalog:",
-    "wagmi": "^1.4.12"
+    "sonner": "catalog:"
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",
