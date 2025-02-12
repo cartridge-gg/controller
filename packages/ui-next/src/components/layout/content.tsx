@@ -40,13 +40,13 @@ export function LayoutContent({
     <div
       ref={containerRef}
       className={cn(
-        "w-full pl-4 pr-1.5 flex flex-col items-stretch gap-2 overflow-y-scroll",
+        "w-full px-4 flex flex-col items-stretch gap-2 overflow-y-scroll",
         withFooter &&
           "[@media(min-width:768px)_and_(min-height:400px)]:mb-[200px]",
         className,
       )}
       style={{
-        scrollbarWidth: "thin",
+        scrollbarWidth: "none",
         scrollbarColor: `rgba(100, 100, 100, ${scrollbarOpacity}) transparent`,
         transition: `scrollbar-color ${transitionDuration}ms ease-in-out`,
       }}
