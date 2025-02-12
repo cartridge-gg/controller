@@ -179,10 +179,13 @@ export function parseValidationError(error: ControllerError): {
         maxFee?: bigint;
         balance?: bigint;
         additionalFunds?: bigint;
+        maxGasPrice?: bigint;
+        actualGasPrice?: bigint;
       }
     | string;
 } {
   if (typeof error.data === "string") {
+    // Handle max fee exceeds balance case
     const maxFeeMatch = error.data.match(
       /Max fee \((\d+)\) exceeds balance \((\d+)\)/,
     );
@@ -197,6 +200,23 @@ export function parseValidationError(error: ControllerError): {
           maxFee,
           balance,
           additionalFunds,
+        },
+      };
+    }
+
+    // Handle max gas price validation case
+    const maxGasPriceMatch = error.data.match(
+      /Max L1 gas price \((\d+)\) is lower than the actual gas price: (\d+)/,
+    );
+    if (maxGasPriceMatch) {
+      const maxGasPrice = BigInt(maxGasPriceMatch[1]);
+      const actualGasPrice = BigInt(maxGasPriceMatch[2]);
+      return {
+        raw: error.data,
+        summary: "Gas price too high",
+        details: {
+          maxGasPrice,
+          actualGasPrice,
         },
       };
     }
