@@ -55,7 +55,7 @@ export function AggregateCard({
       icon={icon}
       title={title}
       trigger={
-        <div className="text-xs text-foreground-400">
+        <div className="text-xs text-foreground-300">
           Approve&nbsp;
           <span className="text-foreground-200 font-bold">
             {count} {count > 1 ? `items` : "item"}
@@ -67,7 +67,7 @@ export function AggregateCard({
       {Object.entries(contracts || {}).map(([address, { name, methods }]) => (
         <div key={address} className="flex flex-col gap-2">
           <div className="flex items-center justify-between bg-background-200 text-xs">
-            <div className="py-2 font-bold">{name}</div>
+            <div className="py-2 font-medium">{name}</div>
             <Link
               to={
                 controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
@@ -82,7 +82,7 @@ export function AggregateCard({
             </Link>
           </div>
 
-          <div className="flex flex-col gap-px rounded overflow-auto border border-background">
+          <div className="flex flex-col gap-px rounded overflow-auto border border-background divide-y-[1px] divide-solid divide-background">
             {methods
               .filter((method) => (isEditable ? true : method.authorized))
               .map((method) => (
@@ -95,11 +95,11 @@ export function AggregateCard({
                       className={cn(
                         "flex flex-row items-center gap-2",
                         method.authorized
-                          ? "text-foreground-200"
-                          : "text-foreground-400",
+                          ? "text-foreground-300"
+                          : "text-background-500",
                       )}
                     >
-                      <p className="font-bold">{method.name}</p>
+                      <p className="font-medium text-xs">{method.name}</p>
                       {method.description && (
                         <TooltipProvider>
                           <Tooltip>

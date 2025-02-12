@@ -169,6 +169,7 @@ export function CreateSession({
     >
       <LayoutContainer>
         <LayoutHeader
+          className="px-6"
           title={!isUpdate ? "Create Session" : "Update Session"}
           description={
             isUpdate
@@ -181,11 +182,10 @@ export function CreateSession({
             !isEditable ? (
               <Button
                 variant="icon"
-                className="size-10 relative"
+                className="size-10 relative bg-background-200"
                 onClick={handleToggleEditable}
               >
                 <SliderIcon
-                  size="lg"
                   color="white"
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                 />
@@ -193,7 +193,7 @@ export function CreateSession({
             ) : undefined
           }
         />
-        <LayoutContent className="gap-6">
+        <LayoutContent className="gap-6 px-6">
           <SessionConsent isVerified={policyState?.verified} />
           {policyState?.verified ? (
             <VerifiedSessionSummary

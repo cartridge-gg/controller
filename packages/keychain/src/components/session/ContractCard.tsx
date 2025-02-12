@@ -60,11 +60,11 @@ export function ContractCard({
   return (
     <AccordionCard
       icon={icon ?? <CodeIcon variant="solid" />}
-      title={<div className="text-xs font-bold uppercase">{title}</div>}
+      title={<div className="text-xs font-semibold">{title}</div>}
       subtitle={explorerLink}
       isExpanded={isExpanded}
       trigger={
-        <div className="text-xs text-foreground-400">
+        <div className="text-xs text-foreground-300">
           Approve&nbsp;
           <span className="text-foreground-200 font-bold">
             {totalEnabledMethod} {totalEnabledMethod > 1 ? `methods` : "method"}
@@ -85,11 +85,11 @@ export function ContractCard({
                 className={cn(
                   "flex flex-row items-center gap-2",
                   method.authorized
-                    ? "text-foreground-200"
-                    : "text-foreground-400",
+                    ? "text-foreground-300"
+                    : "text-background-500",
                 )}
               >
-                <p className="font-bold">
+                <p className="font-medium text-xs">
                   {method.name ?? humanizeString(method.entrypoint)}
                 </p>
                 {method.description && (
