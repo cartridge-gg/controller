@@ -1,9 +1,8 @@
-import { Header, Error } from "@/components";
+import { Header, Error, Input } from "@/components";
 import { Max } from "./max";
 import { Conversion } from "./conversion";
-import { Field } from "./field";
 import { Balance } from "./balance";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 type AmountProps = {
   amount: number | undefined;
@@ -13,6 +12,7 @@ type AmountProps = {
   decimals: number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onMax: (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => void;
+  setError: (error: Error | undefined) => void;
 };
 
 export function Amount({
@@ -23,6 +23,7 @@ export function Amount({
   decimals,
   onChange,
   onMax,
+  setError,
 }: AmountProps) {
   const error = useMemo(() => {
     if (amount && amount > balance) return "Insufficient balance";
@@ -31,6 +32,10 @@ export function Amount({
       return `Min value is ${minAmountStr}`;
     return "";
   }, [amount, balance, decimals]);
+
+  useEffect(() => {
+    setError(error ? { name: "Error", message: error } : undefined);
+  }, [error, setError]);
 
   return (
     <div className="flex flex-col gap-y-px">
@@ -44,7 +49,15 @@ export function Amount({
 
       <div className="flex flex-col gap-y-3">
         <div className="relative">
-          <Field value={amount} isError={!!error} onChange={onChange} />
+          <Input
+            size="lg"
+            type="number"
+            className="pr-28"
+            placeholder={(0).toLocaleString()}
+            value={amount ?? ""}
+            error={error ? { name: "Error", message: "" } : undefined}
+            onChange={onChange}
+          />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-x-3 justify-end">
             <Conversion value={amount && !error ? conversion : undefined} />
             <Max onClick={onMax} />

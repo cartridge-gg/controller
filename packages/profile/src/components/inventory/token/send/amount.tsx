@@ -8,9 +8,11 @@ import { useParams } from "react-router-dom";
 export function SendAmount({
   amount,
   setAmount,
+  setError,
 }: {
   amount: number | undefined;
   setAmount: (amount: number | undefined) => void;
+  setError: (error: Error | undefined) => void;
 }) {
   const { address: tokenAddress } = useParams<{ address: string }>();
   const token = useToken({ tokenAddress: tokenAddress! });
@@ -53,6 +55,7 @@ export function SendAmount({
       balance={parseFloat(token.balance.formatted.replace("~", ""))}
       symbol={token.meta.symbol}
       decimals={token.meta.decimals ?? 18}
+      setError={setError}
       onChange={handleChange}
       onMax={handleMax}
     />
