@@ -24,7 +24,7 @@ export const Collectibles = ({
   const location = useLocation();
 
   return (
-    <div className="grid grid-cols-2 gap-4 place-items-center px-2.5">
+    <div className="grid grid-cols-2 gap-4 place-items-center">
       {assets.map((asset) => {
         const isSelected = tokenIds.includes(asset.tokenId);
         return (

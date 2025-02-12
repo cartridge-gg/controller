@@ -1,6 +1,6 @@
 import { cn } from "@/utils";
-import { Field } from "./field";
 import { Status, ValidationState } from "./status";
+import { Input } from "@/index";
 
 type CreateAccountProps = {
   usernameField: {
@@ -34,14 +34,22 @@ export function CreateAccount({
           "bg-destructive-100 border-destructive-100",
       )}
     >
-      <Field
+      <Input
+        variant="username"
+        size="lg"
         value={usernameField.value}
-        validation={validation}
-        isLoading={isLoading}
-        onUsernameChange={onUsernameChange}
-        onUsernameFocus={onUsernameFocus}
-        onUsernameClear={onUsernameClear}
+        autoFocus
+        spellCheck={false}
+        placeholder="Username"
+        className="relative z-1"
+        onFocus={onUsernameFocus}
+        onChange={(e) => {
+          onUsernameChange(e.target.value.toLowerCase());
+        }}
         onKeyDown={onKeyDown}
+        isLoading={validation.status === "validating"}
+        disabled={isLoading}
+        onClear={onUsernameClear}
       />
       <Status
         username={usernameField.value}

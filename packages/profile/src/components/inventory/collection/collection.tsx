@@ -99,12 +99,12 @@ export function Collection() {
 
                 <LayoutContent
                   className={cn(
-                    "pb-0 px-1.5 flex flex-col gap-y-4",
+                    "pb-0 flex flex-col gap-y-4",
                     !selection && "pb-4",
                   )}
                 >
                   <div
-                    className="px-2.5 flex items-center gap-x-1.5 text-[11px]/3 cursor-pointer font-semibold self-start"
+                    className="flex items-center gap-x-1.5 text-[11px]/3 cursor-pointer font-semibold self-start"
                     onClick={handleSelectAll}
                   >
                     <CheckboxIcon

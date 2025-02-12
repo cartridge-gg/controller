@@ -108,7 +108,7 @@ export const SendRecipient = ({
       onResultClick={handleClick}
       onResultEnter={() => setHover(true)}
       onResultLeave={() => setHover(false)}
-      error={error}
+      error={error ? { name: "Error", message: error } : undefined}
       isLoading={isLoading || isFetching}
       isFocused={focus}
       isHovered={hover}

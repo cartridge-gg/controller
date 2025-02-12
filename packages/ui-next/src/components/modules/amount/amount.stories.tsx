@@ -17,6 +17,7 @@ const meta: Meta<typeof Amount> = {
     conversion: undefined,
     onChange: fn(),
     onMax: fn(),
+    setError: fn(),
   },
 };
 

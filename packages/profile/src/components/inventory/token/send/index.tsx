@@ -30,10 +30,13 @@ export function SendToken() {
 
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState<number | undefined>();
+  const [error, setError] = useState<Error | undefined>();
 
   const disabled = useMemo(() => {
-    return (!validated && !!warning) || !to || !amount;
-  }, [validated, to, amount, warning]);
+    return (
+      !!error || (!validated && !!warning) || !to || !amount || amount <= 0
+    );
+  }, [validated, to, amount, warning, error]);
 
   useEffect(() => {
     setValidated(false);
@@ -85,7 +88,7 @@ export function SendToken() {
       />
       <LayoutContent className="pb-4 gap-6">
         <SendRecipient to={to} setTo={setTo} setWarning={setWarning} />
-        <SendAmount amount={amount} setAmount={setAmount} />
+        <SendAmount amount={amount} setAmount={setAmount} setError={setError} />
       </LayoutContent>
 
       <LayoutFooter>

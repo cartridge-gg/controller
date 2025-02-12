@@ -2,13 +2,14 @@ import { SpinnerIcon, TimesCircleIcon } from "@cartridge/ui-next";
 
 type ClearProps = {
   isLoading: boolean;
-  onClear: () => void;
+  onClear: (e: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 export const Clear = ({ isLoading, onClear }: ClearProps) => {
   return (
     <div
       className="h-9 w-9 p-1.5 flex items-center justify-center cursor-pointer"
+      onMouseDown={(e) => e.preventDefault()}
       onClick={onClear}
     >
       {isLoading ? (
