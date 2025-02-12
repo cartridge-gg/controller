@@ -1,5 +1,4 @@
-import { Header, Error, WalletType } from "@/components";
-import { Field } from "./field";
+import { Header, Textarea, WalletType } from "@/components";
 import { Selection } from "./selection";
 import { Preview } from "./preview";
 import { formatAddress } from "@cartridge/utils";
@@ -20,10 +19,10 @@ type RecipientProps = {
   onResultClick: () => void;
   onResultEnter: () => void;
   onResultLeave: () => void;
-  error: string;
   isLoading: boolean;
   isFocused: boolean;
   isHovered: boolean;
+  error?: Error;
 };
 
 export const Recipient = ({
@@ -61,15 +60,19 @@ export const Recipient = ({
         )}
       </div>
       <div className="relative flex flex-col gap-y-3">
-        <Field
+        <Textarea
+          size="lg"
+          spellCheck={false}
+          placeholder={"Recipient Address or Username"}
           value={value}
+          error={error}
           onChange={onChange}
           onFocus={onFocus}
           onBlur={onBlur}
           isLoading={isLoading}
           onClear={onClear}
+          className={"min-w-[320px]"}
         />
-        <Error label={error} />
 
         {(isFocused || isHovered) &&
           !error &&

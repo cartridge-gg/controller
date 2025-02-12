@@ -22,7 +22,6 @@ const meta: Meta<typeof Recipient> = {
     isFocused: false,
     isHovered: false,
     isLoading: false,
-    error: "",
     onChange: fn(),
     onFocus: fn(),
     onBlur: fn(),
@@ -42,7 +41,7 @@ export const Default: Story = {};
 export const Error: Story = {
   args: {
     value: "shnobiw.stark",
-    error: "Could not get address from stark name",
+    error: { name: "error", message: "Could not get address from stark name" },
   },
 };
 
