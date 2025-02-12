@@ -7,6 +7,7 @@ const meta: Meta<typeof Input> = {
   component: Input,
   tags: ["autodocs"],
   args: {
+    value: "",
     type: "text",
     variant: "default",
     size: "default",
@@ -39,6 +40,13 @@ export const AutoFocus: Story = {
   args: {
     value: "Value",
     autoFocus: true,
+  },
+};
+
+export const LongValue: Story = {
+  args: {
+    value:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
   },
 };
 

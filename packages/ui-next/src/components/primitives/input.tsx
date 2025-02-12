@@ -14,7 +14,7 @@ export interface InputProps
 }
 
 export const inputVariants = cva(
-  "flex w-full rounded-md border px-4 py-3.5 font-mono ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+  "flex w-full rounded-md border px-4 font-mono ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -22,8 +22,8 @@ export const inputVariants = cva(
           "border bg-background-200 border-background-300 text-foreground-100 hover:border-background-400 focus-visible:border-background-400 focus-visible:bg-background-300 placeholder:text-foreground-300",
       },
       size: {
-        default: "h-10 text-sm/[18px]",
-        lg: "h-12 text-[15px]/5",
+        default: "py-2.5 h-10 text-sm/[18px]",
+        lg: "py-3.5 h-12 text-[15px]/5",
       },
     },
     defaultVariants: {
@@ -75,6 +75,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={type}
             className={cn(
               inputVariants({ variant, size, className }),
+              !!props.value && !!onClear && "pr-12",
               !!error &&
                 "border-destructive-100 hover:border-destructive-100 focus-visible:border-destructive-100",
             )}
