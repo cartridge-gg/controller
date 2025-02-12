@@ -16,8 +16,9 @@ export const textareaVariants = cva(
           "border bg-background-200 border-background-300 text-foreground-100 placeholder:text-foreground-400",
       },
       size: {
-        default: "py-2.5 min-h-10 h-10 text-sm/[18px]",
-        lg: "py-3.5 min-h-12 h-12 text-[15px]/5",
+        // The is no text alignment in the textarea, so we need to use padding from top to align the text taking line-height into account
+        default: "pt-[10.3px] min-h-10 h-10 text-sm/[18px]",
+        lg: "pt-[13.3px] min-h-12 h-12 text-[15px]/5",
       },
     },
     defaultVariants: {

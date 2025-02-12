@@ -24,8 +24,8 @@ export const inputVariants = cva(
           "border bg-background-200 border-background-300 text-foreground-100 placeholder:text-foreground-400",
       },
       size: {
-        default: "py-2.5 h-10 text-sm/[18px]",
-        lg: "py-3.5 h-12 text-[15px]/5",
+        default: "h-10 text-sm/[18px]",
+        lg: "h-12 text-[15px]/5",
       },
     },
     defaultVariants: {
