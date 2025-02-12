@@ -33,7 +33,7 @@ export const SendRecipient = ({
   const [hover, setHover] = useState(false);
 
   const { address, name, wallet, isFetching, error, warning } = useAccountInfo({
-    nameOrAddress,
+    nameOrAddress: nameOrAddress.toLowerCase(),
   });
 
   useEffect(() => {
