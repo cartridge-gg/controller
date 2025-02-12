@@ -2,7 +2,7 @@ import { Header, Error, Input } from "@/components";
 import { Max } from "./max";
 import { Conversion } from "./conversion";
 import { Balance } from "./balance";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 type AmountProps = {
   amount: number | undefined;
@@ -12,6 +12,7 @@ type AmountProps = {
   decimals: number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onMax: (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => void;
+  setError: (error: Error | undefined) => void;
 };
 
 export function Amount({
@@ -22,6 +23,7 @@ export function Amount({
   decimals,
   onChange,
   onMax,
+  setError,
 }: AmountProps) {
   const error = useMemo(() => {
     if (amount && amount > balance) return "Insufficient balance";
@@ -30,6 +32,10 @@ export function Amount({
       return `Min value is ${minAmountStr}`;
     return "";
   }, [amount, balance, decimals]);
+
+  useEffect(() => {
+    setError(error ? { name: "Error", message: error } : undefined);
+  }, [error, setError]);
 
   return (
     <div className="flex flex-col gap-y-px">
