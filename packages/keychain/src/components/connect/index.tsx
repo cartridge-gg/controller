@@ -2,7 +2,6 @@ import { Authenticate } from "./authenticate";
 import { CreateController, Legal } from "./create";
 import { CreateSession } from "./CreateSession";
 import { RegisterSession } from "./RegisterSession";
-import { Logout } from "./Logout";
 import { SessionConsent } from "./SessionConsent";
 import { Upgrade } from "./Upgrade";
 
@@ -11,7 +10,6 @@ export {
   CreateController,
   CreateSession,
   Legal,
-  Logout,
   RegisterSession,
   SessionConsent,
   Upgrade,
