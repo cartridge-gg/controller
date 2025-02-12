@@ -66,9 +66,6 @@ export const SendRecipient = ({
 
   const handleBlur = useCallback(() => {
     setFocus(false);
-    if (!hover) {
-      handleClear();
-    }
   }, [setFocus, hover, handleClear]);
 
   const handleClick = useCallback(() => {

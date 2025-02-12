@@ -31,7 +31,7 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
       icon={<PencilIcon variant="solid" />}
       title="Sign Message"
       trigger={
-        <div className="text-xs text-foreground-400">
+        <div className="text-xs text-foreground-300">
           Approve&nbsp;
           <span className="text-foreground-200 font-bold">
             {totalEnabledMessages}{" "}
