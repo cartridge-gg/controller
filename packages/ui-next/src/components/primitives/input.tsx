@@ -63,7 +63,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="flex flex-col gap-y-3">
-        <div className="relative">
+        <div
+          className="relative"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+        >
           <input
             ref={ref}
             type={type}
@@ -72,17 +78,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               !!error &&
                 "border-destructive-100 hover:border-destructive-100 focus-visible:border-destructive-100",
             )}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
             {...props}
           />
           {(isFocused || isHovered) && !!props.value && !!onClear && (
-            <div
-              className="absolute right-1.5 top-1/2 -translate-y-1/2"
-              onMouseEnter={() => setIsHovered(true)}
-            >
+            <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
               <Clear isLoading={!!isLoading} onClear={onClear} />
             </div>
           )}
