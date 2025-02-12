@@ -36,4 +36,23 @@ describe("parseValidationError", () => {
       },
     });
   });
+
+  it("should correctly parse gas price validation error", () => {
+    const error = {
+      code: 55,
+      message: "Account validation failed",
+      data: "Max L1 gas price (69174664530264) is lower than the actual gas price: 71824602546140.",
+    };
+
+    const result = parseValidationError(error);
+
+    expect(result).toEqual({
+      raw: "Max L1 gas price (69174664530264) is lower than the actual gas price: 71824602546140.",
+      summary: "Gas price too high",
+      details: {
+        maxGasPrice: BigInt("69174664530264"),
+        actualGasPrice: BigInt("71824602546140"),
+      },
+    });
+  });
 });

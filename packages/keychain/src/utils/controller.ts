@@ -1,6 +1,5 @@
 import {
   BigNumberish,
-  num,
   InvokeFunctionResponse,
   Signature,
   EstimateFee,
@@ -193,22 +192,7 @@ export default class Controller {
 
   async estimateInvokeFee(calls: Call[]): Promise<EstimateFee> {
     const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
-
-    // The reason why we set the multiplier unseemingly high is to account
-    // for the fact that the estimation above is done without validation (ie SKIP_VALIDATE).
-    //
-    // Setting it lower might cause the actual transaction to fail due to
-    // insufficient max fee.
-    const MULTIPLIER_PERCENTAGE = 170; // x1.7
-
-    // This will essentially multiply the estimated fee by 1.7
-    const suggestedMaxFee = num.addPercent(
-      BigInt(res.overall_fee),
-      MULTIPLIER_PERCENTAGE,
-    );
-
-    const estimate = fromJsFeeEstimate(res);
-    return { ...estimate, suggestedMaxFee };
+    return fromJsFeeEstimate(res);
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
