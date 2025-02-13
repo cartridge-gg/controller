@@ -137,7 +137,7 @@ jobs:
             git commit -m "chore: update storybook snapshots"
 
             # Push to the PR branch
-            git push origin HEAD:${{ github.head_ref }}
+            git push origin "HEAD:${{ github.head_ref }}"
 
             # Set output to indicate we made changes
             echo "changes_committed=true" >> "$GITHUB_ENV"
@@ -162,7 +162,7 @@ jobs:
           git config --global --add safe.directory '*'
 
           # Fetch the base branch first
-          git fetch origin ${{ github.base_ref }}
+          git fetch origin "${{ github.base_ref }}"
 
           touch diff_info.txt
 
@@ -172,7 +172,7 @@ jobs:
             local dir=$2
             
             # Check for snapshot changes in the PR
-            git diff --name-only origin/${{ github.base_ref }} | grep "^${dir}/.*\.png$" | while read -r file; do
+            git diff --name-only "origin/${{ github.base_ref }}" | grep "^${dir}/.*\.png$" | while read -r file; do
               if [ -f "$file" ]; then
                 echo "${pkg}:${file}:update" >> diff_info.txt
               fi
