@@ -27,7 +27,12 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     children: (
-      <div className={cn(layoutBottomTabsVariants(), "px-0 py-0 border-t-0")}>
+      <div
+        className={cn(
+          layoutBottomTabsVariants(),
+          "px-0 py-0 border-t-0 shadow-none",
+        )}
+      >
         <BottomTab>
           <PulseIcon variant="line" size="lg" />
         </BottomTab>

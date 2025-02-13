@@ -7,7 +7,8 @@ export const layoutBottomTabsVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-background-200 border-t border-spacer-100",
+        default:
+          "bg-background-200 border-t border-spacer-100 shadow-[0px_-4px_8px_0px_rgba(0,_0,_0,_0.32)]",
       },
       size: {
         default: "h-[72px] gap-x-2 px-4 pb-2",
