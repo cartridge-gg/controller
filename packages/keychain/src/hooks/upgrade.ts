@@ -44,6 +44,12 @@ export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
     outsideExecutionVersion: OutsideExecutionVersion.V3,
     changes: ["Improved session message signature"],
   },
+  {
+    version: "1.0.9",
+    hash: "0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+    outsideExecutionVersion: OutsideExecutionVersion.V3,
+    changes: ["Wildcard session support"],
+  },
 ];
 
 export const LATEST_CONTROLLER = CONTROLLER_VERSIONS[4];
