@@ -9,14 +9,10 @@ export function VerifiedSessionSummary({
   game,
   contracts,
   messages,
-  duration,
-  onDurationChange,
 }: {
   game: string;
   contracts?: SessionContracts;
   messages?: SessionMessages;
-  duration: bigint;
-  onDurationChange: (duration: bigint) => void;
 }) {
   // Extract token and VRF contracts
   const individual = useMemo(
@@ -60,7 +56,7 @@ export function VerifiedSessionSummary({
         />
       ))}
 
-      <ExpirationCard duration={duration} onDurationChange={onDurationChange} />
+      <ExpirationCard />
     </div>
   );
 }

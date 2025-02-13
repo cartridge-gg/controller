@@ -102,9 +102,9 @@ export function CreateSession({
     setIsEditable(!isEditable);
   }, [isEditable]);
 
-  const expiresAt = useMemo(() => {
-    return duration + NOW;
-  }, [duration]);
+  const handleSetDuration = useCallback((duration: bigint) => {
+    setDuration(duration);
+  }, []);
 
   const chainSpecificMessages = useMemo(() => {
     if (!policyState.messages || !controller) return [];
@@ -126,13 +126,15 @@ export function CreateSession({
 
       const cleanedPolicies = cleanPolicies(policyState);
 
+      const expiresAt = duration + NOW;
+
       await controller.createSession(expiresAt, cleanedPolicies, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
       setIsConnecting(false);
     }
-  }, [controller, policyState, maxFee, onConnect, expiresAt]);
+  }, [controller, policyState, maxFee, onConnect, duration]);
 
   const onSkipSession = useCallback(async () => {
     if (!controller || !policyState) return;
@@ -162,9 +164,11 @@ export function CreateSession({
     <CreateSessionProvider
       value={{
         policies: policyState,
+        duration: duration,
         onToggleMethod: handleToggleMethod,
         onToggleMessage: handleToggleMessage,
         isEditable,
+        onDurationChange: handleSetDuration,
       }}
     >
       <LayoutContainer>
@@ -180,7 +184,7 @@ export function CreateSession({
             !isEditable ? (
               <Button
                 variant="icon"
-                className="size-10 relative bg-background-200"
+                className="size-10 relative bg-background-200 hover:bg-background-300"
                 onClick={handleToggleEditable}
               >
                 <SliderIcon
@@ -198,15 +202,11 @@ export function CreateSession({
               game={theme.name}
               contracts={policyState.contracts}
               messages={chainSpecificMessages}
-              duration={duration}
-              onDurationChange={setDuration}
             />
           ) : (
             <UnverifiedSessionSummary
               contracts={policyState.contracts}
               messages={chainSpecificMessages}
-              duration={duration}
-              onDurationChange={setDuration}
             />
           )}
         </LayoutContent>
@@ -251,7 +251,7 @@ export function CreateSession({
             </Button>
           </div>
 
-          {!error && <div className="flex flex-col"></div>}
+          {!error && <div className="flex flex-col" />}
         </LayoutFooter>
       </LayoutContainer>
     </CreateSessionProvider>

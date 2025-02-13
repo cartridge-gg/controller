@@ -14,6 +14,7 @@ import {
   typedData,
 } from "starknet";
 
+import { DEFAULT_SESSION_DURATION } from "@/const";
 import type { Policy } from "@cartridge/account-wasm";
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
@@ -160,16 +161,20 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
 
 interface ICreateSessionContext {
   policies: ParsedSessionPolicies;
+  duration: bigint;
   onToggleMethod: (address: string, id: string, authorized: boolean) => void;
   onToggleMessage: (id: string, authorized: boolean) => void;
+  onDurationChange: (duration: bigint) => void;
   isEditable: boolean;
 }
 
 const CreateSessionContext = createContext<ICreateSessionContext>({
   policies: {} as ParsedSessionPolicies,
+  duration: DEFAULT_SESSION_DURATION,
   onToggleMethod: () => {},
   onToggleMessage: () => {},
   isEditable: false,
+  onDurationChange: () => {},
 });
 
 export const CreateSessionProvider = CreateSessionContext.Provider;
