@@ -44,7 +44,7 @@ export function VerifiedSessionSummary({
   return (
     <div className="flex flex-col gap-4">
       <AggregateCard
-        title={`PLAY ${game}`}
+        title={game}
         icon={<CodeIcon variant="solid" />}
         contracts={aggregate.contracts}
         messages={messages}

@@ -191,7 +191,7 @@ export function CreateSession({
             ) : undefined
           }
         />
-        <LayoutContent className="gap-6 px-6">
+        <LayoutContent className="gap-6 p-6">
           <SessionConsent isVerified={policyState?.verified} />
           {policyState?.verified ? (
             <VerifiedSessionSummary
