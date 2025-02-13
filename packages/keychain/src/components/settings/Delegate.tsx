@@ -48,7 +48,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
         variant="expanded"
         title="Delegate account"
         onBack={() => onBack()}
-        chainId={controller?.chainId()}
+        hideSettings
       />
       <LayoutContent className="gap-6">
         <div className="flex flex-col gap-4">

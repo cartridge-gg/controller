@@ -5,6 +5,7 @@ import { parseControllerError } from "@/utils/connection/execute";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   Button,
+  HeaderProps,
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
@@ -18,7 +19,8 @@ import type { Call, EstimateFee } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { Funding } from "./funding";
-import type { BannerProps } from "./layout/container/header/Banner";
+import { DeployController } from "./DeployController";
+import { Call, EstimateFee } from "starknet";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -46,8 +48,8 @@ export function ExecutionContainer({
   buttonText = "SUBMIT",
   children,
 }: ExecutionContainerProps &
-  Pick<BannerProps, "title" | "description" | "icon">) {
-  const { controller, closeModal, openSettings } = useConnection();
+  Pick<HeaderProps, "title" | "description" | "icon">) {
+  const { controller } = useConnection();
   const [maxFee, setMaxFee] = useState<EstimateFee | undefined>(feeEstimate);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
@@ -167,28 +169,7 @@ export function ExecutionContainer({
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        title={title}
-        description={description}
-        icon={icon}
-        onClose={closeModal}
-        chainId={controller?.chainId()}
-        openSettings={openSettings}
-        right={
-          !isEditable ? (
-            <Button
-              variant="icon"
-              className="size-10 relative bg-background-200"
-              onClick={onToggleEditable}
-            >
-              <SliderIcon
-                color="white"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              />
-            </Button>
-          ) : undefined
-        }
-      />
+      <LayoutHeader title={title} description={description} icon={icon} />
       {children}
       <LayoutFooter>
         {(() => {
