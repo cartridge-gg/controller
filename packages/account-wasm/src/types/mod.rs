@@ -57,6 +57,8 @@ mod tests {
     use wasm_bindgen::JsValue;
     use wasm_bindgen_test::*;
 
+    wasm_bindgen_test_configure!(run_in_browser);
+
     #[wasm_bindgen_test]
     fn test_jsfelt_serialization() {
         let hex_str = "0x1309e973a3ec4c86dd679a455317ffdaa64e1e86d39f0b420";
@@ -78,7 +80,7 @@ mod tests {
         let deserialized: JsFelt = serde_wasm_bindgen::from_value(jsstr).unwrap();
 
         let expected_felt = Felt::from_str(hex_str).unwrap();
-        assert_eq!(expected_felt, deserialized.0);
+        assert_eq!(expected_felt, deserialized.try_into().unwrap());
 
         // --- test with decimal string ---
 
@@ -88,6 +90,6 @@ mod tests {
         let deserialized: JsFelt = serde_wasm_bindgen::from_value(jsstr).unwrap();
 
         let expected_felt = Felt::from_str(dec_str).unwrap();
-        assert_eq!(expected_felt, deserialized.0);
+        assert_eq!(expected_felt, deserialized.try_into().unwrap());
     }
 }
