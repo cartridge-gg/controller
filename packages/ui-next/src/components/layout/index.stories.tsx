@@ -7,7 +7,7 @@ import {
 } from "./index";
 
 const meta: Meta<typeof Default> = {
-  title: "Layout",
+  title: "Layout/Index",
   component: Default,
   tags: ["autodocs"],
 } satisfies Meta<typeof LayoutHeader>;
