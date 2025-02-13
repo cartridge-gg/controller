@@ -98,7 +98,7 @@ export default class Controller {
   }
 
   async createSession(
-    expiresAt: bigint,
+    _expiresAt: bigint,
     policies: ParsedSessionPolicies,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _maxFee?: BigNumberish,
@@ -107,7 +107,7 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
+    await this.cartridge.createSession(toWasmPolicies(policies));
   }
 
   async registerSessionCalldata(
@@ -162,32 +162,30 @@ export default class Controller {
     );
   }
 
-  async hasSession(calls: Call[]): Promise<boolean> {
-    return await this.cartridge.hasSession(toJsCalls(calls));
+  async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
+    return await this.cartridge.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
   }
 
-  async hasSessionForMessage(typedData: TypedData): Promise<boolean> {
-    return await this.cartridge.hasSessionForMessage(JSON.stringify(typedData));
+  async hasAuthorizedPoliciesForMessage(
+    typedData: TypedData,
+  ): Promise<boolean> {
+    return await this.cartridge.hasAuthorizedPoliciesForMessage(
+      JSON.stringify(typedData),
+    );
   }
 
-  async getAuthorizedSessionMetadata(
+  async isRegisteredSessionAuthorized(
     policies: ParsedSessionPolicies,
     public_key?: string,
   ): Promise<SessionMetadata | undefined> {
-    return await this.cartridge.getAuthorizedSessionMetadata(
+    return await this.cartridge.isRegisteredSessionAuthorized(
       toWasmPolicies(policies),
       public_key,
     );
   }
 
-  async isRequestedSession(
-    policies: ParsedSessionPolicies,
-    public_key?: string,
-  ): Promise<boolean> {
-    return await this.cartridge.isRequestedSession(
-      toWasmPolicies(policies),
-      public_key,
-    );
+  async isRequestedSession(policies: ParsedSessionPolicies): Promise<boolean> {
+    return await this.cartridge.hasRequestedSession(toWasmPolicies(policies));
   }
 
   async estimateInvokeFee(calls: Call[]): Promise<EstimateFee> {
