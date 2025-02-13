@@ -27,7 +27,7 @@ export type FundingProps = {
 };
 
 export function Funding({ title, isSlot, onComplete }: FundingProps) {
-  const { closeModal, controller } = useConnection();
+  const { controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
   const balances: BalanceType[] = isSlot
     ? [BalanceType.CREDITS]
@@ -62,8 +62,6 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
           controller && <CopyAddress address={controller.address()} />
         }
         icon={<DepositIcon size="lg" />}
-        chainId={controller?.chainId()}
-        onClose={closeModal}
       />
       <LayoutContent className="gap-6">
         <Balance types={balances} />

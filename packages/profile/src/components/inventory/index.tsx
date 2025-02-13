@@ -13,7 +13,6 @@ import { Tokens } from "./token";
 import { useAccount } from "@/hooks/account";
 import { Outlet, useParams } from "react-router-dom";
 import { Collections } from "./collection";
-import { useConnection } from "@/hooks/context";
 
 export function Inventory() {
   const { username, address } = useAccount();
@@ -21,8 +20,6 @@ export function Inventory() {
     project?: string;
     address?: string;
   }>();
-  const { closeModal, chainId, openSettings } = useConnection();
-
   if (tokenContractAddress) {
     return <Outlet />;
   }
@@ -33,9 +30,6 @@ export function Inventory() {
         title={username}
         description={<CopyAddress address={address} size="xs" />}
         right={project ? <Navigation /> : undefined}
-        onClose={closeModal}
-        chainId={chainId}
-        openSettings={openSettings}
       />
 
       <LayoutContent className="pb-4">
