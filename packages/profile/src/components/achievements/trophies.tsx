@@ -192,11 +192,19 @@ function Header({
   handleNext: () => void;
   handlePrevious: () => void;
 }) {
+  const title = useMemo(() => {
+    return group
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }, [group]);
+
   return (
     <div className="flex gap-x-px items-center h-10">
       <div className="grow h-full p-3 bg-background-200 flex items-center">
         <p className="text-xs text-foreground-400 font-semibold tracking-wider">
-          {group}
+          {title}
         </p>
       </div>
       {pages.length > 1 && (
