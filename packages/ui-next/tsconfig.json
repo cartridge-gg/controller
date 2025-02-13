@@ -13,6 +13,7 @@
     "src/components/**/*",
     "src/hooks/**/*",
     "src/stories/**/*",
+    "src/context.ts",
     "src/index.ts",
     "src/preset.ts",
     "src/utils.ts"

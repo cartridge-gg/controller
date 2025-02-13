@@ -5,8 +5,8 @@ import { mainnet } from "@starknet-react/chains";
 import { StarknetConfig, publicProvider, voyager } from "@starknet-react/core";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { BrowserRouter } from "react-router-dom";
-
 import { ConnectionContext } from "../src/components/provider/connection";
+import { UIProvider } from "../src/components/provider/ui";
 import { StoryParameters, useMockedConnection } from "./mock";
 import {
   ControllerThemeContext,
@@ -39,11 +39,13 @@ export function Provider({
     >
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
-          <TokensProvider>
-            <ControllerThemeProvider theme={connection.theme}>
-              <BrowserRouter>{children}</BrowserRouter>
-            </ControllerThemeProvider>
-          </TokensProvider>
+          <UIProvider>
+            <TokensProvider>
+              <ControllerThemeProvider theme={connection.theme}>
+                <BrowserRouter>{children}</BrowserRouter>
+              </ControllerThemeProvider>
+            </TokensProvider>
+          </UIProvider>
         </ConnectionContext.Provider>
       </QueryClientProvider>
     </StarknetConfig>

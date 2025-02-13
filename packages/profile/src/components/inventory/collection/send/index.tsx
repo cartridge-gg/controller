@@ -37,7 +37,7 @@ export function SendCollection() {
     address: collectionAddress || "0x0",
   });
   const { address } = useAccount();
-  const { chainId, openSettings, parent } = useConnection();
+  const { parent } = useConnection();
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
   const navigate = useNavigate();
@@ -117,8 +117,6 @@ export function SendCollection() {
         onBack={() => {
           navigate("..");
         }}
-        chainId={chainId}
-        openSettings={openSettings}
       />
       <LayoutContent className="gap-6">
         <SendRecipient to={to} setTo={setTo} setWarning={setRecipientWarning} />

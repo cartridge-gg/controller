@@ -48,7 +48,7 @@ export function Recovery({ onBack }: { onBack: () => void }) {
         variant="expanded"
         title="Recovery Account(s)"
         onBack={onBack}
-        chainId={controller?.chainId()}
+        hideSettings
       />
       <LayoutContent>
         {/* TODO: Get rid of this div once Content is updated with TW */}

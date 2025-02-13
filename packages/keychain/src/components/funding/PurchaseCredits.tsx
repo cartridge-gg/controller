@@ -121,8 +121,6 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           )
         }
         onBack={state === PurchaseState.SELECTION ? onBack : undefined}
-        chainId={controller?.chainId()}
-        onClose={closeModal}
       />
       <LayoutContent className="gap-6">
         <Balance types={[BalanceType.CREDITS]} />

@@ -1,4 +1,5 @@
-import { useCallback, useState } from "react";
+import { UIContext } from "@/context";
+import { useCallback, useContext, useState } from "react";
 
 export function useDisclosure() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,4 +22,8 @@ export function useDisclosure() {
     onClose,
     onToggle,
   };
+}
+
+export function useUI() {
+  return useContext(UIContext);
 }
