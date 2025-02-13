@@ -53,9 +53,11 @@ export function LayoutHeader({
           case "compressed":
           default:
             return (
-              <div className="flex flex-col">
+              <div className="flex flex-col bg-spacer-100 gap-y-px">
                 <div className="w-full bg-cover bg-center h-14 pb-6 bg-[linear-gradient(transparent,var(--background-100)),var(--theme-cover-url)]" />
-                <HeaderInner {...innerProps} />
+                <div className="bg-background-100">
+                  <HeaderInner {...innerProps} />
+                </div>
               </div>
             );
         }
