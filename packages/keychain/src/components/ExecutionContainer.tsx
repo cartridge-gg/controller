@@ -1,22 +1,24 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
+import { useConnection } from "@/hooks/connection";
+import type { ControllerError } from "@/utils/connection";
+import { parseControllerError } from "@/utils/connection/execute";
+import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   Button,
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
+  SliderIcon,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
-import { ControllerError } from "@/utils/connection";
-import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { parseControllerError } from "@/utils/connection/execute";
 import isEqual from "lodash/isEqual";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useCreateSession } from "@/hooks/session";
+import type { Call, EstimateFee } from "starknet";
+import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { Funding } from "./funding";
-import { DeployController } from "./DeployController";
-import { Call, EstimateFee } from "starknet";
-import { BannerProps } from "./layout/container/header/Banner";
+import type { BannerProps } from "./layout/container/header/Banner";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -55,6 +57,8 @@ export function ExecutionContainer({
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
   );
+
+  const { isEditable, onToggleEditable } = useCreateSession();
 
   // Prevent unnecessary estimate fee calls.
   const prevTransactionsRef = useRef<{
@@ -170,6 +174,20 @@ export function ExecutionContainer({
         onClose={closeModal}
         chainId={controller?.chainId()}
         openSettings={openSettings}
+        right={
+          !isEditable ? (
+            <Button
+              variant="icon"
+              className="size-10 relative bg-background-200"
+              onClick={onToggleEditable}
+            >
+              <SliderIcon
+                color="white"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+              />
+            </Button>
+          ) : undefined
+        }
       />
       {children}
       <LayoutFooter>
