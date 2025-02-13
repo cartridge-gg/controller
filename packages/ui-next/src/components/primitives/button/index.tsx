@@ -36,12 +36,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           buttonVariants({
             variant,
             size,
-            status: isLoading ? "loading" : isActive ? "active" : undefined,
+            status: isActive ? "active" : undefined,
             className,
           }),
         )}
         ref={ref}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         {...props}
       >
         {isLoading ? <Spinner /> : children}

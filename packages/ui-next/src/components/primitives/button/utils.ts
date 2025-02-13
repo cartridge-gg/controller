@@ -27,7 +27,6 @@ export const buttonVariants = cva(
       status: {
         active:
           "bg-background-400 text-foreground-100 font-medium hover:bg-background-400 hover:text-foreground-100",
-        loading: "pointer-events-none opacity-80",
       },
     },
     defaultVariants: {
