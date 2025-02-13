@@ -32,7 +32,7 @@ export function CreateSession({
   onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
   isUpdate?: boolean;
 }) {
-  const { closeModal, controller, upgrade, theme } = useConnection();
+  const { controller, upgrade, theme } = useConnection();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isEditable, setIsEditable] = useState(false);
   const [isConsent, setIsConsent] = useState(false);
@@ -176,8 +176,6 @@ export function CreateSession({
               ? "The policies were updated, please update existing session"
               : undefined
           }
-          onClose={closeModal}
-          chainId={controller?.chainId()}
           right={
             !isEditable ? (
               <Button

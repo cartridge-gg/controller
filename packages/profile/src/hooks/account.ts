@@ -4,7 +4,7 @@ import {
   useAddressByUsernameQuery,
 } from "@cartridge/utils/api/cartridge";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useMatch, useParams } from "react-router-dom";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
 import { constants, getChecksumAddress } from "starknet";
@@ -140,12 +140,15 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
 }
 
 export function useAccount() {
+  // To be used in top level provider (Above Route component)
+  // Ref: https://stackoverflow.com/a/75462921
+  const match = useMatch("/account/:username/*");
+
   const params = useParams<{
-    username: string;
     project?: string;
   }>();
   const { setIndexerUrl, isReady } = useIndexerAPI();
-  const username = params.username ?? "";
+  const username = match?.params.username ?? "";
   const { data } = useAddressByUsernameQuery(
     { username },
     { enabled: isReady && !!username },
@@ -167,7 +170,7 @@ export function useAccount() {
 
   const address = useMemo(
     () =>
-      import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS ??
+      (import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS as string) ??
       data?.account?.controllers.edges?.[0]?.node?.address ??
       "",
     [data],

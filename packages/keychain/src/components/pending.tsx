@@ -7,13 +7,11 @@ import {
   ClockIcon,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
 
 export function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
   const [title, setTitle] = useState("Pending...");
   const [description, setDescription] = useState("This may take a second");
-  const { closeModal } = useConnection();
   const { chainId, txns } = useUrlTxns();
 
   useEffect(() => {
@@ -38,8 +36,6 @@ export function Pending() {
         icon={<ClockIcon variant="solid" size="lg" />}
         title={title}
         description={description}
-        chainId={chainId}
-        onClose={closeModal}
       />
       <LayoutContent>
         {chainId &&

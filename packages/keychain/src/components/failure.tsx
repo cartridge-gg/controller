@@ -6,10 +6,8 @@ import {
 } from "@cartridge/ui-next";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { Link } from "react-router-dom";
-import { useConnection } from "@/hooks/connection";
 
 export function Failure() {
-  const { controller, closeModal } = useConnection();
   return (
     <LayoutContainer>
       <LayoutHeader
@@ -29,8 +27,7 @@ export function Failure() {
             </Link>
           </>
         }
-        chainId={controller?.chainId()}
-        onClose={closeModal}
+        hideNetwork
       />
     </LayoutContainer>
   );

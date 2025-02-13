@@ -6,6 +6,8 @@ import { SonnerToaster } from "../src/components/primitives/sonner";
 import { Toaster } from "../src/components/primitives/toaster";
 
 import "../src/index.css";
+import { useThemeEffect } from "../dist";
+import { defaultTheme } from "@cartridge/presets";
 
 const preview: Preview = {
   parameters: {
@@ -28,13 +30,17 @@ const preview: Preview = {
       },
       defaultTheme: "dark",
     }),
-    (Story) => (
-      <>
-        <Story />
-        <SonnerToaster />
-        <Toaster />
-      </>
-    ),
+    (Story) => {
+      useThemeEffect({ theme: defaultTheme, assetUrl: "https://x.cartridge.gg" });
+
+      return (
+        <>
+          <Story />
+          <SonnerToaster />
+          <Toaster />
+        </>
+      )
+    },
   ],
 };
 

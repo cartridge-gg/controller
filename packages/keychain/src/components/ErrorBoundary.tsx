@@ -54,7 +54,6 @@ export function ErrorPage({ error }: { error: Error }) {
         title="Uh oh!"
         description="Something went wrong"
         Icon={AlertIcon}
-        onClose={closeModal}
       />
       <LayoutContent className="gap-4">
         <div className="flex w-full px-4 py-6 bg-background-200 border border-background-300 rounded">
