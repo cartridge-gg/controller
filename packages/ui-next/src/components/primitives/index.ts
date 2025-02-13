@@ -3,6 +3,7 @@ export * from "./alert-dialog";
 export * from "./alert";
 export * from "./aspect-ratio";
 export * from "./badge";
+export * from "./bottom-tab";
 export * from "./breadcrumb";
 export * from "./button";
 export * from "./card";
