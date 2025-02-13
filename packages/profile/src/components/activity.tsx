@@ -110,8 +110,6 @@ export function Activity() {
                 {hasNextPage && (
                   <Button
                     className="w-full my-2"
-                    variant="ghost"
-                    size="sm"
                     onClick={() => fetchNextPage()}
                   >
                     See More
