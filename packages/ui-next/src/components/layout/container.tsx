@@ -50,7 +50,7 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
         <div
           className={cn(
             "w-desktop border border-background-200 rounded-xl flex flex-col relative overflow-hidden align-middle",
-            !isIframe() && "w-[432px] h-[600px]",
+            !isIframe() && "w-[432px] max-h-[600px]",
           )}
         >
           {children}
