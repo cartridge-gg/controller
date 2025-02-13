@@ -116,7 +116,7 @@ export function CreateControllerView({
             disabled={validation.status !== "valid"}
             data-testid="submit-button"
           >
-            {validation.exists ? "login" : "sign up"}
+            {validation.exists || !usernameField.value ? "log in" : "sign up"}
           </Button>
         </LayoutFooter>
       </form>

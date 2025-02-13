@@ -5,6 +5,9 @@ import { fn } from "@storybook/test";
 const meta: Meta<typeof Input> = {
   title: "Primitives/Input",
   component: Input,
+  parameters: {
+    layout: "centered",
+  },
   tags: ["autodocs"],
   args: {
     value: "",

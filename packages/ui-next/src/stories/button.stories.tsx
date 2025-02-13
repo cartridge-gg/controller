@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react";
 import { Button } from "@/components/primitives/button";
-import { TimesIcon } from "@/components/icons/utility/times";
+import { ArrowToLineIcon, CoinsIcon, GiftIcon } from "@/components";
 
 const meta: Meta<typeof Button> = {
   title: "Primitives/Button",
@@ -30,83 +30,133 @@ type Story = StoryObj<typeof Button>;
 
 export const Default: Story = {
   args: {
-    children: "continue",
+    children: "sign up",
   },
 };
 
-export const Destructive: Story = {
+export const DefaultLoading: Story = {
   args: {
-    children: "continue",
-    variant: "destructive",
+    children: "sign up",
+    isLoading: true,
+  },
+};
+
+export const DefaultDisabled: Story = {
+  args: {
+    children: "sign up",
+    disabled: true,
+  },
+};
+
+export const DefaultWithIcon: Story = {
+  args: {
+    children: (
+      <>
+        <CoinsIcon variant="solid" size="sm" /> sign up
+      </>
+    ),
+  },
+};
+
+export const DefaultWithIconDisabled: Story = {
+  args: {
+    children: (
+      <>
+        <CoinsIcon variant="solid" size="sm" /> sign up
+      </>
+    ),
+    disabled: true,
   },
 };
 
 export const Secondary: Story = {
   args: {
-    children: "continue",
+    children: "skip",
     variant: "secondary",
   },
 };
 
-export const Outline: Story = {
+export const SecondaryLoading: Story = {
   args: {
-    children: "continue",
-    variant: "outline",
-  },
-};
-
-export const Ghost: Story = {
-  args: {
-    children: "continue",
-    variant: "ghost",
-  },
-};
-
-export const Disabled: Story = {
-  args: {
-    children: "continue",
-    disabled: true,
-  },
-};
-
-export const Loading: Story = {
-  args: {
-    children: "continue",
+    children: "skip",
+    variant: "secondary",
     isLoading: true,
   },
 };
 
-// export const Small: Story = {
-//   args: {
-//     children: "continue",
-//     size: "sm",
-//   },
-// };
-
-export const Medium: Story = {
+export const SecondaryDisabled: Story = {
   args: {
-    children: "continue",
-    size: "default",
+    children: "skip",
+    disabled: true,
+    variant: "secondary",
   },
 };
 
-// export const Large: Story = {
-//   args: {
-//     children: "continue",
-//     size: "lg",
-//   },
-// };
-
-export const WithIcon: Story = {
+export const SecondaryWithIcon: Story = {
   args: {
-    children: <>Deposit</>,
+    children: (
+      <>
+        <CoinsIcon variant="solid" size="sm" /> skip
+      </>
+    ),
+    variant: "secondary",
   },
 };
 
-export const Icon: Story = {
+export const SecondaryWithIconDisabled: Story = {
   args: {
-    children: <TimesIcon />,
+    children: (
+      <>
+        <CoinsIcon variant="solid" size="sm" /> skip
+      </>
+    ),
+    disabled: true,
+    variant: "secondary",
+  },
+};
+
+export const Tertiary: Story = {
+  args: {
+    children: "$1",
+    variant: "tertiary",
+  },
+};
+
+export const TertiaryLoading: Story = {
+  args: {
+    children: "$1",
+    variant: "tertiary",
+    isLoading: true,
+  },
+};
+
+export const TertiaryActive: Story = {
+  args: {
+    children: "$1",
+    variant: "tertiary",
+    isActive: true,
+  },
+};
+
+export const IconDeposit: Story = {
+  args: {
+    children: <ArrowToLineIcon variant="down" />,
     size: "icon",
     variant: "icon",
+  },
+};
+
+export const IconToggle: Story = {
+  args: {
+    children: <GiftIcon variant="line" />,
+    size: "icon",
+    variant: "icon",
+  },
+};
+
+export const ExternalLink: Story = {
+  args: {
+    children: "View on Starkscan",
+    variant: "link",
   },
 };
