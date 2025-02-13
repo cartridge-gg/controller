@@ -10,12 +10,13 @@ export function UIProvider({ children }: PropsWithChildren) {
   return (
     <Provider
       value={{
-        account: account && controller
-          ? {
-            username: account.username,
-            address: controller.address(),
-          }
-          : undefined,
+        account:
+          account && controller
+            ? {
+                username: account.username,
+                address: controller.address(),
+              }
+            : undefined,
         chainId: controller?.chainId(),
         closeModal,
         openSettings,
