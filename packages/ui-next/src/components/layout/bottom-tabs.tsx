@@ -1,9 +1,35 @@
-import { PropsWithChildren, useEffect } from "react";
+import { useEffect } from "react";
 import { useLayoutContext } from "./context";
+import { cva, VariantProps } from "class-variance-authority";
 
-export function LayoutBottomTabs(
-  props: PropsWithChildren & { className?: string },
-) {
+export const layoutBottomTabsVariants = cva(
+  "w-full flex justify-around items-stretch shrink-0",
+  {
+    variants: {
+      variant: {
+        default: "bg-background-200 border-t border-spacer-100",
+      },
+      size: {
+        default: "h-[72px] gap-x-2 px-4 pb-2",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  },
+);
+
+export interface LayoutBottomTabsProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof layoutBottomTabsVariants> {}
+
+export function LayoutBottomTabs({
+  className,
+  variant,
+  size,
+  ...props
+}: LayoutBottomTabsProps) {
   const { setWithBottomTabs } = useLayoutContext();
 
   useEffect(() => {
@@ -12,7 +38,7 @@ export function LayoutBottomTabs(
 
   return (
     <div
-      className="h-[72px] w-full bg-background flex items-stretch px-4 pb-2 shrink-0"
+      className={layoutBottomTabsVariants({ variant, size, className })}
       {...props}
     />
   );
