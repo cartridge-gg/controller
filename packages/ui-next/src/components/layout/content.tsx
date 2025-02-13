@@ -61,6 +61,7 @@ export function LayoutContent({
       className={cn(
         "w-full px-4 flex flex-col items-stretch gap-2 overflow-y-scroll",
         mbCompensation,
+        isIframe() && "flex-1",
         className,
       )}
       style={{
