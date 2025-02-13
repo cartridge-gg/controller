@@ -1,5 +1,7 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import { LayoutContext } from "./context";
+import { isIframe } from "@cartridge/utils";
+import { cn } from "@/utils";
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
@@ -23,10 +25,13 @@ export function LayoutContainer({
   children,
   className,
 }: PropsWithChildren & { className?: string }) {
+  const [withBottomTabs, setWithBottomTabs] = useState(false);
   const [withFooter, setWithFooter] = useState(false);
 
   return (
-    <LayoutContext.Provider value={{ withFooter, setWithFooter }}>
+    <LayoutContext.Provider
+      value={{ withBottomTabs, setWithBottomTabs, withFooter, setWithFooter }}
+    >
       <ResponsiveWrapper>
         <div className={`flex flex-col flex-1 min-h-0 ${className}`}>
           {children}
@@ -42,7 +47,12 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
   if (isDesktop) {
     return (
       <div className="flex w-screen h-dvh items-center justify-center">
-        <div className="w-desktop border border-background-200 rounded-xl flex flex-col relative overflow-hidden align-middle">
+        <div
+          className={cn(
+            "w-desktop border border-background-200 rounded-xl flex flex-col relative overflow-hidden align-middle",
+            !isIframe() && "w-[432px] max-h-[600px]",
+          )}
+        >
           {children}
         </div>
       </div>

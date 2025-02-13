@@ -1,12 +1,12 @@
 import { cn, ErrorImage, Spinner } from "@cartridge/ui-next";
-import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, useEffect, useRef, useState, useMemo } from "react";
 import { useLayoutContext } from "./context";
+import { isIframe } from "@cartridge/utils";
 
 export function LayoutContent({
   children,
   className,
 }: PropsWithChildren & { className?: string }) {
-  const { withFooter } = useLayoutContext();
   const [scrollbarOpacity, setScrollbarOpacity] = useState(0);
   const [transitionDuration, setTransitionDuration] = useState(1000);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -36,13 +36,32 @@ export function LayoutContent({
     };
   }, []);
 
+  const { withBottomTabs, withFooter } = useLayoutContext();
+  const mbCompensation = useMemo(() => {
+    if (withBottomTabs && withFooter) {
+      throw new Error("BottomTabs and Footer cannot be used at the same time");
+    }
+
+    if (!isIframe()) {
+      return;
+    }
+
+    if (withBottomTabs && !withFooter) {
+      return "[@media(min-width:768px)_and_(min-height:528px)]:mb-[72px]";
+    }
+
+    if (!withBottomTabs && withFooter) {
+      return "[@media(min-width:768px)_and_(min-height:400px)]:mb-[200px]";
+    }
+  }, [withBottomTabs, withFooter]);
+
   return (
     <div
       ref={containerRef}
       className={cn(
         "w-full px-4 flex flex-col items-stretch gap-2 overflow-y-scroll",
-        withFooter &&
-          "[@media(min-width:768px)_and_(min-height:400px)]:mb-[200px]",
+        mbCompensation,
+        isIframe() && "flex-1",
         className,
       )}
       style={{
@@ -67,8 +86,10 @@ export function LayoutContent({
 
 export function LayoutContentLoader() {
   return (
-    <LayoutContent className="h-full items-center justify-center">
-      <Spinner size="lg" />
+    <LayoutContent className="h-full w-full items-center justify-center pb-4 select-none">
+      <div className="w-full flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
+        <Spinner className="text-foreground-400" size="lg" />
+      </div>
     </LayoutContent>
   );
 }
