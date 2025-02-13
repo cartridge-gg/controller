@@ -31,11 +31,9 @@ export function Inventory() {
         description={<CopyAddress address={address} size="xs" />}
       />
 
-      <LayoutContent className="pb-4">
-        <div className="flex flex-col gap-y-4">
-          <Tokens />
-          {project && <Collections />}
-        </div>
+      <LayoutContent className="pb-4 gap-y-4">
+        <Tokens />
+        {project && <Collections />}
       </LayoutContent>
 
       {project && <LayoutBottomNav />}
