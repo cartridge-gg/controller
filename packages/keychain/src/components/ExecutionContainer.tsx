@@ -5,7 +5,7 @@ import { parseControllerError } from "@/utils/connection/execute";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   Button,
-  HeaderProps,
+  type HeaderProps,
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
@@ -19,8 +19,6 @@ import type { Call, EstimateFee } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { Funding } from "./funding";
-import { DeployController } from "./DeployController";
-import { Call, EstimateFee } from "starknet";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -169,7 +167,25 @@ export function ExecutionContainer({
 
   return (
     <LayoutContainer>
-      <LayoutHeader title={title} description={description} icon={icon} />
+      <LayoutHeader
+        title={title}
+        description={description}
+        icon={icon}
+        right={
+          !isEditable ? (
+            <Button
+              variant="icon"
+              className="size-10 relative bg-background-200"
+              onClick={onToggleEditable}
+            >
+              <SliderIcon
+                color="white"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+              />
+            </Button>
+          ) : undefined
+        }
+      />
       {children}
       <LayoutFooter>
         {(() => {
