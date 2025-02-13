@@ -138,7 +138,7 @@ export function Session() {
     // If the requested policies has no mismatch with existing policies and public key already
     // registered then return the exising session
     controller
-      .getAuthorizedSessionMetadata(policies, queries.public_key)
+      .isRegisteredSessionAuthorized(policies, queries.public_key)
       .then((session) => {
         if (session) {
           onCallback({
