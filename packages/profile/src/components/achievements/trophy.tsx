@@ -281,7 +281,7 @@ function Progress({
             width: `${Math.floor((100 * Math.min(count, total)) / total)}%`,
           }}
           className={cn(
-            "grow bg-background-500-foreground rounded-xl",
+            "grow bg-foreground-200 rounded-xl",
             completed ? "bg-primary" : "text-foreground-400",
           )}
         />
