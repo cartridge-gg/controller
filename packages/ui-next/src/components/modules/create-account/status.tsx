@@ -42,7 +42,7 @@ export function Status({ username, validation, error }: StatusProps) {
             ? validation.exists
               ? "Welcome back! Select Login to play"
               : "Welcome! Let's create a new Controller"
-            : validation.error?.message || "Enter a username";
+            : validation.error?.message || "Enter a Username";
   }, [validation, errorMessage, username]);
 
   return (
