@@ -31,8 +31,7 @@ export function Achievements() {
 
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
-  const { closeModal, project, namespace, chainId, openSettings } =
-    useConnection();
+  const { project, namespace } = useConnection();
 
   const [activeTab, setActiveTab] = useState<"trophies" | "leaderboard">(
     "trophies",
@@ -84,9 +83,6 @@ export function Achievements() {
         }
         description={<CopyAddress address={address || self} size="xs" />}
         right={isSelf ? <Navigation /> : <Scoreboard rank={rank} />}
-        chainId={chainId}
-        openSettings={openSettings}
-        onClose={isSelf ? closeModal : undefined}
         onBack={isSelf ? undefined : () => navigate(".")}
       />
 

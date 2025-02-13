@@ -52,7 +52,7 @@ export function Deposit(innerProps: DepositProps) {
 
 function DepositInner({ onComplete, onBack }: DepositProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
-  const { closeModal, controller } = useConnection();
+  const { controller } = useConnection();
   const { account: extAccount } = useAccount();
   const { token: feeToken } = useFeeToken();
 
@@ -163,8 +163,6 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
         }
         icon={<DepositIcon size="lg" />}
         onBack={onBack}
-        chainId={controller?.chainId()}
-        onClose={closeModal}
       />
 
       <LayoutContent className="gap-6">

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
   Button,
+  HeaderProps,
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
@@ -16,7 +17,6 @@ import { Fees } from "./Fees";
 import { Funding } from "./funding";
 import { DeployController } from "./DeployController";
 import { Call, EstimateFee } from "starknet";
-import { BannerProps } from "./layout/container/header/Banner";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -44,8 +44,8 @@ export function ExecutionContainer({
   buttonText = "SUBMIT",
   children,
 }: ExecutionContainerProps &
-  Pick<BannerProps, "title" | "description" | "icon">) {
-  const { controller, closeModal, openSettings } = useConnection();
+  Pick<HeaderProps, "title" | "description" | "icon">) {
+  const { controller } = useConnection();
   const [maxFee, setMaxFee] = useState<EstimateFee | undefined>(feeEstimate);
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
@@ -163,14 +163,7 @@ export function ExecutionContainer({
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        title={title}
-        description={description}
-        icon={icon}
-        onClose={closeModal}
-        chainId={controller?.chainId()}
-        openSettings={openSettings}
-      />
+      <LayoutHeader title={title} description={description} icon={icon} />
       {children}
       <LayoutFooter>
         {(() => {

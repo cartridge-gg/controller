@@ -1,23 +1,42 @@
-import { Network } from "@/components/network";
-import { ArrowIcon, GearIcon, IconProps, TimesIcon } from "@/components/icons";
+import {
+  ArrowIcon,
+  ControllerIcon,
+  GearIcon,
+  IconProps,
+  QuestionIcon,
+  SlotIcon,
+  StarknetColorIcon,
+  StarknetIcon,
+  TimesIcon,
+} from "@/components/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/primitives/tooltip";
 import { cn } from "@/utils";
 import { Button } from "@/components/primitives/button";
-import { isIframe } from "@cartridge/utils";
+import { getChainName, isIframe, isSlotChain } from "@cartridge/utils";
+import { constants } from "starknet";
+import { CopyAddress } from "../copy-address";
+import { Network } from "@/components/network";
+import { useUI } from "@/hooks";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
-  closeModal?: () => void;
-  chainId?: string;
-  openSettings?: () => void;
+  hideNetwork?: boolean;
+  hideSettings?: boolean;
 };
 
 export function LayoutHeader({
   onBack,
-  onClose,
-  chainId,
-  openSettings,
+  hideNetwork,
+  hideSettings,
   ...innerProps
-}: HeaderProps & { onClose?: () => void }) {
+}: HeaderProps) {
+  const { account, chainId, closeModal, openSettings } = useUI();
+
   return (
     <div className="sticky top-0 w-full z-10 bg-background">
       {(() => {
@@ -34,27 +53,72 @@ export function LayoutHeader({
           case "compressed":
           default:
             return (
-              <div className="flex flex-col">
-                <div className="w-full bg-[image:var(--theme-cover-url)] bg-cover bg-center h-14 pb-6" />
-                <HeaderInner {...innerProps} />
+              <div className="flex flex-col bg-spacer-100 gap-y-px">
+                <div className="w-full bg-cover bg-center h-16 pb-6 bg-[linear-gradient(transparent,var(--background-100)),var(--theme-cover-url)]" />
+                <div className="bg-background-100">
+                  <HeaderInner {...innerProps} />
+                </div>
               </div>
             );
         }
       })()}
 
-      <div className="flex items-center justify-between absolute top-0 left-0 right-0 h-14 p-2 z-50">
+      <div className="flex items-center justify-between absolute top-0 left-0 right-0 h-16 p-2 z-50">
         <div>
           {onBack ? (
             <BackButton onClick={onBack} />
-          ) : onClose ? (
-            <CloseButton onClose={onClose} />
+          ) : closeModal ? (
+            <CloseButton onClose={closeModal} />
           ) : null}
         </div>
 
         <div className="flex items-center gap-2">
-          {chainId && <Network chainId={chainId} />}
+          {!!chainId &&
+            (account ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger className="flex items-center gap-1.5 bg-background-100 rounded px-3 py-2.5">
+                    {/* TODO: Replace with avatar */}
+                    <ControllerIcon size="sm" />
+                    <div className="text-sm font-semibold">
+                      {account.username}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex items-center gap-8 px-3 py-2.5 bg-spacer">
+                    {!hideNetwork && (
+                      <div className="flex items-center gap-1.5">
+                        {(() => {
+                          switch (chainId) {
+                            case constants.StarknetChainId.SN_MAIN:
+                              return <StarknetColorIcon />;
+                            case constants.StarknetChainId.SN_SEPOLIA:
+                              return <StarknetIcon />;
+                            default:
+                              return isSlotChain(chainId) ? (
+                                <SlotIcon />
+                              ) : (
+                                <QuestionIcon />
+                              );
+                          }
+                        })()}
+                        <div className="text-sm">{getChainName(chainId)}</div>
+                      </div>
+                    )}
+                    <CopyAddress
+                      size="xs"
+                      className="text-sm"
+                      address={account.address}
+                    />
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              !hideNetwork && <Network chainId={chainId} />
+            ))}
 
-          {openSettings && <SettingsButton onClick={openSettings} />}
+          {openSettings && !hideSettings && (
+            <SettingsButton onClick={openSettings} />
+          )}
         </div>
       </div>
     </div>

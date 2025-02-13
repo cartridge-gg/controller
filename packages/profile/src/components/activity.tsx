@@ -22,7 +22,7 @@ import { constants } from "starknet";
 
 export function Activity() {
   const { address, username } = useAccount();
-  const { closeModal, chainId, openSettings } = useConnection();
+  const { chainId } = useConnection();
   const { isReady } = useIndexerAPI();
   const { status, data, hasNextPage, fetchNextPage } =
     useInfiniteTokenTransfersQuery(
@@ -43,9 +43,6 @@ export function Activity() {
         title={username}
         description={<CopyAddress address={address} size="xs" />}
         right={<Navigation />}
-        onClose={closeModal}
-        chainId={chainId}
-        openSettings={openSettings}
       />
 
       {(() => {
