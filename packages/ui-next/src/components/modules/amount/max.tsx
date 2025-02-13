@@ -17,7 +17,6 @@ export function Max({
         "px-2.5 py-1.5 h-7 rounded-full bg-background-400 text-foreground-100 text-xs font-semibold tracking-wider normal-case hover:bg-background-500 shadow-none font-sans",
         className,
       )}
-      variant="default"
       onClick={onClick}
     >
       {label}
