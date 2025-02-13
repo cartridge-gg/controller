@@ -1,6 +1,7 @@
 import { cn, ErrorImage, Spinner } from "@cartridge/ui-next";
 import { PropsWithChildren, useEffect, useRef, useState, useMemo } from "react";
 import { useLayoutContext } from "./context";
+import { isIframe } from "@cartridge/utils";
 
 export function LayoutContent({
   children,
@@ -39,6 +40,10 @@ export function LayoutContent({
   const mbCompensation = useMemo(() => {
     if (withBottomTabs && withFooter) {
       throw new Error("BottomTabs and Footer cannot be used at the same time");
+    }
+
+    if (!isIframe()) {
+      return;
     }
 
     if (withBottomTabs && !withFooter) {
@@ -80,8 +85,8 @@ export function LayoutContent({
 
 export function LayoutContentLoader() {
   return (
-    <LayoutContent className="h-full items-center justify-center pb-4 select-none">
-      <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
+    <LayoutContent className="h-full w-full items-center justify-center pb-4 select-none">
+      <div className="w-full flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
         <Spinner className="text-foreground-400" size="lg" />
       </div>
     </LayoutContent>

@@ -1,5 +1,7 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import { LayoutContext } from "./context";
+import { isIframe } from "@cartridge/utils";
+import { cn } from "@/utils";
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
@@ -45,7 +47,12 @@ function ResponsiveWrapper({ children }: PropsWithChildren) {
   if (isDesktop) {
     return (
       <div className="flex w-screen h-dvh items-center justify-center">
-        <div className="w-desktop border border-background-200 rounded-xl flex flex-col relative overflow-hidden align-middle">
+        <div
+          className={cn(
+            "w-desktop border border-background-200 rounded-xl flex flex-col relative overflow-hidden align-middle",
+            !isIframe() && "w-[432px] h-[600px]",
+          )}
+        >
           {children}
         </div>
       </div>
