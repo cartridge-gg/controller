@@ -54,7 +54,7 @@ export function LayoutHeader({
           default:
             return (
               <div className="flex flex-col bg-spacer-100 gap-y-px">
-                <div className="w-full bg-cover bg-center h-14 pb-6 bg-[linear-gradient(transparent,var(--background-100)),var(--theme-cover-url)]" />
+                <div className="w-full bg-cover bg-center h-16 pb-6 bg-[linear-gradient(transparent,var(--background-100)),var(--theme-cover-url)]" />
                 <div className="bg-background-100">
                   <HeaderInner {...innerProps} />
                 </div>
@@ -63,7 +63,7 @@ export function LayoutHeader({
         }
       })()}
 
-      <div className="flex items-center justify-between absolute top-0 left-0 right-0 h-14 p-2 z-50">
+      <div className="flex items-center justify-between absolute top-0 left-0 right-0 h-16 p-2 z-50">
         <div>
           {onBack ? (
             <BackButton onClick={onBack} />
