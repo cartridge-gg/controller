@@ -4,12 +4,14 @@ import { type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils";
 import { Spinner } from "@/components/spinner";
 import { buttonVariants } from "./utils";
+import { ExternalIcon } from "@/components/icons";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   isLoading?: boolean;
+  isActive?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -20,6 +22,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       isLoading,
+      isActive,
       children,
       disabled,
       ...props
@@ -29,12 +32,20 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(
+          buttonVariants({
+            variant,
+            size,
+            status: isLoading ? "loading" : isActive ? "active" : undefined,
+            className,
+          }),
+        )}
         ref={ref}
-        disabled={disabled || isLoading}
+        disabled={disabled}
         {...props}
       >
         {isLoading ? <Spinner /> : children}
+        {variant === "link" && !isLoading && <ExternalIcon size="sm" />}
       </Comp>
     );
   },

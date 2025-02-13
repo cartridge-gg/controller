@@ -22,6 +22,7 @@ export * from "./external";
 // export * from "./fingerprint";
 export * from "./fullscreen";
 export * from "./gear";
+export * from "./gift";
 export * from "./hamburger";
 export * from "./info";
 export * from "./l3";
