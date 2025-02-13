@@ -25,12 +25,14 @@ import { useUI } from "@/hooks";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
+  hideUsername?: boolean;
   hideNetwork?: boolean;
   hideSettings?: boolean;
 };
 
 export function LayoutHeader({
   onBack,
+  hideUsername,
   hideNetwork,
   hideSettings,
   ...innerProps
@@ -77,7 +79,12 @@ export function LayoutHeader({
             (account ? (
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger className="flex items-center gap-1.5 bg-background-100 rounded px-3 py-2.5">
+                  <TooltipTrigger
+                    className={cn(
+                      "flex items-center gap-1.5 bg-background-100 rounded px-3 py-2.5",
+                      hideUsername && "hidden",
+                    )}
+                  >
                     {/* TODO: Replace with avatar */}
                     <ControllerIcon size="sm" />
                     <div className="text-sm font-semibold">
