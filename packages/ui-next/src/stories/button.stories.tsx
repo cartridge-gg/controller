@@ -148,7 +148,7 @@ export const IconDeposit: Story = {
 
 export const IconToggle: Story = {
   args: {
-    children: <GiftIcon variant="solid" />,
+    children: <GiftIcon variant="line" />,
     size: "icon",
     variant: "icon",
   },
