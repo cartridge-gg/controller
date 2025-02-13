@@ -1,12 +1,12 @@
 import { cva } from "class-variance-authority";
 
 export const buttonVariants = cva(
-  "inline-flex justify-center items-center gap-1.5 whitespace-nowrap rounded-md uppercase font-mono font-semibold ring-offset-background transition-colors transition-opacity disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 disabled:pointer-events-none",
+  "inline-flex justify-center items-center gap-1.5 whitespace-nowrap rounded-md uppercase font-mono font-semibold ring-offset-background transition-colors transition-opacity disabled:text-foreground-300 disabled:bg-background-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 disabled:pointer-events-none",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:opacity-80 disabled:bg-background-200 disabled:text-foreground-100",
+          "bg-primary text-primary-foreground hover:opacity-80 disabled:bg-background-200",
         secondary:
           "bg-background-200 text-foreground-100 hover:bg-background-300",
         tertiary:
@@ -27,7 +27,7 @@ export const buttonVariants = cva(
       status: {
         active:
           "bg-background-400 text-foreground-100 font-medium hover:bg-background-400 hover:text-foreground-100",
-        loading: "pointer-events-none opacity-50",
+        loading: "pointer-events-none opacity-80",
       },
     },
     defaultVariants: {
