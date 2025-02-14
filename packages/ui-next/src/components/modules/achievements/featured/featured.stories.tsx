@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { FeaturedAchievement } from "./featured";
+import { AchievementFeatured } from "./featured";
 
-const meta: Meta<typeof FeaturedAchievement> = {
+const meta: Meta<typeof AchievementFeatured> = {
   title: "Modules/Achievements/Featured",
-  component: FeaturedAchievement,
+  component: AchievementFeatured,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -15,7 +15,7 @@ const meta: Meta<typeof FeaturedAchievement> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof FeaturedAchievement>;
+type Story = StoryObj<typeof AchievementFeatured>;
 
 export const Default: Story = {};
 

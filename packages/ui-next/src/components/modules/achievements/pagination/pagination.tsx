@@ -1,16 +1,16 @@
 import { Button, WedgeIcon } from "@/index";
 
-interface PaginationAchievementProps {
+interface AchievementPaginationProps {
   direction: "left" | "right";
   disabled?: boolean;
   onClick?: () => void;
 }
 
-export function PaginationAchievement({
+export function AchievementPagination({
   direction,
   disabled,
   onClick,
-}: PaginationAchievementProps) {
+}: AchievementPaginationProps) {
   return (
     <Button
       variant="icon"
@@ -28,4 +28,4 @@ export function PaginationAchievement({
   );
 }
 
-export default PaginationAchievement;
+export default AchievementPagination;

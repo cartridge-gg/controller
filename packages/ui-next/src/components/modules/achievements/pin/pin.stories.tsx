@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { PinAchievement } from "./pin";
+import { AchievementPin } from "./pin";
 import { fn } from "@storybook/test";
 
-const meta: Meta<typeof PinAchievement> = {
+const meta: Meta<typeof AchievementPin> = {
   title: "Modules/Achievements/Pin",
-  component: PinAchievement,
+  component: AchievementPin,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -18,7 +18,7 @@ const meta: Meta<typeof PinAchievement> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof PinAchievement>;
+type Story = StoryObj<typeof AchievementPin>;
 
 export const Default: Story = {};
 

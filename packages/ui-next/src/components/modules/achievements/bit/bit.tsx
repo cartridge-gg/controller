@@ -1,16 +1,16 @@
 import { cn } from "@/index";
 
-interface BitAchievementProps {
+interface AchievementBitProps {
   completed?: boolean;
   active?: boolean;
   onClick?: () => void;
 }
 
-export function BitAchievement({
+export function AchievementBit({
   completed,
   active,
   onClick,
-}: BitAchievementProps) {
+}: AchievementBitProps) {
   return (
     <div
       className={cn(
@@ -23,4 +23,4 @@ export function BitAchievement({
   );
 }
 
-export default BitAchievement;
+export default AchievementBit;

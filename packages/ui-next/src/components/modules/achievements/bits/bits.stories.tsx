@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { BitsAchievement } from "./bits";
-import { BitAchievement } from "../bit/bit";
+import { AchievementBits } from "./bits";
+import { AchievementBit } from "../bit/bit";
 import { fn } from "@storybook/test";
 
-const meta: Meta<typeof BitsAchievement> = {
+const meta: Meta<typeof AchievementBits> = {
   title: "Modules/Achievements/Bits",
-  component: BitsAchievement,
+  component: AchievementBits,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -13,24 +13,24 @@ const meta: Meta<typeof BitsAchievement> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof BitsAchievement>;
+type Story = StoryObj<typeof AchievementBits>;
 
 export const Default: Story = {
   render: () => (
-    <BitsAchievement>
-      <BitAchievement completed onClick={fn()} />
-      <BitAchievement completed onClick={fn()} />
-      <BitAchievement completed active onClick={fn()} />
-    </BitsAchievement>
+    <AchievementBits>
+      <AchievementBit completed onClick={fn()} />
+      <AchievementBit completed onClick={fn()} />
+      <AchievementBit completed active onClick={fn()} />
+    </AchievementBits>
   ),
 };
 
 export const Mixed: Story = {
   render: () => (
-    <BitsAchievement>
-      <BitAchievement completed onClick={fn()} />
-      <BitAchievement active onClick={fn()} />
-      <BitAchievement onClick={fn()} />
-    </BitsAchievement>
+    <AchievementBits>
+      <AchievementBit completed onClick={fn()} />
+      <AchievementBit active onClick={fn()} />
+      <AchievementBit onClick={fn()} />
+    </AchievementBits>
   ),
 };

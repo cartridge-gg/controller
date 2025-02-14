@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { BitAchievement } from "./bit";
+import { AchievementBit } from "./bit";
 import { fn } from "@storybook/test";
 
-const meta: Meta<typeof BitAchievement> = {
+const meta: Meta<typeof AchievementBit> = {
   title: "Modules/Achievements/Bit",
-  component: BitAchievement,
+  component: AchievementBit,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -17,7 +17,7 @@ const meta: Meta<typeof BitAchievement> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof BitAchievement>;
+type Story = StoryObj<typeof AchievementBit>;
 
 export const Default: Story = {};
 

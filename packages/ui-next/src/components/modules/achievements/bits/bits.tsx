@@ -1,8 +1,8 @@
-interface BitsAchievementProps {
+interface AchievementBitsProps {
   children: React.ReactNode;
 }
 
-export function BitsAchievement({ ...props }: BitsAchievementProps) {
+export function AchievementBits({ ...props }: AchievementBitsProps) {
   return (
     <div className="flex justify-center">
       <div
@@ -13,4 +13,4 @@ export function BitsAchievement({ ...props }: BitsAchievementProps) {
   );
 }
 
-export default BitsAchievement;
+export default AchievementBits;

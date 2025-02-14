@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ShareAchievement } from "./share";
+import { AchievementShare } from "./share";
 import { fn } from "@storybook/test";
 
-const meta: Meta<typeof ShareAchievement> = {
+const meta: Meta<typeof AchievementShare> = {
   title: "Modules/Achievements/Share",
-  component: ShareAchievement,
+  component: AchievementShare,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -16,7 +16,7 @@ const meta: Meta<typeof ShareAchievement> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof ShareAchievement>;
+type Story = StoryObj<typeof AchievementShare>;
 
 export const Default: Story = {};
 

@@ -1,17 +1,17 @@
 import { CheckboxCheckedIcon, CheckboxUncheckedIcon, cn } from "@/index";
 import { useMemo } from "react";
 
-interface TaskHeaderAchievementProps {
+interface AchievementTaskHeaderProps {
   count: number;
   total: number;
   description: string;
 }
 
-export function TaskHeaderAchievement({
+export function AchievementTaskHeader({
   count,
   total,
   description,
-}: TaskHeaderAchievementProps) {
+}: AchievementTaskHeaderProps) {
   const Icon = useMemo(() => {
     if (count >= total) {
       return CheckboxCheckedIcon;
@@ -34,4 +34,4 @@ export function TaskHeaderAchievement({
   );
 }
 
-export default TaskHeaderAchievement;
+export default AchievementTaskHeader;

@@ -1,12 +1,12 @@
 import { cn, Card, CardHeader, CardTitle } from "@/index";
 import { useMemo } from "react";
 
-interface FeaturedAchievementProps {
+interface AchievementFeaturedProps {
   icon?: string;
   title?: string;
 }
 
-export function FeaturedAchievement({ icon, title }: FeaturedAchievementProps) {
+export function AchievementFeatured({ icon, title }: AchievementFeaturedProps) {
   const empty = useMemo(() => !icon || !title, [icon, title]);
 
   return (
@@ -62,4 +62,4 @@ export function Banner() {
   );
 }
 
-export default FeaturedAchievement;
+export default AchievementFeatured;

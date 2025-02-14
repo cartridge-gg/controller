@@ -1,18 +1,18 @@
 import { Button, TrackIcon } from "@/index";
 
-interface PinAchievementProps {
+interface AchievementPinProps {
   pinned?: boolean;
   loading?: boolean;
   disabled?: boolean;
   onClick?: () => void;
 }
 
-export function PinAchievement({
+export function AchievementPin({
   pinned,
   loading,
   disabled,
   onClick,
-}: PinAchievementProps) {
+}: AchievementPinProps) {
   return (
     <Button
       variant="tertiary"
@@ -28,4 +28,4 @@ export function PinAchievement({
   );
 }
 
-export default PinAchievement;
+export default AchievementPin;

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { TaskStatusAchievement } from "./task-status";
+import { AchievementTaskStatus } from "./task-status";
 
-const meta: Meta<typeof TaskStatusAchievement> = {
+const meta: Meta<typeof AchievementTaskStatus> = {
   title: "Modules/Achievements/Status",
-  component: TaskStatusAchievement,
+  component: AchievementTaskStatus,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -15,7 +15,7 @@ const meta: Meta<typeof TaskStatusAchievement> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof TaskStatusAchievement>;
+type Story = StoryObj<typeof AchievementTaskStatus>;
 
 export const Default: Story = {};
 

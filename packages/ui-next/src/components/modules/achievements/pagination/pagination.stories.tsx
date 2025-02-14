@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { PaginationAchievement } from "./pagination";
+import { AchievementPagination } from "./pagination";
 import { fn } from "@storybook/test";
 
-const meta: Meta<typeof PaginationAchievement> = {
+const meta: Meta<typeof AchievementPagination> = {
   title: "Modules/Achievements/Pagination",
-  component: PaginationAchievement,
+  component: AchievementPagination,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -15,7 +15,7 @@ const meta: Meta<typeof PaginationAchievement> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof PaginationAchievement>;
+type Story = StoryObj<typeof AchievementPagination>;
 
 export const DefaultLeft: Story = {
   args: {

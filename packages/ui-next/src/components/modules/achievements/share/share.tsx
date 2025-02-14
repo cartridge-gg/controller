@@ -1,11 +1,11 @@
 import { Button, XIcon } from "@/index";
 
-interface ShareAchievementProps {
+interface AchievementShareProps {
   disabled?: boolean;
   onClick?: () => void;
 }
 
-export function ShareAchievement({ disabled, onClick }: ShareAchievementProps) {
+export function AchievementShare({ disabled, onClick }: AchievementShareProps) {
   return (
     <Button
       variant="tertiary"
@@ -19,4 +19,4 @@ export function ShareAchievement({ disabled, onClick }: ShareAchievementProps) {
   );
 }
 
-export default ShareAchievement;
+export default AchievementShare;

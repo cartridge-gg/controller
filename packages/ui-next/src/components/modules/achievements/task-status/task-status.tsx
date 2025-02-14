@@ -1,14 +1,14 @@
 import { CheckIcon } from "@/index";
 
-interface TaskStatusAchievementProps {
+interface AchievementTaskStatusProps {
   count: number;
   total: number;
 }
 
-export function TaskStatusAchievement({
+export function AchievementTaskStatus({
   count,
   total,
-}: TaskStatusAchievementProps) {
+}: AchievementTaskStatusProps) {
   return count >= total ? (
     <div className="flex items-center gap-x-1">
       <CheckIcon size="xs" className="text-foreground-300" />
@@ -23,4 +23,4 @@ export function TaskStatusAchievement({
   );
 }
 
-export default TaskStatusAchievement;
+export default AchievementTaskStatus;
