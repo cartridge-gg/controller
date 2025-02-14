@@ -74,6 +74,8 @@ export function CreateSession({
     return policies;
   });
 
+  const expiresAt = duration + NOW;
+
   const handleToggleMethod = useCallback(
     (address: string, id: string, authorized: boolean) => {
       if (!policyState.contracts) return;
@@ -126,15 +128,13 @@ export function CreateSession({
 
       const cleanedPolicies = cleanPolicies(policyState);
 
-      const expiresAt = duration + NOW;
-
       await controller.createSession(expiresAt, cleanedPolicies, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
       setIsConnecting(false);
     }
-  }, [controller, policyState, maxFee, onConnect, duration]);
+  }, [controller, policyState, maxFee, expiresAt, onConnect]);
 
   const onSkipSession = useCallback(async () => {
     if (!controller || !policyState) return;
@@ -173,7 +173,7 @@ export function CreateSession({
     >
       <LayoutContainer>
         <LayoutHeader
-          className="px-6"
+          className="px-6 pt-6"
           title={!isUpdate ? "Create Session" : "Update Session"}
           description={
             isUpdate
@@ -195,7 +195,7 @@ export function CreateSession({
             ) : undefined
           }
         />
-        <LayoutContent className="gap-6 p-6">
+        <LayoutContent className="gap-6 px-6">
           <SessionConsent isVerified={policyState?.verified} />
           {policyState?.verified ? (
             <VerifiedSessionSummary
