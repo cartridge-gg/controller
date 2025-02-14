@@ -23,7 +23,6 @@ export const Default: Story = {};
 export const Empty: Story = {
   args: {
     count: 0,
-    total: 0,
     points: 0,
   },
 };
@@ -33,6 +32,7 @@ export const Complete: Story = {
     count: 9,
     total: 9,
     points: 690,
+    completed: true,
   },
 };
 

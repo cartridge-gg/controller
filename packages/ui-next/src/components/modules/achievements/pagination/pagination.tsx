@@ -15,7 +15,7 @@ export function AchievementPagination({
     <Button
       variant="icon"
       size="icon"
-      className="rounded-none"
+      className="rounded-none text-foreground-300 hover:text-foreground-200"
       disabled={disabled}
       onClick={onClick}
     >

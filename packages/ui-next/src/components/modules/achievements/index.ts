@@ -8,3 +8,6 @@ export * from "./task";
 export * from "./task-header";
 export * from "./featured";
 export * from "./progress";
+export * from "./label";
+export * from "./icon";
+export * from "./content";

@@ -1,6 +1,6 @@
 import { Button, TrackIcon } from "@/index";
 
-interface AchievementPinProps {
+export interface AchievementPinProps {
   pinned?: boolean;
   loading?: boolean;
   disabled?: boolean;

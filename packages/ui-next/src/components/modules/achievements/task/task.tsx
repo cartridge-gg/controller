@@ -4,17 +4,19 @@ import {
   AchievementTaskStatus,
 } from "@/index";
 
-interface TaskAchievementProps {
+interface AchievementTaskProps {
   count: number;
   total: number;
   description: string;
+  completed?: boolean;
 }
 
-export function TaskAchievement({
+export function AchievementTask({
   count,
   total,
   description,
-}: TaskAchievementProps) {
+  completed,
+}: AchievementTaskProps) {
   return (
     <div className="flex flex-col gap-2">
       <AchievementTaskHeader
@@ -23,11 +25,11 @@ export function TaskAchievement({
         description={description}
       />
       <div className="flex gap-3">
-        <ProgressBar count={count} total={total} completed={count >= total} />
+        <ProgressBar count={count} total={total} completed={!!completed} />
         <AchievementTaskStatus count={count} total={total} />
       </div>
     </div>
   );
 }
 
-export default TaskAchievement;
+export default AchievementTask;

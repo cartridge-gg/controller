@@ -1,6 +1,6 @@
 import { Button, XIcon } from "@/index";
 
-interface AchievementShareProps {
+export interface AchievementShareProps {
   disabled?: boolean;
   onClick?: () => void;
 }
