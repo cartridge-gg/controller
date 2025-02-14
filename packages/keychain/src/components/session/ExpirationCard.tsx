@@ -26,28 +26,28 @@ export function ExpirationCard() {
           <ToggleGroupItem
             value={(60 * 60).toString()}
             aria-label="1 hour"
-            className="rounded-l-full p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground"
+            className="rounded-l-full p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground hover:text-foreground-200 bg-background-100 hover:bg-background-100"
           >
             1h
           </ToggleGroupItem>
           <ToggleGroupItem
             value={(60 * 60 * 24).toString()}
             aria-label="24 hours"
-            className="p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground rounded-none"
+            className="p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground rounded-none hover:text-foreground-200 bg-background-100 hover:bg-background-100"
           >
             24h
           </ToggleGroupItem>
           <ToggleGroupItem
             value={(60 * 60 * 24 * 7).toString()}
             aria-label="1 week"
-            className="p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground rounded-none"
+            className="p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground rounded-none hover:text-foreground-200 bg-background-100 hover:bg-background-100"
           >
             7d
           </ToggleGroupItem>
           <ToggleGroupItem
             value="0"
             aria-label="Never"
-            className="rounded-r-full p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground"
+            className="rounded-r-full p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground hover:text-foreground-200 bg-background-100 hover:bg-background-100"
           >
             Never
           </ToggleGroupItem>
