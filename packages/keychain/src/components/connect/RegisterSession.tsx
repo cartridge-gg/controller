@@ -10,7 +10,7 @@ import {
   CreateSessionProvider,
   type ParsedSessionPolicies,
 } from "@/hooks/session";
-import { LayoutContent } from "@cartridge/ui-next";
+import { Button, LayoutContent, SliderIcon } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type Call,
@@ -157,7 +157,6 @@ export function RegisterSession({
         onToggleMethod: handleToggleMethod,
         onToggleMessage: handleToggleMessage,
         isEditable,
-        onToggleEditable: handleToggleEditable,
       }}
     >
       <ExecutionContainer
@@ -165,6 +164,20 @@ export function RegisterSession({
         transactions={transactions}
         onSubmit={onRegisterSession}
         buttonText="Register Session"
+        right={
+          !isEditable ? (
+            <Button
+              variant="icon"
+              className="size-10 relative bg-background-200"
+              onClick={handleToggleEditable}
+            >
+              <SliderIcon
+                color="white"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+              />
+            </Button>
+          ) : undefined
+        }
       >
         <LayoutContent>
           <SessionConsent isVerified={policyState?.verified} />

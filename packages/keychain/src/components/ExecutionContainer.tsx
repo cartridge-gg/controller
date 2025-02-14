@@ -9,12 +9,10 @@ import {
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
-  SliderIcon,
 } from "@cartridge/ui-next";
 import isEqual from "lodash/isEqual";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useCreateSession } from "@/hooks/session";
 import type { Call, EstimateFee } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
@@ -30,6 +28,7 @@ interface ExecutionContainerProps {
   onError?: (error: ControllerError) => void;
   buttonText?: string;
   children: React.ReactNode;
+  right?: React.ReactElement;
 }
 
 export function ExecutionContainer({
@@ -44,6 +43,7 @@ export function ExecutionContainer({
   onFund,
   onError,
   buttonText = "SUBMIT",
+  right,
   children,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
@@ -57,8 +57,6 @@ export function ExecutionContainer({
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
   );
-
-  const { isEditable, onToggleEditable } = useCreateSession();
 
   // Prevent unnecessary estimate fee calls.
   const prevTransactionsRef = useRef<{
@@ -171,20 +169,7 @@ export function ExecutionContainer({
         title={title}
         description={description}
         icon={icon}
-        right={
-          !isEditable ? (
-            <Button
-              variant="icon"
-              className="size-10 relative bg-background-200"
-              onClick={onToggleEditable}
-            >
-              <SliderIcon
-                color="white"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              />
-            </Button>
-          ) : undefined
-        }
+        right={right}
       />
       {children}
       <LayoutFooter>
