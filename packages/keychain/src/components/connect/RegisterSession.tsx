@@ -1,18 +1,18 @@
-import { LayoutContent } from "@cartridge/ui-next";
-import { useCallback, useState, useEffect, useMemo } from "react";
-import { useConnection } from "@/hooks/connection";
-import { SessionConsent } from "@/components/connect";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { SessionConsent } from "@/components/connect";
+import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
+import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
+import { NOW } from "@/const";
+import { useConnection } from "@/hooks/connection";
+import { type ParsedSessionPolicies, useCreateSession } from "@/hooks/session";
+import { LayoutContent } from "@cartridge/ui-next";
+import { useCallback, useEffect, useState } from "react";
 import {
-  Call,
-  EstimateFee,
+  type Call,
+  type EstimateFee,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
-import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
-import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { ParsedSessionPolicies } from "@/hooks/session";
 
 export function RegisterSession({
   policies,
@@ -24,14 +24,12 @@ export function RegisterSession({
   publicKey?: string;
 }) {
   const { controller, theme } = useConnection();
-  const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
+  const { duration } = useCreateSession();
   const [transactions, setTransactions] = useState<Call[] | undefined>(
     undefined,
   );
 
-  const expiresAt = useMemo(() => {
-    return duration + NOW;
-  }, [duration]);
+  const expiresAt = duration + NOW;
 
   useEffect(() => {
     if (!publicKey || !controller) {
@@ -113,15 +111,11 @@ export function RegisterSession({
             game={theme.name}
             contracts={policies.contracts}
             messages={policies.messages}
-            duration={duration}
-            onDurationChange={setDuration}
           />
         ) : (
           <UnverifiedSessionSummary
             contracts={policies.contracts}
             messages={policies.messages}
-            duration={duration}
-            onDurationChange={setDuration}
           />
         )}
       </LayoutContent>
