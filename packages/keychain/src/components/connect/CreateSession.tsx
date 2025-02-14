@@ -1,6 +1,6 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { SessionConsent } from "@/components/connect";
-import { Upgrade } from "@/components/connect/Upgrade";
+import { Upgrade } from "./Upgrade";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { NOW } from "@/const";
@@ -22,8 +22,9 @@ import {
   SliderIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
-import type { BigNumberish } from "starknet";
-import { OcclusionDetector } from "@/components/OcclusionDetector";
+import { type BigNumberish } from "starknet";
+import { OcclusionDetector } from "../OcclusionDetector";
+import { useUpgrade } from "../provider/upgrade";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -60,7 +61,8 @@ const CreateSessionLayout = ({
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
-  const { controller, upgrade, theme } = useConnection();
+  const { controller, theme } = useConnection();
+  const upgrade = useUpgrade();
 
   const expiresAt = useMemo(() => {
     return duration + NOW;

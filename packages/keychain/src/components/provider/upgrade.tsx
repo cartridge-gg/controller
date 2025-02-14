@@ -1,15 +1,30 @@
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { JsCall } from "@cartridge/account-wasm";
-import { useCallback, useEffect, useState } from "react";
 import { addAddressPadding, Call } from "starknet";
 import { ControllerError } from "@/utils/connection";
 import Controller from "@/utils/controller";
+import { usePostHog } from "./posthog";
 
-enum OutsideExecutionVersion {
+export enum OutsideExecutionVersion {
   V2,
   V3,
 }
 
-export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
+export type ControllerVersionInfo = {
+  version: string;
+  hash: string;
+  outsideExecutionVersion: OutsideExecutionVersion;
+  changes: string[];
+};
+
+export const CONTROLLER_VERSIONS: ControllerVersionInfo[] = [
   {
     version: "1.0.4",
     hash: "0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
@@ -52,14 +67,8 @@ export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
   },
 ];
 
-export const LATEST_CONTROLLER = CONTROLLER_VERSIONS[4];
-
-type ControllerVersionInfo = {
-  version: string;
-  hash: string;
-  outsideExecutionVersion: OutsideExecutionVersion;
-  changes: Array<string>;
-};
+export const STABLE_CONTROLLER = CONTROLLER_VERSIONS[4];
+export const BETA_CONTROLLER = CONTROLLER_VERSIONS[5];
 
 export interface UpgradeInterface {
   available: boolean;
@@ -70,24 +79,53 @@ export interface UpgradeInterface {
   isUpgrading: boolean;
   error?: ControllerError;
   onUpgrade: () => Promise<void>;
+  isBeta: boolean;
 }
 
-export const useUpgrade = (controller?: Controller): UpgradeInterface => {
+const UpgradeContext = createContext<UpgradeInterface | undefined>(undefined);
+
+interface UpgradeProviderProps {
+  controller?: Controller;
+  children: React.ReactNode;
+}
+
+export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
+  controller,
+  children,
+}) => {
   const [available, setAvailable] = useState<boolean>(false);
-  const [error, setError] = useState<ControllerError>();
+  const [error, setError] = useState<ControllerError | undefined>(undefined);
   const [isSynced, setIsSynced] = useState<boolean>(false);
   const [isUpgrading, setIsUpgrading] = useState<boolean>(false);
-  const [current, setCurrent] = useState<ControllerVersionInfo>();
+  const [current, setCurrent] = useState<ControllerVersionInfo | undefined>(
+    undefined,
+  );
   const [calls, setCalls] = useState<JsCall[]>([]);
-  const [syncedControllerAddress, setSyncedControllerAddress] =
-    useState<string>();
+  const [syncedControllerAddress, setSyncedControllerAddress] = useState<
+    string | undefined
+  >(undefined);
+  const posthog = usePostHog();
+  const [isBeta, setIsBeta] = useState<boolean>(false);
+
+  // Pick controller based on feature flag
+  const effectiveController = useMemo(
+    () => (isBeta ? BETA_CONTROLLER : STABLE_CONTROLLER),
+    [isBeta],
+  );
+
+  useEffect(() => {
+    if (!posthog || !controller) return;
+    posthog.onFeatureFlag("controller-beta", (value: string | boolean) => {
+      const newValue = typeof value === "boolean" ? value : value === "true";
+      setIsBeta(newValue);
+    });
+  }, [posthog, controller]);
 
   useEffect(() => {
     if (!controller) {
       return;
     }
 
-    // Skip if we already synced this controller
     if (syncedControllerAddress === controller.address()) {
       return;
     }
@@ -97,25 +135,25 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
     controller.provider
       .getClassHashAt(controller.address())
       .then((classHash) => {
-        const current = CONTROLLER_VERSIONS.find(
+        const found = CONTROLLER_VERSIONS.find(
           (v) => addAddressPadding(v.hash) === addAddressPadding(classHash),
         );
 
-        setCurrent(current);
-        setAvailable(current?.version !== LATEST_CONTROLLER.version);
+        setCurrent(found);
+        setAvailable(found?.version !== effectiveController.version);
         setSyncedControllerAddress(controller.address());
       })
       .catch((e) => {
         if (e.message.includes("Contract not found")) {
-          const current = CONTROLLER_VERSIONS.find(
+          const found = CONTROLLER_VERSIONS.find(
             (v) =>
               addAddressPadding(v.hash) ===
               addAddressPadding(controller.classHash()),
           );
-          setCurrent(current);
-          setAvailable(current?.version !== LATEST_CONTROLLER.version);
+
+          setCurrent(found);
+          setAvailable(found?.version !== effectiveController.version);
         } else {
-          console.log(e);
           setError(e);
         }
       })
@@ -123,26 +161,23 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
         setSyncedControllerAddress(controller.address());
         setIsSynced(true);
       });
-  }, [controller, syncedControllerAddress]);
+  }, [controller, syncedControllerAddress, effectiveController]);
 
   useEffect(() => {
-    if (!controller || !LATEST_CONTROLLER) {
+    if (!controller || !effectiveController) {
       setCalls([]);
-    } else {
-      controller.upgrade(LATEST_CONTROLLER.hash).then((call) => {
-        setCalls([call]);
-      });
-    }
-  }, [controller]);
-
-  const onUpgrade = useCallback(async () => {
-    if (!controller || !LATEST_CONTROLLER) {
       return;
     }
 
+    controller.upgrade(effectiveController.hash).then((call) => {
+      setCalls([call]);
+    });
+  }, [controller, effectiveController]);
+
+  const onUpgrade = useCallback(async () => {
+    if (!controller || !effectiveController) return;
     try {
       setIsUpgrading(true);
-
       let transaction_hash: string;
       if (current?.outsideExecutionVersion === OutsideExecutionVersion.V2) {
         transaction_hash = (await controller.executeFromOutsideV2(calls))
@@ -151,26 +186,49 @@ export const useUpgrade = (controller?: Controller): UpgradeInterface => {
         transaction_hash = (await controller.executeFromOutsideV3(calls))
           .transaction_hash;
       }
-
       await controller.provider.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
       });
-
       setAvailable(false);
     } catch (e) {
-      console.log({ e });
-      setError(e as unknown as ControllerError);
+      setError(e as ControllerError);
     }
-  }, [controller, current, calls]);
+  }, [controller, current, calls, effectiveController]);
 
-  return {
-    available,
-    current,
-    latest: LATEST_CONTROLLER,
-    calls,
-    isSynced,
-    isUpgrading,
-    error,
-    onUpgrade,
-  };
+  const value = useMemo<UpgradeInterface>(
+    () => ({
+      available,
+      current,
+      latest: effectiveController,
+      calls,
+      isSynced,
+      isUpgrading,
+      error,
+      onUpgrade,
+      isBeta,
+    }),
+    [
+      available,
+      current,
+      effectiveController,
+      calls,
+      isSynced,
+      isUpgrading,
+      error,
+      onUpgrade,
+      isBeta,
+    ],
+  );
+
+  return (
+    <UpgradeContext.Provider value={value}>{children}</UpgradeContext.Provider>
+  );
+};
+
+export const useUpgrade = (): UpgradeInterface => {
+  const context = useContext(UpgradeContext);
+  if (!context) {
+    throw new Error("useUpgrade must be used within an UpgradeProvider");
+  }
+  return context;
 };
