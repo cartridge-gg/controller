@@ -1,11 +1,14 @@
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren, useEffect, useState, useContext } from "react";
 import { PostHogContext, PostHogWrapper } from "@cartridge/utils";
 import { useConnection } from "@/hooks/connection";
 
-const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
-  host: import.meta.env.VITE_POSTHOG_HOST,
-  autocapture: true,
-});
+const posthog = new PostHogWrapper(
+  import.meta.env.VITE_POSTHOG_KEY ?? "api key",
+  {
+    host: import.meta.env.VITE_POSTHOG_HOST,
+    autocapture: true,
+  },
+);
 
 export function PostHogProvider({ children }: PropsWithChildren) {
   const { controller, origin } = useConnection();
@@ -42,3 +45,11 @@ export function PostHogProvider({ children }: PropsWithChildren) {
     </PostHogContext.Provider>
   );
 }
+
+export const usePostHog = () => {
+  const context = useContext(PostHogContext);
+  if (!context) {
+    throw new Error("usePostHog must be used within a PostHogProvider");
+  }
+  return context.posthog;
+};

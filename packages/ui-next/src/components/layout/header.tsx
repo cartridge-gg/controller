@@ -25,6 +25,7 @@ import { useUI } from "@/hooks";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
+  onClose?: () => void;
   hideUsername?: boolean;
   hideNetwork?: boolean;
   hideSettings?: boolean;
@@ -32,6 +33,7 @@ export type HeaderProps = HeaderInnerProps & {
 
 export function LayoutHeader({
   onBack,
+  onClose,
   hideUsername,
   hideNetwork,
   hideSettings,
@@ -69,8 +71,13 @@ export function LayoutHeader({
         <div>
           {onBack ? (
             <BackButton onClick={onBack} />
-          ) : closeModal ? (
-            <CloseButton onClose={closeModal} />
+          ) : closeModal || onClose ? (
+            <CloseButton
+              onClose={() => {
+                if (onClose) onClose();
+                if (closeModal) closeModal();
+              }}
+            />
           ) : null}
         </div>
 
