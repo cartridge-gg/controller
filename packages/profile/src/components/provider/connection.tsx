@@ -106,6 +106,12 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           navigate(path);
           setIsVisible(true);
         }),
+        switchChain: normalize(() => (rpcUrl: string) => {
+          setState((state) => ({
+            ...state,
+            provider: new RpcProvider({ nodeUrl: rpcUrl }),
+          }));
+        }),
       },
     });
     connection.promise.then((parent) => {
