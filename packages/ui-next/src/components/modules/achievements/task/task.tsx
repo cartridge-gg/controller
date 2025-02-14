@@ -4,7 +4,7 @@ import {
   AchievementTaskStatus,
 } from "@/index";
 
-interface AchievementTaskProps {
+export interface AchievementTaskProps {
   count: number;
   total: number;
   description: string;

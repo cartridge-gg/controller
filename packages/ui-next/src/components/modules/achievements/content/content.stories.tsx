@@ -14,7 +14,7 @@ const meta: Meta<typeof AchievementContent> = {
     description: "Every journey begins with a single step",
     points: 20,
     difficulty: 12,
-    tasks: [{ count: 1, total: 1, description: "Finish onboarding" }],
+    tasks: [{ id: "1", count: 1, total: 1, description: "Finish onboarding" }],
     timestamp: 1728717697,
   },
 };
@@ -32,8 +32,13 @@ export const Uncompleted: Story = {
     points: 20,
     difficulty: 12,
     tasks: [
-      { count: 1, total: 1, description: "Discover a tile" },
-      { count: 0, total: 1, description: "Discover an ancient fragment" },
+      { id: "1", count: 1, total: 1, description: "Discover a tile" },
+      {
+        id: "2",
+        count: 0,
+        total: 1,
+        description: "Discover an ancient fragment",
+      },
     ],
     timestamp: undefined,
   },
@@ -42,7 +47,7 @@ export const Uncompleted: Story = {
 export const Hidden: Story = {
   args: {
     hidden: true,
-    tasks: [{ count: 1, total: 2, description: "Finish onboarding" }],
+    tasks: [{ id: "1", count: 1, total: 2, description: "Finish onboarding" }],
     timestamp: undefined,
   },
 };

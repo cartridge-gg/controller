@@ -1,27 +1,23 @@
-import { AchievementLabel, AchievementTask, CardContent } from "@/index";
+import { AchievementLabel, AchievementTask, AchievementTaskProps, CardContent } from "@/index";
 import { useMemo } from "react";
 
 export interface AchievementContentProps {
+  points: number;
+  difficulty: number;
+  hidden: boolean;
   icon?: string;
   title?: string;
   description?: string;
-  points: number;
-  difficulty: number;
-  tasks?: {
-    count: number;
-    total: number;
-    description: string;
-  }[];
+  tasks?: (AchievementTaskProps & { id: string })[];
   timestamp?: number;
-  hidden?: boolean;
 }
 
 export function AchievementContent({
+  points,
+  difficulty,
   icon,
   title,
   description,
-  points,
-  difficulty,
   tasks,
   timestamp,
   hidden,
@@ -48,11 +44,7 @@ export function AchievementContent({
       {show &&
         tasks &&
         tasks.map((task) => (
-          <AchievementTask
-            key={task.description}
-            completed={completed}
-            {...task}
-          />
+          <AchievementTask key={task.id} completed={completed} {...task} />
         ))}
     </CardContent>
   );
