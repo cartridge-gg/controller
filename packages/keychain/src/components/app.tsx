@@ -6,13 +6,11 @@ import { Failure } from "./failure";
 import { Success } from "./success";
 import { Pending } from "./pending";
 import { Consent, Slot } from "./slot";
-import { OcclusionDetector } from "./OcclusionDetector";
 import { Fund } from "./slot/fund";
 
 export function App() {
   return (
     <>
-      <OcclusionDetector />
       <div style={{ position: "relative" }}>
         <Routes>
           <Route path="/" element={<Home />} />
