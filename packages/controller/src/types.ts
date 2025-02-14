@@ -133,6 +133,7 @@ export interface Keychain {
 
 export interface Profile {
   navigate(path: string): void;
+  switchChain(rpcUrl: string): Promise<void>;
 }
 
 export interface Modal {
