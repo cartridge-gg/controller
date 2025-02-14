@@ -1,4 +1,9 @@
-import { AchievementLabel, AchievementTask, AchievementTaskProps, CardContent } from "@/index";
+import {
+  AchievementLabel,
+  AchievementTask,
+  AchievementTaskProps,
+  CardContent,
+} from "@/index";
 import { useMemo } from "react";
 
 export interface AchievementContentProps {
