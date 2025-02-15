@@ -8,13 +8,9 @@ import { MessageCard } from "./MessageCard";
 export function UnverifiedSessionSummary({
   contracts,
   messages,
-  duration,
-  onDurationChange,
 }: {
   contracts?: SessionContracts;
   messages?: SessionMessages;
-  duration: bigint;
-  onDurationChange: (duration: bigint) => void;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -39,7 +35,7 @@ export function UnverifiedSessionSummary({
         <MessageCard messages={messages} isExpanded />
       )}
 
-      <ExpirationCard duration={duration} onDurationChange={onDurationChange} />
+      <ExpirationCard />
     </div>
   );
 }
