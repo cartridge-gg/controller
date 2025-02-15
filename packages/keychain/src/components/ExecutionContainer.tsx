@@ -1,22 +1,22 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
+import { useConnection } from "@/hooks/connection";
+import type { ControllerError } from "@/utils/connection";
+import { parseControllerError } from "@/utils/connection/execute";
+import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   Button,
-  HeaderProps,
+  type HeaderProps,
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
-import { ControllerError } from "@/utils/connection";
-import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { parseControllerError } from "@/utils/connection/execute";
 import isEqual from "lodash/isEqual";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import type { Call, EstimateFee } from "starknet";
+import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { Funding } from "./funding";
-import { DeployController } from "./DeployController";
-import { Call, EstimateFee } from "starknet";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -28,6 +28,7 @@ interface ExecutionContainerProps {
   onError?: (error: ControllerError) => void;
   buttonText?: string;
   children: React.ReactNode;
+  right?: React.ReactElement;
 }
 
 export function ExecutionContainer({
@@ -42,6 +43,7 @@ export function ExecutionContainer({
   onFund,
   onError,
   buttonText = "SUBMIT",
+  right,
   children,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
@@ -163,7 +165,12 @@ export function ExecutionContainer({
 
   return (
     <LayoutContainer>
-      <LayoutHeader title={title} description={description} icon={icon} />
+      <LayoutHeader
+        title={title}
+        description={description}
+        icon={icon}
+        right={right}
+      />
       {children}
       <LayoutFooter>
         {(() => {

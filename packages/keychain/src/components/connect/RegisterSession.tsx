@@ -3,16 +3,23 @@ import { SessionConsent } from "@/components/connect";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { NOW } from "@/const";
+import { CreateSessionProvider } from "@/context/session";
 import { useConnection } from "@/hooks/connection";
-import { type ParsedSessionPolicies, useCreateSession } from "@/hooks/session";
-import { LayoutContent } from "@cartridge/ui-next";
-import { useCallback, useEffect, useState } from "react";
+import {
+  type ContractType,
+  type ParsedSessionPolicies,
+  useCreateSession,
+} from "@/hooks/session";
+import { Button, LayoutContent, SliderIcon } from "@cartridge/ui-next";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type Call,
   type EstimateFee,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
+
+const requiredPolicies: Array<ContractType> = ["VRF"];
 
 export function RegisterSession({
   policies,
@@ -23,13 +30,34 @@ export function RegisterSession({
   onConnect: (transaction_hash: string, expiresAt: bigint) => void;
   publicKey?: string;
 }) {
+  return (
+    <CreateSessionProvider
+      initialPolicies={policies}
+      requiredPolicies={requiredPolicies}
+    >
+      <RegisterSessionLayout onConnect={onConnect} publicKey={publicKey} />
+    </CreateSessionProvider>
+  );
+}
+
+const RegisterSessionLayout = ({
+  onConnect,
+  publicKey,
+}: {
+  onConnect: (transaction_hash: string, expiresAt: bigint) => void;
+  publicKey?: string;
+}) => {
+  const { policies } = useCreateSession();
   const { controller, theme } = useConnection();
-  const { duration } = useCreateSession();
   const [transactions, setTransactions] = useState<Call[] | undefined>(
     undefined,
   );
 
-  const expiresAt = duration + NOW;
+  const { duration, isEditable, onToggleEditable } = useCreateSession();
+
+  const expiresAt = useMemo(() => {
+    return duration + NOW;
+  }, [duration]);
 
   useEffect(() => {
     if (!publicKey || !controller) {
@@ -53,24 +81,6 @@ export function RegisterSession({
     async (maxFee?: EstimateFee) => {
       if (maxFee == undefined || !publicKey || !controller) {
         return;
-      }
-
-      // Set all contract policies to authorized
-      if (policies.contracts) {
-        Object.keys(policies.contracts).forEach((address) => {
-          if (policies.contracts![address]) {
-            policies.contracts![address].methods.forEach((method) => {
-              method.authorized = true;
-            });
-          }
-        });
-      }
-
-      // Set all message policies to authorized
-      if (policies.messages) {
-        policies.messages.forEach((message) => {
-          message.authorized = true;
-        });
       }
 
       const { transaction_hash } = await controller.registerSession(
@@ -103,6 +113,20 @@ export function RegisterSession({
       transactions={transactions}
       onSubmit={onRegisterSession}
       buttonText="Register Session"
+      right={
+        !isEditable ? (
+          <Button
+            variant="icon"
+            className="size-10 relative bg-background-200"
+            onClick={onToggleEditable}
+          >
+            <SliderIcon
+              color="white"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            />
+          </Button>
+        ) : undefined
+      }
     >
       <LayoutContent>
         <SessionConsent isVerified={policies?.verified} />
@@ -121,4 +145,4 @@ export function RegisterSession({
       </LayoutContent>
     </ExecutionContainer>
   );
-}
+};
