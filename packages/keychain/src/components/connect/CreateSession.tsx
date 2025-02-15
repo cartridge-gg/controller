@@ -38,7 +38,6 @@ export function CreateSession({
   return (
     <CreateSessionProvider
       initialPolicies={policies}
-      onConnect={onConnect}
       requiredPolicies={requiredPolicies}
     >
       <CreateSessionLayout isUpdate={isUpdate} onConnect={onConnect} />
@@ -51,7 +50,6 @@ const CreateSessionLayout = ({
   onConnect,
 }: {
   isUpdate?: boolean;
-
   onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
 }) => {
   const [isConsent, setIsConsent] = useState(false);

@@ -14,13 +14,6 @@ export interface CreateSessionProviderProps {
   initialPolicies: ParsedSessionPolicies;
   requiredPolicies?: Array<ContractType>;
   chainSpecificMessages?: boolean;
-  onToggleMethod?: (address: string, id: string, authorized: boolean) => void;
-  onToggleMessage?: (id: string, authorized: boolean) => void;
-  onDurationChange?: (duration: bigint) => void;
-  onToggleEditable?: () => void;
-  onConnect?: (transaction_hash?: string, expiresAt?: bigint) => void;
-  onCreateSession?: () => Promise<void>;
-  onSkipSession?: () => Promise<void>;
 }
 
 export const CreateSessionProvider = ({
