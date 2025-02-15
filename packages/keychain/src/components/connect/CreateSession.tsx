@@ -118,31 +118,19 @@ const CreateSessionLayout = ({
             : undefined
         }
         right={
-          <Button
-            variant="icon"
-            className="size-10 relative bg-background-200 hover:bg-background-300"
-            onClick={onToggleEditable}
-          >
-            <SliderIcon
-              color="white"
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            />
-          </Button>
+          !isEditable ? (
+            <Button
+              variant="icon"
+              className="size-10 relative bg-background-200 hover:bg-background-300"
+              onClick={onToggleEditable}
+            >
+              <SliderIcon
+                color="white"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+              />
+            </Button>
+          ) : undefined
         }
-        // right={
-        //   !isEditable ? (
-        //     <Button
-        //       variant="icon"
-        //       className="size-10 relative bg-background-200 hover:bg-background-300"
-        //       onClick={onToggleEditable}
-        //     >
-        //       <SliderIcon
-        //         color="white"
-        //         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        //       />
-        //     </Button>
-        //   ) : undefined
-        // }
       />
       <LayoutContent className="gap-6 px-6">
         <SessionConsent isVerified={policies?.verified} />
