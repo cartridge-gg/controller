@@ -1,5 +1,6 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { SessionConsent } from "@/components/connect";
+import { Upgrade } from "@/components/connect/Upgrade";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
 import { NOW } from "@/const";
@@ -60,7 +61,7 @@ const CreateSessionLayout = ({
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
-  const { controller, theme } = useConnection();
+  const { controller, upgrade, theme } = useConnection();
 
   const expiresAt = useMemo(() => {
     return duration + NOW;
@@ -98,6 +99,14 @@ const CreateSessionLayout = ({
     }
   }, [controller, duration, policies, maxFee, onConnect]);
 
+  if (!upgrade.isSynced) {
+    return <></>;
+  }
+
+  if (upgrade.available) {
+    return <Upgrade />;
+  }
+
   return (
     <LayoutContainer>
       <LayoutHeader
@@ -109,19 +118,31 @@ const CreateSessionLayout = ({
             : undefined
         }
         right={
-          !isEditable ? (
-            <Button
-              variant="icon"
-              className="size-10 relative bg-background-200 hover:bg-background-300"
-              onClick={onToggleEditable}
-            >
-              <SliderIcon
-                color="white"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              />
-            </Button>
-          ) : undefined
+          <Button
+            variant="icon"
+            className="size-10 relative bg-background-200 hover:bg-background-300"
+            onClick={onToggleEditable}
+          >
+            <SliderIcon
+              color="white"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            />
+          </Button>
         }
+        // right={
+        //   !isEditable ? (
+        //     <Button
+        //       variant="icon"
+        //       className="size-10 relative bg-background-200 hover:bg-background-300"
+        //       onClick={onToggleEditable}
+        //     >
+        //       <SliderIcon
+        //         color="white"
+        //         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        //       />
+        //     </Button>
+        //   ) : undefined
+        // }
       />
       <LayoutContent className="gap-6 px-6">
         <SessionConsent isVerified={policies?.verified} />

@@ -1,4 +1,3 @@
-import { Upgrade } from "@/components/connect/Upgrade";
 import { isPolicyRequired } from "@/components/connect/create/utils";
 import { DEFAULT_SESSION_DURATION } from "@/const";
 import { useConnection } from "@/hooks/connection";
@@ -68,7 +67,7 @@ export const CreateSessionProvider = ({
   const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
   const [isEditable, setIsEditable] = useState(false);
 
-  const { controller, upgrade } = useConnection();
+  const { controller } = useConnection();
 
   const onToggleMethod = useCallback(
     (address: string, id: string, authorized: boolean) => {
@@ -120,14 +119,6 @@ export const CreateSessionProvider = ({
       );
     });
   }, [policies.messages, controller, externalChainSpecificMessages]);
-
-  if (!upgrade.isSynced) {
-    return <></>;
-  }
-
-  if (upgrade.available) {
-    return <Upgrade />;
-  }
 
   return (
     <CreateSessionContext.Provider
