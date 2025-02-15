@@ -8,7 +8,7 @@ export function ExpirationCard() {
     <div className="w-full flex flex-row items-center justify-between font-medium text-sm">
       <h1 className="text-foreground-400">Expires In:</h1>
       {!isEditable ? (
-        <div className="text-foreground-300 flex flex-row items-center">
+        <div className="text-foreground-300 flex flex-row items-center py-1.5">
           <ClockIcon variant="line" />
           <h1>{formatDuration(duration)}</h1>
         </div>
