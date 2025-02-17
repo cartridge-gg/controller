@@ -13,6 +13,7 @@ const achievementProgressVariants = cva("p-3 flex items-center gap-x-3", {
   variants: {
     variant: {
       default: "bg-background-200",
+      faded: "bg-background-100",
       ghost: "bg-transparent",
     },
   },
