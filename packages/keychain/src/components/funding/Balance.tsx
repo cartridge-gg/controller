@@ -1,9 +1,3 @@
-import { useController } from "@/hooks/controller";
-import {
-  convertTokenAmountToUSD,
-  formatBalance,
-  useFeeToken,
-} from "@/hooks/tokens";
 import {
   Card,
   CardHeader,
@@ -11,7 +5,9 @@ import {
   CardListItem,
   CardTitle,
 } from "@cartridge/ui-next";
-import { useCreditBalance } from "@cartridge/utils";
+import { useCreditBalance, useFeeToken, } from "@cartridge/utils";
+import { useController } from "@/hooks/controller";
+import { formatBalance, convertTokenAmountToUSD } from "@/hooks/tokens";
 
 export enum BalanceType {
   CREDITS = "credits",
