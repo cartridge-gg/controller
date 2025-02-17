@@ -12,6 +12,7 @@ import {
 } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
+import { AchievementPinIcon } from "../pin-icon";
 
 export interface Metadata {
   name: string;
@@ -84,7 +85,6 @@ export const AchievementGroupHeader = ({
       !variant || variant === "default"
         ? `var(--background-200)`
         : `var(--background-100)`;
-    console.log(variant, bgColor);
     const opacity = metadata.cover ? "96%" : "50%";
     const image = metadata.cover
       ? `url(${metadata.cover})`
@@ -108,7 +108,7 @@ export const AchievementGroupHeader = ({
           name={metadata.name}
           variant={variant}
         />
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-x-4 gap-y-0.5 md:flex-row">
           <CardTitle className="text-foreground-100 text-sm font-medium tracking-normal">
             {metadata.name}
           </CardTitle>
@@ -151,7 +151,7 @@ export const AchievementGroupHeader = ({
 };
 
 const achievementLogoVariants = cva(
-  "w-9 h-9 flex justify-center items-center rounded",
+  "w-11 h-11 flex justify-center items-center rounded md:w-9 md:h-9",
   {
     variants: {
       variant: {
@@ -180,7 +180,11 @@ const AchievementLogo = ({
   return (
     <div className={achievementLogoVariants({ variant })}>
       {logo ? (
-        <img src={logo} alt={name} className="w-8 h-8 rounded" />
+        <img
+          src={logo}
+          alt={name}
+          className="w-[36px] h-[36px] rounded md:w-8 md:h-8"
+        />
       ) : (
         <DojoIcon size="lg" />
       )}
@@ -211,53 +215,15 @@ const AchievementPins = ({
   return (
     <div className={achievementPinsVariants({ variant })}>
       {pins.map((value) => (
-        <AchievementPin key={value.id} icon={value.icon} variant={variant} />
+        <AchievementPinIcon
+          key={value.id}
+          icon={value.icon}
+          variant={variant}
+        />
       ))}
       {Array.from({ length: empty }).map((_, index) => (
-        <AchievementPin key={index} empty variant={variant} />
+        <AchievementPinIcon key={index} empty variant={variant} />
       ))}
-    </div>
-  );
-};
-
-const achievementPinVariants = cva(
-  "w-6 h-6 border rounded flex justify-center items-center",
-  {
-    variants: {
-      variant: {
-        default: "border-background-300 bg-background-200",
-        faded: "border-background-200 bg-background-100",
-        ghost: "",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
-type AchievementPinVariant = VariantProps<
-  typeof achievementPinVariants
->["variant"];
-const AchievementPin = ({
-  icon,
-  empty,
-  variant,
-}: {
-  icon?: string;
-  empty?: boolean;
-  variant: AchievementPinVariant;
-}) => {
-  if (empty) {
-    return (
-      <div className={achievementPinVariants({ variant })}>
-        <div className="w-3 h-3 fa-spider-web fa-thin text-background-500" />
-      </div>
-    );
-  }
-  if (!icon) return null;
-  return (
-    <div className={achievementPinVariants({ variant })}>
-      <div className={cn("w-3 h-3 fa-solid text-foreground-100", icon)} />
     </div>
   );
 };
@@ -384,7 +350,7 @@ const AchievementSocial = ({
     >
       {icon}
       {label && (
-        <p className="px-0.5 text-foreground-100 text-xs font-medium tracking-normal">
+        <p className="px-0.5 text-foreground-100 text-xs font-medium tracking-normal hidden md:block">
           {label}
         </p>
       )}
