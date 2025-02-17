@@ -6,15 +6,14 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import { useConnection } from "@/hooks/connection";
-import { ERC20 as ERC20Contract } from "@cartridge/utils";
+import { ERC20Contract } from "@cartridge/utils";
 import {
   Price,
   TokenPair,
   usePriceByAddressesQuery,
 } from "@cartridge/utils/api/cartridge";
 import { useQuery } from "react-query";
-import { getChecksumAddress } from "starknet";
+import { getChecksumAddress, Provider } from "starknet";
 
 const DEFAULT_TOKENS = [
   {
@@ -68,13 +67,15 @@ export interface TokensContextValue {
 export const TokensContext = createContext<TokensContextValue>({
   tokens: {},
   isLoading: false,
-  registerPair: () => {},
+  registerPair: () => { },
 });
 
 interface TokensProviderProps extends PropsWithChildren {
   tokens?: ERC20Metadata[];
   refetchInterval?: number;
   feeToken?: string;
+  provider?: Provider;
+  address?: string;
 }
 
 export function TokensProvider({
@@ -82,13 +83,14 @@ export function TokensProvider({
   tokens: tokensArg = DEFAULT_TOKENS,
   feeToken = DEFAULT_FEE_TOKEN,
   refetchInterval = 30000,
+  provider,
+  address,
 }: TokensProviderProps) {
-  const { controller } = useConnection();
   const [tokens, setTokens] = useState<Record<string, ERC20>>({});
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   useEffect(() => {
-    if (!controller) {
+    if (!provider || !address) {
       return;
     }
 
@@ -104,7 +106,7 @@ export function TokensProvider({
         const normalizedAddress = getChecksumAddress(address);
         const contract = new ERC20Contract({
           address: normalizedAddress,
-          provider: controller.provider,
+          provider,
         });
 
         acc[normalizedAddress] = {
@@ -126,7 +128,7 @@ export function TokensProvider({
     Object.keys(initialTokens).forEach(async (address) => {
       try {
         const balance = await initialTokens[address].contract.balanceOf(
-          controller.address(),
+          address,
         );
 
         setTokens((prev) => ({
@@ -140,17 +142,17 @@ export function TokensProvider({
         console.error("Error getting balance for:", address, error);
       }
     });
-  }, [controller, tokensArg]);
+  }, [address, tokensArg, provider]);
 
   const { error: balanceError, isLoading: isLoadingBalances } = useQuery(
-    ["token-balances", controller?.address(), Object.keys(tokens)],
+    ["token-balances", address, Object.keys(tokens)],
     async () => {
-      if (!controller) return;
+      if (!address) return;
 
       const updatedTokens = { ...tokens };
       await Promise.all(
         Object.values(updatedTokens).map(async (token) => {
-          const balance = await token.contract.balanceOf(controller.address());
+          const balance = await token.contract.balanceOf(address);
           updatedTokens[token.address] = {
             ...token,
             balance,
@@ -164,7 +166,7 @@ export function TokensProvider({
       }
     },
     {
-      enabled: !!controller && Object.keys(tokens).length > 0,
+      enabled: !!address && Object.keys(tokens).length > 0,
       refetchInterval,
       retry: false,
     },
@@ -202,7 +204,7 @@ export function TokensProvider({
 
   const registerPair = useCallback(
     async (address: string) => {
-      if (!controller) return;
+      if (!provider) return;
 
       const normalizedAddress = getChecksumAddress(address);
       if (tokens[normalizedAddress]) return;
@@ -210,11 +212,11 @@ export function TokensProvider({
       const newTokens = { ...tokens };
       const contract = new ERC20Contract({
         address: normalizedAddress,
-        provider: controller.provider,
+        provider,
       });
 
       try {
-        const balance = await contract.balanceOf(controller.address());
+        const balance = await contract.balanceOf(address);
         await contract.init();
         const metadata = contract.metadata();
 
@@ -233,7 +235,7 @@ export function TokensProvider({
         console.error(`Failed to load token ${normalizedAddress}:`, error);
       }
     },
-    [controller, tokens],
+    [address, tokens, provider],
   );
 
   const value = useMemo(
