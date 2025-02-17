@@ -23,5 +23,16 @@ const config: StorybookConfig = {
     autodocs: "tag",
   },
   staticDirs: ["../../keychain/public"],
+  previewHead: (head) => `
+    ${head}
+    ${
+      process.env.SNAPSHOT &&
+      `<style>
+      * {
+        animation: none !important;
+      }
+    </style>`
+    }
+  `,
 };
 export default config;
