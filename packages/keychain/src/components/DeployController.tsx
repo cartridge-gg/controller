@@ -25,8 +25,7 @@ import { Fees } from "./Fees";
 import { ControllerError } from "@/utils/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { Link } from "react-router-dom";
-import { useFeeToken } from "@/hooks/tokens";
-import { getChainName } from "@cartridge/utils";
+import { getChainName, useFeeToken } from "@cartridge/utils";
 
 export function DeployController({
   onClose,

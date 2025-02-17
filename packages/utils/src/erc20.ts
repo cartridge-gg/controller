@@ -8,13 +8,12 @@ import {
   uint256,
 } from "starknet";
 
-export type ERC20Metadata = {
+type ERC20Metadata = {
   name: string;
   logoUrl?: string;
   symbol: string;
   decimals: number;
   address: string;
-  instance: ERC20;
 };
 
 export const ETH_CONTRACT_ADDRESS = getChecksumAddress(
@@ -24,7 +23,7 @@ export const STRK_CONTRACT_ADDRESS = getChecksumAddress(
   "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
 );
 
-export class ERC20 {
+export class ERC20Contract {
   private address: string;
   private logoUrl?: string;
   private provider: Provider;
@@ -77,7 +76,6 @@ export class ERC20 {
       symbol: this.symbol,
       decimals: this.decimals,
       logoUrl: this.logoUrl,
-      instance: this,
     };
   }
 
