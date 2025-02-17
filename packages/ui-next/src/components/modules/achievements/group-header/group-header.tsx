@@ -12,7 +12,7 @@ import {
 } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
-import { AchievementPinIcon } from "../pin-icon";
+import { AchievementPinIcons } from "../pin-icons";
 
 export interface Metadata {
   name: string;
@@ -68,8 +68,8 @@ export const AchievementGroupHeader = ({
   socials,
   variant,
 }: AchievementGroupHeaderProps) => {
-  const { pins, empty } = useMemo(() => {
-    const pins = achievements
+  const pins = useMemo(() => {
+    return achievements
       .filter((a) => a.content.icon && a.pin?.pinned)
       .map((a) => ({
         id: a.id,
@@ -77,7 +77,6 @@ export const AchievementGroupHeader = ({
         name: a.content.title || "",
       }))
       .slice(0, 3);
-    return { pins, empty: 3 - pins.length };
   }, [achievements]);
 
   const style = useMemo(() => {
@@ -113,7 +112,7 @@ export const AchievementGroupHeader = ({
             {metadata.name}
           </CardTitle>
           {pins.length > 0 && (
-            <AchievementPins pins={pins} empty={empty} variant={variant} />
+            <AchievementPinIcons pins={pins} variant={variant} />
           )}
         </div>
       </div>
@@ -188,42 +187,6 @@ const AchievementLogo = ({
       ) : (
         <DojoIcon size="lg" />
       )}
-    </div>
-  );
-};
-
-const achievementPinsVariants = cva("flex items-center gap-1.5", {
-  variants: {
-    variant: {
-      default: "",
-      faded: "",
-      ghost: "",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
-type AchievementPinsVariant = VariantProps<
-  typeof achievementPinsVariants
->["variant"];
-const AchievementPins = ({
-  pins,
-  empty,
-  variant,
-}: AchievmenetPinsProps & { variant: AchievementPinsVariant }) => {
-  return (
-    <div className={achievementPinsVariants({ variant })}>
-      {pins.map((value) => (
-        <AchievementPinIcon
-          key={value.id}
-          icon={value.icon}
-          variant={variant}
-        />
-      ))}
-      {Array.from({ length: empty }).map((_, index) => (
-        <AchievementPinIcon key={index} empty variant={variant} />
-      ))}
     </div>
   );
 };

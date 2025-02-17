@@ -18,6 +18,7 @@ const achievementPinIconVariants = cva(
       status: {
         default: "text-foreground-100",
         highlight: "text-primary border-background-400 bg-background-300",
+        hover: "text-foreground-100 border-background-400 bg-background-300",
       },
     },
     defaultVariants: {
@@ -32,6 +33,7 @@ export interface AchievementPinIconProps
   extends VariantProps<typeof achievementPinIconVariants> {
   icon?: string;
   empty?: boolean;
+  className?: string;
 }
 
 export const AchievementPinIcon = ({
@@ -40,14 +42,21 @@ export const AchievementPinIcon = ({
   variant,
   size,
   status,
+  className,
 }: AchievementPinIconProps) => {
   return (
-    <div className={achievementPinIconVariants({ variant, size, status })}>
+    <div
+      className={cn(
+        achievementPinIconVariants({ variant, size, status }),
+        className,
+      )}
+    >
       {empty ? (
         <div
           className={cn(
             "w-3 h-3 fa-spider-web fa-thin text-background-500",
-            status === "highlight" && "text-foreground-400",
+            (status === "highlight" || status === "hover") &&
+              "text-foreground-400",
           )}
         />
       ) : (
