@@ -1,6 +1,7 @@
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { useConnectionValue } from "@/hooks/connection";
+import { TokensProvider } from "@cartridge/utils";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { ENDPOINT } from "@/utils/graphql";
 import { PostHogProvider } from "./posthog";
@@ -11,7 +12,6 @@ import { sepolia, mainnet } from "@starknet-react/chains";
 import { constants, num } from "starknet";
 import { BrowserRouter } from "react-router-dom";
 import { ConnectionContext } from "./connection";
-import { TokensProvider } from "./tokens";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -47,7 +47,7 @@ export function Provider({ children }: PropsWithChildren) {
                   defaultChainId={defaultChainId}
                   provider={jsonRpcProvider({ rpc })}
                 >
-                  <TokensProvider>
+                  <TokensProvider provider={connection.controller?.provider}>
                     <PostHogProvider>{children}</PostHogProvider>
                   </TokensProvider>
                 </StarknetConfig>
