@@ -85,7 +85,6 @@ export function TokensProvider({
 }: TokensProviderProps) {
   const { controller } = useConnection();
   const [tokens, setTokens] = useState<Record<string, ERC20>>({});
-  const [addresses, setAdresses] = useState<string[]>([]);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   useEffect(() => {
@@ -122,7 +121,6 @@ export function TokensProvider({
     );
 
     setTokens(initialTokens);
-    setAdresses(Object.keys(initialTokens));
 
     // Then update balances asynchronously
     Object.keys(initialTokens).forEach(async (address) => {
@@ -171,6 +169,7 @@ export function TokensProvider({
       retry: false,
     },
   );
+  const addresses = useMemo(() => Object.keys(tokens), [tokens]);
 
   const {
     data: priceData,
@@ -193,10 +192,7 @@ export function TokensProvider({
         priceData.priceByAddresses.forEach((price, index) => {
           const address = addresses[index];
           if (newTokens[address]) {
-            newTokens[address] = {
-              ...newTokens[address],
-              price,
-            };
+            newTokens[address].price = price;
           }
         });
         return newTokens;
@@ -233,7 +229,6 @@ export function TokensProvider({
         };
 
         setTokens(newTokens);
-        setAdresses(Object.keys(newTokens));
       } catch (error) {
         console.error(`Failed to load token ${normalizedAddress}:`, error);
       }
