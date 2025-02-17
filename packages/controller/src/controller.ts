@@ -186,6 +186,7 @@ export default class ControllerProvider extends BaseProvider {
       }
 
       await this.keychain.switchChain(this.rpcUrl());
+      await this.profile?.switchChain(this.rpcUrl());
     } catch (e) {
       console.error(e);
       return false;
