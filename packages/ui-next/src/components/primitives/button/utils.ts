@@ -23,7 +23,8 @@ export const buttonVariants = cva(
       size: {
         default: "h-10 px-6 py-2.5 text-base/[20px] tracking-wide",
         tall: "h-full w-9 rounded-none p-2",
-        icon: "h-10 w-12 px-3",
+        icon: "h-10 w-10 flex items-center",
+        thumbnail: "h-10 px-3",
       },
       status: {
         active:

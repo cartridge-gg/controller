@@ -81,7 +81,7 @@ export function LayoutHeader({
                 <Tooltip>
                   <TooltipTrigger
                     className={cn(
-                      "flex items-center gap-1.5 bg-background-100 rounded px-3 py-2.5",
+                      "flex items-center gap-1.5 bg-background-200 hover:bg-background-300 rounded px-3 py-2.5",
                       hideUsername && "hidden",
                     )}
                   >
