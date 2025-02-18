@@ -1,6 +1,7 @@
-import { cn, SpaceInvaderIcon, SparklesIcon } from "@/index";
+import { cn, SparklesIcon } from "@/index";
 import { useEffect, useRef, useState } from "react";
 import { AchievementPinIcons } from "../pin-icons";
+import AchievementLeaderboardUsername from "../leaderboard-username/leaderboard-username";
 
 export interface AchievementLeaderboardRowProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -8,6 +9,7 @@ export interface AchievementLeaderboardRowProps
   rank: number;
   name: string;
   points: number;
+  icon?: string;
   highlight?: boolean;
 }
 
@@ -16,6 +18,7 @@ export const AchievementLeaderboardRow = ({
   rank,
   name,
   points,
+  icon,
   highlight,
   className,
   ...props
@@ -54,15 +57,11 @@ export const AchievementLeaderboardRow = ({
     >
       <div className="flex gap-x-1.5 items-center">
         <p className="w-9 text-sm">{`${rank}.`}</p>
-        <div
-          className={cn(
-            "flex gap-1",
-            highlight ? "text-primary" : "text-foreground-100",
-          )}
-        >
-          <SpaceInvaderIcon variant="line" size="sm" />
-          <p className="text-sm">{name}</p>
-        </div>
+        <AchievementLeaderboardUsername
+          username={name}
+          icon={icon}
+          highlight={highlight}
+        />
       </div>
       <div className="flex gap-x-3 items-center">
         <AchievementPinIcons

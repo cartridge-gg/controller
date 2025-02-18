@@ -25,6 +25,12 @@ type Story = StoryObj<typeof AchievementLeaderboardRow>;
 
 export const Default: Story = {};
 
+export const Icon: Story = {
+  args: {
+    icon: "fa-helmet-battle",
+  },
+};
+
 export const Highlight: Story = {
   args: {
     highlight: true,
