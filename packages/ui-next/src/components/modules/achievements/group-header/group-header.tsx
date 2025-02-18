@@ -14,13 +14,13 @@ import { cva, VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 import { AchievementPinIcons } from "../pin-icons";
 
-interface Metadata {
+export interface Metadata {
   name: string;
   logo?: string;
   cover?: string;
 }
 
-interface Socials {
+export interface Socials {
   website?: string;
   discord?: string;
   telegram?: string;
