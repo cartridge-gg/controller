@@ -1,10 +1,12 @@
 import { cn, TabsTrigger } from "@/index";
 import AchievementCounter from "../counter/counter";
 import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
+import React from "react";
 
 export interface AchievementTabProps {
   value: string;
   label: string;
+  active: boolean;
   counter:
     | ReturnType<typeof AchievementCounter>
     | ReturnType<typeof AchievementLeaderboardCounter>;
@@ -14,9 +16,12 @@ export interface AchievementTabProps {
 export const AchievementTab = ({
   value,
   label,
+  active,
   counter,
   className,
 }: AchievementTabProps) => {
+  if (!counter) return null;
+
   return (
     <TabsTrigger
       value={value}
@@ -28,7 +33,7 @@ export const AchievementTab = ({
       )}
     >
       <p className="text-sm">{label}</p>
-      {counter}
+      {React.cloneElement(counter as React.ReactElement<any>, { active })}
     </TabsTrigger>
   );
 };
