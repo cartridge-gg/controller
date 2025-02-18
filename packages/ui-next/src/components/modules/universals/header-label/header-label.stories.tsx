@@ -7,7 +7,7 @@ const meta: Meta<typeof UniversalHeaderLabel> = {
   component: UniversalHeaderLabel,
   tags: ["autodocs"],
   parameters: {
-    layout: "padded",
+    layout: "centered",
   },
   args: {
     variant: "default",
