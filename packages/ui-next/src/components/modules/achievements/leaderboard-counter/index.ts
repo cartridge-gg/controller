@@ -1,1 +1,1 @@
-// export * from "./leaderboard-row";
+export * from "./leaderboard-counter";
