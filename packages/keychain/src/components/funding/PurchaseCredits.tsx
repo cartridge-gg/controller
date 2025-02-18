@@ -3,7 +3,6 @@ import { useConnection } from "@/hooks/connection";
 import {
   Button,
   CheckIcon,
-  CopyAddress,
   DepositIcon,
   LayoutContainer,
   LayoutContent,
@@ -110,9 +109,6 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           "Purchase " +
           (state === PurchaseState.SELECTION ? "Credits" : "Complete")
         }
-        description={
-          controller && <CopyAddress address={controller.address()} />
-        }
         icon={
           state === PurchaseState.SELECTION ? (
             <DepositIcon variant="solid" size="lg" />
@@ -124,6 +120,19 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
       />
       <LayoutContent className="gap-6">
         <Balance types={[BalanceType.CREDITS]} />
+        {state === PurchaseState.SELECTION && (
+          <AmountSelection
+            amount={creditsAmount}
+            onChange={onAmountChanged}
+            lockSelection={isLoading}
+            enableCustom
+          />
+        )}
+      </LayoutContent>
+
+      <Separator className="bg-spacer m-1" />
+
+      <LayoutFooter>
         <ErrorAlert
           variant=""
           title="WHAT ARE CREDITS"
@@ -134,9 +143,6 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           }
           isExpanded
         />
-      </LayoutContent>
-
-      <LayoutFooter>
         {error && (
           <ErrorAlert
             variant="warning"
@@ -150,20 +156,10 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
             Close
           </Button>
         )}
-
         {state === PurchaseState.SELECTION && (
-          <>
-            <AmountSelection
-              amount={creditsAmount}
-              onChange={onAmountChanged}
-              lockSelection={isLoading}
-            />
-            <Separator className="bg-spacer m-1" />
-
-            <Button isLoading={isLoading} onClick={createPaymentIntent}>
-              Purchase
-            </Button>
-          </>
+          <Button isLoading={isLoading} onClick={createPaymentIntent}>
+            Purchase
+          </Button>
         )}
       </LayoutFooter>
     </LayoutContainer>
