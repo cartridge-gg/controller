@@ -28,7 +28,7 @@ export const AchievementLeaderboardRow = ({
   const ref = useRef(null);
 
   useEffect(() => {
-    let cachedRef = ref.current;
+    const cachedRef = ref.current;
     if (!highlight || !cachedRef) return;
     // If the component is sticked to the top or bottom of its parent
     // we need to add a border to the top or bottom of the component

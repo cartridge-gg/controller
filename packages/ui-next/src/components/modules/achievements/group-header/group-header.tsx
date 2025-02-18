@@ -14,13 +14,13 @@ import { cva, VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 import { AchievementPinIcons } from "../pin-icons";
 
-export interface Metadata {
+interface Metadata {
   name: string;
   logo?: string;
   cover?: string;
 }
 
-export interface Socials {
+interface Socials {
   website?: string;
   discord?: string;
   telegram?: string;
@@ -28,12 +28,7 @@ export interface Socials {
   github?: string;
 }
 
-export interface AchievmenetPinsProps {
-  pins: { id: string; icon: string; name: string }[];
-  empty: number;
-}
-
-export interface AchievementGroupHeaderProps
+interface AchievementGroupHeaderProps
   extends VariantProps<typeof achievementGroupHeaderVariants> {
   achievements: {
     id: string;
