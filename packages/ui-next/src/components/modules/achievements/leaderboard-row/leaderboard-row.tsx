@@ -28,16 +28,17 @@ export const AchievementLeaderboardRow = ({
   const ref = useRef(null);
 
   useEffect(() => {
-    if (!highlight || !ref.current) return;
+    let cachedRef = ref.current;
+    if (!highlight || !cachedRef) return;
     // If the component is sticked to the top or bottom of its parent
     // we need to add a border to the top or bottom of the component
     const options = { threshold: [1] };
     const observer = new IntersectionObserver(([entry]) => {
       setSticky(entry.intersectionRatio < 1);
     }, options);
-    observer.observe(ref.current);
+    observer.observe(cachedRef);
     return () => {
-      if (ref.current) observer.unobserve(ref.current);
+      if (cachedRef) observer.unobserve(cachedRef);
     };
   }, [ref, highlight]);
 

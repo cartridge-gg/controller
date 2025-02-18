@@ -1,12 +1,9 @@
 import { cn } from "@/index";
 
-export interface AchievementLeaderboardProps
-  extends React.HTMLAttributes<HTMLDivElement> {}
-
 export const AchievementLeaderboard = ({
   className,
   ...props
-}: AchievementLeaderboardProps) => {
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       className={cn(

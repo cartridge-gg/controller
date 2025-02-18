@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { AchievementPlayerLabel } from "../player-label";
 
-export interface AchievementPlayerHeaderProps {
+interface AchievementPlayerHeaderProps {
   username: string;
   address: string;
   icon?: string;

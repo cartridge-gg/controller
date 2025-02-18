@@ -1,18 +1,20 @@
-import { Tabs, TabsList } from "@/index";
+import { cn, Tabs, TabsList } from "@/index";
 import AchievementTab from "../tab/tab";
 import AchievementCounter from "../counter/counter";
 import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
 
-export interface AchievementTabsProps
-  extends React.HTMLAttributes<HTMLDivElement> {}
-
 export const AchievementTabs = ({
   className,
   ...props
-}: AchievementTabsProps) => {
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <Tabs defaultValue="achievements">
-      <TabsList className="h-auto grid w-full grid-cols-2 gap-x-4 bg-transparent p-0">
+      <TabsList
+        className={cn(
+          "h-auto grid w-full grid-cols-2 gap-x-4 bg-transparent p-0",
+          className,
+        )}
+      >
         <AchievementTab
           value="achievements"
           label="Achievements"
