@@ -1,32 +1,32 @@
-import { useCallback, useMemo, useState } from "react";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { useConnection } from "@/hooks/connection";
 import {
+  Button,
+  CheckIcon,
+  CopyAddress,
+  DepositIcon,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  CheckIcon,
-  CoinsIcon,
-  Button,
-  CopyAddress,
-  Separator,
   LayoutHeader,
+  Separator,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
-import { AmountSelection } from "./AmountSelection";
-import { ErrorAlert } from "@/components/ErrorAlert";
+import { isIframe } from "@cartridge/utils";
 import { Elements } from "@stripe/react-stripe-js";
-import { Appearance, loadStripe } from "@stripe/stripe-js";
+import { type Appearance, loadStripe } from "@stripe/stripe-js";
+import { useCallback, useMemo, useState } from "react";
+import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
-import { isIframe } from "@cartridge/utils";
 import { DEFAULT_AMOUNT } from "./constants";
 
 const STRIPE_API_PUBKEY =
   "pk_test_51Kr6IXIS6lliDpf33KnwWDtIjRPWt3eAI9CuSLR6Vvc3GxHEwmSU0iszYbUlgUadSRluGKAFphe3JzltyjPAKiBK00al4RAFQu";
 
 enum PurchaseState {
-  SELECTION,
-  STRIPE_CHECKOUT,
-  SUCCESS,
+  SELECTION = 0,
+  STRIPE_CHECKOUT = 1,
+  SUCCESS = 2,
 }
 
 type PurchaseCreditsProps = {
@@ -115,7 +115,7 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
         }
         icon={
           state === PurchaseState.SELECTION ? (
-            <CoinsIcon variant="solid" size="lg" />
+            <DepositIcon variant="solid" size="lg" />
           ) : (
             <CheckIcon size="lg" />
           )
