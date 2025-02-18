@@ -1,18 +1,25 @@
-import { LayoutContent } from "@cartridge/ui-next";
-import { useCallback, useState, useEffect, useMemo } from "react";
-import { useConnection } from "@/hooks/connection";
-import { SessionConsent } from "@/components/connect";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { SessionConsent } from "@/components/connect";
+import { isPolicyRequired } from "@/components/connect/create/utils";
+import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
+import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
+import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
+import { useConnection } from "@/hooks/connection";
 import {
-  Call,
-  EstimateFee,
+  type ContractType,
+  CreateSessionProvider,
+  type ParsedSessionPolicies,
+} from "@/hooks/session";
+import { Button, LayoutContent, SliderIcon } from "@cartridge/ui-next";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type Call,
+  type EstimateFee,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
-import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
-import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { ParsedSessionPolicies } from "@/hooks/session";
+
+const requiredPolicies: Array<ContractType> = ["VRF"];
 
 export function RegisterSession({
   policies,
@@ -28,17 +35,79 @@ export function RegisterSession({
   const [transactions, setTransactions] = useState<Call[] | undefined>(
     undefined,
   );
+  const [isEditable, setIsEditable] = useState(false);
+  const [policyState, setPolicyState] = useState<ParsedSessionPolicies>(() => {
+    // Set all contract policyState to authorized
+    if (policies.contracts) {
+      Object.keys(policies.contracts).forEach((address) => {
+        if (policies.contracts![address]) {
+          policies.contracts![address].methods.forEach((method, i) => {
+            method.id = `${i}-${address}-${method.name}`;
+            method.authorized = true;
+
+            // If policy type is required, set the method as required(always true)
+            if (
+              isPolicyRequired({
+                requiredPolicyTypes: requiredPolicies,
+                policyType: policies.contracts![address].meta?.type,
+              })
+            ) {
+              method.isRequired = true;
+            }
+          });
+        }
+      });
+    }
+
+    // Set all message policyState to authorized
+    if (policies.messages) {
+      policies.messages.forEach((message, i) => {
+        message.id = `${i}-${message.domain.name}-${message.name}`;
+        message.authorized = true;
+      });
+    }
+
+    return policies;
+  });
 
   const expiresAt = useMemo(() => {
     return duration + NOW;
   }, [duration]);
+
+  const handleToggleMethod = useCallback(
+    (address: string, id: string, authorized: boolean) => {
+      if (!policyState.contracts) return;
+      const contract = policyState.contracts[address];
+      if (!contract) return;
+      const method = contract.methods.find((method) => method.id === id);
+      if (!method) return;
+      method.authorized = authorized;
+      setPolicyState({ ...policyState });
+    },
+    [policyState],
+  );
+
+  const handleToggleMessage = useCallback(
+    (id: string, authorized: boolean) => {
+      if (!policyState.messages) return;
+      const message = policyState.messages.find((message) => message.id === id);
+      if (!message) return;
+      message.authorized = authorized;
+      setPolicyState({ ...policyState });
+    },
+    [policyState],
+  );
+
+  const handleToggleEditable = useCallback(() => {
+    setIsEditable(!isEditable);
+  }, [isEditable]);
 
   useEffect(() => {
     if (!publicKey || !controller) {
       setTransactions(undefined);
     } else {
       controller
-        .registerSessionCalldata(expiresAt, policies, publicKey)
+        .registerSessionCalldata(expiresAt, policyState, publicKey)
         .then((calldata) => {
           setTransactions([
             {
@@ -49,7 +118,7 @@ export function RegisterSession({
           ]);
         });
     }
-  }, [controller, expiresAt, policies, publicKey]);
+  }, [controller, expiresAt, policyState, publicKey]);
 
   const onRegisterSession = useCallback(
     async (maxFee?: EstimateFee) => {
@@ -57,27 +126,9 @@ export function RegisterSession({
         return;
       }
 
-      // Set all contract policies to authorized
-      if (policies.contracts) {
-        Object.keys(policies.contracts).forEach((address) => {
-          if (policies.contracts![address]) {
-            policies.contracts![address].methods.forEach((method) => {
-              method.authorized = true;
-            });
-          }
-        });
-      }
-
-      // Set all message policies to authorized
-      if (policies.messages) {
-        policies.messages.forEach((message) => {
-          message.authorized = true;
-        });
-      }
-
       const { transaction_hash } = await controller.registerSession(
         expiresAt,
-        policies,
+        policyState,
         publicKey,
         maxFee,
       );
@@ -92,7 +143,7 @@ export function RegisterSession({
 
       onConnect(transaction_hash, expiresAt);
     },
-    [controller, expiresAt, policies, publicKey, onConnect],
+    [controller, expiresAt, policyState, publicKey, onConnect],
   );
 
   if (!transactions) {
@@ -100,31 +151,54 @@ export function RegisterSession({
   }
 
   return (
-    <ExecutionContainer
-      title="Register Session"
-      transactions={transactions}
-      onSubmit={onRegisterSession}
-      buttonText="Register Session"
+    <CreateSessionProvider
+      value={{
+        policies: policyState,
+        onToggleMethod: handleToggleMethod,
+        onToggleMessage: handleToggleMessage,
+        isEditable,
+      }}
     >
-      <LayoutContent>
-        <SessionConsent isVerified={policies?.verified} />
-        {policies?.verified ? (
-          <VerifiedSessionSummary
-            game={theme.name}
-            contracts={policies.contracts}
-            messages={policies.messages}
-            duration={duration}
-            onDurationChange={setDuration}
-          />
-        ) : (
-          <UnverifiedSessionSummary
-            contracts={policies.contracts}
-            messages={policies.messages}
-            duration={duration}
-            onDurationChange={setDuration}
-          />
-        )}
-      </LayoutContent>
-    </ExecutionContainer>
+      <ExecutionContainer
+        title="Register Session"
+        transactions={transactions}
+        onSubmit={onRegisterSession}
+        buttonText="Register Session"
+        right={
+          !isEditable ? (
+            <Button
+              variant="icon"
+              className="size-10 relative bg-background-200"
+              onClick={handleToggleEditable}
+            >
+              <SliderIcon
+                color="white"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+              />
+            </Button>
+          ) : undefined
+        }
+      >
+        <LayoutContent>
+          <SessionConsent isVerified={policyState?.verified} />
+          {policyState?.verified ? (
+            <VerifiedSessionSummary
+              game={theme.name}
+              contracts={policyState.contracts}
+              messages={policyState.messages}
+              duration={duration}
+              onDurationChange={setDuration}
+            />
+          ) : (
+            <UnverifiedSessionSummary
+              contracts={policyState.contracts}
+              messages={policyState.messages}
+              duration={duration}
+              onDurationChange={setDuration}
+            />
+          )}
+        </LayoutContent>
+      </ExecutionContainer>
+    </CreateSessionProvider>
   );
 }
