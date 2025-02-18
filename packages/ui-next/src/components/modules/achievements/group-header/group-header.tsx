@@ -271,12 +271,12 @@ const AchievementSocialTelegram = ({
 };
 
 const achievementSocialVariants = cva(
-  "flex items-center gap-x-1 rounded px-1.5 py-1",
+  "flex items-center gap-x-1 rounded px-1.5 py-1 cursor-pointer",
   {
     variants: {
       variant: {
-        default: "bg-background-200",
-        faded: "bg-background-100",
+        default: "bg-background-200 hover:bg-background-300",
+        faded: "bg-background-100 hover:bg-background-200",
         ghost: "",
       },
     },

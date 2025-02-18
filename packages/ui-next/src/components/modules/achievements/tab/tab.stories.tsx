@@ -34,6 +34,7 @@ export const Default: Story = {
       <AchievementTab
         value="achievements"
         label="Achievements"
+        active
         counter={<AchievementCounter count={4} total={10} />}
       />
     </Wrapper>
@@ -46,6 +47,7 @@ export const Inactive: Story = {
       <AchievementTab
         value="leaderboard"
         label="Leaderboard"
+        active={false}
         counter={<AchievementLeaderboardCounter rank={16} />}
       />
     </Wrapper>
