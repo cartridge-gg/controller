@@ -5,7 +5,7 @@ import { cn } from "@/utils";
 import { Clear } from "./clear";
 import { cva, VariantProps } from "class-variance-authority";
 
-export interface InputProps
+interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
     VariantProps<typeof inputVariants> {
   error?: Error;

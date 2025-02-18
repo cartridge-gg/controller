@@ -9,6 +9,13 @@ import "../src/index.css";
 import { useThemeEffect } from "../dist";
 import { defaultTheme } from "@cartridge/presets";
 
+const loadScript = (src: string) => {
+  const script = document.createElement("script");
+  script.src = src;
+  script.defer = true;
+  document.head.appendChild(script);
+};
+
 const preview: Preview = {
   parameters: {
     actions: { argTypesRegex: "^on[A-Z].*" },
@@ -32,6 +39,9 @@ const preview: Preview = {
     }),
     (Story) => {
       useThemeEffect({ theme: defaultTheme, assetUrl: "https://x.cartridge.gg" });
+      loadScript("/fontawesome/js/fontawesome.min.js");
+      loadScript("/fontawesome/js/solid.min.js");
+      loadScript("/fontawesome/js/thin.min.js");
 
       return (
         <>

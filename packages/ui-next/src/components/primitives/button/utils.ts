@@ -10,8 +10,8 @@ export const buttonVariants = cva(
         secondary:
           "bg-background-200 text-foreground-100 hover:bg-background-300 disabled:text-foreground-300 disabled:bg-background-200",
         tertiary:
-          "bg-background-200 text-foreground-300 font-medium hover:bg-background-300 hover:text-foreground-200",
-        icon: "bg-background-200 text-foreground-100 hover:bg-background-300",
+          "bg-background-200 text-foreground-300 font-medium hover:bg-background-300 hover:text-foreground-200 disabled:text-foreground-400 disabled:bg-background-200",
+        icon: "bg-background-200 text-foreground-100 hover:bg-background-300 disabled:text-foreground-400 disabled:bg-background-200",
         link: "normal-case tracking-normal font-sans font-normal bg-background-100 border border-background-200 text-foreground-300 hover:border-background-300",
         // TODO: The following variants should be removed
         destructive:
@@ -22,11 +22,13 @@ export const buttonVariants = cva(
       },
       size: {
         default: "h-10 px-6 py-2.5 text-base/[20px] tracking-wide",
-        icon: "h-10 w-12 px-3",
+        tall: "h-full w-9 rounded-none p-2",
+        icon: "h-10 w-10 flex items-center",
+        thumbnail: "h-10 px-3",
       },
       status: {
         active:
-          "bg-background-400 text-foreground-100 font-medium hover:bg-background-400 hover:text-foreground-100",
+          "bg-background-300 text-foreground-100 font-medium hover:bg-background-300 hover:text-foreground-100",
       },
     },
     defaultVariants: {
