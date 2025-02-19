@@ -13,13 +13,11 @@ export function useTokens(): UseTokensResponse {
   return context;
 }
 
-export type UseTokenResponse =
-  | {
-      token: ERC20;
-      isLoading: boolean;
-      error?: Error;
-    }
-  | undefined;
+export type UseTokenResponse = {
+  token: ERC20;
+  isLoading: boolean;
+  error?: Error;
+};
 
 export function useToken(address: string): UseTokenResponse {
   const { tokens, isLoading, error } = useTokens();

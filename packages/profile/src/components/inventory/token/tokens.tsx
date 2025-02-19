@@ -6,11 +6,11 @@ import {
   CardTitle,
 } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
-import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
-import { formatEther } from "viem";
-import { useTokens } from "#hooks/token";
-import { TokenPair } from "@cartridge/utils/api/cartridge";
-import { formatBalance } from "./helper";
+import {
+  useTokens,
+  formatBalance,
+  convertTokenAmountToUSD,
+} from "@cartridge/utils";
 
 export function Tokens() {
   // const { isVisible } = useConnection();
@@ -19,7 +19,7 @@ export function Tokens() {
   //   username,
   //   interval: isVisible ? 3000 : undefined,
   // });
-  const erc20 = useTokens();
+  const { tokens } = useTokens();
 
   return (
     <Card>
@@ -37,41 +37,26 @@ export function Tokens() {
       </Link> */}
 
       <CardListContent>
-        {erc20.data.map((t) => (
-          <TokenCardContent token={t} key={t.meta.address} />
+        {Object.entries(tokens).map(([address, token]) => (
+          <Link key={address} to={`token/${token.address}`}>
+            <CardListItem
+              icon={token.icon ?? "/public/placeholder.svg"}
+              className="hover:opacity-80"
+            >
+              <div className="flex items-center gap-2">
+                {token.balance ? formatBalance(token.balance) : "..."}
+                <span className="text-foreground-400">{token.symbol}</span>
+              </div>
+
+              {token?.balance !== undefined && token.price && (
+                <div className="text-foreground-400">
+                  {convertTokenAmountToUSD(token.balance, 18, token.price)}
+                </div>
+              )}
+            </CardListItem>
+          </Link>
         ))}
       </CardListContent>
     </Card>
-  );
-}
-
-function TokenCardContent({
-  token,
-}: {
-  token: { balance: Balance; meta: ERC20Metadata };
-}) {
-  const { countervalue } = useCountervalue({
-    balance: formatEther(token.balance.value || 0n),
-    pair: `${token.meta.symbol}_USDC` as TokenPair,
-  });
-
-  return (
-    <Link to={`token/${token.meta.address}`}>
-      <CardListItem
-        icon={token.meta.logoUrl ?? "/public/placeholder.svg"}
-        className="hover:opacity-80"
-      >
-        <div className="flex items-center gap-2">
-          {formatBalance(token.balance.formatted, ["~"])}
-          <span className="text-foreground-400">{token.meta.symbol}</span>
-        </div>
-
-        {countervalue && (
-          <div className="text-foreground-400">
-            {formatBalance(countervalue.formatted, ["~"])}
-          </div>
-        )}
-      </CardListItem>
-    </Link>
   );
 }

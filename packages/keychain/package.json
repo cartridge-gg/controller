@@ -64,7 +64,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react-swc": "catalog:",
-    "@vitest/coverage-v8": "2.1.8",
+    "@vitest/coverage-v8": "catalog:",
     "autoprefixer": "catalog:",
     "eslint": "catalog:",
     "http-server": "catalog:",
@@ -83,7 +83,7 @@
     "vite-plugin-node-polyfills": "^0.22.0",
     "vite-plugin-top-level-await": "catalog:",
     "vite-plugin-wasm": "catalog:",
-    "vitest": "^2.1.8"
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "@starknet-react/chains": "catalog:",
