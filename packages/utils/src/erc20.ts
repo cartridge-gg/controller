@@ -7,13 +7,14 @@ import {
   shortString,
   uint256,
 } from "starknet";
+import { erc20Metadata } from "@cartridge/presets";
 
 type ERC20Metadata = {
   name: string;
-  logoUrl?: string;
   symbol: string;
   decimals: number;
   address: string;
+  icon?: string;
 };
 
 export const ETH_CONTRACT_ADDRESS = getChecksumAddress(
@@ -25,27 +26,18 @@ export const STRK_CONTRACT_ADDRESS = getChecksumAddress(
 
 export class ERC20Contract {
   private address: string;
-  private logoUrl?: string;
   private provider: Provider;
 
   private name?: string;
   private symbol?: string;
   private decimals?: number;
+  private icon?: string;
 
   // TODO: Utilize Contract class with ABI
   // private contract: Contract;
 
-  constructor({
-    address,
-    provider,
-    logoUrl,
-  }: {
-    address: string;
-    logoUrl?: string;
-    provider: Provider;
-  }) {
-    this.address = address;
-    this.logoUrl = logoUrl;
+  constructor({ address, provider }: { address: string; provider: Provider }) {
+    this.address = getChecksumAddress(address);
     this.provider = provider;
   }
 
@@ -59,6 +51,9 @@ export class ERC20Contract {
     this.name = name;
     this.symbol = symbol;
     this.decimals = decimals;
+    this.icon = erc20Metadata.find(
+      (m) => this.address === getChecksumAddress(m.l2_token_address),
+    )?.logo_url;
 
     return this;
   }
@@ -71,11 +66,11 @@ export class ERC20Contract {
     }
 
     return {
-      address: this.address,
+      address: getChecksumAddress(this.address),
       name: this.name,
       symbol: this.symbol,
       decimals: this.decimals,
-      logoUrl: this.logoUrl,
+      icon: this.icon,
     };
   }
 
