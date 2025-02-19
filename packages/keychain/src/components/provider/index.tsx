@@ -49,7 +49,10 @@ export function Provider({ children }: PropsWithChildren) {
                     defaultChainId={defaultChainId}
                     provider={jsonRpcProvider({ rpc })}
                   >
-                    <TokensProvider provider={connection.controller?.provider}>
+                    <TokensProvider
+                      address={connection.controller?.address()}
+                      provider={connection.controller?.provider}
+                    >
                       {children}
                     </TokensProvider>
                   </StarknetConfig>
@@ -57,9 +60,9 @@ export function Provider({ children }: PropsWithChildren) {
               </UIProvider>
             </UpgradeProvider>
           </PostHogProvider>
-        </ConnectionContext.Provider>
-      </QueryClientProvider>
-    </CartridgeAPIProvider>
+        </ConnectionContext.Provider >
+      </QueryClientProvider >
+    </CartridgeAPIProvider >
   );
 }
 
