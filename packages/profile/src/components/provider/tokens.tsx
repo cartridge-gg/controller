@@ -3,15 +3,16 @@ import {
   TokensProvider as TokensProviderRaw,
   useTokens,
 } from "@cartridge/utils";
-import { useConnection } from "@/hooks/context";
+import { useConnection } from "#hooks/context";
 import { useSearchParams } from "react-router-dom";
 import { getChecksumAddress } from "starknet";
-
+import { useAccount } from "#hooks/account";
 export function TokensProvider({ children }: PropsWithChildren) {
   const { provider } = useConnection();
+  const { address } = useAccount();
 
   return (
-    <TokensProviderRaw provider={provider}>
+    <TokensProviderRaw address={address} provider={provider}>
       <ERC20ParamsRegistry>{children}</ERC20ParamsRegistry>
     </TokensProviderRaw>
   );
