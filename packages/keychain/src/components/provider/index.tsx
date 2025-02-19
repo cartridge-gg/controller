@@ -60,9 +60,9 @@ export function Provider({ children }: PropsWithChildren) {
               </UIProvider>
             </UpgradeProvider>
           </PostHogProvider>
-        </ConnectionContext.Provider >
-      </QueryClientProvider >
-    </CartridgeAPIProvider >
+        </ConnectionContext.Provider>
+      </QueryClientProvider>
+    </CartridgeAPIProvider>
   );
 }
 

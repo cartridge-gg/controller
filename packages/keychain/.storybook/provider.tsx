@@ -30,9 +30,9 @@ export function Provider({
               <BrowserRouter>{children}</BrowserRouter>
             </TokensProvider>
           </UIProvider>
-        </ConnectionContext.Provider >
-      </QueryClientProvider >
-    </StarknetConfig >
+        </ConnectionContext.Provider>
+      </QueryClientProvider>
+    </StarknetConfig>
   );
 }
 

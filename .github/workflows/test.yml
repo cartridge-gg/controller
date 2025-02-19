@@ -69,7 +69,7 @@ jobs:
           run_install: |
             - args: [--frozen-lockfile]
       - run: pnpm build
-      - run: pnpm test:ci --coverage
+      - run: pnpm test:ci -- --coverage
       - uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

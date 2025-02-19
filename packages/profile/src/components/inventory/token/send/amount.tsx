@@ -1,6 +1,5 @@
-import { useToken } from "#hooks/token";
 import { Amount } from "@cartridge/ui-next";
-import { useCountervalue } from "@cartridge/utils";
+import { formatBalance, useCountervalue, useToken } from "@cartridge/utils";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { useCallback } from "react";
 import { useParams } from "react-router-dom";
@@ -17,13 +16,15 @@ export function SendAmount({
   setError: (error: Error | undefined) => void;
 }) {
   const { address: tokenAddress } = useParams<{ address: string }>();
-  const token = useToken({ tokenAddress: tokenAddress! });
+  const { token } = useToken(tokenAddress!);
 
   const handleMax = useCallback(
     (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
       e.preventDefault();
       if (!token) return;
-      setAmount(parseFloat(token.balance.formatted.replace("~", "")));
+      setAmount(
+        parseFloat(formatBalance(token.balance ?? 0n).replace("~", "")),
+      );
     },
     [token, setAmount],
   );
@@ -31,10 +32,10 @@ export function SendAmount({
   const { countervalue } = useCountervalue(
     {
       balance: amount?.toString() ?? "0",
-      pair: `${token?.meta.symbol}_USDC` as TokenPair,
+      pair: `${token.symbol}_USDC` as TokenPair,
     },
     {
-      enabled: token && ["ETH", "STRK"].includes(token.meta.symbol) && !!amount,
+      enabled: token && ["ETH", "STRK"].includes(token.symbol) && !!amount,
     },
   );
 
@@ -55,9 +56,9 @@ export function SendAmount({
       amount={amount}
       submitted={submitted}
       conversion={countervalue?.formatted}
-      balance={parseFloat(token.balance.formatted.replace("~", ""))}
-      symbol={token.meta.symbol}
-      decimals={token.meta.decimals ?? 18}
+      balance={parseFloat(formatBalance(token.balance ?? 0n).replace("~", ""))}
+      symbol={token.symbol}
+      decimals={token.decimals ?? 18}
       setError={setError}
       onChange={handleChange}
       onMax={handleMax}
