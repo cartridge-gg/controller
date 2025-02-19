@@ -14,7 +14,9 @@
     "build:deps": "pnpm graphql:gen && tsc",
     "graphql:gen": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/indexer/codegen.yaml && pnpm tsx bin/post-graphql-gen.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\""
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "test": "vitest",
+    "test:ci": "vitest run"
   },
   "files": [
     "dist"
@@ -36,8 +38,10 @@
     "@graphql-codegen/typescript-react-query": "^3.5.9",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "prettier": "catalog:",
     "tsx": "^4.19.2",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }
