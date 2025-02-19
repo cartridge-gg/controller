@@ -9,6 +9,9 @@ catalogs:
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
+    '@cartridge/presets':
+      specifier: github:cartridge-gg/presets#555aa13
+      version: 0.0.1
     '@eslint/js':
       specifier: ^9.18.0
       version: 9.19.0
@@ -159,7 +162,7 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#555aa13
+        specifier: 'catalog:'
         version: https://codeload.github.com/cartridge-gg/presets/tar.gz/555aa13
     devDependencies:
       '@changesets/changelog-github':
@@ -981,6 +984,9 @@ importers:
 
   packages/utils:
     dependencies:
+      '@cartridge/presets':
+        specifier: 'catalog:'
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/555aa13
       posthog-js-lite:
         specifier: 3.2.1
         version: 3.2.1
