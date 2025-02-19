@@ -9,7 +9,6 @@ import {
 import { ERC20Contract } from "@cartridge/utils";
 import {
   Price,
-  TokenPair,
   usePriceByAddressesQuery,
 } from "@cartridge/utils/api/cartridge";
 import { useQuery } from "react-query";
@@ -61,13 +60,13 @@ export interface TokensContextValue {
   feeToken?: ERC20;
   isLoading: boolean;
   error?: Error;
-  registerPair: (pair: TokenPair) => void;
+  register: (address: string) => void;
 }
 
 export const TokensContext = createContext<TokensContextValue>({
   tokens: {},
   isLoading: false,
-  registerPair: () => { },
+  register: () => { },
 });
 
 interface TokensProviderProps extends PropsWithChildren {
@@ -202,7 +201,7 @@ export function TokensProvider({
     }
   }, [priceData?.priceByAddresses, addresses]);
 
-  const registerPair = useCallback(
+  const register = useCallback(
     async (address: string) => {
       if (!provider) return;
 
@@ -244,7 +243,7 @@ export function TokensProvider({
       feeToken: tokens[getChecksumAddress(feeToken)],
       isLoading: !initialLoadComplete && (isLoadingBalances || isPriceLoading),
       error: (balanceError || priceError) as Error | undefined,
-      registerPair,
+      register,
     }),
     [
       tokens,
@@ -254,7 +253,7 @@ export function TokensProvider({
       isPriceLoading,
       balanceError,
       priceError,
-      registerPair,
+      register,
     ],
   );
 
