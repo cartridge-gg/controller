@@ -5,7 +5,7 @@ import { getChecksumAddress } from "starknet";
 export function useTokens(): TokensContextValue {
   const context = useContext(TokensContext);
   if (!context) {
-    throw new Error("useTokens must be used within a TokensProvider");
+    throw new Error("useERC20 must be used within a ERC20Provider");
   }
 
   return context;
