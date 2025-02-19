@@ -50,28 +50,28 @@ export function DeployController({
   const feeEstimate: FeeEstimate | undefined = ctrlError?.data?.fee_estimate;
   const estimateFee: EstimateFee | undefined = feeEstimate
     ? {
-      gas_consumed: BigInt(feeEstimate.gas_consumed),
-      overall_fee: BigInt(feeEstimate.overall_fee),
-      gas_price: BigInt(feeEstimate.gas_price),
-      unit: feeEstimate.unit,
-      suggestedMaxFee: BigInt(feeEstimate.overall_fee),
-      data_gas_consumed: BigInt(
-        feeEstimate.data_gas_consumed ? feeEstimate.data_gas_consumed : "0x0",
-      ),
-      data_gas_price: BigInt(
-        feeEstimate.data_gas_price ? feeEstimate.data_gas_price : "0x0",
-      ),
-      resourceBounds: {
-        l1_gas: {
-          max_amount: feeEstimate.overall_fee,
-          max_price_per_unit: feeEstimate.gas_price,
+        gas_consumed: BigInt(feeEstimate.gas_consumed),
+        overall_fee: BigInt(feeEstimate.overall_fee),
+        gas_price: BigInt(feeEstimate.gas_price),
+        unit: feeEstimate.unit,
+        suggestedMaxFee: BigInt(feeEstimate.overall_fee),
+        data_gas_consumed: BigInt(
+          feeEstimate.data_gas_consumed ? feeEstimate.data_gas_consumed : "0x0",
+        ),
+        data_gas_price: BigInt(
+          feeEstimate.data_gas_price ? feeEstimate.data_gas_price : "0x0",
+        ),
+        resourceBounds: {
+          l1_gas: {
+            max_amount: feeEstimate.overall_fee,
+            max_price_per_unit: feeEstimate.gas_price,
+          },
+          l2_gas: {
+            max_amount: feeEstimate.overall_fee,
+            max_price_per_unit: feeEstimate.gas_price,
+          },
         },
-        l2_gas: {
-          max_amount: feeEstimate.overall_fee,
-          max_price_per_unit: feeEstimate.gas_price,
-        },
-      },
-    }
+      }
     : undefined;
 
   useEffect(() => {
@@ -272,8 +272,9 @@ function ExplorerLink({
 
   return (
     <Link
-      to={`https://${chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
-        }starkscan.co/tx/${txHash}`}
+      to={`https://${
+        chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
+      }starkscan.co/tx/${txHash}`}
       target="_blank"
       className="flex items-center gap-1 text-sm text-foreground-400 underline"
     >

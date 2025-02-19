@@ -1,11 +1,7 @@
 import { connectToParent } from "@cartridge/penpal";
 import { useState, ReactNode, useEffect, useCallback } from "react";
-import {
-  ETH_CONTRACT_ADDRESS,
-  normalize,
-  STRK_CONTRACT_ADDRESS,
-} from "@cartridge/utils";
-import { constants, getChecksumAddress, RpcProvider } from "starknet";
+import { normalize } from "@cartridge/utils";
+import { constants, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ConnectionContext,
@@ -41,25 +37,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       const nsParam = searchParams.get("ns");
       if (nsParam) {
         state.namespace = decodeURIComponent(nsParam);
-      }
-
-      // Only update when erc20 state hasn't been set
-      if (!state.erc20.length) {
-        const erc20Param = searchParams.get("erc20");
-        state.erc20 = [
-          ETH_CONTRACT_ADDRESS,
-          STRK_CONTRACT_ADDRESS,
-          ...(erc20Param
-            ? decodeURIComponent(erc20Param)
-                .split(",")
-                .filter(
-                  (address) =>
-                    ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
-                      getChecksumAddress(address),
-                    ),
-                )
-            : []),
-        ];
       }
       return state;
     });

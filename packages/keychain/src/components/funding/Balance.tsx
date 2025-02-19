@@ -6,12 +6,9 @@ import {
   CardTitle,
   CoinsIcon,
 } from "@cartridge/ui-next";
-import { useCreditBalance, useFeeToken, } from "@cartridge/utils";
+import { useCreditBalance, useFeeToken } from "@cartridge/utils";
 import { useController } from "@/hooks/controller";
-import {
-  formatBalance,
-  convertTokenAmountToUSD,
-} from "@/hooks/tokens";
+import { formatBalance, convertTokenAmountToUSD } from "@/hooks/tokens";
 
 export enum BalanceType {
   CREDITS = "credits",
