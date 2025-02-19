@@ -26,10 +26,6 @@
       "storybook": "./src/hooks/collection.mock.ts",
       "default": "./src/hooks/collection.ts"
     },
-    "#hooks/token": {
-      "storybook": "./src/hooks/token.mock.ts",
-      "default": "./src/hooks/token.ts"
-    },
     "#*": [
       "./src/*",
       "./src/*.ts",

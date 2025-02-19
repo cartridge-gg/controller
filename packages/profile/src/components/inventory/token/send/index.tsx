@@ -1,6 +1,5 @@
 import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context";
-import { useToken } from "#hooks/token";
 import {
   LayoutContainer,
   LayoutContent,
@@ -18,6 +17,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
 import { SendRecipient } from "#components/modules/recipient";
 import { SendAmount } from "./amount";
+import { useToken } from "@cartridge/utils";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
@@ -25,7 +25,7 @@ export function SendToken() {
   const { parent } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
-  const token = useToken({ tokenAddress: tokenAddress! });
+  const { token } = useToken(tokenAddress!);
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
@@ -47,12 +47,12 @@ export function SendToken() {
       if (!token || !to || !amount) return;
 
       const formattedAmount = uint256.bnToUint256(
-        BigInt(amount * 10 ** token.meta.decimals),
+        BigInt(amount * 10 ** token.decimals),
       );
 
       const calls: Call[] = [
         {
-          contractAddress: token.meta.address,
+          contractAddress: token.address,
           entrypoint: "transfer",
           calldata: [to, formattedAmount],
         },
@@ -70,13 +70,13 @@ export function SendToken() {
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={`Send ${token.meta.symbol}`}
+        title={`Send ${token.symbol}`}
         description={<CopyAddress address={address} size="sm" />}
         icon={
           <div className="rounded-full size-11 bg-foreground-100 flex items-center justify-center">
             <img
               className="w-10 h-10"
-              src={token.meta.logoUrl ?? "/public/placeholder.svg"}
+              src={token.icon ?? "/public/placeholder.svg"}
             />
           </div>
         }
