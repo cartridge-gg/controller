@@ -1,7 +1,7 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import {
-    AppleIcon,
+  AppleIcon,
   Button,
   Card,
   CardDescription,
