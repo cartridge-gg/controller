@@ -47,7 +47,10 @@ export function Provider({ children }: PropsWithChildren) {
                   defaultChainId={defaultChainId}
                   provider={jsonRpcProvider({ rpc })}
                 >
-                  <TokensProvider provider={connection.controller?.provider}>
+                  <TokensProvider
+                    address={connection.controller?.address()}
+                    provider={connection.controller?.provider}
+                  >
                     <PostHogProvider>{children}</PostHogProvider>
                   </TokensProvider>
                 </StarknetConfig>
