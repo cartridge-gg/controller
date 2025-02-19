@@ -1,9 +1,14 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import {
+    AppleIcon,
   Button,
+  Card,
+  CardDescription,
   CheckIcon,
+  CreditCardIcon,
   DepositIcon,
+  InfoIcon,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
@@ -33,7 +38,7 @@ type PurchaseCreditsProps = {
   onBack?: () => void;
 };
 
-export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
+export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   const { closeModal, controller } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
@@ -130,19 +135,9 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
         )}
       </LayoutContent>
 
-      <Separator className="bg-spacer m-1" />
+      <Separator className="bg-spacer m-1 mx-4" />
 
       <LayoutFooter>
-        <ErrorAlert
-          variant=""
-          title="WHAT ARE CREDITS"
-          description={
-            "Credits can be used " +
-            (isSlot ? "for slot deployments" : "to play games") +
-            ". They are not tokens and cannot be transferred or refunded."
-          }
-          isExpanded
-        />
         {error && (
           <ErrorAlert
             variant="warning"
@@ -151,15 +146,47 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           />
         )}
 
+        <Card className="bg-background-100 border border-background-200 p-3">
+          <CardDescription className="flex flex-row items-start gap-1">
+            <InfoIcon size="sm" className="text-foreground-200 flex-shrink-0" />
+            <p className="text-foreground-200 font-normal text-xs">
+              Credits are used to pay for network activity. They are not tokens
+              and cannot be transferred or refunded.
+            </p>
+          </CardDescription>
+        </Card>
+
         {state === PurchaseState.SUCCESS && isIframe() && (
           <Button variant="secondary" onClick={closeModal}>
             Close
           </Button>
         )}
         {state === PurchaseState.SELECTION && (
-          <Button isLoading={isLoading} onClick={createPaymentIntent}>
-            Purchase
-          </Button>
+          <div className="flex flex-row gap-3">
+            <Button
+              className="flex-1"
+              isLoading={isLoading}
+              onClick={createPaymentIntent}
+            >
+              <CreditCardIcon
+                size="sm"
+                variant="solid"
+                className="text-background-100 flex-shrink-0"
+              />
+              <span>Stripe</span>
+            </Button>
+            <Button
+              className="bg-foreground-100 flex-1"
+              isLoading={isLoading}
+              onClick={createPaymentIntent}
+            >
+              <AppleIcon
+                size="sm"
+                className="text-background-100 flex-shrink-0"
+              />
+              <span>Apple Pay</span>
+            </Button>
+          </div>
         )}
       </LayoutFooter>
     </LayoutContainer>
