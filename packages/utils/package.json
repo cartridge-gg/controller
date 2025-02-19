@@ -20,6 +20,7 @@
     "dist"
   ],
   "dependencies": {
+    "@cartridge/presets": "catalog:",
     "posthog-js-lite": "3.2.1",
     "react": "catalog:",
     "react-query": "catalog:",
