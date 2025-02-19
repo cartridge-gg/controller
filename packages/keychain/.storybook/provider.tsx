@@ -12,7 +12,7 @@ import {
   ControllerThemeContext,
   VerifiableControllerTheme,
 } from "../src/context/theme";
-import { TokensProvider } from "../src/components/provider/tokens";
+import { TokensProvider } from "@cartridge/utils";
 
 export function Provider({
   children,
@@ -40,7 +40,10 @@ export function Provider({
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
           <UIProvider>
-            <TokensProvider>
+            <TokensProvider
+              address={parameters.connection?.controller?.address()}
+              provider={parameters.connection?.controller?.provider}
+            >
               <ControllerThemeProvider theme={connection.theme}>
                 <BrowserRouter>{children}</BrowserRouter>
               </ControllerThemeProvider>

@@ -14,7 +14,7 @@
     "starknet": "catalog:"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
+    "typescript": "catalog:",
     "tsx": "^4.7.0",
     "@types/node": "^22.12.0"
   }
