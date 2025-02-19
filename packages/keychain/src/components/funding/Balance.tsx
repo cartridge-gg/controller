@@ -1,18 +1,17 @@
+import { useController } from "@/hooks/controller";
+import {
+  convertTokenAmountToUSD,
+  formatBalance,
+  useFeeToken,
+} from "@/hooks/tokens";
 import {
   Card,
   CardHeader,
   CardListContent,
   CardListItem,
   CardTitle,
-  CoinsIcon,
 } from "@cartridge/ui-next";
 import { useCreditBalance } from "@cartridge/utils";
-import { useController } from "@/hooks/controller";
-import {
-  formatBalance,
-  convertTokenAmountToUSD,
-  useFeeToken,
-} from "@/hooks/tokens";
 
 export enum BalanceType {
   CREDITS = "credits",
@@ -31,19 +30,28 @@ export function Balance({ types }: BalanceProps) {
   });
 
   const { token } = useFeeToken();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Balance</CardTitle>
+        <CardTitle className="normal-case font-semibold">Balance</CardTitle>
       </CardHeader>
 
       <CardListContent>
         {types.includes(BalanceType.CREDITS) && (
-          <CardListItem icon={<CoinsIcon variant="solid" />}>
-            <div className="flex items-center gap-2">
-              {creditBalance.formatted ? 0 : "Loading"}
-              <span className="text-foreground-400">CREDITS</span>
+          <CardListItem className="flex flex-row items-center p-4">
+            <div className="flex flex-row items-center gap-3">
+              <div className="p-1 bg-background-300 rounded-full">
+                <img src="/ERC-20-Icon.svg" className="size-8" />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-foreground-100 font-medium">Credits</p>
+                <p className="text-foreground-300 font-normal">
+                  {creditBalance.formatted ? 0 : "Loading"} CREDITS
+                </p>
+              </div>
             </div>
+            <p className="text-foreground-100 font-medium">{`${creditBalance.formatted}`}</p>
           </CardListItem>
         )}
 
