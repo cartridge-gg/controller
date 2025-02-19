@@ -1,11 +1,11 @@
 import { constants, RpcProvider } from "starknet";
-import Controller from "@cartridge/controller";
 import { SessionPolicies } from "@cartridge/presets";
 import { Parameters } from "@storybook/react";
 import { ConnectionContextValue } from "../src/components/provider/connection";
 import { UpgradeInterface } from "../src/hooks/upgrade";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { defaultTheme } from "@cartridge/presets";
+import Controller from "../src/utils/controller";
 
 export interface StoryParameters extends Parameters {
   connection?: {

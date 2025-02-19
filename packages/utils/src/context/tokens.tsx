@@ -73,8 +73,8 @@ interface TokensProviderProps extends PropsWithChildren {
   tokens?: ERC20Metadata[];
   refetchInterval?: number;
   feeToken?: string;
-  provider?: Provider;
-  address?: string;
+  provider: Provider | undefined;
+  address: string | undefined;
 }
 
 export function TokensProvider({
