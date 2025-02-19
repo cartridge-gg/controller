@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Spinner } from "@cartridge/ui-next";
-import { ERC20, useFeeToken } from "@cartridge/utils";
+import { ERC20, useFeeToken, convertTokenAmountToUSD } from "@cartridge/utils";
 import { EstimateFee } from "starknet";
-import { convertTokenAmountToUSD } from "@/hooks/tokens";
 import { ErrorAlert } from "./ErrorAlert";
 
 export function Fees({
