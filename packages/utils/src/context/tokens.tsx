@@ -99,26 +99,24 @@ export function TokensProvider({
       tokens.push(...tokensArg);
     }
 
-    const initialTokens = tokens.reduce(
+    const initialTokens = tokens.reduce<Record<string, ERC20>>(
       (acc, token) => {
-        const { icon, address, name, symbol, decimals } = token;
         const normalizedAddress = getChecksumAddress(address);
         const contract = new ERC20Contract({
           address: normalizedAddress,
           provider,
         });
 
-        acc[normalizedAddress] = {
-          name,
-          symbol,
-          decimals,
-          address: normalizedAddress,
-          icon,
-          contract,
+        return {
+          ...acc,
+          [normalizedAddress]: {
+            ...token,
+            address: normalizedAddress,
+            contract,
+          }
         };
-        return acc;
       },
-      {} as Record<string, ERC20>,
+      {},
     );
 
     setTokens(initialTokens);
@@ -203,14 +201,10 @@ export function TokensProvider({
 
   const register = useCallback(
     async (address: string) => {
-      if (!provider) return;
+      if (!provider || tokens[getChecksumAddress(address)]) return;
 
-      const normalizedAddress = getChecksumAddress(address);
-      if (tokens[normalizedAddress]) return;
-
-      const newTokens = { ...tokens };
       const contract = new ERC20Contract({
-        address: normalizedAddress,
+        address,
         provider,
       });
 
@@ -219,19 +213,16 @@ export function TokensProvider({
         await contract.init();
         const metadata = contract.metadata();
 
-        newTokens[normalizedAddress] = {
-          name: metadata.name,
-          symbol: metadata.symbol,
-          decimals: metadata.decimals,
-          address: normalizedAddress,
-          icon: "",
-          contract,
-          balance,
-        };
-
-        setTokens(newTokens);
+        setTokens(tokens => ({
+          ...tokens,
+          [metadata.address]: {
+            ...metadata,
+            contract,
+            balance,
+          }
+        }));
       } catch (error) {
-        console.error(`Failed to load token ${normalizedAddress}:`, error);
+        console.error(`Failed to load token ${address}:`, error);
       }
     },
     [address, tokens, provider],
