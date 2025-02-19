@@ -95,6 +95,7 @@ export function AmountSelection({
               const amount = Number.parseFloat(value) || 0;
               onChange?.(amount);
             }}
+            onFocus={() => setCustom(true)}
           />
           <DollarIcon size="xs" className="absolute top-3 left-3" />
         </div>
