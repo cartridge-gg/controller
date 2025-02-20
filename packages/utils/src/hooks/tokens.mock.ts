@@ -1,10 +1,11 @@
 import { TokensContextValue } from "src/context/tokens";
 import { getChecksumAddress } from "starknet";
-import { tokensByAddress } from "@cartridge/utils/mock/data";
+import { tokensByAddress, tokensBySymbol } from "@cartridge/utils/mock/data";
 
 export function useTokens(): TokensContextValue {
   return {
     tokens: tokensByAddress,
+    feeToken: tokensBySymbol.ETH,
     isLoading: false,
     register: () => {},
   };

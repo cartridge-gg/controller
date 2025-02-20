@@ -31,6 +31,7 @@ export function Balance({ types }: BalanceProps) {
   });
 
   const { token } = useFeeToken();
+
   return (
     <Card>
       <CardHeader>
