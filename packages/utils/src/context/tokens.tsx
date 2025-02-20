@@ -89,24 +89,18 @@ export function TokensProvider({
     }
 
     // Create synchronous token initialization
-    const tokens = [...DEFAULT_TOKENS];
-    if (tokensArg) {
-      tokens.push(...tokensArg);
-    }
-
-    const initialTokens = tokens.reduce<Record<string, ERC20>>(
+    const initialTokens = tokensArg.reduce<Record<string, ERC20>>(
       (acc, token) => {
-        const normalizedAddress = getChecksumAddress(address);
         const contract = new ERC20Contract({
-          address: normalizedAddress,
+          address: token.address,
           provider,
         });
 
         return {
           ...acc,
-          [normalizedAddress]: {
+          [contract.address]: {
             ...token,
-            address: normalizedAddress,
+            address: contract.address,
             contract,
           }
         };
@@ -166,7 +160,6 @@ export function TokensProvider({
   const addresses = useMemo(() => Object.keys(tokens), [tokens]);
 
   const {
-    data: priceData,
     isLoading: isPriceLoading,
     error: priceError,
   } = usePriceByAddressesQuery(
@@ -176,28 +169,27 @@ export function TokensProvider({
     {
       refetchInterval,
       enabled: addresses.length > 0,
+      onSuccess: (data) => {
+        if (!data?.priceByAddresses) return;
+
+        setTokens((tokens) => {
+          data.priceByAddresses.forEach((price, index) => {
+            const address = addresses[index];
+            if (tokens[address]) {
+              tokens[address].price = price;
+            }
+          });
+          return tokens;
+        });
+      }
     },
   );
-
-  useEffect(() => {
-    if (priceData?.priceByAddresses) {
-      setTokens((prevTokens) => {
-        const newTokens = { ...prevTokens };
-        priceData.priceByAddresses.forEach((price, index) => {
-          const address = addresses[index];
-          if (newTokens[address]) {
-            newTokens[address].price = price;
-          }
-        });
-        return newTokens;
-      });
-    }
-  }, [priceData?.priceByAddresses, addresses]);
 
   const register = useCallback(
     async (address: string) => {
       if (!provider || tokens[getChecksumAddress(address)]) return;
 
+      const newTokens = { ...tokens };
       const contract = new ERC20Contract({
         address,
         provider,
@@ -207,15 +199,13 @@ export function TokensProvider({
         const balance = await contract.balanceOf(address);
         await contract.init();
         const metadata = contract.metadata();
+        newTokens[metadata.address] = {
+          ...metadata,
+          contract,
+          balance,
+        };
 
-        setTokens(tokens => ({
-          ...tokens,
-          [metadata.address]: {
-            ...metadata,
-            contract,
-            balance,
-          }
-        }));
+        setTokens(newTokens);
       } catch (error) {
         console.error(`Failed to load token ${address}:`, error);
       }
