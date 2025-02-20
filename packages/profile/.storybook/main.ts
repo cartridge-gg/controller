@@ -20,18 +20,37 @@ const config: StorybookConfig = {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
   },
-  viteFinal: (config) => 
+  viteFinal: (config) =>
     mergeConfig(config, {
       resolve: {
         alias: {
           "@/hooks/account": require.resolve("../src/hooks/account.mock.ts"),
-          "@/hooks/collection": require.resolve("../src/hooks/collection.mock.ts"),
+          "@/hooks/collection": require.resolve(
+            "../src/hooks/collection.mock.ts",
+          ),
           "@/hooks/token": require.resolve("../src/hooks/token.mock.ts"),
-          "@cartridge/utils/api/cartridge": require.resolve("../node_modules/@cartridge/utils/dist/api/cartridge/index.js"),
-          "@cartridge/utils/api/indexer": require.resolve("../node_modules/@cartridge/utils/dist/api/indexer/index.js"),
-          "@cartridge/utils/mock/data": require.resolve("../node_modules/@cartridge/utils/dist/mock/data/index.js"),
+          "@cartridge/utils/api/cartridge": require.resolve(
+            "../node_modules/@cartridge/utils/dist/api/cartridge/index.js",
+          ),
+          "@cartridge/utils/api/indexer": require.resolve(
+            "../node_modules/@cartridge/utils/dist/api/indexer/index.js",
+          ),
+          "@cartridge/utils/mock/data": require.resolve(
+            "../node_modules/@cartridge/utils/dist/mock/data/index.js",
+          ),
         },
       },
-    })
+    }),
+  previewHead: (head) => `
+    ${head}
+    ${
+      process.env.SNAPSHOT &&
+      `<style>
+      * {
+        animation: none !important;
+      }
+    </style>`
+    }
+  `,
 };
 export default config;
