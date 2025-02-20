@@ -1,13 +1,18 @@
-import { SparklesIcon, TrophyIcon, WedgeIcon, cn } from "@cartridge/ui-next";
-import { Trophy } from "./trophy";
+import { AchievementCard, AchievementFeatured, AchievementProgress } from "@cartridge/ui-next";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameModel } from "@bal7hazar/arcade-sdk";
+import { useAccount } from "@/hooks/account";
+import { useConnection } from "@/hooks/context";
+import { useArcade } from "@/hooks/arcade";
+import { addAddressPadding } from "starknet";
+import { toast } from "sonner";
 
 const HIDDEN_GROUP = "Hidden";
 
 export function Trophies({
   achievements,
+  pinneds,
   softview,
   enabled,
   game,
@@ -15,12 +20,14 @@ export function Trophies({
   earnings,
 }: {
   achievements: Item[];
+  pinneds: Item[];
   softview: boolean;
   enabled: boolean;
   game: GameModel | undefined;
   pins: { [playerId: string]: string[] };
   earnings: number;
 }) {
+  const { address } = useAccount();
   const [groups, setGroups] = useState<{ [key: string]: Item[] }>({});
 
   useEffect(() => {
@@ -50,13 +57,22 @@ export function Trophies({
 
   return (
     <div className="flex flex-col gap-4">
-      <Total completed={completed} total={total} earnings={earnings} />
-      <div className="flex flex-col gap-3">
+      <div className="flex justify-between">
+        {pinneds.map((pin) => (
+          <AchievementFeatured key={pin.id} icon={pin.icon} title={pin.title} />
+        ))}
+        {Array.from({ length: 3 - pinneds.length }).map((_, index) => (
+          <AchievementFeatured key={index} />
+        ))}
+      </div>
+      <AchievementProgress count={completed} total={total} points={earnings} completed variant="ghost" />
+      <div className="flex flex-col gap-4">
         {Object.entries(groups)
           .filter(([group]) => group !== HIDDEN_GROUP)
           .map(([group, items]) => (
             <Group
               key={group}
+              address={address}
               group={group}
               items={items}
               softview={softview}
@@ -67,6 +83,7 @@ export function Trophies({
           ))}
         <Group
           key={HIDDEN_GROUP}
+          address={address}
           group={HIDDEN_GROUP}
           items={(groups[HIDDEN_GROUP] || []).sort(
             (a, b) => a.earning - b.earning,
@@ -83,6 +100,7 @@ export function Trophies({
 
 function Group({
   group,
+  address,
   items,
   softview,
   enabled,
@@ -90,234 +108,79 @@ function Group({
   pins,
 }: {
   group: string;
+  address: string;
   items: Item[];
   softview: boolean;
   enabled: boolean;
   game: GameModel | undefined;
   pins: { [playerId: string]: string[] };
 }) {
-  const [page, setPage] = useState(0);
-  const [pages, setPages] = useState<number[]>([]);
+  const { parent } = useConnection();
+  const { chainId, provider } = useArcade();
 
-  const visibles = useMemo(() => {
-    return items.filter((a) => a.index === page || (a.hidden && !a.completed));
-  }, [items, page]);
+  const handlePin = useCallback((pinned: boolean, achievementId: string, setLoading: (loading: boolean) => void) => {
+    if (!enabled) return;
+    const process = async () => {
+      setLoading(true);
+      try {
+        const calls = pinned ? provider.social.unpin({ achievementId }) : provider.social.pin({ achievementId });
+        const res = await parent.openExecute(
+          Array.isArray(calls) ? calls : [calls],
+          chainId,
+        );
+        if (res) {
+          toast.success(`Trophy ${pinned ? "unpinned" : "pinned"} successfully`);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error(`Failed to ${pinned ? "unpin" : "pin"} trophy`);
+      } finally {
+        setLoading(false);
+      }
+    };
+    process();
+  }, [enabled]);
 
-  useEffect(() => {
-    // Set the page to the first uncompleted achievement or 0 if there are none
-    const filtereds = items.filter((a) => !a.hidden || a.completed);
-    // Get the unique list of indexes for the achievements in this group
-    const pages =
-      filtereds.length > 0 ? [...new Set(filtereds.map((a) => a.index))] : [0];
-    setPages(pages);
-    const page = filtereds.find((a) => !a.completed);
-    setPage(page ? page.index : pages[pages.length - 1]);
-  }, [items]);
-
-  const handleNext = useCallback(() => {
-    const index = pages.indexOf(page);
-    const next = pages[index + 1];
-    if (!next) return;
-    setPage(next);
-  }, [page, pages]);
-
-  const handlePrevious = useCallback(() => {
-    const index = pages.indexOf(page);
-    if (index === 0) return;
-    setPage(pages[index - 1]);
-  }, [page, pages]);
-
-  if (visibles.length === 0) return null;
-
-  return (
-    <div className="flex flex-col gap-y-px rounded-md overflow-hidden">
-      <Header
-        group={group}
-        page={page}
-        pages={pages}
-        items={items}
-        setPage={setPage}
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
-      />
-      {visibles.map((achievement) => (
-        <Trophy
-          key={achievement.id}
-          icon={
-            achievement.hidden && !achievement.completed
-              ? "fa-trophy"
-              : achievement.icon
-          }
-          title={
-            achievement.hidden && !achievement.completed
-              ? "Hidden Achievement"
-              : achievement.title
-          }
-          description={
-            achievement.hidden && !achievement.completed
-              ? ""
-              : achievement.description
-          }
-          percentage={achievement.percentage}
-          earning={achievement.earning}
-          timestamp={achievement.timestamp}
-          hidden={achievement.hidden}
-          completed={achievement.completed}
-          id={achievement.id}
-          softview={softview}
-          enabled={enabled}
-          tasks={achievement.tasks}
-          game={game}
-          pins={pins}
-        />
-      ))}
-    </div>
-  );
-}
-
-function Header({
-  group,
-  page,
-  pages,
-  items,
-  setPage,
-  handleNext,
-  handlePrevious,
-}: {
-  group: string;
-  page: number;
-  pages: number[];
-  items: Item[];
-  setPage: (page: number) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
-}) {
-  const title = useMemo(() => {
-    return group
-      .toLowerCase()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }, [group]);
+  const achievements = useMemo(() => {
+    
+    return items.map((item) => {
+      const pinned = pins[addAddressPadding(address)]?.includes(item.id) && item.completed;
+      return {
+        id: item.id,
+        index: item.index,
+        completed: item.completed,
+        content: {
+          points: item.earning,
+          difficulty: parseFloat(item.percentage),
+          hidden: item.hidden,
+          icon: item.hidden && !item.completed ? undefined : item.icon,
+          title: item.title,
+          description: item.description,
+          tasks: item.tasks,
+          timestamp: item.completed ? item.timestamp : undefined,
+        },
+        pin: softview || !item.completed ? undefined : {
+          pinned: pinned,
+          achievementId: item.id,
+          disabled: !enabled,
+          onClick: handlePin,
+        },
+        share: softview || !item.completed || !game?.socials.website || !game?.socials.twitter ? undefined : {
+          website: game?.socials.website,
+          twitter: game?.socials.twitter,
+          timestamp: item.timestamp,
+          points: item.earning,
+          difficulty: parseFloat(item.percentage),
+          title: item.title,
+        },
+      }
+    });
+  }, [items, pins, handlePin]);
 
   return (
-    <div className="flex gap-x-px items-center h-10">
-      <div className="grow h-full p-3 bg-background-200 flex items-center">
-        <p className="text-xs text-foreground-400 font-semibold tracking-wider">
-          {title}
-        </p>
-      </div>
-      {pages.length > 1 && (
-        <>
-          <Pagination
-            icon={<WedgeIcon variant="left" size="sm" />}
-            onClick={handlePrevious}
-            disabled={page === pages[0]}
-          />
-          <Pagination
-            icon={<WedgeIcon variant="right" size="sm" />}
-            onClick={handleNext}
-            disabled={page === pages[pages.length - 1]}
-          />
-          <div className="flex items-center justify-center h-full p-3 bg-background-200 gap-2">
-            <div className="flex items-center justify-center rounded-xl bg-background-300 p-[3px]">
-              <div className="flex items-center justify-center rounded-xl overflow-hidden gap-x-px">
-                {pages.map((current) => (
-                  <Page
-                    key={current}
-                    index={current}
-                    completed={items
-                      .filter((a) => a.index === current)
-                      .every((a) => a.completed)}
-                    highlighted={current === page}
-                    setPage={setPage}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function Pagination({
-  icon,
-  onClick,
-  disabled,
-}: {
-  icon: React.ReactNode;
-  onClick: () => void;
-  disabled: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex items-center justify-center h-full w-10 bg-background-200",
-        !disabled && "cursor-pointer hover:opacity-70",
-      )}
-      onClick={onClick}
-    >
-      <div className="text-foreground-300">{icon}</div>
-    </div>
-  );
-}
-
-function Page({
-  index,
-  completed,
-  highlighted,
-  setPage,
-}: {
-  index: number;
-  completed: boolean;
-  highlighted: boolean;
-  setPage: (page: number) => void;
-}) {
-  return (
-    <div
-      className={cn(
-        "h-[10px] w-[10px] opacity-50 hover:cursor-pointer hover:opacity-100",
-        completed ? "bg-primary" : "bg-foreground-400",
-        highlighted && "opacity-100",
-      )}
-      onClick={() => setPage(index)}
+    <AchievementCard
+      name={group}
+      achievements={achievements}
     />
-  );
-}
-
-function Total({
-  completed,
-  total,
-  earnings,
-}: {
-  completed: number;
-  total: number;
-  earnings: number;
-}) {
-  return (
-    <div className="h-8 py-2 px-3 flex items-center justify-between gap-4 rounded-md overflow-hidden">
-      <div className="flex items-center gap-1">
-        <TrophyIcon className="text-foreground-300" size="xs" variant="solid" />
-        <p className="text-xs text-foreground-300 font-medium">
-          {`${completed} of ${total}`}
-        </p>
-      </div>
-      <div className="h-4 grow flex flex-col justify-center items-start bg-background-300 rounded-xl p-1">
-        <div
-          style={{ width: `${Math.floor((100 * completed) / total)}%` }}
-          className={cn("grow bg-primary rounded-xl")}
-        />
-      </div>
-      <div className="flex items-center gap-1">
-        <SparklesIcon
-          className="text-foreground-300"
-          size="xs"
-          variant="solid"
-        />
-        <p className="text-xs text-foreground-300 font-medium">{earnings}</p>
-      </div>
-    </div>
   );
 }

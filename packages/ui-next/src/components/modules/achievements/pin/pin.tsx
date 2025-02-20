@@ -1,18 +1,28 @@
 import { Button, TrackIcon } from "@/index";
+import { useCallback, useState } from "react";
 
 export interface AchievementPinProps {
   pinned?: boolean;
-  loading?: boolean;
+  achievementId?: string;
   disabled?: boolean;
-  onClick?: () => void;
+  onClick?: (pinned: boolean, achievementId: string, setLoading: (loading: boolean) => void) => void;
 }
 
 export function AchievementPin({
   pinned,
-  loading,
+  achievementId,
   disabled,
   onClick,
 }: AchievementPinProps) {
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = useCallback(() => {
+    if (disabled) return;
+    console.log("pinned", !!pinned);
+    console.log("achievementId", achievementId);
+    onClick?.(!!pinned, achievementId ?? "", setLoading);
+  }, [disabled, onClick, pinned, achievementId, setLoading]);
+
   return (
     <Button
       variant="tertiary"
@@ -21,7 +31,7 @@ export function AchievementPin({
       isLoading={loading}
       isActive={pinned}
       disabled={disabled}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <TrackIcon size="sm" variant={pinned ? "solid" : "line"} />
     </Button>

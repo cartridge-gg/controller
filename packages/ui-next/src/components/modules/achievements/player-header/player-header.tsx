@@ -4,17 +4,17 @@ import { AchievementPlayerLabel } from "../player-label";
 interface AchievementPlayerHeaderProps {
   username: string;
   address: string;
-  icon?: string;
   points: number;
-  follower: boolean;
-  followers: string[];
+  icon?: string;
+  follower?: boolean;
+  followers?: string[];
 }
 
 export const AchievementPlayerHeader = ({
   username,
   address,
-  icon,
   points,
+  icon,
   follower,
   followers,
 }: AchievementPlayerHeaderProps) => {
@@ -29,7 +29,7 @@ export const AchievementPlayerHeader = ({
         <div className="h-6 flex items-center gap-x-2">
           <p className="text-xs text-foreground-300 flex items-center gap-x-1">
             <strong className="font-medium text-foreground-100">
-              {followers.length.toLocaleString()}
+              {followers?.length?.toLocaleString() || 0}
             </strong>
             Followers
           </p>
@@ -41,7 +41,7 @@ export const AchievementPlayerHeader = ({
           </p>
           {follower && <FollowerTag />}
         </div>
-        <FollowerDescription followers={followers} />
+        <FollowerDescription followers={followers || []} />
       </div>
     </div>
   );

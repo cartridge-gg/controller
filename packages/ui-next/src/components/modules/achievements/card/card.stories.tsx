@@ -16,7 +16,7 @@ type Story = StoryObj<typeof AchievementCard>;
 
 export const Squire: Story = {
   args: {
-    name: "Squire",
+    name: "SQUIRE",
     achievements: [
       {
         id: "1",
@@ -39,7 +39,12 @@ export const Squire: Story = {
           onClick: fn(),
         },
         share: {
-          onClick: fn(),
+          website: "https://lootsurvivor.io",
+          twitter: "https://x.com/lootsurvivor",
+          timestamp: 1728717697,
+          points: 20,
+          difficulty: 12,
+          title: "Squire",
         },
       },
     ],
@@ -99,7 +104,12 @@ export const Battlelord: Story = {
           onClick: fn(),
         },
         share: {
-          onClick: fn(),
+          website: "https://lootsurvivor.io",
+          twitter: "https://x.com/lootsurvivor",
+          timestamp: 1728717697,
+          points: 20,
+          difficulty: 12,
+          title: "Battlelord 1",
         },
       },
       {

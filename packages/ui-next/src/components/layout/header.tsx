@@ -135,14 +135,14 @@ export function LayoutHeader({
 type HeaderInnerProps = {
   Icon?: React.ComponentType<IconProps>;
   icon?: React.ReactElement;
-  title: string | React.ReactElement;
+  title?: string | React.ReactElement;
   description?: string | React.ReactElement;
   variant?: HeaderVariant;
   right?: React.ReactElement;
   className?: string;
 };
 
-type HeaderVariant = "expanded" | "compressed";
+type HeaderVariant = "expanded" | "compressed" | "hidden";
 
 function HeaderInner({
   variant,
@@ -153,6 +153,8 @@ function HeaderInner({
   right,
   className,
 }: HeaderInnerProps) {
+  if (variant === "hidden") return null;
+
   return (
     <div className={cn("p-4 flex items-center justify-between", className)}>
       <div className="flex items-center gap-4 flex-shrink min-w-0">

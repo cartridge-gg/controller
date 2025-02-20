@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AchievementShare } from "./share";
-import { fn } from "@storybook/test";
 
 const meta: Meta<typeof AchievementShare> = {
   title: "Modules/Achievements/Share",
@@ -11,7 +10,12 @@ const meta: Meta<typeof AchievementShare> = {
   },
   args: {
     disabled: false,
-    onClick: fn(),
+    website: "https://lootsurvivor.io",
+    twitter: "https://x.com/lootsurvivor",
+    timestamp: 1713542400,
+    points: 100,
+    difficulty: 10,
+    title: "Achievement Title",
   },
 };
 

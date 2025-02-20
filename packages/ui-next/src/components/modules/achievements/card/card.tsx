@@ -73,7 +73,7 @@ export const AchievementCard = ({
     <Card>
       <div className="flex flex-row gap-x-px">
         <CardHeader className="grow">
-          <CardTitle>{name}</CardTitle>
+          <CardTitle className="capitalize">{name.toLowerCase()}</CardTitle>
         </CardHeader>
         {pages.length > 1 && (
           <AchievementPagination

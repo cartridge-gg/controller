@@ -7,12 +7,17 @@ interface AchievementIconProps {
 
 export function AchievementIcon({ icon, completed }: AchievementIconProps) {
   return (
-    <div className="h-8 w-8 flex justify-center items-center">
+    <div
+      className={cn(
+        "w-8 h-8 flex items-center justify-center",
+        completed ? "text-primary" : "text-foreground-300",
+      )}
+    >
       <div
         className={cn(
-          "h-6 w-6 fa-solid",
+          "h-6 w-6",
           icon || "fa-trophy",
-          completed ? "text-primary" : "text-foreground-300",
+          "fa-solid"
         )}
       />
     </div>

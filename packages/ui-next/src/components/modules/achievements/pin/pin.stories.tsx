@@ -11,7 +11,6 @@ const meta: Meta<typeof AchievementPin> = {
   },
   args: {
     pinned: false,
-    loading: false,
     disabled: false,
     onClick: fn(),
   },
