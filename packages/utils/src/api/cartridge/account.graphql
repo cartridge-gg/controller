@@ -37,6 +37,23 @@ query AccountName($address: String!) {
   }
 }
 
+query AccountNames($addresses: [String!]!) {
+  accounts(where: { hasControllersWith: { addressIn: $addresses } }) {
+    edges {
+      node {
+        username
+        controllers {
+          edges {
+            node {
+              address
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 query AddressByUsername($username: String!) {
   account(username: $username) {
     controllers(first: 1) {

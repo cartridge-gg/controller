@@ -154,6 +154,22 @@ export const IconToggle: Story = {
   },
 };
 
+export const ThumnailDeposit: Story = {
+  args: {
+    children: <ArrowToLineIcon variant="down" />,
+    size: "thumbnail",
+    variant: "icon",
+  },
+};
+
+export const ThumnailToggle: Story = {
+  args: {
+    children: <GiftIcon variant="line" />,
+    size: "thumbnail",
+    variant: "icon",
+  },
+};
+
 export const ExternalLink: Story = {
   args: {
     children: "View on Starkscan",

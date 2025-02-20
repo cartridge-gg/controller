@@ -43,7 +43,7 @@ export function Status({ username, validation, error }: StatusProps) {
               ? "Welcome! Select Log In to play"
               : "Welcome! Let's create a new Controller"
             : validation.error?.message || "Enter a Username";
-  }, [validation, errorMessage, username]);
+  }, [validation, errorMessage, username, isError]);
 
   return (
     <div className="flex flex-col bg-translucent-100 gap-y-px">
