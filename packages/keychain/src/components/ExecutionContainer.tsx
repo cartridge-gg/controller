@@ -212,6 +212,21 @@ export function ExecutionContainer({
                 </>
               );
             default:
+              // Workaround until we can get same fee token address on provable katana
+              if (buttonText.toLowerCase() === "upgrade") {
+                return (
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    disabled={
+                      !transactions ||
+                      !!(maxFee === null && transactions?.length)
+                    }
+                  >
+                    {buttonText}
+                  </Button>
+                );
+              }
               return (
                 <>
                   {ctrlError && <ControllerErrorAlert error={ctrlError} />}
