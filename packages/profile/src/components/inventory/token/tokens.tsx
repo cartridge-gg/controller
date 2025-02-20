@@ -44,7 +44,9 @@ export function Tokens() {
               className="hover:opacity-80"
             >
               <div className="flex items-center gap-2">
-                {token.balance ? formatBalance(token.balance) : "..."}
+                {token.balance !== undefined
+                  ? formatBalance(token.balance)
+                  : "..."}
                 <span className="text-foreground-400">{token.symbol}</span>
               </div>
 
