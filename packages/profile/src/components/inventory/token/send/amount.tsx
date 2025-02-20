@@ -25,9 +25,7 @@ export function SendAmount({
     (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
       e.preventDefault();
       if (!token) return;
-      setAmount(
-        parseFloat(formatBalance(token.balance ?? 0n).replace("~", "")),
-      );
+      setAmount(parseFloat(formatBalance(token.balance ?? 0n)));
     },
     [token, setAmount],
   );
@@ -53,7 +51,7 @@ export function SendAmount({
           ? convertTokenAmountToUSD(token.balance, token.decimals, token.price)
           : undefined
       }
-      balance={parseFloat(formatBalance(token.balance ?? 0n).replace("~", ""))}
+      balance={parseFloat(formatBalance(token.balance ?? 0n))}
       symbol={token.symbol}
       decimals={token.decimals ?? 18}
       setError={setError}
