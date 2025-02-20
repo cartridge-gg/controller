@@ -4,10 +4,19 @@ import AchievementCounter from "../counter/counter";
 import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
 import { useState } from "react";
 
+export interface AchievementTabsProps extends React.HTMLAttributes<HTMLDivElement> {
+  count: number;
+  total: number;
+  rank: number;
+}
+
 export const AchievementTabs = ({
+  count,
+  total,
+  rank,
   className,
   children
-}: React.HTMLAttributes<HTMLDivElement>) => {
+}: AchievementTabsProps) => {
   const [active, setActive] = useState("achievements");
   return (
     <Tabs className={className} defaultValue="achievements" onValueChange={setActive}>
@@ -17,13 +26,13 @@ export const AchievementTabs = ({
         <AchievementTab
           value="achievements"
           label="Achievements"
-          counter={<AchievementCounter count={4} total={10} active />}
+          counter={<AchievementCounter count={count} total={total} active={active === "achievements"} />}
           active={active === "achievements"}
         />
         <AchievementTab
           value="leaderboard"
           label="Leaderboard"
-          counter={<AchievementLeaderboardCounter rank={16} />}
+          counter={<AchievementLeaderboardCounter rank={rank} />}
           active={active === "leaderboard"}
         />
       </TabsList>

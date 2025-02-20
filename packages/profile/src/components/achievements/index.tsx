@@ -46,17 +46,24 @@ export function Achievements() {
     );
   }, [games, project, namespace]);
 
-  const pinneds = useMemo(() => {
+  const { pinneds, count, total } = useMemo(() => {
     const ids = pins[addAddressPadding(address || self || "0x0")] || [];
     const pinneds = achievements
       .filter((item) => ids.includes(item.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
-    return pinneds;
+    const count = achievements.filter((item) => item.completed).length;
+    const total = achievements.length;
+    return { pinneds, count, total };
   }, [achievements, pins, address, self]);
 
-  const earnings = useMemo(() => {
-    return players.find((player) => player.address === (address || self)) ?.earnings || 0;
+  const { rank, points } = useMemo(() => {
+    const rank =
+      players.findIndex((player) => player.address === (address || self)) + 1;
+    const points =
+      players.find((player) => player.address === (address || self))
+        ?.earnings || 0;
+    return { rank, points };
   }, [address, self, players]);
 
   const isSelf = useMemo(() => {
@@ -96,7 +103,7 @@ export function Achievements() {
       {achievements.length ? (
         <LayoutContent className="py-6 gap-y-6 select-none h-full">
           {isSelf ? (
-            <AchievementTabs className="h-full flex flex-col justify-between gap-y-6">
+            <AchievementTabs count={count} total={total} rank={rank} className="h-full flex flex-col justify-between gap-y-6">
               <TabsContent className="p-0 mt-0 pb-6" value="achievements">
                 <Trophies
                   achievements={achievements}
@@ -105,7 +112,7 @@ export function Achievements() {
                   enabled={pinneds.length < 3}
                   game={game}
                   pins={pins}
-                  earnings={earnings}
+                  earnings={points}
                 />
               </TabsContent>
               <TabsContent className="p-0 mt-0 h-[calc(100%-69px)]" value="leaderboard">
@@ -137,7 +144,7 @@ export function Achievements() {
                 enabled={pinneds.length < 3}
                 game={game}
                 pins={pins}
-                earnings={earnings}
+                earnings={points}
               />
             </>
           )}

@@ -119,7 +119,7 @@ function Group({
   const { chainId, provider } = useArcade();
 
   const handlePin = useCallback((pinned: boolean, achievementId: string, setLoading: (loading: boolean) => void) => {
-    if (!enabled) return;
+    if (!enabled && !pinned) return;
     const process = async () => {
       setLoading(true);
       try {
@@ -162,7 +162,7 @@ function Group({
         pin: softview || !item.completed ? undefined : {
           pinned: pinned,
           achievementId: item.id,
-          disabled: !enabled,
+          disabled: !pinned && !enabled,
           onClick: handlePin,
         },
         share: softview || !item.completed || !game?.socials.website || !game?.socials.twitter ? undefined : {
