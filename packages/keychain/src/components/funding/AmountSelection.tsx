@@ -20,14 +20,16 @@ export function AmountSelection({
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus on the input and set the cursor to the end of the value
+  // Focus on the input
   const setFocus = useCallback(() => {
-    if (inputRef.current) {
-      const ref = inputRef.current;
-      ref.focus();
-      const valueLength = ref.value.length;
-      ref.setSelectionRange(valueLength, valueLength);
-    }
+
+    // wait for the input to be rendered
+    setTimeout(() => {
+      if (inputRef.current) {
+        const ref = inputRef.current;
+        ref.focus();
+      }
+    }, 0);
   }, [inputRef]);
 
   return (
@@ -36,7 +38,7 @@ export function AmountSelection({
         Amount
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {AMOUNTS.map((value) => (
             <Button
               key={value}
@@ -69,6 +71,7 @@ export function AmountSelection({
               disabled={lockSelection}
               onClick={() => {
                 setCustom(true);
+                onChange?.(0);
 
                 if (selected !== amount) {
                   setSelected(amount);
@@ -81,24 +84,31 @@ export function AmountSelection({
             </Button>
           )}
         </div>
-        <div className="relative">
-          <Input
-            ref={inputRef}
-            className="pl-8 flex-1"
-            type="text"
-            inputMode="decimal"
-            pattern="[0-9]*\.?[0-9]*"
-            value={amount}
-            disabled={lockSelection}
-            onChange={(e) => {
-              const value = e.target.value.replace(/[^\d.]/g, "");
-              const amount = Number.parseFloat(value) || 0;
-              onChange?.(amount);
-            }}
-            onFocus={() => setCustom(true)}
-          />
-          <DollarIcon size="xs" className="absolute top-3 left-3" />
-        </div>
+        {custom && (
+          <div className="relative">
+            <Input
+              ref={inputRef}
+              className="pl-8 flex-1"
+              type="number"
+              inputMode="decimal"
+              value={amount || ""}
+              disabled={lockSelection}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "") {
+                  onChange?.(0);
+                } else {
+                  const amount = Number.parseFloat(value);
+                  if (!isNaN(amount)) {
+                    onChange?.(amount);
+                  }
+                }
+              }}
+              onFocus={() => setCustom(true)}
+            />
+            <DollarIcon size="xs" className="absolute top-3 left-3" />
+          </div>
+        )}
       </div>
     </div>
   );

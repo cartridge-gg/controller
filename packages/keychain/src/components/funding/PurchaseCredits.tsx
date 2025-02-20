@@ -137,7 +137,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
 
       <Separator className="bg-spacer m-1 mx-4" />
 
-      <LayoutFooter>
+      <LayoutFooter className="gap-3">
         {error && (
           <ErrorAlert
             variant="warning"
@@ -147,7 +147,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         )}
 
         <Card className="bg-background-100 border border-background-200 p-3">
-          <CardDescription className="flex flex-row items-start gap-1">
+          <CardDescription className="flex flex-row items-start justify-center gap-3">
             <InfoIcon size="sm" className="text-foreground-200 flex-shrink-0" />
             <p className="text-foreground-200 font-normal text-xs">
               Credits are used to pay for network activity. They are not tokens

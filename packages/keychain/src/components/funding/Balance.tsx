@@ -34,7 +34,9 @@ export function Balance({ types }: BalanceProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="normal-case font-semibold">Balance</CardTitle>
+        <CardTitle className="normal-case font-semibold text-xs">
+          Balance
+        </CardTitle>
       </CardHeader>
 
       <CardListContent>
@@ -45,13 +47,15 @@ export function Balance({ types }: BalanceProps) {
                 <img src="/ERC-20-Icon.svg" className="size-8" />
               </div>
               <div className="flex flex-col gap-0.5">
-                <p className="text-foreground-100 font-medium">Credits</p>
-                <p className="text-foreground-300 font-normal">
+                <p className="text-foreground-100 font-medium text-sm">
+                  Credits
+                </p>
+                <p className="text-foreground-300 font-normal text-xs">
                   {creditBalance.formatted ? 0 : "Loading"} CREDITS
                 </p>
               </div>
             </div>
-            <p className="text-foreground-100 font-medium">{`${creditBalance.formatted}`}</p>
+            <p className="text-foreground-100 font-medium text-sm">{`${creditBalance.formatted}`}</p>
           </CardListItem>
         )}
 
