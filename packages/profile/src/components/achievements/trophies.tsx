@@ -1,4 +1,8 @@
-import { AchievementCard, AchievementFeatured, AchievementProgress } from "@cartridge/ui-next";
+import {
+  AchievementCard,
+  AchievementFeatured,
+  AchievementProgress,
+} from "@cartridge/ui-next";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameModel } from "@bal7hazar/arcade-sdk";
@@ -65,7 +69,13 @@ export function Trophies({
           <AchievementFeatured key={index} />
         ))}
       </div>
-      <AchievementProgress count={completed} total={total} points={earnings} completed variant="ghost" />
+      <AchievementProgress
+        count={completed}
+        total={total}
+        points={earnings}
+        completed
+        variant="ghost"
+      />
       <div className="flex flex-col gap-4">
         {Object.entries(groups)
           .filter(([group]) => group !== HIDDEN_GROUP)
@@ -118,33 +128,44 @@ function Group({
   const { parent } = useConnection();
   const { chainId, provider } = useArcade();
 
-  const handlePin = useCallback((pinned: boolean, achievementId: string, setLoading: (loading: boolean) => void) => {
-    if (!enabled && !pinned) return;
-    const process = async () => {
-      setLoading(true);
-      try {
-        const calls = pinned ? provider.social.unpin({ achievementId }) : provider.social.pin({ achievementId });
-        const res = await parent.openExecute(
-          Array.isArray(calls) ? calls : [calls],
-          chainId,
-        );
-        if (res) {
-          toast.success(`Trophy ${pinned ? "unpinned" : "pinned"} successfully`);
+  const handlePin = useCallback(
+    (
+      pinned: boolean,
+      achievementId: string,
+      setLoading: (loading: boolean) => void,
+    ) => {
+      if (!enabled && !pinned) return;
+      const process = async () => {
+        setLoading(true);
+        try {
+          const calls = pinned
+            ? provider.social.unpin({ achievementId })
+            : provider.social.pin({ achievementId });
+          const res = await parent.openExecute(
+            Array.isArray(calls) ? calls : [calls],
+            chainId,
+          );
+          if (res) {
+            toast.success(
+              `Trophy ${pinned ? "unpinned" : "pinned"} successfully`,
+            );
+          }
+        } catch (error) {
+          console.error(error);
+          toast.error(`Failed to ${pinned ? "unpin" : "pin"} trophy`);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error(error);
-        toast.error(`Failed to ${pinned ? "unpin" : "pin"} trophy`);
-      } finally {
-        setLoading(false);
-      }
-    };
-    process();
-  }, [enabled]);
+      };
+      process();
+    },
+    [enabled],
+  );
 
   const achievements = useMemo(() => {
-    
     return items.map((item) => {
-      const pinned = pins[addAddressPadding(address)]?.includes(item.id) && item.completed;
+      const pinned =
+        pins[addAddressPadding(address)]?.includes(item.id) && item.completed;
       return {
         id: item.id,
         index: item.index,
@@ -159,28 +180,32 @@ function Group({
           tasks: item.tasks,
           timestamp: item.completed ? item.timestamp : undefined,
         },
-        pin: softview || !item.completed ? undefined : {
-          pinned: pinned,
-          achievementId: item.id,
-          disabled: !pinned && !enabled,
-          onClick: handlePin,
-        },
-        share: softview || !item.completed || !game?.socials.website || !game?.socials.twitter ? undefined : {
-          website: game?.socials.website,
-          twitter: game?.socials.twitter,
-          timestamp: item.timestamp,
-          points: item.earning,
-          difficulty: parseFloat(item.percentage),
-          title: item.title,
-        },
-      }
+        pin:
+          softview || !item.completed
+            ? undefined
+            : {
+                pinned: pinned,
+                achievementId: item.id,
+                disabled: !pinned && !enabled,
+                onClick: handlePin,
+              },
+        share:
+          softview ||
+          !item.completed ||
+          !game?.socials.website ||
+          !game?.socials.twitter
+            ? undefined
+            : {
+                website: game?.socials.website,
+                twitter: game?.socials.twitter,
+                timestamp: item.timestamp,
+                points: item.earning,
+                difficulty: parseFloat(item.percentage),
+                title: item.title,
+              },
+      };
     });
   }, [items, pins, handlePin]);
 
-  return (
-    <AchievementCard
-      name={group}
-      achievements={achievements}
-    />
-  );
+  return <AchievementCard name={group} achievements={achievements} />;
 }

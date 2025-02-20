@@ -71,21 +71,30 @@ export function Achievements() {
   }, [address, self]);
 
   const location = useLocation();
-  const to = useCallback((address: string) => {
-    if (address === self) return navigate(location.pathname);
-    navigate([...location.pathname.split("/"), address].join("/"));
-  }, [location.pathname, self, navigate]);
+  const to = useCallback(
+    (address: string) => {
+      if (address === self) return navigate(location.pathname);
+      navigate([...location.pathname.split("/"), address].join("/"));
+    },
+    [location.pathname, self, navigate],
+  );
 
   const data = useMemo(() => {
     return players.map((player) => ({
       address: player.address,
-      name: usernames.find((username) => BigInt(username.address || "0x0") === BigInt(player.address))?.username || player.address.slice(0, 9),
+      name:
+        usernames.find(
+          (username) =>
+            BigInt(username.address || "0x0") === BigInt(player.address),
+        )?.username || player.address.slice(0, 9),
       points: player.earnings,
       highlight: player.address === (address || self),
-      pins: pins[addAddressPadding(player.address)]?.map(id => {
-        const achievement = achievements.find(a => a?.id === id);
-        return achievement ? { id, icon: achievement.icon } : undefined;
-      }).filter(Boolean) as { id: string; icon: string }[],
+      pins: pins[addAddressPadding(player.address)]
+        ?.map((id) => {
+          const achievement = achievements.find((a) => a?.id === id);
+          return achievement ? { id, icon: achievement.icon } : undefined;
+        })
+        .filter(Boolean) as { id: string; icon: string }[],
     }));
   }, [players, address, self, pins, usernames]);
 
@@ -103,7 +112,12 @@ export function Achievements() {
       {achievements.length ? (
         <LayoutContent className="py-6 gap-y-6 select-none h-full">
           {isSelf ? (
-            <AchievementTabs count={count} total={total} rank={rank} className="h-full flex flex-col justify-between gap-y-6">
+            <AchievementTabs
+              count={count}
+              total={total}
+              rank={rank}
+              className="h-full flex flex-col justify-between gap-y-6"
+            >
               <TabsContent className="p-0 mt-0 pb-6" value="achievements">
                 <Trophies
                   achievements={achievements}
@@ -115,7 +129,10 @@ export function Achievements() {
                   earnings={points}
                 />
               </TabsContent>
-              <TabsContent className="p-0 mt-0 h-[calc(100%-69px)]" value="leaderboard">
+              <TabsContent
+                className="p-0 mt-0 h-[calc(100%-69px)]"
+                value="leaderboard"
+              >
                 <AchievementLeaderboard className="h-full">
                   {data.map((item, index) => (
                     <AchievementLeaderboardRow

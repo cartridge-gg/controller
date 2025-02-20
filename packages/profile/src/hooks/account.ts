@@ -19,7 +19,13 @@ export function useUsername({ address }: { address: string }) {
 export function useUsernames({ addresses }: { addresses: string[] }) {
   const { data } = useAccountNamesQuery({ addresses });
 
-  return { usernames: data?.accounts?.edges?.map((edge) => ({ username: edge?.node?.username, address: edge?.node?.controllers?.edges?.[0]?.node?.address })) ?? [] };
+  return {
+    usernames:
+      data?.accounts?.edges?.map((edge) => ({
+        username: edge?.node?.username,
+        address: edge?.node?.controllers?.edges?.[0]?.node?.address,
+      })) ?? [],
+  };
 }
 
 export function useAddress({ username }: { username: string }) {

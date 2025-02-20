@@ -11,7 +11,15 @@ export interface AchievementShareProps {
   disabled?: boolean;
 }
 
-export function AchievementShare({ disabled, website, twitter, timestamp, points, difficulty, title }: AchievementShareProps) {
+export function AchievementShare({
+  disabled,
+  website,
+  twitter,
+  timestamp,
+  points,
+  difficulty,
+  title,
+}: AchievementShareProps) {
   const url: string | null = useMemo(() => {
     if (!website) return null;
     return website;
@@ -51,7 +59,7 @@ Only ${difficulty}% of players have earned this rare badge.
 
     window.open(twitterUrl, "_blank", "noopener,noreferrer");
   }, [url, xhandle, title, points, date, difficulty]);
-  
+
   return (
     <Button
       variant="tertiary"

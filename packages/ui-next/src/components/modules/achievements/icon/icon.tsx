@@ -13,13 +13,7 @@ export function AchievementIcon({ icon, completed }: AchievementIconProps) {
         completed ? "text-primary" : "text-foreground-300",
       )}
     >
-      <div
-        className={cn(
-          "h-6 w-6",
-          icon || "fa-trophy",
-          "fa-solid"
-        )}
-      />
+      <div className={cn("h-6 w-6", icon || "fa-trophy", "fa-solid")} />
     </div>
   );
 }

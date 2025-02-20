@@ -5,7 +5,11 @@ export interface AchievementPinProps {
   pinned?: boolean;
   achievementId?: string;
   disabled?: boolean;
-  onClick?: (pinned: boolean, achievementId: string, setLoading: (loading: boolean) => void) => void;
+  onClick?: (
+    pinned: boolean,
+    achievementId: string,
+    setLoading: (loading: boolean) => void,
+  ) => void;
 }
 
 export function AchievementPin({
