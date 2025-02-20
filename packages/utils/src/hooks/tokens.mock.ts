@@ -1,19 +1,15 @@
-import { tokens } from "@cartridge/utils/mock/data";
+import { tokensByAddress } from "@cartridge/utils/mock/data";
 import { fn, Mock } from "@storybook/test";
-import { UseTokensResponse, UseTokenResponse } from "./tokens";
-import { ERC20 } from "../context/tokens";
+import * as actual from "./tokens";
 
 export * from "./tokens";
 
-export const useTokens: Mock<() => UseTokensResponse> = fn(() => ({
-  tokens: Object.fromEntries(
-    Object.values(tokens).map((token) => [token.address, token]),
-  ) as Record<string, ERC20>,
+export const useTokens: Mock<() => actual.UseTokensResponse> = fn(() => ({
+  tokens: tokensByAddress,
   isLoading: false,
   register: () => {},
 })).mockName("useTokens");
 
-export const useToken: Mock<() => UseTokenResponse> = fn(() => ({
-  token: tokens.ETH as ERC20,
-  isLoading: false,
-})).mockName("useToken");
+export const useToken: Mock<() => actual.UseTokenResponse> = fn(
+  actual.useToken,
+).mockName("useToken");

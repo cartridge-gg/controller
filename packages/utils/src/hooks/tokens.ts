@@ -22,6 +22,7 @@ export type UseTokenResponse = {
 export function useToken(address: string): UseTokenResponse {
   const { tokens, isLoading, error } = useTokens();
   const token = tokens[getChecksumAddress(address)];
+
   return {
     token,
     isLoading,
