@@ -22,7 +22,6 @@ export function AmountSelection({
 
   // Focus on the input
   const setFocus = useCallback(() => {
-
     // wait for the input to be rendered
     setTimeout(() => {
       if (inputRef.current) {

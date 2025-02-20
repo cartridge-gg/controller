@@ -110,6 +110,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   return (
     <LayoutContainer>
       <LayoutHeader
+        className="p-6"
         title={
           "Purchase " +
           (state === PurchaseState.SELECTION ? "Credits" : "Complete")
@@ -123,7 +124,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         }
         onBack={state === PurchaseState.SELECTION ? onBack : undefined}
       />
-      <LayoutContent className="gap-6">
+      <LayoutContent className="gap-6 px-6">
         <Balance types={[BalanceType.CREDITS]} />
         {state === PurchaseState.SELECTION && (
           <AmountSelection
@@ -135,9 +136,11 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         )}
       </LayoutContent>
 
-      <Separator className="bg-spacer m-1 mx-4" />
+      <div className="m-1 mx-6">
+        <Separator className="bg-spacer" />
+      </div>
 
-      <LayoutFooter className="gap-3">
+      <LayoutFooter className="gap-3 px-2">
         {error && (
           <ErrorAlert
             variant="warning"
