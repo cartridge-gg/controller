@@ -28,7 +28,6 @@ const config: StorybookConfig = {
           "@/hooks/collection": require.resolve(
             "../src/hooks/collection.mock.ts",
           ),
-          "@/hooks/token": require.resolve("../src/hooks/token.mock.ts"),
           "@cartridge/utils/api/cartridge": require.resolve(
             "../node_modules/@cartridge/utils/dist/api/cartridge/index.js",
           ),
@@ -37,6 +36,9 @@ const config: StorybookConfig = {
           ),
           "@cartridge/utils/mock/data": require.resolve(
             "../node_modules/@cartridge/utils/dist/mock/data/index.js",
+          ),
+          "@cartridge/utils": require.resolve(
+            "../node_modules/@cartridge/utils/dist/index.mock.js",
           ),
         },
       },

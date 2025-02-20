@@ -1,14 +1,13 @@
-import { useContext } from "react";
-import { TokensContext, TokensContextValue } from "../context/tokens";
+import { TokensContextValue } from "src/context/tokens";
 import { getChecksumAddress } from "starknet";
+import { tokensByAddress } from "@cartridge/utils/mock/data";
 
 export function useTokens(): TokensContextValue {
-  const context = useContext(TokensContext);
-  if (!context) {
-    throw new Error("useTokens must be used within a TokensProvider");
-  }
-
-  return context;
+  return {
+    tokens: tokensByAddress,
+    isLoading: false,
+    register: () => {},
+  };
 }
 
 export function useToken(address: string) {
