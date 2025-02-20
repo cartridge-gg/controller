@@ -33,7 +33,9 @@ export const AchievementTab = ({
       )}
     >
       <p className="text-sm">{label}</p>
-      {React.cloneElement(counter as React.ReactElement<any>, { active })}
+      {React.cloneElement(counter as React.ReactElement<{ active: boolean }>, {
+        active,
+      })}
     </TabsTrigger>
   );
 };
