@@ -25,7 +25,7 @@ export const STRK_CONTRACT_ADDRESS = getChecksumAddress(
 );
 
 export class ERC20Contract {
-  private address: string;
+  address: string;
   private provider: Provider;
 
   private name?: string;
@@ -66,7 +66,7 @@ export class ERC20Contract {
     }
 
     return {
-      address: getChecksumAddress(this.address),
+      address: this.address,
       name: this.name,
       symbol: this.symbol,
       decimals: this.decimals,
