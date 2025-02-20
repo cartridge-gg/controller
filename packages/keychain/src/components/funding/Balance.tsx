@@ -41,7 +41,7 @@ export function Balance({ types }: BalanceProps) {
         {types.includes(BalanceType.CREDITS) && (
           <CardListItem icon={<CoinsIcon variant="solid" />}>
             <div className="flex items-center gap-2">
-              {creditBalance.formatted ? 0 : "Loading"}
+              {creditBalance.formatted ? creditBalance.formatted : "Loading"}
               <span className="text-foreground-400">CREDITS</span>
             </div>
           </CardListItem>
