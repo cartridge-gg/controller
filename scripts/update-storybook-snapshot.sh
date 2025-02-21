@@ -22,7 +22,6 @@ docker run \
   --network="host" \
   -v "$(pwd)/packages/$PACKAGE_NAME/__image_snapshots__":/app/packages/$PACKAGE_NAME/__image_snapshots__ \
   -e DEBUG=true \
-  -e SNAPSHOT=1 \
   --ipc=host \
   -ti \
   ghcr.io/cartridge-gg/controller/storybook-env:sha-f1c10ea \
