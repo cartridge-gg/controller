@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
 import { render, RenderResult } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
-import { withTheme } from "./theme";
-import { ConnectionContextValue } from "@/components/provider/connection";
-import type { VerifiableControllerTheme } from "@/context/theme";
+import {
+  ConnectionContextValue,
+  VerifiableControllerTheme,
+} from "@/components/provider/connection";
 import { withConnection } from "./connection";
 import { withPostHog } from "./posthog";
 import { withStarknet } from "./starknet";
@@ -23,7 +24,7 @@ export function renderWithProviders(
 ): RenderResult {
   const wrapped = withConnection(
     <BrowserRouter>
-      {withStarknet(withPostHog(withTheme(ui, config.theme)), config.starknet)}
+      {withStarknet(withPostHog(ui), config.starknet)}
     </BrowserRouter>,
     config.connection,
   );

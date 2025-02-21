@@ -17,7 +17,7 @@ vi.mock("@/hooks/posthog", () => ({
   }),
 }));
 
-vi.mock("@/hooks/theme", () => ({
+vi.mock("@/hooks/connection", () => ({
   useControllerTheme: () => mockUseControllerTheme(),
 }));
 
