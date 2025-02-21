@@ -1,11 +1,12 @@
 import { constants, RpcProvider } from "starknet";
 import Controller from "@cartridge/controller";
-import { SessionPolicies } from "@cartridge/presets";
+import { controllerConfigs, SessionPolicies } from "@cartridge/presets";
 import { Parameters } from "@storybook/react";
 import { ConnectionContextValue } from "../src/components/provider/connection";
 import { UpgradeInterface } from "../src/hooks/upgrade";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { defaultTheme } from "@cartridge/presets";
+import { useThemeEffect } from "@cartridge/ui-next";
 
 export interface StoryParameters extends Parameters {
   connection?: {
@@ -18,18 +19,30 @@ export interface StoryParameters extends Parameters {
   policies?: SessionPolicies;
 }
 
-export function useMockedConnection({
-  chainId = constants.StarknetChainId.SN_MAIN,
-  context = {
-    type: "connect",
-    origin: "http://localhost:3002",
-    policies: [],
-    resolve: () => {},
-    reject: () => {},
-  } as ConnectCtx,
-  controller,
-  ...rest
-}: StoryParameters["connection"] = {}): ConnectionContextValue {
+export function useMockedConnection(
+  parameters: StoryParameters = {},
+): ConnectionContextValue {
+  const {
+    chainId = constants.StarknetChainId.SN_MAIN,
+    context = {
+      type: "connect",
+      origin: "http://localhost:3002",
+      policies: [],
+      resolve: () => {},
+      reject: () => {},
+    } as ConnectCtx,
+    controller,
+    ...rest
+  } = parameters.connection ?? {};
+  const theme = parameters.preset
+    ? (controllerConfigs[parameters.preset].theme ?? defaultTheme)
+    : defaultTheme;
+
+  useThemeEffect({
+    theme,
+    assetUrl: "",
+  });
+
   return {
     context,
     controller: {
@@ -45,7 +58,7 @@ export function useMockedConnection({
     origin: "http://localhost:3002",
     rpcUrl: "http://api.cartridge.gg/x/starknet/mainnet",
     policies: {},
-    theme: { defaultTheme, verified: true },
+    theme: { ...theme, verified: true },
     hasPrefundRequest: false,
     setContext: () => {},
     setController: () => {},
