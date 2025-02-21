@@ -4,7 +4,6 @@ import {
   CardTitle,
   cn,
   DiscordIcon,
-  DojoIcon,
   GitHubIcon,
   GlobeIcon,
   TelegramIcon,
@@ -12,7 +11,8 @@ import {
 } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
-import { AchievementPinIcons } from "../pin-icons";
+import { AchievementPinIcons } from "@/components/modules/achievements/pin-icons";
+import { ArcadeGameIcon } from "../game-icon";
 
 export interface Metadata {
   name: string;
@@ -28,8 +28,8 @@ export interface Socials {
   github?: string;
 }
 
-interface AchievementGroupHeaderProps
-  extends VariantProps<typeof achievementGroupHeaderVariants> {
+interface ArcadeGroupHeaderProps
+  extends VariantProps<typeof arcadeGroupHeaderVariants> {
   achievements: {
     id: string;
     content: AchievementContentProps;
@@ -39,7 +39,7 @@ interface AchievementGroupHeaderProps
   socials?: Socials;
 }
 
-export const achievementGroupHeaderVariants = cva(
+export const arcadeGroupHeaderVariants = cva(
   "h-16 flex justify-between items-center px-4 py-3 gap-x-3",
   {
     variants: {
@@ -54,15 +54,15 @@ export const achievementGroupHeaderVariants = cva(
     },
   },
 );
-type AchievementGroupHeaderVariant = VariantProps<
-  typeof achievementGroupHeaderVariants
+type ArcadeGroupHeaderVariant = VariantProps<
+  typeof arcadeGroupHeaderVariants
 >["variant"];
-export const AchievementGroupHeader = ({
+export const ArcadeGroupHeader = ({
   achievements,
   metadata,
   socials,
   variant,
-}: AchievementGroupHeaderProps) => {
+}: ArcadeGroupHeaderProps) => {
   const pins = useMemo(() => {
     return achievements
       .filter((a) => a.content.icon && a.pin?.pinned)
@@ -91,18 +91,18 @@ export const AchievementGroupHeader = ({
   return (
     <div
       className={cn(
-        achievementGroupHeaderVariants({ variant }),
+        arcadeGroupHeaderVariants({ variant }),
         "bg-top bg-cover bg-no-repeat select-none",
       )}
       style={style}
     >
       <div className="flex items-center gap-3">
-        <AchievementLogo
+        <ArcadeGameIcon
           logo={metadata.logo}
           name={metadata.name}
           variant={variant}
         />
-        <div className="flex flex-col gap-x-4 gap-y-0.5 md:flex-row">
+        <div className="flex flex-col gap-x-4 gap-y-0.5 sm:flex-row">
           <CardTitle className="text-foreground-100 text-sm font-medium tracking-normal">
             {metadata.name}
           </CardTitle>
@@ -144,54 +144,12 @@ export const AchievementGroupHeader = ({
   );
 };
 
-const achievementLogoVariants = cva(
-  "w-11 h-11 flex justify-center items-center rounded md:w-9 md:h-9",
-  {
-    variants: {
-      variant: {
-        default: "bg-background-300",
-        faded: "bg-background-200",
-        ghost: "",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
-type AchievementLogoVariant = VariantProps<
-  typeof achievementLogoVariants
->["variant"];
-const AchievementLogo = ({
-  logo,
-  name,
-  variant,
-}: {
-  logo?: string;
-  name: string;
-  variant: AchievementLogoVariant;
-}) => {
-  return (
-    <div className={achievementLogoVariants({ variant })}>
-      {logo ? (
-        <img
-          src={logo}
-          alt={name}
-          className="w-[36px] h-[36px] rounded md:w-8 md:h-8"
-        />
-      ) : (
-        <DojoIcon size="lg" />
-      )}
-    </div>
-  );
-};
-
 const AchievementSocialWebsite = ({
   website,
   variant,
 }: {
   website: string;
-  variant: AchievementGroupHeaderVariant;
+  variant: ArcadeGroupHeaderVariant;
 }) => {
   const label = useMemo(() => {
     return website.replace(/^.*https?:\/\//, "").replace(/\/$/, "");
@@ -211,7 +169,7 @@ const AchievementSocialDiscord = ({
   variant,
 }: {
   discord: string;
-  variant: AchievementGroupHeaderVariant;
+  variant: ArcadeGroupHeaderVariant;
 }) => {
   return (
     <AchievementSocial
@@ -227,7 +185,7 @@ const AchievementSocialTwitter = ({
   variant,
 }: {
   twitter: string;
-  variant: AchievementGroupHeaderVariant;
+  variant: ArcadeGroupHeaderVariant;
 }) => {
   return (
     <AchievementSocial
@@ -243,7 +201,7 @@ const AchievementSocialGithub = ({
   variant,
 }: {
   github: string;
-  variant: AchievementGroupHeaderVariant;
+  variant: ArcadeGroupHeaderVariant;
 }) => {
   return (
     <AchievementSocial
@@ -259,7 +217,7 @@ const AchievementSocialTelegram = ({
   variant,
 }: {
   telegram: string;
-  variant: AchievementGroupHeaderVariant;
+  variant: ArcadeGroupHeaderVariant;
 }) => {
   return (
     <AchievementSocial
@@ -308,7 +266,7 @@ const AchievementSocial = ({
     >
       {icon}
       {label && (
-        <p className="px-0.5 text-foreground-100 text-xs font-medium tracking-normal hidden md:block">
+        <p className="px-0.5 text-foreground-100 text-xs font-medium tracking-normal hidden sm:block">
           {label}
         </p>
       )}
@@ -316,4 +274,4 @@ const AchievementSocial = ({
   );
 };
 
-export default AchievementGroupHeader;
+export default ArcadeGroupHeader;

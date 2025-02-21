@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AchievementGroupHeader } from "./group-header";
+import { ArcadeGroupHeader } from "./group-header";
 import { fn } from "@storybook/test";
 
-const meta: Meta<typeof AchievementGroupHeader> = {
-  title: "Modules/Achievements/GroupHeader",
-  component: AchievementGroupHeader,
+const meta: Meta<typeof ArcadeGroupHeader> = {
+  title: "Modules/Arcade/GroupHeader",
+  component: ArcadeGroupHeader,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -64,7 +64,7 @@ const meta: Meta<typeof AchievementGroupHeader> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof AchievementGroupHeader>;
+type Story = StoryObj<typeof ArcadeGroupHeader>;
 
 export const Default: Story = {};
 
