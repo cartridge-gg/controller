@@ -14,7 +14,6 @@ export * from "./content";
 export * from "./counter";
 export * from "./card";
 export * from "./summary";
-export * from "./group-header";
 export * from "./player-header";
 export * from "./player-label";
 export * from "./leaderboard";

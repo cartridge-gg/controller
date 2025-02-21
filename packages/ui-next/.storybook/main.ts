@@ -31,7 +31,7 @@ const config: StorybookConfig = {
       * {
         animation: none !important;
       }
-    </style>`
+    </style>` || ""
     }
   `,
 };
