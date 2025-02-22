@@ -161,7 +161,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
             <CopyAddress address={controller.address()} />
           ) : undefined
         }
-        icon={<DepositIcon size="lg" />}
+        icon={<DepositIcon variant="solid" size="lg" />}
         onBack={onBack}
       />
 

@@ -13,7 +13,7 @@ const meta: Meta<typeof UniversalHeaderLabel> = {
     variant: "default",
     size: "default",
     label: "Deposit [Token]",
-    icon: <DepositIcon size="lg" />,
+    icon: <DepositIcon variant="solid" size="lg" />,
   },
 };
 

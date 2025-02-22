@@ -16,6 +16,7 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    layout: "fullscreen",
     preset: "cartridge",
     colorMode: "dark",
     backgrounds: {
