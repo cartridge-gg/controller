@@ -140,7 +140,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         <Separator className="bg-spacer" />
       </div>
 
-      <LayoutFooter className="gap-3 px-2">
+      <LayoutFooter>
         {error && (
           <ErrorAlert
             variant="warning"
