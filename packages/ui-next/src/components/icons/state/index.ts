@@ -17,6 +17,7 @@ export * from "./earth";
 export * from "./eye";
 export * from "./filter";
 export * from "./gem";
+export * from "./globe";
 export * from "./grid";
 export * from "./joystick";
 export * from "./leaderboard";

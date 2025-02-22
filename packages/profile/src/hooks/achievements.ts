@@ -5,7 +5,6 @@ import { useConnection } from "./context";
 import { useAccount } from "./account";
 import { useProgressions } from "./progressions";
 import { useTrophies } from "./trophies";
-import { Task as ItemTask } from "@/components/achievements/trophy";
 
 export interface Item {
   id: string;
@@ -21,6 +20,13 @@ export interface Item {
   completed: boolean;
   pinned: boolean;
   tasks: ItemTask[];
+}
+
+export interface ItemTask {
+  id: string;
+  count: number;
+  total: number;
+  description: string;
 }
 
 export interface Counters {

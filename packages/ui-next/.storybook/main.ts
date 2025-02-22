@@ -22,7 +22,7 @@ const config: StorybookConfig = {
   docs: {
     autodocs: "tag",
   },
-  staticDirs: ["../../keychain/public"],
+  staticDirs: ["../../keychain/public", "../../profile/public"],
   previewHead: (head) => `
     ${head}
     ${

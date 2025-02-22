@@ -21,7 +21,7 @@ export const layoutBottomTabsVariants = cva(
   },
 );
 
-export interface LayoutBottomTabsProps
+interface LayoutBottomTabsProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof layoutBottomTabsVariants> {}
 
