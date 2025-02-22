@@ -51,7 +51,10 @@ export function Balance({ types }: BalanceProps) {
                   Credits
                 </p>
                 <p className="text-foreground-300 font-normal text-xs">
-                  {creditBalance.formatted ? 0 : "Loading"} CREDITS
+                  {creditBalance.formatted
+                    ? creditBalance.formatted
+                    : "Loading"}{" "}
+                  CREDITS
                 </p>
               </div>
             </div>
