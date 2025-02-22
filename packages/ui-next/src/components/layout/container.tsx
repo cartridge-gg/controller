@@ -33,7 +33,12 @@ export function LayoutContainer({
       value={{ withBottomTabs, setWithBottomTabs, withFooter, setWithFooter }}
     >
       <ResponsiveWrapper>
-        <div className={cn("flex flex-col flex-1 min-h-0 overflow-x-hidden", className)}>
+        <div
+          className={cn(
+            "flex flex-col flex-1 min-h-0 overflow-x-hidden",
+            className,
+          )}
+        >
           {children}
         </div>
       </ResponsiveWrapper>
