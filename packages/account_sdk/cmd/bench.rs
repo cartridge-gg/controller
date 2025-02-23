@@ -65,30 +65,6 @@ async fn main() {
         chain_id,
     );
 
-    match factory
-        .deploy_v3(salt)
-        .gas_estimate_multiplier(1.5)
-        .send()
-        .await
-    {
-        Ok(_) => (),
-        Err(e) => {
-            if let AccountFactoryError::Provider(ProviderError::StarknetError(
-                StarknetError::TransactionExecutionError(ref error_data),
-            )) = e
-            {
-                if !error_data
-                    .execution_error
-                    .contains("is unavailable for deployment")
-                {
-                    println!("Deployment failed: {:?}", e);
-                }
-            } else {
-                println!("Deployment failed: {:?}", e);
-            }
-        }
-    }
-
     let contract_address =
         felt!("0x73d81392edc741306bfdef1fce47ce55d5fd1b18914db4ac4257172ddb0f427");
 

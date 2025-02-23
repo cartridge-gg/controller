@@ -184,7 +184,9 @@ impl Controller {
 
     pub fn session_account(&self, policies: &[Policy]) -> Option<SessionAccount> {
         // Check if there's a valid session stored
-        let (_, metadata) = self.authorized_session_metadata(policies, None)?;
+        let metadata = self.authorized_session_metadata(policies, None);
+        let metadata = metadata.unwrap().1;
+
         let credentials = metadata.credentials.as_ref()?;
         let session_signer =
             Signer::Starknet(SigningKey::from_secret_scalar(credentials.private_key));

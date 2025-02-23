@@ -21,6 +21,7 @@ use crate::{
 
 use super::{hash::Session, policy::Policy, AccountHashAndCallsSigner, TypedData};
 
+#[derive(Debug)]
 pub struct SessionAccount {
     provider: CartridgeJsonRpcProvider,
     signer: Signer,
