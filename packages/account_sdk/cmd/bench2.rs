@@ -34,7 +34,6 @@ use url::Url;
 // Controller setup.
 const PRIVATE_KEY: Felt =
     felt!("0x6b80fcafbecee2c7ddff50c9a09b529c8f65b2fdb457ea134e76ee17640d768");
-const USERNAME: &str = "benchnums4";
 
 // Game setup.
 const JACKPOT_ID_NONE: Felt = Felt::ONE;
@@ -65,9 +64,8 @@ struct Cli {
     #[arg(default_value = "1")]
     pub interval: usize,
 
-    #[arg(long, help = "The duration of the benchmark")]
-    #[arg(default_value = "30")]
-    pub duration: u64,
+    #[arg(long, help = "The prefix for controllers usernames")]
+    pub username_prefix: String,
 
     #[arg(
         long,
@@ -103,7 +101,7 @@ async fn main() {
 
     let mut controllers = vec![];
     for i in 0..args.ntxs {
-        let username = format!("{}__{}", USERNAME, i);
+        let username = format!("{}__nb__{}", args.username_prefix, i);
         let salt = cairo_short_string_to_felt(username.as_str()).unwrap();
 
         let mut ctl = create_controller(
