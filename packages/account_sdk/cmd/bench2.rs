@@ -60,8 +60,8 @@ struct Cli {
     #[arg(default_value = "1")]
     pub ntxs: usize,
 
-    #[arg(long, help = "The interval between each transaction batches")]
-    #[arg(default_value = "1")]
+    #[arg(long, help = "The interval between each transaction batches in milliseconds")]
+    #[arg(default_value = "1000")]
     pub interval: usize,
 
     #[arg(long, help = "The prefix for controllers usernames")]
@@ -129,7 +129,7 @@ async fn main() {
         controllers.push(Arc::new(ctl));
     }
 
-    let interval = Duration::from_secs(args.interval as u64);
+    let interval = Duration::from_millis(args.interval as u64);
     dbg!(interval);
 
     let (namespace, bitmask) = (SigningKey::from_random().secret_scalar(), 0u128);
