@@ -52,7 +52,7 @@ export const CONTROLLER_VERSIONS: Array<ControllerVersionInfo> = [
   },
 ];
 
-export const LATEST_CONTROLLER = CONTROLLER_VERSIONS[4];
+export const LATEST_CONTROLLER = CONTROLLER_VERSIONS[5];
 
 type ControllerVersionInfo = {
   version: string;

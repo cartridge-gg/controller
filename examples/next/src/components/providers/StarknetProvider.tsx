@@ -11,11 +11,14 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { SessionPolicies } from "@cartridge/controller";
 import { constants } from "starknet";
 import SessionConnector from "@cartridge/connector/session";
+import { RANDO_CONTRACT_ADDRESS } from "components/Random";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 export const STRK_CONTRACT_ADDRESS =
   "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
+export const VRF_CONTRACT_ADDRESS = 
+  "0x00654cc8aad21800ee35ce9875e3ac56b6de7bae7bc5c6122ecb0a2827d09da7";
 
 const messageForChain = (chainId: constants.StarknetChainId) => {
   return {
@@ -76,6 +79,22 @@ const policies: SessionPolicies = {
         { name: "allowance", entrypoint: "allowance" },
       ],
     },
+    [VRF_CONTRACT_ADDRESS]: {
+      methods: [
+        {
+          name: "Request Random",
+          entrypoint: "request_random",
+        },
+      ]
+    },
+    [RANDO_CONTRACT_ADDRESS] :{
+      methods: [
+        {
+          name: "Request",
+          entrypoint: "request",
+        }
+      ]
+    },
     "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e": {
       methods: [{ name: "new_game", entrypoint: "new_game" }],
     },
@@ -94,7 +113,7 @@ const provider = jsonRpcProvider({
         return { nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet" };
       case sepolia:
       default:
-        return { nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia" };
+        return { nodeUrl: "http://localhost:8001/x/starknet/sepolia" };
     }
   },
 });
@@ -104,8 +123,7 @@ const controller = new ControllerConnector({
   chains: [
     {
       rpcUrl:
-        process.env.NEXT_PUBLIC_RPC_SEPOLIA ??
-        "https://api.cartridge.gg/x/starknet/sepolia",
+        "http://localhost:8001/x/starknet/sepolia",
     },
     {
       rpcUrl:
@@ -140,8 +158,7 @@ const controller = new ControllerConnector({
 const session = new SessionConnector({
   policies,
   rpc:
-    process.env.NEXT_PUBLIC_RPC_SEPOLIA ??
-    "https://api.cartridge.gg/x/starknet/sepolia",
+    "http://localhost:8001/x/starknet/sepolia",
   chainId: constants.StarknetChainId.SN_SEPOLIA,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   keychainUrl: "http://localhost:3001",

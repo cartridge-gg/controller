@@ -11,6 +11,7 @@ import { ManualTransferEth } from "components/ManualTransferEth";
 import { Profile } from "components/Profile";
 import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
+import { Random } from "components/Random";
 
 const Home: FC = () => {
   return (
@@ -27,6 +28,7 @@ const Home: FC = () => {
       <ManualTransferEth />
       <DelegateAccount />
       <InvalidTxn />
+      <Random />
       <SignMessage />
       <LookupControllers />
     </main>
