@@ -19,7 +19,7 @@ import {
   ExternalIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/context";
+import { useConnection } from "#hooks/context";
 import {
   formatAddress,
   isIframe,
@@ -31,7 +31,7 @@ import {
 import { constants } from "starknet";
 import { formatEther } from "viem";
 import { useAccount } from "#hooks/account";
-import { useToken } from "@/hooks/token";
+import { useToken } from "#hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { useMemo } from "react";
 import { compare } from "compare-versions";

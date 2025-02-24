@@ -8,7 +8,7 @@ import {
   LayoutContent,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { LayoutBottomNav } from "@/components/bottom-nav";
+import { LayoutBottomNav } from "#components/bottom-nav";
 import { useAccount } from "#hooks/account";
 import { Outlet, useParams } from "react-router-dom";
 import { Collections } from "./collection";

@@ -3,10 +3,6 @@
   "extends": "@cartridge/tsconfig/react.json",
   "compilerOptions": {
     "noEmit": true,
-    "paths": {
-      "@/*": ["./src/*"],
-      "#*": ["./src/*"]
-    }
   },
   "include": ["src"]
 }

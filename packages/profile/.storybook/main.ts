@@ -24,19 +24,19 @@ const config: StorybookConfig = {
     mergeConfig(config, {
       resolve: {
         alias: {
-          "@/hooks/collection": require.resolve(
-            "../src/hooks/collection.mock.ts",
-          ),
-          "@/hooks/token": require.resolve("../src/hooks/token.mock.ts"),
-          "@cartridge/utils/api/cartridge": require.resolve(
-            "../node_modules/@cartridge/utils/dist/api/cartridge/index.js",
-          ),
-          "@cartridge/utils/api/indexer": require.resolve(
-            "../node_modules/@cartridge/utils/dist/api/indexer/index.js",
-          ),
-          "@cartridge/utils/mock/data": require.resolve(
-            "../node_modules/@cartridge/utils/dist/mock/data/index.js",
-          ),
+          // "@/hooks/collection": require.resolve(
+          //   "../src/hooks/collection.mock.ts",
+          // ),
+          // "@/hooks/token": require.resolve("../src/hooks/token.mock.ts"),
+          // "@cartridge/utils/api/cartridge": require.resolve(
+          //   "../node_modules/@cartridge/utils/dist/api/cartridge/index.js",
+          // ),
+          // "@cartridge/utils/api/indexer": require.resolve(
+          //   "../node_modules/@cartridge/utils/dist/api/indexer/index.js",
+          // ),
+          // "@cartridge/utils/mock/data": require.resolve(
+          //   "../node_modules/@cartridge/utils/dist/mock/data/index.js",
+          // ),
         },
       },
     }),

@@ -23,9 +23,11 @@
       "default": "./src/hooks/account.ts"
     },
     "#*": [
-      "./*",
-      "./*.ts",
-      "./*.tsx"
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
     ]
   },
   "dependencies": {
@@ -75,7 +77,6 @@
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vite": "catalog:",
-    "vite-tsconfig-paths": "catalog:"
+    "vite": "catalog:"
   }
 }

@@ -1,6 +1,6 @@
 import { useAccount } from "#hooks/account";
-import { useConnection } from "@/hooks/context";
-import { useToken } from "@/hooks/token";
+import { useConnection } from "#hooks/context";
+import { useToken } from "#hooks/token";
 import {
   LayoutContainer,
   LayoutContent,
@@ -16,7 +16,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
-import { SendRecipient } from "@/components/modules/recipient";
+import { SendRecipient } from "#components/modules/recipient";
 import { SendAmount } from "./amount";
 
 export function SendToken() {

@@ -3,12 +3,12 @@ import {
   AchievementFeatured,
   AchievementProgress,
 } from "@cartridge/ui-next";
-import { Item } from "@/hooks/achievements";
+import { Item } from "#hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 import { useAccount } from "#hooks/account";
-import { useConnection } from "@/hooks/context";
-import { useArcade } from "@/hooks/arcade";
+import { useConnection } from "#hooks/context";
+import { useArcade } from "#hooks/arcade";
 import { addAddressPadding } from "starknet";
 import { toast } from "sonner";
 

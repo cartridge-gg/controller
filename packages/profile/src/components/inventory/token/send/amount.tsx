@@ -1,4 +1,4 @@
-import { useToken } from "@/hooks/token";
+import { useToken } from "#hooks/token";
 import { Amount } from "@cartridge/ui-next";
 import { useCountervalue } from "@cartridge/utils";
 import { TokenPair } from "@cartridge/utils/api/cartridge";

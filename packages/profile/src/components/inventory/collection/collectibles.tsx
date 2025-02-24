@@ -1,4 +1,4 @@
-import { Asset } from "@/hooks/collection";
+import { Asset } from "#hooks/collection";
 import {
   Button,
   Card,

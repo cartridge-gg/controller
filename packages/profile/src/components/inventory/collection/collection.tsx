@@ -21,7 +21,7 @@ import {
 } from "@cartridge/ui-next";
 import { useCallback, useMemo } from "react";
 import { CollectionImage } from "./image";
-import { useCollection } from "@/hooks/collection";
+import { useCollection } from "#hooks/collection";
 import { Collectibles } from "./collectibles";
 
 export function Collection() {

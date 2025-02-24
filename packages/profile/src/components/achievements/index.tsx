@@ -14,11 +14,11 @@ import { useAccount, useUsername, useUsernames } from "#hooks/account";
 import { useCallback, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
-import { useConnection, useData } from "@/hooks/context";
-import { useArcade } from "@/hooks/arcade";
+import { useConnection, useData } from "#hooks/context";
+import { useArcade } from "#hooks/arcade";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 import { addAddressPadding } from "starknet";
-import { LayoutBottomNav } from "@/components/bottom-nav";
+import { LayoutBottomNav } from "#components/bottom-nav";
 
 export function Achievements() {
   const { address: self } = useAccount();
