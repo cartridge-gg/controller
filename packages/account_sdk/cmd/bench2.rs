@@ -60,7 +60,10 @@ struct Cli {
     #[arg(default_value = "1")]
     pub ntxs: usize,
 
-    #[arg(long, help = "The interval between each transaction batches in milliseconds")]
+    #[arg(
+        long,
+        help = "The interval between each transaction batches in milliseconds"
+    )]
     #[arg(default_value = "1000")]
     pub interval: usize,
 
@@ -72,14 +75,14 @@ struct Cli {
         help = "The address of the master account to pre-fund the controllers"
     )]
     #[arg(long, env = "MASTER_ACCOUNT_ADDRESS")]
-    pub master_account_address: Felt,
+    pub master_account_address: Option<Felt>,
 
     #[arg(
         long,
         help = "The private key of the master account to pre-fund the controllers"
     )]
     #[arg(long, env = "MASTER_ACCOUNT_PRIVATE_KEY")]
-    pub master_account_private_key: Felt,
+    pub master_account_private_key: Option<Felt>,
 }
 
 /// Entrypoint.
@@ -90,12 +93,13 @@ async fn main() {
 
     let signer = SigningKey::from_secret_scalar(PRIVATE_KEY);
     let owner = Owner::Signer(Signer::Starknet(signer.clone()));
-    let master_account = create_sn_account(
-        rpc_url.clone(),
-        args.master_account_address,
-        args.master_account_private_key,
-    )
-    .await;
+
+    let master_account = match (args.master_account_address, args.master_account_private_key) {
+        (Some(address), Some(private_key)) => {
+            Some(create_sn_account(rpc_url.clone(), address, private_key).await)
+        }
+        (None, _) | (_, None) => None,
+    };
 
     let master_account = Arc::new(master_account);
 
@@ -329,6 +333,7 @@ async fn get_nonce(nonce_mutex: &Arc<tokio::sync::Mutex<(Felt, u128)>>) -> (Felt
     };
 
     *nonce_lock = (namespace, bitmask);
+
     drop(nonce_lock);
 
     (namespace, nonce_bitmask)
@@ -368,7 +373,7 @@ async fn create_controller(
     username: &str,
     salt: Felt,
     chain_id: Felt,
-    master_account: Arc<SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>>,
+    master_account: Arc<Option<SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>>>,
 ) -> Controller {
     let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
     let factory = ControllerFactory::new(
@@ -390,46 +395,48 @@ async fn create_controller(
         chain_id,
     );
 
-    let _ = master_account
-        .execute_v3(vec![starknet::core::types::Call {
-            to: FEE_TOKEN_ADDRESS,
-            selector: selector!("transfer"),
-            calldata: vec![
-                controller_address,
-                Felt::from_dec_str("10000000000000000").unwrap(),
-                Felt::ZERO,
-            ],
-        }])
-        .send()
-        .await
-        .unwrap();
+    if let Some(master_account) = master_account.as_ref() {
+        let _ = master_account
+            .execute_v3(vec![starknet::core::types::Call {
+                to: FEE_TOKEN_ADDRESS,
+                selector: selector!("transfer"),
+                calldata: vec![
+                    controller_address,
+                    Felt::from_dec_str("10000000000000000").unwrap(),
+                    Felt::ZERO,
+                ],
+            }])
+            .send()
+            .await
+            .unwrap();
 
-    // Wait for the transaction to included.
-    tokio::time::sleep(Duration::from_secs(1)).await;
+        // Wait for the transaction to included.
+        tokio::time::sleep(Duration::from_secs(1)).await;
 
-    match factory
-        .deploy_v3(salt)
-        .gas_estimate_multiplier(1.5)
-        .send()
-        .await
-    {
-        Ok(_) => (),
-        Err(e) => {
-            if let AccountFactoryError::Provider(ProviderError::StarknetError(
-                StarknetError::TransactionExecutionError(ref error_data),
-            )) = e
-            {
-                if !error_data
-                    .execution_error
-                    .contains("is unavailable for deployment")
+        match factory
+            .deploy_v3(salt)
+            .gas_estimate_multiplier(1.5)
+            .send()
+            .await
+        {
+            Ok(_) => (),
+            Err(e) => {
+                if let AccountFactoryError::Provider(ProviderError::StarknetError(
+                    StarknetError::TransactionExecutionError(ref error_data),
+                )) = e
                 {
-                    println!("Deployment failed tx: {:?}", e);
+                    if !error_data
+                        .execution_error
+                        .contains("is unavailable for deployment")
+                    {
+                        println!("Deployment failed tx: {:?}", e);
+                    }
+                } else {
+                    println!("Deployment failed: {:?}", e);
                 }
-            } else {
-                println!("Deployment failed: {:?}", e);
             }
-        }
-    };
+        };
+    }
 
     controller
 }
