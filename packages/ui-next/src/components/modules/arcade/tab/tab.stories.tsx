@@ -25,7 +25,7 @@ export const Default: Story = {
   render: () => (
     <Wrapper>
       <ArcadeTab
-        Icon={<SparklesIcon variant="line" size="default" />}
+        Icon={<SparklesIcon variant="solid" size="default" />}
         value="assets"
         label="Assets"
         variant="default"

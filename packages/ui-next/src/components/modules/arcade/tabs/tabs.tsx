@@ -28,7 +28,6 @@ export const ArcadeTabs = ({
   children,
 }: ArcadeTabsProps) => {
   const [active, setActive] = useState("discover");
-  const [hover, setHover] = useState("");
   return (
     <Tabs
       className={className}
@@ -37,49 +36,25 @@ export const ArcadeTabs = ({
     >
       <TabsList className="h-16 flex justify-between w-full gap-2 bg-background-100 p-0 pt-2 border-b border-spacer-100">
         {discover && (
-          <DiscoverNavButton
-            value="discover"
-            active={active === "discover"}
-            hover={hover === "discover"}
-            onMouseEnter={() => setHover("discover")}
-            onMouseLeave={() => setHover("")}
-          />
+          <DiscoverNavButton value="discover" active={active === "discover"} />
         )}
         {inventory && (
           <InventoryNavButton
             value="inventory"
             active={active === "inventory"}
-            hover={hover === "inventory"}
-            onMouseEnter={() => setHover("inventory")}
-            onMouseLeave={() => setHover("")}
           />
         )}
         {achievements && (
           <AchievementsNavButton
             value="achievements"
             active={active === "achievements"}
-            hover={hover === "achievements"}
-            onMouseEnter={() => setHover("achievements")}
-            onMouseLeave={() => setHover("")}
           />
         )}
         {guilds && (
-          <GuildsNavButton
-            value="guilds"
-            active={active === "guilds"}
-            hover={hover === "guilds"}
-            onMouseEnter={() => setHover("guilds")}
-            onMouseLeave={() => setHover("")}
-          />
+          <GuildsNavButton value="guilds" active={active === "guilds"} />
         )}
         {activity && (
-          <ActivityNavButton
-            value="activity"
-            active={active === "activity"}
-            hover={hover === "activity"}
-            onMouseEnter={() => setHover("activity")}
-            onMouseLeave={() => setHover("")}
-          />
+          <ActivityNavButton value="activity" active={active === "activity"} />
         )}
       </TabsList>
       {children}
@@ -90,29 +65,16 @@ export const ArcadeTabs = ({
 const DiscoverNavButton = ({
   value,
   active,
-  hover,
-  onMouseEnter,
-  onMouseLeave,
 }: {
   value: string;
   active: boolean;
-  hover: boolean;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
 }) => {
   return (
     <ArcadeTab
       value={value}
-      Icon={
-        <PulseIcon
-          variant={active || hover ? "solid" : "line"}
-          size="default"
-        />
-      }
+      Icon={<PulseIcon variant="solid" size="default" />}
       label="Discover"
       active={active}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
     />
   );
 };
@@ -120,29 +82,16 @@ const DiscoverNavButton = ({
 const InventoryNavButton = ({
   value,
   active,
-  hover,
-  onMouseEnter,
-  onMouseLeave,
 }: {
   value: string;
   active: boolean;
-  hover: boolean;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
 }) => {
   return (
     <ArcadeTab
       value={value}
-      Icon={
-        <ChestIcon
-          variant={active || hover ? "solid" : "line"}
-          size="default"
-        />
-      }
+      Icon={<ChestIcon variant="solid" size="default" />}
       label="Inventory"
       active={active}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
     />
   );
 };
@@ -150,29 +99,16 @@ const InventoryNavButton = ({
 const AchievementsNavButton = ({
   value,
   active,
-  hover,
-  onMouseEnter,
-  onMouseLeave,
 }: {
   value: string;
   active: boolean;
-  hover: boolean;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
 }) => {
   return (
     <ArcadeTab
       value={value}
-      Icon={
-        <TrophyIcon
-          variant={active || hover ? "solid" : "line"}
-          size="default"
-        />
-      }
+      Icon={<TrophyIcon variant="solid" size="default" />}
       label="Achievements"
       active={active}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
     />
   );
 };
@@ -180,29 +116,16 @@ const AchievementsNavButton = ({
 const GuildsNavButton = ({
   value,
   active,
-  hover,
-  onMouseEnter,
-  onMouseLeave,
 }: {
   value: string;
   active: boolean;
-  hover: boolean;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
 }) => {
   return (
     <ArcadeTab
       value={value}
-      Icon={
-        <SwordsIcon
-          variant={active || hover ? "solid" : "line"}
-          size="default"
-        />
-      }
+      Icon={<SwordsIcon variant="solid" size="default" />}
       label="Guilds"
       active={active}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
     />
   );
 };
@@ -210,29 +133,16 @@ const GuildsNavButton = ({
 const ActivityNavButton = ({
   value,
   active,
-  hover,
-  onMouseEnter,
-  onMouseLeave,
 }: {
   value: string;
   active: boolean;
-  hover: boolean;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
 }) => {
   return (
     <ArcadeTab
       value={value}
-      Icon={
-        <ClockIcon
-          variant={active || hover ? "solid" : "line"}
-          size="default"
-        />
-      }
+      Icon={<ClockIcon variant="solid" size="default" />}
       label="Activity"
       active={active}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
     />
   );
 };

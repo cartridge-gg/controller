@@ -110,7 +110,7 @@ export const ArcadeGameHeader = ({
           size={isDesktop ? "lg" : "xl"}
         />
         <div className="flex flex-col gap-x-4 gap-y-0.5 sm:flex-row">
-          <CardTitle className="text-foreground-100 text-sm font-medium tracking-normal flex items-center">
+          <CardTitle className="text-foreground-100 text-sm font-medium tracking-normal flex items-center whitespace-nowrap">
             {metadata.name}
           </CardTitle>
           {pins.length > 0 && (
@@ -118,7 +118,7 @@ export const ArcadeGameHeader = ({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-x-2">
+      <div className="flex items-center justify-end gap-x-1 sm:gap-x-2 gap-y-0.5 flex-wrap">
         {socials?.website && (
           <AchievementSocialWebsite
             website={socials.website}

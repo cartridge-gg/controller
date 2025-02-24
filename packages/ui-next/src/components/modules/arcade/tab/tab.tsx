@@ -22,8 +22,6 @@ export interface ArcadeTabProps extends VariantProps<typeof arcadeTabVariants> {
   label: string;
   active?: boolean;
   className?: string;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
 }
 
 export const ArcadeTab = ({
@@ -33,15 +31,11 @@ export const ArcadeTab = ({
   active,
   className,
   variant,
-  onMouseEnter,
-  onMouseLeave,
 }: ArcadeTabProps) => {
   return (
     <TabsTrigger
       value={value}
       className={cn(arcadeTabVariants({ variant }), className)}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
     >
       <div
         data-active={active}

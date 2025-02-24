@@ -18,8 +18,8 @@ export const arcadeGameSelectVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-background-200",
-        faded: "bg-background-100",
+        default: "bg-background-200 data-[active=true]:bg-background-300",
+        faded: "bg-background-100 data-[active=true]:bg-background-200",
         ghost: "",
       },
     },
@@ -42,8 +42,8 @@ export const ArcadeGameSelect = ({
   const style = useMemo(() => {
     const bgColor =
       !variant || variant === "default"
-        ? `var(--background-200)`
-        : `var(--background-100)`;
+        ? `var(--background-${active ? "300" : "200"})`
+        : `var(--background-${active ? "200" : "100"})`;
     const opacity = cover
       ? active || hover
         ? "92%"
