@@ -4,6 +4,17 @@ import { ERC20, ERC20Metadata } from "../erc20";
 import { CreditQuery, useCreditQuery } from "../api/cartridge";
 import { erc20Metadata } from "@cartridge/presets";
 
+export type ERC20Balance = {
+  balance: Balance;
+  meta: ERC20Metadata;
+};
+
+export type UseERC20BalanceResponse = {
+  data: ERC20Balance[];
+  isFetching: boolean;
+  isLoading: boolean;
+};
+
 export function useERC20Balance({
   address,
   contractAddress,
