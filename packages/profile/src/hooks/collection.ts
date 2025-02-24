@@ -24,13 +24,19 @@ export type Asset = {
   attributes: Record<string, unknown>[];
 };
 
+export type UseCollectionResponse = {
+  collection?: Collection;
+  assets?: Asset[];
+  status: "success" | "error" | "idle" | "loading";
+};
+
 export function useCollection({
   contractAddress,
   tokenIds = [],
 }: {
   contractAddress?: string;
   tokenIds?: string[];
-}) {
+}): UseCollectionResponse {
   const { address } = useAccount();
   const { isReady, indexerUrl } = useIndexerAPI();
   const [offset, setOffset] = useState(0);
@@ -110,7 +116,12 @@ export function useCollection({
   return { collection, assets, status };
 }
 
-export function useCollections() {
+export type UseCollectionsResponse = {
+  collections: Collection[];
+  status: "success" | "error" | "idle" | "loading";
+};
+
+export function useCollections(): UseCollectionsResponse {
   const { address } = useAccount();
   const { isReady, indexerUrl } = useIndexerAPI();
 

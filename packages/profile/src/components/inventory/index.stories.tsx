@@ -5,6 +5,13 @@ import { accounts } from "@cartridge/utils/mock/data";
 
 const meta = {
   component: Inventory,
+  parameters: {
+    router: {
+      params: {
+        project: "test-project-0",
+      },
+    },
+  },
 } satisfies Meta<typeof Inventory>;
 
 export default meta;

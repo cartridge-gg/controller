@@ -22,6 +22,10 @@
       "storybook": "./src/hooks/account.mock.ts",
       "default": "./src/hooks/account.ts"
     },
+    "#hooks/collection": {
+      "storybook": "./src/hooks/collection.mock.ts",
+      "default": "./src/hooks/collection.ts"
+    },
     "#hooks/token": {
       "storybook": "./src/hooks/token.mock.ts",
       "default": "./src/hooks/token.ts"
