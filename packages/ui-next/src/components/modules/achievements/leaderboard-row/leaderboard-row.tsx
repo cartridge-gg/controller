@@ -46,7 +46,7 @@ export const AchievementLeaderboardRow = ({
     <div
       ref={ref}
       className={cn(
-        "flex select-none py-2.5 px-3 justify-between bg-background-200 text-foreground-400 hover:bg-background-300 hover:text-foreground-300 cursor-pointer",
+        "flex select-none py-2.5 px-3 justify-between bg-background-200 text-foreground-400 hover:bg-background-300 hover:text-foreground-300 cursor-pointer transition-colors",
         highlight &&
           "bg-background-300 text-foreground-300 sticky top-[-1px] bottom-[-1px] z-10",
         highlight && sticky && "border-y border-spacer-100",
@@ -67,9 +67,9 @@ export const AchievementLeaderboardRow = ({
       <div className="flex gap-x-3 items-center">
         <AchievementPinIcons
           pins={pins}
-          variant="default"
+          variant={highlight || hover ? "highlight" : "default"}
           size="md"
-          status={highlight ? "highlight" : hover ? "hover" : "default"}
+          theme={highlight}
         />
         <div
           className={cn(
