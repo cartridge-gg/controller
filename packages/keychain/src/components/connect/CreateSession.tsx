@@ -23,6 +23,7 @@ import {
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
 import type { BigNumberish } from "starknet";
+import { OcclusionDetector } from "@/components/OcclusionDetector";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -106,85 +107,88 @@ const CreateSessionLayout = ({
   }
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        className="px-6 pt-6"
-        title={!isUpdate ? "Create Session" : "Update Session"}
-        description={
-          isUpdate
-            ? "The policies were updated, please update existing session"
-            : undefined
-        }
-        right={
-          !isEditable ? (
-            <Button
-              variant="icon"
-              className="size-10 relative bg-background-200 hover:bg-background-300"
-              onClick={onToggleEditable}
-            >
-              <SliderIcon
-                color="white"
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-              />
-            </Button>
-          ) : undefined
-        }
-      />
-      <LayoutContent className="gap-6 px-6">
-        <SessionConsent isVerified={policies?.verified} />
-        {policies?.verified ? (
-          <VerifiedSessionSummary
-            game={theme.name}
-            contracts={policies.contracts}
-          />
-        ) : (
-          <UnverifiedSessionSummary contracts={policies.contracts} />
-        )}
-      </LayoutContent>
-      <LayoutFooter>
-        {!policies?.verified && (
-          <div
-            className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-100 text-destructive-100"
-            onClick={() => !isConnecting && setIsConsent(!isConsent)}
-          >
-            <Checkbox
-              variant="solid"
-              checked={isConsent}
-              disabled={isConnecting}
-              onCheckedChange={() => setIsConsent(!isConsent)}
-              className="pointer-events-none"
+    <>
+      <OcclusionDetector />
+      <LayoutContainer>
+        <LayoutHeader
+          className="px-6 pt-6"
+          title={!isUpdate ? "Create Session" : "Update Session"}
+          description={
+            isUpdate
+              ? "The policies were updated, please update existing session"
+              : undefined
+          }
+          right={
+            !isEditable ? (
+              <Button
+                variant="icon"
+                className="size-10 relative bg-background-200 hover:bg-background-300"
+                onClick={onToggleEditable}
+              >
+                <SliderIcon
+                  color="white"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                />
+              </Button>
+            ) : undefined
+          }
+        />
+        <LayoutContent className="gap-6 px-6">
+          <SessionConsent isVerified={policies?.verified} />
+          {policies?.verified ? (
+            <VerifiedSessionSummary
+              game={theme.name}
+              contracts={policies.contracts}
             />
-            <div className="text-xs">
-              I understand and agree to grant permission for this application to
-              execute these actions.
+          ) : (
+            <UnverifiedSessionSummary contracts={policies.contracts} />
+          )}
+        </LayoutContent>
+        <LayoutFooter>
+          {!policies?.verified && (
+            <div
+              className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-100 text-destructive-100"
+              onClick={() => !isConnecting && setIsConsent(!isConsent)}
+            >
+              <Checkbox
+                variant="solid"
+                checked={isConsent}
+                disabled={isConnecting}
+                onCheckedChange={() => setIsConsent(!isConsent)}
+                className="pointer-events-none"
+              />
+              <div className="text-xs">
+                I understand and agree to grant permission for this application
+                to execute these actions.
+              </div>
             </div>
+          )}
+
+          {error && <ControllerErrorAlert className="mb-3" error={error} />}
+
+          <div className="flex items-center gap-4">
+            <Button
+              variant="secondary"
+              onClick={onSkipSession}
+              disabled={isConnecting}
+              className="px-8"
+            >
+              Skip
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={isConnecting || (!policies?.verified && !isConsent)}
+              isLoading={isConnecting}
+              onClick={onCreateSession}
+            >
+              {isUpdate ? "update" : "create"} session
+            </Button>
           </div>
-        )}
 
-        {error && <ControllerErrorAlert className="mb-3" error={error} />}
-
-        <div className="flex items-center gap-4">
-          <Button
-            variant="secondary"
-            onClick={onSkipSession}
-            disabled={isConnecting}
-            className="px-8"
-          >
-            Skip
-          </Button>
-          <Button
-            className="flex-1"
-            disabled={isConnecting || (!policies?.verified && !isConsent)}
-            isLoading={isConnecting}
-            onClick={onCreateSession}
-          >
-            {isUpdate ? "update" : "create"} session
-          </Button>
-        </div>
-
-        {!error && <div className="flex flex-col" />}
-      </LayoutFooter>
-    </LayoutContainer>
+          {!error && <div className="flex flex-col" />}
+        </LayoutFooter>
+      </LayoutContainer>
+    </>
   );
 };
 
