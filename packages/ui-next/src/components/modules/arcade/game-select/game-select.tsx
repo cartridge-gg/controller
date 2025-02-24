@@ -18,7 +18,7 @@ export const arcadeGameSelectVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-foreground-200",
+        default: "bg-background-200",
         faded: "bg-background-100",
         ghost: "",
       },

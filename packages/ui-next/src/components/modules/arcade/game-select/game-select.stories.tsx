@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { ArcadeGameSelect } from "./game-select";
 
 const meta: Meta<typeof ArcadeGameSelect> = {
-  title: "Modules/Arcade/GameSelect",
+  title: "Modules/Arcade/Game Select",
   component: ArcadeGameSelect,
   tags: ["autodocs"],
   parameters: {

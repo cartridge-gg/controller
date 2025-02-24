@@ -28,18 +28,18 @@ export interface Socials {
   github?: string;
 }
 
-interface ArcadeGroupHeaderProps
-  extends VariantProps<typeof arcadeGroupHeaderVariants> {
-  achievements: {
+export interface ArcadeGameHeaderProps
+  extends VariantProps<typeof arcadeGameHeaderVariants> {
+  metadata: Metadata;
+  achievements?: {
     id: string;
     content: AchievementContentProps;
     pin?: AchievementPinProps;
   }[];
-  metadata: Metadata;
   socials?: Socials;
 }
 
-export const arcadeGroupHeaderVariants = cva(
+export const arcadeGameHeaderVariants = cva(
   "h-16 flex justify-between items-center px-4 py-3 gap-x-3",
   {
     variants: {
@@ -54,16 +54,17 @@ export const arcadeGroupHeaderVariants = cva(
     },
   },
 );
-type ArcadeGroupHeaderVariant = VariantProps<
-  typeof arcadeGroupHeaderVariants
+type ArcadeGameHeaderVariant = VariantProps<
+  typeof arcadeGameHeaderVariants
 >["variant"];
-export const ArcadeGroupHeader = ({
+export const ArcadeGameHeader = ({
   achievements,
   metadata,
   socials,
   variant,
-}: ArcadeGroupHeaderProps) => {
+}: ArcadeGameHeaderProps) => {
   const pins = useMemo(() => {
+    if (!achievements) return [];
     return achievements
       .filter((a) => a.content.icon && a.pin?.pinned)
       .map((a) => ({
@@ -91,7 +92,7 @@ export const ArcadeGroupHeader = ({
   return (
     <div
       className={cn(
-        arcadeGroupHeaderVariants({ variant }),
+        arcadeGameHeaderVariants({ variant }),
         "bg-top bg-cover bg-no-repeat select-none",
       )}
       style={style}
@@ -149,7 +150,7 @@ const AchievementSocialWebsite = ({
   variant,
 }: {
   website: string;
-  variant: ArcadeGroupHeaderVariant;
+  variant: ArcadeGameHeaderVariant;
 }) => {
   const label = useMemo(() => {
     return website.replace(/^.*https?:\/\//, "").replace(/\/$/, "");
@@ -169,7 +170,7 @@ const AchievementSocialDiscord = ({
   variant,
 }: {
   discord: string;
-  variant: ArcadeGroupHeaderVariant;
+  variant: ArcadeGameHeaderVariant;
 }) => {
   return (
     <AchievementSocial
@@ -185,7 +186,7 @@ const AchievementSocialTwitter = ({
   variant,
 }: {
   twitter: string;
-  variant: ArcadeGroupHeaderVariant;
+  variant: ArcadeGameHeaderVariant;
 }) => {
   return (
     <AchievementSocial
@@ -201,7 +202,7 @@ const AchievementSocialGithub = ({
   variant,
 }: {
   github: string;
-  variant: ArcadeGroupHeaderVariant;
+  variant: ArcadeGameHeaderVariant;
 }) => {
   return (
     <AchievementSocial
@@ -217,7 +218,7 @@ const AchievementSocialTelegram = ({
   variant,
 }: {
   telegram: string;
-  variant: ArcadeGroupHeaderVariant;
+  variant: ArcadeGameHeaderVariant;
 }) => {
   return (
     <AchievementSocial
@@ -274,4 +275,4 @@ const AchievementSocial = ({
   );
 };
 
-export default ArcadeGroupHeader;
+export default ArcadeGameHeader;
