@@ -698,6 +698,9 @@ importers:
       '@cartridge/eslint':
         specifier: workspace:*
         version: link:../eslint
+      '@cartridge/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@storybook/addon-essentials':
         specifier: 'catalog:'
         version: 8.5.3(@types/react@18.3.18)(storybook@8.5.3(prettier@3.4.2))
