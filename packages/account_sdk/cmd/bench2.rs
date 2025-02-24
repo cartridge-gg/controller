@@ -15,12 +15,15 @@ use anyhow::Result;
 use clap::Parser;
 
 use futures::StreamExt;
-use starknet::accounts::{Account, AccountFactory, AccountFactoryError};
-use starknet::core::types::StarknetError;
+use starknet::accounts::{
+    Account, AccountFactory, AccountFactoryError, ExecutionEncoding, SingleOwnerAccount,
+};
+use starknet::core::types::{BlockId, BlockTag, StarknetError};
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::{felt, selector};
-use starknet::providers::ProviderError;
-use starknet::signers::SigningKey;
+use starknet::providers::jsonrpc::HttpTransport;
+use starknet::providers::{JsonRpcClient, Provider, ProviderError};
+use starknet::signers::{LocalWallet, SigningKey};
 use starknet_crypto::Felt;
 use std::primitive::{u32, u64};
 use std::sync::Arc;
@@ -40,7 +43,8 @@ const JACKPOT_ID_NONE: Felt = Felt::ONE;
 // Hex for "WP_NUMS_APPCHAIN"
 const CHAIN_ID: Felt = felt!("0x57505f4e554d535f415050434841494e");
 const SERVICE_BASE_URL: &str = "https://api.cartridge.gg/x/nums-appchain";
-const FEE_TOKEN_ADDRESS: Felt = felt!("0x2e7442625bab778683501c0eadbc1ea17b3535da040a12ac7d281066e915eea");
+const FEE_TOKEN_ADDRESS: Felt =
+    felt!("0x2e7442625bab778683501c0eadbc1ea17b3535da040a12ac7d281066e915eea");
 
 // Contracts setup.
 const WORLD_ADDRESS: Felt =
@@ -53,18 +57,34 @@ const GAME_ADDRESS: Felt =
 // USe clap to aat least have the number of TPS and the duration from CLI
 #[derive(Debug, Parser, Clone)]
 struct Cli {
-    #[arg(long)]
+    #[arg(long, help = "The number of transactions per batch")]
     #[arg(default_value = "1")]
-    pub tps: usize,
-    #[arg(long)]
+    pub ntxs: usize,
+
+    #[arg(long, help = "The interval between each transaction batches")]
+    #[arg(default_value = "1")]
+    pub interval: usize,
+
+    #[arg(long, help = "The duration of the benchmark")]
     #[arg(default_value = "30")]
     pub duration: u64,
+
+    #[arg(
+        long,
+        help = "The address of the master account to pre-fund the controllers"
+    )]
     #[arg(long, env = "MASTER_ACCOUNT_ADDRESS")]
     pub master_account_address: Felt,
+
+    #[arg(
+        long,
+        help = "The private key of the master account to pre-fund the controllers"
+    )]
     #[arg(long, env = "MASTER_ACCOUNT_PRIVATE_KEY")]
     pub master_account_private_key: Felt,
 }
 
+/// Entrypoint.
 #[tokio::main]
 async fn main() {
     let args = Cli::parse();
@@ -72,15 +92,32 @@ async fn main() {
 
     let signer = SigningKey::from_secret_scalar(PRIVATE_KEY);
     let owner = Owner::Signer(Signer::Starknet(signer.clone()));
-    let salt = cairo_short_string_to_felt(USERNAME).unwrap();
+    let master_account = create_sn_account(
+        rpc_url.clone(),
+        args.master_account_address,
+        args.master_account_private_key,
+    )
+    .await;
 
-    let duration = Duration::from_secs(args.duration);
-    let total_transactions = args.tps * duration.as_secs() as usize;
+    let master_account = Arc::new(master_account);
 
-    let mut controller = create_controller(rpc_url, &owner, USERNAME, salt, CHAIN_ID).await;
+    let mut controllers = vec![];
+    for i in 0..args.ntxs {
+        let username = format!("{}__{}", USERNAME, i);
+        let salt = cairo_short_string_to_felt(username.as_str()).unwrap();
 
-    controller
-        .create_session(
+        let mut ctl = create_controller(
+            rpc_url.clone(),
+            &owner,
+            &username,
+            salt,
+            CHAIN_ID,
+            master_account.clone(),
+        )
+        .await;
+        println!("Controller created {}: {:#x}", i, ctl.address());
+
+        ctl.create_session(
             vec![
                 Policy::new_call(GAME_ADDRESS, selector!("create_game")),
                 Policy::new_call(GAME_ADDRESS, selector!("set_slot")),
@@ -91,82 +128,92 @@ async fn main() {
         .await
         .unwrap();
 
-    let controller = Arc::new(controller);
-    let interval = Duration::from_secs_f64(1.0 / args.tps as f64);
+        controllers.push(Arc::new(ctl));
+    }
+
+    let interval = Duration::from_secs(args.interval as u64);
     dbg!(interval);
 
     let (namespace, bitmask) = (SigningKey::from_random().secret_scalar(), 0u128);
     let nonce_mutex = Arc::new(tokio::sync::Mutex::new((namespace, bitmask)));
 
-    let mut handles = vec![];
+    loop {
+        let mut handles = vec![];
 
-    for i in 0..total_transactions {
-        let controller = Arc::clone(&controller);
-        let nonce_mutex = Arc::clone(&nonce_mutex);
-        let handle = tokio::spawn(async move {
-            let torii = torii_client::client::Client::new(
-                format!("{}/torii", SERVICE_BASE_URL),
-                format!("{}/katana", SERVICE_BASE_URL),
-                "".to_string(),
-                WORLD_ADDRESS,
-            )
-            .await
-            .expect("Failed to create torii client");
-
-            let mut stream = torii
-                .on_event_message_updated(
-                    vec![EntityKeysClause::Keys(KeysClause {
-                        keys: vec![Some(controller.address())],
-                        pattern_matching: PatternMatching::FixedLen,
-                        models: vec!["nums-GameCreated".to_string()],
-                    })],
-                    false,
+        for i in 0..args.ntxs {
+            let controller = Arc::clone(&controllers[i]);
+            let nonce_mutex = Arc::clone(&nonce_mutex);
+            let handle = tokio::spawn(async move {
+                let torii = torii_client::client::Client::new(
+                    format!("{}/torii", SERVICE_BASE_URL),
+                    format!("{}/katana", SERVICE_BASE_URL),
+                    "".to_string(),
+                    WORLD_ADDRESS,
                 )
                 .await
-                .expect("Failed to subscribe to event messages");
+                .expect("Failed to create torii client");
 
-            match create_game(&controller, get_nonce(&nonce_mutex).await).await {
-                Ok(_) => {
-                    println!("Routine {}: Successfully executed create_game function", i);
+                let mut stream = torii
+                    .on_event_message_updated(
+                        vec![EntityKeysClause::Keys(KeysClause {
+                            keys: vec![Some(controller.address())],
+                            pattern_matching: PatternMatching::FixedLen,
+                            models: vec!["nums-GameCreated".to_string()],
+                        })],
+                        false,
+                    )
+                    .await
+                    .expect("Failed to subscribe to event messages");
 
-                    while let Some(event) = stream.next().await {
-                        if let Ok((_, entity)) = event {
-                            if let Some(game_id) = entity.game_id() {
-                                match set_slot(&controller, game_id, get_nonce(&nonce_mutex).await)
+                match create_game(&controller, get_nonce(&nonce_mutex).await).await {
+                    Ok(_) => {
+                        println!("Routine {}: Successfully executed create_game function", i);
+
+                        while let Some(event) = stream.next().await {
+                            if let Ok((_, entity)) = event {
+                                if let Some(game_id) = entity.game_id() {
+                                    match set_slot(
+                                        &controller,
+                                        game_id,
+                                        get_nonce(&nonce_mutex).await,
+                                    )
                                     .await
-                                {
-                                    Ok(_) => {
-                                        println!("Routine {}: Successfully executed set_slot function (game_id: {})", i, game_id);
-                                        break;
-                                    }
-                                    Err(err) => {
-                                        println!("Routine {}: Failed to execute set_slot function (game_id: {}): {:?}", i, game_id, err);
-                                    }
-                                };
-                            } else {
-                                // ignore the empty subscription response.
+                                    {
+                                        Ok(_) => {
+                                            println!("Routine {}: Successfully executed set_slot function (game_id: {})", i, game_id);
+                                            break;
+                                        }
+                                        Err(err) => {
+                                            println!("Routine {}: Failed to execute set_slot function (game_id: {}): {:?}", i, game_id, err);
+                                        }
+                                    };
+                                } else {
+                                    // ignore the empty subscription response.
+                                }
                             }
                         }
                     }
+                    Err(err) => {
+                        eprintln!(
+                            "Routine {}: Failed to execute create_game function: {:?}",
+                            i, err
+                        );
+                    }
                 }
-                Err(err) => {
-                    eprintln!(
-                        "Routine {}: Failed to execute create_game function: {:?}",
-                        i, err
-                    );
-                }
-            }
-        });
+            });
 
-        handles.push(handle);
+            handles.push(handle);
+        }
+
+        for handle in handles {
+            handle.await.unwrap();
+        }
+
         tokio::time::sleep(interval).await;
-    }
-
-    for handle in handles {
-        handle.await.unwrap();
     }
 }
 
+/// Creates a game new game, the id will be emitted by gRPC in the `nums-GameCreated` event.
 async fn create_game(
     controller: &Controller,
     nonce: (Felt, u128),
@@ -210,6 +257,7 @@ async fn create_game(
         .await
 }
 
+/// Sets the slot for a given game id.
 async fn set_slot(
     controller: &Controller,
     game_id: u32,
@@ -257,6 +305,7 @@ async fn set_slot(
         .await
 }
 
+/// Creates a VRF call to request a random number, to be inserted before each game call.
 fn vrf_call(controller_contract_address: Felt) -> Call {
     Call {
         to: VRF_ADDRESS.into(),
@@ -265,6 +314,7 @@ fn vrf_call(controller_contract_address: Felt) -> Call {
     }
 }
 
+/// Computes the nonce for a given nonce context from the namespace and bitmask.
 async fn get_nonce(nonce_mutex: &Arc<tokio::sync::Mutex<(Felt, u128)>>) -> (Felt, u128) {
     let mut nonce_lock = nonce_mutex.lock().await;
     let (mut namespace, mut bitmask) = *nonce_lock;
@@ -286,10 +336,12 @@ async fn get_nonce(nonce_mutex: &Arc<tokio::sync::Mutex<(Felt, u128)>>) -> (Felt
     (namespace, nonce_bitmask)
 }
 
+/// A trait to extract the game id from the entity returned by Torii gRPC.
 trait EntityGameCreated {
     fn game_id(&self) -> Option<u32>;
 }
 
+/// A trait to extract the game id from the entity to avoid big code above.
 impl EntityGameCreated for torii_grpc::types::schema::Entity {
     fn game_id(&self) -> Option<u32> {
         if self.hashed_keys != Felt::ZERO {
@@ -311,12 +363,14 @@ impl EntityGameCreated for torii_grpc::types::schema::Entity {
     }
 }
 
+/// Create a controller and deploys it with funding with the master account.
 async fn create_controller(
     rpc_url: Url,
     owner: &Owner,
     username: &str,
     salt: Felt,
     chain_id: Felt,
+    master_account: Arc<SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet>>,
 ) -> Controller {
     let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
     let factory = ControllerFactory::new(
@@ -327,7 +381,6 @@ async fn create_controller(
     );
 
     let controller_address = factory.address(salt);
-    println!("Controller address: {:#x}", controller_address);
 
     let controller = Controller::new(
         "https://www.slot.nums.gg".to_string(),
@@ -338,6 +391,23 @@ async fn create_controller(
         controller_address,
         chain_id,
     );
+
+    let _ = master_account
+        .execute_v3(vec![starknet::core::types::Call {
+            to: FEE_TOKEN_ADDRESS,
+            selector: selector!("transfer"),
+            calldata: vec![
+                controller_address,
+                Felt::from_dec_str("10000000000000000").unwrap(),
+                Felt::ZERO,
+            ],
+        }])
+        .send()
+        .await
+        .unwrap();
+
+    // Wait for the transaction to included.
+    tokio::time::sleep(Duration::from_secs(1)).await;
 
     match factory
         .deploy_v3(salt)
@@ -364,4 +434,22 @@ async fn create_controller(
     };
 
     controller
+}
+
+/// Create a starknet account.
+async fn create_sn_account(
+    rpc_url: Url,
+    address: Felt,
+    private_key: Felt,
+) -> SingleOwnerAccount<JsonRpcClient<HttpTransport>, LocalWallet> {
+    let provider = JsonRpcClient::new(HttpTransport::new(rpc_url));
+    let chain_id = provider.chain_id().await.unwrap();
+    let signer = LocalWallet::from(SigningKey::from_secret_scalar(private_key));
+
+    let mut account =
+        SingleOwnerAccount::new(provider, signer, address, chain_id, ExecutionEncoding::New);
+
+    account.set_block_id(BlockId::Tag(BlockTag::Pending));
+
+    account
 }
