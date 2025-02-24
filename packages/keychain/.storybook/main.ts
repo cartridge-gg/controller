@@ -38,12 +38,13 @@ const config: StorybookConfig = {
   previewHead: (head) => `
     ${head}
     ${
-      process.env.SNAPSHOT &&
-      `<style>
+      process.env.SNAPSHOT
+        ? `<style>
       * {
         animation: none !important;
       }
     </style>`
+        : ""
     }
   `,
 };
