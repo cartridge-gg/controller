@@ -9,7 +9,7 @@ import {
   LayoutHeader,
 } from "@cartridge/ui-next";
 import { LayoutBottomNav } from "@/components/bottom-nav";
-import { useAccount } from "@/hooks/account";
+import { useAccount } from "#hooks/account";
 import { Outlet, useParams } from "react-router-dom";
 import { Collections } from "./collection";
 import { Tokens } from "./token";

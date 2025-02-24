@@ -1,4 +1,4 @@
-import { useAccount } from "@/hooks/account";
+import { useAccount } from "#hooks/account";
 import { useConnection } from "@/hooks/context";
 import {
   LayoutContainer,

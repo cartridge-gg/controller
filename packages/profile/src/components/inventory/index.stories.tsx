@@ -1,17 +1,10 @@
 import { Meta, StoryObj } from "@storybook/react";
 import { Inventory } from ".";
+import { useAccount } from "#hooks/account.mock";
 import { accounts } from "@cartridge/utils/mock/data";
-import { decorator } from "@/hooks/account.mock";
 
 const meta = {
   component: Inventory,
-  parameters: {
-    router: {
-      params: {
-        project: "test-0",
-      },
-    },
-  },
 } satisfies Meta<typeof Inventory>;
 
 export default meta;
@@ -21,8 +14,10 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const TestAccount1: Story = {
-  parameters: {
-    account: accounts["test-1"],
+  beforeEach() {
+    useAccount.mockReturnValue({
+      username: accounts["test-1"].username,
+      address: accounts["test-1"].address,
+    });
   },
-  decorators: [decorator],
 };

@@ -4,7 +4,8 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "#*": ["./src/*"]
     }
   },
   "include": ["src"]

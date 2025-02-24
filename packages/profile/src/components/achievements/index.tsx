@@ -10,7 +10,7 @@ import {
   AchievementLeaderboardRow,
   AchievementPlayerLabel,
 } from "@cartridge/ui-next";
-import { useAccount, useUsername, useUsernames } from "@/hooks/account";
+import { useAccount, useUsername, useUsernames } from "#hooks/account";
 import { useCallback, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";

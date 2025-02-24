@@ -30,7 +30,7 @@ import {
 } from "@cartridge/utils";
 import { constants } from "starknet";
 import { formatEther } from "viem";
-import { useAccount } from "@/hooks/account";
+import { useAccount } from "#hooks/account";
 import { useToken } from "@/hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { useMemo } from "react";

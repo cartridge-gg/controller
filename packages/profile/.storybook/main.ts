@@ -24,7 +24,6 @@ const config: StorybookConfig = {
     mergeConfig(config, {
       resolve: {
         alias: {
-          "@/hooks/account": require.resolve("../src/hooks/account.mock.ts"),
           "@/hooks/collection": require.resolve(
             "../src/hooks/collection.mock.ts",
           ),

@@ -6,7 +6,7 @@ import {
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameModel } from "@bal7hazar/arcade-sdk";
-import { useAccount } from "@/hooks/account";
+import { useAccount } from "#hooks/account";
 import { useConnection } from "@/hooks/context";
 import { useArcade } from "@/hooks/arcade";
 import { addAddressPadding } from "starknet";

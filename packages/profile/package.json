@@ -17,6 +17,17 @@
     "test:storybook:update": "start-server-and-test 'SNAPSHOT=1 pnpm storybook:serve' 6003 'pnpm test-storybook --url http://127.0.0.1:6003 -u'",
     "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6003 'pnpm test-storybook --url http://127.0.0.1:6003'"
   },
+  "imports": {
+    "#hooks/account": {
+      "storybook": "./src/hooks/account.mock.ts",
+      "default": "./src/hooks/account.ts"
+    },
+    "#*": [
+      "./*",
+      "./*.ts",
+      "./*.tsx"
+    ]
+  },
   "dependencies": {
     "@bal7hazar/arcade-sdk": "^0.0.73",
     "@cartridge/controller": "workspace:*",

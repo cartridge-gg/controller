@@ -1,32 +1,19 @@
 import { accounts } from "@cartridge/utils/mock/data";
-import { Decorator } from "@storybook/react";
+import { fn, Mock } from "@storybook/test";
+import { UseAccountInfoResponse, UseAccountResponse } from "#hooks/account";
 
-let account = accounts["test-0"];
-export const decorator: Decorator = (story, { parameters }) => {
-  if (parameters?.account) {
-    account = {
-      ...account,
-      ...parameters.account,
-    };
-  }
+export * from "./account";
 
-  return story();
-};
+export const useAccount = fn(() => ({
+  username: accounts["test-0"].username,
+  address: accounts["test-0"].address,
+})).mockName("useAccount") as Mock<() => UseAccountResponse>; // TS doesn't infer the return type of the mock for some reason
 
-export function useAccount() {
-  return {
-    username: account.username,
-    address: account.address,
-  };
-}
-
-export function useAccountInfo() {
-  return {
-    name: account.username,
-    address: account.address,
-    wallet: null,
-    isFetching: false,
-    error: "",
-    warning: "",
-  };
-}
+export const useAccountInfo = fn(() => ({
+  name: accounts["test-0"].username,
+  address: accounts["test-0"].address,
+  wallet: null,
+  isFetching: false,
+  error: "",
+  warning: "",
+})).mockName("useAccountInfo") as Mock<() => UseAccountInfoResponse>;
