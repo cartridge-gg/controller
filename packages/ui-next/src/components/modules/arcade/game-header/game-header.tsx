@@ -104,7 +104,7 @@ export const ArcadeGameHeader = ({
           variant={variant}
         />
         <div className="flex flex-col gap-x-4 gap-y-0.5 sm:flex-row">
-          <CardTitle className="text-foreground-100 text-sm font-medium tracking-normal">
+          <CardTitle className="text-foreground-100 text-sm font-medium tracking-normal flex items-center">
             {metadata.name}
           </CardTitle>
           {pins.length > 0 && (

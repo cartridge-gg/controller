@@ -68,6 +68,12 @@ type Story = StoryObj<typeof ArcadeGameHeader>;
 
 export const Default: Story = {};
 
+export const Empty: Story = {
+  args: {
+    achievements: [],
+  },
+};
+
 export const Faded: Story = {
   args: {
     variant: "faded",
