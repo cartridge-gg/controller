@@ -7,6 +7,7 @@ import {
   GitHubIcon,
   GlobeIcon,
   TelegramIcon,
+  useMediaQuery,
   XIcon,
 } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
@@ -91,6 +92,8 @@ export const ArcadeGameHeader = ({
     };
   }, [metadata.cover, variant]);
 
+  const isDesktop = useMediaQuery("(min-width: 640px)");
+
   return (
     <div
       className={cn(
@@ -104,7 +107,7 @@ export const ArcadeGameHeader = ({
           logo={metadata.logo}
           name={metadata.name}
           variant={variant}
-          size="xl"
+          size={isDesktop ? "lg" : "xl"}
         />
         <div className="flex flex-col gap-x-4 gap-y-0.5 sm:flex-row">
           <CardTitle className="text-foreground-100 text-sm font-medium tracking-normal flex items-center">

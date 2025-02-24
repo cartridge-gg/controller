@@ -3,7 +3,7 @@ import { LayoutContext } from "./context";
 import { isIframe } from "@cartridge/utils";
 import { cn } from "@/utils";
 
-function useMediaQuery(query: string) {
+export function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
 
   useEffect(() => {

@@ -47,7 +47,7 @@ export const ArcadeGameIcon = ({
       {logo ? (
         <img src={logo} alt={name} className="h-full w-full rounded" />
       ) : (
-        <DojoIcon size="lg" />
+        <DojoIcon size={size} />
       )}
     </div>
   );
