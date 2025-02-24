@@ -11,12 +11,11 @@ use account_sdk::provider::{
     ExecuteFromOutsideResponse,
 };
 use account_sdk::signers::{Owner, Signer};
+use anyhow::Result;
+use clap::Parser;
 
-use cainome::cairo_serde::ContractAddress;
 use futures::StreamExt;
-use rand::Rng as _;
 use starknet::accounts::{Account, AccountFactory, AccountFactoryError};
-use starknet::core::types::Felt as felt252;
 use starknet::core::types::StarknetError;
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::macros::{felt, selector};
@@ -29,45 +28,310 @@ use tokio::time::Duration;
 use torii_grpc::types::{EntityKeysClause, KeysClause, PatternMatching};
 use url::Url;
 
-// Constants for TPS and duration
-const TPS: usize = 5;
-const DURATION_SECS: u64 = 30 * 60;
+// Controller setup.
+const PRIVATE_KEY: Felt =
+    felt!("0x6b80fcafbecee2c7ddff50c9a09b529c8f65b2fdb457ea134e76ee17640d768");
+const USERNAME: &str = "benchnums4";
+
+// Game setup.
 const JACKPOT_ID_NONE: Felt = Felt::ONE;
+
+// Chain setup.
+// Hex for "WP_NUMS_APPCHAIN"
+const CHAIN_ID: Felt = felt!("0x57505f4e554d535f415050434841494e");
+const SERVICE_BASE_URL: &str = "https://api.cartridge.gg/x/nums-appchain";
+const FEE_TOKEN_ADDRESS: Felt = felt!("0x2e7442625bab778683501c0eadbc1ea17b3535da040a12ac7d281066e915eea");
+
+// Contracts setup.
 const WORLD_ADDRESS: Felt =
     felt!("0x7686a16189676ac3978c3b865ae7e3d625a1cd7438800849c7fd866e4b9afd1");
-const SERVICE_BASE_URL: &str = "https://api.cartridge.gg/x/nums-appchain";
+const VRF_ADDRESS: Felt =
+    felt!("0x7ed472bdde3b19a5cf2334ad0f368426272f477938270b1b04259f159bdc0e2");
+const GAME_ADDRESS: Felt =
+    felt!("0x0479895f8b2f1250c7eb28d8055b070942fca49bde45454662f4c9f60529d798");
+
+// USe clap to aat least have the number of TPS and the duration from CLI
+#[derive(Debug, Parser, Clone)]
+struct Cli {
+    #[arg(long)]
+    #[arg(default_value = "1")]
+    pub tps: usize,
+    #[arg(long)]
+    #[arg(default_value = "30")]
+    pub duration: u64,
+    #[arg(long, env = "MASTER_ACCOUNT_ADDRESS")]
+    pub master_account_address: Felt,
+    #[arg(long, env = "MASTER_ACCOUNT_PRIVATE_KEY")]
+    pub master_account_private_key: Felt,
+}
 
 #[tokio::main]
 async fn main() {
-    //let rpc_url = Url::parse("https://api.cartridge.gg/x/starknet/mainnet").unwrap();
+    let args = Cli::parse();
     let rpc_url = Url::parse(format!("{}/katana", SERVICE_BASE_URL).as_str()).unwrap();
-    let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
 
-    // let chain_id = felt!("0x534e5f5345504f4c4941"); // Hex for "SN_SEPOLIA"
-    // let chain_id = felt!("0x534e5f4d41494e"); // Hex for "SN_MAIN"
-    let chain_id = felt!("0x57505f4e554d535f415050434841494e"); // Hex for "WP_NUMS_APPCHAIN"
-
-    let signer = SigningKey::from_secret_scalar(felt!(
-        "0x6b80fcafbecee2c7ddff50c9a09b529c8f65b2fdb457ea134e76ee17640d768"
-    ));
+    let signer = SigningKey::from_secret_scalar(PRIVATE_KEY);
     let owner = Owner::Signer(Signer::Starknet(signer.clone()));
-    let username = "benchnums4".to_owned();
-    let salt = cairo_short_string_to_felt(&username).unwrap();
+    let salt = cairo_short_string_to_felt(USERNAME).unwrap();
 
+    let duration = Duration::from_secs(args.duration);
+    let total_transactions = args.tps * duration.as_secs() as usize;
+
+    let mut controller = create_controller(rpc_url, &owner, USERNAME, salt, CHAIN_ID).await;
+
+    controller
+        .create_session(
+            vec![
+                Policy::new_call(GAME_ADDRESS, selector!("create_game")),
+                Policy::new_call(GAME_ADDRESS, selector!("set_slot")),
+                Policy::new_call(VRF_ADDRESS, selector!("request_random")),
+            ],
+            u32::MAX as u64,
+        )
+        .await
+        .unwrap();
+
+    let controller = Arc::new(controller);
+    let interval = Duration::from_secs_f64(1.0 / args.tps as f64);
+    dbg!(interval);
+
+    let (namespace, bitmask) = (SigningKey::from_random().secret_scalar(), 0u128);
+    let nonce_mutex = Arc::new(tokio::sync::Mutex::new((namespace, bitmask)));
+
+    let mut handles = vec![];
+
+    for i in 0..total_transactions {
+        let controller = Arc::clone(&controller);
+        let nonce_mutex = Arc::clone(&nonce_mutex);
+        let handle = tokio::spawn(async move {
+            let torii = torii_client::client::Client::new(
+                format!("{}/torii", SERVICE_BASE_URL),
+                format!("{}/katana", SERVICE_BASE_URL),
+                "".to_string(),
+                WORLD_ADDRESS,
+            )
+            .await
+            .expect("Failed to create torii client");
+
+            let mut stream = torii
+                .on_event_message_updated(
+                    vec![EntityKeysClause::Keys(KeysClause {
+                        keys: vec![Some(controller.address())],
+                        pattern_matching: PatternMatching::FixedLen,
+                        models: vec!["nums-GameCreated".to_string()],
+                    })],
+                    false,
+                )
+                .await
+                .expect("Failed to subscribe to event messages");
+
+            match create_game(&controller, get_nonce(&nonce_mutex).await).await {
+                Ok(_) => {
+                    println!("Routine {}: Successfully executed create_game function", i);
+
+                    while let Some(event) = stream.next().await {
+                        if let Ok((_, entity)) = event {
+                            if let Some(game_id) = entity.game_id() {
+                                match set_slot(&controller, game_id, get_nonce(&nonce_mutex).await)
+                                    .await
+                                {
+                                    Ok(_) => {
+                                        println!("Routine {}: Successfully executed set_slot function (game_id: {})", i, game_id);
+                                        break;
+                                    }
+                                    Err(err) => {
+                                        println!("Routine {}: Failed to execute set_slot function (game_id: {}): {:?}", i, game_id, err);
+                                    }
+                                };
+                            } else {
+                                // ignore the empty subscription response.
+                            }
+                        }
+                    }
+                }
+                Err(err) => {
+                    eprintln!(
+                        "Routine {}: Failed to execute create_game function: {:?}",
+                        i, err
+                    );
+                }
+            }
+        });
+
+        handles.push(handle);
+        tokio::time::sleep(interval).await;
+    }
+
+    for handle in handles {
+        handle.await.unwrap();
+    }
+}
+
+async fn create_game(
+    controller: &Controller,
+    nonce: (Felt, u128),
+) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError> {
+    let calls = vec![
+        vrf_call(controller.address()),
+        Call {
+            to: GAME_ADDRESS.into(),
+            selector: selector!("create_game"),
+            calldata: vec![JACKPOT_ID_NONE],
+        },
+    ];
+
+    let sdk_calls: Vec<starknet::core::types::Call> =
+        calls.iter().map(|c| c.clone().into()).collect::<Vec<_>>();
+
+    let r = controller.session_account(&Policy::from_calls(&sdk_calls));
+
+    let session_account = r.unwrap();
+
+    let exe = OutsideExecutionV3 {
+        caller: OutsideExecutionCaller::Any.into(),
+        execute_after: 0,
+        execute_before: u32::MAX as u64,
+        calls,
+        nonce,
+    };
+
+    let signed = session_account
+        .sign_outside_execution(OutsideExecution::V3(exe.clone()))
+        .await
+        .unwrap();
+
+    controller
+        .provider
+        .add_execute_outside_transaction(
+            OutsideExecution::V3(exe),
+            controller.address(),
+            signed.signature,
+        )
+        .await
+}
+
+async fn set_slot(
+    controller: &Controller,
+    game_id: u32,
+    nonce: (Felt, u128),
+) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError> {
+    // Can always set the slot 2 for testing, since the game has just been created.
+    let target = Felt::TWO;
+
+    let calls = vec![
+        vrf_call(controller.address()),
+        Call {
+            to: GAME_ADDRESS.into(),
+            selector: selector!("set_slot"),
+            calldata: vec![game_id.into(), target],
+        },
+    ];
+
+    let sdk_calls: Vec<starknet::core::types::Call> =
+        calls.iter().map(|c| c.clone().into()).collect::<Vec<_>>();
+
+    let session_account = controller
+        .session_account(&Policy::from_calls(&sdk_calls))
+        .unwrap();
+
+    let exe = OutsideExecutionV3 {
+        caller: OutsideExecutionCaller::Any.into(),
+        execute_after: 0,
+        execute_before: u32::MAX as u64,
+        calls,
+        nonce,
+    };
+
+    let signed = session_account
+        .sign_outside_execution(OutsideExecution::V3(exe.clone()))
+        .await
+        .unwrap();
+
+    controller
+        .provider
+        .add_execute_outside_transaction(
+            OutsideExecution::V3(exe),
+            controller.address(),
+            signed.signature,
+        )
+        .await
+}
+
+fn vrf_call(controller_contract_address: Felt) -> Call {
+    Call {
+        to: VRF_ADDRESS.into(),
+        selector: selector!("request_random"),
+        calldata: vec![GAME_ADDRESS.into(), Felt::ZERO, controller_contract_address],
+    }
+}
+
+async fn get_nonce(nonce_mutex: &Arc<tokio::sync::Mutex<(Felt, u128)>>) -> (Felt, u128) {
+    let mut nonce_lock = nonce_mutex.lock().await;
+    let (mut namespace, mut bitmask) = *nonce_lock;
+
+    let nonce_bitmask = if bitmask == u64::MAX.into() {
+        namespace = SigningKey::from_random().secret_scalar();
+        bitmask = 1;
+        1u128
+    } else {
+        let next_bit = bitmask.trailing_ones();
+        let new_bit = 1u128 << next_bit;
+        bitmask |= new_bit;
+        new_bit
+    };
+
+    *nonce_lock = (namespace, bitmask);
+    drop(nonce_lock);
+
+    (namespace, nonce_bitmask)
+}
+
+trait EntityGameCreated {
+    fn game_id(&self) -> Option<u32>;
+}
+
+impl EntityGameCreated for torii_grpc::types::schema::Entity {
+    fn game_id(&self) -> Option<u32> {
+        if self.hashed_keys != Felt::ZERO {
+            let game_created = self
+                .models
+                .iter()
+                .find(|m| m.name == "nums-GameCreated")
+                .unwrap();
+            let game_id = game_created
+                .children
+                .iter()
+                .find(|f| f.name == "game_id")
+                .unwrap();
+
+            Some(game_id.ty.as_primitive().unwrap().as_u32().unwrap())
+        } else {
+            None
+        }
+    }
+}
+
+async fn create_controller(
+    rpc_url: Url,
+    owner: &Owner,
+    username: &str,
+    salt: Felt,
+    chain_id: Felt,
+) -> Controller {
+    let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
     let factory = ControllerFactory::new(
         CONTROLLERS[&Version::V1_0_8].hash,
-        chain_id,
+        CHAIN_ID,
         owner.clone(),
         provider,
     );
 
     let controller_address = factory.address(salt);
-
     println!("Controller address: {:#x}", controller_address);
 
-    let mut controller = Controller::new(
+    let controller = Controller::new(
         "https://www.slot.nums.gg".to_string(),
-        username,
+        username.to_string(),
         CONTROLLERS[&Version::V1_0_8].hash,
         rpc_url,
         owner.clone(),
@@ -97,208 +361,7 @@ async fn main() {
                 println!("Deployment failed: {:?}", e);
             }
         }
-    }
-
-    let contract_address =
-        felt!("0x04057ea6852973079449b3f99ae8a346a10706a4dd5bd072cbe6c3f97508d5b0");
-
-    let duration = Duration::from_secs(DURATION_SECS);
-    let total_transactions = TPS * duration.as_secs() as usize;
-    let total_transactions = 1;
-
-    let _ = controller
-        .create_session(
-            vec![
-                Policy::new_call(contract_address, selector!("create_game")),
-                Policy::new_call(contract_address, selector!("set_slot")),
-            ],
-            u32::MAX as u64,
-        )
-        .await
-        .unwrap();
-
-    let controller = Arc::new(controller);
-    let interval = Duration::from_secs_f64(1.0 / TPS as f64);
-    let (namespace, bitmask) = (SigningKey::from_random().secret_scalar(), 0u128);
-    let nonce_mutex = Arc::new(tokio::sync::Mutex::new((namespace, bitmask)));
-
-    let mut handles = vec![];
-
-    for i in 0..total_transactions {
-        let controller = Arc::clone(&controller);
-        let nonce_mutex = Arc::clone(&nonce_mutex);
-        let handle = tokio::spawn(async move {
-            let mut nonce_lock = nonce_mutex.lock().await;
-            let (mut namespace, mut bitmask) = *nonce_lock;
-
-            let nonce_bitmask = if bitmask == u64::MAX.into() {
-                namespace = SigningKey::from_random().secret_scalar();
-                bitmask = 1;
-                1u128
-            } else {
-                let next_bit = bitmask.trailing_ones();
-                let new_bit = 1u128 << next_bit;
-                bitmask |= new_bit;
-                new_bit
-            };
-
-            *nonce_lock = (namespace, bitmask);
-            drop(nonce_lock);
-
-            let nonce = (namespace, nonce_bitmask);
-
-            let torii = torii_client::client::Client::new(
-                format!("{}/torii", SERVICE_BASE_URL),
-                format!("{}/katana", SERVICE_BASE_URL),
-                "".to_string(),
-                WORLD_ADDRESS,
-            )
-            .await
-            .expect("Failed to create torii client");
-
-            let mut stream = torii
-                .on_event_message_updated(
-                    vec![EntityKeysClause::Keys(KeysClause {
-                        keys: vec![Some(controller_address)],
-                        pattern_matching: PatternMatching::FixedLen,
-                        models: vec![],
-                    })],
-                    false,
-                )
-                .await
-                .expect("Failed to subscribe to event messages");
-
-            match create_game(&controller, contract_address.into(), nonce).await {
-                Ok(_) => {
-                    println!("Routine {}: Successfully executed create_game function", i);
-
-                    while let Some(event) = stream.next().await {
-                        if let Ok((_, entity)) = event {
-                            dbg!(&entity);
-                            if entity.hashed_keys != Felt::ZERO {
-                                let game_created = entity
-                                    .models
-                                    .iter()
-                                    .find(|m| m.name == "nums-GameCreated")
-                                    .unwrap();
-                                let game_id = game_created
-                                    .children
-                                    .iter()
-                                    .find(|f| f.name == "game_id")
-                                    .unwrap();
-                                let game_id = game_id.ty.as_primitive().unwrap().as_u32().unwrap();
-                                match set_slot(&controller, contract_address.into(), game_id, nonce)
-                                    .await
-                                {
-                                    Ok(_) => {
-                                        println!("Routine {}: Successfully executed set_slot function (game_id: {})", i, game_id);
-                                    }
-                                    Err(err) => {
-                                        eprintln!("Routine {}: Failed to execute set_slot function (game_id: {}): {:?}", i, game_id, err);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                Err(err) => {
-                    eprintln!(
-                        "Routine {}: Failed to execute create_game function: {:?}",
-                        i, err
-                    );
-                }
-            }
-        });
-
-        handles.push(handle);
-        tokio::time::sleep(interval).await;
-    }
-
-    for handle in handles {
-        handle.await.unwrap();
-    }
-}
-
-async fn create_game(
-    controller: &Controller,
-    contract_address: ContractAddress,
-    nonce: (Felt, u128),
-) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError> {
-    let c = Call {
-        to: contract_address,
-        selector: selector!("create_game"),
-        calldata: vec![JACKPOT_ID_NONE],
     };
-
-    let r = controller.session_account(&Policy::from_calls(&[c.clone().into()]));
-
-    let session_account = r.unwrap();
-
-    let exe = OutsideExecutionV3 {
-        caller: OutsideExecutionCaller::Any.into(),
-        execute_after: 0,
-        execute_before: u32::MAX as u64,
-        calls: vec![c],
-        nonce,
-    };
-
-    let signed = session_account
-        .sign_outside_execution(OutsideExecution::V3(exe.clone()))
-        .await
-        .unwrap();
-
-    let r = controller
-        .provider
-        .add_execute_outside_transaction(
-            OutsideExecution::V3(exe),
-            controller.address(),
-            signed.signature,
-        )
-        .await;
-
-    dbg!(&r);
-
-    r
-}
-
-async fn set_slot(
-    controller: &Controller,
-    contract_address: ContractAddress,
-    game_id: u32,
-    nonce: (Felt, u128),
-) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError> {
-    // Can always set the slot 2 for testing, since the game has just been created.
-    let target = Felt::TWO;
-
-    let c = Call {
-        to: contract_address,
-        selector: selector!("set_slot"),
-        calldata: vec![game_id.into(), target],
-    };
-
-    let session_account = controller
-        .session_account(&Policy::from_calls(&[c.clone().into()]))
-        .unwrap();
-
-    let exe = OutsideExecutionV3 {
-        caller: OutsideExecutionCaller::Any.into(),
-        execute_after: 0,
-        execute_before: u32::MAX as u64,
-        calls: vec![c],
-        nonce,
-    };
-
-    let signed = session_account
-        .sign_outside_execution(OutsideExecution::V3(exe.clone()))
-        .await
-        .unwrap();
 
     controller
-        .provider
-        .add_execute_outside_transaction(
-            OutsideExecution::V3(exe),
-            controller.address(),
-            signed.signature,
-        )
-        .await
 }
