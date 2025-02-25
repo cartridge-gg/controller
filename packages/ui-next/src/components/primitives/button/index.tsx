@@ -31,22 +31,24 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const Comp = asChild ? Slot : "button";
     return (
-      <Comp
-        className={cn(
-          buttonVariants({
-            variant,
-            size,
-            status: isActive ? "active" : undefined,
-            className,
-          }),
-        )}
-        ref={ref}
-        disabled={disabled || isLoading}
-        {...props}
-      >
-        {isLoading ? <Spinner /> : children}
-        {variant === "link" && !isLoading && <ExternalIcon size="sm" />}
-      </Comp>
+      <div className="bg-[#000000] p-0 rounded">
+        <Comp
+          className={cn(
+            buttonVariants({
+              variant,
+              size,
+              status: isActive ? "active" : undefined,
+              className,
+            }),
+          )}
+          ref={ref}
+          disabled={disabled || isLoading}
+          {...props}
+        >
+          {isLoading ? <Spinner /> : children}
+          {variant === "link" && !isLoading && <ExternalIcon size="sm" />}
+        </Comp>
+      </div>
     );
   },
 );
