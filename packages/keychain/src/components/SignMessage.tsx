@@ -13,6 +13,7 @@ import {
   LayoutHeader,
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
+import { OcclusionDetector } from "@/components/OcclusionDetector";
 
 export function SignMessage({
   typedData,
@@ -64,57 +65,60 @@ export function SignMessage({
   }, [controller, onSign, typedData]);
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        title="Signature Request"
-        description={`${origin} is asking you to sign a message`}
-      />
-      <LayoutContent>
-        {messageData && (
-          <div className="flex flex-col w-full gap-4 text-sm">
-            {messageData.types[messageData.primaryType].map((typ) => (
-              <Card key={typ.name}>
-                <CardHeader>
-                  <CardTitle>{typ.name}</CardTitle>
-                </CardHeader>
+    <>
+      <OcclusionDetector />
+      <LayoutContainer>
+        <LayoutHeader
+          title="Signature Request"
+          description={`${origin} is asking you to sign a message`}
+        />
+        <LayoutContent>
+          {messageData && (
+            <div className="flex flex-col w-full gap-4 text-sm">
+              {messageData.types[messageData.primaryType].map((typ) => (
+                <Card key={typ.name}>
+                  <CardHeader>
+                    <CardTitle>{typ.name}</CardTitle>
+                  </CardHeader>
 
-                <CardListContent>
-                  {(() => {
-                    const v =
-                      messageData.message[
-                        typ.name as keyof typeof messageData.message
-                      ];
-                    return typeof v === "object" ? (
-                      <CardListContent>
-                        {Object.entries(v).map(([key, value]) => (
-                          <CardListItem className="flex flex-row justify-start gap-2 ">
-                            <div className="capitalize text-foreground-400">
-                              {key}:
-                            </div>
-                            <div className="break-words break-all">
-                              {value as string}
-                            </div>
-                          </CardListItem>
-                        ))}
-                      </CardListContent>
-                    ) : (
-                      <CardListItem>{v as string}</CardListItem>
-                    );
-                  })()}
-                </CardListContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </LayoutContent>
+                  <CardListContent>
+                    {(() => {
+                      const v =
+                        messageData.message[
+                          typ.name as keyof typeof messageData.message
+                        ];
+                      return typeof v === "object" ? (
+                        <CardListContent>
+                          {Object.entries(v).map(([key, value]) => (
+                            <CardListItem className="flex flex-row justify-start gap-2 ">
+                              <div className="capitalize text-foreground-400">
+                                {key}:
+                              </div>
+                              <div className="break-words break-all">
+                                {value as string}
+                              </div>
+                            </CardListItem>
+                          ))}
+                        </CardListContent>
+                      ) : (
+                        <CardListItem>{v as string}</CardListItem>
+                      );
+                    })()}
+                  </CardListContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </LayoutContent>
 
-      <LayoutFooter>
-        <Button onClick={onConfirm}>sign</Button>
+        <LayoutFooter>
+          <Button onClick={onConfirm}>sign</Button>
 
-        <Button variant="secondary" onClick={onCancel}>
-          reject
-        </Button>
-      </LayoutFooter>
-    </LayoutContainer>
+          <Button variant="secondary" onClick={onCancel}>
+            reject
+          </Button>
+        </LayoutFooter>
+      </LayoutContainer>
+    </>
   );
 }
