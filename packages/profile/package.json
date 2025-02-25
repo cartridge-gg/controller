@@ -14,7 +14,7 @@
     "storybook:build": "storybook build",
     "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6003 --silent",
     "test-storybook": "test-storybook --testTimeout=60000",
-    "test:storybook:update": "start-server-and-test 'pnpm storybook:serve' 6003 'pnpm test-storybook --url http://127.0.0.1:6003 -u'",
+    "test:storybook:update": "start-server-and-test 'SNAPSHOT=1 pnpm storybook:serve' 6003 'pnpm test-storybook --url http://127.0.0.1:6003 -u'",
     "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6003 'pnpm test-storybook --url http://127.0.0.1:6003'"
   },
   "dependencies": {
