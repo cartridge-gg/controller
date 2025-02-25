@@ -38,8 +38,6 @@
     "graphql-request": "^5.0.0",
     "inapp-spy": "4.2.1",
     "lodash": "catalog:",
-    "p-throttle": "^6.2.0",
-    "posthog-js-lite": "3.2.1",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-query": "catalog:",
