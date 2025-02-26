@@ -21,7 +21,7 @@ export const SignerCard = React.forwardRef<HTMLDivElement, SignerCardProps>(
       >
         <Card className="flex flex-row items-center bg-background-100 border border-background-200">
           <CardContent className="relative bg-background-200 size-10 flex items-center justify-center">
-            {renderDeviceType(deviceType)}
+            <DeviceIcon deviceType={deviceType} />
           </CardContent>
           <CardContent className="bg-background-100 py-2.5 px-3">
             <h1 className="flex-1 text-sm font-normal">{deviceName}</h1>
@@ -37,7 +37,7 @@ export const SignerCard = React.forwardRef<HTMLDivElement, SignerCardProps>(
 
 SignerCard.displayName = "SignerCard";
 
-const renderDeviceType = (deviceType: DeviceType) => {
+const DeviceIcon = React.memo(({ deviceType }: { deviceType: DeviceType }) => {
   return deviceType === "mobile" ? (
     <MobileIcon variant="solid" size="default" className="absolute" />
   ) : deviceType === "laptop" ? (
@@ -45,4 +45,4 @@ const renderDeviceType = (deviceType: DeviceType) => {
   ) : (
     <DesktopIcon variant="solid" size="default" className="absolute" />
   );
-};
+});
