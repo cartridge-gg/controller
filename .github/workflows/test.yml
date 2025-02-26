@@ -136,8 +136,8 @@ jobs:
             git add packages/*/__image_snapshots__/
             git commit -m "chore: update storybook snapshots"
 
-            # Push to the PR branch using a PAT so that CI is triggered
-            git push https://${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.head_ref }}
+            # Use a personal access token with workflow permissions to trigger CI
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.head_ref }}
 
             # Set output to indicate we made changes
             echo "changes_committed=true" >> "$GITHUB_ENV"

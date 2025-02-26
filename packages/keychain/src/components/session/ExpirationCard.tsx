@@ -1,59 +1,59 @@
-import { ClockIcon } from "@cartridge/ui-next";
-import { AccordionCard } from "./AccordionCard";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@cartridge/ui-next";
+import { useCreateSession } from "@/hooks/session";
+import { ClockIcon, ToggleGroup, ToggleGroupItem } from "@cartridge/ui-next";
 
-interface ExpirationCardProps {
-  duration: bigint;
-  onDurationChange: (duration: bigint) => void;
-  isExpanded?: boolean;
-}
+export function ExpirationCard() {
+  const { isEditable, duration, onDurationChange } = useCreateSession();
 
-export function ExpirationCard({
-  duration,
-  onDurationChange,
-  isExpanded,
-}: ExpirationCardProps) {
   return (
-    <AccordionCard
-      icon={<ClockIcon variant="solid" />}
-      title="Session Expiration"
-      trigger={
-        <div className="text-xs text-foreground-400">
-          Expires in&nbsp;
-          <span className="text-foreground-200 font-bold">
-            {formatDuration(duration)}
-          </span>
+    <div className="w-full flex flex-row items-center justify-between font-medium text-sm">
+      <h1 className="text-foreground-400">Expires In:</h1>
+      {!isEditable ? (
+        <div className="text-foreground-300 flex flex-row items-center py-1.5">
+          <ClockIcon variant="line" />
+          <h1>{formatDuration(duration)}</h1>
         </div>
-      }
-      isExpanded={isExpanded}
-    >
-      <div className="flex flex-col gap-4 p-3 text-xs">
-        <div className="flex items-center justify-between">
-          <div className="text-foreground-400">Duration</div>
-          <Select
-            value={duration.toString()}
-            onValueChange={(val) => onDurationChange(BigInt(val))}
+      ) : (
+        <ToggleGroup
+          value={duration.toString()}
+          onValueChange={(value) => {
+            if (value) {
+              onDurationChange(BigInt(value));
+            }
+          }}
+          type="single"
+          className="rounded-full border border-background-200 gap-0 divide-x divide-background-200 text-sm font-medium text-foreground-400"
+        >
+          <ToggleGroupItem
+            value={(60 * 60).toString()}
+            aria-label="1 hour"
+            className="rounded-l-full p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground hover:text-foreground-200 bg-background-100 hover:bg-background-100"
           >
-            <SelectTrigger className="w-28">
-              <SelectValue placeholder="1 HR" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={(60 * 60).toString()}>1 HR</SelectItem>
-              <SelectItem value={(60 * 60 * 24).toString()}>24 HRS</SelectItem>
-              <SelectItem value={(60 * 60 * 24 * 7).toString()}>
-                1 WEEK
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </AccordionCard>
+            1h
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value={(60 * 60 * 24).toString()}
+            aria-label="24 hours"
+            className="p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground rounded-none hover:text-foreground-200 bg-background-100 hover:bg-background-100"
+          >
+            24h
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value={(60 * 60 * 24 * 7).toString()}
+            aria-label="1 week"
+            className="p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground rounded-none hover:text-foreground-200 bg-background-100 hover:bg-background-100"
+          >
+            7d
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="0"
+            aria-label="Never"
+            className="rounded-r-full p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground hover:text-foreground-200 bg-background-100 hover:bg-background-100"
+          >
+            Never
+          </ToggleGroupItem>
+        </ToggleGroup>
+      )}
+    </div>
   );
 }
 

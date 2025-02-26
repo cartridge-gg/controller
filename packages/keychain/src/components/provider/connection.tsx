@@ -3,7 +3,7 @@ import Controller from "@/utils/controller";
 import { ConnectionCtx } from "@/utils/connection";
 import { UpgradeInterface } from "@/hooks/upgrade";
 import { ParsedSessionPolicies } from "@/hooks/session";
-import { VerifiableControllerTheme } from "@/context/theme";
+import { ControllerTheme } from "@cartridge/ui-next";
 
 export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
@@ -24,4 +24,8 @@ export type ConnectionContextValue = {
   openModal: () => void;
   logout: () => void;
   openSettings: () => void;
+};
+
+export type VerifiableControllerTheme = ControllerTheme & {
+  verified: boolean;
 };
