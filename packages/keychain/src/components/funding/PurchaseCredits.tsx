@@ -1,7 +1,6 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import {
-  AppleIcon,
   Button,
   Card,
   CardDescription,
@@ -165,31 +164,18 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
           </Button>
         )}
         {state === PurchaseState.SELECTION && (
-          <div className="flex flex-row gap-3">
-            <Button
-              className="flex-1"
-              isLoading={isLoading}
-              onClick={createPaymentIntent}
-            >
-              <CreditCardIcon
-                size="sm"
-                variant="solid"
-                className="text-background-100 flex-shrink-0"
-              />
-              <span>Stripe</span>
-            </Button>
-            <Button
-              className="bg-foreground-100 flex-1"
-              isLoading={isLoading}
-              onClick={createPaymentIntent}
-            >
-              <AppleIcon
-                size="sm"
-                className="text-background-100 flex-shrink-0"
-              />
-              <span>Apple Pay</span>
-            </Button>
-          </div>
+          <Button
+            className="flex-1"
+            isLoading={isLoading}
+            onClick={createPaymentIntent}
+          >
+            <CreditCardIcon
+              size="sm"
+              variant="solid"
+              className="text-background-100 flex-shrink-0"
+            />
+            <span>Credit Card</span>
+          </Button>
         )}
       </LayoutFooter>
     </LayoutContainer>
