@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Event, EventNode, useEventsQuery } from "@cartridge/utils/api/indexer";
-import { Trophy, Progress } from "@/models";
+import { Trophy, Progress } from "#models";
 import { hash, byteArray, ByteArray } from "starknet";
 import { useIndexerAPI } from "@cartridge/utils";
 

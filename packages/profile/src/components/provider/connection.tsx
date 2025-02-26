@@ -12,7 +12,7 @@ import {
   ConnectionContextType,
   ParentMethods,
   initialState,
-} from "@/context/connection";
+} from "#context/connection";
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);

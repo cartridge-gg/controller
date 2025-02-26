@@ -41,6 +41,15 @@ export function useAddress({ username }: { username: string }) {
   };
 }
 
+export type UseAccountInfoResponse = {
+  name: string;
+  address: string;
+  wallet: string | null;
+  isFetching: boolean;
+  error: string;
+  warning: string;
+};
+
 export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
   const [starkName, setStarkName] = useState("");
   const [controllerName, setControllerName] = useState("");
@@ -152,7 +161,12 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
   };
 }
 
-export function useAccount() {
+export type UseAccountResponse = {
+  username: string;
+  address: string;
+};
+
+export function useAccount(): UseAccountResponse {
   // To be used in top level provider (Above Route component)
   // Ref: https://stackoverflow.com/a/75462921
   const match = useMatch("/account/:username/*");

@@ -1,4 +1,4 @@
-import { useAccountInfo } from "@/hooks/account";
+import { useAccountInfo } from "#hooks/account";
 import { Recipient, WalletType } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
 import { useCallback, useEffect, useState } from "react";

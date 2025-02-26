@@ -1,6 +1,6 @@
 import { useState, ReactNode } from "react";
-import { useAchievements } from "@/hooks/achievements";
-import { DataContext } from "@/context/data";
+import { useAchievements } from "#hooks/achievements";
+import { DataContext } from "#context/data";
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [accountAddress, setAccountAddress] = useState<string | undefined>(

@@ -13,12 +13,12 @@ import {
   LayoutHeader,
 } from "@cartridge/ui-next";
 import { useInfiniteTokenTransfersQuery } from "@cartridge/utils/api/indexer";
-import { useAccount } from "@/hooks/account";
+import { useAccount } from "#hooks/account";
 import { Link } from "react-router-dom";
 import { StarkscanUrl, useIndexerAPI } from "@cartridge/utils";
-import { useConnection } from "@/hooks/context";
+import { useConnection } from "#hooks/context";
 import { constants } from "starknet";
-import { LayoutBottomNav } from "@/components/bottom-nav";
+import { LayoutBottomNav } from "#components/bottom-nav";
 
 export function Activity() {
   const { address, username } = useAccount();

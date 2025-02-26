@@ -1,5 +1,5 @@
 import { Outlet, Route, Routes, Navigate, useLocation } from "react-router-dom";
-import { Account } from "@/components/account";
+import { Account } from "#components/account";
 import {
   Inventory,
   Collection,
@@ -7,10 +7,10 @@ import {
   SendCollection,
   SendToken,
   Token,
-} from "@/components/inventory";
-import { Achievements } from "@/components/achievements";
-import { Activity } from "@/components/activity";
-import { Slot } from "@/components/slot";
+} from "#components/inventory";
+import { Achievements } from "#components/achievements";
+import { Activity } from "#components/activity";
+import { Slot } from "#components/slot";
 
 export function App() {
   return (

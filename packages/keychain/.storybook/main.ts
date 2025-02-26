@@ -35,16 +35,9 @@ const config: StorybookConfig = {
     });
   },
   staticDirs: ["../public"],
-  previewHead: (head) => `
-    ${head}
-    ${
-      process.env.SNAPSHOT &&
-      `<style>
-      * {
-        animation: none !important;
-      }
-    </style>`
-    }
-  `,
+  previewHead: process.env.SNAPSHOT
+    ? (head) => `${head}<style>*{animation:none!important;}</style>`
+    : undefined,
 };
+
 export default config;
