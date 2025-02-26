@@ -27,6 +27,7 @@ export * from "./moon";
 export * from "./pencil";
 export * from "./pulse";
 export * from "./scroll";
+export * from "./shapes";
 export * from "./shield";
 export * from "./singular-diamond";
 export * from "./singular-oval";
