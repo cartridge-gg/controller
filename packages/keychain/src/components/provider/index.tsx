@@ -4,7 +4,6 @@ import { useConnectionValue } from "@/hooks/connection";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { ENDPOINT } from "@/utils/graphql";
 import { PostHogProvider } from "./posthog";
-import { ControllerThemeProvider } from "./theme";
 import { UIProvider } from "./ui";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
 import { sepolia, mainnet } from "@starknet-react/chains";
@@ -40,18 +39,16 @@ export function Provider({ children }: PropsWithChildren) {
         <ConnectionContext.Provider value={connection}>
           <UIProvider>
             <BrowserRouter>
-              <ControllerThemeProvider>
-                <StarknetConfig
-                  explorer={voyager}
-                  chains={[sepolia, mainnet]}
-                  defaultChainId={defaultChainId}
-                  provider={jsonRpcProvider({ rpc })}
-                >
-                  <TokensProvider>
-                    <PostHogProvider>{children}</PostHogProvider>
-                  </TokensProvider>
-                </StarknetConfig>
-              </ControllerThemeProvider>
+              <StarknetConfig
+                explorer={voyager}
+                chains={[sepolia, mainnet]}
+                defaultChainId={defaultChainId}
+                provider={jsonRpcProvider({ rpc })}
+              >
+                <TokensProvider>
+                  <PostHogProvider>{children}</PostHogProvider>
+                </TokensProvider>
+              </StarknetConfig>
             </BrowserRouter>
           </UIProvider>
         </ConnectionContext.Provider>

@@ -17,6 +17,7 @@ import type { Call, EstimateFee } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { Funding } from "./funding";
+import { OcclusionDetector } from "@/components/OcclusionDetector";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -164,91 +165,96 @@ export function ExecutionContainer({
   }
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        title={title}
-        description={description}
-        icon={icon}
-        right={right}
-      />
-      {children}
-      <LayoutFooter>
-        {(() => {
-          switch (ctrlError?.code) {
-            case ErrorCode.CartridgeControllerNotDeployed:
-              return (
-                <>
-                  <ControllerErrorAlert error={ctrlError} />
-                  <Button onClick={() => setCTAState("deploy")}>
-                    DEPLOY ACCOUNT
-                  </Button>
-                </>
-              );
-            case ErrorCode.InsufficientBalance:
-              return (
-                <>
-                  {ctrlError ? (
-                    <ControllerErrorAlert error={ctrlError} />
-                  ) : (
-                    <Fees isLoading={isEstimating} maxFee={maxFee} />
-                  )}
-                  <Button onClick={() => setCTAState("fund")}>ADD FUNDS</Button>
-                </>
-              );
-            case ErrorCode.SessionAlreadyRegistered:
-              return (
-                <>
-                  <ErrorAlert
-                    variant="info"
-                    title="Session Already Registered"
-                  />
-                  <Button
-                    onClick={() => onSubmit()}
-                    isLoading={false}
-                    data-testid="continue-button"
-                  >
-                    CONTINUE
-                  </Button>
-                </>
-              );
-            default:
-              // Workaround until we can get same fee token address on provable katana
-              if (buttonText.toLowerCase() === "upgrade") {
+    <>
+      <OcclusionDetector />
+      <LayoutContainer>
+        <LayoutHeader
+          title={title}
+          description={description}
+          icon={icon}
+          right={right}
+        />
+        {children}
+        <LayoutFooter>
+          {(() => {
+            switch (ctrlError?.code) {
+              case ErrorCode.CartridgeControllerNotDeployed:
                 return (
-                  <Button
-                    onClick={handleSubmit}
-                    isLoading={isLoading}
-                    disabled={
-                      !transactions ||
-                      !!(maxFee === null && transactions?.length)
-                    }
-                  >
-                    {buttonText}
-                  </Button>
+                  <>
+                    <ControllerErrorAlert error={ctrlError} />
+                    <Button onClick={() => setCTAState("deploy")}>
+                      DEPLOY ACCOUNT
+                    </Button>
+                  </>
                 );
-              }
-              return (
-                <>
-                  {ctrlError && <ControllerErrorAlert error={ctrlError} />}
-                  {!ctrlError && (
-                    <Fees isLoading={isEstimating} maxFee={maxFee} />
-                  )}
-                  <Button
-                    onClick={handleSubmit}
-                    isLoading={isLoading}
-                    disabled={
-                      !!ctrlError ||
-                      !transactions ||
-                      !!(maxFee === null && transactions?.length)
-                    }
-                  >
-                    {buttonText}
-                  </Button>
-                </>
-              );
-          }
-        })()}
-      </LayoutFooter>
-    </LayoutContainer>
+              case ErrorCode.InsufficientBalance:
+                return (
+                  <>
+                    {ctrlError ? (
+                      <ControllerErrorAlert error={ctrlError} />
+                    ) : (
+                      <Fees isLoading={isEstimating} maxFee={maxFee} />
+                    )}
+                    <Button onClick={() => setCTAState("fund")}>
+                      ADD FUNDS
+                    </Button>
+                  </>
+                );
+              case ErrorCode.SessionAlreadyRegistered:
+                return (
+                  <>
+                    <ErrorAlert
+                      variant="info"
+                      title="Session Already Registered"
+                    />
+                    <Button
+                      onClick={() => onSubmit()}
+                      isLoading={false}
+                      data-testid="continue-button"
+                    >
+                      CONTINUE
+                    </Button>
+                  </>
+                );
+              default:
+                // Workaround until we can get same fee token address on provable katana
+                if (buttonText.toLowerCase() === "upgrade") {
+                  return (
+                    <Button
+                      onClick={handleSubmit}
+                      isLoading={isLoading}
+                      disabled={
+                        !transactions ||
+                        !!(maxFee === null && transactions?.length)
+                      }
+                    >
+                      {buttonText}
+                    </Button>
+                  );
+                }
+                return (
+                  <>
+                    {ctrlError && <ControllerErrorAlert error={ctrlError} />}
+                    {!ctrlError && (
+                      <Fees isLoading={isEstimating} maxFee={maxFee} />
+                    )}
+                    <Button
+                      onClick={handleSubmit}
+                      isLoading={isLoading}
+                      disabled={
+                        !!ctrlError ||
+                        !transactions ||
+                        !!(maxFee === null && transactions?.length)
+                      }
+                    >
+                      {buttonText}
+                    </Button>
+                  </>
+                );
+            }
+          })()}
+        </LayoutFooter>
+      </LayoutContainer>
+    </>
   );
 }

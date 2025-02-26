@@ -1,12 +1,16 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { SessionConsent } from "@/components/connect";
-import { isPolicyRequired } from "@/components/connect/create/utils";
+import { Upgrade } from "@/components/connect/Upgrade";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
+import { NOW } from "@/const";
+import { CreateSessionProvider } from "@/context/session";
 import { useConnection } from "@/hooks/connection";
-import { CreateSessionProvider } from "@/hooks/session";
-import type { ContractType, ParsedSessionPolicies } from "@/hooks/session";
+import {
+  type ContractType,
+  type ParsedSessionPolicies,
+  useCreateSession,
+} from "@/hooks/session";
 import type { ControllerError } from "@/utils/connection";
 import {
   Button,
@@ -18,8 +22,8 @@ import {
   SliderIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
-import { type BigNumberish, shortString } from "starknet";
-import { Upgrade } from "./Upgrade";
+import type { BigNumberish } from "starknet";
+import { OcclusionDetector } from "@/components/OcclusionDetector";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -32,99 +36,43 @@ export function CreateSession({
   onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
   isUpdate?: boolean;
 }) {
-  const { controller, upgrade, theme } = useConnection();
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isEditable, setIsEditable] = useState(false);
+  return (
+    <CreateSessionProvider
+      initialPolicies={policies}
+      requiredPolicies={requiredPolicies}
+    >
+      <CreateSessionLayout isUpdate={isUpdate} onConnect={onConnect} />
+    </CreateSessionProvider>
+  );
+}
+
+const CreateSessionLayout = ({
+  isUpdate,
+  onConnect,
+}: {
+  isUpdate?: boolean;
+  onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
+}) => {
   const [isConsent, setIsConsent] = useState(false);
-  const [duration, setDuration] = useState<bigint>(DEFAULT_SESSION_DURATION);
-  const [maxFee] = useState<BigNumberish>();
+  const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
+  const [maxFee] = useState<BigNumberish>();
 
-  const [policyState, setPolicyState] = useState<ParsedSessionPolicies>(() => {
-    // Set all contract policyState to authorized
-    if (policies.contracts) {
-      Object.keys(policies.contracts).forEach((address) => {
-        if (policies.contracts![address]) {
-          policies.contracts![address].methods.forEach((method, i) => {
-            method.id = `${i}-${address}-${method.name}`;
-            method.authorized = true;
-
-            // If policy type is required, set the method as required(always true)
-            if (
-              isPolicyRequired({
-                requiredPolicyTypes: requiredPolicies,
-                policyType: policies.contracts![address].meta?.type,
-              })
-            ) {
-              method.isRequired = true;
-            }
-          });
-        }
-      });
-    }
-
-    // Set all message policyState to authorized
-    if (policies.messages) {
-      policies.messages.forEach((message, i) => {
-        message.id = `${i}-${message.domain.name}-${message.name}`;
-        message.authorized = true;
-      });
-    }
-
-    return policies;
-  });
-
-  const handleToggleMethod = useCallback(
-    (address: string, id: string, authorized: boolean) => {
-      if (!policyState.contracts) return;
-      const contract = policyState.contracts[address];
-      if (!contract) return;
-      const method = contract.methods.find((method) => method.id === id);
-      if (!method) return;
-      method.authorized = authorized;
-      setPolicyState({ ...policyState });
-    },
-    [policyState],
-  );
-
-  const handleToggleMessage = useCallback(
-    (id: string, authorized: boolean) => {
-      if (!policyState.messages) return;
-      const message = policyState.messages.find((message) => message.id === id);
-      if (!message) return;
-      message.authorized = authorized;
-      setPolicyState({ ...policyState });
-    },
-    [policyState],
-  );
-
-  const handleToggleEditable = useCallback(() => {
-    setIsEditable(!isEditable);
-  }, [isEditable]);
+  const { policies, duration, isEditable, onToggleEditable } =
+    useCreateSession();
+  const { controller, upgrade, theme } = useConnection();
 
   const expiresAt = useMemo(() => {
     return duration + NOW;
   }, [duration]);
 
-  const chainSpecificMessages = useMemo(() => {
-    if (!policyState.messages || !controller) return [];
-    return policyState.messages.filter((message) => {
-      return (
-        !("domain" in message) ||
-        (message.domain.chainId &&
-          normalizeChainId(message.domain.chainId) ===
-            normalizeChainId(controller.chainId()))
-      );
-    });
-  }, [policyState.messages, controller]);
-
   const onCreateSession = useCallback(async () => {
-    if (!controller || !policyState) return;
+    if (!controller || !policies) return;
     try {
       setError(undefined);
       setIsConnecting(true);
 
-      const cleanedPolicies = cleanPolicies(policyState);
+      const cleanedPolicies = cleanPolicies(policies);
 
       await controller.createSession(expiresAt, cleanedPolicies, maxFee);
       onConnect();
@@ -132,15 +80,15 @@ export function CreateSession({
       setError(e as unknown as Error);
       setIsConnecting(false);
     }
-  }, [controller, policyState, maxFee, onConnect, expiresAt]);
+  }, [controller, policies, maxFee, expiresAt, onConnect]);
 
   const onSkipSession = useCallback(async () => {
-    if (!controller || !policyState) return;
+    if (!controller || !policies) return;
     try {
       setError(undefined);
       setIsConnecting(true);
 
-      const cleanedPolicies = cleanPolicies(policyState);
+      const cleanedPolicies = cleanPolicies(policies);
 
       await controller.createSession(duration, cleanedPolicies, maxFee);
       onConnect();
@@ -148,7 +96,7 @@ export function CreateSession({
       setError(e as unknown as Error);
       setIsConnecting(false);
     }
-  }, [controller, duration, policyState, maxFee, onConnect]);
+  }, [controller, duration, policies, maxFee, onConnect]);
 
   if (!upgrade.isSynced) {
     return <></>;
@@ -159,17 +107,11 @@ export function CreateSession({
   }
 
   return (
-    <CreateSessionProvider
-      value={{
-        policies: policyState,
-        onToggleMethod: handleToggleMethod,
-        onToggleMessage: handleToggleMessage,
-        isEditable,
-      }}
-    >
+    <>
+      <OcclusionDetector />
       <LayoutContainer>
         <LayoutHeader
-          className="px-6"
+          className="px-6 pt-6"
           title={!isUpdate ? "Create Session" : "Update Session"}
           description={
             isUpdate
@@ -180,8 +122,8 @@ export function CreateSession({
             !isEditable ? (
               <Button
                 variant="icon"
-                className="size-10 relative bg-background-200"
-                onClick={handleToggleEditable}
+                className="size-10 relative bg-background-200 hover:bg-background-300"
+                onClick={onToggleEditable}
               >
                 <SliderIcon
                   color="white"
@@ -192,26 +134,18 @@ export function CreateSession({
           }
         />
         <LayoutContent className="gap-6 px-6">
-          <SessionConsent isVerified={policyState?.verified} />
-          {policyState?.verified ? (
+          <SessionConsent isVerified={policies?.verified} />
+          {policies?.verified ? (
             <VerifiedSessionSummary
               game={theme.name}
-              contracts={policyState.contracts}
-              messages={chainSpecificMessages}
-              duration={duration}
-              onDurationChange={setDuration}
+              contracts={policies.contracts}
             />
           ) : (
-            <UnverifiedSessionSummary
-              contracts={policyState.contracts}
-              messages={chainSpecificMessages}
-              duration={duration}
-              onDurationChange={setDuration}
-            />
+            <UnverifiedSessionSummary contracts={policies.contracts} />
           )}
         </LayoutContent>
         <LayoutFooter>
-          {!policyState?.verified && (
+          {!policies?.verified && (
             <div
               className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-100 text-destructive-100"
               onClick={() => !isConnecting && setIsConsent(!isConsent)}
@@ -243,7 +177,7 @@ export function CreateSession({
             </Button>
             <Button
               className="flex-1"
-              disabled={isConnecting || (!policyState?.verified && !isConsent)}
+              disabled={isConnecting || (!policies?.verified && !isConsent)}
               isLoading={isConnecting}
               onClick={onCreateSession}
             >
@@ -251,24 +185,12 @@ export function CreateSession({
             </Button>
           </div>
 
-          {!error && <div className="flex flex-col"></div>}
+          {!error && <div className="flex flex-col" />}
         </LayoutFooter>
       </LayoutContainer>
-    </CreateSessionProvider>
+    </>
   );
-}
-
-function normalizeChainId(chainId: number | string): string {
-  if (typeof chainId === "number") {
-    return `0x${chainId.toString(16)}`;
-  } else {
-    if (chainId.startsWith("0x")) {
-      return chainId;
-    } else {
-      return shortString.encodeShortString(chainId);
-    }
-  }
-}
+};
 
 /**
  * Deep copy the policies and remove the id fields

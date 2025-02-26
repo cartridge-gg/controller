@@ -34,9 +34,9 @@ export const defaultMockConnection: ConnectionContextValue = {
   rpcUrl: "https://test.rpc.com",
   theme: {
     verified: true,
-    name: "name",
-    cover: "cover",
-    icon: "icon",
+    name: "test",
+    icon: "test-icon",
+    cover: "test-cover",
   },
   hasPrefundRequest: false,
   setController: vi.fn(),
