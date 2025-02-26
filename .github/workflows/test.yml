@@ -102,6 +102,7 @@ jobs:
         with:
           filters: |
             ui:
+              - '.github/workflows/test.yml'
               - 'packages/ui-next/**'
               - 'packages/keychain/**'
               - 'packages/profile/**'
@@ -132,12 +133,11 @@ jobs:
         run: |
           # Check if there are any changes to commit
           if ! git diff --quiet packages/*/__image_snapshots__/; then
-            # Stage and commit changes
             git add packages/*/__image_snapshots__/
             git commit -m "chore: update storybook snapshots"
 
-            # Push to the PR branch
-            git push origin "HEAD:${{ github.head_ref }}"
+            # Use a personal access token with workflow permissions to trigger CI
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.head_ref }}
 
             # Set output to indicate we made changes
             echo "changes_committed=true" >> "$GITHUB_ENV"
