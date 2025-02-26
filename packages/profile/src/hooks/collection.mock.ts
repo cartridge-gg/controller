@@ -1,17 +1,7 @@
-export function useCollections() {
-  return {
-    collections: Object.values(collections),
-    status: "success",
-  };
-}
+import { fn, Mock } from "@storybook/test";
+import { UseCollectionsResponse, UseCollectionResponse } from "./collection";
 
-export function useCollection() {
-  return {
-    collection: collections.collection1,
-    assets,
-    status: "success",
-  };
-}
+export * from "./collection";
 
 const collections = {
   collection1: {
@@ -49,3 +39,14 @@ const assets = [
     ],
   },
 ];
+
+export const useCollections: Mock<() => UseCollectionsResponse> = fn(() => ({
+  collections: Object.values(collections),
+  status: "success" as const,
+})).mockName("useCollections");
+
+export const useCollection: Mock<() => UseCollectionResponse> = fn(() => ({
+  collection: collections.collection1,
+  assets,
+  status: "success" as const,
+})).mockName("useCollection");

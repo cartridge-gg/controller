@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { TROPHY, PROGRESS } from "@/constants";
-import { Trophy, Progress, Task } from "@/models";
+import { TROPHY, PROGRESS } from "#constants";
+import { Trophy, Progress, Task } from "#models";
 import { useConnection } from "./context";
 import { useAccount } from "./account";
 import { useProgressions } from "./progressions";

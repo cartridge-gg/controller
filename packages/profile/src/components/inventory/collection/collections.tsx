@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
 import { CollectionImage } from "./image";
-import { useCollections } from "@/hooks/collection";
+import { useCollections } from "#hooks/collection";
 
 export function Collections() {
   const { collections, status } = useCollections();

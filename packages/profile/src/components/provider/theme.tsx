@@ -6,8 +6,8 @@ import {
 import { useThemeEffect } from "@cartridge/ui-next";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useConnection } from "@/hooks/context";
-import { ColorScheme, ThemeContext, initialState } from "@/context/theme";
+import { useConnection } from "#hooks/context";
+import { ColorScheme, ThemeContext, initialState } from "#context/theme";
 
 export type ThemeProviderProps = {
   children: React.ReactNode;
