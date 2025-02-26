@@ -5,7 +5,7 @@ import {
   CardTitle,
   cn,
 } from "@cartridge/ui-next";
-import { Asset } from "@/hooks/collection";
+import { Asset } from "#hooks/collection";
 import { CollectionImage } from "../image";
 
 export function Sending({ assets }: { assets: Asset[] }) {

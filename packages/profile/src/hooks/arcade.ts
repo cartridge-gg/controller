@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ArcadeContext } from "@/context/arcade";
+import { ArcadeContext } from "#context/arcade";
 
 /**
  * Custom hook to access the Arcade context and account information.

@@ -1,4 +1,4 @@
-import { useAchievements } from "@/hooks/achievements";
+import { useAchievements } from "#hooks/achievements";
 import { createContext } from "react";
 
 export type DataContextType = {
