@@ -28,6 +28,7 @@
     "viem": "catalog:"
   },
   "devDependencies": {
+    "@cartridge/presets": "catalog:",
     "@cartridge/tsconfig": "workspace:*",
     "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/typescript": "^2.4.8",

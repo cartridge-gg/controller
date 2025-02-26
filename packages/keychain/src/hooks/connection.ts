@@ -10,14 +10,15 @@ import {
   ResponseCodes,
   toArray,
   toSessionPolicies,
+  defaultTheme,
+  controllerConfigs,
+  Policies,
 } from "@cartridge/controller";
 import {
   ConnectionContext,
   ConnectionContextValue,
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
-import { Policies } from "@cartridge/presets";
-import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { useThemeEffect } from "@cartridge/ui-next";
 
