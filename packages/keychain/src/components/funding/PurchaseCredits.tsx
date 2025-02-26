@@ -23,9 +23,6 @@ import { Balance, BalanceType } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
 import { DEFAULT_AMOUNT } from "./constants";
 
-const STRIPE_API_PUBKEY =
-  "pk_test_51Kr6IXIS6lliDpf33KnwWDtIjRPWt3eAI9CuSLR6Vvc3GxHEwmSU0iszYbUlgUadSRluGKAFphe3JzltyjPAKiBK00al4RAFQu";
-
 enum PurchaseState {
   SELECTION = 0,
   STRIPE_CHECKOUT = 1,
@@ -44,7 +41,10 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   const [isLoading, setisLoading] = useState<boolean>(false);
   const [state, setState] = useState<PurchaseState>(PurchaseState.SELECTION);
   const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
-  const stripePromise = useMemo(() => loadStripe(STRIPE_API_PUBKEY), []);
+  const stripePromise = useMemo(
+    () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
+    [],
+  );
   const [error, setError] = useState<Error>();
 
   const onAmountChanged = useCallback(
