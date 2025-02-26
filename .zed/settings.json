@@ -1,0 +1,33 @@
+// Folder-specific settings
+//
+// For a full list of overridable settings, and general information on folder-specific settings,
+// see the documentation: https://zed.dev/docs/configuring-zed#settings-files
+{
+  "language_servers": [
+    "!biome",
+    "!typescript-language-server",
+    "vtsls",
+    "eslint",
+    "..."
+  ],
+  "languages": {
+    "TypeScript": {
+      "formatter": {
+        "external": {
+          "command": "prettierd",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      "prettier": { "allowed": false }
+    },
+    "TSX": {
+      "formatter": {
+        "external": {
+          "command": "prettierd",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      "prettier": { "allowed": false }
+    }
+  }
+}
