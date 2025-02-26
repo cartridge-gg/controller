@@ -22,7 +22,7 @@ export const Default: Story = {};
 
 export const IconComponent: Story = {
   args: {
-    icon: <DepositIcon size="lg" />,
+    icon: <DepositIcon variant="solid" size="lg" />,
   },
 };
 

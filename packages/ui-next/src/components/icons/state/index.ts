@@ -9,6 +9,8 @@ export * from "./clone";
 export * from "./code";
 export * from "./coins";
 export * from "./connect";
+export * from "./credit-card";
+export * from "./deposit";
 export * from "./details";
 export * from "./disconnect";
 export * from "./dove";
