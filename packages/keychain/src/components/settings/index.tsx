@@ -6,7 +6,7 @@ import {
   Button,
   GearIcon,
 } from "@cartridge/ui-next";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
@@ -18,8 +18,14 @@ enum State {
 }
 
 export function Settings() {
-  const { logout } = useConnection();
+  const { logout, closeModal } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
+
+  const handleLogout = useCallback(() => {
+    logout();
+    closeModal();
+  }, [logout, closeModal]);
+
   // const [delegateAccount, setDelegateAccount] = useState("");
 
   // useEffect(() => {
@@ -172,7 +178,7 @@ export function Settings() {
       </LayoutContent>
 
       <LayoutFooter>
-        <Button variant="secondary" onClick={logout}>
+        <Button variant="secondary" onClick={handleLogout}>
           Log out
         </Button>
       </LayoutFooter>
