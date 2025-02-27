@@ -1,10 +1,10 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
 import { LayoutContent } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
-import { TransactionSummary } from "@/components/transaction/TransactionSummary";
-import { ExecuteCtx } from "@/utils/connection";
+import { useConnection } from "#hooks/connection";
+import { TransactionSummary } from "#components/transaction/TransactionSummary";
+import { ExecuteCtx } from "#utils/connection";
 import { EstimateFee } from "starknet";
-import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { ExecutionContainer } from "#components/ExecutionContainer";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, setContext } = useConnection();

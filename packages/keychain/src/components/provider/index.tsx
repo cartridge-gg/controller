@@ -1,9 +1,9 @@
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { useConnectionValue } from "@/hooks/connection";
+import { useConnectionValue } from "#hooks/connection";
 import { TokensProvider } from "@cartridge/utils";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
-import { ENDPOINT } from "@/utils/graphql";
+import { ENDPOINT } from "#utils/graphql";
 import { PostHogProvider } from "./posthog";
 import { UIProvider } from "./ui";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
@@ -11,7 +11,7 @@ import { sepolia, mainnet } from "@starknet-react/chains";
 import { constants, num } from "starknet";
 import { BrowserRouter } from "react-router-dom";
 import { ConnectionContext } from "./connection";
-import { UpgradeProvider } from "@/components/provider/upgrade";
+import { UpgradeProvider } from "./upgrade";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();

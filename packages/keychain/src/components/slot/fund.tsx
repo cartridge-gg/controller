@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Funding } from "../funding";
-import Controller from "@/utils/controller";
+import Controller from "#utils/controller";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export function Fund() {

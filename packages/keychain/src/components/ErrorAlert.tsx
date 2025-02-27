@@ -19,8 +19,8 @@ import React, {
   useState,
 } from "react";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { ControllerError } from "@/utils/connection";
-import { parseExecutionError, parseValidationError } from "@/utils/errors";
+import { ControllerError } from "#utils/connection";
+import { parseExecutionError, parseValidationError } from "#utils/errors";
 import { formatAddress } from "@cartridge/utils";
 import { Link } from "react-router-dom";
 import { useExplorer } from "@starknet-react/core";

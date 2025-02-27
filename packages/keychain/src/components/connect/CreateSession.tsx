@@ -1,17 +1,17 @@
-import { ControllerErrorAlert } from "@/components/ErrorAlert";
-import { SessionConsent } from "@/components/connect";
-import { Upgrade } from "./Upgrade";
-import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
-import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { NOW } from "@/const";
-import { CreateSessionProvider } from "@/context/session";
-import { useConnection } from "@/hooks/connection";
+import { ControllerErrorAlert } from "#components/ErrorAlert";
+import { SessionConsent } from "#components/connect";
+import { Upgrade } from "#components/connect/Upgrade";
+import { UnverifiedSessionSummary } from "#components/session/UnverifiedSessionSummary";
+import { VerifiedSessionSummary } from "#components/session/VerifiedSessionSummary";
+import { NOW } from "#const";
+import { CreateSessionProvider } from "#context/session";
+import { useConnection } from "#hooks/connection";
 import {
   type ContractType,
   type ParsedSessionPolicies,
   useCreateSession,
-} from "@/hooks/session";
-import type { ControllerError } from "@/utils/connection";
+} from "#hooks/session";
+import type { ControllerError } from "#utils/connection";
 import {
   Button,
   Checkbox,
@@ -23,7 +23,7 @@ import {
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish } from "starknet";
-import { OcclusionDetector } from "../OcclusionDetector";
+import { OcclusionDetector } from "#components/OcclusionDetector";
 import { useUpgrade } from "../provider/upgrade";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];

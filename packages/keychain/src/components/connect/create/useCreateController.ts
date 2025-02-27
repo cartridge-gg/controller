@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
-import { useConnection } from "@/hooks/connection";
+import { useConnection } from "#hooks/connection";
 import { LoginMode } from "../types";
-import { doLogin, doSignup } from "@/hooks/account";
+import { doLogin, doSignup } from "#hooks/account";
 import { constants, RpcProvider } from "starknet";
-import Controller from "@/utils/controller";
+import Controller from "#utils/controller";
 import { fetchAccount } from "./utils";
-import { PopupCenter } from "@/utils/url";
+import { PopupCenter } from "#utils/url";
 import { useAccountQuery } from "@cartridge/utils/api/cartridge";
 
 export function useCreateController({

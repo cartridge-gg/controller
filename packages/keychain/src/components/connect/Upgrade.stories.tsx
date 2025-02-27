@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { Upgrade } from "./Upgrade";
-import Controller from "@/utils/controller";
+import Controller from "#utils/controller";
 import { constants } from "starknet";
 
 const meta = {

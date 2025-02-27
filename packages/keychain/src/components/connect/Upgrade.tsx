@@ -1,6 +1,6 @@
 import { LayoutContent, BoltIcon, CircleIcon } from "@cartridge/ui-next";
-import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { useConnection } from "@/hooks/connection";
+import { ExecutionContainer } from "#components/ExecutionContainer";
+import { useConnection } from "#hooks/connection";
 import { useUpgrade } from "../provider/upgrade";
 
 export const Upgrade = () => {
