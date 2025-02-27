@@ -40,6 +40,8 @@ export function SendCollection() {
   const { parent } = useConnection();
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
+  const [recipientError, setRecipientError] = useState<Error | undefined>();
+  const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
@@ -68,8 +70,8 @@ export function SendCollection() {
   }, [entrypoints]);
 
   const disabled = useMemo(() => {
-    return (!recipientValidated && !!recipientWarning) || !to;
-  }, [recipientValidated, to, recipientWarning]);
+    return (!recipientValidated && !!recipientWarning) || !!recipientError;
+  }, [recipientValidated, recipientWarning, recipientError]);
 
   useEffect(() => {
     setRecipientValidated(false);
@@ -77,11 +79,13 @@ export function SendCollection() {
 
   const onSubmit = useCallback(
     async (to: string) => {
+      setSubmitted(true);
       if (
         !collectionAddress ||
         !tokenIds ||
         !tokenIds.length ||
         !to ||
+        !!recipientError ||
         !entrypoint
       )
         return;
@@ -119,7 +123,13 @@ export function SendCollection() {
         }}
       />
       <LayoutContent className="gap-6">
-        <SendRecipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
+        <SendRecipient
+          to={to}
+          setTo={setTo}
+          submitted={submitted}
+          setWarning={setRecipientWarning}
+          setError={setRecipientError}
+        />
         <Sending assets={assets} />
       </LayoutContent>
 
