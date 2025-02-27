@@ -96,22 +96,23 @@ export function Settings() {
           Icon={GearIcon}
           hideSettings
         />
-        <LayoutContent className="gap-6">
-          <section>
-            <div>
-              <h1 className="text-foreground-200 text-sm font-medium">
-                Session Keys
-              </h1>
-              <h1 className="text-destructive-100 text-sm font-medium">
-                Inactive
-              </h1>
-            </div>
-            <p className="text-foreground-300 text-sm font-normal">
-              Sessions grant permission to your Controller to perform certain
-              game actions on your behalf
-            </p>
-          </section>
-          {/* <VStack gap="30px" w="full">
+        {process.env.NODE_ENV === "development" && (
+          <LayoutContent className="gap-6">
+            <section>
+              <div>
+                <h1 className="text-foreground-200 text-sm font-medium">
+                  Session Keys
+                </h1>
+                <h1 className="text-destructive-100 text-sm font-medium">
+                  Inactive
+                </h1>
+              </div>
+              <p className="text-foreground-300 text-sm font-normal">
+                Sessions grant permission to your Controller to perform certain
+                game actions on your behalf
+              </p>
+            </section>
+            {/* <VStack gap="30px" w="full">
           <VStack>
             {controller.cartridge.hasSession(
               controller.cartridge.session(),
@@ -196,7 +197,8 @@ export function Settings() {
             )}
           </VStack>
         </VStack> */}
-        </LayoutContent>
+          </LayoutContent>
+        )}
 
         <LayoutFooter>
           <SheetTrigger asChild>
