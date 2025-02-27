@@ -1,6 +1,7 @@
-import { cn, TabsTrigger } from "@/index";
-import AchievementCounter from "../counter/counter";
-import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
+import { TabsTrigger } from "#components/primitives";
+import { cn } from "#utils";
+import { AchievementCounter } from "../counter/counter";
+import { AchievementLeaderboardCounter } from "../leaderboard-counter/leaderboard-counter";
 import React from "react";
 
 export interface AchievementTabProps {
@@ -39,5 +40,3 @@ export const AchievementTab = ({
     </TabsTrigger>
   );
 };
-
-export default AchievementTab;

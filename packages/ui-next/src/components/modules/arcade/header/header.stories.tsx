@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ArcadeHeader } from "./header";
-import { BellIcon, Button, DotsIcon, SpaceInvaderIcon } from "@/index";
+import { BellIcon, DotsIcon, SpaceInvaderIcon } from "#components/icons";
+import { Button } from "#components/primitives";
 import { fn } from "@storybook/test";
 
 const meta: Meta<typeof ArcadeHeader> = {

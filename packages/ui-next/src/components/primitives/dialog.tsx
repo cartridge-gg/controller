@@ -3,8 +3,8 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
-import { cn } from "@/utils";
-import { TimesIcon } from "@/components/icons";
+import { cn } from "#utils";
+import { TimesIcon } from "#components/icons";
 
 const Dialog = DialogPrimitive.Root;
 

@@ -1,5 +1,5 @@
-import { Progress } from "@/index";
-import { cn } from "@/utils";
+import { Progress } from "#components/primitives";
+import { cn } from "#utils";
 import { useMemo } from "react";
 
 interface ProgressBarProps {

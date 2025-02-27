@@ -3,7 +3,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/primitives/tooltip";
+} from "#components/primitives/tooltip";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Tooltip> = {

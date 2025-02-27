@@ -1,4 +1,5 @@
-import { cn, UniversalHeaderIcon } from "@/index";
+import { cn } from "#utils";
+import { UniversalHeaderIcon } from "../header-icon";
 import { cva, VariantProps } from "class-variance-authority";
 
 const headerLabelVariants = cva("flex gap-x-4 items-center", {
@@ -38,5 +39,3 @@ export const UniversalHeaderLabel = ({
     </div>
   );
 };
-
-export default UniversalHeaderLabel;

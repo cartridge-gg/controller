@@ -1,4 +1,4 @@
-import { cn } from "@/utils";
+import { cn } from "#utils";
 import { InfoIcon, WarningIcon, AlertIcon as AlertIconRaw } from "./utility";
 
 export type ErrorAlertIconProps = {

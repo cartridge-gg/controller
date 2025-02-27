@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AchievementLeaderboard } from "./leaderboard";
-import AchievementLeaderboardRow from "../leaderboard-row/leaderboard-row";
+import { AchievementLeaderboardRow } from "../leaderboard-row/leaderboard-row";
 
 const meta: Meta<typeof AchievementLeaderboard> = {
   title: "Modules/Achievements/Leaderboard",

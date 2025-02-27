@@ -6,8 +6,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
   BreadcrumbEllipsis,
-} from "@/components/primitives/breadcrumb";
-import { SlashIcon } from "@/components/icons";
+} from "#components/primitives/breadcrumb";
+import { SlashIcon } from "#components/icons";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Breadcrumb> = {

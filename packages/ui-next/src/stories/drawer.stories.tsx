@@ -1,4 +1,4 @@
-import { Button } from "@/components/primitives/button";
+import { Button } from "#components/primitives/button";
 import {
   Drawer as UIDrawer,
   DrawerClose,
@@ -8,7 +8,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/primitives/drawer";
+} from "#components/primitives/drawer";
 
 import { Meta, StoryObj } from "@storybook/react";
 

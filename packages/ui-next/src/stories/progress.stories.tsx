@@ -1,4 +1,4 @@
-import { Progress as UIProgress } from "@/components/primitives/progress";
+import { Progress as UIProgress } from "#components/primitives/progress";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Progress> = {

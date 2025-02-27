@@ -1,4 +1,4 @@
-import { cn } from "@/index";
+import { cn } from "#utils";
 
 interface AchievementBitProps {
   completed?: boolean;
@@ -22,5 +22,3 @@ export function AchievementBit({
     />
   );
 }
-
-export default AchievementBit;

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { UniversalHeaderIcon } from "./header-icon";
-import { DepositIcon, EthereumColorIcon } from "@/components/icons";
+import { DepositIcon, EthereumColorIcon } from "#components/icons";
 
 const meta: Meta<typeof UniversalHeaderIcon> = {
   title: "Modules/Universals/Header Icon",

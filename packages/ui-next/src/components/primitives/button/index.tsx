@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps } from "class-variance-authority";
-import { cn } from "@/utils";
-import { Spinner } from "@/components/spinner";
+import { cn } from "#utils";
+import { Spinner } from "#components/spinner";
 import { buttonVariants } from "./utils";
-import { ExternalIcon } from "@/components/icons";
+import { ExternalIcon } from "#components/icons";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
