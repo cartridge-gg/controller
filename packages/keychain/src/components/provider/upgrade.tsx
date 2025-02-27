@@ -70,6 +70,34 @@ export const CONTROLLER_VERSIONS: ControllerVersionInfo[] = [
 export const STABLE_CONTROLLER = CONTROLLER_VERSIONS[4];
 export const BETA_CONTROLLER = CONTROLLER_VERSIONS[5];
 
+/**
+ * Determines if an upgrade is available and returns the appropriate controller version
+ * @param currentVersion The current controller version
+ * @param isBeta Whether beta features are enabled
+ * @returns An object containing whether an upgrade is available and the target controller version
+ */
+export function determineUpgradePath(
+  currentVersion: ControllerVersionInfo | undefined,
+  isBeta: boolean,
+): { available: boolean; targetVersion: ControllerVersionInfo } {
+  const targetVersion = isBeta ? BETA_CONTROLLER : STABLE_CONTROLLER;
+
+  if (!currentVersion) {
+    return { available: false, targetVersion };
+  }
+
+  // Find the indices of the current and target versions in the CONTROLLER_VERSIONS array
+  const currentIndex = CONTROLLER_VERSIONS.findIndex(
+    (v) => v === currentVersion,
+  );
+  const targetIndex = CONTROLLER_VERSIONS.findIndex((v) => v === targetVersion);
+
+  // Only set available to true if the target controller is newer than the current one
+  const available = currentIndex !== -1 && targetIndex > currentIndex;
+
+  return { available, targetVersion };
+}
+
 export interface UpgradeInterface {
   available: boolean;
   current?: ControllerVersionInfo;
@@ -140,7 +168,10 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
         );
 
         setCurrent(found);
-        setAvailable(found?.version !== effectiveController.version);
+
+        // Only set available to true if the effective controller is newer than the current one
+        const { available } = determineUpgradePath(found, isBeta);
+        setAvailable(available);
         setSyncedControllerAddress(controller.address());
       })
       .catch((e) => {
@@ -152,7 +183,10 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
           );
 
           setCurrent(found);
-          setAvailable(found?.version !== effectiveController.version);
+
+          // Only set available to true if the effective controller is newer than the current one
+          const { available } = determineUpgradePath(found, isBeta);
+          setAvailable(available);
         } else {
           setError(e);
         }
@@ -161,7 +195,7 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
         setSyncedControllerAddress(controller.address());
         setIsSynced(true);
       });
-  }, [controller, syncedControllerAddress, effectiveController]);
+  }, [controller, syncedControllerAddress, effectiveController, isBeta]);
 
   useEffect(() => {
     if (!controller || !effectiveController) {
