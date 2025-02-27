@@ -25,6 +25,7 @@ export * from "./metrics";
 export * from "./mobile";
 export * from "./moon";
 export * from "./pencil";
+export * from "./plus";
 export * from "./pulse";
 export * from "./scroll";
 export * from "./shapes";
