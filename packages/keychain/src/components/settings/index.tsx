@@ -5,6 +5,12 @@ import {
   LayoutHeader,
   Button,
   GearIcon,
+  SignOutIcon,
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetFooter,
+  SheetTrigger,
 } from "@cartridge/ui-next";
 import { useCallback, useState } from "react";
 import { Recovery } from "./Recovery";
@@ -82,15 +88,16 @@ export function Settings() {
   }
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        variant="compressed"
-        title="Controller Settings"
-        Icon={GearIcon}
-        hideSettings
-      />
-      <LayoutContent className="gap-6">
-        {/* <VStack gap="30px" w="full">
+    <Sheet>
+      <LayoutContainer>
+        <LayoutHeader
+          variant="compressed"
+          title="Controller Settings"
+          Icon={GearIcon}
+          hideSettings
+        />
+        <LayoutContent className="gap-6">
+          {/* <VStack gap="30px" w="full">
           <VStack>
             {controller.cartridge.hasSession(
               controller.cartridge.session(),
@@ -175,13 +182,49 @@ export function Settings() {
             )}
           </VStack>
         </VStack> */}
-      </LayoutContent>
+        </LayoutContent>
 
-      <LayoutFooter>
-        <Button variant="secondary" onClick={handleLogout}>
-          Log out
-        </Button>
-      </LayoutFooter>
-    </LayoutContainer>
+        <LayoutFooter>
+          <SheetTrigger asChild>
+            <Button type="button" variant="secondary" className="gap-2">
+              <SignOutIcon />
+              <span>Log out</span>
+            </Button>
+          </SheetTrigger>
+        </LayoutFooter>
+
+        <SheetContent
+          side="bottom"
+          className="border-background-100 p-6 gap-6 rounded-t-xl"
+          showClose={false}
+        >
+          <div className="flex flex-row items-center gap-3 mb-6">
+            <Button variant="icon" size="icon" className="flex items-center justify-center">
+              <SignOutIcon size="lg" />
+            </Button>
+            <div className="flex flex-col items-start gap-1">
+              <h3 className="text-lg font-semibold text-foreground-100">
+                Log Out
+              </h3>
+              <p className="text-xs font-normal text-foreground-300">
+              Are you sure?
+              </p>
+            </div>
+          </div>
+          <SheetFooter className="flex flex-row items-center gap-4">
+            <SheetClose asChild className="flex-1">
+              <Button variant="secondary">Cancel</Button>
+            </SheetClose>
+            <Button
+              variant="secondary"
+              onClick={handleLogout}
+              className="flex-1"
+            >
+              <span className="text-destructive-100">Log out</span>
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </LayoutContainer>
+    </Sheet>
   );
 }
