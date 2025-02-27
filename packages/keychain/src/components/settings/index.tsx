@@ -12,6 +12,8 @@ import {
   SheetFooter,
   SheetTrigger,
   PlusIcon,
+  ClockIcon,
+  ShapesIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useState } from "react";
 import { Recovery } from "./Recovery";
@@ -20,6 +22,10 @@ import { Status } from "./status";
 import { useConnection } from "@/hooks/connection";
 import { Session, SessionCard } from "./session-card";
 import { Signer, SignerCard } from "./signer-card";
+import {
+  RegisteredAccount,
+  RegisteredAccountCard,
+} from "./registered-account-card";
 
 enum State {
   SETTINGS,
@@ -27,32 +33,38 @@ enum State {
   DELEGATE,
 }
 
+// MOCK DATA
+const signers: Signer[] = [
+  {
+    deviceType: "mobile",
+    deviceName: "Device 1",
+  },
+  {
+    deviceType: "laptop",
+    deviceName: "Device 2",
+  },
+];
+const sessions: Session[] = [
+  {
+    sessionName: "Session 1",
+    expiresAt: BigInt(14400), // 4 hours in seconds
+  },
+  {
+    sessionName: "Session 2",
+    expiresAt: BigInt(7200), // 2 hours in seconds
+  },
+];
+const registeredAccounts: RegisteredAccount[] = [
+  {
+    accountName: "clicksave.stark",
+    accountAddress: "0x04183183013819381932139812918",
+  },
+];
+
 export function Settings() {
   const { logout, closeModal } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [signers, setSigners] = useState<Signer[]>([
-    {
-      deviceType: "mobile",
-      deviceName: "Device 1",
-    },
-    {
-      deviceType: "laptop",
-      deviceName: "Device 2",
-    },
-  ]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sessions, setSession] = useState<Session[]>([
-    {
-      sessionName: "Session 1",
-      expiresAt: BigInt(14400) // 4 hours in seconds
-    },
-    {
-      sessionName: "Session 2",
-      expiresAt: BigInt(7200) // 2 hours in seconds
-    },
-  ]);
-
   const handleLogout = useCallback(() => {
     logout();
     closeModal();
@@ -75,6 +87,8 @@ export function Settings() {
           Icon={GearIcon}
           hideSettings
         />
+
+        {/* Hide the settings screen until API integration is done */}
         {process.env.NODE_ENV === "development" && (
           <LayoutContent className="gap-6">
             {/* SESSION */}
@@ -94,10 +108,14 @@ export function Settings() {
 
               <div className="space-y-3">
                 {sessions.map((i) => (
-                  <SessionCard sessionName={i.sessionName} expiresAt={i.expiresAt} />
+                  <SessionCard
+                    sessionName={i.sessionName}
+                    expiresAt={i.expiresAt}
+                  />
                 ))}
               </div>
               <Button
+                type="button"
                 variant="outline"
                 className="py-2.5 px-3 text-foreground-300 gap-1"
               >
@@ -129,12 +147,45 @@ export function Settings() {
                 ))}
               </div>
               <Button
+                type="button"
                 variant="outline"
                 className="py-2.5 px-3 text-foreground-300 gap-1"
               >
                 <PlusIcon size="sm" variant="line" />
                 <span className="normal-case font-normal font-sans text-sm">
                   Add Signer
+                </span>
+              </Button>
+            </section>
+
+            {/* REGISTERED ACCOUNT */}
+            <section className="space-y-4">
+              <div className="space-y-2">
+                <h1 className="text-foreground-200 text-sm font-medium">
+                  Registered Account
+                </h1>
+                <p className="text-foreground-300 text-xs font-normal">
+                  Information associated with registered accounts can be made
+                  available to games and applications.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {registeredAccounts.map((i) => (
+                  <RegisteredAccountCard
+                    accountName={i.accountName}
+                    accountAddress={i.accountAddress}
+                  />
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="py-2.5 px-3 text-foreground-300 gap-1"
+              >
+                <PlusIcon size="sm" variant="line" />
+                <span className="normal-case font-normal font-sans text-sm">
+                  Add Account
                 </span>
               </Button>
             </section>
@@ -164,15 +215,16 @@ export function Settings() {
             size="icon"
             className="flex items-center justify-center pointer-events-none"
           >
-            <SignOutIcon size="lg" />
+            <ShapesIcon variant="solid" size="lg" />
           </Button>
-          <div className="flex flex-col items-start gap-1">
+          <div className="flex flex-col items-start gap-0.5">
             <h3 className="text-lg font-semibold text-foreground-100">
               Log Out
             </h3>
-            <p className="text-xs font-normal text-foreground-300">
-              Are you sure?
-            </p>
+            <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
+              <ClockIcon variant="line" size="xs" />
+              <span>Expires in 4h</span>
+            </div>
           </div>
         </div>
         <SheetFooter className="flex flex-row items-center gap-4">

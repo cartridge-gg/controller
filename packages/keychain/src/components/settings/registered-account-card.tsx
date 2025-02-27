@@ -4,44 +4,43 @@ import {
   Button,
   Card,
   CardContent,
-  ShapesIcon,
   TrashIcon,
   Sheet,
   SheetClose,
   SheetContent,
   SheetFooter,
   SheetTrigger,
-  ClockIcon,
+  ArgentIcon,
+  CopyIcon,
+  CopyAddress,
 } from "@cartridge/ui-next";
+import { formatAddress } from "@cartridge/utils";
 
-export interface Session {
-  sessionName: string;
-  expiresAt: bigint;
+export interface RegisteredAccount {
+  accountName: string;
+  accountAddress: string;
 }
 
-export interface SessionCardProps extends Session {
+export interface SignerCardProps extends RegisteredAccount {
   onDelete?: () => void;
 }
 
-export const SessionCard = React.forwardRef<
+export const RegisteredAccountCard = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & SessionCardProps
->(({ className, sessionName, expiresAt, onDelete }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & SignerCardProps
+>(({ className, accountName, accountAddress, onDelete }, ref) => {
   return (
     <Sheet>
       <div ref={ref} className={cn("flex items-center gap-3", className)}>
         <Card className="flex flex-1 flex-row items-center bg-background-100 border border-background-200">
-          <CardContent className="relative bg-background-200 size-10 flex items-center justify-center">
-            <ShapesIcon variant="solid" size="default" className="absolute" />
-          </CardContent>
-          <CardContent className="text-foreground-300 bg-background-100 py-2.5 px-3 flex flex-row items-center justify-between w-full">
-            <h1 className="flex-1 text-sm font-normal">{sessionName}</h1>
-            <div className="flex flex-row items-center gap-1">
-              <ClockIcon variant="line" size="xs" />
-              <h1 className="text-xs font-normal">
-                {formatDuration(expiresAt)}
-              </h1>
+          <CardContent className="py-2.5 px-3 flex items-center justify-between w-full">
+            <div className="flex flex-row items-center gap-1.5">
+              <ArgentIcon />
+              <h1 className="flex-1 text-sm font-normal">{accountName}</h1>
             </div>
+            <h1 className="text-xs text-foreground-300 font-normal">
+              {formatAddress(accountAddress, { first: 4, last: 4 })}
+            </h1>
           </CardContent>
         </Card>
         <SheetTrigger asChild>
@@ -51,7 +50,7 @@ export const SessionCard = React.forwardRef<
         </SheetTrigger>
       </div>
 
-      {/* DELETE SESSION SHEET CONTENTS */}
+      {/* DELETE SIGNER SHEET CONTENTS */}
       <SheetContent
         side="bottom"
         className="border-background-100 p-6 gap-6 rounded-t-xl"
@@ -64,16 +63,19 @@ export const SessionCard = React.forwardRef<
             size="icon"
             className="flex items-center justify-center"
           >
-            <ShapesIcon variant="solid" size="default" className="absolute" />
+            <ArgentIcon />
           </Button>
           <div className="flex flex-col items-start gap-1">
             <div className="flex flex-col items-start gap-0.5">
               <h3 className="text-lg font-semibold text-foreground-100">
-                {sessionName}
+                {accountName}
               </h3>
               <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
-                <ClockIcon variant="line" size="xs" />
-                <span>Expires in {formatDuration(expiresAt)}</span>
+                <CopyAddress
+                  size="xs"
+                  className="text-sm"
+                  address={accountAddress}
+                />
               </div>
             </div>
           </div>
@@ -96,20 +98,4 @@ export const SessionCard = React.forwardRef<
   );
 });
 
-SessionCard.displayName = "SessionCard";
-
-function formatDuration(duration: bigint): string {
-  const hours = Number(duration) / (60 * 60);
-  if (hours >= 24) {
-    const days = Math.floor(hours / 24);
-    return `${days}d`;
-  }
-  if (hours >= 1) {
-    return `${Math.floor(hours)}h`;
-  }
-  const minutes = Number(duration) / 60;
-  if (minutes >= 1) {
-    return `${Math.floor(minutes)}m`;
-  }
-  return `${Number(duration)}s`;
-}
+RegisteredAccountCard.displayName = "RegisteredAccountCard";
