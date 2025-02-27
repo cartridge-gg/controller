@@ -30,13 +30,12 @@ export function SendToken() {
 
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState<number | undefined>();
-  const [error, setError] = useState<Error | undefined>();
-
+  const [amountError, setAmountError] = useState<Error | undefined>();
+  const [toError, setToError] = useState<Error | undefined>();
+  const [submitted, setSubmitted] = useState(false);
   const disabled = useMemo(() => {
-    return (
-      !!error || (!validated && !!warning) || !to || !amount || amount <= 0
-    );
-  }, [validated, to, amount, warning, error]);
+    return !!toError || !!amountError || (!validated && !!warning);
+  }, [validated, warning, amountError, toError]);
 
   useEffect(() => {
     setValidated(false);
@@ -44,7 +43,8 @@ export function SendToken() {
 
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
-      if (!token) return;
+      setSubmitted(true);
+      if (!token || !to || !amount) return;
 
       const formattedAmount = uint256.bnToUint256(
         BigInt(amount * 10 ** token.meta.decimals),
@@ -85,8 +85,19 @@ export function SendToken() {
         }}
       />
       <LayoutContent className="pb-4 gap-6">
-        <SendRecipient to={to} setTo={setTo} setWarning={setWarning} />
-        <SendAmount amount={amount} setAmount={setAmount} setError={setError} />
+        <SendRecipient
+          to={to}
+          submitted={submitted}
+          setTo={setTo}
+          setWarning={setWarning}
+          setError={setToError}
+        />
+        <SendAmount
+          amount={amount}
+          submitted={submitted}
+          setAmount={setAmount}
+          setError={setAmountError}
+        />
       </LayoutContent>
 
       <LayoutFooter>
