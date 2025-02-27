@@ -18,7 +18,6 @@ import {
 import { useCallback, useState } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
-import { Status } from "./status";
 import { useConnection } from "@/hooks/connection";
 import { Session, SessionCard } from "./session-card";
 import { Signer, SignerCard } from "./signer-card";
@@ -26,6 +25,7 @@ import {
   RegisteredAccount,
   RegisteredAccountCard,
 } from "./registered-account-card";
+import { SectionHeader } from "./section-header";
 
 enum State {
   SETTINGS,
@@ -83,7 +83,7 @@ export function Settings() {
       <LayoutContainer>
         <LayoutHeader
           variant="compressed"
-          title="Controller Settings"
+          title="Settings"
           Icon={GearIcon}
           hideSettings
         />
@@ -93,19 +93,11 @@ export function Settings() {
           <LayoutContent className="gap-6">
             {/* SESSION */}
             <section className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex flex-row items-center justify-between">
-                  <h1 className="text-foreground-200 text-sm font-medium">
-                    Session Key(s)
-                  </h1>
-                  <Status isActive={false} />
-                </div>
-                <p className="text-foreground-300 text-xs font-normal">
-                  Sessions grant permission to your Controller to perform
-                  certain game actions on your behalf
-                </p>
-              </div>
-
+              <SectionHeader
+                title="Session Key(s)"
+                description="Sessions grant permission to your Controller to perform certain game actions on your behalf"
+                showStatus={true}
+              />
               <div className="space-y-3">
                 {sessions.map((i) => (
                   <SessionCard
@@ -128,16 +120,10 @@ export function Settings() {
 
             {/* SIGNER */}
             <section className="space-y-4">
-              <div className="space-y-2">
-                <h1 className="text-foreground-200 text-sm font-medium">
-                  Signer(s)
-                </h1>
-                <p className="text-foreground-300 text-xs font-normal">
-                  Information associated with registered accounts can be made
-                  available to games and applications.
-                </p>
-              </div>
-
+              <SectionHeader
+                title="Signer(s)"
+                description="Information associated with registered accounts can be made available to games and applications."
+              />
               <div className="space-y-3">
                 {signers.map((i) => (
                   <SignerCard
@@ -160,16 +146,10 @@ export function Settings() {
 
             {/* REGISTERED ACCOUNT */}
             <section className="space-y-4">
-              <div className="space-y-2">
-                <h1 className="text-foreground-200 text-sm font-medium">
-                  Registered Account
-                </h1>
-                <p className="text-foreground-300 text-xs font-normal">
-                  Information associated with registered accounts can be made
-                  available to games and applications.
-                </p>
-              </div>
-
+              <SectionHeader
+                title="Registered Account"
+                description="Information associated with registered accounts can be made available to games and applications."
+              />
               <div className="space-y-3">
                 {registeredAccounts.map((i) => (
                   <RegisteredAccountCard

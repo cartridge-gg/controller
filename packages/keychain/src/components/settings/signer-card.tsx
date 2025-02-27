@@ -29,10 +29,14 @@ export interface SignerCardProps extends Signer {
 export const SignerCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SignerCardProps
->(({ className, deviceName, deviceType, onDelete }, ref) => {
+>(({ className, deviceName, deviceType, onDelete, ...props }, ref) => {
   return (
     <Sheet>
-      <div ref={ref} className={cn("flex items-center gap-3", className)}>
+      <div
+        ref={ref}
+        className={cn("flex items-center gap-3", className)}
+        {...props}
+      >
         <Card className="flex flex-1 flex-row items-center bg-background-100 border border-background-200">
           <CardContent className="relative bg-background-200 size-10 flex items-center justify-center">
             <DeviceIcon deviceType={deviceType} />

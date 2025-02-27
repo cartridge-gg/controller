@@ -11,7 +11,6 @@ import {
   SheetFooter,
   SheetTrigger,
   ArgentIcon,
-  CopyIcon,
   CopyAddress,
 } from "@cartridge/ui-next";
 import { formatAddress } from "@cartridge/utils";
@@ -28,10 +27,14 @@ export interface SignerCardProps extends RegisteredAccount {
 export const RegisteredAccountCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SignerCardProps
->(({ className, accountName, accountAddress, onDelete }, ref) => {
+>(({ className, accountName, accountAddress, onDelete, ...props }, ref) => {
   return (
     <Sheet>
-      <div ref={ref} className={cn("flex items-center gap-3", className)}>
+      <div
+        ref={ref}
+        className={cn("flex items-center gap-3", className)}
+        {...props}
+      >
         <Card className="flex flex-1 flex-row items-center bg-background-100 border border-background-200">
           <CardContent className="py-2.5 px-3 flex items-center justify-between w-full">
             <div className="flex flex-row items-center gap-1.5">
