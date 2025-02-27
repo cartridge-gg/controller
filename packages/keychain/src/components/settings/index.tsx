@@ -18,8 +18,8 @@ import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { Status } from "./status";
 import { useConnection } from "@/hooks/connection";
-import { SessionCard } from "./session-card";
-import { SignerCard } from "./signer-card";
+import { Session, SessionCard } from "./session-card";
+import { Signer, SignerCard } from "./signer-card";
 
 enum State {
   SETTINGS,
@@ -30,6 +30,28 @@ enum State {
 export function Settings() {
   const { logout, closeModal } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [signers, setSigners] = useState<Signer[]>([
+    {
+      deviceType: "mobile",
+      deviceName: "Device 1",
+    },
+    {
+      deviceType: "laptop",
+      deviceName: "Device 2",
+    },
+  ]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [sessions, setSession] = useState<Session[]>([
+    {
+      sessionName: "Session 1",
+      expiresAt: BigInt(14400) // 4 hours in seconds
+    },
+    {
+      sessionName: "Session 2",
+      expiresAt: BigInt(7200) // 2 hours in seconds
+    },
+  ]);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -64,15 +86,15 @@ export function Settings() {
                   </h1>
                   <Status isActive={false} />
                 </div>
-                <p className="text-foreground-300 text-sm font-normal">
+                <p className="text-foreground-300 text-xs font-normal">
                   Sessions grant permission to your Controller to perform
                   certain game actions on your behalf
                 </p>
               </div>
 
               <div className="space-y-3">
-                {Array.from([1, 2]).map((i) => (
-                  <SessionCard sessionName={`Session ${i}`} />
+                {sessions.map((i) => (
+                  <SessionCard sessionName={i.sessionName} expiresAt={i.expiresAt} />
                 ))}
               </div>
               <Button
@@ -92,17 +114,17 @@ export function Settings() {
                 <h1 className="text-foreground-200 text-sm font-medium">
                   Signer(s)
                 </h1>
-                <p className="text-foreground-300 text-sm font-normal">
+                <p className="text-foreground-300 text-xs font-normal">
                   Information associated with registered accounts can be made
                   available to games and applications.
                 </p>
               </div>
 
               <div className="space-y-3">
-                {Array.from([1, 2]).map((i) => (
+                {signers.map((i) => (
                   <SignerCard
-                    deviceName={`Device ${i}`}
-                    deviceType={i % 2 === 0 ? "laptop" : "mobile"}
+                    deviceName={i.deviceName}
+                    deviceType={i.deviceType}
                   />
                 ))}
               </div>
@@ -127,43 +149,41 @@ export function Settings() {
             </Button>
           </SheetTrigger>
         </LayoutFooter>
-
-        <SheetContent
-          side="bottom"
-          className="border-background-100 p-6 gap-6 rounded-t-xl"
-          showClose={false}
-        >
-          <div className="flex flex-row items-center gap-3 mb-6">
-            <Button
-              variant="icon"
-              size="icon"
-              className="flex items-center justify-center"
-            >
-              <SignOutIcon size="lg" />
-            </Button>
-            <div className="flex flex-col items-start gap-1">
-              <h3 className="text-lg font-semibold text-foreground-100">
-                Log Out
-              </h3>
-              <p className="text-xs font-normal text-foreground-300">
-                Are you sure?
-              </p>
-            </div>
-          </div>
-          <SheetFooter className="flex flex-row items-center gap-4">
-            <SheetClose asChild className="flex-1">
-              <Button variant="secondary">Cancel</Button>
-            </SheetClose>
-            <Button
-              variant="secondary"
-              onClick={handleLogout}
-              className="flex-1"
-            >
-              <span className="text-destructive-100">Log out</span>
-            </Button>
-          </SheetFooter>
-        </SheetContent>
       </LayoutContainer>
+
+      {/* LOGOUT SHEET CONTENTS */}
+      <SheetContent
+        side="bottom"
+        className="border-background-100 p-6 gap-6 rounded-t-xl"
+        showClose={false}
+      >
+        <div className="flex flex-row items-center gap-3 mb-6">
+          <Button
+            type="button"
+            variant="icon"
+            size="icon"
+            className="flex items-center justify-center pointer-events-none"
+          >
+            <SignOutIcon size="lg" />
+          </Button>
+          <div className="flex flex-col items-start gap-1">
+            <h3 className="text-lg font-semibold text-foreground-100">
+              Log Out
+            </h3>
+            <p className="text-xs font-normal text-foreground-300">
+              Are you sure?
+            </p>
+          </div>
+        </div>
+        <SheetFooter className="flex flex-row items-center gap-4">
+          <SheetClose asChild className="flex-1">
+            <Button variant="secondary">Cancel</Button>
+          </SheetClose>
+          <Button variant="secondary" onClick={handleLogout} className="flex-1">
+            <span className="text-destructive-100">Log out</span>
+          </Button>
+        </SheetFooter>
+      </SheetContent>
     </Sheet>
   );
 }
