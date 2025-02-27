@@ -128,7 +128,7 @@ impl Controller {
                 m.username,
                 m.class_hash,
                 rpc_url,
-                m.owner.try_into().map_err(ControllerError::from)?,
+                m.owner.try_into()?,
                 m.address,
                 m.chain_id,
             )))
@@ -202,7 +202,7 @@ impl Controller {
             Ok(mut fee_estimate) => {
                 if self
                     .authorized_session_metadata(&Policy::from_calls(&calls), None)
-                    .map_or(true, |(_, metadata)| !metadata.is_registered)
+                    .is_none_or(|(_, metadata)| !metadata.is_registered)
                 {
                     fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
                 }
