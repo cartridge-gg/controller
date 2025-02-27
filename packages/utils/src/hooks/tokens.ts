@@ -30,7 +30,13 @@ export function useToken(address: string): UseTokenResponse {
   };
 }
 
-export function useFeeToken() {
+export type UseFeeTokenResponse = {
+  token: ERC20 | undefined;
+  isLoading: boolean;
+  error?: Error;
+};
+
+export function useFeeToken(): UseFeeTokenResponse {
   const { feeToken, isLoading, error } = useTokens();
   return {
     token: feeToken,
