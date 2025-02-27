@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { SessionCard } from "./session-card";
 
 const meta: Meta<typeof SessionCard> = {
-  title: "Modules/Settings/Session Card",
+  title: "components/settings/Session Card",
   component: SessionCard,
   tags: ["autodocs"],
   parameters: {

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { SignerCard } from "./signer-card";
 
 const meta: Meta<typeof SignerCard> = {
-  title: "Modules/Settings/Signer Card",
+  title: "components/settings/Signer Card",
   component: SignerCard,
   tags: ["autodocs"],
   parameters: {

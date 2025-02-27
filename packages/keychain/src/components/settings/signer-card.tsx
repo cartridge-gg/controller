@@ -1,7 +1,14 @@
 import React from "react";
-import { cn } from "@/utils";
-import { Button, Card, CardContent } from "@/index";
-import { TrashIcon, MobileIcon, DesktopIcon, LaptopIcon } from "@/index";
+import {
+  cn,
+  Button,
+  Card,
+  CardContent,
+  TrashIcon,
+  MobileIcon,
+  DesktopIcon,
+  LaptopIcon,
+} from "@cartridge/ui-next";
 
 type DeviceType = "mobile" | "laptop" | "desktop";
 

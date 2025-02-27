@@ -97,6 +97,20 @@ export function Settings() {
           hideSettings
         />
         <LayoutContent className="gap-6">
+          <section>
+            <div>
+              <h1 className="text-foreground-200 text-sm font-medium">
+                Session Keys
+              </h1>
+              <h1 className="text-destructive-100 text-sm font-medium">
+                Inactive
+              </h1>
+            </div>
+            <p className="text-foreground-300 text-sm font-normal">
+              Sessions grant permission to your Controller to perform certain
+              game actions on your behalf
+            </p>
+          </section>
           {/* <VStack gap="30px" w="full">
           <VStack>
             {controller.cartridge.hasSession(
@@ -199,7 +213,11 @@ export function Settings() {
           showClose={false}
         >
           <div className="flex flex-row items-center gap-3 mb-6">
-            <Button variant="icon" size="icon" className="flex items-center justify-center">
+            <Button
+              variant="icon"
+              size="icon"
+              className="flex items-center justify-center"
+            >
               <SignOutIcon size="lg" />
             </Button>
             <div className="flex flex-col items-start gap-1">
@@ -207,7 +225,7 @@ export function Settings() {
                 Log Out
               </h3>
               <p className="text-xs font-normal text-foreground-300">
-              Are you sure?
+                Are you sure?
               </p>
             </div>
           </div>

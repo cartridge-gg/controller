@@ -1,7 +1,12 @@
 import React from "react";
-import { cn } from "@/utils";
-import { Button, Card, CardContent, ShapesIcon } from "@/index";
-import { TrashIcon } from "@/index";
+import {
+  cn,
+  Button,
+  Card,
+  CardContent,
+  ShapesIcon,
+  TrashIcon,
+} from "@cartridge/ui-next";
 
 interface SignerCardProps {
   className?: string;
