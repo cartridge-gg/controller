@@ -6,12 +6,11 @@ const meta: Meta<typeof AchievementPinIcon> = {
   component: AchievementPinIcon,
   tags: ["autodocs"],
   parameters: {
-    layout: "padded",
+    layout: "centered",
   },
   args: {
     variant: "default",
     size: "default",
-    status: "default",
     icon: "fa-seedling",
     empty: false,
   },
@@ -22,33 +21,60 @@ type Story = StoryObj<typeof AchievementPinIcon>;
 
 export const Default: Story = {};
 
+export const Faded: Story = {
+  args: {
+    variant: "faded",
+  },
+};
+
 export const Highlight: Story = {
   args: {
-    status: "highlight",
+    variant: "highlight",
+  },
+};
+
+export const DefaultTheme: Story = {
+  args: {
+    theme: true,
+  },
+};
+
+export const FadedTheme: Story = {
+  args: {
+    variant: "faded",
+    theme: true,
+  },
+};
+
+export const HighlightTheme: Story = {
+  args: {
+    variant: "highlight",
+    theme: true,
+  },
+};
+
+export const DefaultEmpty: Story = {
+  args: {
+    empty: true,
+  },
+};
+
+export const FadedEmpty: Story = {
+  args: {
+    empty: true,
+    variant: "faded",
+  },
+};
+
+export const HighlightEmpty: Story = {
+  args: {
+    empty: true,
+    variant: "highlight",
   },
 };
 
 export const Missing: Story = {
   args: {
     icon: undefined,
-  },
-};
-
-export const Empty: Story = {
-  args: {
-    empty: true,
-  },
-};
-
-export const EmptyHighlight: Story = {
-  args: {
-    empty: true,
-    status: "highlight",
-  },
-};
-
-export const Faded: Story = {
-  args: {
-    variant: "faded",
   },
 };

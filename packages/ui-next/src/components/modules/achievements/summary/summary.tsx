@@ -1,6 +1,6 @@
 import {
   AchievementContentProps,
-  AchievementGroupHeader,
+  ArcadeGameHeader,
   AchievementPinProps,
   AchievementProgress,
   Card,
@@ -55,7 +55,7 @@ export const AchievementSummary = ({
 
   return (
     <Card className={achievementSummaryVariants({ variant })}>
-      <AchievementGroupHeader
+      <ArcadeGameHeader
         achievements={achievements}
         metadata={metadata}
         socials={socials}
