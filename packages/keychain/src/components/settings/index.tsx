@@ -11,11 +11,15 @@ import {
   SheetContent,
   SheetFooter,
   SheetTrigger,
+  PlusIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useState } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
+import { Status } from "./status";
 import { useConnection } from "@/hooks/connection";
+import { SessionCard } from "./session-card";
+import { SignerCard } from "./signer-card";
 
 enum State {
   SETTINGS,
@@ -31,53 +35,6 @@ export function Settings() {
     logout();
     closeModal();
   }, [logout, closeModal]);
-
-  // const [delegateAccount, setDelegateAccount] = useState("");
-
-  // useEffect(() => {
-  //   const init = async () => {
-  //     const delegate = await controller.delegateAccount();
-  //     setDelegateAccount(delegate);
-  //   };
-  //   init();
-  // }, [controller]);
-
-  // const { externalOwners } = useExternalOwners();
-
-  // const onRemoveExternalOwner = useCallback(
-  //   (externalOwnerAddress: string) => {
-  //     setContext({
-  //       origin: context.origin,
-  //       transactions: [
-  //         {
-  //           contractAddress: controller.address,
-  //           entrypoint: "remove_external_owner",
-  //           calldata: CallData.compile([externalOwnerAddress]),
-  //         },
-  //       ],
-  //       type: "execute",
-  //       resolve: context.resolve,
-  //       reject: context.reject,
-  //     } as ExecuteCtx);
-  //   },
-  //   [controller, context, setContext],
-  // );
-
-  // const onRemoveDelegate = useCallback(() => {
-  //   setContext({
-  //     origin: context.origin,
-  //     transactions: [
-  //       {
-  //         contractAddress: controller.address,
-  //         entrypoint: "set_delegate_account",
-  //         calldata: CallData.compile(["0x0"]),
-  //       },
-  //     ],
-  //     type: "execute",
-  //     resolve: context.resolve,
-  //     reject: context.reject,
-  //   } as ExecuteCtx);
-  // }, [controller, context, setContext]);
 
   if (state === State.RECOVERY) {
     return <Recovery onBack={() => setState(State.SETTINGS)} />;
@@ -98,105 +55,67 @@ export function Settings() {
         />
         {process.env.NODE_ENV === "development" && (
           <LayoutContent className="gap-6">
-            <section>
-              <div>
-                <h1 className="text-foreground-200 text-sm font-medium">
-                  Session Keys
-                </h1>
-                <h1 className="text-destructive-100 text-sm font-medium">
-                  Inactive
-                </h1>
+            {/* SESSION */}
+            <section className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex flex-row items-center justify-between">
+                  <h1 className="text-foreground-200 text-sm font-medium">
+                    Session Key(s)
+                  </h1>
+                  <Status isActive={false} />
+                </div>
+                <p className="text-foreground-300 text-sm font-normal">
+                  Sessions grant permission to your Controller to perform
+                  certain game actions on your behalf
+                </p>
               </div>
-              <p className="text-foreground-300 text-sm font-normal">
-                Sessions grant permission to your Controller to perform certain
-                game actions on your behalf
-              </p>
-            </section>
-            {/* <VStack gap="30px" w="full">
-          <VStack>
-            {controller.cartridge.hasSession(
-              controller.cartridge.session(),
-            ) ? (
-              <Text>Session active</Text>
-            ) : (
-              <Text>No Session</Text>
-            )}
-           <Button
-              onClick={() => {
-                // zzz not implemented
-                controller.cartridge.revokeSession();
-              }}
-            >
-              Clear Session
-            </Button> 
-          </VStack>
 
-          <VStack w="full" alignItems="flex-start">
-            <Text fontWeight="bold" color="text.secondary">
-              Recovery Account(s)
-            </Text>
-            <Text color="text.secondary" fontSize="sm">
-              Controllers can be owned by an existing Starknet wallet. Setting a
-              recovery account will allow you to recover a controller if you
-              lose your passkey.
-            </Text>
-
-            <UnorderedList w="full" listStyleType="none" marginInlineStart={0}>
-              {externalOwners.map((externalOwner) => {
-                return (
-                  <ListItem
-                    w="full"
-                    marginBottom="4px"
-                    key={`ext-${externalOwner}`}
-                  >
-                    <HStack w="full">
-                      <Text w="340px">
-                        {" "}
-                        {formatAddress(externalOwner, {
-                          size: "lg",
-                        })}{" "}
-                      </Text>
-                      <Button
-                        onClick={() => onRemoveExternalOwner(externalOwner)}
-                      >
-                        <TrashIcon />
-                      </Button>
-                    </HStack>
-                  </ListItem>
-                );
-              })}
-            </UnorderedList>
-
-            <Button w="full" onClick={() => setState(State.RECOVERY)}>
-              Set Recovery Account
-            </Button>
-          </VStack>
-
-          <VStack w="full" alignItems="flex-start">
-            <Text fontWeight="bold" color="text.secondary">
-              Delegate Account
-            </Text>
-            <Text color="text.secondary" fontSize="sm">
-              You may optionally send rewards you earn in game to an external
-              wallet.
-            </Text>
-            {delegateAccount && BigInt(delegateAccount) != 0n ? (
-              <HStack w="full">
-                <Text w="340px">
-                  {" "}
-                  {formatAddress(delegateAccount, { size: "lg" })}{" "}
-                </Text>
-                <Button onClick={() => onRemoveDelegate()}>
-                  <TrashIcon />
-                </Button>
-              </HStack>
-            ) : (
-              <Button w="full" onClick={() => setState(State.DELEGATE)}>
-                Set Delegate Account
+              <div className="space-y-3">
+                {Array.from([1, 2]).map((i) => (
+                  <SessionCard sessionName={`Session ${i}`} />
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                className="py-2.5 px-3 text-foreground-300 gap-1"
+              >
+                <PlusIcon size="sm" variant="line" />
+                <span className="normal-case font-normal font-sans text-sm">
+                  Create Session
+                </span>
               </Button>
-            )}
-          </VStack>
-        </VStack> */}
+            </section>
+
+            {/* SIGNER */}
+            <section className="space-y-4">
+              <div className="space-y-2">
+                <h1 className="text-foreground-200 text-sm font-medium">
+                  Signer(s)
+                </h1>
+                <p className="text-foreground-300 text-sm font-normal">
+                  Information associated with registered accounts can be made
+                  available to games and applications.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {Array.from([1, 2]).map((i) => (
+                  <SignerCard
+                    deviceName={`Device ${i}`}
+                    deviceType={i % 2 === 0 ? "laptop" : "mobile"}
+                  />
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                className="py-2.5 px-3 text-foreground-300 gap-1"
+              >
+                <PlusIcon size="sm" variant="line" />
+                <span className="normal-case font-normal font-sans text-sm">
+                  Add Signer
+                </span>
+              </Button>
+            </section>
           </LayoutContent>
         )}
 
