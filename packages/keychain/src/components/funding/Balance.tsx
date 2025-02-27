@@ -11,7 +11,7 @@ import {
   formatBalance,
   convertTokenAmountToUSD,
 } from "@cartridge/utils";
-import { useController } from "@/hooks/controller";
+import { useController } from "#hooks/controller";
 
 export enum BalanceType {
   CREDITS = "credits",

@@ -3,8 +3,8 @@ import { vi } from "vitest";
 import {
   ConnectionContext,
   ConnectionContextValue,
-} from "@/components/provider/connection";
-import { LATEST_CONTROLLER } from "@/hooks/upgrade";
+} from "#components/provider/connection";
+import { LATEST_CONTROLLER } from "#hooks/upgrade";
 import { render, RenderResult } from "@testing-library/react";
 import { constants } from "starknet";
 
@@ -86,7 +86,7 @@ export function mockUseConnection(overrides?: Partial<ConnectionContextValue>) {
       : defaultMockController,
   });
 
-  vi.mock("@/hooks/connection", () => ({
+  vi.mock("#hooks/connection", () => ({
     useConnection: () => mockConnection,
   }));
 

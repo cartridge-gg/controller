@@ -4,7 +4,7 @@ import {
   connectToController,
   ConnectionCtx,
   OpenSettingsCtx,
-} from "@/utils/connection";
+} from "#utils/connection";
 import { isIframe, normalizeOrigin } from "@cartridge/utils";
 import {
   ResponseCodes,
@@ -15,7 +15,7 @@ import {
   ConnectionContext,
   ConnectionContextValue,
   VerifiableControllerTheme,
-} from "@/components/provider/connection";
+} from "#components/provider/connection";
 import { UpgradeInterface, useUpgrade } from "./upgrade";
 import { Policies } from "@cartridge/presets";
 import { defaultTheme, controllerConfigs } from "@cartridge/presets";

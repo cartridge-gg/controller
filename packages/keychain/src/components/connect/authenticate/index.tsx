@@ -7,7 +7,7 @@ import {
   LayoutHeader,
 } from "@cartridge/ui-next";
 import { Unsupported } from "./Unsupported";
-import { doSignup } from "@/hooks/account";
+import { doSignup } from "#hooks/account";
 import { useIsSupported } from "./useIsSupported";
 import { FaceIDImage } from "./FaceID";
 

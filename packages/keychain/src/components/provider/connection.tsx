@@ -1,8 +1,8 @@
 import { createContext } from "react";
-import Controller from "@/utils/controller";
-import { ConnectionCtx } from "@/utils/connection";
-import { UpgradeInterface } from "@/hooks/upgrade";
-import { ParsedSessionPolicies } from "@/hooks/session";
+import Controller from "#utils/controller";
+import { ConnectionCtx } from "#utils/connection";
+import { UpgradeInterface } from "#hooks/upgrade";
+import { ParsedSessionPolicies } from "#hooks/session";
 import { ControllerTheme } from "@cartridge/ui-next";
 
 export const ConnectionContext = createContext<

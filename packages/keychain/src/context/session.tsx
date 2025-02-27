@@ -1,11 +1,11 @@
-import { isPolicyRequired } from "@/components/connect/create/utils";
-import { DEFAULT_SESSION_DURATION } from "@/const";
-import { useConnection } from "@/hooks/connection";
+import { isPolicyRequired } from "#components/connect/create/utils";
+import { DEFAULT_SESSION_DURATION } from "#const";
+import { useConnection } from "#hooks/connection";
 import {
   type ContractType,
   CreateSessionContext,
   type ParsedSessionPolicies,
-} from "@/hooks/session";
+} from "#hooks/session";
 import { useCallback, useMemo, useState } from "react";
 import { shortString } from "starknet";
 

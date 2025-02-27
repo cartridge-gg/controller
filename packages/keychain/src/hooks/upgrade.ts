@@ -1,8 +1,8 @@
 import { JsCall } from "@cartridge/account-wasm";
 import { useCallback, useEffect, useState } from "react";
 import { addAddressPadding, Call } from "starknet";
-import { ControllerError } from "@/utils/connection";
-import Controller from "@/utils/controller";
+import { ControllerError } from "#utils/connection";
+import Controller from "#utils/controller";
 
 enum OutsideExecutionVersion {
   V2,

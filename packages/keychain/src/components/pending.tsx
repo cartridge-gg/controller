@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useUrlTxns } from "@/hooks/transaction";
-import { Transaction, TransactionState } from "@/components/Transaction";
+import { useUrlTxns } from "#hooks/transaction";
+import { Transaction, TransactionState } from "#components/Transaction";
 import {
   LayoutContainer,
   LayoutContent,

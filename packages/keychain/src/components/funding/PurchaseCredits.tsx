@@ -1,5 +1,5 @@
-import { ErrorAlert } from "@/components/ErrorAlert";
-import { useConnection } from "@/hooks/connection";
+import { ErrorAlert } from "#components/ErrorAlert";
+import { useConnection } from "#hooks/connection";
 import {
   Button,
   Card,

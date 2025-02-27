@@ -30,7 +30,7 @@ import {
   LayoutHeader,
 } from "@cartridge/ui-next";
 import { useFeeToken, convertUSDToTokenAmount } from "@cartridge/utils";
-import { useConnection } from "@/hooks/connection";
+import { useConnection } from "#hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "./Balance";

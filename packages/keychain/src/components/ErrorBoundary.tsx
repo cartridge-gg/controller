@@ -8,8 +8,8 @@ import {
   Button,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
-import { CARTRIDGE_DISCORD_LINK } from "@/const";
+import { useConnection } from "#hooks/connection";
+import { CARTRIDGE_DISCORD_LINK } from "#const";
 import { Link } from "react-router-dom";
 import { usePostHog } from "@cartridge/utils";
 import { useEffect } from "react";

@@ -1,5 +1,5 @@
 import { ProbeReply, ResponseCodes } from "@cartridge/controller";
-import Controller from "@/utils/controller";
+import Controller from "#utils/controller";
 
 export function probe({
   setController,

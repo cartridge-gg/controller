@@ -1,7 +1,7 @@
-import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
-import { useConnection } from "@/hooks/connection";
-import type { ControllerError } from "@/utils/connection";
-import { parseControllerError } from "@/utils/connection/execute";
+import { ControllerErrorAlert, ErrorAlert } from "#components/ErrorAlert";
+import { useConnection } from "#hooks/connection";
+import type { ControllerError } from "#utils/connection";
+import { parseControllerError } from "#utils/connection/execute";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   Button,
@@ -17,7 +17,7 @@ import type { Call, EstimateFee } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { Funding } from "./funding";
-import { OcclusionDetector } from "@/components/OcclusionDetector";
+import { OcclusionDetector } from "#components/OcclusionDetector";
 
 interface ExecutionContainerProps {
   transactions: Call[];

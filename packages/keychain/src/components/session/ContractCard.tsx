@@ -1,5 +1,5 @@
-import { useConnection } from "@/hooks/connection";
-import { useCreateSession } from "@/hooks/session";
+import { useConnection } from "#hooks/connection";
+import { useCreateSession } from "#hooks/session";
 import type { Method } from "@cartridge/presets";
 import {
   CodeIcon,
