@@ -27,10 +27,10 @@ import {
   isPublicChain,
   StarkscanUrl,
 } from "@cartridge/utils";
-import { useConnection } from "@/hooks/context";
+import { useConnection } from "#hooks/context";
 import { useMemo } from "react";
 import { Hex, hexToNumber } from "viem";
-import { Asset, Collection, useCollection } from "@/hooks/collection";
+import { Asset, Collection, useCollection } from "#hooks/collection";
 import { compare } from "compare-versions";
 
 export function Collectible() {

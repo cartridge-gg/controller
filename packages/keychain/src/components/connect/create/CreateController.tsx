@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import {
   LayoutContainer,
   LayoutFooter,
@@ -7,16 +7,16 @@ import {
   LayoutHeader,
   CreateAccount,
 } from "@cartridge/ui-next";
-import { useControllerTheme } from "@/hooks/theme";
 import { useDebounce } from "@/hooks/debounce";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { VerifiableControllerTheme } from "@/context/theme";
 import InAppSpy from "inapp-spy";
 import { usePostHog } from "@cartridge/utils";
+import { useControllerTheme } from "@/hooks/connection";
+import { VerifiableControllerTheme } from "@/components/provider/connection";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -174,7 +174,7 @@ export function CreateController({
     loginMode,
   });
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = useCallback(() => {
     if (!usernameField.value) {
       return;
     }
@@ -187,7 +187,7 @@ export function CreateController({
     if (validation.status === "valid") {
       handleSubmit(usernameField.value, !!validation.exists);
     }
-  };
+  }, [handleSubmit, usernameField.value, validation.exists, validation.status]);
 
   useEffect(() => {
     if (pendingSubmitRef.current && debouncedValidation.status === "valid") {

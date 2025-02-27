@@ -8,7 +8,7 @@ import {
 import { Link } from "react-router-dom";
 import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
 import { formatEther } from "viem";
-import { useTokens } from "@/hooks/token";
+import { useTokens } from "#hooks/token";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { formatBalance } from "./helper";
 

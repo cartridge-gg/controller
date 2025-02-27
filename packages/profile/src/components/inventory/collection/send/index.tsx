@@ -1,5 +1,5 @@
-import { useAccount } from "@/hooks/account";
-import { useConnection } from "@/hooks/context";
+import { useAccount } from "#hooks/account";
+import { useConnection } from "#hooks/context";
 import {
   LayoutContainer,
   LayoutContent,
@@ -16,10 +16,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
-import { useCollection } from "@/hooks/collection";
+import { useCollection } from "#hooks/collection";
 import { Sending } from "./sending";
 import { CollectionImage } from "../image";
-import { useEntrypoints } from "@/hooks/entrypoints";
+import { useEntrypoints } from "#hooks/entrypoints";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
