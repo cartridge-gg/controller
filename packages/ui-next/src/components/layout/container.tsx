@@ -3,7 +3,7 @@ import { isIframe } from "@cartridge/utils";
 import { type PropsWithChildren, useEffect, useState } from "react";
 import { LayoutContext } from "./context";
 
-function useMediaQuery(query: string) {
+export function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
 
   useEffect(() => {

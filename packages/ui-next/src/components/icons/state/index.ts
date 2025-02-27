@@ -1,3 +1,4 @@
+export * from "./bell";
 export * from "./bolt";
 export * from "./book";
 export * from "./calendar";
