@@ -8,8 +8,8 @@ import React, {
 } from "react";
 import { JsCall } from "@cartridge/account-wasm";
 import { addAddressPadding, Call } from "starknet";
-import { ControllerError } from "@/utils/connection";
-import Controller from "@/utils/controller";
+import { ControllerError } from "#utils/connection";
+import Controller from "#utils/controller";
 import { usePostHog } from "./posthog";
 
 export enum OutsideExecutionVersion {

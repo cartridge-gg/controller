@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import {
   ConnectionContextValue,
   VerifiableControllerTheme,
-} from "@/components/provider/connection";
+} from "#components/provider/connection";
 import { withConnection } from "./connection";
 import { withPostHog } from "./posthog";
 import { withStarknet } from "./starknet";

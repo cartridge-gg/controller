@@ -1,4 +1,4 @@
-import Controller from "@/utils/controller";
+import Controller from "#utils/controller";
 import {
   LayoutContainer,
   LayoutFooter,

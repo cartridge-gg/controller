@@ -4,7 +4,7 @@ import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   starknetTransactionExecutionErrorTestCases,
   starknetTransactionValidationErrorTestCases,
-} from "@/utils/errors";
+} from "#utils/errors";
 
 const meta = {
   component: ControllerErrorAlert,

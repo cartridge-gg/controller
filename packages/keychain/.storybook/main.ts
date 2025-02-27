@@ -26,22 +26,6 @@ const config: StorybookConfig = {
           external: ["vite-plugin-node-polyfills/shims/global"],
         },
       },
-      resolve: {
-        alias: {
-          "@cartridge/utils/api/cartridge": require.resolve(
-            "../node_modules/@cartridge/utils/dist/api/cartridge/index.js",
-          ),
-          "@cartridge/utils/api/indexer": require.resolve(
-            "../node_modules/@cartridge/utils/dist/api/indexer/index.js",
-          ),
-          "@cartridge/utils/mock/data": require.resolve(
-            "../node_modules/@cartridge/utils/dist/mock/data/index.js",
-          ),
-          "@cartridge/utils": require.resolve(
-            "../node_modules/@cartridge/utils/dist/index.mock.js",
-          ),
-        },
-      },
     }),
   staticDirs: ["../public"],
   previewHead: process.env.SNAPSHOT

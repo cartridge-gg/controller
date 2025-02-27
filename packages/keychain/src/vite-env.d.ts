@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import { Controller } from "@/utils/controller";
+import Controller from "#utils/controller";
 
 declare global {
   interface Window {

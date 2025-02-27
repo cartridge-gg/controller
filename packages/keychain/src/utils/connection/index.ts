@@ -1,7 +1,7 @@
 export * from "./types";
 
 import { connectToParent } from "@cartridge/penpal";
-import Controller from "@/utils/controller";
+import Controller from "#utils/controller";
 import { connect } from "./connect";
 import { execute } from "./execute";
 import { estimateInvokeFee } from "./estimate";

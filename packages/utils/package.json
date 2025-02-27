@@ -6,14 +6,23 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
-    "./hooks/tokens": {
-      "test": "./dist/hooks/tokens.mock.js",
-      "default": "./dist/hooks/tokens.js"
-    },
     "./api/cartridge": "./dist/api/cartridge/index.js",
     "./api/indexer": "./dist/api/indexer/index.js",
     "./mock/data": "./dist/mock/data/index.js"
   },
+  "imports": {
+    "#hooks/tokens": {
+      "test": "./src/hooks/tokens.mock.ts",
+      "default": "./src/hooks/tokens.ts"
+    }
+  },
+  "#*": [
+    "./src/*",
+    "./src/*.ts",
+    "./src/*.tsx",
+    "./src/*/index.ts",
+    "./src/*/index.tsx"
+  ],
   "scripts": {
     "build:deps": "pnpm graphql:gen && tsc",
     "graphql:gen": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/indexer/codegen.yaml && pnpm tsx bin/post-graphql-gen.ts",

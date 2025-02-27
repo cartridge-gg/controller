@@ -2,9 +2,9 @@ import {
   type SessionContracts,
   type SessionMessages,
   useCreateSession,
-} from "@/hooks/session";
+} from "#hooks/session";
 
-import { useConnection } from "@/hooks/connection";
+import { useConnection } from "#hooks/connection";
 import {
   InfoIcon,
   Switch,
