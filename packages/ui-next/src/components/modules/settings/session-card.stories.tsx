@@ -16,6 +16,6 @@ type Story = StoryObj<typeof SessionCard>;
 
 export const Default: Story = {
   args: {
-    sessionName: "This Device",
+    sessionName: "Session 1",
   },
 };
