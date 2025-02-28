@@ -21,6 +21,18 @@
     "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6001 'pnpm test-storybook -u'"
   },
   "imports": {
+    "#hooks/connection": {
+      "storybook": "./src/hooks/connection.mock.ts",
+      "default": "./src/hooks/connection.ts"
+    },
+    "#components/provider/posthog": {
+      "storybook": "./src/components/provider/posthog.mock.tsx",
+      "default": "./src/components/provider/posthog.tsx"
+    },
+    "#components/provider/upgrade": {
+      "storybook": "./src/components/provider/upgrade.mock.tsx",
+      "default": "./src/components/provider/upgrade.tsx"
+    },
     "#*": [
       "./src/*",
       "./src/*.ts",

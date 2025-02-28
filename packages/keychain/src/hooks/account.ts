@@ -228,7 +228,12 @@ export async function doLogin({
   }
 }
 
-export function useAccount() {
+export type UseAccountResponse = {
+  address: () => string;
+  username: string;
+};
+
+export function useAccount(): UseAccountResponse | undefined {
   const { controller } = useConnection();
   return useMemo(() => {
     if (!controller) return;

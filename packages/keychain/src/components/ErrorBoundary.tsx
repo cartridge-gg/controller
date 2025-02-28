@@ -12,7 +12,7 @@ import { useConnection } from "#hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "#const";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { usePostHog } from "./provider/posthog";
+import { usePostHog } from "#components/provider/posthog";
 
 export class ErrorBoundary extends React.Component<
   PropsWithChildren,
