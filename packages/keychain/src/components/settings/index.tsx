@@ -65,7 +65,7 @@ const registeredAccounts: RegisteredAccount[] = [
 export function Settings() {
   const { logout, closeModal } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const handleLogout = useCallback(() => {
     logout();
     closeModal();

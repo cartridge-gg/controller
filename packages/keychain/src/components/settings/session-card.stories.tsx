@@ -10,6 +10,7 @@ const meta = {
   },
   args: {
     sessionName: "Session 1",
+    expiresAt: 1630000000000n,
   },
 } satisfies Meta<typeof SessionCard>;
 
