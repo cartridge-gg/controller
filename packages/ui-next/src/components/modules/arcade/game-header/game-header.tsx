@@ -153,12 +153,14 @@ export const ArcadeGameHeader = ({
   );
 };
 
-const AchievementSocialWebsite = ({
+export const AchievementSocialWebsite = ({
   website,
   variant,
+  className,
 }: {
   website: string;
   variant: ArcadeGameHeaderVariant;
+  className?: string;
 }) => {
   const label = useMemo(() => {
     return website.replace(/^.*https?:\/\//, "").replace(/\/$/, "");
@@ -169,6 +171,7 @@ const AchievementSocialWebsite = ({
       href={website}
       label={label}
       variant={variant}
+      className={className}
     />
   );
 };
@@ -238,7 +241,7 @@ const AchievementSocialTelegram = ({
 };
 
 const achievementSocialVariants = cva(
-  "flex items-center gap-x-1 rounded px-1.5 py-1 cursor-pointer",
+  "flex items-center gap-x-1 rounded px-1.5 py-1 cursor-pointer text-foreground-100",
   {
     variants: {
       variant: {
@@ -255,27 +258,29 @@ const achievementSocialVariants = cva(
 type AchievementSocialVariant = VariantProps<
   typeof achievementSocialVariants
 >["variant"];
-const AchievementSocial = ({
+export const AchievementSocial = ({
   icon,
   href,
   label,
   variant,
+  className,
 }: {
   icon: React.ReactNode;
   href: string;
   label?: string;
   variant: AchievementSocialVariant;
+  className?: string;
 }) => {
   return (
     <a
       href={href}
       draggable={false}
       target="_blank"
-      className={achievementSocialVariants({ variant })}
+      className={cn(achievementSocialVariants({ variant }), className)}
     >
       {icon}
       {label && (
-        <p className="px-0.5 text-foreground-100 text-xs font-medium tracking-normal hidden sm:block">
+        <p className="px-0.5 text-xs font-medium tracking-normal hidden sm:block">
           {label}
         </p>
       )}

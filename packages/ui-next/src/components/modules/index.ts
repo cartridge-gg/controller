@@ -4,5 +4,6 @@ export * from "./recipient";
 export * from "./create-account";
 export * from "./progress-bar";
 export * from "./achievements";
+export * from "./thumbnails";
 export * from "./universals";
 export * from "./arcade";
