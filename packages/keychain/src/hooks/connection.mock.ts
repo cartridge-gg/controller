@@ -47,7 +47,7 @@ const defaultMockConnection: ConnectionContextValue = {
 };
 
 export function createMockConnection(
-  // Better way to type this? Failed to implement `DeepPartial<UpgradeInterface>` type
+  // TODO: type `DeepPartial<ConnectionContextValue>`
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   overrides?: any,
 ) {

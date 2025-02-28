@@ -2,16 +2,19 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { Funding } from ".";
 import { num } from "starknet";
+import { useConnection, createMockConnection } from "#hooks/connection.mock";
 
 const meta = {
   component: Funding,
-  parameters: {
-    connection: {
-      controller: {
-        callContract: () =>
-          Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
-      },
-    },
+  beforeEach: () => {
+    useConnection.mockReturnValue(
+      createMockConnection({
+        controller: {
+          callContract: () =>
+            Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
+        },
+      }),
+    );
   },
 } satisfies Meta<typeof Funding>;
 
