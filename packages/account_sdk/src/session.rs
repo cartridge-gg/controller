@@ -178,6 +178,14 @@ impl Controller {
     }
 
     pub fn session_account(&self, policies: &[Policy]) -> Option<SessionAccount> {
+        // Return None if any policy contains a call to the controller's own address
+        if policies.iter().any(|policy| match policy {
+            Policy::Call(contract_policy) => contract_policy.contract_address == self.address,
+            _ => false,
+        }) {
+            return None;
+        }
+
         // Check if there's a valid session stored
         let (_, metadata) = self.authorized_session_metadata(policies, None)?;
         let credentials = metadata.credentials.as_ref()?;

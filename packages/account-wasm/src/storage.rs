@@ -93,18 +93,19 @@ fn check_is_requested(stored_policies: &[Policy], policies: &[Policy]) -> bool {
 
 fn check_is_authorized(stored_policies: &[Policy], policies: &[Policy]) -> bool {
     check_policies(stored_policies, policies, |stored, requested| {
-        // Only match if both policies are authorized
         match (stored, requested) {
-            (Policy::Call(stored), Policy::Call(requested)) => {
-                stored.target == requested.target
-                    && stored.method == requested.method
-                    && stored.authorized == Some(true)
-                    && requested.authorized == Some(true)
+            (Policy::Call(stored_call), Policy::Call(requested_call)) => {
+                // Target and method must match
+                stored_call.target == requested_call.target &&
+                stored_call.method == requested_call.method &&
+                // The stored policy must explicitly authorize (Some(true))
+                stored_call.authorized == Some(true)
+                // Ignore the requested policy's authorized field
             }
-            (Policy::TypedData(stored), Policy::TypedData(requested)) => {
-                stored.scope_hash == requested.scope_hash
-                    && stored.authorized == Some(true)
-                    && requested.authorized == Some(true)
+            (Policy::TypedData(stored_td), Policy::TypedData(requested_td)) => {
+                stored_td.scope_hash == requested_td.scope_hash
+                    && stored_td.authorized == Some(true)
+                // Ignore the requested policy's authorized field
             }
             _ => false,
         }
@@ -114,24 +115,30 @@ fn check_is_authorized(stored_policies: &[Policy], policies: &[Policy]) -> bool 
 #[cfg(test)]
 mod policy_check_tests {
     use crate::types::policy::CallPolicy;
+    use crate::types::JsFelt;
+    use starknet::{
+        core::types::{Call, Felt},
+        macros::felt,
+    };
+    use std::str::FromStr;
 
     use super::*;
 
     #[test]
     fn test_check_is_requested() {
         let policy1 = Policy::Call(CallPolicy {
-            target: "0x1234".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x1234")),
+            method: JsFelt(felt!("0x5678")),
             authorized: None,
         });
         let policy2 = Policy::Call(CallPolicy {
-            target: "0x1234".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x1234")),
+            method: JsFelt(felt!("0x5678")),
             authorized: Some(true),
         });
         let policy3 = Policy::Call(CallPolicy {
-            target: "0x9999".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x9999")),
+            method: JsFelt(felt!("0x5678")),
             authorized: None,
         });
 
@@ -153,18 +160,18 @@ mod policy_check_tests {
     #[test]
     fn test_check_is_authorized() {
         let policy1 = Policy::Call(CallPolicy {
-            target: "0x1234".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x1234")),
+            method: JsFelt(felt!("0x5678")),
             authorized: Some(true),
         });
         let policy2 = Policy::Call(CallPolicy {
-            target: "0x1234".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x1234")),
+            method: JsFelt(felt!("0x5678")),
             authorized: None,
         });
         let policy3 = Policy::Call(CallPolicy {
-            target: "0x9999".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x9999")),
+            method: JsFelt(felt!("0x5678")),
             authorized: Some(true),
         });
 
@@ -174,7 +181,7 @@ mod policy_check_tests {
         assert!(check_is_authorized(&stored, &[policy1.clone()]));
 
         // Test unauthorized policy doesn't match authorized
-        assert!(!check_is_authorized(&stored, &[policy2]));
+        assert!(check_is_authorized(&stored, &[policy2]));
 
         // Test non-matching policy
         assert!(!check_is_authorized(&stored, &[policy3]));
@@ -182,12 +189,54 @@ mod policy_check_tests {
         // Test multiple policies
         assert!(!check_is_authorized(&stored, &[policy1.clone(), policy1]));
     }
+
+    #[test]
+    fn test_check_is_authorized_from_call() {
+        // Create a policy and store it
+        let stored_policy = Policy::Call(CallPolicy {
+            target: JsFelt(felt!("0x1234")),
+            method: JsFelt(felt!("0x5678")),
+            authorized: Some(true),
+        });
+
+        let stored = vec![stored_policy];
+
+        // Create a Call that matches the stored policy
+        let call = Call {
+            to: Felt::from_str("0x1234").unwrap(),
+            selector: Felt::from_str("0x5678").unwrap(),
+            calldata: vec![],
+        };
+
+        // Create Policy from Call
+        let policy_from_call = Policy::from_call(&call);
+
+        // Test that the policy created from Call is authorized
+        assert!(check_is_authorized(&stored, &[policy_from_call]));
+
+        // Create a Call that doesn't match the stored policy
+        let non_matching_call = Call {
+            to: Felt::from_str("0x9999").unwrap(),
+            selector: Felt::from_str("0x5678").unwrap(),
+            calldata: vec![],
+        };
+
+        // Create Policy from Call
+        let non_matching_policy = Policy::from_call(&non_matching_call);
+
+        // Test that the policy created from non-matching Call is not authorized
+        assert!(!check_is_authorized(&stored, &[non_matching_policy]));
+    }
 }
 
 #[cfg(all(test, target_arch = "wasm32"))]
 mod tests {
     use super::*;
     use crate::types::policy::{CallPolicy, TypedDataPolicy};
+    use starknet::{
+        core::types::{Call, Felt},
+        macros::felt,
+    };
     use wasm_bindgen_test::*;
 
     #[wasm_bindgen_test]
@@ -196,18 +245,18 @@ mod tests {
 
         // Create some test policies
         let policy1 = Policy::Call(CallPolicy {
-            target: "0x1234".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x1234")),
+            method: JsFelt(felt!("0x5678")),
             authorized: None,
         });
         let policy2 = Policy::Call(CallPolicy {
-            target: "0x1234".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x1234")),
+            method: JsFelt(felt!("0x5678")),
             authorized: Some(true),
         });
         let policy3 = Policy::Call(CallPolicy {
-            target: "0x9999".to_string(), // Different target
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x9999")), // Different target
+            method: JsFelt(felt!("0x5678")),
             authorized: None,
         });
 
@@ -235,17 +284,17 @@ mod tests {
 
         // Create some test policies
         let policy1 = Policy::Call(CallPolicy {
-            target: "0x1234".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x1234")),
+            method: JsFelt(felt!("0x5678")),
             authorized: Some(true),
         });
         let policy2 = Policy::Call(CallPolicy {
-            target: "0x1234".to_string(),
-            method: "0x5678".to_string(),
+            target: JsFelt(felt!("0x1234")),
+            method: JsFelt(felt!("0x5678")),
             authorized: None,
         });
         let policy3 = Policy::TypedData(TypedDataPolicy {
-            scope_hash: "0x1234".to_string(),
+            scope_hash: JsFelt(felt!("0x1234")),
             authorized: Some(true),
         });
 

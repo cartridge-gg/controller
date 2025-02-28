@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use starknet::core::utils::NonAsciiNameError;
 use starknet_types_core::felt::{Felt, FromStrError};
 use tsify_next::Tsify;
+use wasm_bindgen::prelude::*;
 
 pub(crate) mod call;
 pub(crate) mod estimate;
@@ -13,21 +14,70 @@ pub(crate) mod session;
 pub(crate) mod signer;
 
 #[allow(non_snake_case)]
-#[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Tsify)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
-pub struct JsFelt(pub String);
+pub struct JsFelt(pub Felt);
+
+// Custom serialization for TypeScript compatibility
+impl Serialize for JsFelt {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.0.to_fixed_hex_string().serialize(serializer)
+    }
+}
+
+// Custom deserialization for TypeScript compatibility
+impl<'de> Deserialize<'de> for JsFelt {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let string_repr = String::deserialize(deserializer)?;
+        let felt = Felt::from_str(&string_repr)
+            .map_err(|e| serde::de::Error::custom(format!("Invalid Felt: {}", e)))?;
+        Ok(JsFelt(felt))
+    }
+}
+
+impl JsFelt {
+    // Get the inner Felt
+    pub fn as_felt(&self) -> &Felt {
+        &self.0
+    }
+
+    // Get the string representation
+    pub fn as_str(&self) -> String {
+        self.0.to_fixed_hex_string()
+    }
+}
 
 impl TryFrom<JsFelt> for Felt {
     type Error = FromStrError;
 
     fn try_from(jsfelt: JsFelt) -> Result<Self, Self::Error> {
-        Felt::from_str(&jsfelt.0)
+        Ok(jsfelt.0)
     }
 }
 
 impl From<Felt> for JsFelt {
     fn from(felt: Felt) -> Self {
-        JsFelt(felt.to_hex_string())
+        JsFelt(felt)
+    }
+}
+
+impl From<&str> for JsFelt {
+    fn from(s: &str) -> Self {
+        let felt = Felt::from_str(s).unwrap_or_else(|_| Felt::from(0));
+        JsFelt(felt)
+    }
+}
+
+impl From<String> for JsFelt {
+    fn from(s: String) -> Self {
+        let felt = Felt::from_str(&s).unwrap_or_else(|_| Felt::from(0));
+        JsFelt(felt)
     }
 }
 

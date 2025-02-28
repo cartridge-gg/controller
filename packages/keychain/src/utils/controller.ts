@@ -97,8 +97,16 @@ export default class Controller {
     delete window.controller;
   }
 
+  async login(expiresAt: bigint) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    await this.cartridge.login(expiresAt);
+  }
+
   async createSession(
-    _expiresAt: bigint,
+    expiresAt: bigint,
     policies: ParsedSessionPolicies,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _maxFee?: BigNumberish,
@@ -107,7 +115,15 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    await this.cartridge.createSession(toWasmPolicies(policies));
+    await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
+  }
+
+  async skipSession(policies: ParsedSessionPolicies) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    await this.cartridge.skipSession(toWasmPolicies(policies));
   }
 
   async registerSessionCalldata(

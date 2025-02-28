@@ -17,7 +17,7 @@ use crate::sync::WasmMutex;
 use crate::types::call::JsCall;
 use crate::types::estimate::JsFeeEstimate;
 use crate::types::owner::Owner;
-use crate::types::policy::Policy;
+use crate::types::policy::{CallPolicy, Policy, TypedDataPolicy};
 use crate::types::session::SessionMetadata;
 use crate::types::{Felts, JsFelt};
 use crate::utils::set_panic_hook;
@@ -172,9 +172,63 @@ impl CartridgeAccount {
     pub async fn create_session(
         &self,
         policies: Vec<Policy>,
+        expires_at: u64,
     ) -> std::result::Result<(), JsControllerError> {
         set_panic_hook();
+
+        let mut controller = self.controller.lock().await;
+
+        // We use a dummy policy here, since all policies are inherently approved for wildcard sessions
+        let wildcard_exists = controller
+            .authorized_session_metadata(
+                &[account_sdk::account::session::policy::Policy::Call(
+                    account_sdk::account::session::policy::CallPolicy {
+                        contract_address: Felt::ZERO,
+                        selector: Felt::ZERO,
+                        authorized: Some(true),
+                    },
+                )],
+                None,
+            )
+            .is_some();
+
+        if !wildcard_exists {
+            controller.create_wildcard_session(expires_at).await?;
+        }
+
         self.policy_storage.lock().await.store(policies.clone())?;
+
+        Ok(())
+    }
+
+    #[wasm_bindgen(js_name = skipSession)]
+    pub async fn skip_session(
+        &self,
+        policies: Vec<Policy>,
+    ) -> std::result::Result<(), JsControllerError> {
+        set_panic_hook();
+
+        // Convert policies to have authorization explicitly set to false
+        let unauthorized_policies = policies
+            .into_iter()
+            .map(|policy| match policy {
+                Policy::Call(call_policy) => Policy::Call(CallPolicy {
+                    target: call_policy.target,
+                    method: call_policy.method,
+                    authorized: Some(false),
+                }),
+                Policy::TypedData(td_policy) => Policy::TypedData(TypedDataPolicy {
+                    scope_hash: td_policy.scope_hash,
+                    authorized: Some(false),
+                }),
+            })
+            .collect();
+
+        self.policy_storage
+            .lock()
+            .await
+            .store(unauthorized_policies)?;
+
         Ok(())
     }
 

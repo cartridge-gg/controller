@@ -1,6 +1,4 @@
 use serde::{Deserialize, Serialize};
-use starknet::core::{types::Felt, utils::get_selector_from_name};
-use std::str::FromStr;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
 
@@ -8,7 +6,7 @@ use account_sdk::account::session::policy::{
     CallPolicy as SdkCallPolicy, Policy as SdkPolicy, TypedDataPolicy as SdkTypedDataPolicy,
 };
 
-use super::EncodingError;
+use super::{EncodingError, JsFelt};
 use account_sdk::typed_data::{encode_type, TypedData};
 use starknet::core::types::Call;
 use starknet::core::utils::starknet_keccak;
@@ -17,8 +15,8 @@ use starknet_crypto::poseidon_hash;
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct CallPolicy {
-    pub target: String,
-    pub method: String,
+    pub target: JsFelt,
+    pub method: JsFelt,
     #[tsify(optional)]
     pub authorized: Option<bool>,
 }
@@ -26,7 +24,7 @@ pub struct CallPolicy {
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct TypedDataPolicy {
-    pub scope_hash: String,
+    pub scope_hash: JsFelt,
     #[tsify(optional)]
     pub authorized: Option<bool>,
 }
@@ -86,15 +84,15 @@ impl TryFrom<Policy> for SdkPolicy {
                 method,
                 authorized,
             }) => Ok(SdkPolicy::Call(SdkCallPolicy {
-                contract_address: Felt::from_str(&target)?,
-                selector: get_selector_from_name(&method).unwrap(),
+                contract_address: target.try_into()?,
+                selector: method.try_into()?,
                 authorized,
             })),
             Policy::TypedData(TypedDataPolicy {
                 scope_hash,
                 authorized,
             }) => Ok(SdkPolicy::TypedData(SdkTypedDataPolicy {
-                scope_hash: Felt::from_str(&scope_hash)?,
+                scope_hash: scope_hash.try_into()?,
                 authorized,
             })),
         }
@@ -105,12 +103,12 @@ impl From<SdkPolicy> for Policy {
     fn from(value: SdkPolicy) -> Self {
         match value {
             SdkPolicy::Call(call_policy) => Policy::Call(CallPolicy {
-                target: call_policy.contract_address.to_string(),
-                method: call_policy.selector.to_string(),
+                target: call_policy.contract_address.into(),
+                method: call_policy.selector.into(),
                 authorized: call_policy.authorized,
             }),
             SdkPolicy::TypedData(typed_data_policy) => Policy::TypedData(TypedDataPolicy {
-                scope_hash: typed_data_policy.scope_hash.to_string(),
+                scope_hash: typed_data_policy.scope_hash.into(),
                 authorized: typed_data_policy.authorized,
             }),
         }
@@ -120,8 +118,8 @@ impl From<SdkPolicy> for Policy {
 impl Policy {
     pub fn from_call(call: &Call) -> Self {
         Self::Call(CallPolicy {
-            target: call.to.to_hex_string(),
-            method: call.selector.to_hex_string(),
+            target: call.to.into(),
+            method: call.selector.into(),
             authorized: Some(true),
         })
     }
@@ -133,7 +131,7 @@ impl Policy {
         let scope_hash = poseidon_hash(domain_hash, *type_hash);
 
         Ok(Self::TypedData(TypedDataPolicy {
-            scope_hash: scope_hash.to_hex_string(),
+            scope_hash: scope_hash.into(),
             authorized: Some(true),
         }))
     }

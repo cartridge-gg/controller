@@ -121,6 +121,11 @@ impl Session {
     }
 
     pub fn is_authorized(&self, policy: &Policy) -> bool {
+        // Wildcard sessions are authorized for all policies
+        if self.is_wildcard() {
+            return true;
+        }
+
         self.proved_policies.iter().any(|proved_policy| {
             proved_policy.policy == *policy && proved_policy.policy.is_authorized()
         })
@@ -142,6 +147,11 @@ impl Session {
     }
 
     pub fn is_requested(&self, policy: &Policy) -> bool {
+        // Wildcard sessions are considered requested for all policies
+        if self.is_wildcard() {
+            return true;
+        }
+
         self.requested_policies.iter().any(|p| p == policy)
     }
 }

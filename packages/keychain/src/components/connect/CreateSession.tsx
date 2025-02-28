@@ -195,17 +195,16 @@ const CreateSessionLayout = ({
 
 /**
  * Deep copy the policies and remove the id fields
- * @param _policies The policies to clean
+ * @param policies The policies to clean
  * @param toggleOff Optional. When true, sets all policies to unauthorized (false)
  */
 const processPolicies = (
-  _policies: ParsedSessionPolicies,
+  policies: ParsedSessionPolicies,
   toggleOff?: boolean,
 ): ParsedSessionPolicies => {
-  console.log(toggleOff);
   // Deep copy the policies
   const processPolicies: ParsedSessionPolicies = JSON.parse(
-    JSON.stringify(_policies),
+    JSON.stringify(policies),
   );
 
   // Remove the id fields from the methods and optionally set authorized to false
