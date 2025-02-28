@@ -80,7 +80,6 @@ impl Session {
     }
 
     pub fn new_wildcard(
-        policies: Vec<Policy>,
         expires_at: u64,
         session_signer: &Signer,
         guardian_guid: Felt,
@@ -95,14 +94,8 @@ impl Session {
                 guardian_key_guid: guardian_guid,
                 metadata_hash: Felt::ZERO,
             },
-            requested_policies: policies.clone(),
-            proved_policies: policies
-                .into_iter()
-                .map(|policy| ProvedPolicy {
-                    policy: policy.clone(),
-                    proof: vec![],
-                })
-                .collect(),
+            requested_policies: vec![],
+            proved_policies: vec![],
             metadata: serde_json::to_string(&metadata).unwrap(),
         })
     }
