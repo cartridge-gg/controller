@@ -1,24 +1,13 @@
 import { JoystickIcon, Thumbnail, ThumbnailsSubIcon } from "@/index";
-import { cva, VariantProps } from "class-variance-authority";
+import { VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
-import ActivityCard, { ActivitySocialWebsite } from "./card";
-
-const activityGameCardVariants = cva(
-  "rounded p-3 pr-4 flex items-center justify-between gap-4",
-  {
-    variants: {
-      variant: {
-        default: "bg-background-200 text-foreground-100",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
+import ActivityCard, {
+  ActivitySocialWebsite,
+  activityCardVariants,
+} from "./card";
 
 export interface ActivityGameCardProps
-  extends VariantProps<typeof activityGameCardVariants> {
+  extends VariantProps<typeof activityCardVariants> {
   title: string;
   website: string;
   image: string;

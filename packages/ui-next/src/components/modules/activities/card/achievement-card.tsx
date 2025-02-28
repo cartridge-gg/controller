@@ -5,26 +5,15 @@ import {
   ThumbnailsSubIcon,
   TrophyIcon,
 } from "@/index";
-import { cva, VariantProps } from "class-variance-authority";
+import { VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
-import ActivityCard, { ActivitySocialWebsite } from "./card";
-
-const activityAchievementCardVariants = cva(
-  "rounded p-3 pr-4 flex items-center justify-between gap-4",
-  {
-    variants: {
-      variant: {
-        default: "bg-background-200 text-foreground-100",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
+import ActivityCard, {
+  ActivitySocialWebsite,
+  activityCardVariants,
+} from "./card";
 
 export interface ActivityAchievementCardProps
-  extends VariantProps<typeof activityAchievementCardVariants> {
+  extends VariantProps<typeof activityCardVariants> {
   title: string;
   topic: string;
   points: number;

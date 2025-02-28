@@ -5,27 +5,13 @@ import {
   ThumbnailCollectible,
   ThumbnailsSubIcon,
 } from "@/index";
-import { cva, VariantProps } from "class-variance-authority";
+import { VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
-import ActivityCard from "./card";
+import ActivityCard, { activityCardVariants } from "./card";
 import { formatAddress } from "@cartridge/utils";
 
-const activityCollectibleCardVariants = cva(
-  "rounded p-3 pr-4 flex items-center justify-between gap-4",
-  {
-    variants: {
-      variant: {
-        default: "bg-background-200 text-foreground-100",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
-
 export interface ActivityCollectibleCardProps
-  extends VariantProps<typeof activityCollectibleCardVariants> {
+  extends VariantProps<typeof activityCardVariants> {
   name: string;
   address: string;
   collection: string;

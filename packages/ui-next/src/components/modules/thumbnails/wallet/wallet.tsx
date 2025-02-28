@@ -5,33 +5,12 @@ import {
   OpenZeppelinIcon,
   WalletIcon,
 } from "@/index";
-import { cva, VariantProps } from "class-variance-authority";
+import { VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
-import { Thumbnail } from "../thumbnail";
-
-const thumbnailWalletVariants = cva("", {
-  variants: {
-    variant: {
-      dark: "",
-      faded: "",
-      default: "",
-      highlight: "",
-    },
-    size: {
-      sm: "",
-      md: "",
-      lg: "",
-      xl: "",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-    size: "md",
-  },
-});
+import { Thumbnail, thumbnailVariants } from "../thumbnail";
 
 export interface ThumbnailWalletProps
-  extends VariantProps<typeof thumbnailWalletVariants> {
+  extends VariantProps<typeof thumbnailVariants> {
   brand?: "argentx" | "braavos" | "openzeppelin" | "controller" | undefined;
   className?: string;
 }
