@@ -1,6 +1,8 @@
 import { cn, ErrorAlertIcon, SpinnerIcon } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 
+const PLACEHOLDER = "https://profile.cartridge.gg/placeholder.svg";
+
 export const thumbnailVariants = cva(
   "relative flex items-center justify-center text-foreground-100 rounded-md data-[rounded=true]:rounded-full data-[error=true]:text-destructive-100",
   {
@@ -87,7 +89,7 @@ export const Thumbnail = ({
               rounded ? "rounded-full" : "rounded-sm",
             )}
             onError={(e) => {
-              e.currentTarget.src = "/public/placeholder.svg";
+              e.currentTarget.src = PLACEHOLDER;
             }}
           />
         )

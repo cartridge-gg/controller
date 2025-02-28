@@ -1,6 +1,8 @@
 import { cn, Thumbnail } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 
+const PLACEHOLDER = "https://profile.cartridge.gg/placeholder.svg";
+
 const thumbnailCollectibleVariants = cva("border-transparent", {
   variants: {
     variant: {
@@ -48,7 +50,7 @@ export const ThumbnailCollectible = ({
             <div
               className="bg-center bg-cover blur-[1px] h-full w-full"
               style={{
-                backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.64), rgba(0, 0, 0, 0.64)), url(${image}), url("/public/placeholder.svg")`,
+                backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.64), rgba(0, 0, 0, 0.64)), url(${image}), url(${PLACEHOLDER})`,
               }}
             />
           </div>
@@ -57,7 +59,7 @@ export const ThumbnailCollectible = ({
             draggable={false}
             src={image}
             onError={(e) => {
-              e.currentTarget.src = "/public/placeholder.svg";
+              e.currentTarget.src = PLACEHOLDER;
             }}
           />
         </>
