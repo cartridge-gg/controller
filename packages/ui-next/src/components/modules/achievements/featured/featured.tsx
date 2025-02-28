@@ -1,6 +1,5 @@
+import { cn, Card, CardHeader, CardTitle } from "@/index";
 import { useMemo } from "react";
-import { Card, CardHeader, CardTitle } from "#components/primitives";
-import { cn } from "#utils";
 
 interface AchievementFeaturedProps {
   icon?: string;
@@ -62,3 +61,5 @@ export function Banner() {
     </div>
   );
 }
+
+export default AchievementFeatured;

@@ -1,4 +1,4 @@
-import { cn } from "#utils";
+import { cn } from "@/utils";
 import { CopyIcon } from "./icons";
 import { toast } from "sonner";
 import { useCallback } from "react";

@@ -1,8 +1,7 @@
-import { cn } from "#utils";
-import { SparklesIcon } from "#components/icons";
+import { cn, SparklesIcon } from "@/index";
 import { useEffect, useRef, useState } from "react";
 import { AchievementPinIcons } from "../pin-icons";
-import { AchievementLeaderboardUsername } from "../leaderboard-username/leaderboard-username";
+import AchievementLeaderboardUsername from "../leaderboard-username/leaderboard-username";
 
 export interface AchievementLeaderboardRowProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -85,3 +84,5 @@ export const AchievementLeaderboardRow = ({
     </div>
   );
 };
+
+export default AchievementLeaderboardRow;

@@ -1,6 +1,4 @@
-import { SparklesIcon } from "#components/icons";
-import { CardTitle } from "#components/primitives";
-import { cn } from "#utils";
+import { CardTitle, cn, SparklesIcon } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo, HTMLAttributes, useState } from "react";
 import { ArcadeGameIcon } from "../game-icon";

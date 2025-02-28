@@ -1,4 +1,4 @@
-import { Header, Textarea, WalletType } from "#components";
+import { Header, Textarea, WalletType } from "@/components";
 import { Selection } from "./selection";
 import { Preview } from "./preview";
 import { formatAddress } from "@cartridge/utils";

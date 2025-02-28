@@ -1,5 +1,5 @@
-import { Input as UIInput } from "#components/primitives/input";
-import { Label as UILabel } from "#components/primitives/label";
+import { Input as UIInput } from "@/components/primitives/input";
+import { Label as UILabel } from "@/components/primitives/label";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Label> = {

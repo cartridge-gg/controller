@@ -1,8 +1,8 @@
 import * as React from "react";
 
-import { Clear } from "#components/primitives/clear";
-import { AlertIcon } from "#components/icons";
-import { cn } from "#utils";
+import { AlertIcon } from "@/components/icons";
+import { cn } from "@/utils";
+import { Clear } from "./clear";
 import { cva, VariantProps } from "class-variance-authority";
 
 interface InputProps

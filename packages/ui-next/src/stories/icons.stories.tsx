@@ -4,14 +4,14 @@ import {
   directionalIcons,
   stateIcons,
   utilityIcons,
-} from "#components/icons";
+} from "@/components/icons";
 import {
   DirectionalIconProps,
   IconProps,
   StateIconProps,
-} from "#components/icons/types";
-import { size } from "#components/icons/utils";
-import { cn } from "#utils";
+} from "@/components/icons/types";
+import { size } from "@/components/icons/utils";
+import { cn } from "@/utils";
 import { Meta, StoryObj } from "@storybook/react";
 import { ComponentType } from "react";
 

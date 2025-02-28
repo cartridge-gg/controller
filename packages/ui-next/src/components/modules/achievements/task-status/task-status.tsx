@@ -1,4 +1,4 @@
-import { CheckIcon } from "#components/icons";
+import { CheckIcon } from "@/index";
 
 interface AchievementTaskStatusProps {
   count: number;
@@ -22,3 +22,5 @@ export function AchievementTaskStatus({
     </p>
   );
 }
+
+export default AchievementTaskStatus;

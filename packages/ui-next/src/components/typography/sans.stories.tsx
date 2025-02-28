@@ -1,4 +1,4 @@
-import { cn } from "#utils";
+import { cn } from "@/utils";
 import type { Meta, StoryObj } from "@storybook/react";
 
 const P = ({ label, className }: { label: string; className: string }) => {

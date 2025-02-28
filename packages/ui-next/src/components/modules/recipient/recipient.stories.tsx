@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { WalletType } from "#components";
+import { WalletType } from "@/components";
 import { fn } from "@storybook/test";
 import { Recipient } from "./recipient";
 

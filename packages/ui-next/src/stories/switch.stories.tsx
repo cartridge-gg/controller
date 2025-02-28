@@ -1,4 +1,4 @@
-import { Switch as UISwitch } from "#components/primitives/switch";
+import { Switch as UISwitch } from "@/components/primitives/switch";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Switch> = {

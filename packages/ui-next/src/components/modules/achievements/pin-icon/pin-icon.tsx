@@ -1,4 +1,4 @@
-import { cn } from "#utils";
+import { cn } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 
 const achievementPinIconVariants = cva(
@@ -57,3 +57,5 @@ export const AchievementPinIcon = ({
     </div>
   );
 };
+
+export default AchievementPinIcon;

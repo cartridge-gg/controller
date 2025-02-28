@@ -1,4 +1,4 @@
-import { Checkbox as UICheckbox } from "#components/primitives/checkbox";
+import { Checkbox as UICheckbox } from "@/components/primitives/checkbox";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Checkbox> = {

@@ -25,17 +25,8 @@
     "./themes/fonts.css": "./dist/themes/fonts.css",
     "./themes/scrollbar.css": "./dist/themes/scrollbar.css"
   },
-  "imports": {
-    "#*": [
-      "./src/*",
-      "./src/*.ts",
-      "./src/*.tsx",
-      "./src/*/index.ts",
-      "./src/*/index.tsx"
-    ]
-  },
   "scripts": {
-    "build:deps": "tsc && pnpm copyThemes",
+    "build:deps": "tsc && tsc-alias && pnpm copyThemes",
     "copyThemes": "rm -rf dist/themes && cp -R src/themes dist/themes",
     "format": "prettier --write ./src",
     "format:check": "prettier --check ./src",
@@ -104,6 +95,7 @@
     "start-server-and-test": "catalog:",
     "storybook": "catalog:",
     "tailwindcss": "catalog:",
+    "tsc-alias": "^1.8.10",
     "typescript": "catalog:",
     "vite": "catalog:"
   },

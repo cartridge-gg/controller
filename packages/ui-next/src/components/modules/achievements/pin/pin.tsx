@@ -1,5 +1,4 @@
-import { Button } from "#components/primitives";
-import { TrackIcon } from "#components/icons";
+import { Button, TrackIcon } from "@/index";
 import { useCallback, useState } from "react";
 
 export interface AchievementPinProps {
@@ -42,3 +41,5 @@ export function AchievementPin({
     </Button>
   );
 }
+
+export default AchievementPin;

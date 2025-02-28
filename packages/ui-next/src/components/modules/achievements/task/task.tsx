@@ -1,6 +1,8 @@
-import { ProgressBar } from "#components/modules/progress-bar";
-import { AchievementTaskHeader } from "../task-header";
-import { AchievementTaskStatus } from "../task-status";
+import {
+  ProgressBar,
+  AchievementTaskHeader,
+  AchievementTaskStatus,
+} from "@/index";
 
 export interface AchievementTaskProps {
   count: number;
@@ -29,3 +31,5 @@ export function AchievementTask({
     </div>
   );
 }
+
+export default AchievementTask;

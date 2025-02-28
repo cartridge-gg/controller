@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { UniversalHeaderLabel } from "./header-label";
-import { DepositIcon } from "#components/icons";
+import { DepositIcon } from "@/components/icons";
 
 const meta: Meta<typeof UniversalHeaderLabel> = {
   title: "Modules/Universals/Header Label",

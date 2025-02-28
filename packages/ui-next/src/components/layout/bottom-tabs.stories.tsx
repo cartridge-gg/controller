@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { BottomTab } from "#components/primitives";
+import { LayoutBottomTabs, layoutBottomTabsVariants } from "./index";
+import { BottomTab } from "@/index";
 import {
   ChestIcon,
   ClockIcon,
@@ -7,9 +8,8 @@ import {
   SwordsIcon,
   TrophyIcon,
   UsersIcon,
-} from "#components/icons";
-import { LayoutBottomTabs, layoutBottomTabsVariants } from "#components/layout";
-import { cn } from "#utils";
+} from "../icons";
+import { cn } from "@/utils";
 
 const meta: Meta<typeof LayoutBottomTabs> = {
   title: "Layout/BottomTabs",

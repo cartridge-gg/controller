@@ -1,6 +1,9 @@
-import { CardContent } from "#components/primitives";
-import { AchievementLabel } from "../label";
-import { AchievementTask, AchievementTaskProps } from "../task";
+import {
+  AchievementLabel,
+  AchievementTask,
+  AchievementTaskProps,
+  CardContent,
+} from "@/index";
 import { useMemo } from "react";
 
 export interface AchievementContentProps {
@@ -51,3 +54,5 @@ export function AchievementContent({
     </CardContent>
   );
 }
+
+export default AchievementContent;
