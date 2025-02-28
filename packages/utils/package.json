@@ -14,15 +14,15 @@
     "#hooks/tokens": {
       "test": "./src/hooks/tokens.mock.ts",
       "default": "./src/hooks/tokens.ts"
-    }
+    },
+    "#*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
   },
-  "#*": [
-    "./src/*",
-    "./src/*.ts",
-    "./src/*.tsx",
-    "./src/*/index.ts",
-    "./src/*/index.tsx"
-  ],
   "scripts": {
     "build:deps": "pnpm graphql:gen && tsc",
     "graphql:gen": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/indexer/codegen.yaml && pnpm tsx bin/post-graphql-gen.ts",
