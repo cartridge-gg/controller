@@ -26,6 +26,7 @@ import {
   RegisteredAccountCard,
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
+import CurrencySelect from "./currency-select";
 
 enum State {
   SETTINGS,
@@ -168,6 +169,15 @@ export function Settings() {
                   Add Account
                 </span>
               </Button>
+            </section>
+
+            {/* CURRENCY */}
+            <section className="space-y-4">
+              <SectionHeader
+                title="Currency"
+                description="Set your default currency for denomination"
+              />
+              <CurrencySelect />
             </section>
           </LayoutContent>
         )}
