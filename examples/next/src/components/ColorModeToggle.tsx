@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 
 import {
   Button,
-  DesktopIcon,
+  LaptopIcon,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -19,7 +19,7 @@ export function ColorModeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon" className="text-foreground">
-          <DesktopIcon className="fill-foreground" />
+          <LaptopIcon variant="solid" className="fill-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
