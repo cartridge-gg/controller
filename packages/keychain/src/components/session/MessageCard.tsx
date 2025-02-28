@@ -1,4 +1,4 @@
-import { useCreateSession } from "@/hooks/session";
+import { useCreateSession } from "#hooks/session";
 import type { SignMessagePolicy } from "@cartridge/presets";
 import {
   Accordion,

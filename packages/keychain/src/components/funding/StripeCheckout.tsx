@@ -14,8 +14,8 @@ import {
   Button,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { ErrorAlert } from "@/components/ErrorAlert";
-import { useConnection } from "@/hooks/connection";
+import { ErrorAlert } from "#components/ErrorAlert";
+import { useConnection } from "#hooks/connection";
 
 type StripeCheckoutProps = {
   creditsAmount: number;

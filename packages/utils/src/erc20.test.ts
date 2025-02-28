@@ -2,7 +2,7 @@ import {
   formatBalance,
   convertTokenAmountToUSD,
   convertUSDToTokenAmount,
-} from "./tokens";
+} from "./erc20";
 
 describe("formatBalance", () => {
   const testCases = [

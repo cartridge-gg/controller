@@ -1,4 +1,4 @@
-import { useCreateSession } from "@/hooks/session";
+import { useCreateSession } from "#hooks/session";
 import { ClockIcon, ToggleGroup, ToggleGroupItem } from "@cartridge/ui-next";
 
 export function ExpirationCard() {

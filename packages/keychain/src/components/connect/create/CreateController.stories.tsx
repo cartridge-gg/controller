@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { CreateControllerView } from "./CreateController";
-import { VerifiableControllerTheme } from "@/components/provider/connection";
+import { VerifiableControllerTheme } from "#components/provider/connection";
 
 const meta: Meta<typeof CreateControllerView> = {
   component: CreateControllerView,

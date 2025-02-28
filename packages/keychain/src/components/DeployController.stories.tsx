@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { DeployController } from "./DeployController";
 import { constants, num } from "starknet";
 import { JsControllerError } from "@cartridge/account-wasm/controller";
-import Controller from "@/utils/controller";
+import Controller from "#utils/controller";
 
 const meta = {
   component: DeployController,

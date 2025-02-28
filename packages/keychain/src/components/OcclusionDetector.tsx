@@ -1,4 +1,4 @@
-import { useConnection } from "@/hooks/connection";
+import { useConnection } from "#hooks/connection";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 export function OcclusionDetector() {

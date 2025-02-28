@@ -4,7 +4,7 @@ import {
   ExternalIcon,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { CARTRIDGE_DISCORD_LINK } from "@/const";
+import { CARTRIDGE_DISCORD_LINK } from "#const";
 import { Link } from "react-router-dom";
 
 export function Failure() {

@@ -1,15 +1,15 @@
-import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { SessionConsent } from "@/components/connect";
-import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
-import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { NOW } from "@/const";
-import { CreateSessionProvider } from "@/context/session";
-import { useConnection } from "@/hooks/connection";
+import { ExecutionContainer } from "#components/ExecutionContainer";
+import { SessionConsent } from "#components/connect";
+import { UnverifiedSessionSummary } from "#components/session/UnverifiedSessionSummary";
+import { VerifiedSessionSummary } from "#components/session/VerifiedSessionSummary";
+import { NOW } from "#const";
+import { CreateSessionProvider } from "#context/session";
+import { useConnection } from "#hooks/connection";
 import {
   type ContractType,
   type ParsedSessionPolicies,
   useCreateSession,
-} from "@/hooks/session";
+} from "#hooks/session";
 import { Button, LayoutContent, SliderIcon } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {

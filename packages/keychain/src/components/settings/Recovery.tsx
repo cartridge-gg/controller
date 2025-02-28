@@ -7,10 +7,10 @@ import {
   Input,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
+import { useConnection } from "#hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
-import { ExecuteCtx } from "@/utils/connection";
+import { ExecuteCtx } from "#utils/connection";
 
 export function Recovery({ onBack }: { onBack: () => void }) {
   const { controller, context, setContext } = useConnection();

@@ -1,4 +1,4 @@
-import { useConnection } from "@/hooks/connection";
+import { useConnection } from "#hooks/connection";
 import { LockIcon, VerifiedIcon } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";

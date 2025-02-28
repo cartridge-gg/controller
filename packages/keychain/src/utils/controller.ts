@@ -20,7 +20,7 @@ import {
 } from "@cartridge/account-wasm/controller";
 
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
-import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
+import { ParsedSessionPolicies, toWasmPolicies } from "#hooks/session";
 import { toJsFeeEstimate, fromJsFeeEstimate } from "./fee";
 
 export default class Controller {

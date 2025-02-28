@@ -7,16 +7,16 @@ import {
   LayoutHeader,
   CreateAccount,
 } from "@cartridge/ui-next";
-import { useDebounce } from "@/hooks/debounce";
+import { useDebounce } from "#hooks/debounce";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { LoginMode } from "../types";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
-import { ErrorAlert } from "@/components/ErrorAlert";
+import { ErrorAlert } from "#components/ErrorAlert";
 import InAppSpy from "inapp-spy";
-import { usePostHog } from "@/components/provider/posthog";
-import { useControllerTheme } from "@/hooks/connection";
-import { VerifiableControllerTheme } from "@/components/provider/connection";
+import { usePostHog } from "#components/provider/posthog";
+import { useControllerTheme } from "#hooks/connection";
+import { VerifiableControllerTheme } from "#components/provider/connection";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;

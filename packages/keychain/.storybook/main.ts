@@ -1,5 +1,5 @@
 import type { StorybookConfig } from "@storybook/react-vite";
-import { join, dirname, resolve } from "path";
+import path from "path";
 import { mergeConfig } from "vite";
 
 /**
@@ -7,7 +7,7 @@ import { mergeConfig } from "vite";
  * It is needed in projects that use Yarn PnP or are set up within a monorepo.
  */
 function getAbsolutePath(value: string) {
-  return dirname(require.resolve(join(value, "package.json")));
+  return path.dirname(require.resolve(path.join(value, "package.json")));
 }
 const config: StorybookConfig = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(ts|tsx)"],
@@ -19,21 +19,14 @@ const config: StorybookConfig = {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
   },
-  viteFinal: async (config) => {
-    return mergeConfig(config, {
+  viteFinal: (config) =>
+    mergeConfig(config, {
       build: {
         rollupOptions: {
           external: ["vite-plugin-node-polyfills/shims/global"],
         },
       },
-      resolve: {
-        alias: {
-          react: resolve(__dirname, "../node_modules/react"),
-          "react-dom": resolve(__dirname, "../node_modules/react-dom"),
-        },
-      },
-    });
-  },
+    }),
   staticDirs: ["../public"],
   previewHead: process.env.SNAPSHOT
     ? (head) => `${head}<style>*{animation:none!important;}</style>`
