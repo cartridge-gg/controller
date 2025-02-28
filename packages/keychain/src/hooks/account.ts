@@ -10,7 +10,7 @@ import { Buffer } from "buffer";
 
 import { client, ENDPOINT } from "#utils/graphql";
 import base64url from "base64url";
-import { useConnection } from "./connection";
+import { useConnection } from "#hooks/connection";
 import { useMemo } from "react";
 
 type RawAssertion = PublicKeyCredential & {
