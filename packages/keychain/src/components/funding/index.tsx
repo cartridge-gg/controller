@@ -61,7 +61,7 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
         description={
           controller && <CopyAddress address={controller.address()} />
         }
-        icon={<DepositIcon size="lg" />}
+        icon={<DepositIcon variant="solid" size="lg" />}
       />
       <LayoutContent className="gap-6">
         <Balance types={balances} />

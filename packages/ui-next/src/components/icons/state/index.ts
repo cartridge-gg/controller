@@ -1,3 +1,4 @@
+export * from "./bell";
 export * from "./bolt";
 export * from "./book";
 export * from "./calendar";
@@ -8,6 +9,8 @@ export * from "./clone";
 export * from "./code";
 export * from "./coins";
 export * from "./connect";
+export * from "./credit-card";
+export * from "./deposit";
 export * from "./details";
 export * from "./desktop";
 export * from "./disconnect";

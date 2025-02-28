@@ -26,3 +26,31 @@ export default meta;
 type Story = StoryObj<typeof AchievementPinIcons>;
 
 export const Default: Story = {};
+
+export const Faded: Story = {
+  args: {
+    variant: "faded",
+  },
+};
+
+export const Highlight: Story = {
+  args: {
+    variant: "highlight",
+  },
+};
+
+export const DefaultTheme: Story = {};
+
+export const FadedTheme: Story = {
+  args: {
+    variant: "faded",
+    theme: true,
+  },
+};
+
+export const HighlightTheme: Story = {
+  args: {
+    variant: "highlight",
+    theme: true,
+  },
+};

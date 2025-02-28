@@ -14,7 +14,7 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import InAppSpy from "inapp-spy";
-import { usePostHog } from "@cartridge/utils";
+import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { VerifiableControllerTheme } from "@/components/provider/connection";
 

@@ -11,9 +11,11 @@ import { constants, num } from "starknet";
 import { BrowserRouter } from "react-router-dom";
 import { ConnectionContext } from "./connection";
 import { TokensProvider } from "./tokens";
+import { UpgradeProvider } from "@/components/provider/upgrade";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
+
   const rpc = useCallback(() => {
     let nodeUrl;
     switch (connection.controller?.chainId()) {
@@ -37,20 +39,22 @@ export function Provider({ children }: PropsWithChildren) {
     <CartridgeAPIProvider url={ENDPOINT}>
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
-          <UIProvider>
-            <BrowserRouter>
-              <StarknetConfig
-                explorer={voyager}
-                chains={[sepolia, mainnet]}
-                defaultChainId={defaultChainId}
-                provider={jsonRpcProvider({ rpc })}
-              >
-                <TokensProvider>
-                  <PostHogProvider>{children}</PostHogProvider>
-                </TokensProvider>
-              </StarknetConfig>
-            </BrowserRouter>
-          </UIProvider>
+          <PostHogProvider>
+            <UpgradeProvider controller={connection.controller}>
+              <UIProvider>
+                <BrowserRouter>
+                  <StarknetConfig
+                    explorer={voyager}
+                    chains={[sepolia, mainnet]}
+                    defaultChainId={defaultChainId}
+                    provider={jsonRpcProvider({ rpc })}
+                  >
+                    <TokensProvider>{children}</TokensProvider>
+                  </StarknetConfig>
+                </BrowserRouter>
+              </UIProvider>
+            </UpgradeProvider>
+          </PostHogProvider>
         </ConnectionContext.Provider>
       </QueryClientProvider>
     </CartridgeAPIProvider>
