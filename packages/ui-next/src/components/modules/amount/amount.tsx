@@ -10,6 +10,7 @@ type AmountProps = {
   balance: number;
   symbol: string;
   decimals: number;
+  submitted: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onMax: (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => void;
   setError: (error: Error | undefined) => void;
@@ -21,6 +22,7 @@ export function Amount({
   balance,
   symbol,
   decimals,
+  submitted,
   onChange,
   onMax,
   setError,
@@ -30,8 +32,9 @@ export function Amount({
     const minAmountStr = decimals > 1 ? `0.${"0".repeat(decimals - 1)}1` : "0";
     if (amount && amount < parseFloat(minAmountStr))
       return `Min value is ${minAmountStr}`;
+    if (submitted && !amount) return "Invalid amount";
     return "";
-  }, [amount, balance, decimals]);
+  }, [amount, balance, decimals, submitted]);
 
   useEffect(() => {
     setError(error ? { name: "Error", message: error } : undefined);
