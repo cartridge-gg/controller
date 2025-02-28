@@ -12,20 +12,7 @@ import Controller from "#utils/controller";
 
 export * from "./connection";
 
-export const mockedController = {
-  address: fn(
-    () => "0x0000000000000000000000000000000000000000000000000000000000000000",
-  ),
-  username: fn(() => "user"),
-  chainId: fn(() => constants.StarknetChainId.SN_MAIN),
-  provider: new RpcProvider({
-    nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet",
-  }),
-  cartridge: {} as CartridgeAccount,
-  cartridgeMeta: {} as CartridgeAccountMeta,
-} as unknown as Controller;
-
-export const mockedConnection: ConnectionContextValue = {
+const defaultMockConnection: ConnectionContextValue = {
   context: {
     type: "connect",
     origin: "http://localhost:3002",
@@ -33,7 +20,19 @@ export const mockedConnection: ConnectionContextValue = {
     resolve: fn(),
     reject: fn(),
   } as ConnectCtx,
-  controller: mockedController,
+  controller: {
+    address: fn(
+      () =>
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+    ),
+    username: fn(() => "user"),
+    chainId: fn(() => constants.StarknetChainId.SN_MAIN),
+    provider: new RpcProvider({
+      nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet",
+    }),
+    cartridge: {} as CartridgeAccount,
+    cartridgeMeta: {} as CartridgeAccountMeta,
+  } as unknown as Controller,
   origin: "http://localhost:3002",
   rpcUrl: "http://api.cartridge.gg/x/starknet/mainnet",
   policies: {} as ParsedSessionPolicies,
@@ -47,10 +46,29 @@ export const mockedConnection: ConnectionContextValue = {
   openSettings: fn(),
 };
 
-export const useConnectionValue: Mock<() => ConnectionContextValue> = fn(() => {
-  return mockedConnection;
-});
+export function createMockConnection(
+  // Better way to type this? Failed to implement `DeepPartial<UpgradeInterface>` type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  overrides?: any,
+) {
+  return {
+    ...defaultMockConnection,
+    ...overrides,
+    controller: {
+      ...defaultMockConnection.controller,
+      ...overrides?.controller,
+    },
+    context: {
+      ...defaultMockConnection.context,
+      ...overrides?.context,
+    },
+  };
+}
+
+export const useConnectionValue: Mock<() => ConnectionContextValue> = fn(
+  () => defaultMockConnection,
+);
 
 export const useConnection: Mock<() => ConnectionContextValue> = fn(
-  () => mockedConnection,
+  () => defaultMockConnection,
 );
