@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useConnection } from "./connection";
+import { useConnection } from "#hooks/connection";
 import { EstimateFee } from "starknet";
 
 type TransactionHash = string;

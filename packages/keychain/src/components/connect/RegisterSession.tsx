@@ -3,7 +3,7 @@ import { SessionConsent } from "#components/connect";
 import { UnverifiedSessionSummary } from "#components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "#components/session/VerifiedSessionSummary";
 import { NOW } from "#const";
-import { CreateSessionProvider } from "#context/session";
+import { CreateSessionProvider } from "#components/provider/session";
 import { useConnection } from "#hooks/connection";
 import {
   type ContractType,

@@ -4,7 +4,7 @@ import { Upgrade } from "#components/connect/Upgrade";
 import { UnverifiedSessionSummary } from "#components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "#components/session/VerifiedSessionSummary";
 import { NOW } from "#const";
-import { CreateSessionProvider } from "#context/session";
+import { CreateSessionProvider } from "#components/provider/session";
 import { useConnection } from "#hooks/connection";
 import {
   type ContractType,
@@ -24,7 +24,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish } from "starknet";
 import { OcclusionDetector } from "#components/OcclusionDetector";
-import { useUpgrade } from "../provider/upgrade";
+import { useUpgrade } from "#components/provider/upgrade";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 

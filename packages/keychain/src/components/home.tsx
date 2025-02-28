@@ -12,8 +12,8 @@ import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 import { execute } from "#utils/connection/execute";
-import { useUpgrade } from "./provider/upgrade";
-import { usePostHog } from "./provider/posthog";
+import { usePostHog } from "#components/provider/posthog";
+import { useUpgrade } from "#components/provider/upgrade";
 
 export function Home() {
   const { context, setContext, controller, policies, origin } = useConnection();
