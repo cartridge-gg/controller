@@ -6,13 +6,6 @@ import { controllerConfigs } from "@cartridge/presets";
 
 const meta: Meta<typeof CreateSession> = {
   component: CreateSession,
-  parameters: {
-    connection: {
-      upgrade: {
-        isSynced: true,
-      },
-    },
-  },
 };
 
 export default meta;

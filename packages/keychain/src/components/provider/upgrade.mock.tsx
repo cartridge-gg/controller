@@ -3,10 +3,10 @@ import { UpgradeInterface } from "./upgrade";
 
 export * from "./upgrade";
 
-export const useUpgrade: Mock<() => UpgradeInterface> = fn(() => ({
+const defaultMockUpgrade: UpgradeInterface = {
   isSynced: true,
   isUpgrading: false,
-  available: true,
+  available: false,
   current: {
     version: "1.0.0",
     hash: "0x1234567890abcdef",
@@ -14,12 +14,29 @@ export const useUpgrade: Mock<() => UpgradeInterface> = fn(() => ({
     changes: [],
   },
   latest: {
-    version: "1.0.1",
+    version: "1.0.0",
     hash: "0x1234567890abcdef",
     outsideExecutionVersion: 1,
-    changes: ["Update 1", "Update 2", "Update 3"],
+    changes: [],
   },
   calls: [],
   onUpgrade: fn(),
   isBeta: false,
-}));
+};
+
+export function createMockUpgrade(
+  // Better way to type this? Failed to implement `DeepPartial<UpgradeInterface>` type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  overrides?: any,
+) {
+  return {
+    ...defaultMockUpgrade,
+    ...overrides,
+    current: { ...defaultMockUpgrade.current, ...overrides?.current },
+    latest: { ...defaultMockUpgrade.latest, ...overrides?.latest },
+  };
+}
+
+export const useUpgrade: Mock<() => UpgradeInterface> = fn(
+  () => defaultMockUpgrade,
+);
