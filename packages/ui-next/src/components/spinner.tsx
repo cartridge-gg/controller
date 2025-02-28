@@ -1,4 +1,4 @@
-import { cn } from "@/utils";
+import { cn } from "#utils";
 import { IconProps, SpinnerIcon } from "./icons";
 
 export function Spinner({ className, ...props }: IconProps) {

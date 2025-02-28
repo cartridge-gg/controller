@@ -1,4 +1,5 @@
-import { CheckboxCheckedIcon, CheckboxUncheckedIcon, cn } from "@/index";
+import { CheckboxCheckedIcon, CheckboxUncheckedIcon } from "#components/icons";
+import { cn } from "#utils";
 import { useMemo } from "react";
 
 interface AchievementTaskHeaderProps {
@@ -33,5 +34,3 @@ export function AchievementTaskHeader({
     </div>
   );
 }
-
-export default AchievementTaskHeader;

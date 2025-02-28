@@ -3,8 +3,8 @@
 import * as React from "react";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva, type VariantProps } from "class-variance-authority";
-import { TimesIcon } from "@/components/icons";
-import { cn } from "@/utils";
+import { TimesIcon } from "#components/icons";
+import { cn } from "#utils";
 
 const ToastProvider = ToastPrimitives.Provider;
 

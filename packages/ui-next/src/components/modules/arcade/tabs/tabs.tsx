@@ -3,10 +3,9 @@ import {
   ClockIcon,
   PulseIcon,
   SwordsIcon,
-  Tabs,
-  TabsList,
   TrophyIcon,
-} from "@/index";
+} from "#components/icons";
+import { Tabs, TabsList } from "#components/primitives";
 import { useState } from "react";
 import { ArcadeTab } from "../tab";
 

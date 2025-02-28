@@ -8,20 +8,20 @@ import {
   StarknetColorIcon,
   StarknetIcon,
   TimesIcon,
-} from "@/components/icons";
+} from "#components/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/primitives/tooltip";
-import { cn } from "@/utils";
-import { Button } from "@/components/primitives/button";
+} from "#components/primitives/tooltip";
+import { cn } from "#utils";
+import { Button } from "#components/primitives/button";
 import { getChainName, isIframe, isSlotChain } from "@cartridge/utils";
 import { constants } from "starknet";
 import { CopyAddress } from "../copy-address";
-import { Network } from "@/components/network";
-import { useUI } from "@/hooks";
+import { Network } from "#components/network";
+import { useUI } from "#hooks";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;

@@ -1,5 +1,7 @@
-import { cn, ProgressBar, SparklesIcon, TrophyIcon } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
+import { SparklesIcon, TrophyIcon } from "#components/icons";
+import { cn } from "#utils";
+import { ProgressBar } from "../../progress-bar/progress-bar";
 
 export interface AchievementProgressProps
   extends VariantProps<typeof achievementProgressVariants> {
@@ -51,5 +53,3 @@ export function AchievementProgress({
     </div>
   );
 }
-
-export default AchievementProgress;

@@ -1,6 +1,6 @@
-import { CopyAddress } from "@/components/copy-address";
-import { SpaceInvaderIcon } from "@/components/icons";
-import { UniversalHeaderIcon } from "@/index";
+import { CopyAddress } from "#components/copy-address";
+import { SpaceInvaderIcon } from "#components/icons";
+import { UniversalHeaderIcon } from "../../universals/header-icon";
 
 export interface AchievementPlayerLabelProps {
   username: string;
@@ -27,5 +27,3 @@ export const AchievementPlayerLabel = ({
     </div>
   );
 };
-
-export default AchievementPlayerLabel;

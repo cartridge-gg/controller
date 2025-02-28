@@ -1,4 +1,5 @@
-import { cn, LeaderboardIcon } from "@/index";
+import { LeaderboardIcon } from "#components/icons";
+import { cn } from "#utils";
 
 export interface AchievementLeaderboardCounterProps {
   rank: number;
@@ -35,5 +36,3 @@ export const AchievementLeaderboardCounter = ({
     </div>
   );
 };
-
-export default AchievementLeaderboardCounter;
