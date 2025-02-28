@@ -1,12 +1,14 @@
 import { constants, RpcProvider } from "starknet";
-import Controller from "@cartridge/controller";
-import { controllerConfigs, SessionPolicies } from "@cartridge/presets";
+import Controller, {
+  controllerConfigs,
+  defaultTheme,
+  SessionPolicies,
+} from "@cartridge/controller";
+import { useThemeEffect } from "@cartridge/ui-next";
 import { Parameters } from "@storybook/react";
 import { ConnectionContextValue } from "../src/components/provider/connection";
 import { UpgradeInterface } from "../src/hooks/upgrade";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
-import { defaultTheme } from "@cartridge/presets";
-import { useThemeEffect } from "@cartridge/ui-next";
 
 export interface StoryParameters extends Parameters {
   connection?: {

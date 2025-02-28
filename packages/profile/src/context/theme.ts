@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { defaultTheme, ControllerTheme } from "@cartridge/presets";
+import { defaultTheme, ControllerTheme } from "@cartridge/controller";
 
 export type ColorScheme = "dark" | "light" | "system";
 

@@ -5,7 +5,7 @@ import {
   type SignMessagePolicy,
   type TypedDataPolicy,
   erc20Metadata,
-} from "@cartridge/presets";
+} from "@cartridge/controller";
 import { CartridgeIcon, CoinsIcon } from "@cartridge/ui-next";
 import React, { createContext, useContext } from "react";
 import {

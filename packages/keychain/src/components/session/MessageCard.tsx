@@ -1,5 +1,5 @@
 import { useCreateSession } from "@/hooks/session";
-import type { SignMessagePolicy } from "@cartridge/presets";
+import type { SignMessagePolicy } from "@cartridge/controller";
 import {
   Accordion,
   AccordionContent,

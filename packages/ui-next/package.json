@@ -71,6 +71,7 @@
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:^",
+    "@cartridge/presets": "catalog:",
     "@cartridge/tsconfig": "workspace:*",
     "@storybook/addon-essentials": "catalog:",
     "@storybook/addon-themes": "catalog:",

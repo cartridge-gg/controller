@@ -66,6 +66,7 @@
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/penpal": "catalog:",
+    "@cartridge/presets": "catalog:",
     "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
     "base64url": "catalog:",

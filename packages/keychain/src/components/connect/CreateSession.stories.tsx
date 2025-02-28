@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { CreateSession } from "./CreateSession";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { parseSessionPolicies } from "@/hooks/session";
-import { controllerConfigs } from "@cartridge/presets";
+import { controllerConfigs } from "@cartridge/controller";
 
 const meta: Meta<typeof CreateSession> = {
   component: CreateSession,

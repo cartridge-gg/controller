@@ -1,6 +1,6 @@
 import { useConnection } from "@/hooks/connection";
 import { useCreateSession } from "@/hooks/session";
-import type { Method } from "@cartridge/presets";
+import type { Method } from "@cartridge/controller";
 import {
   CodeIcon,
   InfoIcon,

@@ -4,8 +4,8 @@ import {
   ExecuteReply,
   ConnectError,
   DeployReply,
+  Policies,
 } from "@cartridge/controller";
-import { Policies } from "@cartridge/presets";
 import { Call, EstimateFee, Signature, TypedData } from "starknet";
 
 export type ConnectionCtx =
