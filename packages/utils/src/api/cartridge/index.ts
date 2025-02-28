@@ -1,2 +1,2 @@
-export * from "./generated";
-export * from "./context";
+export * from "#api/cartridge/generated";
+export * from "#api/cartridge/context";

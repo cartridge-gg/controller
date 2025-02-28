@@ -8,6 +8,7 @@ import { sepolia, mainnet } from "@starknet-react/chains";
 import { num } from "starknet";
 import { mockedConnection } from "#hooks/connection.mock";
 import { controllerConfigs, defaultTheme } from "@cartridge/presets";
+import { UIProvider } from "#components/provider/ui";
 
 import "../src/index.css";
 
@@ -45,7 +46,9 @@ const preview: Preview = {
       defaultTheme: "dark",
     }),
     (Story, { parameters }) => {
-      // This can be directly mocked once #1436 is merged
+      {
+        /* TODO: Replace with mock once #1436 is merged */
+      }
       useThemeEffect({
         theme: parameters.preset
           ? (controllerConfigs[parameters.preset].theme ?? defaultTheme)
@@ -66,7 +69,10 @@ const preview: Preview = {
               rpc: () => ({ nodeUrl: mockedConnection.rpcUrl }),
             })}
           >
-            <Story />
+            {/* TODO: Remove once #1436 is merged */}
+            <UIProvider>
+              <Story />
+            </UIProvider>
             <SonnerToaster />
           </StarknetConfig>
         </BrowserRouter>

@@ -1,4 +1,4 @@
-import { CreditQuery, useCreditQuery } from "../api/cartridge";
+import { CreditQuery, useCreditQuery } from "#api/cartridge";
 
 export type Balance = {
   value: bigint;
