@@ -26,6 +26,7 @@ interface ExecutionContainerProps {
   onSubmit: (maxFee?: EstimateFee) => Promise<void>;
   onDeploy?: () => void;
   onFund?: () => void;
+  onClose?: () => void;
   onError?: (error: ControllerError) => void;
   buttonText?: string;
   children: React.ReactNode;
@@ -43,6 +44,7 @@ export function ExecutionContainer({
   onDeploy,
   onFund,
   onError,
+  onClose,
   buttonText = "SUBMIT",
   right,
   children,
@@ -172,6 +174,7 @@ export function ExecutionContainer({
           title={title}
           description={description}
           icon={icon}
+          onClose={onClose}
           right={right}
         />
         {children}
@@ -232,6 +235,7 @@ export function ExecutionContainer({
                     </Button>
                   );
                 }
+
                 return (
                   <>
                     {ctrlError && <ControllerErrorAlert error={ctrlError} />}
