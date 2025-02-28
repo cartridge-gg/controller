@@ -5,8 +5,10 @@ import {
   Card,
   CardDescription,
   CheckIcon,
+  CoinsIcon,
   CreditCardIcon,
   DepositIcon,
+  ExternalIcon,
   InfoIcon,
   LayoutContainer,
   LayoutContent,
@@ -27,6 +29,7 @@ enum PurchaseState {
   SELECTION = 0,
   STRIPE_CHECKOUT = 1,
   SUCCESS = 2,
+  COMPLETE_EXTERNAL = 3,
 }
 
 type PurchaseCreditsProps = {
@@ -60,7 +63,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     setisLoading(true);
 
     try {
-      const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT!, {
+      const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT_INTENT!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,6 +85,20 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     }
   }, [controller, creditsAmount]);
 
+  const handleCryptoPaymentLink = useCallback(async () => {
+    if (!controller) return;
+
+    const paymentUrl = new URL(import.meta.env.VITE_STRIPE_PAYMENT_LINK_CRYPTO);
+    paymentUrl.searchParams.append(
+      "client_reference_id",
+      controller.username(),
+    );
+
+    setState(PurchaseState.COMPLETE_EXTERNAL);
+
+    window.open(paymentUrl.toString(), "_blank");
+  }, [controller]);
+
   const appearance = {
     theme: "night",
     variables: {
@@ -90,6 +107,23 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
       focusBoxShadow: "none",
     },
   } as Appearance;
+
+  const { title, icon } = useMemo(() => {
+    switch (state) {
+      case PurchaseState.SUCCESS:
+        return { title: "Purchase Complete", icon: <CheckIcon size="lg" /> };
+      case PurchaseState.COMPLETE_EXTERNAL:
+        return {
+          title: "Complete purchase externally",
+          icon: <ExternalIcon size="lg" />,
+        };
+      default:
+        return {
+          title: "Purchase Credits",
+          icon: <DepositIcon variant="solid" size="lg" />,
+        };
+    }
+  }, [state]);
 
   if (state === PurchaseState.STRIPE_CHECKOUT) {
     return (
@@ -110,17 +144,8 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     <LayoutContainer>
       <LayoutHeader
         className="p-6"
-        title={
-          "Purchase " +
-          (state === PurchaseState.SELECTION ? "Credits" : "Complete")
-        }
-        icon={
-          state === PurchaseState.SELECTION ? (
-            <DepositIcon variant="solid" size="lg" />
-          ) : (
-            <CheckIcon size="lg" />
-          )
-        }
+        title={title}
+        icon={icon}
         onBack={state === PurchaseState.SELECTION ? onBack : undefined}
       />
       <LayoutContent className="gap-6 px-6">
@@ -158,24 +183,41 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
           </CardDescription>
         </Card>
 
-        {state === PurchaseState.SUCCESS && isIframe() && (
-          <Button variant="secondary" onClick={closeModal}>
-            Close
-          </Button>
-        )}
+        {state === PurchaseState.SUCCESS ||
+          (state === PurchaseState.COMPLETE_EXTERNAL && isIframe() && (
+            <Button variant="secondary" onClick={closeModal}>
+              Close
+            </Button>
+          ))}
         {state === PurchaseState.SELECTION && (
-          <Button
-            className="flex-1"
-            isLoading={isLoading}
-            onClick={createPaymentIntent}
-          >
-            <CreditCardIcon
-              size="sm"
-              variant="solid"
-              className="text-background-100 flex-shrink-0"
-            />
-            <span>Credit Card</span>
-          </Button>
+          <>
+            <div className="flex flex-row gap-2">
+              <Button
+                className="flex-1"
+                isLoading={isLoading}
+                onClick={createPaymentIntent}
+              >
+                <CreditCardIcon
+                  size="sm"
+                  variant="solid"
+                  className="text-background-100 flex-shrink-0"
+                />
+                <span>Credit Card</span>
+              </Button>
+              <Button
+                className="flex-1"
+                isLoading={isLoading}
+                onClick={handleCryptoPaymentLink}
+              >
+                <CoinsIcon
+                  size="sm"
+                  variant="solid"
+                  className="text-background-100 flex-shrink-0"
+                />
+                <span>Crypto</span>
+              </Button>
+            </div>
+          </>
         )}
       </LayoutFooter>
     </LayoutContainer>

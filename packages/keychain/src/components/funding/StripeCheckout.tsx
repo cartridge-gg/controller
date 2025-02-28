@@ -65,6 +65,7 @@ export default function StripeCheckout({
 
       onComplete();
     } catch (e) {
+      console.log(e);
       // Catch redirects, 'allow-top-navigation' is not set on our iframe
       if ((e as Error).message.includes("Failed to set the 'href' property")) {
         setError(new Error("Payment unsupported"));

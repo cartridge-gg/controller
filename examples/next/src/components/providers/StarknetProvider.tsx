@@ -113,7 +113,7 @@ const controller = new ControllerConnector({
         "https://api.cartridge.gg/x/starknet/mainnet",
     },
   ],
-  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+  defaultChainId: constants.StarknetChainId.SN_MAIN,
   url:
     process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL,

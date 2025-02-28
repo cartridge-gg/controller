@@ -17,8 +17,8 @@ export function App() {
         <Route path="session" element={<Session />} />
         <Route path="slot" element={<Slot />}>
           <Route path="consent" element={<Consent />} />
-          <Route path="fund" element={<Fund />} />
         </Route>
+        <Route path="fund" element={<Fund />} />
         <Route path="success" element={<Success />} />
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />

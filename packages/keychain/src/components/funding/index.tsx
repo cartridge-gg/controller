@@ -32,9 +32,7 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
   const balances: BalanceType[] = isSlot
     ? [BalanceType.CREDITS]
     : [BalanceType.CREDITS, BalanceType.FEE_TOKEN];
-  const showCredits =
-    (typeof document !== "undefined" && document.cookie.includes("credits=")) ||
-    isSlot;
+  const showCredits = true;
 
   if (state === FundingState.FUND_ETH) {
     return (
