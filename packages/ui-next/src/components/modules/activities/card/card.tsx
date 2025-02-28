@@ -1,4 +1,4 @@
-import { AchievementSocial, cn, GlobeIcon, VerifiedIcon } from "@/index";
+import { cn, GlobeIcon, VerifiedIcon } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 
@@ -96,13 +96,10 @@ export const ActivitySocialWebsite = ({
   }, [certified]);
 
   return (
-    <AchievementSocial
-      icon={Icon}
-      href={website}
-      label={label}
-      variant="default"
-      className={cn("text-inherit p-0", className)}
-    />
+    <div className={cn("select-none flex gap-x-1 items-center", className)}>
+      {Icon}
+      {label && <p className="text-xs">{label}</p>}
+    </div>
   );
 };
 
