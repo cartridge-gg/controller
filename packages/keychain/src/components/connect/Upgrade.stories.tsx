@@ -4,6 +4,8 @@ import {
   useUpgrade,
   createMockUpgrade,
 } from "#components/provider/upgrade.mock";
+import { createMockConnection } from "#hooks/connection.mock";
+import { useConnection } from "#hooks/connection.mock";
 
 const meta = {
   component: Upgrade,
@@ -12,6 +14,13 @@ const meta = {
       createMockUpgrade({
         latest: {
           changes: ["Update 1", "Update 2", "Update 3"],
+        },
+      }),
+    );
+    useConnection.mockReturnValue(
+      createMockConnection({
+        controller: {
+          username: () => "Account 1",
         },
       }),
     );
