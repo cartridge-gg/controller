@@ -6,7 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { voyager, jsonRpcProvider, StarknetConfig } from "@starknet-react/core";
 import { sepolia, mainnet } from "@starknet-react/chains";
 import { num } from "starknet";
-import { mockedConnection } from "#hooks/connection.mock";
+import { createMockConnection } from "#hooks/connection.mock";
 import { controllerConfigs, defaultTheme } from "@cartridge/presets";
 import { UIProvider } from "#components/provider/ui";
 
@@ -55,6 +55,7 @@ const preview: Preview = {
           : defaultTheme,
         assetUrl: "",
       });
+      const connection = createMockConnection();
 
       return (
         // Render only third party providers which consumer hook is directly used across the source code and hard to mock otherwise
@@ -62,11 +63,9 @@ const preview: Preview = {
           <StarknetConfig
             explorer={voyager}
             chains={[sepolia, mainnet]}
-            defaultChainId={num.toBigInt(
-              mockedConnection.controller!.chainId(),
-            )}
+            defaultChainId={num.toBigInt(connection.controller!.chainId())}
             provider={jsonRpcProvider({
-              rpc: () => ({ nodeUrl: mockedConnection.rpcUrl }),
+              rpc: () => ({ nodeUrl: connection.rpcUrl }),
             })}
           >
             {/* TODO: Remove once #1436 is merged */}
