@@ -10,7 +10,7 @@ const meta = {
   },
   args: {
     accountName: "Clicksave.stark",
-    accountAddress: "0x04183183013819381932139812918"
+    accountAddress: "0x04183183013819381932139812918",
   },
 } satisfies Meta<typeof RegisteredAccountCard>;
 
