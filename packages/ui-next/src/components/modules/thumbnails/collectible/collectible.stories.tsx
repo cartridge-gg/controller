@@ -25,7 +25,34 @@ export const Default: Story = {
       <div className="flex gap-3 ">
         <ThumbnailCollectible
           image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="lg"
+          size="sm"
+          variant="dark"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="sm"
+          variant="faded"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="sm"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="sm"
+          variant="highlight"
+        />
+      </div>
+      <div className="flex gap-3 ">
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="md"
+          variant="dark"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="md"
+          variant="faded"
         />
         <ThumbnailCollectible
           image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
@@ -33,27 +60,63 @@ export const Default: Story = {
         />
         <ThumbnailCollectible
           image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="sm"
+          size="md"
+          variant="highlight"
         />
       </div>
       <div className="flex gap-3 ">
         <ThumbnailCollectible
           image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="lg"
+          variant="dark"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="lg"
           variant="faded"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
           size="lg"
         />
         <ThumbnailCollectible
           image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          variant="faded"
-          size="md"
+          size="lg"
+          variant="highlight"
         />
         <ThumbnailCollectible
           image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          variant="faded"
-          size="sm"
+          subIcon={
+            <ThumbnailsSubIcon
+              Icon={
+                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+              }
+              size="md"
+            />
+          }
+          size="lg"
         />
       </div>
       <div className="flex gap-3 ">
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="xl"
+          variant="dark"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="xl"
+          variant="faded"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="xl"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="xl"
+          variant="highlight"
+        />
         <ThumbnailCollectible
           image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
           subIcon={
@@ -64,44 +127,72 @@ export const Default: Story = {
               size="lg"
             />
           }
-          size="lg"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-            />
-          }
-          size="md"
+          size="xl"
         />
       </div>
     </div>
   ),
 };
 
-export const Small: Story = {
-  args: {
-    size: "sm",
-  },
+export const Fallback: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3 ">
+      <div className="flex gap-3 ">
+        <ThumbnailCollectible image="" size="sm" variant="dark" />
+        <ThumbnailCollectible image="" size="sm" variant="faded" />
+        <ThumbnailCollectible image="" size="sm" />
+        <ThumbnailCollectible image="" size="sm" variant="highlight" />
+      </div>
+      <div className="flex gap-3 ">
+        <ThumbnailCollectible image="" size="md" variant="dark" />
+        <ThumbnailCollectible image="" size="md" variant="faded" />
+        <ThumbnailCollectible image="" size="md" />
+        <ThumbnailCollectible image="" size="md" variant="highlight" />
+      </div>
+      <div className="flex gap-3 ">
+        <ThumbnailCollectible image="" size="lg" variant="dark" />
+        <ThumbnailCollectible image="" size="lg" variant="faded" />
+        <ThumbnailCollectible image="" size="lg" />
+        <ThumbnailCollectible image="" size="lg" variant="highlight" />
+        <ThumbnailCollectible
+          image=""
+          subIcon={
+            <ThumbnailsSubIcon
+              Icon={
+                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+              }
+              size="md"
+            />
+          }
+          size="lg"
+        />
+      </div>
+      <div className="flex gap-3 ">
+        <ThumbnailCollectible image="" size="xl" variant="dark" />
+        <ThumbnailCollectible image="" size="xl" variant="faded" />
+        <ThumbnailCollectible image="" size="xl" />
+        <ThumbnailCollectible image="" size="xl" variant="highlight" />
+        <ThumbnailCollectible
+          image=""
+          subIcon={
+            <ThumbnailsSubIcon
+              Icon={
+                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+              }
+              size="lg"
+            />
+          }
+          size="xl"
+        />
+      </div>
+    </div>
+  ),
 };
 
-export const Medium: Story = {
-  args: {
-    size: "md",
-  },
+export const Loading: Story = {
+  render: () => <ThumbnailCollectible image="" size="xl" loading />,
 };
 
-export const Large: Story = {
-  args: {
-    size: "lg",
-  },
-};
-
-export const NoImage: Story = {
-  args: {
-    image: "",
-  },
+export const Error: Story = {
+  render: () => <ThumbnailCollectible image="" size="xl" error />,
 };

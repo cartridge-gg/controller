@@ -1,35 +1,38 @@
 import {
   ArgentIcon,
   BraavosIcon,
-  cn,
   ControllerIcon,
   OpenZeppelinIcon,
   WalletIcon,
 } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
+import { Thumbnail } from "../thumbnail";
 
-const thumbnailWalletVariants = cva(
-  "rounded-full aspect-square flex items-center justify-center p-1",
-  {
-    variants: {
-      variant: {
-        default: "bg-background-300 text-foreground-100",
-      },
-      size: {
-        default: "w-10",
-      },
+const thumbnailWalletVariants = cva("", {
+  variants: {
+    variant: {
+      dark: "",
+      faded: "",
+      default: "",
+      highlight: "",
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
+    size: {
+      sm: "",
+      md: "",
+      lg: "",
+      xl: "",
     },
   },
-);
+  defaultVariants: {
+    variant: "default",
+    size: "md",
+  },
+});
 
 export interface ThumbnailWalletProps
   extends VariantProps<typeof thumbnailWalletVariants> {
-  brand: "argentx" | "braavos" | "openzeppelin" | "controller" | undefined;
+  brand?: "argentx" | "braavos" | "openzeppelin" | "controller" | undefined;
   className?: string;
 }
 
@@ -42,22 +45,27 @@ export const ThumbnailWallet = ({
   const Icon = useMemo(() => {
     switch (brand) {
       case "argentx":
-        return <ArgentIcon size="lg" />;
+        return <ArgentIcon className="w-full h-full" />;
       case "braavos":
-        return <BraavosIcon size="lg" />;
+        return <BraavosIcon className="w-full h-full" />;
       case "openzeppelin":
-        return <OpenZeppelinIcon size="lg" />;
+        return <OpenZeppelinIcon className="w-full h-full" />;
       case "controller":
-        return <ControllerIcon size="lg" />;
+        return <ControllerIcon className="w-full h-full" />;
       default:
-        return <WalletIcon variant="solid" size="lg" />;
+        return <WalletIcon variant="solid" className="w-full h-full" />;
     }
   }, [brand]);
 
   return (
-    <div className={cn(thumbnailWalletVariants({ variant, size }), className)}>
-      {Icon}
-    </div>
+    <Thumbnail
+      icon={Icon}
+      variant={variant}
+      size={size}
+      className={className}
+      rounded
+      centered
+    />
   );
 };
 
