@@ -75,3 +75,5 @@ const FollowerDescription = ({ followers }: { followers: string[] }) => {
     </p>
   );
 };
+
+export default AchievementPlayerHeader;

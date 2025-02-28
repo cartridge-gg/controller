@@ -1,4 +1,4 @@
-import { Separator as UISeparator } from "#components/primitives/separator";
+import { Separator as UISeparator } from "@/components/primitives/separator";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Separator> = {

@@ -1,20 +1,18 @@
-import { cva, VariantProps } from "class-variance-authority";
-import { useMemo } from "react";
 import {
+  AchievementContentProps,
+  AchievementPinProps,
+  CardTitle,
+  cn,
   DiscordIcon,
   GitHubIcon,
   GlobeIcon,
   TelegramIcon,
+  useMediaQuery,
   XIcon,
-} from "#components/icons";
-import { CardTitle } from "#components/primitives";
-import { cn } from "#utils";
-import {
-  AchievementContentProps,
-  AchievementPinProps,
-} from "#components/modules/achievements";
-import { AchievementPinIcons } from "#components/modules/achievements/pin-icons";
-import { useMediaQuery } from "#hooks/ui";
+} from "@/index";
+import { cva, VariantProps } from "class-variance-authority";
+import { useMemo } from "react";
+import { AchievementPinIcons } from "@/components/modules/achievements/pin-icons";
 import { ArcadeGameIcon } from "../game-icon";
 
 export interface Metadata {
@@ -282,3 +280,5 @@ const AchievementSocial = ({
     </a>
   );
 };
+
+export default ArcadeGameHeader;

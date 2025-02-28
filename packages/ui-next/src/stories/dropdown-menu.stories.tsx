@@ -11,7 +11,7 @@ import {
   DropdownMenuSub,
   DropdownMenuRadioItem,
   DropdownMenuRadioGroup,
-} from "#components/primitives/dropdown-menu";
+} from "@/components/primitives/dropdown-menu";
 
 const meta: Meta<typeof DropdownMenu> = {
   title: "Primitives/Dropdown Menu",

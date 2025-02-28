@@ -1,4 +1,4 @@
-import { cn } from "#utils";
+import { cn } from "@/index";
 
 export const AchievementLeaderboard = ({
   className,
@@ -17,3 +17,5 @@ export const AchievementLeaderboard = ({
     />
   );
 };
+
+export default AchievementLeaderboard;

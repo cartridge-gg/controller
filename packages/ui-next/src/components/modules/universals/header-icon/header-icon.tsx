@@ -1,5 +1,4 @@
-import { SpaceInvaderIcon } from "#components/icons";
-import { cn } from "#utils";
+import { cn, SpaceInvaderIcon } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 
 const headerIconVariants = cva("flex items-center justify-center rounded", {
@@ -46,3 +45,5 @@ export const UniversalHeaderIcon = ({
     </div>
   );
 };
+
+export default UniversalHeaderIcon;

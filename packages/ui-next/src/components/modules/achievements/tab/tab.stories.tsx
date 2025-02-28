@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Tabs, TabsList } from "#components/primitives";
 import { AchievementTab } from "./tab";
-import { AchievementCounter } from "../counter/counter";
-import { AchievementLeaderboardCounter } from "../leaderboard-counter/leaderboard-counter";
+import AchievementCounter from "../counter/counter";
+import { Tabs, TabsList } from "@/index";
+import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <Tabs defaultValue="achievements">

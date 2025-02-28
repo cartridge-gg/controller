@@ -2,7 +2,7 @@ import {
   HoverCard as UIHoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "#components/primitives/hover-card";
+} from "@/components/primitives/hover-card";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof HoverCard> = {

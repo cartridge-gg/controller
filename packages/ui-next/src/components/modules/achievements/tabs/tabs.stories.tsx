@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { TabsContent } from "#components/primitives";
 import { AchievementTabs } from "./tabs";
+import { TabsContent } from "@/index";
 
 const meta: Meta<typeof AchievementTabs> = {
   title: "Modules/Achievements/Tabs",

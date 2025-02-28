@@ -1,5 +1,5 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { AchievementPinIcon } from "../pin-icon/pin-icon";
+import { AchievementPinIcon } from "../pin-icon";
 
 const achievementPinsVariants = cva("flex items-center gap-1.5", {
   variants: {
@@ -56,3 +56,5 @@ export const AchievementPinIcons = ({
     </div>
   );
 };
+
+export default AchievementPinIcons;

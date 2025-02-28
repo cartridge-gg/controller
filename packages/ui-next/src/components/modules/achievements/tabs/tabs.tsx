@@ -1,7 +1,7 @@
-import { Tabs, TabsList } from "#components/primitives";
-import { AchievementTab } from "../tab/tab";
-import { AchievementCounter } from "../counter/counter";
-import { AchievementLeaderboardCounter } from "../leaderboard-counter/leaderboard-counter";
+import { Tabs, TabsList } from "@/index";
+import AchievementTab from "../tab/tab";
+import AchievementCounter from "../counter/counter";
+import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
 import { useState } from "react";
 
 export interface AchievementTabsProps
@@ -49,3 +49,5 @@ export const AchievementTabs = ({
     </Tabs>
   );
 };
+
+export default AchievementTabs;

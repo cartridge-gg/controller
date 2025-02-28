@@ -1,8 +1,7 @@
-import { SpaceInvaderIcon } from "#components/icons";
-import { CardTitle } from "#components/primitives";
-import { cn } from "#utils";
+import { CardTitle, cn, SpaceInvaderIcon } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo, HTMLAttributes, useState, useEffect } from "react";
+
 export interface ArcadeDiscoveryEventProps
   extends HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof arcadeDiscoveryEventVariants> {

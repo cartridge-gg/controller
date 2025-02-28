@@ -1,8 +1,25 @@
-import { useMediaQuery } from "#hooks/ui";
-import { cn } from "#utils";
+import { cn } from "@/utils";
 import { isIframe } from "@cartridge/utils";
-import { type PropsWithChildren, useState } from "react";
+import { type PropsWithChildren, useEffect, useState } from "react";
 import { LayoutContext } from "./context";
+
+export function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    setMatches(media.matches);
+
+    const listener = (e: MediaQueryListEvent) => {
+      setMatches(e.matches);
+    };
+
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, [query]);
+
+  return matches;
+}
 
 export function LayoutContainer({
   children,

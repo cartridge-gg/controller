@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { CheckIcon } from "#components/icons";
+import { CheckIcon } from "@/components/icons";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 
-import { cn } from "#utils";
+import { cn } from "@/utils";
 
 const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,

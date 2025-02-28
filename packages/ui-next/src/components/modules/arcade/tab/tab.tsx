@@ -1,5 +1,4 @@
-import { TabsTrigger } from "#components/primitives";
-import { cn } from "#utils";
+import { cn, TabsTrigger } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 
 const arcadeTabVariants = cva(

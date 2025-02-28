@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { BottomTab } from "#components/primitives/index";
-import { ChestIcon } from "#components/icons";
+import { BottomTab } from "@/components/primitives/index";
+import { ChestIcon } from "@/components/icons";
 
 const meta: Meta<typeof BottomTab> = {
   title: "Primitives/BottomTab",

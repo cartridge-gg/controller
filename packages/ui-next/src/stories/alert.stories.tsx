@@ -1,9 +1,9 @@
-import { AlertIcon, TerminalIcon } from "#components/icons";
+import { AlertIcon, TerminalIcon } from "@/components/icons";
 import {
   Alert as UIAlert,
   AlertDescription,
   AlertTitle,
-} from "#components/primitives/alert";
+} from "@/components/primitives/alert";
 
 import { Meta, StoryObj } from "@storybook/react";
 

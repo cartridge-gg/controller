@@ -1,7 +1,5 @@
-import { CalendarIcon, SparklesIcon } from "#components/icons";
-import { Separator } from "#components/primitives";
+import { CalendarIcon, cn, Separator, SparklesIcon } from "@/index";
 import { useMemo } from "react";
-import { cn } from "#utils";
 
 interface AchievementPointsProps {
   points: number;
@@ -60,3 +58,5 @@ function Timestamp({ timestamp }: { timestamp: number }) {
     </div>
   );
 }
+
+export default AchievementPoints;

@@ -1,7 +1,7 @@
 import { forwardRef, memo } from "react";
 import { iconVariants } from "../utils";
 import { IconProps } from "../types";
-import { cn } from "#utils";
+import { cn } from "@/utils";
 
 export const SlashIcon = memo(
   forwardRef<SVGSVGElement, IconProps>(

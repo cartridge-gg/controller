@@ -1,14 +1,15 @@
-import { cva, VariantProps } from "class-variance-authority";
-import { useMemo } from "react";
-import { Card, CardContent } from "#components/primitives";
-import { AchievementContentProps } from "../content/content";
-import { AchievementPinProps } from "../pin/pin";
-import { AchievementProgress } from "../progress/progress";
 import {
+  AchievementContentProps,
   ArcadeGameHeader,
+  AchievementPinProps,
+  AchievementProgress,
+  Card,
+  CardContent,
   Metadata,
   Socials,
-} from "#components/modules/arcade";
+} from "@/index";
+import { cva, VariantProps } from "class-variance-authority";
+import { useMemo } from "react";
 
 export interface AchievementSummaryProps
   extends VariantProps<typeof achievementSummaryVariants> {
@@ -72,3 +73,5 @@ export const AchievementSummary = ({
     </Card>
   );
 };
+
+export default AchievementSummary;

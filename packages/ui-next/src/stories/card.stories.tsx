@@ -8,8 +8,8 @@ import {
   CardIcon,
   CardListContent,
   CardListItem,
-} from "#components/primitives/card";
-import { EthereumIcon } from "#components/icons";
+} from "@/components/primitives/card";
+import { EthereumIcon } from "@/components/icons";
 import { Meta, StoryObj } from "@storybook/react";
 import { useEffect } from "react";
 

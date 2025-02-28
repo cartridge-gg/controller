@@ -12,3 +12,5 @@ export function AchievementBits({ ...props }: AchievementBitsProps) {
     </div>
   );
 }
+
+export default AchievementBits;
