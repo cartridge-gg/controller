@@ -14,6 +14,10 @@ import { Policies, SessionPolicies } from "@cartridge/presets";
 import { ChainId } from "@starknet-io/types-js";
 import { ParsedSessionPolicies } from "./policies";
 
+export const LOCAL_CHAIN_ID = shortString.encodeShortString(
+  "LOCAL_KATANA",
+) as ChainId;
+
 // Whitelist of allowed property names to prevent prototype pollution
 const ALLOWED_PROPERTIES = new Set([
   "contracts",
@@ -26,6 +30,8 @@ const ALLOWED_PROPERTIES = new Set([
   "domain",
   "primaryType",
 ]);
+
+const LOCAL_HOSTNAMES = ["localhost", "127.0.0.1", "0.0.0.0"];
 
 function validatePropertyName(prop: string): void {
   if (!ALLOWED_PROPERTIES.has(prop)) {
@@ -156,6 +162,10 @@ export function parseChainId(url: URL): ChainId {
         `GG_${projectName.toUpperCase().replace(/-/g, "_")}`,
       ) as ChainId;
     }
+  }
+
+  if (LOCAL_HOSTNAMES.includes(url.hostname) && url.port === "5050") {
+    return LOCAL_CHAIN_ID;
   }
 
   throw new Error(`Chain ${url.toString()} not supported`);
