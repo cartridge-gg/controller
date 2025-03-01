@@ -298,6 +298,7 @@ export default class ControllerProvider extends BaseProvider {
         `Chain not found: ${shortString.decodeShortString(this.selectedChain)}. Available chains: ${availableChains.join(", ")}`,
       );
     }
+    console.log(chain, this.selectedChain);
     return chain.rpcUrl;
   }
 
