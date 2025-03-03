@@ -26,6 +26,10 @@
     "./themes/scrollbar.css": "./dist/themes/scrollbar.css"
   },
   "imports": {
+    "#hooks/ui": {
+      "storybook": "./src/hooks/ui.mock.ts",
+      "default": "./src/hooks/ui.ts"
+    },
     "#*": [
       "./src/*",
       "./src/*.ts",

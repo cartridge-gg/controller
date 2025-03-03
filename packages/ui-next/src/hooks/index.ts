@@ -1,2 +1,2 @@
-export * from "./ui";
-export * from "./theme";
+export * from "#hooks/ui";
+export * from "#hooks/theme";
