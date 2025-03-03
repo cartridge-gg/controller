@@ -5,11 +5,28 @@ import {
   LayoutHeader,
   Button,
   GearIcon,
+  SignOutIcon,
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetFooter,
+  SheetTrigger,
+  PlusIcon,
+  ClockIcon,
+  ShapesIcon,
 } from "@cartridge/ui-next";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
+import { Session, SessionCard } from "./session-card";
+import { Signer, SignerCard } from "./signer-card";
+import {
+  RegisteredAccount,
+  RegisteredAccountCard,
+} from "./registered-account-card";
+import { SectionHeader } from "./section-header";
+import CurrencySelect from "./currency-select";
 
 enum State {
   SETTINGS,
@@ -17,55 +34,42 @@ enum State {
   DELEGATE,
 }
 
+// MOCK DATA
+const signers: Signer[] = [
+  {
+    deviceType: "mobile",
+    deviceName: "Device 1",
+  },
+  {
+    deviceType: "laptop",
+    deviceName: "Device 2",
+  },
+];
+const sessions: Session[] = [
+  {
+    sessionName: "Session 1",
+    expiresAt: BigInt(14400), // 4 hours in seconds
+  },
+  {
+    sessionName: "Session 2",
+    expiresAt: BigInt(7200), // 2 hours in seconds
+  },
+];
+const registeredAccounts: RegisteredAccount[] = [
+  {
+    accountName: "clicksave.stark",
+    accountAddress: "0x04183183013819381932139812918",
+  },
+];
+
 export function Settings() {
-  const { logout } = useConnection();
+  const { logout, closeModal } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
-  // const [delegateAccount, setDelegateAccount] = useState("");
 
-  // useEffect(() => {
-  //   const init = async () => {
-  //     const delegate = await controller.delegateAccount();
-  //     setDelegateAccount(delegate);
-  //   };
-  //   init();
-  // }, [controller]);
-
-  // const { externalOwners } = useExternalOwners();
-
-  // const onRemoveExternalOwner = useCallback(
-  //   (externalOwnerAddress: string) => {
-  //     setContext({
-  //       origin: context.origin,
-  //       transactions: [
-  //         {
-  //           contractAddress: controller.address,
-  //           entrypoint: "remove_external_owner",
-  //           calldata: CallData.compile([externalOwnerAddress]),
-  //         },
-  //       ],
-  //       type: "execute",
-  //       resolve: context.resolve,
-  //       reject: context.reject,
-  //     } as ExecuteCtx);
-  //   },
-  //   [controller, context, setContext],
-  // );
-
-  // const onRemoveDelegate = useCallback(() => {
-  //   setContext({
-  //     origin: context.origin,
-  //     transactions: [
-  //       {
-  //         contractAddress: controller.address,
-  //         entrypoint: "set_delegate_account",
-  //         calldata: CallData.compile(["0x0"]),
-  //       },
-  //     ],
-  //     type: "execute",
-  //     resolve: context.resolve,
-  //     reject: context.reject,
-  //   } as ExecuteCtx);
-  // }, [controller, context, setContext]);
+  const handleLogout = useCallback(() => {
+    logout();
+    closeModal();
+  }, [logout, closeModal]);
 
   if (state === State.RECOVERY) {
     return <Recovery onBack={() => setState(State.SETTINGS)} />;
@@ -76,106 +80,152 @@ export function Settings() {
   }
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        variant="compressed"
-        title="Controller Settings"
-        Icon={GearIcon}
-        hideSettings
-      />
-      <LayoutContent className="gap-6">
-        {/* <VStack gap="30px" w="full">
-          <VStack>
-            {controller.cartridge.hasSession(
-              controller.cartridge.session(),
-            ) ? (
-              <Text>Session active</Text>
-            ) : (
-              <Text>No Session</Text>
-            )}
-           <Button
-              onClick={() => {
-                // zzz not implemented
-                controller.cartridge.revokeSession();
-              }}
-            >
-              Clear Session
-            </Button> 
-          </VStack>
+    <Sheet>
+      <LayoutContainer>
+        <LayoutHeader
+          variant="compressed"
+          title="Settings"
+          Icon={GearIcon}
+          hideSettings
+        />
 
-          <VStack w="full" alignItems="flex-start">
-            <Text fontWeight="bold" color="text.secondary">
-              Recovery Account(s)
-            </Text>
-            <Text color="text.secondary" fontSize="sm">
-              Controllers can be owned by an existing Starknet wallet. Setting a
-              recovery account will allow you to recover a controller if you
-              lose your passkey.
-            </Text>
-
-            <UnorderedList w="full" listStyleType="none" marginInlineStart={0}>
-              {externalOwners.map((externalOwner) => {
-                return (
-                  <ListItem
-                    w="full"
-                    marginBottom="4px"
-                    key={`ext-${externalOwner}`}
-                  >
-                    <HStack w="full">
-                      <Text w="340px">
-                        {" "}
-                        {formatAddress(externalOwner, {
-                          size: "lg",
-                        })}{" "}
-                      </Text>
-                      <Button
-                        onClick={() => onRemoveExternalOwner(externalOwner)}
-                      >
-                        <TrashIcon />
-                      </Button>
-                    </HStack>
-                  </ListItem>
-                );
-              })}
-            </UnorderedList>
-
-            <Button w="full" onClick={() => setState(State.RECOVERY)}>
-              Set Recovery Account
-            </Button>
-          </VStack>
-
-          <VStack w="full" alignItems="flex-start">
-            <Text fontWeight="bold" color="text.secondary">
-              Delegate Account
-            </Text>
-            <Text color="text.secondary" fontSize="sm">
-              You may optionally send rewards you earn in game to an external
-              wallet.
-            </Text>
-            {delegateAccount && BigInt(delegateAccount) != 0n ? (
-              <HStack w="full">
-                <Text w="340px">
-                  {" "}
-                  {formatAddress(delegateAccount, { size: "lg" })}{" "}
-                </Text>
-                <Button onClick={() => onRemoveDelegate()}>
-                  <TrashIcon />
-                </Button>
-              </HStack>
-            ) : (
-              <Button w="full" onClick={() => setState(State.DELEGATE)}>
-                Set Delegate Account
+        {/* Hide the settings screen until API integration is done */}
+        {process.env.NODE_ENV === "development" && (
+          <LayoutContent className="gap-6">
+            {/* SESSION */}
+            <section className="space-y-4">
+              <SectionHeader
+                title="Session Key(s)"
+                description="Sessions grant permission to your Controller to perform certain game actions on your behalf"
+                showStatus={true}
+              />
+              <div className="space-y-3">
+                {sessions.map((i) => (
+                  <SessionCard
+                    sessionName={i.sessionName}
+                    expiresAt={i.expiresAt}
+                  />
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="py-2.5 px-3 text-foreground-300 gap-1"
+              >
+                <PlusIcon size="sm" variant="line" />
+                <span className="normal-case font-normal font-sans text-sm">
+                  Create Session
+                </span>
               </Button>
-            )}
-          </VStack>
-        </VStack> */}
-      </LayoutContent>
+            </section>
 
-      <LayoutFooter>
-        <Button variant="secondary" onClick={logout}>
-          Log out
-        </Button>
-      </LayoutFooter>
-    </LayoutContainer>
+            {/* SIGNER */}
+            <section className="space-y-4">
+              <SectionHeader
+                title="Signer(s)"
+                description="Information associated with registered accounts can be made available to games and applications."
+              />
+              <div className="space-y-3">
+                {signers.map((i) => (
+                  <SignerCard
+                    deviceName={i.deviceName}
+                    deviceType={i.deviceType}
+                  />
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="py-2.5 px-3 text-foreground-300 gap-1"
+              >
+                <PlusIcon size="sm" variant="line" />
+                <span className="normal-case font-normal font-sans text-sm">
+                  Add Signer
+                </span>
+              </Button>
+            </section>
+
+            {/* REGISTERED ACCOUNT */}
+            <section className="space-y-4">
+              <SectionHeader
+                title="Registered Account"
+                description="Information associated with registered accounts can be made available to games and applications."
+              />
+              <div className="space-y-3">
+                {registeredAccounts.map((i) => (
+                  <RegisteredAccountCard
+                    accountName={i.accountName}
+                    accountAddress={i.accountAddress}
+                  />
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="py-2.5 px-3 text-foreground-300 gap-1"
+              >
+                <PlusIcon size="sm" variant="line" />
+                <span className="normal-case font-normal font-sans text-sm">
+                  Add Account
+                </span>
+              </Button>
+            </section>
+
+            {/* CURRENCY */}
+            <section className="space-y-4">
+              <SectionHeader
+                title="Currency"
+                description="Set your default currency for denomination"
+              />
+              <CurrencySelect />
+            </section>
+          </LayoutContent>
+        )}
+
+        <LayoutFooter>
+          <SheetTrigger asChild>
+            <Button type="button" variant="secondary" className="gap-2">
+              <SignOutIcon />
+              <span>Log out</span>
+            </Button>
+          </SheetTrigger>
+        </LayoutFooter>
+      </LayoutContainer>
+
+      {/* LOGOUT SHEET CONTENTS */}
+      <SheetContent
+        side="bottom"
+        className="border-background-100 p-6 gap-6 rounded-t-xl"
+        showClose={false}
+      >
+        <div className="flex flex-row items-center gap-3 mb-6">
+          <Button
+            type="button"
+            variant="icon"
+            size="icon"
+            className="flex items-center justify-center pointer-events-none"
+          >
+            <ShapesIcon variant="solid" size="lg" />
+          </Button>
+          <div className="flex flex-col items-start gap-0.5">
+            <h3 className="text-lg font-semibold text-foreground-100">
+              Log Out
+            </h3>
+            <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
+              <ClockIcon variant="line" size="xs" />
+              <span>Expires in 4h</span>
+            </div>
+          </div>
+        </div>
+        <SheetFooter className="flex flex-row items-center gap-4">
+          <SheetClose asChild className="flex-1">
+            <Button variant="secondary">Cancel</Button>
+          </SheetClose>
+          <Button variant="secondary" onClick={handleLogout} className="flex-1">
+            <span className="text-destructive-100">Log out</span>
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
