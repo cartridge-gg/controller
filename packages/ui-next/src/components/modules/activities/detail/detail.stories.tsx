@@ -28,13 +28,13 @@ export const Samples: Story = {
       <ActivityDetail label="From">0xb668...dd65</ActivityDetail>
       <ActivityDetail label="Network">
         <div className="flex gap-1.5 items-center">
-          <StarknetColorIcon />
+          <StarknetColorIcon size="sm" />
           Starknet
         </div>
       </ActivityDetail>
       <ActivityDetail label="Network Fee">
         <div className="flex gap-1.5 items-center">
-          <CoinsIcon variant="line" />
+          <CoinsIcon variant="line" size="sm" />
           .01 CREDITS
         </div>
       </ActivityDetail>

@@ -7,3 +7,4 @@ export * from "./achievements";
 export * from "./thumbnails";
 export * from "./universals";
 export * from "./arcade";
+export * from "./activities";

@@ -35,7 +35,7 @@ export const ActivityDetail = ({
       <p className="text-sm">{label}</p>
       <div
         data-status={status}
-        className="text-foreground-100 data-[status=success]:text-constructive-100 data-[status=fail]:text-destructive-100"
+        className="text-sm text-foreground-100 data-[status=success]:text-constructive-100 data-[status=fail]:text-destructive-100"
       >
         {children}
       </div>
