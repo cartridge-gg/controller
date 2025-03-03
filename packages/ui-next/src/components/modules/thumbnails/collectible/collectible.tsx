@@ -69,7 +69,11 @@ export const ThumbnailCollectible = ({
       loading={loading}
       variant={variant}
       size={size}
-      className={cn(thumbnailCollectibleVariants({ variant, size }), className)}
+      className={cn(
+        thumbnailCollectibleVariants({ variant, size }),
+        (loading || error) && "border-0",
+        className,
+      )}
     />
   );
 };
