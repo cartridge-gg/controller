@@ -1,6 +1,5 @@
-import { ConnectReply } from "@cartridge/controller";
+import { ConnectReply, Policies } from "@cartridge/controller";
 import { ConnectCtx, ConnectionCtx } from "./types";
-import { Policies } from "@cartridge/presets";
 
 export function connect({
   setRpcUrl,
