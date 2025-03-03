@@ -14,9 +14,10 @@ export const thumbnailVariants = cva(
         highlight: "bg-background-400",
       },
       size: {
-        sm: "w-6 h-6 p-0.5 data-[centered=true]:p-[5px]",
-        md: "w-8 h-8 p-0.5 data-[centered=true]:p-[5px]",
-        lg: "w-10 h-10 p-[3px] data-[centered=true]:p-1.5",
+        xs: "w-5 h-5 p-0.5 data-[centered=true]:p-[2px]",
+        sm: "w-6 h-6 p-0.5 data-[centered=true]:p-[3px]",
+        md: "w-8 h-8 p-0.5 data-[centered=true]:p-[4px]",
+        lg: "w-10 h-10 p-[3px] data-[centered=true]:p-[5px]",
         xl: "w-12 h-12 p-[3px] data-[centered=true]:p-1.5",
       },
     },
@@ -77,7 +78,7 @@ export const Thumbnail = ({
     >
       {typeof icon === "string" ? (
         icon.includes("fa-") ? (
-          <div className="w-full h-full flex items-center justify-center p-[3px]">
+          <div className="w-full h-full flex items-center justify-center p-0.5">
             <div className={cn("w-4/5 h-4/5 fa-solid", icon)} />
           </div>
         ) : (

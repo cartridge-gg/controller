@@ -12,6 +12,7 @@ const thumbnailCollectibleVariants = cva("border-transparent", {
       highlight: "",
     },
     size: {
+      xs: "border-[2px] p-px",
       sm: "border-[2px] p-px",
       md: "border-[2px] p-0.5",
       lg: "border-[3px] p-0.5",

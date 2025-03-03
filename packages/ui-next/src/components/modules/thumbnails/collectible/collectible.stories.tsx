@@ -25,6 +25,27 @@ export const Default: Story = {
       <div className="flex gap-3 ">
         <ThumbnailCollectible
           image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="xs"
+          variant="dark"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="xs"
+          variant="faded"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="xs"
+        />
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+          size="xs"
+          variant="highlight"
+        />
+      </div>
+      <div className="flex gap-3 ">
+        <ThumbnailCollectible
+          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
           size="sm"
           variant="dark"
         />
@@ -137,6 +158,12 @@ export const Default: Story = {
 export const Fallback: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
+      <div className="flex gap-3 ">
+        <ThumbnailCollectible image="" size="xs" variant="dark" />
+        <ThumbnailCollectible image="" size="xs" variant="faded" />
+        <ThumbnailCollectible image="" size="xs" />
+        <ThumbnailCollectible image="" size="xs" variant="highlight" />
+      </div>
       <div className="flex gap-3 ">
         <ThumbnailCollectible image="" size="sm" variant="dark" />
         <ThumbnailCollectible image="" size="sm" variant="faded" />

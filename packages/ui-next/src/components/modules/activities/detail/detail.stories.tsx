@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ActivityDetail } from ".";
-import { CoinsIcon, StarknetColorIcon } from "@/components/icons";
+import { CreditIcon, StarknetColorIcon } from "@/components/icons";
+import { Thumbnail } from "@/index";
 
 const meta: Meta<typeof ActivityDetail> = {
   title: "Modules/Activities/Detail",
@@ -28,14 +29,24 @@ export const Samples: Story = {
       <ActivityDetail label="From">0xb668...dd65</ActivityDetail>
       <ActivityDetail label="Network">
         <div className="flex gap-1.5 items-center">
-          <StarknetColorIcon size="sm" />
+          <Thumbnail
+            icon={<StarknetColorIcon className="absolute" size="default" />}
+            size="xs"
+            centered
+            rounded
+          />
           Starknet
         </div>
       </ActivityDetail>
       <ActivityDetail label="Network Fee">
         <div className="flex gap-1.5 items-center">
-          <CoinsIcon variant="line" size="sm" />
-          .01 CREDITS
+          <Thumbnail
+            icon={<CreditIcon className="absolute" size="default" />}
+            size="xs"
+            centered
+            rounded
+          />
+          .01 CREDITS ($0.001)
         </div>
       </ActivityDetail>
       <ActivityDetail label="Token ID">8</ActivityDetail>

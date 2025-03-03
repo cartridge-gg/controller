@@ -21,6 +21,28 @@ export const Default: Story = {
       <div className="flex gap-3 ">
         <Thumbnail
           icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+          size="xs"
+          variant="dark"
+        />
+        <Thumbnail
+          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+          size="xs"
+          variant="faded"
+        />
+        <Thumbnail
+          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+          size="xs"
+          variant="default"
+        />
+        <Thumbnail
+          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+          size="xs"
+          variant="highlight"
+        />
+      </div>
+      <div className="flex gap-3 ">
+        <Thumbnail
+          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
           size="sm"
           variant="dark"
         />
@@ -138,6 +160,32 @@ export const Default: Story = {
 export const Rounded: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
+      <div className="flex gap-3 ">
+        <Thumbnail
+          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
+          size="xs"
+          variant="dark"
+          rounded
+        />
+        <Thumbnail
+          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
+          size="xs"
+          variant="faded"
+          rounded
+        />
+        <Thumbnail
+          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
+          size="xs"
+          variant="default"
+          rounded
+        />
+        <Thumbnail
+          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
+          size="xs"
+          variant="highlight"
+          rounded
+        />
+      </div>
       <div className="flex gap-3 ">
         <Thumbnail
           icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
@@ -279,6 +327,32 @@ export const Component: Story = {
       <div className="flex gap-3 ">
         <Thumbnail
           icon={<DepositIcon variant="solid" className="w-full h-full" />}
+          size="xs"
+          variant="dark"
+          centered
+        />
+        <Thumbnail
+          icon={<DepositIcon variant="solid" className="w-full h-full" />}
+          size="xs"
+          variant="faded"
+          centered
+        />
+        <Thumbnail
+          icon={<DepositIcon variant="solid" className="w-full h-full" />}
+          size="xs"
+          variant="default"
+          centered
+        />
+        <Thumbnail
+          icon={<DepositIcon variant="solid" className="w-full h-full" />}
+          size="xs"
+          variant="highlight"
+          centered
+        />
+      </div>
+      <div className="flex gap-3 ">
+        <Thumbnail
+          icon={<DepositIcon variant="solid" className="w-full h-full" />}
           size="sm"
           variant="dark"
           centered
@@ -414,6 +488,36 @@ export const Component: Story = {
 export const ComponentRounded: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
+      <div className="flex gap-3 ">
+        <Thumbnail
+          icon={<ArgentIcon className="w-full h-full" />}
+          size="xs"
+          variant="dark"
+          rounded
+          centered
+        />
+        <Thumbnail
+          icon={<ArgentIcon className="w-full h-full" />}
+          size="xs"
+          variant="faded"
+          rounded
+          centered
+        />
+        <Thumbnail
+          icon={<ArgentIcon className="w-full h-full" />}
+          size="xs"
+          variant="default"
+          rounded
+          centered
+        />
+        <Thumbnail
+          icon={<ArgentIcon className="w-full h-full" />}
+          size="xs"
+          variant="highlight"
+          rounded
+          centered
+        />
+      </div>
       <div className="flex gap-3 ">
         <Thumbnail
           icon={<ArgentIcon className="w-full h-full" />}
@@ -570,6 +674,36 @@ export const ComponentRounded: Story = {
 export const FontAwesome: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
+      <div className="flex gap-3 ">
+        <Thumbnail
+          icon="fa-seedling"
+          size="xs"
+          variant="dark"
+          className="text-primary"
+          centered
+        />
+        <Thumbnail
+          icon="fa-seedling"
+          size="xs"
+          variant="faded"
+          className="text-primary"
+          centered
+        />
+        <Thumbnail
+          icon="fa-seedling"
+          size="xs"
+          variant="default"
+          className="text-primary"
+          centered
+        />
+        <Thumbnail
+          icon="fa-seedling"
+          size="xs"
+          variant="highlight"
+          className="text-primary"
+          centered
+        />
+      </div>
       <div className="flex gap-3 ">
         <Thumbnail
           icon="fa-seedling"
@@ -733,6 +867,12 @@ export const Fallback: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
       <div className="flex gap-3 ">
+        <Thumbnail icon="" size="xs" variant="dark" />
+        <Thumbnail icon="" size="xs" variant="faded" />
+        <Thumbnail icon="" size="xs" variant="default" />
+        <Thumbnail icon="" size="xs" variant="highlight" />
+      </div>
+      <div className="flex gap-3 ">
         <Thumbnail icon="" size="sm" variant="dark" />
         <Thumbnail icon="" size="sm" variant="faded" />
         <Thumbnail icon="" size="sm" variant="default" />
@@ -789,6 +929,12 @@ export const Loading: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
       <div className="flex gap-3 ">
+        <Thumbnail icon="" size="xs" variant="dark" loading />
+        <Thumbnail icon="" size="xs" variant="faded" loading />
+        <Thumbnail icon="" size="xs" variant="default" loading />
+        <Thumbnail icon="" size="xs" variant="highlight" loading />
+      </div>
+      <div className="flex gap-3 ">
         <Thumbnail icon="" size="sm" variant="dark" loading />
         <Thumbnail icon="" size="sm" variant="faded" loading />
         <Thumbnail icon="" size="sm" variant="default" loading />
@@ -819,6 +965,12 @@ export const Loading: Story = {
 export const Error: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
+      <div className="flex gap-3 ">
+        <Thumbnail icon="" size="xs" variant="dark" error />
+        <Thumbnail icon="" size="xs" variant="faded" error />
+        <Thumbnail icon="" size="xs" variant="default" error />
+        <Thumbnail icon="" size="xs" variant="highlight" error />
+      </div>
       <div className="flex gap-3 ">
         <Thumbnail icon="" size="sm" variant="dark" error />
         <Thumbnail icon="" size="sm" variant="faded" error />
