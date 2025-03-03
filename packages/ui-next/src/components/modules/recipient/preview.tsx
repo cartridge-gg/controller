@@ -5,7 +5,7 @@ import {
   OpenZeppelinIcon,
   WalletIcon,
   WalletType,
-} from "@/components";
+} from "#components";
 import { formatAddress } from "@cartridge/utils";
 import { useCallback } from "react";
 

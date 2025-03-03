@@ -1,4 +1,5 @@
-import { cn, DojoIcon } from "@/index";
+import { DojoIcon } from "#components/icons";
+import { cn } from "#utils";
 import { cva, VariantProps } from "class-variance-authority";
 
 const arcadeGameIconVariants = cva(

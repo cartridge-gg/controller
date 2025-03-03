@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 
-import { cn } from "@/utils";
+import { cn } from "#utils";
 import { CheckboxIcon } from "../icons";
 import { iconVariants, size } from "../icons/utils";
 

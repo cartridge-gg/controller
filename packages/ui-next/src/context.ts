@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-type UIContextValue = {
+export type UIContextValue = {
   account?: {
     username: string;
     address: string;

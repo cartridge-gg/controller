@@ -3,7 +3,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/primitives/accordion";
+} from "#components/primitives/accordion";
 import { Meta, StoryObj } from "@storybook/react";
 import { CircleIcon, InfoIcon } from "../";
 

@@ -1,4 +1,4 @@
-import { cn } from "@/index";
+import { cn } from "#utils";
 
 export interface AchievementLeaderboardUsernameProps {
   username: string;
@@ -28,5 +28,3 @@ export const AchievementLeaderboardUsername = ({
     </div>
   );
 };
-
-export default AchievementLeaderboardUsername;

@@ -1,18 +1,11 @@
-import {
-  AchievementBit,
-  AchievementBits,
-  AchievementContent,
-  AchievementContentProps,
-  AchievementPagination,
-  AchievementPin,
-  AchievementPinProps,
-  AchievementShare,
-  AchievementShareProps,
-  Card,
-  CardHeader,
-  CardTitle,
-  cn,
-} from "@/index";
+import { Card, CardHeader, CardTitle } from "#components/primitives";
+import { cn } from "#utils";
+import { AchievementBit } from "../bit";
+import { AchievementBits } from "../bits";
+import { AchievementContent, AchievementContentProps } from "../content";
+import { AchievementPagination } from "../pagination";
+import { AchievementPin, AchievementPinProps } from "../pin";
+import { AchievementShare, AchievementShareProps } from "../share";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface AchievementCardProps
@@ -123,5 +116,3 @@ export const AchievementCard = ({
     </Card>
   );
 };
-
-export default AchievementCard;

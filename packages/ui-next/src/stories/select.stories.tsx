@@ -4,7 +4,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/primitives/select";
+} from "#components/primitives/select";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Select> = {

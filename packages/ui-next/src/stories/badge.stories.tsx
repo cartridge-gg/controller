@@ -1,4 +1,4 @@
-import { Badge } from "@/components/primitives/badge";
+import { Badge } from "#components/primitives/badge";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Badge> = {

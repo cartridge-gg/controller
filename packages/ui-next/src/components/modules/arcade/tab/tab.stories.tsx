@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ArcadeTab } from "./tab";
-import { SparklesIcon } from "@/components/icons";
-import { Tabs, TabsList } from "@/index";
+import { SparklesIcon } from "#components/icons";
+import { Tabs, TabsList } from "#components/primitives";
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <Tabs className="p-0" defaultValue="assets">

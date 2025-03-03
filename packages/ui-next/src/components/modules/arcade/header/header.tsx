@@ -1,4 +1,4 @@
-import { ControllerIcon } from "@/index";
+import { ControllerIcon } from "#components/icons";
 import { useMemo } from "react";
 
 export interface ArcadeHeaderProps extends React.PropsWithChildren {
