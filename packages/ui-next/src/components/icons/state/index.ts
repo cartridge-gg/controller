@@ -24,6 +24,7 @@ export * from "./joystick";
 export * from "./leaderboard";
 export * from "./metrics";
 export * from "./moon";
+export * from "./paper-plane";
 export * from "./pencil";
 export * from "./pulse";
 export * from "./scroll";
