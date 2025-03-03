@@ -1,5 +1,5 @@
-import { MoonIcon } from "@/components/icons";
-import { Toggle as UIToggle } from "@/components/primitives/toggle";
+import { MoonIcon } from "#components/icons";
+import { Toggle as UIToggle } from "#components/primitives/toggle";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Toggle> = {

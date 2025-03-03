@@ -5,8 +5,8 @@ import {
   OpenZeppelinIcon,
   WalletIcon,
   WalletType,
-} from "@/components";
-import { cn } from "@/utils";
+} from "#components";
+import { cn } from "#utils";
 import { useCallback } from "react";
 
 type SelectionProps = {

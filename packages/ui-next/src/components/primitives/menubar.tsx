@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { CheckIcon, CircleIcon, WedgeIcon } from "@/components/icons";
+import { CheckIcon, CircleIcon, WedgeIcon } from "#components/icons";
 import * as MenubarPrimitive from "@radix-ui/react-menubar";
 
-import { cn } from "@/utils";
+import { cn } from "#utils";
 
 const MenubarMenu: typeof MenubarPrimitive.Menu = MenubarPrimitive.Menu;
 

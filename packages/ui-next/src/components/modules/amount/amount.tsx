@@ -1,4 +1,4 @@
-import { Header, Error, Input } from "@/components";
+import { Header, Error, Input } from "#components";
 import { Max } from "./max";
 import { Conversion } from "./conversion";
 import { Balance } from "./balance";

@@ -1,4 +1,4 @@
-import { cn } from "@/index";
+import { cn } from "#utils";
 import { AchievementIcon } from "../icon";
 import { AchievementPoints } from "../points";
 
@@ -51,5 +51,3 @@ export function AchievementTitle({
     </p>
   );
 }
-
-export default AchievementLabel;

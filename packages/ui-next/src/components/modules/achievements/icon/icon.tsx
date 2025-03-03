@@ -1,4 +1,4 @@
-import { cn } from "@/index";
+import { cn } from "#utils";
 
 interface AchievementIconProps {
   icon?: string;
@@ -17,5 +17,3 @@ export function AchievementIcon({ icon, completed }: AchievementIconProps) {
     </div>
   );
 }
-
-export default AchievementIcon;

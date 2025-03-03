@@ -1,4 +1,4 @@
-import { Textarea } from "@/components/primitives/textarea";
+import { Textarea } from "#components/primitives/textarea";
 import { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 

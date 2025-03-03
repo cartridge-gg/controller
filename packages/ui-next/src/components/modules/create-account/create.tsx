@@ -1,6 +1,6 @@
-import { cn } from "@/utils";
+import { Input } from "#components/primitives";
+import { cn } from "#utils";
 import { Status, ValidationState } from "./status";
-import { Input } from "@/index";
 
 type CreateAccountProps = {
   usernameField: {
@@ -59,5 +59,3 @@ export function CreateAccount({
     </div>
   );
 }
-
-export default CreateAccount;

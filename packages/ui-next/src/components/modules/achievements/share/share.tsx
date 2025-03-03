@@ -1,4 +1,5 @@
-import { Button, XIcon } from "@/index";
+import { XIcon } from "#components/icons";
+import { Button } from "#components/primitives";
 import { useCallback, useMemo } from "react";
 
 export interface AchievementShareProps {
@@ -72,5 +73,3 @@ Only ${difficulty}% of players have earned this rare badge.
     </Button>
   );
 }
-
-export default AchievementShare;

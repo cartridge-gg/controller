@@ -1,4 +1,4 @@
-import { cn } from "@/index";
+import { cn } from "#utils";
 
 export interface AchievementCounterProps {
   count: number;
@@ -32,5 +32,3 @@ export const AchievementCounter = ({
     </div>
   );
 };
-
-export default AchievementCounter;

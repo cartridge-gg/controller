@@ -1,10 +1,12 @@
 import {
-  ArcadeDiscoveryEvent,
-  ArcadeDiscoveryEventProps,
   ArcadeGameHeader,
   ArcadeGameHeaderProps,
-  cn,
-} from "@/index";
+} from "#components/modules/arcade/game-header";
+import {
+  ArcadeDiscoveryEvent,
+  ArcadeDiscoveryEventProps,
+} from "#components/modules/arcade/discovery-event";
+import { cn } from "#utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes } from "react";
 

@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
   TableFooter,
-} from "@/components/primitives/table";
+} from "#components/primitives/table";
 import { Meta, StoryObj } from "@storybook/react";
 
 const meta: Meta<typeof Table> = {

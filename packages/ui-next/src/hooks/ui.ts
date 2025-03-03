@@ -1,5 +1,5 @@
-import { UIContext } from "@/context";
-import { useCallback, useContext, useState } from "react";
+import { UIContext } from "#context";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 export function useDisclosure() {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,4 +26,22 @@ export function useDisclosure() {
 
 export function useUI() {
   return useContext(UIContext);
+}
+
+export function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    setMatches(media.matches);
+
+    const listener = (e: MediaQueryListEvent) => {
+      setMatches(e.matches);
+    };
+
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, [query]);
+
+  return matches;
 }

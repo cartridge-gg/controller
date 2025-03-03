@@ -1,4 +1,5 @@
-import { Button, WedgeIcon } from "@/index";
+import { Button } from "#components/primitives";
+import { WedgeIcon } from "#components/icons";
 
 interface AchievementPaginationProps {
   direction: "left" | "right";
@@ -27,5 +28,3 @@ export function AchievementPagination({
     </Button>
   );
 }
-
-export default AchievementPagination;
