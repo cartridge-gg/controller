@@ -12,8 +12,10 @@ import {
   SheetFooter,
   SheetTrigger,
   PlusIcon,
-  ClockIcon,
-  ShapesIcon,
+  ControllerIcon,
+  useUI,
+  CopyAddress,
+  Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useState } from "react";
 import { Recovery } from "./Recovery";
@@ -64,6 +66,7 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, closeModal } = useConnection();
+  const { account } = useUI();
   const [state, setState] = useState<State>(State.SETTINGS);
 
   const handleLogout = useCallback(() => {
@@ -182,6 +185,10 @@ export function Settings() {
           </LayoutContent>
         )}
 
+        <div className="mb-3 mx-6">
+          <Separator className="bg-spacer" />
+        </div>
+
         <LayoutFooter>
           <SheetTrigger asChild>
             <Button type="button" variant="secondary" className="gap-2">
@@ -205,17 +212,22 @@ export function Settings() {
             size="icon"
             className="flex items-center justify-center pointer-events-none"
           >
-            <ShapesIcon variant="solid" size="lg" />
+            <ControllerIcon size="lg" />
           </Button>
-          <div className="flex flex-col items-start gap-0.5">
-            <h3 className="text-lg font-semibold text-foreground-100">
-              Log Out
-            </h3>
-            <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
-              <ClockIcon variant="line" size="xs" />
-              <span>Expires in 4h</span>
+          {account && (
+            <div className="flex flex-col items-start gap-0.5">
+              <h3 className="text-lg font-semibold text-foreground-100">
+                {account.username}
+              </h3>
+              <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
+                <CopyAddress
+                  size="xs"
+                  className="text-sm"
+                  address={account.address}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <SheetFooter className="flex flex-row items-center gap-4">
           <SheetClose asChild className="flex-1">
