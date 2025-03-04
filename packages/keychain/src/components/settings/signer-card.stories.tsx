@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { SignerCard } from "./signer-card";
+import { SignerType } from "@cartridge/utils/api/cartridge";
 
 const meta = {
   title: "components/settings/Signer Card",
@@ -9,8 +10,8 @@ const meta = {
     layout: "centered",
   },
   args: {
-    deviceName: "This Device",
-    deviceType: "mobile",
+    signerName: "This Device",
+    signerType: SignerType.StarknetAccount,
   },
 } satisfies Meta<typeof SignerCard>;
 

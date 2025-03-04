@@ -14,13 +14,14 @@ import {
   PlusIcon,
   ClockIcon,
   ShapesIcon,
+  Skeleton,
 } from "@cartridge/ui-next";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
 import { Session, SessionCard } from "./session-card";
-import { Signer, SignerCard } from "./signer-card";
+import { SignerCard } from "./signer-card";
 import {
   RegisteredAccount,
   RegisteredAccountCard,
@@ -28,7 +29,6 @@ import {
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
 import { useSignerQuery } from "@cartridge/utils/api/cartridge";
-import { useController } from "@/hooks/controller";
 
 enum State {
   SETTINGS,
@@ -37,16 +37,6 @@ enum State {
 }
 
 // MOCK DATA
-const signers: Signer[] = [
-  {
-    deviceType: "mobile",
-    deviceName: "Device 1",
-  },
-  {
-    deviceType: "laptop",
-    deviceName: "Device 2",
-  },
-];
 const sessions: Session[] = [
   {
     sessionName: "Session 1",
@@ -65,17 +55,27 @@ const registeredAccounts: RegisteredAccount[] = [
 ];
 
 export function Settings() {
-  const { logout, closeModal } = useConnection();
-  const { controller } = useController();
+  const { logout, closeModal, controller } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
-  const data = useSignerQuery({
-    username: controller?.username() as string,
-  });
-
-  useEffect(() => {
-    console.log("controller username: ", controller?.username());
-    console.log("signer data: ", data);
-  }, [controller, data]);
+  const data = useSignerQuery(
+    {
+      username:
+        process.env.NODE_ENV === "development"
+          ? "slot-auth-local"
+          : (controller?.username() as string),
+    },
+    {
+      onSuccess: (data) => {
+        data.account?.controllers.edges?.map((i) => {
+          i?.node?.signers?.map((j) => {
+            return {
+              signerType: j.type,
+            };
+          });
+        });
+      },
+    },
+  );
 
   const handleLogout = useCallback(() => {
     logout();
@@ -137,12 +137,24 @@ export function Settings() {
                 description="Information associated with registered accounts can be made available to games and applications."
               />
               <div className="space-y-3">
-                {signers.map((i) => (
-                  <SignerCard
-                    deviceName={i.deviceName}
-                    deviceType={i.deviceType}
-                  />
-                ))}
+                {data.isLoading ? (
+                  <Skeleton className="w-full h-10 bg-background-200" />
+                ) : data.isError ? (
+                  <div>Error</div>
+                ) : data.isSuccess && data.data ? (
+                  data.data?.account?.controllers.edges?.map((i) =>
+                    i?.node?.signers?.map((j) => {
+                      return (
+                        <SignerCard
+                          signerName={controller?.username() as string}
+                          signerType={j.type}
+                        />
+                      );
+                    }),
+                  )
+                ) : (
+                  <div>No data</div>
+                )}
               </div>
               <Button
                 type="button"
