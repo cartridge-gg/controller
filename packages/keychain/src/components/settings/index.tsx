@@ -16,7 +16,7 @@ import {
   CopyAddress,
   Separator,
 } from "@cartridge/ui-next";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
@@ -28,6 +28,8 @@ import {
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
+import { useDisconnect } from "@starknet-react/core";
+import { isIframe } from "@cartridge/utils";
 
 enum State {
   SETTINGS,
@@ -65,12 +67,26 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, closeModal, controller } = useConnection();
+  const { disconnect } = useDisconnect();
   const [state, setState] = useState<State>(State.SETTINGS);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = () => {
+    disconnect();
     logout();
+    if (isIframe()) {
+      console.log("In iframe");
+      try {
+        // Attempt to send postMessage with wildcard origin
+        window.parent.postMessage("controller-reload", "*");
+        console.log("Reload message sent to parent");
+      } catch (error) {
+        console.error("Error sending reload message:", error);
+      }
+    } else {
+      console.log("Not in iframe");
+    }
     closeModal();
-  }, [logout, closeModal]);
+  };
 
   if (state === State.RECOVERY) {
     return <Recovery onBack={() => setState(State.SETTINGS)} />;
