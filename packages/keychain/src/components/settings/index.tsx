@@ -28,6 +28,56 @@ import {
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
 
+// example query
+// query GetControllerWithSigners {
+//   account(id: "slot-auth-local") {
+//     controllers{
+//       edges {
+//         node {
+//           signers{
+//             id
+//             type
+//             createdAt
+//             updatedAt
+//             controller {
+//               id
+//               accountID
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+
+// example response
+// {
+//   "data": {
+//     "account": {
+//       "controllers": {
+//         "edges": [
+//           {
+//             "node": {
+//               "signers": [
+//                 {
+//                   "id": "cm38p75as0001gaozgfs9ia3p",
+//                   "type": "webauthn",
+//                   "createdAt": "2025-03-04T20:52:16.491182+08:00",
+//                   "updatedAt": "2025-03-04T20:52:16.491183+08:00",
+//                   "controller": {
+//                     "id": "cm38p75as0000gaozwfc9swzb",
+//                     "accountID": "slot-auth-local"
+//                   }
+//                 }
+//               ]
+//             }
+//           }
+//         ]
+//       }
+//     }
+//   }
+// }
+
 enum State {
   SETTINGS,
   RECOVERY,
