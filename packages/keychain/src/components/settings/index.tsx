@@ -13,7 +13,6 @@ import {
   SheetTrigger,
   PlusIcon,
   ControllerIcon,
-  useUI,
   CopyAddress,
   Separator,
 } from "@cartridge/ui-next";
@@ -65,8 +64,7 @@ const registeredAccounts: RegisteredAccount[] = [
 ];
 
 export function Settings() {
-  const { logout, closeModal } = useConnection();
-  const { account } = useUI();
+  const { logout, closeModal, controller } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
 
   const handleLogout = useCallback(() => {
@@ -214,16 +212,16 @@ export function Settings() {
           >
             <ControllerIcon size="lg" />
           </Button>
-          {account && (
+          {controller && (
             <div className="flex flex-col items-start gap-0.5">
               <h3 className="text-lg font-semibold text-foreground-100">
-                {account.username}
+                {controller.username()}
               </h3>
               <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
                 <CopyAddress
                   size="xs"
                   className="text-sm"
-                  address={account.address}
+                  address={controller.address()}
                 />
               </div>
             </div>
