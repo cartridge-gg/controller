@@ -15,7 +15,7 @@ import {
   ClockIcon,
   ShapesIcon,
 } from "@cartridge/ui-next";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
@@ -27,56 +27,8 @@ import {
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
-
-// example query
-// query GetControllerWithSigners {
-//   account(id: "slot-auth-local") {
-//     controllers{
-//       edges {
-//         node {
-//           signers{
-//             id
-//             type
-//             createdAt
-//             updatedAt
-//             controller {
-//               id
-//               accountID
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
-
-// example response
-// {
-//   "data": {
-//     "account": {
-//       "controllers": {
-//         "edges": [
-//           {
-//             "node": {
-//               "signers": [
-//                 {
-//                   "id": "cm38p75as0001gaozgfs9ia3p",
-//                   "type": "webauthn",
-//                   "createdAt": "2025-03-04T20:52:16.491182+08:00",
-//                   "updatedAt": "2025-03-04T20:52:16.491183+08:00",
-//                   "controller": {
-//                     "id": "cm38p75as0000gaozwfc9swzb",
-//                     "accountID": "slot-auth-local"
-//                   }
-//                 }
-//               ]
-//             }
-//           }
-//         ]
-//       }
-//     }
-//   }
-// }
+import { useSignerQuery } from "@cartridge/utils/api/cartridge";
+import { useController } from "@/hooks/controller";
 
 enum State {
   SETTINGS,
@@ -114,7 +66,16 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, closeModal } = useConnection();
+  const { controller } = useController();
   const [state, setState] = useState<State>(State.SETTINGS);
+  const data = useSignerQuery({
+    username: controller?.username() as string,
+  });
+
+  useEffect(() => {
+    console.log("controller username: ", controller?.username());
+    console.log("signer data: ", data);
+  }, [controller, data]);
 
   const handleLogout = useCallback(() => {
     logout();
