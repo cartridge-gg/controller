@@ -2,9 +2,11 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import {
+  BETA_CONTROLLER,
   CONTROLLER_VERSIONS,
   ControllerVersionInfo,
   OutsideExecutionVersion,
+  STABLE_CONTROLLER,
   UpgradeProvider,
   determineUpgradePath,
   useUpgrade,
@@ -28,35 +30,35 @@ describe("determineUpgradePath", () => {
   it("should return available=false when currentVersion is undefined", () => {
     const result = determineUpgradePath(undefined, false);
     expect(result.available).toBe(false);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.targetVersion).toBe(STABLE_CONTROLLER);
   });
 
   it("should return available=false when current version is the same as target version (stable)", () => {
-    const currentVersion = CONTROLLER_VERSIONS[4]; // STABLE_CONTROLLER
+    const currentVersion = STABLE_CONTROLLER;
     const result = determineUpgradePath(currentVersion, false);
     expect(result.available).toBe(false);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.targetVersion).toBe(STABLE_CONTROLLER);
   });
 
   it("should return available=false when current version is the same as target version (beta)", () => {
-    const currentVersion = CONTROLLER_VERSIONS[5]; // BETA_CONTROLLER
+    const currentVersion = BETA_CONTROLLER;
     const result = determineUpgradePath(currentVersion, true);
     expect(result.available).toBe(false);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[5]); // BETA_CONTROLLER
+    expect(result.targetVersion).toBe(BETA_CONTROLLER);
   });
 
   it("should return available=true when current version is older than target version (stable)", () => {
     const currentVersion = CONTROLLER_VERSIONS[3]; // Older version
     const result = determineUpgradePath(currentVersion, false);
     expect(result.available).toBe(true);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.targetVersion).toBe(STABLE_CONTROLLER);
   });
 
   it("should return available=true when current version is older than target version (beta)", () => {
-    const currentVersion = CONTROLLER_VERSIONS[4]; // STABLE_CONTROLLER
+    const currentVersion = CONTROLLER_VERSIONS[4];
     const result = determineUpgradePath(currentVersion, true);
     expect(result.available).toBe(true);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[5]); // BETA_CONTROLLER
+    expect(result.targetVersion).toBe(BETA_CONTROLLER);
   });
 
   it("should return available=false when current version is newer than target version (downgrade not allowed)", () => {
@@ -72,7 +74,7 @@ describe("determineUpgradePath", () => {
     // We're testing that we don't allow downgrades
     const result = determineUpgradePath(newerVersion, true);
     expect(result.available).toBe(false);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[5]); // BETA_CONTROLLER
+    expect(result.targetVersion).toBe(BETA_CONTROLLER);
   });
 });
 
@@ -149,7 +151,7 @@ describe("UpgradeProvider", () => {
 
     expect(result.current.available).toBe(true);
     expect(result.current.current).toBe(CONTROLLER_VERSIONS[3]);
-    expect(result.current.latest).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.current.latest).toBe(STABLE_CONTROLLER);
     expect(result.current.isUpgrading).toBe(false);
     expect(result.current.error).toBeUndefined();
     expect(result.current.isBeta).toBe(false);
@@ -181,7 +183,7 @@ describe("UpgradeProvider", () => {
 
     expect(result.current.available).toBe(true);
     expect(result.current.current).toBe(CONTROLLER_VERSIONS[3]);
-    expect(result.current.latest).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.current.latest).toBe(STABLE_CONTROLLER);
   });
 
   it("should handle other errors", async () => {
