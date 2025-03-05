@@ -3,23 +3,18 @@ import {
   cn,
   Button,
   Card,
-  CardContent,
   TrashIcon,
-  MobileIcon,
-  DesktopIcon,
-  LaptopIcon,
   Sheet,
   SheetClose,
   SheetContent,
   SheetFooter,
-  SheetTrigger,
+  StarknetIcon,
+  FingerprintIcon,
 } from "@cartridge/ui-next";
-
-export type DeviceType = "mobile" | "laptop" | "desktop";
+import { SignerType } from "@cartridge/utils/api/cartridge";
 
 export interface Signer {
-  deviceType: DeviceType;
-  deviceName: string;
+  signerType: SignerType;
 }
 
 export interface SignerCardProps extends Signer {
@@ -29,7 +24,7 @@ export interface SignerCardProps extends Signer {
 export const SignerCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SignerCardProps
->(({ className, deviceName, deviceType, onDelete, ...props }, ref) => {
+>(({ className, signerType, onDelete, ...props }, ref) => {
   return (
     <Sheet>
       <div
@@ -37,19 +32,22 @@ export const SignerCard = React.forwardRef<
         className={cn("flex items-center gap-3", className)}
         {...props}
       >
-        <Card className="flex flex-1 flex-row items-center bg-background-100 border border-background-200">
-          <CardContent className="relative bg-background-200 size-10 flex items-center justify-center">
-            <DeviceIcon deviceType={deviceType} />
-          </CardContent>
-          <CardContent className="bg-background-100 py-2.5 px-3">
-            <h1 className="flex-1 text-sm font-normal">{deviceName}</h1>
-          </CardContent>
+        <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-center bg-background-200">
+          <DeviceIcon signerType={signerType} />
+          <p className="flex-1 text-sm font-normal">
+            {signerType === SignerType.StarknetAccount
+              ? "Starknet Account"
+              : signerType === SignerType.Webauthn
+                ? "WebAuthn"
+                : "Unknown"}
+          </p>
         </Card>
-        <SheetTrigger asChild>
-          <Button variant="icon" size="icon" type="button">
-            <TrashIcon size="default" className="text-foreground-300" />
-          </Button>
-        </SheetTrigger>
+        {/* disabled until delete signer functionality is implemented */}
+        {/* <SheetTrigger asChild> */}
+        {/*   <Button variant="icon" size="icon" type="button"> */}
+        {/*     <TrashIcon size="default" className="text-foreground-300" /> */}
+        {/*   </Button> */}
+        {/* </SheetTrigger> */}
       </div>
 
       {/* DELETE SIGNER SHEET CONTENTS */}
@@ -65,11 +63,15 @@ export const SignerCard = React.forwardRef<
             size="icon"
             className="flex items-center justify-center"
           >
-            <DeviceIcon deviceType={deviceType} />
+            <DeviceIcon signerType={signerType} />
           </Button>
           <div className="flex flex-col items-start gap-1">
             <h3 className="text-lg font-semibold text-foreground-100">
-              {deviceName}
+              {signerType === SignerType.StarknetAccount
+                ? "Starknet Account"
+                : signerType === SignerType.Webauthn
+                  ? "WebAuthn"
+                  : "Unknown"}
             </h3>
           </div>
         </div>
@@ -93,12 +95,12 @@ export const SignerCard = React.forwardRef<
 
 SignerCard.displayName = "SignerCard";
 
-const DeviceIcon = React.memo(({ deviceType }: { deviceType: DeviceType }) => {
-  return deviceType === "mobile" ? (
-    <MobileIcon variant="solid" size="default" className="absolute" />
-  ) : deviceType === "laptop" ? (
-    <LaptopIcon variant="solid" size="default" className="absolute" />
+const DeviceIcon = React.memo(({ signerType }: { signerType: SignerType }) => {
+  return signerType === SignerType.StarknetAccount ? (
+    <StarknetIcon size="default" />
+  ) : signerType === SignerType.Webauthn ? (
+    <FingerprintIcon size="default" />
   ) : (
-    <DesktopIcon variant="solid" size="default" className="absolute" />
+    <FingerprintIcon size="default" />
   );
 });
