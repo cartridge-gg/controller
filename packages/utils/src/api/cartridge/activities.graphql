@@ -1,0 +1,20 @@
+query Activities($projects: [ActivityProject!]!) {
+  activities(projects: $projects) {
+    items {
+      meta {
+        project
+        address
+        limit
+        date
+        count
+      }
+      activities {
+        contractAddress
+        entrypoint
+        executedAt
+        playerAddress
+        transactionHash
+      }
+    }
+  }
+}
