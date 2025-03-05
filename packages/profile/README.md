@@ -7,5 +7,5 @@ interactions with the users credentials in a secure, self-custodial manner.
 
 ```
 # `pnpm profile` is reserved command. Make sure to type in French.
-pnpm profil dev
+pnpm profile dev
 ```
