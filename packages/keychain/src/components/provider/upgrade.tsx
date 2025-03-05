@@ -67,7 +67,7 @@ export const CONTROLLER_VERSIONS: ControllerVersionInfo[] = [
   },
 ];
 
-export const STABLE_CONTROLLER = CONTROLLER_VERSIONS[4];
+export const STABLE_CONTROLLER = CONTROLLER_VERSIONS[5];
 export const BETA_CONTROLLER = CONTROLLER_VERSIONS[5];
 
 /**
