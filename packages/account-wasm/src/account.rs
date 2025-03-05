@@ -1,24 +1,23 @@
 use std::borrow::BorrowMut;
 
-use account_sdk::account::session::policy::Policy as SdkPolicy;
 use account_sdk::controller::{compute_gas_and_price, Controller};
 use account_sdk::errors::ControllerError;
-use account_sdk::typed_data::{encode_type, TypedData};
+use account_sdk::typed_data::TypedData;
 use serde_wasm_bindgen::to_value;
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::Call;
-use starknet::core::utils::starknet_keccak;
-use starknet_crypto::poseidon_hash;
+
 use starknet_types_core::felt::Felt;
 use url::Url;
 use wasm_bindgen::prelude::*;
 
 use crate::errors::JsControllerError;
+use crate::storage::PolicyStorage;
 use crate::sync::WasmMutex;
 use crate::types::call::JsCall;
 use crate::types::estimate::JsFeeEstimate;
 use crate::types::owner::Owner;
-use crate::types::policy::Policy;
+use crate::types::policy::{CallPolicy, Policy, TypedDataPolicy};
 use crate::types::session::SessionMetadata;
 use crate::types::{Felts, JsFelt};
 use crate::utils::set_panic_hook;
@@ -28,6 +27,7 @@ type Result<T> = std::result::Result<T, JsError>;
 #[wasm_bindgen]
 pub struct CartridgeAccount {
     controller: WasmMutex<Controller>,
+    policy_storage: WasmMutex<PolicyStorage>,
 }
 
 #[wasm_bindgen]
@@ -55,7 +55,6 @@ impl CartridgeAccount {
         set_panic_hook();
 
         let rpc_url = Url::parse(&rpc_url)?;
-
         let username = username.to_lowercase();
 
         let controller = Controller::new(
@@ -78,10 +77,7 @@ impl CartridgeAccount {
         let controller =
             Controller::from_storage(app_id).map_err(|e| JsError::new(&e.to_string()))?;
 
-        match controller {
-            Some(c) => Ok(Some(CartridgeAccountWithMeta::new(c))),
-            None => Ok(None),
-        }
+        Ok(controller.map(CartridgeAccountWithMeta::new))
     }
 
     #[wasm_bindgen(js_name = disconnect)]
@@ -159,6 +155,19 @@ impl CartridgeAccount {
         })
     }
 
+    #[wasm_bindgen(js_name = login)]
+    pub async fn login(&self, expires_at: u64) -> std::result::Result<(), JsControllerError> {
+        set_panic_hook();
+
+        self.controller
+            .lock()
+            .await
+            .create_wildcard_session(expires_at)
+            .await?;
+
+        Ok(())
+    }
+
     #[wasm_bindgen(js_name = createSession)]
     pub async fn create_session(
         &self,
@@ -167,16 +176,58 @@ impl CartridgeAccount {
     ) -> std::result::Result<(), JsControllerError> {
         set_panic_hook();
 
-        let methods = policies
-            .into_iter()
-            .map(TryFrom::try_from)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
+        let mut controller = self.controller.lock().await;
 
-        self.controller
+        // We use a dummy policy here, since all policies are inherently approved for wildcard sessions
+        let wildcard_exists = controller
+            .authorized_session_metadata(
+                &[account_sdk::account::session::policy::Policy::Call(
+                    account_sdk::account::session::policy::CallPolicy {
+                        contract_address: Felt::ZERO,
+                        selector: Felt::ZERO,
+                        authorized: Some(true),
+                    },
+                )],
+                None,
+            )
+            .is_some();
+
+        if !wildcard_exists {
+            controller.create_wildcard_session(expires_at).await?;
+        }
+
+        self.policy_storage.lock().await.store(policies.clone())?;
+
+        Ok(())
+    }
+
+    #[wasm_bindgen(js_name = skipSession)]
+    pub async fn skip_session(
+        &self,
+        policies: Vec<Policy>,
+    ) -> std::result::Result<(), JsControllerError> {
+        set_panic_hook();
+
+        // Convert policies to have authorization explicitly set to false
+        let unauthorized_policies = policies
+            .into_iter()
+            .map(|policy| match policy {
+                Policy::Call(call_policy) => Policy::Call(CallPolicy {
+                    target: call_policy.target,
+                    method: call_policy.method,
+                    authorized: Some(false),
+                }),
+                Policy::TypedData(td_policy) => Policy::TypedData(TypedDataPolicy {
+                    scope_hash: td_policy.scope_hash,
+                    authorized: Some(false),
+                }),
+            })
+            .collect();
+
+        self.policy_storage
             .lock()
             .await
-            .create_session(methods, expires_at)
-            .await?;
+            .store(unauthorized_policies)?;
 
         Ok(())
     }
@@ -268,39 +319,8 @@ impl CartridgeAccount {
         Ok(to_value(&response)?)
     }
 
-    #[wasm_bindgen(js_name = hasSession)]
-    pub async fn has_session(&self, calls: Vec<JsCall>) -> Result<bool> {
-        let calls: Vec<Call> = calls
-            .into_iter()
-            .map(TryFrom::try_from)
-            .collect::<std::result::Result<_, _>>()?;
-
-        Ok(self
-            .controller
-            .lock()
-            .await
-            .session_account(&SdkPolicy::from_calls(&calls))
-            .is_some())
-    }
-
-    #[wasm_bindgen(js_name = hasSessionForMessage)]
-    pub async fn has_session_for_message(&self, typed_data: String) -> Result<bool> {
-        let typed_data: TypedData = serde_json::from_str(&typed_data)?;
-        let domain_hash = typed_data.domain.encode(&typed_data.types)?;
-        let type_hash =
-            &starknet_keccak(encode_type(&typed_data.primary_type, &typed_data.types)?.as_bytes());
-        let scope_hash = poseidon_hash(domain_hash, *type_hash);
-
-        Ok(self
-            .controller
-            .lock()
-            .await
-            .session_account(&[SdkPolicy::new_typed_data(scope_hash)])
-            .is_some())
-    }
-
-    #[wasm_bindgen(js_name = getAuthorizedSessionMetadata)]
-    pub async fn authorized_session_metadata(
+    #[wasm_bindgen(js_name = isRegisteredSessionAuthorized)]
+    pub async fn is_registered_session_authorized(
         &self,
         policies: Vec<Policy>,
         public_key: Option<JsFelt>,
@@ -318,22 +338,12 @@ impl CartridgeAccount {
             .map(|(_, metadata)| SessionMetadata::from(metadata)))
     }
 
-    #[wasm_bindgen(js_name = isRequestedSession)]
-    pub async fn is_requested_session(
+    #[wasm_bindgen(js_name = hasRequestedSession)]
+    pub async fn has_requested_session(
         &self,
         policies: Vec<Policy>,
-        public_key: Option<JsFelt>,
     ) -> std::result::Result<bool, JsControllerError> {
-        let policies = policies
-            .into_iter()
-            .map(TryFrom::try_from)
-            .collect::<std::result::Result<Vec<_>, _>>()?;
-
-        Ok(self
-            .controller
-            .lock()
-            .await
-            .is_requested_session(&policies, public_key.map(|f| f.try_into()).transpose()?))
+        Ok(self.policy_storage.lock().await.is_requested(&policies)?)
     }
 
     #[wasm_bindgen(js_name = revokeSession)]
@@ -404,6 +414,24 @@ impl CartridgeAccount {
             .map_err(JsControllerError::from)?;
 
         Ok(res.into())
+    }
+
+    #[wasm_bindgen(js_name = hasAuthorizedPoliciesForCalls)]
+    pub async fn has_authorized_policies_for_calls(&self, calls: Vec<JsCall>) -> Result<bool> {
+        let calls: Vec<Call> = calls
+            .into_iter()
+            .map(TryFrom::try_from)
+            .collect::<std::result::Result<_, _>>()?;
+
+        let policies: Vec<_> = calls.iter().map(Policy::from_call).collect();
+        self.policy_storage.lock().await.is_authorized(&policies)
+    }
+
+    #[wasm_bindgen(js_name = hasAuthorizedPoliciesForMessage)]
+    pub async fn has_authorized_policies_for_message(&self, typed_data: String) -> Result<bool> {
+        let typed_data: TypedData = serde_json::from_str(&typed_data)?;
+        let policy = Policy::from_typed_data(&typed_data)?;
+        self.policy_storage.lock().await.is_authorized(&[policy])
     }
 }
 
@@ -503,9 +531,16 @@ pub struct CartridgeAccountWithMeta {
 impl CartridgeAccountWithMeta {
     fn new(controller: Controller) -> Self {
         let meta = CartridgeAccountMeta::new(&controller);
+        let policy_storage = PolicyStorage::new(
+            &controller.address,
+            &controller.app_id,
+            &controller.chain_id,
+        );
+
         Self {
             account: CartridgeAccount {
                 controller: WasmMutex::new(controller),
+                policy_storage: WasmMutex::new(policy_storage),
             },
             meta,
         }

@@ -134,7 +134,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
         const methodsArr = Array.isArray(methods) ? methods : [methods];
         return methodsArr.map((m) => ({
           target,
-          method: m.entrypoint,
+          method: hash.getSelectorFromName(m.entrypoint),
           authorized: !!m.authorized,
         }));
       },

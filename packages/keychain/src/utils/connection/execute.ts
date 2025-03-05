@@ -68,15 +68,13 @@ export function execute({
       async (resolve, reject) => {
         if (!controller) {
           setContext(undefined);
-
           return reject({
             message: "Controller context not available",
           });
         }
 
-        // If a session call and there is no session available
-        // fallback to manual apporval flow
-        if (!(await controller.hasSession(calls))) {
+        // Check if calls are authorized by stored policies
+        if (!(await controller.hasAuthorizedPoliciesForCalls(calls))) {
           setContext({
             type: "execute",
             transactions,
@@ -90,19 +88,17 @@ export function execute({
           });
         }
 
-        // Try paymaster if it is enabled. If it fails, fallback to user pays session flow.
+        // Try paymaster flow
         try {
           const { transaction_hash } =
             await controller.executeFromOutsideV3(calls);
-
           setContext(undefined);
-
           return resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,
           });
         } catch (e) {
-          // User only pays if the error is ErrorCode.PaymasterNotSupported
+          // Continue with user pays flow if paymaster not supported
           const error = e as ControllerError;
           if (error.code !== ErrorCode.PaymasterNotSupported) {
             setContext({
@@ -112,7 +108,6 @@ export function execute({
               resolve,
               reject,
             } as ExecuteCtx);
-
             return resolve({
               code: ResponseCodes.ERROR,
               message: error.message,
@@ -121,6 +116,7 @@ export function execute({
           }
         }
 
+        // User pays flow
         try {
           const estimate = await controller.estimateInvokeFee(calls);
           const { transaction_hash } = await controller.execute(
@@ -129,7 +125,6 @@ export function execute({
           );
 
           setContext(undefined);
-
           return resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,
@@ -143,7 +138,6 @@ export function execute({
             resolve,
             reject,
           } as ExecuteCtx);
-
           return resolve({
             code: ResponseCodes.ERROR,
             message: (e as Error).message,

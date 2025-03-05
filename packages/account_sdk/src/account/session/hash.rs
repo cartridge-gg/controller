@@ -80,7 +80,6 @@ impl Session {
     }
 
     pub fn new_wildcard(
-        policies: Vec<Policy>,
         expires_at: u64,
         session_signer: &Signer,
         guardian_guid: Felt,
@@ -95,14 +94,8 @@ impl Session {
                 guardian_key_guid: guardian_guid,
                 metadata_hash: Felt::ZERO,
             },
-            requested_policies: policies.clone(),
-            proved_policies: policies
-                .into_iter()
-                .map(|policy| ProvedPolicy {
-                    policy: policy.clone(),
-                    proof: vec![],
-                })
-                .collect(),
+            requested_policies: vec![],
+            proved_policies: vec![],
             metadata: serde_json::to_string(&metadata).unwrap(),
         })
     }
@@ -128,6 +121,11 @@ impl Session {
     }
 
     pub fn is_authorized(&self, policy: &Policy) -> bool {
+        // Wildcard sessions are authorized for all policies
+        if self.is_wildcard() {
+            return true;
+        }
+
         self.proved_policies.iter().any(|proved_policy| {
             proved_policy.policy == *policy && proved_policy.policy.is_authorized()
         })
@@ -149,6 +147,11 @@ impl Session {
     }
 
     pub fn is_requested(&self, policy: &Policy) -> bool {
+        // Wildcard sessions are considered requested for all policies
+        if self.is_wildcard() {
+            return true;
+        }
+
         self.requested_policies.iter().any(|p| p == policy)
     }
 }
