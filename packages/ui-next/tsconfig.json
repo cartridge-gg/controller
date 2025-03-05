@@ -10,6 +10,7 @@
     }
   },
   "include": [
+    "src/assets/**/*",
     "src/components/**/*",
     "src/hooks/**/*",
     "src/stories/**/*",
