@@ -52,7 +52,7 @@ Run Controller with examples:
 pnpm dev
 ```
 
-This command builds all workspace dependencies first and start these servers:
+This command builds all workspace dependencies first and starts these servers:
 
 - http://localhost:3002: Controller Example (Next.js)
 - http://localhost:5174: Controller Example (Svelte)
@@ -65,7 +65,7 @@ from the production keychain:
 - Login to your account at https://x.cartridge.gg/login
 - Open your console, dump your account with `window.cartridge.exportAccount()`
   and copy it
-- Visting your local keychain at http://localhost:3001/
+- Visiting your local keychain at http://localhost:3001/
 - Load your account into your local keychain
 
 ```js
@@ -90,11 +90,11 @@ make
 
 in the root directory.
 
-#### Commiting changes
+#### Committing changes
 
 The compiled account is stored in the git repository in the
 `crates/account_sdk/artifacts/` folder. To make sure that the tests are run
-against the most reacent version of the code run `make` in the root repository.
+against the most recent version of the code run `make` in the root repository.
 The `make` command should also be run before commiting any changes to ensure a
 valid state of the compiled code.
 
