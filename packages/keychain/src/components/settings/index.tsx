@@ -29,7 +29,6 @@ import {
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
 import { useDisconnect } from "@starknet-react/core";
-import { isIframe } from "@cartridge/utils";
 
 enum State {
   SETTINGS,
@@ -73,17 +72,11 @@ export function Settings() {
   const handleLogout = () => {
     disconnect();
     logout();
-    if (isIframe()) {
-      console.log("In iframe");
-      try {
-        // Attempt to send postMessage with wildcard origin
-        window.parent.postMessage("controller-reload", "*");
-        console.log("Reload message sent to parent");
-      } catch (error) {
-        console.error("Error sending reload message:", error);
-      }
-    } else {
-      console.log("Not in iframe");
+    try {
+      // Attempt to send postMessage with wildcard origin
+      window.parent.postMessage("controller-reload", "*");
+    } catch (error) {
+      console.error("Error sending reload message:", error);
     }
     closeModal();
   };
