@@ -1,9 +1,3 @@
-import { useController } from "@/hooks/controller";
-import {
-  convertTokenAmountToUSD,
-  formatBalance,
-  useFeeToken,
-} from "@/hooks/tokens";
 import {
   Card,
   CardHeader,
@@ -11,7 +5,13 @@ import {
   CardListItem,
   CardTitle,
 } from "@cartridge/ui-next";
-import { useCreditBalance } from "@cartridge/utils";
+import {
+  useCreditBalance,
+  useFeeToken,
+  formatBalance,
+  convertTokenAmountToUSD,
+} from "@cartridge/utils";
+import { useController } from "#hooks/controller";
 
 export enum BalanceType {
   CREDITS = "credits",
@@ -71,7 +71,7 @@ export function Balance({ types }: BalanceProps) {
               <span className="text-foreground-400">{token.symbol}</span>
             </div>
 
-            {token && token.balance !== undefined && token.price ? (
+            {token.balance !== undefined && token.price ? (
               <div className="text-foreground-400">
                 {convertTokenAmountToUSD(token.balance, 18, token.price)}
               </div>

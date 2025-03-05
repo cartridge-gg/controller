@@ -1,5 +1,5 @@
-import type { ContractType } from "@/hooks/session";
-import { fetchData } from "@/utils/graphql";
+import type { ContractType } from "#hooks/session";
+import { fetchData } from "#utils/graphql";
 import {
   AccountDocument,
   type AccountQuery,

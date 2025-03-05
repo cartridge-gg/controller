@@ -11,7 +11,7 @@ import {
 } from "./upgrade";
 import { ReactNode } from "react";
 import { PostHogContext, PostHogWrapper } from "@cartridge/utils";
-import Controller from "@/utils/controller";
+import Controller from "#utils/controller";
 
 // Mock the usePostHog hook
 vi.mock("./posthog", () => ({

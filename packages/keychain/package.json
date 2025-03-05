@@ -20,6 +20,15 @@
     "test:storybook:update": "start-server-and-test 'SNAPSHOT=1 pnpm storybook:serve' 6001 'pnpm test-storybook --url http://127.0.0.1:6001 -u'",
     "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6001 'pnpm test-storybook -u'"
   },
+  "imports": {
+    "#*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
+  },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/controller": "workspace:*",
@@ -64,7 +73,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react-swc": "catalog:",
-    "@vitest/coverage-v8": "2.1.8",
+    "@vitest/coverage-v8": "catalog:",
     "autoprefixer": "catalog:",
     "eslint": "catalog:",
     "http-server": "catalog:",
@@ -83,7 +92,7 @@
     "vite-plugin-node-polyfills": "^0.22.0",
     "vite-plugin-top-level-await": "catalog:",
     "vite-plugin-wasm": "catalog:",
-    "vitest": "^2.1.8"
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "@starknet-react/chains": "catalog:",

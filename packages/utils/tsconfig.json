@@ -5,6 +5,7 @@
     "baseUrl": ".",
     "rootDir": "./src",
     "outDir": "./dist",
+    "types": ["vitest/globals"],
   },
   "include": ["src/**/*"]
 }

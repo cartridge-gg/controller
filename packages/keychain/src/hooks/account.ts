@@ -8,7 +8,7 @@ import {
 } from "@cartridge/utils/api/cartridge";
 import { Buffer } from "buffer";
 
-import { client, ENDPOINT } from "@/utils/graphql";
+import { client, ENDPOINT } from "#utils/graphql";
 import base64url from "base64url";
 import { useConnection } from "./connection";
 import { useMemo } from "react";

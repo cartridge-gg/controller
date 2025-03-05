@@ -10,16 +10,32 @@
     "./api/indexer": "./dist/api/indexer/index.js",
     "./mock/data": "./dist/mock/data/index.js"
   },
+  "imports": {
+    "#hooks/tokens": {
+      "test": "./src/hooks/tokens.mock.ts",
+      "default": "./src/hooks/tokens.ts"
+    },
+    "#*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
+  },
   "scripts": {
     "build:deps": "pnpm graphql:gen && tsc",
     "graphql:gen": "graphql-codegen --config src/api/cartridge/codegen.yaml && graphql-codegen --config src/api/indexer/codegen.yaml && pnpm tsx bin/post-graphql-gen.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\""
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "test": "vitest",
+    "test:ci": "vitest run"
   },
   "files": [
     "dist"
   ],
   "dependencies": {
+    "@cartridge/presets": "catalog:",
     "posthog-js-lite": "3.2.1",
     "react": "catalog:",
     "react-query": "catalog:",
@@ -33,10 +49,13 @@
     "@graphql-codegen/typescript": "^2.4.8",
     "@graphql-codegen/typescript-operations": "^2.3.5",
     "@graphql-codegen/typescript-react-query": "^3.5.9",
+    "@storybook/test": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "prettier": "catalog:",
     "tsx": "^4.19.2",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

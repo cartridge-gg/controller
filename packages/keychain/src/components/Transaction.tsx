@@ -6,8 +6,8 @@ import {
   Spinner,
   StarknetIcon,
 } from "@cartridge/ui-next";
-import { useController } from "@/hooks/controller";
-import { useChainName } from "@/hooks/chain";
+import { useController } from "#hooks/controller";
+import { useChainName } from "#hooks/chain";
 import { StarkscanUrl } from "@cartridge/utils";
 import { Link } from "react-router-dom";
 

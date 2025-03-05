@@ -18,15 +18,14 @@ import {
   ControllerIcon,
 } from "@cartridge/ui-next";
 import { Funding } from "./funding";
-import { useConnection } from "@/hooks/connection";
+import { useConnection } from "#hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
-import { useDeploy } from "@/hooks/deploy";
+import { useDeploy } from "#hooks/deploy";
 import { Fees } from "./Fees";
-import { ControllerError } from "@/utils/connection";
-import { TransactionSummary } from "@/components/transaction/TransactionSummary";
+import { ControllerError } from "#utils/connection";
+import { TransactionSummary } from "#components/transaction/TransactionSummary";
 import { Link } from "react-router-dom";
-import { useFeeToken } from "@/hooks/tokens";
-import { getChainName } from "@cartridge/utils";
+import { getChainName, useFeeToken } from "@cartridge/utils";
 
 export function DeployController({
   onClose,

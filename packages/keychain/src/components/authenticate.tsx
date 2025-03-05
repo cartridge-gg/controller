@@ -1,4 +1,4 @@
-import { Authenticate as AuthComponent } from "@/components/connect";
+import { Authenticate as AuthComponent } from "#components/connect";
 import { constants } from "starknet";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";

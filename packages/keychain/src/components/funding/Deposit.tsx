@@ -29,13 +29,13 @@ import {
   Separator,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
+import { useFeeToken, convertUSDToTokenAmount } from "@cartridge/utils";
+import { useConnection } from "#hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "./Balance";
 import { toast } from "sonner";
 import { DEFAULT_AMOUNT } from "./constants";
-import { convertUSDToTokenAmount, useFeeToken } from "@/hooks/tokens";
 
 type DepositProps = {
   onComplete?: (deployHash?: string) => void;

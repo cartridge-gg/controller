@@ -1,4 +1,4 @@
-import type { SessionContracts, SessionMessages } from "@/hooks/session";
+import type { SessionContracts, SessionMessages } from "#hooks/session";
 import { toArray } from "@cartridge/controller";
 
 import { ContractCard } from "./ContractCard";

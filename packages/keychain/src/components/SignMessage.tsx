@@ -12,8 +12,8 @@ import {
   CardListItem,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
-import { OcclusionDetector } from "@/components/OcclusionDetector";
+import { useConnection } from "#hooks/connection";
+import { OcclusionDetector } from "#components/OcclusionDetector";
 
 export function SignMessage({
   typedData,

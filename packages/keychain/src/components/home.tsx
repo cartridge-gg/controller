@@ -1,8 +1,8 @@
 import { Signature } from "starknet";
 import { useEffect, useState } from "react";
 import { ResponseCodes } from "@cartridge/controller";
-import { useConnection } from "@/hooks/connection";
-import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
+import { useConnection } from "#hooks/connection";
+import { DeployCtx, ExecuteCtx, SignMessageCtx } from "#utils/connection";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
@@ -11,7 +11,7 @@ import { PurchaseCredits } from "./funding/PurchaseCredits";
 import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
-import { execute } from "@/utils/connection/execute";
+import { execute } from "#utils/connection/execute";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 

@@ -1,8 +1,8 @@
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { ExecutionContainer } from "./ExecutionContainer";
 import { describe, expect, beforeEach, it, vi } from "vitest";
-import { renderWithConnection } from "@/test/mocks/connection";
-import { renderWithProviders } from "@/test/mocks/providers";
+import { renderWithConnection } from "#test/mocks/connection";
+import { renderWithProviders } from "#test/mocks/providers";
 
 describe("ExecutionContainer", () => {
   const defaultProps = {

@@ -25,13 +25,13 @@
     "utils": "pnpm --filter @cartridge/utils",
     "example:next": "pnpm --filter @cartridge/controller-example-next",
     "example:svelte": "pnpm --filter @cartridge/controller-example-svelte",
-    "test": "pnpm keychain test",
-    "test:ci": "pnpm keychain test:ci",
+    "test": "turbo test",
+    "test:ci": "turbo test:ci",
     "test:storybook": "pnpm turbo build:deps test:storybook",
     "test:storybook:update": "pnpm turbo build:deps test:storybook:update"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#c7e6fb7"
+    "@cartridge/presets": "catalog:"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.2",

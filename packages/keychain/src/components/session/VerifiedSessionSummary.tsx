@@ -1,4 +1,4 @@
-import type { SessionContracts, SessionMessages } from "@/hooks/session";
+import type { SessionContracts, SessionMessages } from "#hooks/session";
 import { CodeIcon } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { AggregateCard } from "./AggregateCard";
