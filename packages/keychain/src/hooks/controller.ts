@@ -1,4 +1,4 @@
-import { useConnection } from "./connection";
+import { useConnection } from "#hooks/connection";
 
 export function useController() {
   const { controller, setController } = useConnection();

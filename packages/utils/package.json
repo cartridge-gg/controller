@@ -11,6 +11,10 @@
     "./mock/data": "./dist/mock/data/index.js"
   },
   "imports": {
+    "#hooks/balance": {
+      "test": "./src/hooks/balance.mock.ts",
+      "default": "./src/hooks/balance.ts"
+    },
     "#hooks/tokens": {
       "test": "./src/hooks/tokens.mock.ts",
       "default": "./src/hooks/tokens.ts"

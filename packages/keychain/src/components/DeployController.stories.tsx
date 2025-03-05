@@ -3,21 +3,23 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { DeployController } from "./DeployController";
 import { constants, num } from "starknet";
 import { JsControllerError } from "@cartridge/account-wasm/controller";
-import Controller from "#utils/controller";
+import { useConnection, createMockConnection } from "#hooks/connection.mock";
 
 const meta = {
   component: DeployController,
-  parameters: {
-    connection: {
-      controller: {
-        chainId: () => constants.StarknetChainId.SN_SEPOLIA as string,
-        callContract: () =>
-          Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
-        username: () => "test-account",
-        address: () =>
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-      } as Partial<Controller>,
-    },
+  beforeEach: () => {
+    useConnection.mockReturnValue(
+      createMockConnection({
+        controller: {
+          chainId: () => constants.StarknetChainId.SN_SEPOLIA as string,
+          callContract: () =>
+            Promise.resolve([num.toHex("2000000000000000000"), "0x0"]),
+          username: () => "test-account",
+          address: () =>
+            "0x0000000000000000000000000000000000000000000000000000000000000000",
+        },
+      }),
+    );
   },
 } satisfies Meta<typeof DeployController>;
 

@@ -1,14 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { SessionConsent } from "./SessionConsent";
+import { useConnection, createMockConnection } from "#hooks/connection.mock";
 
 const meta = {
   // tags: ["autodocs"],
   component: SessionConsent,
-  parameters: {
-    connection: {
-      origin: "https://cartridge.gg",
-    },
+  beforeEach: () => {
+    useConnection.mockReturnValue(
+      createMockConnection({
+        origin: "https://cartridge.gg",
+      }),
+    );
   },
   args: {
     isVerified: true,

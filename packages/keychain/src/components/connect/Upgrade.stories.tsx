@@ -1,23 +1,29 @@
 import type { Meta, StoryObj } from "@storybook/react";
-
 import { Upgrade } from "./Upgrade";
-import Controller from "#utils/controller";
-import { constants } from "starknet";
+import {
+  useUpgrade,
+  createMockUpgrade,
+} from "#components/provider/upgrade.mock";
+import { createMockConnection } from "#hooks/connection.mock";
+import { useConnection } from "#hooks/connection.mock";
 
 const meta = {
   component: Upgrade,
-  parameters: {
-    connection: {
-      controller: {
-        username: () => "Account 1",
-        chainId: () => constants.StarknetChainId.SN_MAIN,
-      } as Partial<Controller>,
-      upgrade: {
+  beforeEach: () => {
+    useUpgrade.mockReturnValue(
+      createMockUpgrade({
         latest: {
           changes: ["Update 1", "Update 2", "Update 3"],
         },
-      },
-    },
+      }),
+    );
+    useConnection.mockReturnValue(
+      createMockConnection({
+        controller: {
+          username: () => "Account 1",
+        },
+      }),
+    );
   },
 } satisfies Meta<typeof Upgrade>;
 
