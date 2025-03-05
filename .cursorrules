@@ -1,0 +1,21 @@
+# Cursor Rules for c7e/controller
+
+## Repository Overview
+This repository contains a Starknet smart contract wallet implementation with TypeScript/JavaScript packages for web and Node.js integration.
+
+## Development Guidelines
+- Follow TypeScript best practices with proper typing
+- Use camelCase for variables/functions, PascalCase for components/types
+- Organize imports with external dependencies first, then internal
+- Prefix React hooks with "use"
+- Test new functionality and update storybook snapshots when changing UI
+
+## Common Commands
+- Build: `pnpm build`
+- Lint: `pnpm lint`
+- Format: `pnpm format`
+- Test: `pnpm test`
+- Storybook: `pnpm storybook`
+
+## Error Handling
+Use custom error classes with descriptive codes and messages. Propagate errors properly through promises.

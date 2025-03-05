@@ -1,4 +1,5 @@
 mod account;
+mod factory;
 mod delegate_account {
     mod delegate_account;
     mod interface;

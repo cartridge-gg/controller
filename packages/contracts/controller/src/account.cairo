@@ -4,6 +4,12 @@ use starknet::account::Call;
 use starknet::ContractAddress;
 use argent::signer::signer_signature::{Signer, SignerSignature, SignerType};
 
+#[derive(Drop, Copy, Serde)]
+enum Owner {
+    Signer: Signer,
+    Account: ContractAddress,
+}
+
 #[starknet::interface]
 trait IAssertOwner<TState> {
     fn assert_owner(self: @TState);
@@ -16,7 +22,7 @@ trait ICartridgeAccount<TContractState> {
         ref self: TContractState,
         class_hash: felt252,
         contract_address_salt: felt252,
-        owner: CartridgeAccount::Owner,
+        owner: Owner,
         guardian: Option<Signer>
     ) -> felt252;
 }
@@ -89,6 +95,7 @@ mod CartridgeAccount {
     use controller::multiple_owners::{
         multiple_owners::{multiple_owners_component}, interface::IMultipleOwners
     };
+    use controller::account::Owner;
 
     const TRANSACTION_VERSION: felt252 = 1;
     // 2**128 + TRANSACTION_VERSION
@@ -187,12 +194,6 @@ mod CartridgeAccount {
         SRC5Events: src5_component::Event,
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event
-    }
-
-    #[derive(Drop, Copy, Serde)]
-    enum Owner {
-        Signer: Signer,
-        Account: ContractAddress,
     }
 
     /// @notice Emitted when the account executes a transaction

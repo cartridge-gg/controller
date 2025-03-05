@@ -46,7 +46,9 @@ mod multiple_owners_component {
         fn add_owner(
             ref self: ComponentState<TContractState>, owner: Signer, signature: SignerSignature
         ) {
-            self.get_contract().assert_owner();
+            let mut contract = self.get_contract_mut();
+            contract.assert_owner();
+
             self.assert_valid_owner_signature(signature);
 
             self.owners.write(owner.into_guid(), true);
