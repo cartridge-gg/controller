@@ -16,7 +16,7 @@ import {
   ShapesIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
@@ -34,6 +34,14 @@ enum State {
   SETTINGS,
   RECOVERY,
   DELEGATE,
+}
+
+// Feature flag configuration
+interface FeatureFlags {
+  sessions: boolean;
+  signers: boolean;
+  registeredAccounts: boolean;
+  currency: boolean;
 }
 
 // MOCK DATA
@@ -57,6 +65,17 @@ const registeredAccounts: RegisteredAccount[] = [
 export function Settings() {
   const { logout, closeModal, controller } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
+
+  // Feature flags - can be moved to environment variables or API config later
+  const featureFlags = useMemo<FeatureFlags>(
+    () => ({
+      sessions: false,
+      signers: true,
+      registeredAccounts: false,
+      currency: false,
+    }),
+    [],
+  );
   const data = useSignerQuery(
     {
       username:
@@ -100,10 +119,9 @@ export function Settings() {
           hideSettings
         />
 
-        {/* Hide the settings screen until API integration is done */}
-        {process.env.NODE_ENV === "development" && (
-          <LayoutContent className="gap-6">
-            {/* SESSION */}
+        <LayoutContent className="gap-6">
+          {/* SESSION */}
+          {featureFlags.sessions && (
             <section className="space-y-4">
               <SectionHeader
                 title="Session Key(s)"
@@ -111,8 +129,9 @@ export function Settings() {
                 showStatus={true}
               />
               <div className="space-y-3">
-                {sessions.map((i) => (
+                {sessions.map((i, index) => (
                   <SessionCard
+                    key={index}
                     sessionName={i.sessionName}
                     expiresAt={i.expiresAt}
                   />
@@ -129,8 +148,10 @@ export function Settings() {
                 </span>
               </Button>
             </section>
+          )}
 
-            {/* SIGNER */}
+          {/* SIGNER */}
+          {featureFlags.signers && (
             <section className="space-y-4">
               <SectionHeader
                 title="Signer(s)"
@@ -142,11 +163,11 @@ export function Settings() {
                 ) : data.isError ? (
                   <div>Error</div>
                 ) : data.isSuccess && data.data ? (
-                  data.data?.account?.controllers.edges?.map((i) =>
-                    i?.node?.signers?.map((j) => {
+                  data.data?.account?.controllers.edges?.map((i, edgeIndex) =>
+                    i?.node?.signers?.map((j, signerIndex) => {
                       return (
                         <SignerCard
-                          signerName={controller?.username() as string}
+                          key={`${edgeIndex}-${signerIndex}`}
                           signerType={j.type}
                         />
                       );
@@ -156,27 +177,31 @@ export function Settings() {
                   <div>No data</div>
                 )}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="py-2.5 px-3 text-foreground-300 gap-1"
-              >
-                <PlusIcon size="sm" variant="line" />
-                <span className="normal-case font-normal font-sans text-sm">
-                  Add Signer
-                </span>
-              </Button>
+              {/* disabled until add signer functionality is implemented */}
+              {/* <Button */}
+              {/*   type="button" */}
+              {/*   variant="outline" */}
+              {/*   className="py-2.5 px-3 text-foreground-300 gap-1" */}
+              {/* > */}
+              {/*   <PlusIcon size="sm" variant="line" /> */}
+              {/*   <span className="normal-case font-normal font-sans text-sm"> */}
+              {/*     Add Signer */}
+              {/*   </span> */}
+              {/* </Button> */}
             </section>
+          )}
 
-            {/* REGISTERED ACCOUNT */}
+          {/* REGISTERED ACCOUNT */}
+          {featureFlags.registeredAccounts && (
             <section className="space-y-4">
               <SectionHeader
                 title="Registered Account"
                 description="Information associated with registered accounts can be made available to games and applications."
               />
               <div className="space-y-3">
-                {registeredAccounts.map((i) => (
+                {registeredAccounts.map((i, index) => (
                   <RegisteredAccountCard
+                    key={index}
                     accountName={i.accountName}
                     accountAddress={i.accountAddress}
                   />
@@ -193,8 +218,10 @@ export function Settings() {
                 </span>
               </Button>
             </section>
+          )}
 
-            {/* CURRENCY */}
+          {/* CURRENCY */}
+          {featureFlags.currency && (
             <section className="space-y-4">
               <SectionHeader
                 title="Currency"
@@ -202,8 +229,8 @@ export function Settings() {
               />
               <CurrencySelect />
             </section>
-          </LayoutContent>
-        )}
+          )}
+        </LayoutContent>
 
         <LayoutFooter>
           <SheetTrigger asChild>
