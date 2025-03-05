@@ -45,7 +45,7 @@ describe("parseChainId", () => {
 
     test("identifies slot mainnet chain on localhost", () => {
       expect(parseChainId(new URL("http://localhost:5050"))).toBe(
-        shortString.encodeShortString("LOCAL_KATANA"),
+        shortString.encodeShortString("KATANA"),
       );
     });
   });

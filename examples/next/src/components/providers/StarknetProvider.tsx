@@ -118,7 +118,7 @@ const controller = new ControllerConnector({
         "https://api.cartridge.gg/x/starknet/mainnet",
     },
   ],
-  defaultChainId: LOCAL_CHAIN_ID,
+  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
   url:
     process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL,
@@ -144,8 +144,10 @@ const controller = new ControllerConnector({
 
 const session = new SessionConnector({
   policies,
-  rpc: process.env.NEXT_PUBLIC_RPC_LOCAL ?? "http://localhost:5050",
-  chainId: LOCAL_CHAIN_ID,
+  rpc:
+    process.env.NEXT_PUBLIC_RPC_SEPOLIA ??
+    "https://api.cartridge.gg/x/starknet/sepolia",
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   keychainUrl: "http://localhost:3001",
 });

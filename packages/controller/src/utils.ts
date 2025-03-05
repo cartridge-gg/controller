@@ -15,7 +15,7 @@ import { ChainId } from "@starknet-io/types-js";
 import { ParsedSessionPolicies } from "./policies";
 
 export const LOCAL_CHAIN_ID = shortString.encodeShortString(
-  "LOCAL_KATANA",
+  "KATANA",
 ) as ChainId;
 
 // Whitelist of allowed property names to prevent prototype pollution

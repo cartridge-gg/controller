@@ -54,8 +54,6 @@ class ControllerAccount extends WalletAccount {
    * @returns response from addTransaction
    */
   async execute(calls: AllowArray<Call>): Promise<InvokeFunctionResponse> {
-    console.log("account->execute", calls, this);
-
     calls = toArray(calls);
 
     return new Promise(async (resolve, reject) => {
