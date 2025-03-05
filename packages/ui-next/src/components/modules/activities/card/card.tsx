@@ -7,7 +7,7 @@ export const activityCardVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-background-200",
+        default: "bg-background-200 hover:bg-background-300 cursor-pointer",
       },
     },
     defaultVariants: {
@@ -17,7 +17,8 @@ export const activityCardVariants = cva(
 );
 
 export interface ActivityCardProps
-  extends VariantProps<typeof activityCardVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof activityCardVariants> {
   Logo: React.ReactNode;
   title: string;
   subTitle: string | React.ReactNode;
@@ -38,12 +39,14 @@ export const ActivityCard = ({
   loading,
   variant,
   className,
+  ...props
 }: ActivityCardProps) => {
   return (
     <div
       data-loading={loading}
       data-error={error}
       className={cn(activityCardVariants({ variant }), className)}
+      {...props}
     >
       {Logo}
       <div className="flex flex-col gap-0.5 items-stretch grow">

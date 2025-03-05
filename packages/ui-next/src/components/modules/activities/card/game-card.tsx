@@ -7,7 +7,8 @@ import ActivityCard, {
 } from "./card";
 
 export interface ActivityGameCardProps
-  extends VariantProps<typeof activityCardVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof activityCardVariants> {
   title: string;
   website: string;
   image: string;
@@ -26,6 +27,7 @@ export const ActivityGameCard = ({
   certified,
   variant,
   className,
+  ...props
 }: ActivityGameCardProps) => {
   const Icon = useMemo(
     () => <JoystickIcon className="w-full h-full" variant="solid" />,
@@ -59,6 +61,7 @@ export const ActivityGameCard = ({
       loading={loading}
       variant={variant}
       className={className}
+      {...props}
     />
   );
 };

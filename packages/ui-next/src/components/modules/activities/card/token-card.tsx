@@ -11,7 +11,8 @@ import ActivityCard, { activityCardVariants } from "./card";
 import { formatAddress } from "@cartridge/utils";
 
 export interface ActivityTokenCardProps
-  extends VariantProps<typeof activityCardVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof activityCardVariants> {
   amount: string;
   address: string;
   value: string;
@@ -32,6 +33,7 @@ export const ActivityTokenCard = ({
   loading,
   variant,
   className,
+  ...props
 }: ActivityTokenCardProps) => {
   const Icon = useMemo(() => {
     switch (action) {
@@ -94,6 +96,7 @@ export const ActivityTokenCard = ({
       loading={loading}
       variant={variant}
       className={className}
+      {...props}
     />
   );
 };

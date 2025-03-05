@@ -13,7 +13,8 @@ import ActivityCard, {
 } from "./card";
 
 export interface ActivityAchievementCardProps
-  extends VariantProps<typeof activityCardVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof activityCardVariants> {
   title: string;
   topic: string;
   points: number;
@@ -36,6 +37,7 @@ export const ActivityAchievementCard = ({
   certified,
   variant,
   className,
+  ...props
 }: ActivityAchievementCardProps) => {
   const Icon = useMemo(
     () => (
@@ -86,6 +88,7 @@ export const ActivityAchievementCard = ({
       loading={loading}
       variant={variant}
       className={className}
+      {...props}
     />
   );
 };
