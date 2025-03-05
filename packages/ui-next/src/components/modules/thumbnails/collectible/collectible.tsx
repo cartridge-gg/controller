@@ -1,7 +1,6 @@
 import { cn, Thumbnail } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
-
-const PLACEHOLDER = "https://profile.cartridge.gg/placeholder.svg";
+import { PLACEHOLDER } from "@/assets";
 
 const thumbnailCollectibleVariants = cva("border-transparent", {
   variants: {

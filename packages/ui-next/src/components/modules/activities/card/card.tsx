@@ -46,31 +46,22 @@ export const ActivityCard = ({
       className={cn(activityCardVariants({ variant }), className)}
     >
       {Logo}
-      <div className="flex flex-col gap-0.5 items-start grow">
-        <p className="text-sm font-medium">{title}</p>
+      <div className="flex flex-col gap-0.5 items-stretch grow">
         <div
           data-error={error}
-          className="flex text-foreground-300 text-xs data-[error]:text-destructive-100"
+          className="flex items-center gap-1 justify-between text-sm font-medium capitalize data-[error]:text-destructive-100"
+        >
+          <p>{title}</p>
+          {!!topic && <p>{topic}</p>}
+        </div>
+        <div
+          data-error={error}
+          className="flex items-center gap-1 justify-between text-xs text-foreground-300 data-[error]:text-destructive-100"
         >
           {subTitle}
+          {!!subTopic && subTopic}
         </div>
       </div>
-      {(!!topic || !!subTopic) && (
-        <div
-          data-error={error}
-          className="flex flex-col gap-0.5 items-end data-[error]:text-destructive-100"
-        >
-          {!!topic && <p className="text-sm font-medium">{topic}</p>}
-          {!!subTopic && (
-            <div
-              data-error={error}
-              className="flex text-foreground-300 text-xs data-[error]:text-destructive-100"
-            >
-              {subTopic}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
