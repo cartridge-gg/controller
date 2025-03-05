@@ -50,7 +50,7 @@ export const AchievementPinIcons = ({
           empty
           variant={variant}
           size={size}
-          theme={theme}
+          theme={false}
         />
       ))}
     </div>
