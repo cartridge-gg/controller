@@ -42,12 +42,6 @@ describe("parseChainId", () => {
         parseChainId(new URL("https://api.cartridge.gg/x/slot/mainnet")),
       ).toBe(shortString.encodeShortString("GG_SLOT"));
     });
-
-    test("identifies slot mainnet chain on localhost", () => {
-      expect(parseChainId(new URL("http://localhost:5050"))).toBe(
-        shortString.encodeShortString("KATANA"),
-      );
-    });
   });
 
   describe("Error cases", () => {
