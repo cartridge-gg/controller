@@ -16,7 +16,7 @@ import {
   CopyAddress,
   Separator,
 } from "@cartridge/ui-next";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
@@ -66,20 +66,20 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, closeModal, controller } = useConnection();
-  const { disconnect } = useDisconnect();
+  const {disconnect} = useDisconnect();
   const [state, setState] = useState<State>(State.SETTINGS);
 
-  const handleLogout = () => {
-    disconnect();
-    logout();
+  const handleLogout = useCallback(() => {
     try {
-      // Attempt to send postMessage with wildcard origin
+      logout();
+      disconnect();
+      // Send a message to the parent window to reload the controller
       window.parent.postMessage("controller-reload", "*");
+      closeModal();
     } catch (error) {
       console.error("Error sending reload message:", error);
     }
-    closeModal();
-  };
+  }, [logout, closeModal]);
 
   if (state === State.RECOVERY) {
     return <Recovery onBack={() => setState(State.SETTINGS)} />;
