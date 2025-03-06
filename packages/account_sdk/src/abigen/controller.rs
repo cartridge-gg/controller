@@ -137,6 +137,14 @@ impl cainome::cairo_serde::CairoSerde for DelegateAccountChanged {
         Ok(DelegateAccountChanged { address })
     }
 }
+impl DelegateAccountChanged {
+    pub fn event_selector() -> starknet::core::types::Felt {
+        starknet::core::utils::get_selector_from_name("DelegateAccountChanged").unwrap()
+    }
+    pub fn event_name() -> &'static str {
+        "DelegateAccountChanged"
+    }
+}
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub struct Eip191Signer {
     pub eth_address: cainome::cairo_serde::EthAddress,
@@ -197,6 +205,14 @@ impl cainome::cairo_serde::CairoSerde for ExternalOwnerRegistered {
         Ok(ExternalOwnerRegistered { address })
     }
 }
+impl ExternalOwnerRegistered {
+    pub fn event_selector() -> starknet::core::types::Felt {
+        starknet::core::utils::get_selector_from_name("ExternalOwnerRegistered").unwrap()
+    }
+    pub fn event_name() -> &'static str {
+        "ExternalOwnerRegistered"
+    }
+}
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub struct ExternalOwnerRemoved {
     pub address: cainome::cairo_serde::ContractAddress,
@@ -225,6 +241,14 @@ impl cainome::cairo_serde::CairoSerde for ExternalOwnerRemoved {
         let address = cainome::cairo_serde::ContractAddress::cairo_deserialize(__felts, __offset)?;
         __offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&address);
         Ok(ExternalOwnerRemoved { address })
+    }
+}
+impl ExternalOwnerRemoved {
+    pub fn event_selector() -> starknet::core::types::Felt {
+        starknet::core::utils::get_selector_from_name("ExternalOwnerRemoved").unwrap()
+    }
+    pub fn event_name() -> &'static str {
+        "ExternalOwnerRemoved"
     }
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
@@ -325,6 +349,14 @@ impl cainome::cairo_serde::CairoSerde for OwnerAdded {
         Ok(OwnerAdded { owner })
     }
 }
+impl OwnerAdded {
+    pub fn event_selector() -> starknet::core::types::Felt {
+        starknet::core::utils::get_selector_from_name("OwnerAdded").unwrap()
+    }
+    pub fn event_name() -> &'static str {
+        "OwnerAdded"
+    }
+}
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub struct OwnerRemoved {
     pub owner: Signer,
@@ -351,6 +383,14 @@ impl cainome::cairo_serde::CairoSerde for OwnerRemoved {
         let owner = Signer::cairo_deserialize(__felts, __offset)?;
         __offset += Signer::cairo_serialized_size(&owner);
         Ok(OwnerRemoved { owner })
+    }
+}
+impl OwnerRemoved {
+    pub fn event_selector() -> starknet::core::types::Felt {
+        starknet::core::utils::get_selector_from_name("OwnerRemoved").unwrap()
+    }
+    pub fn event_name() -> &'static str {
+        "OwnerRemoved"
     }
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
@@ -521,6 +561,14 @@ impl cainome::cairo_serde::CairoSerde for SessionRegistered {
         Ok(SessionRegistered { session_hash })
     }
 }
+impl SessionRegistered {
+    pub fn event_selector() -> starknet::core::types::Felt {
+        starknet::core::utils::get_selector_from_name("SessionRegistered").unwrap()
+    }
+    pub fn event_name() -> &'static str {
+        "SessionRegistered"
+    }
+}
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub struct SessionRevoked {
     pub session_hash: starknet::core::types::Felt,
@@ -549,6 +597,14 @@ impl cainome::cairo_serde::CairoSerde for SessionRevoked {
         let session_hash = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
         __offset += starknet::core::types::Felt::cairo_serialized_size(&session_hash);
         Ok(SessionRevoked { session_hash })
+    }
+}
+impl SessionRevoked {
+    pub fn event_selector() -> starknet::core::types::Felt {
+        starknet::core::utils::get_selector_from_name("SessionRevoked").unwrap()
+    }
+    pub fn event_name() -> &'static str {
+        "SessionRevoked"
     }
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
@@ -767,6 +823,14 @@ impl cainome::cairo_serde::CairoSerde for TransactionExecuted {
         Ok(TransactionExecuted { hash, response })
     }
 }
+impl TransactionExecuted {
+    pub fn event_selector() -> starknet::core::types::Felt {
+        starknet::core::utils::get_selector_from_name("TransactionExecuted").unwrap()
+    }
+    pub fn event_name() -> &'static str {
+        "TransactionExecuted"
+    }
+}
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub struct TypedData {
     pub scope_hash: starknet::core::types::Felt,
@@ -835,6 +899,14 @@ impl cainome::cairo_serde::CairoSerde for Upgraded {
         let class_hash = cainome::cairo_serde::ClassHash::cairo_deserialize(__felts, __offset)?;
         __offset += cainome::cairo_serde::ClassHash::cairo_serialized_size(&class_hash);
         Ok(Upgraded { class_hash })
+    }
+}
+impl Upgraded {
+    pub fn event_selector() -> starknet::core::types::Felt {
+        starknet::core::utils::get_selector_from_name("Upgraded").unwrap()
+    }
+    pub fn event_name() -> &'static str {
+        "Upgraded"
     }
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
@@ -1097,9 +1169,241 @@ impl cainome::cairo_serde::CairoSerde for ControllerEvent {
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for ControllerEvent {
+impl TryFrom<&starknet::core::types::EmittedEvent> for ControllerEvent {
     type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: &starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("TransactionExecuted")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "TransactionExecuted"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let hash = match starknet::core::types::Felt::cairo_deserialize(&event.keys, key_offset)
+            {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "hash", "TransactionExecuted", e
+                    ));
+                }
+            };
+            key_offset += starknet::core::types::Felt::cairo_serialized_size(&hash);
+            let response = match Vec::<Vec<starknet::core::types::Felt>>::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "response", "TransactionExecuted", e
+                    ));
+                }
+            };
+            data_offset +=
+                Vec::<Vec<starknet::core::types::Felt>>::cairo_serialized_size(&response);
+            return Ok(ControllerEvent::TransactionExecuted(TransactionExecuted {
+                hash,
+                response,
+            }));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("OwnerAdded")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "OwnerAdded"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let owner = match Signer::cairo_deserialize(&event.data, data_offset) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "owner", "OwnerAdded", e
+                    ));
+                }
+            };
+            data_offset += Signer::cairo_serialized_size(&owner);
+            return Ok(ControllerEvent::MultipleOwnersEvent(
+                MultipleOwnersEvent::OwnerAdded(OwnerAdded { owner }),
+            ));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("OwnerRemoved")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "OwnerRemoved"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let owner = match Signer::cairo_deserialize(&event.data, data_offset) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "owner", "OwnerRemoved", e
+                    ));
+                }
+            };
+            data_offset += Signer::cairo_serialized_size(&owner);
+            return Ok(ControllerEvent::MultipleOwnersEvent(
+                MultipleOwnersEvent::OwnerRemoved(OwnerRemoved { owner }),
+            ));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("SessionRevoked")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "SessionRevoked"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let session_hash =
+                match starknet::core::types::Felt::cairo_deserialize(&event.data, data_offset) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        return Err(format!(
+                            "Could not deserialize field {} for {}: {:?}",
+                            "session_hash", "SessionRevoked", e
+                        ));
+                    }
+                };
+            data_offset += starknet::core::types::Felt::cairo_serialized_size(&session_hash);
+            return Ok(ControllerEvent::SessionEvent(SessionEvent::SessionRevoked(
+                SessionRevoked { session_hash },
+            )));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("SessionRegistered")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "SessionRegistered"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let session_hash =
+                match starknet::core::types::Felt::cairo_deserialize(&event.data, data_offset) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        return Err(format!(
+                            "Could not deserialize field {} for {}: {:?}",
+                            "session_hash", "SessionRegistered", e
+                        ));
+                    }
+                };
+            data_offset += starknet::core::types::Felt::cairo_serialized_size(&session_hash);
+            return Ok(ControllerEvent::SessionEvent(
+                SessionEvent::SessionRegistered(SessionRegistered { session_hash }),
+            ));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("ExternalOwnerRegistered")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "ExternalOwnerRegistered"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let address = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "address", "ExternalOwnerRegistered", e
+                    ));
+                }
+            };
+            data_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&address);
+            return Ok(ControllerEvent::ExternalOwnersEvent(
+                ExternalOwnersEvent::ExternalOwnerRegistered(ExternalOwnerRegistered { address }),
+            ));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("ExternalOwnerRemoved")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "ExternalOwnerRemoved"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let address = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "address", "ExternalOwnerRemoved", e
+                    ));
+                }
+            };
+            data_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&address);
+            return Ok(ControllerEvent::ExternalOwnersEvent(
+                ExternalOwnersEvent::ExternalOwnerRemoved(ExternalOwnerRemoved { address }),
+            ));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("DelegateAccountChanged")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "DelegateAccountChanged"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let address = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "address", "DelegateAccountChanged", e
+                    ));
+                }
+            };
+            data_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&address);
+            return Ok(ControllerEvent::DelegateAccountEvents(
+                DelegateAccountEvent::DelegateAccountChanged(DelegateAccountChanged { address }),
+            ));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("Upgraded")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Upgraded"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let class_hash = match cainome::cairo_serde::ClassHash::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "class_hash", "Upgraded", e
+                    ));
+                }
+            };
+            data_offset += cainome::cairo_serde::ClassHash::cairo_serialized_size(&class_hash);
+            return Ok(ControllerEvent::UpgradeableEvent(UpgradeEvent::Upgraded(
+                Upgraded { class_hash },
+            )));
+        }
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+impl TryFrom<&starknet::core::types::Event> for ControllerEvent {
+    type Error = String;
+    fn try_from(event: &starknet::core::types::Event) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
         if event.keys.is_empty() {
             return Err("Event has no key".to_string());
@@ -1375,9 +1679,46 @@ impl cainome::cairo_serde::CairoSerde for DelegateAccountEvent {
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for DelegateAccountEvent {
+impl TryFrom<&starknet::core::types::EmittedEvent> for DelegateAccountEvent {
     type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: &starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("DelegateAccountChanged")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "DelegateAccountChanged"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let address = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "address", "DelegateAccountChanged", e
+                    ));
+                }
+            };
+            data_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&address);
+            return Ok(DelegateAccountEvent::DelegateAccountChanged(
+                DelegateAccountChanged { address },
+            ));
+        }
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+impl TryFrom<&starknet::core::types::Event> for DelegateAccountEvent {
+    type Error = String;
+    fn try_from(event: &starknet::core::types::Event) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
         if event.keys.is_empty() {
             return Err("Event has no key".to_string());
@@ -1471,9 +1812,70 @@ impl cainome::cairo_serde::CairoSerde for ExternalOwnersEvent {
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for ExternalOwnersEvent {
+impl TryFrom<&starknet::core::types::EmittedEvent> for ExternalOwnersEvent {
     type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: &starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("ExternalOwnerRegistered")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "ExternalOwnerRegistered"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let address = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "address", "ExternalOwnerRegistered", e
+                    ));
+                }
+            };
+            data_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&address);
+            return Ok(ExternalOwnersEvent::ExternalOwnerRegistered(
+                ExternalOwnerRegistered { address },
+            ));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("ExternalOwnerRemoved")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "ExternalOwnerRemoved"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let address = match cainome::cairo_serde::ContractAddress::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "address", "ExternalOwnerRemoved", e
+                    ));
+                }
+            };
+            data_offset += cainome::cairo_serde::ContractAddress::cairo_serialized_size(&address);
+            return Ok(ExternalOwnersEvent::ExternalOwnerRemoved(
+                ExternalOwnerRemoved { address },
+            ));
+        }
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+impl TryFrom<&starknet::core::types::Event> for ExternalOwnersEvent {
+    type Error = String;
+    fn try_from(event: &starknet::core::types::Event) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
         if event.keys.is_empty() {
             return Err("Event has no key".to_string());
@@ -1587,9 +1989,60 @@ impl cainome::cairo_serde::CairoSerde for MultipleOwnersEvent {
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for MultipleOwnersEvent {
+impl TryFrom<&starknet::core::types::EmittedEvent> for MultipleOwnersEvent {
     type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: &starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("OwnerAdded")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "OwnerAdded"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let owner = match Signer::cairo_deserialize(&event.data, data_offset) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "owner", "OwnerAdded", e
+                    ));
+                }
+            };
+            data_offset += Signer::cairo_serialized_size(&owner);
+            return Ok(MultipleOwnersEvent::OwnerAdded(OwnerAdded { owner }));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("OwnerRemoved")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "OwnerRemoved"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let owner = match Signer::cairo_deserialize(&event.data, data_offset) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "owner", "OwnerRemoved", e
+                    ));
+                }
+            };
+            data_offset += Signer::cairo_serialized_size(&owner);
+            return Ok(MultipleOwnersEvent::OwnerRemoved(OwnerRemoved { owner }));
+        }
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+impl TryFrom<&starknet::core::types::Event> for MultipleOwnersEvent {
+    type Error = String;
+    fn try_from(event: &starknet::core::types::Event) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
         if event.keys.is_empty() {
             return Err("Event has no key".to_string());
@@ -1670,9 +2123,22 @@ impl cainome::cairo_serde::CairoSerde for OutsideExecutionV3Event {
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for OutsideExecutionV3Event {
+impl TryFrom<&starknet::core::types::EmittedEvent> for OutsideExecutionV3Event {
     type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: &starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+impl TryFrom<&starknet::core::types::Event> for OutsideExecutionV3Event {
+    type Error = String;
+    fn try_from(event: &starknet::core::types::Event) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
         if event.keys.is_empty() {
             return Err("Event has no key".to_string());
@@ -1773,9 +2239,22 @@ impl cainome::cairo_serde::CairoSerde for ReentrancyGuardEvent {
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for ReentrancyGuardEvent {
+impl TryFrom<&starknet::core::types::EmittedEvent> for ReentrancyGuardEvent {
     type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: &starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+impl TryFrom<&starknet::core::types::Event> for ReentrancyGuardEvent {
+    type Error = String;
+    fn try_from(event: &starknet::core::types::Event) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
         if event.keys.is_empty() {
             return Err("Event has no key".to_string());
@@ -1843,9 +2322,66 @@ impl cainome::cairo_serde::CairoSerde for SessionEvent {
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for SessionEvent {
+impl TryFrom<&starknet::core::types::EmittedEvent> for SessionEvent {
     type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: &starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("SessionRevoked")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "SessionRevoked"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let session_hash =
+                match starknet::core::types::Felt::cairo_deserialize(&event.data, data_offset) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        return Err(format!(
+                            "Could not deserialize field {} for {}: {:?}",
+                            "session_hash", "SessionRevoked", e
+                        ));
+                    }
+                };
+            data_offset += starknet::core::types::Felt::cairo_serialized_size(&session_hash);
+            return Ok(SessionEvent::SessionRevoked(SessionRevoked {
+                session_hash,
+            }));
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("SessionRegistered")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "SessionRegistered"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let session_hash =
+                match starknet::core::types::Felt::cairo_deserialize(&event.data, data_offset) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        return Err(format!(
+                            "Could not deserialize field {} for {}: {:?}",
+                            "session_hash", "SessionRegistered", e
+                        ));
+                    }
+                };
+            data_offset += starknet::core::types::Felt::cairo_serialized_size(&session_hash);
+            return Ok(SessionEvent::SessionRegistered(SessionRegistered {
+                session_hash,
+            }));
+        }
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+impl TryFrom<&starknet::core::types::Event> for SessionEvent {
+    type Error = String;
+    fn try_from(event: &starknet::core::types::Event) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
         if event.keys.is_empty() {
             return Err("Event has no key".to_string());
@@ -2129,9 +2665,22 @@ impl cainome::cairo_serde::CairoSerde for Src5ComponentEvent {
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for Src5ComponentEvent {
+impl TryFrom<&starknet::core::types::EmittedEvent> for Src5ComponentEvent {
     type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: &starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+impl TryFrom<&starknet::core::types::Event> for Src5ComponentEvent {
+    type Error = String;
+    fn try_from(event: &starknet::core::types::Event) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
         if event.keys.is_empty() {
             return Err("Event has no key".to_string());
@@ -2187,9 +2736,44 @@ impl cainome::cairo_serde::CairoSerde for UpgradeEvent {
         }
     }
 }
-impl TryFrom<starknet::core::types::EmittedEvent> for UpgradeEvent {
+impl TryFrom<&starknet::core::types::EmittedEvent> for UpgradeEvent {
     type Error = String;
-    fn try_from(event: starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: &starknet::core::types::EmittedEvent) -> Result<Self, Self::Error> {
+        use cainome::cairo_serde::CairoSerde;
+        if event.keys.is_empty() {
+            return Err("Event has no key".to_string());
+        }
+        let selector = event.keys[0];
+        if selector
+            == starknet::core::utils::get_selector_from_name("Upgraded")
+                .unwrap_or_else(|_| panic!("Invalid selector for {}", "Upgraded"))
+        {
+            let mut key_offset = 0 + 1;
+            let mut data_offset = 0;
+            let class_hash = match cainome::cairo_serde::ClassHash::cairo_deserialize(
+                &event.data,
+                data_offset,
+            ) {
+                Ok(v) => v,
+                Err(e) => {
+                    return Err(format!(
+                        "Could not deserialize field {} for {}: {:?}",
+                        "class_hash", "Upgraded", e
+                    ));
+                }
+            };
+            data_offset += cainome::cairo_serde::ClassHash::cairo_serialized_size(&class_hash);
+            return Ok(UpgradeEvent::Upgraded(Upgraded { class_hash }));
+        }
+        Err(format!(
+            "Could not match any event from keys {:?}",
+            event.keys
+        ))
+    }
+}
+impl TryFrom<&starknet::core::types::Event> for UpgradeEvent {
+    type Error = String;
+    fn try_from(event: &starknet::core::types::Event) -> Result<Self, Self::Error> {
         use cainome::cairo_serde::CairoSerde;
         if event.keys.is_empty() {
             return Err("Event has no key".to_string());
