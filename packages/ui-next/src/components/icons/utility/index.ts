@@ -16,7 +16,7 @@ export * from "./dots";
 export * from "./double-wedge";
 export * from "./external";
 // Not sure why but it breaks Profile app
-// export * from "./fingerprint";
+export * from "./fingerprint";
 export * from "./fullscreen";
 export * from "./gear";
 export * from "./gift";
