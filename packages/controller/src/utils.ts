@@ -5,6 +5,7 @@ import {
   constants,
   getChecksumAddress,
   hash,
+  Provider,
   shortString,
   typedData,
   TypedDataRevision,
@@ -26,6 +27,8 @@ const ALLOWED_PROPERTIES = new Set([
   "domain",
   "primaryType",
 ]);
+
+const LOCAL_HOSTNAMES = ["localhost", "127.0.0.1", "0.0.0.0"];
 
 function validatePropertyName(prop: string): void {
   if (!ALLOWED_PROPERTIES.has(prop)) {
@@ -136,7 +139,7 @@ export function humanizeString(str: string): string {
   );
 }
 
-export function parseChainId(url: URL): ChainId {
+export async function parseChainId(url: URL): Promise<ChainId> {
   const parts = url.pathname.split("/");
 
   if (parts.includes("starknet")) {
@@ -156,6 +159,13 @@ export function parseChainId(url: URL): ChainId {
         `GG_${projectName.toUpperCase().replace(/-/g, "_")}`,
       ) as ChainId;
     }
+  }
+
+  if (LOCAL_HOSTNAMES.includes(url.hostname)) {
+    const provider = new Provider({
+      nodeUrl: url.toString(),
+    });
+    return await provider.getChainId();
   }
 
   throw new Error(`Chain ${url.toString()} not supported`);
