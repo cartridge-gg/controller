@@ -32,33 +32,8 @@ export default class ControllerProvider extends BaseProvider {
   constructor(options: ControllerOptions) {
     super();
 
-    const chains = new Map<ChainId, Chain>();
-
-    for (const chain of options.chains) {
-      const url = new URL(chain.rpcUrl);
-      const chainId = parseChainId(url);
-      chains.set(chainId, chain);
-    }
-
-    if (
-      options.policies?.messages?.length &&
-      options.policies.messages.length !== chains.size
-    ) {
-      console.warn(
-        "Each message policy is associated with a specific chain. " +
-          "The number of message policies does not match the number of chains specified - " +
-          "session message signing may not work on some chains.",
-      );
-    }
-
-    this.chains = chains;
     this.selectedChain = options.defaultChainId;
-
-    if (!this.chains.has(this.selectedChain)) {
-      throw new Error(
-        `Chain ${this.selectedChain} not found in configured chains`,
-      );
-    }
+    this.chains = new Map<ChainId, Chain>();
 
     this.iframes = {
       keychain: new KeychainIFrame({
@@ -71,6 +46,8 @@ export default class ControllerProvider extends BaseProvider {
     };
 
     this.options = options;
+
+    this.validateChains(options.chains);
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;
@@ -367,6 +344,25 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return await this.keychain.delegateAccount();
+  }
+
+  private async validateChains(chains: Chain[]) {
+    for (const chain of chains) {
+      try {
+        const url = new URL(chain.rpcUrl);
+        const chainId = await parseChainId(url);
+        this.chains.set(chainId, chain);
+      } catch (error) {
+        console.error(`Failed to parse chainId for ${chain.rpcUrl}:`, error);
+      }
+    }
+
+    if (!this.chains.has(this.selectedChain)) {
+      console.warn(
+        `Selected chain ${this.selectedChain} not found in configured chains. ` +
+          `Available chains: ${Array.from(this.chains.keys()).join(", ")}`,
+      );
+    }
   }
 
   private waitForKeychain({

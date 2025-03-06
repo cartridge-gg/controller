@@ -9,9 +9,8 @@ import {
 import { PropsWithChildren } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { SessionPolicies } from "@cartridge/controller";
-import { constants } from "starknet";
+import { constants, num, shortString } from "starknet";
 import SessionConnector from "@cartridge/connector/session";
-import { LOCAL_CHAIN_ID } from "@cartridge/controller";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -92,49 +91,60 @@ const provider = jsonRpcProvider({
   rpc: (chain: Chain) => {
     switch (chain) {
       case mainnet:
-        return { nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet" };
+        return { nodeUrl: process.env.NEXT_PUBLIC_RPC_MAINNET! };
       case sepolia:
-        return { nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia" };
+        return { nodeUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA! };
+      case localKatana:
+        return { nodeUrl: process.env.NEXT_PUBLIC_RPC_LOCAL! };
       default:
-        return { nodeUrl: "http://localhost:5050" };
+        return null;
     }
   },
 });
+
+const localKatana: Chain = {
+  id: num.toBigInt(shortString.encodeShortString("KATANA")),
+  network: "local",
+  name: "Katana",
+  rpcUrls: {
+    default: {
+      http: [process.env.NEXT_PUBLIC_RPC_LOCAL!],
+    },
+    public: {
+      http: [process.env.NEXT_PUBLIC_RPC_LOCAL!],
+    },
+  },
+  nativeCurrency: {
+    name: "Starknet",
+    symbol: "STRK",
+    decimals: 18,
+    address: STRK_CONTRACT_ADDRESS,
+  },
+};
 
 const controller = new ControllerConnector({
   policies,
   chains: [
     {
-      rpcUrl: process.env.NEXT_PUBLIC_RPC_LOCAL ?? "http://localhost:5050",
+      rpcUrl: process.env.NEXT_PUBLIC_RPC_LOCAL!,
     },
     {
-      rpcUrl:
-        process.env.NEXT_PUBLIC_RPC_SEPOLIA ??
-        "https://api.cartridge.gg/x/starknet/sepolia",
+      rpcUrl: process.env.NEXT_PUBLIC_RPC_SEPOLIA!,
     },
     {
-      rpcUrl:
-        process.env.NEXT_PUBLIC_RPC_MAINNET ??
-        "https://api.cartridge.gg/x/starknet/mainnet",
+      rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET!,
     },
   ],
-  defaultChainId: LOCAL_CHAIN_ID,
+  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
   url:
     process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL,
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
-  // slot: "profile-example",
   slot: "ryomainnet",
   preset: "dope-wars",
   // namespace: "dopewars",
-  // slot: "eternum-prod",
-  // preset: "eternum",
-  // namespace: "s0_eternum",
-  // slot: "darkshuffle-mainnet",
-  // preset: "dark-shuffle",
-  // namespace: "darkshuffle_s0",
   tokens: {
     erc20: [
       "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
@@ -144,17 +154,17 @@ const controller = new ControllerConnector({
 
 const session = new SessionConnector({
   policies,
-  rpc: process.env.NEXT_PUBLIC_RPC_LOCAL ?? "http://localhost:5050",
-  chainId: LOCAL_CHAIN_ID,
+  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
-  keychainUrl: "http://localhost:3001",
+  keychainUrl: process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL,
 });
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      chains={[mainnet, sepolia]}
+      chains={[mainnet, sepolia, localKatana]}
       connectors={[controller, session]}
       explorer={starkscan}
       provider={provider}

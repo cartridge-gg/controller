@@ -13,7 +13,6 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { constants, num, shortString } from "starknet";
 import { Chain } from "@starknet-react/chains";
 import SessionConnector from "@cartridge/connector/session";
-import { LOCAL_CHAIN_ID } from "@cartridge/controller";
 
 const Header = () => {
   const { connect, connectors } = useConnect();
@@ -100,17 +99,6 @@ const Header = () => {
                   {c.network}
                 </button>
               ))}
-              <button
-                className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
-                onClick={() => {
-                  switchChain({
-                    chainId: LOCAL_CHAIN_ID,
-                  });
-                  setNetworkOpen(false);
-                }}
-              >
-                katana
-              </button>
               <button
                 className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
                 onClick={() => {

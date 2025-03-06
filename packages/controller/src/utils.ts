@@ -5,6 +5,7 @@ import {
   constants,
   getChecksumAddress,
   hash,
+  Provider,
   shortString,
   typedData,
   TypedDataRevision,
@@ -13,10 +14,6 @@ import wasm from "@cartridge/account-wasm/controller";
 import { Policies, SessionPolicies } from "@cartridge/presets";
 import { ChainId } from "@starknet-io/types-js";
 import { ParsedSessionPolicies } from "./policies";
-
-export const LOCAL_CHAIN_ID = shortString.encodeShortString(
-  "LOCAL_KATANA",
-) as ChainId;
 
 // Whitelist of allowed property names to prevent prototype pollution
 const ALLOWED_PROPERTIES = new Set([
@@ -142,7 +139,7 @@ export function humanizeString(str: string): string {
   );
 }
 
-export function parseChainId(url: URL): ChainId {
+export async function parseChainId(url: URL): Promise<ChainId> {
   const parts = url.pathname.split("/");
 
   if (parts.includes("starknet")) {
@@ -164,8 +161,11 @@ export function parseChainId(url: URL): ChainId {
     }
   }
 
-  if (LOCAL_HOSTNAMES.includes(url.hostname) && url.port === "5050") {
-    return LOCAL_CHAIN_ID;
+  if (LOCAL_HOSTNAMES.includes(url.hostname)) {
+    const provider = new Provider({
+      nodeUrl: url.toString(),
+    });
+    return await provider.getChainId();
   }
 
   throw new Error(`Chain ${url.toString()} not supported`);
