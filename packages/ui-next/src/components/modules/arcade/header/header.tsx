@@ -1,4 +1,4 @@
-import { ControllerIcon } from "@/index";
+import { ArcadeIcon } from "@/index";
 import { useMemo } from "react";
 
 export interface ArcadeHeaderProps extends React.PropsWithChildren {
@@ -17,8 +17,8 @@ export const ArcadeHeader = ({ cover, children }: ArcadeHeaderProps) => {
 
   return (
     <div className="w-full flex gap-x-px h-14">
-      <div className="flex items-center justify-center bg-background-100 text-primary aspect-square">
-        <ControllerIcon className="w-7 h-7" />
+      <div className="flex items-center justify-center bg-background-100 text-primary w-14">
+        <ArcadeIcon className="w-8 h-8" />
       </div>
       <div
         className="grow flex justify-end items-center gap-2 px-3 py-2 bg-center bg-cover bg-no-repeat select-none"
