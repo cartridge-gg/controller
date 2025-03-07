@@ -36,6 +36,7 @@ export const ArcadeGameSelect = ({
   points,
   active,
   variant,
+  className,
 }: ArcadeGameSelectProps) => {
   const [hover, setHover] = useState(false);
 
@@ -63,6 +64,7 @@ export const ArcadeGameSelect = ({
       className={cn(
         arcadeGameSelectVariants({ variant }),
         "bg-top bg-cover bg-no-repeat select-none",
+        className,
       )}
       style={style}
       onMouseEnter={() => setHover(true)}
