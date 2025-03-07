@@ -14,7 +14,7 @@ interface ArcadeGameSelectProps
 }
 
 export const arcadeGameSelectVariants = cva(
-  "select-none h-12 flex justify-between items-center px-4 py-3 gap-x-3 cursor-pointer data-[active=true]:cursor-default",
+  "select-none h-12 flex justify-between items-center p-2 gap-x-3 cursor-pointer data-[active=true]:cursor-default",
   {
     variants: {
       variant: {
