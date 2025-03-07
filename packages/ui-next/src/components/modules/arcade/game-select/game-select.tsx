@@ -37,6 +37,7 @@ export const ArcadeGameSelect = ({
   active,
   variant,
   className,
+  ...props
 }: ArcadeGameSelectProps) => {
   const [hover, setHover] = useState(false);
 
@@ -69,6 +70,7 @@ export const ArcadeGameSelect = ({
       style={style}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      {...props}
     >
       <div className="flex items-center gap-3">
         <ArcadeGameIcon
