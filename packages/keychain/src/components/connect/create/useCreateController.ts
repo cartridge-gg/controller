@@ -127,36 +127,33 @@ export function useCreateController({
           if (!credentialId)
             throw new Error("No credential ID found for this account");
 
-          if (
-            loginMode === LoginMode.Webauthn ||
-            Object.keys(policies?.contracts ?? {}).length +
-              (policies?.messages?.length ?? 0) ===
-              0
-          ) {
+          if (!controllerNode || !publicKey) {
+            return;
+          }
+
+          const controller = await createController(
+            origin!,
+            chainId!,
+            rpcUrl!,
+            username,
+            controllerNode.constructorCalldata[0],
+            controllerNode.address,
+            credentialId,
+            publicKey,
+          );
+
+          if (loginMode === LoginMode.Webauthn) {
             await doLogin({
               name: username,
               credentialId,
               finalize: !!isSlot,
             });
-          }
-
-          if (controllerNode && publicKey) {
-            const controller = await createController(
-              origin!,
-              chainId!,
-              rpcUrl!,
-              username,
-              controllerNode.constructorCalldata[0],
-              controllerNode.address,
-              credentialId,
-              publicKey,
-            );
-
+          } else {
             await controller.login(NOW + DEFAULT_SESSION_DURATION);
-
-            window.controller = controller;
-            setController(controller);
           }
+
+          window.controller = controller;
+          setController(controller);
         } else {
           // Signup flow
           const isSafari = /^((?!chrome|android).)*safari/i.test(
