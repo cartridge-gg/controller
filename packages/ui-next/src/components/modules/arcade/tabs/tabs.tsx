@@ -34,7 +34,7 @@ export const ArcadeTabs = ({
       defaultValue="discover"
       onValueChange={setActive}
     >
-      <TabsList className="h-16 flex justify-between w-full gap-2 bg-background-100 p-0 pt-2 border-b border-spacer-100">
+      <TabsList className="h-16 flex justify-start w-full gap-2 bg-background-100 p-0 pt-2 border-b border-spacer-100">
         {discover && (
           <DiscoverNavButton value="discover" active={active === "discover"} />
         )}
