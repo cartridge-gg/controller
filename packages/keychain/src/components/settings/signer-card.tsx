@@ -9,7 +9,7 @@ import {
   SheetContent,
   SheetFooter,
   StarknetIcon,
-  FingerprintIcon,
+  TouchIcon,
 } from "@cartridge/ui-next";
 import { SignerType } from "@cartridge/utils/api/cartridge";
 
@@ -99,8 +99,8 @@ const DeviceIcon = React.memo(({ signerType }: { signerType: SignerType }) => {
   return signerType === SignerType.StarknetAccount ? (
     <StarknetIcon size="default" />
   ) : signerType === SignerType.Webauthn ? (
-    <FingerprintIcon size="default" />
+    <TouchIcon size="default" />
   ) : (
-    <FingerprintIcon size="default" />
+    <TouchIcon size="default" />
   );
 });
