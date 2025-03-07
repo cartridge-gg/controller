@@ -153,9 +153,7 @@ describe("CreateController", () => {
   });
 
   it("calls onCreated callback after successful creation", async () => {
-    const onCreated = vi.fn();
     const handleSubmit = vi.fn().mockImplementation(() => {
-      onCreated();
       return Promise.resolve();
     });
 
@@ -166,9 +164,7 @@ describe("CreateController", () => {
       handleSubmit,
     });
 
-    renderWithProviders(
-      <CreateController {...defaultProps} onCreated={onCreated} />,
-    );
+    renderWithProviders(<CreateController {...defaultProps} />);
 
     const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "validuser" } });
@@ -178,7 +174,6 @@ describe("CreateController", () => {
 
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledWith("validuser", false);
-      expect(onCreated).toHaveBeenCalled();
     });
   });
 });

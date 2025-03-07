@@ -141,11 +141,9 @@ function getNativeBrowserUrl() {
 export function CreateController({
   isSlot,
   loginMode = LoginMode.Webauthn,
-  onCreated,
 }: {
   isSlot?: boolean;
   loginMode?: LoginMode;
-  onCreated?: () => void;
   error?: Error;
 }) {
   const posthog = usePostHog();
@@ -169,7 +167,6 @@ export function CreateController({
   const { debouncedValue: debouncedValidation } = useDebounce(validation, 200);
 
   const { isLoading, error, setError, handleSubmit } = useCreateController({
-    onCreated,
     isSlot,
     loginMode,
   });

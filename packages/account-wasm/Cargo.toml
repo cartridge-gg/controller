@@ -39,6 +39,7 @@ starknet-crypto.workspace = true
 starknet-types-core.workspace = true
 thiserror.workspace = true
 url = { workspace = true, default-features = false }
+urlencoding = "2.1.0"
 wasm-bindgen = { workspace = true, features = ["serde-serialize"] }
 wasm-bindgen-futures.workspace = true
 webauthn-rs-proto = { workspace = true, features = ["wasm"] }
