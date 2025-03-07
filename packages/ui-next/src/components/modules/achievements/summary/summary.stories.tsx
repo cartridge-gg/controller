@@ -174,3 +174,9 @@ export const Faded: Story = {
     variant: "faded",
   },
 };
+
+export const Active: Story = {
+  args: {
+    active: true,
+  },
+};
