@@ -14,7 +14,7 @@ interface ArcadeGameSelectProps
 }
 
 export const arcadeGameSelectVariants = cva(
-  "select-none h-12 flex justify-between items-center px-4 py-3 gap-x-3 cursor-pointer data-[active=true]:cursor-default",
+  "select-none h-12 flex justify-between items-center p-2 gap-x-3 cursor-pointer data-[active=true]:cursor-default",
   {
     variants: {
       variant: {
@@ -36,6 +36,8 @@ export const ArcadeGameSelect = ({
   points,
   active,
   variant,
+  className,
+  ...props
 }: ArcadeGameSelectProps) => {
   const [hover, setHover] = useState(false);
 
@@ -63,10 +65,12 @@ export const ArcadeGameSelect = ({
       className={cn(
         arcadeGameSelectVariants({ variant }),
         "bg-top bg-cover bg-no-repeat select-none",
+        className,
       )}
       style={style}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      {...props}
     >
       <div className="flex items-center gap-3">
         <ArcadeGameIcon

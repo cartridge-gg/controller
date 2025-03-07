@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ArcadeGameSelect } from "./game-select";
+import { fn } from "@storybook/test";
 
 const meta: Meta<typeof ArcadeGameSelect> = {
   title: "Modules/Arcade/Game Select",
@@ -14,6 +15,7 @@ const meta: Meta<typeof ArcadeGameSelect> = {
     cover:
       "https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png",
     points: 400,
+    onClick: fn(),
   },
 };
 
