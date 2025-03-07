@@ -2,7 +2,7 @@ import { forwardRef, memo } from "react";
 import { iconVariants } from "../utils";
 import { IconProps } from "../types";
 
-export const FingerprintIcon = memo(
+export const TouchIcon = memo(
   forwardRef<SVGSVGElement, IconProps>(
     ({ className, size, ...props }, forwardedRef) => (
       <svg
@@ -28,4 +28,4 @@ export const FingerprintIcon = memo(
   ),
 );
 
-FingerprintIcon.displayName = "FingerprintIcon";
+TouchIcon.displayName = "TouchIcon";

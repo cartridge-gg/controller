@@ -13,7 +13,7 @@
     "lint": "turbo lint format:check",
     "format": "turbo format lint:fix",
     "clean": "git clean -xdf && pnpm store prune",
-    "release": "pnpm build && pnpm changeset publish",
+    "release": "pnpm build && pnpm changeset publish --tag latest",
     "prerelease": "pnpm build && pnpm changeset publish --tag prerelease",
     "keychain": "pnpm --filter @cartridge/keychain",
     "controller": "pnpm --filter @cartridge/controller",
