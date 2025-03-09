@@ -1,0 +1,17 @@
+query GetActivities($username: String!) {
+  account(username: $username) {
+    id
+    activities {
+      edges {
+        node {
+          id
+          controllerID
+          status
+          type
+          network
+          
+        }
+      }
+    }
+  }
+}

@@ -20,7 +20,7 @@ import { useCallback, useState, useMemo } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
-import { Session, SessionCard } from "./session-card";
+import { SessionCard } from "./session-card";
 import { SignerCard } from "./signer-card";
 import {
   RegisteredAccount,
@@ -29,6 +29,7 @@ import {
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
 import { useSignerQuery } from "@cartridge/utils/api/cartridge";
+import { useGetActivitiesQuery } from "@cartridge/utils/api/cartridge";
 
 enum State {
   SETTINGS,
@@ -45,16 +46,6 @@ interface FeatureFlags {
 }
 
 // MOCK DATA
-const sessions: Session[] = [
-  {
-    sessionName: "Session 1",
-    expiresAt: BigInt(14400), // 4 hours in seconds
-  },
-  {
-    sessionName: "Session 2",
-    expiresAt: BigInt(7200), // 2 hours in seconds
-  },
-];
 const registeredAccounts: RegisteredAccount[] = [
   {
     accountName: "clicksave.stark",
@@ -69,14 +60,14 @@ export function Settings() {
   // Feature flags - can be moved to environment variables or API config later
   const featureFlags = useMemo<FeatureFlags>(
     () => ({
-      sessions: false,
+      sessions: true,
       signers: true,
       registeredAccounts: false,
       currency: false,
     }),
     [],
   );
-  const data = useSignerQuery(
+  const signerQuery = useSignerQuery(
     {
       username:
         process.env.NODE_ENV === "development"
@@ -84,15 +75,19 @@ export function Settings() {
           : (controller?.username() as string),
     },
     {
-      onSuccess: (data) => {
-        data.account?.controllers.edges?.map((i) => {
-          i?.node?.signers?.map((j) => {
-            return {
-              signerType: j.type,
-            };
-          });
-        });
-      },
+      enabled: featureFlags.signers,
+    },
+  );
+
+  const activityQuery = useGetActivitiesQuery(
+    {
+      username:
+        process.env.NODE_ENV === "development"
+          ? "slot-auth-local"
+          : (controller?.username() as string),
+    },
+    {
+      enabled: featureFlags.sessions,
     },
   );
 
@@ -129,24 +124,37 @@ export function Settings() {
                 showStatus={true}
               />
               <div className="space-y-3">
-                {sessions.map((i, index) => (
-                  <SessionCard
-                    key={index}
-                    sessionName={i.sessionName}
-                    expiresAt={i.expiresAt}
-                  />
-                ))}
+                {activityQuery.isLoading ? (
+                  <Skeleton className="w-full h-10 bg-background-200" />
+                ) : activityQuery.isError ? (
+                  <div>Error</div>
+                ) : activityQuery.isSuccess && activityQuery.data ? (
+                  activityQuery.data?.account?.activities?.edges?.map(
+                    (i, index) => {
+                      return (
+                        <SessionCard
+                          key={index}
+                          sessionName={i?.node?.id || "No name"}
+                          // expiresAt={i?.node?.expiresAt || "No expiry"}
+                        />
+                      );
+                    },
+                  )
+                ) : (
+                  <div>No data</div>
+                )}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="py-2.5 px-3 text-foreground-300 gap-1"
-              >
-                <PlusIcon size="sm" variant="line" />
-                <span className="normal-case font-normal font-sans text-sm">
-                  Create Session
-                </span>
-              </Button>
+              {/* disabled until add session functionality is implemented */}
+              {/* <Button */}
+              {/*   type="button" */}
+              {/*   variant="outline" */}
+              {/*   className="py-2.5 px-3 text-foreground-300 gap-1" */}
+              {/* > */}
+              {/*   <PlusIcon size="sm" variant="line" /> */}
+              {/*   <span className="normal-case font-normal font-sans text-sm"> */}
+              {/*     Create Session */}
+              {/*   </span> */}
+              {/* </Button> */}
             </section>
           )}
 
@@ -158,20 +166,21 @@ export function Settings() {
                 description="Information associated with registered accounts can be made available to games and applications."
               />
               <div className="space-y-3">
-                {data.isLoading ? (
+                {signerQuery.isLoading ? (
                   <Skeleton className="w-full h-10 bg-background-200" />
-                ) : data.isError ? (
+                ) : signerQuery.isError ? (
                   <div>Error</div>
-                ) : data.isSuccess && data.data ? (
-                  data.data?.account?.controllers.edges?.map((i, edgeIndex) =>
-                    i?.node?.signers?.map((j, signerIndex) => {
-                      return (
-                        <SignerCard
-                          key={`${edgeIndex}-${signerIndex}`}
-                          signerType={j.type}
-                        />
-                      );
-                    }),
+                ) : signerQuery.isSuccess && signerQuery.data ? (
+                  signerQuery.data?.account?.controllers.edges?.map(
+                    (i, edgeIndex) =>
+                      i?.node?.signers?.map((j, signerIndex) => {
+                        return (
+                          <SignerCard
+                            key={`${edgeIndex}-${signerIndex}`}
+                            signerType={j.type}
+                          />
+                        );
+                      }),
                   )
                 ) : (
                   <div>No data</div>
