@@ -9,7 +9,7 @@ export interface AchievementTabsProps
   count: number;
   total: number;
   rank: number;
-  value: string;
+  value?: string;
   onValueChange?: (value: string) => void;
 }
 

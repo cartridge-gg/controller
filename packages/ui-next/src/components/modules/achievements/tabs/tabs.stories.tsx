@@ -16,7 +16,7 @@ type Story = StoryObj<typeof AchievementTabs>;
 
 export const Default: Story = {
   render: () => (
-    <AchievementTabs count={4} total={10} rank={16} value="achievements">
+    <AchievementTabs count={4} total={10} rank={16}>
       <TabsContent className="p-0 mt-0" value="achievements">
         <h1 className="text-foreground-100 p-4">Achievements content</h1>
       </TabsContent>
