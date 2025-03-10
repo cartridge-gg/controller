@@ -3,11 +3,11 @@ import {
   cn,
   Button,
   Card,
-  TrashIcon,
+  // TrashIcon,
   Sheet,
-  SheetClose,
+  // SheetClose,
   SheetContent,
-  SheetFooter,
+  // SheetFooter,
   StarknetIcon,
   TouchIcon,
 } from "@cartridge/ui-next";
@@ -24,7 +24,7 @@ export interface SignerCardProps extends Signer {
 export const SignerCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SignerCardProps
->(({ className, signerType, onDelete, ...props }, ref) => {
+>(({ className, signerType, ...props }, ref) => {
   return (
     <Sheet>
       <div
@@ -75,19 +75,19 @@ export const SignerCard = React.forwardRef<
             </h3>
           </div>
         </div>
-        <SheetFooter className="flex flex-row items-center gap-4">
-          <SheetClose asChild className="flex-1">
-            <Button variant="secondary">Cancel</Button>
-          </SheetClose>
-          <Button
-            variant="secondary"
-            onClick={onDelete}
-            className="flex-1 text-destructive-100"
-          >
-            <TrashIcon size="default" />
-            <span>DELETE</span>
-          </Button>
-        </SheetFooter>
+        {/* <SheetFooter className="flex flex-row items-center gap-4"> */}
+        {/*   <SheetClose asChild className="flex-1"> */}
+        {/*     <Button variant="secondary">Cancel</Button> */}
+        {/*   </SheetClose> */}
+        {/*   <Button */}
+        {/*     variant="secondary" */}
+        {/*     onClick={onDelete} */}
+        {/*     className="flex-1 text-destructive-100" */}
+        {/*   > */}
+        {/*     <TrashIcon size="default" /> */}
+        {/*     <span>DELETE</span> */}
+        {/*   </Button> */}
+        {/* </SheetFooter> */}
       </SheetContent>
     </Sheet>
   );
