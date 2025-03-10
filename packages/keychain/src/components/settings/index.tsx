@@ -16,7 +16,7 @@ import {
   ShapesIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useEffect } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
@@ -28,7 +28,7 @@ import {
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
-import { useSignerQuery } from "@cartridge/utils/api/cartridge";
+import { ActivityStatus, useSignerQuery } from "@cartridge/utils/api/cartridge";
 import { useSessionQuery } from "@cartridge/utils/api/cartridge";
 
 enum State {
@@ -57,6 +57,10 @@ export function Settings() {
   const { logout, closeModal, controller } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
 
+  useEffect(() => {
+    console.log("controller username: ", controller?.username());
+  }, [controller]);
+
   // Feature flags - can be moved to environment variables or API config later
   const featureFlags = useMemo<FeatureFlags>(
     () => ({
@@ -69,25 +73,25 @@ export function Settings() {
   );
   const signerQuery = useSignerQuery(
     {
-      username:
-        process.env.NODE_ENV === "development"
-          ? "slot-auth-local"
-          : (controller?.username() as string),
+      username: controller?.username() as string,
     },
     {
       enabled: featureFlags.signers,
+      onSuccess: (data) => {
+        console.log("signers: ", data);
+      },
     },
   );
 
   const sessionQuery = useSessionQuery(
     {
-      username:
-        process.env.NODE_ENV === "development"
-          ? "slot-auth-local"
-          : (controller?.username() as string),
+      username: controller?.username() as string,
     },
     {
       enabled: featureFlags.sessions,
+      onSuccess: (data) => {
+        console.log("sessions: ", data);
+      },
     },
   );
 
@@ -129,17 +133,18 @@ export function Settings() {
                 ) : sessionQuery.isError ? (
                   <div>Error</div>
                 ) : sessionQuery.isSuccess && sessionQuery.data ? (
-                  sessionQuery.data?.account?.activities?.edges?.map(
-                    (i, index) => {
+                  sessionQuery.data?.account?.activities?.edges
+                    ?.filter(
+                      (item) => item?.node?.status !== ActivityStatus.Completed,
+                    )
+                    .map((i, index) => {
                       return (
                         <SessionCard
                           key={index}
-                          sessionName={i?.node?.id || "No name"}
-                          // expiresAt={i?.node?.expiresAt || "No expiry"}
+                          sessionName={i?.node?.network || "Unknown"}
                         />
                       );
-                    },
-                  )
+                    })
                 ) : (
                   <div>No data</div>
                 )}
