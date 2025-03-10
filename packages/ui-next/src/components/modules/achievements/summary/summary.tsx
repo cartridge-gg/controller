@@ -21,6 +21,7 @@ export interface AchievementSummaryProps
   metadata: Metadata;
   socials?: Socials;
   active?: boolean;
+  className?: string;
 }
 
 const achievementSummaryVariants = cva("border border-transparent", {
@@ -41,6 +42,7 @@ export const AchievementSummary = ({
   metadata,
   socials,
   active,
+  className,
   variant,
 }: AchievementSummaryProps) => {
   const { points, count } = useMemo(() => {
@@ -63,6 +65,7 @@ export const AchievementSummary = ({
         socials={socials}
         variant={variant}
         active={active}
+        className={className}
       />
       <CardContent className="p-0">
         <AchievementProgress
@@ -71,6 +74,7 @@ export const AchievementSummary = ({
           points={points}
           variant={variant}
           completed
+          className={className}
         />
       </CardContent>
     </Card>

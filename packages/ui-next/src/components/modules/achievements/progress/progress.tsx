@@ -7,6 +7,7 @@ export interface AchievementProgressProps
   total: number;
   points: number;
   completed?: boolean;
+  className?: string;
 }
 
 const achievementProgressVariants = cva("p-3 flex items-center gap-x-3", {
@@ -28,16 +29,22 @@ export function AchievementProgress({
   points,
   completed,
   variant,
+  className,
 }: AchievementProgressProps) {
   return (
-    <div className={cn(achievementProgressVariants({ variant }))}>
+    <div className={cn(achievementProgressVariants({ variant }), className)}>
       <div className="flex gap-x-1">
         <TrophyIcon variant="solid" size="xs" className="text-foreground-300" />
         <p className="text-foreground-300 text-xs font-medium">
           {count.toLocaleString()} of {total.toLocaleString()}
         </p>
       </div>
-      <ProgressBar count={count} total={total} completed={!!completed} />
+      <ProgressBar
+        count={count}
+        total={total}
+        completed={!!completed}
+        className={className}
+      />
       <div className="flex gap-x-1">
         <SparklesIcon
           variant="solid"
