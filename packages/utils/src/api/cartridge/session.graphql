@@ -1,4 +1,4 @@
-query GetActivities($username: String!) {
+query Session($username: String!) {
   account(username: $username) {
     id
     activities {
