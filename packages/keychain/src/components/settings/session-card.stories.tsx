@@ -9,8 +9,7 @@ const meta = {
     layout: "centered",
   },
   args: {
-    sessionName: "Session 1",
-    expiresAt: 1630000000000n,
+    sessionName: "WP-NUMS-APPCHAIN",
   },
 } satisfies Meta<typeof SessionCard>;
 
