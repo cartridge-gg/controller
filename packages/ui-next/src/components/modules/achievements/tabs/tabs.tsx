@@ -2,29 +2,37 @@ import { Tabs, TabsList } from "@/index";
 import AchievementTab from "../tab/tab";
 import AchievementCounter from "../counter/counter";
 import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export interface AchievementTabsProps
   extends React.HTMLAttributes<HTMLDivElement> {
   count: number;
   total: number;
   rank: number;
+  value: string;
+  onValueChange?: (value: string) => void;
 }
 
 export const AchievementTabs = ({
   count,
   total,
   rank,
+  value,
   className,
   children,
+  onValueChange,
 }: AchievementTabsProps) => {
   const [active, setActive] = useState("achievements");
+  const handleChange = useCallback(
+    (value: string) => {
+      setActive(value);
+      onValueChange?.(value);
+    },
+    [setActive, onValueChange],
+  );
+
   return (
-    <Tabs
-      className={className}
-      defaultValue="achievements"
-      onValueChange={setActive}
-    >
+    <Tabs className={className} value={value} onValueChange={handleChange}>
       <TabsList className="h-[45px] grid w-full grid-cols-2 gap-x-4 bg-transparent p-0">
         <AchievementTab
           value="achievements"
