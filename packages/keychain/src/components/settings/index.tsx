@@ -29,7 +29,7 @@ import {
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
 import { useSignerQuery } from "@cartridge/utils/api/cartridge";
-import { useGetActivitiesQuery } from "@cartridge/utils/api/cartridge";
+import { useSessionQuery } from "@cartridge/utils/api/cartridge";
 
 enum State {
   SETTINGS,
@@ -79,7 +79,7 @@ export function Settings() {
     },
   );
 
-  const activityQuery = useGetActivitiesQuery(
+  const sessionQuery = useSessionQuery(
     {
       username:
         process.env.NODE_ENV === "development"
@@ -124,12 +124,12 @@ export function Settings() {
                 showStatus={true}
               />
               <div className="space-y-3">
-                {activityQuery.isLoading ? (
+                {sessionQuery.isLoading ? (
                   <Skeleton className="w-full h-10 bg-background-200" />
-                ) : activityQuery.isError ? (
+                ) : sessionQuery.isError ? (
                   <div>Error</div>
-                ) : activityQuery.isSuccess && activityQuery.data ? (
-                  activityQuery.data?.account?.activities?.edges?.map(
+                ) : sessionQuery.isSuccess && sessionQuery.data ? (
+                  sessionQuery.data?.account?.activities?.edges?.map(
                     (i, index) => {
                       return (
                         <SessionCard
