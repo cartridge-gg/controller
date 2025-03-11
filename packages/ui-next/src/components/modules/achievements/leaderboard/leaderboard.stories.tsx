@@ -122,7 +122,7 @@ export const Default: Story = {
           key={index}
           pins={[
             { id: "1", icon: "fa-seedling" },
-            { id: "2", icon: "fa-seedling" },
+            { id: "2", icon: "fa-swords" },
           ]}
           rank={index + 1}
           name={item.name}
