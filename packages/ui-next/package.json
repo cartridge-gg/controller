@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/ui-next",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "Catridge UI component library",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
