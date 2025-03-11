@@ -183,6 +183,8 @@ export type ProfileOptions = IFrameOptions & {
   namespace?: string;
   /** The tokens to be listed on Inventory modal */
   tokens?: Tokens;
+  /** The policies to use for the profile */
+  policies?: SessionPolicies;
 };
 
 export type ProfileContextTypeVariant =

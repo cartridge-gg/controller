@@ -12,6 +12,7 @@ import {
 import { EthereumIcon } from "@/components/icons";
 import { Meta, StoryObj } from "@storybook/react";
 import { useEffect } from "react";
+import { PLACEHOLDER } from "@/assets";
 
 const meta: Meta<typeof Card> = {
   title: "Primitives/Card",
@@ -94,9 +95,7 @@ function Card({
           <CardListContent>
             <CardListItem>No icon item</CardListItem>
 
-            <CardListItem icon="https://profile.cartridge.gg/placeholder.svg">
-              placeholder
-            </CardListItem>
+            <CardListItem icon={PLACEHOLDER}>placeholder</CardListItem>
 
             <CardListItem icon={<EthereumIcon />}>
               <div className="flex items-center gap-2">

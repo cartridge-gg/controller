@@ -150,8 +150,9 @@ export function useCollections(): UseCollectionsResponse {
     if (!indexerUrl || !Object.values(tokens).length) return [];
 
     const collections =
-      Object.values(tokens).reduce<Record<string, Collection>>(
-        (prev, token) => {
+      Object.values(tokens)
+        .filter((token) => !!token.contractAddress)
+        .reduce<Record<string, Collection>>((prev, token) => {
           const agg = prev[token.contractAddress];
           const collection = agg
             ? { ...agg, totalCount: agg.totalCount + 1 }
@@ -169,9 +170,7 @@ export function useCollections(): UseCollectionsResponse {
             ...prev,
             [collection.address]: collection,
           };
-        },
-        {},
-      ) ?? [];
+        }, {}) ?? [];
 
     return Object.values(collections);
   }, [tokens, indexerUrl]);
