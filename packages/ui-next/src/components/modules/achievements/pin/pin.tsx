@@ -22,8 +22,6 @@ export function AchievementPin({
 
   const handleClick = useCallback(() => {
     if (disabled) return;
-    console.log("pinned", !!pinned);
-    console.log("achievementId", achievementId);
     onClick?.(!!pinned, achievementId ?? "", setLoading);
   }, [disabled, onClick, pinned, achievementId, setLoading]);
 

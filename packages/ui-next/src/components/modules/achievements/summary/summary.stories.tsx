@@ -174,3 +174,18 @@ export const Faded: Story = {
     variant: "faded",
   },
 };
+
+export const Active: Story = {
+  args: {
+    active: true,
+  },
+};
+
+export const NoCover: Story = {
+  args: {
+    metadata: {
+      name: "Loot Survivor",
+      logo: "https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png",
+    },
+  },
+};

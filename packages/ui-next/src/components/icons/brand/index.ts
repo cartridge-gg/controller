@@ -1,5 +1,6 @@
 export * from "./argent";
 export * from "./apple";
+export * from "./arcade";
 export * from "./braavos";
 export * from "./cartridge";
 export * from "./cartridge-face";

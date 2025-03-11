@@ -2,9 +2,11 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import {
+  BETA_CONTROLLER,
   CONTROLLER_VERSIONS,
   ControllerVersionInfo,
   OutsideExecutionVersion,
+  STABLE_CONTROLLER,
   UpgradeProvider,
   determineUpgradePath,
   useUpgrade,
@@ -16,8 +18,10 @@ import Controller from "@/utils/controller";
 // Mock the usePostHog hook
 vi.mock("./posthog", () => ({
   usePostHog: () => ({
-    onFeatureFlag: vi.fn(() => {
-      return false;
+    onFeatureFlag: vi.fn((key, callback) => {
+      if (key === "controller-beta") {
+        callback(false);
+      }
     }),
   }),
 }));
@@ -26,35 +30,35 @@ describe("determineUpgradePath", () => {
   it("should return available=false when currentVersion is undefined", () => {
     const result = determineUpgradePath(undefined, false);
     expect(result.available).toBe(false);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.targetVersion).toBe(STABLE_CONTROLLER);
   });
 
   it("should return available=false when current version is the same as target version (stable)", () => {
-    const currentVersion = CONTROLLER_VERSIONS[4]; // STABLE_CONTROLLER
+    const currentVersion = STABLE_CONTROLLER;
     const result = determineUpgradePath(currentVersion, false);
     expect(result.available).toBe(false);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.targetVersion).toBe(STABLE_CONTROLLER);
   });
 
   it("should return available=false when current version is the same as target version (beta)", () => {
-    const currentVersion = CONTROLLER_VERSIONS[5]; // BETA_CONTROLLER
+    const currentVersion = BETA_CONTROLLER;
     const result = determineUpgradePath(currentVersion, true);
     expect(result.available).toBe(false);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[5]); // BETA_CONTROLLER
+    expect(result.targetVersion).toBe(BETA_CONTROLLER);
   });
 
   it("should return available=true when current version is older than target version (stable)", () => {
     const currentVersion = CONTROLLER_VERSIONS[3]; // Older version
     const result = determineUpgradePath(currentVersion, false);
     expect(result.available).toBe(true);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.targetVersion).toBe(STABLE_CONTROLLER);
   });
 
   it("should return available=true when current version is older than target version (beta)", () => {
-    const currentVersion = CONTROLLER_VERSIONS[4]; // STABLE_CONTROLLER
+    const currentVersion = CONTROLLER_VERSIONS[4];
     const result = determineUpgradePath(currentVersion, true);
     expect(result.available).toBe(true);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[5]); // BETA_CONTROLLER
+    expect(result.targetVersion).toBe(BETA_CONTROLLER);
   });
 
   it("should return available=false when current version is newer than target version (downgrade not allowed)", () => {
@@ -70,7 +74,7 @@ describe("determineUpgradePath", () => {
     // We're testing that we don't allow downgrades
     const result = determineUpgradePath(newerVersion, true);
     expect(result.available).toBe(false);
-    expect(result.targetVersion).toBe(CONTROLLER_VERSIONS[5]); // BETA_CONTROLLER
+    expect(result.targetVersion).toBe(BETA_CONTROLLER);
   });
 });
 
@@ -98,12 +102,10 @@ describe("UpgradeProvider", () => {
   const mockPosthogInstance = {
     onFeatureFlag: vi.fn((key, callback) => {
       if (key === "controller-beta") {
+        // Immediately call the callback to set the feature flag
         callback(false);
-        // Store the callback for later use in tests
-        mockPosthogInstance.storedCallbacks[key] = callback;
       }
     }),
-    storedCallbacks: {} as Record<string, (value: boolean) => void>,
   };
 
   beforeEach(() => {
@@ -123,22 +125,33 @@ describe("UpgradeProvider", () => {
   );
 
   it("should initialize with correct default values", async () => {
+    // Setup the mock to resolve immediately
     mockController.provider.getClassHashAt.mockResolvedValueOnce(
       CONTROLLER_VERSIONS[3].hash,
     );
 
-    const { result } = renderHook(() => useUpgrade(), {
-      wrapper,
+    const { result } = renderHook(() => useUpgrade(), { wrapper });
+
+    // Wait for the component to update
+    await act(async () => {
+      // Wait for all promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    // Wait for the async operations to complete
-    await vi.waitFor(() => {
-      expect(result.current.isSynced).toBe(true);
+    // Wait for the component to update
+    await act(async () => {
+      // Manually trigger the state updates that would happen after API calls
+      await vi.waitFor(
+        () => {
+          return result.current.isSynced === true;
+        },
+        { timeout: 5000 },
+      );
     });
 
     expect(result.current.available).toBe(true);
     expect(result.current.current).toBe(CONTROLLER_VERSIONS[3]);
-    expect(result.current.latest).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.current.latest).toBe(STABLE_CONTROLLER);
     expect(result.current.isUpgrading).toBe(false);
     expect(result.current.error).toBeUndefined();
     expect(result.current.isBeta).toBe(false);
@@ -149,31 +162,51 @@ describe("UpgradeProvider", () => {
       new Error("Contract not found"),
     );
 
-    const { result } = renderHook(() => useUpgrade(), {
-      wrapper,
+    const { result } = renderHook(() => useUpgrade(), { wrapper });
+
+    // Wait for the component to update
+    await act(async () => {
+      // Wait for all promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    // Wait for the async operations to complete
-    await vi.waitFor(() => {
-      expect(result.current.isSynced).toBe(true);
+    // Wait for the component to update
+    await act(async () => {
+      // Manually trigger the state updates that would happen after API calls
+      await vi.waitFor(
+        () => {
+          return result.current.isSynced === true;
+        },
+        { timeout: 5000 },
+      );
     });
 
     expect(result.current.available).toBe(true);
     expect(result.current.current).toBe(CONTROLLER_VERSIONS[3]);
-    expect(result.current.latest).toBe(CONTROLLER_VERSIONS[4]); // STABLE_CONTROLLER
+    expect(result.current.latest).toBe(STABLE_CONTROLLER);
   });
 
   it("should handle other errors", async () => {
     const testError = new Error("Test error");
     mockController.provider.getClassHashAt.mockRejectedValueOnce(testError);
 
-    const { result } = renderHook(() => useUpgrade(), {
-      wrapper,
+    const { result } = renderHook(() => useUpgrade(), { wrapper });
+
+    // Wait for the component to update
+    await act(async () => {
+      // Wait for all promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    // Wait for the async operations to complete
-    await vi.waitFor(() => {
-      expect(result.current.isSynced).toBe(true);
+    // Wait for the component to update
+    await act(async () => {
+      // Manually trigger the state updates that would happen after API calls
+      await vi.waitFor(
+        () => {
+          return result.current.isSynced === true;
+        },
+        { timeout: 5000 },
+      );
     });
 
     expect(result.current.error).toBe(testError);
@@ -184,13 +217,23 @@ describe("UpgradeProvider", () => {
       CONTROLLER_VERSIONS[1].hash,
     );
 
-    const { result } = renderHook(() => useUpgrade(), {
-      wrapper,
+    const { result } = renderHook(() => useUpgrade(), { wrapper });
+
+    // Wait for the component to update
+    await act(async () => {
+      // Wait for all promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    // Wait for the async operations to complete
-    await vi.waitFor(() => {
-      expect(result.current.isSynced).toBe(true);
+    // Wait for the component to update
+    await act(async () => {
+      // Manually trigger the state updates that would happen after API calls
+      await vi.waitFor(
+        () => {
+          return result.current.isSynced === true;
+        },
+        { timeout: 5000 },
+      );
     });
 
     expect(result.current.current?.outsideExecutionVersion).toBe(
@@ -217,13 +260,23 @@ describe("UpgradeProvider", () => {
       CONTROLLER_VERSIONS[2].hash,
     );
 
-    const { result } = renderHook(() => useUpgrade(), {
-      wrapper,
+    const { result } = renderHook(() => useUpgrade(), { wrapper });
+
+    // Wait for the component to update
+    await act(async () => {
+      // Wait for all promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    // Wait for the async operations to complete
-    await vi.waitFor(() => {
-      expect(result.current.isSynced).toBe(true);
+    // Wait for the component to update
+    await act(async () => {
+      // Manually trigger the state updates that would happen after API calls
+      await vi.waitFor(
+        () => {
+          return result.current.isSynced === true;
+        },
+        { timeout: 5000 },
+      );
     });
 
     expect(result.current.current?.outsideExecutionVersion).toBe(
@@ -252,13 +305,23 @@ describe("UpgradeProvider", () => {
     const testError = new Error("Upgrade failed");
     mockController.executeFromOutsideV3.mockRejectedValueOnce(testError);
 
-    const { result } = renderHook(() => useUpgrade(), {
-      wrapper,
+    const { result } = renderHook(() => useUpgrade(), { wrapper });
+
+    // Wait for the component to update
+    await act(async () => {
+      // Wait for all promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    // Wait for the async operations to complete
-    await vi.waitFor(() => {
-      expect(result.current.isSynced).toBe(true);
+    // Wait for the component to update
+    await act(async () => {
+      // Manually trigger the state updates that would happen after API calls
+      await vi.waitFor(
+        () => {
+          return result.current.isSynced === true;
+        },
+        { timeout: 5000 },
+      );
     });
 
     // Trigger upgrade

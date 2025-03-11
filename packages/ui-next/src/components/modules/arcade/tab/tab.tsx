@@ -22,6 +22,7 @@ export interface ArcadeTabProps extends VariantProps<typeof arcadeTabVariants> {
   label: string;
   active?: boolean;
   className?: string;
+  onClick?: () => void;
 }
 
 export const ArcadeTab = ({
@@ -31,11 +32,13 @@ export const ArcadeTab = ({
   active,
   className,
   variant,
+  onClick,
 }: ArcadeTabProps) => {
   return (
     <TabsTrigger
       value={value}
       className={cn(arcadeTabVariants({ variant }), className)}
+      onClick={onClick}
     >
       <div
         data-active={active}

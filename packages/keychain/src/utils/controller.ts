@@ -97,6 +97,14 @@ export default class Controller {
     delete window.controller;
   }
 
+  async login(expiresAt: bigint) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    await this.cartridge.login(expiresAt);
+  }
+
   async createSession(
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
@@ -108,6 +116,14 @@ export default class Controller {
     }
 
     await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
+  }
+
+  async skipSession(policies: ParsedSessionPolicies) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    await this.cartridge.skipSession(toWasmPolicies(policies));
   }
 
   async registerSessionCalldata(
@@ -162,32 +178,30 @@ export default class Controller {
     );
   }
 
-  async hasSession(calls: Call[]): Promise<boolean> {
-    return await this.cartridge.hasSession(toJsCalls(calls));
+  async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
+    return await this.cartridge.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
   }
 
-  async hasSessionForMessage(typedData: TypedData): Promise<boolean> {
-    return await this.cartridge.hasSessionForMessage(JSON.stringify(typedData));
+  async hasAuthorizedPoliciesForMessage(
+    typedData: TypedData,
+  ): Promise<boolean> {
+    return await this.cartridge.hasAuthorizedPoliciesForMessage(
+      JSON.stringify(typedData),
+    );
   }
 
-  async getAuthorizedSessionMetadata(
+  async isRegisteredSessionAuthorized(
     policies: ParsedSessionPolicies,
     public_key?: string,
   ): Promise<SessionMetadata | undefined> {
-    return await this.cartridge.getAuthorizedSessionMetadata(
+    return await this.cartridge.isRegisteredSessionAuthorized(
       toWasmPolicies(policies),
       public_key,
     );
   }
 
-  async isRequestedSession(
-    policies: ParsedSessionPolicies,
-    public_key?: string,
-  ): Promise<boolean> {
-    return await this.cartridge.isRequestedSession(
-      toWasmPolicies(policies),
-      public_key,
-    );
+  async isRequestedSession(policies: ParsedSessionPolicies): Promise<boolean> {
+    return await this.cartridge.hasRequestedSession(toWasmPolicies(policies));
   }
 
   async estimateInvokeFee(calls: Call[]): Promise<EstimateFee> {

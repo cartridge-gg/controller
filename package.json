@@ -13,7 +13,7 @@
     "lint": "turbo lint format:check",
     "format": "turbo format lint:fix",
     "clean": "git clean -xdf && pnpm store prune",
-    "release": "pnpm build && pnpm changeset publish",
+    "release": "pnpm build && pnpm changeset publish --tag latest",
     "prerelease": "pnpm build && pnpm changeset publish --tag prerelease",
     "keychain": "pnpm --filter @cartridge/keychain",
     "controller": "pnpm --filter @cartridge/controller",
@@ -31,7 +31,7 @@
     "test:storybook:update": "pnpm turbo build:deps test:storybook:update"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#c7e6fb7"
+    "@cartridge/presets": "github:cartridge-gg/presets#420887d"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.2",

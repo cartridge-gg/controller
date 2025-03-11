@@ -67,7 +67,7 @@ export const CONTROLLER_VERSIONS: ControllerVersionInfo[] = [
   },
 ];
 
-export const STABLE_CONTROLLER = CONTROLLER_VERSIONS[4];
+export const STABLE_CONTROLLER = CONTROLLER_VERSIONS[5];
 export const BETA_CONTROLLER = CONTROLLER_VERSIONS[5];
 
 /**
@@ -134,6 +134,8 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
   >(undefined);
   const posthog = usePostHog();
   const [isBeta, setIsBeta] = useState<boolean>(false);
+  const [featureFlagLoaded, setFeatureFlagLoaded] = useState<boolean>(false);
+  const [controllerSynced, setControllerSynced] = useState<boolean>(false);
 
   // Pick controller based on feature flag
   const effectiveController = useMemo(
@@ -141,14 +143,17 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
     [isBeta],
   );
 
+  // Load feature flag
   useEffect(() => {
     if (!posthog || !controller) return;
     posthog.onFeatureFlag("controller-beta", (value: string | boolean) => {
       const newValue = typeof value === "boolean" ? value : value === "true";
       setIsBeta(newValue);
+      setFeatureFlagLoaded(true);
     });
   }, [posthog, controller]);
 
+  // Sync controller class hash
   useEffect(() => {
     if (!controller) {
       return;
@@ -158,7 +163,7 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
       return;
     }
 
-    setIsSynced(false);
+    setControllerSynced(false);
 
     controller.provider
       .getClassHashAt(controller.address())
@@ -168,13 +173,9 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
         );
 
         setCurrent(found);
-
-        // Only set available to true if the effective controller is newer than the current one
-        const { available } = determineUpgradePath(found, isBeta);
-        setAvailable(available);
-        setSyncedControllerAddress(controller.address());
       })
       .catch((e) => {
+        // We set the class hash to the controllers initial class hash
         if (e.message.includes("Contract not found")) {
           const found = CONTROLLER_VERSIONS.find(
             (v) =>
@@ -183,19 +184,24 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
           );
 
           setCurrent(found);
-
-          // Only set available to true if the effective controller is newer than the current one
-          const { available } = determineUpgradePath(found, isBeta);
-          setAvailable(available);
         } else {
           setError(e);
         }
       })
       .finally(() => {
         setSyncedControllerAddress(controller.address());
-        setIsSynced(true);
+        setControllerSynced(true);
       });
-  }, [controller, syncedControllerAddress, effectiveController, isBeta]);
+  }, [controller, syncedControllerAddress]);
+
+  // Recalculate upgrade availability when effective controller changes
+  useEffect(() => {
+    if (current && featureFlagLoaded && controllerSynced) {
+      const { available: newAvailable } = determineUpgradePath(current, isBeta);
+      setAvailable(newAvailable);
+      setIsSynced(true);
+    }
+  }, [current, featureFlagLoaded, controllerSynced, isBeta]);
 
   useEffect(() => {
     if (!controller || !effectiveController) {

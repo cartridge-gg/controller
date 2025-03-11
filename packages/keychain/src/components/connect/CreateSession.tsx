@@ -74,9 +74,9 @@ const CreateSessionLayout = ({
       setError(undefined);
       setIsConnecting(true);
 
-      const cleanedPolicies = cleanPolicies(policies);
+      const processedPolicies = processPolicies(policies);
 
-      await controller.createSession(expiresAt, cleanedPolicies, maxFee);
+      await controller.createSession(expiresAt, processedPolicies, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
@@ -90,9 +90,8 @@ const CreateSessionLayout = ({
       setError(undefined);
       setIsConnecting(true);
 
-      const cleanedPolicies = cleanPolicies(policies);
-
-      await controller.createSession(duration, cleanedPolicies, maxFee);
+      const processedPolicies = processPolicies(policies, true);
+      await controller.createSession(duration, processedPolicies, maxFee);
       onConnect();
     } catch (e) {
       setError(e as unknown as Error);
@@ -196,31 +195,40 @@ const CreateSessionLayout = ({
 
 /**
  * Deep copy the policies and remove the id fields
+ * @param policies The policies to clean
+ * @param toggleOff Optional. When true, sets all policies to unauthorized (false)
  */
-const cleanPolicies = (
-  _policies: ParsedSessionPolicies,
+const processPolicies = (
+  policies: ParsedSessionPolicies,
+  toggleOff?: boolean,
 ): ParsedSessionPolicies => {
   // Deep copy the policies
-  const cleanPolicies: ParsedSessionPolicies = JSON.parse(
-    JSON.stringify(_policies),
+  const processPolicies: ParsedSessionPolicies = JSON.parse(
+    JSON.stringify(policies),
   );
 
-  // Remove the id fields from the methods
-  if (cleanPolicies.contracts) {
-    Object.values(cleanPolicies.contracts).forEach((contract) => {
+  // Remove the id fields from the methods and optionally set authorized to false
+  if (processPolicies.contracts) {
+    Object.values(processPolicies.contracts).forEach((contract) => {
       contract.methods.forEach((method) => {
         delete method.id;
+        if (toggleOff) {
+          method.authorized = false;
+        }
       });
     });
   }
 
-  // Remove the id fields from the messages
-  if (cleanPolicies.messages) {
-    cleanPolicies.messages.forEach((message) => {
+  // Remove the id fields from the messages and optionally set authorized to false
+  if (processPolicies.messages) {
+    processPolicies.messages.forEach((message) => {
       delete message.id;
+      if (toggleOff) {
+        message.authorized = false;
+      }
     });
   }
 
   // Return the cleaned policies
-  return cleanPolicies;
+  return processPolicies;
 };
