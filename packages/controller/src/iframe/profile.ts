@@ -20,6 +20,7 @@ export class ProfileIFrame extends IFrame<Profile> {
     slot,
     namespace,
     tokens,
+    policies,
     ...iframeOptions
   }: ProfileIFrameOptions) {
     const _profileUrl = (profileUrl || PROFILE_URL).replace(/\/$/, "");
@@ -45,6 +46,16 @@ export class ProfileIFrame extends IFrame<Profile> {
       _url.searchParams.set(
         "erc20",
         encodeURIComponent(tokens.erc20.toString()),
+      );
+    }
+
+    if (policies?.contracts) {
+      const methods = Object.values(policies.contracts).flatMap(
+        (contract) => contract.methods,
+      );
+      _url.searchParams.set(
+        "methods",
+        encodeURIComponent(JSON.stringify(methods)),
       );
     }
 

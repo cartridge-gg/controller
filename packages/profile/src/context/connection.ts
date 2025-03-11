@@ -8,6 +8,7 @@ export type ConnectionContextType = {
   provider: RpcProvider;
   chainId: string;
   erc20: string[];
+  methods: { name: string; entrypoint: string }[];
   project?: string;
   namespace?: string;
   version?: string;
@@ -35,6 +36,7 @@ export const initialState: ConnectionContextType = {
   provider: new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_SEPOLIA }),
   chainId: "",
   erc20: [],
+  methods: [],
   isVisible: !isIframe(),
   setIsVisible: () => {},
   closeModal: () => {},

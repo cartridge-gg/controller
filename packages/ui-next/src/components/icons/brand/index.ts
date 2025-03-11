@@ -7,6 +7,7 @@ export * from "./cartridge-face";
 export * from "./chrome";
 export * from "./controller";
 export * from "./controller-account";
+export * from "./credit";
 export * from "./discord";
 export * from "./dojo";
 export * from "./dope-wars";
