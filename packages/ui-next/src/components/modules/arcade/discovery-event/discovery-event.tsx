@@ -13,6 +13,7 @@ export interface ArcadeDiscoveryEventProps
     icon: string;
   };
   loading?: boolean;
+  color?: string;
 }
 
 export const arcadeDiscoveryEventVariants = cva(
@@ -39,6 +40,7 @@ export const ArcadeDiscoveryEvent = ({
   loading,
   variant,
   className,
+  color,
 }: ArcadeDiscoveryEventProps) => {
   const bgColor = useMemo(() => {
     switch (variant) {
@@ -71,6 +73,7 @@ export const ArcadeDiscoveryEvent = ({
             title={achievement.title}
             icon={achievement.icon}
             className={className}
+            color={color}
           />
         )}
       </div>
@@ -83,10 +86,12 @@ const AchievementEvent = ({
   title,
   icon,
   className,
+  color,
 }: {
   title: string;
   icon: string;
   className?: string;
+  color?: string;
 }) => {
   return (
     <div
@@ -95,6 +100,7 @@ const AchievementEvent = ({
         "flex items-center gap-x-1.5 data-[theme=true]:text-primary",
         className,
       )}
+      style={{ color }}
     >
       <p className="text-xs text-foreground-300">earned</p>
       <div className="flex items-center gap-1 p-1 border-background-400 border rounded-sm">

@@ -40,6 +40,7 @@ export const ArcadeDiscoveryGroup = ({
   rounded,
   variant,
   className,
+  color,
 }: ArcadeDiscoveryGroupProps) => {
   return (
     <div
@@ -53,6 +54,7 @@ export const ArcadeDiscoveryGroup = ({
           loading={loading}
           className={className}
           variant={variant}
+          color={color}
           {...event}
         />
       ))}

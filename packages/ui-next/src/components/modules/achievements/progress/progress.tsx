@@ -8,6 +8,7 @@ export interface AchievementProgressProps
   points: number;
   completed?: boolean;
   className?: string;
+  color?: string;
 }
 
 const achievementProgressVariants = cva("p-3 flex items-center gap-x-3", {
@@ -30,6 +31,7 @@ export function AchievementProgress({
   completed,
   variant,
   className,
+  color,
 }: AchievementProgressProps) {
   return (
     <div className={cn(achievementProgressVariants({ variant }), className)}>
@@ -44,6 +46,7 @@ export function AchievementProgress({
         total={total}
         completed={!!completed}
         className={className}
+        color={color}
       />
       <div className="flex gap-x-1">
         <SparklesIcon

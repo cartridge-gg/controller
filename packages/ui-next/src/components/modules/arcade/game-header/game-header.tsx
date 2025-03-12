@@ -40,6 +40,7 @@ export interface ArcadeGameHeaderProps
   socials?: Socials;
   active?: boolean;
   className?: string;
+  color?: string;
 }
 
 export const arcadeGameHeaderVariants = cva(
@@ -67,6 +68,7 @@ export const ArcadeGameHeader = ({
   active,
   variant,
   className,
+  color,
 }: ArcadeGameHeaderProps) => {
   const pins = useMemo(() => {
     if (!achievements) return [];
@@ -121,6 +123,7 @@ export const ArcadeGameHeader = ({
               pins={pins}
               variant={variant}
               className={className}
+              color={color}
             />
           )}
         </div>

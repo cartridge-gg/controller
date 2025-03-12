@@ -72,16 +72,8 @@ export const MultiColors: Story = {
   render: (args) => {
     return (
       <div className="flex flex-col gap-4">
-        <ArcadeDiscoveryGroup
-          {...args}
-          rounded
-          className="data-[theme=true]:text-[#ff00ff]"
-        />
-        <ArcadeDiscoveryGroup
-          {...args}
-          rounded
-          className="data-[theme=true]:text-[#00ff00]"
-        />
+        <ArcadeDiscoveryGroup {...args} rounded color="#ff00ff" />
+        <ArcadeDiscoveryGroup {...args} rounded color="#00ff00" />
       </div>
     );
   },

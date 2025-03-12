@@ -194,16 +194,8 @@ export const MultiColors: Story = {
   render: (args) => {
     return (
       <div className="flex flex-col gap-4">
-        <AchievementSummary
-          {...args}
-          active
-          className="data-[theme=true]:text-[#ff00ff] data-[completed=true]:bg-[#ff00ff]"
-        />
-        <AchievementSummary
-          {...args}
-          active
-          className="data-[theme=true]:text-[#00ff00] data-[completed=true]:bg-[#00ff00]"
-        />
+        <AchievementSummary {...args} active color="#ff00ff" />
+        <AchievementSummary {...args} active color="#00ff00" />
       </div>
     );
   },

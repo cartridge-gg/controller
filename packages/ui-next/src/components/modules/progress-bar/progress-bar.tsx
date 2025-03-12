@@ -7,6 +7,7 @@ interface ProgressBarProps {
   total: number;
   completed: boolean;
   className?: string;
+  color?: string;
 }
 
 export function ProgressBar({
@@ -14,6 +15,7 @@ export function ProgressBar({
   total,
   completed,
   className,
+  color,
 }: ProgressBarProps) {
   const value = useMemo(() => {
     return Math.floor((100 * Math.min(count, total)) / total);
@@ -23,6 +25,7 @@ export function ProgressBar({
     <div className="grow flex items-center bg-background-300 rounded-full p-1 ">
       <Progress
         value={value}
+        color={color}
         completed={completed}
         className={cn(
           "grow rounded-full bg-foreground-200 data-[completed=true]:bg-primary",
