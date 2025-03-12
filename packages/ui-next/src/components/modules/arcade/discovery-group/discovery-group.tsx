@@ -35,12 +35,18 @@ export const ArcadeDiscoveryGroup = ({
   game,
   events,
   variant,
+  className,
 }: ArcadeDiscoveryGroupProps) => {
   return (
-    <div className={cn(arcadeDiscoveryGroupVariants({ variant }))}>
+    <div className={cn(arcadeDiscoveryGroupVariants({ variant }), className)}>
       <ArcadeGameHeader variant={variant} {...game} />
       {events.map((event, index) => (
-        <ArcadeDiscoveryEvent key={index} variant={variant} {...event} />
+        <ArcadeDiscoveryEvent
+          key={index}
+          className={className}
+          variant={variant}
+          {...event}
+        />
       ))}
     </div>
   );

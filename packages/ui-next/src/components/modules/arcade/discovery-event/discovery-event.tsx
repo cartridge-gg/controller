@@ -36,16 +36,21 @@ export const ArcadeDiscoveryEvent = ({
   Icon,
   achievement,
   variant,
+  className,
 }: ArcadeDiscoveryEventProps) => {
   return (
-    <div className={cn(arcadeDiscoveryEventVariants({ variant }))}>
+    <div className={cn(arcadeDiscoveryEventVariants({ variant }), className)}>
       <div className="flex items-center gap-x-1.5">
         {Icon ? Icon : <SpaceInvaderIcon size="sm" variant="solid" />}
         <CardTitle className="text-sm font-normal tracking-normal text-foreground-100">
           {name}
         </CardTitle>
         {achievement && (
-          <AchievementEvent title={achievement.title} icon={achievement.icon} />
+          <AchievementEvent
+            title={achievement.title}
+            icon={achievement.icon}
+            className={className}
+          />
         )}
       </div>
       <Timestamp timestamp={timestamp} />
@@ -53,11 +58,25 @@ export const ArcadeDiscoveryEvent = ({
   );
 };
 
-const AchievementEvent = ({ title, icon }: { title: string; icon: string }) => {
+const AchievementEvent = ({
+  title,
+  icon,
+  className,
+}: {
+  title: string;
+  icon: string;
+  className?: string;
+}) => {
   return (
-    <div className="flex items-center gap-x-1.5">
+    <div
+      data-theme
+      className={cn(
+        "flex items-center gap-x-1.5 data-[theme=true]:text-primary",
+        className,
+      )}
+    >
       <p className="text-xs text-foreground-300">earned</p>
-      <div className="flex items-center gap-1 p-1 text-primary border-background-400 border rounded-sm">
+      <div className="flex items-center gap-1 p-1 border-background-400 border rounded-sm">
         <div className={cn(icon, "fa-solid w-3 h-3")} />
         <p className="text-xs">{title}</p>
       </div>

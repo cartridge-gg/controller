@@ -55,3 +55,24 @@ export default meta;
 type Story = StoryObj<typeof ArcadeDiscoveryGroup>;
 
 export const Default: Story = {};
+
+export const MultiColors: Story = {
+  render: (args) => {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="rounded-lg overflow-hidden">
+          <ArcadeDiscoveryGroup
+            {...args}
+            className="data-[theme=true]:text-[#ff00ff]"
+          />
+        </div>
+        <div className="rounded-lg overflow-hidden">
+          <ArcadeDiscoveryGroup
+            {...args}
+            className="data-[theme=true]:text-[#00ff00]"
+          />
+        </div>
+      </div>
+    );
+  },
+};
