@@ -54,3 +54,11 @@ export const HighlightTheme: Story = {
     theme: true,
   },
 };
+
+export const Color: Story = {
+  args: {
+    variant: "highlight",
+    theme: true,
+    color: "#ff00ff",
+  },
+};

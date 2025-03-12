@@ -33,6 +33,7 @@ export interface AchievementPinIconProps
   empty?: boolean;
   theme?: boolean;
   className?: string;
+  color?: string;
 }
 
 export const AchievementPinIcon = ({
@@ -42,12 +43,14 @@ export const AchievementPinIcon = ({
   variant,
   size,
   className,
+  color,
 }: AchievementPinIconProps) => {
   return (
     <div
       data-theme={theme}
       data-empty={empty}
       className={cn(achievementPinIconVariants({ variant, size }), className)}
+      style={{ color: theme ? color : undefined }}
     >
       {empty ? (
         <div className="w-3 h-3 fa-spider-web fa-thin" />

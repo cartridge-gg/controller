@@ -9,8 +9,9 @@ const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & {
     completed?: boolean;
+    color?: string;
   }
->(({ className, value, completed, ...props }, ref) => (
+>(({ className, value, completed, color, ...props }, ref) => (
   <ProgressPrimitive.Root
     ref={ref}
     className="relative h-2 w-full overflow-hidden rounded-full"
@@ -23,6 +24,7 @@ const Progress = React.forwardRef<
         className,
       )}
       style={{
+        backgroundColor: completed ? color : undefined,
         transform: `translateX(-${100 - (value && value > 0 ? value : -1)}%)`,
       }}
     />
