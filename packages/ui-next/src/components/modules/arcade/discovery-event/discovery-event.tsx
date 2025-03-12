@@ -1,4 +1,4 @@
-import { CardTitle, cn, SpaceInvaderIcon } from "@/index";
+import { CardTitle, cn, Skeleton, SpaceInvaderIcon } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo, HTMLAttributes, useState, useEffect } from "react";
 
@@ -12,6 +12,7 @@ export interface ArcadeDiscoveryEventProps
     title: string;
     icon: string;
   };
+  loading?: boolean;
 }
 
 export const arcadeDiscoveryEventVariants = cva(
@@ -35,9 +36,29 @@ export const ArcadeDiscoveryEvent = ({
   timestamp,
   Icon,
   achievement,
+  loading,
   variant,
   className,
 }: ArcadeDiscoveryEventProps) => {
+  const bgColor = useMemo(() => {
+    switch (variant) {
+      case "faded":
+        return "bg-background-200";
+      case "default":
+      case "ghost":
+      default:
+        return "bg-background-300";
+    }
+  }, [variant]);
+
+  if (loading) {
+    return (
+      <div className={cn(arcadeDiscoveryEventVariants({ variant }), className)}>
+        <Skeleton className={cn("w-[120px] h-full", bgColor)} />
+        <Skeleton className={cn("w-[60px] h-full", bgColor)} />
+      </div>
+    );
+  }
   return (
     <div className={cn(arcadeDiscoveryEventVariants({ variant }), className)}>
       <div className="flex items-center gap-x-1.5">

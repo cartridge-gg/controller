@@ -56,22 +56,32 @@ type Story = StoryObj<typeof ArcadeDiscoveryGroup>;
 
 export const Default: Story = {};
 
+export const Loading: Story = {
+  args: {
+    loading: true,
+  },
+};
+
+export const Rounded: Story = {
+  args: {
+    rounded: true,
+  },
+};
+
 export const MultiColors: Story = {
   render: (args) => {
     return (
       <div className="flex flex-col gap-4">
-        <div className="rounded-lg overflow-hidden">
-          <ArcadeDiscoveryGroup
-            {...args}
-            className="data-[theme=true]:text-[#ff00ff]"
-          />
-        </div>
-        <div className="rounded-lg overflow-hidden">
-          <ArcadeDiscoveryGroup
-            {...args}
-            className="data-[theme=true]:text-[#00ff00]"
-          />
-        </div>
+        <ArcadeDiscoveryGroup
+          {...args}
+          rounded
+          className="data-[theme=true]:text-[#ff00ff]"
+        />
+        <ArcadeDiscoveryGroup
+          {...args}
+          rounded
+          className="data-[theme=true]:text-[#00ff00]"
+        />
       </div>
     );
   },
