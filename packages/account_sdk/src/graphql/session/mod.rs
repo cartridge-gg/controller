@@ -1,4 +1,4 @@
-use create_session::SignerType;
+use crate::graphql::session::create_session::SignerType;
 use graphql_client::GraphQLQuery;
 use reqwest::Client;
 use anyhow::Result;
@@ -19,7 +19,7 @@ pub async fn create_session(
   chain_id: String,
   app_id: String,
   metadata: Option<JSON>,
-  authorization: Vec<std::string::String>,
+  authorization: Vec<String>,
   signer: SignerType,
   expires_at: String,
 ) -> Result<create_session::ResponseData> {
