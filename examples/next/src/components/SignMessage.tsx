@@ -10,7 +10,7 @@ import {
   typedData,
 } from "starknet";
 
-const MESSAGE: TypedData = {
+const DEFAULT_MESSAGE: TypedData = {
   types: {
     StarknetDomain: [
       { name: "name", type: "shortstring" },
@@ -50,11 +50,26 @@ const MESSAGE: TypedData = {
 
 export function SignMessage() {
   const { address, account } = useAccount();
-  const [message, setMessage] = useState(MESSAGE);
+  const [message, setMessage] = useState<TypedData>(DEFAULT_MESSAGE);
+  const [messageText, setMessageText] = useState(
+    JSON.stringify(DEFAULT_MESSAGE, null, 2),
+  );
   const [isValid, setIsValid] = useState<boolean | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
   const { signTypedData, data: signature } = useSignTypedData({
     params: message,
   });
+
+  const handleMessageChange = (text: string) => {
+    setMessageText(text);
+    try {
+      const parsedMessage = JSON.parse(text);
+      setMessage(parsedMessage);
+      setParseError(null);
+    } catch (error) {
+      setParseError("Invalid JSON format");
+    }
+  };
 
   const onValidateSig = useCallback(async () => {
     if (!account || !address) {
@@ -85,15 +100,17 @@ export function SignMessage() {
       <h2>Sign Message</h2>
       <Textarea
         className="h-96"
-        value={JSON.stringify(message, null, 2)}
-        onChange={(e) => setMessage(JSON.parse(e.target.value))}
+        value={messageText}
+        onChange={(e) => handleMessageChange(e.target.value)}
       />
+      {parseError && <p className="text-red-500 text-sm">{parseError}</p>}
       <div className="flex gap-2">
         <Button
           onClick={() => {
             setIsValid(null);
             signTypedData(message);
           }}
+          disabled={!!parseError}
         >
           Sign Message
         </Button>
