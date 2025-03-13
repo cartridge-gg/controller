@@ -1,5 +1,5 @@
-export type SupportedWallet = 'argent' | 'metamask' | 'phantom';
-export type WalletPlatform = 'starknet' | 'ethereum' | 'solana';
+export type SupportedWallet = "argent" | "metamask" | "phantom";
+export type WalletPlatform = "starknet" | "ethereum" | "solana";
 
 export interface WalletInfo {
   type: SupportedWallet;
@@ -15,14 +15,13 @@ export interface WalletResponse<T = unknown> {
   wallet: SupportedWallet;
   result?: T;
   error?: string;
-  account?: string; 
+  account?: string;
 }
-
 
 export interface WalletAdapter {
   type: SupportedWallet;
   platform: WalletPlatform;
-  
+
   // Methods
   isAvailable(): boolean;
   getInfo(): WalletInfo;

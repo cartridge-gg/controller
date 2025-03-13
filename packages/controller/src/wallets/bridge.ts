@@ -1,36 +1,48 @@
-import { SupportedWallet, WalletAdapter, WalletInfo, WalletResponse } from './types';
-import { MetaMaskWallet } from './metamask';
-import { PhantomWallet } from './phantom';
-import { ArgentWallet } from './argent';
+import {
+  SupportedWallet,
+  WalletAdapter,
+  WalletInfo,
+  WalletResponse,
+} from "./types";
+import { MetaMaskWallet } from "./metamask";
+import { PhantomWallet } from "./phantom";
+import { ArgentWallet } from "./argent";
 
 export class WalletBridge {
   private readonly walletAdapters: Map<SupportedWallet, WalletAdapter>;
-  private readonly connectedWallets: Map<SupportedWallet, WalletAdapter> = new Map();
+  private readonly connectedWallets: Map<SupportedWallet, WalletAdapter> =
+    new Map();
 
   constructor() {
     this.walletAdapters = new Map<SupportedWallet, WalletAdapter>();
-    this.walletAdapters.set('metamask', new MetaMaskWallet());
-    this.walletAdapters.set('phantom', new PhantomWallet());
-    this.walletAdapters.set('argent', new ArgentWallet());
+    this.walletAdapters.set("metamask", new MetaMaskWallet());
+    this.walletAdapters.set("phantom", new PhantomWallet());
+    this.walletAdapters.set("argent", new ArgentWallet());
+
+    console.log(this.detectWallets());
 
     if (typeof window !== "undefined") {
       window.wallet_bridge = this;
     }
   }
 
-  // Return a frozen object to prevent modification
   getIFrameMethods() {
     return Object.freeze({
       detectWallets: () => this.detectWallets(),
       connectWallet: (type: SupportedWallet) => this.connectWallet(type),
-      signTransaction: (type: SupportedWallet, tx: unknown) => this.signTransaction(type, tx),
-      switchChain: (type: SupportedWallet, chainId: string) => this.switchChain(type, chainId),
-      getBalance: (type: SupportedWallet, tokenAddress?: string) => this.getBalance(type, tokenAddress),
+      signTransaction: (type: SupportedWallet, tx: unknown) =>
+        this.signTransaction(type, tx),
+      switchChain: (type: SupportedWallet, chainId: string) =>
+        this.switchChain(type, chainId),
+      getBalance: (type: SupportedWallet, tokenAddress?: string) =>
+        this.getBalance(type, tokenAddress),
     });
   }
 
   detectWallets(): WalletInfo[] {
-    return Array.from(this.walletAdapters.values()).map(adapter => adapter.getInfo());
+    return Array.from(this.walletAdapters.values()).map((adapter) =>
+      adapter.getInfo(),
+    );
   }
 
   private getWalletAdapter(type: SupportedWallet): WalletAdapter {
@@ -41,9 +53,13 @@ export class WalletBridge {
     return adapter;
   }
 
-  // Simplify error handling with a helper method
-  private handleError(type: SupportedWallet, error: unknown, operation: string): WalletResponse {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+  private handleError(
+    type: SupportedWallet,
+    error: unknown,
+    operation: string,
+  ): WalletResponse {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     console.error(`Error ${operation} with ${type} wallet:`, error);
     return { success: false, wallet: type, error: errorMessage };
   }
@@ -57,18 +73,21 @@ export class WalletBridge {
 
       const wallet = this.getWalletAdapter(type);
       const response = await wallet.connect();
-      
+
       if (response.success) {
         this.connectedWallets.set(type, wallet);
       }
-      
+
       return response;
     } catch (error) {
-      return this.handleError(type, error, 'connecting to');
+      return this.handleError(type, error, "connecting to");
     }
   }
 
-  async signTransaction(type: SupportedWallet, transaction: unknown): Promise<WalletResponse> {
+  async signTransaction(
+    type: SupportedWallet,
+    transaction: unknown,
+  ): Promise<WalletResponse> {
     try {
       if (!this.connectedWallets.has(type)) {
         throw new Error(`Wallet ${type} is not connected`);
@@ -77,7 +96,7 @@ export class WalletBridge {
       const wallet = this.connectedWallets.get(type)!;
       return await wallet.signTransaction(transaction);
     } catch (error) {
-      return this.handleError(type, error, 'signing transaction with');
+      return this.handleError(type, error, "signing transaction with");
     }
   }
 
@@ -91,7 +110,10 @@ export class WalletBridge {
     }
   }
 
-  async getBalance(type: SupportedWallet, tokenAddress?: string): Promise<WalletResponse> {
+  async getBalance(
+    type: SupportedWallet,
+    tokenAddress?: string,
+  ): Promise<WalletResponse> {
     try {
       if (!this.connectedWallets.has(type)) {
         throw new Error(`Wallet ${type} is not connected`);
@@ -100,7 +122,7 @@ export class WalletBridge {
       const wallet = this.connectedWallets.get(type)!;
       return await wallet.getBalance(tokenAddress);
     } catch (error) {
-      return this.handleError(type, error, 'getting balance from');
+      return this.handleError(type, error, "getting balance from");
     }
   }
 }
@@ -114,4 +136,9 @@ declare global {
   }
 }
 
-export type { SupportedWallet, WalletInfo, WalletResponse, WalletAdapter } from './types';
+export type {
+  SupportedWallet,
+  WalletInfo,
+  WalletResponse,
+  WalletAdapter,
+} from "./types";
