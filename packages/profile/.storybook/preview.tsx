@@ -7,6 +7,21 @@ import { Provider } from "../src/components/provider";
 import "../src/index.css";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
+// Add CSS styles directly to the head
+const styleTag = document.createElement('style');
+styleTag.textContent = `
+  #responsive-wrapper {
+    width: 432px !important;
+    max-height: 600px !important;
+    overflow: auto !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+`;
+document.head.appendChild(styleTag);
+
 const routerDecorator: Decorator = (Story, { parameters: { router } }) => {
   const params = router?.params || {}
   const path = Object.keys(params).length
