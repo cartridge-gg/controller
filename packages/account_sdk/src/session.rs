@@ -93,16 +93,25 @@ impl Controller {
             session,
         );
 
+        // convert authorization from Vec<Felt> to Vec<String>
+        let authorization = authorization
+            .iter()
+            .map(|auth| auth.to_string())
+            .collect::<Vec<String>>();
+
+        let signer = session_signer.clone();
+
         let session = session::create_session(
-          "slot-auth-local".to_string(),
-          self.address.to_string(),
-          self.chain_id.to_string(),
-          self.app_id,
-          Some(session.metadata),
-          authorization,
-          Signer::Starknet(session_signer),
-          session.inner.expires_at.to_string(),
-        ).await;
+            "slot-auth-local".to_string(),
+            self.address.to_string(),
+            self.chain_id.to_string(),
+            self.app_id,
+            Some(session.metadata),
+            authorization,
+            Signer::Starknet(session_signer),
+            session.inner.expires_at.to_string(),
+        )
+        .await;
 
         Ok(session_account)
     }
