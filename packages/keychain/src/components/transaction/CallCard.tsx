@@ -7,8 +7,8 @@ import {
   AccordionItem,
   AccordionTrigger,
   Badge,
+  Address,
 } from "@cartridge/ui-next";
-import { formatAddress } from "@cartridge/utils";
 import { useExplorer } from "@starknet-react/core";
 import { constants, Call } from "starknet";
 import { useState, useEffect } from "react";
@@ -81,9 +81,7 @@ function formatValue(value: any): React.ReactNode {
   if (isHexAddress(value)) {
     return (
       <CopyableValue value={value}>
-        <span className="font-mono text-primary">
-          {formatAddress(value, { first: 6, last: 4 })}
-        </span>
+        <Address address={value} first={6} last={4} copyable={false} />
       </CopyableValue>
     );
   }
@@ -251,7 +249,7 @@ export function CallCard({
       target="_blank"
       rel="noreferrer"
     >
-      {formatAddress(address, { first: 5, last: 5 })}
+      <Address address={address} first={5} last={5} />
     </a>
   );
 
@@ -271,13 +269,6 @@ export function CallCard({
                 <p className="text-foreground font-bold text-s">
                   {humanizeString(call.entrypoint)}
                 </p>
-                {!isExpanded && call.calldata && (
-                  <Badge variant="outline" className="text-xs">
-                    {Array.isArray(call.calldata)
-                      ? `${call.calldata.length} params`
-                      : `${Object.keys(call.calldata).length} params`}
-                  </Badge>
-                )}
               </div>
             </AccordionTrigger>
             <AccordionContent>

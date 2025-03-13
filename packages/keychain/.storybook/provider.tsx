@@ -5,8 +5,13 @@ import { StarknetConfig, publicProvider, voyager } from "@starknet-react/core";
 import { BrowserRouter } from "react-router-dom";
 import { ConnectionContext } from "../src/components/provider/connection";
 import { UIProvider } from "../src/components/provider/ui";
-import { StoryParameters, useMockedConnection } from "./mock";
+import {
+  MockUpgradeProvider,
+  StoryParameters,
+  useMockedConnection,
+} from "./mock";
 import { TokensProvider } from "../src/components/provider/tokens";
+import { PostHogProvider } from "../src/components/provider/posthog";
 
 export function Provider({
   children,
@@ -22,11 +27,15 @@ export function Provider({
     >
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
-          <UIProvider>
-            <TokensProvider>
-              <BrowserRouter>{children}</BrowserRouter>
-            </TokensProvider>
-          </UIProvider>
+          <PostHogProvider>
+            <MockUpgradeProvider controller={connection.controller}>
+              <UIProvider>
+                <TokensProvider>
+                  <BrowserRouter>{children}</BrowserRouter>
+                </TokensProvider>
+              </UIProvider>
+            </MockUpgradeProvider>
+          </PostHogProvider>
         </ConnectionContext.Provider>
       </QueryClientProvider>
     </StarknetConfig>
