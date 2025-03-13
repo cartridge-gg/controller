@@ -33,11 +33,21 @@ pub struct StarknetSigner {
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(rename_all = "camelCase")]
+pub struct Eip191Signer {
+    pub address: String,
+}
+
+#[allow(non_snake_case)]
+#[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+#[serde(rename_all = "camelCase")]
 pub struct Signer {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub webauthn: Option<WebauthnSigner>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub starknet: Option<StarknetSigner>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub eip191: Option<Eip191Signer>,
 }
 
 impl TryFrom<WebauthnSigner> for account_sdk::signers::webauthn::WebauthnSigner {
@@ -97,10 +107,17 @@ impl From<account_sdk::signers::Signer> for Signer {
             account_sdk::signers::Signer::Webauthn(s) => Self {
                 webauthn: Some(s.into()),
                 starknet: None,
+                eip191: None,
             },
             account_sdk::signers::Signer::Starknet(s) => Self {
                 webauthn: None,
                 starknet: Some(s.into()),
+                eip191: None,
+            },
+            account_sdk::signers::Signer::Eip191(s) => Self {
+                webauthn: None,
+                starknet: None,
+                eip191: Some(s.into()),
             },
         }
     }
@@ -125,6 +142,14 @@ impl From<SigningKey> for StarknetSigner {
     fn from(key: SigningKey) -> Self {
         Self {
             private_key: key.secret_scalar().into(),
+        }
+    }
+}
+
+impl From<account_sdk::signers::eip191::Eip191Signer> for Eip191Signer {
+    fn from(signer: account_sdk::signers::eip191::Eip191Signer) -> Self {
+        Self {
+            address: format!("0x{}", hex::encode(signer.address().as_bytes())),
         }
     }
 }
