@@ -22,3 +22,9 @@ export default meta;
 type Story = StoryObj<typeof ArcadeDiscoveryEvent>;
 
 export const Default: Story = {};
+
+export const Loading: Story = {
+  args: {
+    loading: true,
+  },
+};

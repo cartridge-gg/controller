@@ -13,10 +13,12 @@ interface ArcadeDiscoveryGroupProps
     VariantProps<typeof arcadeDiscoveryGroupVariants> {
   game: ArcadeGameHeaderProps;
   events: ArcadeDiscoveryEventProps[];
+  loading?: boolean;
+  rounded?: boolean;
 }
 
 export const arcadeDiscoveryGroupVariants = cva(
-  "select-none flex flex-col gap-y-px",
+  "select-none flex flex-col gap-y-px data-[rounded=true]:rounded-lg data-[rounded=true]:overflow-hidden",
   {
     variants: {
       variant: {
@@ -34,13 +36,27 @@ export const arcadeDiscoveryGroupVariants = cva(
 export const ArcadeDiscoveryGroup = ({
   game,
   events,
+  loading,
+  rounded,
   variant,
+  className,
+  color,
 }: ArcadeDiscoveryGroupProps) => {
   return (
-    <div className={cn(arcadeDiscoveryGroupVariants({ variant }))}>
+    <div
+      data-rounded={rounded}
+      className={cn(arcadeDiscoveryGroupVariants({ variant }), className)}
+    >
       <ArcadeGameHeader variant={variant} {...game} />
       {events.map((event, index) => (
-        <ArcadeDiscoveryEvent key={index} variant={variant} {...event} />
+        <ArcadeDiscoveryEvent
+          key={index}
+          loading={loading}
+          className={className}
+          variant={variant}
+          color={color}
+          {...event}
+        />
       ))}
     </div>
   );

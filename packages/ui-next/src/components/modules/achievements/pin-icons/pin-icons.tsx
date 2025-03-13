@@ -26,6 +26,7 @@ export interface AchievementPinIconsProps
   pins: { id: string; icon: string }[];
   theme?: boolean;
   className?: string;
+  color?: string;
 }
 
 export const AchievementPinIcons = ({
@@ -34,6 +35,7 @@ export const AchievementPinIcons = ({
   variant,
   size,
   className,
+  color,
 }: AchievementPinIconsProps) => {
   return (
     <div className={achievementPinsVariants({ variant, size })}>
@@ -45,6 +47,7 @@ export const AchievementPinIcons = ({
           size={size}
           theme={theme}
           className={className}
+          color={color}
         />
       ))}
       {Array.from({ length: 3 - pins.length }).map((_, index) => (
