@@ -9,6 +9,7 @@ use crate::account::session::hash::Session;
 use crate::account::session::policy::Policy;
 use crate::controller::Controller;
 use crate::errors::ControllerError;
+use crate::graphql::session;
 use crate::hash::MessageHashRev1;
 use crate::signers::{HashSigner, Signer};
 use crate::storage::StorageBackend;
@@ -91,6 +92,17 @@ impl Controller {
             authorization,
             session,
         );
+
+        let session = session::create_session(
+          "slot-auth-local".to_string(),
+          self.address.to_string(),
+          self.chain_id.to_string(),
+          self.app_id,
+          Some(session.metadata),
+          authorization,
+          Signer::Starknet(session_signer),
+          session.inner.expires_at.to_string(),
+        ).await;
 
         Ok(session_account)
     }
