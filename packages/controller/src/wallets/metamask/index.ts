@@ -1,21 +1,21 @@
 import {
   WalletAdapter,
-  WalletInfo,
-  WalletResponse,
-  SupportedWallet,
-  WalletPlatform,
+  ExternalWallet,
+  ExternalWalletResponse,
+  ExternalWalletType,
+  ExternalPlatform,
 } from "../types";
 
 export class MetaMaskWallet implements WalletAdapter {
-  readonly type: SupportedWallet = "metamask";
-  readonly platform: WalletPlatform = "ethereum";
+  readonly type: ExternalWalletType = "metamask";
+  readonly platform: ExternalPlatform = "ethereum";
   private account: string | undefined = undefined;
 
   isAvailable(): boolean {
     return typeof window !== "undefined" && !!window.ethereum?.isMetaMask;
   }
 
-  getInfo(): WalletInfo {
+  getInfo(): ExternalWallet {
     const available = this.isAvailable();
 
     return {
@@ -28,7 +28,7 @@ export class MetaMaskWallet implements WalletAdapter {
     };
   }
 
-  async connect(): Promise<WalletResponse<any>> {
+  async connect(): Promise<ExternalWalletResponse<any>> {
     if (this.account) {
       return { success: true, wallet: this.type, account: this.account };
     }
@@ -57,7 +57,9 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
-  async signTransaction(transaction: any): Promise<WalletResponse<any>> {
+  async signTransaction(
+    transaction: any,
+  ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("MetaMask is not connected");
@@ -103,7 +105,9 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
-  async getBalance(tokenAddress?: string): Promise<WalletResponse<any>> {
+  async getBalance(
+    tokenAddress?: string,
+  ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("MetaMask is not connected");

@@ -1,32 +1,31 @@
-export type SupportedWallet = "argent" | "metamask" | "phantom";
-export type WalletPlatform = "starknet" | "ethereum" | "solana";
+export type ExternalWalletType = "argent" | "metamask" | "phantom";
+export type ExternalPlatform = "starknet" | "ethereum" | "solana";
 
-export interface WalletInfo {
-  type: SupportedWallet;
+export interface ExternalWallet {
+  type: ExternalWalletType;
   available: boolean;
   version?: string;
   chainId?: string;
   name?: string;
-  platform?: WalletPlatform;
+  platform?: ExternalPlatform;
 }
 
-export interface WalletResponse<T = unknown> {
+export interface ExternalWalletResponse<T = unknown> {
   success: boolean;
-  wallet: SupportedWallet;
+  wallet: ExternalWalletType;
   result?: T;
   error?: string;
   account?: string;
 }
 
 export interface WalletAdapter {
-  type: SupportedWallet;
-  platform: WalletPlatform;
+  type: ExternalWalletType;
+  platform: ExternalPlatform;
 
   // Methods
   isAvailable(): boolean;
-  getInfo(): WalletInfo;
-  connect(): Promise<WalletResponse<any>>;
-  signTransaction(transaction: any): Promise<WalletResponse<any>>;
-  switchChain(chainId: string): Promise<boolean>;
-  getBalance(tokenAddress?: string): Promise<WalletResponse<any>>;
+  getInfo(): ExternalWallet;
+  connect(): Promise<ExternalWalletResponse<any>>;
+  signTransaction(transaction: any): Promise<ExternalWalletResponse<any>>;
+  getBalance(tokenAddress?: string): Promise<ExternalWalletResponse<any>>;
 }

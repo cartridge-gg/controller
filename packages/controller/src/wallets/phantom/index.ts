@@ -1,21 +1,21 @@
 import {
   WalletAdapter,
-  WalletInfo,
-  WalletResponse,
-  SupportedWallet,
-  WalletPlatform,
+  ExternalWallet,
+  ExternalWalletResponse,
+  ExternalWalletType,
+  ExternalPlatform,
 } from "../types";
 
 export class PhantomWallet implements WalletAdapter {
-  readonly type: SupportedWallet = "phantom";
-  readonly platform: WalletPlatform = "solana";
+  readonly type: ExternalWalletType = "phantom";
+  readonly platform: ExternalPlatform = "solana";
   private account: string | undefined = undefined;
 
   isAvailable(): boolean {
     return typeof window !== "undefined" && !!window.solana?.isPhantom;
   }
 
-  getInfo(): WalletInfo {
+  getInfo(): ExternalWallet {
     const available = this.isAvailable();
 
     return {
@@ -27,7 +27,7 @@ export class PhantomWallet implements WalletAdapter {
     };
   }
 
-  async connect(): Promise<WalletResponse<any>> {
+  async connect(): Promise<ExternalWalletResponse<any>> {
     if (this.account) {
       return { success: true, wallet: this.type, account: this.account };
     }
@@ -54,7 +54,9 @@ export class PhantomWallet implements WalletAdapter {
     }
   }
 
-  async signTransaction(transaction: any): Promise<WalletResponse<any>> {
+  async signTransaction(
+    transaction: any,
+  ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Phantom is not connected");
@@ -72,12 +74,14 @@ export class PhantomWallet implements WalletAdapter {
     }
   }
 
-  async switchChain(chainId: string): Promise<boolean> {
+  async switchChain(_chainId: string): Promise<boolean> {
     console.warn("Chain switching not supported for Phantom");
     return false;
   }
 
-  async getBalance(tokenAddress?: string): Promise<WalletResponse<any>> {
+  async getBalance(
+    _tokenAddress?: string,
+  ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Phantom is not connected");

@@ -1,21 +1,21 @@
 import {
   WalletAdapter,
-  WalletInfo,
-  WalletResponse,
-  SupportedWallet,
-  WalletPlatform,
+  ExternalWallet,
+  ExternalWalletResponse,
+  ExternalWalletType,
+  ExternalPlatform,
 } from "../types";
 
 export class ArgentWallet implements WalletAdapter {
-  readonly type: SupportedWallet = "argent";
-  readonly platform: WalletPlatform = "starknet";
+  readonly type: ExternalWalletType = "argent";
+  readonly platform: ExternalPlatform = "starknet";
   private account: any | undefined = undefined;
 
   isAvailable(): boolean {
     return typeof window !== "undefined" && !!window.starknet_argentX;
   }
 
-  getInfo(): WalletInfo {
+  getInfo(): ExternalWallet {
     const available = this.isAvailable();
 
     return {
@@ -30,7 +30,7 @@ export class ArgentWallet implements WalletAdapter {
     };
   }
 
-  async connect(): Promise<WalletResponse<any>> {
+  async connect(): Promise<ExternalWalletResponse<any>> {
     if (this.account) {
       return { success: true, wallet: this.type, account: this.account };
     }
@@ -58,7 +58,9 @@ export class ArgentWallet implements WalletAdapter {
     }
   }
 
-  async signTransaction(transaction: any): Promise<WalletResponse<any>> {
+  async signTransaction(
+    transaction: any,
+  ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Argent X is not connected");
@@ -76,21 +78,22 @@ export class ArgentWallet implements WalletAdapter {
     }
   }
 
-  async switchChain(chainId: string): Promise<boolean> {
+  async switchChain(_chainId: string): Promise<boolean> {
     console.warn(
       "Chain switching for Argent X may require custom implementation",
     );
     return false;
   }
 
-  async getBalance(tokenAddress?: string): Promise<WalletResponse<any>> {
+  async getBalance(
+    _tokenAddress?: string,
+  ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Argent X is not connected");
       }
 
-      // Implementation depends on Argent X's API
-      // This is a placeholder - you'll need to implement based on Argent's actual API
+      // TODO: Implement balance fetching based on Argent X's API
       return {
         success: true,
         wallet: this.type,

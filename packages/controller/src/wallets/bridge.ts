@@ -1,20 +1,20 @@
 import {
-  SupportedWallet,
+  ExternalWalletType,
   WalletAdapter,
-  WalletInfo,
-  WalletResponse,
+  ExternalWallet,
+  ExternalWalletResponse,
 } from "./types";
 import { MetaMaskWallet } from "./metamask";
 import { PhantomWallet } from "./phantom";
 import { ArgentWallet } from "./argent";
 
 export class WalletBridge {
-  private readonly walletAdapters: Map<SupportedWallet, WalletAdapter>;
-  private readonly connectedWallets: Map<SupportedWallet, WalletAdapter> =
+  private readonly walletAdapters: Map<ExternalWalletType, WalletAdapter>;
+  private readonly connectedWallets: Map<ExternalWalletType, WalletAdapter> =
     new Map();
 
   constructor() {
-    this.walletAdapters = new Map<SupportedWallet, WalletAdapter>();
+    this.walletAdapters = new Map<ExternalWalletType, WalletAdapter>();
     this.walletAdapters.set("metamask", new MetaMaskWallet());
     this.walletAdapters.set("phantom", new PhantomWallet());
     this.walletAdapters.set("argent", new ArgentWallet());
@@ -28,24 +28,23 @@ export class WalletBridge {
 
   getIFrameMethods() {
     return Object.freeze({
-      detectWallets: () => this.detectWallets(),
-      connectWallet: (type: SupportedWallet) => this.connectWallet(type),
-      signTransaction: (type: SupportedWallet, tx: unknown) =>
+      externalDetectWallets: () => this.detectWallets(),
+      externalConnectWallet: (type: ExternalWalletType) =>
+        this.connectWallet(type),
+      externalSignTransaction: (type: ExternalWalletType, tx: unknown) =>
         this.signTransaction(type, tx),
-      switchChain: (type: SupportedWallet, chainId: string) =>
-        this.switchChain(type, chainId),
-      getBalance: (type: SupportedWallet, tokenAddress?: string) =>
+      externalGetBalance: (type: ExternalWalletType, tokenAddress?: string) =>
         this.getBalance(type, tokenAddress),
     });
   }
 
-  detectWallets(): WalletInfo[] {
+  detectWallets(): ExternalWallet[] {
     return Array.from(this.walletAdapters.values()).map((adapter) =>
       adapter.getInfo(),
     );
   }
 
-  private getWalletAdapter(type: SupportedWallet): WalletAdapter {
+  private getWalletAdapter(type: ExternalWalletType): WalletAdapter {
     const adapter = this.walletAdapters.get(type);
     if (!adapter) {
       throw new Error(`Unsupported wallet type: ${type}`);
@@ -54,17 +53,19 @@ export class WalletBridge {
   }
 
   private handleError(
-    type: SupportedWallet,
+    type: ExternalWalletType,
     error: unknown,
     operation: string,
-  ): WalletResponse {
+  ): ExternalWalletResponse {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     console.error(`Error ${operation} with ${type} wallet:`, error);
     return { success: false, wallet: type, error: errorMessage };
   }
 
-  async connectWallet(type: SupportedWallet): Promise<WalletResponse> {
+  async connectWallet(
+    type: ExternalWalletType,
+  ): Promise<ExternalWalletResponse> {
     try {
       if (this.connectedWallets.has(type)) {
         const wallet = this.connectedWallets.get(type)!;
@@ -85,9 +86,9 @@ export class WalletBridge {
   }
 
   async signTransaction(
-    type: SupportedWallet,
+    type: ExternalWalletType,
     transaction: unknown,
-  ): Promise<WalletResponse> {
+  ): Promise<ExternalWalletResponse> {
     try {
       if (!this.connectedWallets.has(type)) {
         throw new Error(`Wallet ${type} is not connected`);
@@ -100,20 +101,10 @@ export class WalletBridge {
     }
   }
 
-  async switchChain(type: SupportedWallet, chainId: string): Promise<boolean> {
-    try {
-      const wallet = this.getWalletAdapter(type);
-      return await wallet.switchChain(chainId);
-    } catch (error) {
-      console.error(`Error switching chain for ${type} wallet:`, error);
-      return false;
-    }
-  }
-
   async getBalance(
-    type: SupportedWallet,
+    type: ExternalWalletType,
     tokenAddress?: string,
-  ): Promise<WalletResponse> {
+  ): Promise<ExternalWalletResponse> {
     try {
       if (!this.connectedWallets.has(type)) {
         throw new Error(`Wallet ${type} is not connected`);
@@ -137,8 +128,8 @@ declare global {
 }
 
 export type {
-  SupportedWallet,
-  WalletInfo,
-  WalletResponse,
+  ExternalWalletType,
+  ExternalWallet,
+  ExternalWalletResponse,
   WalletAdapter,
 } from "./types";

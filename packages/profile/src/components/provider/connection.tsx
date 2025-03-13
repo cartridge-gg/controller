@@ -14,6 +14,7 @@ import {
   initialState,
 } from "#context/connection";
 import { Method } from "@cartridge/presets";
+import { ExternalWalletType } from "@cartridge/controller";
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
@@ -52,13 +53,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           STRK_CONTRACT_ADDRESS,
           ...(erc20Param
             ? decodeURIComponent(erc20Param)
-                .split(",")
-                .filter(
-                  (address) =>
-                    ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
-                      getChecksumAddress(address),
-                    ),
-                )
+              .split(",")
+              .filter(
+                (address) =>
+                  ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
+                    getChecksumAddress(address),
+                  ),
+              )
             : []),
         ];
       }
@@ -127,6 +128,22 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
             provider: new RpcProvider({ nodeUrl: rpcUrl }),
           }));
         }),
+        externalDetectWallets: normalize(() => () => {
+          return state.parent.externalDetectWallets();
+        }),
+        externalConnectWallet: normalize(() => (type: ExternalWalletType) => {
+          return state.parent.externalConnectWallet(type);
+        }),
+        externalSignTransaction: normalize(
+          () => (type: ExternalWalletType, tx: unknown) => {
+            return state.parent.externalSignTransaction(type, tx);
+          },
+        ),
+        externalGetBalance: normalize(
+          () => (type: ExternalWalletType, tokenAddress?: string) => {
+            return state.parent.externalGetBalance(type, tokenAddress);
+          },
+        ),
       },
     });
     connection.promise.then((parent) => {

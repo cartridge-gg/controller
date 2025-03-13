@@ -135,7 +135,7 @@ const controller = new ControllerConnector({
       rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET!,
     },
   ],
-  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+  defaultChainId: constants.StarknetChainId.SN_MAIN,
   url:
     process.env.NEXT_PUBLIC_KEYCHAIN_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL,

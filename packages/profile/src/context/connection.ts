@@ -1,6 +1,11 @@
 import { isIframe } from "@cartridge/utils";
 import { createContext } from "react";
 import { Call, RpcProvider } from "starknet";
+import {
+  ExternalWalletType,
+  ExternalWallet,
+  ExternalWalletResponse,
+} from "@cartridge/controller";
 
 export type ConnectionContextType = {
   origin: string;
@@ -23,6 +28,20 @@ export type ParentMethods = {
   openSettings: () => void;
   openPurchaseCredits: () => void;
   openExecute: (calls: Call[], chain?: string) => Promise<boolean>;
+
+  // Wallet bridge methods
+  externalDetectWallets: () => Promise<ExternalWallet[]>;
+  externalConnectWallet: (
+    type: ExternalWalletType,
+  ) => Promise<ExternalWalletResponse>;
+  externalSignTransaction: (
+    type: ExternalWalletType,
+    tx: unknown,
+  ) => Promise<ExternalWalletResponse>;
+  externalGetBalance: (
+    type: ExternalWalletType,
+    tokenAddress?: string,
+  ) => Promise<ExternalWalletResponse>;
 };
 
 export const initialState: ConnectionContextType = {
@@ -32,6 +51,23 @@ export const initialState: ConnectionContextType = {
     openSettings: () => {},
     openPurchaseCredits: () => {},
     openExecute: async () => false,
+
+    externalDetectWallets: () => Promise.resolve([]),
+    externalConnectWallet: async () => ({
+      success: false,
+      wallet: "metamask",
+      error: "Not ready",
+    }),
+    externalSignTransaction: async () => ({
+      success: false,
+      wallet: "metamask",
+      error: "Not ready",
+    }),
+    externalGetBalance: async () => ({
+      success: false,
+      wallet: "metamask",
+      error: "Not ready",
+    }),
   },
   provider: new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_SEPOLIA }),
   chainId: "",
