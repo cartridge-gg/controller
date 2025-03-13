@@ -1,6 +1,7 @@
 pub mod abigen;
 pub mod account;
 pub mod artifacts;
+pub mod graphql;
 pub mod constants;
 pub mod controller;
 pub mod errors;

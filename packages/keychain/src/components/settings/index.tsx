@@ -16,7 +16,7 @@ import {
   ShapesIcon,
   Skeleton,
 } from "@cartridge/ui-next";
-import { useCallback, useState, useMemo, useEffect } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { Recovery } from "./Recovery";
 import { Delegate } from "./Delegate";
 import { useConnection } from "@/hooks/connection";
@@ -54,12 +54,10 @@ const registeredAccounts: RegisteredAccount[] = [
 ];
 
 export function Settings() {
-  const { logout, closeModal, controller } = useConnection();
+  const { logout, closeModal } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
 
-  useEffect(() => {
-    console.log("controller username: ", controller?.username());
-  }, [controller]);
+  const controllerUsername = "slot-auth-local";
 
   // Feature flags - can be moved to environment variables or API config later
   const featureFlags = useMemo<FeatureFlags>(
@@ -73,24 +71,24 @@ export function Settings() {
   );
   const signerQuery = useSignerQuery(
     {
-      username: controller?.username() as string,
+      username: controllerUsername,
     },
     {
       enabled: featureFlags.signers,
       onSuccess: (data) => {
-        console.log("signers: ", data);
+        console.log("signers from graphql: ", data);
       },
     },
   );
 
   const sessionQuery = useSessionQuery(
     {
-      username: controller?.username() as string,
+      username: controllerUsername,
     },
     {
       enabled: featureFlags.sessions,
       onSuccess: (data) => {
-        console.log("sessions: ", data);
+        console.log("sessions from graphql: ", data);
       },
     },
   );
