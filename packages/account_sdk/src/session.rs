@@ -106,7 +106,7 @@ impl Controller {
         //     _ => unreachable!(),
         // };
 
-        let session = session::create_session(
+        let _session = session::create_session(
             "slot-auth-local".to_string(),
             self.address.to_string(),
             self.chain_id.to_string(),
