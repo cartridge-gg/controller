@@ -1,5 +1,6 @@
 overwrite: true
-schema: https://api.cartridge.gg/query
+# schema: https://api.cartridge.gg/query
+schema: http://localhost:8000/query
 documents: src/api/cartridge/**/*.graphql
 generates:
   src/api/cartridge/generated.ts:

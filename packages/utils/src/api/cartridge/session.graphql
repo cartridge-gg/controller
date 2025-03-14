@@ -1,17 +1,20 @@
 query Session($username: String!) {
   account(username: $username) {
-    id
     activities {
       edges {
         node {
-          id
-          controllerID
-          status
-          type
-          network
-          
+          session {
+            id
+            appID
+            expiresAt
+            isRevoked
+          }
         }
       }
     }
   }
+}
+
+mutation RevokeSession($id: String!) {
+  revokeSession(sessionID: $id)
 }
