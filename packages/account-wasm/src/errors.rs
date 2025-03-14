@@ -177,6 +177,11 @@ impl From<ControllerError> for JsControllerError {
                 message: format!("GraphQL API error: {:?}", e),
                 data: None,
             },
+            ControllerError::ReqwestError(e) => JsControllerError {
+                code: ErrorCode::ProviderOther,
+                message: format!("Reqwest error: {:?}", e),
+                data: None,
+            },
         }
     }
 }
