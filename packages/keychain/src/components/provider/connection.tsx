@@ -20,7 +20,11 @@ export type ConnectionContextValue = {
   setController: (controller: Controller) => void;
   closeModal: () => void;
   openModal: () => void;
-  logout: () => void;
+  /**
+   * Logout user from the application and revoke session if needed
+   * @param sessionID - optional session ID(username) to logout
+   */
+  logout: (sessionID?: string) => void;
   openSettings: () => void;
 };
 

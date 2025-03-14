@@ -9,7 +9,8 @@ const meta = {
     layout: "centered",
   },
   args: {
-    sessionName: "WP-NUMS-APPCHAIN",
+    sessionName: "https://loothero.com",
+    expiresAt: BigInt(0),
   },
 } satisfies Meta<typeof SessionCard>;
 

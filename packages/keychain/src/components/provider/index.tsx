@@ -1,5 +1,4 @@
 import { PropsWithChildren, useCallback, useMemo } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { useConnectionValue } from "@/hooks/connection";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { ENDPOINT } from "@/utils/graphql";
@@ -37,34 +36,24 @@ export function Provider({ children }: PropsWithChildren) {
 
   return (
     <CartridgeAPIProvider url={ENDPOINT}>
-      <QueryClientProvider client={queryClient}>
-        <ConnectionContext.Provider value={connection}>
-          <PostHogProvider>
-            <UpgradeProvider controller={connection.controller}>
-              <UIProvider>
-                <BrowserRouter>
-                  <StarknetConfig
-                    explorer={voyager}
-                    chains={[sepolia, mainnet]}
-                    defaultChainId={defaultChainId}
-                    provider={jsonRpcProvider({ rpc })}
-                  >
-                    <TokensProvider>{children}</TokensProvider>
-                  </StarknetConfig>
-                </BrowserRouter>
-              </UIProvider>
-            </UpgradeProvider>
-          </PostHogProvider>
-        </ConnectionContext.Provider>
-      </QueryClientProvider>
+      <ConnectionContext.Provider value={connection}>
+        <PostHogProvider>
+          <UpgradeProvider controller={connection.controller}>
+            <UIProvider>
+              <BrowserRouter>
+                <StarknetConfig
+                  explorer={voyager}
+                  chains={[sepolia, mainnet]}
+                  defaultChainId={defaultChainId}
+                  provider={jsonRpcProvider({ rpc })}
+                >
+                  <TokensProvider>{children}</TokensProvider>
+                </StarknetConfig>
+              </BrowserRouter>
+            </UIProvider>
+          </UpgradeProvider>
+        </PostHogProvider>
+      </ConnectionContext.Provider>
     </CartridgeAPIProvider>
   );
 }
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 20,
-    },
-  },
-});

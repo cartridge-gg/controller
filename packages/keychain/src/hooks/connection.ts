@@ -20,6 +20,7 @@ import { Policies } from "@cartridge/presets";
 import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { useThemeEffect } from "@cartridge/ui-next";
+import { useRevokeSessionMutation } from "@cartridge/utils/api/cartridge";
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -146,16 +147,32 @@ export function useConnectionValue() {
     };
   }, [setOrigin, setRpcUrl, setContext, setController]);
 
-  const logout = useCallback(() => {
-    window.controller?.disconnect().then(() => {
-      setController(undefined);
+  const revokeMutation = useRevokeSessionMutation();
 
-      context?.resolve?.({
-        code: ResponseCodes.NOT_CONNECTED,
-        message: "User logged out",
-      });
-    });
-  }, [context, setController]);
+  /**
+   * Logout user from the application and revoke session if needed
+   * @param sessionID - optional session ID(username) to logout
+   */
+  const logout = useCallback(
+    (sessionID?: string) => {
+      window.controller
+        ?.disconnect()
+        .then(() => {
+          setController(undefined);
+
+          context?.resolve?.({
+            code: ResponseCodes.NOT_CONNECTED,
+            message: "User logged out",
+          });
+        })
+        .finally(async () => {
+          if (sessionID) {
+            await revokeMutation.mutateAsync({ id: sessionID });
+          }
+        });
+    },
+    [context, setController, revokeMutation],
+  );
 
   const openSettings = useCallback(() => {
     if (!context) return;
@@ -180,7 +197,7 @@ export function useConnectionValue() {
     } catch {
       // Always fails for some reason
     }
-  }, [context, parent, setContext, logout]);
+  }, [context, parent, setContext]);
 
   const openModal = useCallback(async () => {
     if (!parent || !context?.resolve) return;

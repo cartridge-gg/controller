@@ -28,7 +28,7 @@ import {
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
-import { ActivityStatus, useSignerQuery } from "@cartridge/utils/api/cartridge";
+import { useSignerQuery } from "@cartridge/utils/api/cartridge";
 import { useSessionQuery } from "@cartridge/utils/api/cartridge";
 
 enum State {
@@ -54,10 +54,10 @@ const registeredAccounts: RegisteredAccount[] = [
 ];
 
 export function Settings() {
-  const { logout, closeModal } = useConnection();
+  const { logout, closeModal, controller } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
 
-  const controllerUsername = "slot-auth-local";
+  const controllerUsername = controller?.username() as string;
 
   // Feature flags - can be moved to environment variables or API config later
   const featureFlags = useMemo<FeatureFlags>(
@@ -94,9 +94,9 @@ export function Settings() {
   );
 
   const handleLogout = useCallback(() => {
-    logout();
+    logout(controllerUsername);
     closeModal();
-  }, [logout, closeModal]);
+  }, [logout, closeModal, controllerUsername]);
 
   if (state === State.RECOVERY) {
     return <Recovery onBack={() => setState(State.SETTINGS)} />;
@@ -131,18 +131,17 @@ export function Settings() {
                 ) : sessionQuery.isError ? (
                   <div>Error</div>
                 ) : sessionQuery.isSuccess && sessionQuery.data ? (
-                  sessionQuery.data?.account?.activities?.edges
-                    ?.filter(
-                      (item) => item?.node?.status !== ActivityStatus.Completed,
-                    )
-                    .map((i, index) => {
+                  sessionQuery.data?.account?.activities?.edges?.map(
+                    (i, index) => {
                       return (
                         <SessionCard
                           key={index}
-                          sessionName={i?.node?.network || "Unknown"}
+                          sessionName={i?.node?.session?.appID || "Unknown"}
+                          expiresAt={BigInt(i?.node?.session?.expiresAt || 0)}
                         />
                       );
-                    })
+                    },
+                  )
                 ) : (
                   <div>No data</div>
                 )}
