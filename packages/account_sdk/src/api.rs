@@ -33,10 +33,9 @@ impl Client {
             .post(path)
             .json(body)
             .send()
-            .await
-            .expect("Failed to send request");
+            .await?;
 
-        let res: Response<R> = response.json().await.expect("Failed to parse response");
+        let res: Response<R> = response.json().await?;
 
         if let Some(errors) = res.errors {
             Err(ControllerError::Api(GraphQLErrors(errors)))
