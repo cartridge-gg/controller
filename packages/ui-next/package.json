@@ -97,7 +97,8 @@
     "tailwindcss": "catalog:",
     "tsc-alias": "^1.8.10",
     "typescript": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "vite-plugin-svgr": "^4.3.0"
   },
   "peerDependencies": {
     "react": "catalog:",

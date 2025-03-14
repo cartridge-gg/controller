@@ -17,6 +17,7 @@
     "src/context.ts",
     "src/index.ts",
     "src/preset.ts",
-    "src/utils.ts"
+    "src/utils.ts",
+    "src/types/**/*"
   ]
 }
