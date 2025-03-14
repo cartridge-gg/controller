@@ -1,3 +1,4 @@
+pub mod eip191;
 pub mod starknet;
 
 #[cfg(feature = "webauthn")]
@@ -5,7 +6,7 @@ pub mod webauthn;
 
 use ::starknet::{
     core::{crypto::EcdsaSignError, types::Felt, utils::NonAsciiNameError},
-    macros::selector,
+    macros::{selector, short_string},
     signers::SigningKey,
 };
 use cainome::cairo_serde::NonZero;
@@ -18,7 +19,9 @@ use webauthn::WebauthnSigner;
 use crate::abigen::controller::SignerSignature;
 use async_trait::async_trait;
 
-#[derive(Debug, Clone)]
+use self::eip191::Eip191Signer;
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum Owner {
     Signer(Signer),
     Account(Felt),
@@ -58,6 +61,19 @@ pub enum Signer {
     Starknet(SigningKey),
     #[cfg(feature = "webauthn")]
     Webauthn(WebauthnSigner),
+    Eip191(Eip191Signer),
+}
+
+impl PartialEq for Signer {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Starknet(_), Self::Starknet(_)) => true, // We can't compare SigningKey directly
+            #[cfg(feature = "webauthn")]
+            (Self::Webauthn(_), Self::Webauthn(_)) => true, // We can't compare WebauthnSigner directly
+            (Self::Eip191(a), Self::Eip191(b)) => a == b,
+            _ => false,
+        }
+    }
 }
 
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
@@ -68,6 +84,7 @@ impl HashSigner for Signer {
             Signer::Starknet(s) => HashSigner::sign(s, tx_hash).await,
             #[cfg(feature = "webauthn")]
             Signer::Webauthn(s) => HashSigner::sign(s, tx_hash).await,
+            Signer::Eip191(s) => HashSigner::sign(s, tx_hash).await,
         }
     }
 }
@@ -82,6 +99,11 @@ impl From<Signer> for crate::abigen::controller::Signer {
             ),
             #[cfg(feature = "webauthn")]
             Signer::Webauthn(s) => crate::abigen::controller::Signer::Webauthn(s.into()),
+            Signer::Eip191(s) => {
+                crate::abigen::controller::Signer::Eip191(crate::abigen::controller::Eip191Signer {
+                    eth_address: cainome::cairo_serde::EthAddress(s.address().into()),
+                })
+            }
         }
     }
 }
@@ -92,6 +114,9 @@ impl From<crate::abigen::controller::Signer> for Felt {
             crate::abigen::controller::Signer::Starknet(s) => s.into(),
             #[cfg(feature = "webauthn")]
             crate::abigen::controller::Signer::Webauthn(s) => s.into(),
+            crate::abigen::controller::Signer::Eip191(s) => {
+                starknet_crypto::poseidon_hash(short_string!("Eip191 Signer"), s.eth_address.0)
+            }
             _ => panic!("not implemented"),
         }
     }
@@ -106,6 +131,11 @@ impl From<Signer> for Felt {
 impl Signer {
     pub fn new_starknet_random() -> Self {
         Self::Starknet(SigningKey::from_random())
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn new_eip191_random() -> Self {
+        Self::Eip191(Eip191Signer::random())
     }
 }
 
