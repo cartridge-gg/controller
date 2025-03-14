@@ -23,11 +23,13 @@
     "./themes/default.css": "./dist/themes/default.css",
     "./themes/dark.css": "./dist/themes/dark.css",
     "./themes/fonts.css": "./dist/themes/fonts.css",
-    "./themes/scrollbar.css": "./dist/themes/scrollbar.css"
+    "./themes/scrollbar.css": "./dist/themes/scrollbar.css",
+    "./assets/*": "./dist/assets/*"
   },
   "scripts": {
-    "build:deps": "tsc && tsc-alias && pnpm copyThemes",
+    "build:deps": "tsc && tsc-alias && pnpm copyThemes && pnpm copyAssets",
     "copyThemes": "rm -rf dist/themes && cp -R src/themes dist/themes",
+    "copyAssets": "rm -rf dist/assets && cp -R src/assets dist/assets",
     "format": "prettier --write ./src",
     "format:check": "prettier --check ./src",
     "lint": "eslint .",
