@@ -1,17 +1,19 @@
 use std::env;
 
 pub fn get_cartridge_keychain_url() -> String {
-    if cfg!(debug_assertions) {
-        return "http://localhost:3001".to_string();
-    }
-    return get_env("CARTRIDGE_KEYCHAIN_URL", "https://x.cartridge.gg")
+    // if cfg!(debug_assertions) {
+    //     return "http://localhost:3001".to_string();
+    // }
+    // return get_env("CARTRIDGE_KEYCHAIN_URL", "https://x.cartridge.gg")
+    return "http://localhost:3001".to_string();
 }
 
 pub fn get_cartridge_api_url() -> String {
-    if cfg!(debug_assertions) {
-        return "http://localhost:8000".to_string();
-    }
-    return get_env("CARTRIDGE_API_URL", "https://api.cartridge.gg")
+    // if cfg!(debug_assertions) {
+    //     return "http://localhost:8000".to_string();
+    // }
+    // return get_env("CARTRIDGE_API_URL", "https://api.cartridge.gg")
+    return "http://localhost:8000".to_string();
 }
 
 pub fn get_env(key: &str, default: &str) -> String {
