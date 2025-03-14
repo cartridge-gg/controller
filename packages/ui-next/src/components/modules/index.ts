@@ -9,3 +9,4 @@ export * from "./universals";
 export * from "./arcade";
 export * from "./activities";
 export * from "./tokens";
+export * from "./collectibles";
