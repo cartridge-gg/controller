@@ -181,6 +181,9 @@ export function parseValidationError(error: ControllerError): {
         additionalFunds?: bigint;
         maxGasPrice?: bigint;
         actualGasPrice?: bigint;
+        l1gasMaxAmount?: bigint;
+        l1gasMaxPrice?: bigint;
+        l1gasMaxFee?: bigint;
       }
     | string;
 } {
@@ -200,6 +203,25 @@ export function parseValidationError(error: ControllerError): {
           maxFee,
           balance,
           additionalFunds,
+        },
+      };
+    }
+
+    // Handle L1 gas bounds exceed balance case
+    const l1GasBoundsMatch = error.data.match(
+      /L1 gas bounds \(max amount: (\d+), max price: (\d+)\) exceed balance \((\d+)\)/,
+    );
+    if (l1GasBoundsMatch) {
+      const l1gasMaxAmount = BigInt(l1GasBoundsMatch[1]);
+      const l1gasMaxPrice = BigInt(l1GasBoundsMatch[2]);
+      const balance = BigInt(l1GasBoundsMatch[3]);
+      return {
+        raw: error.data,
+        summary: "Insufficient balance for transaction fee",
+        details: {
+          l1gasMaxAmount,
+          l1gasMaxPrice,
+          balance,
         },
       };
     }
@@ -655,6 +677,21 @@ export const starknetTransactionValidationErrorTestCases = [
       details: {
         maxGasPrice: 69174664530264n,
         actualGasPrice: 71824602546140n,
+      },
+    },
+  },
+  {
+    input: {
+      message: "Account validation failed",
+      data: "L1 gas bounds (max amount: 7206, max price: 18106067943992) exceed balance (122941657491449276).",
+    },
+    expected: {
+      raw: "L1 gas bounds (max amount: 7206, max price: 18106067943992) exceed balance (122941657491449276).",
+      summary: "Insufficient balance for transaction fee",
+      details: {
+        l1gasMaxAmount: 7206n,
+        l1gasMaxPrice: 18106067943992n,
+        balance: 122941657491449276n,
       },
     },
   },
