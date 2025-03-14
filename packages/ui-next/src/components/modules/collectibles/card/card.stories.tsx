@@ -23,7 +23,7 @@ export default meta;
 type Story = StoryObj<typeof CollectibleCard>;
 
 export const Default: Story = {
-  render: (args) => {
+  render: function Render(args) {
     const [selected, setSelected] = useState(false);
 
     return (
@@ -40,7 +40,7 @@ export const Default: Story = {
 };
 
 export const Selectable: Story = {
-  render: (args) => {
+  render: function Render(args) {
     const [selected, setSelected] = useState(false);
 
     return (
