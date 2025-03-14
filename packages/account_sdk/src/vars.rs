@@ -5,7 +5,7 @@ pub fn get_cartridge_keychain_url() -> String {
     //     return "http://localhost:3001".to_string();
     // }
     // return get_env("CARTRIDGE_KEYCHAIN_URL", "https://x.cartridge.gg")
-    return "http://localhost:3001".to_string();
+    return get_env("CARTRIDGE_KEYCHAIN_URL", "http://localhost:3001");
 }
 
 pub fn get_cartridge_api_url() -> String {
@@ -13,7 +13,7 @@ pub fn get_cartridge_api_url() -> String {
     //     return "http://localhost:8000".to_string();
     // }
     // return get_env("CARTRIDGE_API_URL", "https://api.cartridge.gg")
-    return "http://localhost:8000".to_string();
+    return get_env("CARTRIDGE_API_URL", "http://localhost:8000");
 }
 
 pub fn get_env(key: &str, default: &str) -> String {

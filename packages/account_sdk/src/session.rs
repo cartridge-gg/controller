@@ -108,7 +108,7 @@ impl Controller {
 
         let _ = session::create_session(
             // TODO: get account id from the controller
-            "slot-auth-local".to_string(),
+            self.username.clone(),
             self.address.to_string(),
             self.chain_id.to_string(),
             self.app_id.to_string(),
