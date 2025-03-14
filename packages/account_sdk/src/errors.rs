@@ -1,5 +1,5 @@
-use cainome::cairo_serde;
 use crate::api::{self};
+use cainome::cairo_serde;
 use starknet::{
     accounts::{AccountError, AccountFactoryError},
     core::types::FeeEstimate,
@@ -59,4 +59,7 @@ pub enum ControllerError {
 
     #[error(transparent)]
     Api(#[from] api::GraphQLErrors),
+
+    #[error(transparent)]
+    ReqwestError(#[from] reqwest::Error),
 }

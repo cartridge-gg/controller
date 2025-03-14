@@ -100,21 +100,13 @@ impl Controller {
             .map(|auth| auth.to_string())
             .collect::<Vec<String>>();
 
-        // let signer_type = match Signer::Starknet(session_signer.clone()) {
-        //     Signer::Starknet(signer) => SignerType::starknet_account,
-        //     Signer::Webauthn(signer) => SignerType::webauthn,
-        //     _ => unreachable!(),
-        // };
-
         let _ = session::create_session(
-            // TODO: get account id from the controller
             self.username.clone(),
             self.address.to_string(),
             self.chain_id.to_string(),
             self.app_id.to_string(),
             Some(session.metadata),
             session_authorization,
-            // signer_type,
             SignerType::starknet_account,
             session.inner.expires_at.to_string(),
         )
