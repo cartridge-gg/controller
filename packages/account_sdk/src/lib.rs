@@ -1,4 +1,5 @@
 pub mod abigen;
+pub mod api;
 pub mod account;
 pub mod artifacts;
 pub mod graphql;
@@ -15,6 +16,7 @@ pub mod storage;
 pub mod typed_data;
 pub mod upgrade;
 pub mod utils;
+pub mod vars;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]

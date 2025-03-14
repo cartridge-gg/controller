@@ -10,6 +10,7 @@ use crate::account::session::policy::Policy;
 use crate::controller::Controller;
 use crate::errors::ControllerError;
 use crate::graphql::session;
+use crate::graphql::session::create_session::SignerType;
 use crate::hash::MessageHashRev1;
 use crate::signers::{HashSigner, Signer};
 use crate::storage::StorageBackend;
@@ -86,29 +87,34 @@ impl Controller {
 
         let session_account = SessionAccount::new(
             self.provider().clone(),
-            Signer::Starknet(session_signer),
+            Signer::Starknet(session_signer.clone()),
             self.address,
             self.chain_id,
-            authorization,
-            session,
+            authorization.clone(),
+            session.clone(),
         );
 
         // convert authorization from Vec<Felt> to Vec<String>
-        let authorization = authorization
+        let session_authorization: Vec<String> = authorization
             .iter()
             .map(|auth| auth.to_string())
             .collect::<Vec<String>>();
 
-        let signer = session_signer.clone();
+        // let signer_type = match Signer::Starknet(session_signer.clone()) {
+        //     Signer::Starknet(signer) => SignerType::starknet_account,
+        //     Signer::Webauthn(signer) => SignerType::webauthn,
+        //     _ => unreachable!(),
+        // };
 
         let session = session::create_session(
             "slot-auth-local".to_string(),
             self.address.to_string(),
             self.chain_id.to_string(),
-            self.app_id,
+            self.app_id.to_string(),
             Some(session.metadata),
-            authorization,
-            Signer::Starknet(session_signer),
+            session_authorization,
+            // signer_type,
+            SignerType::starknet_account,
             session.inner.expires_at.to_string(),
         )
         .await;
