@@ -39,7 +39,7 @@ export const Default: Story = {
   },
 };
 
-export const SelectableGlobally: Story = {
+export const Selectable: Story = {
   render: (args) => {
     const [selected, setSelected] = useState(false);
 
@@ -53,6 +53,12 @@ export const SelectableGlobally: Story = {
         />
       </div>
     );
+  },
+};
+
+export const Faded: Story = {
+  args: {
+    variant: "faded",
   },
 };
 
