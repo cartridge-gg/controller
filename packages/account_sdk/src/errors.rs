@@ -1,4 +1,5 @@
 use cainome::cairo_serde;
+use crate::api::{self};
 use starknet::{
     accounts::{AccountError, AccountFactoryError},
     core::types::FeeEstimate,
@@ -55,4 +56,7 @@ pub enum ControllerError {
     #[cfg(feature = "webauthn")]
     #[error(transparent)]
     CoseError(#[from] coset::CoseError),
+
+    #[error(transparent)]
+    Api(#[from] api::GraphQLErrors),
 }

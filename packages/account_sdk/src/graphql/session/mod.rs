@@ -1,6 +1,6 @@
-use crate::graphql::session::create_session::SignerType;
+use crate::{api::Client, graphql::session::create_session::SignerType};
+use create_session::ResponseData;
 use graphql_client::GraphQLQuery;
-use reqwest::Client;
 use anyhow::Result;
 
 type JSON = String;
@@ -38,14 +38,8 @@ pub async fn create_session(
       expires_at,
     },
   });
-  let path = "http://localhost:8000/query";
-  let response = client
-      .post(path)
-      .json(&request_body)
-      .send()
-      .await?;
 
-  let res = response.json::<create_session::ResponseData>().await?;
+  let res: ResponseData = client.query(&request_body).await?;
 
   Ok(res)
 }
