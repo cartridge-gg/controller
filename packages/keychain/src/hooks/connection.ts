@@ -16,12 +16,33 @@ import {
   ConnectionContextValue,
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
+import {
+  ExternalWalletType,
+  ExternalWallet,
+  ExternalWalletResponse,
+} from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
 import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { useThemeEffect } from "@cartridge/ui-next";
 
-type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
+type ParentMethods = AsyncMethodReturns<{ 
+  close: () => Promise<void> 
+
+  // Wallet bridge methods
+  externalDetectWallets: () => Promise<ExternalWallet[]>;
+  externalConnectWallet: (
+    type: ExternalWalletType,
+  ) => Promise<ExternalWalletResponse>;
+  externalSignTransaction: (
+    type: ExternalWalletType,
+    tx: unknown,
+  ) => Promise<ExternalWalletResponse>;
+  externalGetBalance: (
+    type: ExternalWalletType,
+    tokenAddress?: string,
+  ) => Promise<ExternalWalletResponse>;
+}>;
 
 export function useConnectionValue() {
   const [parent, setParent] = useState<ParentMethods>();
@@ -196,6 +217,26 @@ export function useConnectionValue() {
     }
   }, [context, parent]);
 
+  const externalDetectWallets = useCallback(() => {
+    if (!parent) return Promise.resolve([]);
+    return parent.externalDetectWallets();
+  }, [parent]); 
+
+  const externalConnectWallet = useCallback((type: ExternalWalletType) => {
+    if (!parent) return Promise.resolve({ success: false, wallet: type, error: "No parent" });
+    return parent.externalConnectWallet(type);
+  }, [parent]);
+
+  const externalSignTransaction = useCallback((type: ExternalWalletType, tx: unknown) => {
+    if (!parent) return Promise.resolve({ success: false, wallet: type, error: "No parent" });
+    return parent.externalSignTransaction(type, tx);
+  }, [parent]);
+  
+  const externalGetBalance = useCallback((type: ExternalWalletType, tokenAddress?: string) => {
+    if (!parent) return Promise.resolve({ success: false, wallet: type, error: "No parent" });
+    return parent.externalGetBalance(type, tokenAddress);
+  }, [parent]);
+
   return {
     context,
     controller,
@@ -210,6 +251,10 @@ export function useConnectionValue() {
     openModal,
     logout,
     openSettings,
+    externalDetectWallets,
+    externalConnectWallet,
+    externalSignTransaction,
+    externalGetBalance,
   };
 }
 

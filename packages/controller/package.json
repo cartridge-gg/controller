@@ -60,12 +60,13 @@
     "exports": "named"
   },
   "peerDependencies": {
-    "starknet": "catalog:",
-    "open": "^10.1.0"
+    "open": "^10.1.0",
+    "starknet": "catalog:"
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/penpal": "catalog:",
+    "@phantom/wallet-sdk": "^0.0.23",
     "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
     "base64url": "catalog:",

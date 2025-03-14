@@ -13,6 +13,11 @@ import {
 } from "@starknet-io/types-js";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import { Policy, SessionPolicies } from "@cartridge/presets";
+import {
+  ExternalWallet,
+  ExternalWalletResponse,
+  ExternalWalletType,
+} from "./wallets/types";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -129,6 +134,20 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
+
+  // External wallet methods
+  externalDetectWallets(): Promise<ExternalWallet[]>;
+  externalConnectWallet(
+    type: ExternalWalletType,
+  ): Promise<ExternalWalletResponse>;
+  externalSignTransaction(
+    type: ExternalWalletType,
+    tx: unknown,
+  ): Promise<ExternalWalletResponse>;
+  externalGetBalance(
+    type: ExternalWalletType,
+    tokenAddress?: string,
+  ): Promise<ExternalWalletResponse>;
 }
 
 export interface Profile {

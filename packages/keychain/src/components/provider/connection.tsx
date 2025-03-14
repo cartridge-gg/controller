@@ -3,6 +3,11 @@ import Controller from "@/utils/controller";
 import { ConnectionCtx } from "@/utils/connection";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import { ControllerTheme } from "@cartridge/ui-next";
+import {
+  ExternalWalletType,
+  ExternalWallet,
+  ExternalWalletResponse,
+} from "@cartridge/controller";
 
 export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
@@ -22,6 +27,18 @@ export type ConnectionContextValue = {
   openModal: () => void;
   logout: () => void;
   openSettings: () => void;
+  externalDetectWallets: () => Promise<ExternalWallet[]>;
+  externalConnectWallet: (
+    type: ExternalWalletType,
+  ) => Promise<ExternalWalletResponse>;
+  externalSignTransaction: (
+    type: ExternalWalletType,
+    tx: unknown,
+  ) => Promise<ExternalWalletResponse>;
+  externalGetBalance: (
+    type: ExternalWalletType,
+    tokenAddress?: string,
+  ) => Promise<ExternalWalletResponse>;
 };
 
 export type VerifiableControllerTheme = ControllerTheme & {
