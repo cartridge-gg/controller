@@ -1,6 +1,6 @@
 import {
   AchievementContentProps,
-  AchievementGroupHeader,
+  ArcadeGameHeader,
   AchievementPinProps,
   AchievementProgress,
   Card,
@@ -20,6 +20,9 @@ export interface AchievementSummaryProps
   }[];
   metadata: Metadata;
   socials?: Socials;
+  active?: boolean;
+  className?: string;
+  color?: string;
 }
 
 const achievementSummaryVariants = cva("border border-transparent", {
@@ -39,6 +42,9 @@ export const AchievementSummary = ({
   achievements,
   metadata,
   socials,
+  active,
+  className,
+  color,
   variant,
 }: AchievementSummaryProps) => {
   const { points, count } = useMemo(() => {
@@ -55,11 +61,14 @@ export const AchievementSummary = ({
 
   return (
     <Card className={achievementSummaryVariants({ variant })}>
-      <AchievementGroupHeader
+      <ArcadeGameHeader
         achievements={achievements}
         metadata={metadata}
         socials={socials}
         variant={variant}
+        active={active}
+        className={className}
+        color={color}
       />
       <CardContent className="p-0">
         <AchievementProgress
@@ -68,6 +77,8 @@ export const AchievementSummary = ({
           points={points}
           variant={variant}
           completed
+          className={className}
+          color={color}
         />
       </CardContent>
     </Card>

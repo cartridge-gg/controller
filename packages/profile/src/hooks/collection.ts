@@ -24,13 +24,19 @@ export type Asset = {
   attributes: Record<string, unknown>[];
 };
 
+export type UseCollectionResponse = {
+  collection?: Collection;
+  assets?: Asset[];
+  status: "success" | "error" | "idle" | "loading";
+};
+
 export function useCollection({
   contractAddress,
   tokenIds = [],
 }: {
   contractAddress?: string;
   tokenIds?: string[];
-}) {
+}): UseCollectionResponse {
   const { address } = useAccount();
   const { isReady, indexerUrl } = useIndexerAPI();
   const [offset, setOffset] = useState(0);
@@ -110,7 +116,12 @@ export function useCollection({
   return { collection, assets, status };
 }
 
-export function useCollections() {
+export type UseCollectionsResponse = {
+  collections: Collection[];
+  status: "success" | "error" | "idle" | "loading";
+};
+
+export function useCollections(): UseCollectionsResponse {
   const { address } = useAccount();
   const { isReady, indexerUrl } = useIndexerAPI();
 
@@ -139,8 +150,9 @@ export function useCollections() {
     if (!indexerUrl || !Object.values(tokens).length) return [];
 
     const collections =
-      Object.values(tokens).reduce<Record<string, Collection>>(
-        (prev, token) => {
+      Object.values(tokens)
+        .filter((token) => !!token.contractAddress)
+        .reduce<Record<string, Collection>>((prev, token) => {
           const agg = prev[token.contractAddress];
           const collection = agg
             ? { ...agg, totalCount: agg.totalCount + 1 }
@@ -158,9 +170,7 @@ export function useCollections() {
             ...prev,
             [collection.address]: collection,
           };
-        },
-        {},
-      ) ?? [];
+        }, {}) ?? [];
 
     return Object.values(collections);
   }, [tokens, indexerUrl]);

@@ -18,7 +18,7 @@ import {
   RegistryOptions,
 } from "@bal7hazar/arcade-sdk";
 import { constants } from "starknet";
-import { ArcadeContext } from "@/context/arcade";
+import { ArcadeContext } from "#context/arcade";
 
 const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
 

@@ -12,11 +12,12 @@ import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 import { execute } from "@/utils/connection/execute";
-import { usePostHog } from "@cartridge/utils";
+import { useUpgrade } from "./provider/upgrade";
+import { usePostHog } from "./provider/posthog";
 
 export function Home() {
-  const { context, setContext, controller, policies, origin, upgrade } =
-    useConnection();
+  const { context, setContext, controller, policies, origin } = useConnection();
+  const upgrade = useUpgrade();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
   >(undefined);

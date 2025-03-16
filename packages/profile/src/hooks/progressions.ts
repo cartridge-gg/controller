@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Project, useProgressionsQuery } from "@cartridge/utils/api/cartridge";
-import { Progress, RawProgress, getSelectorFromTag } from "@/models";
+import { Progress, RawProgress, getSelectorFromTag } from "#models";
 
 interface Response {
   items: { achievements: RawProgress[] }[];

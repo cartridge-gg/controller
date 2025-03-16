@@ -4,7 +4,6 @@ import { useConnectionValue } from "@/hooks/connection";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { ENDPOINT } from "@/utils/graphql";
 import { PostHogProvider } from "./posthog";
-import { ControllerThemeProvider } from "./theme";
 import { UIProvider } from "./ui";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
 import { sepolia, mainnet } from "@starknet-react/chains";
@@ -12,9 +11,11 @@ import { constants, num } from "starknet";
 import { BrowserRouter } from "react-router-dom";
 import { ConnectionContext } from "./connection";
 import { TokensProvider } from "./tokens";
+import { UpgradeProvider } from "@/components/provider/upgrade";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
+
   const rpc = useCallback(() => {
     let nodeUrl;
     switch (connection.controller?.chainId()) {
@@ -38,22 +39,22 @@ export function Provider({ children }: PropsWithChildren) {
     <CartridgeAPIProvider url={ENDPOINT}>
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
-          <UIProvider>
-            <BrowserRouter>
-              <ControllerThemeProvider>
-                <StarknetConfig
-                  explorer={voyager}
-                  chains={[sepolia, mainnet]}
-                  defaultChainId={defaultChainId}
-                  provider={jsonRpcProvider({ rpc })}
-                >
-                  <TokensProvider>
-                    <PostHogProvider>{children}</PostHogProvider>
-                  </TokensProvider>
-                </StarknetConfig>
-              </ControllerThemeProvider>
-            </BrowserRouter>
-          </UIProvider>
+          <PostHogProvider>
+            <UpgradeProvider controller={connection.controller}>
+              <UIProvider>
+                <BrowserRouter>
+                  <StarknetConfig
+                    explorer={voyager}
+                    chains={[sepolia, mainnet]}
+                    defaultChainId={defaultChainId}
+                    provider={jsonRpcProvider({ rpc })}
+                  >
+                    <TokensProvider>{children}</TokensProvider>
+                  </StarknetConfig>
+                </BrowserRouter>
+              </UIProvider>
+            </UpgradeProvider>
+          </PostHogProvider>
         </ConnectionContext.Provider>
       </QueryClientProvider>
     </CartridgeAPIProvider>

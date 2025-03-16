@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/profile",
-  "version": "0.7.3",
+  "version": "0.7.6",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,8 +14,29 @@
     "storybook:build": "storybook build",
     "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6003 --silent",
     "test-storybook": "test-storybook --testTimeout=60000",
-    "test:storybook:update": "start-server-and-test 'pnpm storybook:serve' 6003 'pnpm test-storybook --url http://127.0.0.1:6003 -u'",
+    "test:storybook:update": "start-server-and-test 'SNAPSHOT=1 pnpm storybook:serve' 6003 'pnpm test-storybook --url http://127.0.0.1:6003 -u'",
     "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6003 'pnpm test-storybook --url http://127.0.0.1:6003'"
+  },
+  "imports": {
+    "#hooks/account": {
+      "storybook": "./src/hooks/account.mock.ts",
+      "default": "./src/hooks/account.ts"
+    },
+    "#hooks/collection": {
+      "storybook": "./src/hooks/collection.mock.ts",
+      "default": "./src/hooks/collection.ts"
+    },
+    "#hooks/token": {
+      "storybook": "./src/hooks/token.mock.ts",
+      "default": "./src/hooks/token.ts"
+    },
+    "#*": [
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
   },
   "dependencies": {
     "@bal7hazar/arcade-sdk": "^0.0.73",
@@ -37,6 +58,7 @@
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",
+    "@cartridge/tsconfig": "workspace:*",
     "@storybook/addon-essentials": "catalog:",
     "@storybook/addon-themes": "catalog:",
     "@storybook/blocks": "catalog:",
@@ -63,7 +85,6 @@
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vite": "catalog:",
-    "vite-tsconfig-paths": "catalog:"
+    "vite": "catalog:"
   }
 }

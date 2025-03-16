@@ -3,6 +3,7 @@ import {
   type Method,
   type SessionPolicies,
   type SignMessagePolicy,
+  type TypedDataPolicy,
   erc20Metadata,
 } from "@cartridge/presets";
 import { CartridgeIcon, CoinsIcon } from "@cartridge/ui-next";
@@ -14,6 +15,7 @@ import {
   typedData,
 } from "starknet";
 
+import { DEFAULT_SESSION_DURATION } from "@/const";
 import type { Policy } from "@cartridge/account-wasm";
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
@@ -132,7 +134,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
         const methodsArr = Array.isArray(methods) ? methods : [methods];
         return methodsArr.map((m) => ({
           target,
-          method: m.entrypoint,
+          method: hash.getSelectorFromName(m.entrypoint),
           authorized: !!m.authorized,
         }));
       },
@@ -160,20 +162,34 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
 
 interface ICreateSessionContext {
   policies: ParsedSessionPolicies;
+  duration: bigint;
+  isEditable: boolean;
+  requiredPolicies: Array<ContractType>;
+  chainSpecificMessages:
+    | true
+    | (TypedDataPolicy & {
+        name?: string;
+        description?: string;
+      } & {
+        authorized?: boolean;
+        id?: string;
+      })[];
   onToggleMethod: (address: string, id: string, authorized: boolean) => void;
   onToggleMessage: (id: string, authorized: boolean) => void;
-  isEditable?: boolean;
-  onToggleEditable?: () => void;
+  onDurationChange: (duration: bigint) => void;
+  onToggleEditable: () => void;
 }
 
-const CreateSessionContext = createContext<ICreateSessionContext>({
+export const CreateSessionContext = createContext<ICreateSessionContext>({
   policies: {} as ParsedSessionPolicies,
+  duration: DEFAULT_SESSION_DURATION,
+  isEditable: false,
+  requiredPolicies: [],
+  chainSpecificMessages: [],
   onToggleMethod: () => {},
   onToggleMessage: () => {},
-  isEditable: false,
+  onDurationChange: () => {},
   onToggleEditable: () => {},
 });
-
-export const CreateSessionProvider = CreateSessionContext.Provider;
 
 export const useCreateSession = () => useContext(CreateSessionContext);

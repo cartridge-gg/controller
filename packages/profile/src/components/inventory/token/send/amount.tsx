@@ -1,4 +1,4 @@
-import { useToken } from "@/hooks/token";
+import { useToken } from "#hooks/token";
 import { Amount } from "@cartridge/ui-next";
 import { useCountervalue } from "@cartridge/utils";
 import { TokenPair } from "@cartridge/utils/api/cartridge";
@@ -7,10 +7,12 @@ import { useParams } from "react-router-dom";
 
 export function SendAmount({
   amount,
+  submitted,
   setAmount,
   setError,
 }: {
   amount: number | undefined;
+  submitted: boolean;
   setAmount: (amount: number | undefined) => void;
   setError: (error: Error | undefined) => void;
 }) {
@@ -51,6 +53,7 @@ export function SendAmount({
   return (
     <Amount
       amount={amount}
+      submitted={submitted}
       conversion={countervalue?.formatted}
       balance={parseFloat(token.balance.formatted.replace("~", ""))}
       symbol={token.meta.symbol}

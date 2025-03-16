@@ -14,12 +14,12 @@ import {
 import {
   ConnectionContext,
   ConnectionContextValue,
+  VerifiableControllerTheme,
 } from "@/components/provider/connection";
-import { UpgradeInterface, useUpgrade } from "./upgrade";
 import { Policies } from "@cartridge/presets";
 import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
-import { VerifiableControllerTheme } from "@/context/theme";
+import { useThemeEffect } from "@cartridge/ui-next";
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -37,7 +37,6 @@ export function useConnectionValue() {
   });
   const [controller, setController] = useState(window.controller);
   const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
-  const upgrade: UpgradeInterface = useUpgrade(controller);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -97,7 +96,7 @@ export function useConnectionValue() {
     if (presetParam && presetParam in controllerConfigs) {
       const allowedOrigins = toArray(controllerConfigs[presetParam].origin);
       const verified =
-        origin &&
+        !!origin &&
         allowedOrigins.some((allowedOrigin) => {
           const originUrl = new URL(origin);
           return originUrl.hostname === allowedOrigin;
@@ -105,7 +104,7 @@ export function useConnectionValue() {
 
       if (controllerConfigs[presetParam].theme) {
         setTheme({
-          verified: !!verified,
+          verified,
           ...controllerConfigs[presetParam].theme,
         });
       }
@@ -114,7 +113,7 @@ export function useConnectionValue() {
       if (!policiesParam && controllerConfigs[presetParam].policies) {
         setPolicies(
           parseSessionPolicies({
-            verified: !!verified,
+            verified,
             policies: controllerConfigs[presetParam].policies,
           }),
         );
@@ -128,6 +127,8 @@ export function useConnectionValue() {
     setHasPrefundRequest,
     setController,
   ]);
+
+  useThemeEffect({ theme, assetUrl: "" });
 
   useEffect(() => {
     const connection = connectToController<ParentMethods>({
@@ -169,10 +170,6 @@ export function useConnectionValue() {
   const closeModal = useCallback(async () => {
     if (!parent || !context?.resolve) return;
 
-    if (upgrade.available) {
-      logout();
-    }
-
     try {
       context.resolve({
         code: ResponseCodes.CANCELED,
@@ -183,7 +180,7 @@ export function useConnectionValue() {
     } catch {
       // Always fails for some reason
     }
-  }, [context, parent, setContext, upgrade.available, logout]);
+  }, [context, parent, setContext, logout]);
 
   const openModal = useCallback(async () => {
     if (!parent || !context?.resolve) return;
@@ -207,7 +204,6 @@ export function useConnectionValue() {
     policies,
     theme,
     hasPrefundRequest,
-    upgrade,
     setController,
     setContext,
     closeModal,
@@ -224,4 +220,8 @@ export function useConnection() {
   }
 
   return ctx;
+}
+
+export function useControllerTheme() {
+  return useConnection().theme;
 }

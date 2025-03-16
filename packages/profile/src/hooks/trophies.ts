@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Project, useAchievementsQuery } from "@cartridge/utils/api/cartridge";
-import { RawTrophy, Trophy, getSelectorFromTag } from "@/models";
+import { RawTrophy, Trophy, getSelectorFromTag } from "#models";
 
 interface Response {
   items: { achievements: RawTrophy[] }[];

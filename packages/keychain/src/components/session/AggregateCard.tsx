@@ -82,7 +82,7 @@ export function AggregateCard({
             </Link>
           </div>
 
-          <div className="flex flex-col gap-px rounded overflow-auto border border-background divide-y-[1px] divide-solid divide-background">
+          <div className="flex flex-col gap-px rounded overflow-auto border border-background divide-y divide-solid divide-background">
             {methods
               .filter((method) => (isEditable ? true : method.authorized))
               .map((method) => (

@@ -1,9 +1,9 @@
-import { PropsWithChildren, useEffect, useState } from "react";
-import { LayoutContext } from "./context";
-import { isIframe } from "@cartridge/utils";
 import { cn } from "@/utils";
+import { isIframe } from "@cartridge/utils";
+import { type PropsWithChildren, useEffect, useState } from "react";
+import { LayoutContext } from "./context";
 
-function useMediaQuery(query: string) {
+export function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
 
   useEffect(() => {
@@ -33,7 +33,12 @@ export function LayoutContainer({
       value={{ withBottomTabs, setWithBottomTabs, withFooter, setWithFooter }}
     >
       <ResponsiveWrapper>
-        <div className={`flex flex-col flex-1 min-h-0 ${className}`}>
+        <div
+          className={cn(
+            "flex flex-col flex-1 min-h-0 overflow-x-hidden",
+            className,
+          )}
+        >
           {children}
         </div>
       </ResponsiveWrapper>

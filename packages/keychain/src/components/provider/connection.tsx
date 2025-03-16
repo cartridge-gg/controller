@@ -1,9 +1,8 @@
 import { createContext } from "react";
 import Controller from "@/utils/controller";
 import { ConnectionCtx } from "@/utils/connection";
-import { UpgradeInterface } from "@/hooks/upgrade";
 import { ParsedSessionPolicies } from "@/hooks/session";
-import { VerifiableControllerTheme } from "@/context/theme";
+import { ControllerTheme } from "@cartridge/ui-next";
 
 export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
@@ -17,11 +16,14 @@ export type ConnectionContextValue = {
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
   hasPrefundRequest: boolean;
-  upgrade: UpgradeInterface;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
   closeModal: () => void;
   openModal: () => void;
   logout: () => void;
   openSettings: () => void;
+};
+
+export type VerifiableControllerTheme = ControllerTheme & {
+  verified: boolean;
 };

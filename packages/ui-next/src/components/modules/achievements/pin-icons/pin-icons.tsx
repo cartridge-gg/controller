@@ -6,6 +6,7 @@ const achievementPinsVariants = cva("flex items-center gap-1.5", {
     variant: {
       default: "",
       faded: "",
+      highlight: "",
       ghost: "",
     },
     size: {
@@ -13,38 +14,40 @@ const achievementPinsVariants = cva("flex items-center gap-1.5", {
       default: "",
       md: "",
     },
-    status: {
-      default: "",
-      highlight: "",
-      hover: "",
-    },
   },
   defaultVariants: {
     variant: "default",
-    status: "default",
+    size: "default",
   },
 });
 
 export interface AchievementPinIconsProps
   extends VariantProps<typeof achievementPinsVariants> {
   pins: { id: string; icon: string }[];
+  theme?: boolean;
+  className?: string;
+  color?: string;
 }
 
 export const AchievementPinIcons = ({
   pins,
+  theme,
   variant,
   size,
-  status,
+  className,
+  color,
 }: AchievementPinIconsProps) => {
   return (
-    <div className={achievementPinsVariants({ variant, status, size })}>
+    <div className={achievementPinsVariants({ variant, size })}>
       {pins.map((value) => (
         <AchievementPinIcon
           key={value.id}
           icon={value.icon}
           variant={variant}
           size={size}
-          status={status}
+          theme={theme}
+          className={className}
+          color={color}
         />
       ))}
       {Array.from({ length: 3 - pins.length }).map((_, index) => (
@@ -53,7 +56,8 @@ export const AchievementPinIcons = ({
           empty
           variant={variant}
           size={size}
-          status={status}
+          theme={false}
+          className={className}
         />
       ))}
     </div>

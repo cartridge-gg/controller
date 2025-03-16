@@ -1,32 +1,32 @@
-import { useCallback, useMemo, useState } from "react";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { useConnection } from "@/hooks/connection";
 import {
+  Button,
+  Card,
+  CardDescription,
+  CheckIcon,
+  CreditCardIcon,
+  DepositIcon,
+  InfoIcon,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  CheckIcon,
-  CoinsIcon,
-  Button,
-  CopyAddress,
-  Separator,
   LayoutHeader,
+  Separator,
 } from "@cartridge/ui-next";
-import { useConnection } from "@/hooks/connection";
-import { AmountSelection } from "./AmountSelection";
-import { ErrorAlert } from "@/components/ErrorAlert";
+import { isIframe } from "@cartridge/utils";
 import { Elements } from "@stripe/react-stripe-js";
-import { Appearance, loadStripe } from "@stripe/stripe-js";
+import { type Appearance, loadStripe } from "@stripe/stripe-js";
+import { useCallback, useMemo, useState } from "react";
+import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "./Balance";
 import CheckoutForm from "./StripeCheckout";
-import { isIframe } from "@cartridge/utils";
 import { DEFAULT_AMOUNT } from "./constants";
 
-const STRIPE_API_PUBKEY =
-  "pk_test_51Kr6IXIS6lliDpf33KnwWDtIjRPWt3eAI9CuSLR6Vvc3GxHEwmSU0iszYbUlgUadSRluGKAFphe3JzltyjPAKiBK00al4RAFQu";
-
 enum PurchaseState {
-  SELECTION,
-  STRIPE_CHECKOUT,
-  SUCCESS,
+  SELECTION = 0,
+  STRIPE_CHECKOUT = 1,
+  SUCCESS = 2,
 }
 
 type PurchaseCreditsProps = {
@@ -34,14 +34,17 @@ type PurchaseCreditsProps = {
   onBack?: () => void;
 };
 
-export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
+export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   const { closeModal, controller } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setisLoading] = useState<boolean>(false);
   const [state, setState] = useState<PurchaseState>(PurchaseState.SELECTION);
   const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
-  const stripePromise = useMemo(() => loadStripe(STRIPE_API_PUBKEY), []);
+  const stripePromise = useMemo(
+    () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
+    [],
+  );
   const [error, setError] = useState<Error>();
 
   const onAmountChanged = useCallback(
@@ -106,35 +109,35 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
   return (
     <LayoutContainer>
       <LayoutHeader
+        className="p-6"
         title={
           "Purchase " +
           (state === PurchaseState.SELECTION ? "Credits" : "Complete")
         }
-        description={
-          controller && <CopyAddress address={controller.address()} />
-        }
         icon={
           state === PurchaseState.SELECTION ? (
-            <CoinsIcon variant="solid" size="lg" />
+            <DepositIcon variant="solid" size="lg" />
           ) : (
             <CheckIcon size="lg" />
           )
         }
         onBack={state === PurchaseState.SELECTION ? onBack : undefined}
       />
-      <LayoutContent className="gap-6">
+      <LayoutContent className="gap-6 px-6">
         <Balance types={[BalanceType.CREDITS]} />
-        <ErrorAlert
-          variant=""
-          title="WHAT ARE CREDITS"
-          description={
-            "Credits can be used " +
-            (isSlot ? "for slot deployments" : "to play games") +
-            ". They are not tokens and cannot be transferred or refunded."
-          }
-          isExpanded
-        />
+        {state === PurchaseState.SELECTION && (
+          <AmountSelection
+            amount={creditsAmount}
+            onChange={onAmountChanged}
+            lockSelection={isLoading}
+            enableCustom
+          />
+        )}
       </LayoutContent>
+
+      <div className="m-1 mx-6">
+        <Separator className="bg-spacer" />
+      </div>
 
       <LayoutFooter>
         {error && (
@@ -145,25 +148,34 @@ export function PurchaseCredits({ isSlot, onBack }: PurchaseCreditsProps) {
           />
         )}
 
+        <Card className="bg-background-100 border border-background-200 p-3">
+          <CardDescription className="flex flex-row items-start justify-center gap-3">
+            <InfoIcon size="sm" className="text-foreground-200 flex-shrink-0" />
+            <p className="text-foreground-200 font-normal text-xs">
+              Credits are used to pay for network activity. They are not tokens
+              and cannot be transferred or refunded.
+            </p>
+          </CardDescription>
+        </Card>
+
         {state === PurchaseState.SUCCESS && isIframe() && (
           <Button variant="secondary" onClick={closeModal}>
             Close
           </Button>
         )}
-
         {state === PurchaseState.SELECTION && (
-          <>
-            <AmountSelection
-              amount={creditsAmount}
-              onChange={onAmountChanged}
-              lockSelection={isLoading}
+          <Button
+            className="flex-1"
+            isLoading={isLoading}
+            onClick={createPaymentIntent}
+          >
+            <CreditCardIcon
+              size="sm"
+              variant="solid"
+              className="text-background-100 flex-shrink-0"
             />
-            <Separator className="bg-spacer m-1" />
-
-            <Button isLoading={isLoading} onClick={createPaymentIntent}>
-              Purchase
-            </Button>
-          </>
+            <span>Credit Card</span>
+          </Button>
         )}
       </LayoutFooter>
     </LayoutContainer>

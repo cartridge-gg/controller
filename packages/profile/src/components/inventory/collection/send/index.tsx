@@ -1,5 +1,5 @@
-import { useAccount } from "@/hooks/account";
-import { useConnection } from "@/hooks/context";
+import { useAccount } from "#hooks/account";
+import { useConnection } from "#hooks/context";
 import {
   LayoutContainer,
   LayoutContent,
@@ -16,10 +16,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Call, uint256 } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
-import { useCollection } from "@/hooks/collection";
+import { useCollection } from "#hooks/collection";
 import { Sending } from "./sending";
 import { CollectionImage } from "../image";
-import { useEntrypoints } from "@/hooks/entrypoints";
+import { useEntrypoints } from "#hooks/entrypoints";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
@@ -40,6 +40,8 @@ export function SendCollection() {
   const { parent } = useConnection();
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
+  const [recipientError, setRecipientError] = useState<Error | undefined>();
+  const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
@@ -68,8 +70,8 @@ export function SendCollection() {
   }, [entrypoints]);
 
   const disabled = useMemo(() => {
-    return (!recipientValidated && !!recipientWarning) || !to;
-  }, [recipientValidated, to, recipientWarning]);
+    return (!recipientValidated && !!recipientWarning) || !!recipientError;
+  }, [recipientValidated, recipientWarning, recipientError]);
 
   useEffect(() => {
     setRecipientValidated(false);
@@ -77,11 +79,13 @@ export function SendCollection() {
 
   const onSubmit = useCallback(
     async (to: string) => {
+      setSubmitted(true);
       if (
         !collectionAddress ||
         !tokenIds ||
         !tokenIds.length ||
         !to ||
+        !!recipientError ||
         !entrypoint
       )
         return;
@@ -119,7 +123,13 @@ export function SendCollection() {
         }}
       />
       <LayoutContent className="gap-6">
-        <SendRecipient to={to} setTo={setTo} setWarning={setRecipientWarning} />
+        <SendRecipient
+          to={to}
+          setTo={setTo}
+          submitted={submitted}
+          setWarning={setRecipientWarning}
+          setError={setRecipientError}
+        />
         <Sending assets={assets} />
       </LayoutContent>
 

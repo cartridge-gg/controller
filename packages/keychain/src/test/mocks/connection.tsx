@@ -4,7 +4,6 @@ import {
   ConnectionContext,
   ConnectionContextValue,
 } from "@/components/provider/connection";
-import { LATEST_CONTROLLER } from "@/hooks/upgrade";
 import { render, RenderResult } from "@testing-library/react";
 import { constants } from "starknet";
 
@@ -17,15 +16,6 @@ const defaultMockController: any = {
 } as const;
 
 export const defaultMockConnection: ConnectionContextValue = {
-  upgrade: {
-    available: false,
-    error: undefined,
-    latest: LATEST_CONTROLLER,
-    calls: [],
-    isSynced: false,
-    isUpgrading: false,
-    onUpgrade: vi.fn(),
-  },
   closeModal: vi.fn(),
   openModal: vi.fn(),
   logout: vi.fn(),
@@ -34,9 +24,9 @@ export const defaultMockConnection: ConnectionContextValue = {
   rpcUrl: "https://test.rpc.com",
   theme: {
     verified: true,
-    name: "name",
-    cover: "cover",
-    icon: "icon",
+    name: "test",
+    icon: "test-icon",
+    cover: "test-cover",
   },
   hasPrefundRequest: false,
   setController: vi.fn(),
@@ -54,9 +44,6 @@ export function createMockConnection(
     controller: overrides?.controller
       ? { ...defaultMockController, ...overrides.controller }
       : defaultMockController,
-    upgrade: overrides?.upgrade
-      ? { ...defaultMockConnection.upgrade, ...overrides.upgrade }
-      : defaultMockConnection.upgrade,
     theme: overrides?.theme
       ? { ...defaultMockConnection.theme, ...overrides.theme }
       : defaultMockConnection.theme,
