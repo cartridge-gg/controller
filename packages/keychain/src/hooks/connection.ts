@@ -248,13 +248,13 @@ export function useConnectionValue() {
             message: "User logged out",
           });
         })
-        .finally(async () => {
-          if (sessionID) {
-            await revokeMutation.mutateAsync({ id: sessionID });
-          }
-        });
+        // .finally(async () => {
+        //   if (sessionID) {
+        //     await revokeMutation.mutateAsync({ id: sessionID });
+        //   }
+        // });
     },
-    [context, setController, revokeMutation],
+    [context, setController],
   );
 
   const openSettings = useCallback(() => {

@@ -15,6 +15,12 @@ query Session($username: String!) {
   }
 }
 
-mutation RevokeSession($id: String!) {
-  revokeSession(sessionID: $id)
-}
+# mutation RevokeSession($input: RevokeSessionInput!) {
+#   revokeSession(input: $input): Boolean!
+# }
+#
+# input RevokeSessionInput {
+#   sessionID: ID!
+#   accountID: ID!
+# }
+#

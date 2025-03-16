@@ -1,3 +1,5 @@
+use std::ptr::null;
+
 use cainome::cairo_serde::{CairoSerde, NonZero};
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::{Call, FeeEstimate, Felt, InvokeTransactionResult};
@@ -103,11 +105,12 @@ impl Controller {
         let _ = session::create_session(
             self.username.clone(),
             self.address.to_string(),
-            self.chain_id.to_string(),
             self.app_id.to_string(),
-            Some(session.metadata),
+            self.chain_id.to_string(),
             session_authorization,
+            Some(session.metadata),
             SignerType::starknet_account,
+            None,
             session.inner.expires_at.to_string(),
         )
         .await;

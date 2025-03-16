@@ -7182,21 +7182,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "address",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "chainID",
+              "name": "controllerAddress",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -7211,6 +7197,20 @@
               "defaultValue": null,
               "description": null,
               "name": "appID",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "chainID",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -7246,20 +7246,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "signer",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "ENUM",
-                  "name": "SignerType",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "metadata",
               "type": {
                 "kind": "SCALAR",
@@ -7279,6 +7265,30 @@
                   "name": "String",
                   "ofType": null
                 }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "signerType",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "SignerType",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "signerMetadata",
+              "type": {
+                "kind": "SCALAR",
+                "name": "JSON",
+                "ofType": null
               }
             }
           ],
@@ -15914,7 +15924,7 @@
                 {
                   "defaultValue": null,
                   "description": null,
-                  "name": "session",
+                  "name": "input",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -15945,13 +15955,13 @@
                 {
                   "defaultValue": null,
                   "description": null,
-                  "name": "sessionID",
+                  "name": "input",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
                     "ofType": {
-                      "kind": "SCALAR",
-                      "name": "String",
+                      "kind": "INPUT_OBJECT",
+                      "name": "RevokeSessionInput",
                       "ofType": null
                     }
                   }
@@ -20307,6 +20317,45 @@
         },
         {
           "description": null,
+          "enumValues": [],
+          "fields": [],
+          "inputFields": [
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "sessionID",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "accountID",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            }
+          ],
+          "interfaces": [],
+          "kind": "INPUT_OBJECT",
+          "name": "RevokeSessionInput",
+          "possibleTypes": []
+        },
+        {
+          "description": null,
           "enumValues": [
             {
               "deprecationReason": null,
@@ -20985,13 +21034,13 @@
               "deprecationReason": null,
               "description": null,
               "isDeprecated": false,
-              "name": "address",
+              "name": "controllerAddress",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "String",
+                  "name": "ID",
                   "ofType": null
                 }
               }
@@ -21024,22 +21073,6 @@
                 "ofType": {
                   "kind": "SCALAR",
                   "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "signer",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "ENUM",
-                  "name": "SessionSigner",
                   "ofType": null
                 }
               }
@@ -21205,6 +21238,34 @@
                 "ofType": {
                   "kind": "OBJECT",
                   "name": "ActivityConnection",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": null,
+              "isDeprecated": false,
+              "name": "signer",
+              "type": {
+                "kind": "OBJECT",
+                "name": "Signer",
+                "ofType": null
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
+              "description": null,
+              "isDeprecated": false,
+              "name": "controller",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Controller",
                   "ofType": null
                 }
               }
@@ -21377,29 +21438,6 @@
           "possibleTypes": []
         },
         {
-          "description": "SessionSigner is enum for the field signer",
-          "enumValues": [
-            {
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "webauthn"
-            },
-            {
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "starknet_account"
-            }
-          ],
-          "fields": [],
-          "inputFields": [],
-          "interfaces": [],
-          "kind": "ENUM",
-          "name": "SessionSigner",
-          "possibleTypes": []
-        },
-        {
           "description": "SessionWhereInput is used for filtering Session objects.\nInput was generated by ent.",
           "enumValues": [],
           "fields": [],
@@ -21568,18 +21606,8 @@
             },
             {
               "defaultValue": null,
-              "description": "address field predicates",
-              "name": "address",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "addressNEQ",
+              "description": "controller_address field predicates",
+              "name": "controllerAddress",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
@@ -21589,43 +21617,7 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "addressIn",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "addressNotIn",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "addressGT",
+              "name": "controllerAddressNEQ",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
@@ -21635,80 +21627,126 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "addressGTE",
+              "name": "controllerAddressIn",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "controllerAddressNotIn",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "controllerAddressGT",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "ID",
                 "ofType": null
               }
             },
             {
               "defaultValue": null,
               "description": null,
-              "name": "addressLT",
+              "name": "controllerAddressGTE",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "ID",
                 "ofType": null
               }
             },
             {
               "defaultValue": null,
               "description": null,
-              "name": "addressLTE",
+              "name": "controllerAddressLT",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "ID",
                 "ofType": null
               }
             },
             {
               "defaultValue": null,
               "description": null,
-              "name": "addressContains",
+              "name": "controllerAddressLTE",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "ID",
                 "ofType": null
               }
             },
             {
               "defaultValue": null,
               "description": null,
-              "name": "addressHasPrefix",
+              "name": "controllerAddressContains",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "ID",
                 "ofType": null
               }
             },
             {
               "defaultValue": null,
               "description": null,
-              "name": "addressHasSuffix",
+              "name": "controllerAddressHasPrefix",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "ID",
                 "ofType": null
               }
             },
             {
               "defaultValue": null,
               "description": null,
-              "name": "addressEqualFold",
+              "name": "controllerAddressHasSuffix",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "ID",
                 "ofType": null
               }
             },
             {
               "defaultValue": null,
               "description": null,
-              "name": "addressContainsFold",
+              "name": "controllerAddressEqualFold",
               "type": {
                 "kind": "SCALAR",
-                "name": "String",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "controllerAddressContainsFold",
+              "type": {
+                "kind": "SCALAR",
+                "name": "ID",
                 "ofType": null
               }
             },
@@ -22002,62 +22040,6 @@
                 "kind": "SCALAR",
                 "name": "String",
                 "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": "signer field predicates",
-              "name": "signer",
-              "type": {
-                "kind": "ENUM",
-                "name": "SessionSigner",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "signerNEQ",
-              "type": {
-                "kind": "ENUM",
-                "name": "SessionSigner",
-                "ofType": null
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "signerIn",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "ENUM",
-                    "name": "SessionSigner",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "signerNotIn",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "ENUM",
-                    "name": "SessionSigner",
-                    "ofType": null
-                  }
-                }
               }
             },
             {
@@ -22391,6 +22373,62 @@
                   "ofType": {
                     "kind": "INPUT_OBJECT",
                     "name": "ActivityWhereInput",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": "signer edge predicates",
+              "name": "hasSigner",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "hasSignerWith",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "SignerWhereInput",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": "controller edge predicates",
+              "name": "hasController",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "hasControllerWith",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "ControllerWhereInput",
                     "ofType": null
                   }
                 }
@@ -30514,4 +30552,3 @@
     }
   }
 }
-
