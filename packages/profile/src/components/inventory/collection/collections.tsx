@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { Card, CardHeader, CardTitle } from "@cartridge/ui-next";
-import { CollectionImage } from "./image";
 import { useCollections } from "#hooks/collection";
+import placeholder from "/public/placeholder.svg";
+import { CollectibleAsset } from "@cartridge/ui-next";
 
 export function Collections() {
   const { collections, status } = useCollections();
@@ -21,16 +21,11 @@ export function Collections() {
               to={`./collection/${collection.address}`}
               key={collection.address}
             >
-              <Card className="w-full h-full">
-                <CardHeader className="flex flex-row gap-1 group-hover:opacity-70 items-center justify-between">
-                  <CardTitle className="truncate">{collection.name}</CardTitle>
-                  <div className="truncate rounded-full min-w-5 h-5 flex justify-center items-center text-xs font-bold bg-background-500 px-1.5">
-                    {collection.totalCount}
-                  </div>
-                </CardHeader>
-
-                <CollectionImage imageUrl={collection.imageUrl || undefined} />
-              </Card>
+              <CollectibleAsset
+                title={collection.name}
+                image={collection.imageUrl || placeholder}
+                count={collection.totalCount}
+              />
             </Link>
           ))}
         </div>

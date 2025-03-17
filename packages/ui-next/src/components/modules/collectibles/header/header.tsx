@@ -47,7 +47,7 @@ export function CollectibleHeader({
       className={cn(collectibleHeaderVariants({ variant }), className)}
       {...props}
     >
-      {title}
+      <p className="truncate">{title}</p>
       {selected && (
         <div
           className="absolute right-1 top-1/2 -translate-y-1/2 px-2 py-2 text-foreground-100 cursor-pointer"

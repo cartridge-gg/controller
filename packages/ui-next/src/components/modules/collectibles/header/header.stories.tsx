@@ -21,6 +21,13 @@ type Story = StoryObj<typeof CollectibleHeader>;
 
 export const Default: Story = {};
 
+export const LongName: Story = {
+  args: {
+    title:
+      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+  },
+};
+
 export const Hover: Story = {
   args: {
     hover: true,
