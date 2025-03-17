@@ -1,4 +1,3 @@
-import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context";
 import { useToken } from "#hooks/token";
 import {
@@ -10,7 +9,6 @@ import {
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
-  CopyAddress,
   Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -21,7 +19,6 @@ import { SendAmount } from "./amount";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
-  const { address } = useAccount();
   const { parent } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
@@ -71,7 +68,6 @@ export function SendToken() {
     <LayoutContainer>
       <LayoutHeader
         title={`Send ${token.meta.symbol}`}
-        description={<CopyAddress address={address} size="sm" />}
         icon={
           <div className="rounded-full size-11 bg-foreground-100 flex items-center justify-center">
             <img

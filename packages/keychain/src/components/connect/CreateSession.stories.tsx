@@ -10,6 +10,7 @@ const meta: Meta<typeof CreateSession> = {
     connection: {
       upgrade: {
         isSynced: true,
+        available: false,
       },
     },
   },

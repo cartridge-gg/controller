@@ -1,3 +1,4 @@
+export * from "./address";
 export * from "./copy-address";
 export * from "./copy-text";
 export * from "./error-image";
