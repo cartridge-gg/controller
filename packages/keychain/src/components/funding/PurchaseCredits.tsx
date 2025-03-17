@@ -35,7 +35,8 @@ type PurchaseCreditsProps = {
 };
 
 export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
-  const { closeModal, controller } = useConnection();
+  const { closeModal, controller, externalDetectWallets } =
+    useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setisLoading] = useState<boolean>(false);
@@ -164,18 +165,30 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
           </Button>
         )}
         {state === PurchaseState.SELECTION && (
-          <Button
-            className="flex-1"
-            isLoading={isLoading}
-            onClick={createPaymentIntent}
-          >
-            <CreditCardIcon
-              size="sm"
-              variant="solid"
-              className="text-background-100 flex-shrink-0"
-            />
-            <span>Credit Card</span>
-          </Button>
+          <>
+            <Button
+              className="flex-1"
+              isLoading={isLoading}
+              onClick={createPaymentIntent}
+            >
+              <CreditCardIcon
+                size="sm"
+                variant="solid"
+                className="text-background-100 flex-shrink-0"
+              />
+              <span>Credit Card</span>
+            </Button>
+            <Button
+              className="flex-1 mt-2"
+              onClick={() => {
+                externalDetectWallets().then((wallets) => {
+                  console.log(wallets);
+                });
+              }}
+            >
+              <span>Detect Wallets</span>
+            </Button>
+          </>
         )}
       </LayoutFooter>
     </LayoutContainer>

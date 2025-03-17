@@ -19,29 +19,34 @@ export class WalletBridge {
     this.walletAdapters.set("phantom", new PhantomWallet());
     this.walletAdapters.set("argent", new ArgentWallet());
 
-    console.log(this.detectWallets());
-
     if (typeof window !== "undefined") {
       window.wallet_bridge = this;
     }
   }
 
   getIFrameMethods() {
-    return Object.freeze({
-      externalDetectWallets: () => this.detectWallets(),
-      externalConnectWallet: (type: ExternalWalletType) =>
+    return {
+      externalDetectWallets: (_origin: string) => () => this.detectWallets(),
+      externalConnectWallet: (_origin: string) => (type: ExternalWalletType) =>
         this.connectWallet(type),
-      externalSignTransaction: (type: ExternalWalletType, tx: unknown) =>
-        this.signTransaction(type, tx),
-      externalGetBalance: (type: ExternalWalletType, tokenAddress?: string) =>
-        this.getBalance(type, tokenAddress),
-    });
+      externalSignTransaction:
+        (_origin: string) => (type: ExternalWalletType, tx: unknown) =>
+          this.signTransaction(type, tx),
+      externalGetBalance:
+        (_origin: string) =>
+        (type: ExternalWalletType, tokenAddress?: string) =>
+          this.getBalance(type, tokenAddress),
+    };
   }
 
-  detectWallets(): ExternalWallet[] {
-    return Array.from(this.walletAdapters.values()).map((adapter) =>
+  async detectWallets(): Promise<ExternalWallet[]> {
+    console.log("detectWallets");
+    const wallets = Array.from(this.walletAdapters.values()).map((adapter) =>
       adapter.getInfo(),
-    );
+    ) as ExternalWallet[];
+
+    console.log("wallets", wallets);
+    return wallets;
   }
 
   private getWalletAdapter(type: ExternalWalletType): WalletAdapter {

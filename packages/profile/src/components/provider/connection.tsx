@@ -14,7 +14,6 @@ import {
   initialState,
 } from "#context/connection";
 import { Method } from "@cartridge/presets";
-import { ExternalWalletType } from "@cartridge/controller";
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
