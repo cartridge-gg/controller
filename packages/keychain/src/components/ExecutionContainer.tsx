@@ -139,7 +139,12 @@ export function ExecutionContainer({
 
   if (
     ctaState === "fund" &&
-    ctrlError?.code === ErrorCode.InsufficientBalance
+    (ctrlError?.code === ErrorCode.InsufficientBalance ||
+      (ctrlError?.code === ErrorCode.StarknetValidationFailure &&
+        ctrlError?.data &&
+        typeof ctrlError.data === "string" &&
+        (ctrlError.data.includes("exceed balance") ||
+          ctrlError.data.includes("exceeds balance"))))
   ) {
     return (
       <Funding
@@ -203,6 +208,25 @@ export function ExecutionContainer({
                     </Button>
                   </>
                 );
+              case ErrorCode.StarknetValidationFailure:
+                // Check if it's an insufficient balance error
+                if (
+                  ctrlError?.data &&
+                  typeof ctrlError.data === "string" &&
+                  (ctrlError.data.includes("exceed balance") ||
+                    ctrlError.data.includes("exceeds balance"))
+                ) {
+                  return (
+                    <>
+                      <ControllerErrorAlert error={ctrlError} />
+                      <Button onClick={() => setCTAState("fund")}>
+                        ADD FUNDS
+                      </Button>
+                    </>
+                  );
+                }
+                // Fall through to default case for other validation failures
+                break;
               case ErrorCode.SessionAlreadyRegistered:
                 return (
                   <>
