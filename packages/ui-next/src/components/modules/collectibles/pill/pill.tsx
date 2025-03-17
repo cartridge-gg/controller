@@ -9,7 +9,7 @@ export interface CollectiblePillProps
 }
 
 const collectiblePillVariants = cva(
-  "px-1.5 py-0.5 rounded-full h-5 w-5 flex justify-center items-center text-xs tracking-wider font-semibold select-none",
+  "px-1.5 py-0.5 rounded-full h-5 flex justify-center items-center text-xs tracking-wider font-semibold select-none",
   {
     variants: {
       variant: {

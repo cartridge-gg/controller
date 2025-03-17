@@ -9,7 +9,7 @@ const meta: Meta<typeof CollectiblePill> = {
     layout: "centered",
   },
   args: {
-    label: "9",
+    label: "100",
   },
 };
 
