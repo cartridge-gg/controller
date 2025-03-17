@@ -149,18 +149,22 @@ impl Controller {
         Ok(txn)
     }
 
-    pub fn authorized_session_metadata(
+    pub fn authorized_session(&self) -> Option<SessionMetadata> {
+        let key = self.session_key();
+        self.storage.session(&key).ok().flatten()
+    }
+
+    pub fn authorized_session_for_policies(
         &self,
         policies: &[Policy],
         public_key: Option<Felt>,
-    ) -> Option<(String, SessionMetadata)> {
+    ) -> Option<SessionMetadata> {
         let key = self.session_key();
         self.storage
             .session(&key)
             .ok()
             .flatten()
             .filter(|metadata| metadata.is_authorized(policies, public_key))
-            .map(|metadata| (key, metadata))
     }
 
     pub fn is_requested_session(&self, policies: &[Policy], public_key: Option<Felt>) -> bool {
@@ -187,7 +191,7 @@ impl Controller {
         }
 
         // Check if there's a valid session stored
-        let (_, metadata) = self.authorized_session_metadata(policies, None)?;
+        let metadata = self.authorized_session_for_policies(policies, None)?;
         let credentials = metadata.credentials.as_ref()?;
         let session_signer =
             Signer::Starknet(SigningKey::from_secret_scalar(credentials.private_key));

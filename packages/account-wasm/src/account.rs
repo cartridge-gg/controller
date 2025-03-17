@@ -18,7 +18,7 @@ use crate::types::call::JsCall;
 use crate::types::estimate::JsFeeEstimate;
 use crate::types::owner::Owner;
 use crate::types::policy::{CallPolicy, Policy, TypedDataPolicy};
-use crate::types::session::SessionMetadata;
+use crate::types::session::AuthorizedSession;
 use crate::types::{Felts, JsFelt};
 use crate::utils::set_panic_hook;
 
@@ -156,16 +156,33 @@ impl CartridgeAccount {
     }
 
     #[wasm_bindgen(js_name = login)]
-    pub async fn login(&self, expires_at: u64) -> std::result::Result<(), JsControllerError> {
+    pub async fn login(
+        &self,
+        expires_at: u64,
+    ) -> std::result::Result<AuthorizedSession, JsControllerError> {
         set_panic_hook();
 
-        self.controller
+        let account = self
+            .controller
             .lock()
             .await
             .create_wildcard_session(expires_at)
             .await?;
 
-        Ok(())
+        let session_metadata = AuthorizedSession {
+            session: account.session.clone().into(),
+            authorization: Some(
+                account
+                    .session_authorization
+                    .clone()
+                    .into_iter()
+                    .map(Into::into)
+                    .collect(),
+            ),
+            is_registered: false,
+        };
+
+        Ok(session_metadata)
     }
 
     #[wasm_bindgen(js_name = createSession)]
@@ -173,32 +190,38 @@ impl CartridgeAccount {
         &self,
         policies: Vec<Policy>,
         expires_at: u64,
-    ) -> std::result::Result<(), JsControllerError> {
+    ) -> std::result::Result<Option<AuthorizedSession>, JsControllerError> {
         set_panic_hook();
 
         let mut controller = self.controller.lock().await;
 
-        // We use a dummy policy here, since all policies are inherently approved for wildcard sessions
         let wildcard_exists = controller
-            .authorized_session_metadata(
-                &[account_sdk::account::session::policy::Policy::Call(
-                    account_sdk::account::session::policy::CallPolicy {
-                        contract_address: Felt::ZERO,
-                        selector: Felt::ZERO,
-                        authorized: Some(true),
-                    },
-                )],
-                None,
-            )
+            .authorized_session()
+            .filter(|session| session.is_wildcard())
             .is_some();
 
-        if !wildcard_exists {
-            controller.create_wildcard_session(expires_at).await?;
-        }
+        let session = if !wildcard_exists {
+            let account = controller.create_wildcard_session(expires_at).await?;
+            let session_metadata = AuthorizedSession {
+                session: account.session.clone().into(),
+                authorization: Some(
+                    account
+                        .session_authorization
+                        .clone()
+                        .into_iter()
+                        .map(Into::into)
+                        .collect(),
+                ),
+                is_registered: false,
+            };
+            Some(session_metadata)
+        } else {
+            None
+        };
 
         self.policy_storage.lock().await.store(policies.clone())?;
 
-        Ok(())
+        Ok(session)
     }
 
     #[wasm_bindgen(js_name = skipSession)]
@@ -324,7 +347,7 @@ impl CartridgeAccount {
         &self,
         policies: Vec<Policy>,
         public_key: Option<JsFelt>,
-    ) -> std::result::Result<Option<SessionMetadata>, JsControllerError> {
+    ) -> std::result::Result<Option<AuthorizedSession>, JsControllerError> {
         let policies = policies
             .into_iter()
             .map(TryFrom::try_from)
@@ -334,8 +357,11 @@ impl CartridgeAccount {
             .controller
             .lock()
             .await
-            .authorized_session_metadata(&policies, public_key.map(|f| f.try_into()).transpose()?)
-            .map(|(_, metadata)| SessionMetadata::from(metadata)))
+            .authorized_session_for_policies(
+                &policies,
+                public_key.map(|f| f.try_into()).transpose()?,
+            )
+            .map(AuthorizedSession::from))
     }
 
     #[wasm_bindgen(js_name = hasRequestedSession)]

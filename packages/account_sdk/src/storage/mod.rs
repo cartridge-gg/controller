@@ -223,6 +223,10 @@ impl SessionMetadata {
                 .iter()
                 .all(|policy| self.session.is_requested(policy))
     }
+
+    pub fn is_wildcard(&self) -> bool {
+        self.session.is_wildcard()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
