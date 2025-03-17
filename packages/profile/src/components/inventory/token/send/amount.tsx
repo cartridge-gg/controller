@@ -1,8 +1,7 @@
 import { useToken } from "#hooks/token";
 import { Amount } from "@cartridge/ui-next";
 import { useCountervalue } from "@cartridge/utils";
-import { TokenPair } from "@cartridge/utils/api/cartridge";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 export function SendAmount({
@@ -28,14 +27,22 @@ export function SendAmount({
     [token, setAmount],
   );
 
-  const { countervalue } = useCountervalue(
+  const { countervalues } = useCountervalue(
     {
-      balance: amount?.toString() ?? "0",
-      pair: `${token?.meta.symbol}_USDC` as TokenPair,
+      tokens: [
+        {
+          balance: amount?.toString() ?? "0",
+          address: token?.meta.address || "0x0",
+        },
+      ],
     },
     {
-      enabled: token && ["ETH", "STRK"].includes(token.meta.symbol) && !!amount,
+      enabled: !!token && !!amount,
     },
+  );
+  const countervalue = useMemo(
+    () => countervalues.find((v) => v?.address === token?.meta.address),
+    [countervalues, token?.meta.address],
   );
 
   const handleChange = useCallback(
@@ -54,7 +61,7 @@ export function SendAmount({
     <Amount
       amount={amount}
       submitted={submitted}
-      conversion={countervalue?.formatted}
+      conversion={countervalue?.current.formatted}
       balance={parseFloat(token.balance.formatted.replace("~", ""))}
       symbol={token.meta.symbol}
       decimals={token.meta.decimals ?? 18}

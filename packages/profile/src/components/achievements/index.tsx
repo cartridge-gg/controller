@@ -11,7 +11,7 @@ import {
   AchievementPlayerLabel,
 } from "@cartridge/ui-next";
 import { useAccount, useUsername, useUsernames } from "#hooks/account";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
 import { useConnection, useData } from "#hooks/context";
@@ -22,6 +22,9 @@ import { LayoutBottomNav } from "#components/bottom-nav";
 
 export function Achievements() {
   const { address: self } = useAccount();
+  const [tab, setTab] = useState<"achievements" | "leaderboard">(
+    "achievements",
+  );
   const {
     trophies: { achievements, players, isLoading },
     setAccountAddress,
@@ -113,6 +116,10 @@ export function Achievements() {
         <LayoutContent className="py-6 gap-y-6 select-none h-full">
           {isSelf ? (
             <AchievementTabs
+              value={tab}
+              onValueChange={(value) =>
+                setTab(value as "achievements" | "leaderboard")
+              }
               count={count}
               total={total}
               rank={rank}
