@@ -56,6 +56,7 @@ pub enum Signer {
     Starknet(StarknetSigner),
     #[cfg(feature = "webauthn")]
     Webauthn(WebauthnSigner),
+    Eip191,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -106,6 +107,7 @@ impl From<&crate::signers::Signer> for Signer {
             crate::signers::Signer::Starknet(s) => Signer::Starknet(s.into()),
             #[cfg(feature = "webauthn")]
             crate::signers::Signer::Webauthn(s) => Signer::Webauthn(s.into()),
+            crate::signers::Signer::Eip191(_) => Signer::Eip191,
         }
     }
 }
@@ -157,6 +159,11 @@ impl TryFrom<Signer> for crate::signers::Signer {
                     crate::signers::webauthn::WebauthnSigner::new(w.rp_id, credential_id, cose),
                 ))
             }
+            Signer::Eip191 => Err(ControllerError::StorageError(
+                StorageError::OperationFailed(
+                    "Cannot restore Eip191 signer from storage".to_string(),
+                ),
+            )),
         }
     }
 }
