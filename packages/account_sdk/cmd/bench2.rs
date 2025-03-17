@@ -51,7 +51,7 @@ const WORLD_ADDRESS: Felt =
 const VRF_ADDRESS: Felt =
     felt!("0x7ed472bdde3b19a5cf2334ad0f368426272f477938270b1b04259f159bdc0e2");
 const GAME_ADDRESS: Felt =
-    felt!("0x0479895f8b2f1250c7eb28d8055b070942fca49bde45454662f4c9f60529d798");
+    felt!("0x026ffffe740e0099f773f97e6189082c1b34f37ebe0b524c0ada064b67c8b0e9");
 
 // USe clap to aat least have the number of TPS and the duration from CLI
 #[derive(Debug, Parser, Clone)]
@@ -377,7 +377,7 @@ async fn create_controller(
 ) -> Controller {
     let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
     let factory = ControllerFactory::new(
-        CONTROLLERS[&Version::V1_0_8].hash,
+        CONTROLLERS[&Version::V1_0_9].hash,
         CHAIN_ID,
         owner.clone(),
         provider,
@@ -388,7 +388,7 @@ async fn create_controller(
     let controller = Controller::new(
         "https://www.slot.nums.gg".to_string(),
         username.to_string(),
-        CONTROLLERS[&Version::V1_0_8].hash,
+        CONTROLLERS[&Version::V1_0_9].hash,
         rpc_url,
         owner.clone(),
         controller_address,
