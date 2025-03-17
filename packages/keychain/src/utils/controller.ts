@@ -16,7 +16,7 @@ import {
   JsCall,
   JsFelt,
   Owner,
-  SessionMetadata,
+  AuthorizedSession,
 } from "@cartridge/account-wasm/controller";
 
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
@@ -102,7 +102,7 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    await this.cartridge.login(expiresAt);
+    return await this.cartridge.login(expiresAt);
   }
 
   async createSession(
@@ -115,7 +115,10 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
+    return await this.cartridge.createSession(
+      toWasmPolicies(policies),
+      expiresAt,
+    );
   }
 
   async skipSession(policies: ParsedSessionPolicies) {
@@ -193,7 +196,7 @@ export default class Controller {
   async isRegisteredSessionAuthorized(
     policies: ParsedSessionPolicies,
     public_key?: string,
-  ): Promise<SessionMetadata | undefined> {
+  ): Promise<AuthorizedSession | undefined> {
     return await this.cartridge.isRegisteredSessionAuthorized(
       toWasmPolicies(policies),
       public_key,

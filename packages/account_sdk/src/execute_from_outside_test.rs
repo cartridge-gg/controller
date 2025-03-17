@@ -93,8 +93,8 @@ async fn test_execute_from_outside_with_session() {
         .expect("Failed to create session");
 
     // Check that the session is not registered initially
-    let (_, initial_metadata) = controller
-        .authorized_session_metadata(&Policy::from_calls(&[]), None)
+    let initial_metadata = controller
+        .authorized_session_for_policies(&Policy::from_calls(&[]), None)
         .expect("Failed to get session metadata");
     assert!(
         !initial_metadata.is_registered,
@@ -139,8 +139,8 @@ async fn test_execute_from_outside_with_session() {
     assert_eq!(balance, amount);
 
     // Check that the session is registered
-    let (_, metadata) = controller
-        .authorized_session_metadata(&Policy::from_calls(&[]), None)
+    let metadata = controller
+        .authorized_session_for_policies(&Policy::from_calls(&[]), None)
         .expect("Failed to get session metadata");
     assert!(metadata.is_registered, "Session should be registered");
 }
