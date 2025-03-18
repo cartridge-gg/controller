@@ -183,7 +183,10 @@ export const WithPreset: Story = {
   args: {
     policies: parseSessionPolicies({
       verified: true,
-      policies: { ...controllerConfigs["dope-wars"].policies!, messages },
+      policies: {
+        ...controllerConfigs["dope-wars"].chains!["SN_MAIN"]?.policies,
+        messages,
+      },
     }),
     onConnect: () => {},
   },

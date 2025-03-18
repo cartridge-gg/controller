@@ -1,5 +1,5 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { useContext, useState, useEffect, useCallback } from "react";
+import { useContext, useState, useEffect, useCallback, useMemo } from "react";
 import {
   connectToController,
   ConnectionCtx,
@@ -20,6 +20,7 @@ import { Policies } from "@cartridge/presets";
 import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { useThemeEffect } from "@cartridge/ui-next";
+import { shortString } from "starknet";
 
 type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
 
@@ -31,15 +32,21 @@ export function useConnectionValue() {
     import.meta.env.VITE_RPC_SEPOLIA,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
+  const [verified, setVerified] = useState<boolean>(false);
   const [theme, setTheme] = useState<VerifiableControllerTheme>({
     verified: true,
     ...defaultTheme,
   });
   const [controller, setController] = useState(window.controller);
-  const [hasPrefundRequest, setHasPrefundRequest] = useState<boolean>(false);
+  const chainId = useMemo(() => controller?.chainId(), [controller]);
 
+  // Extract URL parameters once
+  const urlParams = useMemo(() => {
+    return new URLSearchParams(window.location.search);
+  }, []);
+
+  // Handle RPC URL and controller initialization
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
     const rpcUrl = urlParams.get("rpc_url");
 
     // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
@@ -51,20 +58,35 @@ export function useConnectionValue() {
       if (rpcUrl) {
         setRpcUrl(rpcUrl);
       }
+    }
+  }, [urlParams, controller]);
 
-      // if (controller && rpcUrl) {
-      //   controller.switchChain(rpcUrl);
-      // }
+  // Check if preset is verified for the current origin
+  useEffect(() => {
+    const presetParam = urlParams.get("preset");
+    if (!presetParam) {
+      return;
     }
 
-    // Handle theme and policies
-    const policiesParam = urlParams.get("policies");
+    const allowedOrigins = toArray(controllerConfigs[presetParam].origin);
+    setVerified(
+      !!origin &&
+        allowedOrigins.some((allowedOrigin) => {
+          const originUrl = new URL(origin);
+          return originUrl.hostname === allowedOrigin;
+        }),
+    );
+  }, [origin, urlParams]);
+
+  // Handle theme configuration
+  useEffect(() => {
     const themeParam = urlParams.get("theme");
     const presetParam = urlParams.get("preset");
 
     if (themeParam) {
       const decodedPreset = decodeURIComponent(themeParam);
-      if (controllerConfigs[decodedPreset].theme) {
+      if (controllerConfigs[decodedPreset]?.theme) {
+        setVerified(true);
         setTheme({
           ...controllerConfigs[decodedPreset].theme,
           verified: true,
@@ -72,7 +94,20 @@ export function useConnectionValue() {
       } else {
         console.error("Theme preset not valid");
       }
+    } else if (presetParam && presetParam in controllerConfigs) {
+      if (controllerConfigs[presetParam]?.theme) {
+        setTheme({
+          verified,
+          ...controllerConfigs[presetParam].theme,
+        });
+      }
     }
+  }, [urlParams, verified]);
+
+  // Handle policies configuration
+  useEffect(() => {
+    const policiesParam = urlParams.get("policies");
+    const presetParam = urlParams.get("preset");
 
     // URL policies take precedence over preset policies
     if (policiesParam) {
@@ -90,43 +125,21 @@ export function useConnectionValue() {
       } catch (e) {
         console.error("Failed to parse policies:", e);
       }
-    }
-
-    // Application provided policies take precedence over preset policies.
-    if (presetParam && presetParam in controllerConfigs) {
-      const allowedOrigins = toArray(controllerConfigs[presetParam].origin);
-      const verified =
-        !!origin &&
-        allowedOrigins.some((allowedOrigin) => {
-          const originUrl = new URL(origin);
-          return originUrl.hostname === allowedOrigin;
-        });
-
-      if (controllerConfigs[presetParam].theme) {
-        setTheme({
-          verified,
-          ...controllerConfigs[presetParam].theme,
-        });
-      }
-
+    } else if (presetParam && presetParam in controllerConfigs) {
       // Set policies from preset if no URL policies
-      if (!policiesParam && controllerConfigs[presetParam].policies) {
+      if (chainId && controllerConfigs[presetParam]?.chains) {
         setPolicies(
           parseSessionPolicies({
             verified,
-            policies: controllerConfigs[presetParam].policies,
+            policies:
+              controllerConfigs[presetParam].chains[
+                shortString.encodeShortString(chainId)
+              ].policies,
           }),
         );
       }
     }
-  }, [
-    origin,
-    controller,
-    setTheme,
-    setPolicies,
-    setHasPrefundRequest,
-    setController,
-  ]);
+  }, [urlParams, chainId, verified]);
 
   useThemeEffect({ theme, assetUrl: "" });
 
@@ -203,7 +216,7 @@ export function useConnectionValue() {
     rpcUrl,
     policies,
     theme,
-    hasPrefundRequest,
+    verified,
     setController,
     setContext,
     closeModal,
