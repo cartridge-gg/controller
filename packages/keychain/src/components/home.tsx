@@ -14,6 +14,7 @@ import { PageLoading } from "./Loading";
 import { execute } from "@/utils/connection/execute";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
+import { StarterPack } from "./starter-pack";
 
 export function Home() {
   const { context, setContext, controller, policies, origin } = useConnection();
@@ -156,6 +157,9 @@ export function Home() {
     }
     case "open-purchase-credits": {
       return <PurchaseCredits />;
+    }
+    case "open-starter-pack": {
+      return <StarterPack />;
     }
     default:
       return <>*Waves*</>;

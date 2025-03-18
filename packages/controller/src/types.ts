@@ -129,6 +129,7 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
+  openStarterPack(): void;
 }
 
 export interface Profile {

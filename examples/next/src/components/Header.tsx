@@ -146,6 +146,12 @@ const Header = () => {
                 Settings
               </button>
               <button
+                className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600"
+                onClick={() => controllerConnector.controller.openStarterPack()}
+              >
+                Get Starter Pack
+              </button>
+              <button
                 className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors"
                 onClick={() => disconnect()}
               >

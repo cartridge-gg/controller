@@ -8,6 +8,7 @@ import {
   StarknetColorIcon,
   StarknetIcon,
   TimesIcon,
+  GiftIcon,
 } from "@/components/icons";
 import {
   Tooltip,
@@ -29,6 +30,7 @@ export type HeaderProps = HeaderInnerProps & {
   hideUsername?: boolean;
   hideNetwork?: boolean;
   hideSettings?: boolean;
+  onOpenStarterPack?: () => void;
 };
 
 export function LayoutHeader({
@@ -37,6 +39,7 @@ export function LayoutHeader({
   hideUsername,
   hideNetwork,
   hideSettings,
+  onOpenStarterPack,
   ...innerProps
 }: HeaderProps) {
   const { account, chainId, closeModal, openSettings } = useUI();
@@ -84,48 +87,61 @@ export function LayoutHeader({
         <div className="flex items-center gap-2">
           {!!chainId &&
             (account ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger
-                    className={cn(
-                      "flex items-center gap-1.5 bg-background-200 hover:bg-background-300 rounded px-3 py-2.5",
-                      hideUsername && "hidden",
-                    )}
+              <>
+                {onOpenStarterPack && (
+                  <Button
+                    variant="secondary"
+                    size="default"
+                    className="gap-2"
+                    onClick={onOpenStarterPack}
                   >
-                    {/* TODO: Replace with avatar */}
-                    <ControllerIcon size="sm" />
-                    <div className="text-sm font-semibold">
-                      {account.username}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="flex items-center gap-8 px-3 py-2.5 bg-spacer">
-                    {!hideNetwork && (
-                      <div className="flex items-center gap-1.5">
-                        {(() => {
-                          switch (chainId) {
-                            case constants.StarknetChainId.SN_MAIN:
-                              return <StarknetColorIcon />;
-                            case constants.StarknetChainId.SN_SEPOLIA:
-                              return <StarknetIcon />;
-                            default:
-                              return isSlotChain(chainId) ? (
-                                <SlotIcon />
-                              ) : (
-                                <QuestionIcon />
-                              );
-                          }
-                        })()}
-                        <div className="text-sm">{getChainName(chainId)}</div>
+                    <GiftIcon size="default" variant="line" />
+                    <span>Get Starter Pack</span>
+                  </Button>
+                )}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger
+                      className={cn(
+                        "flex items-center gap-1.5 bg-background-200 hover:bg-background-300 rounded px-3 py-2.5",
+                        hideUsername && "hidden",
+                      )}
+                    >
+                      {/* TODO: Replace with avatar */}
+                      <ControllerIcon size="sm" />
+                      <div className="text-sm font-semibold">
+                        {account.username}
                       </div>
-                    )}
-                    <CopyAddress
-                      size="xs"
-                      className="text-sm"
-                      address={account.address}
-                    />
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                    </TooltipTrigger>
+                    <TooltipContent className="flex items-center gap-8 px-3 py-2.5 bg-spacer">
+                      {!hideNetwork && (
+                        <div className="flex items-center gap-1.5">
+                          {(() => {
+                            switch (chainId) {
+                              case constants.StarknetChainId.SN_MAIN:
+                                return <StarknetColorIcon />;
+                              case constants.StarknetChainId.SN_SEPOLIA:
+                                return <StarknetIcon />;
+                              default:
+                                return isSlotChain(chainId) ? (
+                                  <SlotIcon />
+                                ) : (
+                                  <QuestionIcon />
+                                );
+                            }
+                          })()}
+                          <div className="text-sm">{getChainName(chainId)}</div>
+                        </div>
+                      )}
+                      <CopyAddress
+                        size="xs"
+                        className="text-sm"
+                        address={account.address}
+                      />
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </>
             ) : (
               !hideNetwork && <Network chainId={chainId} />
             ))}
