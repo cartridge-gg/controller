@@ -215,15 +215,18 @@ export function useConnectionValue() {
   }, [context, parent]);
 
   const externalDetectWallets = useCallback(() => {
-    if (!parent) return;
+    if (!parent) {
+      return Promise.resolve([]);
+    };
 
     return parent.externalDetectWallets();
   }, [parent]);
 
   const externalConnectWallet = useCallback(
     (type: ExternalWalletType) => {
-      if (!parent) return;
-
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
       return parent.externalConnectWallet(type);
     },
     [parent],
@@ -231,26 +234,29 @@ export function useConnectionValue() {
 
   const externalSignMessage = useCallback(
     (type: ExternalWalletType, message: string) => {
-      if (!parent) return;
-
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
       return parent.externalSignMessage(type, message);
     },
     [parent],
   );
 
   const externalSignTypedData = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (type: ExternalWalletType, data: any) => {
-      if (!parent) return;
-
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
       return parent.externalSignTypedData(type, data);
     },
     [parent],
   );
+
   const externalGetBalance = useCallback(
     (type: ExternalWalletType, tokenAddress?: string) => {
-      if (!parent) return;
-
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
       return parent.externalGetBalance(type, tokenAddress);
     },
     [parent],
