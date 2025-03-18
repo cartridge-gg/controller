@@ -16,13 +16,39 @@ import {
   ConnectionContextValue,
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
+import {
+  ExternalWalletType,
+  ExternalWallet,
+  ExternalWalletResponse,
+} from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
 import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { shortString } from "starknet";
 
-type ParentMethods = AsyncMethodReturns<{ close: () => Promise<void> }>;
+type ParentMethods = AsyncMethodReturns<{
+  close: () => Promise<void>;
+
+  // Wallet bridge methods
+  externalDetectWallets: () => Promise<ExternalWallet[]>;
+  externalConnectWallet: (
+    type: ExternalWalletType,
+  ) => Promise<ExternalWalletResponse>;
+  externalSignTypedData: (
+    type: ExternalWalletType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
+  ) => Promise<ExternalWalletResponse>;
+  externalSignMessage: (
+    type: ExternalWalletType,
+    message: string,
+  ) => Promise<ExternalWalletResponse>;
+  externalGetBalance: (
+    type: ExternalWalletType,
+    tokenAddress?: string,
+  ) => Promise<ExternalWalletResponse>;
+}>;
 
 export function useConnectionValue() {
   const [parent, setParent] = useState<ParentMethods>();
@@ -183,31 +209,72 @@ export function useConnectionValue() {
   const closeModal = useCallback(async () => {
     if (!parent || !context?.resolve) return;
 
-    try {
-      context.resolve({
-        code: ResponseCodes.CANCELED,
-        message: "User aborted",
-      });
-      setContext(undefined); // clears context
-      await parent.close();
-    } catch {
-      // Always fails for some reason
-    }
+    context.resolve({
+      code: ResponseCodes.CANCELED,
+      message: "User aborted",
+    });
+    setContext(undefined); // clears context
+    await parent.close();
   }, [context, parent, setContext, logout]);
 
   const openModal = useCallback(async () => {
     if (!parent || !context?.resolve) return;
 
-    try {
-      context.resolve({
-        code: ResponseCodes.USER_INTERACTION_REQUIRED,
-        message: "User interaction required",
-      });
-      await parent.close();
-    } catch {
-      // Always fails for some reason
-    }
+    context.resolve({
+      code: ResponseCodes.USER_INTERACTION_REQUIRED,
+      message: "User interaction required",
+    });
+    await parent.close();
   }, [context, parent]);
+
+  const externalDetectWallets = useCallback(() => {
+    if (!parent) {
+      return Promise.resolve([]);
+    }
+
+    return parent.externalDetectWallets();
+  }, [parent]);
+
+  const externalConnectWallet = useCallback(
+    (type: ExternalWalletType) => {
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
+      return parent.externalConnectWallet(type);
+    },
+    [parent],
+  );
+
+  const externalSignMessage = useCallback(
+    (type: ExternalWalletType, message: string) => {
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
+      return parent.externalSignMessage(type, message);
+    },
+    [parent],
+  );
+
+  const externalSignTypedData = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (type: ExternalWalletType, data: any) => {
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
+      return parent.externalSignTypedData(type, data);
+    },
+    [parent],
+  );
+
+  const externalGetBalance = useCallback(
+    (type: ExternalWalletType, tokenAddress?: string) => {
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
+      return parent.externalGetBalance(type, tokenAddress);
+    },
+    [parent],
+  );
 
   return {
     context,
@@ -223,6 +290,11 @@ export function useConnectionValue() {
     openModal,
     logout,
     openSettings,
+    externalDetectWallets,
+    externalConnectWallet,
+    externalSignMessage,
+    externalSignTypedData,
+    externalGetBalance,
   };
 }
 
