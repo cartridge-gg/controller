@@ -285,3 +285,46 @@ async fn test_multiple_transactions() {
     let result2 = ensure_txn(transfer2, runner.client()).await;
     assert!(result2.is_ok(), "Second transaction failed");
 }
+
+#[tokio::test]
+async fn test_controller_with_eip191_signer() {
+    use crate::signers::Signer;
+    use crate::tests::ensure_txn;
+    use cainome::cairo_serde::U256;
+
+    let runner = KatanaRunner::load();
+
+    // Create an Eip191 signer with a random key
+    let eip191_signer = Signer::new_eip191_random();
+
+    // Deploy controller with Eip191 signer
+    let controller = runner
+        .deploy_controller(
+            "eip191_user".to_string(),
+            Owner::Signer(eip191_signer.clone()),
+            Version::LATEST,
+        )
+        .await;
+
+    // Verify controller was deployed correctly
+    assert_eq!(
+        controller.owner,
+        Owner::Signer(eip191_signer.clone()),
+        "Controller owner doesn't match the Eip191 signer"
+    );
+
+    // Test a transaction with the Eip191 signer
+    let erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
+
+    let recipient = ContractAddress(felt!("0x18301129"));
+    let amount = U256 { low: 50, high: 0 };
+    let transfer = erc20.transfer(&recipient, &amount);
+
+    // Skip storage operations by directly executing the transaction
+    let result = ensure_txn(transfer, runner.client()).await;
+    assert!(
+        result.is_ok(),
+        "Transaction with Eip191 signer failed: {:?}",
+        result.err()
+    );
+}

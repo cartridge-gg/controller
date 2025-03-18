@@ -105,10 +105,11 @@ impl Controller {
             .map_err(ControllerError::PaymasterError)?;
 
         // Update is_registered to true after successful execution with a session
-        if let Some((key, metadata)) =
-            self.authorized_session_metadata(&Policy::from_calls(&calls), None)
+        if let Some(metadata) =
+            self.authorized_session_for_policies(&Policy::from_calls(&calls), None)
         {
             if !metadata.is_registered {
+                let key = self.session_key();
                 let mut updated_metadata = metadata;
                 updated_metadata.is_registered = true;
                 self.storage.set_session(&key, updated_metadata)?;
