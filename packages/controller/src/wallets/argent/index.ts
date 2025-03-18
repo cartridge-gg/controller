@@ -25,7 +25,7 @@ export class ArgentWallet implements WalletAdapter {
         ? window.starknet_argentX?.version || "Unknown"
         : undefined,
       chainId: available ? window.starknet_argentX?.chainId : undefined,
-      name: "Argent X",
+      name: "Argent",
       platform: this.platform,
     };
   }
@@ -37,7 +37,7 @@ export class ArgentWallet implements WalletAdapter {
 
     try {
       if (!this.isAvailable()) {
-        throw new Error("Argent X is not available");
+        throw new Error("Argent is not available");
       }
 
       await window.starknet_argentX.enable();

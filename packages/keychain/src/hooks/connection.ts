@@ -211,7 +211,7 @@ export function useConnectionValue() {
 
   const externalDetectWallets = useCallback(() => {
     if (!parent) {
-      return Promise.resolve([]);;
+      return Promise.resolve([]);
     }
     return parent.externalDetectWallets();
   }, [parent]);

@@ -52,13 +52,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           STRK_CONTRACT_ADDRESS,
           ...(erc20Param
             ? decodeURIComponent(erc20Param)
-              .split(",")
-              .filter(
-                (address) =>
-                  ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
-                    getChecksumAddress(address),
-                  ),
-              )
+                .split(",")
+                .filter(
+                  (address) =>
+                    ![ETH_CONTRACT_ADDRESS, STRK_CONTRACT_ADDRESS].includes(
+                      getChecksumAddress(address),
+                    ),
+                )
             : []),
         ];
       }
