@@ -217,7 +217,7 @@ export function useConnectionValue() {
   const externalDetectWallets = useCallback(() => {
     if (!parent) {
       return Promise.resolve([]);
-    };
+    }
 
     return parent.externalDetectWallets();
   }, [parent]);
@@ -243,6 +243,7 @@ export function useConnectionValue() {
   );
 
   const externalSignTypedData = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (type: ExternalWalletType, data: any) => {
       if (!parent) {
         return Promise.reject(new Error("Parent not available"));
