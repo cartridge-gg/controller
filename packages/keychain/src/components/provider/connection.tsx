@@ -20,7 +20,6 @@ export type ConnectionContextValue = {
   rpcUrl?: string;
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
-  hasPrefundRequest: boolean;
   setContext: (context: ConnectionCtx) => void;
   setController: (controller: Controller) => void;
   closeModal: () => void;

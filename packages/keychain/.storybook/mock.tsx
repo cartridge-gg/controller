@@ -67,7 +67,6 @@ export function useMockedConnection(
     rpcUrl: "http://api.cartridge.gg/x/starknet/mainnet",
     policies: {},
     theme: { ...theme, verified: true },
-    hasPrefundRequest: false,
     setContext: () => {},
     setController: () => {},
     closeModal: () => {},
