@@ -76,6 +76,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     externalDetectWallets,
     externalConnectWallet,
     externalSignMessage,
+    externalSignTypedData,
   } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
@@ -158,7 +159,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         if (selectedWallet) {
           return `Purchase Credits`;
         }
-        
+
         return "Connect Wallet";
       case PurchaseState.STRIPE_CHECKOUT:
         return "Credit Card";
@@ -184,13 +185,19 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
 
   const getInfo = (wallet?: ExternalWallet) => {
     if (!wallet) {
-      return <>Credits are used to pay for network activity. They are not tokens and cannot be transferred or refunded.</>;
+      return (
+        <>
+          Credits are used to pay for network activity. They are not tokens and
+          cannot be transferred or refunded.
+        </>
+      );
     }
 
     const NetworkIcon = WALLET_CONFIG[wallet.type].networkIcon;
     return (
       <>
-        Purchase funds on <NetworkIcon size="sm" className="inline-block" /> {WALLET_CONFIG[wallet.type].network}
+        Purchase funds on <NetworkIcon size="sm" className="inline-block" />{" "}
+        {WALLET_CONFIG[wallet.type].network}
       </>
     );
   };
@@ -225,7 +232,8 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         className="p-6"
         title={title}
         icon={
-          state === PurchaseState.SELECTION || state === PurchaseState.CRYPTO_CHECKOUT ? (
+          state === PurchaseState.SELECTION ||
+          state === PurchaseState.CRYPTO_CHECKOUT ? (
             <DepositIcon variant="solid" size="lg" />
           ) : (
             <CheckIcon size="lg" />
@@ -304,7 +312,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
                       connecting && wallet.type === selectedWallet?.type
                     }
                     disabled={!wallet.available || connecting || isLoading}
-                    onClick={() => onExternalConnect(wallet)}
+                    onClick={async () => onExternalConnect(wallet)}
                   >
                     {getWalletIcon(wallet, true)}
                   </Button>
@@ -322,9 +330,32 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
               border: "none",
             }}
             onClick={async () => {
-              const res = await externalSignMessage(selectedWallet!.type, "Test signing message");
-              if (!res.success) {
-                setError(new Error(res.error));
+              if (selectedWallet?.type === "argent") {
+                const res = await externalSignTypedData(selectedWallet!.type, {
+                  domain: {
+                    name: "StarkNet",
+                    version: "1",
+                    chainId: "SN_MAIN",
+                  },
+                  primaryType: "Mail",
+                  message: {
+                    from: { name: "John Doe", wallet: "0x123" },
+                    to: { name: "Jane Doe", wallet: "0x456" },
+                    contents: "Hello, world!",
+                  },
+                });
+
+                if (!res.success) {
+                  setError(new Error(res.error));
+                }
+              } else {
+                const res = await externalSignMessage(
+                  selectedWallet!.type,
+                  "Test signing message",
+                );
+                if (!res.success) {
+                  setError(new Error(res.error));
+                }
               }
             }}
           >

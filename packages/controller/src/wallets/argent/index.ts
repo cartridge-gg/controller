@@ -5,11 +5,15 @@ import {
   ExternalWalletType,
   ExternalPlatform,
 } from "../types";
+import { connect, StarknetWindowObject } from "starknetkit";
+import { InjectedConnector } from "starknetkit/injected";
+import { TypedData } from "@starknet-io/types-js";
 
 export class ArgentWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "argent";
   readonly platform: ExternalPlatform = "starknet";
-  private account: any | undefined = undefined;
+  private wallet: StarknetWindowObject | undefined = undefined;
+  private account: string | undefined = undefined;
 
   isAvailable(): boolean {
     return typeof window !== "undefined" && !!window.starknet_argentX;
@@ -40,14 +44,17 @@ export class ArgentWallet implements WalletAdapter {
         throw new Error("Argent is not available");
       }
 
-      await window.starknet_argentX.enable();
-      const account = window.starknet_argentX.account;
-      if (account) {
-        this.account = account;
-        return { success: true, wallet: this.type, account: this.account };
+      const { wallet, connectorData } = await connect({
+        connectors: [new InjectedConnector({ options: { id: "argentX" } })],
+      });
+
+      if (!wallet) {
+        throw new Error("No wallet found");
       }
 
-      throw new Error("No accounts found");
+      this.wallet = wallet;
+      this.account = connectorData?.account;
+      return { success: true, wallet: this.type, account: this.account };
     } catch (error) {
       console.error(`Error connecting to Argent:`, error);
       return {
@@ -58,36 +65,22 @@ export class ArgentWallet implements WalletAdapter {
     }
   }
 
-  async signTransaction(
-    transaction: any,
-  ): Promise<ExternalWalletResponse<any>> {
+  async signTypedData(data: TypedData): Promise<ExternalWalletResponse<any>> {
     try {
-      if (!this.isAvailable() || !this.account) {
+      if (!this.isAvailable() || !this.wallet) {
         throw new Error("Argent is not connected");
       }
 
-      const result = await window.starknet_argentX.account.execute(transaction);
-      return { success: true, wallet: this.type, result };
-    } catch (error) {
-      console.error(`Error signing transaction with Argent:`, error);
-      return {
-        success: false,
-        wallet: this.type,
-        error: (error as Error).message || "Unknown error",
-      };
-    }
-  }
+      console.log("signTypedData", data);
 
-  async signMessage(message: string): Promise<ExternalWalletResponse<any>> {
-    try {
-      if (!this.isAvailable() || !this.account) {
-        throw new Error("Argent is not connected");
-      }
+      const sig = await this.wallet.request({
+        type: "wallet_signTypedData",
+        params: data,
+      });
 
-      const result = await window.starknet_argentX.account.signMessage(message);
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: sig };
     } catch (error) {
-      console.error(`Error signing message with Argent:`, error);
+      console.error(`Error signing typed data with Argent:`, error);
       return {
         success: false,
         wallet: this.type,
@@ -107,7 +100,7 @@ export class ArgentWallet implements WalletAdapter {
     _tokenAddress?: string,
   ): Promise<ExternalWalletResponse<any>> {
     try {
-      if (!this.isAvailable() || !this.account) {
+      if (!this.isAvailable() || !this.wallet) {
         throw new Error("Argent is not connected");
       }
 

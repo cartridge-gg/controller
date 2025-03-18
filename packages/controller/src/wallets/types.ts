@@ -26,7 +26,7 @@ export interface WalletAdapter {
   isAvailable(): boolean;
   getInfo(): ExternalWallet;
   connect(): Promise<ExternalWalletResponse<any>>;
-  signTransaction(transaction: any): Promise<ExternalWalletResponse<any>>;
-  signMessage(message: string): Promise<ExternalWalletResponse<any>>;
+  signMessage?(message: string): Promise<ExternalWalletResponse<any>>;
+  signTypedData?(data: any): Promise<ExternalWalletResponse<any>>;
   getBalance(tokenAddress?: string): Promise<ExternalWalletResponse<any>>;
 }

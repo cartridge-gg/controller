@@ -7,17 +7,20 @@ import {
 } from "../types";
 import { MetaMaskSDK } from "@metamask/sdk";
 
-const MMSDK = new MetaMaskSDK({
-  dappMetadata: {
-    name: "Cartridge Controller",
-    url: window.location.href,
-  },
-});
-
 export class MetaMaskWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "metamask";
   readonly platform: ExternalPlatform = "ethereum";
+  private MMSDK: MetaMaskSDK;
   private account: string | undefined = undefined;
+
+  constructor() {
+    this.MMSDK = new MetaMaskSDK({
+      dappMetadata: {
+        name: "Cartridge Controller",
+        url: window.location.href,
+      },
+    });
+  }
 
   isAvailable(): boolean {
     return typeof window !== "undefined" && !!window.ethereum?.isMetaMask;
@@ -46,7 +49,7 @@ export class MetaMaskWallet implements WalletAdapter {
         throw new Error("MetaMask is not available");
       }
 
-      const accounts = await MMSDK.connect();
+      const accounts = await this.MMSDK.connect();
       if (accounts && accounts.length > 0) {
         this.account = accounts[0];
         return { success: true, wallet: this.type, account: this.account };
@@ -71,7 +74,12 @@ export class MetaMaskWallet implements WalletAdapter {
         throw new Error("MetaMask is not connected");
       }
 
-      const result = await window.ethereum.request({
+      const ethereum = this.MMSDK.getProvider();
+      if (!ethereum) {
+        throw new Error("MetaMask is not connected");
+      }
+
+      const result = await ethereum.request({
         method: "eth_sendTransaction",
         params: [transaction],
       });
@@ -93,7 +101,7 @@ export class MetaMaskWallet implements WalletAdapter {
         throw new Error("MetaMask is not connected");
       }
 
-      const result = await MMSDK.connectAndSign({
+      const result = await this.MMSDK.connectAndSign({
         msg: message,
       });
 
@@ -108,14 +116,46 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
+  async signTypedData(data: any): Promise<ExternalWalletResponse<any>> {
+    try {
+      if (!this.isAvailable() || !this.account) {
+        throw new Error("MetaMask is not connected");
+      }
+
+      const ethereum = this.MMSDK.getProvider();
+      if (!ethereum) {
+        throw new Error("MetaMask is not connected");
+      }
+
+      const result = await ethereum.request({
+        method: "eth_signTypedData_v4",
+        params: [this.account, JSON.stringify(data)],
+      });
+
+      return { success: true, wallet: this.type, result };
+    } catch (error) {
+      console.error(`Error signing typed data with MetaMask:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
+  }
+
   async switchChain(chainId: string): Promise<boolean> {
     try {
       if (!this.isAvailable()) {
         throw new Error("MetaMask is not available");
       }
 
+      const ethereum = this.MMSDK.getProvider();
+      if (!ethereum) {
+        throw new Error("MetaMask is not connected");
+      }
+
       try {
-        await window.ethereum.request({
+        await ethereum.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId }],
         });
@@ -147,7 +187,12 @@ export class MetaMaskWallet implements WalletAdapter {
           error: "Not implemented for ERC20",
         };
       } else {
-        const balance = await window.ethereum.request({
+        const ethereum = this.MMSDK.getProvider();
+        if (!ethereum) {
+          throw new Error("MetaMask is not connected");
+        }
+
+        const balance = await ethereum.request({
           method: "eth_getBalance",
           params: [this.account, "latest"],
         });

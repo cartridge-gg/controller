@@ -29,12 +29,12 @@ export class WalletBridge {
       externalDetectWallets: (_origin: string) => () => this.detectWallets(),
       externalConnectWallet: (_origin: string) => (type: ExternalWalletType) =>
         this.connectWallet(type),
-      externalSignTransaction:
-        (_origin: string) => (type: ExternalWalletType, tx: unknown) =>
-          this.signTransaction(type, tx),
       externalSignMessage:
         (_origin: string) => (type: ExternalWalletType, message: string) =>
           this.signMessage(type, message),
+      externalSignTypedData:
+        (_origin: string) => (type: ExternalWalletType, data: any) =>
+          this.signTypedData(type, data),
       externalGetBalance:
         (_origin: string) =>
         (type: ExternalWalletType, tokenAddress?: string) =>
@@ -91,22 +91,6 @@ export class WalletBridge {
     }
   }
 
-  async signTransaction(
-    type: ExternalWalletType,
-    transaction: unknown,
-  ): Promise<ExternalWalletResponse> {
-    try {
-      if (!this.connectedWallets.has(type)) {
-        throw new Error(`Wallet ${type} is not connected`);
-      }
-
-      const wallet = this.connectedWallets.get(type)!;
-      return await wallet.signTransaction(transaction);
-    } catch (error) {
-      return this.handleError(type, error, "signing transaction with");
-    }
-  }
-
   async signMessage(
     type: ExternalWalletType,
     message: string,
@@ -117,9 +101,33 @@ export class WalletBridge {
       }
 
       const wallet = this.connectedWallets.get(type)!;
+      if (!wallet.signMessage) {
+        throw new Error(`Wallet ${type} does not support signing messages`);
+      }
+
       return await wallet.signMessage(message);
     } catch (error) {
       return this.handleError(type, error, "signing message with");
+    }
+  }
+
+  async signTypedData(
+    type: ExternalWalletType,
+    data: any,
+  ): Promise<ExternalWalletResponse> {
+    try {
+      if (!this.connectedWallets.has(type)) {
+        throw new Error(`Wallet ${type} is not connected`);
+      }
+
+      const wallet = this.connectedWallets.get(type)!;
+      if (!wallet.signTypedData) {
+        throw new Error(`Wallet ${type} does not support signing typed data`);
+      }
+
+      return await wallet.signTypedData(data);
+    } catch (error) {
+      return this.handleError(type, error, "signing typed data with");
     }
   }
 

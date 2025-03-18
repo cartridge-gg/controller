@@ -34,9 +34,10 @@ type ParentMethods = AsyncMethodReturns<{
   externalConnectWallet: (
     type: ExternalWalletType,
   ) => Promise<ExternalWalletResponse>;
-  externalSignTransaction: (
+  externalSignTypedData: (
     type: ExternalWalletType,
-    tx: unknown,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
   ) => Promise<ExternalWalletResponse>;
   externalSignMessage: (
     type: ExternalWalletType,
@@ -214,47 +215,42 @@ export function useConnectionValue() {
   }, [context, parent]);
 
   const externalDetectWallets = useCallback(() => {
-    if (!parent) {
-      return Promise.resolve([]);
-    }
+    if (!parent) return;
+
     return parent.externalDetectWallets();
   }, [parent]);
 
   const externalConnectWallet = useCallback(
     (type: ExternalWalletType) => {
-      if (!parent) {
-        return Promise.reject(new Error("no parent iframe"));
-      }
-      return parent.externalConnectWallet(type);
-    },
-    [parent],
-  );
+      if (!parent) return;
 
-  const externalSignTransaction = useCallback(
-    (type: ExternalWalletType, tx: unknown) => {
-      if (!parent) {
-        return Promise.reject(new Error("no parent iframe"));
-      }
-      return parent.externalSignTransaction(type, tx);
+      return parent.externalConnectWallet(type);
     },
     [parent],
   );
 
   const externalSignMessage = useCallback(
     (type: ExternalWalletType, message: string) => {
-      if (!parent) {
-        return Promise.reject(new Error("no parent iframe"));
-      }
+      if (!parent) return;
+
       return parent.externalSignMessage(type, message);
     },
     [parent],
   );
 
+  const externalSignTypedData = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (type: ExternalWalletType, data: any) => {
+      if (!parent) return;
+
+      return parent.externalSignTypedData(type, data);
+    },
+    [parent],
+  );
   const externalGetBalance = useCallback(
     (type: ExternalWalletType, tokenAddress?: string) => {
-      if (!parent) {
-        return Promise.reject(new Error("no parent iframe"));
-      }
+      if (!parent) return;
+
       return parent.externalGetBalance(type, tokenAddress);
     },
     [parent],
@@ -276,8 +272,8 @@ export function useConnectionValue() {
     openSettings,
     externalDetectWallets,
     externalConnectWallet,
-    externalSignTransaction,
     externalSignMessage,
+    externalSignTypedData,
     externalGetBalance,
   };
 }
