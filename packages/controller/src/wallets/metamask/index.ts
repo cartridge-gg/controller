@@ -5,6 +5,14 @@ import {
   ExternalWalletType,
   ExternalPlatform,
 } from "../types";
+import { MetaMaskSDK } from "@metamask/sdk";
+
+const MMSDK = new MetaMaskSDK({
+  dappMetadata: {
+    name: "Cartridge Controller",
+    url: window.location.href,
+  },
+});
 
 export class MetaMaskWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "metamask";
@@ -38,9 +46,7 @@ export class MetaMaskWallet implements WalletAdapter {
         throw new Error("MetaMask is not available");
       }
 
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      const accounts = await MMSDK.connect();
       if (accounts && accounts.length > 0) {
         this.account = accounts[0];
         return { success: true, wallet: this.type, account: this.account };
@@ -73,6 +79,27 @@ export class MetaMaskWallet implements WalletAdapter {
       return { success: true, wallet: this.type, result };
     } catch (error) {
       console.error(`Error signing transaction with MetaMask:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
+  }
+
+  async signMessage(message: string): Promise<ExternalWalletResponse<any>> {
+    try {
+      if (!this.isAvailable() || !this.account) {
+        throw new Error("MetaMask is not connected");
+      }
+
+      const result = await MMSDK.connectAndSign({
+        msg: message,
+      });
+
+      return { success: true, wallet: this.type, result };
+    } catch (error) {
+      console.error(`Error signing message with MetaMask:`, error);
       return {
         success: false,
         wallet: this.type,

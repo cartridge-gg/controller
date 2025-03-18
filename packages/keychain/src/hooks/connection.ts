@@ -38,6 +38,10 @@ type ParentMethods = AsyncMethodReturns<{
     type: ExternalWalletType,
     tx: unknown,
   ) => Promise<ExternalWalletResponse>;
+  externalSignMessage: (
+    type: ExternalWalletType,
+    message: string,
+  ) => Promise<ExternalWalletResponse>;
   externalGetBalance: (
     type: ExternalWalletType,
     tokenAddress?: string,
@@ -236,6 +240,16 @@ export function useConnectionValue() {
     [parent],
   );
 
+  const externalSignMessage = useCallback(
+    (type: ExternalWalletType, message: string) => {
+      if (!parent) {
+        return Promise.reject(new Error("no parent iframe"));
+      }
+      return parent.externalSignMessage(type, message);
+    },
+    [parent],
+  );
+
   const externalGetBalance = useCallback(
     (type: ExternalWalletType, tokenAddress?: string) => {
       if (!parent) {
@@ -263,6 +277,7 @@ export function useConnectionValue() {
     externalDetectWallets,
     externalConnectWallet,
     externalSignTransaction,
+    externalSignMessage,
     externalGetBalance,
   };
 }

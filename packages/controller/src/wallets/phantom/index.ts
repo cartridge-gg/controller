@@ -74,6 +74,25 @@ export class PhantomWallet implements WalletAdapter {
     }
   }
 
+  async signMessage(message: string): Promise<ExternalWalletResponse<any>> {
+    try {
+      if (!this.isAvailable() || !this.account) {
+        throw new Error("Phantom is not connected");
+      }
+
+      const encodedMessage = new TextEncoder().encode(message);
+      const result = await window.solana.signMessage(encodedMessage, "utf8");
+      return { success: true, wallet: this.type, result };
+    } catch (error) {
+      console.error(`Error signing message with Phantom:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
+  }
+
   async switchChain(_chainId: string): Promise<boolean> {
     console.warn("Chain switching not supported for Phantom");
     return false;

@@ -32,6 +32,9 @@ export class WalletBridge {
       externalSignTransaction:
         (_origin: string) => (type: ExternalWalletType, tx: unknown) =>
           this.signTransaction(type, tx),
+      externalSignMessage:
+        (_origin: string) => (type: ExternalWalletType, message: string) =>
+          this.signMessage(type, message),
       externalGetBalance:
         (_origin: string) =>
         (type: ExternalWalletType, tokenAddress?: string) =>
@@ -101,6 +104,22 @@ export class WalletBridge {
       return await wallet.signTransaction(transaction);
     } catch (error) {
       return this.handleError(type, error, "signing transaction with");
+    }
+  }
+
+  async signMessage(
+    type: ExternalWalletType,
+    message: string,
+  ): Promise<ExternalWalletResponse> {
+    try {
+      if (!this.connectedWallets.has(type)) {
+        throw new Error(`Wallet ${type} is not connected`);
+      }
+
+      const wallet = this.connectedWallets.get(type)!;
+      return await wallet.signMessage(message);
+    } catch (error) {
+      return this.handleError(type, error, "signing message with");
     }
   }
 

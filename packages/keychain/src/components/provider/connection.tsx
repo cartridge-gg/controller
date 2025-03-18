@@ -35,6 +35,10 @@ export type ConnectionContextValue = {
     type: ExternalWalletType,
     tx: unknown,
   ) => Promise<ExternalWalletResponse>;
+  externalSignMessage: (
+    type: ExternalWalletType,
+    message: string,
+  ) => Promise<ExternalWalletResponse>;
   externalGetBalance: (
     type: ExternalWalletType,
     tokenAddress?: string,

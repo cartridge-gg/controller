@@ -49,7 +49,7 @@ export class ArgentWallet implements WalletAdapter {
 
       throw new Error("No accounts found");
     } catch (error) {
-      console.error(`Error connecting to Argent X:`, error);
+      console.error(`Error connecting to Argent:`, error);
       return {
         success: false,
         wallet: this.type,
@@ -63,13 +63,31 @@ export class ArgentWallet implements WalletAdapter {
   ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
-        throw new Error("Argent X is not connected");
+        throw new Error("Argent is not connected");
       }
 
       const result = await window.starknet_argentX.account.execute(transaction);
       return { success: true, wallet: this.type, result };
     } catch (error) {
-      console.error(`Error signing transaction with Argent X:`, error);
+      console.error(`Error signing transaction with Argent:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
+  }
+
+  async signMessage(message: string): Promise<ExternalWalletResponse<any>> {
+    try {
+      if (!this.isAvailable() || !this.account) {
+        throw new Error("Argent is not connected");
+      }
+
+      const result = await window.starknet_argentX.account.signMessage(message);
+      return { success: true, wallet: this.type, result };
+    } catch (error) {
+      console.error(`Error signing message with Argent:`, error);
       return {
         success: false,
         wallet: this.type,
@@ -80,7 +98,7 @@ export class ArgentWallet implements WalletAdapter {
 
   async switchChain(_chainId: string): Promise<boolean> {
     console.warn(
-      "Chain switching for Argent X may require custom implementation",
+      "Chain switching for Argent may require custom implementation",
     );
     return false;
   }
@@ -90,17 +108,17 @@ export class ArgentWallet implements WalletAdapter {
   ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
-        throw new Error("Argent X is not connected");
+        throw new Error("Argent is not connected");
       }
 
-      // TODO: Implement balance fetching based on Argent X's API
+      // TODO: Implement balance fetching based on Argent's API
       return {
         success: true,
         wallet: this.type,
         result: "Implement based on Argent API",
       };
     } catch (error) {
-      console.error(`Error getting balance from Argent X:`, error);
+      console.error(`Error getting balance from Argent:`, error);
       return {
         success: false,
         wallet: this.type,

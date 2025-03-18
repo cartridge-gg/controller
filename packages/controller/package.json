@@ -66,10 +66,10 @@
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/penpal": "catalog:",
+    "@metamask/sdk": "^0.32.1",
     "@phantom/wallet-sdk": "^0.0.23",
     "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
-    "base64url": "catalog:",
     "cbor-x": "^1.5.0",
     "fast-deep-equal": "catalog:"
   },

@@ -75,6 +75,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     controller,
     externalDetectWallets,
     externalConnectWallet,
+    externalSignMessage,
   } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
@@ -302,7 +303,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
                     isLoading={
                       connecting && wallet.type === selectedWallet?.type
                     }
-                    disabled={!wallet.available || connecting}
+                    disabled={!wallet.available || connecting || isLoading}
                     onClick={() => onExternalConnect(wallet)}
                   >
                     {getWalletIcon(wallet, true)}
@@ -320,10 +321,15 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
               backgroundColor: getWalletBgColor(selectedWallet!),
               border: "none",
             }}
-            onClick={() => {}}
+            onClick={async () => {
+              const res = await externalSignMessage(selectedWallet!.type, "Test signing message");
+              if (!res.success) {
+                setError(new Error(res.error));
+              }
+            }}
           >
             {getWalletIcon(selectedWallet)}
-            Purchase with {selectedWallet?.name}
+            Sign Message with {selectedWallet?.name}
           </Button>
         )}
       </LayoutFooter>
