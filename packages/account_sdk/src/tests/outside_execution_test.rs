@@ -17,12 +17,15 @@ use crate::{
     },
     artifacts::{Version, CONTROLLERS},
     controller::Controller,
-    signers::{webauthn::WebauthnSigner, Owner, Signer},
+    signers::{Owner, Signer},
     tests::{
         account::FEE_TOKEN_ADDRESS, runners::katana::KatanaRunner,
         transaction_waiter::TransactionWaiter,
     },
 };
+
+#[cfg(feature = "webauthn")]
+use crate::signers::webauthn::WebauthnSigner;
 
 pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
     let runner = KatanaRunner::load();

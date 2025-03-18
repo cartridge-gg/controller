@@ -32,7 +32,6 @@ import { constants } from "starknet";
 import { formatEther } from "viem";
 import { useAccount } from "#hooks/account";
 import { useToken } from "#hooks/token";
-import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { useMemo } from "react";
 import { compare } from "compare-versions";
 import { formatBalance } from "./helper";
@@ -97,13 +96,21 @@ function ERC20() {
   const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
   const { chainId, version } = useConnection();
-  const t = useToken({ tokenAddress: address! });
-  const { countervalue } = useCountervalue(
+  const token = useToken({ tokenAddress: address! });
+  const { countervalues } = useCountervalue(
     {
-      balance: formatEther(t?.balance.value ?? 0n),
-      pair: `${t?.meta.symbol}_USDC` as TokenPair,
+      tokens: [
+        {
+          balance: formatEther(token?.balance.value ?? 0n),
+          address: token?.meta.address || "0x0",
+        },
+      ],
     },
-    { enabled: t && ["ETH", "STRK"].includes(t.meta.symbol) },
+    { enabled: !!token },
+  );
+  const countervalue = useMemo(
+    () => countervalues.find((v) => v?.address === token?.meta.address),
+    [countervalues, token?.meta.address],
   );
 
   const compatibility = useMemo(() => {
@@ -111,7 +118,7 @@ function ERC20() {
     return compare(version, "0.5.6", ">=");
   }, [version]);
 
-  if (!t) {
+  if (!token) {
     return;
   }
 
@@ -119,20 +126,21 @@ function ERC20() {
     <LayoutContainer>
       <LayoutHeader
         title={`${
-          t.balance === undefined ? (
+          token.balance === undefined ? (
             <Skeleton className="h-[20px] w-[120px] rounded" />
           ) : (
-            formatBalance(t.balance.formatted, ["~"])
+            formatBalance(token.balance.formatted, ["~"])
           )
-        } ${t.meta.symbol}`}
+        } ${token.meta.symbol}`}
         description={
-          countervalue && `${formatBalance(countervalue.formatted, ["~"])}`
+          countervalue &&
+          `${formatBalance(countervalue.current.formatted, ["~"])}`
         }
         icon={
           <div className="rounded-full size-11 bg-background-300 flex items-center justify-center">
             <img
               className="w-10 h-10"
-              src={t.meta.logoUrl ?? "/public/placeholder.svg"}
+              src={token.meta.logoUrl ?? "/public/placeholder.svg"}
             />
           </div>
         }
@@ -144,7 +152,7 @@ function ERC20() {
       <LayoutContent className="pb-4">
         <Card>
           <CardHeader>
-            <CardTitle>details</CardTitle>
+            <CardTitle>Details</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <div className="text-foreground-400">Contract</div>
@@ -152,17 +160,17 @@ function ERC20() {
               <Link
                 to={`${StarkscanUrl(
                   chainId as constants.StarknetChainId,
-                ).contract(t.meta.address)} `}
+                ).contract(token.meta.address)} `}
                 className="flex items-center gap-1 text-sm"
                 target="_blank"
               >
                 <div className="font-medium">
-                  {formatAddress(t.meta.address, { size: "sm" })}
+                  {formatAddress(token.meta.address, { size: "sm" })}
                 </div>
                 <ExternalIcon size="sm" />
               </Link>
             ) : (
-              <div>{formatAddress(t.meta.address)}</div>
+              <div>{formatAddress(token.meta.address)}</div>
             )}
           </CardContent>
 

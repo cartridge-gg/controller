@@ -140,9 +140,14 @@ export interface Keychain {
   externalConnectWallet(
     type: ExternalWalletType,
   ): Promise<ExternalWalletResponse>;
-  externalSignTransaction(
+  externalSignMessage(
     type: ExternalWalletType,
-    tx: unknown,
+    message: string,
+  ): Promise<ExternalWalletResponse>;
+  externalSignTypedData(
+    type: ExternalWalletType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
   ): Promise<ExternalWalletResponse>;
   externalGetBalance(
     type: ExternalWalletType,

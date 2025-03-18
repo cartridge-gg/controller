@@ -15,3 +15,12 @@ query PriceByAddresses($addresses: [String!]!) {
     quote
   }
 }
+
+query PricePeriodByAddresses($addresses: [String!]!, $start: Int!, $end: Int!) {
+  pricePeriodByAddresses(addresses: $addresses, start: $start, end: $end) {
+    amount
+    base
+    decimals
+    quote
+  }
+}
