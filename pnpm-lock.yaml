@@ -644,8 +644,8 @@ importers:
   packages/profile:
     dependencies:
       '@bal7hazar/arcade-sdk':
-        specifier: ^0.0.73
-        version: 0.0.73(@tanstack/react-query@5.66.0(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)(utf-8-validate@5.0.10)
+        specifier: ^0.0.83
+        version: 0.0.83(@tanstack/react-query@5.66.0(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
       '@cartridge/controller':
         specifier: workspace:*
         version: link:../controller
@@ -1399,8 +1399,8 @@ packages:
     resolution: {integrity: sha512-t8kDRGrKXyp6+tjUh7hw2RLyclsW4TRoRvRHtSyAX9Bb5ldlFh+90YAYY6awRXrlB4G5G2izNeGySpATlFzmOg==}
     engines: {node: '>=6.9.0'}
 
-  '@bal7hazar/arcade-sdk@0.0.73':
-    resolution: {integrity: sha512-9Ah9lm9/LnwpspMTltp6JHI/Ae6yiba5aB9oblrnR4IInMgIkPIqxsLK1UT/M/GQGtL/FHS/f8x+Xjfmu8IrSQ==}
+  '@bal7hazar/arcade-sdk@0.0.83':
+    resolution: {integrity: sha512-NFPbUsBl7x2kQ2Btk0VINR/xxDcx2RC4MsotWs6x+AN5y0KK8eGAW4pVoKjqXFYn8iT5+/wg1jBHxbqHG1ACLA==}
 
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
@@ -1474,15 +1474,15 @@ packages:
     resolution: {integrity: sha512-UJnjoFsmxfKUdNYdWgOB0mWUypuLvAfQPH1+pyvRJs6euowbFkFC6P13w1l8mJyi3vxYMxc9kld5jZEGRQs6bw==}
     engines: {node: '>=18'}
 
-  '@dojoengine/core@1.0.13':
-    resolution: {integrity: sha512-QtE/y9px5fwxYFZwnK5NwVz3douAB8CSYwqr9jH4VA93RNtsoRlMbZbsFEPVnITF5wucDUqEwkvTiba4EsDdug==}
+  '@dojoengine/core@1.3.0':
+    resolution: {integrity: sha512-4VQR5wV3aLifQUV1pRclVFLTjU9CDQSiPjEJmRiIOFMHuGgg1ZcOlcHoRCQRHcqP7MbwxCd6cyM6qMHMcwBE7g==}
     hasBin: true
 
   '@dojoengine/recs@2.0.13':
     resolution: {integrity: sha512-Cgz4Unlnk2FSDoFTYKrJexX/KiSYPMFMxftxQkC+9LUKS5yNGkgFQM7xu4/L1HvpDAenL7NjUmH6ynRAS7Iifw==}
 
-  '@dojoengine/sdk@1.0.13':
-    resolution: {integrity: sha512-wP/EX2hLmc5pX4by73oFMSkNxpj8CequmVNy+6ARgTlA9vNqbjhJZUY3gUtawVtmYsa2Qg5aYFGxYHZ12IdQmg==}
+  '@dojoengine/sdk@1.3.0':
+    resolution: {integrity: sha512-sSD7dP2cc2om9N3msRcc5F5BRp+SoXN+GveDIJRNXFBOfh1ELRbdbnZwoetC5TkE5E9dpHO4x6PGRaHuDqJYiA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@tanstack/react-query': ^5.62.16
@@ -1490,13 +1490,18 @@ packages:
       '@types/react-dom': ^18.3.1
       react: ^18.3.1
       react-dom: ^18.3.1
-      starknet: 6.21.0
+      starknet: 6.23.1
 
-  '@dojoengine/torii-client@1.0.13':
-    resolution: {integrity: sha512-OZTc3hUbfdcYAgOlgm+yi+BQd6Mi7W3IaYF2/i3WawC43NUILV42ccO69mBoONuDWybo9VVImEEHWIuRr8a/EA==}
+  '@dojoengine/torii-client@1.3.0':
+    resolution: {integrity: sha512-KzGIZGwzaQUG6f4uGFElHgF1w5W4TjiXdKlmlcX9EVqbkFpoC4JSsfkP4BqvTBrXXiy70eayvSFr/io1COFghw==}
 
-  '@dojoengine/torii-wasm@1.0.13':
-    resolution: {integrity: sha512-YSVIsLGBXwCSAHIfwypdPG5/EuZJqIbXbm1U3lcSt5t/NpriylNh9Ue3k+NtFU4Zm8Bhs+VuD+dlJf18AvaE9Q==}
+  '@dojoengine/torii-wasm@1.3.0':
+    resolution: {integrity: sha512-nYZUf1f65SDQNqvDUy0s21s7QPua4WE+fcxKjBrq+fn107fD+9TyTQ86SdR2Fla6wrH6abx+NDiZl8r1GtzXLQ==}
+
+  '@dojoengine/utils@1.3.0':
+    resolution: {integrity: sha512-SW54zLEFjUiaZxW0Hpi9qVNixjXtsoiGTdFhO0udgL1jP5QaZ9izZ9pfo1luvVWuwyQ0QOKclf0XKJ4/DssWyA==}
+    peerDependencies:
+      starknet: 6.23.1
 
   '@ecies/ciphers@0.2.3':
     resolution: {integrity: sha512-tapn6XhOueMwht3E2UzY0ZZjYokdaw9XtL9kEyjhQ/Fb9vL9xTFbOaI+fV0AWvTpYu4BNloC6getKW6NtSg4mA==}
@@ -2453,6 +2458,9 @@ packages:
   '@latticexyz/utils@2.0.12':
     resolution: {integrity: sha512-AwniovUlWY7YL92Mjz/3R0V9g8c5wYg5t3agRmMZ9wgktUB6BYZC65n+sKp88wUuN3DrMLb51UFZOycGh0JD2w==}
 
+  '@latticexyz/utils@2.2.20':
+    resolution: {integrity: sha512-yMpz65yecEfNR4DArZ55EOM2jDhvyEksK+RIFd1R4eGiiWGRzArjstREBHc7dX8WIGurzFbnCkOjE8QtACCO1Q==}
+
   '@mapbox/node-pre-gyp@1.0.11':
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
     hasBin: true
@@ -2581,6 +2589,9 @@ packages:
     resolution: {integrity: sha512-rONPWMC7PeExE077uLE4oqWrZ1IvAfz3oH9LibVAcVCopJiA9R62uavnbEzdkVmJYI6M6Zgkbeb07+tWjlq2XA==}
     engines: {node: ^14.21.3 || >=16}
 
+  '@noble/curves@1.0.0':
+    resolution: {integrity: sha512-2upgEu0iLiDVDZkNLeFV2+ht0BAVgQnEmCk6JsOch9Rp8xfkMCbvbAZlA2pBHQc73dbl+vFOXfqkf4uemdn0bw==}
+
   '@noble/curves@1.2.0':
     resolution: {integrity: sha512-oYclrNgRaM9SsBUBVbb8M6DTV7ZHRTKugureoYEncY5c65HOmRzvSiTE3y5CYaPYJA/GVkrhXEoF0M3Ya9PMnw==}
 
@@ -2598,6 +2609,9 @@ packages:
   '@noble/curves@1.8.1':
     resolution: {integrity: sha512-warwspo+UYUPep0Q+vtdVB4Ugn8GGQj8iyB3gnRWsztmUHTI3S1nhdiWNsPUGL0vud7JlRRk1XEu7Lq1KGTnMQ==}
     engines: {node: ^14.21.3 || >=16}
+
+  '@noble/hashes@1.3.0':
+    resolution: {integrity: sha512-ilHEACi9DwqJB0pw7kv+Apvh50jiiSyR/cQ3y4W7lOR5mhvn/50FLUfsnfJz0BDZtl/RR16kXvptiv6q1msYZg==}
 
   '@noble/hashes@1.3.2':
     resolution: {integrity: sha512-MVC8EAQp7MvEcm30KWENFjgR+Mkmf+D189XJTkFIlwohU5hcBbn1ZkKq7KVTi2Hme3PMGF390DaL52beVrIihQ==}
@@ -4971,6 +4985,9 @@ packages:
   compare-versions@6.1.1:
     resolution: {integrity: sha512-4hm4VPpIecmlg59CHXnRDnqGplJFrbLG4aFEl5vl6cK1u76ws3LLvX7ikFnTDl5vo39sjWD6AaDPYodJp/NNHg==}
 
+  complex.js@2.4.2:
+    resolution: {integrity: sha512-qtx7HRhPGSCBtGiST4/WGHuW+zeaND/6Ld+db6PbrulIB1i2Ev/2UPiqcmpQNPSyfBKraC0EOvOKCB5dGZKt3g==}
+
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
@@ -5635,6 +5652,9 @@ packages:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
     engines: {node: '>=6'}
 
+  escape-latex@1.2.0:
+    resolution: {integrity: sha512-nV5aVWW1K0wEiUIEdZ4erkGGH8mDxGyxSeqPzRNtWP7ataw+/olFObw7hujFWlVjNsaDFw5VZ5NzVSIqRgfTiw==}
+
   escape-string-regexp@1.0.5:
     resolution: {integrity: sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==}
     engines: {node: '>=0.8.0'}
@@ -6036,6 +6056,9 @@ packages:
   form-data@4.0.1:
     resolution: {integrity: sha512-tzN8e4TX8+kkxGPK8D5u0FNmjPUjw3lwC9lSLxxoB/+GtsJG91CO8bSWy73APlgAZzZbXEYZJuxjkHH2w+Ezhw==}
     engines: {node: '>= 6'}
+
+  fraction.js@4.3.4:
+    resolution: {integrity: sha512-pwiTgt0Q7t+GHZA4yaLjObx4vXmmdcS0iSJ19o8d/goUGgItX9UZWKWNnLHehxviD8wU2IWRsnR8cD5+yOJP2Q==}
 
   fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
@@ -6732,6 +6755,9 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  javascript-natural-sort@0.7.1:
+    resolution: {integrity: sha512-nO6jcEfZWQXDhOiBtG2KvKyEptz7RVbpGP4vTD2hLBdmNQSsCiicO2Ioinv6UI4y9ukqnBpy+XZ9H6uLNgJTlw==}
+
   jest-changed-files@29.7.0:
     resolution: {integrity: sha512-fEArFiwf1BpQ+4bXSprcDc3/x4HSzL4al2tozwVpDFpsxALjLYdyiIK4e5Vz66GQJIbXJ82+35PtysofptNX2w==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -7167,6 +7193,11 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
+  mathjs@12.4.3:
+    resolution: {integrity: sha512-oHdGPDbp7gO873xxG90RLq36IuicuKvbpr/bBG5g9c8Obm/VsKVrK9uoRZZHUodohzlnmCEqfDzbR3LH6m+aAQ==}
+    engines: {node: '>= 18'}
+    hasBin: true
+
   md5.js@1.3.5:
     resolution: {integrity: sha512-xitP+WxNPcTTOgnTJcrhM0xvdPepipPSf3I8EIpGKeFLjt3PlJLIDG3u8EX53ZIubkb+5U2+3rELYpEhHhzdkg==}
 
@@ -7191,6 +7222,9 @@ packages:
 
   micro-ftch@0.3.1:
     resolution: {integrity: sha512-/0LLxhzP0tfiR5hcQebtudP56gUurs2CLkGarnCiB/OqEyUFQ6U3paQi/tgLv0hBJYt2rnr9MNpxz4fiiugstg==}
+
+  micro-starknet@0.2.3:
+    resolution: {integrity: sha512-6XBcC+GerlwJSR4iA0VaeXtS2wrayWFcA4PEzrJPMuFmWCaUtuGIq5K/DB5F/XgnL54/zl2Bxo690Lj7mYVA8A==}
 
   micro@9.3.5-canary.3:
     resolution: {integrity: sha512-viYIo9PefV+w9dvoIBh1gI44Mvx1BOk67B4BpC2QK77qdY0xZF0Q+vWLt/BII6cLkIc8rLmSIcJaB/OrXXKe1g==}
@@ -8316,6 +8350,9 @@ packages:
   secure-compare@3.0.1:
     resolution: {integrity: sha512-AckIIV90rPDcBcglUwXPF3kg0P0qmPsPXAj6BBEENQE1p5yA1xfmDJzfi1Tappj37Pv2mVbKpL3Z1T+Nn7k1Qw==}
 
+  seedrandom@3.0.5:
+    resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==}
+
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
     hasBin: true
@@ -8511,9 +8548,6 @@ packages:
 
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
-
-  starknet@6.21.0:
-    resolution: {integrity: sha512-xUSlqyE+J/S5un3TyQY0Kehilh1u7ewPaut87eOxTDS1r90SU0QvQ3JEECp5LbW/sqsaMhfb+tGTBGrKzXg7bg==}
 
   starknet@6.23.1:
     resolution: {integrity: sha512-vQV9luXpmwZZs9RVZaRwm2iD8T0PYx1AzgZeQsCvD89tR0HwUF0paty27ZzuJrdPe0CmAs/ipAYFCE55jbj0RQ==}
@@ -8782,6 +8816,9 @@ packages:
   timers-browserify@2.0.12:
     resolution: {integrity: sha512-9phl76Cqm6FhSX9Xe1ZUAMLtm1BLkKj2Qd5ApyWkXzsMRaA7dgr81kf4wJmQf/hAvg8EEyJxDo3du/0KlhPiKQ==}
     engines: {node: '>=0.6.0'}
+
+  tiny-emitter@2.1.0:
+    resolution: {integrity: sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q==}
 
   tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
@@ -9058,6 +9095,10 @@ packages:
   typed-array-length@1.0.7:
     resolution: {integrity: sha512-3KS2b+kL7fsuk/eJZ7EQdnEmQoaho/r6KUef7hxvltNA5DR8NAUM+8wJMbJyZ4G9/7i3v5zPBIMN5aybAh2/Jg==}
     engines: {node: '>= 0.4'}
+
+  typed-function@4.2.1:
+    resolution: {integrity: sha512-EGjWssW7Tsk4DGfE+5yluuljS1OGYWiI1J6e8puZz9nTMM51Oug8CD5Zo4gWMsOhq5BI+1bF+rWTm4Vbj3ivRA==}
+    engines: {node: '>= 18'}
 
   typedarray-to-buffer@3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
@@ -10197,11 +10238,11 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@bal7hazar/arcade-sdk@0.0.73(@tanstack/react-query@5.66.0(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)(utf-8-validate@5.0.10)':
+  '@bal7hazar/arcade-sdk@0.0.83(@tanstack/react-query@5.66.0(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
-      '@dojoengine/core': 1.0.13(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
-      '@dojoengine/sdk': 1.0.13(@tanstack/react-query@5.66.0(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(typescript@5.7.3)(utf-8-validate@5.0.10)
-      '@dojoengine/torii-client': 1.0.13
+      '@dojoengine/core': 1.3.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@dojoengine/sdk': 1.3.0(@tanstack/react-query@5.66.0(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      '@dojoengine/torii-client': 1.3.0
       eventemitter3: 5.0.1
       starknet: 6.23.1
     transitivePeerDependencies:
@@ -10214,6 +10255,7 @@ snapshots:
       - react-dom
       - typescript
       - utf-8-validate
+      - zod
 
   '@bcoe/v8-coverage@0.2.3': {}
 
@@ -10265,10 +10307,10 @@ snapshots:
 
   '@csstools/css-tokenizer@3.0.3': {}
 
-  '@dojoengine/core@1.0.13(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)':
+  '@dojoengine/core@1.3.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
-      starknet: 6.21.0
+      starknet: 6.23.1
       zod: 3.24.1
     transitivePeerDependencies:
       - bufferutil
@@ -10288,10 +10330,11 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/sdk@1.0.13(@tanstack/react-query@5.66.0(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(typescript@5.7.3)(utf-8-validate@5.0.10)':
+  '@dojoengine/sdk@1.3.0(@tanstack/react-query@5.66.0(react@18.3.1))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
-      '@dojoengine/core': 1.0.13(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
-      '@dojoengine/torii-client': 1.0.13
+      '@dojoengine/core': 1.3.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@dojoengine/torii-client': 1.3.0
+      '@dojoengine/utils': 1.3.0(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
       '@tanstack/react-query': 5.66.0(react@18.3.1)
       '@types/react': 18.3.18
       '@types/react-dom': 18.3.5(@types/react@18.3.18)
@@ -10305,12 +10348,26 @@ snapshots:
       - encoding
       - typescript
       - utf-8-validate
+      - zod
 
-  '@dojoengine/torii-client@1.0.13':
+  '@dojoengine/torii-client@1.3.0':
     dependencies:
-      '@dojoengine/torii-wasm': 1.0.13
+      '@dojoengine/torii-wasm': 1.3.0
 
-  '@dojoengine/torii-wasm@1.0.13': {}
+  '@dojoengine/torii-wasm@1.3.0': {}
+
+  '@dojoengine/utils@1.3.0(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
+    dependencies:
+      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      '@latticexyz/utils': 2.2.20
+      mathjs: 12.4.3
+      micro-starknet: 0.2.3
+      starknet: 6.23.1
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
 
   '@ecies/ciphers@0.2.3(@noble/ciphers@1.2.1)':
     dependencies:
@@ -11421,6 +11478,12 @@ snapshots:
       proxy-deep: 3.1.1
       rxjs: 7.5.5
 
+  '@latticexyz/utils@2.2.20':
+    dependencies:
+      mobx: 6.13.6
+      proxy-deep: 3.1.1
+      rxjs: 7.5.5
+
   '@mapbox/node-pre-gyp@1.0.11':
     dependencies:
       detect-libc: 2.0.3
@@ -11608,6 +11671,10 @@ snapshots:
 
   '@noble/ciphers@1.2.1': {}
 
+  '@noble/curves@1.0.0':
+    dependencies:
+      '@noble/hashes': 1.3.0
+
   '@noble/curves@1.2.0':
     dependencies:
       '@noble/hashes': 1.3.2
@@ -11627,6 +11694,8 @@ snapshots:
   '@noble/curves@1.8.1':
     dependencies:
       '@noble/hashes': 1.7.1
+
+  '@noble/hashes@1.3.0': {}
 
   '@noble/hashes@1.3.2': {}
 
@@ -14665,6 +14734,8 @@ snapshots:
 
   compare-versions@6.1.1: {}
 
+  complex.js@2.4.2: {}
+
   concat-map@0.0.1: {}
 
   consola@3.4.0: {}
@@ -15449,6 +15520,8 @@ snapshots:
 
   escalade@3.2.0: {}
 
+  escape-latex@1.2.0: {}
+
   escape-string-regexp@1.0.5: {}
 
   escape-string-regexp@2.0.0: {}
@@ -15973,6 +16046,8 @@ snapshots:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       mime-types: 2.1.35
+
+  fraction.js@4.3.4: {}
 
   fraction.js@4.3.7: {}
 
@@ -16773,6 +16848,8 @@ snapshots:
       filelist: 1.0.4
       minimatch: 3.1.2
 
+  javascript-natural-sort@0.7.1: {}
+
   jest-changed-files@29.7.0:
     dependencies:
       execa: 5.1.1
@@ -17551,6 +17628,18 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
+  mathjs@12.4.3:
+    dependencies:
+      '@babel/runtime': 7.26.7
+      complex.js: 2.4.2
+      decimal.js: 10.5.0
+      escape-latex: 1.2.0
+      fraction.js: 4.3.4
+      javascript-natural-sort: 0.7.1
+      seedrandom: 3.0.5
+      tiny-emitter: 2.1.0
+      typed-function: 4.2.1
+
   md5.js@1.3.5:
     dependencies:
       hash-base: 3.0.5
@@ -17570,6 +17659,11 @@ snapshots:
       '@types/node': 18.19.75
 
   micro-ftch@0.3.1: {}
+
+  micro-starknet@0.2.3:
+    dependencies:
+      '@noble/curves': 1.0.0
+      '@noble/hashes': 1.3.2
 
   micro@9.3.5-canary.3:
     dependencies:
@@ -18747,6 +18841,8 @@ snapshots:
 
   secure-compare@3.0.1: {}
 
+  seedrandom@3.0.5: {}
+
   semver@6.3.1: {}
 
   semver@7.3.5:
@@ -18986,22 +19082,6 @@ snapshots:
       escape-string-regexp: 2.0.0
 
   stackback@0.0.2: {}
-
-  starknet@6.21.0:
-    dependencies:
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.0
-      '@scure/base': 1.2.1
-      '@scure/starknet': 1.1.0
-      abi-wan-kanabi: 2.2.4
-      fetch-cookie: 3.0.1
-      isomorphic-fetch: 3.0.0
-      lossless-json: 4.0.2
-      pako: 2.1.0
-      starknet-types-07: '@starknet-io/types-js@0.7.10'
-      ts-mixer: 6.0.4
-    transitivePeerDependencies:
-      - encoding
 
   starknet@6.23.1:
     dependencies:
@@ -19432,6 +19512,8 @@ snapshots:
     dependencies:
       setimmediate: 1.0.5
 
+  tiny-emitter@2.1.0: {}
+
   tiny-invariant@1.3.3: {}
 
   tinybench@2.9.0: {}
@@ -19736,6 +19818,8 @@ snapshots:
       is-typed-array: 1.1.15
       possible-typed-array-names: 1.1.0
       reflect.getprototypeof: 1.0.10
+
+  typed-function@4.2.1: {}
 
   typedarray-to-buffer@3.1.5:
     dependencies:
