@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useConnection } from "@/hooks/connection";
 import { LoginMode } from "../types";
 import { doLogin, doSignup } from "@/hooks/account";
-import { constants, RpcProvider } from "starknet";
+import { constants } from "starknet";
 import Controller from "@/utils/controller";
 import { fetchAccount } from "./utils";
 import { PopupCenter } from "@/utils/url";
@@ -19,25 +19,7 @@ export function useCreateController({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
-  const { origin, policies, rpcUrl, setController } = useConnection();
-
-  const [chainId, setChainId] = useState<string>();
-
-  useEffect(() => {
-    const fetchChainId = async () => {
-      try {
-        const provider = new RpcProvider({ nodeUrl: rpcUrl });
-        const id = await provider.getChainId();
-        setChainId(id);
-      } catch (e) {
-        console.error("Failed to fetch chain ID:", e);
-      }
-    };
-
-    if (rpcUrl) {
-      fetchChainId();
-    }
-  }, [rpcUrl]);
+  const { origin, policies, rpcUrl, chainId, setController } = useConnection();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {

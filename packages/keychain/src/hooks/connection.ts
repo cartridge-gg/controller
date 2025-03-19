@@ -26,6 +26,7 @@ import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { shortString } from "starknet";
+import { RpcProvider } from "starknet";
 
 type ParentMethods = AsyncMethodReturns<{
   close: () => Promise<void>;
@@ -64,7 +65,7 @@ export function useConnectionValue() {
     ...defaultTheme,
   });
   const [controller, setController] = useState(window.controller);
-  const chainId = useMemo(() => controller?.chainId(), [controller]);
+  const [chainId, setChainId] = useState<string>();
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -79,6 +80,23 @@ export function useConnectionValue() {
 
     return { theme, preset, policies };
   }, []);
+
+  // Fetch chain ID from RPC provider when rpcUrl changes
+  useEffect(() => {
+    const fetchChainId = async () => {
+      try {
+        const provider = new RpcProvider({ nodeUrl: rpcUrl });
+        const id = await provider.getChainId();
+        setChainId(id);
+      } catch (e) {
+        console.error("Failed to fetch chain ID:", e);
+      }
+    };
+
+    if (rpcUrl) {
+      fetchChainId();
+    }
+  }, [rpcUrl]);
 
   // Handle controller initialization
   useEffect(() => {
@@ -157,13 +175,13 @@ export function useConnectionValue() {
       preset in controllerConfigs &&
       controllerConfigs[preset]?.chains
     ) {
-      const encodedChainId = shortString.encodeShortString(chainId);
-      if (encodedChainId in controllerConfigs[preset].chains) {
+      const decodedChainId = shortString.decodeShortString(chainId);
+      if (decodedChainId in controllerConfigs[preset].chains) {
         // Set policies from preset if no URL policies
         setPolicies(
           parseSessionPolicies({
             verified,
-            policies: controllerConfigs[preset].chains[encodedChainId].policies,
+            policies: controllerConfigs[preset].chains[decodedChainId].policies,
           }),
         );
       }
@@ -287,6 +305,7 @@ export function useConnectionValue() {
     policies,
     theme,
     verified,
+    chainId,
     setController,
     setContext,
     closeModal,
