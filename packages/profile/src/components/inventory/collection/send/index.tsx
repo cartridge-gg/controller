@@ -104,7 +104,15 @@ export function SendCollection() {
       await parent.openExecute(calls);
       navigate("../../..");
     },
-    [tokenIds, contractAddress, address, parent, entrypoint, navigate],
+    [
+      tokenIds,
+      contractAddress,
+      address,
+      parent,
+      recipientError,
+      entrypoint,
+      navigate,
+    ],
   );
 
   if (!collection || !assets) return null;
