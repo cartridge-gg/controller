@@ -1,10 +1,10 @@
-import { useIndexerAPI } from "@cartridge/utils";
 import { useAccount } from "./account";
-import {
-  Erc721__Token,
-  useErc721BalancesQuery,
-} from "@cartridge/utils/api/indexer";
 import { useMemo, useState } from "react";
+import {
+  useCollectionQuery,
+  useCollectionsQuery,
+} from "@cartridge/utils/api/cartridge";
+import { useConnection } from "./context";
 
 const LIMIT = 1000;
 
@@ -38,82 +38,61 @@ export function useCollection({
   tokenIds?: string[];
 }): UseCollectionResponse {
   const { address } = useAccount();
-  const { isReady, indexerUrl } = useIndexerAPI();
-  const [offset, setOffset] = useState(0);
-  const [tokens, setTokens] = useState<{ [key: string]: Erc721__Token }>({});
+  const { project } = useConnection();
+  const [collection, setCollection] = useState<Collection | undefined>(
+    undefined,
+  );
+  const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
 
-  const { status } = useErc721BalancesQuery(
-    { address, limit: LIMIT, offset: offset },
+  const { status } = useCollectionQuery(
     {
-      queryKey: ["tokenBalances", offset],
-      enabled: isReady && !!address,
-      onSuccess: ({ tokenBalances }) => {
-        const newTokens: { [key: string]: Erc721__Token } = {};
-        tokenBalances?.edges
-          .filter(
-            (e) =>
-              !contractAddress ||
-              (e.node.tokenMetadata as Erc721__Token).contractAddress ===
-                contractAddress,
-          )
-          .filter(
-            (e) =>
-              !tokenIds.length ||
-              tokenIds.includes(
-                (e.node.tokenMetadata as Erc721__Token).tokenId,
-              ),
-          )
-          .forEach((e) => {
-            const token = e.node.tokenMetadata as Erc721__Token;
-            newTokens[`${token.contractAddress}-${token.tokenId}`] = token;
-          });
-        if (tokenBalances?.edges.length === LIMIT) {
-          setOffset(offset + LIMIT);
-        }
-        setTokens((prev) => ({ ...prev, ...newTokens }));
+      projects: [project ?? ""],
+      accountAddress: address,
+      contractAddress: contractAddress ?? "",
+    },
+    {
+      queryKey: ["collection"],
+      enabled: !!project && !!address,
+      onSuccess: ({ collection }) => {
+        const newCollection: Collection = {
+          address: collection.meta.contractAddress,
+          name: collection.meta.name,
+          type: "ERC-721",
+          imageUrl: collection.meta.imagePath,
+          totalCount: collection.meta.assetCount,
+        };
+
+        const newAssets: { [key: string]: Asset } = {};
+        collection.assets.forEach((a) => {
+          let imageUrl = a.imageUrl;
+          if (!imageUrl.includes("://")) {
+            imageUrl = newCollection.imageUrl.replace(
+              /0x[a-fA-F0-9]+(?=\/image$)/,
+              a.tokenId,
+            );
+          }
+          const asset: Asset = {
+            tokenId: a.tokenId,
+            name: a.name,
+            description: a.description ?? "",
+            imageUrl: imageUrl,
+            attributes: JSON.parse(a.attributes ?? "{}"),
+          };
+          newAssets[`${newCollection.address}-${a.tokenId}`] = asset;
+        });
+
+        setCollection(newCollection);
+        setAssets(newAssets);
       },
     },
   );
 
-  const { collection, assets } = useMemo<{
-    collection?: Collection;
-    assets?: Asset[];
-  }>(() => {
-    if (!indexerUrl || !Object.values(tokens).length) return {};
+  const filteredAssets = useMemo(() => {
+    if (!tokenIds.length) return Object.values(assets);
+    return Object.values(assets).filter((a) => tokenIds.includes(a.tokenId));
+  }, [assets, tokenIds]);
 
-    const assets = Object.values(tokens).map((token) => {
-      let attributes;
-      try {
-        attributes = JSON.parse(token.metadataAttributes);
-      } catch {
-        console.log("Failed to parse attributes");
-      }
-      return {
-        tokenId: token.tokenId,
-        name: token.metadataName,
-        description: token.metadataDescription,
-        imageUrl: token.imagePath
-          ? `${indexerUrl.replace("/graphql", "")}/static/${token.imagePath}`
-          : "",
-        attributes,
-      };
-    });
-
-    const collection = {
-      address: Object.values(tokens)[0].contractAddress,
-      name: Object.values(tokens)[0].name,
-      type: "ERC-721",
-      imageUrl: assets[0].imageUrl,
-      totalCount: assets.length,
-    };
-
-    return {
-      collection,
-      assets,
-    };
-  }, [tokens, indexerUrl]);
-
-  return { collection, assets, status };
+  return { collection, assets: filteredAssets, status };
 }
 
 export type UseCollectionsResponse = {
@@ -121,59 +100,57 @@ export type UseCollectionsResponse = {
   status: "success" | "error" | "idle" | "loading";
 };
 
+export type CollectionType = {
+  contractAddress: string;
+  imagePath: string;
+  metadataAttributes: string;
+  metadataDescription: string;
+  metadataName: string;
+  name: string;
+  tokenId: string;
+  count: number;
+};
+
 export function useCollections(): UseCollectionsResponse {
   const { address } = useAccount();
-  const { isReady, indexerUrl } = useIndexerAPI();
-
+  const { project } = useConnection();
   const [offset, setOffset] = useState(0);
-  const [tokens, setTokens] = useState<{ [key: string]: Erc721__Token }>({});
-  const { status } = useErc721BalancesQuery(
-    { address, limit: LIMIT, offset: offset },
+  const [collections, setCollections] = useState<{ [key: string]: Collection }>(
+    {},
+  );
+
+  const { status } = useCollectionsQuery(
     {
-      queryKey: ["tokenBalances", offset],
-      enabled: isReady && !!address,
-      onSuccess: ({ tokenBalances }) => {
-        const newTokens: { [key: string]: Erc721__Token } = {};
-        tokenBalances?.edges.forEach((e) => {
-          const token = e.node.tokenMetadata as Erc721__Token;
-          newTokens[`${token.contractAddress}-${token.tokenId}`] = token;
+      accountAddress: address,
+      projects: [project ?? ""],
+      limit: LIMIT,
+      offset: offset,
+    },
+    {
+      queryKey: ["collections", offset],
+      enabled: !!project && !!address,
+      onSuccess: ({ collections }) => {
+        const newCollections: { [key: string]: Collection } = {};
+        collections?.edges.forEach((e) => {
+          const contractAddress = e.node.meta.contractAddress;
+          const imagePath = e.node.meta.imagePath;
+          const name = e.node.meta.name;
+          const count = e.node.meta.assetCount;
+          newCollections[`${contractAddress}`] = {
+            address: contractAddress,
+            imageUrl: imagePath,
+            name,
+            totalCount: count,
+            type: "ERC-721",
+          };
         });
-        if (tokenBalances?.edges.length === LIMIT) {
+        if (collections?.edges.length === LIMIT) {
           setOffset(offset + LIMIT);
         }
-        setTokens((prev) => ({ ...prev, ...newTokens }));
+        setCollections((prev) => ({ ...prev, ...newCollections }));
       },
     },
   );
 
-  const collections = useMemo(() => {
-    if (!indexerUrl || !Object.values(tokens).length) return [];
-
-    const collections =
-      Object.values(tokens)
-        .filter((token) => !!token.contractAddress)
-        .reduce<Record<string, Collection>>((prev, token) => {
-          const agg = prev[token.contractAddress];
-          const collection = agg
-            ? { ...agg, totalCount: agg.totalCount + 1 }
-            : {
-                address: token.contractAddress,
-                name: token.name,
-                totalCount: 1,
-                imageUrl: token.imagePath
-                  ? `${indexerUrl.replace("/graphql", "")}/static/${token.imagePath}`
-                  : "",
-                type: "ERC-721",
-              };
-
-          return {
-            ...prev,
-            [collection.address]: collection,
-          };
-        }, {}) ?? [];
-
-    return Object.values(collections);
-  }, [tokens, indexerUrl]);
-
-  return { collections, status };
+  return { collections: Object.values(collections), status };
 }

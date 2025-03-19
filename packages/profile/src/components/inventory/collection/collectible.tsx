@@ -43,8 +43,9 @@ export function Collectible() {
     return compare(version, "0.5.6", ">=");
   }, [version]);
 
-  const { tokenId } = useParams<{ tokenId: string }>();
+  const { address: contractAddress, tokenId } = useParams();
   const { collection, assets, status } = useCollection({
+    contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
   });
 
@@ -187,7 +188,8 @@ export const Properties = ({
       <CardContent className="bg-background grid grid-cols-3 p-0 gap-px">
         {properties.map((property) => {
           const trait = property.trait_type ?? property.trait;
-          return typeof property.value === "string" ? (
+          return typeof property.value === "string" ||
+            typeof property.value === "number" ? (
             <div
               key={`${trait}-${property.value}`}
               className="bg-background-200 p-3 flex flex-col gap-1"
