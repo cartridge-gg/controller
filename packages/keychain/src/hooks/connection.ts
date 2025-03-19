@@ -66,35 +66,37 @@ export function useConnectionValue() {
   const [controller, setController] = useState(window.controller);
   const chainId = useMemo(() => controller?.chainId(), [controller]);
 
-  // Extract URL parameters once
   const urlParams = useMemo(() => {
-    return new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(window.location.search);
+    const theme = urlParams.get("theme");
+    const preset = urlParams.get("preset");
+    const rpcUrl = urlParams.get("rpc_url");
+    const policies = urlParams.get("policies");
+
+    if (rpcUrl) {
+      setRpcUrl(rpcUrl);
+    }
+
+    return { theme, preset, policies };
   }, []);
 
-  // Handle RPC URL and controller initialization
+  // Handle controller initialization
   useEffect(() => {
-    const rpcUrl = urlParams.get("rpc_url");
-
     // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
     if (!isIframe()) {
       if (controller) {
         setController(controller);
       }
-
-      if (rpcUrl) {
-        setRpcUrl(rpcUrl);
-      }
     }
-  }, [urlParams, controller]);
+  }, [controller]);
 
   // Check if preset is verified for the current origin
   useEffect(() => {
-    const presetParam = urlParams.get("preset");
-    if (!presetParam) {
+    if (!urlParams.preset) {
       return;
     }
 
-    const allowedOrigins = toArray(controllerConfigs[presetParam].origin);
+    const allowedOrigins = toArray(controllerConfigs[urlParams.preset].origin);
     setVerified(
       !!origin &&
         allowedOrigins.some((allowedOrigin) => {
@@ -106,11 +108,10 @@ export function useConnectionValue() {
 
   // Handle theme configuration
   useEffect(() => {
-    const themeParam = urlParams.get("theme");
-    const presetParam = urlParams.get("preset");
+    const { preset } = urlParams;
 
-    if (themeParam) {
-      const decodedPreset = decodeURIComponent(themeParam);
+    if (urlParams.theme) {
+      const decodedPreset = decodeURIComponent(urlParams.theme);
       if (controllerConfigs[decodedPreset]?.theme) {
         setVerified(true);
         setTheme({
@@ -120,11 +121,11 @@ export function useConnectionValue() {
       } else {
         console.error("Theme preset not valid");
       }
-    } else if (presetParam && presetParam in controllerConfigs) {
-      if (controllerConfigs[presetParam]?.theme) {
+    } else if (preset && preset in controllerConfigs) {
+      if (controllerConfigs[preset]?.theme) {
         setTheme({
           verified,
-          ...controllerConfigs[presetParam].theme,
+          ...controllerConfigs[preset].theme,
         });
       }
     }
@@ -132,14 +133,13 @@ export function useConnectionValue() {
 
   // Handle policies configuration
   useEffect(() => {
-    const policiesParam = urlParams.get("policies");
-    const presetParam = urlParams.get("preset");
+    const { policies, preset } = urlParams;
 
     // URL policies take precedence over preset policies
-    if (policiesParam) {
+    if (policies) {
       try {
         const parsedPolicies = JSON.parse(
-          decodeURIComponent(policiesParam),
+          decodeURIComponent(policies),
         ) as Policies;
 
         setPolicies(
@@ -151,16 +151,19 @@ export function useConnectionValue() {
       } catch (e) {
         console.error("Failed to parse policies:", e);
       }
-    } else if (presetParam && presetParam in controllerConfigs) {
-      // Set policies from preset if no URL policies
-      if (chainId && controllerConfigs[presetParam]?.chains) {
+    } else if (
+      chainId &&
+      preset &&
+      preset in controllerConfigs &&
+      controllerConfigs[preset]?.chains
+    ) {
+      const encodedChainId = shortString.encodeShortString(chainId);
+      if (encodedChainId in controllerConfigs[preset].chains) {
+        // Set policies from preset if no URL policies
         setPolicies(
           parseSessionPolicies({
             verified,
-            policies:
-              controllerConfigs[presetParam].chains[
-                shortString.encodeShortString(chainId)
-              ].policies,
+            policies: controllerConfigs[preset].chains[encodedChainId].policies,
           }),
         );
       }
