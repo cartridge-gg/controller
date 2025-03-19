@@ -4,5 +4,7 @@ export * from "./ethereum-dark";
 export * from "./ethereum-light";
 export * from "./ethereum";
 export * from "./metamask";
+export * from "./phantom";
+export * from "./rabby";
 export * from "./starknet";
 export * from "./wallet-connect";
