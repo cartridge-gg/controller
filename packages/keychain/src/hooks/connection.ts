@@ -44,6 +44,11 @@ type ParentMethods = AsyncMethodReturns<{
     type: ExternalWalletType,
     message: string,
   ) => Promise<ExternalWalletResponse>;
+  externalSendTransaction: (
+    type: ExternalWalletType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    txn: any,
+  ) => Promise<ExternalWalletResponse>;
   externalGetBalance: (
     type: ExternalWalletType,
     tokenAddress?: string,
@@ -269,6 +274,15 @@ export function useConnectionValue() {
     [parent],
   );
 
+  const externalSendTransaction = useCallback(
+    (type: ExternalWalletType, txn: any) => {
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
+      return parent.externalSendTransaction(type, txn);
+    },
+    [parent],
+  );
   const externalGetBalance = useCallback(
     (type: ExternalWalletType, tokenAddress?: string) => {
       if (!parent) {
@@ -297,6 +311,7 @@ export function useConnectionValue() {
     externalConnectWallet,
     externalSignMessage,
     externalSignTypedData,
+    externalSendTransaction,
     externalGetBalance,
   };
 }

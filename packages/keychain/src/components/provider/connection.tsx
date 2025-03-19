@@ -39,6 +39,11 @@ export type ConnectionContextValue = {
     type: ExternalWalletType,
     message: string,
   ) => Promise<ExternalWalletResponse>;
+  externalSendTransaction: (
+    type: ExternalWalletType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    txn: any,
+  ) => Promise<ExternalWalletResponse>;
   externalGetBalance: (
     type: ExternalWalletType,
     tokenAddress?: string,

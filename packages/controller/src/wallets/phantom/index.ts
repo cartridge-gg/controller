@@ -1,3 +1,4 @@
+import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import {
   WalletAdapter,
   ExternalWallet,
@@ -6,10 +7,51 @@ import {
   ExternalPlatform,
 } from "../types";
 
+interface PhantomProvider {
+  isPhantom: boolean;
+  publicKey: PublicKey | null;
+  isConnected: boolean;
+  connect(opts?: { onlyIfTrusted: boolean }): Promise<{ publicKey: PublicKey }>;
+  disconnect(): Promise<void>;
+  signTransaction(
+    transaction: Transaction | VersionedTransaction,
+  ): Promise<Transaction | VersionedTransaction>;
+  signAllTransactions(
+    transactions: (Transaction | VersionedTransaction)[],
+  ): Promise<(Transaction | VersionedTransaction)[]>;
+  signAndSendTransaction(
+    transaction: Transaction | VersionedTransaction,
+    opts?: { skipPreflight?: boolean; maxRetries?: number },
+  ): Promise<{ signature: string }>;
+  signMessage(
+    message: Uint8Array,
+    display?: "utf8" | "hex",
+  ): Promise<{ signature: Uint8Array }>;
+  on(
+    event: "connect" | "disconnect" | "accountChanged",
+    handler: (args: unknown) => void,
+  ): void;
+  request(args: { method: string; params?: unknown }): Promise<unknown>;
+}
+
 export class PhantomWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "phantom";
   readonly platform: ExternalPlatform = "solana";
   private account: string | undefined = undefined;
+
+  private getProvider(): PhantomProvider {
+    if (typeof window === "undefined") {
+      throw new Error("Not ready");
+    }
+
+    const provider = window.solana;
+
+    if (!provider?.isPhantom) {
+      throw new Error("Phantom is not available");
+    }
+
+    return provider;
+  }
 
   isAvailable(): boolean {
     return typeof window !== "undefined" && !!window.solana?.isPhantom;
@@ -37,7 +79,7 @@ export class PhantomWallet implements WalletAdapter {
         throw new Error("Phantom is not available");
       }
 
-      const response = await window.solana.connect();
+      const response = await this.getProvider().connect();
       if (response.publicKey) {
         this.account = response.publicKey.toString();
         return { success: true, wallet: this.type, account: this.account };
@@ -54,18 +96,20 @@ export class PhantomWallet implements WalletAdapter {
     }
   }
 
-  async signTransaction(
-    transaction: any,
-  ): Promise<ExternalWalletResponse<any>> {
+  async signMessage(message: string): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Phantom is not connected");
       }
 
-      const result = await window.solana.signTransaction(transaction);
+      const encodedMessage = new TextEncoder().encode(message);
+      const result = await this.getProvider().signMessage(
+        encodedMessage,
+        "utf8",
+      );
       return { success: true, wallet: this.type, result };
     } catch (error) {
-      console.error(`Error signing transaction with Phantom:`, error);
+      console.error(`Error signing message with Phantom:`, error);
       return {
         success: false,
         wallet: this.type,
@@ -74,17 +118,24 @@ export class PhantomWallet implements WalletAdapter {
     }
   }
 
-  async signMessage(message: string): Promise<ExternalWalletResponse<any>> {
-    try {
-      if (!this.isAvailable() || !this.account) {
-        throw new Error("Phantom is not connected");
-      }
+  async sendTransaction(
+    serailized_txn: string,
+  ): Promise<ExternalWalletResponse<any>> {
+    if (!this.isAvailable() || !this.account) {
+      throw new Error("Phantom is not connected");
+    }
 
-      const encodedMessage = new TextEncoder().encode(message);
-      const result = await window.solana.signMessage(encodedMessage, "utf8");
-      return { success: true, wallet: this.type, result };
+    try {
+      const txn = Transaction.from(Buffer.from(serailized_txn, 'base64'));
+      const provider = this.getProvider();
+      const result = await provider.signAndSendTransaction(txn);
+      return {
+        success: true,
+        wallet: this.type,
+        result,
+      };
     } catch (error) {
-      console.error(`Error signing message with Phantom:`, error);
+      console.error(`Error sending transaction with Phantom:`, error);
       return {
         success: false,
         wallet: this.type,

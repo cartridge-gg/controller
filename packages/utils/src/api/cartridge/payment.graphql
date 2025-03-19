@@ -1,0 +1,22 @@
+query CryptoPayment($id: ID!) {
+  cryptoPayment(id: $id) {
+    tokenAmount
+    status
+    chain
+    tokenAddress
+    depositAddress
+    expiresAt
+  }
+}
+
+mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
+  createCryptoPayment(input: $input) {
+    id
+    tokenAmount
+    status
+    chain
+    tokenAddress
+    depositAddress
+    expiresAt
+  }
+}

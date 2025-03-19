@@ -29,6 +29,8 @@
     "@starknet-io/types-js": "catalog:",
     "@stripe/react-stripe-js": "^2.8.1",
     "@stripe/stripe-js": "^4.8.0",
+    "@solana/spl-token": "catalog:",
+    "@solana/web3.js": "catalog:",
     "base64url": "catalog:",
     "caip": "^1.1.0",
     "cbor": "^8.1.0",

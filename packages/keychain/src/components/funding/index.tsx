@@ -11,7 +11,7 @@ import {
   DepositIcon,
 } from "@cartridge/ui-next";
 import { Deposit } from "./Deposit";
-import { PurchaseCredits } from "./PurchaseCredits";
+import { PurchaseCredits } from "./purchase/PurchaseCredits";
 import { Balance, BalanceType } from "./Balance";
 
 const enum FundingState {

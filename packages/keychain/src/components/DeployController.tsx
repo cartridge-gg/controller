@@ -78,7 +78,7 @@ export function DeployController({
   useEffect(() => {
     if (
       !controller ||
-      controller.chainId() !== constants.StarknetChainId.SN_MAIN ||
+      controller.chainId() === constants.StarknetChainId.SN_MAIN ||
       !feeEstimate
     ) {
       return;
