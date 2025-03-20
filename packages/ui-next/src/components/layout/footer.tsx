@@ -17,7 +17,7 @@ export function LayoutFooter({
     <div
       className={cn(
         "flex flex-col gap-3 w-full p-2 mt-auto bg-background shrink-0",
-        !showCatridgeLogo && "pb-4",
+        !showCatridgeLogo && "pb-6",
         className,
       )}
     >

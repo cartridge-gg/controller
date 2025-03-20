@@ -23,7 +23,7 @@ export function Receiving({ title, items }: ReceivingProps) {
 
       <CardListContent>
         {items.map((item) => (
-          <CardListItem className="flex flex-row items-center p-4">
+          <CardListItem className="flex flex-row items-center p-3">
             <div className="flex flex-row items-center gap-3">
               <img src={item.image} className="size-8" />
               <div className="flex flex-col gap-0.5">

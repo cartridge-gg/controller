@@ -59,7 +59,7 @@ export function LayoutContent({
     <div
       ref={containerRef}
       className={cn(
-        "w-full p-6 flex flex-col items-stretch gap-2 overflow-y-scroll",
+        "w-full px-6 py-1 flex flex-col items-stretch gap-3 overflow-y-scroll",
         mbCompensation,
         isIframe() && "flex-1",
         className,
