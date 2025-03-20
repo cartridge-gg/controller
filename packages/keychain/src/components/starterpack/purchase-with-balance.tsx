@@ -1,5 +1,7 @@
 import {
   Button,
+  Card,
+  CardContent,
   GiftIcon,
   LayoutContent,
   LayoutFooter,
@@ -73,10 +75,12 @@ export const PurchaseWithBalance = React.memo(() => {
 
       <LayoutFooter>
         {purchaseState === PurchaseState.PENDING ? (
-          <div className="flex items-center justify-center w-full text-sm text-foreground-400">
-            <Spinner className="mr-2" />
-            <span>Confirming on starknet</span>
-          </div>
+          <Card>
+            <CardContent className="flex items-center justify-center w-full text-sm bg-background-100 border border-background-200 p-2.5 text-foreground-400">
+              <Spinner className="mr-2" />
+              <span>Confirming on starknet</span>
+            </CardContent>
+          </Card>
         ) : purchaseState === PurchaseState.SUCCESS ? (
           <Button
             variant="secondary"
