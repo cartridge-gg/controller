@@ -6,3 +6,4 @@ export * from "./game-select";
 export * from "./header";
 export * from "./tabs";
 export * from "./tab";
+export * from "./tab-item";
