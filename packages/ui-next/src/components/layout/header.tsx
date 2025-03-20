@@ -179,7 +179,12 @@ function HeaderInner({
   if (variant === "hidden") return null;
 
   return (
-    <div className={cn("p-4 flex items-center justify-between", className)}>
+    <div
+      className={cn(
+        "px-6 pt-6 pb-4 flex items-center justify-between",
+        className,
+      )}
+    >
       <div className="flex items-center gap-4 flex-shrink min-w-0">
         <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
         <Headline variant={variant} title={title} description={description} />

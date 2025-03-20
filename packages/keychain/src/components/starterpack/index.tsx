@@ -15,44 +15,51 @@ import {
 import { StarterItem } from "./starter-item";
 import { CreditCardIcon } from "@cartridge/ui-next";
 import { TotalCost } from "./total-cost";
-type StarterItemData = {
-  title: string;
-  description: string;
-  price: number;
-  image: string;
-};
+import { useState } from "react";
+import { PurchaseWithBalance } from "./purchase-with-balance";
+import { PurchaseWithoutBalance } from "./purchase-without-balance";
+import { StarterPackProvider } from "../../context/starterpack";
+import { useStarterPack } from "../../hooks/starterpack";
 
-const ITEMS: StarterItemData[] = [
-  {
-    title: "Village",
-    description:
-      "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
-    price: 5,
-    image: "https://r2.quddus.my/Frame%203231.png",
-  },
-  {
-    title: "20 Credits",
-    description: "Credits cover service fee(s) in Eternum.",
-    price: 0,
-    image: "/ERC-20-Icon.svg",
-  },
-];
+const enum PurchaseState {
+  SHOW_OPTIONS,
+  PURCHASE_WITH_BALANCE,
+  PURCHASE_WITHOUT_BALANCE,
+}
 
-export function StarterPack() {
-  const balance = 0;
+function StarterPackContent() {
+  const { starterPackItems } = useStarterPack();
+  const balance = 1;
+  const [purchaseState, setPurchaseState] = useState<PurchaseState>(
+    PurchaseState.SHOW_OPTIONS,
+  );
+
+  const handlePurchase = () => {
+    if (balance > 0) {
+      setPurchaseState(PurchaseState.PURCHASE_WITH_BALANCE);
+    } else {
+      setPurchaseState(PurchaseState.PURCHASE_WITHOUT_BALANCE);
+    }
+  };
+
+  if (purchaseState === PurchaseState.PURCHASE_WITH_BALANCE) {
+    return <PurchaseWithBalance />;
+  }
+
+  if (purchaseState === PurchaseState.PURCHASE_WITHOUT_BALANCE) {
+    return <PurchaseWithoutBalance balance={balance} />;
+  }
 
   return (
     <LayoutContainer>
       <LayoutHeader title="Get Starter Pack" />
       <LayoutContent>
-        <div className="p-1">
-          <h1 className="text-xs font-semibold text-foreground-400">
-            You receive
-          </h1>
-        </div>
+        <h1 className="text-xs font-semibold text-foreground-400">
+          You receive
+        </h1>
 
         <div className="flex flex-col gap-3">
-          {ITEMS.map((item, index) => (
+          {starterPackItems.map((item, index) => (
             <StarterItem key={index} {...item} />
           ))}
         </div>
@@ -64,7 +71,9 @@ export function StarterPack() {
 
       <LayoutFooter>
         <Card className="flex flex-row items-center justify-between gap-2">
-          <TotalCost price={ITEMS.reduce((acc, item) => acc + item.price, 0)} />
+          <TotalCost
+            price={starterPackItems.reduce((acc, item) => acc + item.price, 0)}
+          />
           {balance <= 0 && (
             <CardContent className="relative flex items-center justify-center bg-background-200 w-11 aspect-square rounded">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-background-300 rounded-full">
@@ -73,7 +82,7 @@ export function StarterPack() {
             </CardContent>
           )}
         </Card>
-        <Button className="w-full">
+        <Button className="w-full" onClick={handlePurchase}>
           {balance <= 0 && (
             <CreditCardIcon variant="solid" className="size-4" />
           )}
@@ -95,5 +104,13 @@ export function StarterPack() {
         </div>
       </LayoutFooter>
     </LayoutContainer>
+  );
+}
+
+export function StarterPack() {
+  return (
+    <StarterPackProvider>
+      <StarterPackContent />
+    </StarterPackProvider>
   );
 }

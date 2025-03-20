@@ -19,10 +19,11 @@ export enum BalanceType {
 }
 
 type BalanceProps = {
+  title?: string;
   types: BalanceType[];
 };
 
-export function Balance({ types }: BalanceProps) {
+export function Balance({ types, title }: BalanceProps) {
   const { controller } = useController();
   const { balance: creditBalance } = useCreditBalance({
     username: controller?.username(),
@@ -35,7 +36,7 @@ export function Balance({ types }: BalanceProps) {
     <Card>
       <CardHeader>
         <CardTitle className="normal-case font-semibold text-xs">
-          Balance
+          {title ?? "Balance"}
         </CardTitle>
       </CardHeader>
 

@@ -14,7 +14,7 @@ import { PageLoading } from "./Loading";
 import { execute } from "@/utils/connection/execute";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
-import { StarterPack } from "./starter-pack";
+import { StarterPack } from "./starterpack";
 
 export function Home() {
   const { context, setContext, controller, policies, origin } = useConnection();
