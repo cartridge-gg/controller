@@ -1,14 +1,7 @@
 import { Asset } from "#hooks/collection";
-import {
-  Button,
-  Card,
-  CardHeader,
-  CardTitle,
-  CheckboxIcon,
-  cn,
-} from "@cartridge/ui-next";
+import { CollectibleCard } from "@cartridge/ui-next";
 import { Link, useLocation } from "react-router-dom";
-import { CollectionImage } from "./image";
+import placeholder from "/public/placeholder.svg";
 
 export const Collectibles = ({
   assets,
@@ -29,7 +22,7 @@ export const Collectibles = ({
         const isSelected = tokenIds.includes(asset.tokenId);
         return (
           <Link
-            className="w-full aspect-square group select-none"
+            className="w-full select-none"
             draggable={false}
             to={`token/${asset.tokenId}`}
             state={location.state}
@@ -41,37 +34,19 @@ export const Collectibles = ({
               }
             }}
           >
-            <Card
-              className={cn(
-                "w-full h-full border-2 border-solid transition overflow-hidden rounded-lg",
-                isSelected ? "border-foreground" : "border-transparent",
-              )}
-            >
-              <CardHeader className="flex flex-row items-center group-hover:opacity-70 p-0 justify-between">
-                <CardTitle className="truncate p-3">{asset.name}</CardTitle>
-
-                <div className="h-full place-content-center">
-                  <Button
-                    size="icon"
-                    variant="icon"
-                    className="h-full w-auto aspect-square bg-transparent hover:bg-transparent"
-                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      handleSelect(asset.tokenId);
-                    }}
-                  >
-                    <CheckboxIcon
-                      variant={isSelected ? "line" : "unchecked-line"}
-                    />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CollectionImage
-                imageUrl={asset.imageUrl || undefined}
-                size="xl"
-              />
-            </Card>
+            <CollectibleCard
+              title={
+                asset.name.includes(
+                  `${parseInt(BigInt(asset.tokenId).toString())}`,
+                )
+                  ? asset.name
+                  : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
+              }
+              image={asset.imageUrl || placeholder}
+              selected={isSelected}
+              onSelect={() => handleSelect(asset.tokenId)}
+              className="rounded overflow-hidden"
+            />
           </Link>
         );
       })}

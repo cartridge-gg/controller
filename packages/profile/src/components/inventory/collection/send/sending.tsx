@@ -4,9 +4,10 @@ import {
   CardHeader,
   CardTitle,
   cn,
+  ThumbnailCollectible,
 } from "@cartridge/ui-next";
 import { Asset } from "#hooks/collection";
-import { CollectionImage } from "../image";
+import { formatName } from "../helper";
 
 export function Sending({ assets }: { assets: Asset[] }) {
   return (
@@ -18,8 +19,7 @@ export function Sending({ assets }: { assets: Asset[] }) {
       {assets.map((asset) => (
         <Item
           key={asset.tokenId}
-          name={asset.name || ""}
-          tokenId={asset.tokenId}
+          name={formatName(asset.name, asset.tokenId)}
           imageUrl={asset.imageUrl || undefined}
         />
       ))}
@@ -29,11 +29,9 @@ export function Sending({ assets }: { assets: Asset[] }) {
 
 function Item({
   name,
-  tokenId,
   imageUrl = "/public/placeholder.svg",
 }: {
   name: string;
-  tokenId: string;
   imageUrl?: string;
 }) {
   return (
@@ -44,12 +42,12 @@ function Item({
     >
       <div className="bg-background-200 flex w-11 aspect-square items-center justify-center">
         <div className="flex items-center justify-center overflow-hidden h-7 w-7 bg-background-300 p-0.5">
-          <CollectionImage imageUrl={imageUrl} size="xs" />
+          <ThumbnailCollectible image={imageUrl} size="lg" />
         </div>
       </div>
 
       <div className="bg-background-200 flex flex-1 gap-x-1.5 items-center justify-between p-3 text-medium">
-        <p>{`${name} #${parseInt(tokenId, 16)}`}</p>
+        {name}
       </div>
     </CardContent>
   );

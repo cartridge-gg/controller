@@ -95,11 +95,11 @@ export function Profile() {
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileAt(
-                `account/${username}/slot/pistols-staging/inventory/collection/0x43f800e9f5f6e290a798379029fcb28ba7c34e9669f7b5fc77fce8a4ebdc893?ps=pistols-staging`,
+                `account/${username}/slot/dragark-mainnet-v9-5/inventory/collection/0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420?ps=dragark-mainnet-v9-5`,
               )
             }
           >
-            Open at Pistols Collection
+            Open at Dragark Collection
           </Button>
         </div>
       </div>
