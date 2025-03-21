@@ -1,4 +1,5 @@
 pub mod eip191;
+pub mod siws;
 pub mod starknet;
 
 #[cfg(feature = "webauthn")]
@@ -10,6 +11,7 @@ use ::starknet::{
     signers::SigningKey,
 };
 use cainome::cairo_serde::NonZero;
+use cainome_cairo_serde::U256;
 
 use starknet_crypto::PoseidonHasher;
 
@@ -20,6 +22,7 @@ use crate::abigen::controller::SignerSignature;
 use async_trait::async_trait;
 
 use self::eip191::Eip191Signer;
+use self::siws::SIWSSigner;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Owner {
@@ -62,6 +65,7 @@ pub enum Signer {
     #[cfg(feature = "webauthn")]
     Webauthn(WebauthnSigner),
     Eip191(Eip191Signer),
+    SIWS(SIWSSigner),
 }
 
 impl PartialEq for Signer {
@@ -71,6 +75,7 @@ impl PartialEq for Signer {
             #[cfg(feature = "webauthn")]
             (Self::Webauthn(_), Self::Webauthn(_)) => true, // We can't compare WebauthnSigner directly
             (Self::Eip191(a), Self::Eip191(b)) => a == b,
+            (Self::SIWS(a), Self::SIWS(b)) => a == b,
             _ => false,
         }
     }
@@ -85,6 +90,7 @@ impl HashSigner for Signer {
             #[cfg(feature = "webauthn")]
             Signer::Webauthn(s) => HashSigner::sign(s, tx_hash).await,
             Signer::Eip191(s) => HashSigner::sign(s, tx_hash).await,
+            Signer::SIWS(s) => HashSigner::sign(s, tx_hash).await,
         }
     }
 }
@@ -104,6 +110,13 @@ impl From<Signer> for crate::abigen::controller::Signer {
                     eth_address: cainome::cairo_serde::EthAddress(s.address().into()),
                 })
             }
+            Signer::SIWS(s) => {
+                let nonzero_pubkey = NonZero::new(U256::from_bytes_be(&s.pubkey))
+                    .unwrap_or_else(|| panic!("Public key cannot be zero"));
+                crate::abigen::controller::Signer::SIWS(crate::abigen::controller::Ed25519Signer {
+                    pubkey: nonzero_pubkey,
+                })
+            }
         }
     }
 }
@@ -117,6 +130,7 @@ impl From<crate::abigen::controller::Signer> for Felt {
             crate::abigen::controller::Signer::Eip191(s) => {
                 starknet_crypto::poseidon_hash(short_string!("Eip191 Signer"), s.eth_address.0)
             }
+            crate::abigen::controller::Signer::SIWS(s) => s.into(),
             _ => panic!("not implemented"),
         }
     }
@@ -136,6 +150,16 @@ impl Signer {
     #[cfg(not(target_arch = "wasm32"))]
     pub fn new_eip191_random() -> Self {
         Self::Eip191(Eip191Signer::random())
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn new_siws_random() -> Self {
+        Self::SIWS(SIWSSigner::random())
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn new_siws_with_domain(domain: String) -> Self {
+        Self::SIWS(SIWSSigner::random_with_domain(domain))
     }
 }
 

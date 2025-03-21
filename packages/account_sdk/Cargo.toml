@@ -48,6 +48,9 @@ sha2 = { workspace = true, optional = true }
 # Filestorage deps
 dirs = { version = "5", optional = true }
 
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+bs58 = "0.5"
+
 [dev-dependencies]
 hyper = { version = "0.14.27", features = ["server"] }
 rand_core = { version = "0.6", features = ["getrandom"] }
