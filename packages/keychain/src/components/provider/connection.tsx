@@ -16,6 +16,7 @@ export const ConnectionContext = createContext<
 export type ConnectionContextValue = {
   context: ConnectionCtx;
   controller?: Controller;
+  externalWallets?: ExternalWallet[];
   origin?: string;
   rpcUrl?: string;
   chainId?: string;
@@ -30,6 +31,10 @@ export type ConnectionContextValue = {
   externalDetectWallets: () => Promise<ExternalWallet[]>;
   externalConnectWallet: (
     type: ExternalWalletType,
+  ) => Promise<ExternalWalletResponse>;
+  externalSignIn: (
+    type: ExternalWalletType,
+    challenge: string,
   ) => Promise<ExternalWalletResponse>;
   externalSignTypedData: (
     type: ExternalWalletType,

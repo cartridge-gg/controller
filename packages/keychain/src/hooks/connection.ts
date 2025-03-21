@@ -38,6 +38,10 @@ type ParentMethods = AsyncMethodReturns<{
   externalConnectWallet: (
     type: ExternalWalletType,
   ) => Promise<ExternalWalletResponse>;
+  externalSignIn: (
+    type: ExternalWalletType,
+    challenge: string,
+  ) => Promise<ExternalWalletResponse>;
   externalSignTypedData: (
     type: ExternalWalletType,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,6 +77,7 @@ export function useConnectionValue() {
   });
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
+  const [externalWallets, setExternalWallets] = useState<ExternalWallet[]>([]);
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -302,6 +307,16 @@ export function useConnectionValue() {
     [parent],
   );
 
+  const externalSignIn = useCallback(
+    (type: ExternalWalletType, challenge: string) => {
+      if (!parent) {
+        return Promise.reject(new Error("Parent not available"));
+      }
+      return parent.externalSignIn(type, challenge);
+    },
+    [parent],
+  );
+
   const externalSignMessage = useCallback(
     (type: ExternalWalletType, message: string) => {
       if (!parent) {
@@ -346,6 +361,7 @@ export function useConnectionValue() {
   return {
     context,
     controller,
+    externalWallets,
     origin,
     rpcUrl,
     policies,
@@ -360,6 +376,7 @@ export function useConnectionValue() {
     openSettings,
     externalDetectWallets,
     externalConnectWallet,
+    externalSignIn,
     externalSignMessage,
     externalSignTypedData,
     externalSendTransaction,

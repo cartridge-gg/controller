@@ -7,10 +7,10 @@ cairo-version = "2.9.4"
 
 [workspace.dependencies]
 starknet = "2.9.4"
-alexandria_math = "0.3.0"
-alexandria_encoding = "0.3.0"
-alexandria_merkle_tree = "0.3.0"
+alexandria_math = { git = "https://github.com/cartridge-gg/alexandria", rev = "79eeca8b8ae90bd4cb5129e5f5c6bfe9f773a814" }
+alexandria_encoding = { git = "https://github.com/cartridge-gg/alexandria", rev = "79eeca8b8ae90bd4cb5129e5f5c6bfe9f773a814" }
+alexandria_merkle_tree = { git = "https://github.com/cartridge-gg/alexandria", rev = "79eeca8b8ae90bd4cb5129e5f5c6bfe9f773a814" }
 openzeppelin = "1.0.0"
-argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "15b24ea" }
+argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "8a4d779c00d0b4783153271bea6f4bfd31781caf" }
 snforge_std = "0.38.3"
 assert_macros = "2.9.4"
