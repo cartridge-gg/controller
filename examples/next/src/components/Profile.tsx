@@ -92,6 +92,15 @@ export function Profile() {
           >
             Open at Dark Shuffle Achievements
           </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                `account/${username}/slot/pistols-staging/inventory/collection/0x43f800e9f5f6e290a798379029fcb28ba7c34e9669f7b5fc77fce8a4ebdc893?ps=pistols-staging`,
+              )
+            }
+          >
+            Open at Pistols Collection
+          </Button>
         </div>
       </div>
     </div>
