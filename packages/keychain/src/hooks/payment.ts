@@ -7,54 +7,161 @@ import {
 import { client } from "@/utils/graphql";
 import { useConnection } from "./connection";
 import { ExternalPlatform } from "@cartridge/controller";
+import {
+  clusterApiUrl,
+  Connection,
+  PublicKey,
+  Transaction,
+} from "@solana/web3.js";
+import {
+  createAssociatedTokenAccountInstruction,
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+} from "@solana/spl-token";
 
 const PLATFORM_TO_CHAIN: Record<ExternalPlatform, Chain | null> = {
   ethereum: Chain.Ethereum,
   solana: Chain.Solana,
-  starknet: null, // TODO: Add Starknet
+  starknet: Chain.Starknet, // TODO: Add Starknet
 };
 
 const useCryptoPayment = () => {
-  const { controller } = useConnection();
+  const { controller, externalSendTransaction } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const createCryptoPayment = useCallback(
-    async (credits: number, platform: ExternalPlatform, isMainnet: boolean = false) => {
+  const sendPayment = useCallback(
+    async (
+      walletAddress: string,
+      credits: number,
+      platform: ExternalPlatform,
+      isMainnet: boolean = false,
+    ) => {
       if (!controller) {
         throw new Error("Controller not connected");
       }
 
-      setIsLoading(true);
-      setError(null);
-
       try {
-        const result = await client.request<CreateCryptoPaymentMutation>(
-          CreateCryptoPaymentDocument,
-          {
-            input: {
-              username: controller.username(),
-              credits,
-              chain: PLATFORM_TO_CHAIN[platform],
-              isMainnet,
-            },
-          }
-        );
+        setIsLoading(true);
+        setError(null);
 
-        return result.createCryptoPayment;
+        const { depositAddress, tokenAmount, tokenAddress } =
+          await createCryptoPayment(
+            controller.username(),
+            credits,
+            platform,
+            isMainnet,
+          );
+
+        switch (platform) {
+          case "solana":
+            await requestPhantomPayment(
+              walletAddress,
+              depositAddress,
+              tokenAmount,
+              tokenAddress,
+              isMainnet,
+            );
+            break;
+          case "ethereum":
+            throw new Error("Ethereum not supported yet");
+          case "starknet":
+            throw new Error("Starknet not supported yet");
+        }
       } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
+        setError(err as Error);
+        throw err;
       } finally {
         setIsLoading(false);
       }
     },
-    [controller]
+    [controller, externalSendTransaction],
   );
 
+  async function createCryptoPayment(
+    username: string,
+    credits: number,
+    platform: ExternalPlatform,
+    isMainnet: boolean = false,
+  ) {
+    const result = await client.request<CreateCryptoPaymentMutation>(
+      CreateCryptoPaymentDocument,
+      {
+        input: {
+          username,
+          credits,
+          chain: PLATFORM_TO_CHAIN[platform],
+          isMainnet,
+        },
+      },
+    );
+
+    return result.createCryptoPayment;
+  }
+
+  async function requestPhantomPayment(
+    walletAddress: string,
+    depositAddress: string,
+    tokenAmount: number,
+    tokenAddress: string,
+    isMainnet: boolean = false,
+  ) {
+    const connection = new Connection(
+      isMainnet ? clusterApiUrl("mainnet-beta") : clusterApiUrl("devnet"),
+    );
+    const senderPublicKey = new PublicKey(walletAddress);
+    const recipientPublicKey = new PublicKey(depositAddress);
+    const tokenMint = new PublicKey(tokenAddress);
+
+    const senderTokenAccount = await getAssociatedTokenAddress(
+      tokenMint,
+      senderPublicKey,
+    );
+
+    const recipientTokenAccount = await getAssociatedTokenAddress(
+      tokenMint,
+      recipientPublicKey,
+    );
+
+    const createAtaIx = createAssociatedTokenAccountInstruction(
+      senderPublicKey,
+      recipientTokenAccount,
+      recipientPublicKey,
+      tokenMint,
+    );
+
+    const transferInstruction = createTransferInstruction(
+      senderTokenAccount,
+      recipientTokenAccount,
+      new PublicKey(walletAddress),
+      tokenAmount,
+    );
+
+    const txn = new Transaction().add(createAtaIx, transferInstruction);
+    txn.feePayer = senderPublicKey;
+    const { blockhash, lastValidBlockHeight } =
+      await connection.getLatestBlockhash();
+    txn.recentBlockhash = blockhash;
+
+    const serializedTxn = txn
+      .serialize({ requireAllSignatures: false })
+      .toString("base64");
+    const res = await externalSendTransaction("phantom", serializedTxn);
+    if (!res.success) {
+      throw new Error(res.error);
+    }
+
+    const { signature } = res.result as { signature: string };
+
+    await connection.confirmTransaction({
+      signature,
+      blockhash,
+      lastValidBlockHeight,
+    });
+  }
+
   return {
-    createCryptoPayment,
+    sendPayment,
     isLoading,
     error,
   };

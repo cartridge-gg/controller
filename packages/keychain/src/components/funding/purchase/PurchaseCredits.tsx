@@ -106,7 +106,11 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         const res = await externalConnectWallet(wallet.type);
         if (res.success) {
           if (!res.account) {
-            setError(new Error(`Connected to ${wallet.name} but no wallet address found`));
+            setError(
+              new Error(
+                `Connected to ${wallet.name} but no wallet address found`,
+              ),
+            );
             return;
           }
 
@@ -126,13 +130,13 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
 
   const title = useMemo(() => {
     switch (state) {
-        case PurchaseState.SELECTION:
-          return "Purchase Credits";
-        case PurchaseState.STRIPE_CHECKOUT:
-          return "Credit Card";
-        case PurchaseState.SUCCESS:
-          return "Purchase Complete";
-      }
+      case PurchaseState.SELECTION:
+        return "Purchase Credits";
+      case PurchaseState.STRIPE_CHECKOUT:
+        return "Credit Card";
+      case PurchaseState.SUCCESS:
+        return "Purchase Complete";
+    }
   }, [state]);
 
   const appearance = {
@@ -224,8 +228,8 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
           <CardDescription className="flex flex-row items-start gap-3">
             <InfoIcon size="sm" className="text-foreground-200 flex-shrink-0" />
             <p className="text-foreground-200 font-normal text-xs">
-                Credits are used to pay for network activity. They are not tokens and
-                cannot be transferred or refunded.
+              Credits are used to pay for network activity. They are not tokens
+              and cannot be transferred or refunded.
             </p>
           </CardDescription>
         </Card>

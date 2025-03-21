@@ -4,8 +4,6 @@ import {
   Button,
   Card,
   CardDescription,
-  CheckIcon,
-  CreditCardIcon,
   DepositIcon,
   EthereumIcon,
   InfoIcon,
@@ -22,140 +20,96 @@ import {
   SolanaIcon,
 } from "@cartridge/ui-next";
 import { Balance, BalanceType } from "../Balance";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
+import { ExternalWallet } from "@cartridge/controller";
 import useCryptoPayment from "@/hooks/payment";
-import { useConnection } from "@/hooks/connection";
-import { clusterApiUrl, Connection, PublicKey, Transaction } from "@solana/web3.js";
-import {
-  getAssociatedTokenAddress,
-  createTransferInstruction,
-  createAssociatedTokenAccountInstruction
-} from "@solana/spl-token";
 
 const WALLET_CONFIG = {
-    argent: {
-      icon: ArgentIcon,
-      colorIcon: ArgentColorIcon,
-      network: "Starknet",
-      networkIcon: StarknetIcon,
-      bgColor: "#FF875B",
-    },
-    metamask: {
-      icon: MetaMaskIcon,
-      colorIcon: MetaMaskColorIcon,
-      network: "Ethereum",
-      networkIcon: EthereumIcon,
-      bgColor: "#E88A39",
-    },
-    phantom: {
-      icon: PhantomIcon,
-      colorIcon: PhantomColorIcon,
-      network: "Solana",
-      networkIcon: SolanaIcon,
-      bgColor: "#AB9FF2",
-    },
-  } as const;
+  argent: {
+    icon: ArgentIcon,
+    colorIcon: ArgentColorIcon,
+    network: "Starknet",
+    networkIcon: StarknetIcon,
+    bgColor: "#FF875B",
+  },
+  metamask: {
+    icon: MetaMaskIcon,
+    colorIcon: MetaMaskColorIcon,
+    network: "Ethereum",
+    networkIcon: EthereumIcon,
+    bgColor: "#E88A39",
+  },
+  phantom: {
+    icon: PhantomIcon,
+    colorIcon: PhantomColorIcon,
+    network: "Solana",
+    networkIcon: SolanaIcon,
+    bgColor: "#AB9FF2",
+  },
+} as const;
 
-  export function CryptoCheckout({ selectedWallet, walletAddress, creditsAmount, onBack, onComplete }: { selectedWallet: ExternalWallet, walletAddress: string, creditsAmount: number, onBack: () => void, onComplete: () => void }) {
-    const [error, setError] = useState<Error>();
-    const { externalSendTransaction } = useConnection();
-    const { createCryptoPayment } = useCryptoPayment();
-    const [sendingTransaction, setSendingTransaction] = useState(false);
-    
-    const getInfo = (wallet?: ExternalWallet) => {
-      if (!wallet) {
-        return (
-          <>
-            Credits are used to pay for network activity. They are not tokens and
-            cannot be transferred or refunded.
-          </>
-        );
-      }
-  
-      const NetworkIcon = WALLET_CONFIG[wallet.type].networkIcon;
+export function CryptoCheckout({
+  selectedWallet,
+  walletAddress,
+  creditsAmount,
+  onBack,
+  onComplete,
+}: {
+  selectedWallet: ExternalWallet;
+  walletAddress: string;
+  creditsAmount: number;
+  onBack: () => void;
+  onComplete: () => void;
+}) {
+  const [error, setError] = useState<Error>();
+  const { sendPayment } = useCryptoPayment();
+  const [sendingTransaction, setSendingTransaction] = useState(false);
+
+  const getInfo = (wallet?: ExternalWallet) => {
+    if (!wallet) {
       return (
         <>
-          Purchase funds on <NetworkIcon size="sm" className="inline-block" />{" "}
-          {WALLET_CONFIG[wallet.type].network}
+          Credits are used to pay for network activity. They are not tokens and
+          cannot be transferred or refunded.
         </>
       );
-    };
+    }
 
-    const handleSendTransaction = useCallback(async () => {
-      setSendingTransaction(true);
-
-      try {    
-        const connection = new Connection(clusterApiUrl("devnet"))    
-        const { depositAddress, tokenAmount, tokenAddress } = await createCryptoPayment(creditsAmount, selectedWallet.platform!)
-
-        const senderPublicKey = new PublicKey(walletAddress)
-        const recipientPublicKey = new PublicKey(depositAddress)
-        const tokenMint = new PublicKey(tokenAddress)
-        
-        const senderTokenAccount = await getAssociatedTokenAddress(
-          tokenMint,
-          senderPublicKey
-        );
-
-        const recipientTokenAccount = await getAssociatedTokenAddress(
-          tokenMint,
-          recipientPublicKey
-        );
-
-        const createAtaIx = createAssociatedTokenAccountInstruction(
-          senderPublicKey, 
-          recipientTokenAccount,
-          recipientPublicKey,
-          tokenMint
-        );
-        
-        const transferInstruction = createTransferInstruction(
-          senderTokenAccount,
-          recipientTokenAccount,
-          new PublicKey(walletAddress),
-          tokenAmount
-        );
-
-        const txn = new Transaction().add(
-          createAtaIx,
-          transferInstruction
-        );
-        txn.feePayer = senderPublicKey;
-        const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-        txn.recentBlockhash = blockhash;
-
-        const serializedTxn = txn.serialize({requireAllSignatures: false}).toString('base64');
-        const res = await externalSendTransaction(selectedWallet.type, serializedTxn);
-        if (!res.success) {
-          throw new Error(res.error);
-        }
-
-        const { signature } = res.result as { signature: string };
-
-        await connection.confirmTransaction({
-          signature,
-          blockhash,
-          lastValidBlockHeight
-        });
-
-        onComplete();
-      } catch (error) {
-        console.error(error);
-        setError(error as Error);
-      } finally {
-        setSendingTransaction(false);
-      }
-    }, [createCryptoPayment, selectedWallet, creditsAmount, onComplete]);
-
+    const NetworkIcon = WALLET_CONFIG[wallet.type].networkIcon;
     return (
-      <LayoutContainer>
+      <>
+        Purchase funds on <NetworkIcon size="sm" className="inline-block" />{" "}
+        {WALLET_CONFIG[wallet.type].network}
+      </>
+    );
+  };
+
+  const handleSendTransaction = useCallback(async () => {
+    try {
+      setSendingTransaction(true);
+      await sendPayment(
+        walletAddress,
+        creditsAmount,
+        selectedWallet.platform!,
+        false,
+      );
+
+      onComplete();
+    } catch (error) {
+      console.error(error);
+      setError(error as Error);
+    } finally {
+      setSendingTransaction(false);
+    }
+  }, [sendPayment, selectedWallet, creditsAmount, onComplete]);
+
+  return (
+    <LayoutContainer>
       <LayoutHeader
         className="p-6"
         title={"Purchase Credits"}
-        icon={<DepositIcon variant="solid" size="lg" />
-        }
+        icon={<DepositIcon variant="solid" size="lg" />}
         onBack={() => onBack()}
       />
       <LayoutContent className="gap-6 px-6">
@@ -198,16 +152,16 @@ const WALLET_CONFIG = {
         </Button>
       </LayoutFooter>
     </LayoutContainer>
-    );
+  );
+}
+
+export const walletIcon = (wallet?: ExternalWallet, useColor = false) => {
+  if (!wallet) {
+    return null;
   }
 
-  export const walletIcon = (wallet?: ExternalWallet, useColor = false) => {
-    if (!wallet) {
-      return null;
-    }
-
-    const Icon = useColor
-      ? WALLET_CONFIG[wallet.type].colorIcon
-      : WALLET_CONFIG[wallet.type].icon;
-    return <Icon />;
-  };
+  const Icon = useColor
+    ? WALLET_CONFIG[wallet.type].colorIcon
+    : WALLET_CONFIG[wallet.type].icon;
+  return <Icon />;
+};

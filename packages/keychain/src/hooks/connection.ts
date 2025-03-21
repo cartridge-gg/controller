@@ -275,6 +275,7 @@ export function useConnectionValue() {
   );
 
   const externalSendTransaction = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (type: ExternalWalletType, txn: any) => {
       if (!parent) {
         return Promise.reject(new Error("Parent not available"));

@@ -126,7 +126,7 @@ export class PhantomWallet implements WalletAdapter {
     }
 
     try {
-      const txn = Transaction.from(Buffer.from(serailized_txn, 'base64'));
+      const txn = Transaction.from(Buffer.from(serailized_txn, "base64"));
       const provider = this.getProvider();
       const result = await provider.signAndSendTransaction(txn);
       return {
