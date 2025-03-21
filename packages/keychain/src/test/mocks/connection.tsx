@@ -37,6 +37,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   controller: defaultMockController,
   externalDetectWallets: vi.fn(),
   externalConnectWallet: vi.fn(),
+  externalSignIn: vi.fn(),
   externalSignMessage: vi.fn(),
   externalSignTypedData: vi.fn(),
   externalSendTransaction: vi.fn(),

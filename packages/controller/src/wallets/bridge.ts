@@ -33,6 +33,9 @@ export class WalletBridge {
       externalDetectWallets: (_origin: string) => () => this.detectWallets(),
       externalConnectWallet: (_origin: string) => (type: ExternalWalletType) =>
         this.connectWallet(type),
+      externalSignIn:
+        (_origin: string) => (type: ExternalWalletType, challenge: string) =>
+          this.signIn(type, challenge),
       externalSignMessage:
         (_origin: string) =>
         (identifier: ExternalWalletType | string, message: string) =>
@@ -144,6 +147,34 @@ export class WalletBridge {
       );
     }
     return wallet;
+  }
+
+  async signIn(
+    identifier: ExternalWalletType | string,
+    challenge: string,
+  ): Promise<ExternalWalletResponse> {
+    let wallet: WalletAdapter | undefined;
+    try {
+      wallet = this.getConnectedWalletAdapter(identifier);
+      const response = await wallet.signIn(challenge);
+
+      if (response.success) {
+        if (typeof identifier === "string") {
+          this.connectedWalletsByAddress.set(identifier, wallet);
+        } else {
+          this.connectedWalletsByType.set(identifier, wallet);
+        }
+      }
+
+      return response;
+    } catch (error) {
+      return this.handleError(
+        identifier,
+        error,
+        "signing in with",
+        wallet?.type,
+      );
+    }
   }
 
   async signMessage(
