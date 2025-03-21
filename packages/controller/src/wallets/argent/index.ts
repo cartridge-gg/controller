@@ -65,6 +65,14 @@ export class ArgentWallet implements WalletAdapter {
     }
   }
 
+  async signIn(): Promise<ExternalWalletResponse<any>> {
+    return {
+      success: false,
+      wallet: this.type,
+      error: "Not implemented",
+    };
+  }
+
   async signTypedData(data: TypedData): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.wallet) {
