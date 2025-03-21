@@ -15,7 +15,7 @@ import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import InAppSpy from "inapp-spy";
 import { usePostHog } from "@/components/provider/posthog";
-import { useControllerTheme } from "@/hooks/connection";
+import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { VerifiableControllerTheme } from "@/components/provider/connection";
 
 interface CreateControllerViewProps {
@@ -31,9 +31,12 @@ interface CreateControllerViewProps {
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
   onSubmit: () => void;
+  onConnectPhantom: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
   isSlot?: boolean;
+  connectingPhantom: boolean;
+  phantomAvailable: boolean;
 }
 
 export function CreateControllerView({
@@ -48,7 +51,10 @@ export function CreateControllerView({
   onUsernameFocus,
   onUsernameClear,
   onSubmit,
+  onConnectPhantom,
   onKeyDown,
+  connectingPhantom,
+  phantomAvailable,
 }: CreateControllerViewProps) {
   return (
     <LayoutContainer>
@@ -118,6 +124,18 @@ export function CreateControllerView({
           >
             {validation.exists || !usernameField.value ? "log in" : "sign up"}
           </Button>
+          {phantomAvailable && process.env.NODE_ENV === "never" && (
+            <Button
+              type="button"
+              isLoading={connectingPhantom}
+              onClick={onConnectPhantom}
+              data-testid="solana-button"
+              className="mt-2"
+              disabled={!phantomAvailable}
+            >
+              Sign in with Solana
+            </Button>
+          )}
         </LayoutFooter>
       </form>
     </LayoutContainer>
@@ -151,11 +169,26 @@ export function CreateController({
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
+  const { externalWallets, externalSignIn } = useConnection();
+  const [connectingPhantom, setConnectingPhantom] = useState(false);
+  const [phantomAvailable, setPhantomAvailable] = useState(false);
 
   const [usernameField, setUsernameField] = useState({
     value: "",
     error: undefined,
   });
+
+  // Check if Phantom wallet is available
+  useEffect(() => {
+    if (externalWallets) {
+      const phantomWallet = externalWallets.find(
+        (wallet) => wallet.type === "phantom",
+      );
+      setPhantomAvailable(!!phantomWallet?.available);
+    } else {
+      setPhantomAvailable(false);
+    }
+  }, [externalWallets]);
 
   // Debounce validation quickly to reduce latency
   const { debouncedValue: validationUsername } = useDebounce(
@@ -170,40 +203,6 @@ export function CreateController({
     isSlot,
     loginMode,
   });
-
-  const handleFormSubmit = useCallback(() => {
-    if (!usernameField.value) {
-      return;
-    }
-
-    if (validation.status === "validating") {
-      pendingSubmitRef.current = true;
-      return;
-    }
-
-    if (validation.status === "valid") {
-      handleSubmit(usernameField.value, !!validation.exists);
-    }
-  }, [handleSubmit, usernameField.value, validation.exists, validation.status]);
-
-  useEffect(() => {
-    if (pendingSubmitRef.current && debouncedValidation.status === "valid") {
-      pendingSubmitRef.current = false;
-      handleFormSubmit();
-    }
-  }, [debouncedValidation.status, handleFormSubmit]);
-
-  const [{ isInApp }] = useState(() => InAppSpy());
-
-  useEffect(() => {
-    if (isInApp) {
-      const nativeBrowserUrl = getNativeBrowserUrl();
-      if (nativeBrowserUrl) {
-        // Try to open in native browser
-        window.location.href = nativeBrowserUrl;
-      }
-    }
-  }, [isInApp]);
 
   const handleUsernameChange = (value: string) => {
     if (!hasLoggedChange.current) {
@@ -237,6 +236,79 @@ export function CreateController({
     }
   };
 
+  const handleFormSubmit = useCallback(() => {
+    if (!usernameField.value) {
+      return;
+    }
+
+    if (validation.status === "validating") {
+      pendingSubmitRef.current = true;
+      return;
+    }
+
+    if (validation.status === "valid") {
+      handleSubmit(usernameField.value, !!validation.exists);
+    }
+  }, [handleSubmit, usernameField.value, validation.exists, validation.status]);
+
+  const handleConnectPhantom = useCallback(async () => {
+    setConnectingPhantom(true);
+    try {
+      posthog?.capture("Connect Phantom");
+      const response = await externalSignIn("phantom", "0x1235");
+      if (response.success) {
+        // The user has connected their Phantom wallet
+        console.log("Connected to Phantom wallet:", response);
+      } else {
+        setError(
+          new Error(response.error || "Failed to connect Phantom wallet"),
+        );
+        posthog?.capture("Phantom Connection Failed", {
+          error: response.error,
+        });
+      }
+    } catch (error) {
+      console.error("Error connecting to Phantom wallet:", error);
+      setError(
+        error instanceof Error
+          ? error
+          : new Error("Unknown error connecting to Phantom wallet"),
+      );
+      posthog?.capture("Phantom Connection Error", {
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setConnectingPhantom(false);
+    }
+  }, [
+    externalSignIn,
+    posthog,
+    setError,
+    usernameField.value,
+    validation.status,
+    handleFormSubmit,
+    handleUsernameChange,
+  ]);
+
+  useEffect(() => {
+    if (pendingSubmitRef.current && debouncedValidation.status === "valid") {
+      pendingSubmitRef.current = false;
+      handleFormSubmit();
+    }
+  }, [debouncedValidation.status, handleFormSubmit]);
+
+  const [{ isInApp }] = useState(() => InAppSpy());
+
+  useEffect(() => {
+    if (isInApp) {
+      const nativeBrowserUrl = getNativeBrowserUrl();
+      if (nativeBrowserUrl) {
+        // Try to open in native browser
+        window.location.href = nativeBrowserUrl;
+      }
+    }
+  }, [isInApp]);
+
   return (
     <CreateControllerView
       theme={theme}
@@ -250,7 +322,10 @@ export function CreateController({
       onUsernameFocus={handleUsernameFocus}
       onUsernameClear={handleUsernameClear}
       onSubmit={handleFormSubmit}
+      onConnectPhantom={handleConnectPhantom}
       onKeyDown={handleKeyDown}
+      connectingPhantom={connectingPhantom}
+      phantomAvailable={phantomAvailable}
     />
   );
 }

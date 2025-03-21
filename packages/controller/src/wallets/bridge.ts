@@ -29,6 +29,9 @@ export class WalletBridge {
       externalDetectWallets: (_origin: string) => () => this.detectWallets(),
       externalConnectWallet: (_origin: string) => (type: ExternalWalletType) =>
         this.connectWallet(type),
+      externalSignIn:
+        (_origin: string) => (type: ExternalWalletType, challenge: string) =>
+          this.signIn(type, challenge),
       externalSignMessage:
         (_origin: string) => (type: ExternalWalletType, message: string) =>
           this.signMessage(type, message),
@@ -80,6 +83,29 @@ export class WalletBridge {
 
       const wallet = this.getWalletAdapter(type);
       const response = await wallet.connect();
+
+      if (response.success) {
+        this.connectedWallets.set(type, wallet);
+      }
+
+      return response;
+    } catch (error) {
+      return this.handleError(type, error, "connecting to");
+    }
+  }
+
+  async signIn(
+    type: ExternalWalletType,
+    challenge: string,
+  ): Promise<ExternalWalletResponse> {
+    try {
+      if (this.connectedWallets.has(type)) {
+        const wallet = this.connectedWallets.get(type)!;
+        return { success: true, wallet: type, account: wallet.type };
+      }
+
+      const wallet = this.getWalletAdapter(type);
+      const response = await wallet.signIn(challenge);
 
       if (response.success) {
         this.connectedWallets.set(type, wallet);

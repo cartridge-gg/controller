@@ -66,6 +66,25 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
+  async signIn(challenge: string) {
+    try {
+      if (!this.isAvailable()) {
+        throw new Error("MetaMask is not available");
+      }
+
+      const response: any = await this.signIn(challenge);
+
+      return { success: true, wallet: this.type, response };
+    } catch (error) {
+      console.error(`Error Signing in with MetaMask:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
+  }
+
   async signTransaction(
     transaction: any,
   ): Promise<ExternalWalletResponse<any>> {
