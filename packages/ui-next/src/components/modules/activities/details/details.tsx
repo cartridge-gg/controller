@@ -2,10 +2,10 @@ import { cn } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes } from "react";
 
-export const activityDetailsVariants = cva("flx p-3", {
+export const activityDetailsVariants = cva("flex p-3", {
   variants: {
     variant: {
-      default: "bg-background-200 text-foreground-400",
+      default: "bg-background-200 text-foreground-400 rounded-t",
     },
   },
   defaultVariants: {

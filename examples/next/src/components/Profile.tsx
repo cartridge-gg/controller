@@ -92,6 +92,15 @@ export function Profile() {
           >
             Open at Dark Shuffle Achievements
           </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                `account/${username}/slot/dragark-mainnet-v9-5/inventory/collection/0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420?ps=dragark-mainnet-v9-5`,
+              )
+            }
+          >
+            Open at Dragark Collection
+          </Button>
         </div>
       </div>
     </div>

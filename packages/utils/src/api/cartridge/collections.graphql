@@ -28,6 +28,7 @@ query Collections(
           tokenId
         }
         meta {
+          project
           assetCount
           contractAddress
           imagePath
