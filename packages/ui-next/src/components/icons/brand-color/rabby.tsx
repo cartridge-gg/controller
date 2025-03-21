@@ -41,8 +41,8 @@ export const RabbyColorIcon = memo(
             y2="15.068"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="white" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="white" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
           <linearGradient
             id="paint1_linear_9302_60023"
@@ -52,7 +52,7 @@ export const RabbyColorIcon = memo(
             y2="3.87901"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#8697FF" />
+            <stop stopColor="#8697FF" />
             <stop offset="1" stopColor="#8697FF" stopOpacity="0" />
           </linearGradient>
           <linearGradient

@@ -1,4 +1,4 @@
-import { createContext, ReactNode } from "react";
+import { createContext, PropsWithChildren } from "react";
 
 export interface StarterItemData {
   title: string;
@@ -8,6 +8,7 @@ export interface StarterItemData {
 }
 
 export interface StarterPackContextType {
+  balance: number;
   starterPackItems: StarterItemData[];
 }
 
@@ -15,29 +16,15 @@ export const StarterPackContext = createContext<
   StarterPackContextType | undefined
 >(undefined);
 
-interface StarterPackProviderProps {
-  children: ReactNode;
-}
-
-export function StarterPackProvider({ children }: StarterPackProviderProps) {
-  const StarterPackItems: StarterItemData[] = [
-    {
-      title: "Village",
-      description:
-        "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
-      price: 5,
-      image: "https://r2.quddus.my/Frame%203231.png",
-    },
-    {
-      title: "20 Credits",
-      description: "Credits cover service fee(s) in Eternum.",
-      price: 0,
-      image: "/ERC-20-Icon.svg",
-    },
-  ];
-
+export function StarterPackProvider({
+  children,
+  balance,
+  starterPackItems,
+}: PropsWithChildren<StarterPackContextType>) {
   return (
-    <StarterPackContext.Provider value={{ starterPackItems: StarterPackItems }}>
+    <StarterPackContext.Provider
+      value={{ balance: balance, starterPackItems: starterPackItems }}
+    >
       {children}
     </StarterPackContext.Provider>
   );

@@ -15,6 +15,7 @@ import React, { useState, useEffect } from "react";
 import { Balance, BalanceType } from "../funding/Balance";
 import { Receiving } from "./receiving";
 import { useStarterPack } from "@/hooks/starterpack";
+
 const enum PurchaseState {
   REVIEW = 0,
   PENDING = 1,

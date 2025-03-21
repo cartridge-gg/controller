@@ -18,7 +18,10 @@ import { TotalCost } from "./total-cost";
 import { useState } from "react";
 import { PurchaseWithBalance } from "./purchase-with-balance";
 import { PurchaseWithoutBalance } from "./purchase-without-balance";
-import { StarterPackProvider } from "../../context/starterpack";
+import {
+  StarterItemData,
+  StarterPackProvider,
+} from "../../context/starterpack";
 import { useStarterPack } from "../../hooks/starterpack";
 
 const enum PurchaseState {
@@ -29,10 +32,11 @@ const enum PurchaseState {
 
 function StarterPackContent() {
   const { starterPackItems } = useStarterPack();
-  const balance = 1;
   const [purchaseState, setPurchaseState] = useState<PurchaseState>(
     PurchaseState.SHOW_OPTIONS,
   );
+
+  const { balance } = useStarterPack();
 
   const handlePurchase = () => {
     if (balance > 0) {
@@ -47,7 +51,7 @@ function StarterPackContent() {
   }
 
   if (purchaseState === PurchaseState.PURCHASE_WITHOUT_BALANCE) {
-    return <PurchaseWithoutBalance balance={balance} />;
+    return <PurchaseWithoutBalance />;
   }
 
   return (
@@ -108,8 +112,26 @@ function StarterPackContent() {
 }
 
 export function StarterPack() {
+  const starterPackItems: StarterItemData[] = [
+    {
+      title: "Village",
+      description:
+        "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
+      price: 5,
+      image: "https://r2.quddus.my/Frame%203231.png",
+    },
+    {
+      title: "20 Credits",
+      description: "Credits cover service fee(s) in Eternum.",
+      price: 0,
+      image: "/ERC-20-Icon.svg",
+    },
+  ];
+
+  const balance = 0;
+
   return (
-    <StarterPackProvider>
+    <StarterPackProvider balance={balance} starterPackItems={starterPackItems}>
       <StarterPackContent />
     </StarterPackProvider>
   );
