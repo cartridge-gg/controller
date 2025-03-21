@@ -27,14 +27,13 @@ const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
 const TRANSFER_FROM_SNAKE_CASE = "transfer_from";
 
 export function SendCollection() {
-  const { address: collectionAddress } = useParams<{ address: string }>();
+  const { address: contractAddress, tokenId } = useParams();
 
   const [searchParams] = useSearchParams();
   const paramsTokenIds = searchParams.getAll("tokenIds");
-  const { tokenId } = useParams<{ tokenId: string }>();
 
   const { entrypoints } = useEntrypoints({
-    address: collectionAddress || "0x0",
+    address: contractAddress || "0x0",
   });
   const { address } = useAccount();
   const { parent } = useConnection();
@@ -51,7 +50,10 @@ export function SendCollection() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collection, assets } = useCollection({ tokenIds });
+  const { collection, assets } = useCollection({
+    contractAddress: contractAddress,
+    tokenIds,
+  });
 
   const entrypoint: string | null = useMemo(() => {
     if (entrypoints.includes(SAFE_TRANSFER_FROM_SNAKE_CASE)) {
@@ -81,7 +83,7 @@ export function SendCollection() {
     async (to: string) => {
       setSubmitted(true);
       if (
-        !collectionAddress ||
+        !contractAddress ||
         !tokenIds ||
         !tokenIds.length ||
         !to ||
@@ -94,7 +96,7 @@ export function SendCollection() {
       const calls: Call[] = (tokenIds as string[]).map((id: string) => {
         const tokenId = uint256.bnToUint256(BigInt(id));
         return {
-          contractAddress: collectionAddress,
+          contractAddress: contractAddress,
           entrypoint,
           calldata: [address, to, tokenId, ...calldata],
         };
@@ -102,7 +104,15 @@ export function SendCollection() {
       await parent.openExecute(calls);
       navigate("../../..");
     },
-    [tokenIds, collectionAddress, address, parent, entrypoint, navigate],
+    [
+      tokenIds,
+      contractAddress,
+      address,
+      parent,
+      recipientError,
+      entrypoint,
+      navigate,
+    ],
   );
 
   if (!collection || !assets) return null;
