@@ -1,17 +1,21 @@
 import { cn, TabsTrigger } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
+import React from "react";
 
 const arcadeTabVariants = cva(
-  "p-0 flex flex-col items-center cursor-pointer select-none transition-colors",
+  "flex justify-center items-center text-foreground-300 hover:text-foreground-200 data-[active=true]:text-primary transition-colors",
   {
     variants: {
       variant: {
         default: "",
-        ghost: "",
+      },
+      size: {
+        default: "p-2 pt-[10px] gap-1 text-sm",
       },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   },
 );
@@ -25,37 +29,39 @@ export interface ArcadeTabProps extends VariantProps<typeof arcadeTabVariants> {
   onClick?: () => void;
 }
 
-export const ArcadeTab = ({
-  Icon,
-  value,
-  label,
-  active,
-  className,
-  variant,
-  onClick,
-}: ArcadeTabProps) => {
-  return (
-    <TabsTrigger
-      value={value}
-      className={cn(arcadeTabVariants({ variant }), className)}
-      onClick={onClick}
-    >
-      <div
-        data-active={active}
-        className="px-4 pt-3 pb-[18px] flex justify-center items-center gap-2 text-foreground-300 hover:text-foreground-200 data-[active=true]:text-primary transition-colors"
-      >
-        {Icon}
-        <p className="text-base/5 font-normal tracking-wider">{label}</p>
-      </div>
-      <div
-        data-active={active}
+export const ArcadeTab = React.forwardRef<HTMLButtonElement, ArcadeTabProps>(
+  (
+    { Icon, value, label, active, className, variant, size, onClick, ...props },
+    ref,
+  ) => {
+    return (
+      <TabsTrigger
+        value={value}
         className={cn(
-          "rounded-full bg-primary h-0.5 w-full translate-y-[1px] text-primary",
-          active ? "opacity-100" : "opacity-0",
+          "p-0 flex flex-col items-center cursor-pointer select-none transition-colors",
+          className,
         )}
-      />
-    </TabsTrigger>
-  );
-};
+        onClick={onClick}
+        ref={ref}
+        {...props}
+      >
+        <div
+          data-active={active}
+          className={cn(arcadeTabVariants({ variant, size }))}
+        >
+          {Icon}
+          <p className="font-medium tracking-wider">{label}</p>
+        </div>
+        <div
+          data-active={active}
+          className={cn(
+            "rounded-full bg-primary h-0.5 w-full translate-y-[1px] text-primary",
+            active ? "opacity-100" : "opacity-0",
+          )}
+        />
+      </TabsTrigger>
+    );
+  },
+);
 
 export default ArcadeTab;
