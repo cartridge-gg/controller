@@ -338,3 +338,46 @@ async fn test_controller_with_eip191_signer() {
         result.err()
     );
 }
+
+#[tokio::test]
+async fn test_controller_with_siws_signer() {
+    use crate::signers::Signer;
+    use crate::tests::ensure_txn;
+    use cainome::cairo_serde::U256;
+
+    let runner = KatanaRunner::load();
+
+    // Create a SIWS signer with a random key using our new implementation
+    let siws_signer = Signer::new_siws_random();
+
+    // Deploy controller with SIWS signer
+    let controller = runner
+        .deploy_controller(
+            "siws_user".to_string(),
+            Owner::Signer(siws_signer.clone()),
+            Version::LATEST,
+        )
+        .await;
+
+    // Verify controller was deployed correctly
+    assert_eq!(
+        controller.owner,
+        Owner::Signer(siws_signer.clone()),
+        "Controller owner doesn't match the SIWS signer"
+    );
+
+    // Test a transaction with the SIWS signer
+    let erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller);
+
+    let recipient = ContractAddress(felt!("0x18301129"));
+    let amount = U256 { low: 50, high: 0 };
+    let transfer = erc20.transfer(&recipient, &amount);
+
+    // Execute the transaction and check result
+    let result = ensure_txn(transfer, runner.client()).await;
+    assert!(
+        result.is_ok(),
+        "Transaction with SIWS signer failed: {:?}",
+        result.err()
+    );
+}
