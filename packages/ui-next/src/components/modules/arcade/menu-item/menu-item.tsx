@@ -2,7 +2,7 @@ import { cn, SelectItem, TabsTrigger } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import React, { useCallback } from "react";
 
-const arcadeTabItemVariants = cva(
+const arcadeMenuItemVariants = cva(
   "rounded-none flex justify-start items-center gap-1 text-foreground-300 bg-background-200 hover:text-foreground-200 hover:bg-background-300 data-[active=true]:text-primary transition-colors cursor-pointer line-clamp-1",
   {
     variants: {
@@ -20,8 +20,8 @@ const arcadeTabItemVariants = cva(
   },
 );
 
-export interface ArcadeTabItemProps
-  extends VariantProps<typeof arcadeTabItemVariants> {
+export interface ArcadeMenuItemProps
+  extends VariantProps<typeof arcadeMenuItemVariants> {
   Icon: React.ReactNode;
   value: string;
   label: string;
@@ -30,9 +30,9 @@ export interface ArcadeTabItemProps
   onClick?: () => void;
 }
 
-export const ArcadeTabItem = React.forwardRef<
+export const ArcadeMenuItem = React.forwardRef<
   HTMLButtonElement,
-  ArcadeTabItemProps
+  ArcadeMenuItemProps
 >(
   (
     { Icon, value, label, active, className, variant, size, onClick, ...props },
@@ -59,7 +59,7 @@ export const ArcadeTabItem = React.forwardRef<
           data-active={active}
           value={value}
           simplified
-          className={cn(arcadeTabItemVariants({ variant, size }))}
+          className={cn(arcadeMenuItemVariants({ variant, size }))}
         >
           <div className={cn("flex justify-start items-center gap-1")}>
             {Icon}
@@ -71,4 +71,4 @@ export const ArcadeTabItem = React.forwardRef<
   },
 );
 
-export default ArcadeTabItem;
+export default ArcadeMenuItem;
