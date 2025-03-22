@@ -86,26 +86,32 @@ function StarterPackContent() {
             </CardContent>
           )}
         </Card>
-        <Button className="w-full" onClick={handlePurchase}>
-          {balance <= 0 && (
-            <CreditCardIcon variant="solid" className="size-4" />
-          )}
-          <span>Purchase</span>
-        </Button>
-        <div className="w-full flex flex-row gap-3">
-          <Button variant="secondary" className="w-full">
-            <MetaMaskColorIcon className="size-4" />
+        {balance <= 0 ? (
+          <>
+            <Button className="w-full" onClick={handlePurchase}>
+              <CreditCardIcon variant="solid" className="size-4" />
+              <span>Purchase</span>
+            </Button>
+            <div className="w-full flex flex-row gap-3">
+              <Button variant="secondary" className="w-full">
+                <MetaMaskColorIcon className="size-4" />
+              </Button>
+              <Button variant="secondary" className="w-full">
+                <ArgentColorIcon className="size-4" />
+              </Button>
+              <Button variant="secondary" className="w-full">
+                <RabbyColorIcon className="size-4" />
+              </Button>
+              <Button variant="secondary" className="w-full">
+                <PhantomColorIcon className="size-4" />
+              </Button>
+            </div>
+          </>
+        ) : (
+          <Button className="w-full" onClick={handlePurchase}>
+            <span>Purchase</span>
           </Button>
-          <Button variant="secondary" className="w-full">
-            <ArgentColorIcon className="size-4" />
-          </Button>
-          <Button variant="secondary" className="w-full">
-            <RabbyColorIcon className="size-4" />
-          </Button>
-          <Button variant="secondary" className="w-full">
-            <PhantomColorIcon className="size-4" />
-          </Button>
-        </div>
+        )}
       </LayoutFooter>
     </LayoutContainer>
   );
@@ -128,7 +134,7 @@ export function StarterPack() {
     },
   ];
 
-  const balance = 0;
+  const balance = 10;
 
   return (
     <StarterPackProvider balance={balance} starterPackItems={starterPackItems}>

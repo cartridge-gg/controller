@@ -106,7 +106,7 @@ export const PurchaseWithoutBalance = () => {
       <LayoutHeader title="Get Starter Pack" />
       <LayoutContent className="w-full flex items-center justify-center">
         <div className="m-1 mx-6">
-          {isLoading && <Spinner className="bg-spacer" />}
+          {isLoading && <Spinner />}
           {error && (
             <ErrorAlert
               variant="warning"
