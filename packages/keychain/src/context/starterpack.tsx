@@ -9,6 +9,7 @@ export interface StarterItemData {
 
 export interface StarterPackContextType {
   balance: number;
+  price: number;
   starterPackItems: StarterItemData[];
 }
 
@@ -20,11 +21,10 @@ export function StarterPackProvider({
   children,
   balance,
   starterPackItems,
+  price,
 }: PropsWithChildren<StarterPackContextType>) {
   return (
-    <StarterPackContext.Provider
-      value={{ balance: balance, starterPackItems: starterPackItems }}
-    >
+    <StarterPackContext.Provider value={{ balance, starterPackItems, price }}>
       {children}
     </StarterPackContext.Provider>
   );

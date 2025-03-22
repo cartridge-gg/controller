@@ -23,7 +23,7 @@ const enum PurchaseState {
 }
 
 export const PurchaseWithBalance = React.memo(() => {
-  const { starterPackItems } = useStarterPack();
+  const { starterPackItems, price } = useStarterPack();
   const { closeModal } = useUI();
   const [purchaseState, setPurchaseState] = useState<PurchaseState>(
     PurchaseState.REVIEW,
@@ -57,7 +57,11 @@ export const PurchaseWithBalance = React.memo(() => {
       />
       <LayoutContent>
         {purchaseState === PurchaseState.REVIEW ? (
-          <Balance types={[BalanceType.CREDITS]} title="Spending" />
+          <Balance
+            balance={price}
+            types={[BalanceType.CREDITS]}
+            title="Spending"
+          />
         ) : purchaseState === PurchaseState.PENDING ? (
           <h1 className="text-xs font-semibold text-foreground-400 pb-4">
             Your starter pack is on the way!

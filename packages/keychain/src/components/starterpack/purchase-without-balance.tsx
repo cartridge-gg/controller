@@ -10,12 +10,12 @@ import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { useMemo, useState } from "react";
 import StripeCheckout from "../funding/StripeCheckout";
-import { DEFAULT_AMOUNT } from "../funding/constants";
 import { PurchaseWithBalance } from "./purchase-with-balance";
 import { useQuery } from "react-query";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { StarterPack } from ".";
+import { useStarterPack } from "@/hooks/starterpack";
 
 const enum PurchaseState {
   REVIEW = 0,
@@ -33,6 +33,7 @@ export const PurchaseWithoutBalance = () => {
   const [error, setError] = useState<Error>();
 
   const { controller } = useConnection();
+  const { price } = useStarterPack();
 
   const stripePromise = useMemo(
     () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
@@ -55,7 +56,7 @@ export const PurchaseWithoutBalance = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          credits: DEFAULT_AMOUNT,
+          credits: price,
           username: controller?.username(),
         }),
       });
@@ -95,7 +96,7 @@ export const PurchaseWithoutBalance = () => {
         <StripeCheckout
           onBack={() => setPurchaseState(PurchaseState.BACK)}
           onComplete={() => setPurchaseState(PurchaseState.SUCCESS)}
-          creditsAmount={DEFAULT_AMOUNT}
+          creditsAmount={price}
         />
       </Elements>
     );

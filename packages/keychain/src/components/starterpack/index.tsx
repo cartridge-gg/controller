@@ -36,7 +36,7 @@ function StarterPackContent() {
     PurchaseState.SHOW_OPTIONS,
   );
 
-  const { balance } = useStarterPack();
+  const { balance, price } = useStarterPack();
 
   const handlePurchase = () => {
     if (balance > 0) {
@@ -75,9 +75,7 @@ function StarterPackContent() {
 
       <LayoutFooter>
         <Card className="flex flex-row items-center justify-between gap-2">
-          <TotalCost
-            price={starterPackItems.reduce((acc, item) => acc + item.price, 0)}
-          />
+          <TotalCost price={price} />
           {balance <= 0 && (
             <CardContent className="relative flex items-center justify-center bg-background-200 w-11 aspect-square rounded">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-background-300 rounded-full">
@@ -135,9 +133,14 @@ export function StarterPack() {
   ];
 
   const balance = 10;
+  const price = 5;
 
   return (
-    <StarterPackProvider balance={balance} starterPackItems={starterPackItems}>
+    <StarterPackProvider
+      balance={balance}
+      starterPackItems={starterPackItems}
+      price={price}
+    >
       <StarterPackContent />
     </StarterPackProvider>
   );

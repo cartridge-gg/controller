@@ -21,9 +21,13 @@ export enum BalanceType {
 type BalanceProps = {
   title?: string;
   types: BalanceType[];
+  /**
+   * Should only be used for demo purpose
+   */
+  balance?: number;
 };
 
-export function Balance({ types, title }: BalanceProps) {
+export function Balance({ types, title, balance }: BalanceProps) {
   const { controller } = useController();
   const { balance: creditBalance } = useCreditBalance({
     username: controller?.username(),
@@ -52,12 +56,18 @@ export function Balance({ types, title }: BalanceProps) {
                   <p className="text-foreground-100 font-medium text-sm">
                     Credits
                   </p>
-                  <p className="text-foreground-100 font-medium text-sm">{`${creditBalance.formatted}`}</p>
+                  <p className="text-foreground-100 font-medium text-sm">
+                    {balance
+                      ? `$${balance.toFixed(2)}`
+                      : creditBalance.formatted}
+                  </p>
                 </div>
                 <p className="text-foreground-300 font-normal text-xs">
-                  {creditBalance.formatted
-                    ? creditBalance.formatted
-                    : "Loading"}{" "}
+                  {balance
+                    ? balance
+                    : creditBalance.formatted
+                      ? creditBalance.formatted
+                      : "Loading"}{" "}
                   Credits
                 </p>
               </div>
