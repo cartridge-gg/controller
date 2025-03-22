@@ -22,7 +22,8 @@ export const StarterItem = React.forwardRef<
         <img
           src={image}
           alt={title}
-          className="size-16 object-cover border-4 border-solid border-background-300 rounded-sm overflow-hidden"
+          // className="size-16 object-cover border-4 border-solid border-background-300 rounded-sm overflow-hidden"
+          className="size-16 object-cover"
         />
         <div className="flex flex-col gap-1 flex-1 min-w-0">
           <h3 className="text-sm font-medium text-foreground-100 truncate">
