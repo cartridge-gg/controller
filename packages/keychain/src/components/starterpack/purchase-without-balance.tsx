@@ -1,27 +1,32 @@
 import {
   Button,
+  Card,
+  CardContent,
+  GiftIcon,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
   Spinner,
+  useUI,
 } from "@cartridge/ui-next";
 import { LayoutContainer } from "@cartridge/ui-next";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import StripeCheckout from "../funding/StripeCheckout";
-import { PurchaseWithBalance } from "./purchase-with-balance";
 import { useQuery } from "react-query";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { StarterPack } from ".";
 import { useStarterPack } from "@/hooks/starterpack";
+import { Receiving } from "./receiving";
 
 const enum PurchaseState {
   REVIEW = 0,
   STRIPE_CHECKOUT = 1,
-  SUCCESS = 2,
-  BACK = 3,
+  PENDING = 2,
+  SUCCESS = 3,
+  BACK = 4,
 }
 
 export const PurchaseWithoutBalance = () => {
@@ -31,9 +36,10 @@ export const PurchaseWithoutBalance = () => {
     PurchaseState.REVIEW,
   );
   const [error, setError] = useState<Error>();
+  const { closeModal } = useUI();
 
   const { controller } = useConnection();
-  const { price } = useStarterPack();
+  const { price, starterPackItems } = useStarterPack();
 
   const stripePromise = useMemo(
     () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
@@ -79,9 +85,15 @@ export const PurchaseWithoutBalance = () => {
     },
   });
 
-  if (purchaseState === PurchaseState.SUCCESS) {
-    return <PurchaseWithBalance />;
-  }
+  // Simulate a purchase
+  useEffect(() => {
+    if (purchaseState === PurchaseState.PENDING) {
+      const timer = setTimeout(() => {
+        setPurchaseState(PurchaseState.SUCCESS);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [purchaseState]);
 
   if (purchaseState === PurchaseState.BACK) {
     return <StarterPack />;
@@ -95,7 +107,7 @@ export const PurchaseWithoutBalance = () => {
       >
         <StripeCheckout
           onBack={() => setPurchaseState(PurchaseState.BACK)}
-          onComplete={() => setPurchaseState(PurchaseState.SUCCESS)}
+          onComplete={() => setPurchaseState(PurchaseState.PENDING)}
           creditsAmount={price}
         />
       </Elements>
@@ -104,23 +116,69 @@ export const PurchaseWithoutBalance = () => {
 
   return (
     <LayoutContainer>
-      <LayoutHeader title="Get Starter Pack" />
-      <LayoutContent className="w-full flex items-center justify-center">
-        <div className="m-1 mx-6">
-          {isLoading && <Spinner />}
-          {error && (
+      <LayoutHeader
+        icon={
+          purchaseState === PurchaseState.PENDING ? (
+            <Spinner />
+          ) : purchaseState === PurchaseState.REVIEW ? (
+            <GiftIcon variant="solid" />
+          ) : undefined
+        }
+        title="Purchase Starter Pack"
+      />
+      <LayoutContent>
+        <div className="w-full flex items-center justify-center">
+          {isLoading ? (
+            <Spinner />
+          ) : error ? (
             <ErrorAlert
               variant="warning"
               title="Purchase Alert"
               description={error.message}
             />
-          )}
+          ) : null}
         </div>
+
+        {purchaseState === PurchaseState.PENDING ? (
+          <h1 className="text-xs font-semibold text-foreground-400 pb-4">
+            Your starter pack is on the way!
+          </h1>
+        ) : (
+          purchaseState === PurchaseState.SUCCESS && (
+            <h1 className="text-xs font-semibold text-foreground-400 pb-4">
+              Purchase complete
+            </h1>
+          )
+        )}
+
+        {/* Display Receiving component for both PENDING and SUCCESS states */}
+        {(purchaseState === PurchaseState.PENDING ||
+          purchaseState === PurchaseState.SUCCESS) && (
+          <Receiving title="Receiving" items={starterPackItems} />
+        )}
       </LayoutContent>
       <LayoutFooter>
-        <Button className="w-full">
-          <span>Purchase</span>
-        </Button>
+        {purchaseState === PurchaseState.PENDING ? (
+          <Card>
+            <CardContent className="flex items-center justify-center w-full text-sm bg-background-100 border border-background-200 p-2.5 text-foreground-400">
+              <Spinner className="mr-2" />
+              <span>Confirming on starknet</span>
+            </CardContent>
+          </Card>
+        ) : purchaseState === PurchaseState.SUCCESS ? (
+          <Button
+            variant="secondary"
+            type="button"
+            className="w-full"
+            onClick={closeModal}
+          >
+            <span>Close</span>
+          </Button>
+        ) : (
+          <Button type="button" className="w-full" onClick={() => {}}>
+            <span>Purchase</span>
+          </Button>
+        )}
       </LayoutFooter>
     </LayoutContainer>
   );
