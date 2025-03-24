@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.7.6",
+  "version": "0.7.8",
   "description": "Cartridge Controller",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -60,15 +60,18 @@
     "exports": "named"
   },
   "peerDependencies": {
+    "@phantom/wallet-sdk": "^0.0.23",
+    "@metamask/sdk": "^0.32.1",
+    "open": "^10.1.0",
     "starknet": "catalog:",
-    "open": "^10.1.0"
+    "starknetkit": "^2.6.1"
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/penpal": "catalog:",
+    "@metamask/sdk": "^0.32.1",
     "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
-    "base64url": "catalog:",
     "cbor-x": "^1.5.0",
     "fast-deep-equal": "catalog:"
   },

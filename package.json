@@ -31,7 +31,7 @@
     "test:storybook:update": "pnpm turbo build:deps test:storybook:update"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#420887d"
+    "@cartridge/presets": "github:cartridge-gg/presets#4daeb54"
   },
   "devDependencies": {
     "turbo": "^2.0.12",
