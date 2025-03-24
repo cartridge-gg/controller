@@ -72,7 +72,7 @@ export function CreateControllerView({
           onSubmit();
         }}
       >
-        <LayoutContent className="gap-6 pt-16">
+        <LayoutContent className="gap-6">
           <CreateAccount
             usernameField={usernameField}
             validation={validation}

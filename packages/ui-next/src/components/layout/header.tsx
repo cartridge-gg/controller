@@ -47,10 +47,11 @@ export function LayoutHeader({
         switch (innerProps.variant) {
           case "expanded":
             return (
-              <div className="flex flex-col w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none">
+              <div className="flex flex-col w-full h-[176px]">
+                <div className="w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none" />
                 <HeaderInner
                   {...innerProps}
-                  className="absolute -bottom-10 left-0 right-0"
+                  className="absolute bottom-0 left-0 right-0"
                 />
               </div>
             );
