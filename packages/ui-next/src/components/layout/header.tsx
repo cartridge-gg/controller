@@ -157,6 +157,7 @@ function HeaderInner({
   Icon,
   icon,
   title,
+  description,
   right,
   className,
 }: HeaderInnerProps) {
@@ -168,7 +169,7 @@ function HeaderInner({
     >
       <div className="flex items-center flex-shrink min-w-0 gap-6">
         <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
-        <Headline variant={variant} title={title} />
+        <Headline variant={variant} title={title} description={description} />
       </div>
 
       {right}

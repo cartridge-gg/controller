@@ -59,7 +59,6 @@ export function CreateControllerView({
             ? "Play with Controller"
             : `Play ${theme.name}`
         }
-        description="Connect your Controller"
         hideUsername
         hideNetwork={isSlot}
         hideSettings
