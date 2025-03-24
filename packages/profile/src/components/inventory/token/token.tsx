@@ -18,6 +18,7 @@ import {
   CoinsIcon,
   ExternalIcon,
   Skeleton,
+  Thumbnail,
 } from "@cartridge/ui-next";
 import { useConnection } from "#hooks/context";
 import {
@@ -118,38 +119,32 @@ function ERC20() {
     return compare(version, "0.5.6", ">=");
   }, [version]);
 
-  if (!token) {
-    return;
-  }
+  if (!token) return;
+
+  console.log(compatibility);
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        title={`${
-          token.balance === undefined ? (
-            <Skeleton className="h-[20px] w-[120px] rounded" />
-          ) : (
-            formatBalance(token.balance.formatted, ["~"])
-          )
-        } ${token.meta.symbol}`}
-        description={
-          countervalue &&
-          `${formatBalance(countervalue.current.formatted, ["~"])}`
-        }
-        icon={
-          <div className="rounded-full size-11 bg-background-300 flex items-center justify-center">
-            <img
-              className="w-10 h-10"
-              src={token.meta.logoUrl ?? "/public/placeholder.svg"}
-            />
-          </div>
-        }
-        onBack={() => {
-          navigate("..");
-        }}
-      />
+      <LayoutHeader className="hidden" onBack={() => navigate("..")} />
 
-      <LayoutContent className="pb-4">
+      <LayoutContent className="pb-4 gap-6">
+        <div className="flex items-center gap-4">
+          <Thumbnail icon={token.meta.logoUrl} size="lg" rounded />
+          <div className="flex flex-col gap-0.5">
+            {token.balance === undefined ? (
+              <Skeleton className="h-[20px] w-[120px] rounded" />
+            ) : (
+              <p className="text-semibold text-lg/[22px]">
+                {formatBalance(token.balance.formatted, ["~"])}
+              </p>
+            )}
+            {countervalue && (
+              <p className="text-foreground-300 text-xs">
+                {formatBalance(countervalue.current.formatted, ["~"])}
+              </p>
+            )}
+          </div>
+        </div>
         <Card>
           <CardHeader>
             <CardTitle>Details</CardTitle>
