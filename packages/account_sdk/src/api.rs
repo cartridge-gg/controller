@@ -29,11 +29,7 @@ impl Client {
     {
         let path = "/query";
 
-        let response = self
-            .post(path)
-            .json(body)
-            .send()
-            .await?;
+        let response = self.post(path).json(body).send().await?;
 
         let res: Response<R> = response.json().await?;
 
