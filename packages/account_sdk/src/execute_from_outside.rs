@@ -66,7 +66,7 @@ impl Controller {
         let (mut namespace, mut bitmask) = self.execute_from_outside_nonce;
 
         // Find the next available bit
-        let nonce_bitmask = if bitmask == u64::MAX.into() {
+        let nonce_bitmask: u128 = if bitmask == u64::MAX.into() {
             // All bits are used, create new namespace and reset bitmask
             namespace = SigningKey::from_random().secret_scalar();
             bitmask = 1;
