@@ -47,7 +47,7 @@ export function LayoutHeader({
         switch (innerProps.variant) {
           case "expanded":
             return (
-              <div className="flex flex-col w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative mb-16 before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none">
+              <div className="flex flex-col w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none">
                 <HeaderInner
                   {...innerProps}
                   className="absolute -bottom-10 left-0 right-0"
@@ -156,17 +156,18 @@ function HeaderInner({
   Icon,
   icon,
   title,
-  description,
   right,
   className,
 }: HeaderInnerProps) {
   if (variant === "hidden") return null;
 
   return (
-    <div className={cn("p-4 flex items-center justify-between", className)}>
-      <div className="flex items-center gap-4 flex-shrink min-w-0">
+    <div
+      className={cn("p-6 flex items-center justify-between h-20", className)}
+    >
+      <div className="flex items-center flex-shrink min-w-0 gap-6">
         <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
-        <Headline variant={variant} title={title} description={description} />
+        <Headline variant={variant} title={title} />
       </div>
 
       {right}
@@ -230,7 +231,7 @@ function Headline({
   description,
 }: Pick<HeaderInnerProps, "variant" | "title" | "description">) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 items-center">
       <div className="text-lg font-semibold line-clamp-1 text-ellipsis">
         {title}
       </div>

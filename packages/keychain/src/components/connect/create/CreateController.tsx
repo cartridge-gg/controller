@@ -66,13 +66,13 @@ export function CreateControllerView({
       />
 
       <form
-        className="flex flex-col flex-1"
+        className="flex flex-col flex-1 overflow-y-scroll"
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit();
         }}
       >
-        <LayoutContent className="gap-0">
+        <LayoutContent className="gap-6 pt-16">
           <CreateAccount
             usernameField={usernameField}
             validation={validation}
@@ -83,33 +83,29 @@ export function CreateControllerView({
             onUsernameClear={onUsernameClear}
             onKeyDown={onKeyDown}
           />
-        </LayoutContent>
 
-        <LayoutFooter showCatridgeLogo>
           {isInAppBrowser && (
-            <div className="mb-5">
-              <ErrorAlert
-                title="Browser not supported"
-                description="Please open this page in your device's native browser (Safari/Chrome) to continue."
-                variant="warning"
-                isExpanded
-              />
-            </div>
+            <ErrorAlert
+              title="Browser not supported"
+              description="Please open this page in your device's native browser (Safari/Chrome) to continue."
+              variant="warning"
+              isExpanded
+            />
           )}
 
           {!theme.verified && (
-            <div className="mb-5">
-              <ErrorAlert
-                title="Please proceed with caution"
-                description="Application domain does not match the configured domain."
-                variant="warning"
-                isExpanded
-              />
-            </div>
+            <ErrorAlert
+              title="Please proceed with caution"
+              description="Application domain does not match the configured domain."
+              variant="warning"
+              isExpanded
+            />
           )}
 
           <Legal />
+        </LayoutContent>
 
+        <LayoutFooter showCatridgeLogo>
           <Button
             type="submit"
             isLoading={isLoading}

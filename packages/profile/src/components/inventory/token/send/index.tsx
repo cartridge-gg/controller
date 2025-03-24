@@ -9,7 +9,6 @@ import {
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
-  Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -97,7 +96,6 @@ export function SendToken() {
       </LayoutContent>
 
       <LayoutFooter>
-        <Separator className="bg-spacer" />
         <div
           className={cn(
             "border border-destructive-100 rounded flex items-center gap-2 p-2 cursor-pointer select-none",
