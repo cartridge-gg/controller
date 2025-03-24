@@ -1,4 +1,4 @@
-import { GiftIcon } from "@/components/icons";
+import { CheckIcon } from "@/components/icons";
 import {
   Card,
   CardHeader,
@@ -9,13 +9,13 @@ import {
 import { cn } from "@/utils";
 import React from "react";
 
-export interface StarterpackClaimableProps {
+export interface StarterpackClaimedProps {
   items: Array<string>;
 }
 
-export const StarterpackClaimable = React.forwardRef<
+export const StarterpackClaimed = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & StarterpackClaimableProps
+  React.HTMLAttributes<HTMLDivElement> & StarterpackClaimedProps
 >(({ items, className, ...props }, ref) => {
   return (
     <Card className={cn(className)} {...props} ref={ref}>
@@ -31,11 +31,8 @@ export const StarterpackClaimable = React.forwardRef<
       <CardListContent>
         {items.map((item) => (
           <CardListItem className="flex flex-row items-center py-2 px-3">
-            <div className="flex flex-row items-center gap-3 text-foreground-100">
-              <GiftIcon
-                variant="solid"
-                className="bg-background-300 rounded-full p-0.5"
-              />
+            <div className="flex flex-row items-center gap-3 text-foreground-400">
+              <CheckIcon className="bg-background-300 rounded-full p-0.5" />
               <p className="font-medium text-sm">{item}</p>
             </div>
           </CardListItem>
@@ -45,4 +42,4 @@ export const StarterpackClaimable = React.forwardRef<
   );
 });
 
-StarterpackClaimable.displayName = "StarterPackClaimable";
+StarterpackClaimed.displayName = "StarterPackClaimable";

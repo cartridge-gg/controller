@@ -1,23 +1,23 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { StarterpackClaimable } from "./claimable";
+import { StarterpackClaimed } from "./claimed";
 
 const meta = {
-  title: "Modules/Starterpack/Claimable",
-  component: StarterpackClaimable,
+  title: "Modules/Starterpack/Claimed",
+  component: StarterpackClaimed,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
   },
   argTypes: {
     items: {
-      description: "Array of claimable items",
+      description: "Array of claimed items",
       control: { type: "object" },
     },
   },
-} satisfies Meta<typeof StarterpackClaimable>;
+} satisfies Meta<typeof StarterpackClaimed>;
 
 export default meta;
-type Story = StoryObj<typeof StarterpackClaimable>;
+type Story = StoryObj<typeof StarterpackClaimed>;
 
 export const Default: Story = {
   args: {
