@@ -6,7 +6,13 @@ import { ExecuteCtx } from "@/utils/connection";
 import { EstimateFee } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 
-export function ConfirmTransaction() {
+interface ConfirmTransactionProps {
+  defaultExpanded?: boolean;
+}
+
+export function ConfirmTransaction({
+  defaultExpanded,
+}: ConfirmTransactionProps = {}) {
   const { controller, context, origin, setContext } = useConnection();
   const ctx = context as ExecuteCtx;
   const account = controller;
@@ -36,7 +42,10 @@ export function ConfirmTransaction() {
       onSubmit={onSubmit}
     >
       <LayoutContent>
-        <TransactionSummary calls={transactions} />
+        <TransactionSummary
+          calls={transactions}
+          defaultExpanded={defaultExpanded}
+        />
       </LayoutContent>
     </ExecutionContainer>
   );

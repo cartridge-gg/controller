@@ -1,7 +1,15 @@
 import { Call } from "starknet";
 import { CallCard } from "./CallCard";
 
-export function TransactionSummary({ calls }: { calls: Call[] }) {
+interface TransactionSummaryProps {
+  calls: Call[];
+  defaultExpanded?: boolean;
+}
+
+export function TransactionSummary({
+  calls,
+  defaultExpanded,
+}: TransactionSummaryProps) {
   return (
     <div className="flex flex-col gap-4">
       {calls.map((c, i) => {
@@ -13,6 +21,7 @@ export function TransactionSummary({ calls }: { calls: Call[] }) {
             // title={c?.meta?.name || "Contract"}
             // icon={c?.meta?.icon}
             call={c}
+            defaultExpanded={defaultExpanded}
           />
         );
       })}
