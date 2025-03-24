@@ -72,14 +72,38 @@ export function Collectible() {
       {(() => {
         switch (status) {
           case "loading": {
-            return <LayoutContentLoader />;
+            return (
+              <>
+                <LayoutHeader
+                  className="hidden"
+                  onBack={() => navigate("..")}
+                />
+                <LayoutContentLoader />
+              </>
+            );
           }
           case "error": {
-            return <LayoutContentError />;
+            return (
+              <>
+                <LayoutHeader
+                  className="hidden"
+                  onBack={() => navigate("..")}
+                />
+                <LayoutContentError />
+              </>
+            );
           }
           default: {
             if (!collection || !asset) {
-              return <LayoutContentLoader />;
+              return (
+                <>
+                  <LayoutHeader
+                    className="hidden"
+                    onBack={() => navigate("..")}
+                  />
+                  <LayoutContentLoader />
+                </>
+              );
             }
             return (
               <>
@@ -91,7 +115,7 @@ export function Collectible() {
                 />
                 <LayoutContent className="p-6 flex flex-col gap-4">
                   <CollectionHeader
-                    image={collection.imageUrl || placeholder}
+                    image={asset.imageUrl || placeholder}
                     title={title}
                     subtitle={
                       <p className="text-foreground-300 text-xs">

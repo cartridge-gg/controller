@@ -66,14 +66,38 @@ export function Collection() {
       {(() => {
         switch (status) {
           case "loading": {
-            return <LayoutContentLoader />;
+            return (
+              <>
+                <LayoutHeader
+                  className="hidden"
+                  onBack={() => navigate("..")}
+                />
+                <LayoutContentLoader />
+              </>
+            );
           }
           case "error": {
-            return <LayoutContentError />;
+            return (
+              <>
+                <LayoutHeader
+                  className="hidden"
+                  onBack={() => navigate("..")}
+                />
+                <LayoutContentError />
+              </>
+            );
           }
           default: {
             if (!collection || !assets) {
-              return <LayoutContentLoader />;
+              return (
+                <>
+                  <LayoutHeader
+                    className="hidden"
+                    onBack={() => navigate("..")}
+                  />
+                  <LayoutContentLoader />
+                </>
+              );
             }
 
             return (
