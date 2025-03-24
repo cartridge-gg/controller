@@ -59,20 +59,20 @@ export function CreateControllerView({
             ? "Play with Controller"
             : `Play ${theme.name}`
         }
-        description="Connect your Controller"
         hideUsername
         hideNetwork={isSlot}
         hideSettings
       />
 
       <form
-        className="flex flex-col flex-1"
+        className="flex flex-col flex-1 overflow-y-scroll"
+        style={{ scrollbarWidth: "none" }}
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit();
         }}
       >
-        <LayoutContent className="gap-0">
+        <LayoutContent className="gap-6">
           <CreateAccount
             usernameField={usernameField}
             validation={validation}
@@ -83,32 +83,27 @@ export function CreateControllerView({
             onUsernameClear={onUsernameClear}
             onKeyDown={onKeyDown}
           />
+          <Legal />
         </LayoutContent>
 
         <LayoutFooter showCatridgeLogo>
           {isInAppBrowser && (
-            <div className="mb-5">
-              <ErrorAlert
-                title="Browser not supported"
-                description="Please open this page in your device's native browser (Safari/Chrome) to continue."
-                variant="warning"
-                isExpanded
-              />
-            </div>
+            <ErrorAlert
+              title="Browser not supported"
+              description="Please open this page in your device's native browser (Safari/Chrome) to continue."
+              variant="error"
+              isExpanded
+            />
           )}
 
           {!theme.verified && (
-            <div className="mb-5">
-              <ErrorAlert
-                title="Please proceed with caution"
-                description="Application domain does not match the configured domain."
-                variant="warning"
-                isExpanded
-              />
-            </div>
+            <ErrorAlert
+              title="Please proceed with caution"
+              description="Application domain does not match the configured domain."
+              variant="error"
+              isExpanded
+            />
           )}
-
-          <Legal />
 
           <Button
             type="submit"

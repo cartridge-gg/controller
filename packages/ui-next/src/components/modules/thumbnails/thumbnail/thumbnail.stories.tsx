@@ -153,6 +153,41 @@ export const Default: Story = {
           variant="faded"
         />
       </div>
+      <div className="flex gap-3">
+        <Thumbnail
+          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+          size="xxl"
+          variant="dark"
+        />
+        <Thumbnail
+          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+          size="xxl"
+          variant="faded"
+        />
+        <Thumbnail
+          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+          size="xxl"
+          variant="default"
+        />
+        <Thumbnail
+          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+          size="xxl"
+          variant="highlight"
+        />
+        <Thumbnail
+          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+          subIcon={
+            <ThumbnailsSubIcon
+              Icon={
+                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+              }
+              size="lg"
+            />
+          }
+          size="xxl"
+          variant="faded"
+        />
+      </div>
     </div>
   ),
 };
@@ -994,6 +1029,66 @@ export const Error: Story = {
         <Thumbnail icon="" size="xl" variant="faded" error />
         <Thumbnail icon="" size="xl" variant="default" error />
         <Thumbnail icon="" size="xl" variant="highlight" error />
+      </div>
+    </div>
+  ),
+};
+
+export const Undefined: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3 ">
+      <div className="flex gap-3 ">
+        <Thumbnail size="xs" variant="dark" />
+        <Thumbnail size="xs" variant="faded" />
+        <Thumbnail size="xs" variant="default" />
+        <Thumbnail size="xs" variant="highlight" />
+      </div>
+      <div className="flex gap-3 ">
+        <Thumbnail size="sm" variant="dark" />
+        <Thumbnail size="sm" variant="faded" />
+        <Thumbnail size="sm" variant="default" />
+        <Thumbnail size="sm" variant="highlight" />
+      </div>
+      <div className="flex gap-3 ">
+        <Thumbnail size="md" variant="dark" />
+        <Thumbnail size="md" variant="faded" />
+        <Thumbnail size="md" variant="default" />
+        <Thumbnail size="md" variant="highlight" />
+      </div>
+      <div className="flex gap-3 ">
+        <Thumbnail size="lg" variant="dark" />
+        <Thumbnail size="lg" variant="faded" />
+        <Thumbnail size="lg" variant="default" />
+        <Thumbnail size="lg" variant="highlight" />
+        <Thumbnail
+          subIcon={
+            <ThumbnailsSubIcon
+              Icon={
+                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+              }
+            />
+          }
+          size="lg"
+          variant="faded"
+        />
+      </div>
+      <div className="flex gap-3 ">
+        <Thumbnail size="xl" variant="dark" />
+        <Thumbnail size="xl" variant="faded" />
+        <Thumbnail size="xl" variant="default" />
+        <Thumbnail size="xl" variant="highlight" />
+        <Thumbnail
+          subIcon={
+            <ThumbnailsSubIcon
+              Icon={
+                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+              }
+              size="lg"
+            />
+          }
+          size="xl"
+          variant="faded"
+        />
       </div>
     </div>
   ),
