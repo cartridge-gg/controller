@@ -115,12 +115,11 @@ export function SendCollection() {
   );
 
   const title = useMemo(() => {
-    if (!collection || !assets || tokenIds.length === 0) return "";
-    if (tokenIds.length > 1)
-      return `Send (${tokenIds.length}) ${collection.name}`;
+    if (!collection || !assets || assets.length === 0) return "";
+    if (assets.length > 1) return `Send (${assets.length}) ${collection.name}`;
     const asset = assets[0];
     return `Send ${formatName(asset.name, asset.tokenId)}`;
-  }, [collection, tokenIds, assets]);
+  }, [collection, assets]);
 
   const image = useMemo(() => {
     if (!collection || !assets) return placeholder;
@@ -147,7 +146,7 @@ export function SendCollection() {
           setWarning={setRecipientWarning}
           setError={setRecipientError}
         />
-        <Sending assets={assets} />
+        <Sending assets={assets} description={collection.name} />
       </LayoutContent>
 
       <LayoutFooter
