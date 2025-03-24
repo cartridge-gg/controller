@@ -130,7 +130,7 @@ const CreateSessionLayout = ({
             ) : undefined
           }
         />
-        <LayoutContent className="gap-6 px-6">
+        <LayoutContent className="gap-6 px-6 mt-3">
           <SessionConsent isVerified={policies?.verified} />
           {policies?.verified ? (
             <VerifiedSessionSummary
