@@ -133,7 +133,7 @@ function ERC20() {
               <Skeleton className="h-[20px] w-[120px] rounded" />
             ) : (
               <p className="text-semibold text-lg/[22px]">
-                {formatBalance(token.balance.formatted, ["~"])}
+                {`${formatBalance(token.balance.formatted, ["~"])} ${token.meta.symbol}`}
               </p>
             )}
             {countervalue && (
