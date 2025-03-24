@@ -28,6 +28,13 @@ export function Fees({
         18,
         token.price,
       );
+      console.log("Fee calculation:", {
+        maxFee: maxFee?.overall_fee?.toString(),
+        tokenPrice: token.price,
+        tokenSymbol: token.symbol,
+        tokenDecimals: token.decimals,
+        calculatedUSD: formatted,
+      });
       setFormattedFee(formatted);
     } else {
       setFormattedFee("FREE");
