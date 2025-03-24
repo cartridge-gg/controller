@@ -87,8 +87,6 @@ export function TokensProvider({
   const [addresses, setAdresses] = useState<string[]>([]);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  console.log(DEFAULT_FEE_TOKEN);
-
   useEffect(() => {
     if (!controller) {
       return;
