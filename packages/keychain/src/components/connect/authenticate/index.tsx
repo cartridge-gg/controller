@@ -74,7 +74,7 @@ export function Authenticate({
         title={title}
         description={description}
       />
-      <LayoutContent className="items-center pb-10">
+      <LayoutContent className="items-center pt-16 pb-10">
         <FaceIDImage />
       </LayoutContent>
 
