@@ -66,6 +66,7 @@ export function CreateControllerView({
 
       <form
         className="flex flex-col flex-1 overflow-y-scroll"
+        style={{ scrollbarWidth: "none" }}
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit();
@@ -82,12 +83,15 @@ export function CreateControllerView({
             onUsernameClear={onUsernameClear}
             onKeyDown={onKeyDown}
           />
+          <Legal />
+        </LayoutContent>
 
+        <LayoutFooter showCatridgeLogo>
           {isInAppBrowser && (
             <ErrorAlert
               title="Browser not supported"
               description="Please open this page in your device's native browser (Safari/Chrome) to continue."
-              variant="warning"
+              variant="error"
               isExpanded
             />
           )}
@@ -96,15 +100,11 @@ export function CreateControllerView({
             <ErrorAlert
               title="Please proceed with caution"
               description="Application domain does not match the configured domain."
-              variant="warning"
+              variant="error"
               isExpanded
             />
           )}
 
-          <Legal />
-        </LayoutContent>
-
-        <LayoutFooter showCatridgeLogo>
           <Button
             type="submit"
             isLoading={isLoading}
