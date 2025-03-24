@@ -191,8 +191,8 @@ export function TokensProvider({
     if (priceData?.priceByAddresses) {
       setTokens((prevTokens) => {
         const newTokens = { ...prevTokens };
-        priceData.priceByAddresses.forEach((price, index) => {
-          const address = addresses[index];
+        priceData.priceByAddresses.forEach((price) => {
+          const address = getChecksumAddress(price.base);
           if (newTokens[address]) {
             newTokens[address] = {
               ...newTokens[address],
