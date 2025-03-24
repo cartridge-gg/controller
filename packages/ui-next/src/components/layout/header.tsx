@@ -22,6 +22,7 @@ import { constants } from "starknet";
 import { CopyAddress } from "../copy-address";
 import { Network } from "@/components/network";
 import { useUI } from "@/hooks";
+import { Thumbnail } from "@/index";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
@@ -169,7 +170,7 @@ function HeaderInner({
     >
       <div className="flex items-center flex-shrink min-w-0 gap-6">
         <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
-        <Headline variant={variant} title={title} description={description} />
+        <Headline title={title} description={description} />
       </div>
 
       {right}
@@ -194,7 +195,10 @@ function HeaderIcon({
         }
 
         return (
-          <div className="size-full rounded bg-[image:var(--theme-icon-url)] bg-cover bg-center" />
+          <Thumbnail
+            variant={variant === "expanded" ? "dark" : "default"}
+            size={variant === "expanded" ? "xxl" : "lg"}
+          />
         );
       })()}
     </IconWrapper>
@@ -220,7 +224,7 @@ function IconWrapper({
     default:
     case "compressed":
       return (
-        <div className="flex-shrink-0 rounded size-11 flex items-center justify-center bg-background-200">
+        <div className="flex-shrink-0 rounded size-10 flex items-center justify-center bg-background-200">
           {children}
         </div>
       );
@@ -228,23 +232,17 @@ function IconWrapper({
 }
 
 function Headline({
-  variant,
   title,
   description,
-}: Pick<HeaderInnerProps, "variant" | "title" | "description">) {
+}: Pick<HeaderInnerProps, "title" | "description">) {
   return (
-    <div className="flex flex-col gap-1 items-center">
-      <div className="text-lg font-semibold line-clamp-1 text-ellipsis">
+    <div className="flex flex-col gap-0.5">
+      <div className="text-lg/[22px] font-semibold line-clamp-1 text-ellipsis">
         {title}
       </div>
 
       {description && (
-        <div
-          className={cn(
-            "text-foreground-300 break-words",
-            variant === "compressed" ? "text-xs" : "text-sm",
-          )}
-        >
+        <div className={cn("text-foreground-300 break-words text-xs")}>
           {description}
         </div>
       )}
