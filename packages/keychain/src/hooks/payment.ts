@@ -19,10 +19,10 @@ import {
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
 
-const PLATFORM_TO_CHAIN: Record<ExternalPlatform, Chain | null> = {
+const PLATFORM_TO_CHAIN: Record<ExternalPlatform, Chain> = {
   ethereum: Chain.Ethereum,
   solana: Chain.Solana,
-  starknet: Chain.Starknet, // TODO: Add Starknet
+  starknet: Chain.Starknet,
 };
 
 const useCryptoPayment = () => {
@@ -36,6 +36,7 @@ const useCryptoPayment = () => {
       credits: number,
       platform: ExternalPlatform,
       isMainnet: boolean = false,
+      onSubmitted?: (explorer: Explorer) => void,
     ) => {
       if (!controller) {
         throw new Error("Controller not connected");
@@ -55,13 +56,16 @@ const useCryptoPayment = () => {
 
         switch (platform) {
           case "solana":
-            await requestPhantomPayment(
+            const {signature, confirmTransaction} = await requestPhantomPayment(
               walletAddress,
               depositAddress,
               tokenAmount,
               tokenAddress,
               isMainnet,
             );
+
+            onSubmitted?.(getExplorer(platform, signature, isMainnet) as Explorer);
+            await confirmTransaction();
             break;
           case "ethereum":
             throw new Error("Ethereum not supported yet");
@@ -152,12 +156,17 @@ const useCryptoPayment = () => {
     }
 
     const { signature } = res.result as { signature: string };
-
-    await connection.confirmTransaction({
+  
+    return {
       signature,
-      blockhash,
-      lastValidBlockHeight,
-    });
+      confirmTransaction: async () => {
+        await connection.confirmTransaction({
+          signature,
+          blockhash,
+          lastValidBlockHeight,
+        })
+      }
+    }
   }
 
   return {
@@ -165,6 +174,45 @@ const useCryptoPayment = () => {
     isLoading,
     error,
   };
+};
+
+export interface Explorer {
+  name: string;
+  url: string;
+}
+
+const getExplorer = (
+  platform: ExternalPlatform,
+  txHash: string,
+  isMainnet?: boolean,
+): Explorer => {
+  if (!txHash) {
+    throw new Error("Transaction hash is required");
+  }
+
+  switch (platform) {
+    case "solana":
+      return {
+        name: "Solana Explorer",
+        url: `https://explorer.solana.com/tx/${txHash}${isMainnet ? '' : '?cluster=devnet'}`,
+      };
+    case "ethereum":
+      return {
+        name: "Etherscan",
+        url: isMainnet
+        ? `https://etherscan.io/tx/${txHash}`
+        : `https://sepolia.etherscan.io/tx/${txHash}`,
+      };
+    case "starknet":
+      return {
+        name: "Voyager",
+        url: isMainnet
+        ? `https://voyager.online/tx/${txHash}`
+        : `https://goerli.voyager.online/tx/${txHash}`,
+      };
+    default:
+      throw new Error(`Unsupported platform: ${platform}`);
+  }
 };
 
 export default useCryptoPayment;

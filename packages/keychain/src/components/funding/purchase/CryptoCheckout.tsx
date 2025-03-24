@@ -18,6 +18,7 @@ import {
   Separator,
   StarknetIcon,
   SolanaIcon,
+  ExternalIcon,
 } from "@cartridge/ui-next";
 import { Balance, BalanceType } from "../Balance";
 import { useCallback, useState } from "react";
@@ -65,25 +66,35 @@ export function CryptoCheckout({
   const [error, setError] = useState<Error>();
   const { sendPayment } = useCryptoPayment();
   const [sendingTransaction, setSendingTransaction] = useState(false);
+  const [explorer, setExplorer] = useState<{name: string, url: string} | null>(null);
 
-  const getInfo = (wallet?: ExternalWallet) => {
-    if (!wallet) {
+  const getInfo = useCallback((wallet: ExternalWallet) => {
+    const NetworkIcon = WALLET_CONFIG[wallet.type].networkIcon;
+
+    if (explorer) {
       return (
         <>
-          Credits are used to pay for network activity. They are not tokens and
-          cannot be transferred or refunded.
+          <div className="flex justify-between w-full">
+            <p className="text-foreground-200 font-normal text-xs flex items-center">View on {explorer.name}</p>
+            <a href={explorer.url} target="_blank" className="flex items-center">
+              <ExternalIcon size="sm" className="inline-block" />
+            </a>
+          </div>
         </>
       );
     }
 
-    const NetworkIcon = WALLET_CONFIG[wallet.type].networkIcon;
     return (
       <>
-        Purchase funds on <NetworkIcon size="sm" className="inline-block" />{" "}
-        {WALLET_CONFIG[wallet.type].network}
+        <InfoIcon size="sm" className="text-foreground-200 flex-shrink-0" />
+        <p className="text-foreground-200 font-normal text-xs">
+          Purchase funds on <NetworkIcon size="xs" className="inline-block" />{" "}
+          {WALLET_CONFIG[wallet.type].network}
+        </p>
+        
       </>
     );
-  };
+  }, [explorer]);
 
   const handleSendTransaction = useCallback(async () => {
     try {
@@ -93,6 +104,7 @@ export function CryptoCheckout({
         creditsAmount,
         selectedWallet.platform!,
         false,
+        (explorer) => setExplorer(explorer),
       );
 
       onComplete();
@@ -130,11 +142,8 @@ export function CryptoCheckout({
         )}
 
         <Card className="bg-background-100 border border-background-200 p-3">
-          <CardDescription className="flex flex-row items-start gap-3">
-            <InfoIcon size="sm" className="text-foreground-200 flex-shrink-0" />
-            <p className="text-foreground-200 font-normal text-xs">
-              {getInfo(selectedWallet)}
-            </p>
+          <CardDescription className="flex flex-row items-start gap-3 items-center">
+            {getInfo(selectedWallet)}
           </CardDescription>
         </Card>
         <Button
