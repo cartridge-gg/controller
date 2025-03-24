@@ -170,7 +170,7 @@ function HeaderInner({
     >
       <div className="flex items-center flex-shrink min-w-0 gap-6">
         <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
-        <Headline title={title} description={description} />
+        <Headline variant={variant} title={title} description={description} />
       </div>
 
       {right}
@@ -232,11 +232,17 @@ function IconWrapper({
 }
 
 function Headline({
+  variant,
   title,
   description,
-}: Pick<HeaderInnerProps, "title" | "description">) {
+}: Pick<HeaderInnerProps, "variant" | "title" | "description">) {
   return (
-    <div className="flex flex-col gap-0.5 justify-between">
+    <div
+      className={cn(
+        "flex flex-col gap-0.5 justify-between",
+        variant === "expanded" ? "gap-1.5" : "gap-0.5",
+      )}
+    >
       <div className="text-lg/[22px] font-semibold line-clamp-1 text-ellipsis">
         {title}
       </div>
