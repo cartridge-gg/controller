@@ -236,7 +236,7 @@ function Headline({
   description,
 }: Pick<HeaderInnerProps, "title" | "description">) {
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-0.5 justify-between">
       <div className="text-lg/[22px] font-semibold line-clamp-1 text-ellipsis">
         {title}
       </div>

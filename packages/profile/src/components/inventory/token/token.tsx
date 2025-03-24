@@ -121,8 +121,6 @@ function ERC20() {
 
   if (!token) return;
 
-  console.log(compatibility);
-
   return (
     <LayoutContainer>
       <LayoutHeader className="hidden" onBack={() => navigate("..")} />
