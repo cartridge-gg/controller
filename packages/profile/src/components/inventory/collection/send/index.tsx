@@ -122,6 +122,12 @@ export function SendCollection() {
     return `Send ${formatName(asset.name, asset.tokenId)}`;
   }, [collection, tokenIds, assets]);
 
+  const image = useMemo(() => {
+    if (!collection || !assets) return placeholder;
+    if (assets.length > 1) return collection.imageUrl || placeholder;
+    return assets[0].imageUrl || placeholder;
+  }, [collection, assets]);
+
   if (!collection || !assets) return null;
 
   return (
@@ -133,10 +139,7 @@ export function SendCollection() {
         }}
       />
       <LayoutContent className="p-6 flex flex-col gap-6">
-        <CollectionHeader
-          image={collection.imageUrl || placeholder}
-          title={title}
-        />
+        <CollectionHeader image={image} title={title} />
         <SendRecipient
           to={to}
           setTo={setTo}
