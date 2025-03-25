@@ -19,7 +19,6 @@ import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance, loadStripe } from "@stripe/stripe-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AmountSelection } from "../AmountSelection";
-import { Balance, BalanceType } from "../Balance";
 import CheckoutForm from "./StripeCheckout";
 import { DEFAULT_AMOUNT } from "../constants";
 import { CryptoCheckout, walletIcon } from "./CryptoCheckout";
@@ -200,7 +199,6 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         }}
       />
       <LayoutContent className="gap-6 px-6">
-        <Balance types={[BalanceType.CREDITS]} />
         {state === PurchaseState.SELECTION && (
           <AmountSelection
             amount={creditsAmount}

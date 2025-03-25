@@ -55,22 +55,28 @@ const useCryptoPayment = () => {
           );
 
         switch (platform) {
-          case "solana":
-            const {signature, confirmTransaction} = await requestPhantomPayment(
-              walletAddress,
-              depositAddress,
-              tokenAmount,
-              tokenAddress,
-              isMainnet,
-            );
+          case "solana": {
+            const { signature, confirmTransaction } =
+              await requestPhantomPayment(
+                walletAddress,
+                depositAddress,
+                tokenAmount,
+                tokenAddress,
+                isMainnet,
+              );
 
-            onSubmitted?.(getExplorer(platform, signature, isMainnet) as Explorer);
+            onSubmitted?.(
+              getExplorer(platform, signature, isMainnet) as Explorer,
+            );
             await confirmTransaction();
             break;
-          case "ethereum":
+          }
+          case "ethereum": {
             throw new Error("Ethereum not supported yet");
-          case "starknet":
+          }
+          case "starknet": {
             throw new Error("Starknet not supported yet");
+          }
         }
       } catch (err) {
         setError(err as Error);
@@ -156,7 +162,7 @@ const useCryptoPayment = () => {
     }
 
     const { signature } = res.result as { signature: string };
-  
+
     return {
       signature,
       confirmTransaction: async () => {
@@ -164,9 +170,9 @@ const useCryptoPayment = () => {
           signature,
           blockhash,
           lastValidBlockHeight,
-        })
-      }
-    }
+        });
+      },
+    };
   }
 
   return {
@@ -194,21 +200,21 @@ const getExplorer = (
     case "solana":
       return {
         name: "Solana Explorer",
-        url: `https://explorer.solana.com/tx/${txHash}${isMainnet ? '' : '?cluster=devnet'}`,
+        url: `https://explorer.solana.com/tx/${txHash}${isMainnet ? "" : "?cluster=devnet"}`,
       };
     case "ethereum":
       return {
         name: "Etherscan",
         url: isMainnet
-        ? `https://etherscan.io/tx/${txHash}`
-        : `https://sepolia.etherscan.io/tx/${txHash}`,
+          ? `https://etherscan.io/tx/${txHash}`
+          : `https://sepolia.etherscan.io/tx/${txHash}`,
       };
     case "starknet":
       return {
         name: "Voyager",
         url: isMainnet
-        ? `https://voyager.online/tx/${txHash}`
-        : `https://goerli.voyager.online/tx/${txHash}`,
+          ? `https://voyager.online/tx/${txHash}`
+          : `https://goerli.voyager.online/tx/${txHash}`,
       };
     default:
       throw new Error(`Unsupported platform: ${platform}`);
