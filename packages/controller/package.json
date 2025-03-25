@@ -6,8 +6,10 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build:deps": "tsup",
-    "build": "pnpm build:deps",
+    "build:browser": "vite build",
+    "build:node": "tsup --config tsup.node.config.ts",
+    "build": "pnpm build:browser && pnpm build:node",
+    "buid:deps": "build",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",
@@ -16,13 +18,11 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js"
     },
     "./session": {
       "types": "./dist/session/index.d.ts",
-      "import": "./dist/session/index.js",
-      "require": "./dist/session/index.cjs"
+      "import": "./dist/session/index.js"
     },
     "./session/node": {
       "types": "./dist/node/index.d.ts",
@@ -38,30 +38,9 @@
       "import": "./dist/types/index.js"
     }
   },
-  "tsup": {
-    "entry": [
-      "src/index.ts",
-      "src/controller.ts",
-      "src/lookup.ts",
-      "src/session/index.ts",
-      "src/node/index.ts"
-    ],
-    "format": [
-      "esm",
-      "cjs"
-    ],
-    "splitting": false,
-    "sourcemap": true,
-    "clean": true,
-    "dts": true,
-    "treeshake": {
-      "preset": "recommended"
-    },
-    "exports": "named"
-  },
   "peerDependencies": {
-    "@phantom/wallet-sdk": "^0.0.23",
     "@metamask/sdk": "^0.32.1",
+    "@phantom/wallet-sdk": "^0.0.23",
     "open": "^10.1.0",
     "starknet": "catalog:",
     "starknetkit": "^2.6.1"
@@ -81,8 +60,14 @@
     "@types/node": "catalog:",
     "jest": "^29.7.0",
     "prettier": "catalog:",
+    "rollup-plugin-visualizer": "^5.12.0",
     "ts-jest": "^29.2.5",
     "tsup": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "^4.5.3",
+    "vite-plugin-node-polyfills": "^0.22.0",
+    "vite-plugin-top-level-await": "catalog:",
+    "vite-plugin-wasm": "catalog:"
   }
 }
