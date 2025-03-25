@@ -8,6 +8,16 @@ import { Provider } from "./provider";
 
 import "../src/index.css";
 
+// Add CSS styles directly to the head
+const styleTag = document.createElement('style');
+styleTag.textContent = `
+  #storybook-root {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+`;
+document.head.appendChild(styleTag);
+
 const preview: Preview = {
   parameters: {
     controls: {
@@ -16,7 +26,19 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
-    layout: "fullscreen",
+    layout: "centered",
+    viewport: {
+      defaultViewport: "desktop",
+      viewports: {
+        desktop: {
+          name: "Desktop",
+          styles: {
+            width: "500px",
+            height: "600px",
+          },
+        },
+      },
+    },
     preset: "cartridge",
     colorMode: "dark",
     backgrounds: {

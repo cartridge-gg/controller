@@ -8,6 +8,7 @@ export const activityCardVariants = cva(
     variants: {
       variant: {
         default: "bg-background-200 hover:bg-background-300 cursor-pointer",
+        static: "bg-background-200",
       },
     },
     defaultVariants: {
