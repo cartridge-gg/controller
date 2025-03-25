@@ -23,6 +23,7 @@ import { constants } from "starknet";
 import { CopyAddress } from "../copy-address";
 import { Network } from "@/components/network";
 import { useUI } from "@/hooks";
+import { Thumbnail } from "@/index";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
@@ -50,10 +51,11 @@ export function LayoutHeader({
         switch (innerProps.variant) {
           case "expanded":
             return (
-              <div className="flex flex-col w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative mb-16 before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none">
+              <div className="flex flex-col w-full h-[176px]">
+                <div className="w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none" />
                 <HeaderInner
                   {...innerProps}
-                  className="absolute -bottom-10 left-0 right-0"
+                  className="absolute bottom-0 left-0 right-0"
                 />
               </div>
             );
@@ -180,12 +182,9 @@ function HeaderInner({
 
   return (
     <div
-      className={cn(
-        "px-6 pt-6 pb-4 flex items-center justify-between",
-        className,
-      )}
+      className={cn("p-6 flex items-center justify-between h-20", className)}
     >
-      <div className="flex items-center gap-4 flex-shrink min-w-0">
+      <div className="flex items-center flex-shrink min-w-0 gap-6">
         <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
         <Headline variant={variant} title={title} description={description} />
       </div>
@@ -212,7 +211,10 @@ function HeaderIcon({
         }
 
         return (
-          <div className="size-full rounded bg-[image:var(--theme-icon-url)] bg-cover bg-center" />
+          <Thumbnail
+            variant={variant === "expanded" ? "dark" : "default"}
+            size={variant === "expanded" ? "xxl" : "lg"}
+          />
         );
       })()}
     </IconWrapper>
@@ -238,7 +240,7 @@ function IconWrapper({
     default:
     case "compressed":
       return (
-        <div className="flex-shrink-0 rounded size-11 flex items-center justify-center bg-background-200">
+        <div className="flex-shrink-0 rounded size-10 flex items-center justify-center bg-background-200">
           {children}
         </div>
       );
@@ -251,18 +253,18 @@ function Headline({
   description,
 }: Pick<HeaderInnerProps, "variant" | "title" | "description">) {
   return (
-    <div className="flex flex-col gap-1">
-      <div className="text-lg font-semibold line-clamp-1 text-ellipsis">
+    <div
+      className={cn(
+        "flex flex-col gap-0.5 justify-between",
+        variant === "expanded" ? "gap-1.5" : "gap-0.5",
+      )}
+    >
+      <div className="text-lg/[22px] font-semibold line-clamp-1 text-ellipsis">
         {title}
       </div>
 
       {description && (
-        <div
-          className={cn(
-            "text-foreground-300 break-words",
-            variant === "compressed" ? "text-xs" : "text-sm",
-          )}
-        >
+        <div className={cn("text-foreground-300 break-words text-xs")}>
           {description}
         </div>
       )}

@@ -10,7 +10,6 @@ import {
   MetaMaskColorIcon,
   PhantomColorIcon,
   RabbyColorIcon,
-  Separator,
 } from "@cartridge/ui-next";
 import { StarterItem } from "./starter-item";
 import { CreditCardIcon } from "@cartridge/ui-next";
@@ -68,10 +67,6 @@ function StarterPackContent() {
           ))}
         </div>
       </LayoutContent>
-
-      <div className="m-1 mx-6">
-        <Separator className="bg-spacer" />
-      </div>
 
       <LayoutFooter>
         <Card className="flex flex-row items-center justify-between gap-2">

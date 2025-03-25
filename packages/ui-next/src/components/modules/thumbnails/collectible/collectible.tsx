@@ -55,7 +55,7 @@ export const ThumbnailCollectible = ({
             />
           </div>
           <img
-            className="object-contain rounded-xs transition z-10"
+            className="object-contain max-h-full max-w-full z-10"
             draggable={false}
             src={image}
             onError={(e) => {

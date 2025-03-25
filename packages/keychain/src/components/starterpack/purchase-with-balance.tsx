@@ -6,7 +6,6 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-  Separator,
   Spinner,
   useUI,
 } from "@cartridge/ui-next";
@@ -73,10 +72,6 @@ export const PurchaseWithBalance = React.memo(() => {
         )}
         <Receiving title="Receiving" items={starterPackItems} />
       </LayoutContent>
-
-      <div className="m-1 mx-6">
-        <Separator className="bg-spacer" />
-      </div>
 
       <LayoutFooter>
         {purchaseState === PurchaseState.PENDING ? (

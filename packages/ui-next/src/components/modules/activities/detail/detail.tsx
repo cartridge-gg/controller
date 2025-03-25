@@ -3,7 +3,7 @@ import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes } from "react";
 
 export const activityDetailVariants = cva(
-  "flex justify-between items-center gap-3 p-3",
+  "flex justify-between items-center gap-3 p-3 select-none",
   {
     variants: {
       variant: {

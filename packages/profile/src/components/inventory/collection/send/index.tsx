@@ -9,8 +9,6 @@ import {
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
-  CopyAddress,
-  Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -18,9 +16,10 @@ import { Call, uint256 } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
 import { useCollection } from "#hooks/collection";
 import { Sending } from "./sending";
-import { CollectionImage } from "../image";
 import { useEntrypoints } from "#hooks/entrypoints";
-
+import { CollectionHeader } from "../header";
+import placeholder from "/public/placeholder.svg";
+import { formatName } from "../helper";
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
 const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
@@ -115,24 +114,31 @@ export function SendCollection() {
     ],
   );
 
+  const title = useMemo(() => {
+    if (!collection || !assets || assets.length === 0) return "";
+    if (assets.length > 1) return `Send (${assets.length}) ${collection.name}`;
+    const asset = assets[0];
+    return `Send ${formatName(asset.name, asset.tokenId)}`;
+  }, [collection, assets]);
+
+  const image = useMemo(() => {
+    if (!collection || !assets) return placeholder;
+    if (assets.length > 1) return collection.imageUrl || placeholder;
+    return assets[0].imageUrl || placeholder;
+  }, [collection, assets]);
+
   if (!collection || !assets) return null;
 
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={`Send (${tokenIds.length}) ${collection.name}`}
-        description={<CopyAddress address={address} size="sm" />}
-        icon={
-          <CollectionImage
-            imageUrl={collection.imageUrl || undefined}
-            size="xs"
-          />
-        }
+        className="hidden"
         onBack={() => {
           navigate("..");
         }}
       />
-      <LayoutContent className="gap-6">
+      <LayoutContent className="p-6 flex flex-col gap-6">
+        <CollectionHeader image={image} title={title} />
         <SendRecipient
           to={to}
           setTo={setTo}
@@ -140,11 +146,14 @@ export function SendCollection() {
           setWarning={setRecipientWarning}
           setError={setRecipientError}
         />
-        <Sending assets={assets} />
+        <Sending assets={assets} description={collection.name} />
       </LayoutContent>
 
-      <LayoutFooter className="bg-background relative pt-0">
-        <Separator className="bg-spacer" />
+      <LayoutFooter
+        className={cn(
+          "relative flex flex-col items-center justify-center gap-y-4 bg-background",
+        )}
+      >
         <Warning
           warning={recipientWarning}
           validated={recipientValidated}

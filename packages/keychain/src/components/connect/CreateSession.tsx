@@ -112,13 +112,9 @@ const CreateSessionLayout = ({
       <OcclusionDetector />
       <LayoutContainer>
         <LayoutHeader
-          className="px-6 pt-6"
+          className="px-6 pt-6 pb-0"
           title={!isUpdate ? "Create Session" : "Update Session"}
-          description={
-            isUpdate
-              ? "The policies were updated, please update existing session"
-              : undefined
-          }
+          description={isUpdate ? "The policies were updated" : undefined}
           right={
             !isEditable ? (
               <Button
@@ -134,7 +130,7 @@ const CreateSessionLayout = ({
             ) : undefined
           }
         />
-        <LayoutContent className="gap-6 px-6">
+        <LayoutContent className="gap-6 px-6 mt-3">
           <SessionConsent isVerified={policies?.verified} />
           {policies?.verified ? (
             <VerifiedSessionSummary
