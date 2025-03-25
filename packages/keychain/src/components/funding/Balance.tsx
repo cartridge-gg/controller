@@ -1,5 +1,9 @@
 import { useController } from "@/hooks/controller";
-import { convertTokenAmountToUSD, useFeeToken } from "@/hooks/tokens";
+import {
+  convertTokenAmountToUSD,
+  formatBalance,
+  useFeeToken,
+} from "@/hooks/tokens";
 import {
   Card,
   CardHeader,
@@ -43,19 +47,23 @@ export function Balance({ types }: BalanceProps) {
           <TokenCard
             image={"https://static.cartridge.gg/presets/credit/icon.svg"}
             title={"Credits"}
-            amount={creditBalance.value.toString() + " CREDITS"}
-            value={creditBalance.formatted}
+            amount={`${creditBalance.formatted || "Loading"} CREDITS`}
+            value={creditBalance.formatted || ""}
           />
         )}
         {types.includes(BalanceType.FEE_TOKEN) && token && (
           <TokenCard
-            image={token.icon!}
-            title={token.symbol}
-            amount={token.balance!.toString() + " " + token.symbol}
+            image={token.icon || ""}
+            title={token.name}
+            amount={
+              token?.balance !== undefined
+                ? `${formatBalance(token.balance)} ${token.symbol}`
+                : "Loading"
+            }
             value={
-              token.balance && token.price
+              token && token.balance !== undefined && token.price
                 ? convertTokenAmountToUSD(token.balance, 18, token.price)
-                : "$0"
+                : ""
             }
           />
         )}

@@ -6,9 +6,8 @@ import {
   LayoutFooter,
   Button,
   CoinsIcon,
-  CopyAddress,
   LayoutHeader,
-  DepositIcon,
+  ControllerIcon,
 } from "@cartridge/ui-next";
 import { Deposit } from "./Deposit";
 import { PurchaseCredits } from "./purchase/PurchaseCredits";
@@ -57,13 +56,11 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
   return (
     <LayoutContainer>
       <LayoutHeader
+        className="p-6"
         title={title || (controller ? `Fund ${controller.username()}` : "")}
-        description={
-          controller && <CopyAddress address={controller.address()} />
-        }
-        icon={<DepositIcon variant="solid" size="lg" />}
+        icon={<ControllerIcon size="lg" />}
       />
-      <LayoutContent className="gap-6">
+      <LayoutContent className="gap-6 px-6">
         <Balance types={balances} />
       </LayoutContent>
       <LayoutFooter>

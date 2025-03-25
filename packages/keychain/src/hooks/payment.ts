@@ -3,6 +3,8 @@ import {
   CreateCryptoPaymentDocument,
   CreateCryptoPaymentMutation,
   Chain,
+  CryptoPaymentQuery,
+  CryptoPaymentDocument,
 } from "@cartridge/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "./connection";
@@ -37,7 +39,7 @@ const useCryptoPayment = () => {
       platform: ExternalPlatform,
       isMainnet: boolean = false,
       onSubmitted?: (explorer: Explorer) => void,
-    ) => {
+    ): Promise<string> => {
       if (!controller) {
         throw new Error("Controller not connected");
       }
@@ -46,7 +48,7 @@ const useCryptoPayment = () => {
         setIsLoading(true);
         setError(null);
 
-        const { depositAddress, tokenAmount, tokenAddress } =
+        const { id: paymentId, depositAddress, tokenAmount, tokenAddress } =
           await createCryptoPayment(
             controller.username(),
             credits,
@@ -78,6 +80,8 @@ const useCryptoPayment = () => {
             throw new Error("Starknet not supported yet");
           }
         }
+
+        return paymentId;
       } catch (err) {
         setError(err as Error);
         throw err;
@@ -87,6 +91,40 @@ const useCryptoPayment = () => {
     },
     [controller, externalSendTransaction],
   );
+
+  const waitForPayment = useCallback(async (paymentId: string) => {
+    const MAX_WAIT_TIME = 60 * 1000; // 1 minute
+    const POLL_INTERVAL = 3000; // 3 seconds
+    const startTime = Date.now();
+    
+    while (Date.now() - startTime < MAX_WAIT_TIME) {
+      const result = await client.request<CryptoPaymentQuery>(
+        CryptoPaymentDocument,
+        {
+          id: paymentId,
+        },
+      );
+      
+      const payment = result.cryptoPayment;
+      if (!payment) {
+        throw new Error("Payment not found");
+      }
+      
+      switch (payment.status) {
+        case "CONFIRMED":
+          return payment;
+        case "FAILED":
+          throw new Error(`Payment failed, ref id: ${paymentId}`);
+        case "EXPIRED":
+          throw new Error(`Payment expired, ref id: ${paymentId}`);
+        case "PENDING":
+          await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+          break;
+      }
+    }
+    
+    throw new Error(`Payment confirmation timed out after 1 minute, ref id: ${paymentId}`);
+  }, []);
 
   async function createCryptoPayment(
     username: string,
@@ -177,6 +215,7 @@ const useCryptoPayment = () => {
 
   return {
     sendPayment,
+    waitForPayment,
     isLoading,
     error,
   };

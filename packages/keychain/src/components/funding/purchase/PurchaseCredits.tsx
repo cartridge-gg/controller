@@ -23,6 +23,7 @@ import CheckoutForm from "./StripeCheckout";
 import { DEFAULT_AMOUNT } from "../constants";
 import { CryptoCheckout, walletIcon } from "./CryptoCheckout";
 import { ExternalWallet } from "@cartridge/controller";
+import { Balance, BalanceType } from "../Balance";
 
 enum PurchaseState {
   SELECTION = 0,
@@ -207,6 +208,9 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
             enableCustom
           />
         )}
+        {state === PurchaseState.SUCCESS && (
+          <Balance types={[BalanceType.CREDITS]} />
+        )}
       </LayoutContent>
 
       <div className="m-1 mx-6">
@@ -222,15 +226,20 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
           />
         )}
 
-        <Card className="bg-background-100 border border-background-200 p-3">
-          <CardDescription className="flex flex-row items-start gap-3">
-            <InfoIcon size="sm" className="text-foreground-200 flex-shrink-0" />
-            <p className="text-foreground-200 font-normal text-xs">
-              Credits are used to pay for network activity. They are not tokens
-              and cannot be transferred or refunded.
-            </p>
-          </CardDescription>
-        </Card>
+        {state !== PurchaseState.SUCCESS && (
+          <Card className="bg-background-100 border border-background-200 p-3">
+            <CardDescription className="flex flex-row items-start gap-3">
+              <InfoIcon
+                size="sm"
+                className="text-foreground-200 flex-shrink-0"
+              />
+              <p className="text-foreground-200 font-normal text-xs">
+                Creditss are used to pay for network activity. They are not
+                tokens and cannot be transferred or refunded.
+              </p>
+            </CardDescription>
+          </Card>
+        )}
 
         {state === PurchaseState.SUCCESS && isIframe() && (
           <Button variant="secondary" onClick={closeModal}>

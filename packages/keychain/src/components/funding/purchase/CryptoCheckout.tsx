@@ -54,10 +54,11 @@ const WALLET_CONFIG = {
   },
 } as const;
 
-enum State {
+enum CheckoutState {
   REVIEW_PURCHASE = 0,
   REQUESTING_PAYMENT = 1,
   TRANSACTION_SUBMITTED = 2,
+  PAYMENT_CONFIRMED = 3,
 }
 
 export function CryptoCheckout({
@@ -74,8 +75,8 @@ export function CryptoCheckout({
   onComplete: () => void;
 }) {
   const [error, setError] = useState<Error>();
-  const { sendPayment } = useCryptoPayment();
-  const [state, setState] = useState<State>(State.REVIEW_PURCHASE);
+  const { sendPayment, waitForPayment } = useCryptoPayment();
+  const [state, setState] = useState<CheckoutState>(CheckoutState.REVIEW_PURCHASE);
   const [explorer, setExplorer] = useState<{
     name: string;
     url: string;
@@ -119,10 +120,10 @@ export function CryptoCheckout({
 
   const getTitle = useMemo(() => {
     switch (state) {
-      case State.REVIEW_PURCHASE:
+      case CheckoutState.REVIEW_PURCHASE:
         return "Review Purchase";
-      case State.REQUESTING_PAYMENT:
-      case State.TRANSACTION_SUBMITTED:
+      case CheckoutState.REQUESTING_PAYMENT:
+      case CheckoutState.TRANSACTION_SUBMITTED:
         return "Pending Confirmation";
     }
   }, [state]);
@@ -130,24 +131,26 @@ export function CryptoCheckout({
   const handleSendTransaction = useCallback(async () => {
     setError(undefined);
     try {
-      setState(State.REQUESTING_PAYMENT);
-      await sendPayment(
+      setState(CheckoutState.REQUESTING_PAYMENT);
+      const paymentId = await sendPayment(
         walletAddress,
         creditsAmount,
         selectedWallet.platform!,
         false,
         (explorer) => {
+          setState(CheckoutState.TRANSACTION_SUBMITTED);
           setExplorer(explorer);
         },
       );
 
+      await waitForPayment(paymentId);
+
       onComplete();
-      setState(State.TRANSACTION_SUBMITTED);
     } catch (error) {
       console.error(error);
       setError(error as Error);
     } finally {
-      setState(State.REVIEW_PURCHASE);
+      setState(CheckoutState.REVIEW_PURCHASE);
     }
   }, [sendPayment, selectedWallet, creditsAmount, onComplete]);
 
@@ -160,7 +163,7 @@ export function CryptoCheckout({
         onBack={() => onBack()}
       />
       <LayoutContent className="gap-6 px-6">
-        {state !== State.TRANSACTION_SUBMITTED && (
+        {state !== CheckoutState.TRANSACTION_SUBMITTED && (
           <ReviewToken
             title={"Spending"}
             name={"USDC"}
@@ -176,6 +179,7 @@ export function CryptoCheckout({
           icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
           amount={creditsAmount.toString() + " Credits"}
           value={"$" + creditsAmount.toString()}
+          isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
         />
       </LayoutContent>
 
@@ -197,7 +201,7 @@ export function CryptoCheckout({
             {getInfo(selectedWallet)}
           </CardDescription>
         </Card>
-        {state !== State.TRANSACTION_SUBMITTED && (
+        {state !== CheckoutState.TRANSACTION_SUBMITTED && (
           <Button
             className="flex-1 text-background-100 hover:brightness-90"
             variant="secondary"
@@ -205,7 +209,7 @@ export function CryptoCheckout({
               backgroundColor: WALLET_CONFIG[selectedWallet!.type].bgColor,
               border: "none",
             }}
-            isLoading={state === State.REQUESTING_PAYMENT}
+            isLoading={state === CheckoutState.REQUESTING_PAYMENT}
             onClick={() => handleSendTransaction()}
           >
             {walletIcon(selectedWallet)}
