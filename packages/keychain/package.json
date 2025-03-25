@@ -15,7 +15,7 @@
     "test:ci": "vitest run",
     "storybook": "storybook dev -p 6001 --no-open",
     "storybook:build": "storybook build",
-    "storybook:serve": "pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6001 --silent",
+    "storybook:serve": "rm -rf storybook-static && pnpm storybook:build --quiet && pnpm http-server -c-1 storybook-static --port 6001 --silent",
     "test-storybook": "test-storybook --testTimeout=60000",
     "test:storybook:update": "start-server-and-test 'SNAPSHOT=1 pnpm storybook:serve' 6001 'pnpm test-storybook --url http://127.0.0.1:6001 -u'",
     "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6001 'pnpm test-storybook -u'"

@@ -8,6 +8,16 @@ import { Provider } from "./provider";
 
 import "../src/index.css";
 
+// Add CSS styles directly to the head
+const styleTag = document.createElement('style');
+styleTag.textContent = `
+  #storybook-root {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+`;
+document.head.appendChild(styleTag);
+
 const preview: Preview = {
   parameters: {
     controls: {
@@ -18,19 +28,12 @@ const preview: Preview = {
     },
     layout: "centered",
     viewport: {
-      defaultViewport: "mobile1",
+      defaultViewport: "desktop",
       viewports: {
-        mobile1: {
-          name: "Mobile",
-          styles: {
-            width: "375px",
-            height: "667px",
-          },
-        },
-        desktop1: {
+        desktop: {
           name: "Desktop",
           styles: {
-            width: "432px",
+            width: "500px",
             height: "600px",
           },
         },

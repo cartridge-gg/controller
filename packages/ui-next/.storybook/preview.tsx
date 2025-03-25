@@ -19,6 +19,10 @@ const loadScript = (src: string) => {
 // Add CSS styles directly to the head
 const styleTag = document.createElement('style');
 styleTag.textContent = `
+  #storybook-root {
+    padding: 0;
+    margin: 0;
+  }
   #responsive-wrapper {
     width: 432px !important;
     max-height: 600px !important;

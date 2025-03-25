@@ -124,8 +124,26 @@ jobs:
 
       - run: pnpm i --frozen-lockfile
       - run: pnpm build
-      - run: pnpm test:storybook:update
+      - name: Run Storybook tests with screenshot updates
         id: test-storybook
+        run: |
+          # Create error log file
+          touch /tmp/test-error.txt
+
+          # Run the test with output capture
+          pnpm test:storybook:update 2>&1 | tee /tmp/test-output.txt || true
+
+          # Check for specific error patterns in output
+          if grep -i "error:" /tmp/test-output.txt > /tmp/test-error.txt || grep -i "ELIFECYCLE" /tmp/test-output.txt >> /tmp/test-error.txt; then
+            echo "Detected build or test errors"
+            echo "test_failed=true" >> "$GITHUB_ENV"
+            cat /tmp/test-error.txt
+            
+            # Don't immediately fail - we'll capture the error for reporting
+            echo "error_output<<EOF" >> "$GITHUB_ENV"
+            cat /tmp/test-error.txt >> "$GITHUB_ENV"
+            echo "EOF" >> "$GITHUB_ENV"
+          fi
         continue-on-error: true
 
       - name: Update and commit snapshots
@@ -142,6 +160,13 @@ jobs:
             # Set output to indicate we made changes
             echo "changes_committed=true" >> "$GITHUB_ENV"
           else
+            # Check if test-storybook step failed due to errors (not visual differences)
+            if [ "${{ steps.test-storybook.outcome }}" == "failure" ]; then
+              echo "test_failed=true" >> "$GITHUB_ENV"
+              echo "test_error=$(cat /tmp/test-error.txt 2>/dev/null || echo 'Test failed with build errors')" >> "$GITHUB_ENV"
+              exit 1
+            fi
+            
             echo "changes_committed=false" >> "$GITHUB_ENV"
             echo "No visual differences found - skipping remaining visual test steps"
             exit 0
@@ -225,7 +250,7 @@ jobs:
             // Add test execution status
             if (process.env.test_failed === 'true') {
               comment += '⚠️ Tests completed with some issues:\n';
-              comment += '```\n' + process.env.test_error + '\n```\n\n';
+              comment += '```\n' + (process.env.error_output || process.env.test_error || 'Unknown error') + '\n```\n\n';
             }
 
             const testStatus = process.env.snapshot_failed === 'true' 
@@ -291,7 +316,15 @@ jobs:
       - name: Check for failures
         if: always()
         run: |
-          if [[ "${{ env.snapshot_failed }}" == "true" ]]; then
+          if [[ "${{ env.test_failed }}" == "true" ]]; then
+            echo "Storybook test failed with errors:"
+            if [[ -n "${{ env.error_output }}" ]]; then
+              echo "${{ env.error_output }}"
+            else
+              echo "${{ env.test_error }}"
+            fi
+            exit 1
+          elif [[ "${{ env.snapshot_failed }}" == "true" ]]; then
             echo "Visual differences detected in Storybook tests - snapshots have been updated automatically"
             exit 0
           fi
