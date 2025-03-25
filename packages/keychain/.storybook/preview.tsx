@@ -18,20 +18,20 @@ const preview: Preview = {
     },
     layout: "centered",
     viewport: {
-      defaultViewport: 'mobile1',
+      defaultViewport: "mobile1",
       viewports: {
         mobile1: {
-          name: 'Mobile',
+          name: "Mobile",
           styles: {
-            width: '375px',
-            height: '667px',
+            width: "375px",
+            height: "667px",
           },
         },
         desktop1: {
-          name: 'Desktop',
+          name: "Desktop",
           styles: {
-            width: '432px',
-            height: '600px',
+            width: "432px",
+            height: "600px",
           },
         },
       },
