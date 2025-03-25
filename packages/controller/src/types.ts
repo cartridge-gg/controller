@@ -13,6 +13,11 @@ import {
 } from "@starknet-io/types-js";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
 import { Policy, SessionPolicies } from "@cartridge/presets";
+import {
+  ExternalWallet,
+  ExternalWalletResponse,
+  ExternalWalletType,
+} from "./wallets/types";
 
 export type Session = {
   chainId: constants.StarknetChainId;
@@ -129,6 +134,25 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
+
+  // External wallet methods
+  externalDetectWallets(): Promise<ExternalWallet[]>;
+  externalConnectWallet(
+    type: ExternalWalletType,
+  ): Promise<ExternalWalletResponse>;
+  externalSignMessage(
+    type: ExternalWalletType,
+    message: string,
+  ): Promise<ExternalWalletResponse>;
+  externalSignTypedData(
+    type: ExternalWalletType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
+  ): Promise<ExternalWalletResponse>;
+  externalGetBalance(
+    type: ExternalWalletType,
+    tokenAddress?: string,
+  ): Promise<ExternalWalletResponse>;
 }
 
 export interface Profile {
@@ -183,6 +207,8 @@ export type ProfileOptions = IFrameOptions & {
   namespace?: string;
   /** The tokens to be listed on Inventory modal */
   tokens?: Tokens;
+  /** The policies to use for the profile */
+  policies?: SessionPolicies;
 };
 
 export type ProfileContextTypeVariant =

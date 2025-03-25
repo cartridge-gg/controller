@@ -13,8 +13,8 @@
     "lint": "turbo lint format:check",
     "format": "turbo format lint:fix",
     "clean": "git clean -xdf && pnpm store prune",
-    "release": "pnpm build && pnpm changeset publish --tag latest",
-    "prerelease": "pnpm build && pnpm changeset publish --tag prerelease",
+    "release": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/utils --filter=@cartridge/ui-next --filter=@cartridge/account-wasm publish --tag latest --no-git-checks --access public",
+    "release:prerelease": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/utils --filter=@cartridge/ui-next --filter=@cartridge/account-wasm publish --tag prerelease --no-git-checks --access public",
     "keychain": "pnpm --filter @cartridge/keychain",
     "controller": "pnpm --filter @cartridge/controller",
     "connector": "pnpm --filter @cartridge/connector",
@@ -31,11 +31,9 @@
     "test:storybook:update": "pnpm turbo build:deps test:storybook:update"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#420887d"
+    "@cartridge/presets": "github:cartridge-gg/presets#bf05e76"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.4.2",
-    "@changesets/cli": "^2.20.0",
     "turbo": "^2.0.12",
     "vercel": "^37.4.2"
   }

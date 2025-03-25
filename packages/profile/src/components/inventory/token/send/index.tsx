@@ -1,4 +1,3 @@
-import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context";
 import { useToken } from "#hooks/token";
 import {
@@ -10,8 +9,7 @@ import {
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
-  CopyAddress,
-  Separator,
+  Thumbnail,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -21,7 +19,6 @@ import { SendAmount } from "./amount";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
-  const { address } = useAccount();
   const { parent } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
@@ -69,22 +66,12 @@ export function SendToken() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        title={`Send ${token.meta.symbol}`}
-        description={<CopyAddress address={address} size="sm" />}
-        icon={
-          <div className="rounded-full size-11 bg-foreground-100 flex items-center justify-center">
-            <img
-              className="w-10 h-10"
-              src={token.meta.logoUrl ?? "/public/placeholder.svg"}
-            />
-          </div>
-        }
-        onBack={() => {
-          navigate("..");
-        }}
-      />
+      <LayoutHeader className="hidden" onBack={() => navigate("..")} />
       <LayoutContent className="pb-4 gap-6">
+        <div className="flex items-center gap-4">
+          <Thumbnail icon={token.meta.logoUrl} size="lg" rounded />
+          <p className="text-semibold text-lg/[22px]">Send ETH</p>
+        </div>
         <SendRecipient
           to={to}
           submitted={submitted}
@@ -101,7 +88,6 @@ export function SendToken() {
       </LayoutContent>
 
       <LayoutFooter>
-        <Separator className="bg-spacer" />
         <div
           className={cn(
             "border border-destructive-100 rounded flex items-center gap-2 p-2 cursor-pointer select-none",

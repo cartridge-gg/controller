@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.7.4",
+  "version": "0.7.8",
   "description": "Cartridge Controler Connector",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,6 @@
   "sideEffects": false,
   "scripts": {
     "build:deps": "tsup --dts-resolve",
-    "prepublish": "pnpm build:deps",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
   },

@@ -189,3 +189,14 @@ export const NoCover: Story = {
     },
   },
 };
+
+export const MultiColors: Story = {
+  render: (args) => {
+    return (
+      <div className="flex flex-col gap-4">
+        <AchievementSummary {...args} active color="#ff00ff" />
+        <AchievementSummary {...args} active color="#00ff00" />
+      </div>
+    );
+  },
+};

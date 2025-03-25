@@ -1,4 +1,4 @@
-import { CardTitle, cn, SpaceInvaderIcon } from "@/index";
+import { CardTitle, cn, Skeleton, SpaceInvaderIcon } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo, HTMLAttributes, useState, useEffect } from "react";
 
@@ -12,6 +12,8 @@ export interface ArcadeDiscoveryEventProps
     title: string;
     icon: string;
   };
+  loading?: boolean;
+  color?: string;
 }
 
 export const arcadeDiscoveryEventVariants = cva(
@@ -35,17 +37,44 @@ export const ArcadeDiscoveryEvent = ({
   timestamp,
   Icon,
   achievement,
+  loading,
   variant,
+  className,
+  color,
 }: ArcadeDiscoveryEventProps) => {
+  const bgColor = useMemo(() => {
+    switch (variant) {
+      case "faded":
+        return "bg-background-200";
+      case "default":
+      case "ghost":
+      default:
+        return "bg-background-300";
+    }
+  }, [variant]);
+
+  if (loading) {
+    return (
+      <div className={cn(arcadeDiscoveryEventVariants({ variant }), className)}>
+        <Skeleton className={cn("w-[120px] h-full", bgColor)} />
+        <Skeleton className={cn("w-[60px] h-full", bgColor)} />
+      </div>
+    );
+  }
   return (
-    <div className={cn(arcadeDiscoveryEventVariants({ variant }))}>
+    <div className={cn(arcadeDiscoveryEventVariants({ variant }), className)}>
       <div className="flex items-center gap-x-1.5">
         {Icon ? Icon : <SpaceInvaderIcon size="sm" variant="solid" />}
         <CardTitle className="text-sm font-normal tracking-normal text-foreground-100">
           {name}
         </CardTitle>
         {achievement && (
-          <AchievementEvent title={achievement.title} icon={achievement.icon} />
+          <AchievementEvent
+            title={achievement.title}
+            icon={achievement.icon}
+            className={className}
+            color={color}
+          />
         )}
       </div>
       <Timestamp timestamp={timestamp} />
@@ -53,11 +82,28 @@ export const ArcadeDiscoveryEvent = ({
   );
 };
 
-const AchievementEvent = ({ title, icon }: { title: string; icon: string }) => {
+const AchievementEvent = ({
+  title,
+  icon,
+  className,
+  color,
+}: {
+  title: string;
+  icon: string;
+  className?: string;
+  color?: string;
+}) => {
   return (
-    <div className="flex items-center gap-x-1.5">
+    <div
+      data-theme
+      className={cn(
+        "flex items-center gap-x-1.5 data-[theme=true]:text-primary",
+        className,
+      )}
+      style={{ color }}
+    >
       <p className="text-xs text-foreground-300">earned</p>
-      <div className="flex items-center gap-1 p-1 text-primary border-background-400 border rounded-sm">
+      <div className="flex items-center gap-1 p-1 border-background-400 border rounded-sm">
         <div className={cn(icon, "fa-solid w-3 h-3")} />
         <p className="text-xs">{title}</p>
       </div>

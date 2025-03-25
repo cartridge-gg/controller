@@ -17,6 +17,7 @@ const OZ_ACCOUNT_CLASS_HASHES: BigNumberish[] = [
 ];
 const CONTROLLER_CLASS_HASHES: BigNumberish[] = [
   BigInt("0x511dd75da368f5311134dee2356356ac4da1538d2ad18aa66d57c47e3757d59"),
+  BigInt("0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf"),
 ];
 
 export function useWallet({ address }: { address: string }) {

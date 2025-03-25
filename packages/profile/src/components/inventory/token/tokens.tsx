@@ -1,77 +1,86 @@
-import {
-  Card,
-  CardHeader,
-  CardListContent,
-  CardListItem,
-  CardTitle,
-} from "@cartridge/ui-next";
+import { TokenCard } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
 import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
 import { formatEther } from "viem";
 import { useTokens } from "#hooks/token";
-import { TokenPair } from "@cartridge/utils/api/cartridge";
 import { formatBalance } from "./helper";
+import { useMemo } from "react";
+import placeholder from "/public/placeholder.svg";
 
 export function Tokens() {
-  // const { isVisible } = useConnection();
-  // const { username } = useAccount();
-  // const credit = useCreditBalance({
-  //   username,
-  //   interval: isVisible ? 3000 : undefined,
-  // });
   const erc20 = useTokens();
 
+  const tokens = useMemo(
+    () =>
+      erc20.data.map((t) => ({
+        balance: t.balance,
+        meta: t.meta,
+      })),
+    [erc20.data],
+  );
+
+  const tokenData = useMemo(
+    () =>
+      tokens.map((token) => ({
+        balance: formatEther(token.balance.value || 0n),
+        address: token.meta.address,
+      })),
+    [tokens],
+  );
+
+  const { countervalues } = useCountervalue({
+    tokens: tokenData,
+  });
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Tokens</CardTitle>
-      </CardHeader>
-
-      {/* <Link to={`${location.pathname}/token/credit`} state={{ back: location.pathname }}>
-        <CardListItem icon={<CoinsIcon variant="solid" />} className="hover:opacity-80">
-          <div className="flex items-center gap-2">
-            {credit.balance.formatted}
-            <span className="text-foreground-400">CREDITS</span>
-          </div>
-        </CardListItem>
-      </Link> */}
-
-      <CardListContent>
-        {erc20.data.map((t) => (
-          <TokenCardContent token={t} key={t.meta.address} />
-        ))}
-      </CardListContent>
-    </Card>
+    <div
+      className="rounded overflow-clip w-full flex flex-col gap-y-px"
+      style={{ scrollbarWidth: "none" }}
+    >
+      {tokens.map((token) => (
+        <TokenCardContent
+          key={token.meta.address}
+          token={token}
+          values={countervalues}
+        />
+      ))}
+    </div>
   );
 }
 
 function TokenCardContent({
   token,
+  values,
 }: {
   token: { balance: Balance; meta: ERC20Metadata };
+  values: ReturnType<typeof useCountervalue>["countervalues"];
 }) {
-  const { countervalue } = useCountervalue({
-    balance: formatEther(token.balance.value || 0n),
-    pair: `${token.meta.symbol}_USDC` as TokenPair,
-  });
+  const value = useMemo(
+    () => values.find((v) => v?.address === token.meta.address),
+    [values, token.meta.address],
+  );
+  const change = useMemo(() => {
+    if (!value) {
+      return 0;
+    }
+    return value.current.value - value.period.value;
+  }, [value]);
 
   return (
     <Link to={`token/${token.meta.address}`}>
-      <CardListItem
-        icon={token.meta.logoUrl ?? "/public/placeholder.svg"}
-        className="hover:opacity-80"
-      >
-        <div className="flex items-center gap-2">
-          {formatBalance(token.balance.formatted, ["~"])}
-          <span className="text-foreground-400">{token.meta.symbol}</span>
-        </div>
-
-        {countervalue && (
-          <div className="text-foreground-400">
-            {formatBalance(countervalue.formatted, ["~"])}
-          </div>
-        )}
-      </CardListItem>
+      <TokenCard
+        image={token.meta.logoUrl || placeholder}
+        title={token.meta.name}
+        amount={`${formatBalance(token.balance.formatted, ["~"])} ${token.meta.symbol}`}
+        value={value ? formatBalance(value.current.formatted, ["~"]) : ""}
+        change={
+          !change
+            ? undefined
+            : change > 0
+              ? `+$${change.toFixed(2)}`
+              : `-$${(-change).toFixed(2)}`
+        }
+      />
     </Link>
   );
 }

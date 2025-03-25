@@ -32,7 +32,6 @@ export const mockConnection = {
   chainName: "testnet",
   policies: {},
   theme: {},
-  hasPrefundRequest: false,
   error: null,
   setController: vi.fn(),
   setContext: vi.fn(),

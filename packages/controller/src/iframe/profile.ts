@@ -20,20 +20,23 @@ export class ProfileIFrame extends IFrame<Profile> {
     slot,
     namespace,
     tokens,
+    policies,
     ...iframeOptions
   }: ProfileIFrameOptions) {
     const _profileUrl = (profileUrl || PROFILE_URL).replace(/\/$/, "");
     let _url = new URL(
       slot
-        ? namespace
-          ? `${_profileUrl}/account/${username}/slot/${slot}?ps=${encodeURIComponent(
-              slot,
-            )}&ns=${encodeURIComponent(namespace)}`
-          : `${_profileUrl}/account/${username}/slot/${slot}?ps=${encodeURIComponent(
-              slot,
-            )}`
+        ? `${_profileUrl}/account/${username}/slot/${slot}`
         : `${_profileUrl}/account/${username}`,
     );
+
+    if (slot) {
+      _url.searchParams.set("ps", encodeURIComponent(slot));
+    }
+
+    if (namespace) {
+      _url.searchParams.set("ns", encodeURIComponent(namespace));
+    }
 
     if (version) {
       _url.searchParams.set("v", encodeURIComponent(version));
@@ -45,6 +48,16 @@ export class ProfileIFrame extends IFrame<Profile> {
       _url.searchParams.set(
         "erc20",
         encodeURIComponent(tokens.erc20.toString()),
+      );
+    }
+
+    if (policies?.contracts) {
+      const methods = Object.values(policies.contracts).flatMap(
+        (contract) => contract.methods,
+      );
+      _url.searchParams.set(
+        "methods",
+        encodeURIComponent(JSON.stringify(methods)),
       );
     }
 

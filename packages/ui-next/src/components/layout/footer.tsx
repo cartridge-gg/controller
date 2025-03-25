@@ -1,5 +1,5 @@
 import { forwardRef, memo, PropsWithChildren, useEffect } from "react";
-import { cn } from "@cartridge/ui-next";
+import { cn, Separator } from "@cartridge/ui-next";
 import { useLayoutContext } from "./context";
 
 export function LayoutFooter({
@@ -14,27 +14,32 @@ export function LayoutFooter({
   }, [setWithFooter]);
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-3 w-full p-2 mt-auto bg-background shrink-0",
-        !showCatridgeLogo && "pb-4",
-        className,
-      )}
-    >
-      <div className="flex flex-col px-4 gap-2">{children}</div>
-
+    <>
+      <div
+        className={cn(
+          "flex flex-col gap-4 w-full p-6 pt-0 mt-auto bg-background shrink-0",
+          showCatridgeLogo && "pb-3",
+          className,
+        )}
+      >
+        <Separator orientation="horizontal" className="bg-spacer" />
+        {children}
+      </div>
       {showCatridgeLogo && (
-        <a
-          href="https://cartridge.gg"
-          target="_blank"
-          className="h-10 flex items-center justify-center gap-1 text-foreground-400 hover:text-primary"
-        >
-          <ControllerIcon />
-          <div className="text-xs font-medium">by</div>
-          <CartridgeLogo />
-        </a>
+        <div className="flex flex-col">
+          <Separator orientation="horizontal" className="bg-spacer" />
+          <a
+            href="https://cartridge.gg"
+            target="_blank"
+            className="h-10 flex items-center justify-center gap-1 text-foreground-400 hover:text-primary transition-colors"
+          >
+            <ControllerIcon />
+            <div className="text-xs font-medium">by</div>
+            <CartridgeLogo />
+          </a>
+        </div>
       )}
-    </div>
+    </>
   );
 }
 

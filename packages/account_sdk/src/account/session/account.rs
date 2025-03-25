@@ -27,8 +27,8 @@ pub struct SessionAccount {
     address: Felt,
     chain_id: Felt,
     block_id: BlockId,
-    session_authorization: Vec<Felt>,
-    session: Session,
+    pub session: Session,
+    pub session_authorization: Vec<Felt>,
 }
 
 impl SessionAccount {

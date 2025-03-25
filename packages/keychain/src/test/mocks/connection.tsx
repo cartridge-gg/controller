@@ -22,17 +22,22 @@ export const defaultMockConnection: ConnectionContextValue = {
   context: undefined,
   origin: "https://test.com",
   rpcUrl: "https://test.rpc.com",
+  chainId: "SN_MAIN",
   theme: {
     verified: true,
     name: "test",
     icon: "test-icon",
     cover: "test-cover",
   },
-  hasPrefundRequest: false,
   setController: vi.fn(),
   setContext: vi.fn(),
   openSettings: vi.fn(),
   controller: defaultMockController,
+  externalDetectWallets: vi.fn(),
+  externalConnectWallet: vi.fn(),
+  externalSignMessage: vi.fn(),
+  externalSignTypedData: vi.fn(),
+  externalGetBalance: vi.fn(),
 };
 
 export function createMockConnection(

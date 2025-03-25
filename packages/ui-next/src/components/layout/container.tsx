@@ -38,6 +38,7 @@ export function LayoutContainer({
             "flex flex-col flex-1 min-h-0 overflow-x-hidden",
             className,
           )}
+          style={{ scrollbarWidth: "none" }}
         >
           {children}
         </div>

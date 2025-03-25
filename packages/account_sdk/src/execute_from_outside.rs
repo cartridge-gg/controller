@@ -66,7 +66,8 @@ impl Controller {
         let (mut namespace, mut bitmask) = self.execute_from_outside_nonce;
 
         // Find the next available bit
-        let nonce_bitmask = if bitmask == u64::MAX.into() {
+        let u64_max: u128 = u64::MAX.into();
+        let nonce_bitmask = if bitmask == u64_max {
             // All bits are used, create new namespace and reset bitmask
             namespace = SigningKey::from_random().secret_scalar();
             bitmask = 1;
@@ -105,10 +106,11 @@ impl Controller {
             .map_err(ControllerError::PaymasterError)?;
 
         // Update is_registered to true after successful execution with a session
-        if let Some((key, metadata)) =
-            self.authorized_session_metadata(&Policy::from_calls(&calls), None)
+        if let Some(metadata) =
+            self.authorized_session_for_policies(&Policy::from_calls(&calls), None)
         {
             if !metadata.is_registered {
+                let key = self.session_key();
                 let mut updated_metadata = metadata;
                 updated_metadata.is_registered = true;
                 self.storage.set_session(&key, updated_metadata)?;
