@@ -16,7 +16,26 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
-    layout: "fullscreen",
+    layout: "centered",
+    viewport: {
+      defaultViewport: 'mobile1',
+      viewports: {
+        mobile1: {
+          name: 'Mobile',
+          styles: {
+            width: '375px',
+            height: '667px',
+          },
+        },
+        desktop1: {
+          name: 'Desktop',
+          styles: {
+            width: '432px',
+            height: '600px',
+          },
+        },
+      },
+    },
     preset: "cartridge",
     colorMode: "dark",
     backgrounds: {

@@ -49,14 +49,19 @@ export function LayoutContainer({
 
 function ResponsiveWrapper({ children }: PropsWithChildren) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isStorybook = typeof window !== 'undefined' && window.location.href.includes('iframe.html');
 
   if (isDesktop) {
     return (
-      <div className="flex w-screen h-dvh items-center justify-center">
+      <div className={cn(
+        "flex items-center justify-center",
+        isStorybook ? "w-full h-full" : "w-screen h-dvh"
+      )}>
         <div
           className={cn(
             "w-desktop border border-background-200 rounded-xl flex flex-col relative overflow-hidden align-middle",
             !isIframe() && "w-[432px] max-h-[600px]",
+            isStorybook && "!w-full !h-full"
           )}
         >
           {children}
