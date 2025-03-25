@@ -25,6 +25,13 @@ export const Default: Story = {
   },
 };
 
+export const Claimed: Story = {
+  args: {
+    items: ["Adventurer #94", "Adventurer #95", "Adventurer #96"],
+    isClaimed: true,
+  },
+};
+
 export const SingleItem: Story = {
   args: {
     items: ["Special Bonus Item"],
