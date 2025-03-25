@@ -1,13 +1,12 @@
-import { GiftIcon, CheckIcon } from "@/components/icons";
 import {
   Card,
   CardHeader,
   CardListContent,
-  CardListItem,
   CardTitle,
 } from "@/components/primitives";
 import { cn } from "@/utils";
 import React from "react";
+import { StarterpackCard } from "../card";
 
 export interface StarterpackClaimableProps {
   items: Array<string>;
@@ -30,25 +29,8 @@ export const StarterpackClaimable = React.forwardRef<
       </CardHeader>
 
       <CardListContent>
-        {items.map((item) => (
-          <CardListItem className="flex flex-row items-center py-2 px-3">
-            <div
-              className={cn(
-                "flex flex-row items-center gap-3 text-foreground-100",
-                isClaimed ? "text-foreground-400" : "text-foreground-100",
-              )}
-            >
-              {isClaimed ? (
-                <CheckIcon className="bg-background-300 rounded-full p-0.5" />
-              ) : (
-                <GiftIcon
-                  variant="solid"
-                  className="bg-background-300 rounded-full p-0.5"
-                />
-              )}
-              <p className="font-medium text-sm">{item}</p>
-            </div>
-          </CardListItem>
+        {items.map((item, i) => (
+          <StarterpackCard key={i} item={item} isClaimed={isClaimed} />
         ))}
       </CardListContent>
     </Card>
