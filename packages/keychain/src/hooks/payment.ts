@@ -48,13 +48,17 @@ const useCryptoPayment = () => {
         setIsLoading(true);
         setError(null);
 
-        const { id: paymentId, depositAddress, tokenAmount, tokenAddress } =
-          await createCryptoPayment(
-            controller.username(),
-            credits,
-            platform,
-            isMainnet,
-          );
+        const {
+          id: paymentId,
+          depositAddress,
+          tokenAmount,
+          tokenAddress,
+        } = await createCryptoPayment(
+          controller.username(),
+          credits,
+          platform,
+          isMainnet,
+        );
 
         switch (platform) {
           case "solana": {
@@ -96,7 +100,7 @@ const useCryptoPayment = () => {
     const MAX_WAIT_TIME = 60 * 1000; // 1 minute
     const POLL_INTERVAL = 3000; // 3 seconds
     const startTime = Date.now();
-    
+
     while (Date.now() - startTime < MAX_WAIT_TIME) {
       const result = await client.request<CryptoPaymentQuery>(
         CryptoPaymentDocument,
@@ -104,12 +108,12 @@ const useCryptoPayment = () => {
           id: paymentId,
         },
       );
-      
+
       const payment = result.cryptoPayment;
       if (!payment) {
         throw new Error("Payment not found");
       }
-      
+
       switch (payment.status) {
         case "CONFIRMED":
           return payment;
@@ -118,12 +122,14 @@ const useCryptoPayment = () => {
         case "EXPIRED":
           throw new Error(`Payment expired, ref id: ${paymentId}`);
         case "PENDING":
-          await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+          await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
           break;
       }
     }
-    
-    throw new Error(`Payment confirmation timed out after 1 minute, ref id: ${paymentId}`);
+
+    throw new Error(
+      `Payment confirmation timed out after 1 minute, ref id: ${paymentId}`,
+    );
   }, []);
 
   async function createCryptoPayment(

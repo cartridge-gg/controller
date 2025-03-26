@@ -76,7 +76,9 @@ export function CryptoCheckout({
 }) {
   const [error, setError] = useState<Error>();
   const { sendPayment, waitForPayment } = useCryptoPayment();
-  const [state, setState] = useState<CheckoutState>(CheckoutState.REVIEW_PURCHASE);
+  const [state, setState] = useState<CheckoutState>(
+    CheckoutState.REVIEW_PURCHASE,
+  );
   const [explorer, setExplorer] = useState<{
     name: string;
     url: string;
