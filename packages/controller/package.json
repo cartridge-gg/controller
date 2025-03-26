@@ -32,7 +32,6 @@
   },
   "peerDependencies": {
     "@metamask/sdk": "^0.32.1",
-    "@phantom/wallet-sdk": "^0.0.23",
     "open": "^10.1.0",
     "starknet": "catalog:",
     "starknetkit": "^2.6.1"
@@ -40,7 +39,6 @@
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/penpal": "catalog:",
-    "@metamask/sdk": "^0.32.1",
     "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
     "cbor-x": "^1.5.0",

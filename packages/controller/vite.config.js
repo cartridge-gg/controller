@@ -8,7 +8,6 @@ import { visualizer } from "rollup-plugin-visualizer";
 
 // List peer dependencies, prevents bundling into library
 const externalDeps = [
-  "@phantom/wallet-sdk",
   "@solana/web3.js",
   "@metamask/sdk", 
   "open",
