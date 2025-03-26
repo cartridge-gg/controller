@@ -6,10 +6,10 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
+    "build:deps": "pnpm build",
     "build:browser": "vite build",
     "build:node": "tsup --config tsup.node.config.ts",
     "build": "pnpm build:browser && pnpm build:node",
-    "buid:deps": "build",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "jest",
