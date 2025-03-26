@@ -71,18 +71,9 @@ fn check_policies<F>(stored_policies: &[Policy], policies: &[Policy], check_fn: 
 where
     F: Fn(&Policy, &Policy) -> bool,
 {
-    let mut remaining_stored = stored_policies.to_vec();
-    policies.iter().all(|p| {
-        if let Some(pos) = remaining_stored
-            .iter()
-            .position(|stored_p| check_fn(stored_p, p))
-        {
-            remaining_stored.remove(pos);
-            true
-        } else {
-            false
-        }
-    })
+    policies
+        .iter()
+        .all(|p| stored_policies.iter().any(|stored_p| check_fn(stored_p, p)))
 }
 
 fn check_is_requested(stored_policies: &[Policy], policies: &[Policy]) -> bool {
@@ -153,8 +144,18 @@ mod policy_check_tests {
         // Test non-matching policy
         assert!(!check_is_requested(&stored, &[policy3]));
 
-        // Test multiple policies
-        assert!(!check_is_requested(&stored, &[policy1.clone(), policy1]));
+        // Test multiple policies - should now pass since we allow duplicates
+        assert!(check_is_requested(
+            &stored,
+            &[policy1.clone(), policy1.clone()]
+        ));
+
+        // Test duplicate requested policies with multiple stored - should pass
+        let stored_multiple = vec![policy1.clone(), policy1.clone()];
+        assert!(check_is_requested(
+            &stored_multiple,
+            &[policy1.clone(), policy1.clone()]
+        ));
     }
 
     #[test]
@@ -187,7 +188,17 @@ mod policy_check_tests {
         assert!(!check_is_authorized(&stored, &[policy3]));
 
         // Test multiple policies
-        assert!(!check_is_authorized(&stored, &[policy1.clone(), policy1]));
+        assert!(check_is_authorized(
+            &stored,
+            &[policy1.clone(), policy1.clone()]
+        ));
+
+        // Test duplicate authorized policies - this should pass after our fix
+        let stored_multiple = vec![policy1.clone(), policy1.clone()];
+        assert!(check_is_authorized(
+            &stored_multiple,
+            &[policy1.clone(), policy1.clone()]
+        ));
     }
 
     #[test]
