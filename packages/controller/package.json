@@ -21,8 +21,8 @@
       "import": "./dist/index.js"
     },
     "./session": {
-      "types": "./dist/session/index.d.ts",
-      "import": "./dist/session/index.js"
+      "types": "./dist/session.d.ts",
+      "import": "./dist/session.js"
     },
     "./session/node": {
       "types": "./dist/node/index.d.ts",
