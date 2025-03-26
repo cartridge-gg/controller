@@ -1,5 +1,3 @@
-use std::ptr::null;
-
 use cainome::cairo_serde::{CairoSerde, NonZero};
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::{Call, FeeEstimate, Felt, InvokeTransactionResult};
@@ -69,6 +67,9 @@ impl Controller {
         session_signer: SigningKey,
         session: Session,
     ) -> Result<SessionAccount, ControllerError> {
+        #[cfg(target_arch = "wasm32")]
+        use web_sys::console;
+
         let hash = session
             .inner
             .get_message_hash_rev_1(self.chain_id, self.address);
@@ -87,6 +88,9 @@ impl Controller {
             },
         )?;
 
+        #[cfg(target_arch = "wasm32")]
+        console::log_1(&format!("controller address: {:?}", self.address).into());
+
         let session_account = SessionAccount::new(
             self.provider().clone(),
             Signer::Starknet(session_signer.clone()),
@@ -102,7 +106,7 @@ impl Controller {
             .map(|auth| auth.to_string())
             .collect::<Vec<String>>();
 
-        let _ = session::create_session(
+        let created_session = session::create_session(
             self.username.clone(),
             self.address.to_string(),
             self.app_id.to_string(),
@@ -114,6 +118,9 @@ impl Controller {
             session.inner.expires_at.to_string(),
         )
         .await;
+
+        #[cfg(target_arch = "wasm32")]
+        console::log_1(&format!("Created session: {:?}", created_session).into());
 
         Ok(session_account)
     }
