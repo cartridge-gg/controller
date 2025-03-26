@@ -143,6 +143,14 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
+  async sendTransaction(_txn: any): Promise<ExternalWalletResponse<any>> {
+    return {
+      success: false,
+      wallet: this.type,
+      error: "Not implemented",
+    };
+  }
+
   async switchChain(chainId: string): Promise<boolean> {
     try {
       if (!this.isAvailable()) {
