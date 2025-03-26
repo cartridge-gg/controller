@@ -26,6 +26,7 @@ import { defaultTheme, controllerConfigs } from "@cartridge/presets";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { useThemeEffect } from "@cartridge/ui-next";
 import { shortString } from "starknet";
+import { RpcProvider } from "starknet";
 
 type ParentMethods = AsyncMethodReturns<{
   close: () => Promise<void>;
@@ -69,7 +70,7 @@ export function useConnectionValue() {
     ...defaultTheme,
   });
   const [controller, setController] = useState(window.controller);
-  const chainId = useMemo(() => controller?.chainId(), [controller]);
+  const [chainId, setChainId] = useState<string>();
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -85,6 +86,23 @@ export function useConnectionValue() {
     return { theme, preset, policies };
   }, []);
 
+  // Fetch chain ID from RPC provider when rpcUrl changes
+  useEffect(() => {
+    const fetchChainId = async () => {
+      try {
+        const provider = new RpcProvider({ nodeUrl: rpcUrl });
+        const id = await provider.getChainId();
+        setChainId(id);
+      } catch (e) {
+        console.error("Failed to fetch chain ID:", e);
+      }
+    };
+
+    if (rpcUrl) {
+      fetchChainId();
+    }
+  }, [rpcUrl]);
+
   // Handle controller initialization
   useEffect(() => {
     // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
@@ -97,7 +115,11 @@ export function useConnectionValue() {
 
   // Check if preset is verified for the current origin
   useEffect(() => {
-    if (!urlParams.preset) {
+    if (
+      !urlParams.preset ||
+      !controllerConfigs?.[urlParams.preset] ||
+      !controllerConfigs?.[urlParams.preset]?.origin
+    ) {
       return;
     }
 
@@ -105,34 +127,41 @@ export function useConnectionValue() {
     setVerified(
       !!origin &&
         allowedOrigins.some((allowedOrigin) => {
-          const originUrl = new URL(origin);
-          return originUrl.hostname === allowedOrigin;
+          try {
+            const originUrl = new URL(origin);
+            return originUrl.hostname === allowedOrigin;
+          } catch (e) {
+            console.error("Invalid origin URL:", e);
+            return false;
+          }
         }),
     );
   }, [origin, urlParams]);
 
   // Handle theme configuration
   useEffect(() => {
-    const { preset } = urlParams;
+    const { preset, theme: urlTheme } = urlParams;
 
-    if (urlParams.theme) {
-      const decodedPreset = decodeURIComponent(urlParams.theme);
-      if (controllerConfigs[decodedPreset]?.theme) {
-        setVerified(true);
-        setTheme({
-          ...controllerConfigs[decodedPreset].theme,
-          verified: true,
-        });
-      } else {
-        console.error("Theme preset not valid");
+    if (urlTheme) {
+      try {
+        const decodedPreset = decodeURIComponent(urlTheme);
+        if (controllerConfigs?.[decodedPreset]?.theme) {
+          setVerified(true);
+          setTheme({
+            ...controllerConfigs[decodedPreset].theme,
+            verified: true,
+          });
+        } else {
+          console.error("Theme preset not valid");
+        }
+      } catch (e) {
+        console.error("Failed to decode theme preset:", e);
       }
-    } else if (preset && preset in controllerConfigs) {
-      if (controllerConfigs[preset]?.theme) {
-        setTheme({
-          verified,
-          ...controllerConfigs[preset].theme,
-        });
-      }
+    } else if (preset && controllerConfigs?.[preset]?.theme) {
+      setTheme({
+        verified,
+        ...controllerConfigs[preset].theme,
+      });
     }
   }, [urlParams, verified]);
 
@@ -156,21 +185,22 @@ export function useConnectionValue() {
       } catch (e) {
         console.error("Failed to parse policies:", e);
       }
-    } else if (
-      chainId &&
-      preset &&
-      preset in controllerConfigs &&
-      controllerConfigs[preset]?.chains
-    ) {
-      const encodedChainId = shortString.encodeShortString(chainId);
-      if (encodedChainId in controllerConfigs[preset].chains) {
-        // Set policies from preset if no URL policies
-        setPolicies(
-          parseSessionPolicies({
-            verified,
-            policies: controllerConfigs[preset].chains[encodedChainId].policies,
-          }),
-        );
+    } else if (chainId && preset && controllerConfigs?.[preset]?.chains) {
+      try {
+        const decodedChainId = shortString.decodeShortString(chainId);
+        const presetChains = controllerConfigs[preset].chains;
+
+        if (presetChains?.[decodedChainId]?.policies) {
+          // Set policies from preset if no URL policies
+          setPolicies(
+            parseSessionPolicies({
+              verified,
+              policies: presetChains[decodedChainId].policies,
+            }),
+          );
+        }
+      } catch (e) {
+        console.error("Failed to process chain policies:", e);
       }
     }
   }, [urlParams, chainId, verified]);
@@ -194,14 +224,23 @@ export function useConnectionValue() {
   }, [setOrigin, setRpcUrl, setContext, setController]);
 
   const logout = useCallback(() => {
-    window.controller?.disconnect().then(() => {
-      setController(undefined);
+    if (window.controller?.disconnect) {
+      window.controller
+        .disconnect()
+        .then(() => {
+          setController(undefined);
 
-      context?.resolve?.({
-        code: ResponseCodes.NOT_CONNECTED,
-        message: "User logged out",
-      });
-    });
+          if (context?.resolve) {
+            context.resolve({
+              code: ResponseCodes.NOT_CONNECTED,
+              message: "User logged out",
+            });
+          }
+        })
+        .catch((err) => {
+          console.error("Disconnect failed:", err);
+        });
+    }
   }, [context, setController]);
 
   const openSettings = useCallback(() => {
@@ -222,8 +261,12 @@ export function useConnectionValue() {
       message: "User aborted",
     });
     setContext(undefined); // clears context
-    await parent.close();
-  }, [context, parent, setContext, logout]);
+    try {
+      await parent.close();
+    } catch (e) {
+      console.error("Failed to close modal:", e);
+    }
+  }, [context, parent, setContext]);
 
   const openModal = useCallback(async () => {
     if (!parent || !context?.resolve) return;
@@ -232,7 +275,11 @@ export function useConnectionValue() {
       code: ResponseCodes.USER_INTERACTION_REQUIRED,
       message: "User interaction required",
     });
-    await parent.close();
+    try {
+      await parent.close();
+    } catch (e) {
+      console.error("Failed to open modal:", e);
+    }
   }, [context, parent]);
 
   const externalDetectWallets = useCallback(() => {
@@ -240,7 +287,10 @@ export function useConnectionValue() {
       return Promise.resolve([]);
     }
 
-    return parent.externalDetectWallets();
+    return parent.externalDetectWallets().catch((err) => {
+      console.error("Failed to detect external wallets:", err);
+      return [];
+    });
   }, [parent]);
 
   const externalConnectWallet = useCallback(
@@ -302,6 +352,7 @@ export function useConnectionValue() {
     policies,
     theme,
     verified,
+    chainId,
     setController,
     setContext,
     closeModal,

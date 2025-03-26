@@ -2,7 +2,7 @@ import { LayoutContainer, CheckIcon, LayoutHeader } from "@cartridge/ui-next";
 
 export function Success() {
   return (
-    <LayoutContainer>
+    <LayoutContainer className="pb-12">
       <LayoutHeader
         variant="expanded"
         Icon={CheckIcon}

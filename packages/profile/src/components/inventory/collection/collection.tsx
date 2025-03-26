@@ -17,12 +17,13 @@ import {
   CheckboxIcon,
   cn,
   CopyAddress,
-  Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useMemo } from "react";
-import { CollectionImage } from "./image";
 import { useCollection } from "#hooks/collection";
 import { Collectibles } from "./collectibles";
+import placeholder from "/public/placeholder.svg";
+import { addAddressPadding } from "starknet";
+import { CollectionHeader } from "./header";
 
 export function Collection() {
   const { address: contractAddress, tokenId } = useParams();
@@ -65,50 +66,69 @@ export function Collection() {
       {(() => {
         switch (status) {
           case "loading": {
-            return <LayoutContentLoader />;
+            return (
+              <>
+                <LayoutHeader
+                  className="hidden"
+                  onBack={() => navigate("..")}
+                />
+                <LayoutContentLoader />
+              </>
+            );
           }
           case "error": {
-            return <LayoutContentError />;
+            return (
+              <>
+                <LayoutHeader
+                  className="hidden"
+                  onBack={() => navigate("..")}
+                />
+                <LayoutContentError />
+              </>
+            );
           }
           default: {
             if (!collection || !assets) {
-              return <LayoutContentLoader />;
+              return (
+                <>
+                  <LayoutHeader
+                    className="hidden"
+                    onBack={() => navigate("..")}
+                  />
+                  <LayoutContentLoader />
+                </>
+              );
             }
 
             return (
               <>
                 <LayoutHeader
-                  title={collection.name}
-                  description={
-                    <CopyAddress address={collection.address!} size="sm" />
-                  }
-                  icon={
-                    <CollectionImage
-                      imageUrl={collection.imageUrl || undefined}
-                      size="xs"
-                    />
-                  }
-                  onBack={() => {
-                    navigate("..");
-                  }}
+                  className="hidden"
+                  onBack={() => navigate("..")}
                 />
+                <LayoutContent className={cn("p-6 flex flex-col gap-y-4")}>
+                  <CollectionHeader
+                    image={collection.imageUrl || placeholder}
+                    title={collection.name}
+                    subtitle={
+                      <CopyAddress
+                        address={addAddressPadding(collection.address!)}
+                        size="xs"
+                      />
+                    }
+                  />
 
-                <LayoutContent
-                  className={cn(
-                    "pb-0 flex flex-col gap-y-4",
-                    !selection && "pb-4",
-                  )}
-                >
                   <div
-                    className="flex items-center gap-x-1.5 text-[11px]/3 cursor-pointer font-semibold self-start"
+                    className="flex items-center gap-x-1.5 text-xs cursor-pointer self-start text-foreground-300"
                     onClick={handleSelectAll}
                   >
                     <CheckboxIcon
+                      className={cn(selection && "text-foreground-100")}
                       variant={selection ? "minus-line" : "unchecked-line"}
                       size="sm"
                     />
-                    <div className="text-foreground-400 font-semibold uppercase">
-                      {selection ? `${tokenIds.length} selected` : "Select all"}
+                    <div>
+                      {selection ? `${tokenIds.length} Selected` : "Select all"}
                     </div>
                   </div>
 
@@ -122,16 +142,15 @@ export function Collection() {
 
                 <LayoutFooter
                   className={cn(
-                    "relative flex flex-col items-center justify-center gap-y-4 pb-6 px-4 bg-background pt-0",
+                    "relative flex flex-col items-center justify-center gap-y-4 bg-background",
                     !selection && "hidden",
                   )}
                 >
-                  <Separator orientation="horizontal" className="bg-spacer" />
                   <Link
                     className="flex items-center justify-center gap-x-4 w-full"
                     to={`send?${searchParams.toString()}`}
                   >
-                    <Button className="w-full">Send</Button>
+                    <Button className="w-full">{`Send (${tokenIds.length})`}</Button>
                   </Link>
                 </LayoutFooter>
               </>

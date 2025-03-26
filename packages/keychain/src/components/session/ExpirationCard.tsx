@@ -45,7 +45,7 @@ export function ExpirationCard() {
             7d
           </ToggleGroupItem>
           <ToggleGroupItem
-            value="0"
+            value={(60 * 60 * 24 * 365 * 100).toString()}
             aria-label="Never"
             className="rounded-r-full p-4 data-[state=on]:bg-background-200 data-[state=on]:text-foreground hover:text-foreground-200 bg-background-100 hover:bg-background-100"
           >

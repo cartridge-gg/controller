@@ -10,7 +10,6 @@ import { useConnection } from "@/hooks/connection";
 import { ERC20 as ERC20Contract } from "@cartridge/utils";
 import {
   Price,
-  TokenPair,
   usePriceByAddressesQuery,
 } from "@cartridge/utils/api/cartridge";
 import { useQuery } from "react-query";
@@ -62,7 +61,7 @@ export interface TokensContextValue {
   feeToken?: ERC20;
   isLoading: boolean;
   error?: Error;
-  registerPair: (pair: TokenPair) => void;
+  registerPair: (address: string) => void;
 }
 
 export const TokensContext = createContext<TokensContextValue>({
@@ -190,8 +189,8 @@ export function TokensProvider({
     if (priceData?.priceByAddresses) {
       setTokens((prevTokens) => {
         const newTokens = { ...prevTokens };
-        priceData.priceByAddresses.forEach((price, index) => {
-          const address = addresses[index];
+        priceData.priceByAddresses.forEach((price) => {
+          const address = getChecksumAddress(price.base);
           if (newTokens[address]) {
             newTokens[address] = {
               ...newTokens[address],

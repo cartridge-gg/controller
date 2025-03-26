@@ -18,6 +18,7 @@ export type ConnectionContextValue = {
   controller?: Controller;
   origin?: string;
   rpcUrl?: string;
+  chainId?: string;
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
   setContext: (context: ConnectionCtx) => void;

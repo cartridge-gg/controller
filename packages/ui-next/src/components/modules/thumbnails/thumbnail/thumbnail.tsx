@@ -18,6 +18,7 @@ export const thumbnailVariants = cva(
         md: "w-8 h-8 p-0.5 data-[centered=true]:p-[4px]",
         lg: "w-10 h-10 p-[3px] data-[centered=true]:p-[5px]",
         xl: "w-12 h-12 p-[3px] data-[centered=true]:p-1.5",
+        xxl: "w-20 h-20 p-1 data-[centered=true]:p-1.5",
       },
     },
     defaultVariants: {
@@ -28,7 +29,7 @@ export const thumbnailVariants = cva(
 );
 
 export interface ThumbnailProps extends VariantProps<typeof thumbnailVariants> {
-  icon: string | React.ReactNode;
+  icon?: string | React.ReactNode;
   subIcon?: React.ReactNode;
   rounded?: boolean;
   centered?: boolean;
@@ -75,7 +76,9 @@ export const Thumbnail = ({
       data-centered={centered}
       className={cn(thumbnailVariants({ variant, size }), className)}
     >
-      {typeof icon === "string" ? (
+      {icon === undefined || null ? (
+        <div className="w-full h-full flex aspect-square bg-[image:var(--theme-icon-url)] bg-cover bg-center" />
+      ) : typeof icon === "string" ? (
         icon.includes("fa-") ? (
           <div className="w-full h-full flex items-center justify-center p-0.5">
             <div className={cn("w-4/5 h-4/5 fa-solid", icon)} />
