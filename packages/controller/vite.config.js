@@ -13,15 +13,11 @@ const externalDeps = [
   "@metamask/sdk", 
   "open",
   "starknet",
-  "starknetkit",
-  "@cartridge/penpal", 
+  "starknetkit", 
 ];
 
 export default defineConfig(({ mode }) => ({
   plugins: [
-    nodePolyfills({
-      exclude: ['fs']
-    }),
     wasm(),
     topLevelAwait(),
     dts({
@@ -30,8 +26,6 @@ export default defineConfig(({ mode }) => ({
       include: ["src/**/*.ts"],
       exclude: ["src/**/*.test.ts"], 
     }),
-    // --- Development/Analysis ---
-    // Add visualizer in build mode to analyze bundle size
     mode === "production" &&
       visualizer({
         open: false, 
@@ -68,6 +62,12 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       external: (id) => {
+        // remove wasm files from bundle
+        const isWasmFile = id.endsWith('.wasm');
+        if (isWasmFile) {
+          return true;
+        }
+
         return externalDeps.some(
           (dep) => id === dep || id.startsWith(`${dep}/`)
         );
