@@ -7,7 +7,7 @@ import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
 import { DeployController } from "./DeployController";
-import { PurchaseCredits } from "./funding/PurchaseCredits";
+import { PurchaseCredits } from "./funding/purchase/PurchaseCredits";
 import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";

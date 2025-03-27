@@ -7,9 +7,9 @@ import {
 import {
   Card,
   CardHeader,
-  CardListContent,
-  CardListItem,
   CardTitle,
+  TokenCard,
+  TokenSummary,
 } from "@cartridge/ui-next";
 import { useCreditBalance } from "@cartridge/utils";
 
@@ -21,13 +21,10 @@ export enum BalanceType {
 type BalanceProps = {
   title?: string;
   types: BalanceType[];
-  /**
-   * Should only be used for demo purpose
-   */
-  balance?: number;
+  amount?: number;
 };
 
-export function Balance({ types, title, balance }: BalanceProps) {
+export function Balance({ types, title, amount }: BalanceProps) {
   const { controller } = useController();
   const { balance: creditBalance } = useCreditBalance({
     username: controller?.username(),
@@ -36,6 +33,10 @@ export function Balance({ types, title, balance }: BalanceProps) {
 
   const { token } = useFeeToken();
 
+  if (!token) {
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -43,55 +44,40 @@ export function Balance({ types, title, balance }: BalanceProps) {
           {title ?? "Balance"}
         </CardTitle>
       </CardHeader>
-
-      <CardListContent>
+      <TokenSummary>
         {types.includes(BalanceType.CREDITS) && (
-          <CardListItem className="flex flex-row items-center p-3">
-            <div className="flex flex-row items-center gap-3 w-full">
-              <div className="p-1 bg-background-300 rounded-full">
-                <img src="/ERC-20-Icon.svg" className="size-8" />
-              </div>
-              <div className="flex flex-col gap-0.5 w-full">
-                <div className="w-full flex flex-row item-center justify-between">
-                  <p className="text-foreground-100 font-medium text-sm">
-                    Credits
-                  </p>
-                  <p className="text-foreground-100 font-medium text-sm">
-                    {balance
-                      ? `$${balance.toFixed(2)}`
-                      : creditBalance.formatted}
-                  </p>
-                </div>
-                <p className="text-foreground-300 font-normal text-xs">
-                  {balance
-                    ? balance
-                    : creditBalance.formatted
-                      ? creditBalance.formatted
-                      : "Loading"}{" "}
-                  Credits
-                </p>
-              </div>
-            </div>
-          </CardListItem>
+          <TokenCard
+            image={"https://static.cartridge.gg/presets/credit/icon.svg"}
+            title={"Credits"}
+            amount={
+              amount
+                ? `$${amount.toFixed(2).toString()}`
+                : `${creditBalance.formatted || "Loading"} Credits`
+            }
+            value={
+              amount
+                ? `$${amount.toFixed(2).toString()}`
+                : creditBalance.formatted || ""
+            }
+          />
         )}
-
         {types.includes(BalanceType.FEE_TOKEN) && token && (
-          <CardListItem icon={token.icon}>
-            <div className="flex items-center gap-2">
-              {token?.balance !== undefined
-                ? formatBalance(token.balance)
-                : "Loading"}
-              <span className="text-foreground-400">{token.symbol}</span>
-            </div>
-
-            {token && token.balance !== undefined && token.price ? (
-              <div className="text-foreground-400">
-                {convertTokenAmountToUSD(token.balance, 18, token.price)}
-              </div>
-            ) : null}
-          </CardListItem>
+          <TokenCard
+            image={token.icon || ""}
+            title={token.name}
+            amount={
+              token?.balance !== undefined
+                ? `${formatBalance(token.balance)} ${token.symbol}`
+                : "Loading"
+            }
+            value={
+              token && token.balance !== undefined && token.price
+                ? convertTokenAmountToUSD(token.balance, 18, token.price)
+                : ""
+            }
+          />
         )}
-      </CardListContent>
+      </TokenSummary>
     </Card>
   );
 }

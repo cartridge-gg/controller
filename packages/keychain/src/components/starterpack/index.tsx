@@ -127,7 +127,7 @@ export function StarterPack() {
     },
   ];
 
-  const balance = 0;
+  const balance = 10;
   const price = 5;
 
   return (

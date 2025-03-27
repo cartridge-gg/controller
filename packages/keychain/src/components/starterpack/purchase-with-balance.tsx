@@ -57,7 +57,7 @@ export const PurchaseWithBalance = React.memo(() => {
       <LayoutContent>
         {purchaseState === PurchaseState.REVIEW ? (
           <Balance
-            balance={price}
+            amount={price}
             types={[BalanceType.CREDITS]}
             title="Spending"
           />

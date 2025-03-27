@@ -13,7 +13,7 @@ import { LayoutContainer } from "@cartridge/ui-next";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { useEffect, useMemo, useState } from "react";
-import StripeCheckout from "../funding/StripeCheckout";
+import StripeCheckout from "../funding/purchase/StripeCheckout";
 import { useQuery } from "react-query";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
