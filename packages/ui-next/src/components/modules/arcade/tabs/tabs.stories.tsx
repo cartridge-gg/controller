@@ -11,19 +11,7 @@ const meta: Meta<typeof ArcadeTabs> = {
     layout: "padded",
   },
   args: {
-    discover: true,
-    inventory: true,
-    achievements: true,
-    leaderboard: true,
-    guilds: true,
-    activity: true,
-    onDiscoverClick: fn(),
-    onInventoryClick: fn(),
-    onAchievementsClick: fn(),
-    onLeaderboardClick: fn(),
-    onGuildsClick: fn(),
-    onActivityClick: fn(),
-    defaultValue: "discover",
+    onTabClick: fn(),
   },
 };
 
@@ -39,19 +27,23 @@ export const Default: Story = {
       <TabsContent value="leaderboard">Leaderboard content</TabsContent>
       <TabsContent value="guilds">Guilds content</TabsContent>
       <TabsContent value="activity">Activity content</TabsContent>
+      <TabsContent value="metrics">Metrics content</TabsContent>
+      <TabsContent value="info">Info content</TabsContent>
+      <TabsContent value="marketplace">Marketplace content</TabsContent>
     </ArcadeTabs>
   ),
 };
 
-export const Inventory: Story = {
+export const Player: Story = {
   args: {
     defaultValue: "inventory",
+    order: ["inventory", "achievements", "guilds", "activity"],
   },
 };
 
-export const Reversed: Story = {
+export const Game: Story = {
   args: {
     defaultValue: "activity",
-    order: ["activity", "guilds", "achievements", "inventory", "discover"],
+    order: ["activity", "leaderboard", "info", "metrics", "marketplace"],
   },
 };
