@@ -104,10 +104,10 @@ impl Controller {
             .collect::<Vec<String>>();
 
         let created_session = session::create_session(
-            hash.to_string(),
+            format!("0x{:x}", hash),
             self.username.clone(),
-            self.address.to_string(),
-            self.chain_id.to_string(),
+            format!("0x{:x}", self.address),
+            format!("0x{:x}", self.chain_id),
             self.app_id.to_string(),
             Some(session.metadata.clone()),
             session_authorization.clone(),
