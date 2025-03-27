@@ -1,14 +1,35 @@
-import { useMemo } from "react";
+import { HTMLAttributes, useMemo } from "react";
 import { AchievementPlayerLabel } from "../player-label";
+import { cva, VariantProps } from "class-variance-authority";
+import { cn } from "@/utils";
 
-interface AchievementPlayerHeaderProps {
+interface AchievementPlayerHeaderProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof achievementPlayerHeaderVariants> {
   username: string;
   address: string;
   points: number;
   icon?: string;
   follower?: boolean;
+  followerCount?: number;
+  followingCount?: number;
   followers?: string[];
+  compacted?: boolean;
 }
+
+const achievementPlayerHeaderVariants = cva("flex flex-col gap-y-4", {
+  variants: {
+    variant: {
+      default: "",
+      gold: "",
+      silver: "",
+      bronze: "",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 export const AchievementPlayerHeader = ({
   username,
@@ -16,22 +37,38 @@ export const AchievementPlayerHeader = ({
   points,
   icon,
   follower,
+  followerCount,
+  followingCount,
   followers,
+  compacted,
+  variant,
+  className,
+  ...props
 }: AchievementPlayerHeaderProps) => {
   return (
-    <div className="flex flex-col gap-y-4">
+    <div
+      className={cn(achievementPlayerHeaderVariants({ variant }), className)}
+      {...props}
+    >
       <AchievementPlayerLabel
         username={username}
         address={address}
         icon={icon}
+        variant={variant}
       />
       <div className="flex flex-col">
         <div className="h-6 flex items-center gap-x-2">
           <p className="text-xs text-foreground-300 flex items-center gap-x-1">
             <strong className="font-medium text-foreground-100">
-              {followers?.length?.toLocaleString() || 0}
+              {followerCount?.toLocaleString() || 0}
             </strong>
             Followers
+          </p>
+          <p className="text-xs text-foreground-300 flex items-center gap-x-1">
+            <strong className="font-medium text-foreground-100">
+              {followingCount?.toLocaleString() || 0}
+            </strong>
+            Following
           </p>
           <p className="text-xs text-foreground-300 flex items-center gap-x-1">
             <strong className="font-medium text-foreground-100">
@@ -41,7 +78,7 @@ export const AchievementPlayerHeader = ({
           </p>
           {follower && <FollowerTag />}
         </div>
-        <FollowerDescription followers={followers || []} />
+        {!compacted && <FollowerDescription followers={followers || []} />}
       </div>
     </div>
   );

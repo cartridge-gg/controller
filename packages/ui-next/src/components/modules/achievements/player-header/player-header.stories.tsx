@@ -14,6 +14,8 @@ const meta: Meta<typeof AchievementPlayerHeader> = {
     address: "0x1234567890123456789012345678901234567890",
     points: 2800,
     follower: true,
+    followerCount: 1337,
+    followingCount: 42,
     followers: [
       "clicksave",
       "shinobi",
@@ -55,23 +57,53 @@ export const NotFollower: Story = {
 export const NoFollowers: Story = {
   args: {
     followers: [],
+    followerCount: 0,
+    followingCount: 0,
   },
 };
 
 export const OneFollower: Story = {
   args: {
     followers: ["clicksave"],
+    followerCount: 1,
+    followingCount: 1,
   },
 };
 
 export const TwoFollowers: Story = {
   args: {
     followers: ["clicksave", "shinobi"],
+    followerCount: 2,
+    followingCount: 2,
   },
 };
 
 export const ThreeFollowers: Story = {
   args: {
     followers: ["clicksave", "shinobi", "johndoe"],
+    followerCount: 3,
+    followingCount: 3,
+  },
+};
+
+export const Compacted: Story = {
+  args: {
+    follower: false,
+    compacted: true,
+  },
+};
+
+export const Silver: Story = {
+  args: {
+    follower: true,
+    variant: "silver",
+  },
+};
+
+export const GoldCompacted: Story = {
+  args: {
+    follower: false,
+    compacted: true,
+    variant: "gold",
   },
 };
