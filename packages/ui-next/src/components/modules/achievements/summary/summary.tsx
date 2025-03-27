@@ -29,7 +29,7 @@ const achievementSummaryVariants = cva("border border-transparent", {
   variants: {
     variant: {
       default: "",
-      faded: "border-background-200 bg-background-200",
+      faded: "",
       ghost: "",
     },
   },
