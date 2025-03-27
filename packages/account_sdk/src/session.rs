@@ -88,9 +88,6 @@ impl Controller {
             },
         )?;
 
-        #[cfg(target_arch = "wasm32")]
-        console::log_1(&format!("controller address: {:?}", self.address).into());
-
         let session_account = SessionAccount::new(
             self.provider().clone(),
             Signer::Starknet(session_signer.clone()),
@@ -107,12 +104,13 @@ impl Controller {
             .collect::<Vec<String>>();
 
         let created_session = session::create_session(
+            hash.to_string(),
             self.username.clone(),
             self.address.to_string(),
-            self.app_id.to_string(),
             self.chain_id.to_string(),
-            session_authorization,
-            Some(session.metadata),
+            self.app_id.to_string(),
+            Some(session.metadata.clone()),
+            session_authorization.clone(),
             SignerType::starknet_account,
             None,
             session.inner.expires_at.to_string(),
