@@ -19,3 +19,21 @@ export default meta;
 type Story = StoryObj<typeof AchievementPlayerLabel>;
 
 export const Default: Story = {};
+
+export const Gold: Story = {
+  args: {
+    variant: "gold",
+  },
+};
+
+export const Silver: Story = {
+  args: {
+    variant: "silver",
+  },
+};
+
+export const Bronze: Story = {
+  args: {
+    variant: "bronze",
+  },
+};
