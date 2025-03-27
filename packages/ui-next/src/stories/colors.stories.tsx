@@ -42,6 +42,8 @@ export const Background: Story = {
       <>
         <Palette color="bg-background" label="bg-background" />
         <Palette color="bg-background-100" label="bg-background-100" />
+        <Palette color="bg-background-125" label="bg-background-125" />
+        <Palette color="bg-background-150" label="bg-background-150" />
         <Palette color="bg-background-200" label="bg-background-200" />
         <Palette color="bg-background-300" label="bg-background-300" />
         <Palette color="bg-background-400" label="bg-background-400" />
