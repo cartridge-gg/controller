@@ -1,6 +1,8 @@
 // export * from "./achievement";
 export * from "./alert";
 export * from "./arrow-turn-down";
+export * from "./award";
+export * from "./award-simple";
 export * from "./check";
 export * from "./checkbox-checked";
 export * from "./checkbox-unchecked";
@@ -35,6 +37,7 @@ export * from "./mystery";
 export * from "./pacman";
 export * from "./play";
 export * from "./question";
+export * from "./ribbon";
 export * from "./robot";
 export * from "./scan-qr";
 export * from "./scan-self";
