@@ -140,11 +140,20 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   }, [state]);
 
   const appearance = {
-    theme: "night",
+    theme: "flat",
     variables: {
-      colorPrimary: "#FBCB4A",
-      colorBackground: "#161A17",
+      colorBackground: "#1E221F",
+      colorText: "#505050",
+      colorTextPlaceholder: "#505050",
+      borderRadius: "4px",
       focusBoxShadow: "none",
+    },
+    rules: {
+      ".Input": {
+        border: "1px solid #242824",
+        color: "#FFFFFF",
+        padding: "14px",
+      },
     },
   } as Appearance;
 
@@ -220,7 +229,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
       <LayoutFooter>
         {error && (
           <ErrorAlert
-            variant="warning"
+            variant="error"
             title="Purchase Alert"
             description={error.message}
           />

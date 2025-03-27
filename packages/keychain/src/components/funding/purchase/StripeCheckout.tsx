@@ -9,13 +9,11 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  CoinsIcon,
-  CopyAddress,
   Button,
   LayoutHeader,
+  CreditCardIcon,
 } from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { useConnection } from "@/hooks/connection";
 
 type StripeCheckoutProps = {
   creditsAmount: number;
@@ -30,7 +28,6 @@ export default function StripeCheckout({
 }: StripeCheckoutProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const { controller } = useConnection();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -78,17 +75,15 @@ export default function StripeCheckout({
   };
 
   const paymentElementOptions: StripePaymentElementOptions = {
-    layout: "accordion",
+    layout: "tabs",
   };
 
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={"Purchase $" + creditsAmount}
-        description={
-          controller && <CopyAddress address={controller.address()} />
-        }
-        icon={<CoinsIcon variant="solid" size="lg" />}
+        title={"Enter Payment Details"}
+        description={"$" + creditsAmount.toFixed(2)}
+        icon={<CreditCardIcon variant="solid" size="lg" />}
         onBack={onBack}
       />
       <LayoutContent className="gap-6">
@@ -104,7 +99,7 @@ export default function StripeCheckout({
       <LayoutFooter>
         {error && (
           <ErrorAlert
-            variant="expanded"
+            variant="error"
             title="Stripe Checkout Error"
             description={error.message}
           />
