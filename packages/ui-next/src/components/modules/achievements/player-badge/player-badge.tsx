@@ -79,9 +79,11 @@ export const AchievementPlayerBadge = ({
       {...props}
     >
       <Thumbnail
-        icon={icon ?? <SpaceInvaderIcon variant="solid" />}
+        icon={
+          icon ?? <SpaceInvaderIcon variant="solid" className="h-full w-full" />
+        }
         variant={variant}
-        size="lg"
+        size={size === "2xl" ? "lg" : "md"}
         className="rounded-full"
       />
       {BadgeIcon}
