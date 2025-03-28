@@ -44,7 +44,7 @@ export type TabValue =
   | "guilds"
   | "activity"
   | "metrics"
-  | "info"
+  | "about"
   | "marketplace";
 
 export interface ArcadeTabsProps
@@ -60,7 +60,7 @@ export const ArcadeTabs = ({
   order = [
     "activity",
     "leaderboard",
-    "info",
+    "about",
     "metrics",
     "marketplace",
     "inventory",
@@ -225,8 +225,8 @@ const Tab = ({
       return <ActivityNavButton {...props} />;
     case "metrics":
       return <MetricsNavButton {...props} />;
-    case "info":
-      return <InfoNavButton {...props} />;
+    case "about":
+      return <AboutNavButton {...props} />;
     case "marketplace":
       return <MarketplaceNavButton {...props} />;
     default:
@@ -450,7 +450,7 @@ const MetricsNavButton = React.forwardRef<
   );
 });
 
-const InfoNavButton = React.forwardRef<
+const AboutNavButton = React.forwardRef<
   HTMLButtonElement,
   {
     value: string;

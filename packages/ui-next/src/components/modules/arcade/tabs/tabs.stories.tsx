@@ -21,29 +21,28 @@ type Story = StoryObj<typeof ArcadeTabs>;
 export const Default: Story = {
   render: (args) => (
     <ArcadeTabs {...args}>
-      <TabsContent value="discover">Discover content</TabsContent>
       <TabsContent value="inventory">Inventory content</TabsContent>
       <TabsContent value="achievements">Achievements content</TabsContent>
       <TabsContent value="leaderboard">Leaderboard content</TabsContent>
       <TabsContent value="guilds">Guilds content</TabsContent>
       <TabsContent value="activity">Activity content</TabsContent>
       <TabsContent value="metrics">Metrics content</TabsContent>
-      <TabsContent value="info">Info content</TabsContent>
+      <TabsContent value="about">About content</TabsContent>
       <TabsContent value="marketplace">Marketplace content</TabsContent>
     </ArcadeTabs>
   ),
 };
 
-export const Player: Story = {
-  args: {
-    defaultValue: "inventory",
-    order: ["inventory", "achievements", "guilds", "activity"],
-  },
-};
-
 export const Game: Story = {
   args: {
     defaultValue: "activity",
-    order: ["activity", "leaderboard", "info", "metrics", "marketplace"],
+    order: ["activity", "leaderboard", "marketplace", "guilds", "about"],
+  },
+};
+
+export const Player: Story = {
+  args: {
+    defaultValue: "inventory",
+    order: ["inventory", "achievements", "activity"],
   },
 };
