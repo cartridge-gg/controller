@@ -14,7 +14,7 @@ import { useState, useEffect } from "react";
 import { Receiving } from "./receiving";
 import { useStarterPack } from "@/hooks/starterpack";
 import { Spending } from "./spending";
-
+import { TotalCost } from "./total-cost";
 const enum PurchaseState {
   REVIEW = 0,
   PENDING = 1,
@@ -99,9 +99,19 @@ export const PurchaseWithBalance = () => {
             <span>Close</span>
           </Button>
         ) : (
-          <Button type="button" className="w-full" onClick={handlePurchase}>
-            <span>Purchase</span>
-          </Button>
+          <>
+            <Card className="flex flex-row items-center justify-between gap-2">
+              <TotalCost price={price} />
+              <CardContent className="relative bg-background-200 w-9 aspect-square rounded">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-background-300 rounded-full w-6">
+                  <img src="https://static.cartridge.gg/presets/credit/icon.svg" />
+                </div>
+              </CardContent>
+            </Card>
+            <Button type="button" className="w-full" onClick={handlePurchase}>
+              <span>Purchase</span>
+            </Button>
+          </>
         )}
       </LayoutFooter>
     </LayoutContainer>

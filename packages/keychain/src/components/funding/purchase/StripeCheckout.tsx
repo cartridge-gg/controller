@@ -98,7 +98,7 @@ export default function StripeCheckout({
         </form>
       </LayoutContent>
       <LayoutFooter>
-        <TotalCost price={creditsAmount} />
+        <TotalCost price={creditsAmount} processingFee={0.15} />
         {error && (
           <ErrorAlert
             variant="error"
