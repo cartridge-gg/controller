@@ -184,7 +184,7 @@ function HeaderInner({
     <div
       className={cn("p-6 flex items-center justify-between h-20", className)}
     >
-      <div className="flex items-center flex-shrink min-w-0 gap-6">
+      <div className="flex items-center flex-shrink min-w-0 gap-3">
         <HeaderIcon variant={variant} Icon={Icon} icon={icon} />
         <Headline variant={variant} title={title} description={description} />
       </div>
