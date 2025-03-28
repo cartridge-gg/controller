@@ -150,7 +150,7 @@ export function CryptoCheckout({
       <LayoutFooter>
         {error && (
           <ErrorAlert
-            variant="warning"
+            variant="error"
             title="Purchase Alert"
             description={error.message}
           />
