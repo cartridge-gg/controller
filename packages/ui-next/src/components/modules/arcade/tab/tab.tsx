@@ -50,7 +50,7 @@ export const ArcadeTab = React.forwardRef<HTMLButtonElement, ArcadeTabProps>(
           className={cn(arcadeTabVariants({ variant, size }))}
         >
           {Icon}
-          <p className="font-medium tracking-wider">{label}</p>
+          <p className="font-normal">{label}</p>
         </div>
         <div
           data-active={active}

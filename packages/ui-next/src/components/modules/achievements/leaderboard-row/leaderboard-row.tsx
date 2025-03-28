@@ -1,5 +1,11 @@
-import { cn, SparklesIcon } from "@/index";
-import { useEffect, useRef, useState } from "react";
+import {
+  BronzeTagIcon,
+  cn,
+  GoldTagIcon,
+  SilverTagIcon,
+  SparklesIcon,
+} from "@/index";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AchievementPinIcons } from "../pin-icons";
 import AchievementLeaderboardUsername from "../leaderboard-username/leaderboard-username";
 
@@ -26,6 +32,19 @@ export const AchievementLeaderboardRow = ({
   const [hover, setHover] = useState(false);
   const [sticky, setSticky] = useState(false);
   const ref = useRef(null);
+
+  const Tag = useMemo(() => {
+    switch (rank) {
+      case 1:
+        return <GoldTagIcon />;
+      case 2:
+        return <SilverTagIcon />;
+      case 3:
+        return <BronzeTagIcon />;
+      default:
+        return null;
+    }
+  }, [rank]);
 
   useEffect(() => {
     const cachedRef = ref.current;
@@ -63,11 +82,12 @@ export const AchievementLeaderboardRow = ({
           icon={icon}
           highlight={highlight}
         />
+        {Tag}
       </div>
       <div className="flex gap-x-3 items-center">
         <AchievementPinIcons
           pins={pins}
-          variant={highlight || hover ? "highlight" : "default"}
+          variant={highlight || hover ? "light" : "default"}
           size="md"
           theme={highlight}
         />

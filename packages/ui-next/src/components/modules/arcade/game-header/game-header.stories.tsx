@@ -66,7 +66,28 @@ const meta: Meta<typeof ArcadeGameHeader> = {
 export default meta;
 type Story = StoryObj<typeof ArcadeGameHeader>;
 
-export const Default: Story = {};
+const variants = [
+  "darkest",
+  "darker",
+  "dark",
+  "default",
+  "light",
+  "lighter",
+  "lightest",
+  "ghost",
+] as const;
+
+export const Default: Story = {
+  render: (args) => {
+    return (
+      <div className="flex flex-col gap-4">
+        {variants.map((variant) => (
+          <ArcadeGameHeader key={variant} {...args} variant={variant} />
+        ))}
+      </div>
+    );
+  },
+};
 
 export const Theme: Story = {
   args: {
@@ -77,12 +98,6 @@ export const Theme: Story = {
 export const Empty: Story = {
   args: {
     achievements: [],
-  },
-};
-
-export const Faded: Story = {
-  args: {
-    variant: "faded",
   },
 };
 

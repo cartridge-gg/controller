@@ -14,8 +14,13 @@ export interface AchievementProgressProps
 const achievementProgressVariants = cva("p-3 flex items-center gap-x-3", {
   variants: {
     variant: {
+      darkest: "bg-background-100",
+      darker: "bg-background-100",
+      dark: "bg-background-100",
       default: "bg-background-200",
-      faded: "bg-background-100",
+      light: "bg-background-200",
+      lighter: "bg-background-200",
+      lightest: "bg-background-200",
       ghost: "bg-transparent",
     },
   },

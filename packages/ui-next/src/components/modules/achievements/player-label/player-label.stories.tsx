@@ -18,4 +18,33 @@ const meta: Meta<typeof AchievementPlayerLabel> = {
 export default meta;
 type Story = StoryObj<typeof AchievementPlayerLabel>;
 
-export const Default: Story = {};
+const variants = [
+  "darkest",
+  "darker",
+  "dark",
+  "default",
+  "light",
+  "lighter",
+  "lightest",
+  "ghost",
+] as const;
+const ranks = ["default", "gold", "silver", "bronze"] as const;
+
+export const Default: Story = {
+  render: (args) => {
+    return (
+      <div className="flex flex-col gap-3">
+        {variants.map((variant) => (
+          <div key={variant} className="grid grid-cols-5 items-center gap-6">
+            <p className="text-sm text-foreground-100 capitalize text-medium">
+              {variant}
+            </p>
+            {ranks.map((rank) => (
+              <AchievementPlayerLabel {...args} variant={variant} rank={rank} />
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  },
+};

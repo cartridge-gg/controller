@@ -42,7 +42,7 @@ export const ActivityGameCard = ({
         error={error}
         loading={loading}
         size="lg"
-        variant={loading || error ? "faded" : undefined}
+        variant="light"
       />
     ),
     [image, error, loading, Icon],

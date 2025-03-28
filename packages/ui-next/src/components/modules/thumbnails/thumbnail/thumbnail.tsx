@@ -7,10 +7,14 @@ export const thumbnailVariants = cva(
   {
     variants: {
       variant: {
+        darkest: "bg-background-100",
+        darker: "bg-background-100",
         dark: "bg-background-100",
-        faded: "bg-background-200",
-        default: "bg-background-300",
-        highlight: "bg-background-400",
+        default: "bg-background-200",
+        light: "bg-background-300",
+        lighter: "bg-background-300",
+        lightest: "bg-background-400",
+        ghost: "bg-transparent",
       },
       size: {
         xs: "w-5 h-5 p-0.5 data-[centered=true]:p-[2px]",

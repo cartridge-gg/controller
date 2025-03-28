@@ -11,19 +11,7 @@ const meta: Meta<typeof ArcadeTabs> = {
     layout: "padded",
   },
   args: {
-    discover: true,
-    inventory: true,
-    achievements: true,
-    leaderboard: true,
-    guilds: true,
-    activity: true,
-    onDiscoverClick: fn(),
-    onInventoryClick: fn(),
-    onAchievementsClick: fn(),
-    onLeaderboardClick: fn(),
-    onGuildsClick: fn(),
-    onActivityClick: fn(),
-    defaultValue: "discover",
+    onTabClick: fn(),
   },
 };
 
@@ -33,25 +21,28 @@ type Story = StoryObj<typeof ArcadeTabs>;
 export const Default: Story = {
   render: (args) => (
     <ArcadeTabs {...args}>
-      <TabsContent value="discover">Discover content</TabsContent>
       <TabsContent value="inventory">Inventory content</TabsContent>
       <TabsContent value="achievements">Achievements content</TabsContent>
       <TabsContent value="leaderboard">Leaderboard content</TabsContent>
       <TabsContent value="guilds">Guilds content</TabsContent>
       <TabsContent value="activity">Activity content</TabsContent>
+      <TabsContent value="metrics">Metrics content</TabsContent>
+      <TabsContent value="about">About content</TabsContent>
+      <TabsContent value="marketplace">Marketplace content</TabsContent>
     </ArcadeTabs>
   ),
 };
 
-export const Inventory: Story = {
+export const Game: Story = {
   args: {
-    defaultValue: "inventory",
+    defaultValue: "activity",
+    order: ["activity", "leaderboard", "marketplace", "guilds", "about"],
   },
 };
 
-export const Reversed: Story = {
+export const Player: Story = {
   args: {
-    defaultValue: "activity",
-    order: ["activity", "guilds", "achievements", "inventory", "discover"],
+    defaultValue: "inventory",
+    order: ["inventory", "achievements", "activity"],
   },
 };

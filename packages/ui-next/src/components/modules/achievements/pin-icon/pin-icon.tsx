@@ -6,13 +6,21 @@ const achievementPinIconVariants = cva(
   {
     variants: {
       variant: {
+        darkest:
+          "border-background-200 bg-background-100 text-foreground-100 data-[empty=true]:text-background-500",
+        darker:
+          "border-background-200 bg-background-100 text-foreground-100 data-[empty=true]:text-background-500",
+        dark: "border-background-200 bg-background-100 text-foreground-100 data-[empty=true]:text-background-500",
         default:
           "border-background-300 bg-background-200 text-foreground-100 data-[empty=true]:text-foreground-400",
-        faded:
-          "border-background-200 bg-background-100 text-foreground-100 data-[empty=true]:text-background-500",
-        highlight:
+        light:
           "border-background-400 bg-background-300 text-foreground-100 data-[empty=true]:text-foreground-400",
-        ghost: "",
+        lighter:
+          "border-background-400 bg-background-300 text-foreground-100 data-[empty=true]:text-foreground-400",
+        lightest:
+          "border-background-400 bg-background-300 text-foreground-100 data-[empty=true]:text-foreground-400",
+        ghost:
+          "bg-transparent text-foreground-100 data-[empty=true]:text-foreground-400",
       },
       size: {
         xs: "w-5 h-5",

@@ -9,72 +9,99 @@ const meta: Meta<typeof AchievementPinIcon> = {
     layout: "centered",
   },
   args: {
-    variant: "default",
-    size: "default",
     icon: "fa-seedling",
-    empty: false,
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof AchievementPinIcon>;
 
-export const Default: Story = {};
+const variants = [
+  "darkest",
+  "darker",
+  "dark",
+  "default",
+  "light",
+  "lighter",
+  "lightest",
+  "ghost",
+] as const;
+const sizes = ["xs", "default", "md"] as const;
 
-export const Faded: Story = {
-  args: {
-    variant: "faded",
-  },
+export const Default: Story = {
+  render: (args) => (
+    <div className="flex flex-col gap-3">
+      {sizes.map((size) => (
+        <div key={size} className="flex gap-3">
+          {variants.map((variant) => (
+            <AchievementPinIcon
+              key={`${variant}-${size}`}
+              variant={variant}
+              size={size}
+              {...args}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
 };
 
-export const Highlight: Story = {
-  args: {
-    variant: "highlight",
-  },
+export const Theme: Story = {
+  render: (args) => (
+    <div className="flex flex-col gap-3">
+      {sizes.map((size) => (
+        <div key={size} className="flex gap-3">
+          {variants.map((variant) => (
+            <AchievementPinIcon
+              key={`${variant}-${size}`}
+              variant={variant}
+              size={size}
+              theme
+              {...args}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
 };
 
-export const DefaultTheme: Story = {
-  args: {
-    theme: true,
-  },
-};
-
-export const FadedTheme: Story = {
-  args: {
-    variant: "faded",
-    theme: true,
-  },
-};
-
-export const HighlightTheme: Story = {
-  args: {
-    variant: "highlight",
-    theme: true,
-  },
-};
-
-export const DefaultEmpty: Story = {
-  args: {
-    empty: true,
-  },
-};
-
-export const FadedEmpty: Story = {
-  args: {
-    empty: true,
-    variant: "faded",
-  },
-};
-
-export const HighlightEmpty: Story = {
-  args: {
-    empty: true,
-    variant: "highlight",
-  },
+export const Empty: Story = {
+  render: (args) => (
+    <div className="flex flex-col gap-3">
+      {sizes.map((size) => (
+        <div key={size} className="flex gap-3">
+          {variants.map((variant) => (
+            <AchievementPinIcon
+              key={`${variant}-${size}`}
+              variant={variant}
+              size={size}
+              empty
+              {...args}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
 };
 
 export const Missing: Story = {
-  args: {
-    icon: undefined,
-  },
+  render: () => (
+    <div className="flex flex-col gap-3">
+      {sizes.map((size) => (
+        <div key={size} className="flex gap-3">
+          {variants.map((variant) => (
+            <AchievementPinIcon
+              key={`${variant}-${size}`}
+              variant={variant}
+              size={size}
+              icon={undefined}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
 };

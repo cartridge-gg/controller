@@ -18,7 +18,33 @@ const meta: Meta<typeof AchievementProgress> = {
 export default meta;
 type Story = StoryObj<typeof AchievementProgress>;
 
-export const Default: Story = {};
+const variants = [
+  "darkest",
+  "darker",
+  "dark",
+  "default",
+  "light",
+  "lighter",
+  "lightest",
+  "ghost",
+] as const;
+
+export const Default: Story = {
+  render: (args) => (
+    <div className="flex flex-col gap-4">
+      {variants.map((variant) => (
+        <div key={variant} className="grid grid-cols-4 items-center">
+          <p className="text-sm text-foreground-100 capitalize text-medium">
+            {variant}
+          </p>
+          <div className="col-span-3">
+            <AchievementProgress key={variant} {...args} variant={variant} />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+};
 
 export const Empty: Story = {
   args: {

@@ -5,11 +5,15 @@ import {
   TrophyIcon,
   ClockIcon,
   BottomTab,
+  cn,
 } from "@cartridge/ui-next";
 import { useMemo } from "react";
+import { useConnection } from "#hooks/context.js";
 
 export function LayoutBottomNav() {
   const { pathname } = useLocation();
+  const { namespace } = useConnection();
+
   const active = useMemo<
     "inventory" | "trophies" | "achievements" | "activity"
   >(() => {
@@ -33,7 +37,10 @@ export function LayoutBottomNav() {
           />
         </Link>
       </BottomTab>
-      <BottomTab status={active === "achievements" ? "active" : undefined}>
+      <BottomTab
+        status={active === "achievements" ? "active" : undefined}
+        className={cn(!namespace && "hidden")}
+      >
         <Link
           to="../achievements"
           className="h-full w-full flex items-center justify-center"

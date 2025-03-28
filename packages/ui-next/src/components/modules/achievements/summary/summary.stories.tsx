@@ -169,9 +169,9 @@ type Story = StoryObj<typeof AchievementSummary>;
 
 export const Default: Story = {};
 
-export const Faded: Story = {
+export const Dark: Story = {
   args: {
-    variant: "faded",
+    variant: "dark",
   },
 };
 

@@ -4,16 +4,16 @@ import {
   CardTitle,
   cn,
   DiscordIcon,
+  DojoIcon,
   GitHubIcon,
   GlobeIcon,
   TelegramIcon,
-  useMediaQuery,
+  Thumbnail,
   XIcon,
 } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 import { AchievementPinIcons } from "@/components/modules/achievements/pin-icons";
-import { ArcadeGameIcon } from "../game-icon";
 
 export interface Metadata {
   name: string;
@@ -48,9 +48,14 @@ export const arcadeGameHeaderVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-foreground-200",
-        faded: "bg-background-100",
-        ghost: "",
+        darkest: "bg-background-100",
+        darker: "bg-background-100",
+        dark: "bg-background-100",
+        default: "bg-background-200",
+        light: "bg-background-200",
+        lighter: "bg-background-200",
+        lightest: "bg-background-200",
+        ghost: "bg-transparent",
       },
     },
     defaultVariants: {
@@ -84,7 +89,7 @@ export const ArcadeGameHeader = ({
 
   const style = useMemo(() => {
     const bgColor =
-      !variant || variant === "default"
+      !variant || variant === "default" || variant.includes("light")
         ? `var(--background-200)`
         : `var(--background-100)`;
     const opacity = metadata.cover ? "96%" : "50%";
@@ -96,8 +101,6 @@ export const ArcadeGameHeader = ({
     };
   }, [metadata.cover, variant]);
 
-  const isDesktop = useMediaQuery("(min-width: 640px)");
-
   return (
     <div
       className={cn(
@@ -107,11 +110,14 @@ export const ArcadeGameHeader = ({
       style={style}
     >
       <div className="flex items-center gap-3">
-        <ArcadeGameIcon
-          logo={metadata.logo}
-          name={metadata.name}
-          variant={variant}
-          size={isDesktop ? "lg" : "xl"}
+        <Thumbnail
+          icon={metadata.logo ?? <DojoIcon className="w-full h-full" />}
+          variant={
+            !variant || variant === "default" || variant?.includes("light")
+              ? "light"
+              : "default"
+          }
+          size="lg"
         />
         <div className="flex flex-col gap-x-4 gap-y-0.5 sm:flex-row">
           <CardTitle className="text-foreground-100 text-sm font-medium tracking-normal flex items-center whitespace-nowrap">
@@ -253,8 +259,13 @@ const achievementSocialVariants = cva(
   {
     variants: {
       variant: {
+        darkest: "bg-background-100 hover:bg-background-200",
+        darker: "bg-background-100 hover:bg-background-200",
+        dark: "bg-background-100 hover:bg-background-200",
         default: "bg-background-200 hover:bg-background-300",
-        faded: "bg-background-100 hover:bg-background-200",
+        light: "bg-background-200 hover:bg-background-300",
+        lighter: "bg-background-200 hover:bg-background-300",
+        lightest: "bg-background-200 hover:bg-background-300",
         ghost: "",
       },
     },

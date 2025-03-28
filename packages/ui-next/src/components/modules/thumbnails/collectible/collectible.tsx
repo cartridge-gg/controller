@@ -5,10 +5,14 @@ import { PLACEHOLDER } from "@/assets";
 const thumbnailCollectibleVariants = cva("border-transparent", {
   variants: {
     variant: {
+      darkest: "",
+      darker: "",
       dark: "",
-      faded: "",
       default: "",
-      highlight: "",
+      light: "",
+      lighter: "",
+      lightest: "",
+      ghost: "",
     },
     size: {
       xs: "border-[2px] p-px",

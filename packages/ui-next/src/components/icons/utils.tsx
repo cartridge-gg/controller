@@ -9,6 +9,7 @@ export const size = {
   default: "h-6 w-6",
   lg: "h-8 w-8",
   xl: "h-12 w-12",
+  "2xl": "h-14 w-14",
 };
 
 export const iconVariants = cva(base, {

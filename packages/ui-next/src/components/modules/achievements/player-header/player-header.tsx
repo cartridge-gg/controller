@@ -1,14 +1,47 @@
-import { useMemo } from "react";
+import { HTMLAttributes, useMemo } from "react";
 import { AchievementPlayerLabel } from "../player-label";
+import { cva, VariantProps } from "class-variance-authority";
+import { cn } from "@/utils";
+import { AchievementFollowerTag } from "@/index";
 
-interface AchievementPlayerHeaderProps {
+interface AchievementPlayerHeaderProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof achievementPlayerHeaderVariants> {
   username: string;
   address: string;
   points: number;
   icon?: string;
   follower?: boolean;
+  followerCount?: number;
+  followingCount?: number;
   followers?: string[];
+  compacted?: boolean;
 }
+
+const achievementPlayerHeaderVariants = cva("flex flex-col gap-y-4", {
+  variants: {
+    variant: {
+      darkest: "",
+      darker: "",
+      dark: "",
+      default: "",
+      light: "",
+      lighter: "",
+      lightest: "",
+      ghost: "",
+    },
+    rank: {
+      default: "",
+      gold: "",
+      silver: "",
+      bronze: "",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+    rank: "default",
+  },
+});
 
 export const AchievementPlayerHeader = ({
   username,
@@ -16,22 +49,43 @@ export const AchievementPlayerHeader = ({
   points,
   icon,
   follower,
+  followerCount,
+  followingCount,
   followers,
+  compacted,
+  variant,
+  rank,
+  className,
+  ...props
 }: AchievementPlayerHeaderProps) => {
   return (
-    <div className="flex flex-col gap-y-4">
+    <div
+      className={cn(
+        achievementPlayerHeaderVariants({ variant, rank }),
+        className,
+      )}
+      {...props}
+    >
       <AchievementPlayerLabel
         username={username}
         address={address}
         icon={icon}
+        variant="default"
+        rank={rank}
       />
       <div className="flex flex-col">
         <div className="h-6 flex items-center gap-x-2">
           <p className="text-xs text-foreground-300 flex items-center gap-x-1">
             <strong className="font-medium text-foreground-100">
-              {followers?.length?.toLocaleString() || 0}
+              {followerCount?.toLocaleString() || 0}
             </strong>
             Followers
+          </p>
+          <p className="text-xs text-foreground-300 flex items-center gap-x-1">
+            <strong className="font-medium text-foreground-100">
+              {followingCount?.toLocaleString() || 0}
+            </strong>
+            Following
           </p>
           <p className="text-xs text-foreground-300 flex items-center gap-x-1">
             <strong className="font-medium text-foreground-100">
@@ -39,19 +93,11 @@ export const AchievementPlayerHeader = ({
             </strong>
             Points
           </p>
-          {follower && <FollowerTag />}
+          {follower && <AchievementFollowerTag variant={variant} />}
         </div>
-        <FollowerDescription followers={followers || []} />
+        {!compacted && <FollowerDescription followers={followers || []} />}
       </div>
     </div>
-  );
-};
-
-const FollowerTag = () => {
-  return (
-    <p className="bg-background-100 border border-background-200 rounded px-1.5 py-0.5 text-xs text-foreground-400">
-      Follows you
-    </p>
   );
 };
 

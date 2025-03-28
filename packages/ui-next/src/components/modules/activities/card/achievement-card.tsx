@@ -57,7 +57,7 @@ export const ActivityAchievementCard = ({
         error={error}
         loading={loading}
         size="lg"
-        variant="faded"
+        variant="light"
         className={cn(!error && !loading && "text-primary")}
       />
     ),

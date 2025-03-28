@@ -1,4 +1,5 @@
 import {
+  badgeIcons,
   brandColorIcons,
   brandIcons,
   directionalIcons,
@@ -16,6 +17,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { ComponentType } from "react";
 
 const iconsByCategory = {
+  badge: badgeIcons,
   brand: brandIcons,
   "brand-color": brandColorIcons,
   directional: directionalIcons,
@@ -73,6 +75,12 @@ const meta: Meta<typeof Icons> = {
 export default meta;
 
 type Story = StoryObj<typeof Icons>;
+
+export const Badge: Story = {
+  args: {
+    category: "badge",
+  },
+};
 
 export const Brand: Story = {
   args: {

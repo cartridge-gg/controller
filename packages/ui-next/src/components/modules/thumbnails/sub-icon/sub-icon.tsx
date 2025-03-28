@@ -2,21 +2,27 @@ import { cn } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 
 const thumbnailsSubIconVariants = cva(
-  "rounded-full flex items-center justify-center",
+  "rounded-full flex items-center justify-center text-foreground-100",
   {
     variants: {
       variant: {
+        darkest: "bg-background-200",
+        darker: "bg-background-200",
+        dark: "bg-background-200",
         default: "bg-background-300",
-        faded: "bg-background-200",
+        light: "bg-background-300",
+        lighter: "bg-background-300",
+        lightest: "bg-background-300",
+        ghost: "bg-transparent",
       },
       size: {
-        md: "w-5 h-5 p-1",
-        lg: "w-6 h-6 p-1",
+        lg: "w-5 h-5 p-1",
+        xl: "w-6 h-6 p-1",
       },
     },
     defaultVariants: {
       variant: "default",
-      size: "md",
+      size: "lg",
     },
   },
 );

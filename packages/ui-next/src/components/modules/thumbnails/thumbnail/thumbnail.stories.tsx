@@ -15,179 +15,48 @@ const meta: Meta<typeof Thumbnail> = {
 export default meta;
 type Story = StoryObj<typeof Thumbnail>;
 
+const variants = [
+  "darkest",
+  "darker",
+  "dark",
+  "default",
+  "light",
+  "lighter",
+  "lightest",
+  "ghost",
+] as const;
+const sizes = ["xs", "sm", "md", "lg", "xl", "xxl"] as const;
+
 export const Default: Story = {
   render: () => (
-    <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xs"
-          variant="dark"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xs"
-          variant="faded"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xs"
-          variant="default"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xs"
-          variant="highlight"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="sm"
-          variant="dark"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="sm"
-          variant="faded"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="sm"
-          variant="default"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="sm"
-          variant="highlight"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="md"
-          variant="dark"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="md"
-          variant="faded"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="md"
-          variant="default"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="md"
-          variant="highlight"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="lg"
-          variant="dark"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="lg"
-          variant="faded"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="lg"
-          variant="default"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="lg"
-          variant="highlight"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+    <div className="flex flex-col gap-3">
+      {sizes.map((size) => (
+        <div className="flex gap-3">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+              size={size}
+              variant={variant}
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+              size={size}
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
               }
             />
-          }
-          size="lg"
-          variant="faded"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xl"
-          variant="dark"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xl"
-          variant="faded"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xl"
-          variant="default"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xl"
-          variant="highlight"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-              size="lg"
-            />
-          }
-          size="xl"
-          variant="faded"
-        />
-      </div>
-      <div className="flex gap-3">
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xxl"
-          variant="dark"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xxl"
-          variant="faded"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xxl"
-          variant="default"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          size="xxl"
-          variant="highlight"
-        />
-        <Thumbnail
-          icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-              size="lg"
-            />
-          }
-          size="xxl"
-          variant="faded"
-        />
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   ),
 };
@@ -195,163 +64,35 @@ export const Default: Story = {
 export const Rounded: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="xs"
-          variant="dark"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="xs"
-          variant="faded"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="xs"
-          variant="default"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="xs"
-          variant="highlight"
-          rounded
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="sm"
-          variant="dark"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="sm"
-          variant="faded"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="sm"
-          variant="default"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="sm"
-          variant="highlight"
-          rounded
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="md"
-          variant="dark"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="md"
-          variant="faded"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="md"
-          variant="default"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="md"
-          variant="highlight"
-          rounded
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="lg"
-          variant="dark"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="lg"
-          variant="faded"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="lg"
-          variant="default"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="lg"
-          variant="highlight"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+      {sizes.map((size) => (
+        <div className="flex gap-3 ">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
+              size={size}
+              variant={variant}
+              rounded
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
+              size={size}
+              rounded
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
               }
             />
-          }
-          size="lg"
-          variant="faded"
-          rounded
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="xl"
-          variant="dark"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="xl"
-          variant="faded"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="xl"
-          variant="default"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          size="xl"
-          variant="highlight"
-          rounded
-        />
-        <Thumbnail
-          icon="https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-              size="lg"
-            />
-          }
-          size="xl"
-          variant="faded"
-          rounded
-        />
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   ),
 };
@@ -359,163 +100,35 @@ export const Rounded: Story = {
 export const Component: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="xs"
-          variant="dark"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="xs"
-          variant="faded"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="xs"
-          variant="default"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="xs"
-          variant="highlight"
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="sm"
-          variant="dark"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="sm"
-          variant="faded"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="sm"
-          variant="default"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="sm"
-          variant="highlight"
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="md"
-          variant="dark"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="md"
-          variant="faded"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="md"
-          variant="default"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="md"
-          variant="highlight"
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="lg"
-          variant="dark"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="lg"
-          variant="faded"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="lg"
-          variant="default"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="lg"
-          variant="highlight"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+      {sizes.map((size) => (
+        <div className="flex gap-3 ">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon={<DepositIcon variant="solid" className="w-full h-full" />}
+              size={size}
+              variant={variant}
+              centered
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon={<DepositIcon variant="solid" className="w-full h-full" />}
+              size={size}
+              centered
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
               }
             />
-          }
-          size="lg"
-          variant="faded"
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="xl"
-          variant="dark"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="xl"
-          variant="faded"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="xl"
-          variant="default"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          size="xl"
-          variant="highlight"
-          centered
-        />
-        <Thumbnail
-          icon={<DepositIcon variant="solid" className="w-full h-full" />}
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-              size="lg"
-            />
-          }
-          size="xl"
-          variant="faded"
-          centered
-        />
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   ),
 };
@@ -523,185 +136,37 @@ export const Component: Story = {
 export const ComponentRounded: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="xs"
-          variant="dark"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="xs"
-          variant="faded"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="xs"
-          variant="default"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="xs"
-          variant="highlight"
-          rounded
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="sm"
-          variant="dark"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="sm"
-          variant="faded"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="sm"
-          variant="default"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="sm"
-          variant="highlight"
-          rounded
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="md"
-          variant="dark"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="md"
-          variant="faded"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="md"
-          variant="default"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="md"
-          variant="highlight"
-          rounded
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="lg"
-          variant="dark"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="lg"
-          variant="faded"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="lg"
-          variant="default"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="lg"
-          variant="highlight"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+      {sizes.map((size) => (
+        <div className="flex gap-3 ">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon={<ArgentIcon className="w-full h-full" />}
+              size={size}
+              variant={variant}
+              rounded
+              centered
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon={<ArgentIcon className="w-full h-full" />}
+              size={size}
+              rounded
+              centered
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
               }
             />
-          }
-          size="lg"
-          variant="faded"
-          rounded
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="xl"
-          variant="dark"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="xl"
-          variant="faded"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="xl"
-          variant="default"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          size="xl"
-          variant="highlight"
-          rounded
-          centered
-        />
-        <Thumbnail
-          icon={<ArgentIcon className="w-full h-full" />}
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-              size="lg"
-            />
-          }
-          size="xl"
-          variant="faded"
-          rounded
-          centered
-        />
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   ),
 };
@@ -709,191 +174,37 @@ export const ComponentRounded: Story = {
 export const FontAwesome: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="fa-seedling"
-          size="xs"
-          variant="dark"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="xs"
-          variant="faded"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="xs"
-          variant="default"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="xs"
-          variant="highlight"
-          className="text-primary"
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="fa-seedling"
-          size="sm"
-          variant="dark"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="sm"
-          variant="faded"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="sm"
-          variant="default"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="sm"
-          variant="highlight"
-          className="text-primary"
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="fa-seedling"
-          size="md"
-          variant="dark"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="md"
-          variant="faded"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="md"
-          variant="default"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="md"
-          variant="highlight"
-          className="text-primary"
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="fa-seedling"
-          size="lg"
-          variant="dark"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="lg"
-          variant="faded"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="lg"
-          variant="default"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="lg"
-          variant="highlight"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon
-                  className="w-full h-full text-foreground-100"
-                  variant="solid"
+      {sizes.map((size) => (
+        <div className="flex gap-3 ">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon="fa-seedling"
+              size={size}
+              variant={variant}
+              className="text-primary"
+              centered
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon="fa-seedling"
+              size={size}
+              className="text-primary"
+              centered
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
                 />
               }
             />
-          }
-          size="lg"
-          variant="faded"
-          className="text-primary"
-          centered
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail
-          icon="fa-seedling"
-          size="xl"
-          variant="dark"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="xl"
-          variant="faded"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="xl"
-          variant="default"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          size="xl"
-          variant="highlight"
-          className="text-primary"
-          centered
-        />
-        <Thumbnail
-          icon="fa-seedling"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon
-                  className="w-full h-full text-foreground-100"
-                  variant="solid"
-                />
-              }
-              size="lg"
-            />
-          }
-          size="xl"
-          variant="faded"
-          className="text-primary"
-          centered
-        />
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   ),
 };
@@ -901,61 +212,33 @@ export const FontAwesome: Story = {
 export const Fallback: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="xs" variant="dark" />
-        <Thumbnail icon="" size="xs" variant="faded" />
-        <Thumbnail icon="" size="xs" variant="default" />
-        <Thumbnail icon="" size="xs" variant="highlight" />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="sm" variant="dark" />
-        <Thumbnail icon="" size="sm" variant="faded" />
-        <Thumbnail icon="" size="sm" variant="default" />
-        <Thumbnail icon="" size="sm" variant="highlight" />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="md" variant="dark" />
-        <Thumbnail icon="" size="md" variant="faded" />
-        <Thumbnail icon="" size="md" variant="default" />
-        <Thumbnail icon="" size="md" variant="highlight" />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="lg" variant="dark" />
-        <Thumbnail icon="" size="lg" variant="faded" />
-        <Thumbnail icon="" size="lg" variant="default" />
-        <Thumbnail icon="" size="lg" variant="highlight" />
-        <Thumbnail
-          icon=""
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+      {sizes.map((size) => (
+        <div className="flex gap-3 ">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon=""
+              size={size}
+              variant={variant}
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon=""
+              size={size}
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
               }
             />
-          }
-          size="lg"
-          variant="faded"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="xl" variant="dark" />
-        <Thumbnail icon="" size="xl" variant="faded" />
-        <Thumbnail icon="" size="xl" variant="default" />
-        <Thumbnail icon="" size="xl" variant="highlight" />
-        <Thumbnail
-          icon=""
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-              size="lg"
-            />
-          }
-          size="xl"
-          variant="faded"
-        />
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   ),
 };
@@ -963,36 +246,35 @@ export const Fallback: Story = {
 export const Loading: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="xs" variant="dark" loading />
-        <Thumbnail icon="" size="xs" variant="faded" loading />
-        <Thumbnail icon="" size="xs" variant="default" loading />
-        <Thumbnail icon="" size="xs" variant="highlight" loading />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="sm" variant="dark" loading />
-        <Thumbnail icon="" size="sm" variant="faded" loading />
-        <Thumbnail icon="" size="sm" variant="default" loading />
-        <Thumbnail icon="" size="sm" variant="highlight" loading />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="md" variant="dark" loading />
-        <Thumbnail icon="" size="md" variant="faded" loading />
-        <Thumbnail icon="" size="md" variant="default" loading />
-        <Thumbnail icon="" size="md" variant="highlight" loading />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="lg" variant="dark" loading />
-        <Thumbnail icon="" size="lg" variant="faded" loading />
-        <Thumbnail icon="" size="lg" variant="default" loading />
-        <Thumbnail icon="" size="lg" variant="highlight" loading />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="xl" variant="dark" loading />
-        <Thumbnail icon="" size="xl" variant="faded" loading />
-        <Thumbnail icon="" size="xl" variant="default" loading />
-        <Thumbnail icon="" size="xl" variant="highlight" loading />
-      </div>
+      {sizes.map((size) => (
+        <div className="flex gap-3 ">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon=""
+              size={size}
+              variant={variant}
+              loading
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon=""
+              size={size}
+              loading
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
+              }
+            />
+          )}
+        </div>
+      ))}
     </div>
   ),
 };
@@ -1000,96 +282,40 @@ export const Loading: Story = {
 export const Error: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="xs" variant="dark" error />
-        <Thumbnail icon="" size="xs" variant="faded" error />
-        <Thumbnail icon="" size="xs" variant="default" error />
-        <Thumbnail icon="" size="xs" variant="highlight" error />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="sm" variant="dark" error />
-        <Thumbnail icon="" size="sm" variant="faded" error />
-        <Thumbnail icon="" size="sm" variant="default" error />
-        <Thumbnail icon="" size="sm" variant="highlight" error />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="md" variant="dark" error />
-        <Thumbnail icon="" size="md" variant="faded" error />
-        <Thumbnail icon="" size="md" variant="default" error />
-        <Thumbnail icon="" size="md" variant="highlight" error />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="lg" variant="dark" error />
-        <Thumbnail icon="" size="lg" variant="faded" error />
-        <Thumbnail icon="" size="lg" variant="default" error />
-        <Thumbnail icon="" size="lg" variant="highlight" error />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail icon="" size="xl" variant="dark" error />
-        <Thumbnail icon="" size="xl" variant="faded" error />
-        <Thumbnail icon="" size="xl" variant="default" error />
-        <Thumbnail icon="" size="xl" variant="highlight" error />
-      </div>
-    </div>
-  ),
-};
-
-export const Undefined: Story = {
-  render: () => (
-    <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <Thumbnail size="xs" variant="dark" />
-        <Thumbnail size="xs" variant="faded" />
-        <Thumbnail size="xs" variant="default" />
-        <Thumbnail size="xs" variant="highlight" />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail size="sm" variant="dark" />
-        <Thumbnail size="sm" variant="faded" />
-        <Thumbnail size="sm" variant="default" />
-        <Thumbnail size="sm" variant="highlight" />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail size="md" variant="dark" />
-        <Thumbnail size="md" variant="faded" />
-        <Thumbnail size="md" variant="default" />
-        <Thumbnail size="md" variant="highlight" />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail size="lg" variant="dark" />
-        <Thumbnail size="lg" variant="faded" />
-        <Thumbnail size="lg" variant="default" />
-        <Thumbnail size="lg" variant="highlight" />
-        <Thumbnail
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+      {sizes.map((size) => (
+        <div className="flex gap-3 ">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon=""
+              size={size}
+              variant={variant}
+              error
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon=""
+              size={size}
+              error
+              subIcon={
+                ["lg", "xl", "xxl"].includes(size) && (
+                  <ThumbnailsSubIcon
+                    Icon={
+                      <PaperPlaneIcon
+                        className="w-full h-full"
+                        variant="solid"
+                      />
+                    }
+                    size={size as "lg" | "xl"}
+                  />
+                )
               }
             />
-          }
-          size="lg"
-          variant="faded"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <Thumbnail size="xl" variant="dark" />
-        <Thumbnail size="xl" variant="faded" />
-        <Thumbnail size="xl" variant="default" />
-        <Thumbnail size="xl" variant="highlight" />
-        <Thumbnail
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-              size="lg"
-            />
-          }
-          size="xl"
-          variant="faded"
-        />
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   ),
 };
