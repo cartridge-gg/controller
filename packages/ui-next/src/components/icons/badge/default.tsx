@@ -44,10 +44,10 @@ export const DefaultIcon = memo(
             y2="24"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#404041" />
-            <stop offset="0.3123" stop-color="#3B3B3D" />
-            <stop offset="0.7592" stop-color="#2D2D2F" />
-            <stop offset="1" stop-color="#434344" />
+            <stop stopColor="#404041" />
+            <stop offset="0.3123" stopColor="#3B3B3D" />
+            <stop offset="0.7592" stopColor="#2D2D2F" />
+            <stop offset="1" stopColor="#434344" />
           </linearGradient>
           <linearGradient
             id="paint1_linear_10143_96692"
@@ -57,10 +57,10 @@ export const DefaultIcon = memo(
             y2="23.7566"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#404041" />
-            <stop offset="0.3123" stop-color="#3B3B3D" />
-            <stop offset="0.7592" stop-color="#2D2D2F" />
-            <stop offset="1" stop-color="#434344" />
+            <stop stopColor="#404041" />
+            <stop offset="0.3123" stopColor="#3B3B3D" />
+            <stop offset="0.7592" stopColor="#2D2D2F" />
+            <stop offset="1" stopColor="#434344" />
           </linearGradient>
           <linearGradient
             id="paint2_linear_10143_96692"
@@ -70,10 +70,10 @@ export const DefaultIcon = memo(
             y2="23.7566"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#404041" />
-            <stop offset="0.3123" stop-color="#3B3B3D" />
-            <stop offset="0.7592" stop-color="#2D2D2F" />
-            <stop offset="1" stop-color="#434344" />
+            <stop stopColor="#404041" />
+            <stop offset="0.3123" stopColor="#3B3B3D" />
+            <stop offset="0.7592" stopColor="#2D2D2F" />
+            <stop offset="1" stopColor="#434344" />
           </linearGradient>
           <linearGradient
             id="paint3_linear_10143_96692"
@@ -83,10 +83,10 @@ export const DefaultIcon = memo(
             y2="23.7566"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#404041" />
-            <stop offset="0.3123" stop-color="#3B3B3D" />
-            <stop offset="0.7592" stop-color="#2D2D2F" />
-            <stop offset="1" stop-color="#434344" />
+            <stop stopColor="#404041" />
+            <stop offset="0.3123" stopColor="#3B3B3D" />
+            <stop offset="0.7592" stopColor="#2D2D2F" />
+            <stop offset="1" stopColor="#434344" />
           </linearGradient>
         </defs>
       </svg>

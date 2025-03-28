@@ -38,10 +38,10 @@ export const GoldIcon = memo(
             y2="37.775"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFFCA8" />
-            <stop offset="0.3123" stop-color="#FDB836" />
-            <stop offset="0.7592" stop-color="#FDC966" />
-            <stop offset="1" stop-color="#F1DC83" />
+            <stop stopColor="#FFFCA8" />
+            <stop offset="0.3123" stopColor="#FDB836" />
+            <stop offset="0.7592" stopColor="#FDC966" />
+            <stop offset="1" stopColor="#F1DC83" />
           </linearGradient>
           <linearGradient
             id="paint1_linear_10143_96689"
@@ -51,10 +51,10 @@ export const GoldIcon = memo(
             y2="23.9929"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFFCA8" />
-            <stop offset="0.3123" stop-color="#FDB836" />
-            <stop offset="0.7592" stop-color="#FDC966" />
-            <stop offset="1" stop-color="#F1DC83" />
+            <stop stopColor="#FFFCA8" />
+            <stop offset="0.3123" stopColor="#FDB836" />
+            <stop offset="0.7592" stopColor="#FDC966" />
+            <stop offset="1" stopColor="#F1DC83" />
           </linearGradient>
         </defs>
       </svg>

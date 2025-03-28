@@ -24,11 +24,11 @@ export const SilverTagIcon = memo(
             y2="9.99695"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="#E3E3E3" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="#E3E3E3" />
           </linearGradient>
         </defs>
       </svg>

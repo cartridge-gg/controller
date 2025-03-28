@@ -64,11 +64,11 @@ export const SilverIcon = memo(
             y2="23.9929"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
           <linearGradient
             id="paint1_linear_10143_96690"
@@ -78,11 +78,11 @@ export const SilverIcon = memo(
             y2="23.9929"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
           <linearGradient
             id="paint2_linear_10143_96690"
@@ -92,11 +92,11 @@ export const SilverIcon = memo(
             y2="23.9929"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
           <linearGradient
             id="paint3_linear_10143_96690"
@@ -106,11 +106,11 @@ export const SilverIcon = memo(
             y2="23.9929"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
           <linearGradient
             id="paint4_linear_10143_96690"
@@ -120,11 +120,11 @@ export const SilverIcon = memo(
             y2="23.9929"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
           <linearGradient
             id="paint5_linear_10143_96690"
@@ -134,11 +134,11 @@ export const SilverIcon = memo(
             y2="23.9929"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
           <linearGradient
             id="paint6_linear_10143_96690"
@@ -148,11 +148,11 @@ export const SilverIcon = memo(
             y2="23.9929"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
           <linearGradient
             id="paint7_linear_10143_96690"
@@ -162,11 +162,11 @@ export const SilverIcon = memo(
             y2="23.9929"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
           <linearGradient
             id="paint8_linear_10143_96690"
@@ -176,11 +176,11 @@ export const SilverIcon = memo(
             y2="23.9938"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#FFF8C1" />
-            <stop offset="0.0001" stop-color="#C2E8FD" />
-            <stop offset="0.3123" stop-color="#919191" />
-            <stop offset="0.7592" stop-color="#DDDDDD" />
-            <stop offset="1" stop-color="white" />
+            <stop stopColor="#FFF8C1" />
+            <stop offset="0.0001" stopColor="#C2E8FD" />
+            <stop offset="0.3123" stopColor="#919191" />
+            <stop offset="0.7592" stopColor="#DDDDDD" />
+            <stop offset="1" stopColor="white" />
           </linearGradient>
         </defs>
       </svg>

@@ -2,8 +2,8 @@ import {
   BronzeIcon,
   DefaultIcon,
   GoldIcon,
+  OlmechIcon,
   SilverIcon,
-  SpaceInvaderIcon,
 } from "@/components/icons";
 import { cn, Thumbnail } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
@@ -79,12 +79,12 @@ export const AchievementPlayerBadge = ({
       {...props}
     >
       <Thumbnail
-        icon={
-          icon ?? <SpaceInvaderIcon variant="solid" className="h-full w-full" />
-        }
+        icon={icon ?? <OlmechIcon variant="six" className="h-full w-full" />}
         variant={variant}
         size={size === "2xl" ? "lg" : "md"}
         className="rounded-full"
+        centered
+        rounded
       />
       {BadgeIcon}
       {children}

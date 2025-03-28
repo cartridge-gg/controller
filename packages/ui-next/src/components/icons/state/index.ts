@@ -29,6 +29,7 @@ export * from "./list";
 export * from "./metrics";
 export * from "./mobile";
 export * from "./moon";
+export * from "./olmech";
 export * from "./paper-plane";
 export * from "./pencil";
 export * from "./plus";

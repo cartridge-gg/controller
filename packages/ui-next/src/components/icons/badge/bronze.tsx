@@ -63,10 +63,10 @@ export const BronzeIcon = memo(
               y2="23.9954"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stop-color="#DDB5A4" />
-              <stop offset="0.3123" stop-color="#7F5746" />
-              <stop offset="0.7592" stop-color="#744C3B" />
-              <stop offset="1" stop-color="#B18979" />
+              <stop stopColor="#DDB5A4" />
+              <stop offset="0.3123" stopColor="#7F5746" />
+              <stop offset="0.7592" stopColor="#744C3B" />
+              <stop offset="1" stopColor="#B18979" />
             </linearGradient>
             <linearGradient
               id="paint1_linear_10143_96691"
@@ -76,10 +76,10 @@ export const BronzeIcon = memo(
               y2="23.9954"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stop-color="#DDB5A4" />
-              <stop offset="0.3123" stop-color="#7F5746" />
-              <stop offset="0.7592" stop-color="#744C3B" />
-              <stop offset="1" stop-color="#B18979" />
+              <stop stopColor="#DDB5A4" />
+              <stop offset="0.3123" stopColor="#7F5746" />
+              <stop offset="0.7592" stopColor="#744C3B" />
+              <stop offset="1" stopColor="#B18979" />
             </linearGradient>
             <linearGradient
               id="paint2_linear_10143_96691"
@@ -89,10 +89,10 @@ export const BronzeIcon = memo(
               y2="23.9954"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stop-color="#DDB5A4" />
-              <stop offset="0.3123" stop-color="#7F5746" />
-              <stop offset="0.7592" stop-color="#744C3B" />
-              <stop offset="1" stop-color="#B18979" />
+              <stop stopColor="#DDB5A4" />
+              <stop offset="0.3123" stopColor="#7F5746" />
+              <stop offset="0.7592" stopColor="#744C3B" />
+              <stop offset="1" stopColor="#B18979" />
             </linearGradient>
             <linearGradient
               id="paint3_linear_10143_96691"
@@ -102,10 +102,10 @@ export const BronzeIcon = memo(
               y2="23.9954"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stop-color="#DDB5A4" />
-              <stop offset="0.3123" stop-color="#7F5746" />
-              <stop offset="0.7592" stop-color="#744C3B" />
-              <stop offset="1" stop-color="#B18979" />
+              <stop stopColor="#DDB5A4" />
+              <stop offset="0.3123" stopColor="#7F5746" />
+              <stop offset="0.7592" stopColor="#744C3B" />
+              <stop offset="1" stopColor="#B18979" />
             </linearGradient>
             <linearGradient
               id="paint4_linear_10143_96691"
@@ -115,10 +115,10 @@ export const BronzeIcon = memo(
               y2="23.9954"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stop-color="#DDB5A4" />
-              <stop offset="0.3123" stop-color="#7F5746" />
-              <stop offset="0.7592" stop-color="#744C3B" />
-              <stop offset="1" stop-color="#B18979" />
+              <stop stopColor="#DDB5A4" />
+              <stop offset="0.3123" stopColor="#7F5746" />
+              <stop offset="0.7592" stopColor="#744C3B" />
+              <stop offset="1" stopColor="#B18979" />
             </linearGradient>
             <linearGradient
               id="paint5_linear_10143_96691"
@@ -128,10 +128,10 @@ export const BronzeIcon = memo(
               y2="23.9954"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stop-color="#DDB5A4" />
-              <stop offset="0.3123" stop-color="#7F5746" />
-              <stop offset="0.7592" stop-color="#744C3B" />
-              <stop offset="1" stop-color="#B18979" />
+              <stop stopColor="#DDB5A4" />
+              <stop offset="0.3123" stopColor="#7F5746" />
+              <stop offset="0.7592" stopColor="#744C3B" />
+              <stop offset="1" stopColor="#B18979" />
             </linearGradient>
             <linearGradient
               id="paint6_linear_10143_96691"
@@ -141,10 +141,10 @@ export const BronzeIcon = memo(
               y2="24"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stop-color="#DDB5A4" />
-              <stop offset="0.3123" stop-color="#7F5746" />
-              <stop offset="0.7592" stop-color="#744C3B" />
-              <stop offset="1" stop-color="#B18979" />
+              <stop stopColor="#DDB5A4" />
+              <stop offset="0.3123" stopColor="#7F5746" />
+              <stop offset="0.7592" stopColor="#744C3B" />
+              <stop offset="1" stopColor="#B18979" />
             </linearGradient>
           </defs>
         </svg>

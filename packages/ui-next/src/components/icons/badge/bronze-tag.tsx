@@ -24,10 +24,10 @@ export const BronzeTagIcon = memo(
             y2="9.88749"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#966E5E" />
-            <stop offset="0.3123" stop-color="#7F5746" />
-            <stop offset="0.7592" stop-color="#744C3B" />
-            <stop offset="1" stop-color="#966E5E" />
+            <stop stopColor="#966E5E" />
+            <stop offset="0.3123" stopColor="#7F5746" />
+            <stop offset="0.7592" stopColor="#744C3B" />
+            <stop offset="1" stopColor="#966E5E" />
           </linearGradient>
         </defs>
       </svg>

@@ -39,6 +39,7 @@ export const Default: Story = {
               <div key={`${variant}-${rank}`} className="flex gap-3">
                 {sizes.map((size) => (
                   <AchievementPlayerBadge
+                    key={`${variant}-${rank}-${size}`}
                     {...args}
                     variant={variant}
                     size={size}
