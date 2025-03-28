@@ -97,7 +97,7 @@ function StarterPackContent() {
           </>
         ) : (
           <Button className="w-full" onClick={handlePurchase}>
-            <span>Purchase</span>
+            <span>Continue</span>
           </Button>
         )}
       </LayoutFooter>

@@ -2,6 +2,7 @@ import {
   Button,
   Card,
   CardContent,
+  ExternalIcon,
   GiftIcon,
   LayoutContent,
   LayoutFooter,
@@ -169,9 +170,14 @@ export const PurchaseWithoutBalance = () => {
       <LayoutFooter>
         {purchaseState === PurchaseState.PENDING ? (
           <Card>
-            <CardContent className="flex items-center justify-center w-full text-sm bg-background-100 border border-background-200 p-2.5 text-foreground-400">
-              <Spinner className="mr-2" />
-              <span>Confirming on starknet</span>
+            <CardContent className="flex items-center justify-between w-full text-sm bg-background-100 border border-background-200 p-2.5 text-foreground-400">
+              <div className="flex items-center gap-2">
+                <Spinner className="size-4" />
+                <span>Confirming on starknet</span>
+              </div>
+              <a href="#" className="hover:text-foreground-200">
+                <ExternalIcon className="size-4" />
+              </a>
             </CardContent>
           </Card>
         ) : purchaseState === PurchaseState.SUCCESS ? (
