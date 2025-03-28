@@ -20,6 +20,16 @@ export const achievementPlayerBadgeVariants = cva(
   {
     variants: {
       variant: {
+        darkest: "",
+        darker: "",
+        dark: "",
+        default: "",
+        light: "",
+        lighter: "",
+        lightest: "",
+        ghost: "",
+      },
+      rank: {
         default: "",
         gold: "",
         silver: "",
@@ -40,13 +50,14 @@ export const achievementPlayerBadgeVariants = cva(
 export const AchievementPlayerBadge = ({
   icon,
   variant,
+  rank,
   size,
   className,
   children,
   ...props
 }: AchievementPlayerBadgeProps) => {
   const BadgeIcon = useMemo(() => {
-    switch (variant) {
+    switch (rank) {
       case "gold":
         return <GoldIcon className="absolute" size={size ?? "xl"} />;
       case "silver":
@@ -57,16 +68,19 @@ export const AchievementPlayerBadge = ({
       default:
         return <DefaultIcon className="absolute" size={size ?? "xl"} />;
     }
-  }, [variant, size]);
+  }, [rank, size]);
 
   return (
     <div
-      className={cn(achievementPlayerBadgeVariants({ variant }), className)}
+      className={cn(
+        achievementPlayerBadgeVariants({ variant, rank }),
+        className,
+      )}
       {...props}
     >
       <Thumbnail
         icon={icon ?? <SpaceInvaderIcon variant="solid" />}
-        variant="faded"
+        variant={variant}
         size="lg"
         className="rounded-full"
       />

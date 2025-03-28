@@ -46,7 +46,55 @@ const meta: Meta<typeof AchievementPlayerHeader> = {
 export default meta;
 type Story = StoryObj<typeof AchievementPlayerHeader>;
 
-export const Default: Story = {};
+const ranks = ["default", "gold", "silver", "bronze"] as const;
+
+export const Dark: Story = {
+  render: (args) => {
+    const variant = "dark";
+    return (
+      <div key={variant} className="flex flex-col gap-3">
+        <p className="text-sm text-foreground-100 capitalize text-medium">
+          {variant}
+        </p>
+        {ranks.map((rank) => (
+          <AchievementPlayerHeader {...args} variant={variant} rank={rank} />
+        ))}
+      </div>
+    );
+  },
+};
+
+export const Default: Story = {
+  render: (args) => {
+    const variant = "default";
+    return (
+      <div key={variant} className="flex flex-col gap-3">
+        <p className="text-sm text-foreground-100 capitalize text-medium">
+          {variant}
+        </p>
+        {ranks.map((rank) => (
+          <AchievementPlayerHeader {...args} variant={variant} rank={rank} />
+        ))}
+      </div>
+    );
+  },
+};
+
+export const Light: Story = {
+  render: (args) => {
+    const variant = "light";
+    return (
+      <div key={variant} className="flex flex-col gap-3">
+        <p className="text-sm text-foreground-100 capitalize text-medium">
+          {variant}
+        </p>
+        {ranks.map((rank) => (
+          <AchievementPlayerHeader {...args} variant={variant} rank={rank} />
+        ))}
+      </div>
+    );
+  },
+};
 
 export const NotFollower: Story = {
   args: {
@@ -93,17 +141,10 @@ export const Compacted: Story = {
   },
 };
 
-export const Silver: Story = {
-  args: {
-    follower: true,
-    variant: "silver",
-  },
-};
-
 export const GoldCompacted: Story = {
   args: {
     follower: false,
     compacted: true,
-    variant: "gold",
+    rank: "gold",
   },
 };

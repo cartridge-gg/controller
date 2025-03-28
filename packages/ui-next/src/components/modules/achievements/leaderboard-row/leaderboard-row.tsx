@@ -87,7 +87,7 @@ export const AchievementLeaderboardRow = ({
       <div className="flex gap-x-3 items-center">
         <AchievementPinIcons
           pins={pins}
-          variant={highlight || hover ? "highlight" : "default"}
+          variant={highlight || hover ? "light" : "default"}
           size="md"
           theme={highlight}
         />

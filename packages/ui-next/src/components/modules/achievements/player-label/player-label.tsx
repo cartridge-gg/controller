@@ -15,6 +15,16 @@ export interface AchievementPlayerLabelProps
 const achievementPlayerLabelVariants = cva("flex items-center gap-x-4", {
   variants: {
     variant: {
+      darkest: "",
+      darker: "",
+      dark: "",
+      default: "",
+      light: "",
+      lighter: "",
+      lightest: "",
+      ghost: "",
+    },
+    rank: {
       default: "",
       gold: "",
       silver: "",
@@ -23,6 +33,7 @@ const achievementPlayerLabelVariants = cva("flex items-center gap-x-4", {
   },
   defaultVariants: {
     variant: "default",
+    rank: "default",
   },
 });
 
@@ -31,11 +42,12 @@ export const AchievementPlayerLabel = ({
   address,
   icon,
   variant,
+  rank,
   className,
   ...props
 }: AchievementPlayerLabelProps) => {
   const TagIcon = useMemo(() => {
-    switch (variant) {
+    switch (rank) {
       case "gold":
         return <GoldTagIcon size="sm" />;
       case "silver":
@@ -46,14 +58,14 @@ export const AchievementPlayerLabel = ({
       default:
         return null;
     }
-  }, [variant]);
+  }, [rank]);
 
   return (
     <div
       className={cn(achievementPlayerLabelVariants({ variant }), className)}
       {...props}
     >
-      <AchievementPlayerBadge icon={icon} variant={variant} />
+      <AchievementPlayerBadge icon={icon} variant={variant} rank={rank} />
       <div className="flex flex-col gap-y-0.5">
         <div className="flex items-center gap-x-2">
           <p className="text-lg/[22px] font-semibold text-foreground-100">

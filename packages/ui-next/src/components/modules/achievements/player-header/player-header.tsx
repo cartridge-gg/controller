@@ -2,6 +2,7 @@ import { HTMLAttributes, useMemo } from "react";
 import { AchievementPlayerLabel } from "../player-label";
 import { cva, VariantProps } from "class-variance-authority";
 import { cn } from "@/utils";
+import { AchievementFollowerTag } from "@/index";
 
 interface AchievementPlayerHeaderProps
   extends HTMLAttributes<HTMLDivElement>,
@@ -20,6 +21,16 @@ interface AchievementPlayerHeaderProps
 const achievementPlayerHeaderVariants = cva("flex flex-col gap-y-4", {
   variants: {
     variant: {
+      darkest: "",
+      darker: "",
+      dark: "",
+      default: "",
+      light: "",
+      lighter: "",
+      lightest: "",
+      ghost: "",
+    },
+    rank: {
       default: "",
       gold: "",
       silver: "",
@@ -28,6 +39,7 @@ const achievementPlayerHeaderVariants = cva("flex flex-col gap-y-4", {
   },
   defaultVariants: {
     variant: "default",
+    rank: "default",
   },
 });
 
@@ -42,19 +54,24 @@ export const AchievementPlayerHeader = ({
   followers,
   compacted,
   variant,
+  rank,
   className,
   ...props
 }: AchievementPlayerHeaderProps) => {
   return (
     <div
-      className={cn(achievementPlayerHeaderVariants({ variant }), className)}
+      className={cn(
+        achievementPlayerHeaderVariants({ variant, rank }),
+        className,
+      )}
       {...props}
     >
       <AchievementPlayerLabel
         username={username}
         address={address}
         icon={icon}
-        variant={variant}
+        variant="default"
+        rank={rank}
       />
       <div className="flex flex-col">
         <div className="h-6 flex items-center gap-x-2">
@@ -76,19 +93,11 @@ export const AchievementPlayerHeader = ({
             </strong>
             Points
           </p>
-          {follower && <FollowerTag />}
+          {follower && <AchievementFollowerTag variant={variant} />}
         </div>
         {!compacted && <FollowerDescription followers={followers || []} />}
       </div>
     </div>
-  );
-};
-
-const FollowerTag = () => {
-  return (
-    <p className="bg-background-100 border border-background-200 rounded px-1.5 py-0.5 text-xs text-foreground-400">
-      Follows you
-    </p>
   );
 };
 

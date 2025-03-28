@@ -28,8 +28,13 @@ export interface AchievementSummaryProps
 const achievementSummaryVariants = cva("border border-transparent", {
   variants: {
     variant: {
+      darkest: "",
+      darker: "",
+      dark: "",
       default: "",
-      faded: "",
+      light: "",
+      lighter: "",
+      lightest: "",
       ghost: "",
     },
   },
