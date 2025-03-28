@@ -2,7 +2,7 @@ import { createContext, PropsWithChildren } from "react";
 
 export const enum StarterItemType {
   NFT = "NFT",
-  CREDIT = "CREDIT"
+  CREDIT = "CREDIT",
 }
 
 export interface StarterItemData {
