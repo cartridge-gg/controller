@@ -6,7 +6,6 @@ import {
   CardDescription,
   DepositIcon,
   EthereumIcon,
-  InfoIcon,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
@@ -15,7 +14,6 @@ import {
   MetaMaskIcon,
   PhantomColorIcon,
   PhantomIcon,
-  Separator,
   StarknetIcon,
   SolanaIcon,
   ExternalIcon,
@@ -27,10 +25,11 @@ import {
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { ExternalWallet } from "@cartridge/controller";
+import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import useCryptoPayment from "@/hooks/payment";
+import { CostBreakdown } from "./CostBreakdown";
 
-const WALLET_CONFIG = {
+export const WALLET_CONFIG = {
   argent: {
     icon: ArgentIcon,
     colorIcon: ArgentColorIcon,
@@ -54,71 +53,34 @@ const WALLET_CONFIG = {
   },
 } as const;
 
-enum CheckoutState {
+export enum CheckoutState {
   REVIEW_PURCHASE = 0,
   REQUESTING_PAYMENT = 1,
   TRANSACTION_SUBMITTED = 2,
-  PAYMENT_CONFIRMED = 3,
 }
 
 export function CryptoCheckout({
   selectedWallet,
   walletAddress,
   creditsAmount,
+  initialState = CheckoutState.REVIEW_PURCHASE,
   onBack,
   onComplete,
 }: {
   selectedWallet: ExternalWallet;
   walletAddress: string;
   creditsAmount: number;
+  initialState?: CheckoutState;
   onBack: () => void;
   onComplete: () => void;
 }) {
   const [error, setError] = useState<Error>();
   const { sendPayment, waitForPayment } = useCryptoPayment();
-  const [state, setState] = useState<CheckoutState>(
-    CheckoutState.REVIEW_PURCHASE,
-  );
+  const [state, setState] = useState<CheckoutState>(initialState);
   const [explorer, setExplorer] = useState<{
     name: string;
     url: string;
   } | null>(null);
-
-  const getInfo = useCallback(
-    (wallet: ExternalWallet) => {
-      const NetworkIcon = WALLET_CONFIG[wallet.type].networkIcon;
-
-      if (explorer) {
-        return (
-          <>
-            <div className="flex justify-between w-full">
-              <p className="text-foreground-200 font-normal text-xs flex items-center">
-                View on {explorer.name}
-              </p>
-              <a
-                href={explorer.url}
-                target="_blank"
-                className="flex items-center"
-              >
-                <ExternalIcon size="sm" className="inline-block" />
-              </a>
-            </div>
-          </>
-        );
-      }
-
-      return (
-        <>
-          <InfoIcon size="sm" className="text-foreground-200 flex-shrink-0" />
-          <p className="text-foreground-200 font-normal text-xs">
-            Purchase funds on <NetworkIcon size="xs" className="inline-block" />{" "}
-            {WALLET_CONFIG[wallet.type].network}
-          </p>
-        </>
-      );
-    },
-    [explorer],
-  );
 
   const getTitle = useMemo(() => {
     switch (state) {
@@ -185,10 +147,6 @@ export function CryptoCheckout({
         />
       </LayoutContent>
 
-      <div className="m-1 mx-6">
-        <Separator className="bg-spacer" />
-      </div>
-
       <LayoutFooter>
         {error && (
           <ErrorAlert
@@ -198,11 +156,37 @@ export function CryptoCheckout({
           />
         )}
 
-        <Card className="bg-background-100 border border-background-200 p-3">
-          <CardDescription className="flex flex-row items-start gap-3 items-center">
-            {getInfo(selectedWallet)}
-          </CardDescription>
-        </Card>
+        {(state === CheckoutState.REVIEW_PURCHASE ||
+          state === CheckoutState.REQUESTING_PAYMENT) && (
+          <CostBreakdown
+            rails="crypto"
+            walletType={selectedWallet.type}
+            price={{
+              processingFeeInCents: 0,
+              baseCostInCents: creditsAmount * 100,
+              totalInCents: creditsAmount * 100,
+            }}
+          />
+        )}
+        {state === CheckoutState.TRANSACTION_SUBMITTED && (
+          <Card className="bg-background-100 border border-background-200 p-3">
+            <CardDescription className="flex flex-row items-start gap-3 items-center">
+              <div className="flex justify-between w-full">
+                <div className="text-foreground-200 font-normal text-xs flex items-center gap-1">
+                  <Spinner size="sm" />
+                  Confirming on {humanizeString(selectedWallet.platform!)}
+                </div>
+                <a
+                  href={explorer?.url}
+                  target="_blank"
+                  className="flex items-center"
+                >
+                  <ExternalIcon size="sm" className="inline-block" />
+                </a>
+              </div>
+            </CardDescription>
+          </Card>
+        )}
         {state !== CheckoutState.TRANSACTION_SUBMITTED && (
           <Button
             className="flex-1 text-background-100 hover:brightness-90"
@@ -215,7 +199,7 @@ export function CryptoCheckout({
             onClick={() => handleSendTransaction()}
           >
             {walletIcon(selectedWallet)}
-            Purchase with {selectedWallet?.name}
+            Purchase with {selectedWallet!.type}
           </Button>
         )}
       </LayoutFooter>
