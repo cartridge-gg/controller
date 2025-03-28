@@ -21,7 +21,7 @@ export const TotalCost = React.forwardRef<HTMLDivElement, TotalCostProps>(
             <span className="text-foreground-400 text-xs font-normal">
               Cost
             </span>
-            <div className="text-foreground-400 text-sm font-normal">
+            <div className="text-foreground-400 text-xs font-normal">
               ${price.toFixed(2)}
             </div>
           </div>
@@ -32,7 +32,7 @@ export const TotalCost = React.forwardRef<HTMLDivElement, TotalCostProps>(
               </span>
               <InfoIcon size="xs" className="text-foreground-400" />
             </div>
-            <div className="text-foreground-400 text-sm font-normal">$0.15</div>
+            <div className="text-foreground-400 text-xs font-normal">$0.15</div>
           </div>
           <div className="w-full">
             <Separator className="bg-background-200" />

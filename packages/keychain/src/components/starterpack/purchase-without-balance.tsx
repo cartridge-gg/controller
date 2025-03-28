@@ -126,7 +126,7 @@ export const PurchaseWithoutBalance = () => {
         }
         title="Purchase Starter Pack"
       />
-      <LayoutContent>
+      <LayoutContent className="pt-1">
         <div className="w-full flex items-center justify-center">
           {isLoading ? (
             <Spinner />
