@@ -71,8 +71,6 @@ export class ArgentWallet implements WalletAdapter {
         throw new Error("Argent is not connected");
       }
 
-      console.log("signTypedData", data);
-
       const sig = await this.wallet.request({
         type: "wallet_signTypedData",
         params: data,
@@ -87,6 +85,14 @@ export class ArgentWallet implements WalletAdapter {
         error: (error as Error).message || "Unknown error",
       };
     }
+  }
+
+  async sendTransaction(_txn: any): Promise<ExternalWalletResponse<any>> {
+    return {
+      success: false,
+      wallet: this.type,
+      error: "Not implemented",
+    };
   }
 
   async switchChain(_chainId: string): Promise<boolean> {

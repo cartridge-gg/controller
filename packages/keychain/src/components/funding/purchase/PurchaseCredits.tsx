@@ -1,61 +1,29 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import {
-  ArgentColorIcon,
-  ArgentIcon,
   Button,
   Card,
   CardDescription,
   CheckIcon,
   CreditCardIcon,
   DepositIcon,
-  EthereumIcon,
   InfoIcon,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-  MetaMaskColorIcon,
-  MetaMaskIcon,
-  PhantomColorIcon,
-  PhantomIcon,
   Separator,
-  StarknetIcon,
-  SolanaIcon,
 } from "@cartridge/ui-next";
 import { isIframe } from "@cartridge/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance, loadStripe } from "@stripe/stripe-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AmountSelection } from "./AmountSelection";
-import { Balance, BalanceType } from "./Balance";
+import { AmountSelection } from "../AmountSelection";
 import CheckoutForm from "./StripeCheckout";
-import { DEFAULT_AMOUNT } from "./constants";
+import { DEFAULT_AMOUNT } from "../constants";
+import { CryptoCheckout, walletIcon } from "./CryptoCheckout";
 import { ExternalWallet } from "@cartridge/controller";
-
-const WALLET_CONFIG = {
-  argent: {
-    icon: ArgentIcon,
-    colorIcon: ArgentColorIcon,
-    network: "Starknet",
-    networkIcon: StarknetIcon,
-    bgColor: "#FF875B",
-  },
-  metamask: {
-    icon: MetaMaskIcon,
-    colorIcon: MetaMaskColorIcon,
-    network: "Ethereum",
-    networkIcon: EthereumIcon,
-    bgColor: "#E88A39",
-  },
-  phantom: {
-    icon: PhantomIcon,
-    colorIcon: PhantomColorIcon,
-    network: "Solana",
-    networkIcon: SolanaIcon,
-    bgColor: "#AB9FF2",
-  },
-} as const;
+import { Balance, BalanceType } from "../Balance";
 
 enum PurchaseState {
   SELECTION = 0,
@@ -71,12 +39,10 @@ type PurchaseCreditsProps = {
 
 export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   const {
-    closeModal,
     controller,
+    closeModal,
     externalDetectWallets,
     externalConnectWallet,
-    externalSignMessage,
-    externalSignTypedData,
   } = useConnection();
 
   const [clientSecret, setClientSecret] = useState("");
@@ -85,12 +51,13 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
   const [externalWallets, setExternalWallets] = useState<ExternalWallet[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
+  const [walletAddress, setWalletAddress] = useState<string>();
   const [connecting, setConnecting] = useState<boolean>(false);
+  const [error, setError] = useState<Error>();
   const stripePromise = useMemo(
     () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
     [],
   );
-  const [error, setError] = useState<Error>();
 
   useEffect(() => {
     externalDetectWallets().then((wallets) => setExternalWallets(wallets));
@@ -138,6 +105,16 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         setSelectedWallet(wallet);
         const res = await externalConnectWallet(wallet.type);
         if (res.success) {
+          if (!res.account) {
+            setError(
+              new Error(
+                `Connected to ${wallet.name} but no wallet address found`,
+              ),
+            );
+            return;
+          }
+
+          setWalletAddress(res.account);
           setState(PurchaseState.CRYPTO_CHECKOUT);
         } else {
           setError(new Error(res.error));
@@ -155,59 +132,28 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
     switch (state) {
       case PurchaseState.SELECTION:
         return "Purchase Credits";
-      case PurchaseState.CRYPTO_CHECKOUT:
-        if (selectedWallet) {
-          return `Purchase Credits`;
-        }
-
-        return "Connect Wallet";
       case PurchaseState.STRIPE_CHECKOUT:
         return "Credit Card";
       case PurchaseState.SUCCESS:
         return "Purchase Complete";
     }
-  }, [state, selectedWallet]);
-
-  const getWalletIcon = (wallet?: ExternalWallet, useColor = false) => {
-    if (!wallet) {
-      return null;
-    }
-
-    const Icon = useColor
-      ? WALLET_CONFIG[wallet.type].colorIcon
-      : WALLET_CONFIG[wallet.type].icon;
-    return <Icon />;
-  };
-
-  const getWalletBgColor = (wallet: ExternalWallet) => {
-    return WALLET_CONFIG[wallet.type].bgColor;
-  };
-
-  const getInfo = (wallet?: ExternalWallet) => {
-    if (!wallet) {
-      return (
-        <>
-          Credits are used to pay for network activity. They are not tokens and
-          cannot be transferred or refunded.
-        </>
-      );
-    }
-
-    const NetworkIcon = WALLET_CONFIG[wallet.type].networkIcon;
-    return (
-      <>
-        Purchase funds on <NetworkIcon size="sm" className="inline-block" />{" "}
-        {WALLET_CONFIG[wallet.type].network}
-      </>
-    );
-  };
+  }, [state]);
 
   const appearance = {
-    theme: "night",
+    theme: "flat",
     variables: {
-      colorPrimary: "#FBCB4A",
-      colorBackground: "#161A17",
+      colorBackground: "#1E221F",
+      colorText: "#505050",
+      colorTextPlaceholder: "#505050",
+      borderRadius: "4px",
       focusBoxShadow: "none",
+    },
+    rules: {
+      ".Input": {
+        border: "1px solid #242824",
+        color: "#FFFFFF",
+        padding: "14px",
+      },
     },
   } as Appearance;
 
@@ -218,11 +164,23 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         stripe={stripePromise}
       >
         <CheckoutForm
+          creditsAmount={creditsAmount}
           onBack={() => setState(PurchaseState.SELECTION)}
           onComplete={() => setState(PurchaseState.SUCCESS)}
-          creditsAmount={creditsAmount}
         />
       </Elements>
+    );
+  }
+
+  if (state === PurchaseState.CRYPTO_CHECKOUT) {
+    return (
+      <CryptoCheckout
+        walletAddress={walletAddress!}
+        selectedWallet={selectedWallet!}
+        creditsAmount={creditsAmount}
+        onBack={() => setState(PurchaseState.SELECTION)}
+        onComplete={() => setState(PurchaseState.SUCCESS)}
+      />
     );
   }
 
@@ -232,23 +190,25 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         className="p-6"
         title={title}
         icon={
-          state === PurchaseState.SELECTION ||
-          state === PurchaseState.CRYPTO_CHECKOUT ? (
+          state === PurchaseState.SELECTION ? (
             <DepositIcon variant="solid" size="lg" />
           ) : (
             <CheckIcon size="lg" />
           )
         }
         onBack={() => {
-          if (state === PurchaseState.SELECTION) {
-            onBack?.();
-          } else {
-            setState(PurchaseState.SELECTION);
+          switch (state) {
+            case PurchaseState.SUCCESS:
+              return;
+            case PurchaseState.SELECTION:
+              onBack?.();
+              break;
+            default:
+              setState(PurchaseState.SELECTION);
           }
         }}
       />
       <LayoutContent className="gap-6 px-6">
-        <Balance types={[BalanceType.CREDITS]} />
         {state === PurchaseState.SELECTION && (
           <AmountSelection
             amount={creditsAmount}
@@ -256,6 +216,9 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
             lockSelection={isLoading}
             enableCustom
           />
+        )}
+        {state === PurchaseState.SUCCESS && (
+          <Balance types={[BalanceType.CREDITS]} />
         )}
       </LayoutContent>
 
@@ -266,20 +229,26 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
       <LayoutFooter>
         {error && (
           <ErrorAlert
-            variant="warning"
+            variant="error"
             title="Purchase Alert"
             description={error.message}
           />
         )}
 
-        <Card className="bg-background-100 border border-background-200 p-3">
-          <CardDescription className="flex flex-row items-start gap-3">
-            <InfoIcon size="sm" className="text-foreground-200 flex-shrink-0" />
-            <p className="text-foreground-200 font-normal text-xs">
-              {getInfo(selectedWallet)}
-            </p>
-          </CardDescription>
-        </Card>
+        {state !== PurchaseState.SUCCESS && (
+          <Card className="bg-background-100 border border-background-200 p-3">
+            <CardDescription className="flex flex-row items-start gap-3">
+              <InfoIcon
+                size="sm"
+                className="text-foreground-200 flex-shrink-0"
+              />
+              <p className="text-foreground-200 font-normal text-xs">
+                Creditss are used to pay for network activity. They are not
+                tokens and cannot be transferred or refunded.
+              </p>
+            </CardDescription>
+          </Card>
+        )}
 
         {state === PurchaseState.SUCCESS && isIframe() && (
           <Button variant="secondary" onClick={closeModal}>
@@ -291,7 +260,6 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
             <Button
               className="flex-1"
               isLoading={isLoading}
-              disabled={connecting}
               onClick={createPaymentIntent}
             >
               <CreditCardIcon
@@ -314,54 +282,12 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
                     disabled={!wallet.available || connecting || isLoading}
                     onClick={async () => onExternalConnect(wallet)}
                   >
-                    {getWalletIcon(wallet, true)}
+                    {walletIcon(wallet, true)}
                   </Button>
                 );
               })}
             </div>
           </>
-        )}
-        {state === PurchaseState.CRYPTO_CHECKOUT && (
-          <Button
-            className="flex-1 text-background-100 hover:brightness-90"
-            variant="secondary"
-            style={{
-              backgroundColor: getWalletBgColor(selectedWallet!),
-              border: "none",
-            }}
-            onClick={async () => {
-              if (selectedWallet?.type === "argent") {
-                const res = await externalSignTypedData(selectedWallet!.type, {
-                  domain: {
-                    name: "StarkNet",
-                    version: "1",
-                    chainId: "SN_MAIN",
-                  },
-                  primaryType: "Mail",
-                  message: {
-                    from: { name: "John Doe", wallet: "0x123" },
-                    to: { name: "Jane Doe", wallet: "0x456" },
-                    contents: "Hello, world!",
-                  },
-                });
-
-                if (!res.success) {
-                  setError(new Error(res.error));
-                }
-              } else {
-                const res = await externalSignMessage(
-                  selectedWallet!.type,
-                  "Test signing message",
-                );
-                if (!res.success) {
-                  setError(new Error(res.error));
-                }
-              }
-            }}
-          >
-            {getWalletIcon(selectedWallet)}
-            Sign Message with {selectedWallet?.name}
-          </Button>
         )}
       </LayoutFooter>
     </LayoutContainer>

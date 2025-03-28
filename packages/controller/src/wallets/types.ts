@@ -28,5 +28,6 @@ export interface WalletAdapter {
   connect(): Promise<ExternalWalletResponse<any>>;
   signMessage?(message: string): Promise<ExternalWalletResponse<any>>;
   signTypedData?(data: any): Promise<ExternalWalletResponse<any>>;
+  sendTransaction(tx: any): Promise<ExternalWalletResponse<any>>;
   getBalance(tokenAddress?: string): Promise<ExternalWalletResponse<any>>;
 }
