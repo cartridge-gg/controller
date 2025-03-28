@@ -12,7 +12,8 @@ use starknet_crypto::PoseidonHasher;
 use ed25519_dalek::{Signer as Ed25519Signer, SigningKey};
 
 use crate::abigen::controller::{
-    Ed25519Signer as ControllerEd25519Signer, EdDSASignatureWithHint, SignerSignature,
+    Ed25519Signer as ControllerEd25519Signer, EdDSASignatureWithHint, SIWSSignature,
+    SignerSignature,
 };
 use crate::signers::{HashSigner, SignError};
 
@@ -86,19 +87,22 @@ impl HashSigner for SIWSSigner {
             .map(|x| Felt::from(x.clone()))
             .collect::<Vec<_>>();
 
+        let signature_with_hint = EdDSASignatureWithHint::cairo_deserialize(&calldata, 0).unwrap();
+
+        let siws_signature = SIWSSignature {
+            domain: self.domain.as_bytes().to_vec(),
+            signature_with_hint,
+        };
+
         // Create the controller signer
         let nonzero_pubkey = NonZero::new(U256::from_bytes_be(&self.pubkey))
             .unwrap_or_else(|| panic!("Public key cannot be zero"));
         let controller_signer = ControllerEd25519Signer {
             pubkey: nonzero_pubkey,
         };
-        let signature_with_hints = EdDSASignatureWithHint::cairo_deserialize(&calldata, 0).unwrap();
 
         // Return the signature
-        Ok(SignerSignature::SIWS((
-            controller_signer,
-            signature_with_hints,
-        )))
+        Ok(SignerSignature::SIWS((controller_signer, siws_signature)))
     }
 }
 
