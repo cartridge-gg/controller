@@ -1,8 +1,8 @@
 {
   "controllers": {
     "latest": {
-      "casm_hash": "0x2649897514bd47117fb8bf3d653e6febac4bc596ba50506b0ec64e83553d326",
-      "class_hash": "0xec3bd940de1187715d252263c5cf7bd850427b2797e7499f0a58cf8e89e1b4"
+      "casm_hash": "0x1e77caeae35023a1fdceee2766eedbce9434604264435d5826171e5699fe5a0",
+      "class_hash": "0x2205185163af27565d6e73ba4993b0fce928d32061bcc28cbd227c52a5881cd"
     },
     "v1.0.4": {
       "casm_hash": "0x6b22de13b878ab346fa53442adaa8a40a6bd25732aa1aeb2a26375987f0be00",

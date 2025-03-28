@@ -1,5 +1,8 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::{NonZero, U256};
+use cainome_cairo_serde::CairoSerde;
+use garaga_rs::calldata::signatures::eddsa_calldata_builder;
+use num_bigint::BigUint;
 use rand::rngs::OsRng;
 use starknet::core::types::Felt;
 use starknet::macros::short_string;
@@ -8,9 +11,8 @@ use starknet_crypto::PoseidonHasher;
 #[cfg(not(target_arch = "wasm32"))]
 use ed25519_dalek::{Signer as Ed25519Signer, SigningKey};
 
-use crate::abigen::controller::SignerSignature;
 use crate::abigen::controller::{
-    Ed25519Signature, Ed25519Signer as ControllerEd25519Signer, SIWSSignature,
+    Ed25519Signer as ControllerEd25519Signer, EdDSASignatureWithHint, SignerSignature,
 };
 use crate::signers::{HashSigner, SignError};
 
@@ -69,29 +71,20 @@ impl HashSigner for SIWSSigner {
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
         // Construct the SIWS message
         let message = self.construct_siws_message(tx_hash);
-        // Print the SIWS message for debugging or user display
-        println!("SIWS Message: {}", message);
-        let message_bytes = message.as_bytes();
 
-        // Sign the message using Ed25519
-        let signature = self.keypair.sign(message_bytes);
-        let signature_bytes = signature.to_bytes();
+        // Sign the message
+        let signature = self.keypair.sign(message.as_bytes());
 
-        // Split into r and s components (first 32 bytes for r, last 32 bytes for s)
-        let r_bytes = &signature_bytes[0..32];
-        let s_bytes = &signature_bytes[32..64];
+        let pubkey = BigUint::from_bytes_le(&self.pubkey);
 
-        // Convert &[u8] slices to &[u8; 32] arrays
-        let mut r_array = [0u8; 32];
-        r_array.copy_from_slice(r_bytes);
-        let r = U256::from_bytes_be(&r_array);
+        let r = BigUint::from_bytes_le(signature.r_bytes());
+        let s = BigUint::from_bytes_le(signature.s_bytes());
 
-        let mut s_array = [0u8; 32];
-        s_array.copy_from_slice(s_bytes);
-        let s = U256::from_bytes_be(&s_array);
-
-        // Create the Ed25519 signature for the controller
-        let ed25519_signature = Ed25519Signature { r, s };
+        let calldata = eddsa_calldata_builder(r, s, pubkey, message.as_bytes().to_vec())
+            .map_err(SignError::InvalidMessageError)?
+            .iter()
+            .map(|x| Felt::from(x.clone()))
+            .collect::<Vec<_>>();
 
         // Create the controller signer
         let nonzero_pubkey = NonZero::new(U256::from_bytes_be(&self.pubkey))
@@ -99,14 +92,13 @@ impl HashSigner for SIWSSigner {
         let controller_signer = ControllerEd25519Signer {
             pubkey: nonzero_pubkey,
         };
+        let signature_with_hints = EdDSASignatureWithHint::cairo_deserialize(&calldata, 0).unwrap();
 
-        // Create the SIWS signature with domain
-        let siws_signature = SIWSSignature {
-            domain: self.domain.as_bytes().to_vec(),
-            signature: ed25519_signature,
-        };
-
-        Ok(SignerSignature::SIWS((controller_signer, siws_signature)))
+        // Return the signature
+        Ok(SignerSignature::SIWS((
+            controller_signer,
+            signature_with_hints,
+        )))
     }
 }
 
