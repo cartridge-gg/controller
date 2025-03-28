@@ -34,7 +34,7 @@ export function Spending({ title, price }: BalanceProps) {
       </CardHeader>
       <ActivityCard
         Logo={Logo}
-        title={title ?? "Spending"}
+        title="Credits"
         subTitle={`${(price * 10).toString()} Credits`}
         topic={`$${price.toFixed(2).toString()}`}
         subTopic={""}

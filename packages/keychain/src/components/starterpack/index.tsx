@@ -122,6 +122,7 @@ export function StarterPack() {
   const starterPackItems: StarterItemData[] = [
     {
       title: "Village",
+      collectionName: "Eternum Village",
       description:
         "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
       price: 5,

@@ -35,10 +35,14 @@ export function Receiving({ title, items }: ReceivingProps) {
               />
               <div className="flex flex-col gap-0.5">
                 <p className="text-foreground-100 font-medium text-sm">
-                  {item.title}
+                  {item.type === StarterItemType.CREDIT
+                    ? "Credits"
+                    : item.title}
                 </p>
                 <p className="text-foreground-300 font-normal text-xs">
-                  {item.description}
+                  {item.type === StarterItemType.NFT
+                    ? item.collectionName || item.description
+                    : `${item.value} Credits`}
                 </p>
               </div>
             </div>
