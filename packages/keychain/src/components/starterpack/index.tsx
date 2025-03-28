@@ -19,6 +19,7 @@ import { PurchaseWithBalance } from "./purchase-with-balance";
 import { PurchaseWithoutBalance } from "./purchase-without-balance";
 import {
   StarterItemData,
+  StarterItemType,
   StarterPackProvider,
 } from "../../context/starterpack";
 import { useStarterPack } from "../../hooks/starterpack";
@@ -63,12 +64,12 @@ function StarterPackContent() {
 
         <div className="flex flex-col gap-3">
           {starterPackItems
-            .filter((item) => item.type === "NFT")
+            .filter((item) => item.type === StarterItemType.NFT)
             .map((item, index) => (
               <StarterItem key={index} {...item} />
             ))}
           {starterPackItems
-            .filter((item) => item.type === "CREDIT")
+            .filter((item) => item.type === StarterItemType.CREDIT)
             .map((item, index) => (
               <StarterItem key={index} {...item} />
             ))}
@@ -125,14 +126,14 @@ export function StarterPack() {
         "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
       price: 5,
       image: "https://r2.quddus.my/Frame%203231.png",
-      type: "NFT",
+      type: StarterItemType.NFT,
     },
     {
       title: "20 Credits",
       description: "Credits cover service fee(s) in Eternum.",
       price: 0,
       image: "/ERC-20-Icon.svg",
-      type: "CREDIT",
+      type: StarterItemType.CREDIT,
       value: 50,
     },
   ];

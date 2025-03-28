@@ -4,8 +4,9 @@ import {
   CardListContent,
   CardListItem,
   CardTitle,
+  Thumbnail,
 } from "@cartridge/ui-next";
-import { StarterItemData } from "../../context/starterpack";
+import { StarterItemData, StarterItemType } from "../../context/starterpack";
 
 type ReceivingProps = {
   title?: string;
@@ -25,7 +26,13 @@ export function Receiving({ title, items }: ReceivingProps) {
         {items.map((item) => (
           <CardListItem className="flex flex-row items-center p-3">
             <div className="flex flex-row items-center gap-3">
-              <img src={item.image} className="size-8" />
+              {/* <img src={item.image} className="size-8" /> */}
+              <Thumbnail
+                rounded={item.type === StarterItemType.CREDIT}
+                icon={item.image}
+                size="lg"
+                className="aspect-square"
+              />
               <div className="flex flex-col gap-0.5">
                 <p className="text-foreground-100 font-medium text-sm">
                   {item.title}

@@ -1,9 +1,13 @@
 import { createContext, PropsWithChildren } from "react";
 
-export type StarterItemType = "NFT" | "CREDIT";
+export const enum StarterItemType {
+  NFT = "NFT",
+  CREDIT = "CREDIT"
+}
 
 export interface StarterItemData {
   title: string;
+  collectionName?: string;
   description: string;
   price: number;
   image?: string;

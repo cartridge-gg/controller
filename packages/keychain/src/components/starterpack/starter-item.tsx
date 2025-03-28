@@ -6,60 +6,55 @@ import {
   cn,
   Thumbnail,
 } from "@cartridge/ui-next";
-import { StarterItemData } from "@/context/starterpack";
-interface NFTStarterItemProps extends StarterItemData {
-  type: "NFT";
-}
-
-interface CreditStarterItemProps extends StarterItemData {
-  type: "CREDIT";
-}
-
-export type StarterItemProps = NFTStarterItemProps | CreditStarterItemProps;
+import { StarterItemData, StarterItemType } from "@/context/starterpack";
 
 export const StarterItem = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & StarterItemProps
->(({ title, description, image, type, className, price, ...props }, ref) => {
-  const value =
-    type === "CREDIT" ? (props as CreditStarterItemProps).value : undefined;
-
-  return (
-    <div className={cn("relative pt-1", className)} ref={ref} {...props}>
-      <Card className="relative bg-background-100 overflow-visible h-[88px]">
-        {/* Price tag */}
-        <div className="absolute -top-1 right-4">
-          <Union price={price} />
-        </div>
-        <CardContent className="py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3">
-          {/* <img src={image} alt={title} className="size-16 object-cover" /> */}
-          <Thumbnail rounded={type === "CREDIT"} icon={image} className="size-16 p-1" />
-          <div className="flex flex-col gap-1 flex-1 min-w-0">
-            <h3 className="text-sm font-medium text-foreground-100 truncate">
-              {type === "CREDIT" && value
-                ? `${value} Credits`
-                : price === 0
-                  ? "FREE"
-                  : title}
-            </h3>
-            <CardDescription className="font-normal text-xs text-foreground-200 line-clamp-2">
-              {description}
-            </CardDescription>
+  React.HTMLAttributes<HTMLDivElement> & StarterItemData
+>(
+  (
+    { title, description, image, type, className, price, value, ...props },
+    ref,
+  ) => {
+    return (
+      <div className={cn("relative pt-1", className)} ref={ref} {...props}>
+        <Card className="relative bg-background-100 overflow-visible h-[88px]">
+          {/* Price tag */}
+          <div className="absolute -top-1 right-4">
+            <Union price={price} />
           </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-});
+          <CardContent className="py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3">
+            {/* <img src={image} alt={title} className="size-16 object-cover" /> */}
+            <Thumbnail
+              rounded={type === StarterItemType.CREDIT}
+              icon={image}
+              className="size-16 p-1"
+            />
+            <div className="flex flex-col gap-1 flex-1 min-w-0">
+              <h3 className="text-sm font-medium text-foreground-100 truncate">
+                {type === StarterItemType.CREDIT && value
+                  ? `${value} Credits`
+                  : price === 0
+                    ? "FREE"
+                    : title}
+              </h3>
+              <CardDescription className="font-normal text-xs text-foreground-200 line-clamp-2">
+                {description}
+              </CardDescription>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  },
+);
 
 StarterItem.displayName = "StarterItem";
 
 const Union = ({ price }: { price: number }) => {
   return (
     <div className="relative flex items-center justify-center">
-      <div className="absolute bottom-0 left-0 w-1/2">
-        <Subtract />
-      </div>
+      <Subtract />
       <svg
         width="48"
         height="36"
@@ -105,6 +100,7 @@ const Subtract = () => {
       height="35"
       viewBox="0 0 46 35"
       fill="none"
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
     >
       <g opacity="0.04">
         <path

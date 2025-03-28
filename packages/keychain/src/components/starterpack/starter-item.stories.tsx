@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { StarterItem } from "./starter-item";
+import { StarterItemType } from "@/context/starterpack";
 
 const meta: Meta<typeof StarterItem> = {
   component: StarterItem,
@@ -21,7 +22,7 @@ type Story = StoryObj<typeof StarterItem>;
 
 export const NFT: Story = {
   args: {
-    type: "NFT",
+    type: StarterItemType.NFT,
     title: "Starter NFT",
     description: "A unique starter NFT for your collection",
     image: "https://picsum.photos/200",
@@ -31,7 +32,7 @@ export const NFT: Story = {
 
 export const Credit: Story = {
   args: {
-    type: "CREDIT",
+    type: StarterItemType.CREDIT,
     title: "100 Credits",
     description: "Get 100 credits to use in the marketplace",
     image: "https://static.cartridge.gg/presets/credit/icon.svg",
@@ -42,7 +43,7 @@ export const Credit: Story = {
 
 export const FreeCredit: Story = {
   args: {
-    type: "CREDIT",
+    type: StarterItemType.CREDIT,
     title: "Free Credits",
     description: "Get 50 free credits to start your journey",
     image: "https://static.cartridge.gg/presets/credit/icon.svg",
