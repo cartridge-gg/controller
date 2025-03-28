@@ -12,7 +12,6 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-  Separator,
 } from "@cartridge/ui-next";
 import { isIframe } from "@cartridge/utils";
 import { Elements } from "@stripe/react-stripe-js";
@@ -32,9 +31,20 @@ enum PurchaseState {
   SUCCESS = 3,
 }
 
-type PurchaseCreditsProps = {
+export type PurchaseCreditsProps = {
   isSlot?: boolean;
   onBack?: () => void;
+};
+
+export type PricingDetails = {
+  baseCostInCents: number;
+  processingFeeInCents: number;
+  totalInCents: number;
+};
+
+export type StripeResponse = {
+  clientSecret: string;
+  pricing: PricingDetails;
 };
 
 export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
@@ -47,6 +57,9 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
 
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setisLoading] = useState<boolean>(false);
+  const [pricingDetails, setPricingDetails] = useState<PricingDetails | null>(
+    null,
+  );
   const [state, setState] = useState<PurchaseState>(PurchaseState.SELECTION);
   const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
   const [externalWallets, setExternalWallets] = useState<ExternalWallet[]>([]);
@@ -64,7 +77,10 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   }, [externalDetectWallets]);
 
   const onAmountChanged = useCallback(
-    (amount: number) => setCreditsAmount(amount),
+    (amount: number) => {
+      setError(undefined);
+      setCreditsAmount(amount);
+    },
     [setCreditsAmount],
   );
 
@@ -88,8 +104,9 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         setError(new Error("Payment intent endpoint failure"));
         return;
       }
-      const data = await res.json();
+      const data: StripeResponse = await res.json();
       setClientSecret(data.clientSecret);
+      setPricingDetails(data.pricing);
       setState(PurchaseState.STRIPE_CHECKOUT);
     } catch (e) {
       setError(e as unknown as Error);
@@ -164,7 +181,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
         stripe={stripePromise}
       >
         <CheckoutForm
-          creditsAmount={creditsAmount}
+          price={pricingDetails!}
           onBack={() => setState(PurchaseState.SELECTION)}
           onComplete={() => setState(PurchaseState.SUCCESS)}
         />
@@ -221,10 +238,6 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
           <Balance types={[BalanceType.CREDITS]} />
         )}
       </LayoutContent>
-
-      <div className="m-1 mx-6">
-        <Separator className="bg-spacer" />
-      </div>
 
       <LayoutFooter>
         {error && (
