@@ -62,9 +62,16 @@ function StarterPackContent() {
         </h1>
 
         <div className="flex flex-col gap-3">
-          {starterPackItems.map((item, index) => (
-            <StarterItem key={index} {...item} />
-          ))}
+          {starterPackItems
+            .filter((item) => item.type === "NFT")
+            .map((item, index) => (
+              <StarterItem key={index} {...item} />
+            ))}
+          {starterPackItems
+            .filter((item) => item.type === "CREDIT")
+            .map((item, index) => (
+              <StarterItem key={index} {...item} />
+            ))}
         </div>
       </LayoutContent>
 
@@ -118,12 +125,15 @@ export function StarterPack() {
         "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
       price: 5,
       image: "https://r2.quddus.my/Frame%203231.png",
+      type: "NFT",
     },
     {
       title: "20 Credits",
       description: "Credits cover service fee(s) in Eternum.",
       price: 0,
       image: "/ERC-20-Icon.svg",
+      type: "CREDIT",
+      value: 50,
     },
   ];
 

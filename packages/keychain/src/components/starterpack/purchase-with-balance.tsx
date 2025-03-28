@@ -10,10 +10,10 @@ import {
   useUI,
 } from "@cartridge/ui-next";
 import { LayoutContainer } from "@cartridge/ui-next";
-import React, { useState, useEffect } from "react";
-import { Balance, BalanceType } from "../funding/Balance";
+import { useState, useEffect } from "react";
 import { Receiving } from "./receiving";
 import { useStarterPack } from "@/hooks/starterpack";
+import { Spending } from "./spending";
 
 const enum PurchaseState {
   REVIEW = 0,
@@ -21,7 +21,7 @@ const enum PurchaseState {
   SUCCESS = 2,
 }
 
-export const PurchaseWithBalance = React.memo(() => {
+export const PurchaseWithBalance = () => {
   const { starterPackItems, price } = useStarterPack();
   const { closeModal } = useUI();
   const [purchaseState, setPurchaseState] = useState<PurchaseState>(
@@ -52,15 +52,16 @@ export const PurchaseWithBalance = React.memo(() => {
             <GiftIcon variant="solid" />
           ) : undefined
         }
-        title="Purchase Starter Pack"
+        // title="Purchase Starter Pack"
+        title={
+          purchaseState === PurchaseState.SUCCESS
+            ? "Success!"
+            : "Purchase Starter Pack"
+        }
       />
       <LayoutContent>
         {purchaseState === PurchaseState.REVIEW ? (
-          <Balance
-            amount={price}
-            types={[BalanceType.CREDITS]}
-            title="Spending"
-          />
+          <Spending title="Spending" price={price} />
         ) : purchaseState === PurchaseState.PENDING ? (
           <h1 className="text-xs font-semibold text-foreground-400 pb-4">
             Your starter pack is on the way!
@@ -70,7 +71,14 @@ export const PurchaseWithBalance = React.memo(() => {
             Purchase complete
           </h1>
         )}
-        <Receiving title="Receiving" items={starterPackItems} />
+        <Receiving
+          title={
+            purchaseState === PurchaseState.SUCCESS
+              ? "You received"
+              : "Receiving"
+          }
+          items={starterPackItems}
+        />
       </LayoutContent>
 
       <LayoutFooter>
@@ -98,4 +106,4 @@ export const PurchaseWithBalance = React.memo(() => {
       </LayoutFooter>
     </LayoutContainer>
   );
-});
+};

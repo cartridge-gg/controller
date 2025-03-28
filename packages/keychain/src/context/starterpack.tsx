@@ -1,10 +1,14 @@
 import { createContext, PropsWithChildren } from "react";
 
+export type StarterItemType = "NFT" | "CREDIT";
+
 export interface StarterItemData {
   title: string;
   description: string;
   price: number;
-  image: string;
+  image?: string;
+  type: StarterItemType;
+  value?: number;
 }
 
 export interface StarterPackContextType {

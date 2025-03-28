@@ -1,42 +1,56 @@
 import * as React from "react";
-import { Card, CardContent, CardDescription, cn } from "@cartridge/ui-next";
-
-interface StarterItemProps {
-  title: string;
-  description: string;
-  price: number;
-  image: string;
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  cn,
+  Thumbnail,
+} from "@cartridge/ui-next";
+import { StarterItemData } from "@/context/starterpack";
+interface NFTStarterItemProps extends StarterItemData {
+  type: "NFT";
 }
+
+interface CreditStarterItemProps extends StarterItemData {
+  type: "CREDIT";
+}
+
+export type StarterItemProps = NFTStarterItemProps | CreditStarterItemProps;
 
 export const StarterItem = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & StarterItemProps
->(({ title, description, price, image, className, ...props }, ref) => (
-  <div className={cn("relative pt-1", className)} ref={ref} {...props}>
-    <Card className="relative bg-background-100 overflow-visible h-[88px]">
-      {/* Price tag */}
-      <div className="absolute -top-1 right-4">
-        <Union price={price} />
-      </div>
-      <CardContent className="py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3">
-        <img
-          src={image}
-          alt={title}
-          // className="size-16 object-cover border-4 border-solid border-background-300 rounded-sm overflow-hidden"
-          className="size-16 object-cover"
-        />
-        <div className="flex flex-col gap-1 flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-foreground-100 truncate">
-            {title}
-          </h3>
-          <CardDescription className="font-normal text-xs text-foreground-200 line-clamp-2">
-            {description}
-          </CardDescription>
+>(({ title, description, image, type, className, price, ...props }, ref) => {
+  const value =
+    type === "CREDIT" ? (props as CreditStarterItemProps).value : undefined;
+
+  return (
+    <div className={cn("relative pt-1", className)} ref={ref} {...props}>
+      <Card className="relative bg-background-100 overflow-visible h-[88px]">
+        {/* Price tag */}
+        <div className="absolute -top-1 right-4">
+          <Union price={price} />
         </div>
-      </CardContent>
-    </Card>
-  </div>
-));
+        <CardContent className="py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3">
+          {/* <img src={image} alt={title} className="size-16 object-cover" /> */}
+          <Thumbnail rounded={type === "CREDIT"} icon={image} className="size-16 p-1" />
+          <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <h3 className="text-sm font-medium text-foreground-100 truncate">
+              {type === "CREDIT" && value
+                ? `${value} Credits`
+                : price === 0
+                  ? "FREE"
+                  : title}
+            </h3>
+            <CardDescription className="font-normal text-xs text-foreground-200 line-clamp-2">
+              {description}
+            </CardDescription>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+});
 
 StarterItem.displayName = "StarterItem";
 
