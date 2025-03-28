@@ -100,7 +100,7 @@ const Subtract = () => {
       height="35"
       viewBox="0 0 46 35"
       fill="none"
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[52%] w-[45px]"
     >
       <g opacity="0.04">
         <path

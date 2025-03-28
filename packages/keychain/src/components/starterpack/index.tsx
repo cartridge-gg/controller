@@ -1,8 +1,6 @@
 import {
   ArgentColorIcon,
   Button,
-  Card,
-  CardContent,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
@@ -13,7 +11,6 @@ import {
 } from "@cartridge/ui-next";
 import { StarterItem } from "./starter-item";
 import { CreditCardIcon } from "@cartridge/ui-next";
-import { TotalCost } from "./total-cost";
 import { useState } from "react";
 import { PurchaseWithBalance } from "./purchase-with-balance";
 import { PurchaseWithoutBalance } from "./purchase-without-balance";
@@ -36,7 +33,7 @@ function StarterPackContent() {
     PurchaseState.SHOW_OPTIONS,
   );
 
-  const { balance, price } = useStarterPack();
+  const { balance } = useStarterPack();
 
   const handlePurchase = () => {
     if (balance > 0) {
@@ -56,7 +53,7 @@ function StarterPackContent() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader title="Get Starter Pack" />
+      <LayoutHeader title="Eternum Starter Pack" />
       <LayoutContent>
         <h1 className="text-xs font-semibold text-foreground-400">
           You receive
@@ -77,16 +74,6 @@ function StarterPackContent() {
       </LayoutContent>
 
       <LayoutFooter>
-        <Card className="flex flex-row items-center justify-between gap-2">
-          <TotalCost price={price} />
-          {balance <= 0 && (
-            <CardContent className="relative flex items-center justify-center bg-background-200 w-11 aspect-square rounded">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-background-300 rounded-full">
-                <img src="/ERC-20-Icon.svg" className="w-5" />
-              </div>
-            </CardContent>
-          )}
-        </Card>
         {balance <= 0 ? (
           <>
             <Button className="w-full" onClick={handlePurchase}>
@@ -139,7 +126,7 @@ export function StarterPack() {
     },
   ];
 
-  const balance = 10;
+  const balance = 0;
   const price = 5;
 
   return (
