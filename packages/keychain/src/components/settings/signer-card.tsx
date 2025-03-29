@@ -35,8 +35,8 @@ export const SignerCard = React.forwardRef<
         <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-center bg-background-200">
           <DeviceIcon signerType={signerType} />
           <p className="flex-1 text-sm font-normal">
-            {signerType === SignerType.StarknetAccount
-              ? "Starknet Account"
+            {signerType === SignerType.Starknet
+              ? "Starknet"
               : signerType === SignerType.Webauthn
                 ? "WebAuthn"
                 : "Unknown"}
@@ -67,8 +67,8 @@ export const SignerCard = React.forwardRef<
           </Button>
           <div className="flex flex-col items-start gap-1">
             <h3 className="text-lg font-semibold text-foreground-100">
-              {signerType === SignerType.StarknetAccount
-                ? "Starknet Account"
+              {signerType === SignerType.Starknet
+                ? "Starknet"
                 : signerType === SignerType.Webauthn
                   ? "WebAuthn"
                   : "Unknown"}
@@ -96,7 +96,7 @@ export const SignerCard = React.forwardRef<
 SignerCard.displayName = "SignerCard";
 
 const DeviceIcon = React.memo(({ signerType }: { signerType: SignerType }) => {
-  return signerType === SignerType.StarknetAccount ? (
+  return signerType === SignerType.Starknet ? (
     <StarknetIcon size="default" />
   ) : signerType === SignerType.Webauthn ? (
     <TouchIcon size="default" />
