@@ -103,19 +103,20 @@ impl Controller {
             .map(|auth| auth.to_string())
             .collect::<Vec<String>>();
 
-        let created_session = session::create_session(
-            format!("0x{:x}", hash),
-            self.username.clone(),
-            format!("0x{:x}", self.address),
-            format!("0x{:x}", self.chain_id),
-            self.app_id.to_string(),
-            Some(session.metadata.clone()),
-            session_authorization.clone(),
-            SignerType::starknet_account,
-            None,
-            session.inner.expires_at.to_string(),
-        )
-        .await;
+        let session_input = session::CreateSessionInput {
+            session_hash: format!("0x{:x}", hash),
+            account_id: format!("0x{:x}", self.address),
+            controller_address: format!("0x{:x}", self.address),
+            chain_id: format!("0x{:x}", self.chain_id),
+            app_id: self.app_id.to_string(),
+            metadata: Some(session.metadata.clone()),
+            authorization: session_authorization.clone(),
+            signer_type: SignerType::starknet_account,
+            signer_metadata: None,
+            expires_at: session.inner.expires_at.to_string(),
+        };
+
+        let created_session = session::create_session(session_input).await;
 
         #[cfg(target_arch = "wasm32")]
         console::log_1(&format!("Created session: {:?}", created_session).into());
