@@ -36,7 +36,7 @@ export const SignerCard = React.forwardRef<
           <DeviceIcon signerType={signerType} />
           <p className="flex-1 text-sm font-normal">
             {signerType === SignerType.Starknet
-              ? "Starknet Account"
+              ? "Starknet"
               : signerType === SignerType.Webauthn
                 ? "WebAuthn"
                 : "Unknown"}
@@ -68,7 +68,7 @@ export const SignerCard = React.forwardRef<
           <div className="flex flex-col items-start gap-1">
             <h3 className="text-lg font-semibold text-foreground-100">
               {signerType === SignerType.Starknet
-                ? "Starknet Account"
+                ? "Starknet"
                 : signerType === SignerType.Webauthn
                   ? "WebAuthn"
                   : "Unknown"}
