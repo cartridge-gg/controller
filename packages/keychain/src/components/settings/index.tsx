@@ -106,8 +106,6 @@ export function Settings() {
     return <Delegate onBack={() => setState(State.SETTINGS)} />;
   }
 
-  console.log(controller?.chainId());
-
   return (
     <Sheet>
       <LayoutContainer>
