@@ -7,9 +7,9 @@ import {
 import {
   Card,
   CardHeader,
-  CardListContent,
-  CardListItem,
   CardTitle,
+  TokenCard,
+  TokenSummary,
 } from "@cartridge/ui-next";
 import { useCreditBalance } from "@cartridge/utils";
 
@@ -31,6 +31,10 @@ export function Balance({ types }: BalanceProps) {
 
   const { token } = useFeeToken();
 
+  if (!token) {
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -38,47 +42,32 @@ export function Balance({ types }: BalanceProps) {
           Balance
         </CardTitle>
       </CardHeader>
-
-      <CardListContent>
+      <TokenSummary>
         {types.includes(BalanceType.CREDITS) && (
-          <CardListItem className="flex flex-row items-center p-4">
-            <div className="flex flex-row items-center gap-3">
-              <div className="p-1 bg-background-300 rounded-full">
-                <img src="/ERC-20-Icon.svg" className="size-8" />
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <p className="text-foreground-100 font-medium text-sm">
-                  Credits
-                </p>
-                <p className="text-foreground-300 font-normal text-xs">
-                  {creditBalance.formatted
-                    ? creditBalance.formatted
-                    : "Loading"}{" "}
-                  CREDITS
-                </p>
-              </div>
-            </div>
-            <p className="text-foreground-100 font-medium text-sm">{`${creditBalance.formatted}`}</p>
-          </CardListItem>
+          <TokenCard
+            image={"https://static.cartridge.gg/presets/credit/icon.svg"}
+            title={"Credits"}
+            amount={`${creditBalance.formatted || "Loading"} CREDITS`}
+            value={creditBalance.formatted || ""}
+          />
         )}
-
         {types.includes(BalanceType.FEE_TOKEN) && token && (
-          <CardListItem icon={token.icon}>
-            <div className="flex items-center gap-2">
-              {token?.balance !== undefined
-                ? formatBalance(token.balance)
-                : "Loading"}
-              <span className="text-foreground-400">{token.symbol}</span>
-            </div>
-
-            {token && token.balance !== undefined && token.price ? (
-              <div className="text-foreground-400">
-                {convertTokenAmountToUSD(token.balance, 18, token.price)}
-              </div>
-            ) : null}
-          </CardListItem>
+          <TokenCard
+            image={token.icon || ""}
+            title={token.name}
+            amount={
+              token?.balance !== undefined
+                ? `${formatBalance(token.balance)} ${token.symbol}`
+                : "Loading"
+            }
+            value={
+              token && token.balance !== undefined && token.price
+                ? convertTokenAmountToUSD(token.balance, 18, token.price)
+                : ""
+            }
+          />
         )}
-      </CardListContent>
+      </TokenSummary>
     </Card>
   );
 }

@@ -78,7 +78,7 @@ export function DeployController({
   useEffect(() => {
     if (
       !controller ||
-      controller.chainId() !== constants.StarknetChainId.SN_MAIN ||
+      controller.chainId() === constants.StarknetChainId.SN_MAIN ||
       !feeEstimate
     ) {
       return;
@@ -142,12 +142,7 @@ export function DeployController({
     case "fund":
       return (
         <Funding
-          title={
-            <>
-              Fund <b className="text-primary">{controller?.username()}</b> for
-              deployment
-            </>
-          }
+          title={"Fund Controller"}
           onComplete={() => {
             setAccountState("deploy");
           }}
