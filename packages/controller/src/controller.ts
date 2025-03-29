@@ -301,6 +301,20 @@ export default class ControllerProvider extends BaseProvider {
     this.keychain.openPurchaseCredits();
   }
 
+  openStarterPack() {
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+    if (!this.iframes.profile) {
+      console.error("Profile is not ready");
+      return;
+    }
+    this.iframes.profile.close();
+    this.iframes.keychain.open();
+    this.keychain.openStarterPack();
+  }
+
   async openExecute(calls: any, chainId?: string) {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);

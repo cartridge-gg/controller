@@ -36,8 +36,8 @@ export const CreditIcon = memo(
             y2="18.9394"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#564A29" />
-            <stop offset="1" stop-color="#645630" />
+            <stop stopColor="#564A29" />
+            <stop offset="1" stopColor="#645630" />
           </linearGradient>
           <linearGradient
             id="paint1_linear_8653_127005"
@@ -47,8 +47,8 @@ export const CreditIcon = memo(
             y2="4"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#7E6B38" />
-            <stop offset="1" stop-color="#80775F" />
+            <stop stopColor="#7E6B38" />
+            <stop offset="1" stopColor="#80775F" />
           </linearGradient>
         </defs>
       </svg>

@@ -10,6 +10,7 @@ export const PhantomColorIcon = memo(
         className={iconVariants({ size, className })}
         ref={forwardedRef}
         {...props}
+        fill="none"
       >
         <path
           fillRule="evenodd"

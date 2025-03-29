@@ -14,17 +14,15 @@ export function LayoutFooter({
   }, [setWithFooter]);
 
   return (
-    <>
-      <div
-        className={cn(
-          "flex flex-col gap-4 w-full p-6 pt-0 mt-auto bg-background shrink-0",
-          showCatridgeLogo && "pb-3",
-          className,
-        )}
-      >
-        <Separator orientation="horizontal" className="bg-spacer" />
-        {children}
-      </div>
+    <div
+      className={cn(
+        "flex flex-col gap-3 w-full p-6 mt-auto bg-background shrink-0",
+        showCatridgeLogo && "pb-2",
+        className,
+      )}
+    >
+      <Separator orientation="horizontal" className="bg-spacer" />
+      {children}
       {showCatridgeLogo && (
         <div className="flex flex-col">
           <Separator orientation="horizontal" className="bg-spacer" />
@@ -39,7 +37,7 @@ export function LayoutFooter({
           </a>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

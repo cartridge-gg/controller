@@ -64,57 +64,66 @@ const Header = () => {
   }, []);
 
   return (
-    <div className="w-full absolute top-0 left-0 p-5 flex items-center">
+    <div className="w-full absolute top-0 left-0 p-5 flex items-center space-x-2">
       <div className="flex-1" />
+
       {status === "connected" && (
-        <div className="relative" ref={networkRef}>
+        <>
           <Button
-            onClick={() => {
-              setNetworkOpen(!networkOpen);
-              setProfileOpen(false);
-            }}
             className="flex items-center gap-2 min-w-[120px]"
+            onClick={() => controllerConnector.controller.openStarterPack()}
           >
-            {chain.network}
-            <span
-              className={`transition-transform duration-200 ${
-                networkOpen ? "rotate-180" : ""
-              }`}
-            >
-              ▼
-            </span>
+            Get Starter Pack
           </Button>
-          {networkOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-background shadow-lg rounded-md min-w-[160px] py-1 z-10 border border-gray-600">
-              {chains.map((c: Chain) => (
+          <div className="relative" ref={networkRef}>
+            <Button
+              onClick={() => {
+                setNetworkOpen(!networkOpen);
+                setProfileOpen(false);
+              }}
+              className="flex items-center gap-2 min-w-[120px]"
+            >
+              {chain.network}
+              <span
+                className={`transition-transform duration-200 ${
+                  networkOpen ? "rotate-180" : ""
+                }`}
+              >
+                ▼
+              </span>
+            </Button>
+            {networkOpen && (
+              <div className="absolute right-0 top-full mt-1 bg-background shadow-lg rounded-md min-w-[160px] py-1 z-10 border border-gray-600">
+                {chains.map((c: Chain) => (
+                  <button
+                    key={c.id}
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
+                    onClick={() => {
+                      switchChain({ chainId: num.toHex(c.id) });
+                      setNetworkOpen(false);
+                    }}
+                  >
+                    {c.network}
+                  </button>
+                ))}
                 <button
-                  key={c.id}
                   className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
                   onClick={() => {
-                    switchChain({ chainId: num.toHex(c.id) });
+                    switchChain({
+                      chainId: shortString.encodeShortString("UNSUPPORTED"),
+                    });
                     setNetworkOpen(false);
                   }}
                 >
-                  {c.network}
+                  unsupported
                 </button>
-              ))}
-              <button
-                className="block w-full px-4 py-2 text-left hover:bg-gray-600 transition-colors border-b border-gray-600 last:border-0"
-                onClick={() => {
-                  switchChain({
-                    chainId: shortString.encodeShortString("UNSUPPORTED"),
-                  });
-                  setNetworkOpen(false);
-                }}
-              >
-                unsupported
-              </button>
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        </>
       )}
       {address ? (
-        <div className="relative ml-2" ref={profileRef}>
+        <div ref={profileRef}>
           <Button
             onClick={() => {
               setProfileOpen(!profileOpen);

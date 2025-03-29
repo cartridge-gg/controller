@@ -19,10 +19,12 @@ export enum BalanceType {
 }
 
 type BalanceProps = {
+  title?: string;
   types: BalanceType[];
+  amount?: number;
 };
 
-export function Balance({ types }: BalanceProps) {
+export function Balance({ types, title, amount }: BalanceProps) {
   const { controller } = useController();
   const { balance: creditBalance } = useCreditBalance({
     username: controller?.username(),
@@ -39,7 +41,7 @@ export function Balance({ types }: BalanceProps) {
     <Card>
       <CardHeader>
         <CardTitle className="normal-case font-semibold text-xs">
-          Balance
+          {title ?? "Balance"}
         </CardTitle>
       </CardHeader>
       <TokenSummary>
@@ -47,8 +49,16 @@ export function Balance({ types }: BalanceProps) {
           <TokenCard
             image={"https://static.cartridge.gg/presets/credit/icon.svg"}
             title={"Credits"}
-            amount={`${creditBalance.formatted || "Loading"} CREDITS`}
-            value={creditBalance.formatted || ""}
+            amount={
+              amount
+                ? `$${amount.toFixed(2).toString()}`
+                : `${creditBalance.formatted || "Loading"} Credits`
+            }
+            value={
+              amount
+                ? `$${amount.toFixed(2).toString()}`
+                : creditBalance.formatted || ""
+            }
           />
         )}
         {types.includes(BalanceType.FEE_TOKEN) && token && (

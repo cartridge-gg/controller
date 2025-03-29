@@ -10,7 +10,7 @@ const meta = {
     layout: "centered",
   },
   args: {
-    signerType: SignerType.StarknetAccount,
+    signerType: SignerType.Starknet,
   },
 } satisfies Meta<typeof SignerCard>;
 

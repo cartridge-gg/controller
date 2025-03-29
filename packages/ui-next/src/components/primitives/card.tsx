@@ -25,7 +25,7 @@ export const CardHeader = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "h-9 flex items-center gap-x-px bg-background-200",
+        "h-10 flex items-center gap-x-px bg-background-200",
         className,
       )}
     >
