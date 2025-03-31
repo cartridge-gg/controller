@@ -32,7 +32,7 @@ const enum PurchaseState {
 
 export const PurchaseWithoutBalance = () => {
   const [clientSecret, setClientSecret] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
   const [purchaseState, setPurchaseState] = useState<PurchaseState>(
     PurchaseState.REVIEW,
   );
@@ -65,7 +65,7 @@ export const PurchaseWithoutBalance = () => {
     },
   } as Appearance;
 
-  useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["payment"],
     queryFn: async () => {
       const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT!, {
@@ -87,7 +87,7 @@ export const PurchaseWithoutBalance = () => {
     onSuccess: (data) => {
       setClientSecret(data.clientSecret);
       setPurchaseState(PurchaseState.STRIPE_CHECKOUT);
-      setIsLoading(false);
+      // setIsLoading(false);
     },
     onError: (e) => {
       console.error("Payment intent creation failed: ", e);
