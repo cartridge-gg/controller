@@ -7,7 +7,6 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
   DAI_CONTRACT_ADDRESS,
-  EKUBO_CONTRACT_ADDRESS,
 } from "@cartridge/utils";
 import { constants, getChecksumAddress, hash, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -57,7 +56,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           USDC_CONTRACT_ADDRESS,
           USDT_CONTRACT_ADDRESS,
           DAI_CONTRACT_ADDRESS,
-          EKUBO_CONTRACT_ADDRESS,
           ...(erc20Param
             ? decodeURIComponent(erc20Param)
                 .split(",")
@@ -69,7 +67,6 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
                       USDC_CONTRACT_ADDRESS,
                       USDT_CONTRACT_ADDRESS,
                       DAI_CONTRACT_ADDRESS,
-                      EKUBO_CONTRACT_ADDRESS,
                     ].includes(getChecksumAddress(address)),
                 )
             : []),
