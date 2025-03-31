@@ -5,7 +5,7 @@ import {
   normalize,
   STRK_CONTRACT_ADDRESS,
 } from "@cartridge/utils";
-import { constants, getChecksumAddress, RpcProvider } from "starknet";
+import { constants, getChecksumAddress, hash, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ConnectionContext,
@@ -13,6 +13,7 @@ import {
   ParentMethods,
   initialState,
 } from "#context/connection";
+import { Method } from "@cartridge/presets";
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
@@ -61,6 +62,20 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
             : []),
         ];
       }
+
+      if (!state.methods.length) {
+        const methodsParam = searchParams.get("methods");
+        if (methodsParam) {
+          const methods: Method[] = JSON.parse(
+            decodeURIComponent(methodsParam),
+          );
+          state.methods = methods.map((method) => ({
+            name: method.name || method.entrypoint,
+            entrypoint: `0x${hash.starknetKeccak(method.entrypoint).toString(16)}`,
+          }));
+        }
+      }
+
       return state;
     });
   }, [searchParams]);

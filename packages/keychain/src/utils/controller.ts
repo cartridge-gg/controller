@@ -16,7 +16,7 @@ import {
   JsCall,
   JsFelt,
   Owner,
-  SessionMetadata,
+  AuthorizedSession,
 } from "@cartridge/account-wasm/controller";
 
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
@@ -97,6 +97,14 @@ export default class Controller {
     delete window.controller;
   }
 
+  async login(expiresAt: bigint) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    return await this.cartridge.login(expiresAt);
+  }
+
   async createSession(
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
@@ -107,7 +115,18 @@ export default class Controller {
       throw new Error("Account not found");
     }
 
-    await this.cartridge.createSession(toWasmPolicies(policies), expiresAt);
+    return await this.cartridge.createSession(
+      toWasmPolicies(policies),
+      expiresAt,
+    );
+  }
+
+  async skipSession(policies: ParsedSessionPolicies) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+
+    await this.cartridge.skipSession(toWasmPolicies(policies));
   }
 
   async registerSessionCalldata(
@@ -162,32 +181,30 @@ export default class Controller {
     );
   }
 
-  async hasSession(calls: Call[]): Promise<boolean> {
-    return await this.cartridge.hasSession(toJsCalls(calls));
+  async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
+    return await this.cartridge.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
   }
 
-  async hasSessionForMessage(typedData: TypedData): Promise<boolean> {
-    return await this.cartridge.hasSessionForMessage(JSON.stringify(typedData));
-  }
-
-  async getAuthorizedSessionMetadata(
-    policies: ParsedSessionPolicies,
-    public_key?: string,
-  ): Promise<SessionMetadata | undefined> {
-    return await this.cartridge.getAuthorizedSessionMetadata(
-      toWasmPolicies(policies),
-      public_key,
-    );
-  }
-
-  async isRequestedSession(
-    policies: ParsedSessionPolicies,
-    public_key?: string,
+  async hasAuthorizedPoliciesForMessage(
+    typedData: TypedData,
   ): Promise<boolean> {
-    return await this.cartridge.isRequestedSession(
+    return await this.cartridge.hasAuthorizedPoliciesForMessage(
+      JSON.stringify(typedData),
+    );
+  }
+
+  async isRegisteredSessionAuthorized(
+    policies: ParsedSessionPolicies,
+    public_key?: string,
+  ): Promise<AuthorizedSession | undefined> {
+    return await this.cartridge.isRegisteredSessionAuthorized(
       toWasmPolicies(policies),
       public_key,
     );
+  }
+
+  async isRequestedSession(policies: ParsedSessionPolicies): Promise<boolean> {
+    return await this.cartridge.hasRequestedSession(toWasmPolicies(policies));
   }
 
   async estimateInvokeFee(calls: Call[]): Promise<EstimateFee> {

@@ -57,10 +57,10 @@ webauthn-authenticator-rs = { git = "https://github.com/cartridge-gg/webauthn-rs
     "softpasskey",
 ] }
 
-cainome = { git = "https://github.com/cartridge-gg/cainome", tag = "v0.4.5", features = [
+cainome = { version = "0.5.0", features = [
     "abigen-rs",
 ] }
-cainome-cairo-serde = { git = "https://github.com/cartridge-gg/cainome", tag = "v0.4.5" }
+cainome-cairo-serde = "0.1.0"
 
 starknet = "0.13.0"
 starknet-crypto = { version = "0.7.3", features = ["pedersen_no_lookup"] }

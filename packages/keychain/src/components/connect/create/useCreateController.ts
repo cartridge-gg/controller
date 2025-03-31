@@ -2,25 +2,64 @@ import { useState, useCallback } from "react";
 import { useConnection } from "@/hooks/connection";
 import { LoginMode } from "../types";
 import { doLogin, doSignup } from "@/hooks/account";
-import { constants, RpcProvider } from "starknet";
+import { constants } from "starknet";
 import Controller from "@/utils/controller";
 import { fetchAccount } from "./utils";
 import { PopupCenter } from "@/utils/url";
-import { useAccountQuery } from "@cartridge/utils/api/cartridge";
+import { useAccountQuery, AccountQuery } from "@cartridge/utils/api/cartridge";
+import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
 
 export function useCreateController({
-  onCreated,
   isSlot,
   loginMode = LoginMode.Webauthn,
 }: {
-  onCreated?: () => void;
   isSlot?: boolean;
   loginMode?: LoginMode;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
-  const { origin, policies, rpcUrl, setController } = useConnection();
+  const { origin, policies, rpcUrl, chainId, setController } = useConnection();
+
+  const handleAccountQuerySuccess = useCallback(
+    async (data: AccountQuery) => {
+      try {
+        const { username, credentials, controllers } = data.account ?? {};
+        const { id: credentialId, publicKey } =
+          credentials?.webauthn?.[0] ?? {};
+
+        const controllerNode = controllers?.edges?.[0]?.node;
+
+        if (
+          controllerNode &&
+          username &&
+          credentialId &&
+          publicKey &&
+          rpcUrl &&
+          chainId &&
+          origin
+        ) {
+          const controller = await createController(
+            origin,
+            chainId,
+            rpcUrl,
+            username,
+            controllerNode.constructorCalldata[0],
+            controllerNode.address,
+            credentialId,
+            publicKey,
+          );
+
+          window.controller = controller;
+          setController(controller);
+        }
+      } catch (e: unknown) {
+        console.error(e);
+        setError(e as Error);
+      }
+    },
+    [chainId, origin, rpcUrl, setController],
+  );
 
   useAccountQuery(
     { username: pendingUsername || "" },
@@ -31,67 +70,8 @@ export function useCreateController({
       staleTime: 10000000,
       cacheTime: 10000000,
       refetchInterval: (data) => (!data ? 1000 : false),
-      onSuccess: async (data) => {
-        try {
-          const { username, credentials, controllers } = data.account ?? {};
-          const { id: credentialId, publicKey } =
-            credentials?.webauthn?.[0] ?? {};
-
-          const controllerNode = controllers?.edges?.[0]?.node;
-
-          if (controllerNode && username && credentialId && publicKey) {
-            await initController(
-              username,
-              controllerNode.constructorCalldata[0],
-              controllerNode.address,
-              credentialId,
-              publicKey,
-            );
-          }
-        } catch (e: unknown) {
-          console.error(e);
-          setError(e as Error);
-        }
-      },
+      onSuccess: handleAccountQuerySuccess,
     },
-  );
-
-  const initController = useCallback(
-    async (
-      username: string,
-      classHash: string,
-      address: string,
-      credentialId: string,
-      publicKey: string,
-    ) => {
-      if (!origin || !rpcUrl) return;
-
-      const provider = new RpcProvider({ nodeUrl: rpcUrl });
-      const chainId = await provider.getChainId();
-
-      const controller = new Controller({
-        appId: origin,
-        classHash,
-        chainId,
-        rpcUrl,
-        address,
-        username,
-        owner: {
-          signer: {
-            webauthn: {
-              rpId: import.meta.env.VITE_RP_ID!,
-              credentialId,
-              publicKey,
-            },
-          },
-        },
-      });
-
-      window.controller = controller;
-      setController(controller);
-      onCreated?.();
-    },
-    [origin, rpcUrl, setController, onCreated],
   );
 
   const doPopupFlow = useCallback(
@@ -129,28 +109,33 @@ export function useCreateController({
           if (!credentialId)
             throw new Error("No credential ID found for this account");
 
-          if (
-            loginMode === LoginMode.Webauthn ||
-            Object.keys(policies?.contracts ?? {}).length +
-              (policies?.messages?.length ?? 0) ===
-              0
-          ) {
+          if (!controllerNode || !publicKey) {
+            return;
+          }
+
+          const controller = await createController(
+            origin!,
+            chainId!,
+            rpcUrl!,
+            username,
+            controllerNode.constructorCalldata[0],
+            controllerNode.address,
+            credentialId,
+            publicKey,
+          );
+
+          if (loginMode === LoginMode.Webauthn) {
             await doLogin({
               name: username,
               credentialId,
               finalize: !!isSlot,
             });
+          } else {
+            await controller.login(NOW + DEFAULT_SESSION_DURATION);
           }
 
-          if (controllerNode && publicKey) {
-            await initController(
-              username,
-              controllerNode.constructorCalldata[0],
-              controllerNode.address,
-              credentialId,
-              publicKey,
-            );
-          }
+          window.controller = controller;
+          setController(controller);
         } else {
           // Signup flow
           const isSafari = /^((?!chrome|android).)*safari/i.test(
@@ -176,15 +161,28 @@ export function useCreateController({
             credentials.webauthn?.[0] ?? {};
           const controllerNode = controllers?.edges?.[0]?.node;
 
-          if (!controllerNode || !finalUsername) return;
+          if (
+            !controllerNode ||
+            !finalUsername ||
+            !chainId ||
+            !rpcUrl ||
+            !origin
+          )
+            return;
 
-          await initController(
+          const controller = await createController(
+            origin,
+            chainId,
+            rpcUrl,
             finalUsername,
             controllerNode.constructorCalldata[0],
             controllerNode.address,
             credentialId,
             publicKey,
           );
+
+          window.controller = controller;
+          setController(controller);
         }
       } catch (e: unknown) {
         if (
@@ -202,7 +200,16 @@ export function useCreateController({
 
       setIsLoading(false);
     },
-    [loginMode, policies, isSlot, initController, doPopupFlow],
+    [
+      chainId,
+      rpcUrl,
+      origin,
+      loginMode,
+      policies,
+      isSlot,
+      createController,
+      doPopupFlow,
+    ],
   );
 
   return {
@@ -211,4 +218,33 @@ export function useCreateController({
     setError,
     handleSubmit,
   };
+}
+
+async function createController(
+  origin: string,
+  chainId: string,
+  rpcUrl: string,
+  username: string,
+  classHash: string,
+  address: string,
+  credentialId: string,
+  publicKey: string,
+) {
+  return new Controller({
+    appId: origin,
+    classHash,
+    chainId,
+    rpcUrl,
+    address,
+    username,
+    owner: {
+      signer: {
+        webauthn: {
+          rpId: import.meta.env.VITE_RP_ID!,
+          credentialId,
+          publicKey,
+        },
+      },
+    },
+  });
 }

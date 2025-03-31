@@ -7,15 +7,19 @@
     "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": [
+    "src/assets/**/*",
     "src/components/**/*",
     "src/hooks/**/*",
     "src/stories/**/*",
     "src/context.ts",
     "src/index.ts",
     "src/preset.ts",
-    "src/utils.ts"
+    "src/utils.ts",
+    "src/types/**/*",
+    "src/**/*.svg"
   ]
 }

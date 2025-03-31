@@ -66,14 +66,13 @@ impl From<account_sdk::account::session::hash::Session> for Session {
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(rename_all = "camelCase")]
-pub struct SessionMetadata {
+pub struct AuthorizedSession {
     pub session: Session,
-    pub max_fee: Option<JsFelt>,
-    pub credentials: Option<Credentials>,
+    pub authorization: Option<Vec<JsFelt>>,
     pub is_registered: bool,
 }
 
-impl TryFrom<JsValue> for SessionMetadata {
+impl TryFrom<JsValue> for AuthorizedSession {
     type Error = EncodingError;
 
     fn try_from(value: JsValue) -> Result<Self, Self::Error> {
@@ -81,12 +80,13 @@ impl TryFrom<JsValue> for SessionMetadata {
     }
 }
 
-impl From<account_sdk::storage::SessionMetadata> for SessionMetadata {
+impl From<account_sdk::storage::SessionMetadata> for AuthorizedSession {
     fn from(value: account_sdk::storage::SessionMetadata) -> Self {
-        SessionMetadata {
+        AuthorizedSession {
             session: value.session.into(),
-            max_fee: value.max_fee.map(Into::into),
-            credentials: value.credentials.map(Into::into),
+            authorization: value
+                .credentials
+                .map(|c| c.authorization.into_iter().map(Into::into).collect()),
             is_registered: value.is_registered,
         }
     }

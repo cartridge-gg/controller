@@ -35,7 +35,7 @@ export function DeployController({
   onClose: () => void;
   ctrlError?: ControllerError;
 }) {
-  const { controller, hasPrefundRequest } = useConnection();
+  const { controller } = useConnection();
   const { deploySelf, isDeploying } = useDeploy();
   const { token: feeToken, isLoading } = useFeeToken();
   const [deployHash, setDeployHash] = useState<string>();
@@ -78,15 +78,14 @@ export function DeployController({
   useEffect(() => {
     if (
       !controller ||
-      controller.chainId() !== constants.StarknetChainId.SN_MAIN ||
-      !hasPrefundRequest ||
+      controller.chainId() === constants.StarknetChainId.SN_MAIN ||
       !feeEstimate
     ) {
       return;
     }
 
     setAccountState("deploy");
-  }, [controller, hasPrefundRequest, feeEstimate]);
+  }, [controller, feeEstimate]);
 
   useEffect(() => {
     if (deployHash && controller) {
@@ -143,12 +142,7 @@ export function DeployController({
     case "fund":
       return (
         <Funding
-          title={
-            <>
-              Fund <b className="text-primary">{controller?.username()}</b> for
-              deployment
-            </>
-          }
+          title={"Fund Controller"}
           onComplete={() => {
             setAccountState("deploy");
           }}

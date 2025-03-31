@@ -9,8 +9,6 @@ import {
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
-  CopyAddress,
-  Separator,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -18,23 +16,23 @@ import { Call, uint256 } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
 import { useCollection } from "#hooks/collection";
 import { Sending } from "./sending";
-import { CollectionImage } from "../image";
 import { useEntrypoints } from "#hooks/entrypoints";
-
+import { CollectionHeader } from "../header";
+import placeholder from "/public/placeholder.svg";
+import { formatName } from "../helper";
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
 const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
 const TRANSFER_FROM_SNAKE_CASE = "transfer_from";
 
 export function SendCollection() {
-  const { address: collectionAddress } = useParams<{ address: string }>();
+  const { address: contractAddress, tokenId } = useParams();
 
   const [searchParams] = useSearchParams();
   const paramsTokenIds = searchParams.getAll("tokenIds");
-  const { tokenId } = useParams<{ tokenId: string }>();
 
   const { entrypoints } = useEntrypoints({
-    address: collectionAddress || "0x0",
+    address: contractAddress || "0x0",
   });
   const { address } = useAccount();
   const { parent } = useConnection();
@@ -51,7 +49,10 @@ export function SendCollection() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collection, assets } = useCollection({ tokenIds });
+  const { collection, assets } = useCollection({
+    contractAddress: contractAddress,
+    tokenIds,
+  });
 
   const entrypoint: string | null = useMemo(() => {
     if (entrypoints.includes(SAFE_TRANSFER_FROM_SNAKE_CASE)) {
@@ -81,7 +82,7 @@ export function SendCollection() {
     async (to: string) => {
       setSubmitted(true);
       if (
-        !collectionAddress ||
+        !contractAddress ||
         !tokenIds ||
         !tokenIds.length ||
         !to ||
@@ -94,7 +95,7 @@ export function SendCollection() {
       const calls: Call[] = (tokenIds as string[]).map((id: string) => {
         const tokenId = uint256.bnToUint256(BigInt(id));
         return {
-          contractAddress: collectionAddress,
+          contractAddress: contractAddress,
           entrypoint,
           calldata: [address, to, tokenId, ...calldata],
         };
@@ -102,27 +103,42 @@ export function SendCollection() {
       await parent.openExecute(calls);
       navigate("../../..");
     },
-    [tokenIds, collectionAddress, address, parent, entrypoint, navigate],
+    [
+      tokenIds,
+      contractAddress,
+      address,
+      parent,
+      recipientError,
+      entrypoint,
+      navigate,
+    ],
   );
+
+  const title = useMemo(() => {
+    if (!collection || !assets || assets.length === 0) return "";
+    if (assets.length > 1) return `Send (${assets.length}) ${collection.name}`;
+    const asset = assets[0];
+    return `Send ${formatName(asset.name, asset.tokenId)}`;
+  }, [collection, assets]);
+
+  const image = useMemo(() => {
+    if (!collection || !assets) return placeholder;
+    if (assets.length > 1) return collection.imageUrl || placeholder;
+    return assets[0].imageUrl || placeholder;
+  }, [collection, assets]);
 
   if (!collection || !assets) return null;
 
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={`Send (${tokenIds.length}) ${collection.name}`}
-        description={<CopyAddress address={address} size="sm" />}
-        icon={
-          <CollectionImage
-            imageUrl={collection.imageUrl || undefined}
-            size="xs"
-          />
-        }
+        className="hidden"
         onBack={() => {
           navigate("..");
         }}
       />
-      <LayoutContent className="gap-6">
+      <LayoutContent className="p-6 flex flex-col gap-6">
+        <CollectionHeader image={image} title={title} />
         <SendRecipient
           to={to}
           setTo={setTo}
@@ -130,11 +146,14 @@ export function SendCollection() {
           setWarning={setRecipientWarning}
           setError={setRecipientError}
         />
-        <Sending assets={assets} />
+        <Sending assets={assets} description={collection.name} />
       </LayoutContent>
 
-      <LayoutFooter className="bg-background relative pt-0">
-        <Separator className="bg-spacer" />
+      <LayoutFooter
+        className={cn(
+          "relative flex flex-col items-center justify-center gap-y-4 bg-background",
+        )}
+      >
         <Warning
           warning={recipientWarning}
           validated={recipientValidated}

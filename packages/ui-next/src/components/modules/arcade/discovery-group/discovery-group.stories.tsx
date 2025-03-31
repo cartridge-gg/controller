@@ -55,3 +55,26 @@ export default meta;
 type Story = StoryObj<typeof ArcadeDiscoveryGroup>;
 
 export const Default: Story = {};
+
+export const Loading: Story = {
+  args: {
+    loading: true,
+  },
+};
+
+export const Rounded: Story = {
+  args: {
+    rounded: true,
+  },
+};
+
+export const MultiColors: Story = {
+  render: (args) => {
+    return (
+      <div className="flex flex-col gap-4">
+        <ArcadeDiscoveryGroup {...args} rounded color="#ff00ff" />
+        <ArcadeDiscoveryGroup {...args} rounded color="#00ff00" />
+      </div>
+    );
+  },
+};

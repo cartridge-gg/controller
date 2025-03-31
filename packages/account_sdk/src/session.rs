@@ -49,18 +49,13 @@ impl Controller {
 
     pub async fn create_wildcard_session(
         &mut self,
-        methods: Vec<Policy>,
         expires_at: u64,
     ) -> Result<SessionAccount, ControllerError> {
         let signer = SigningKey::from_random();
         let session_signer = Signer::Starknet(signer.clone());
 
-        let session = Session::new_wildcard(
-            methods,
-            expires_at,
-            &session_signer.clone().into(),
-            Felt::ZERO,
-        )?;
+        let session =
+            Session::new_wildcard(expires_at, &session_signer.clone().into(), Felt::ZERO)?;
 
         self.create_with_session(signer, session).await
     }
@@ -154,18 +149,22 @@ impl Controller {
         Ok(txn)
     }
 
-    pub fn authorized_session_metadata(
+    pub fn authorized_session(&self) -> Option<SessionMetadata> {
+        let key = self.session_key();
+        self.storage.session(&key).ok().flatten()
+    }
+
+    pub fn authorized_session_for_policies(
         &self,
         policies: &[Policy],
         public_key: Option<Felt>,
-    ) -> Option<(String, SessionMetadata)> {
+    ) -> Option<SessionMetadata> {
         let key = self.session_key();
         self.storage
             .session(&key)
             .ok()
             .flatten()
             .filter(|metadata| metadata.is_authorized(policies, public_key))
-            .map(|metadata| (key, metadata))
     }
 
     pub fn is_requested_session(&self, policies: &[Policy], public_key: Option<Felt>) -> bool {
@@ -183,8 +182,16 @@ impl Controller {
     }
 
     pub fn session_account(&self, policies: &[Policy]) -> Option<SessionAccount> {
+        // Return None if any policy contains a call to the controller's own address
+        if policies.iter().any(|policy| match policy {
+            Policy::Call(contract_policy) => contract_policy.contract_address == self.address,
+            _ => false,
+        }) {
+            return None;
+        }
+
         // Check if there's a valid session stored
-        let (_, metadata) = self.authorized_session_metadata(policies, None)?;
+        let metadata = self.authorized_session_for_policies(policies, None)?;
         let credentials = metadata.credentials.as_ref()?;
         let session_signer =
             Signer::Starknet(SigningKey::from_secret_scalar(credentials.private_key));

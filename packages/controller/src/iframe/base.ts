@@ -75,7 +75,7 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     connectToChild<CallSender>({
       iframe: this.iframe,
-      methods: { close: () => this.close(), ...methods },
+      methods: { close: (_origin: string) => () => this.close(), ...methods },
     }).promise.then(onConnect);
 
     this.resize();

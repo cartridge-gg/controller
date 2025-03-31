@@ -116,7 +116,7 @@ pub async fn test_session_off_chain_sig_via_controller() {
     let owner = Owner::Signer(Signer::new_starknet_random());
     let runner = KatanaRunner::load();
     let mut controller = runner
-        .deploy_controller("username".to_owned(), owner, Version::LATEST)
+        .deploy_controller("username".to_owned(), owner.clone(), Version::LATEST)
         .await;
 
     let typed_data = TypedData {
@@ -236,12 +236,34 @@ pub async fn test_session_off_chain_sig_via_controller() {
         .await
         .unwrap();
 
-    let signature = controller.sign_message(typed_data).await.unwrap();
+    let signature = controller.sign_message(typed_data.clone()).await.unwrap();
     assert_eq!(signature[0], SESSION_TYPED_DATA_MAGIC);
 
     let contract_reader = ControllerReader::new(controller.address, runner.client());
     let is_valid = contract_reader
         .is_valid_signature(&hashes.hash, &signature)
+        .call()
+        .await
+        .unwrap();
+
+    assert_ne!(is_valid, Felt::ZERO);
+
+    let mut wildcard_controller = runner
+        .deploy_controller("wildcard".to_owned(), owner, Version::LATEST)
+        .await;
+    let wildcard_hashes = typed_data.encode(wildcard_controller.address).unwrap();
+
+    wildcard_controller
+        .create_wildcard_session(u64::MAX)
+        .await
+        .unwrap();
+
+    let signature = wildcard_controller.sign_message(typed_data).await.unwrap();
+    assert_eq!(signature[0], SESSION_TYPED_DATA_MAGIC);
+
+    let contract_reader = ControllerReader::new(wildcard_controller.address, runner.client());
+    let is_valid = contract_reader
+        .is_valid_signature(&wildcard_hashes.hash, &signature)
         .call()
         .await
         .unwrap();

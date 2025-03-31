@@ -91,12 +91,12 @@ mod tests {
     fn test_fee_estimate_conversion() {
         // Create a JsFeeEstimate that matches the JS structure
         let js_estimate = JsFeeEstimate {
-            gas_consumed: JsFelt("0x0".to_string()),
-            gas_price: JsFelt("0x0".to_string()),
-            overall_fee: JsFelt("0x0".to_string()),
+            gas_consumed: Felt::ZERO.into(),
+            gas_price: Felt::ZERO.into(),
+            overall_fee: Felt::ZERO.into(),
             unit: JsPriceUnit::Fri,
-            data_gas_consumed: JsFelt("0x0".to_string()),
-            data_gas_price: JsFelt("0x0".to_string()),
+            data_gas_consumed: Felt::ZERO.into(),
+            data_gas_price: Felt::ZERO.into(),
         };
 
         // Test conversion to FeeEstimate
@@ -113,12 +113,12 @@ mod tests {
         // Test conversion back to JsFeeEstimate
         let converted_back: JsFeeEstimate = fee_estimate.into();
 
-        assert_eq!(converted_back.gas_consumed.0, "0x0");
-        assert_eq!(converted_back.gas_price.0, "0x0");
-        assert_eq!(converted_back.overall_fee.0, "0x0");
+        assert_eq!(converted_back.gas_consumed.0, Felt::ZERO);
+        assert_eq!(converted_back.gas_price.0, Felt::ZERO);
+        assert_eq!(converted_back.overall_fee.0, Felt::ZERO);
         assert_eq!(converted_back.unit, JsPriceUnit::Fri);
-        assert_eq!(converted_back.data_gas_consumed.0, "0x0");
-        assert_eq!(converted_back.data_gas_price.0, "0x0");
+        assert_eq!(converted_back.data_gas_consumed.0, Felt::ZERO);
+        assert_eq!(converted_back.data_gas_price.0, Felt::ZERO);
     }
 
     #[test]

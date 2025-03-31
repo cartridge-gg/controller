@@ -110,9 +110,11 @@ export interface UpgradeInterface {
   isBeta: boolean;
 }
 
-const UpgradeContext = createContext<UpgradeInterface | undefined>(undefined);
+export const UpgradeContext = createContext<UpgradeInterface | undefined>(
+  undefined,
+);
 
-interface UpgradeProviderProps {
+export interface UpgradeProviderProps {
   controller?: Controller;
   children: React.ReactNode;
 }
