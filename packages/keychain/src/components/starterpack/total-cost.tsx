@@ -22,12 +22,9 @@ export const TotalCost = React.forwardRef<HTMLDivElement, TotalCostProps>(
             <ProcessingFee price={price} processingFee={processingFee} />
           )}
           <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <span className="text-foreground-300 text-xs font-medium">
-                Total
-              </span>
-              <InfoIcon size="xs" className="text-foreground-300" />
-            </div>
+            <span className="text-foreground-300 text-xs font-medium">
+              Total
+            </span>
             <div className="text-foreground-100 text-sm font-medium">
               ${(price + (processingFee ?? 0)).toFixed(2)}
             </div>
