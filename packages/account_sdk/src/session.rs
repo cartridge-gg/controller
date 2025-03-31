@@ -1,5 +1,3 @@
-use std::intrinsics::rustc_peek;
-
 use cainome::cairo_serde::{CairoSerde, NonZero};
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::{Call, FeeEstimate, Felt, InvokeTransactionResult};

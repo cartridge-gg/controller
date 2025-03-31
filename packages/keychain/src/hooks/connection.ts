@@ -243,20 +243,6 @@ export function useConnectionValue() {
     }
   }, [context, setController]);
 
-          context?.resolve?.({
-            code: ResponseCodes.NOT_CONNECTED,
-            message: "User logged out",
-          });
-        })
-        // .finally(async () => {
-        //   if (sessionID) {
-        //     await revokeMutation.mutateAsync({ id: sessionID });
-        //   }
-        // });
-    },
-    [context, setController],
-  );
-
   const openSettings = useCallback(() => {
     if (!context) return;
 
