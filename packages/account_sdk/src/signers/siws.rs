@@ -70,10 +70,8 @@ impl SIWSSigner {
 #[async_trait]
 impl HashSigner for SIWSSigner {
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
-        // Construct the SIWS message
         let message = self.construct_siws_message(tx_hash);
 
-        // Sign the message
         let signature = self.keypair.sign(message.as_bytes());
 
         let pubkey = BigUint::from_bytes_le(&self.pubkey);
@@ -94,14 +92,12 @@ impl HashSigner for SIWSSigner {
             signature_with_hint,
         };
 
-        // Create the controller signer
         let nonzero_pubkey = NonZero::new(U256::from_bytes_be(&self.pubkey))
             .unwrap_or_else(|| panic!("Public key cannot be zero"));
         let controller_signer = ControllerEd25519Signer {
             pubkey: nonzero_pubkey,
         };
 
-        // Return the signature
         Ok(SignerSignature::SIWS((controller_signer, siws_signature)))
     }
 }
