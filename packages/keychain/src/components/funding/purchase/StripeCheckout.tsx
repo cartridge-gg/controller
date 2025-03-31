@@ -14,6 +14,7 @@ import {
   CreditCardIcon,
 } from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { TotalCost } from "@/components/starterpack/total-cost";
 
 type StripeCheckoutProps = {
   creditsAmount: number;
@@ -97,6 +98,7 @@ export default function StripeCheckout({
         </form>
       </LayoutContent>
       <LayoutFooter>
+        <TotalCost price={creditsAmount} processingFee={0.15} />
         {error && (
           <ErrorAlert
             variant="error"
