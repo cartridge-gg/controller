@@ -75,9 +75,6 @@ export function Settings() {
     },
     {
       enabled: featureFlags.signers,
-      onSuccess: (data) => {
-        console.log("signers from graphql: ", data);
-      },
     },
   );
 

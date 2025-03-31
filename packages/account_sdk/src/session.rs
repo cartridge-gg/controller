@@ -1,3 +1,5 @@
+use std::intrinsics::rustc_peek;
+
 use cainome::cairo_serde::{CairoSerde, NonZero};
 use starknet::accounts::ConnectedAccount;
 use starknet::core::types::{Call, FeeEstimate, Felt, InvokeTransactionResult};
@@ -10,7 +12,6 @@ use crate::account::session::policy::Policy;
 use crate::controller::Controller;
 use crate::errors::ControllerError;
 use crate::graphql::session;
-use crate::graphql::session::create_session::SignerType;
 use crate::hash::MessageHashRev1;
 use crate::signers::{HashSigner, Signer};
 use crate::storage::StorageBackend;
@@ -97,22 +98,40 @@ impl Controller {
             session.clone(),
         );
 
+        // Get the public key from the session signer
+        let public_key = session_signer.verifying_key().scalar();
+
         // convert authorization from Vec<Felt> to Vec<String>
         let session_authorization: Vec<String> = authorization
             .iter()
-            .map(|auth| auth.to_string())
+            .map(|auth| auth.to_fixed_hex_string())
             .collect::<Vec<String>>();
 
+        // Convert felt to string
+        let controller_address = self.address.to_fixed_hex_string();
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            console::log_1(&"Session Input Properties:".into());
+            console::log_1(&format!("Raw Felt value: {}", self.address).into());
+            console::log_1(&format!("Raw Felt value (hex): {:x}", self.address).into());
+            console::log_1(
+                &format!(
+                    "Controller Address after conversion: {}",
+                    controller_address
+                )
+                .into(),
+            );
+        }
+
         let session_input = session::CreateSessionInput {
-            session_hash: format!("0x{:x}", hash),
-            account_id: format!("0x{:x}", self.address),
-            controller_address: format!("0x{:x}", self.address),
-            chain_id: format!("0x{:x}", self.chain_id),
+            hash: hash.to_fixed_hex_string(),
+            account_id: self.username.clone(),
+            controller_address: controller_address.clone(),
             app_id: self.app_id.to_string(),
-            metadata: Some(session.metadata.clone()),
+            chain_id: self.chain_id.to_fixed_hex_string(),
             authorization: session_authorization.clone(),
-            signer_type: SignerType::starknet_account,
-            signer_metadata: None,
+            public_key: public_key.to_fixed_hex_string(),
             expires_at: session.inner.expires_at.to_string(),
         };
 

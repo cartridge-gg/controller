@@ -7168,20 +7168,6 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "sessionHash",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
               "name": "accountID",
               "type": {
                 "kind": "NON_NULL",
@@ -7197,6 +7183,20 @@
               "defaultValue": null,
               "description": null,
               "name": "controllerAddress",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "hash",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -7260,11 +7260,15 @@
             {
               "defaultValue": null,
               "description": null,
-              "name": "metadata",
+              "name": "publicKey",
               "type": {
-                "kind": "SCALAR",
-                "name": "JSON",
-                "ofType": null
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
               }
             },
             {
@@ -7279,30 +7283,6 @@
                   "name": "String",
                   "ofType": null
                 }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "signerType",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "ENUM",
-                  "name": "SignerType",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "signerMetadata",
-              "type": {
-                "kind": "SCALAR",
-                "name": "JSON",
-                "ofType": null
               }
             }
           ],
@@ -16303,12 +16283,12 @@
             },
             {
               "kind": "OBJECT",
-              "name": "Session",
+              "name": "Service",
               "ofType": null
             },
             {
               "kind": "OBJECT",
-              "name": "Signer",
+              "name": "Session",
               "ofType": null
             },
             {
@@ -16324,11 +16304,6 @@
             {
               "kind": "OBJECT",
               "name": "TeamCreditsHistory",
-              "ofType": null
-            },
-            {
-              "kind": "OBJECT",
-              "name": "Whitelist",
               "ofType": null
             }
           ]
@@ -24638,25 +24613,17 @@
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "Cursor",
                     "ofType": null
                   }
-                }
-              }
-            },
-            {
-              "defaultValue": null,
-              "description": null,
-              "name": "idNotIn",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
+                },
+                {
+                  "defaultValue": null,
+                  "description": "Returns the first _n_ elements from the list.",
+                  "name": "first",
+                  "type": {
                     "kind": "SCALAR",
-                    "name": "ID",
+                    "name": "Int",
                     "ofType": null
                   }
                 }
@@ -25457,38 +25424,10 @@
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
-                  "kind": "SCALAR",
-                  "name": "ID",
+                  "kind": "OBJECT",
+                  "name": "DeploymentConnection",
                   "ofType": null
                 }
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "name",
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              }
-            },
-            {
-              "args": [],
-              "deprecationReason": null,
-              "description": null,
-              "isDeprecated": false,
-              "name": "description",
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
               }
             },
             {
@@ -25535,21 +25474,21 @@
                 },
                 {
                   "defaultValue": null,
-                  "description": "Ordering options for Deployments returned from the connection.",
+                  "description": "Ordering options for Paymasters returned from the connection.",
                   "name": "orderBy",
                   "type": {
                     "kind": "INPUT_OBJECT",
-                    "name": "DeploymentOrder",
+                    "name": "PaymasterOrder",
                     "ofType": null
                   }
                 },
                 {
                   "defaultValue": null,
-                  "description": "Filtering options for Deployments returned from the connection.",
+                  "description": "Filtering options for Paymasters returned from the connection.",
                   "name": "where",
                   "type": {
                     "kind": "INPUT_OBJECT",
-                    "name": "DeploymentWhereInput",
+                    "name": "PaymasterWhereInput",
                     "ofType": null
                   }
                 }
@@ -25557,13 +25496,13 @@
               "deprecationReason": null,
               "description": null,
               "isDeprecated": false,
-              "name": "deployments",
+              "name": "paymasters",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
-                  "name": "DeploymentConnection",
+                  "name": "PaymasterConnection",
                   "ofType": null
                 }
               }
