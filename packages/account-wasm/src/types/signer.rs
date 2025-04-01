@@ -41,6 +41,15 @@ pub struct Eip191Signer {
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
 #[serde(rename_all = "camelCase")]
+pub struct SiwsSigner {
+    pub domain: String,
+    pub pubkey: String,
+}
+
+#[allow(non_snake_case)]
+#[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+#[serde(rename_all = "camelCase")]
 pub struct Signer {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub webauthn: Option<WebauthnSigner>,
@@ -48,6 +57,8 @@ pub struct Signer {
     pub starknet: Option<StarknetSigner>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub eip191: Option<Eip191Signer>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub siws: Option<SiwsSigner>,
 }
 
 impl TryFrom<WebauthnSigner> for account_sdk::signers::webauthn::WebauthnSigner {
@@ -108,16 +119,25 @@ impl From<account_sdk::signers::Signer> for Signer {
                 webauthn: Some(s.into()),
                 starknet: None,
                 eip191: None,
+                siws: None,
             },
             account_sdk::signers::Signer::Starknet(s) => Self {
                 webauthn: None,
                 starknet: Some(s.into()),
                 eip191: None,
+                siws: None,
             },
             account_sdk::signers::Signer::Eip191(s) => Self {
                 webauthn: None,
                 starknet: None,
                 eip191: Some(s.into()),
+                siws: None,
+            },
+            account_sdk::signers::Signer::SIWS(s) => Self {
+                webauthn: None,
+                starknet: None,
+                eip191: None,
+                siws: Some(s.into()),
             },
         }
     }
@@ -150,6 +170,15 @@ impl From<account_sdk::signers::eip191::Eip191Signer> for Eip191Signer {
     fn from(signer: account_sdk::signers::eip191::Eip191Signer) -> Self {
         Self {
             address: format!("0x{}", hex::encode(signer.address().as_bytes())),
+        }
+    }
+}
+
+impl From<account_sdk::signers::siws::SIWSSigner> for SiwsSigner {
+    fn from(signer: account_sdk::signers::siws::SIWSSigner) -> Self {
+        Self {
+            domain: signer.domain,
+            pubkey: hex::encode(signer.pubkey),
         }
     }
 }
