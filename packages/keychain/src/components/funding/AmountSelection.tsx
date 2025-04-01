@@ -89,7 +89,9 @@ export function AmountSelection({
               ref={inputRef}
               className="pl-8 flex-1"
               type="number"
-              inputMode="decimal"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              step="1"
               value={amount || ""}
               disabled={lockSelection}
               onChange={(e) => {
@@ -97,8 +99,8 @@ export function AmountSelection({
                 if (value === "") {
                   onChange?.(0);
                 } else {
-                  const amount = Number.parseFloat(value);
-                  if (!isNaN(amount)) {
+                  const amount = Number.parseInt(value, 10);
+                  if (!isNaN(amount) && amount >= 0) {
                     onChange?.(amount);
                   }
                 }

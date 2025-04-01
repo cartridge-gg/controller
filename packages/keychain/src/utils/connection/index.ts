@@ -62,6 +62,13 @@ export function connectToController<ParentMethods extends object>({
           reject: () => Promise.reject(),
         });
       },
+      openStarterPack: () => () => {
+        setContext({
+          type: "open-starter-pack",
+          resolve: () => Promise.resolve(),
+          reject: () => Promise.reject(),
+        });
+      },
       switchChain: () => switchChain({ setController, setRpcUrl }),
     },
   });
