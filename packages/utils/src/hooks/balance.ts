@@ -152,7 +152,7 @@ export function useCreditBalance({
   const fractionalPart = ((value * 100n) / divisor) % 100n;
 
   // Only convert to string at the very end for display
-  const formatted = `$${wholePart}.${fractionalPart.toString().padStart(2, "0")}`;
+  const formatted = `${wholePart}.${fractionalPart.toString().padStart(2, "0")}`;
 
   return {
     balance: {

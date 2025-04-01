@@ -51,13 +51,13 @@ export function Balance({ types, title, amount }: BalanceProps) {
             title={"Credits"}
             amount={
               amount
-                ? `$${amount.toFixed(2).toString()}`
-                : `${creditBalance.formatted || "Loading"} Credits`
+                ? `${amount.toFixed(2).toString()}`
+                : `${creditBalance.formatted} CREDITS`
             }
             value={
               amount
                 ? `$${amount.toFixed(2).toString()}`
-                : creditBalance.formatted || ""
+                : `$${creditBalance.formatted}`
             }
           />
         )}

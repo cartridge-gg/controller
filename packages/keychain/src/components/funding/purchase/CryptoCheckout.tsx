@@ -141,7 +141,7 @@ export function CryptoCheckout({
           title={"Receiving"}
           name={"CREDITS"}
           icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
-          amount={creditsAmount.toString() + " Credits"}
+          amount={creditsAmount.toString() + " CREDITS"}
           value={"$" + creditsAmount.toString()}
           isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
         />
