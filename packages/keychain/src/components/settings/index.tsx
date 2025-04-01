@@ -66,7 +66,7 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, closeModal, controller } = useConnection();
-  const {disconnect} = useDisconnect();
+  const { disconnect } = useDisconnect();
   const [state, setState] = useState<State>(State.SETTINGS);
 
   // Feature flags - can be moved to environment variables or API config later
