@@ -1,4 +1,4 @@
-query Collections(
+query Balances(
   $projects: [String!]
   $accountAddress: String!
   $first: Int
@@ -8,7 +8,7 @@ query Collections(
   $offset: Int
   $limit: Int
 ) {
-  collections(
+  balances(
     projects: $projects
     accountAddress: $accountAddress
     first: $first
@@ -18,49 +18,47 @@ query Collections(
     offset: $offset
     limit: $limit
   ) {
+    totalCount
     edges {
       node {
-        assets {
-          attributes
-          description
-          imageUrl
-          name
-          tokenId
-        }
+        raw
+        amount
+        value
         meta {
           project
-          assetCount
+          decimals
           contractAddress
-          imagePath
           name
+          symbol
+          price
+          periodPrice
         }
       }
     }
   }
 }
 
-query Collection(
+query Balance(
   $projects: [String!]!
-  $contractAddress: String!
+  $tokenAddress: String!
   $accountAddress: String!
 ) {
-  collection(
+  balance(
     projects: $projects
-    contractAddress: $contractAddress
+    tokenAddress: $tokenAddress
     accountAddress: $accountAddress
   ) {
-    assets {
-      attributes
-      description
-      imageUrl
-      name
-      tokenId
-    }
+    raw
+    amount
+    value
     meta {
-      assetCount
+      project
+      decimals
       contractAddress
-      imagePath
       name
+      symbol
+      price
+      periodPrice
     }
   }
 }
