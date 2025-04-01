@@ -14,7 +14,6 @@ import {
   PlusIcon,
   ControllerIcon,
   CopyAddress,
-  Separator,
   Skeleton,
 } from "@cartridge/ui-next";
 import { useCallback, useState, useMemo } from "react";
@@ -103,8 +102,6 @@ export function Settings() {
     try {
       logout();
       disconnect();
-      // Send a message to the parent window to reload the controller
-      window.parent.postMessage("controller-reload", "*");
       closeModal();
     } catch (error) {
       console.error("Error sending reload message:", error);
@@ -241,10 +238,6 @@ export function Settings() {
             </section>
           )}
         </LayoutContent>
-
-        <div className="mb-3 mx-6">
-          <Separator className="bg-spacer" />
-        </div>
 
         <LayoutFooter>
           <SheetTrigger asChild>

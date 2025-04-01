@@ -236,6 +236,9 @@ export function useConnectionValue() {
               message: "User logged out",
             });
           }
+
+          // Send a message to the parent window to reload the controller
+          window.parent.postMessage("controller-reload", "*");
         })
         .catch((err) => {
           console.error("Disconnect failed:", err);

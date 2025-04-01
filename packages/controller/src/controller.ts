@@ -51,6 +51,15 @@ export default class ControllerProvider extends BaseProvider {
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;
+
+      // Add event listener for messages from iframes
+      window.addEventListener("message", (event) => {
+        if (event.data === "controller-reload") {
+          this.iframes.profile?.close();
+          this.iframes.keychain?.close();
+          window.location.reload();
+        }
+      });
     }
   }
 
