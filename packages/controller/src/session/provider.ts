@@ -73,6 +73,13 @@ export default class SessionProvider extends BaseProvider {
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller_session = this;
+
+      // Add event listener for the controller-reload message
+      window.addEventListener("message", (event) => {
+        if (event.data === "controller-reload") {
+          window.location.reload();
+        }
+      });
     }
   }
 
@@ -177,6 +184,9 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("sessionPolicies");
     this.account = undefined;
     this._username = undefined;
+
+    window.postMessage("controller-reload", "*");
+
     return Promise.resolve();
   }
 

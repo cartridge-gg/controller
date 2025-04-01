@@ -64,10 +64,6 @@ const Header = () => {
     };
   }, []);
 
-  useEffect(() => {
-    console.log("address: ", address);
-  }, [address]);
-
   return (
     <div className="w-full absolute top-0 left-0 p-5 flex items-center space-x-2">
       <div className="flex-1" />
