@@ -118,7 +118,11 @@ export const PurchaseWithoutBalance = () => {
         <StripeCheckout
           onBack={() => setPurchaseState(PurchaseState.BACK)}
           onComplete={() => setPurchaseState(PurchaseState.PENDING)}
-          creditsAmount={price}
+          price={{
+            baseCostInCents: price,
+            processingFeeInCents: 0,
+            totalInCents: price,
+          }}
         />
       </Elements>
     );
@@ -164,8 +168,8 @@ export const PurchaseWithoutBalance = () => {
         {/* Display Receiving component for both PENDING and SUCCESS states */}
         {(purchaseState === PurchaseState.PENDING ||
           purchaseState === PurchaseState.SUCCESS) && (
-          <Receiving title="Receiving" items={starterPackItems} />
-        )}
+            <Receiving title="Receiving" items={starterPackItems} />
+          )}
       </LayoutContent>
       <LayoutFooter>
         {purchaseState === PurchaseState.PENDING ? (
@@ -190,7 +194,7 @@ export const PurchaseWithoutBalance = () => {
             <span>Close</span>
           </Button>
         ) : (
-          <Button type="button" className="w-full" onClick={() => {}}>
+          <Button type="button" className="w-full" onClick={() => { }}>
             <span>Purchase</span>
           </Button>
         )}

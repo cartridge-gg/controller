@@ -4,7 +4,11 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import { StripePaymentElementOptions } from "@stripe/stripe-js";
+import {
+  Stripe,
+  StripeElements,
+  StripePaymentElementOptions,
+} from "@stripe/stripe-js";
 import {
   LayoutContainer,
   LayoutContent,
@@ -14,16 +18,17 @@ import {
   CreditCardIcon,
 } from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { TotalCost } from "@/components/starterpack/total-cost";
+import { PricingDetails } from "./PurchaseCredits";
+import { CostBreakdown } from "./CostBreakdown";
 
 type StripeCheckoutProps = {
-  creditsAmount: number;
+  price: PricingDetails;
   onBack: () => void;
   onComplete: () => void;
 };
 
 export default function StripeCheckout({
-  creditsAmount,
+  price,
   onBack,
   onComplete,
 }: StripeCheckoutProps) {
@@ -80,25 +85,58 @@ export default function StripeCheckout({
   };
 
   return (
+    <StripeCheckoutContainer
+      price={price}
+      stripe={stripe}
+      elements={elements}
+      error={error}
+      isLoading={isLoading}
+      isSubmitting={isSubmitting}
+      onBack={onBack}
+      handleSubmit={handleSubmit}
+    >
+      <form id="payment-form">
+        <PaymentElement
+          id="payment-element"
+          options={paymentElementOptions}
+          onReady={() => setIsLoading(false)}
+          onChange={() => setError(undefined)}
+        />
+      </form>
+    </StripeCheckoutContainer>
+  );
+}
+
+export const StripeCheckoutContainer = ({
+  price,
+  stripe,
+  elements,
+  error,
+  isLoading,
+  isSubmitting,
+  children,
+  onBack,
+  handleSubmit,
+}: {
+  price: PricingDetails;
+  stripe: Stripe | null;
+  elements: StripeElements | null;
+  error: Error | undefined;
+  isLoading: boolean;
+  isSubmitting: boolean;
+  children: React.ReactNode;
+  onBack: () => void;
+  handleSubmit: (e: React.FormEvent) => Promise<void>;
+}) => {
+  return (
     <LayoutContainer>
       <LayoutHeader
         title={"Enter Payment Details"}
-        description={"$" + creditsAmount.toFixed(2)}
         icon={<CreditCardIcon variant="solid" size="lg" />}
         onBack={onBack}
       />
-      <LayoutContent className="gap-6">
-        <form id="payment-form">
-          <PaymentElement
-            id="payment-element"
-            options={paymentElementOptions}
-            onReady={() => setIsLoading(false)}
-            onChange={() => setError(undefined)}
-          />
-        </form>
-      </LayoutContent>
+      <LayoutContent className="gap-6">{children}</LayoutContent>
       <LayoutFooter>
-        <TotalCost price={creditsAmount} processingFee={0.15} />
         {error && (
           <ErrorAlert
             variant="error"
@@ -106,7 +144,7 @@ export default function StripeCheckout({
             description={error.message}
           />
         )}
-
+        {!error && <CostBreakdown rails="stripe" price={price} />}
         <Button
           isLoading={isLoading}
           disabled={isSubmitting || !stripe || !elements || isLoading}
@@ -117,4 +155,4 @@ export default function StripeCheckout({
       </LayoutFooter>
     </LayoutContainer>
   );
-}
+};
