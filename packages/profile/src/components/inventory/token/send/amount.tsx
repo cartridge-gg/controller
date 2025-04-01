@@ -43,9 +43,9 @@ export function SendAmount({
       amount={amount}
       submitted={submitted}
       conversion={
-        !!token.balance.value
-          ? `~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-          : undefined
+        !token.balance.value
+          ? undefined
+          : `~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
       }
       balance={parseFloat(token.balance.amount.toString())}
       symbol={token.metadata.symbol}
