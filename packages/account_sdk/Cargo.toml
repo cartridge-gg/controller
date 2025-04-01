@@ -36,6 +36,10 @@ urlencoding = "2.1.3"
 once_cell.workspace = true
 chrono = { workspace = true }
 
+# Commit with SHA-512 optimizations
+garaga_rs = { git = "https://github.com/keep-starknet-strange/garaga.git", rev = "0959ef19729ac2ec5a2ba2ca54fbe9680e23f767", default-features = false }
+num-bigint = "0.4"
+
 # Webauthn deps
 base64 = { workspace = true, optional = true }
 base64urlsafedata = { workspace = true, optional = true }
