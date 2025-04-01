@@ -26,16 +26,13 @@ import {
   isIframe,
   isPublicChain,
   StarkscanUrl,
-  useCountervalue,
   useCreditBalance,
 } from "@cartridge/utils";
 import { constants } from "starknet";
-import { formatEther } from "viem";
 import { useAccount } from "#hooks/account";
 import { useToken } from "#hooks/token";
 import { useMemo } from "react";
 import { compare } from "compare-versions";
-import { formatBalance } from "./helper";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -97,22 +94,7 @@ function ERC20() {
   const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
   const { chainId, version } = useConnection();
-  const token = useToken({ tokenAddress: address! });
-  const { countervalues } = useCountervalue(
-    {
-      tokens: [
-        {
-          balance: formatEther(token?.balance.value ?? 0n),
-          address: token?.meta.address || "0x0",
-        },
-      ],
-    },
-    { enabled: !!token },
-  );
-  const countervalue = useMemo(
-    () => countervalues.find((v) => v?.address === token?.meta.address),
-    [countervalues, token?.meta.address],
-  );
+  const { token } = useToken({ tokenAddress: address! });
 
   const compatibility = useMemo(() => {
     if (!version) return false;
@@ -127,18 +109,18 @@ function ERC20() {
 
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-4">
-          <Thumbnail icon={token.meta.logoUrl} size="lg" rounded />
+          <Thumbnail icon={token.metadata.image} size="lg" rounded />
           <div className="flex flex-col gap-0.5">
             {token.balance === undefined ? (
               <Skeleton className="h-[20px] w-[120px] rounded" />
             ) : (
               <p className="text-semibold text-lg/[22px]">
-                {`${formatBalance(token.balance.formatted, ["~"])} ${token.meta.symbol}`}
+                {`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
               </p>
             )}
-            {countervalue && (
+            {token.balance.value && (
               <p className="text-foreground-300 text-xs">
-                {formatBalance(countervalue.current.formatted, ["~"])}
+                {`~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
               </p>
             )}
           </div>
@@ -153,17 +135,17 @@ function ERC20() {
               <Link
                 to={`${StarkscanUrl(
                   chainId as constants.StarknetChainId,
-                ).contract(token.meta.address)} `}
+                ).contract(token.metadata.address)} `}
                 className="flex items-center gap-1 text-sm"
                 target="_blank"
               >
                 <div className="font-medium">
-                  {formatAddress(token.meta.address, { size: "sm" })}
+                  {formatAddress(token.metadata.address, { size: "sm" })}
                 </div>
                 <ExternalIcon size="sm" />
               </Link>
             ) : (
-              <div>{formatAddress(token.meta.address)}</div>
+              <div>{formatAddress(token.metadata.address)}</div>
             )}
           </CardContent>
 

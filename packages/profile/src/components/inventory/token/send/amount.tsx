@@ -1,7 +1,6 @@
 import { useToken } from "#hooks/token";
 import { Amount } from "@cartridge/ui-next";
-import { useCountervalue } from "@cartridge/utils";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useParams } from "react-router-dom";
 
 export function SendAmount({
@@ -16,33 +15,15 @@ export function SendAmount({
   setError: (error: Error | undefined) => void;
 }) {
   const { address: tokenAddress } = useParams<{ address: string }>();
-  const token = useToken({ tokenAddress: tokenAddress! });
+  const { token } = useToken({ tokenAddress: tokenAddress! });
 
   const handleMax = useCallback(
     (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
       e.preventDefault();
       if (!token) return;
-      setAmount(parseFloat(token.balance.formatted.replace("~", "")));
+      setAmount(parseFloat(token.balance.amount.toString()));
     },
     [token, setAmount],
-  );
-
-  const { countervalues } = useCountervalue(
-    {
-      tokens: [
-        {
-          balance: amount?.toString() ?? "0",
-          address: token?.meta.address || "0x0",
-        },
-      ],
-    },
-    {
-      enabled: !!token && !!amount,
-    },
-  );
-  const countervalue = useMemo(
-    () => countervalues.find((v) => v?.address === token?.meta.address),
-    [countervalues, token?.meta.address],
   );
 
   const handleChange = useCallback(
@@ -61,10 +42,10 @@ export function SendAmount({
     <Amount
       amount={amount}
       submitted={submitted}
-      conversion={countervalue?.current.formatted}
-      balance={parseFloat(token.balance.formatted.replace("~", ""))}
-      symbol={token.meta.symbol}
-      decimals={token.meta.decimals ?? 18}
+      conversion={`~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+      balance={parseFloat(token.balance.amount.toString())}
+      symbol={token.metadata.symbol}
+      decimals={token.metadata.decimals ?? 18}
       setError={setError}
       onChange={handleChange}
       onMax={handleMax}

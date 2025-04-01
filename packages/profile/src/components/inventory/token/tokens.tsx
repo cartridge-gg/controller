@@ -1,84 +1,43 @@
 import { TokenCard } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
-import { Balance, ERC20Metadata, useCountervalue } from "@cartridge/utils";
-import { formatEther } from "viem";
-import { useTokens } from "#hooks/token";
-import { formatBalance } from "./helper";
-import { useMemo } from "react";
+import { Token, useTokens } from "#hooks/token";
 import placeholder from "/public/placeholder.svg";
 
 export function Tokens() {
-  const erc20 = useTokens();
-
-  const tokens = useMemo(
-    () =>
-      erc20.data.map((t) => ({
-        balance: t.balance,
-        meta: t.meta,
-      })),
-    [erc20.data],
-  );
-
-  const tokenData = useMemo(
-    () =>
-      tokens.map((token) => ({
-        balance: formatEther(token.balance.value || 0n),
-        address: token.meta.address,
-      })),
-    [tokens],
-  );
-
-  const { countervalues } = useCountervalue({
-    tokens: tokenData,
-  });
+  const { tokens } = useTokens();
 
   return (
     <div
       className="rounded overflow-clip w-full flex flex-col gap-y-px"
       style={{ scrollbarWidth: "none" }}
     >
-      {tokens.map((token) => (
-        <TokenCardContent
-          key={token.meta.address}
-          token={token}
-          values={countervalues}
-        />
-      ))}
+      {tokens
+        .filter((token) => token.balance.amount !== 0)
+        .map((token) => (
+          <TokenCardContent key={token.metadata.address} token={token} />
+        ))}
     </div>
   );
 }
 
-function TokenCardContent({
-  token,
-  values,
-}: {
-  token: { balance: Balance; meta: ERC20Metadata };
-  values: ReturnType<typeof useCountervalue>["countervalues"];
-}) {
-  const value = useMemo(
-    () => values.find((v) => v?.address === token.meta.address),
-    [values, token.meta.address],
-  );
-  const change = useMemo(() => {
-    if (!value) {
-      return 0;
-    }
-    return value.current.value - value.period.value;
-  }, [value]);
-
+function TokenCardContent({ token }: { token: Token }) {
   return (
-    <Link to={`token/${token.meta.address}`}>
+    <Link to={`token/${token.metadata.address}`}>
       <TokenCard
-        image={token.meta.logoUrl || placeholder}
-        title={token.meta.name}
-        amount={`${formatBalance(token.balance.formatted, ["~"])} ${token.meta.symbol}`}
-        value={value ? formatBalance(value.current.formatted, ["~"]) : ""}
+        image={token.metadata.image || placeholder}
+        title={token.metadata.name}
+        amount={`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
+        value={
+          token.balance.value
+            ? `$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+            : ""
+        }
         change={
-          !change
+          token.balance.change === 0
             ? undefined
-            : change > 0
-              ? `+$${change.toFixed(2)}`
-              : `-$${(-change).toFixed(2)}`
+            : token.balance.change > 0
+              ? `+$${token.balance.change.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+              : `-$${(-token.balance.change).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
         }
       />
     </Link>
