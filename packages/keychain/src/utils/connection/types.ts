@@ -16,6 +16,7 @@ export type ConnectionCtx =
   | SignMessageCtx
   | OpenSettingsCtx
   | OpenPurchaseCreditsCtx
+  | OpenStarterPackCtx
   | undefined;
 
 export type ConnectCtx = {
@@ -74,6 +75,12 @@ export type DeployCtx = {
 
 export type OpenPurchaseCreditsCtx = {
   type: "open-purchase-credits";
+  resolve: (res: ConnectError) => void;
+  reject: (reason?: unknown) => void;
+};
+
+export type OpenStarterPackCtx = {
+  type: "open-starter-pack";
   resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;
 };
