@@ -44,7 +44,7 @@ export function Balance({ types, title, amount }: BalanceProps) {
           {title ?? "Balance"}
         </CardTitle>
       </CardHeader>
-      <TokenSummary>
+      <TokenSummary className="rounded-tl-none rounded-tr-none">
         {types.includes(BalanceType.CREDITS) && (
           <TokenCard
             image={"https://static.cartridge.gg/presets/credit/icon.svg"}

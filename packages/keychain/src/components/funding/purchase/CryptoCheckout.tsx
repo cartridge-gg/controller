@@ -241,7 +241,7 @@ const ReviewToken = ({
         </CardTitle>
         {isLoading && <Spinner size="sm" />}
       </CardHeader>
-      <TokenSummary>
+      <TokenSummary className="rounded-tl-none rounded-tr-none">
         <TokenCard title={name} image={icon} amount={amount} value={value} />
       </TokenSummary>
     </Card>
