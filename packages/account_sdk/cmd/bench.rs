@@ -120,7 +120,7 @@ async fn main() {
             let mut nonce_lock = nonce_mutex.lock().await;
             let (mut namespace, mut bitmask) = *nonce_lock;
 
-            let nonce_bitmask = if bitmask == u64::MAX.into() {
+            let nonce_bitmask = if bitmask == Into::<u128>::into(u64::MAX) {
                 namespace = SigningKey::from_random().secret_scalar();
                 bitmask = 1;
                 1u128
