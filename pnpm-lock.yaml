@@ -162,8 +162,8 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#8fcd261
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/8fcd261
+        specifier: github:cartridge-gg/presets#2373780
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/2373780
     devDependencies:
       turbo:
         specifier: ^2.0.12
@@ -396,7 +396,7 @@ importers:
         version: 6.23.1
       starknetkit:
         specifier: ^2.6.1
-        version: 2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.2)(utf-8-validate@5.0.10)
+        version: 2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.1)
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:*
@@ -1438,8 +1438,8 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/8fcd261':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/8fcd261}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/2373780':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/2373780}
     version: 0.0.1
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
@@ -10616,7 +10616,7 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/8fcd261':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/2373780':
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
@@ -14256,7 +14256,7 @@ snapshots:
 
   '@vue/shared@3.5.13': {}
 
-  '@walletconnect/core@2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)':
+  '@walletconnect/core@2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-provider': 1.0.14
@@ -14270,7 +14270,7 @@ snapshots:
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
       '@walletconnect/types': 2.19.1
-      '@walletconnect/utils': 2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)
+      '@walletconnect/utils': 2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.1)
       '@walletconnect/window-getters': 1.0.1
       es-toolkit: 1.33.0
       events: 3.3.0
@@ -14386,16 +14386,16 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/sign-client@2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)':
+  '@walletconnect/sign-client@2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
-      '@walletconnect/core': 2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)
+      '@walletconnect/core': 2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.1)
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.2
       '@walletconnect/time': 1.0.2
       '@walletconnect/types': 2.19.1
-      '@walletconnect/utils': 2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)
+      '@walletconnect/utils': 2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.1)
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -14453,7 +14453,7 @@ snapshots:
       - ioredis
       - uploadthing
 
-  '@walletconnect/utils@2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)':
+  '@walletconnect/utils@2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
       '@noble/ciphers': 1.2.1
       '@noble/curves': 1.8.1
@@ -19938,14 +19938,14 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.2)(utf-8-validate@5.0.10):
+  starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.1):
     dependencies:
       '@starknet-io/get-starknet': 4.0.6
       '@starknet-io/get-starknet-core': 4.0.6
       '@starknet-io/types-js': 0.7.10
       '@trpc/client': 10.45.2(@trpc/server@10.45.2)
       '@trpc/server': 10.45.2
-      '@walletconnect/sign-client': 2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)
+      '@walletconnect/sign-client': 2.19.1(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.1)
       bowser: 2.11.0
       detect-browser: 5.3.0
       eventemitter3: 5.0.1

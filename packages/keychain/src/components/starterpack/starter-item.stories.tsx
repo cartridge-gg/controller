@@ -25,7 +25,8 @@ export const NFT: Story = {
     type: StarterItemType.NFT,
     title: "Starter NFT",
     description: "A unique starter NFT for your collection",
-    image: "https://picsum.photos/200",
+    image:
+      "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
     price: 100,
   },
 };
