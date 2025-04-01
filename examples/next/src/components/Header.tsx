@@ -59,17 +59,6 @@ const Header = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
 
-    // reload the page when controller-reload(logout) event is received
-    window.addEventListener(
-      "message",
-      (event) => {
-        if (event.data === "controller-reload") {
-          window.location.reload();
-        }
-      },
-      false,
-    );
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
