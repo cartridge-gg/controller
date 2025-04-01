@@ -3,14 +3,14 @@ members = ["packages/contracts/controller", "packages/contracts/resolver"]
 
 [workspace.package]
 version = "0.1.0"
-cairo-version = "2.9.4"
+cairo-version = "2.11.1"
 
 [workspace.dependencies]
-starknet = "2.9.4"
-alexandria_math = { git = "https://github.com/cartridge-gg/alexandria", rev = "79eeca8b8ae90bd4cb5129e5f5c6bfe9f773a814" }
-alexandria_encoding = { git = "https://github.com/cartridge-gg/alexandria", rev = "79eeca8b8ae90bd4cb5129e5f5c6bfe9f773a814" }
-alexandria_merkle_tree = { git = "https://github.com/cartridge-gg/alexandria", rev = "79eeca8b8ae90bd4cb5129e5f5c6bfe9f773a814" }
+starknet = "2.11.1"
+alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria", rev = "a0163821eab6d5d42e3dc63b10ec96e4d7a622e0" }
+alexandria_encoding = { git = "https://github.com/keep-starknet-strange/alexandria", rev = "a0163821eab6d5d42e3dc63b10ec96e4d7a622e0" }
+alexandria_merkle_tree = { git = "https://github.com/keep-starknet-strange/alexandria", rev = "a0163821eab6d5d42e3dc63b10ec96e4d7a622e0" }
 openzeppelin = "1.0.0"
-argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "8a4d779c00d0b4783153271bea6f4bfd31781caf" }
+argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "3e6577cd4e48d04a0f99f4808d5a9d95032fffaa" }
 snforge_std = "0.38.3"
-assert_macros = "2.9.4"
+assert_macros = "2.11.1"

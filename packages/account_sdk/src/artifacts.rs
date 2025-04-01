@@ -23,8 +23,13 @@ lazy_static! {
         let mut m = HashMap::new();
         m.insert(Version::LATEST, ContractClass {
             content: include_str!("../artifacts/classes/controller.latest.contract_class.json"),
+<<<<<<< HEAD
             hash: felt!("0xec3bd940de1187715d252263c5cf7bd850427b2797e7499f0a58cf8e89e1b4"),
             casm_hash: felt!("0x2649897514bd47117fb8bf3d653e6febac4bc596ba50506b0ec64e83553d326"),
+=======
+            hash: felt!("0x7788f2d073f55b740f313309b3b4be4d4fe13c618540bb559ab5fe820c9dd5a"),
+            casm_hash: felt!("0x2ad355123fc02d8d47be5eb4343810a41f0b31b3bb0d4095790a94030cc2269"),
+>>>>>>> 76690ff01 (feat: add garaga calldata builder for siws (#1511))
         });m.insert(Version::V1_0_7, ContractClass {
             content: include_str!("../artifacts/classes/controller.v1.0.7.contract_class.json"),
             hash: felt!("0x3e0a04bab386eaa51a41abe93d8035dccc96bd9d216d44201266fe0b8ea1115"),
