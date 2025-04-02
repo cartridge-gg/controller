@@ -1,6 +1,8 @@
 @layer base {
   :root {
     --background-100: #161a17;
+    --background-125: #181c19;
+    --background-150: #1a1e1b;
     --background-200: #1e221f;
     --background-300: #242824;
     --background-400: #2a2f2a;

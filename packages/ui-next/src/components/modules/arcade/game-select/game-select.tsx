@@ -1,7 +1,6 @@
-import { CardTitle, cn, SparklesIcon } from "@/index";
+import { CardTitle, cn, SparklesIcon, Thumbnail } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo, HTMLAttributes, useState } from "react";
-import { ArcadeGameIcon } from "../game-icon";
 
 interface ArcadeGameSelectProps
   extends HTMLAttributes<HTMLDivElement>,
@@ -18,8 +17,13 @@ export const arcadeGameSelectVariants = cva(
   {
     variants: {
       variant: {
+        darkest: "bg-background-100 data-[active=true]:bg-background-200",
+        darker: "bg-background-100 data-[active=true]:bg-background-200",
+        dark: "bg-background-100 data-[active=true]:bg-background-200",
         default: "bg-background-200 data-[active=true]:bg-background-300",
-        faded: "bg-background-100 data-[active=true]:bg-background-200",
+        light: "bg-background-200 data-[active=true]:bg-background-300",
+        lighter: "bg-background-200 data-[active=true]:bg-background-300",
+        lightest: "bg-background-200 data-[active=true]:bg-background-300",
         ghost: "",
       },
     },
@@ -73,11 +77,9 @@ export const ArcadeGameSelect = ({
       {...props}
     >
       <div className="flex items-center gap-3">
-        <ArcadeGameIcon
-          logo={logo}
-          name={name}
-          active={active || hover}
-          variant={variant}
+        <Thumbnail
+          icon={logo}
+          variant={active || hover ? "lightest" : "light"}
         />
         <CardTitle
           className={cn(
@@ -104,10 +106,19 @@ const arcadePointsVariants = cva(
   {
     variants: {
       variant: {
+        darkest:
+          "text-foreground-200 bg-background-100 data-[active=true]:bg-background-200 data-[active=true]:text-foreground-100",
+        darker:
+          "text-foreground-200 bg-background-100 data-[active=true]:bg-background-200 data-[active=true]:text-foreground-100",
+        dark: "text-foreground-200 bg-background-100 data-[active=true]:bg-background-200 data-[active=true]:text-foreground-100",
         default:
           "text-foreground-300 bg-background-200 data-[active=true]:bg-background-300 data-[active=true]:text-foreground-100",
-        faded:
-          "text-foreground-200 bg-background-100 data-[active=true]:bg-background-200 data-[active=true]:text-foreground-100",
+        light:
+          "text-foreground-300 bg-background-200 data-[active=true]:bg-background-300 data-[active=true]:text-foreground-100",
+        lighter:
+          "text-foreground-300 bg-background-200 data-[active=true]:bg-background-300 data-[active=true]:text-foreground-100",
+        lightest:
+          "text-foreground-300 bg-background-200 data-[active=true]:bg-background-300 data-[active=true]:text-foreground-100",
         ghost: "",
       },
     },
