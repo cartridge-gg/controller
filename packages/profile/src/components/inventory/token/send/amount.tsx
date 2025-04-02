@@ -42,7 +42,11 @@ export function SendAmount({
     <Amount
       amount={amount}
       submitted={submitted}
-      conversion={`~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+      conversion={
+        !token.balance.value
+          ? undefined
+          : `~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+      }
       balance={parseFloat(token.balance.amount.toString())}
       symbol={token.metadata.symbol}
       decimals={token.metadata.decimals ?? 18}
