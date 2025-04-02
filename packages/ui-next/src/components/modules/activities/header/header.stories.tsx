@@ -32,11 +32,11 @@ export const Collectible: Story = {
           subIcon={
             <ThumbnailsSubIcon
               Icon={<SparklesIcon variant="solid" />}
-              variant="faded"
-              size="lg"
+              variant="dark"
+              size="xl"
             />
           }
-          variant="faded"
+          variant="default"
           size="xl"
         />
       }
@@ -56,11 +56,11 @@ export const Token: Story = {
           subIcon={
             <ThumbnailsSubIcon
               Icon={<PaperPlaneIcon variant="solid" />}
-              variant="faded"
-              size="lg"
+              variant="dark"
+              size="xl"
             />
           }
-          variant="faded"
+          variant="default"
           size="xl"
           rounded
         />
@@ -82,11 +82,11 @@ export const Error: Story = {
           subIcon={
             <ThumbnailsSubIcon
               Icon={<PaperPlaneIcon variant="solid" />}
-              variant="faded"
-              size="lg"
+              variant="dark"
+              size="xl"
             />
           }
-          variant="faded"
+          variant="default"
           size="xl"
           error
           rounded
@@ -109,11 +109,11 @@ export const Loading: Story = {
           subIcon={
             <ThumbnailsSubIcon
               Icon={<PaperPlaneIcon variant="solid" />}
-              variant="faded"
-              size="lg"
+              variant="dark"
+              size="xl"
             />
           }
-          variant="faded"
+          variant="default"
           size="xl"
           loading
           rounded

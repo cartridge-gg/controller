@@ -55,8 +55,21 @@ export default class ControllerProvider extends BaseProvider {
       // Add event listener for messages from iframes
       window.addEventListener("message", (event) => {
         if (event.data === "controller-reload") {
-          this.iframes.profile?.close();
-          this.iframes.keychain?.close();
+          // Get all iframes except version
+          const iframes = Object.values(this.iframes).filter(
+            (i) => typeof i !== "number",
+          );
+
+          if (iframes.length === 0) {
+            return;
+          }
+
+          // Close all opened iframes
+          for (const iframe of iframes) {
+            iframe.close();
+          }
+
+          // Reload the parent page
           window.location.reload();
         }
       });

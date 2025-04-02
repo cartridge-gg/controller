@@ -40,7 +40,7 @@ query Collections(
 }
 
 query Collection(
-  $projects: [String!]
+  $projects: [String!]!
   $contractAddress: String!
   $accountAddress: String!
 ) {
