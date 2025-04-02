@@ -6,7 +6,13 @@ export const activityHeaderVariants = cva(
   {
     variants: {
       variant: {
+        darkest: "",
+        darker: "",
+        dark: "",
         default: "",
+        light: "",
+        lighter: "",
+        lightest: "",
       },
     },
     defaultVariants: {

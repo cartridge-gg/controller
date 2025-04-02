@@ -19,138 +19,48 @@ const meta: Meta<typeof ThumbnailCollectible> = {
 export default meta;
 type Story = StoryObj<typeof ThumbnailCollectible>;
 
+const variants = [
+  "darkest",
+  "darker",
+  "dark",
+  "default",
+  "light",
+  "lighter",
+  "lightest",
+  "ghost",
+] as const;
+const sizes = ["xs", "sm", "md", "lg", "xl"] as const;
+
 export const Default: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="xs"
-          variant="dark"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="xs"
-          variant="faded"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="xs"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="xs"
-          variant="highlight"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="sm"
-          variant="dark"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="sm"
-          variant="faded"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="sm"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="sm"
-          variant="highlight"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="md"
-          variant="dark"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="md"
-          variant="faded"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="md"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="md"
-          variant="highlight"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="lg"
-          variant="dark"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="lg"
-          variant="faded"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="lg"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="lg"
-          variant="highlight"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-              size="md"
+      {sizes.map((size) => (
+        <div key={size} className="flex gap-3 ">
+          {variants.map((variant) => (
+            <ThumbnailCollectible
+              key={`${size}-${variant}`}
+              image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+              size={size}
+              variant={variant}
             />
-          }
-          size="lg"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="xl"
-          variant="dark"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="xl"
-          variant="faded"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="xl"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          size="xl"
-          variant="highlight"
-        />
-        <ThumbnailCollectible
-          image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <ThumbnailCollectible
+              key={`${size}-subicon`}
+              image="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png"
+              size={size}
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
               }
-              size="lg"
             />
-          }
-          size="xl"
-        />
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   ),
 };
@@ -158,60 +68,33 @@ export const Default: Story = {
 export const Fallback: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible image="" size="xs" variant="dark" />
-        <ThumbnailCollectible image="" size="xs" variant="faded" />
-        <ThumbnailCollectible image="" size="xs" />
-        <ThumbnailCollectible image="" size="xs" variant="highlight" />
-      </div>
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible image="" size="sm" variant="dark" />
-        <ThumbnailCollectible image="" size="sm" variant="faded" />
-        <ThumbnailCollectible image="" size="sm" />
-        <ThumbnailCollectible image="" size="sm" variant="highlight" />
-      </div>
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible image="" size="md" variant="dark" />
-        <ThumbnailCollectible image="" size="md" variant="faded" />
-        <ThumbnailCollectible image="" size="md" />
-        <ThumbnailCollectible image="" size="md" variant="highlight" />
-      </div>
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible image="" size="lg" variant="dark" />
-        <ThumbnailCollectible image="" size="lg" variant="faded" />
-        <ThumbnailCollectible image="" size="lg" />
-        <ThumbnailCollectible image="" size="lg" variant="highlight" />
-        <ThumbnailCollectible
-          image=""
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
-              }
-              size="md"
+      {sizes.map((size) => (
+        <div key={size} className="flex gap-3 ">
+          {variants.map((variant) => (
+            <ThumbnailCollectible
+              key={`${size}-${variant}`}
+              image=""
+              size={size}
+              variant={variant}
             />
-          }
-          size="lg"
-        />
-      </div>
-      <div className="flex gap-3 ">
-        <ThumbnailCollectible image="" size="xl" variant="dark" />
-        <ThumbnailCollectible image="" size="xl" variant="faded" />
-        <ThumbnailCollectible image="" size="xl" />
-        <ThumbnailCollectible image="" size="xl" variant="highlight" />
-        <ThumbnailCollectible
-          image=""
-          subIcon={
-            <ThumbnailsSubIcon
-              Icon={
-                <PaperPlaneIcon className="w-full h-full" variant="solid" />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <ThumbnailCollectible
+              key={`${size}-subicon`}
+              image=""
+              size={size}
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
               }
-              size="lg"
             />
-          }
-          size="xl"
-        />
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   ),
 };

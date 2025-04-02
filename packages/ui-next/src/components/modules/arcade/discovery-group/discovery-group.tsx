@@ -22,8 +22,13 @@ export const arcadeDiscoveryGroupVariants = cva(
   {
     variants: {
       variant: {
+        darkest: "",
+        darker: "",
+        dark: "",
         default: "",
-        faded: "",
+        light: "",
+        lighter: "",
+        lightest: "",
         ghost: "",
       },
     },
