@@ -1,4 +1,4 @@
-import { AsyncMethodReturns } from "@cartridge/penpal";
+import { AsyncMethodReturns, connectToParent } from "@cartridge/penpal";
 import { useContext, useState, useEffect, useCallback, useMemo } from "react";
 import {
   connectToController,
@@ -30,6 +30,8 @@ import { RpcProvider } from "starknet";
 
 type ParentMethods = AsyncMethodReturns<{
   close: () => Promise<void>;
+  closeAll: () => Promise<void>;
+  reload: () => Promise<void>;
 
   // Wallet bridge methods
   externalDetectWallets: () => Promise<ExternalWallet[]>;
@@ -237,8 +239,17 @@ export function useConnectionValue() {
             });
           }
 
-          // Send a message to the parent window to reload the controller
-          window.parent.postMessage("controller-reload", "*");
+          const connection = connectToParent<ParentMethods>({
+            methods: {
+              close: () => {
+                window.location.reload();
+              },
+            },
+          });
+          connection.promise.then((parent) => {
+            parent.closeAll();
+            parent.reload();
+          });
         })
         .catch((err) => {
           console.error("Disconnect failed:", err);

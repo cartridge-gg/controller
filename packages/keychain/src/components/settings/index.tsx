@@ -28,7 +28,6 @@ import {
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
 import CurrencySelect from "./currency-select";
-import { useDisconnect } from "@starknet-react/core";
 import { useSignerQuery } from "@cartridge/utils/api/cartridge";
 
 enum State {
@@ -64,8 +63,7 @@ const registeredAccounts: RegisteredAccount[] = [
 ];
 
 export function Settings() {
-  const { logout, closeModal, controller } = useConnection();
-  const { disconnect } = useDisconnect();
+  const { logout, controller } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
 
   // Feature flags - can be moved to environment variables or API config later
@@ -78,35 +76,20 @@ export function Settings() {
     }),
     [],
   );
-  const data = useSignerQuery(
-    {
-      username:
-        process.env.NODE_ENV === "development"
-          ? "slot-auth-local"
-          : (controller?.username() as string),
-    },
-    {
-      onSuccess: (data) => {
-        data.account?.controllers.edges?.map((i) => {
-          i?.node?.signers?.map((j) => {
-            return {
-              signerType: j.type,
-            };
-          });
-        });
-      },
-    },
-  );
+  const data = useSignerQuery({
+    username:
+      process.env.NODE_ENV === "development"
+        ? "slot-auth-local"
+        : (controller?.username() as string),
+  });
 
   const handleLogout = useCallback(() => {
     try {
       logout();
-      disconnect();
-      closeModal();
     } catch (error) {
       console.error("Error sending reload message:", error);
     }
-  }, [logout, closeModal, disconnect]);
+  }, [logout]);
 
   if (state === State.RECOVERY) {
     return <Recovery onBack={() => setState(State.SETTINGS)} />;

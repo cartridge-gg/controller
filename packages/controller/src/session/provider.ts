@@ -178,8 +178,6 @@ export default class SessionProvider extends BaseProvider {
     this.account = undefined;
     this._username = undefined;
 
-    window.postMessage("controller-reload", "*");
-
     return Promise.resolve();
   }
 
