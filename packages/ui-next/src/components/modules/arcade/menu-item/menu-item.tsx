@@ -63,7 +63,7 @@ export const ArcadeMenuItem = React.forwardRef<
         >
           <div className={cn("flex justify-start items-center gap-1")}>
             {Icon}
-            <p className="font-medium tracking-wider">{label}</p>
+            <p className="font-normal">{label}</p>
           </div>
         </SelectItem>
       </TabsTrigger>

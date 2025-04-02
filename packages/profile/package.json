@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/profile",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "private": true,
   "type": "module",
   "scripts": {
@@ -39,7 +39,7 @@
     ]
   },
   "dependencies": {
-    "@bal7hazar/arcade-sdk": "^0.0.83",
+    "@bal7hazar/arcade-sdk": "0.0.84",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui-next": "workspace:*",

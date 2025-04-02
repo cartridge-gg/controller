@@ -18,6 +18,8 @@ export const cartridgeTWPreset: Partial<Config> = {
       background: {
         DEFAULT: "var(--background-100)",
         100: "var(--background-100)",
+        125: "var(--background-125)",
+        150: "var(--background-150)",
         200: "var(--background-200)",
         300: "var(--background-300)",
         400: "var(--background-400)",

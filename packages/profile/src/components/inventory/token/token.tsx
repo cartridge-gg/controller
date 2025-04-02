@@ -118,7 +118,7 @@ function ERC20() {
                 {`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
               </p>
             )}
-            {token.balance.value && (
+            {!!token.balance.value && (
               <p className="text-foreground-300 text-xs">
                 {`~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
               </p>

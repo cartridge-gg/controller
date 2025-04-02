@@ -21,8 +21,13 @@ export const arcadeDiscoveryEventVariants = cva(
   {
     variants: {
       variant: {
+        darkest: "bg-background-100",
+        darker: "bg-background-100",
+        dark: "bg-background-100",
         default: "bg-background-200",
-        faded: "bg-background-100",
+        light: "bg-background-200",
+        lighter: "bg-background-200",
+        lightest: "bg-background-200",
         ghost: "",
       },
     },
@@ -44,9 +49,14 @@ export const ArcadeDiscoveryEvent = ({
 }: ArcadeDiscoveryEventProps) => {
   const bgColor = useMemo(() => {
     switch (variant) {
-      case "faded":
+      case "darkest":
+      case "darker":
+      case "dark":
         return "bg-background-200";
       case "default":
+      case "light":
+      case "lighter":
+      case "lightest":
       case "ghost":
       default:
         return "bg-background-300";
