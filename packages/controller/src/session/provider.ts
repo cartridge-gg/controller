@@ -177,7 +177,6 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("sessionPolicies");
     this.account = undefined;
     this._username = undefined;
-
     return Promise.resolve();
   }
 
