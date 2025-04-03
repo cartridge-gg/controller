@@ -44,20 +44,20 @@ export function Balance({ types, title, amount }: BalanceProps) {
           {title ?? "Balance"}
         </CardTitle>
       </CardHeader>
-      <TokenSummary>
+      <TokenSummary className="rounded-tl-none rounded-tr-none">
         {types.includes(BalanceType.CREDITS) && (
           <TokenCard
             image={"https://static.cartridge.gg/presets/credit/icon.svg"}
             title={"Credits"}
             amount={
               amount
-                ? `$${amount.toFixed(2).toString()}`
-                : `${creditBalance.formatted || "Loading"} Credits`
+                ? `${amount.toFixed(2).toString()}`
+                : `${creditBalance.formatted} CREDITS`
             }
             value={
               amount
                 ? `$${amount.toFixed(2).toString()}`
-                : creditBalance.formatted || ""
+                : `$${creditBalance.formatted}`
             }
           />
         )}

@@ -21,11 +21,11 @@ export const Default: Story = {
   // args: { },
 };
 
-function Accordion() {
+function Accordion({ triggerColor }: { triggerColor?: string }) {
   return (
     <UIAccordion type="single" collapsible>
       <AccordionItem value="item-1">
-        <AccordionTrigger className="gap-1">
+        <AccordionTrigger className="gap-1" color={triggerColor}>
           Approve{" "}
           <span className="text-foreground-200 font-bold">2 methods</span>
         </AccordionTrigger>
@@ -44,3 +44,9 @@ function Accordion() {
     </UIAccordion>
   );
 }
+
+export const TriggerColor: Story = {
+  args: {
+    triggerColor: "text-destructive-100",
+  },
+};

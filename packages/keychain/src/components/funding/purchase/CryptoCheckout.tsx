@@ -141,7 +141,7 @@ export function CryptoCheckout({
           title={"Receiving"}
           name={"CREDITS"}
           icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
-          amount={creditsAmount.toString() + " Credits"}
+          amount={creditsAmount.toString() + " CREDITS"}
           value={"$" + creditsAmount.toString()}
           isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
         />
@@ -241,7 +241,7 @@ const ReviewToken = ({
         </CardTitle>
         {isLoading && <Spinner size="sm" />}
       </CardHeader>
-      <TokenSummary>
+      <TokenSummary className="rounded-tl-none rounded-tr-none">
         <TokenCard title={name} image={icon} amount={amount} value={value} />
       </TokenSummary>
     </Card>

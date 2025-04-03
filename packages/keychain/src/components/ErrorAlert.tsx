@@ -81,7 +81,11 @@ export function ErrorAlert({
           styles.text,
         )}
       >
-        <AccordionTrigger hideIcon={!collapsible} className="items-start gap-1">
+        <AccordionTrigger
+          hideIcon={!collapsible}
+          color={"text-destructive-100"}
+          className="items-start gap-1"
+        >
           {variant && variant !== "default" && (
             <div className="w-5">
               <ErrorAlertIcon
@@ -89,7 +93,7 @@ export function ErrorAlert({
               />
             </div>
           )}
-          <div className={cn("text-2xs font-bold uppercase", styles.text)}>
+          <div className={cn("text-xs/[20px] font-semibold", styles.text)}>
             {title}
           </div>
         </AccordionTrigger>
