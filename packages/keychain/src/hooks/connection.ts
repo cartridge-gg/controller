@@ -239,13 +239,7 @@ export function useConnectionValue() {
             });
           }
 
-          const connection = connectToParent<ParentMethods>({
-            methods: {
-              close: () => {
-                window.location.reload();
-              },
-            },
-          });
+          const connection = connectToParent<ParentMethods>();
           connection.promise.then((parent) => {
             parent.closeAll();
             parent.reload();
