@@ -30,6 +30,8 @@ import { RpcProvider } from "starknet";
 
 type ParentMethods = AsyncMethodReturns<{
   close: () => Promise<void>;
+  closeAll: () => Promise<void>;
+  reload: () => Promise<void>;
 
   // Wallet bridge methods
   externalDetectWallets: () => Promise<ExternalWallet[]>;
@@ -223,25 +225,22 @@ export function useConnectionValue() {
     };
   }, [setOrigin, setRpcUrl, setContext, setController]);
 
-  const logout = useCallback(() => {
-    if (window.controller?.disconnect) {
-      window.controller
-        .disconnect()
-        .then(() => {
-          setController(undefined);
+  const logout = useCallback(async () => {
+    if (!parent || !context?.resolve) return;
 
-          if (context?.resolve) {
-            context.resolve({
-              code: ResponseCodes.NOT_CONNECTED,
-              message: "User logged out",
-            });
-          }
-        })
-        .catch((err) => {
-          console.error("Disconnect failed:", err);
-        });
+    try {
+      await window.controller?.disconnect();
+      parent.closeAll();
+      parent.reload();
+
+      context.resolve({
+        code: ResponseCodes.NOT_CONNECTED,
+        message: "User logged out",
+      });
+    } catch (err) {
+      console.error("Disconnect failed:", err);
     }
-  }, [context, setController]);
+  }, [context, parent, setController]);
 
   const openSettings = useCallback(() => {
     if (!context) return;
