@@ -1,4 +1,4 @@
-import { AsyncMethodReturns, connectToParent } from "@cartridge/penpal";
+import { AsyncMethodReturns } from "@cartridge/penpal";
 import { useContext, useState, useEffect, useCallback, useMemo } from "react";
 import {
   connectToController,
@@ -225,31 +225,22 @@ export function useConnectionValue() {
     };
   }, [setOrigin, setRpcUrl, setContext, setController]);
 
-  const logout = useCallback(() => {
-    if (window.controller?.disconnect) {
-      window.controller
-        .disconnect()
-        .then(() => {
-          setController(undefined);
+  const logout = useCallback(async () => {
+    if (!parent || !context?.resolve) return;
 
-          if (context?.resolve) {
-            context.resolve({
-              code: ResponseCodes.NOT_CONNECTED,
-              message: "User logged out",
-            });
-          }
+    try {
+      await window.controller?.disconnect();
+      parent.closeAll();
+      parent.reload();
 
-          const connection = connectToParent<ParentMethods>();
-          connection.promise.then((parent) => {
-            parent.closeAll();
-            parent.reload();
-          });
-        })
-        .catch((err) => {
-          console.error("Disconnect failed:", err);
-        });
+      context.resolve({
+        code: ResponseCodes.NOT_CONNECTED,
+        message: "User logged out",
+      });
+    } catch (err) {
+      console.error("Disconnect failed:", err);
     }
-  }, [context, setController]);
+  }, [context, parent, setController]);
 
   const openSettings = useCallback(() => {
     if (!context) return;
