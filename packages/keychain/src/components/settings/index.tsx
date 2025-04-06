@@ -12,8 +12,8 @@ import {
   SheetFooter,
   SheetTrigger,
   PlusIcon,
-  ClockIcon,
-  ShapesIcon,
+  ControllerIcon,
+  CopyAddress,
   Skeleton,
 } from "@cartridge/ui-next";
 import { useCallback, useState, useMemo } from "react";
@@ -63,7 +63,7 @@ const registeredAccounts: RegisteredAccount[] = [
 ];
 
 export function Settings() {
-  const { logout, closeModal, controller } = useConnection();
+  const { logout, controller } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
 
   // Feature flags - can be moved to environment variables or API config later
@@ -76,30 +76,20 @@ export function Settings() {
     }),
     [],
   );
-  const data = useSignerQuery(
-    {
-      username:
-        process.env.NODE_ENV === "development"
-          ? "slot-auth-local"
-          : (controller?.username() as string),
-    },
-    {
-      onSuccess: (data) => {
-        data.account?.controllers.edges?.map((i) => {
-          i?.node?.signers?.map((j) => {
-            return {
-              signerType: j.type,
-            };
-          });
-        });
-      },
-    },
-  );
+  const data = useSignerQuery({
+    username:
+      process.env.NODE_ENV === "development"
+        ? "slot-auth-local"
+        : (controller?.username() as string),
+  });
 
   const handleLogout = useCallback(() => {
-    logout();
-    closeModal();
-  }, [logout, closeModal]);
+    try {
+      logout();
+    } catch (error) {
+      console.error("Error sending reload message:", error);
+    }
+  }, [logout]);
 
   if (state === State.RECOVERY) {
     return <Recovery onBack={() => setState(State.SETTINGS)} />;
@@ -255,17 +245,22 @@ export function Settings() {
             size="icon"
             className="flex items-center justify-center pointer-events-none"
           >
-            <ShapesIcon variant="solid" size="lg" />
+            <ControllerIcon size="lg" />
           </Button>
-          <div className="flex flex-col items-start gap-0.5">
-            <h3 className="text-lg font-semibold text-foreground-100">
-              Log Out
-            </h3>
-            <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
-              <ClockIcon variant="line" size="xs" />
-              <span>Expires in 4h</span>
+          {controller && (
+            <div className="flex flex-col items-start gap-0.5">
+              <h3 className="text-lg font-semibold text-foreground-100">
+                {controller.username()}
+              </h3>
+              <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
+                <CopyAddress
+                  size="xs"
+                  className="text-sm"
+                  address={controller.address()}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <SheetFooter className="flex flex-row items-center gap-4">
           <SheetClose asChild className="flex-1">
