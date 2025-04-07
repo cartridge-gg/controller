@@ -47,7 +47,6 @@ impl Controller {
                 OutsideExecution::V2(outside_execution),
                 self.address,
                 signed.signature,
-                self.enforce_fees,
             )
             .await
             .map_err(ControllerError::PaymasterError)?;
@@ -102,7 +101,6 @@ impl Controller {
                 OutsideExecution::V3(outside_execution),
                 self.address,
                 signed.signature,
-                self.enforce_fees,
             )
             .await
             .map_err(ControllerError::PaymasterError)?;

@@ -41,7 +41,6 @@ impl CartridgeAccount {
     /// - `address`: The blockchain address associated with the account.
     /// - `username`: Username associated with the account.
     /// - `owner`: A Owner struct containing the owner signer and associated data.
-    /// - `enforce_fees`: Enforces fees for all chains including Sepolia and Slot Katana.
     ///
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
@@ -52,7 +51,6 @@ impl CartridgeAccount {
         address: JsFelt,
         username: String,
         owner: Owner,
-        enforce_fees: bool,
     ) -> Result<CartridgeAccountWithMeta> {
         set_panic_hook();
 
@@ -67,7 +65,6 @@ impl CartridgeAccount {
             owner.into(),
             address.try_into()?,
             chain_id.try_into()?,
-            enforce_fees,
         );
 
         Ok(CartridgeAccountWithMeta::new(controller))

@@ -173,7 +173,6 @@ impl CartridgeSessionAccount {
                 OutsideExecution::V3(outside_execution),
                 session.address(),
                 signed.signature,
-                false
             )
             .await?;
 
