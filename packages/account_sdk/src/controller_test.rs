@@ -51,6 +51,7 @@ async fn test_deploy_controller() {
         owner.clone(),
         address,
         chain_id,
+        false,
     );
 
     runner.fund(&address).await;
@@ -100,6 +101,7 @@ async fn test_controller_not_deployed() {
         Owner::Signer(signer.clone()),
         felt!("0xdeadbeef"),
         chain_id,
+        false,
     );
 
     let recipient = ContractAddress(felt!("0x18301129"));
@@ -142,6 +144,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         Owner::Signer(signer.clone()),
         controller1.address,
         chain_id,
+        false,
     );
 
     // Send a transaction using controller1
