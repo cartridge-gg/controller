@@ -47,6 +47,7 @@ pub struct Controller {
     pub(crate) salt: Felt,
     pub provider: CartridgeJsonRpcProvider,
     pub owner: Owner,
+    pub enforce_fees: bool,
     contract: Option<Box<abigen::controller::Controller<Self>>>,
     factory: ControllerFactory,
     pub storage: Storage,
@@ -63,6 +64,7 @@ impl Controller {
         owner: Owner,
         address: Felt,
         chain_id: Felt,
+        enforce_fees: bool,
     ) -> Self {
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
         let salt = cairo_short_string_to_felt(&username).unwrap();
@@ -87,6 +89,7 @@ impl Controller {
                 starknet::signers::SigningKey::from_random().secret_scalar(),
                 0,
             ),
+            enforce_fees,
         };
 
         let contract = Box::new(abigen::controller::Controller::new(
@@ -131,6 +134,7 @@ impl Controller {
                 m.owner.try_into()?,
                 m.address,
                 m.chain_id,
+                m.enforce_fees,
             )))
         } else {
             Ok(None)
