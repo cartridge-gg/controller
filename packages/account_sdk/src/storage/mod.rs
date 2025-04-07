@@ -74,6 +74,7 @@ pub struct ControllerMetadata {
     pub owner: Owner,
     pub address: Felt,
     pub chain_id: Felt,
+    pub enforce_fees: bool,
 }
 
 use crate::controller::Controller;
@@ -88,6 +89,7 @@ impl From<&Controller> for ControllerMetadata {
             salt: controller.salt,
             owner: (&controller.owner).into(),
             username: controller.username.clone(),
+            enforce_fees: controller.enforce_fees,
         }
     }
 }
