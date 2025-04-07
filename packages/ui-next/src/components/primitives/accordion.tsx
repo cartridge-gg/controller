@@ -19,8 +19,9 @@ const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> & {
     hideIcon?: boolean;
+    color?: string;
   }
->(({ className, children, hideIcon, ...props }, ref) => (
+>(({ className, children, hideIcon, color, ...props }, ref) => (
   <AccordionPrimitive.Header className="flex">
     <AccordionPrimitive.Trigger
       ref={ref}
@@ -31,7 +32,7 @@ const AccordionTrigger = React.forwardRef<
       {!hideIcon && (
         <WedgeIcon
           variant="right"
-          className="transition-transform duration-200"
+          className={cn("transition-transform duration-200", color)}
         />
       )}
     </AccordionPrimitive.Trigger>

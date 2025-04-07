@@ -64,7 +64,7 @@ export const ActivityTokenCard = ({
         subIcon={<ThumbnailsSubIcon Icon={Icon} />}
         error={error}
         loading={loading}
-        variant={loading || error ? "faded" : undefined}
+        variant="light"
         size="lg"
         rounded
       />

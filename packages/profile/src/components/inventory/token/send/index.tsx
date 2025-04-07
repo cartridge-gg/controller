@@ -22,7 +22,7 @@ export function SendToken() {
   const { parent } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
-  const token = useToken({ tokenAddress: tokenAddress! });
+  const { token } = useToken({ tokenAddress: tokenAddress! });
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
@@ -44,12 +44,12 @@ export function SendToken() {
       if (!token || !to || !amount) return;
 
       const formattedAmount = uint256.bnToUint256(
-        BigInt(amount * 10 ** token.meta.decimals),
+        BigInt(amount * 10 ** token.metadata.decimals),
       );
 
       const calls: Call[] = [
         {
-          contractAddress: token.meta.address,
+          contractAddress: token.metadata.address,
           entrypoint: "transfer",
           calldata: [to, formattedAmount],
         },
@@ -69,7 +69,7 @@ export function SendToken() {
       <LayoutHeader className="hidden" onBack={() => navigate("..")} />
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-4">
-          <Thumbnail icon={token.meta.logoUrl} size="lg" rounded />
+          <Thumbnail icon={token.metadata.image} size="lg" rounded />
           <p className="text-semibold text-lg/[22px]">Send ETH</p>
         </div>
         <SendRecipient

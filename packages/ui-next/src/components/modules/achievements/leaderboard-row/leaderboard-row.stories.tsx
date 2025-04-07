@@ -37,13 +37,32 @@ export const Highlight: Story = {
   },
 };
 
-export const LowRank: Story = {
+export const HighlightTop1: Story = {
+  args: {
+    highlight: true,
+    rank: 1,
+  },
+};
+
+export const Top1: Story = {
   args: {
     rank: 1,
   },
 };
 
-export const HighRank: Story = {
+export const Top2: Story = {
+  args: {
+    rank: 2,
+  },
+};
+
+export const Top3: Story = {
+  args: {
+    rank: 3,
+  },
+};
+
+export const LowRank: Story = {
   args: {
     rank: 9999,
   },

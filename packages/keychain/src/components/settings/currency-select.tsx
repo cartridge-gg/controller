@@ -27,8 +27,10 @@ const CurrencySelect = () => {
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          {currencies.map((item) => (
-            <SelectItem value={item.value}>{item.value}</SelectItem>
+          {currencies.map((item, index) => (
+            <SelectItem key={index} value={item.value}>
+              {item.value}
+            </SelectItem>
           ))}
         </SelectGroup>
       </SelectContent>

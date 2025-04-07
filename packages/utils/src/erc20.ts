@@ -23,6 +23,18 @@ export const ETH_CONTRACT_ADDRESS = getChecksumAddress(
 export const STRK_CONTRACT_ADDRESS = getChecksumAddress(
   "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
 );
+export const USDC_CONTRACT_ADDRESS = getChecksumAddress(
+  "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
+);
+export const USDT_CONTRACT_ADDRESS = getChecksumAddress(
+  "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
+);
+export const DAI_CONTRACT_ADDRESS = getChecksumAddress(
+  "0x00da114221cb83fa859dbdb4c44beeaa0bb37c7537ad5ae66fe5e0efd20e6eb3",
+);
+export const EKUBO_CONTRACT_ADDRESS = getChecksumAddress(
+  "0x075afe6402ad5a5c20dd25e10ec3b3986acaa647b77e4ae24b0cbc9a54a27a87",
+);
 
 export class ERC20 {
   private address: string;
