@@ -16,7 +16,7 @@ type Story = StoryObj<typeof TokenSummary>;
 
 export const Default: Story = {
   render: () => (
-    <TokenSummary className="h-[259px]">
+    <TokenSummary>
       <TokenCard
         image={"https://static.cartridge.gg/presets/credit/icon.svg"}
         title={"Credits"}

@@ -24,7 +24,7 @@ import { CryptoCheckout, walletIcon } from "./CryptoCheckout";
 import { ExternalWallet } from "@cartridge/controller";
 import { Balance, BalanceType } from "../Balance";
 
-enum PurchaseState {
+export enum PurchaseState {
   SELECTION = 0,
   STRIPE_CHECKOUT = 1,
   CRYPTO_CHECKOUT = 2,
@@ -33,6 +33,8 @@ enum PurchaseState {
 
 export type PurchaseCreditsProps = {
   isSlot?: boolean;
+  wallets?: ExternalWallet[];
+  initState?: PurchaseState;
   onBack?: () => void;
 };
 
@@ -47,7 +49,11 @@ export type StripeResponse = {
   pricing: PricingDetails;
 };
 
-export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
+export function PurchaseCredits({
+  onBack,
+  wallets,
+  initState = PurchaseState.SELECTION,
+}: PurchaseCreditsProps) {
   const {
     controller,
     closeModal,
@@ -60,7 +66,7 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   const [pricingDetails, setPricingDetails] = useState<PricingDetails | null>(
     null,
   );
-  const [state, setState] = useState<PurchaseState>(PurchaseState.SELECTION);
+  const [state, setState] = useState<PurchaseState>(initState);
   const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
   const [externalWallets, setExternalWallets] = useState<ExternalWallet[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
@@ -73,8 +79,13 @@ export function PurchaseCredits({ onBack }: PurchaseCreditsProps) {
   );
 
   useEffect(() => {
+    if (wallets) {
+      setExternalWallets(wallets);
+      return;
+    }
+
     externalDetectWallets().then((wallets) => setExternalWallets(wallets));
-  }, [externalDetectWallets]);
+  }, [externalDetectWallets, wallets]);
 
   const onAmountChanged = useCallback(
     (amount: number) => {

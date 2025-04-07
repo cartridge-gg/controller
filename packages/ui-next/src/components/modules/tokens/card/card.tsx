@@ -53,7 +53,7 @@ export const TokenCard = ({
     if (change?.includes("-")) {
       return <p className="text-destructive-100">{change}</p>;
     }
-    return <p className="text-foreground-400">---</p>;
+    return <></>;
   }, [change]);
 
   return (
