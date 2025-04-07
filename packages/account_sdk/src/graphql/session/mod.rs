@@ -20,7 +20,6 @@ pub struct CreateSessionInput {
     pub app_id: String,
     pub chain_id: String,
     pub authorization: Vec<String>,
-    pub public_key: String,
     pub expires_at: String,
 }
 
@@ -38,7 +37,7 @@ pub async fn create_session(input: CreateSessionInput) -> Result<create_session:
             app_id: input.app_id.clone(),
             chain_id: input.chain_id.clone(),
             authorization: input.authorization.clone(),
-            public_key: input.public_key.clone(),
+            metadata: "{}".to_string(),
             expires_at: input.expires_at.clone(),
         },
     });
@@ -47,7 +46,6 @@ pub async fn create_session(input: CreateSessionInput) -> Result<create_session:
     #[cfg(target_arch = "wasm32")]
     {
         console::log_1(&format!("hash: {:?}", &input.hash).into());
-        console::log_1(&format!("public_key: {:?}", &input.public_key).into());
         console::log_1(&format!("account_id: {:?}", &input.account_id).into());
         console::log_1(&format!("controller_address: {:?}", &input.controller_address).into());
         console::log_1(&format!("chain_id: {:?}", &input.chain_id).into());

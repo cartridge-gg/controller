@@ -129,7 +129,6 @@ impl Controller {
             app_id: self.app_id.to_string(),
             chain_id: self.chain_id.to_fixed_hex_string(),
             authorization: session_authorization.clone(),
-            public_key: public_key.to_fixed_hex_string(),
             expires_at: session.inner.expires_at.to_string(),
         };
 
