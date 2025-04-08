@@ -96,9 +96,6 @@ impl Controller {
             session.clone(),
         );
 
-        // Get the public key from the session signer
-        let public_key = session_signer.verifying_key().scalar();
-
         // convert authorization from Vec<Felt> to Vec<String>
         let session_authorization: Vec<String> = authorization
             .iter()
@@ -108,19 +105,15 @@ impl Controller {
         // Convert felt to string
         let controller_address = self.address.to_fixed_hex_string();
 
-        #[cfg(target_arch = "wasm32")]
-        {
-            console::log_1(&"Session Input Properties:".into());
-            console::log_1(&format!("Raw Felt value: {}", self.address).into());
-            console::log_1(&format!("Raw Felt value (hex): {:x}", self.address).into());
-            console::log_1(
-                &format!(
-                    "Controller Address after conversion: {}",
-                    controller_address
-                )
-                .into(),
-            );
-        }
+        let _ = self
+            .register_session(
+                session.requested_policies,
+                session.inner.expires_at,
+                session_signer.verifying_key().scalar(),
+                session.inner.guardian_key_guid,
+                None,
+            )
+            .await?;
 
         let session_input = session::CreateSessionInput {
             hash: hash.to_fixed_hex_string(),
@@ -134,6 +127,7 @@ impl Controller {
 
         let created_session = session::create_session(session_input).await;
 
+        // For debugging purposes, print out response from create_session
         #[cfg(target_arch = "wasm32")]
         console::log_1(&format!("Created session: {:?}", created_session).into());
 

@@ -24,8 +24,6 @@ pub struct CreateSessionInput {
 }
 
 pub async fn create_session(input: CreateSessionInput) -> Result<create_session::ResponseData> {
-    #[cfg(target_arch = "wasm32")]
-    use web_sys::console;
 
     let client = Client::new();
 
@@ -41,16 +39,6 @@ pub async fn create_session(input: CreateSessionInput) -> Result<create_session:
             expires_at: input.expires_at.clone(),
         },
     });
-
-    // print out all the fields for created_session
-    #[cfg(target_arch = "wasm32")]
-    {
-        console::log_1(&format!("hash: {:?}", &input.hash).into());
-        console::log_1(&format!("account_id: {:?}", &input.account_id).into());
-        console::log_1(&format!("controller_address: {:?}", &input.controller_address).into());
-        console::log_1(&format!("chain_id: {:?}", &input.chain_id).into());
-        console::log_1(&format!("app_id: {:?}", &input.app_id).into());
-    }
 
     let res: ResponseData = client.query(&request_body).await?;
 
