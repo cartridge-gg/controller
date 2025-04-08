@@ -5,14 +5,13 @@ query Activities($projects: [ActivityProject!]!) {
         project
         address
         limit
-        date
         count
       }
       activities {
         contractAddress
         entrypoint
         executedAt
-        playerAddress
+        callerAddress
         transactionHash
       }
     }
