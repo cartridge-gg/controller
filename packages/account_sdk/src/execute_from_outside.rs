@@ -4,6 +4,7 @@ use starknet::{
     signers::SigningKey,
 };
 
+use serde::{Deserialize, Serialize};
 use crate::{
     abigen::controller::OutsideExecutionV3,
     account::{
@@ -21,6 +22,12 @@ use crate::{
 #[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "execute_from_outside_test.rs"]
 mod execute_from_outside_test;
+
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub enum FeeSource {
+    Paymaster,
+    Credits,
+}
 
 impl Controller {
     pub async fn execute_from_outside_v2(

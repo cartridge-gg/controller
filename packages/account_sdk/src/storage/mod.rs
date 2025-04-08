@@ -7,7 +7,7 @@ use starknet::{
 
 use crate::{
     account::session::{hash::Session, policy::Policy},
-    controller::FeeSource,
+    execute_from_outside::FeeSource,
     errors::ControllerError,
 };
 

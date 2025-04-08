@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use account_sdk::controller::FeeSource;
+use account_sdk::execute_from_outside::FeeSource;
 use serde::{Deserialize, Serialize};
 use starknet::core::utils::NonAsciiNameError;
 use starknet_types_core::felt::{Felt, FromStrError};

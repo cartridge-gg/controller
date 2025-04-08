@@ -23,7 +23,7 @@ use crate::abigen::controller::{SessionToken, SignerSignature};
 use crate::account::outside_execution::OutsideExecution;
 use crate::account::session::hash::SessionHash;
 use crate::constants::GUARDIAN_SIGNER;
-use crate::controller::FeeSource;
+use crate::execute_from_outside::FeeSource;
 use crate::hash::MessageHashRev1;
 use crate::provider::OutsideExecutionParams;
 use crate::signers::HashSigner;

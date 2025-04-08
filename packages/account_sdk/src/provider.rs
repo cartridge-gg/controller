@@ -17,7 +17,7 @@ use starknet::providers::{
 use url::Url;
 
 use crate::account::outside_execution::OutsideExecution;
-use crate::controller::FeeSource;
+use crate::execute_from_outside::FeeSource;
 
 #[cfg(test)]
 #[path = "provider_test.rs"]
