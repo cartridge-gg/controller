@@ -20,7 +20,6 @@ mod tests {
             Owner::Signer(Signer::new_starknet_random()),
             Felt::ONE,
             Felt::ZERO,
-            None,
         );
 
         // Create invalid JSON

@@ -62,6 +62,7 @@ class ControllerAccount extends WalletAccount {
         undefined,
         undefined,
         false,
+        this.options?.feeSource,
       );
 
       // Session call succeeded

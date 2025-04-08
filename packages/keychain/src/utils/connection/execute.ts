@@ -1,4 +1,9 @@
-import { ResponseCodes, ConnectError, toArray } from "@cartridge/controller";
+import {
+  ResponseCodes,
+  ConnectError,
+  toArray,
+  FeeSource,
+} from "@cartridge/controller";
 import {
   Abi,
   AllowArray,
@@ -44,9 +49,10 @@ export function execute({
     __?: Abi[],
     ___?: InvocationsDetails,
     sync?: boolean,
-    _?: unknown,
+    feeSource?: FeeSource,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
+    console.log("feeSource", feeSource);
     const controller: Controller | undefined = window.controller;
     const calls = normalizeCalls(transactions);
 
@@ -90,8 +96,10 @@ export function execute({
 
         // Try paymaster flow
         try {
-          const { transaction_hash } =
-            await controller.executeFromOutsideV3(calls);
+          const { transaction_hash } = await controller.executeFromOutsideV3(
+            calls,
+            feeSource,
+          );
           setContext(undefined);
           return resolve({
             code: ResponseCodes.SUCCESS,
@@ -122,6 +130,7 @@ export function execute({
           const { transaction_hash } = await controller.execute(
             transactions as Call[],
             estimate,
+            feeSource,
           );
 
           setContext(undefined);

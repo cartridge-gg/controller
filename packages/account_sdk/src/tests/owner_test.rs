@@ -322,7 +322,6 @@ async fn test_change_owner_invalidate_old_sessions() {
         Owner::Signer(new_signer.clone()),
         controller.address(),
         runner.client().chain_id().await.unwrap(),
-        None,
     );
 
     let session_account = controller

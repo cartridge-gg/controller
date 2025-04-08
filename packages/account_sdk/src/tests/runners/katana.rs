@@ -194,7 +194,6 @@ impl KatanaRunner {
             owner,
             address,
             self.chain_id,
-            None,
         )
     }
 }

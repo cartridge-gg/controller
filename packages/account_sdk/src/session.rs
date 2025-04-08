@@ -134,7 +134,7 @@ impl Controller {
         let call = self
             .contract()
             .register_session_getcall(&session.clone().into(), &self.owner_guid());
-        let txn = self.execute(vec![call], max_fee).await?;
+        let txn = self.execute(vec![call], max_fee, None).await?;
 
         self.storage.set_session(
             &Selectors::session(&self.address, &self.app_id, &self.chain_id),

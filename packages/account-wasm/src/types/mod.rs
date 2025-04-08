@@ -105,6 +105,7 @@ pub enum EncodingError {
 #[allow(non_snake_case)]
 #[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
 #[tsify(into_wasm_abi, from_wasm_abi)]
+#[serde(rename_all = "UPPERCASE")]
 pub enum JsFeeSource {
     Paymaster,
     Credits,

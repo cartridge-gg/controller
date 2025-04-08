@@ -51,7 +51,6 @@ async fn test_deploy_controller() {
         owner.clone(),
         address,
         chain_id,
-        None,
     );
 
     runner.fund(&address).await;
@@ -101,7 +100,6 @@ async fn test_controller_not_deployed() {
         Owner::Signer(signer.clone()),
         felt!("0xdeadbeef"),
         chain_id,
-        None,
     );
 
     let recipient = ContractAddress(felt!("0x18301129"));
@@ -144,7 +142,6 @@ async fn test_controller_nonce_mismatch_recovery() {
         Owner::Signer(signer.clone()),
         controller1.address,
         chain_id,
-        None,
     );
 
     // Send a transaction using controller1
@@ -157,7 +154,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         .estimate_invoke_fee(vec![tx1.clone()])
         .await
         .unwrap();
-    let res = Controller::execute(&mut controller1, vec![tx1.clone()], Some(max_fee.clone()))
+    let res = Controller::execute(&mut controller1, vec![tx1.clone()], Some(max_fee.clone()), None)
         .await
         .unwrap();
 
@@ -171,7 +168,7 @@ async fn test_controller_nonce_mismatch_recovery() {
     let tx2 = erc20.transfer_getcall(&recipient, &amount);
 
     let tx2_result =
-        Controller::execute(&mut controller2, vec![tx2.clone()], Some(max_fee.clone())).await;
+        Controller::execute(&mut controller2, vec![tx2.clone()], Some(max_fee.clone()), None).await;
 
     // Verify that it succeeds after recovering from nonce mismatch
     assert!(
@@ -185,7 +182,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         .await
         .unwrap();
 
-    let res = Controller::execute(&mut controller1, vec![tx1], Some(max_fee.clone()))
+    let res = Controller::execute(&mut controller1, vec![tx1], Some(max_fee.clone()), None)
         .await
         .unwrap();
 
@@ -194,7 +191,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         .await
         .unwrap();
 
-    let tx2_result = Controller::execute(&mut controller2, vec![tx2], Some(max_fee)).await;
+    let tx2_result = Controller::execute(&mut controller2, vec![tx2], Some(max_fee), None).await;
 
     // Verify that it succeeds after recovering from nonce mismatch
     assert!(
