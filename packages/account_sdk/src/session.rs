@@ -102,26 +102,23 @@ impl Controller {
             .map(|auth| auth.to_fixed_hex_string())
             .collect::<Vec<String>>();
 
-        // Convert felt to string
-        let controller_address = self.address.to_fixed_hex_string();
-
-        let _ = self
-            .register_session(
-                session.requested_policies,
-                session.inner.expires_at,
-                session_signer.verifying_key().scalar(),
-                session.inner.guardian_key_guid,
-                None,
-            )
-            .await?;
+        self.register_session(
+            session.requested_policies,
+            session.inner.expires_at,
+            session_signer.verifying_key().scalar(),
+            session.inner.guardian_key_guid,
+            None,
+        )
+        .await?;
 
         let session_input = session::CreateSessionInput {
             hash: hash.to_fixed_hex_string(),
             account_id: self.username.clone(),
-            controller_address: controller_address.clone(),
+            controller_address: self.address.to_fixed_hex_string(),
             app_id: self.app_id.to_string(),
             chain_id: self.chain_id.to_fixed_hex_string(),
             authorization: session_authorization.clone(),
+            metadata: session.metadata.clone(),
             expires_at: session.inner.expires_at.to_string(),
         };
 

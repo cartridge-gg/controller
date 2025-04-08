@@ -3,6 +3,7 @@ use anyhow::Result;
 use create_session::ResponseData;
 use graphql_client::GraphQLQuery;
 
+#[allow(clippy::upper_case_acronyms)]
 type JSON = String;
 
 #[derive(GraphQLQuery)]
@@ -20,23 +21,23 @@ pub struct CreateSessionInput {
     pub app_id: String,
     pub chain_id: String,
     pub authorization: Vec<String>,
+    pub metadata: JSON,
     pub expires_at: String,
 }
 
 pub async fn create_session(input: CreateSessionInput) -> Result<create_session::ResponseData> {
-
     let client = Client::new();
 
     let request_body = CreateSession::build_query(create_session::Variables {
         session: create_session::CreateSessionInput {
             hash: input.hash.clone(),
-            account_id: input.account_id.clone(),
-            controller_address: input.controller_address.clone(),
-            app_id: input.app_id.clone(),
-            chain_id: input.chain_id.clone(),
-            authorization: input.authorization.clone(),
-            metadata: "{}".to_string(),
-            expires_at: input.expires_at.clone(),
+            account_id: input.account_id,
+            controller_address: input.controller_address,
+            app_id: input.app_id,
+            chain_id: input.chain_id,
+            authorization: input.authorization,
+            metadata: Some(input.metadata),
+            expires_at: input.expires_at,
         },
     });
 
