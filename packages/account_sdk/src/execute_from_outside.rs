@@ -4,7 +4,6 @@ use starknet::{
     signers::SigningKey,
 };
 
-use serde::{Deserialize, Serialize};
 use crate::{
     abigen::controller::OutsideExecutionV3,
     account::{
@@ -18,6 +17,7 @@ use crate::{
     storage::StorageBackend,
     utils::time::get_current_timestamp,
 };
+use serde::{Deserialize, Serialize};
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "execute_from_outside_test.rs"]
