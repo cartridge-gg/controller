@@ -32,7 +32,7 @@ pub trait CartridgeProvider: Provider + Clone {
         outside_execution: OutsideExecution,
         address: Felt,
         signature: Vec<Felt>,
-        fee_source: FeeSource,
+        fee_source: Option<FeeSource>,
     ) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError>;
 }
 
@@ -68,7 +68,7 @@ impl CartridgeProvider for CartridgeJsonRpcProvider {
         outside_execution: OutsideExecution,
         address: Felt,
         signature: Vec<Felt>,
-        fee_source: FeeSource,
+        fee_source: Option<FeeSource>,
     ) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError> {
         let request = JsonRpcRequest {
             id: 1,
@@ -430,7 +430,8 @@ pub struct OutsideExecutionParams {
     pub outside_execution: OutsideExecution,
     #[serde_as(as = "Vec<UfeHex>")]
     pub signature: Vec<Felt>,
-    pub fee_source: FeeSource,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fee_source: Option<FeeSource>,
 }
 
 #[serde_as]

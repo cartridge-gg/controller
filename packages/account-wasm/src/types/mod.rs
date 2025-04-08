@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use account_sdk::controller::FeeSource;
 use serde::{Deserialize, Serialize};
 use starknet::core::utils::NonAsciiNameError;
 use starknet_types_core::felt::{Felt, FromStrError};
@@ -99,6 +100,25 @@ pub enum EncodingError {
 
     #[error("Unexpected option: {0}")]
     UnexpectedOption(String),
+}
+
+#[allow(non_snake_case)]
+#[derive(Tsify, Serialize, Deserialize, Debug, Clone)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+pub enum JsFeeSource {
+    Paymaster,
+    Credits,
+}
+
+impl TryFrom<JsFeeSource> for FeeSource {
+    type Error = FromStrError;
+
+    fn try_from(value: JsFeeSource) -> Result<Self, Self::Error> {
+        match value {
+            JsFeeSource::Paymaster => Ok(FeeSource::Paymaster),
+            JsFeeSource::Credits => Ok(FeeSource::Credits),
+        }
+    }
 }
 
 #[cfg(all(test, target_arch = "wasm32"))]

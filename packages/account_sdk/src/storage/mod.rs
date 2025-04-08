@@ -7,6 +7,7 @@ use starknet::{
 
 use crate::{
     account::session::{hash::Session, policy::Policy},
+    controller::FeeSource,
     errors::ControllerError,
 };
 
@@ -74,6 +75,7 @@ pub struct ControllerMetadata {
     pub owner: Owner,
     pub address: Felt,
     pub chain_id: Felt,
+    pub fee_source: Option<FeeSource>,
 }
 
 use crate::controller::Controller;
@@ -88,6 +90,7 @@ impl From<&Controller> for ControllerMetadata {
             salt: controller.salt,
             owner: (&controller.owner).into(),
             username: controller.username.clone(),
+            fee_source: controller.execute_from_outside_fee_source,
         }
     }
 }

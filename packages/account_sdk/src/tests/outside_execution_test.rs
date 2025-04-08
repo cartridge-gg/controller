@@ -169,6 +169,7 @@ async fn test_verify_execute_paymaster_should_fail() {
         Owner::Signer(Signer::new_starknet_random()),
         controller.address(),
         runner.client().chain_id().await.unwrap(),
+        None,
     );
 
     let outside_execution = wrong_account

@@ -4,6 +4,7 @@ use account_sdk::account::outside_execution::{
 };
 use account_sdk::account::session::account::SessionAccount;
 use account_sdk::account::AccountHashAndCallsSigner;
+use account_sdk::controller::FeeSource;
 use account_sdk::provider::{CartridgeJsonRpcProvider, CartridgeProvider};
 use account_sdk::signers::Signer;
 use account_sdk::utils::time::get_current_timestamp;
@@ -173,6 +174,7 @@ impl CartridgeSessionAccount {
                 OutsideExecution::V3(outside_execution),
                 session.address(),
                 signed.signature,
+                None,
             )
             .await?;
 

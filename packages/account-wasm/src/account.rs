@@ -19,7 +19,7 @@ use crate::types::estimate::JsFeeEstimate;
 use crate::types::owner::Owner;
 use crate::types::policy::{CallPolicy, Policy, TypedDataPolicy};
 use crate::types::session::AuthorizedSession;
-use crate::types::{Felts, JsFelt};
+use crate::types::{Felts, JsFeeSource, JsFelt};
 use crate::utils::set_panic_hook;
 
 type Result<T> = std::result::Result<T, JsError>;
@@ -51,6 +51,7 @@ impl CartridgeAccount {
         address: JsFelt,
         username: String,
         owner: Owner,
+        fee_source: Option<JsFeeSource>,
     ) -> Result<CartridgeAccountWithMeta> {
         set_panic_hook();
 
@@ -65,6 +66,7 @@ impl CartridgeAccount {
             owner.into(),
             address.try_into()?,
             chain_id.try_into()?,
+            fee_source.map(|fs| fs.try_into()).transpose()?,
         );
 
         Ok(CartridgeAccountWithMeta::new(controller))

@@ -59,7 +59,7 @@ pub struct Controller {
     pub storage: Storage,
     nonce: Felt,
     pub(crate) execute_from_outside_nonce: (Felt, u128),
-    pub(crate) execute_from_outside_fee_source: FeeSource,
+    pub(crate) execute_from_outside_fee_source: Option<FeeSource>,
 }
 
 impl Controller {
@@ -71,6 +71,7 @@ impl Controller {
         owner: Owner,
         address: Felt,
         chain_id: Felt,
+        fee_source: Option<FeeSource>,
     ) -> Self {
         let provider = CartridgeJsonRpcProvider::new(rpc_url.clone());
         let salt = cairo_short_string_to_felt(&username).unwrap();
@@ -95,7 +96,7 @@ impl Controller {
                 starknet::signers::SigningKey::from_random().secret_scalar(),
                 0,
             ),
-            execute_from_outside_fee_source: FeeSource::Paymaster,
+            execute_from_outside_fee_source: fee_source,
         };
 
         let contract = Box::new(abigen::controller::Controller::new(
@@ -140,6 +141,7 @@ impl Controller {
                 m.owner.try_into()?,
                 m.address,
                 m.chain_id,
+                m.fee_source,
             )))
         } else {
             Ok(None)
