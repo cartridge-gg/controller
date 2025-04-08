@@ -15,6 +15,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use cainome::cairo_serde::{CairoSerde, U256};
+use serde::{Deserialize, Serialize};
 use starknet::accounts::{AccountDeploymentV3, AccountError, AccountFactory, ExecutionV3};
 use starknet::core::types::{
     BlockTag, Call, FeeEstimate, FunctionCall, InvokeTransactionResult, StarknetError,
@@ -36,6 +37,12 @@ mod controller_test;
 
 const SESSION_TYPED_DATA_MAGIC: Felt = short_string!("session-typed-data");
 
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub enum FeeSource {
+    Paymaster,
+    Credits,
+}
+
 #[derive(Clone)]
 pub struct Controller {
     pub app_id: String,
@@ -52,6 +59,7 @@ pub struct Controller {
     pub storage: Storage,
     nonce: Felt,
     pub(crate) execute_from_outside_nonce: (Felt, u128),
+    pub(crate) execute_from_outside_fee_source: FeeSource,
 }
 
 impl Controller {
@@ -87,6 +95,7 @@ impl Controller {
                 starknet::signers::SigningKey::from_random().secret_scalar(),
                 0,
             ),
+            execute_from_outside_fee_source: FeeSource::Paymaster,
         };
 
         let contract = Box::new(abigen::controller::Controller::new(
