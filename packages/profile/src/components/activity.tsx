@@ -80,17 +80,11 @@ export function Activity() {
       .hasNextPage;
   }, [transfers]);
 
-  const entrypoints = useMemo(() => {
-    return methods.map((m) => m.entrypoint);
-  }, [methods]);
-
   const { data: transactions } = useActivitiesQuery(
     {
       projects: {
         project: "dopewarsbal",
-        entrypoints,
         address,
-        date: "",
         limit: 0,
       },
     },
