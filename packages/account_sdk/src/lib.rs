@@ -13,7 +13,6 @@ pub mod signers;
 pub mod storage;
 pub mod typed_data;
 pub mod upgrade;
-pub mod utils;
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]

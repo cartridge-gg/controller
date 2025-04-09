@@ -2,7 +2,6 @@ import type { SessionContracts, SessionMessages } from "@/hooks/session";
 import { toArray } from "@cartridge/controller";
 
 import { ContractCard } from "./ContractCard";
-import { ExpirationCard } from "./ExpirationCard";
 import { MessageCard } from "./MessageCard";
 
 export function UnverifiedSessionSummary({
@@ -34,8 +33,6 @@ export function UnverifiedSessionSummary({
       {messages && messages.length > 0 && (
         <MessageCard messages={messages} isExpanded />
       )}
-
-      <ExpirationCard />
     </div>
   );
 }

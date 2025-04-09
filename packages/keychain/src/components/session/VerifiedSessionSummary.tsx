@@ -3,7 +3,6 @@ import { CodeIcon } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";
-import { ExpirationCard } from "./ExpirationCard";
 
 export function VerifiedSessionSummary({
   game,
@@ -55,8 +54,6 @@ export function VerifiedSessionSummary({
           methods={contract.methods}
         />
       ))}
-
-      <ExpirationCard />
     </div>
   );
 }

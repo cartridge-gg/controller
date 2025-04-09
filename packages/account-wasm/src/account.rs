@@ -369,7 +369,13 @@ impl CartridgeAccount {
         &self,
         policies: Vec<Policy>,
     ) -> std::result::Result<bool, JsControllerError> {
-        Ok(self.policy_storage.lock().await.is_requested(&policies)?)
+        if !self.policy_storage.lock().await.is_requested(&policies)? {
+            // If not requested locally, we don't need to check the session
+            return Ok(false);
+        }
+
+        let controller_guard = self.controller.lock().await;
+        Ok(controller_guard.authorized_session().is_some())
     }
 
     #[wasm_bindgen(js_name = revokeSession)]
@@ -450,14 +456,28 @@ impl CartridgeAccount {
             .collect::<std::result::Result<_, _>>()?;
 
         let policies: Vec<_> = calls.iter().map(Policy::from_call).collect();
-        self.policy_storage.lock().await.is_authorized(&policies)
+
+        // Check local policy authorization
+        if !self.policy_storage.lock().await.is_authorized(&policies)? {
+            return Ok(false);
+        }
+
+        let controller_guard = self.controller.lock().await;
+        Ok(controller_guard.authorized_session().is_some())
     }
 
     #[wasm_bindgen(js_name = hasAuthorizedPoliciesForMessage)]
     pub async fn has_authorized_policies_for_message(&self, typed_data: String) -> Result<bool> {
-        let typed_data: TypedData = serde_json::from_str(&typed_data)?;
-        let policy = Policy::from_typed_data(&typed_data)?;
-        self.policy_storage.lock().await.is_authorized(&[policy])
+        let typed_data_obj: TypedData = serde_json::from_str(&typed_data)?;
+        let policy = Policy::from_typed_data(&typed_data_obj)?;
+
+        // Check local policy authorization
+        if !self.policy_storage.lock().await.is_authorized(&[policy])? {
+            return Ok(false);
+        }
+
+        let controller_guard = self.controller.lock().await;
+        Ok(controller_guard.authorized_session().is_some())
     }
 }
 
