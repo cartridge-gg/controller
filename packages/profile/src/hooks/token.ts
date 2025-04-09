@@ -6,7 +6,6 @@ import {
 import {
   useBalanceQuery,
   useBalancesQuery,
-  useMetricsQuery,
 } from "@cartridge/utils/api/cartridge";
 import { useAccount } from "./account";
 import { useConnection } from "./context";
