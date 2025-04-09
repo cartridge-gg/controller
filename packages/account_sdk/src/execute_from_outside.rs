@@ -1,3 +1,4 @@
+use chrono::Utc;
 use starknet::{
     accounts::ConnectedAccount,
     core::types::{Call, InvokeTransactionResult},
@@ -15,7 +16,6 @@ use crate::{
     errors::ControllerError,
     provider::CartridgeProvider,
     storage::StorageBackend,
-    utils::time::get_current_timestamp,
 };
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
@@ -27,7 +27,7 @@ impl Controller {
         &mut self,
         calls: Vec<Call>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        let now = get_current_timestamp();
+        let now = Utc::now().timestamp() as u64;
 
         let outside_execution = OutsideExecutionV2 {
             caller: OutsideExecutionCaller::Any.into(),
@@ -60,7 +60,7 @@ impl Controller {
         &mut self,
         calls: Vec<Call>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        let now = get_current_timestamp();
+        let now = Utc::now().timestamp() as u64;
 
         // Get the current namespace and bitmask
         let (mut namespace, mut bitmask) = self.execute_from_outside_nonce;
