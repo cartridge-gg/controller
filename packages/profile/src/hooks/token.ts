@@ -261,23 +261,3 @@ export function useToken({
     status,
   };
 }
-
-export function useMetrics({ projectName }: { projectName: string }) {
-  const {
-    data: _data,
-    isLoading,
-    isError,
-    isSuccess,
-  } = useMetricsQuery({
-    projects: { project: projectName },
-  });
-
-  const data = _data?.metrics.items || [];
-
-  return {
-    data,
-    isLoading,
-    isError,
-    isSuccess,
-  };
-}
