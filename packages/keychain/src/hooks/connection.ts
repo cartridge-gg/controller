@@ -77,7 +77,6 @@ export function useConnectionValue() {
   });
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
-  const [externalWallets, setExternalWallets] = useState<ExternalWallet[]>([]);
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -367,7 +366,6 @@ export function useConnectionValue() {
     parent,
     context,
     controller,
-    externalWallets,
     origin,
     rpcUrl,
     policies,

@@ -195,7 +195,7 @@ impl From<account_sdk::signers::siws::SIWSSigner> for SiwsSigner {
     fn from(signer: account_sdk::signers::siws::SIWSSigner) -> Self {
         Self {
             domain: signer.domain,
-            pubkey: hex::encode(signer.pubkey),
+            pubkey: bs58::encode(&signer.pubkey).into_string(),
         }
     }
 }

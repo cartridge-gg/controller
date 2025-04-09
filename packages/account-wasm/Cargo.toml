@@ -22,6 +22,7 @@ alloy-signer.workspace = true
 wee_alloc = { version = "0.4.5", optional = true }
 account_sdk = { workspace = true, features = ["webauthn"] }
 async-trait.workspace = true
+bs58.workspace = true
 base64.workspace = true
 cainome.workspace = true
 convert_case = "0.6.0"

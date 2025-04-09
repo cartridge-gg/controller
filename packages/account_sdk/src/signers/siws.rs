@@ -66,6 +66,14 @@ impl SIWSSigner {
     }
 }
 
+#[cfg(target_arch = "wasm32")]
+#[async_trait(?Send)]
+impl HashSigner for SIWSSigner {
+    async fn sign(&self, _tx_hash: &Felt) -> Result<SignerSignature, SignError> {
+        unimplemented!("SIWS signing is not supported in WASM")
+    }
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 #[async_trait]
 impl HashSigner for SIWSSigner {
@@ -119,15 +127,5 @@ impl From<ControllerEd25519Signer> for Felt {
         state.update(pubkey.low.into());
         state.update(pubkey.high.into());
         state.finalize()
-    }
-}
-
-#[cfg(target_arch = "wasm32")]
-#[async_trait(?Send)]
-impl HashSigner for SIWSSigner {
-    async fn sign(&self, _tx_hash: &Felt) -> Result<SignerSignature, SignError> {
-        Err(SignError::InvalidMessageError(
-            "SIWS signing not implemented for WASM".to_string(),
-        ))
     }
 }
