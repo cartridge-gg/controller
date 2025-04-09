@@ -24,6 +24,7 @@ import { CopyAddress } from "../copy-address";
 import { Network } from "@/components/network";
 import { useUI } from "@/hooks";
 import { Thumbnail } from "@/index";
+import { StarBackground } from "./StarBackground";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
@@ -32,6 +33,8 @@ export type HeaderProps = HeaderInnerProps & {
   hideNetwork?: boolean;
   hideSettings?: boolean;
   onOpenStarterPack?: () => void;
+  useStarBackground?: boolean;
+  starBackgroundHeight?: number;
 };
 
 export function LayoutHeader({
@@ -41,6 +44,8 @@ export function LayoutHeader({
   hideNetwork,
   hideSettings,
   onOpenStarterPack,
+  useStarBackground = false,
+  starBackgroundHeight = 120,
   ...innerProps
 }: HeaderProps) {
   const { account, chainId, closeModal, openSettings } = useUI();
@@ -52,7 +57,17 @@ export function LayoutHeader({
           case "expanded":
             return (
               <div className="flex flex-col w-full h-[176px]">
-                <div className="w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none" />
+                {useStarBackground ? (
+                  <div className="w-full h-[136px] relative">
+                    <StarBackground 
+                      width="100%" 
+                      height={starBackgroundHeight} 
+                      className="absolute inset-0"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none" />
+                )}
                 <HeaderInner
                   {...innerProps}
                   className="absolute bottom-0 left-0 right-0"
@@ -63,7 +78,17 @@ export function LayoutHeader({
           default:
             return (
               <div className="flex flex-col bg-spacer-100 gap-y-px">
-                <div className="w-full bg-cover bg-center h-16 pb-6 bg-[linear-gradient(transparent,var(--background-100)),var(--theme-cover-url)]" />
+                {useStarBackground ? (
+                  <div className="w-full h-16 pb-6 relative">
+                    <StarBackground 
+                      width="100%" 
+                      height={starBackgroundHeight} 
+                      className="absolute inset-0"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full bg-cover bg-center h-16 pb-6 bg-[linear-gradient(transparent,var(--background-100)),var(--theme-cover-url)]" />
+                )}
                 <div className="bg-background-100">
                   <HeaderInner {...innerProps} />
                 </div>

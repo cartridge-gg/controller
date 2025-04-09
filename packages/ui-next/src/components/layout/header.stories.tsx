@@ -50,3 +50,25 @@ export const VeryLongTitle: Story = {
       "This is a very long description that should be wrapped and demonstrate how text behaves when it extends beyond multiple lines. It's important to test how the UI handles lengthy content to ensure proper wrapping, readability, and overall visual appeal. How does this much longer description look in the component?",
   },
 };
+
+export const WithStarBackground: Story = {
+  args: {
+    useStarBackground: true,
+    starBackgroundHeight: 120,
+  },
+};
+
+export const ExpandedWithStarBackground: Story = {
+  args: {
+    variant: "expanded",
+    useStarBackground: true,
+    starBackgroundHeight: 136,
+  },
+};
+
+export const CustomStarBackgroundHeight: Story = {
+  args: {
+    useStarBackground: true,
+    starBackgroundHeight: 80,
+  },
+};
