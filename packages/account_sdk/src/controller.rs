@@ -241,7 +241,7 @@ impl Controller {
     pub async fn execute(
         &mut self,
         calls: Vec<Call>,
-        max_fee: Option<FeeEstimate>,   
+        max_fee: Option<FeeEstimate>,
         fee_source: Option<FeeSource>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
         if max_fee.is_none() {
