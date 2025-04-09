@@ -55,9 +55,9 @@ export function CreateControllerView({
       <LayoutHeader
         variant="expanded"
         title={
-          theme.name === "cartridge"
-            ? "Play with Controller"
-            : `Play ${theme.name}`
+          theme.name.toLowerCase() === "cartridge"
+            ? "Connect Controller"
+            : `Connect to ${theme.name}`
         }
         hideUsername
         hideNetwork={isSlot}
