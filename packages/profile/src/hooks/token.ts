@@ -6,6 +6,7 @@ import {
 import {
   useBalanceQuery,
   useBalancesQuery,
+  useMetricsQuery,
 } from "@cartridge/utils/api/cartridge";
 import { useAccount } from "./account";
 import { useConnection } from "./context";
@@ -258,5 +259,25 @@ export function useToken({
         getChecksumAddress(tokenAddress),
     ),
     status,
+  };
+}
+
+export function useMetrics({ projectName }: { projectName: string }) {
+  const {
+    data: _data,
+    isLoading,
+    isError,
+    isSuccess,
+  } = useMetricsQuery({
+    projects: { project: projectName },
+  });
+
+  const data = _data?.metrics.items || [];
+
+  return {
+    data,
+    isLoading,
+    isError,
+    isSuccess,
   };
 }
