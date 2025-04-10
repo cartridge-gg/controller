@@ -41,7 +41,9 @@ async fn test_execute_from_outside() {
     }];
 
     // First execution
-    let result = controller.execute_from_outside_v3(calls.clone()).await;
+    let result = controller
+        .execute_from_outside_v3(calls.clone(), None)
+        .await;
     let response = result.expect("Failed to execute from outside");
 
     TransactionWaiter::new(response.transaction_hash, runner.client())
@@ -63,7 +65,9 @@ async fn test_execute_from_outside() {
     }
 
     for _ in 0..129 {
-        let result = controller.execute_from_outside_v3(calls.clone()).await;
+        let result = controller
+            .execute_from_outside_v3(calls.clone(), None)
+            .await;
         result.expect("Failed to execute from outside");
     }
 }
@@ -118,7 +122,7 @@ async fn test_execute_from_outside_with_session() {
     };
 
     let result = controller
-        .execute_from_outside_v3(vec![call])
+        .execute_from_outside_v3(vec![call], None)
         .await
         .expect("Execute to succeed");
 

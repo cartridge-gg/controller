@@ -1,3 +1,4 @@
+use chrono::Utc;
 use starknet::{
     accounts::ConnectedAccount,
     core::types::{Call, InvokeTransactionResult},
@@ -15,19 +16,26 @@ use crate::{
     errors::ControllerError,
     provider::CartridgeProvider,
     storage::StorageBackend,
-    utils::time::get_current_timestamp,
 };
+use serde::{Deserialize, Serialize};
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "execute_from_outside_test.rs"]
 mod execute_from_outside_test;
 
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub enum FeeSource {
+    Paymaster,
+    Credits,
+}
+
 impl Controller {
     pub async fn execute_from_outside_v2(
         &mut self,
         calls: Vec<Call>,
+        fee_source: Option<FeeSource>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        let now = get_current_timestamp();
+        let now = Utc::now().timestamp() as u64;
 
         let outside_execution = OutsideExecutionV2 {
             caller: OutsideExecutionCaller::Any.into(),
@@ -47,6 +55,7 @@ impl Controller {
                 OutsideExecution::V2(outside_execution),
                 self.address,
                 signed.signature,
+                fee_source,
             )
             .await
             .map_err(ControllerError::PaymasterError)?;
@@ -59,8 +68,9 @@ impl Controller {
     pub async fn execute_from_outside_v3(
         &mut self,
         calls: Vec<Call>,
+        fee_source: Option<FeeSource>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
-        let now = get_current_timestamp();
+        let now = Utc::now().timestamp() as u64;
 
         // Get the current namespace and bitmask
         let (mut namespace, mut bitmask) = self.execute_from_outside_nonce;
@@ -101,6 +111,7 @@ impl Controller {
                 OutsideExecution::V3(outside_execution),
                 self.address,
                 signed.signature,
+                fee_source,
             )
             .await
             .map_err(ControllerError::PaymasterError)?;

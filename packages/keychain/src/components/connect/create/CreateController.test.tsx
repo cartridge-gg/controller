@@ -69,7 +69,7 @@ describe("CreateController", () => {
 
   it("renders basic content correctly", () => {
     renderComponent();
-    expect(screen.getByText("Play with Controller")).toBeInTheDocument();
+    expect(screen.getByText("Connect Controller")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Username")).toBeInTheDocument();
   });
 

@@ -1,4 +1,5 @@
 use cainome_cairo_serde::NonZero;
+use chrono::Utc;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::json;
@@ -17,7 +18,6 @@ use crate::hash::MessageHashRev1;
 use crate::hash::StarknetDomain;
 use crate::hash::StructHashRev1;
 use crate::signers::SignError;
-use crate::utils::time::get_current_timestamp;
 
 use super::merkle::MerkleTree;
 use super::policy::MerkleLeaf;
@@ -132,7 +132,7 @@ impl Session {
     }
 
     pub fn is_expired(&self) -> bool {
-        let current_timestamp = get_current_timestamp();
+        let current_timestamp = Utc::now().timestamp() as u64;
         self.inner.expires_at <= current_timestamp
     }
 

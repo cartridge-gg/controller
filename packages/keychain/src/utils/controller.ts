@@ -17,11 +17,13 @@ import {
   JsFelt,
   Owner,
   AuthorizedSession,
+  JsFeeSource,
 } from "@cartridge/account-wasm/controller";
 
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
 import { toJsFeeEstimate, fromJsFeeEstimate } from "./fee";
+import { FeeSource } from "@cartridge/controller";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -163,21 +165,35 @@ export default class Controller {
     return await this.cartridge.upgrade(new_class_hash);
   }
 
-  async executeFromOutsideV2(calls: Call[]): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV2(toJsCalls(calls));
+  async executeFromOutsideV2(
+    calls: Call[],
+    feeSource?: FeeSource,
+  ): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.executeFromOutsideV2(
+      toJsCalls(calls),
+      toJsFeeSource(feeSource),
+    );
   }
 
-  async executeFromOutsideV3(calls: Call[]): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV3(toJsCalls(calls));
+  async executeFromOutsideV3(
+    calls: Call[],
+    feeSource?: FeeSource,
+  ): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.executeFromOutsideV3(
+      toJsCalls(calls),
+      toJsFeeSource(feeSource),
+    );
   }
 
   async execute(
     calls: Call[],
     maxFee?: EstimateFee,
+    feeSource?: FeeSource,
   ): Promise<InvokeFunctionResponse> {
     return await this.cartridge.execute(
       toJsCalls(calls),
       toJsFeeEstimate(maxFee),
+      toJsFeeSource(feeSource),
     );
   }
 
@@ -251,4 +267,21 @@ function toJsCalls(calls: Call[]): JsCall[] {
     ...call,
     calldata: CallData.toHex(call.calldata),
   }));
+}
+
+function toJsFeeSource(
+  feeSource: FeeSource | undefined,
+): JsFeeSource | undefined {
+  if (!feeSource) {
+    return undefined;
+  }
+
+  switch (feeSource) {
+    case FeeSource.PAYMASTER:
+      return "PAYMASTER";
+    case FeeSource.CREDITS:
+      return "CREDITS";
+    default:
+      throw new Error("Invalid fee source");
+  }
 }
