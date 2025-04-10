@@ -15,6 +15,8 @@ argent.workspace = true
 snforge_std.workspace = true
 
 [[target.starknet-contract]]
-allowed-libfuncs-list.name = "experimental"
+build-external-contracts = ["argent::signer::siws::GaragaEddsa"]
 sierra = true
 casm = true
+inlining-strategy = 2
+sierra-replace-ids = false

@@ -11,6 +11,6 @@ alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria",
 alexandria_encoding = { git = "https://github.com/keep-starknet-strange/alexandria", rev = "a0163821eab6d5d42e3dc63b10ec96e4d7a622e0" }
 alexandria_merkle_tree = { git = "https://github.com/keep-starknet-strange/alexandria", rev = "a0163821eab6d5d42e3dc63b10ec96e4d7a622e0" }
 openzeppelin = "1.0.0"
-argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "3e6577cd4e48d04a0f99f4808d5a9d95032fffaa" }
+argent = { git = "https://github.com/cartridge-gg/argent-contracts-starknet.git", rev = "bd4a6c23d128ede2c33b6b23f810407b6522bf29" }
 snforge_std = "0.38.3"
 assert_macros = "2.11.1"

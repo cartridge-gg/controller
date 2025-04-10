@@ -19,7 +19,7 @@ jobs:
   rust:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/dojoengine/dojo-dev:v1.0.9
+      image: ghcr.io/dojoengine/katana:v1.2.3
     steps:
       - uses: actions/checkout@v4
       - run: git config --global --add safe.directory '*'

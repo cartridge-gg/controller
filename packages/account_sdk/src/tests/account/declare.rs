@@ -17,6 +17,10 @@ pub const ERC_20_COMPILED_CLASS_HASH: Felt =
     felt!("0x732654ca6baa90ff202d2fcc35fb39766eb34842a7e5ac6dbf7714af71f1dab");
 pub const ERC_20_SIERRA_STR: &str =
     include_str!("../../../artifacts/classes/erc20.contract_class.json");
+pub const GARAGA_COMPILED_CLASS_HASH: Felt =
+    felt!("0x3d12d63bd7c309c264802ea127085b8ccd0b25e256311352c9b975c6e9977f3");
+pub const GARAGA_SIERRA_STR: &str =
+    include_str!("../../../artifacts/classes/garaga.contract_class.json");
 
 pub struct AccountDeclaration<'a> {
     contract_artifact: SierraClass,
@@ -56,6 +60,16 @@ impl<'a> AccountDeclaration<'a> {
         Self::new(
             serde_json::from_str(ERC_20_SIERRA_STR).unwrap(),
             ERC_20_COMPILED_CLASS_HASH,
+            client,
+        )
+    }
+    pub fn garaga(client: &'a CartridgeJsonRpcProvider) -> Self
+    where
+        &'a CartridgeJsonRpcProvider: Provider,
+    {
+        Self::new(
+            serde_json::from_str(GARAGA_SIERRA_STR).unwrap(),
+            GARAGA_COMPILED_CLASS_HASH,
             client,
         )
     }
