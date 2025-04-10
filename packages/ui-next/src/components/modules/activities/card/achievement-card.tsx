@@ -6,7 +6,7 @@ import {
   TrophyIcon,
 } from "@/index";
 import { VariantProps } from "class-variance-authority";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import ActivityCard, {
   ActivitySocialWebsite,
   activityCardVariants,
@@ -39,6 +39,8 @@ export const ActivityAchievementCard = ({
   className,
   ...props
 }: ActivityAchievementCardProps) => {
+  const [hover, setHover] = useState(false);
+
   const Icon = useMemo(
     () => (
       <TrophyIcon
@@ -53,15 +55,20 @@ export const ActivityAchievementCard = ({
     () => (
       <Thumbnail
         icon={image}
-        subIcon={<ThumbnailsSubIcon Icon={Icon} />}
+        subIcon={
+          <ThumbnailsSubIcon
+            variant={hover ? "lighter" : "light"}
+            Icon={Icon}
+          />
+        }
         error={error}
         loading={loading}
         size="lg"
-        variant="light"
+        variant={hover ? "lighter" : "light"}
         className={cn(!error && !loading && "text-primary")}
       />
     ),
-    [image, error, loading, Icon],
+    [image, error, loading, hover, Icon],
   );
 
   const Social = useMemo(() => {
@@ -88,6 +95,8 @@ export const ActivityAchievementCard = ({
       loading={loading}
       variant={variant}
       className={className}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       {...props}
     />
   );

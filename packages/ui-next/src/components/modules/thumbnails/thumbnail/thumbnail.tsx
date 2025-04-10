@@ -12,8 +12,8 @@ export const thumbnailVariants = cva(
         dark: "bg-background-100",
         default: "bg-background-200",
         light: "bg-background-300",
-        lighter: "bg-background-300",
-        lightest: "bg-background-400",
+        lighter: "bg-background-400",
+        lightest: "bg-background-500",
         ghost: "bg-transparent",
       },
       size: {
