@@ -8,7 +8,8 @@ use starknet::providers::{JsonRpcClient, Provider};
 use starknet::signers::LocalWallet;
 use starknet::{core::types::Felt, macros::felt, signers::SigningKey};
 use std::process::{Command, Stdio};
-use std::sync::Arc;
+use std::sync::{mpsc, Arc};
+use std::time::Duration;
 use tokio::task::JoinHandle;
 use url::Url;
 
@@ -24,6 +25,7 @@ use crate::tests::account::{AccountDeclaration, FEE_TOKEN_ADDRESS, UDC_ADDRESS};
 use crate::tests::transaction_waiter::TransactionWaiter;
 
 use super::cartridge::CartridgeProxy;
+use super::waiter::OutputWaiter;
 use super::{find_free_port, SubprocessRunner, TestnetConfig};
 
 lazy_static! {
@@ -54,24 +56,57 @@ pub struct KatanaRunner {
     pub rpc_url: Url,
     rpc_client: Arc<JsonRpcClient<HttpTransport>>,
     proxy_handle: JoinHandle<()>,
+    log_waiter_handle: JoinHandle<()>,
 }
 
 impl KatanaRunner {
     pub fn new(config: TestnetConfig) -> Self {
         let katana_port = find_free_port();
-        let child = Command::new(config.exec)
+        println!("[KatanaRunner] Using Katana port: {}", katana_port);
+        let mut child = Command::new(config.exec)
             .args(["--chain-id", &config.chain_id])
             .args(["--http.port", &katana_port.to_string()])
-            .args(["--log.format", "json"])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
             .expect("failed to start subprocess");
 
-        let testnet = SubprocessRunner::new(child, |l| l.contains(r#""target":"katana::cli""#));
+        // Capture both stdout and stderr
+        let stdout = child
+            .stdout
+            .take()
+            .expect("failed to take subprocess stdout");
+        let stderr = child
+            .stderr
+            .take()
+            .expect("failed to take subprocess stderr");
+
+        // Create OutputWaiter and spawn its wait task
+        let waiter = OutputWaiter::new(stdout, stderr);
+        let (sender, receiver) = mpsc::channel();
+        let log_waiter_handle: tokio::task::JoinHandle<()> =
+            tokio::task::spawn_blocking(move || {
+                waiter.wait(move |l| {
+                    let started = l.contains("RPC server started");
+                    if started {
+                        // Signal that Katana has started
+                        let _ = sender.send(());
+                    }
+                    started // Continue waiting until the predicate is met
+                });
+                // Keep the thread running to process logs until the waiter is dropped
+            });
+
+        // Wait for the signal that Katana has started
+        receiver
+            .recv_timeout(Duration::from_secs(10)) // Increase timeout slightly
+            .expect("timeout waiting for Katana to start");
+
+        let testnet = SubprocessRunner::new(child);
 
         let rpc_url = Url::parse(&format!("http://0.0.0.0:{}/", katana_port)).unwrap();
-        let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", find_free_port())).unwrap();
+        let proxy_port = find_free_port();
+        let proxy_url = Url::parse(&format!("http://0.0.0.0:{}/", proxy_port)).unwrap();
         let client = CartridgeJsonRpcProvider::new(proxy_url.clone());
 
         let chain_id = cairo_short_string_to_felt(&config.chain_id).expect("Should convert");
@@ -88,6 +123,7 @@ impl KatanaRunner {
             rpc_url: proxy_url,
             rpc_client,
             proxy_handle,
+            log_waiter_handle,
         }
     }
 
@@ -133,6 +169,13 @@ impl KatanaRunner {
 
     pub async fn declare_controller(&self, version: Version) {
         let prefunded = self.executor().await;
+
+        AccountDeclaration::garaga(self.client())
+            .declare(&prefunded)
+            .await
+            .unwrap()
+            .wait_for_completion()
+            .await;
 
         AccountDeclaration::cartridge_account(self.client(), version)
             .declare(&prefunded)
@@ -202,6 +245,7 @@ impl Drop for KatanaRunner {
     fn drop(&mut self) {
         self.testnet.kill();
         self.proxy_handle.abort();
+        self.log_waiter_handle.abort();
     }
 }
 
