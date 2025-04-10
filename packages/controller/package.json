@@ -43,7 +43,8 @@
     "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
     "cbor-x": "^1.5.0",
-    "fast-deep-equal": "catalog:"
+    "fast-deep-equal": "catalog:",
+    "@cartridge/presets": "^0.5.2"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
