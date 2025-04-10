@@ -19,7 +19,7 @@ use crate::types::estimate::JsFeeEstimate;
 use crate::types::owner::Owner;
 use crate::types::policy::{CallPolicy, Policy, TypedDataPolicy};
 use crate::types::session::AuthorizedSession;
-use crate::types::{Felts, JsFelt};
+use crate::types::{Felts, JsFeeSource, JsFelt};
 use crate::utils::set_panic_hook;
 
 type Result<T> = std::result::Result<T, JsError>;
@@ -282,6 +282,7 @@ impl CartridgeAccount {
         &self,
         calls: Vec<JsCall>,
         max_fee: Option<JsFeeEstimate>,
+        fee_source: Option<JsFeeSource>,
     ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
@@ -294,6 +295,7 @@ impl CartridgeAccount {
             self.controller.lock().await.borrow_mut(),
             calls,
             max_fee.map(|fee| fee.try_into()).transpose()?,
+            fee_source.map(|fs| fs.try_into()).transpose()?,
         )
         .await?;
 
@@ -304,6 +306,7 @@ impl CartridgeAccount {
     pub async fn execute_from_outside_v2(
         &self,
         calls: Vec<JsCall>,
+        fee_source: Option<JsFeeSource>,
     ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
@@ -316,7 +319,7 @@ impl CartridgeAccount {
             .controller
             .lock()
             .await
-            .execute_from_outside_v2(calls)
+            .execute_from_outside_v2(calls, fee_source.map(|fs| fs.try_into()).transpose()?)
             .await?;
         Ok(to_value(&response)?)
     }
@@ -325,6 +328,7 @@ impl CartridgeAccount {
     pub async fn execute_from_outside_v3(
         &self,
         calls: Vec<JsCall>,
+        fee_source: Option<JsFeeSource>,
     ) -> std::result::Result<JsValue, JsControllerError> {
         set_panic_hook();
 
@@ -337,7 +341,7 @@ impl CartridgeAccount {
             .controller
             .lock()
             .await
-            .execute_from_outside_v3(calls)
+            .execute_from_outside_v3(calls, fee_source.map(|fs| fs.try_into()).transpose()?)
             .await?;
         Ok(to_value(&response)?)
     }

@@ -3,6 +3,7 @@ use crate::account::session::policy::Policy;
 use crate::account::{AccountHashAndCallsSigner, CallEncoder};
 use crate::constants::{STRK_CONTRACT_ADDRESS, WEBAUTHN_GAS};
 use crate::errors::ControllerError;
+use crate::execute_from_outside::FeeSource;
 use crate::factory::ControllerFactory;
 use crate::impl_account;
 use crate::provider::CartridgeJsonRpcProvider;
@@ -241,9 +242,10 @@ impl Controller {
         &mut self,
         calls: Vec<Call>,
         max_fee: Option<FeeEstimate>,
+        fee_source: Option<FeeSource>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
         if max_fee.is_none() {
-            return self.execute_from_outside_v3(calls).await;
+            return self.execute_from_outside_v3(calls, fee_source).await;
         }
 
         let gas_estimate_multiplier = 1.5;

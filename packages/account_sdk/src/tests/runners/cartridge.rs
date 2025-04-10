@@ -23,6 +23,7 @@ use crate::abigen::controller::{SessionToken, SignerSignature};
 use crate::account::outside_execution::OutsideExecution;
 use crate::account::session::hash::SessionHash;
 use crate::constants::GUARDIAN_SIGNER;
+use crate::execute_from_outside::FeeSource;
 use crate::hash::MessageHashRev1;
 use crate::provider::OutsideExecutionParams;
 use crate::signers::HashSigner;
@@ -209,7 +210,7 @@ impl CartridgeProxy {
     ) -> Result<Response<Body>, hyper::Error> {
         let params = &body["params"];
         let result = match parse_execute_outside_transaction_params(params) {
-            Ok((address, outside_execution, signature)) => {
+            Ok((address, outside_execution, signature, _)) => {
                 match self
                     .execute_from_outside(outside_execution, signature, address)
                     .await
@@ -336,14 +337,15 @@ impl CartridgeProxy {
 
 fn parse_execute_outside_transaction_params(
     params: &Value,
-) -> Result<(Felt, OutsideExecution, Vec<Felt>), Error> {
+) -> Result<(Felt, OutsideExecution, Vec<Felt>, Option<FeeSource>), Error> {
     let OutsideExecutionParams {
         address,
         outside_execution,
         signature,
+        fee_source,
     } = serde_json::from_value(params.clone())?;
 
-    Ok((address, outside_execution, signature))
+    Ok((address, outside_execution, signature, fee_source))
 }
 
 #[cfg(test)]
@@ -368,7 +370,7 @@ mod tests {
             panic!("Error parsing execute outside transaction: {}", e);
         }
 
-        let (address, outside_execution, signature) = result.unwrap();
+        let (address, outside_execution, signature, _) = result.unwrap();
 
         // Assert address
         let expected_address = Felt::from_str(params["address"].as_str().unwrap()).unwrap();

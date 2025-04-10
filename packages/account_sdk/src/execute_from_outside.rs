@@ -17,15 +17,23 @@ use crate::{
     provider::CartridgeProvider,
     storage::StorageBackend,
 };
+use serde::{Deserialize, Serialize};
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "execute_from_outside_test.rs"]
 mod execute_from_outside_test;
 
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub enum FeeSource {
+    Paymaster,
+    Credits,
+}
+
 impl Controller {
     pub async fn execute_from_outside_v2(
         &mut self,
         calls: Vec<Call>,
+        fee_source: Option<FeeSource>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
         let now = Utc::now().timestamp() as u64;
 
@@ -47,6 +55,7 @@ impl Controller {
                 OutsideExecution::V2(outside_execution),
                 self.address,
                 signed.signature,
+                fee_source,
             )
             .await
             .map_err(ControllerError::PaymasterError)?;
@@ -59,6 +68,7 @@ impl Controller {
     pub async fn execute_from_outside_v3(
         &mut self,
         calls: Vec<Call>,
+        fee_source: Option<FeeSource>,
     ) -> Result<InvokeTransactionResult, ControllerError> {
         let now = Utc::now().timestamp() as u64;
 
@@ -101,6 +111,7 @@ impl Controller {
                 OutsideExecution::V3(outside_execution),
                 self.address,
                 signed.signature,
+                fee_source,
             )
             .await
             .map_err(ControllerError::PaymasterError)?;

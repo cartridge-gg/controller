@@ -95,6 +95,11 @@ export interface LookupResponse {
   results: LookupResult[];
 }
 
+export enum FeeSource {
+  PAYMASTER = "PAYMASTER",
+  CREDITS = "CREDITS",
+}
+
 type ContractAddress = string;
 type CartridgeID = string;
 export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
@@ -116,7 +121,7 @@ export interface Keychain {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
-    paymaster?: any,
+    feeSource?: any,
     error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
   signMessage(
@@ -197,6 +202,8 @@ export type KeychainOptions = IFrameOptions & {
   origin?: string;
   /** Propagate transaction errors back to caller instead of showing modal */
   propagateSessionErrors?: boolean;
+  /** The fee source to use for execute from outside */
+  feeSource?: FeeSource;
 };
 
 export type ProfileOptions = IFrameOptions & {

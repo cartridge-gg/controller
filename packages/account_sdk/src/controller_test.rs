@@ -154,9 +154,14 @@ async fn test_controller_nonce_mismatch_recovery() {
         .estimate_invoke_fee(vec![tx1.clone()])
         .await
         .unwrap();
-    let res = Controller::execute(&mut controller1, vec![tx1.clone()], Some(max_fee.clone()))
-        .await
-        .unwrap();
+    let res = Controller::execute(
+        &mut controller1,
+        vec![tx1.clone()],
+        Some(max_fee.clone()),
+        None,
+    )
+    .await
+    .unwrap();
 
     TransactionWaiter::new(res.transaction_hash, runner.client())
         .wait()
@@ -167,8 +172,13 @@ async fn test_controller_nonce_mismatch_recovery() {
     let erc20 = Erc20::new(*FEE_TOKEN_ADDRESS, &controller2);
     let tx2 = erc20.transfer_getcall(&recipient, &amount);
 
-    let tx2_result =
-        Controller::execute(&mut controller2, vec![tx2.clone()], Some(max_fee.clone())).await;
+    let tx2_result = Controller::execute(
+        &mut controller2,
+        vec![tx2.clone()],
+        Some(max_fee.clone()),
+        None,
+    )
+    .await;
 
     // Verify that it succeeds after recovering from nonce mismatch
     assert!(
@@ -182,7 +192,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         .await
         .unwrap();
 
-    let res = Controller::execute(&mut controller1, vec![tx1], Some(max_fee.clone()))
+    let res = Controller::execute(&mut controller1, vec![tx1], Some(max_fee.clone()), None)
         .await
         .unwrap();
 
@@ -191,7 +201,7 @@ async fn test_controller_nonce_mismatch_recovery() {
         .await
         .unwrap();
 
-    let tx2_result = Controller::execute(&mut controller2, vec![tx2], Some(max_fee)).await;
+    let tx2_result = Controller::execute(&mut controller2, vec![tx2], Some(max_fee), None).await;
 
     // Verify that it succeeds after recovering from nonce mismatch
     assert!(

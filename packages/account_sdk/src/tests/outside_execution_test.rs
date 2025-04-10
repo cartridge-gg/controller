@@ -65,7 +65,10 @@ pub async fn test_verify_paymaster_execute(signer: Signer, use_session: bool) {
         .concat(),
     }];
 
-    let tx = controller.execute_from_outside_v3(calls).await.unwrap();
+    let tx = controller
+        .execute_from_outside_v3(calls, None)
+        .await
+        .unwrap();
 
     TransactionWaiter::new(tx.transaction_hash, runner.client())
         .wait()

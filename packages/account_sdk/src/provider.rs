@@ -17,6 +17,7 @@ use starknet::providers::{
 use url::Url;
 
 use crate::account::outside_execution::OutsideExecution;
+use crate::execute_from_outside::FeeSource;
 
 #[cfg(test)]
 #[path = "provider_test.rs"]
@@ -31,6 +32,7 @@ pub trait CartridgeProvider: Provider + Clone {
         outside_execution: OutsideExecution,
         address: Felt,
         signature: Vec<Felt>,
+        fee_source: Option<FeeSource>,
     ) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError>;
 }
 
@@ -66,6 +68,7 @@ impl CartridgeProvider for CartridgeJsonRpcProvider {
         outside_execution: OutsideExecution,
         address: Felt,
         signature: Vec<Felt>,
+        fee_source: Option<FeeSource>,
     ) -> Result<ExecuteFromOutsideResponse, ExecuteFromOutsideError> {
         let request = JsonRpcRequest {
             id: 1,
@@ -75,6 +78,7 @@ impl CartridgeProvider for CartridgeJsonRpcProvider {
                 address,
                 outside_execution,
                 signature,
+                fee_source,
             },
         };
 
@@ -426,6 +430,8 @@ pub struct OutsideExecutionParams {
     pub outside_execution: OutsideExecution,
     #[serde_as(as = "Vec<UfeHex>")]
     pub signature: Vec<Felt>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fee_source: Option<FeeSource>,
 }
 
 #[serde_as]
