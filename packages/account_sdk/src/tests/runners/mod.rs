@@ -2,8 +2,6 @@ use std::{net::TcpListener, process::Child};
 
 use serde::Deserialize;
 
-use self::waiter::OutputWaiter;
-
 pub mod cartridge;
 pub mod katana;
 pub mod waiter;
@@ -14,12 +12,7 @@ struct SubprocessRunner {
 }
 
 impl SubprocessRunner {
-    pub fn new(mut child: Child, line_predicate: impl (Fn(&str) -> bool) + Send + 'static) -> Self {
-        let stdout = child
-            .stdout
-            .take()
-            .expect("failed to take subprocess stdout");
-        OutputWaiter::new(stdout).wait(line_predicate);
+    pub fn new(child: Child) -> Self {
         Self { child }
     }
     pub fn kill(&mut self) {

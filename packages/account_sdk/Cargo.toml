@@ -37,7 +37,7 @@ once_cell.workspace = true
 chrono = { workspace = true }
 
 # Commit with SHA-512 optimizations
-garaga_rs = { git = "https://github.com/keep-starknet-strange/garaga.git", rev = "0959ef19729ac2ec5a2ba2ca54fbe9680e23f767", default-features = false }
+garaga_rs = { git = "https://github.com/keep-starknet-strange/garaga.git", rev = "3ce085a38aa55d1c09d2e7248d899905e985bdee", default-features = false }
 num-bigint = "0.4"
 
 # Webauthn deps
