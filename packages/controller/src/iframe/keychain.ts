@@ -27,6 +27,11 @@ export class KeychainIFrame extends IFrame<Keychain> {
     });
 
     this.walletBridge = walletBridge;
+
+    // Expose the wallet bridge instance globally for WASM interop
+    if (typeof window !== "undefined") {
+      (window as any).external_wallets = this.walletBridge;
+    }
   }
 
   getWalletBridge(): WalletBridge {

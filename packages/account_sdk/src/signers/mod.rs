@@ -4,6 +4,9 @@ pub mod starknet;
 #[cfg(feature = "webauthn")]
 pub mod webauthn;
 
+#[cfg(target_arch = "wasm32")]
+pub mod external;
+
 use ::starknet::{
     core::{crypto::EcdsaSignError, types::Felt, utils::NonAsciiNameError},
     macros::{selector, short_string},
