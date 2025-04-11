@@ -16,6 +16,7 @@ export * from "./etherscan";
 export * from "./github";
 export * from "./metamask";
 export * from "./open-zeppelin";
+export * from "./passkey";
 export * from "./phantom";
 export * from "./realms";
 export * from "./safari";

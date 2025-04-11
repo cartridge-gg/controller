@@ -23,3 +23,11 @@ export type LoginProps = AuthBaseProps & {
   mode?: LoginMode;
   onSignup: (username: string) => void;
 };
+
+export enum SignupMode {
+  Webauthn,
+  Social,
+  MetaMask,
+  Phantom,
+  Argent,
+}

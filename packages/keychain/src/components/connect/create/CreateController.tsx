@@ -1,22 +1,23 @@
-import { useRef, useState, useEffect, useCallback } from "react";
-import {
-  LayoutContainer,
-  LayoutFooter,
-  LayoutContent,
-  Button,
-  LayoutHeader,
-  CreateAccount,
-} from "@cartridge/ui-next";
-import { useDebounce } from "@/hooks/debounce";
-import { useUsernameValidation } from "./useUsernameValidation";
-import { LoginMode } from "../types";
-import { Legal } from "./Legal";
-import { useCreateController } from "./useCreateController";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import InAppSpy from "inapp-spy";
+import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
-import { VerifiableControllerTheme } from "@/components/provider/connection";
+import { useDebounce } from "@/hooks/debounce";
+import {
+  Button,
+  CreateAccount,
+  LayoutContainer,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+} from "@cartridge/ui-next";
+import InAppSpy from "inapp-spy";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { LoginMode, SignupMode } from "../types";
+import { ChooseSignupMethod } from "./ChooseSignupMethod";
+import { Legal } from "./Legal";
+import { useCreateController } from "./useCreateController";
+import { useUsernameValidation } from "./useUsernameValidation";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -34,9 +35,15 @@ interface CreateControllerViewProps {
   onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
   isSlot?: boolean;
+  handleLogin: (username: string) => void;
+  handleSignup: (username: string, signupMethod: SignupMode) => void;
 }
 
-export function CreateControllerView({
+interface CreateControllerFormProps extends CreateControllerViewProps {
+  setSelectSignupMethod: (value: boolean) => void;
+}
+
+function CreateControllerForm({
   theme,
   usernameField,
   validation,
@@ -47,11 +54,13 @@ export function CreateControllerView({
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
-  onSubmit,
   onKeyDown,
-}: CreateControllerViewProps) {
+  handleLogin,
+  setSelectSignupMethod,
+}: CreateControllerFormProps) {
+  const isLogin = validation.exists || !usernameField.value;
   return (
-    <LayoutContainer>
+    <>
       <LayoutHeader
         variant="expanded"
         title={
@@ -69,7 +78,6 @@ export function CreateControllerView({
         style={{ scrollbarWidth: "none" }}
         onSubmit={(e) => {
           e.preventDefault();
-          onSubmit();
         }}
       >
         <LayoutContent className="gap-6">
@@ -106,15 +114,74 @@ export function CreateControllerView({
           )}
 
           <Button
+            onClick={(e) => {
+              e.preventDefault();
+              if (isLogin) {
+                handleLogin(usernameField.value);
+              } else {
+                setSelectSignupMethod(true);
+              }
+            }}
             type="submit"
             isLoading={isLoading}
             disabled={validation.status !== "valid"}
             data-testid="submit-button"
           >
-            {validation.exists || !usernameField.value ? "log in" : "sign up"}
+            {isLogin ? "log in" : "sign up"}
           </Button>
         </LayoutFooter>
       </form>
+    </>
+  );
+}
+export function CreateControllerView({
+  theme,
+  usernameField,
+  validation,
+  isLoading,
+  error,
+  isInAppBrowser,
+  isSlot,
+  onUsernameChange,
+  onUsernameFocus,
+  onUsernameClear,
+  onSubmit,
+  onKeyDown,
+  handleLogin,
+  handleSignup,
+}: CreateControllerViewProps) {
+  const [selectSignupMethod, setSelectSignupMethod] = useState<boolean>(false);
+
+  return (
+    <LayoutContainer>
+      {!selectSignupMethod && (
+        <CreateControllerForm
+          theme={theme}
+          usernameField={usernameField}
+          validation={validation}
+          isLoading={isLoading}
+          error={error}
+          isInAppBrowser={isInAppBrowser}
+          isSlot={isSlot}
+          onUsernameChange={onUsernameChange}
+          onUsernameFocus={onUsernameFocus}
+          onUsernameClear={onUsernameClear}
+          onSubmit={onSubmit}
+          onKeyDown={onKeyDown}
+          handleLogin={handleLogin}
+          handleSignup={handleSignup}
+          setSelectSignupMethod={setSelectSignupMethod}
+        />
+      )}
+      {selectSignupMethod && (
+        <ChooseSignupMethod
+          usernameField={usernameField}
+          isSlot={isSlot}
+          isLoading={isLoading}
+          handleSignup={handleSignup}
+          setSelectSignupMethod={setSelectSignupMethod}
+        />
+      )}
     </LayoutContainer>
   );
 }
@@ -161,7 +228,14 @@ export function CreateController({
   const validation = useUsernameValidation(validationUsername);
   const { debouncedValue: debouncedValidation } = useDebounce(validation, 200);
 
-  const { isLoading, error, setError, handleSubmit } = useCreateController({
+  const {
+    isLoading,
+    error,
+    setError,
+    handleSubmit,
+    handleLogin,
+    handleSignup,
+  } = useCreateController({
     isSlot,
     loginMode,
   });
@@ -246,6 +320,8 @@ export function CreateController({
       onUsernameClear={handleUsernameClear}
       onSubmit={handleFormSubmit}
       onKeyDown={handleKeyDown}
+      handleLogin={handleLogin}
+      handleSignup={handleSignup}
     />
   );
 }

@@ -1,13 +1,15 @@
-import { useState, useCallback } from "react";
-import { useConnection } from "@/hooks/connection";
-import { LoginMode } from "../types";
-import { doLogin, doSignup } from "@/hooks/account";
-import { constants } from "starknet";
-import Controller from "@/utils/controller";
-import { fetchAccount } from "./utils";
-import { PopupCenter } from "@/utils/url";
-import { useAccountQuery, AccountQuery } from "@cartridge/utils/api/cartridge";
 import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
+import { doLogin, doSignup } from "@/hooks/account";
+import { useConnection } from "@/hooks/connection";
+import Controller from "@/utils/controller";
+import { PopupCenter } from "@/utils/url";
+import { AccountQuery, useAccountQuery } from "@cartridge/utils/api/cartridge";
+import { useCallback, useState } from "react";
+import { constants } from "starknet";
+import { LoginMode, SignupMode } from "../types";
+import { useSignupWithSocial } from "./social/signup";
+import { fetchAccount } from "./utils";
+import { useSignupWithWebauthn } from "./webauthn/signup";
 
 export function useCreateController({
   isSlot,
@@ -20,6 +22,8 @@ export function useCreateController({
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
   const { origin, policies, rpcUrl, chainId, setController } = useConnection();
+  const signupWithWebauthn = useSignupWithWebauthn();
+  const { handleSignupWithSocial } = useSignupWithSocial();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -89,6 +93,120 @@ export function useCreateController({
       );
     },
     [setPendingUsername],
+  );
+
+  const handleSignup = useCallback(
+    async (username: string, signupMethod: SignupMode) => {
+      setError(undefined);
+      setIsLoading(true);
+
+      try {
+        switch (signupMethod) {
+          case SignupMode.Webauthn:
+            await signupWithWebauthn(username, doPopupFlow);
+            break;
+          case SignupMode.Social:
+            await handleSignupWithSocial(username);
+            break;
+          default:
+            break;
+        }
+      } catch (e: unknown) {
+        if (
+          e instanceof Error &&
+          (e.message.includes("Invalid 'sameOriginWithAncestors' value") ||
+            e.message.includes("document which is same-origin"))
+        ) {
+          doPopupFlow(username);
+          return;
+        }
+
+        console.error(e);
+        setError(e as Error);
+      }
+
+      setIsLoading(false);
+    },
+    [
+      chainId,
+      rpcUrl,
+      origin,
+      loginMode,
+      policies,
+      isSlot,
+      createController,
+      doPopupFlow,
+    ],
+  );
+
+  const handleLogin = useCallback(
+    async (username: string) => {
+      setError(undefined);
+      setIsLoading(true);
+      try {
+        const { account } = await fetchAccount(username);
+        const { credentials, controllers } = account ?? {};
+        const { id: credentialId, publicKey } =
+          credentials?.webauthn?.[0] ?? {};
+
+        const controllerNode = controllers?.edges?.[0]?.node;
+
+        if (!credentialId)
+          throw new Error("No credential ID found for this account");
+
+        if (!controllerNode || !publicKey) {
+          return;
+        }
+
+        const controller = await createController(
+          origin!,
+          chainId!,
+          rpcUrl!,
+          username,
+          controllerNode.constructorCalldata[0],
+          controllerNode.address,
+          credentialId,
+          publicKey,
+        );
+
+        if (loginMode === LoginMode.Webauthn) {
+          await doLogin({
+            name: username,
+            credentialId,
+            finalize: !!isSlot,
+          });
+        } else {
+          await controller.login(NOW + DEFAULT_SESSION_DURATION);
+        }
+
+        window.controller = controller;
+        setController(controller);
+      } catch (e: unknown) {
+        if (
+          e instanceof Error &&
+          (e.message.includes("Invalid 'sameOriginWithAncestors' value") ||
+            e.message.includes("document which is same-origin"))
+        ) {
+          doPopupFlow(username);
+          return;
+        }
+
+        console.error(e);
+        setError(e as Error);
+      }
+
+      setIsLoading(false);
+    },
+    [
+      chainId,
+      rpcUrl,
+      origin,
+      loginMode,
+      policies,
+      isSlot,
+      createController,
+      doPopupFlow,
+    ],
   );
 
   const handleSubmit = useCallback(
@@ -217,10 +335,12 @@ export function useCreateController({
     error,
     setError,
     handleSubmit,
+    handleLogin,
+    handleSignup,
   };
 }
 
-async function createController(
+export async function createController(
   origin: string,
   chainId: string,
   rpcUrl: string,
