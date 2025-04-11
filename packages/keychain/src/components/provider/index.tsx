@@ -12,6 +12,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ConnectionContext } from "./connection";
 import { TokensProvider } from "./tokens";
 import { UpgradeProvider } from "@/components/provider/upgrade";
+import { WalletsProvider } from "@/hooks/wallets";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -39,22 +40,24 @@ export function Provider({ children }: PropsWithChildren) {
     <CartridgeAPIProvider url={ENDPOINT}>
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
-          <PostHogProvider>
-            <UpgradeProvider controller={connection.controller}>
-              <UIProvider>
-                <BrowserRouter>
-                  <StarknetConfig
-                    explorer={voyager}
-                    chains={[sepolia, mainnet]}
-                    defaultChainId={defaultChainId}
-                    provider={jsonRpcProvider({ rpc })}
-                  >
-                    <TokensProvider>{children}</TokensProvider>
-                  </StarknetConfig>
-                </BrowserRouter>
-              </UIProvider>
-            </UpgradeProvider>
-          </PostHogProvider>
+          <WalletsProvider>
+            <PostHogProvider>
+              <UpgradeProvider controller={connection.controller}>
+                <UIProvider>
+                  <BrowserRouter>
+                    <StarknetConfig
+                      explorer={voyager}
+                      chains={[sepolia, mainnet]}
+                      defaultChainId={defaultChainId}
+                      provider={jsonRpcProvider({ rpc })}
+                    >
+                      <TokensProvider>{children}</TokensProvider>
+                    </StarknetConfig>
+                  </BrowserRouter>
+                </UIProvider>
+              </UpgradeProvider>
+            </PostHogProvider>
+          </WalletsProvider>
         </ConnectionContext.Provider>
       </QueryClientProvider>
     </CartridgeAPIProvider>

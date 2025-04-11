@@ -1,5 +1,6 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
+import { useWallets } from "@/hooks/wallets";
 import {
   Button,
   Card,
@@ -54,42 +55,43 @@ export function PurchaseCredits({
   wallets,
   initState = PurchaseState.SELECTION,
 }: PurchaseCreditsProps) {
+  const { controller, closeModal } = useConnection();
   const {
-    controller,
-    closeModal,
-    externalDetectWallets,
-    externalConnectWallet,
-  } = useConnection();
+    wallets: detectedWallets,
+    isLoading: isLoadingWallets,
+    isConnecting,
+    error: walletError,
+    connectWallet,
+  } = useWallets();
 
   const [clientSecret, setClientSecret] = useState("");
-  const [isLoading, setisLoading] = useState<boolean>(false);
+  const [isProcessingPayment, setIsProcessingPayment] =
+    useState<boolean>(false);
   const [pricingDetails, setPricingDetails] = useState<PricingDetails | null>(
     null,
   );
   const [state, setState] = useState<PurchaseState>(initState);
   const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
-  const [externalWallets, setExternalWallets] = useState<ExternalWallet[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
-  const [connecting, setConnecting] = useState<boolean>(false);
-  const [error, setError] = useState<Error>();
+  const [displayError, setDisplayError] = useState<Error | null>(null);
   const stripePromise = useMemo(
     () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
     [],
   );
 
   useEffect(() => {
-    if (wallets) {
-      setExternalWallets(wallets);
-      return;
-    }
+    setDisplayError(walletError);
+  }, [walletError]);
 
-    externalDetectWallets().then((wallets) => setExternalWallets(wallets));
-  }, [externalDetectWallets, wallets]);
+  const availableWallets = useMemo(
+    () => wallets ?? detectedWallets,
+    [wallets, detectedWallets],
+  );
 
   const onAmountChanged = useCallback(
     (amount: number) => {
-      setError(undefined);
+      setDisplayError(null);
       setCreditsAmount(amount);
     },
     [setCreditsAmount],
@@ -100,7 +102,8 @@ export function PurchaseCredits({
       return;
     }
 
-    setisLoading(true);
+    setIsProcessingPayment(true);
+    setDisplayError(null);
 
     try {
       const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT!, {
@@ -112,7 +115,7 @@ export function PurchaseCredits({
         }),
       });
       if (!res.ok) {
-        setError(new Error("Payment intent endpoint failure"));
+        setDisplayError(new Error("Payment intent endpoint failure"));
         return;
       }
       const data: StripeResponse = await res.json();
@@ -120,40 +123,36 @@ export function PurchaseCredits({
       setPricingDetails(data.pricing);
       setState(PurchaseState.STRIPE_CHECKOUT);
     } catch (e) {
-      setError(e as unknown as Error);
+      setDisplayError(e as unknown as Error);
     } finally {
-      setisLoading(false);
+      setIsProcessingPayment(false);
     }
   }, [controller, creditsAmount]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet) => {
-      try {
-        setConnecting(true);
-        setSelectedWallet(wallet);
-        const res = await externalConnectWallet(wallet.type);
-        if (res.success) {
-          if (!res.account) {
-            setError(
-              new Error(
-                `Connected to ${wallet.name} but no wallet address found`,
-              ),
-            );
-            return;
-          }
-
-          setWalletAddress(res.account);
-          setState(PurchaseState.CRYPTO_CHECKOUT);
-        } else {
-          setError(new Error(res.error));
+      setDisplayError(null);
+      setSelectedWallet(wallet);
+      const res = await connectWallet(wallet.type);
+      if (res?.success) {
+        if (!res.account) {
+          setDisplayError(
+            new Error(
+              `Connected to ${wallet.name} but no wallet address found`,
+            ),
+          );
+          return;
         }
-      } catch (e) {
-        setError(e as unknown as Error);
-      } finally {
-        setConnecting(false);
+        setWalletAddress(res.account);
+        setState(PurchaseState.CRYPTO_CHECKOUT);
+      } else if (res && !res.success) {
+        // Error is already set by the context hook
+        // setDisplayError(new Error(res.error));
+      } else if (!res) {
+        // Error case where connectWallet returned null (handled by context)
       }
     },
-    [externalConnectWallet],
+    [connectWallet],
   );
 
   const title = useMemo(() => {
@@ -241,7 +240,7 @@ export function PurchaseCredits({
           <AmountSelection
             amount={creditsAmount}
             onChange={onAmountChanged}
-            lockSelection={isLoading}
+            lockSelection={isProcessingPayment || isLoadingWallets}
             enableCustom
           />
         )}
@@ -251,11 +250,11 @@ export function PurchaseCredits({
       </LayoutContent>
 
       <LayoutFooter>
-        {error && (
+        {displayError && (
           <ErrorAlert
             variant="error"
             title="Purchase Alert"
-            description={error.message}
+            description={displayError.message}
           />
         )}
 
@@ -267,8 +266,8 @@ export function PurchaseCredits({
                 className="text-foreground-200 flex-shrink-0"
               />
               <p className="text-foreground-200 font-normal text-xs">
-                Creditss are used to pay for network activity. They are not
-                tokens and cannot be transferred or refunded.
+                Credits can be used to purchase items or pay for network fees.
+                They cannot be transferred or refunded.
               </p>
             </CardDescription>
           </Card>
@@ -283,8 +282,9 @@ export function PurchaseCredits({
           <>
             <Button
               className="flex-1"
-              isLoading={isLoading}
+              isLoading={isProcessingPayment}
               onClick={createPaymentIntent}
+              disabled={isLoadingWallets}
             >
               <CreditCardIcon
                 size="sm"
@@ -294,16 +294,21 @@ export function PurchaseCredits({
               <span>Credit Card</span>
             </Button>
             <div className="flex flex-row gap-4 mt-2">
-              {externalWallets.map((wallet) => {
+              {availableWallets.map((wallet: ExternalWallet) => {
                 return (
                   <Button
                     key={wallet.type}
                     className="flex-1"
                     variant="secondary"
                     isLoading={
-                      connecting && wallet.type === selectedWallet?.type
+                      isConnecting && wallet.type === selectedWallet?.type
                     }
-                    disabled={!wallet.available || connecting || isLoading}
+                    disabled={
+                      !wallet.available ||
+                      isConnecting ||
+                      isProcessingPayment ||
+                      isLoadingWallets
+                    }
                     onClick={async () => onExternalConnect(wallet)}
                   >
                     {walletIcon(wallet, true)}

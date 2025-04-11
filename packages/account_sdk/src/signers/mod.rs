@@ -178,6 +178,9 @@ pub enum SignError {
 
     #[error("Account owner cannot sign")]
     AccountOwnerCannotSign,
+
+    #[error("External bridge error: {0}")]
+    BridgeError(String),
 }
 
 #[derive(Debug, thiserror::Error)]
