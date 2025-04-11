@@ -28,7 +28,7 @@ import { useThemeEffect } from "@cartridge/ui-next";
 import { shortString } from "starknet";
 import { RpcProvider } from "starknet";
 
-type ParentMethods = AsyncMethodReturns<{
+export type ParentMethods = AsyncMethodReturns<{
   close: () => Promise<void>;
   closeAll: () => Promise<void>;
   reload: () => Promise<void>;
@@ -39,21 +39,21 @@ type ParentMethods = AsyncMethodReturns<{
     type: ExternalWalletType,
   ) => Promise<ExternalWalletResponse>;
   externalSignTypedData: (
-    type: ExternalWalletType,
+    identifier: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
   ) => Promise<ExternalWalletResponse>;
   externalSignMessage: (
-    type: ExternalWalletType,
+    identifier: string,
     message: string,
   ) => Promise<ExternalWalletResponse>;
   externalSendTransaction: (
-    type: ExternalWalletType,
+    identifier: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     txn: any,
   ) => Promise<ExternalWalletResponse>;
   externalGetBalance: (
-    type: ExternalWalletType,
+    identifier: string,
     tokenAddress?: string,
   ) => Promise<ExternalWalletResponse>;
 }>;
@@ -215,10 +215,15 @@ export function useConnectionValue() {
       setContext,
       setController,
     });
-    connection.promise.then((parent) => {
-      setOrigin(normalizeOrigin(parent.origin));
-      setParent(parent);
-    });
+
+    connection.promise
+      .then((parentConnection) => {
+        setOrigin(normalizeOrigin(parentConnection.origin));
+        setParent(parentConnection);
+      })
+      .catch((error) => {
+        console.error("Penpal connection failed:", error);
+      });
 
     return () => {
       connection.destroy();
@@ -285,7 +290,6 @@ export function useConnectionValue() {
     if (!parent) {
       return Promise.resolve([]);
     }
-
     return parent.externalDetectWallets().catch((err) => {
       console.error("Failed to detect external wallets:", err);
       return [];
@@ -295,7 +299,7 @@ export function useConnectionValue() {
   const externalConnectWallet = useCallback(
     (type: ExternalWalletType) => {
       if (!parent) {
-        return Promise.reject(new Error("Parent not available"));
+        return Promise.reject(new Error("Parent connection not ready."));
       }
       return parent.externalConnectWallet(type);
     },
@@ -303,47 +307,49 @@ export function useConnectionValue() {
   );
 
   const externalSignMessage = useCallback(
-    (type: ExternalWalletType, message: string) => {
+    (identifier: string, message: string) => {
       if (!parent) {
         return Promise.reject(new Error("Parent not available"));
       }
-      return parent.externalSignMessage(type, message);
+      return parent.externalSignMessage(identifier, message);
     },
     [parent],
   );
 
   const externalSignTypedData = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (type: ExternalWalletType, data: any) => {
+    (identifier: string, data: any) => {
       if (!parent) {
-        return Promise.reject(new Error("Parent not available"));
+        return Promise.reject(new Error("Parent connection not ready."));
       }
-      return parent.externalSignTypedData(type, data);
+      return parent.externalSignTypedData(identifier, data);
     },
     [parent],
   );
 
   const externalSendTransaction = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (type: ExternalWalletType, txn: any) => {
+    (identifier: string, txn: any) => {
       if (!parent) {
-        return Promise.reject(new Error("Parent not available"));
+        return Promise.reject(new Error("Parent connection not ready."));
       }
-      return parent.externalSendTransaction(type, txn);
+      return parent.externalSendTransaction(identifier, txn);
     },
     [parent],
   );
+
   const externalGetBalance = useCallback(
-    (type: ExternalWalletType, tokenAddress?: string) => {
+    (identifier: string, tokenAddress?: string) => {
       if (!parent) {
-        return Promise.reject(new Error("Parent not available"));
+        return Promise.reject(new Error("Parent connection not ready."));
       }
-      return parent.externalGetBalance(type, tokenAddress);
+      return parent.externalGetBalance(identifier, tokenAddress);
     },
     [parent],
   );
 
   return {
+    parent,
     context,
     controller,
     origin,

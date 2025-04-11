@@ -8,45 +8,48 @@ import {
   ExternalWallet,
   ExternalWalletResponse,
 } from "@cartridge/controller";
+import { ParentMethods } from "@/hooks/connection";
 
 export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
 >(undefined);
 
 export type ConnectionContextValue = {
-  context: ConnectionCtx;
+  parent: ParentMethods | undefined;
+  context?: ConnectionCtx;
   controller?: Controller;
-  origin?: string;
-  rpcUrl?: string;
-  chainId?: string;
+  origin: string;
+  rpcUrl: string;
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
-  setContext: (context: ConnectionCtx) => void;
-  setController: (controller: Controller) => void;
-  closeModal: () => void;
-  openModal: () => void;
-  logout: () => void;
+  verified: boolean;
+  chainId?: string;
+  setController: (controller?: Controller) => void;
+  setContext: (ctx: ConnectionCtx | undefined) => void;
+  closeModal: () => Promise<void>;
+  openModal: () => Promise<void>;
+  logout: () => Promise<void>;
   openSettings: () => void;
   externalDetectWallets: () => Promise<ExternalWallet[]>;
   externalConnectWallet: (
     type: ExternalWalletType,
   ) => Promise<ExternalWalletResponse>;
   externalSignTypedData: (
-    type: ExternalWalletType,
+    identifier: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
   ) => Promise<ExternalWalletResponse>;
   externalSignMessage: (
-    type: ExternalWalletType,
+    identifier: string,
     message: string,
   ) => Promise<ExternalWalletResponse>;
   externalSendTransaction: (
-    type: ExternalWalletType,
+    identifier: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     txn: any,
   ) => Promise<ExternalWalletResponse>;
   externalGetBalance: (
-    type: ExternalWalletType,
+    identifier: string,
     tokenAddress?: string,
   ) => Promise<ExternalWalletResponse>;
 };
