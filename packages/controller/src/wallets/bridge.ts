@@ -10,7 +10,11 @@ import { ArgentWallet } from "./argent";
 
 export class WalletBridge {
   private readonly walletAdapters: Map<ExternalWalletType, WalletAdapter>;
-  private readonly connectedWallets: Map<ExternalWalletType, WalletAdapter> =
+  private readonly connectedWalletsByType: Map<
+    ExternalWalletType,
+    WalletAdapter
+  > = new Map();
+  private readonly connectedWalletsByAddress: Map<string, WalletAdapter> =
     new Map();
 
   constructor() {
@@ -30,18 +34,21 @@ export class WalletBridge {
       externalConnectWallet: (_origin: string) => (type: ExternalWalletType) =>
         this.connectWallet(type),
       externalSignMessage:
-        (_origin: string) => (type: ExternalWalletType, message: string) =>
-          this.signMessage(type, message),
+        (_origin: string) =>
+        (identifier: ExternalWalletType | string, message: string) =>
+          this.signMessage(identifier, message),
       externalSignTypedData:
-        (_origin: string) => (type: ExternalWalletType, data: any) =>
-          this.signTypedData(type, data),
+        (_origin: string) =>
+        (identifier: ExternalWalletType | string, data: any) =>
+          this.signTypedData(identifier, data),
       externalSendTransaction:
-        (_origin: string) => (type: ExternalWalletType, txn: any) =>
-          this.sendTransaction(type, txn),
+        (_origin: string) =>
+        (identifier: ExternalWalletType | string, txn: any) =>
+          this.sendTransaction(identifier, txn),
       externalGetBalance:
         (_origin: string) =>
-        (type: ExternalWalletType, tokenAddress?: string) =>
-          this.getBalance(type, tokenAddress),
+        (identifier: ExternalWalletType | string, tokenAddress?: string) =>
+          this.getBalance(identifier, tokenAddress),
     };
   }
 
@@ -53,7 +60,7 @@ export class WalletBridge {
     return wallets;
   }
 
-  private getWalletAdapter(type: ExternalWalletType): WalletAdapter {
+  private getWalletAdapterByType(type: ExternalWalletType): WalletAdapter {
     const adapter = this.walletAdapters.get(type);
     if (!adapter) {
       throw new Error(`Unsupported wallet type: ${type}`);
@@ -62,25 +69,51 @@ export class WalletBridge {
   }
 
   private handleError(
-    type: ExternalWalletType,
+    identifier: ExternalWalletType | string,
     error: unknown,
     operation: string,
+    responseType?: ExternalWalletType,
   ): ExternalWalletResponse {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    console.error(`Error ${operation} with ${type} wallet:`, error);
-    return { success: false, wallet: type, error: errorMessage };
+    let walletType: ExternalWalletType | string = "unknown";
+    if (typeof identifier === "string") {
+      const adapter = this.connectedWalletsByAddress.get(identifier);
+      walletType = responseType ?? adapter?.type ?? identifier;
+    } else {
+      walletType = identifier;
+    }
+
+    console.error(`Error ${operation} with ${identifier} wallet:`, error);
+    return {
+      success: false,
+      wallet: walletType as ExternalWalletType,
+      error: errorMessage,
+    };
   }
 
   async connectWallet(
     type: ExternalWalletType,
   ): Promise<ExternalWalletResponse> {
     try {
-      const wallet = this.getWalletAdapter(type);
+      const wallet = this.getWalletAdapterByType(type);
       const response = await wallet.connect();
 
-      if (response.success) {
-        this.connectedWallets.set(type, wallet);
+      if (response.success && response.account) {
+        this.connectedWalletsByType.set(type, wallet);
+        this.connectedWalletsByAddress.set(response.account, wallet);
+        console.log(
+          `Wallet ${type} connected with address ${response.account}`,
+        );
+      } else if (response.success && !response.account) {
+        console.error(
+          `Wallet ${type} connected successfully but did not provide an address.`,
+        );
+        return {
+          ...response,
+          success: false,
+          error: "Wallet connected but address not found.",
+        };
       }
 
       return response;
@@ -89,75 +122,109 @@ export class WalletBridge {
     }
   }
 
+  private getConnectedWalletAdapter(
+    identifier: ExternalWalletType | string,
+  ): WalletAdapter {
+    let wallet: WalletAdapter | undefined;
+    if (typeof identifier === "string") {
+      wallet = this.connectedWalletsByAddress.get(identifier);
+    } else {
+      wallet = this.connectedWalletsByType.get(identifier);
+    }
+
+    if (!wallet && typeof identifier === "string") {
+      wallet = this.connectedWalletsByType.get(
+        identifier as ExternalWalletType,
+      );
+    }
+
+    if (!wallet) {
+      throw new Error(
+        `Wallet with identifier ${identifier} is not connected or supported`,
+      );
+    }
+    return wallet;
+  }
+
   async signMessage(
-    type: ExternalWalletType,
+    identifier: ExternalWalletType | string,
     message: string,
   ): Promise<ExternalWalletResponse> {
+    let wallet: WalletAdapter | undefined;
     try {
-      if (!this.connectedWallets.has(type)) {
-        throw new Error(`Wallet ${type} is not connected`);
-      }
-
-      const wallet = this.connectedWallets.get(type)!;
+      wallet = this.getConnectedWalletAdapter(identifier);
       if (!wallet.signMessage) {
-        throw new Error(`Wallet ${type} does not support signing messages`);
+        throw new Error(
+          `Wallet type ${wallet.type} (identifier: ${identifier}) does not support signing messages`,
+        );
       }
-
       return await wallet.signMessage(message);
     } catch (error) {
-      return this.handleError(type, error, "signing message with");
+      return this.handleError(
+        identifier,
+        error,
+        "signing message with",
+        wallet?.type,
+      );
     }
   }
 
   async signTypedData(
-    type: ExternalWalletType,
+    identifier: ExternalWalletType | string,
     data: any,
   ): Promise<ExternalWalletResponse> {
+    let wallet: WalletAdapter | undefined;
     try {
-      if (!this.connectedWallets.has(type)) {
-        throw new Error(`Wallet ${type} is not connected`);
-      }
-
-      const wallet = this.connectedWallets.get(type)!;
+      wallet = this.getConnectedWalletAdapter(identifier);
       if (!wallet.signTypedData) {
-        throw new Error(`Wallet ${type} does not support signing typed data`);
+        throw new Error(
+          `Wallet type ${wallet.type} (identifier: ${identifier}) does not support signing typed data`,
+        );
       }
-
       return await wallet.signTypedData(data);
     } catch (error) {
-      return this.handleError(type, error, "signing typed data with");
+      return this.handleError(
+        identifier,
+        error,
+        "signing typed data with",
+        wallet?.type,
+      );
     }
   }
 
   async sendTransaction(
-    type: ExternalWalletType,
+    identifier: ExternalWalletType | string,
     txn: any,
   ): Promise<ExternalWalletResponse> {
+    let wallet: WalletAdapter | undefined;
     try {
-      if (!this.connectedWallets.has(type)) {
-        throw new Error(`Wallet ${type} is not connected`);
-      }
-
-      const wallet = this.connectedWallets.get(type)!;
+      wallet = this.getConnectedWalletAdapter(identifier);
       return await wallet.sendTransaction(txn);
     } catch (error) {
-      return this.handleError(type, error, "sending transaction with");
+      return this.handleError(
+        identifier,
+        error,
+        "sending transaction with",
+        wallet?.type,
+      );
     }
   }
 
   async getBalance(
-    type: ExternalWalletType,
+    identifier: ExternalWalletType | string,
     tokenAddress?: string,
   ): Promise<ExternalWalletResponse> {
+    let wallet: WalletAdapter | undefined;
     try {
-      if (!this.connectedWallets.has(type)) {
-        throw new Error(`Wallet ${type} is not connected`);
-      }
-
-      const wallet = this.connectedWallets.get(type)!;
+      wallet = this.getConnectedWalletAdapter(identifier);
       return await wallet.getBalance(tokenAddress);
     } catch (error) {
-      return this.handleError(type, error, "getting balance from");
+      return this.handleError(
+        identifier,
+        error,
+        "getting balance from",
+        wallet?.type,
+      );
     }
   }
 }
