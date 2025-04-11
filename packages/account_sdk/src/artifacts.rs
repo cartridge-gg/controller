@@ -31,9 +31,9 @@ lazy_static! {
             Version::LATEST,
             ContractClass {
                 content: include_str!("../artifacts/classes/controller.latest.contract_class.json"),
-                hash: felt!("0x35fe40d30fd6937d972492ed09f9f409973fa61b3cc2fe821c3ebb517c1c44d"),
+                hash: felt!("0x7833080a27a49cd1be627c83ce536e7379259286b58fe676bc95c81e72a3eb2"),
                 casm_hash: felt!(
-                    "0x462d4f81293ffa97dc725e28179dfa8e7160b4b92f00c8dc2acd248bcd9cc01"
+                    "0x2ddd29bc09cf704adac8a6aaa17af4f4ba96cb06d8aa398b779bdcd30b09ab4"
                 ),
             },
         );
