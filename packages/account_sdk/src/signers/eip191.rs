@@ -17,6 +17,17 @@ use crate::abigen::controller::{
 };
 use crate::signers::{HashSigner, SignError};
 
+#[cfg(target_arch = "wasm32")]
+use crate::abigen::controller::{
+    Eip191Signer as ControllerEip191Signer, Signature as ControllerSignature,
+};
+#[cfg(target_arch = "wasm32")]
+use crate::signers::external::external_sign_message;
+#[cfg(target_arch = "wasm32")]
+use cainome::cairo_serde::{EthAddress as CairoEthAddress, U256};
+#[cfg(target_arch = "wasm32")]
+use hex;
+
 /// A signer that implements EIP-191 signing using the Alloy library
 #[derive(Debug, Clone, PartialEq)]
 pub struct Eip191Signer {
@@ -96,8 +107,47 @@ impl HashSigner for Eip191Signer {
 #[cfg(target_arch = "wasm32")]
 #[async_trait(?Send)]
 impl HashSigner for Eip191Signer {
-    async fn sign(&self, _tx_hash: &Felt) -> Result<SignerSignature, SignError> {
-        unimplemented!()
+    async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
+        // Format address and hash for the bridge
+        let address_hex = format!("{:#x}", self.address);
+        // Convert Felt to bytes, then to hex string. Assume bridge/wallet handles EIP-191 hashing.
+        let message_hex = hex::encode(tx_hash.to_bytes_be());
+
+        // Call the external signing function via the bridge
+        let signature_hex = external_sign_message(&address_hex, &message_hex).await?;
+
+        // Parse the combined hex signature (r, s, v)
+        let signature_bytes = hex::decode(signature_hex.trim_start_matches("0x")).map_err(|e| {
+            SignError::InvalidSignature(format!("Failed to decode signature hex: {}", e))
+        })?;
+
+        if signature_bytes.len() != 65 {
+            return Err(SignError::InvalidSignature(format!(
+                "Invalid signature length: expected 65, got {}",
+                signature_bytes.len()
+            )));
+        }
+
+        let r_bytes = &signature_bytes[0..32];
+        let s_bytes = &signature_bytes[32..64];
+        let v_byte = signature_bytes[64];
+
+        // Convert r and s to U256
+        let r = U256::from_bytes_be(r_bytes);
+        let s = U256::from_bytes_be(s_bytes);
+
+        // Calculate y_parity from v (normalize 27/28 or 0/1 to bool)
+        // Starknet expects y_parity: 0 or 1. Ethereum uses v: 27 or 28.
+        // y_parity is true if v is odd (1 or 27)
+        let y_parity = v_byte % 2 != 0;
+
+        // Create the controller structs
+        let controller_signer = ControllerEip191Signer {
+            eth_address: CairoEthAddress(self.address.into()),
+        };
+        let signature = ControllerSignature { r, s, y_parity };
+
+        Ok(SignerSignature::Eip191((controller_signer, signature)))
     }
 }
 

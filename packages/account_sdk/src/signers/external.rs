@@ -26,34 +26,26 @@ struct ExternalWalletResponse {
 
 #[wasm_bindgen]
 extern "C" {
-    // Assumes window.wallet_bridge.signMessage(wallet_type: string, message: string): Promise<ExternalWalletResponse>
+    // Assumes window.wallet_bridge.signMessage(identifier: string, message: string): Promise<ExternalWalletResponse>
     #[wasm_bindgen(js_namespace = ["window", "wallet_bridge"], catch, js_name = signMessage)]
-    async fn sign_message(wallet_type: String, message: String) -> Result<JsValue, JsValue>;
+    async fn sign_message(identifier: String, message: String) -> Result<JsValue, JsValue>;
 }
 
-/// Signs a message using the specified external wallet type connected via the WalletBridge.
+/// Signs a message using the specified external wallet connected via the WalletBridge.
+/// The wallet is identified by a string (e.g., address or public key).
 ///
 /// # Arguments
 ///
-/// * `wallet_type` - The type of the external wallet to use (e.g., Metamask, Argent).
+/// * `identifier` - The identifier string of the external wallet (e.g., address).
 /// * `message` - The message to sign.
 ///
 /// # Returns
 ///
 /// A `Result` containing the signature as a hex string on success,
 /// or a `SignError` on failure.
-pub async fn external_sign_message(
-    wallet_type: ExternalWalletType,
-    message: &str,
-) -> Result<String, SignError> {
-    let wallet_type_str = serde_json::to_string(&wallet_type)
-        .map(|s| s.trim_matches('"').to_string()) // Convert enum to lowercase string (e.g., "metamask")
-        .map_err(|e| {
-            SignError::ExternalSignerError(format!("Failed to serialize wallet type: {}", e))
-        })?;
-
-    // Call the external JS function
-    let promise_result = sign_message(wallet_type_str.clone(), message.to_string()).await;
+pub async fn external_sign_message(identifier: &str, message: &str) -> Result<String, SignError> {
+    // Call the external JS function directly with the identifier
+    let promise_result = sign_message(identifier.to_string(), message.to_string()).await;
 
     // Handle potential errors during the JS call itself (e.g., function not found)
     let promise = promise_result
@@ -75,7 +67,7 @@ pub async fn external_sign_message(
         response.result.ok_or_else(|| {
             SignError::ExternalSignerError(format!(
                 "Wallet '{}' reported success but provided no signature result.",
-                wallet_type_str
+                identifier
             ))
         })
     } else {
@@ -84,7 +76,7 @@ pub async fn external_sign_message(
             .unwrap_or_else(|| "Unknown error".to_string());
         Err(SignError::ExternalSignerError(format!(
             "Wallet '{}' failed to sign: {}",
-            wallet_type_str, error_message
+            identifier, error_message
         )))
     }
 }
