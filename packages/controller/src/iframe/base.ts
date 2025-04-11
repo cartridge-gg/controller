@@ -68,6 +68,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.visibility = "hidden";
     container.style.opacity = "0";
     container.style.transition = "opacity 0.2s ease";
+    container.style.pointerEvents = "auto";
     container.appendChild(iframe);
 
     this.iframe = iframe;
