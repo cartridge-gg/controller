@@ -1,6 +1,6 @@
 import { forwardRef, memo } from "react";
-import { iconVariants } from "../utils";
 import { IconProps } from "../types";
+import { iconVariants } from "../utils";
 
 export const RabbyColorIcon = memo(
   forwardRef<SVGSVGElement, IconProps>(
@@ -63,7 +63,7 @@ export const RabbyColorIcon = memo(
             y2="12.3469"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#8697FF" />
+            <stop stopColor="#8697FF" />
             <stop offset="1" stopColor="#8697FF" stopOpacity="0" />
           </linearGradient>
           <linearGradient

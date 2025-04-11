@@ -1,13 +1,14 @@
-import { useState, useCallback } from "react";
-import { useConnection } from "@/hooks/connection";
-import { LoginMode } from "../types";
-import { doLogin, doSignup } from "@/hooks/account";
-import { constants } from "starknet";
-import Controller from "@/utils/controller";
-import { fetchAccount } from "./utils";
-import { PopupCenter } from "@/utils/url";
-import { useAccountQuery, AccountQuery } from "@cartridge/utils/api/cartridge";
 import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
+import { doLogin } from "@/hooks/account";
+import { useConnection } from "@/hooks/connection";
+import Controller from "@/utils/controller";
+import { PopupCenter } from "@/utils/url";
+import { AccountQuery, useAccountQuery } from "@cartridge/utils/api/cartridge";
+import { useCallback, useState } from "react";
+import { AuthenticationMode, LoginMode } from "../types";
+import { useSignupWithSocial } from "./social/signup";
+import { fetchAccount } from "./utils";
+import { useSignupWithWebauthn } from "./webauthn/signup";
 
 export function useCreateController({
   isSlot,
@@ -20,6 +21,8 @@ export function useCreateController({
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
   const { origin, policies, rpcUrl, chainId, setController } = useConnection();
+  const { signupWithWebauthn } = useSignupWithWebauthn();
+  const { signupWithSocial } = useSignupWithSocial();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -91,98 +94,103 @@ export function useCreateController({
     [setPendingUsername],
   );
 
+  const handleSignup = useCallback(
+    async (username: string, authenticationMode: AuthenticationMode) => {
+      switch (authenticationMode) {
+        case AuthenticationMode.Webauthn:
+          await signupWithWebauthn(username, doPopupFlow);
+          break;
+        case AuthenticationMode.Social:
+          await signupWithSocial(username);
+          break;
+        default:
+          break;
+      }
+    },
+    [
+      chainId,
+      rpcUrl,
+      origin,
+      loginMode,
+      policies,
+      isSlot,
+      createController,
+      doPopupFlow,
+    ],
+  );
+
+  const handleLogin = useCallback(
+    async (username: string) => {
+      const { account } = await fetchAccount(username);
+      const { credentials, controllers } = account ?? {};
+      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
+
+      const controllerNode = controllers?.edges?.[0]?.node;
+
+      if (!credentialId)
+        throw new Error("No credential ID found for this account");
+
+      if (!controllerNode || !publicKey) {
+        return;
+      }
+
+      const controller = await createController(
+        origin!,
+        chainId!,
+        rpcUrl!,
+        username,
+        controllerNode.constructorCalldata[0],
+        controllerNode.address,
+        credentialId,
+        publicKey,
+      );
+
+      if (loginMode === LoginMode.Webauthn) {
+        await doLogin({
+          name: username,
+          credentialId,
+          finalize: !!isSlot,
+        });
+      } else {
+        await controller.login(NOW + DEFAULT_SESSION_DURATION);
+      }
+
+      window.controller = controller;
+      setController(controller);
+    },
+    [
+      chainId,
+      rpcUrl,
+      origin,
+      loginMode,
+      policies,
+      isSlot,
+      createController,
+      doPopupFlow,
+    ],
+  );
+
   const handleSubmit = useCallback(
-    async (username: string, exists: boolean) => {
+    async (
+      username: string,
+      exists: boolean,
+      authenticationMode?: AuthenticationMode,
+    ) => {
       setError(undefined);
       setIsLoading(true);
 
       try {
         if (exists) {
-          // Login flow
-          const { account } = await fetchAccount(username);
-          const { credentials, controllers } = account ?? {};
-          const { id: credentialId, publicKey } =
-            credentials?.webauthn?.[0] ?? {};
-
-          const controllerNode = controllers?.edges?.[0]?.node;
-
-          if (!credentialId)
-            throw new Error("No credential ID found for this account");
-
-          if (!controllerNode || !publicKey) {
-            return;
-          }
-
-          const controller = await createController(
-            origin!,
-            chainId!,
-            rpcUrl!,
-            username,
-            controllerNode.constructorCalldata[0],
-            controllerNode.address,
-            credentialId,
-            publicKey,
-          );
-
-          if (loginMode === LoginMode.Webauthn) {
-            await doLogin({
-              name: username,
-              credentialId,
-              finalize: !!isSlot,
-            });
-          } else {
-            await controller.login(NOW + DEFAULT_SESSION_DURATION);
-          }
-
-          window.controller = controller;
-          setController(controller);
+          await handleLogin(username);
         } else {
-          // Signup flow
-          const isSafari = /^((?!chrome|android).)*safari/i.test(
-            navigator.userAgent,
-          );
-
-          if (isSafari) {
-            doPopupFlow(username);
-            return;
+          if (!authenticationMode && !import.meta.env.DEV) {
+            throw new Error("No authentication mode provided");
+          } else {
+            await handleSignup(
+              username,
+              authenticationMode ?? AuthenticationMode.Webauthn,
+            );
           }
-
-          const data = await doSignup(username, constants.NetworkName.SN_MAIN);
-
-          const {
-            username: finalUsername,
-            controllers,
-            credentials,
-          } = data?.finalizeRegistration ?? {};
-
-          if (!credentials?.webauthn) return;
-
-          const { id: credentialId, publicKey } =
-            credentials.webauthn?.[0] ?? {};
-          const controllerNode = controllers?.edges?.[0]?.node;
-
-          if (
-            !controllerNode ||
-            !finalUsername ||
-            !chainId ||
-            !rpcUrl ||
-            !origin
-          )
-            return;
-
-          const controller = await createController(
-            origin,
-            chainId,
-            rpcUrl,
-            finalUsername,
-            controllerNode.constructorCalldata[0],
-            controllerNode.address,
-            credentialId,
-            publicKey,
-          );
-
-          window.controller = controller;
-          setController(controller);
         }
       } catch (e: unknown) {
         if (
@@ -197,19 +205,9 @@ export function useCreateController({
         console.error(e);
         setError(e as Error);
       }
-
       setIsLoading(false);
     },
-    [
-      chainId,
-      rpcUrl,
-      origin,
-      loginMode,
-      policies,
-      isSlot,
-      createController,
-      doPopupFlow,
-    ],
+    [handleLogin, handleSignup, doPopupFlow],
   );
 
   return {
@@ -220,7 +218,7 @@ export function useCreateController({
   };
 }
 
-async function createController(
+export async function createController(
   origin: string,
   chainId: string,
   rpcUrl: string,
