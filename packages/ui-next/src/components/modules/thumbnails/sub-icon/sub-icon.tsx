@@ -11,8 +11,8 @@ const thumbnailsSubIconVariants = cva(
         dark: "bg-background-200",
         default: "bg-background-300",
         light: "bg-background-300",
-        lighter: "bg-background-300",
-        lightest: "bg-background-300",
+        lighter: "bg-background-400",
+        lightest: "bg-background-400",
         ghost: "bg-transparent",
       },
       size: {

@@ -1,6 +1,6 @@
 import { JoystickIcon, Thumbnail, ThumbnailsSubIcon } from "@/index";
 import { VariantProps } from "class-variance-authority";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import ActivityCard, {
   ActivitySocialWebsite,
   activityCardVariants,
@@ -29,6 +29,8 @@ export const ActivityGameCard = ({
   className,
   ...props
 }: ActivityGameCardProps) => {
+  const [hover, setHover] = useState(false);
+
   const Icon = useMemo(
     () => <JoystickIcon className="w-full h-full" variant="solid" />,
     [],
@@ -38,14 +40,19 @@ export const ActivityGameCard = ({
     () => (
       <Thumbnail
         icon={image}
-        subIcon={<ThumbnailsSubIcon Icon={Icon} />}
+        subIcon={
+          <ThumbnailsSubIcon
+            variant={hover ? "lighter" : "light"}
+            Icon={Icon}
+          />
+        }
         error={error}
         loading={loading}
         size="lg"
-        variant="light"
+        variant={hover ? "lighter" : "light"}
       />
     ),
-    [image, error, loading, Icon],
+    [image, error, loading, hover, Icon],
   );
 
   const Social = useMemo(() => {
@@ -61,6 +68,8 @@ export const ActivityGameCard = ({
       loading={loading}
       variant={variant}
       className={className}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       {...props}
     />
   );

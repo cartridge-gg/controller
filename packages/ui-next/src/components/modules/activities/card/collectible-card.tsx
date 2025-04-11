@@ -6,7 +6,7 @@ import {
   ThumbnailsSubIcon,
 } from "@/index";
 import { VariantProps } from "class-variance-authority";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import ActivityCard, { activityCardVariants } from "./card";
 import { formatAddress } from "@cartridge/utils";
 
@@ -35,6 +35,8 @@ export const ActivityCollectibleCard = ({
   className,
   ...props
 }: ActivityCollectibleCardProps) => {
+  const [hover, setHover] = useState(false);
+
   const Icon = useMemo(() => {
     switch (action) {
       case "send":
@@ -61,14 +63,19 @@ export const ActivityCollectibleCard = ({
     () => (
       <ThumbnailCollectible
         image={image}
-        subIcon={<ThumbnailsSubIcon Icon={Icon} />}
+        subIcon={
+          <ThumbnailsSubIcon
+            variant={hover ? "lighter" : "light"}
+            Icon={Icon}
+          />
+        }
         error={error}
         loading={loading}
-        variant="light"
+        variant={hover ? "lighter" : "light"}
         size="lg"
       />
     ),
-    [image, error, loading, Icon],
+    [image, error, loading, hover, Icon],
   );
 
   const Address = useMemo(() => {
@@ -95,6 +102,8 @@ export const ActivityCollectibleCard = ({
       loading={loading}
       variant={variant}
       className={className}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       {...props}
     />
   );
