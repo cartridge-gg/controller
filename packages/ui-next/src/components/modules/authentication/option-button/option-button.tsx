@@ -1,24 +1,27 @@
 import { Button } from "@/components/primitives/button";
-import { isValidElement, ReactElement } from "react";
+import { isValidElement, JSXElementConstructor, ReactElement } from "react";
 
 interface OptionButtonProps extends React.ComponentProps<typeof Button> {
   icon: ReactElement;
 }
 
-function getComponentName(type: any): string | null {
-  if (!type) {
+type ComponentWithName = {
+  displayName?: string;
+  name?: string;
+};
+
+function getComponentName(
+  elementType: string | JSXElementConstructor<unknown> | null | undefined,
+): string | null {
+  if (!elementType) {
     return null;
   }
-  if (typeof type === "string") {
-    return type;
+  if (typeof elementType === "string") {
+    return elementType;
   }
-  if (typeof type === "function") {
-    return type.displayName || type.name || null;
-  }
-  if (typeof type === "object") {
-    return getComponentName(type.type) || type.displayName || null;
-  }
-  return null;
+  // Attempt to get displayName or name from the component type
+  const componentWithName = elementType as ComponentWithName;
+  return componentWithName.displayName || componentWithName.name || null;
 }
 
 export function OptionButton({ icon, ...props }: OptionButtonProps) {

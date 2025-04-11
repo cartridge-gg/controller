@@ -149,7 +149,7 @@ const getNonce = (seed: string) => {
   return bytesToHex(sha256(seed));
 };
 
-const doFetch = async (endpoint: string, body: any) => {
+const doFetch = async (endpoint: string, body: Record<string, unknown>) => {
   const response = await fetch(
     `${import.meta.env.VITE_CARTRIDGE_API_URL}/oauth2/${endpoint}`,
     {

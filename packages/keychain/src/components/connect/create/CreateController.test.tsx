@@ -84,7 +84,7 @@ describe("CreateController", () => {
   });
 
   it("submits form with valid username", async () => {
-	vi.stubEnv("DEV", false);
+    vi.stubEnv("DEV", false);
 
     const handleSubmit = vi.fn().mockResolvedValue(undefined);
     mockUseCreateController.mockReturnValue({
@@ -155,7 +155,6 @@ describe("CreateController", () => {
   });
 
   it("calls onCreated callback after successful creation", async () => {
-   
     vi.stubEnv("DEV", false);
     const handleSubmit = vi.fn().mockImplementation(() => {
       return Promise.resolve();

@@ -39,7 +39,7 @@ interface CreateControllerViewProps {
   setAuthenticationMode: (value: AuthenticationMode | undefined) => void;
 }
 
-interface CreateControllerFormProps extends CreateControllerViewProps {}
+type CreateControllerFormProps = CreateControllerViewProps;
 
 function CreateControllerForm({
   theme,
