@@ -13,42 +13,51 @@ import {
   PasskeyIcon,
   PhantomColorIcon,
 } from "@cartridge/ui-next";
-import { SignupMode } from "../types";
+import { AuthenticationMode } from "../types";
 
 interface ChooseSignupMethodProps {
-  usernameField: {
-    value: string;
-    error?: Error;
-  };
   isSlot?: boolean;
   isLoading: boolean;
-  error?: Error;
-  handleSignup: (username: string, signupMethod: SignupMode) => void;
-  setSelectSignupMethod: (value: boolean) => void;
+  onSubmit: (authenticationMode?: AuthenticationMode) => void;
+  setAuthenticationMode: (value: AuthenticationMode | undefined) => void;
 }
 
 export function ChooseSignupMethod({
-  usernameField,
   isLoading,
   isSlot,
-  handleSignup,
-  setSelectSignupMethod,
+  setAuthenticationMode,
+  onSubmit,
 }: ChooseSignupMethodProps) {
-  const wallets = [
+  const authOptions = [
     {
       handler: new MetaMaskWallet(),
+      variant: "secondary" as const,
       icon: <MetaMaskColorIcon />,
-      signupMode: SignupMode.MetaMask,
+      signupMode: AuthenticationMode.MetaMask,
     },
     {
       handler: new PhantomWallet(),
+      variant: "secondary" as const,
       icon: <PhantomColorIcon />,
-      signupMode: SignupMode.Phantom,
+      signupMode: AuthenticationMode.Phantom,
     },
     {
       handler: new ArgentWallet(),
+      variant: "secondary" as const,
       icon: <ArgentColorIcon />,
-      signupMode: SignupMode.Argent,
+      signupMode: AuthenticationMode.Argent,
+    },
+    {
+      handler: new AlwaysAvailableAuth("social"),
+      variant: "secondary" as const,
+      icon: <DiscordIcon />,
+      signupMode: AuthenticationMode.Social,
+    },
+    {
+      handler: new AlwaysAvailableAuth("webauthn"),
+      variant: "primary" as const,
+      icon: <PasskeyIcon />,
+      signupMode: AuthenticationMode.Webauthn,
     },
   ];
 
@@ -61,19 +70,19 @@ export function ChooseSignupMethod({
         hideNetwork={isSlot}
         hideSettings
         description={"Choose a sign in method"}
-        onBack={() => setSelectSignupMethod(false)}
+        onBack={() => setAuthenticationMode(undefined)}
       />
       <LayoutContent className="gap-3 justify-end">
-        {wallets.map(
-          (wallet) =>
-            wallet.handler.isAvailable() && (
+        {authOptions.map(
+          (option) =>
+            option.handler.isAvailable() && (
               <OptionButton
-                key={wallet.handler.type}
-                icon={wallet.icon}
-                variant="secondary"
+                key={option.handler.type}
+                icon={option.icon}
+                variant={option.variant}
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.preventDefault();
-                  handleSignup(usernameField.value, wallet.signupMode);
+                  onSubmit(option.signupMode);
                 }}
                 type="submit"
                 isLoading={isLoading}
@@ -81,29 +90,14 @@ export function ChooseSignupMethod({
               />
             ),
         )}
-        <OptionButton
-          icon={<DiscordIcon />}
-          variant="secondary"
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault();
-            handleSignup(usernameField.value, SignupMode.Social);
-          }}
-          type="submit"
-          isLoading={isLoading}
-          data-testid="submit-button"
-        />
-        <OptionButton
-          icon={<PasskeyIcon />}
-          variant="primary"
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault();
-            handleSignup(usernameField.value, SignupMode.Webauthn);
-          }}
-          type="submit"
-          isLoading={isLoading}
-          data-testid="submit-button"
-        />
       </LayoutContent>
     </>
   );
+}
+
+class AlwaysAvailableAuth {
+  constructor(public type: string) {}
+  isAvailable() {
+    return true;
+  }
 }

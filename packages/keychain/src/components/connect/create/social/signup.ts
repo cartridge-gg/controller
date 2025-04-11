@@ -46,34 +46,33 @@ export const useSignupWithSocial = () => {
             `Nonce mismatch: expected ${expectedNonce}, got ${decodedToken.tknonce}`,
           );
         }
-        console.log("hereeeeeeeeeeeeeeee");
 
         const getSuborgsResponse = await doFetch("suborgs", {
           filterType: "OIDC_TOKEN",
           filterValue: oidcTokenString,
         });
-        console.log("yeahhhhhhh biutchhhhh");
 
         if (!getSuborgsResponse) {
           console.error("No suborgs response found");
           return;
         }
-        console.log("getSuborgsResponse", getSuborgsResponse);
-        if (getSuborgsResponse.organizationIds.length > 0) {
-          //   throw new Error(
-          //     "TurnKey SubOrg for user already created: " +
-          //       getSuborgsResponse.organizationIds[0],
-          //   );
+
+        let targetSubOrgId: string;
+        if (getSuborgsResponse.organizationIds.length > 1) {
+          throw new Error("Multiple suborgs found for user");
+        } else if (getSuborgsResponse.organizationIds.length === 0) {
+          const createSuborgResponse = await doFetch("create-suborg", {
+            rootUserUsername: userName,
+            oauthProviders: [
+              { providerName: "Discord-Test", oidcToken: oidcTokenString },
+            ],
+          });
+          targetSubOrgId = createSuborgResponse.subOrganizationId;
+        } else {
+          targetSubOrgId = getSuborgsResponse.organizationIds[0];
         }
 
-        const createSuborgResponse = await doFetch("create-suborg", {
-          rootUserUsername: userName,
-          oauthProviders: [
-            { providerName: "Discord-Test", oidcToken: oidcTokenString },
-          ],
-        });
-        const targetSubOrgId = createSuborgResponse.subOrganizationId;
-        console.log(`New sub-org created with ID: ${targetSubOrgId}`);
+        console.log(`Using sub-org with ID: ${targetSubOrgId}`);
 
         const authResponse = await doFetch("auth", {
           suborgID: targetSubOrgId,
@@ -103,8 +102,6 @@ export const useSignupWithSocial = () => {
           accounts: [walletConfig],
         });
 
-        console.log("createWalletResponse", createWalletResponse);
-
         const address = refineNonNull(createWalletResponse.addresses[0]);
 
         alert(`SUCCESS! Wallet and new address created: ${address} `);
@@ -118,7 +115,7 @@ export const useSignupWithSocial = () => {
     })();
   }, [isAuthenticated, user, userName, authIframeClient, logout]);
 
-  const handleSignupWithSocial = useCallback(
+  const signupWithSocial = useCallback(
     async (username: string) => {
       if (!authIframeClient?.iframePublicKey) {
         console.error("Turnkey iframe client or public key not available.");
@@ -146,7 +143,7 @@ export const useSignupWithSocial = () => {
     [authIframeClient, setUserName, loginWithPopup],
   );
 
-  return { handleSignupWithSocial };
+  return { signupWithSocial };
 };
 const getNonce = (seed: string) => {
   return bytesToHex(sha256(seed));

@@ -52,5 +52,5 @@ export function useSignupWithWebauthn() {
     [origin, rpcUrl, chainId, setController],
   );
 
-  return signupWithWebauthn;
+  return { signupWithWebauthn };
 }
