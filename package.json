@@ -34,7 +34,7 @@
     "@cartridge/presets": "github:cartridge-gg/presets#2373780"
   },
   "devDependencies": {
-    "turbo": "^2.0.12",
-    "vercel": "^37.4.2"
+    "turbo": "^2.4.4",
+    "vercel": "^37.14.0"
   }
 }
