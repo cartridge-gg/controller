@@ -1,22 +1,29 @@
 import { useAuth0 } from "@auth0/auth0-react";
+import { useRegisterMutation } from "@cartridge/utils/api/cartridge";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
 import { useTurnkey } from "@turnkey/sdk-react";
-import { jwtDecode, JwtPayload } from "jwt-decode";
 import { useCallback, useEffect, useState } from "react";
+import {
+  authenticateToTurnkey,
+  getTurnkeySuborg,
+  registerController,
+} from "./api";
+import { getOidcToken } from "./auth0";
+import { getOrCreateWallet, signCreateControllerMessage } from "./turnkey";
 
 export const useSignupWithSocial = () => {
   const { authIframeClient } = useTurnkey();
   const { loginWithPopup, logout, getIdTokenClaims, isAuthenticated, user } =
     useAuth0();
-
+  const { mutateAsync: register } = useRegisterMutation();
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
     (async () => {
       if (
-        // // sanity check as the userName has already been validated at the previous step
-        // userName.length === 0 ||
+        // Sanity check: the userName has already been validated at the previous step
+        userName.length === 0 ||
         !isAuthenticated ||
         !user ||
         !authIframeClient?.iframePublicKey
@@ -26,85 +33,40 @@ export const useSignupWithSocial = () => {
       }
 
       try {
-        const tokenClaims = await getIdTokenClaims();
-        if (!tokenClaims) {
-          console.error("User has not authenticated himself with Auth0 yet");
-          return;
-        }
-
-        const oidcTokenString = tokenClaims.__raw;
-        if (!oidcTokenString) {
-          console.error("Raw ID token string (__raw) not found in claims");
-          return;
-        }
-
-        const decodedToken = jwtDecode<DecodedIdToken>(oidcTokenString);
-        const expectedNonce = getNonce(authIframeClient!.iframePublicKey!);
-
-        if (decodedToken.tknonce !== expectedNonce) {
-          throw new Error(
-            `Nonce mismatch: expected ${expectedNonce}, got ${decodedToken.tknonce}`,
-          );
-        }
-
-        const getSuborgsResponse = await doFetch("suborgs", {
-          filterType: "OIDC_TOKEN",
-          filterValue: oidcTokenString,
-        });
-
-        if (!getSuborgsResponse) {
-          console.error("No suborgs response found");
-          return;
-        }
-
-        let targetSubOrgId: string;
-        if (getSuborgsResponse.organizationIds.length > 1) {
-          throw new Error("Multiple suborgs found for user");
-        } else if (getSuborgsResponse.organizationIds.length === 0) {
-          const createSuborgResponse = await doFetch("create-suborg", {
-            rootUserUsername: userName,
-            oauthProviders: [
-              { providerName: "Discord-Test", oidcToken: oidcTokenString },
-            ],
-          });
-          targetSubOrgId = createSuborgResponse.subOrganizationId;
-        } else {
-          targetSubOrgId = getSuborgsResponse.organizationIds[0];
-        }
-
-        console.log(`Using sub-org with ID: ${targetSubOrgId}`);
-
-        const authResponse = await doFetch("auth", {
-          suborgID: targetSubOrgId,
-          targetPublicKey: authIframeClient.iframePublicKey,
-          oidcToken: oidcTokenString,
-          invalidateExisting: true,
-        });
-
-        const injectResponse = await authIframeClient!.injectCredentialBundle(
-          authResponse.credentialBundle,
+        const oidcTokenString = await getOidcToken(
+          getIdTokenClaims,
+          getNonce(authIframeClient.iframePublicKey!),
         );
-        if (!injectResponse) {
-          throw new Error("Failed to inject credentials into Turnkey");
-        }
 
-        const wallets = await authIframeClient!.getWallets({
-          organizationId: targetSubOrgId,
-        });
+        const targetSubOrgId = await getTurnkeySuborg(
+          oidcTokenString,
+          userName,
+        );
 
-        if (wallets.wallets.length > 0) {
-          throw new Error("Wallet already exists" + wallets.wallets);
-        }
+        await authenticateToTurnkey(
+          targetSubOrgId,
+          oidcTokenString,
+          authIframeClient,
+        );
 
-        const createWalletResponse = await authIframeClient!.createWallet({
-          organizationId: targetSubOrgId,
-          walletName: userName,
-          accounts: [walletConfig],
-        });
+        const address = await getOrCreateWallet(
+          targetSubOrgId,
+          userName,
+          authIframeClient,
+        );
 
-        const address = refineNonNull(createWalletResponse.addresses[0]);
+        const signature = await signCreateControllerMessage(
+          address,
+          authIframeClient,
+        );
 
-        alert(`SUCCESS! Wallet and new address created: ${address} `);
+        const res = await registerController(
+          register,
+          address,
+          signature,
+          userName,
+        );
+        console.log("Register response:", res);
       } catch (error) {
         await logout({
           logoutParams: { returnTo: import.meta.env.VITE_ORIGIN },
@@ -145,49 +107,7 @@ export const useSignupWithSocial = () => {
 
   return { signupWithSocial };
 };
+
 const getNonce = (seed: string) => {
   return bytesToHex(sha256(seed));
-};
-
-const doFetch = async (endpoint: string, body: Record<string, unknown>) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_CARTRIDGE_API_URL}/oauth2/${endpoint}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    },
-  );
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(
-      `HTTP error! status: ${response.status}, body: ${errorBody}`,
-    );
-  }
-  return await response.json();
-};
-
-interface DecodedIdToken extends JwtPayload {
-  nonce?: string;
-  tknonce?: string;
-}
-
-function refineNonNull<T>(
-  input: T | null | undefined,
-  errorMessage?: string,
-): T {
-  if (input == null) {
-    throw new Error(errorMessage ?? `Unexpected ${JSON.stringify(input)}`);
-  }
-
-  return input;
-}
-
-const walletConfig = {
-  curve: "CURVE_SECP256K1" as const,
-  pathFormat: "PATH_FORMAT_BIP32" as const,
-  path: "m/44'/60'/0'/0/0" as const,
-  addressFormat: "ADDRESS_FORMAT_ETHEREUM" as const,
 };
