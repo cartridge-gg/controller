@@ -99,7 +99,7 @@ export function Achievements() {
         })
         .filter(Boolean) as { id: string; icon: string }[],
     }));
-  }, [players, address, self, pins, usernames]);
+  }, [players, address, self, pins, usernames, achievements]);
 
   useEffect(() => {
     setAccountAddress(address || self || "");
