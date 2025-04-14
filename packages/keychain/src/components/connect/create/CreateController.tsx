@@ -54,6 +54,7 @@ export function CreateControllerView({
     <LayoutContainer>
       <LayoutHeader
         variant="expanded"
+        useStarBackground
         title={
           theme.name === "cartridge"
             ? "Play with Controller"

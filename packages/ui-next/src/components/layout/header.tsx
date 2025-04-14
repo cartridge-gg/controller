@@ -59,9 +59,9 @@ export function LayoutHeader({
               <div className="flex flex-col w-full h-[176px]">
                 {useStarBackground ? (
                   <div className="w-full h-[136px] relative">
-                    <StarBackground 
-                      width="100%" 
-                      height={starBackgroundHeight} 
+                    <StarBackground
+                      width="100%"
+                      height={starBackgroundHeight}
                       className="absolute inset-0"
                     />
                   </div>
@@ -80,9 +80,9 @@ export function LayoutHeader({
               <div className="flex flex-col bg-spacer-100 gap-y-px">
                 {useStarBackground ? (
                   <div className="w-full h-16 pb-6 relative">
-                    <StarBackground 
-                      width="100%" 
-                      height={starBackgroundHeight} 
+                    <StarBackground
+                      width="100%"
+                      height={starBackgroundHeight}
                       className="absolute inset-0"
                     />
                   </div>
