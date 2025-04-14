@@ -1,38 +1,12 @@
 import { OlmechIcon } from "@/components/icons";
-import { cva, VariantProps } from "class-variance-authority";
+import { VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 
 export interface AchievementPlayerAvatarProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof achievementPlayerAvatarVariants> {
+  extends React.HTMLAttributes<HTMLDivElement> {
   username: string;
   size?: VariantProps<typeof OlmechIcon>["size"];
 }
-
-const achievementPlayerAvatarVariants = cva("flex items-center gap-x-4", {
-  variants: {
-    variant: {
-      darkest: "",
-      darker: "",
-      dark: "",
-      default: "",
-      light: "",
-      lighter: "",
-      lightest: "",
-      ghost: "",
-    },
-    rank: {
-      default: "",
-      gold: "",
-      silver: "",
-      bronze: "",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-    rank: "default",
-  },
-});
 
 export const AchievementPlayerAvatar = ({
   username,
