@@ -19,7 +19,7 @@ jobs:
   rust:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/dojoengine/katana:v1.2.3
+      image: ghcr.io/dojoengine/dojo-dev:v1.5.0-preview.0
     steps:
       - uses: actions/checkout@v4
       - run: git config --global --add safe.directory '*'
@@ -37,12 +37,16 @@ jobs:
           components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
         if: steps.changes.outputs.rust == 'true'
-      - uses: taiki-e/install-action@cargo-llvm-cov
-        if: steps.changes.outputs.rust == 'true'
+      - name: Install OpenSSL
+        run: |
+          apt-get update
+          apt-get install -y openssl libssl-dev
       - run:
           cargo llvm-cov --features webauthn --all-features --lcov --output-path
           lcov.info
         if: steps.changes.outputs.rust == 'true'
+        env:
+          OPENSSL_DIR: /usr
       - uses: codecov/codecov-action@v3
         if: steps.changes.outputs.rust == 'true'
         with:
