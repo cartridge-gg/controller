@@ -242,6 +242,7 @@ export function Activity() {
       dates: uniqueDates,
     };
   }, [
+    address,
     transfers,
     transactions,
     methods,
