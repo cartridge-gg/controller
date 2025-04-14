@@ -99,7 +99,7 @@ export function Achievements() {
         })
         .filter(Boolean) as { id: string; icon: string }[],
     }));
-  }, [players, address, self, pins, usernames]);
+  }, [players, address, self, pins, usernames, achievements]);
 
   useEffect(() => {
     setAccountAddress(address || self || "");
@@ -160,6 +160,15 @@ export function Achievements() {
               <AchievementPlayerLabel
                 username={username}
                 address={address || self}
+                rank={
+                  rank === 1
+                    ? "gold"
+                    : rank === 2
+                      ? "silver"
+                      : rank === 3
+                        ? "bronze"
+                        : "default"
+                }
               />
               <Trophies
                 achievements={achievements}

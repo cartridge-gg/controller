@@ -2,16 +2,16 @@ import {
   BronzeIcon,
   DefaultIcon,
   GoldIcon,
-  OlmechIcon,
   SilverIcon,
 } from "@/components/icons";
-import { cn, Thumbnail } from "@/index";
+import { AchievementPlayerAvatar, cn, Thumbnail } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useMemo } from "react";
 
 export interface AchievementPlayerBadgeProps
   extends HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof achievementPlayerBadgeVariants> {
+  username?: string;
   icon?: React.ReactNode;
 }
 
@@ -48,6 +48,7 @@ export const achievementPlayerBadgeVariants = cva(
 );
 
 export const AchievementPlayerBadge = ({
+  username,
   icon,
   variant,
   rank,
@@ -59,16 +60,34 @@ export const AchievementPlayerBadge = ({
   const BadgeIcon = useMemo(() => {
     switch (rank) {
       case "gold":
-        return <GoldIcon className="absolute" size={size ?? "xl"} />;
+        return (
+          <GoldIcon className="absolute text-primary" size={size ?? "xl"} />
+        );
       case "silver":
-        return <SilverIcon className="absolute" size={size ?? "xl"} />;
+        return (
+          <SilverIcon className="absolute text-primary" size={size ?? "xl"} />
+        );
       case "bronze":
-        return <BronzeIcon className="absolute" size={size ?? "xl"} />;
+        return (
+          <BronzeIcon className="absolute text-primary" size={size ?? "xl"} />
+        );
       case "default":
       default:
-        return <DefaultIcon className="absolute" size={size ?? "xl"} />;
+        return (
+          <DefaultIcon className="absolute text-primary" size={size ?? "xl"} />
+        );
     }
   }, [rank, size]);
+
+  const ThumbnailIcon = useMemo(() => {
+    if (icon) return icon;
+    return (
+      <AchievementPlayerAvatar
+        username={username ?? ""}
+        className="h-full w-full"
+      />
+    );
+  }, [icon, username]);
 
   return (
     <div
@@ -79,7 +98,7 @@ export const AchievementPlayerBadge = ({
       {...props}
     >
       <Thumbnail
-        icon={icon ?? <OlmechIcon variant="six" className="h-full w-full" />}
+        icon={ThumbnailIcon}
         variant={variant}
         size={size === "2xl" ? "lg" : "md"}
         className="rounded-full"
