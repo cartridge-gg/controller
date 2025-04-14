@@ -1,3 +1,4 @@
+import { fetchApiCreator } from "@cartridge/utils";
 import {
   Exact,
   RegisterMutation,
@@ -8,7 +9,13 @@ import {
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
 import { Signature } from "ethers";
 import { UseMutateAsyncFunction } from "react-query";
-import { doApiFetch } from "./utils";
+
+export const fetchApi = fetchApiCreator(
+  `${import.meta.env.VITE_CARTRIDGE_API_URL}/oauth2`,
+  {
+    credentials: "omit",
+  },
+);
 
 type RegisterMutateFn = UseMutateAsyncFunction<
   RegisterMutation,
@@ -40,8 +47,8 @@ export const registerController = async (
   return res;
 };
 
-export const getSuborg = async (oidcToken: string, username: string) => {
-  const getSuborgsResponse = await doApiFetch("suborgs", {
+export const getTurnkeySuborg = async (oidcToken: string, username: string) => {
+  const getSuborgsResponse = await fetchApi<GetSuborgsResponse>("suborgs", {
     filterType: "OIDC_TOKEN",
     filterValue: oidcToken,
   });
@@ -54,10 +61,13 @@ export const getSuborg = async (oidcToken: string, username: string) => {
     // Not supported at the moment
     throw new Error("Multiple suborgs found for user");
   } else if (getSuborgsResponse.organizationIds.length === 0) {
-    const createSuborgResponse = await doApiFetch("create-suborg", {
-      rootUserUsername: username,
-      oauthProviders: [{ providerName: "Discord", oidcToken }],
-    });
+    const createSuborgResponse = await fetchApi<CreateSuborgResponse>(
+      "create-suborg",
+      {
+        rootUserUsername: username,
+        oauthProviders: [{ providerName: "Discord", oidcToken }],
+      },
+    );
     targetSubOrgId = createSuborgResponse.subOrganizationId;
   } else {
     targetSubOrgId = getSuborgsResponse.organizationIds[0];
@@ -71,7 +81,7 @@ export const authenticateToTurnkey = async (
   oidcToken: string,
   authIframeClient: TurnkeyIframeClient,
 ) => {
-  const authResponse = await doApiFetch("auth", {
+  const authResponse = await fetchApi<AuthResponse>("auth", {
     suborgID: subOrgId,
     targetPublicKey: authIframeClient.iframePublicKey,
     oidcToken,
@@ -87,3 +97,15 @@ export const authenticateToTurnkey = async (
 };
 
 const CHAIN_ID = "SN_MAIN";
+
+type GetSuborgsResponse = {
+  organizationIds: string[];
+};
+
+type CreateSuborgResponse = {
+  subOrganizationId: string;
+};
+
+type AuthResponse = {
+  credentialBundle: string;
+};

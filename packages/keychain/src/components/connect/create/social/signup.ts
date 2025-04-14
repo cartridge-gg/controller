@@ -4,7 +4,11 @@ import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
 import { useTurnkey } from "@turnkey/sdk-react";
 import { useCallback, useEffect, useState } from "react";
-import { authenticateToTurnkey, getSuborg, registerController } from "./api";
+import {
+  authenticateToTurnkey,
+  getTurnkeySuborg,
+  registerController,
+} from "./api";
 import { getOidcToken } from "./auth0";
 import { getOrCreateWallet, signCreateControllerMessage } from "./turnkey";
 
@@ -18,7 +22,7 @@ export const useSignupWithSocial = () => {
   useEffect(() => {
     (async () => {
       if (
-        // sanity check as the userName has already been validated at the previous step
+        // Sanity check: the userName has already been validated at the previous step
         userName.length === 0 ||
         !isAuthenticated ||
         !user ||
@@ -34,7 +38,10 @@ export const useSignupWithSocial = () => {
           getNonce(authIframeClient.iframePublicKey!),
         );
 
-        const targetSubOrgId = await getSuborg(oidcTokenString, userName);
+        const targetSubOrgId = await getTurnkeySuborg(
+          oidcTokenString,
+          userName,
+        );
 
         await authenticateToTurnkey(
           targetSubOrgId,
