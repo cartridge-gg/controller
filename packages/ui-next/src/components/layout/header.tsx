@@ -239,6 +239,7 @@ function HeaderIcon({
           <Thumbnail
             variant={variant === "expanded" ? "dark" : "default"}
             size={variant === "expanded" ? "xxl" : "lg"}
+            className="z-20"
           />
         );
       })()}
