@@ -1,4 +1,5 @@
-import { cn } from "@/index";
+import { AchievementPlayerAvatar, cn } from "@/index";
+import { useMemo } from "react";
 
 export interface AchievementLeaderboardUsernameProps {
   username: string;
@@ -13,6 +14,11 @@ export const AchievementLeaderboardUsername = ({
   highlight,
   className,
 }: AchievementLeaderboardUsernameProps) => {
+  const Icon = useMemo(() => {
+    if (icon) return <div className={cn("h-4 w-4 fa-solid", icon)} />;
+    return <AchievementPlayerAvatar username={username} className="h-4 w-4" />;
+  }, [icon, username]);
+
   return (
     <div
       className={cn(
@@ -21,9 +27,7 @@ export const AchievementLeaderboardUsername = ({
         className,
       )}
     >
-      <div className="h-5 w-5 flex items-center justify-center">
-        <div className={cn("h-4 w-4 fa-solid", icon || "fa-alien-8bit")} />
-      </div>
+      <div className="h-5 w-5 flex items-center justify-center">{Icon}</div>
       <p className="text-sm">{username}</p>
     </div>
   );

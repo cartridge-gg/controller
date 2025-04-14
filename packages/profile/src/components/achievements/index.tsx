@@ -160,6 +160,15 @@ export function Achievements() {
               <AchievementPlayerLabel
                 username={username}
                 address={address || self}
+                rank={
+                  rank === 1
+                    ? "gold"
+                    : rank === 2
+                      ? "silver"
+                      : rank === 3
+                        ? "bronze"
+                        : "default"
+                }
               />
               <Trophies
                 achievements={achievements}
