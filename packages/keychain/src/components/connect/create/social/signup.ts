@@ -1,7 +1,12 @@
 import { useAuth0 } from "@auth0/auth0-react";
+import {
+  SignerType,
+  useRegisterMutation,
+} from "@cartridge/utils/api/cartridge";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
 import { useTurnkey } from "@turnkey/sdk-react";
+import { Signature } from "ethers";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { useCallback, useEffect, useState } from "react";
 
@@ -9,14 +14,14 @@ export const useSignupWithSocial = () => {
   const { authIframeClient } = useTurnkey();
   const { loginWithPopup, logout, getIdTokenClaims, isAuthenticated, user } =
     useAuth0();
-
+  const { mutateAsync: register } = useRegisterMutation();
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
     (async () => {
       if (
         // // sanity check as the userName has already been validated at the previous step
-        // userName.length === 0 ||
+        userName.length === 0 ||
         !isAuthenticated ||
         !user ||
         !authIframeClient?.iframePublicKey
@@ -93,7 +98,9 @@ export const useSignupWithSocial = () => {
         });
 
         if (wallets.wallets.length > 0) {
-          throw new Error("Wallet already exists" + wallets.wallets);
+          throw new Error(
+            "Wallet already exists" + JSON.stringify(wallets, null, 2),
+          );
         }
 
         const createWalletResponse = await authIframeClient!.createWallet({
@@ -104,7 +111,39 @@ export const useSignupWithSocial = () => {
 
         const address = refineNonNull(createWalletResponse.addresses[0]);
 
-        alert(`SUCCESS! Wallet and new address created: ${address} `);
+        const message = "Hello World!";
+        const signedTx = await authIframeClient!.signRawPayload({
+          payload: eip191Encode(message),
+          encoding: "PAYLOAD_ENCODING_TEXT_UTF8",
+          hashFunction: "HASH_FUNCTION_SHA256",
+          signWith: address,
+        });
+
+        const r = signedTx.r.startsWith("0x") ? signedTx.r : "0x" + signedTx.r;
+        const s = signedTx.s.startsWith("0x") ? signedTx.s : "0x" + signedTx.s;
+
+        const vNumber = parseInt(signedTx.v, 16);
+        if (isNaN(vNumber) || (vNumber !== 0 && vNumber !== 1)) {
+          throw new Error(`Invalid recovery ID (v) received: ${signedTx.v}`);
+        }
+        const normalizedV = Signature.getNormalizedV(vNumber);
+
+        const signature = Signature.from({
+          r,
+          s,
+          v: normalizedV,
+        });
+
+        const res = await register({
+          chainId: "SN_MAIN",
+          owner: {
+            credential: JSON.stringify({ eth_address: address }),
+            type: SignerType.Eip191,
+          },
+          signature: [signature.serialized],
+          username: userName,
+        });
+        console.log("res", res);
       } catch (error) {
         await logout({
           logoutParams: { returnTo: import.meta.env.VITE_ORIGIN },
@@ -190,4 +229,9 @@ const walletConfig = {
   pathFormat: "PATH_FORMAT_BIP32" as const,
   path: "m/44'/60'/0'/0/0" as const,
   addressFormat: "ADDRESS_FORMAT_ETHEREUM" as const,
+};
+
+const eip191Encode = (message: string): string => {
+  const encodedMessage = `\x19Ethereum Signed Message:\n${message.length}${message}`;
+  return encodedMessage;
 };
