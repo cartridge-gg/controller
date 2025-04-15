@@ -44,8 +44,8 @@ export const GoldIcon = memo(
             y2="42.877"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
         </defs>
       </svg>
