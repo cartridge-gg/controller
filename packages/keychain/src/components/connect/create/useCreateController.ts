@@ -183,14 +183,10 @@ export function useCreateController({
         if (exists) {
           await handleLogin(username);
         } else {
-          if (!authenticationMode && !import.meta.env.DEV) {
-            throw new Error("No authentication mode provided");
-          } else {
-            await handleSignup(
-              username,
-              authenticationMode ?? AuthenticationMode.Webauthn,
-            );
-          }
+          await handleSignup(
+            username,
+            authenticationMode ?? AuthenticationMode.Webauthn,
+          );
         }
       } catch (e: unknown) {
         if (
