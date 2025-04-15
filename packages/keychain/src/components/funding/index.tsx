@@ -10,8 +10,9 @@ import {
   ControllerIcon,
 } from "@cartridge/ui-next";
 import { Deposit } from "./Deposit";
-import { PurchaseCredits } from "./purchase/PurchaseCredits";
-import { Balance, BalanceType } from "./Balance";
+import { Purchase } from "../purchase";
+import { Balance, BalanceType } from "../purchase/Balance";
+import { PurchaseType } from "@/hooks/payment";
 
 const enum FundingState {
   SHOW_OPTIONS,
@@ -46,7 +47,8 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
 
   if (state === FundingState.FUND_CREDITS) {
     return (
-      <PurchaseCredits
+      <Purchase
+        type={PurchaseType.CREDITS}
         isSlot={isSlot}
         onBack={() => setState(FundingState.SHOW_OPTIONS)}
       />

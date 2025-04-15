@@ -18,7 +18,7 @@ import {
   CreditCardIcon,
 } from "@cartridge/ui-next";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { PricingDetails } from "./PurchaseCredits";
+import { PricingDetails } from ".";
 import { CostBreakdown } from "./CostBreakdown";
 
 type StripeCheckoutProps = {

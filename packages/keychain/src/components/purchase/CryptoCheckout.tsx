@@ -26,8 +26,10 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
-import useCryptoPayment from "@/hooks/payment";
+import useCryptoPayment, { PurchaseType } from "@/hooks/payment";
 import { CostBreakdown } from "./CostBreakdown";
+import { StarterItemData } from "@/hooks/starterpack";
+import { Receiving } from "../starterpack/receiving";
 
 export const WALLET_CONFIG = {
   argent: {
@@ -62,14 +64,16 @@ export enum CheckoutState {
 export function CryptoCheckout({
   selectedWallet,
   walletAddress,
-  creditsAmount,
+  cost,
+  starterpackItems,
   initialState = CheckoutState.REVIEW_PURCHASE,
   onBack,
   onComplete,
 }: {
   selectedWallet: ExternalWallet;
   walletAddress: string;
-  creditsAmount: number;
+  cost: number;
+  starterpackItems?: StarterItemData[];
   initialState?: CheckoutState;
   onBack: () => void;
   onComplete: () => void;
@@ -98,8 +102,9 @@ export function CryptoCheckout({
       setState(CheckoutState.REQUESTING_PAYMENT);
       const paymentId = await sendPayment(
         walletAddress,
-        creditsAmount,
+        cost,
         selectedWallet.platform!,
+        starterpackItems ? PurchaseType.STARTERPACK : PurchaseType.CREDITS,
         false,
         (explorer) => {
           setState(CheckoutState.TRANSACTION_SUBMITTED);
@@ -116,7 +121,7 @@ export function CryptoCheckout({
     } finally {
       setState(CheckoutState.REVIEW_PURCHASE);
     }
-  }, [sendPayment, selectedWallet, creditsAmount, onComplete]);
+  }, [sendPayment, selectedWallet, cost, onComplete]);
 
   return (
     <LayoutContainer>
@@ -132,19 +137,23 @@ export function CryptoCheckout({
             title={"Spending"}
             name={"USDC"}
             icon={"https://static.cartridge.gg/tokens/usdc.svg"}
-            amount={creditsAmount.toString() + " USDC"}
-            value={"$" + creditsAmount.toString()}
+            amount={cost.toString() + " USDC"}
+            value={"$" + cost.toString()}
           />
         )}
 
-        <ReviewToken
-          title={"Receiving"}
-          name={"CREDITS"}
-          icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
-          amount={creditsAmount.toString() + " CREDITS"}
-          value={"$" + creditsAmount.toString()}
-          isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
-        />
+        {starterpackItems ? (
+          <Receiving title={"Receiving"} items={starterpackItems} isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}/>
+        ) : (
+          <ReviewToken
+            title={"Receiving"}
+            name={"Credits"}
+            icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
+            amount={cost.toString() + " Credits"}
+            value={"$" + cost.toString()}
+            isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
+          />
+        )}
       </LayoutContent>
 
       <LayoutFooter>
@@ -163,8 +172,8 @@ export function CryptoCheckout({
             walletType={selectedWallet.type}
             price={{
               processingFeeInCents: 0,
-              baseCostInCents: creditsAmount * 100,
-              totalInCents: creditsAmount * 100,
+              baseCostInCents: cost * 100,
+              totalInCents: cost * 100,
             }}
           />
         )}

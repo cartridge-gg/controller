@@ -14,7 +14,7 @@ import { LayoutContainer } from "@cartridge/ui-next";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { useEffect, useMemo, useState } from "react";
-import StripeCheckout from "../funding/purchase/StripeCheckout";
+import StripeCheckout from "../purchase/StripeCheckout";
 import { useQuery } from "react-query";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
@@ -40,7 +40,7 @@ export const PurchaseWithoutBalance = () => {
   const { closeModal } = useUI();
 
   const { controller } = useConnection();
-  const { price, starterPackItems } = useStarterPack();
+  const { price, items: starterPackItems } = useStarterPack("");
 
   const stripePromise = useMemo(
     () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
@@ -106,7 +106,7 @@ export const PurchaseWithoutBalance = () => {
   }, [purchaseState]);
 
   if (purchaseState === PurchaseState.BACK) {
-    return <StarterPack />;
+    return <StarterPack starterpackId="" />;
   }
 
   if (purchaseState === PurchaseState.STRIPE_CHECKOUT) {

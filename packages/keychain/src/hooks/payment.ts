@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import {
   CreateCryptoPaymentDocument,
   CreateCryptoPaymentMutation,
-  Chain,
+  Network,
   CryptoPaymentQuery,
   CryptoPaymentDocument,
 } from "@cartridge/utils/api/cartridge";
@@ -21,11 +21,10 @@ import {
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
 
-const PLATFORM_TO_CHAIN: Record<ExternalPlatform, Chain> = {
-  ethereum: Chain.Ethereum,
-  solana: Chain.Solana,
-  starknet: Chain.Starknet,
-};
+export enum PurchaseType {
+  CREDITS = "CREDITS",
+  STARTERPACK = "STARTERPACK",
+}
 
 const useCryptoPayment = () => {
   const { controller, externalSendTransaction } = useConnection();
@@ -37,6 +36,7 @@ const useCryptoPayment = () => {
       walletAddress: string,
       credits: number,
       platform: ExternalPlatform,
+      purchaseType: PurchaseType,
       isMainnet: boolean = false,
       onSubmitted?: (explorer: Explorer) => void,
     ): Promise<string> => {
@@ -57,6 +57,7 @@ const useCryptoPayment = () => {
           controller.username(),
           credits,
           platform,
+          purchaseType,
           isMainnet,
         );
 
@@ -66,7 +67,7 @@ const useCryptoPayment = () => {
               await requestPhantomPayment(
                 walletAddress,
                 depositAddress,
-                tokenAmount,
+                parseInt(tokenAmount),
                 tokenAddress,
                 isMainnet,
               );
@@ -136,6 +137,7 @@ const useCryptoPayment = () => {
     username: string,
     credits: number,
     platform: ExternalPlatform,
+    purchaseType: PurchaseType,
     isMainnet: boolean = false,
   ) {
     const result = await client.request<CreateCryptoPaymentMutation>(
@@ -144,7 +146,8 @@ const useCryptoPayment = () => {
         input: {
           username,
           credits,
-          chain: PLATFORM_TO_CHAIN[platform],
+          network: platform.toUpperCase() as Network,
+          purchaseType,
           isMainnet,
         },
       },

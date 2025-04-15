@@ -71,7 +71,11 @@ const Header = () => {
         <>
           <Button
             className="flex items-center gap-2 min-w-[120px]"
-            onClick={() => controllerConnector.controller.openStarterPack()}
+            onClick={() =>
+              controllerConnector.controller.openStarterPack(
+                "eternum-starterpack",
+              )
+            }
           >
             Get Starter Pack
           </Button>

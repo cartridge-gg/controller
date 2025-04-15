@@ -5,9 +5,7 @@ import {
   Button,
   Card,
   CardDescription,
-  CheckIcon,
   CreditCardIcon,
-  DepositIcon,
   InfoIcon,
   LayoutContainer,
   LayoutContent,
@@ -18,12 +16,16 @@ import { isIframe } from "@cartridge/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance, loadStripe } from "@stripe/stripe-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AmountSelection } from "../AmountSelection";
+import { AmountSelection } from "../funding/AmountSelection";
 import CheckoutForm from "./StripeCheckout";
-import { DEFAULT_AMOUNT } from "../constants";
+import { DEFAULT_AMOUNT } from "../funding/constants";
 import { CryptoCheckout, walletIcon } from "./CryptoCheckout";
 import { ExternalWallet } from "@cartridge/controller";
-import { Balance, BalanceType } from "../Balance";
+import { Balance, BalanceType } from "./Balance";
+import { StarterPackDetails } from "@/hooks/starterpack";
+import { StarterPackContent } from "../starterpack";
+import { PurchaseType } from "@/hooks/payment";
+import { Receiving } from "../starterpack/receiving";
 
 export enum PurchaseState {
   SELECTION = 0,
@@ -35,6 +37,8 @@ export enum PurchaseState {
 export type PurchaseCreditsProps = {
   isSlot?: boolean;
   wallets?: ExternalWallet[];
+  type: PurchaseType;
+  starterpackDetails?: StarterPackDetails;
   initState?: PurchaseState;
   onBack?: () => void;
 };
@@ -50,9 +54,11 @@ export type StripeResponse = {
   pricing: PricingDetails;
 };
 
-export function PurchaseCredits({
+export function Purchase({
   onBack,
   wallets,
+  type,
+  starterpackDetails,
   initState = PurchaseState.SELECTION,
 }: PurchaseCreditsProps) {
   const { controller, closeModal } = useConnection();
@@ -71,7 +77,9 @@ export function PurchaseCredits({
     null,
   );
   const [state, setState] = useState<PurchaseState>(initState);
-  const [creditsAmount, setCreditsAmount] = useState<number>(DEFAULT_AMOUNT);
+  const [creditsAmount, setCreditsAmount] = useState<number>(
+    starterpackDetails?.price ?? DEFAULT_AMOUNT,
+  );
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
   const [displayError, setDisplayError] = useState<Error | null>(null);
@@ -84,10 +92,12 @@ export function PurchaseCredits({
     setDisplayError(walletError);
   }, [walletError]);
 
-  const availableWallets = useMemo(
-    () => wallets ?? detectedWallets,
-    [wallets, detectedWallets],
-  );
+  // Only show phantom for now ad Solana is the only supported chain
+  const availableWallets = useMemo(() => {
+    const list = wallets ?? detectedWallets;
+    const phantom = list.find(w => w.type === "phantom");
+    return phantom ? [phantom] : [];
+  }, [wallets, detectedWallets]);
 
   const onAmountChanged = useCallback(
     (amount: number) => {
@@ -106,12 +116,15 @@ export function PurchaseCredits({
     setDisplayError(null);
 
     try {
+
       const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           credits: creditsAmount,
+          starterpackId: starterpackDetails?.id,
           username: controller.username(),
+          purchaseType: type === PurchaseType.CREDITS ? "CREDITS" : "STARTERPACK",
         }),
       });
       if (!res.ok) {
@@ -158,7 +171,9 @@ export function PurchaseCredits({
   const title = useMemo(() => {
     switch (state) {
       case PurchaseState.SELECTION:
-        return "Purchase Credits";
+        return type === PurchaseType.CREDITS
+          ? "Purchase Credits"
+          : "Purchase Starter Pack";
       case PurchaseState.STRIPE_CHECKOUT:
         return "Credit Card";
       case PurchaseState.SUCCESS:
@@ -204,7 +219,7 @@ export function PurchaseCredits({
       <CryptoCheckout
         walletAddress={walletAddress!}
         selectedWallet={selectedWallet!}
-        creditsAmount={creditsAmount}
+        cost={creditsAmount}
         onBack={() => setState(PurchaseState.SELECTION)}
         onComplete={() => setState(PurchaseState.SUCCESS)}
       />
@@ -216,19 +231,16 @@ export function PurchaseCredits({
       <LayoutHeader
         className="p-6"
         title={title}
-        icon={
-          state === PurchaseState.SELECTION ? (
-            <DepositIcon variant="solid" size="lg" />
-          ) : (
-            <CheckIcon size="lg" />
-          )
-        }
         onBack={() => {
           switch (state) {
             case PurchaseState.SUCCESS:
               return;
             case PurchaseState.SELECTION:
-              onBack?.();
+              if (onBack) {
+                return onBack();
+              }
+
+              closeModal();
               break;
             default:
               setState(PurchaseState.SELECTION);
@@ -236,16 +248,29 @@ export function PurchaseCredits({
         }}
       />
       <LayoutContent className="gap-6 px-6">
-        {state === PurchaseState.SELECTION && (
-          <AmountSelection
-            amount={creditsAmount}
-            onChange={onAmountChanged}
-            lockSelection={isProcessingPayment || isLoadingWallets}
-            enableCustom
-          />
-        )}
+        {state === PurchaseState.SELECTION &&
+          ((type === PurchaseType.CREDITS && (
+            <AmountSelection
+              amount={creditsAmount}
+              onChange={onAmountChanged}
+              lockSelection={isProcessingPayment || isLoadingWallets}
+              enableCustom
+            />
+          )) ||
+            (type === PurchaseType.STARTERPACK && (
+              <StarterPackContent
+                starterpackItems={starterpackDetails?.starterPackItems}
+              />
+            )))}
         {state === PurchaseState.SUCCESS && (
-          <Balance types={[BalanceType.CREDITS]} />
+          starterpackDetails ? (
+            <Receiving
+              title="Received"
+              items={starterpackDetails?.starterPackItems}
+            />
+          ) : (
+            <Balance types={[BalanceType.CREDITS]} />
+          )
         )}
       </LayoutContent>
 
@@ -258,7 +283,7 @@ export function PurchaseCredits({
           />
         )}
 
-        {state !== PurchaseState.SUCCESS && (
+        {state !== PurchaseState.SUCCESS && type === PurchaseType.CREDITS && (
           <Card className="bg-background-100 border border-background-200 p-3">
             <CardDescription className="flex flex-row items-start gap-3">
               <InfoIcon
@@ -293,7 +318,7 @@ export function PurchaseCredits({
               />
               <span>Credit Card</span>
             </Button>
-            <div className="flex flex-row gap-4 mt-2">
+            <div className="flex flex-row gap-4">
               {availableWallets.map((wallet: ExternalWallet) => {
                 return (
                   <Button
@@ -311,7 +336,8 @@ export function PurchaseCredits({
                     }
                     onClick={async () => onExternalConnect(wallet)}
                   >
-                    {walletIcon(wallet, true)}
+                    {walletIcon(wallet, true)}{" "}
+                    {availableWallets.length < 2 && wallet.type}
                   </Button>
                 );
               })}
