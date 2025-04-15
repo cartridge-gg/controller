@@ -17,7 +17,10 @@ export function useUsername({ address }: { address: string }) {
 }
 
 export function useUsernames({ addresses }: { addresses: string[] }) {
-  const { data } = useAccountNamesQuery({ addresses }, { enabled: addresses.length > 0 });
+  const { data } = useAccountNamesQuery(
+    { addresses },
+    { enabled: addresses.length > 0 },
+  );
 
   return {
     usernames:
