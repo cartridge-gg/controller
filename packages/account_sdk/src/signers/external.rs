@@ -1,9 +1,6 @@
-#![cfg(target_arch = "wasm32")]
-
 use crate::signers::SignError;
-use js_sys::{Object, Promise, Reflect};
+use js_sys::{Object, Reflect};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::JsFuture;
 
 #[wasm_bindgen]
 extern "C" {
@@ -26,6 +23,17 @@ fn js_value_to_error_string(value: JsValue) -> String {
         .unwrap_or_else(|| "Unknown JS error".to_string())
 }
 
+#[derive(Debug, serde::Deserialize)]
+struct SignatureResult {
+    success: bool,
+    #[allow(unused)]
+    wallet: String,
+    result: String,
+    error: Option<String>,
+    #[allow(unused)]
+    account: String,
+}
+
 /// Signs a message using the KeychainWalletService, which routes to the appropriate
 /// embedded or external wallet.
 /// The wallet is identified by a string (e.g., address or public key).
@@ -40,21 +48,20 @@ fn js_value_to_error_string(value: JsValue) -> String {
 /// A `Result` containing the signature as a hex string on success,
 /// or a `SignError::BridgeError` on failure.
 pub async fn external_sign_message(identifier: &str, message: &str) -> Result<String, SignError> {
-    let promise_result = sign_message(identifier.to_string(), message.to_string()).await;
+    let promise_result = sign_message(identifier.to_string(), message.to_string())
+        .await
+        .map_err(|e| SignError::BridgeError(js_value_to_error_string(e)))?;
 
-    let promise = match promise_result {
-        Ok(p) => Promise::from(p),
-        Err(js_err) => {
-            return Err(SignError::BridgeError(js_value_to_error_string(js_err)));
-        }
-    };
+    let signature_result: SignatureResult = serde_wasm_bindgen::from_value(promise_result)
+        .map_err(|e| SignError::BridgeError(format!("Failed to parse result: {}", e)))?;
 
-    match JsFuture::from(promise).await {
-        Ok(js_signature) => js_signature.as_string().ok_or_else(|| {
-            SignError::BridgeError(
-                "Keychain service returned non-string value for signature".to_string(),
-            )
-        }),
-        Err(js_err) => Err(SignError::BridgeError(js_value_to_error_string(js_err))),
+    if !signature_result.success {
+        return Err(SignError::BridgeError(
+            signature_result
+                .error
+                .unwrap_or_else(|| "Unknown error".to_string()),
+        ));
     }
+
+    Ok(signature_result.result)
 }

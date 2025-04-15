@@ -108,14 +108,10 @@ impl HashSigner for Eip191Signer {
 #[async_trait(?Send)]
 impl HashSigner for Eip191Signer {
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
-        // Format address for the bridge
         let address_hex = format!("0x{}", hex::encode(self.address.clone().as_bytes()));
         let message_hex = hex::encode(tx_hash.to_bytes_be());
 
-        // Call the external signing function via the bridge
         let signature_hex = external_sign_message(&address_hex, &message_hex).await?;
-
-        // Parse the combined hex signature (r, s, v)
         let signature_bytes = hex::decode(signature_hex.trim_start_matches("0x")).map_err(|e| {
             SignError::BridgeError(format!("Failed to decode signature hex: {}", e))
         })?;
@@ -176,15 +172,15 @@ mod wasm_tests {
 
     // Define the mock wallet bridge JS interface
     #[wasm_bindgen(inline_js = r#"
-        export function setup_mock_bridge() {
-            if (!window.wallet_bridge) { window.wallet_bridge = {}; }
+        export function setup_mock_keychain_wallets() {
+            if (!window.keychain_wallets) { window.keychain_wallets = {}; }
 
-            window.wallet_bridge.signMessage = (identifier, message) => {
+            window.keychain_wallets.signMessage = (identifier, message) => {
                 console.log(`Mock bridge called: signMessage(${identifier}, ${message})`);
 
                 // --- Define Expected Test Values ---
-                const expectedIdentifier = "0xba740c9035ff3c24a69e0df231149c9cd12bae07";
-                const mockSignature = "0x0ecc2f69607efa55b890d7ca861fe6003e3120b9ff82ee6597ba98173fb4576a4834931220b573fe9b38444f52ad92e26281136b385a3fee6c0e92836f3a14741c";
+                const expectedIdentifier = "0xa517d17bc2cca98e94f9975efd295ec70bfb3cf7";
+                const mockSignature = "0xc4c387bf41b6aea0711abf8305bcd16d9a78fac00abc343066a1f2b23e35c16241801f2354ab277a16cfd1d70fa66b1b0891549eec1370ba43967cb414b3fae01c";
 
                 return new Promise((resolve, reject) => {
                     // Check if the identifier matches the expected one for the success test
@@ -208,24 +204,22 @@ mod wasm_tests {
                 });
             };
 
-            console.log("Mock wallet_bridge setup complete.", window.wallet_bridge);
+            console.log("Mock keychain_wallets setup complete.", JSON.stringify(window.keychain_wallets, null, 2));
         }
     "#)]
 
     extern "C" {
-        fn setup_mock_bridge();
+        fn setup_mock_keychain_wallets();
     }
 
     #[wasm_bindgen_test]
     async fn test_eip191_wasm_sign_success() {
         // Setup the mock bridge in the JS environment
-        setup_mock_bridge();
+        setup_mock_keychain_wallets();
 
-        let address_hex = "0xba740c9035ff3c24a69e0df231149c9cd12bae07";
+        let address_hex = "0xa517d17bc2cca98e94f9975efd295ec70bfb3cf7";
         let address = EthAddress::from_str(address_hex).expect("Failed to parse test address");
-        let tx_hash = Felt::from_hex_unchecked(
-            "0x03e0a3ec5f7f954ed70f672af670ac53ba9e429a796ca094fb43bb252ffa5f1f",
-        );
+        let tx_hash = Felt::from_hex_unchecked("0x48656c6c6f20576f726c6421");
 
         // Create the signer instance
         let signer = Eip191Signer { address };
@@ -238,53 +232,63 @@ mod wasm_tests {
         match result.unwrap() {
             SignerSignature::Eip191((controller_signer, signature)) => {
                 assert_eq!(
-                    controller_signer.eth_address.0.to_string(),
-                    address_hex,
+                    controller_signer.eth_address.0,
+                    Felt::from_str(address_hex).expect("Failed to parse test address"),
                     "Signer address mismatch"
                 );
+
+                // Create expected r from bytes
+                let expected_r_bytes =
+                    hex::decode("c4c387bf41b6aea0711abf8305bcd16d9a78fac00abc343066a1f2b23e35c162")
+                        .unwrap();
+                let expected_r = U256::from_bytes_be(&expected_r_bytes.try_into().unwrap());
                 assert_eq!(signature.r, expected_r, "Signature R mismatch");
+
+                // Create expected s from bytes
+                let expected_s_bytes =
+                    hex::decode("41801f2354ab277a16cfd1d70fa66b1b0891549eec1370ba43967cb414b3fae0")
+                        .unwrap();
+                let expected_s = U256::from_bytes_be(&expected_s_bytes.try_into().unwrap());
                 assert_eq!(signature.s, expected_s, "Signature S mismatch");
-                assert_eq!(
-                    signature.y_parity, expected_y_parity,
-                    "Signature Y-Parity mismatch"
-                );
+
+                assert!(!signature.y_parity, "Signature Y-Parity mismatch");
             }
             _ => panic!("Unexpected SignerSignature variant"),
         }
     }
 
-    // #[wasm_bindgen_test]
-    // async fn test_eip191_wasm_sign_bridge_error() {
-    //     // Setup the mock bridge
-    //     setup_mock_bridge();
+    #[wasm_bindgen_test]
+    async fn test_eip191_wasm_sign_keychain_wallets_error() {
+        // Setup the mock bridge
+        setup_mock_keychain_wallets();
 
-    //     // Use a different address to trigger the error case in the mock bridge
-    //     let wrong_address_hex = "0xffffffffffffffffffffffffffffffffffffffff";
-    //     let address =
-    //         EthAddress::from_str(wrong_address_hex).expect("Failed to parse wrong address");
-    //     let tx_hash = Felt::from_hex_unchecked("0x12345");
+        // Use a different address to trigger the error case in the mock bridge
+        let wrong_address_hex = "0xffffffffffffffffffffffffffffffffffffffff";
+        let address =
+            EthAddress::from_str(wrong_address_hex).expect("Failed to parse wrong address");
+        let tx_hash = Felt::from_hex_unchecked("0x12345");
 
-    //     let signer = Eip191Signer { address };
+        let signer = Eip191Signer { address };
 
-    //     // Execute
-    //     let result = signer.sign(&tx_hash).await;
+        // Execute
+        let result = signer.sign(&tx_hash).await;
 
-    //     // Assertions
-    //     assert!(result.is_err(), "Signing should have failed");
-    //     match result.err().unwrap() {
-    //         SignError::BridgeError(msg) => {
-    //             assert!(
-    //                 msg.contains("Unexpected input"),
-    //                 "Error message mismatch: {}",
-    //                 msg
-    //             );
-    //             assert!(
-    //                 msg.contains(wrong_address_hex),
-    //                 "Error message should contain wrong address: {}",
-    //                 msg
-    //             );
-    //         }
-    //         e => panic!("Unexpected error type: {:?}", e),
-    //     }
-    // }
+        // Assertions
+        assert!(result.is_err(), "Signing should have failed");
+        match result.err().unwrap() {
+            SignError::BridgeError(msg) => {
+                assert!(
+                    msg.contains("Unexpected input"),
+                    "Error message mismatch: {}",
+                    msg
+                );
+                assert!(
+                    msg.contains(wrong_address_hex),
+                    "Error message should contain wrong address: {}",
+                    msg
+                );
+            }
+            e => panic!("Unexpected error type: {:?}", e),
+        }
+    }
 }
