@@ -50,9 +50,14 @@ export function Achievements() {
   }, [games, project, namespace]);
 
   const { pinneds, count, total } = useMemo(() => {
-    const ids = pins[addAddressPadding(address || self || "0x0")] || [];
+    const ids = (
+      pins[addAddressPadding(address || self || "0x0")] || []
+    ).filter((id) => achievements.find((item) => item.id === id)?.completed);
     const pinneds = achievements
-      .filter((item) => ids.includes(item.id))
+      .filter(
+        (item) => item.completed && (ids.length === 0 || ids.includes(item.id)),
+      )
+      .sort((a, b) => a.id.localeCompare(b.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     const count = achievements.filter((item) => item.completed).length;
@@ -83,22 +88,31 @@ export function Achievements() {
   );
 
   const data = useMemo(() => {
-    return players.map((player) => ({
-      address: player.address,
-      name:
-        usernames.find(
-          (username) =>
-            BigInt(username.address || "0x0") === BigInt(player.address),
-        )?.username || player.address.slice(0, 9),
-      points: player.earnings,
-      highlight: player.address === (address || self),
-      pins: pins[addAddressPadding(player.address)]
-        ?.map((id) => {
-          const achievement = achievements.find((a) => a?.id === id);
-          return achievement ? { id, icon: achievement.icon } : undefined;
-        })
-        .filter(Boolean) as { id: string; icon: string }[],
-    }));
+    return players.map((player) => {
+      const ids = (pins[addAddressPadding(player.address)] || []).filter((id) =>
+        player.completeds.includes(id),
+      );
+      const pinneds = achievements
+        .filter(
+          (item) =>
+            player.completeds.includes(item.id) &&
+            (ids.length === 0 || ids.includes(item.id)),
+        )
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
+        .slice(0, 3);
+      return {
+        address: player.address,
+        name:
+          usernames.find(
+            (username) =>
+              BigInt(username.address || "0x0") === BigInt(player.address),
+          )?.username || player.address.slice(0, 9),
+        points: player.earnings,
+        highlight: player.address === (address || self),
+        pins: pinneds,
+      };
+    });
   }, [players, address, self, pins, usernames, achievements]);
 
   useEffect(() => {
