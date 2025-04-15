@@ -12,6 +12,8 @@ export type ConnectionContextType = {
   project?: string;
   namespace?: string;
   version?: string;
+  closable?: boolean;
+  visitor?: boolean;
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
   closeModal: () => void;
@@ -22,7 +24,10 @@ export type ParentMethods = {
   close: () => void;
   openSettings: () => void;
   openPurchaseCredits: () => void;
-  openExecute: (calls: Call[], chain?: string) => Promise<boolean>;
+  openExecute: (
+    calls: Call[],
+    chain?: string,
+  ) => Promise<{ status: boolean; transactionHash: string }>;
 };
 
 export const initialState: ConnectionContextType = {
@@ -31,7 +36,7 @@ export const initialState: ConnectionContextType = {
     close: () => {},
     openSettings: () => {},
     openPurchaseCredits: () => {},
-    openExecute: async () => false,
+    openExecute: async () => ({ status: false, transactionHash: "" }),
   },
   provider: new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_SEPOLIA }),
   chainId: "",

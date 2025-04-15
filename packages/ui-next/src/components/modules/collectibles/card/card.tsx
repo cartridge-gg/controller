@@ -8,6 +8,7 @@ export interface CollectibleCardProps
     VariantProps<typeof collectibleCardVariants> {
   title: string;
   image: string;
+  selectable?: boolean;
   selected?: boolean;
   onSelect?: () => void;
 }
@@ -30,6 +31,7 @@ const collectibleCardVariants = cva(
 export function CollectibleCard({
   title,
   image,
+  selectable = true,
   selected,
   onSelect,
   variant,
@@ -48,7 +50,7 @@ export function CollectibleCard({
     >
       <CollectibleHeader
         title={title}
-        selectable={!selected}
+        selectable={!selected && selectable}
         selected={selected}
         onSelect={onSelect}
         hover={hover}

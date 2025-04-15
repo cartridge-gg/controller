@@ -36,7 +36,9 @@ export function useProgressions({
       queryKey: ["progressions", namespace, name, project],
       refetchInterval: 600_000, // Refetch every 10 minutes
       onSuccess: ({ playerAchievements }: { playerAchievements: Response }) => {
-        const progressions = playerAchievements.items[0].achievements
+        const items = playerAchievements.items;
+        if (items.length === 0) return;
+        const progressions = items[0].achievements
           .map(parser)
           .reduce((acc: { [key: string]: Progress }, achievement: Progress) => {
             acc[achievement.key] = achievement;

@@ -1,7 +1,8 @@
 import { Asset } from "#hooks/collection";
 import { CollectibleCard } from "@cartridge/ui-next";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import placeholder from "/public/placeholder.svg";
+import { useConnection } from "#hooks/context.js";
 
 export const Collectibles = ({
   assets,
@@ -14,6 +15,8 @@ export const Collectibles = ({
   selection: boolean;
   handleSelect: (tokenId: string) => void;
 }) => {
+  const { visitor } = useConnection();
+  const [searchParams] = useSearchParams();
   const location = useLocation();
 
   return (
@@ -24,7 +27,7 @@ export const Collectibles = ({
           <Link
             className="w-full select-none"
             draggable={false}
-            to={`token/${asset.tokenId}`}
+            to={`token/${asset.tokenId}?${searchParams.toString()}`}
             state={location.state}
             key={asset.tokenId}
             onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -43,6 +46,7 @@ export const Collectibles = ({
                   : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
               }
               image={asset.imageUrl || placeholder}
+              selectable={!visitor}
               selected={isSelected}
               onSelect={() => handleSelect(asset.tokenId)}
               className="rounded overflow-hidden"

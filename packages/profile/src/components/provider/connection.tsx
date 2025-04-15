@@ -47,6 +47,17 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         state.namespace = decodeURIComponent(nsParam);
       }
 
+      // It checks until it is enabled then it is never disabled
+      const closableParam = searchParams.get("closable");
+      if (closableParam !== undefined) {
+        state.closable = closableParam === "true";
+      }
+
+      const visitorParam = searchParams.get("visitor");
+      if (visitorParam !== undefined) {
+        state.visitor = visitorParam === "true";
+      }
+
       // Only update when erc20 state hasn't been set
       if (!state.erc20.length) {
         const erc20Param = searchParams.get("erc20");

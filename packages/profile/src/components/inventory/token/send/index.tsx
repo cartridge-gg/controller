@@ -12,17 +12,24 @@ import {
   Thumbnail,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Call, uint256 } from "starknet";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Call,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+  uint256,
+} from "starknet";
 import { SendRecipient } from "#components/modules/recipient";
 import { SendAmount } from "./amount";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
-  const { parent } = useConnection();
+  const { parent, provider, closable } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
   const { token } = useToken({ tokenAddress: tokenAddress! });
+
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
@@ -30,6 +37,7 @@ export function SendToken() {
   const [amountError, setAmountError] = useState<Error | undefined>();
   const [toError, setToError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const disabled = useMemo(() => {
     return !!toError || !!amountError || (!validated && !!warning);
   }, [validated, warning, amountError, toError]);
@@ -41,6 +49,7 @@ export function SendToken() {
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
       setSubmitted(true);
+      setLoading(true);
       if (!token || !to || !amount) return;
 
       const formattedAmount = uint256.bnToUint256(
@@ -54,11 +63,32 @@ export function SendToken() {
           calldata: [to, formattedAmount],
         },
       ];
-      await parent.openExecute(calls);
-      navigate("../../..");
+      try {
+        const res = await parent.openExecute(calls);
+        if (res?.transactionHash) {
+          await provider.waitForTransaction(res.transactionHash, {
+            retryInterval: 1000,
+            successStates: [
+              TransactionExecutionStatus.SUCCEEDED,
+              TransactionFinalityStatus.ACCEPTED_ON_L2,
+            ],
+          });
+        }
+        if (closable) {
+          navigate(`..?${searchParams.toString()}`);
+        } else {
+          navigate(`../../..?${searchParams.toString()}`);
+        }
+      } finally {
+        setLoading(false);
+      }
     },
-    [token, parent, navigate],
+    [token, provider, parent, closable, navigate, searchParams],
   );
+
+  const handleBack = useCallback(() => {
+    navigate(`..?${searchParams.toString()}`);
+  }, [navigate, searchParams]);
 
   if (!token) {
     return null;
@@ -66,7 +96,7 @@ export function SendToken() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader className="hidden" onBack={() => navigate("..")} />
+      <LayoutHeader className="hidden" onBack={handleBack} />
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-4">
           <Thumbnail icon={token.metadata.image} size="lg" rounded />
@@ -107,6 +137,7 @@ export function SendToken() {
           disabled={disabled}
           type="submit"
           className="w-full"
+          isLoading={loading}
           onClick={() => onSubmit(to, amount!)}
         >
           Review Send
