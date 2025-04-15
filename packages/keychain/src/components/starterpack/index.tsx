@@ -105,7 +105,7 @@ function StarterPackContent() {
   );
 }
 
-export function StarterPack() {
+export function StarterPack({ starterpackId }: { starterpackId: string }) {
   const starterPackItems: StarterItemData[] = [
     {
       title: "Village",

@@ -2,7 +2,12 @@ import { Signature } from "starknet";
 import { useEffect, useState } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
+import {
+  DeployCtx,
+  ExecuteCtx,
+  OpenStarterPackCtx,
+  SignMessageCtx,
+} from "@/utils/connection";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
@@ -159,7 +164,8 @@ export function Home() {
       return <PurchaseCredits />;
     }
     case "open-starter-pack": {
-      return <StarterPack />;
+      const ctx = context as OpenStarterPackCtx;
+      return <StarterPack starterpackId={ctx.starterpackId} />;
     }
     default:
       return <>*Waves*</>;

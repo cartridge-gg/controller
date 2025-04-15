@@ -301,7 +301,7 @@ export default class ControllerProvider extends BaseProvider {
     this.keychain.openPurchaseCredits();
   }
 
-  openStarterPack() {
+  openStarterPack(starterpackId: string) {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -312,7 +312,7 @@ export default class ControllerProvider extends BaseProvider {
     }
     this.iframes.profile.close();
     this.iframes.keychain.open();
-    this.keychain.openStarterPack();
+    this.keychain.openStarterPack(starterpackId);
   }
 
   async openExecute(calls: any, chainId?: string) {
