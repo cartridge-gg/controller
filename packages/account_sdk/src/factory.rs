@@ -1,10 +1,7 @@
 use async_trait::async_trait;
 use cainome::cairo_serde::CairoSerde;
 use starknet::{
-    accounts::{
-        AccountDeploymentV1, AccountFactory, PreparedAccountDeploymentV1,
-        PreparedAccountDeploymentV3, RawAccountDeploymentV1, RawAccountDeploymentV3,
-    },
+    accounts::{AccountFactory, PreparedAccountDeploymentV3, RawAccountDeploymentV3},
     core::types::{BlockId, BlockTag, Felt},
 };
 
@@ -77,17 +74,6 @@ impl AccountFactory for ControllerFactory {
         self.block_id
     }
 
-    async fn sign_deployment_v1(
-        &self,
-        deployment: &RawAccountDeploymentV1,
-        query_only: bool,
-    ) -> Result<Vec<Felt>, Self::SignError> {
-        let tx_hash = PreparedAccountDeploymentV1::from_raw(deployment.clone(), self)
-            .transaction_hash(query_only);
-        let signature = self.owner.sign(&tx_hash).await?;
-        Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
-    }
-
     async fn sign_deployment_v3(
         &self,
         deployment: &RawAccountDeploymentV3,
@@ -97,9 +83,5 @@ impl AccountFactory for ControllerFactory {
             .transaction_hash(query_only);
         let signature = self.owner.sign(&tx_hash).await?;
         Ok(Vec::<SignerSignature>::cairo_serialize(&vec![signature]))
-    }
-
-    fn deploy_v1(&self, salt: Felt) -> AccountDeploymentV1<'_, Self> {
-        AccountDeploymentV1::new(salt, self)
     }
 }

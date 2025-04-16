@@ -22,6 +22,7 @@ use crate::{
         account::FEE_TOKEN_ADDRESS, ensure_txn, runners::katana::KatanaRunner,
         transaction_waiter::TransactionWaiter,
     },
+    utils::contract_error_contains,
 };
 
 pub async fn test_verify_execute(owner: Owner) {
@@ -232,11 +233,13 @@ async fn test_create_and_use_registered_session() {
     // Register the session
     let expires_at = u64::MAX;
     let max_fee = FeeEstimate {
-        gas_consumed: Felt::ZERO,
-        gas_price: Felt::from(20000000000_u128),
+        l2_gas_price: Felt::ZERO,
+        l2_gas_consumed: Felt::ZERO,
+        l1_gas_consumed: Felt::ZERO,
+        l1_gas_price: Felt::from(20000000000_u128),
         overall_fee: Felt::from(57780000000000_u128),
-        data_gas_consumed: Felt::ZERO,
-        data_gas_price: Felt::ZERO,
+        l1_data_gas_consumed: Felt::ZERO,
+        l1_data_gas_price: Felt::ZERO,
         unit: PriceUnit::Fri,
     };
     let txn = controller
@@ -391,7 +394,7 @@ pub async fn test_verify_execute_with_invalid_guardian() {
                     execution_error,
                     ..
                 })
-            ))) if execution_error.contains("session/invalid-guardian")
+            ))) if contract_error_contains(&execution_error, "session/invalid-guardian")
         ),
         "Should return error"
     );

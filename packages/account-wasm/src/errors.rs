@@ -34,6 +34,7 @@ pub enum ErrorCode {
     // Starknet-specific errors (0-100)
     StarknetFailedToReceiveTransaction = 1,
     StarknetContractNotFound = 20,
+    EntrypointNotFound = 21,
     StarknetBlockNotFound = 24,
     StarknetInvalidTransactionIndex = 27,
     StarknetClassHashNotFound = 28,
@@ -44,9 +45,10 @@ pub enum ErrorCode {
     StarknetTooManyKeysInFilter = 34,
     StarknetContractError = 40,
     StarknetTransactionExecutionError = 41,
+    StorageProofNotSupported  = 42,
     StarknetClassAlreadyDeclared = 51,
     StarknetInvalidTransactionNonce = 52,
-    StarknetInsufficientMaxFee = 53,
+    InsufficientResourcesForValidate = 53,
     StarknetInsufficientAccountBalance = 54,
     StarknetValidationFailure = 55,
     StarknetCompilationFailed = 56,
@@ -244,10 +246,6 @@ impl From<AccountError<account_sdk::signers::SignError>> for JsControllerError {
                 ErrorCode::AccountClassHashCalculation,
                 calc_error.to_string(),
             ),
-            AccountError::ClassCompression(compression_error) => (
-                ErrorCode::AccountClassCompression,
-                compression_error.to_string(),
-            ),
             AccountError::FeeOutOfRange => (
                 ErrorCode::AccountFeeOutOfRange,
                 "Fee calculation overflow".to_string(),
@@ -287,6 +285,16 @@ impl From<ProviderError> for JsControllerError {
 impl From<StarknetError> for JsControllerError {
     fn from(e: StarknetError) -> Self {
         let (code, message, data) = match e {
+        	StarknetError::EntrypointNotFound => (
+		        ErrorCode::EntrypointNotFound,
+				"Requested entrypoint does not exist in the contract",
+				None
+        	),
+        	StarknetError::StorageProofNotSupported => (
+		        ErrorCode::StorageProofNotSupported,
+				"The node doesn't support storage proofs for blocks that are too far in the past",
+				None
+	       	),
             StarknetError::FailedToReceiveTransaction => (
                 ErrorCode::StarknetFailedToReceiveTransaction,
                 "Failed to write transaction",
@@ -334,7 +342,7 @@ impl From<StarknetError> for JsControllerError {
             StarknetError::ContractError(data) => (
                 ErrorCode::StarknetContractError,
                 "Contract error",
-                Some(data.revert_error),
+                Some(serde_json::to_string(&data).unwrap_or_default()),
             ),
             StarknetError::TransactionExecutionError(data) => (
                 ErrorCode::StarknetTransactionExecutionError,
@@ -351,8 +359,8 @@ impl From<StarknetError> for JsControllerError {
                 "Invalid transaction nonce",
                 None,
             ),
-            StarknetError::InsufficientMaxFee => (
-                ErrorCode::StarknetInsufficientMaxFee,
+            StarknetError::InsufficientResourcesForValidate => (
+                ErrorCode::InsufficientResourcesForValidate,
                 "Max fee is smaller than the minimal transaction cost",
                 None,
             ),
@@ -366,10 +374,10 @@ impl From<StarknetError> for JsControllerError {
                 "Validation failure",
                 Some(msg),
             ),
-            StarknetError::CompilationFailed => (
+            StarknetError::CompilationFailed(msg) => (
                 ErrorCode::StarknetCompilationFailed,
                 "Compilation failed",
-                None,
+                Some(msg),
             ),
             StarknetError::ContractClassSizeIsTooLarge => (
                 ErrorCode::StarknetContractClassSizeIsTooLarge,

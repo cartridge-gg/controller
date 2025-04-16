@@ -5,15 +5,13 @@ use hyper::{http::request::Parts, Body, Client, Request, Response, Server, Statu
 use serde_json::{json, Value};
 use starknet::accounts::single_owner::SignError;
 use starknet::accounts::{Account, AccountError, ExecutionEncoding};
-use starknet::core::crypto::compute_hash_on_elements;
 use starknet::core::types::{
-    BroadcastedInvokeTransaction, BroadcastedInvokeTransactionV1, BroadcastedTransaction, Call,
-    InvokeTransactionResult,
+    BroadcastedInvokeTransaction, BroadcastedTransaction, Call, DataAvailabilityMode, InvokeTransactionResult, ResourceBounds
 };
 use starknet::macros::selector;
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::JsonRpcClient;
-use starknet_crypto::Felt;
+use starknet_crypto::{poseidon_hash_many, Felt};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -115,8 +113,7 @@ impl CartridgeProxy {
             serde_json::from_value(body["params"].clone()).unwrap();
 
         for tx in &mut txs {
-            if let BroadcastedTransaction::Invoke(BroadcastedInvokeTransaction::V1(ref mut tx)) = tx
-            {
+            if let BroadcastedTransaction::Invoke(ref mut tx) = tx {
                 let tx_hash = self.transaction_hash(tx);
                 tx.signature = self
                     .add_guardian_signature(tx.sender_address, tx_hash, &tx.signature)
@@ -132,8 +129,7 @@ impl CartridgeProxy {
             serde_json::from_value(body["params"][0].clone()).unwrap();
 
         for tx in &mut txs {
-            if let BroadcastedTransaction::Invoke(BroadcastedInvokeTransaction::V1(ref mut tx)) = tx
-            {
+            if let BroadcastedTransaction::Invoke(ref mut tx) = tx {
                 if tx.signature.is_empty() {
                     continue;
                 }
@@ -302,37 +298,102 @@ impl CartridgeProxy {
         executor.execute_v3(vec![call]).send().await
     }
 
-    pub fn transaction_hash(&self, tx: &BroadcastedInvokeTransactionV1) -> Felt {
-        /// Cairo string for "invoke"
-        const PREFIX_INVOKE: Felt = Felt::from_raw([
-            513398556346534256,
-            18446744073709551615,
-            18446744073709551615,
-            18443034532770911073,
-        ]);
-
-        /// 2 ^ 128 + 1
-        const QUERY_VERSION_ONE: Felt = Felt::from_raw([
-            576460752142433776,
-            18446744073709551584,
-            17407,
-            18446744073700081633,
-        ]);
-        compute_hash_on_elements(&[
-            PREFIX_INVOKE,
-            if tx.is_query {
-                QUERY_VERSION_ONE
-            } else {
-                Felt::ONE
-            }, // version
+    pub fn transaction_hash(&self, tx: &BroadcastedInvokeTransaction) -> Felt {
+        compute_invoke_v3_tx_hash(
             tx.sender_address,
-            Felt::ZERO, // entry_point_selector
-            compute_hash_on_elements(&tx.calldata),
-            tx.max_fee,
+            &tx.calldata,
+            tx.tip,
+            &tx.resource_bounds.l1_gas,
+            &tx.resource_bounds.l2_gas,
+            &tx.resource_bounds.l1_data_gas,
+            &tx.paymaster_data,
             self.chain_id,
             tx.nonce,
-        ])
+            &tx.nonce_data_availability_mode,
+            &tx.fee_data_availability_mode,
+            &tx.account_deployment_data,
+            tx.is_query,
+        )
     }
+}
+
+/// Compute the hash of a V3 Invoke transaction.
+#[allow(clippy::too_many_arguments)]
+fn compute_invoke_v3_tx_hash(
+    sender_address: Felt,
+    calldata: &[Felt],
+    tip: u64,
+    l1_gas_bounds: &ResourceBounds,
+    l2_gas_bounds: &ResourceBounds,
+    l1_data_gas_bounds: &ResourceBounds,
+    paymaster_data: &[Felt],
+    chain_id: Felt,
+    nonce: Felt,
+    nonce_da_mode: &DataAvailabilityMode,
+    fee_da_mode: &DataAvailabilityMode,
+    account_deployment_data: &[Felt],
+    is_query: bool,
+) -> Felt {
+	/// Cairo string for "invoke"
+    const PREFIX_INVOKE: Felt = Felt::from_raw([
+        513398556346534256,
+        18446744073709551615,
+        18446744073709551615,
+        18443034532770911073,
+    ]);
+
+    /// 2^ 128
+    const QUERY_VERSION_OFFSET: Felt =
+        Felt::from_raw([576460752142434320, 18446744073709551584, 17407, 18446744073700081665]);
+
+    poseidon_hash_many(&[
+        PREFIX_INVOKE,
+        if is_query { QUERY_VERSION_OFFSET + Felt::THREE } else { Felt::THREE }, // version
+        sender_address,
+        hash_fee_fields(tip, l1_gas_bounds, l2_gas_bounds, l1_data_gas_bounds),
+        poseidon_hash_many(paymaster_data),
+        chain_id,
+        nonce,
+        encode_da_mode(nonce_da_mode, fee_da_mode),
+        poseidon_hash_many(account_deployment_data),
+        poseidon_hash_many(calldata),
+    ])
+}
+
+fn hash_fee_fields(
+    tip: u64,
+    l1_gas_bounds: &ResourceBounds,
+    l2_gas_bounds: &ResourceBounds,
+    l1_data_gas_bounds: &ResourceBounds,
+) -> Felt {
+    poseidon_hash_many(&[
+        tip.into(),
+        encode_gas_bound(b"L1_GAS", l1_gas_bounds),
+        encode_gas_bound(b"L2_GAS", l2_gas_bounds),
+        encode_gas_bound(b"L1_DATA_GAS", l1_data_gas_bounds),
+    ])
+}
+
+fn encode_gas_bound(name: &[u8], bound: &ResourceBounds) -> Felt {
+    let mut buffer = [0u8; 32];
+    let (remainder, max_price) = buffer.split_at_mut(128 / 8);
+    let (gas_kind, max_amount) = remainder.split_at_mut(64 / 8);
+
+    let padding = gas_kind.len() - name.len();
+    gas_kind[padding..].copy_from_slice(name);
+    max_amount.copy_from_slice(&bound.max_amount.to_be_bytes());
+    max_price.copy_from_slice(&bound.max_price_per_unit.to_be_bytes());
+
+    Felt::from_bytes_be(&buffer)
+}
+
+fn encode_da_mode(
+    nonce_da_mode: &DataAvailabilityMode,
+    fee_da_mode: &DataAvailabilityMode,
+) -> Felt {
+    let nonce = (*nonce_da_mode as u64) << 32;
+    let fee = *fee_da_mode as u64;
+    Felt::from(nonce + fee)
 }
 
 fn parse_execute_outside_transaction_params(
