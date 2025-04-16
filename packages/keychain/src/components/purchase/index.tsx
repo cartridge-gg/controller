@@ -26,6 +26,7 @@ import { StarterPackDetails } from "@/hooks/starterpack";
 import { StarterPackContent } from "../starterpack";
 import { PurchaseType } from "@/hooks/payment";
 import { Receiving } from "../starterpack/receiving";
+import { constants } from "starknet";
 
 export enum PurchaseState {
   SELECTION = 0,
@@ -58,6 +59,7 @@ export function Purchase({
   onBack,
   wallets,
   type,
+  isSlot,
   starterpackDetails,
   initState = PurchaseState.SELECTION,
 }: PurchaseCreditsProps) {
@@ -83,16 +85,37 @@ export function Purchase({
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
   const [displayError, setDisplayError] = useState<Error | null>(null);
+
+  const getStripeKey = () => {
+    if (import.meta.env.DEV) {
+      // Always use test mode in local dev
+      return import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE;
+    }
+    if (isSlot) {
+      // Slot is live now and should always use live mode
+      return import.meta.env.VITE_STRIPE_API_PUBKEY_LIVE_MODE;
+    }
+    if (
+      import.meta.env.PROD &&
+      controller?.chainId() === constants.StarknetChainId.SN_MAIN
+    ) {
+      // In prod, only use live mode if on mainnet
+      return import.meta.env.VITE_STRIPE_API_PUBKEY_PROD_MODE;
+    }
+    // Default to test mode
+    return import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE;
+  };
+
   const stripePromise = useMemo(
-    () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
-    [],
+    () => loadStripe(getStripeKey()),
+    [controller, isSlot],
   );
 
   useEffect(() => {
     setDisplayError(walletError);
   }, [walletError]);
 
-  // Only show phantom for now ad Solana is the only supported chain
+  // Only show phantom for now as Solana is the only supported network
   const availableWallets = useMemo(() => {
     const list = wallets ?? detectedWallets;
     const phantom = list.find((w) => w.type === "phantom");
