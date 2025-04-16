@@ -100,7 +100,7 @@ export function SendToken() {
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-4">
           <Thumbnail icon={token.metadata.image} size="lg" rounded />
-          <p className="text-semibold text-lg/[22px]">Send ETH</p>
+          <p className="text-semibold text-lg/[22px]">{`Send ${token.metadata.symbol ?? "Token"}`}</p>
         </div>
         <SendRecipient
           to={to}
