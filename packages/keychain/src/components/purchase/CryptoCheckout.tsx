@@ -26,9 +26,9 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
-import useCryptoPayment, { PurchaseType } from "@/hooks/payment";
+import useCryptoPayment from "@/hooks/payment";
 import { CostBreakdown } from "./CostBreakdown";
-import { StarterItemData } from "@/hooks/starterpack";
+import { StarterPackDetails } from "@/hooks/starterpack";
 import { Receiving } from "../starterpack/receiving";
 
 export const WALLET_CONFIG = {
@@ -64,16 +64,16 @@ export enum CheckoutState {
 export function CryptoCheckout({
   selectedWallet,
   walletAddress,
-  cost,
-  starterpackItems,
+  creditsAmount,
+  starterpackDetails,
   initialState = CheckoutState.REVIEW_PURCHASE,
   onBack,
   onComplete,
 }: {
   selectedWallet: ExternalWallet;
   walletAddress: string;
-  cost: number;
-  starterpackItems?: StarterItemData[];
+  creditsAmount: number;
+  starterpackDetails?: StarterPackDetails;
   initialState?: CheckoutState;
   onBack: () => void;
   onComplete: () => void;
@@ -102,9 +102,9 @@ export function CryptoCheckout({
       setState(CheckoutState.REQUESTING_PAYMENT);
       const paymentId = await sendPayment(
         walletAddress,
-        cost,
+        creditsAmount,
         selectedWallet.platform!,
-        starterpackItems ? PurchaseType.STARTERPACK : PurchaseType.CREDITS,
+        starterpackDetails,
         false,
         (explorer) => {
           setState(CheckoutState.TRANSACTION_SUBMITTED);
@@ -121,8 +121,15 @@ export function CryptoCheckout({
     } finally {
       setState(CheckoutState.REVIEW_PURCHASE);
     }
-  }, [sendPayment, selectedWallet, cost, onComplete]);
+  }, [sendPayment, selectedWallet, creditsAmount, onComplete]);
 
+  const cost = useMemo(() => {
+    if (starterpackDetails) {
+      return starterpackDetails.price;
+    }
+
+    return creditsAmount;
+  }, [starterpackDetails, creditsAmount]);
   return (
     <LayoutContainer>
       <LayoutHeader
@@ -142,8 +149,12 @@ export function CryptoCheckout({
           />
         )}
 
-        {starterpackItems ? (
-          <Receiving title={"Receiving"} items={starterpackItems} isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}/>
+        {starterpackDetails ? (
+          <Receiving
+            title={"Receiving"}
+            items={starterpackDetails.starterPackItems}
+            isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
+          />
         ) : (
           <ReviewToken
             title={"Receiving"}

@@ -52,7 +52,10 @@ export function useStarterPack(starterpackId: string) {
               });
             }
           }
-          if (result.starterpack.bonusCredits) {
+          if (
+            result.starterpack.bonusCredits &&
+            parseInt(result.starterpack.bonusCredits) > 0
+          ) {
             items.push({
               title: `${result.starterpack.bonusCredits} Credits`,
               description: "Credits cover service fee(s).",

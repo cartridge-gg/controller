@@ -95,7 +95,7 @@ export function Purchase({
   // Only show phantom for now ad Solana is the only supported chain
   const availableWallets = useMemo(() => {
     const list = wallets ?? detectedWallets;
-    const phantom = list.find(w => w.type === "phantom");
+    const phantom = list.find((w) => w.type === "phantom");
     return phantom ? [phantom] : [];
   }, [wallets, detectedWallets]);
 
@@ -116,7 +116,6 @@ export function Purchase({
     setDisplayError(null);
 
     try {
-
       const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -124,7 +123,7 @@ export function Purchase({
           credits: creditsAmount,
           starterpackId: starterpackDetails?.id,
           username: controller.username(),
-          purchaseType: type === PurchaseType.CREDITS ? "CREDITS" : "STARTERPACK",
+          purchaseType: type,
         }),
       });
       if (!res.ok) {
@@ -219,7 +218,8 @@ export function Purchase({
       <CryptoCheckout
         walletAddress={walletAddress!}
         selectedWallet={selectedWallet!}
-        cost={creditsAmount}
+        creditsAmount={creditsAmount}
+        starterpackDetails={starterpackDetails}
         onBack={() => setState(PurchaseState.SELECTION)}
         onComplete={() => setState(PurchaseState.SUCCESS)}
       />
@@ -262,16 +262,15 @@ export function Purchase({
                 starterpackItems={starterpackDetails?.starterPackItems}
               />
             )))}
-        {state === PurchaseState.SUCCESS && (
-          starterpackDetails ? (
+        {state === PurchaseState.SUCCESS &&
+          (starterpackDetails ? (
             <Receiving
               title="Received"
               items={starterpackDetails?.starterPackItems}
             />
           ) : (
             <Balance types={[BalanceType.CREDITS]} />
-          )
-        )}
+          ))}
       </LayoutContent>
 
       <LayoutFooter>

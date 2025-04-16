@@ -87,7 +87,6 @@ export const CreditsTxnSubmitted: Story = {
   },
 };
 
-
 export const StarterpackTxnSubmitted: Story = {
   args: {
     selectedWallet: {

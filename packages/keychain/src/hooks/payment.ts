@@ -20,6 +20,7 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
+import { StarterPackDetails } from "./starterpack";
 
 export enum PurchaseType {
   CREDITS = "CREDITS",
@@ -36,7 +37,7 @@ const useCryptoPayment = () => {
       walletAddress: string,
       credits: number,
       platform: ExternalPlatform,
-      purchaseType: PurchaseType,
+      starterpack?: StarterPackDetails,
       isMainnet: boolean = false,
       onSubmitted?: (explorer: Explorer) => void,
     ): Promise<string> => {
@@ -57,7 +58,7 @@ const useCryptoPayment = () => {
           controller.username(),
           credits,
           platform,
-          purchaseType,
+          starterpack,
           isMainnet,
         );
 
@@ -137,7 +138,7 @@ const useCryptoPayment = () => {
     username: string,
     credits: number,
     platform: ExternalPlatform,
-    purchaseType: PurchaseType,
+    starterpack?: StarterPackDetails,
     isMainnet: boolean = false,
   ) {
     const result = await client.request<CreateCryptoPaymentMutation>(
@@ -147,7 +148,10 @@ const useCryptoPayment = () => {
           username,
           credits,
           network: platform.toUpperCase() as Network,
-          purchaseType,
+          purchaseType: starterpack
+            ? PurchaseType.STARTERPACK
+            : PurchaseType.CREDITS,
+          starterpackId: starterpack?.id,
           isMainnet,
         },
       },
