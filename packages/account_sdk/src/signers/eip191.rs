@@ -37,6 +37,10 @@ pub struct Eip191Signer {
 }
 
 impl Eip191Signer {
+    pub fn new(address: EthAddress) -> Self {
+        Self { address }
+    }
+
     #[cfg(not(target_arch = "wasm32"))]
     /// Create a random Eip191Signer
     pub fn random() -> Self {

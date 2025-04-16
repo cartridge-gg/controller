@@ -1,17 +1,20 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  PropsWithChildren,
-  useMemo,
-} from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   ExternalWallet,
-  ExternalWalletType,
   ExternalWalletResponse,
+  ExternalWalletType,
+  TurnkeyWallet,
 } from "@cartridge/controller";
+import { useTurnkey } from "@turnkey/sdk-react";
+import React, {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ParentMethods, useConnection } from "./connection";
 
 interface WalletsContextValue {
@@ -41,6 +44,25 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const { isAuthenticated } = useAuth0();
+  const { authIframeClient } = useTurnkey();
+
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      authIframeClient &&
+      authIframeClient.iframePublicKey
+    ) {
+      setWallets((prevWallets: ExternalWallet[]) => {
+        return [...prevWallets, new TurnkeyWallet(authIframeClient).getInfo()];
+      });
+    }
+  }, [
+    isAuthenticated,
+    setWallets,
+    authIframeClient,
+    authIframeClient?.iframePublicKey,
+  ]);
 
   // Instantiate KeychainWallets once parent is available
   useEffect(() => {
@@ -165,7 +187,7 @@ export class KeychainWallets {
    */
   async signMessage(identifier: string, message: string): Promise<string> {
     console.log(
-      `KeychainWallets: signMessage called for identifier: ${identifier}`,
+      `KeychainWallets: signMessage called for identifier: ${identifier} and message: ${message}`,
     );
 
     // --- Decision Logic ---

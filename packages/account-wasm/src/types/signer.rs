@@ -85,6 +85,14 @@ impl TryFrom<StarknetSigner> for SigningKey {
     }
 }
 
+impl TryFrom<Eip191Signer> for account_sdk::signers::eip191::Eip191Signer {
+    type Error = EncodingError;
+
+    fn try_from(eip191: Eip191Signer) -> Result<Self, Self::Error> {
+        Ok(Self::new(eip191.address.parse().unwrap()))
+    }
+}
+
 impl TryFrom<Signer> for account_sdk::signers::Signer {
     type Error = EncodingError;
 
@@ -93,6 +101,8 @@ impl TryFrom<Signer> for account_sdk::signers::Signer {
             Ok(Self::Webauthn(webauthn.try_into()?))
         } else if let Some(starknet) = signer.starknet {
             Ok(Self::Starknet(starknet.try_into()?))
+        } else if let Some(eip191) = signer.eip191 {
+            Ok(Self::Eip191(eip191.try_into()?))
         } else {
             Err(EncodingError::Serialization(
                 serde_wasm_bindgen::Error::new("Missing signer data"),

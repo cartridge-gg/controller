@@ -39,9 +39,11 @@
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
+    "@cartridge/utils": "workspace:*",
     "@cartridge/penpal": "catalog:",
     "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
+    "@turnkey/sdk-browser": "^4.0.0",
     "cbor-x": "^1.5.0",
     "fast-deep-equal": "catalog:"
   },

@@ -1,14 +1,21 @@
+import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
 import { doLogin } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
+import { Signer } from "@cartridge/account-wasm";
 import { AccountQuery, useAccountQuery } from "@cartridge/utils/api/cartridge";
 import { useCallback, useState } from "react";
 import { AuthenticationMode, LoginMode } from "../types";
 import { useSignupWithSocial } from "./social/signup";
 import { fetchAccount } from "./utils";
 import { useSignupWithWebauthn } from "./webauthn/signup";
+
+export interface SignupResponse {
+  address: string;
+  signer: Signer;
+}
 
 export function useCreateController({
   isSlot,
@@ -96,16 +103,48 @@ export function useCreateController({
 
   const handleSignup = useCallback(
     async (username: string, authenticationMode: AuthenticationMode) => {
+      if (!origin || !chainId || !rpcUrl) {
+        throw new Error("Origin, chainId, or rpcUrl not found");
+      }
+
+      let signupResponse: SignupResponse | undefined;
       switch (authenticationMode) {
         case AuthenticationMode.Webauthn:
           await signupWithWebauthn(username, doPopupFlow);
           break;
         case AuthenticationMode.Social:
-          await signupWithSocial(username);
+          signupResponse = await signupWithSocial(username);
           break;
         default:
           break;
       }
+
+      if (!signupResponse) {
+        throw new Error("No signature found");
+      }
+
+      const controller = new Controller({
+        appId: origin,
+        classHash: STABLE_CONTROLLER.hash,
+        chainId,
+        rpcUrl,
+        address: signupResponse.address,
+        username,
+        owner: {
+          signer: signupResponse.signer,
+        },
+      });
+
+      const ret = await controller.login(NOW + DEFAULT_SESSION_DURATION);
+      console.log(ret);
+
+      // const res = await registerController(
+      //   register,
+      //   address,
+      //   signature,
+      //   userName,
+      // );
+      // console.log(`Registered controller with res: ${res}`);
     },
     [
       chainId,

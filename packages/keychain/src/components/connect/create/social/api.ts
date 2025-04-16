@@ -10,10 +10,12 @@ import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
 import { Signature } from "ethers";
 import { UseMutateAsyncFunction } from "react-query";
 
+export const SOCIAL_PROVIDER_NAME = "discord";
+
 export const fetchApi = fetchApiCreator(
   `${import.meta.env.VITE_CARTRIDGE_API_URL}/oauth2`,
   {
-    credentials: "omit",
+    credentials: "same-origin",
   },
 );
 
@@ -47,7 +49,10 @@ export const registerController = async (
   return res;
 };
 
-export const getTurnkeySuborg = async (oidcToken: string, username: string) => {
+export const getOrCreateTurnkeySuborg = async (
+  oidcToken: string,
+  username: string,
+) => {
   const getSuborgsResponse = await fetchApi<GetSuborgsResponse>("suborgs", {
     filterType: "OIDC_TOKEN",
     filterValue: oidcToken,
@@ -65,7 +70,7 @@ export const getTurnkeySuborg = async (oidcToken: string, username: string) => {
       "create-suborg",
       {
         rootUserUsername: username,
-        oauthProviders: [{ providerName: "Discord", oidcToken }],
+        oauthProviders: [{ providerName: SOCIAL_PROVIDER_NAME, oidcToken }],
       },
     );
     targetSubOrgId = createSuborgResponse.subOrganizationId;
@@ -81,12 +86,18 @@ export const authenticateToTurnkey = async (
   oidcToken: string,
   authIframeClient: TurnkeyIframeClient,
 ) => {
-  const authResponse = await fetchApi<AuthResponse>("auth", {
-    suborgID: subOrgId,
-    targetPublicKey: authIframeClient.iframePublicKey,
-    oidcToken,
-    invalidateExisting: true,
-  });
+  const authResponse = await fetchApi<AuthResponse>(
+    `auth`,
+    {
+      suborgID: subOrgId,
+      targetPublicKey: authIframeClient.iframePublicKey,
+      oidcToken,
+      invalidateExisting: true,
+    },
+    {
+      client_id: "turnkey",
+    },
+  );
 
   const injectResponse = await authIframeClient.injectCredentialBundle(
     authResponse.credentialBundle,
