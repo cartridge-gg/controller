@@ -32,8 +32,8 @@ use hex;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Eip191Signer {
     #[cfg(not(target_arch = "wasm32"))]
-    signing_key: SigningKey,
-    address: EthAddress,
+    pub signing_key: SigningKey,
+    pub address: EthAddress,
 }
 
 impl Eip191Signer {
