@@ -24,9 +24,12 @@ import { Collectibles } from "./collectibles";
 import placeholder from "/public/placeholder.svg";
 import { addAddressPadding } from "starknet";
 import { CollectionHeader } from "./header";
+import { useConnection } from "#hooks/context.js";
 
 export function Collection() {
   const { address: contractAddress, tokenId } = useParams();
+  const { closable, visitor } = useConnection();
+
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,23 +42,30 @@ export function Collection() {
 
   const handleSelectAll = useCallback(() => {
     if (!assets) return;
-    const options = {
+    const params = Object.fromEntries(searchParams.entries());
+    setSearchParams({
+      ...params,
       tokenIds: tokenIds.length ? [] : assets.map((asset) => asset.tokenId),
-    };
-    setSearchParams(options);
-  }, [assets, tokenIds, setSearchParams]);
+    });
+  }, [assets, tokenIds, searchParams, setSearchParams]);
 
   const handleSelect = useCallback(
     (tokenId: string) => {
       const isSelected = tokenIds.includes(tokenId);
+      const params = Object.fromEntries(searchParams.entries());
       setSearchParams({
+        ...params,
         tokenIds: isSelected
           ? tokenIds.filter((id) => id !== tokenId)
           : [...tokenIds, tokenId],
       });
     },
-    [tokenIds, setSearchParams],
+    [tokenIds, searchParams, setSearchParams],
   );
+
+  const handleBack = useCallback(() => {
+    navigate(`..?${searchParams.toString()}`);
+  }, [navigate, searchParams]);
 
   if (tokenId || location.pathname.includes("/send")) {
     return <Outlet />;
@@ -70,7 +80,7 @@ export function Collection() {
               <>
                 <LayoutHeader
                   className="hidden"
-                  onBack={() => navigate("..")}
+                  onBack={closable || visitor ? undefined : handleBack}
                 />
                 <LayoutContentLoader />
               </>
@@ -81,7 +91,7 @@ export function Collection() {
               <>
                 <LayoutHeader
                   className="hidden"
-                  onBack={() => navigate("..")}
+                  onBack={closable || visitor ? undefined : handleBack}
                 />
                 <LayoutContentError />
               </>
@@ -93,7 +103,7 @@ export function Collection() {
                 <>
                   <LayoutHeader
                     className="hidden"
-                    onBack={() => navigate("..")}
+                    onBack={closable || visitor ? undefined : handleBack}
                   />
                   <LayoutContentLoader />
                 </>
@@ -104,7 +114,7 @@ export function Collection() {
               <>
                 <LayoutHeader
                   className="hidden"
-                  onBack={() => navigate("..")}
+                  onBack={closable || visitor ? undefined : handleBack}
                 />
                 <LayoutContent className={cn("p-6 flex flex-col gap-y-4")}>
                   <CollectionHeader
@@ -119,7 +129,10 @@ export function Collection() {
                   />
 
                   <div
-                    className="flex items-center gap-x-1.5 text-xs cursor-pointer self-start text-foreground-300"
+                    className={cn(
+                      "flex items-center gap-x-1.5 text-xs cursor-pointer self-start text-foreground-300",
+                      visitor && "invisible",
+                    )}
                     onClick={handleSelectAll}
                   >
                     <CheckboxIcon
@@ -143,7 +156,7 @@ export function Collection() {
                 <LayoutFooter
                   className={cn(
                     "relative flex flex-col items-center justify-center gap-y-4 bg-background",
-                    !selection && "hidden",
+                    (!selection || visitor) && "hidden",
                   )}
                 >
                   <Link

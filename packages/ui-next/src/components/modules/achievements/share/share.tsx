@@ -43,15 +43,9 @@ export function AchievementShare({
 
   const handleShare = useCallback(() => {
     if (!url || !xhandle) return;
-    const content = `🚨 THIS ISN’T JUST AN ACHIEVEMENT. IT’S HISTORY.
+    const content = `I earned ${points} points by unlocking 🏆 ${title} in @${xhandle}. Only ${difficulty}% of players have earned this achievement.
 
-🏆 ${title} Unlocked in @${xhandle}
-
-✨ +${points} Points | 📅 ${date}
-
-Only ${difficulty}% of players have earned this rare badge.
-
-💥 Prove it. Play now 👇`;
+Play now 👇`;
 
     const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
       content,

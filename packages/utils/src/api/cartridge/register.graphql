@@ -1,0 +1,16 @@
+mutation Register(
+  $chainId: String!
+  $owner: SignerInput!
+  $signature: [String!]!
+  $username: String!
+) {
+  register(
+    chainId: $chainId
+    owner: $owner
+    signature: $signature
+    username: $username
+  ) {
+    name
+    username
+  }
+}

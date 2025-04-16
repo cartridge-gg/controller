@@ -96,8 +96,8 @@ export const SilverIcon = memo(
             y2="42.877"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
           <linearGradient
             id="paint1_linear_10556_64341"
@@ -107,8 +107,8 @@ export const SilverIcon = memo(
             y2="42.877"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
           <linearGradient
             id="paint2_linear_10556_64341"
@@ -118,8 +118,8 @@ export const SilverIcon = memo(
             y2="42.877"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
           <linearGradient
             id="paint3_linear_10556_64341"
@@ -129,8 +129,8 @@ export const SilverIcon = memo(
             y2="42.877"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
           <linearGradient
             id="paint4_linear_10556_64341"
@@ -140,8 +140,8 @@ export const SilverIcon = memo(
             y2="42.877"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
           <linearGradient
             id="paint5_linear_10556_64341"
@@ -151,8 +151,8 @@ export const SilverIcon = memo(
             y2="42.877"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
           <linearGradient
             id="paint6_linear_10556_64341"
@@ -162,8 +162,8 @@ export const SilverIcon = memo(
             y2="42.877"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
           <linearGradient
             id="paint7_linear_10556_64341"
@@ -173,8 +173,8 @@ export const SilverIcon = memo(
             y2="42.877"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
         </defs>
       </svg>

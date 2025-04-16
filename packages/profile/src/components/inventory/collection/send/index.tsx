@@ -12,7 +12,12 @@ import {
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Call, uint256 } from "starknet";
+import {
+  Call,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+  uint256,
+} from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
 import { useCollection } from "#hooks/collection";
 import { Sending } from "./sending";
@@ -35,11 +40,12 @@ export function SendCollection() {
     address: contractAddress || "0x0",
   });
   const { address } = useAccount();
-  const { parent } = useConnection();
+  const { provider, parent, closable } = useConnection();
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
   const [recipientError, setRecipientError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
@@ -80,6 +86,7 @@ export function SendCollection() {
 
   const onSubmit = useCallback(
     async (to: string) => {
+      setLoading(true);
       setSubmitted(true);
       if (
         !contractAddress ||
@@ -100,17 +107,34 @@ export function SendCollection() {
           calldata: [address, to, tokenId, ...calldata],
         };
       });
-      await parent.openExecute(calls);
-      navigate("../../..");
+      const res = await parent.openExecute(calls);
+      if (res?.transactionHash) {
+        await provider.waitForTransaction(res.transactionHash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+      }
+      if (closable) {
+        navigate(`../..?${searchParams.toString()}`);
+      } else {
+        navigate(`../../..?${searchParams.toString()}`);
+      }
+      setLoading(false);
     },
     [
+      provider,
       tokenIds,
       contractAddress,
       address,
       parent,
       recipientError,
       entrypoint,
+      closable,
       navigate,
+      searchParams,
     ],
   );
 
@@ -127,16 +151,15 @@ export function SendCollection() {
     return assets[0].imageUrl || placeholder;
   }, [collection, assets]);
 
+  const handleBack = useCallback(() => {
+    navigate(`..?${searchParams.toString()}`);
+  }, [navigate, searchParams]);
+
   if (!collection || !assets) return null;
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        className="hidden"
-        onBack={() => {
-          navigate("..");
-        }}
-      />
+      <LayoutHeader className="hidden" onBack={handleBack} />
       <LayoutContent className="p-6 flex flex-col gap-6">
         <CollectionHeader image={image} title={title} />
         <SendRecipient
@@ -163,6 +186,7 @@ export function SendCollection() {
           disabled={disabled}
           type="submit"
           className="w-full"
+          isLoading={loading}
           onClick={() => onSubmit(to)}
         >
           Review Send

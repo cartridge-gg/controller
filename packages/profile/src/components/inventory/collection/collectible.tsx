@@ -4,6 +4,7 @@ import {
   useLocation,
   useNavigate,
   useParams,
+  useSearchParams,
 } from "react-router-dom";
 import {
   LayoutContainer,
@@ -21,7 +22,7 @@ import {
 } from "@cartridge/ui-next";
 import { constants } from "starknet";
 import { useConnection } from "#hooks/context";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useCollection } from "#hooks/collection";
 import { compare } from "compare-versions";
 import { CollectionHeader } from "./header";
@@ -29,7 +30,8 @@ import placeholder from "/public/placeholder.svg";
 import { formatName } from "./helper";
 
 export function Collectible() {
-  const { chainId, version } = useConnection();
+  const { chainId, version, visitor } = useConnection();
+  const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -63,6 +65,10 @@ export function Collectible() {
       }));
   }, [asset]);
 
+  const handleBack = useCallback(() => {
+    navigate(`..?${searchParams.toString()}`);
+  }, [navigate, searchParams]);
+
   if (location.pathname.includes("/send")) {
     return <Outlet />;
   }
@@ -74,10 +80,7 @@ export function Collectible() {
           case "loading": {
             return (
               <>
-                <LayoutHeader
-                  className="hidden"
-                  onBack={() => navigate("..")}
-                />
+                <LayoutHeader className="hidden" onBack={handleBack} />
                 <LayoutContentLoader />
               </>
             );
@@ -85,10 +88,7 @@ export function Collectible() {
           case "error": {
             return (
               <>
-                <LayoutHeader
-                  className="hidden"
-                  onBack={() => navigate("..")}
-                />
+                <LayoutHeader className="hidden" onBack={handleBack} />
                 <LayoutContentError />
               </>
             );
@@ -97,22 +97,14 @@ export function Collectible() {
             if (!collection || !asset) {
               return (
                 <>
-                  <LayoutHeader
-                    className="hidden"
-                    onBack={() => navigate("..")}
-                  />
+                  <LayoutHeader className="hidden" onBack={handleBack} />
                   <LayoutContentLoader />
                 </>
               );
             }
             return (
               <>
-                <LayoutHeader
-                  className="hidden"
-                  onBack={() => {
-                    navigate("..");
-                  }}
-                />
+                <LayoutHeader className="hidden" onBack={handleBack} />
                 <LayoutContent className="p-6 flex flex-col gap-4">
                   <CollectionHeader
                     image={asset.imageUrl || placeholder}
@@ -139,13 +131,13 @@ export function Collectible() {
 
                 <LayoutFooter
                   className={cn(
-                    "relative flex flex-col items-center justify-center gap-y-4 bg-background",
-                    !compatibility && "hidden",
+                    "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-0",
+                    (!compatibility || visitor) && "hidden",
                   )}
                 >
                   <Link
                     className="flex items-center justify-center gap-x-4 w-full"
-                    to="send"
+                    to={`send?${searchParams.toString()}`}
                   >
                     <Button className="h-10 w-full">Send</Button>
                   </Link>

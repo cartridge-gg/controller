@@ -32,7 +32,9 @@ export function useTrophies({
       queryKey: ["achievements", namespace, name, project],
       refetchInterval: 600_000, // Refetch every 10 minutes
       onSuccess: ({ achievements }: { achievements: Response }) => {
-        const rawTrophies = achievements.items[0].achievements
+        const items = achievements.items;
+        if (items.length === 0) return;
+        const rawTrophies = items[0].achievements
           .map(parser)
           .reduce((acc: { [key: string]: Trophy }, achievement: Trophy) => {
             acc[achievement.key] = achievement;
