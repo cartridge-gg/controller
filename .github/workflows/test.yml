@@ -129,6 +129,10 @@ jobs:
         run: |
           # Check if there are any changes to commit
           if ! git diff --quiet packages/*/__image_snapshots__/; then
+            # Configure committer identity using secrets
+            git config --global user.email "tarrence@cartridge.gg"
+            git config --global user.name "Robot Tarrence"
+
             git add packages/*/__image_snapshots__/
             git commit -m "chore: update storybook snapshots"
 
