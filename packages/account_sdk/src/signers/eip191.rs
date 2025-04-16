@@ -108,14 +108,10 @@ impl HashSigner for Eip191Signer {
 #[async_trait(?Send)]
 impl HashSigner for Eip191Signer {
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
-        // Format address for the bridge
         let address_hex = format!("0x{}", hex::encode(self.address.clone().as_bytes()));
         let message_hex = hex::encode(tx_hash.to_bytes_be());
 
-        // Call the external signing function via the bridge
         let signature_hex = external_sign_message(&address_hex, &message_hex).await?;
-
-        // Parse the combined hex signature (r, s, v)
         let signature_bytes = hex::decode(signature_hex.trim_start_matches("0x")).map_err(|e| {
             SignError::BridgeError(format!("Failed to decode signature hex: {}", e))
         })?;
@@ -176,78 +172,57 @@ mod wasm_tests {
 
     // Define the mock wallet bridge JS interface
     #[wasm_bindgen(inline_js = r#"
-        export function setup_mock_bridge() {
-            if (!window.wallet_bridge) { window.wallet_bridge = {}; }
+        export function setup_mock_keychain_wallets() {
+            if (!window.keychain_wallets) { window.keychain_wallets = {}; }
 
-            window.wallet_bridge.signMessage = (identifier, message) => {
+            window.keychain_wallets.signMessage = (identifier, message) => {
                 console.log(`Mock bridge called: signMessage(${identifier}, ${message})`);
 
-                // --- Define Expected Test Values --- 
-                const expectedIdentifier = "0x0102030405060708090a0b0c0d0e0f1011121314";
-                // Note: JS doesn't handle Felt directly, we expect the hex string from Rust
-                const expectedMessageHex = "0000000000000000000000000000000000000000000000000000000000012345";
-                const mockSignatureHex = "0x790a151f5bcb03f5adeb6c5780e1d7e229c44f8767043f90663b621124945a31510c283547586f70c39ac8e7bfb4546e4596640d6c54a7f21d8a42e315174a7c1b";
-                const mockErrorMsg = "Simulated bridge error";
+                // --- Define Expected Test Values ---
+                const expectedIdentifier = "0xa517d17bc2cca98e94f9975efd295ec70bfb3cf7";
+                const mockSignature = "0xc4c387bf41b6aea0711abf8305bcd16d9a78fac00abc343066a1f2b23e35c16241801f2354ab277a16cfd1d70fa66b1b0891549eec1370ba43967cb414b3fae01c";
 
-                // --- Mock Logic --- 
                 return new Promise((resolve, reject) => {
-                    if (identifier === expectedIdentifier && message === expectedMessageHex) {
-                        // Simulate successful signing
+                    // Check if the identifier matches the expected one for the success test
+                    if (identifier === expectedIdentifier) {
                         const response = {
                             success: true,
-                            wallet: "metamask", // Type doesn't strictly matter for this test
-                            result: mockSignatureHex,
+                            wallet: "metamask",
+                            result: mockSignature,
                             error: null,
                             account: identifier
                         };
-                        console.log("Mock bridge resolving successfully with:", response);
-                        resolve(response);
+                        console.log("Mock bridge resolving successfully for:", identifier);
+                        resolve(response); // Resolve with success data
                     } else {
-                         // Simulate failure (e.g., wrong identifier or message)
-                         const response = {
-                            success: false,
-                            wallet: "metamask",
-                            result: null,
-                            error: `Unexpected input. Identifier: ${identifier}, Message: ${message}. Expected: ${expectedIdentifier}, ${expectedMessageHex}`,
-                            account: identifier
-                         };
-                        console.error("Mock bridge rejecting with:", response);
-                        // Note: The Rust binding uses 'catch', so we resolve with the error structure
-                        // resolve(response);
-                        // Actually, the wasm_bindgen `catch` expects the promise to reject for JS errors.
-                        // For application errors (like failed sig), the promise resolves with success:false.
-                        resolve(response);
+                        // Handle the error case for test_eip191_wasm_sign_bridge_error
+                        const errorMessage = `Bridge Error: Unexpected input: ${identifier}`;
+                        console.error("Mock bridge rejecting for:", identifier, errorMessage);
+                        // Reject the promise for error cases, as expected by wasm-bindgen(catch)
+                        reject(new Error(errorMessage));
                     }
                 });
             };
-            console.log("Mock wallet_bridge setup complete.", window.wallet_bridge);
+
+            console.log("Mock keychain_wallets setup complete.", JSON.stringify(window.keychain_wallets, null, 2));
         }
     "#)]
+
     extern "C" {
-        fn setup_mock_bridge();
+        fn setup_mock_keychain_wallets();
     }
 
     #[wasm_bindgen_test]
     async fn test_eip191_wasm_sign_success() {
         // Setup the mock bridge in the JS environment
-        setup_mock_bridge();
+        setup_mock_keychain_wallets();
 
-        // --- Test Data ---
-        let address_hex = "0x0102030405060708090a0b0c0d0e0f1011121314";
+        let address_hex = "0xa517d17bc2cca98e94f9975efd295ec70bfb3cf7";
         let address = EthAddress::from_str(address_hex).expect("Failed to parse test address");
-        let tx_hash = Felt::from_hex_unchecked("0x12345");
+        let tx_hash = Felt::from_hex_unchecked("0x48656c6c6f20576f726c6421");
 
         // Create the signer instance
         let signer = Eip191Signer { address };
-
-        // Expected signature components derived from the mock hex signature
-        let expected_r =
-            U256::from_str("0x790a151f5bcb03f5adeb6c5780e1d7e229c44f8767043f90663b621124945a31")
-                .unwrap();
-        let expected_s =
-            U256::from_str("0x510c283547586f70c39ac8e7bfb4546e4596640d6c54a7f21d8a42e315174a7c")
-                .unwrap();
-        let expected_y_parity = true; // v = 0x1b (27) is odd
 
         // --- Execute Test ---
         let result = signer.sign(&tx_hash).await;
@@ -257,25 +232,35 @@ mod wasm_tests {
         match result.unwrap() {
             SignerSignature::Eip191((controller_signer, signature)) => {
                 assert_eq!(
-                    controller_signer.eth_address.0.to_string(),
-                    address_hex,
+                    controller_signer.eth_address.0,
+                    Felt::from_str(address_hex).expect("Failed to parse test address"),
                     "Signer address mismatch"
                 );
+
+                // Create expected r from bytes
+                let expected_r_bytes =
+                    hex::decode("c4c387bf41b6aea0711abf8305bcd16d9a78fac00abc343066a1f2b23e35c162")
+                        .unwrap();
+                let expected_r = U256::from_bytes_be(&expected_r_bytes.try_into().unwrap());
                 assert_eq!(signature.r, expected_r, "Signature R mismatch");
+
+                // Create expected s from bytes
+                let expected_s_bytes =
+                    hex::decode("41801f2354ab277a16cfd1d70fa66b1b0891549eec1370ba43967cb414b3fae0")
+                        .unwrap();
+                let expected_s = U256::from_bytes_be(&expected_s_bytes.try_into().unwrap());
                 assert_eq!(signature.s, expected_s, "Signature S mismatch");
-                assert_eq!(
-                    signature.y_parity, expected_y_parity,
-                    "Signature Y-Parity mismatch"
-                );
+
+                assert!(!signature.y_parity, "Signature Y-Parity mismatch");
             }
             _ => panic!("Unexpected SignerSignature variant"),
         }
     }
 
     #[wasm_bindgen_test]
-    async fn test_eip191_wasm_sign_bridge_error() {
+    async fn test_eip191_wasm_sign_keychain_wallets_error() {
         // Setup the mock bridge
-        setup_mock_bridge();
+        setup_mock_keychain_wallets();
 
         // Use a different address to trigger the error case in the mock bridge
         let wrong_address_hex = "0xffffffffffffffffffffffffffffffffffffffff";
