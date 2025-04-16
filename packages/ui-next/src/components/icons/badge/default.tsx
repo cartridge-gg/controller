@@ -56,8 +56,8 @@ export const DefaultIcon = memo(
             y2="35.4728"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
           <linearGradient
             id="paint1_linear_10556_64333"
@@ -67,8 +67,8 @@ export const DefaultIcon = memo(
             y2="35.4728"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
           <linearGradient
             id="paint2_linear_10556_64333"
@@ -78,8 +78,8 @@ export const DefaultIcon = memo(
             y2="35.4728"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#161A17" stop-opacity="0" />
-            <stop offset="1" stop-color="#161A17" stop-opacity="0.24" />
+            <stop stopColor="#161A17" stopOpacity="0" />
+            <stop offset="1" stopColor="#161A17" stopOpacity="0.24" />
           </linearGradient>
         </defs>
       </svg>
