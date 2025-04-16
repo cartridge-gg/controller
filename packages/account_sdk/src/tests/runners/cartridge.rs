@@ -6,7 +6,8 @@ use serde_json::{json, Value};
 use starknet::accounts::single_owner::SignError;
 use starknet::accounts::{Account, AccountError, ExecutionEncoding};
 use starknet::core::types::{
-    BroadcastedInvokeTransaction, BroadcastedTransaction, Call, DataAvailabilityMode, InvokeTransactionResult, ResourceBounds
+    BroadcastedInvokeTransaction, BroadcastedTransaction, Call, DataAvailabilityMode,
+    InvokeTransactionResult, ResourceBounds,
 };
 use starknet::macros::selector;
 use starknet::providers::jsonrpc::HttpTransport;
@@ -334,7 +335,7 @@ fn compute_invoke_v3_tx_hash(
     account_deployment_data: &[Felt],
     is_query: bool,
 ) -> Felt {
-	/// Cairo string for "invoke"
+    /// Cairo string for "invoke"
     const PREFIX_INVOKE: Felt = Felt::from_raw([
         513398556346534256,
         18446744073709551615,
@@ -343,12 +344,20 @@ fn compute_invoke_v3_tx_hash(
     ]);
 
     /// 2^ 128
-    const QUERY_VERSION_OFFSET: Felt =
-        Felt::from_raw([576460752142434320, 18446744073709551584, 17407, 18446744073700081665]);
+    const QUERY_VERSION_OFFSET: Felt = Felt::from_raw([
+        576460752142434320,
+        18446744073709551584,
+        17407,
+        18446744073700081665,
+    ]);
 
     poseidon_hash_many(&[
         PREFIX_INVOKE,
-        if is_query { QUERY_VERSION_OFFSET + Felt::THREE } else { Felt::THREE }, // version
+        if is_query {
+            QUERY_VERSION_OFFSET + Felt::THREE
+        } else {
+            Felt::THREE
+        }, // version
         sender_address,
         hash_fee_fields(tip, l1_gas_bounds, l2_gas_bounds, l1_data_gas_bounds),
         poseidon_hash_many(paymaster_data),

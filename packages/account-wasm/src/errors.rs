@@ -45,7 +45,7 @@ pub enum ErrorCode {
     StarknetTooManyKeysInFilter = 34,
     StarknetContractError = 40,
     StarknetTransactionExecutionError = 41,
-    StorageProofNotSupported  = 42,
+    StorageProofNotSupported = 42,
     StarknetClassAlreadyDeclared = 51,
     StarknetInvalidTransactionNonce = 52,
     InsufficientResourcesForValidate = 53,
@@ -285,16 +285,16 @@ impl From<ProviderError> for JsControllerError {
 impl From<StarknetError> for JsControllerError {
     fn from(e: StarknetError) -> Self {
         let (code, message, data) = match e {
-        	StarknetError::EntrypointNotFound => (
-		        ErrorCode::EntrypointNotFound,
-				"Requested entrypoint does not exist in the contract",
-				None
-        	),
-        	StarknetError::StorageProofNotSupported => (
-		        ErrorCode::StorageProofNotSupported,
-				"The node doesn't support storage proofs for blocks that are too far in the past",
-				None
-	       	),
+            StarknetError::EntrypointNotFound => (
+                ErrorCode::EntrypointNotFound,
+                "Requested entrypoint does not exist in the contract",
+                None,
+            ),
+            StarknetError::StorageProofNotSupported => (
+                ErrorCode::StorageProofNotSupported,
+                "The node doesn't support storage proofs for blocks that are too far in the past",
+                None,
+            ),
             StarknetError::FailedToReceiveTransaction => (
                 ErrorCode::StarknetFailedToReceiveTransaction,
                 "Failed to write transaction",
