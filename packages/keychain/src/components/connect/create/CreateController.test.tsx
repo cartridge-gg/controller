@@ -2,7 +2,7 @@ import { vi } from "vitest";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { CreateController } from "./CreateController";
 import { describe, expect, beforeEach, it } from "vitest";
-import { LoginMode } from "../types";
+import { AuthenticationMode, LoginMode } from "../types";
 import { renderWithProviders } from "@/test/mocks/providers";
 
 // Create mock functions that we'll use in multiple tests
@@ -100,8 +100,15 @@ describe("CreateController", () => {
     const submitButton = screen.getByText("sign up");
     fireEvent.click(submitButton);
 
+    const passkeyButton = screen.getByText("Passkey");
+    fireEvent.click(passkeyButton);
+
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith("validuser", false);
+      expect(handleSubmit).toHaveBeenCalledWith(
+        "validuser",
+        false,
+        AuthenticationMode.Webauthn,
+      );
     });
   });
 
@@ -172,8 +179,15 @@ describe("CreateController", () => {
     const submitButton = screen.getByText("sign up");
     fireEvent.click(submitButton);
 
+    const passkeyButton = screen.getByText("Passkey");
+    fireEvent.click(passkeyButton);
+
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith("validuser", false);
+      expect(handleSubmit).toHaveBeenCalledWith(
+        "validuser",
+        false,
+        AuthenticationMode.Webauthn,
+      );
     });
   });
 });

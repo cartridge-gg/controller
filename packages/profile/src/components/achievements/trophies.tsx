@@ -159,7 +159,7 @@ function Group({
       };
       process();
     },
-    [enabled],
+    [enabled, chainId, provider, parent],
   );
 
   const achievements = useMemo(() => {
@@ -205,7 +205,7 @@ function Group({
               },
       };
     });
-  }, [items, pins, handlePin]);
+  }, [items, pins, address, enabled, softview, game, handlePin]);
 
   return <AchievementCard name={group} achievements={achievements} />;
 }

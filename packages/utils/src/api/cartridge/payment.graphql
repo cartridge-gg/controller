@@ -2,6 +2,7 @@ query CryptoPayment($id: ID!) {
   cryptoPayment(id: $id) {
     tokenAmount
     status
+    network
     tokenAddress
     depositAddress
     expiresAt
@@ -13,6 +14,7 @@ mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
     id
     tokenAmount
     status
+    network
     tokenAddress
     depositAddress
     expiresAt
