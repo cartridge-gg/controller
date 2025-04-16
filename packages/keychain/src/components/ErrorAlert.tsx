@@ -276,7 +276,7 @@ export function ControllerErrorAlert({
     case ErrorCode.StarknetContractError:
     case ErrorCode.StarknetClassAlreadyDeclared:
     case ErrorCode.StarknetInvalidTransactionNonce:
-    case ErrorCode.StarknetInsufficientMaxFee:
+    case ErrorCode.InsufficientResourcesForValidate:
     case ErrorCode.StarknetInsufficientAccountBalance:
     case ErrorCode.StarknetCompilationFailed:
     case ErrorCode.StarknetContractClassSizeIsTooLarge:
