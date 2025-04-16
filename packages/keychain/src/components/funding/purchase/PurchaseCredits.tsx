@@ -112,6 +112,7 @@ export function PurchaseCredits({
         body: JSON.stringify({
           credits: creditsAmount,
           username: controller.username(),
+          purchaseType: "CREDITS",
         }),
       });
       if (!res.ok) {
