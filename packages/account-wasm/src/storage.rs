@@ -243,11 +243,11 @@ mod policy_check_tests {
 #[cfg(all(test, target_arch = "wasm32"))]
 mod tests {
     use super::*;
-    use crate::types::policy::{CallPolicy, TypedDataPolicy};
-    use starknet::{
-        core::types::{Call, Felt},
-        macros::felt,
+    use crate::types::{
+        policy::{CallPolicy, TypedDataPolicy},
+        JsFelt,
     };
+    use starknet::{core::types::Felt, macros::felt};
     use wasm_bindgen_test::*;
 
     #[wasm_bindgen_test]
