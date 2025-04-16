@@ -62,7 +62,7 @@ cainome-cairo-serde = "0.2.0"
 
 starknet = "0.14.0"
 starknet-crypto = { version = "0.7.3", features = ["pedersen_no_lookup"] }
-starknet-types-core = { version = "0.1", features = ["curve", "hash"] }
+starknet-types-core = { version = "0.1.8", features = ["curve", "hash"] }
 
 chrono = { version = "0.4", features = ["wasmbind", "serde"] }
 
