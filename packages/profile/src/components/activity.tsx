@@ -11,6 +11,7 @@ import {
   LayoutContentError,
   LayoutContentLoader,
   LayoutHeader,
+  PlusIcon,
 } from "@cartridge/ui-next";
 import { VoyagerUrl } from "@cartridge/utils";
 import { useConnection, useData } from "#hooks/context";
@@ -162,12 +163,14 @@ export function Activity() {
                   </div>
                 )}
                 <Button
+                  variant="secondary"
                   className={cn(
-                    "w-full my-2",
+                    "text-foreground-300 hover:text-foreground-200 normal-case text-sm font-medium tracking-normal font-sans",
                     (cap >= data.length || dates.length === 0) && "hidden",
                   )}
                   onClick={() => setCap((prev) => prev + OFFSET)}
                 >
+                  <PlusIcon variant="solid" size="xs" />
                   See More
                 </Button>
               </LayoutContent>
