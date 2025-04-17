@@ -175,7 +175,8 @@ export function Activity() {
               const metadata = JSON.parse(transfer.metadata ?? "{}");
               const name =
                 metadata.attributes.find(
-                  (attribute: any) => attribute.trait.toLowerCase() === "name",
+                  (attribute: { trait: string; value: string }) =>
+                    attribute.trait.toLowerCase() === "name",
                 )?.value || metadata.name;
               if (!dates.includes(date)) {
                 dates.push(date);
