@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Project, useProgressionsQuery } from "@cartridge/utils/api/cartridge";
 import { Progress, RawProgress, getSelectorFromTag } from "#models";
+import { useConnection } from "./context";
 
 interface Response {
   items: { achievements: RawProgress[] }[];
@@ -20,6 +21,7 @@ export function useProgressions({
   const [progressions, setProgressions] = useState<{ [key: string]: Progress }>(
     {},
   );
+  const { isVisible } = useConnection();
 
   // Fetch achievement creations from raw events
   const projects: Project[] = useMemo(
@@ -27,14 +29,14 @@ export function useProgressions({
     [namespace, name, project],
   );
 
-  useProgressionsQuery(
+  const { status } = useProgressionsQuery(
     {
       projects,
     },
     {
       enabled: !!namespace && !!project,
-      queryKey: ["progressions", namespace, name, project],
-      refetchInterval: 600_000, // Refetch every 10 minutes
+      queryKey: ["progressions", namespace, name, project, isVisible],
+      refetchOnWindowFocus: false,
       onSuccess: ({ playerAchievements }: { playerAchievements: Response }) => {
         const items = playerAchievements.items;
         if (items.length === 0) return;
@@ -49,5 +51,5 @@ export function useProgressions({
     },
   );
 
-  return { progressions };
+  return { progressions, status };
 }

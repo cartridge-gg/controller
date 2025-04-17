@@ -1,16 +1,256 @@
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useMemo } from "react";
 import { useAchievements } from "#hooks/achievements";
 import { DataContext } from "#context/data";
+import {
+  useActivitiesQuery,
+  useTransfersQuery,
+} from "@cartridge/utils/api/cartridge";
+import { useAccount } from "#hooks/account";
+import { useConnection } from "#hooks/context.js";
+import { getChecksumAddress } from "starknet";
+import { erc20Metadata } from "@cartridge/presets";
+import { useArcade } from "#hooks/arcade.js";
+import { GameModel } from "@bal7hazar/arcade-sdk";
+
+const getDate = (timestamp: number) => {
+  const date = new Date(timestamp);
+  const today = new Date();
+  if (date.toDateString() === today.toDateString()) {
+    return "Today";
+  } else if (
+    date.toDateString() ===
+    new Date(today.getTime() - 24 * 60 * 60 * 1000).toDateString()
+  ) {
+    return "Yesterday";
+  } else {
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+};
+
+export interface CardProps {
+  variant: "token" | "collectible" | "game" | "achievement";
+  key: string;
+  transactionHash: string;
+  amount: string;
+  address: string;
+  value: string;
+  name: string;
+  collection: string;
+  image: string;
+  title: string;
+  website: string;
+  certified: boolean;
+  action: "send" | "receive" | "mint";
+  timestamp: number;
+  date: string;
+  points?: number;
+}
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [accountAddress, setAccountAddress] = useState<string | undefined>(
     undefined,
   );
 
+  const { address } = useAccount();
+  const { project, namespace, isVisible } = useConnection();
+
+  const { games } = useArcade();
+  const game: GameModel | undefined = useMemo(() => {
+    return Object.values(games).find(
+      (game) => game.namespace === namespace && game.config.project === project,
+    );
+  }, [games, project, namespace]);
+
   const trophies = useAchievements(accountAddress);
 
+  const { data: transfers, status: transfersStatus } = useTransfersQuery(
+    {
+      projects: {
+        project: project ?? "",
+        address,
+        date: "",
+        limit: 0,
+      },
+    },
+    {
+      queryKey: ["transfers", address, project, isVisible],
+      enabled: !!address && !!project,
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  const { data: transactions, status: activitiesStatus } = useActivitiesQuery(
+    {
+      projects: {
+        project: project ?? "",
+        address,
+        limit: 0,
+      },
+    },
+    {
+      queryKey: ["activities", address, project, isVisible],
+      enabled: !!address && !!project,
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  const status = useMemo(() => {
+    return transfersStatus === "loading" && activitiesStatus === "loading"
+      ? "loading"
+      : transfersStatus === "error" || activitiesStatus === "error"
+        ? "error"
+        : "success";
+  }, [transfersStatus, activitiesStatus]);
+
+  const erc20s: CardProps[] = useMemo(() => {
+    return (
+      transfers?.transfers?.items.flatMap((item) =>
+        item.transfers
+          .filter(({ tokenId }) => !tokenId)
+          .map((transfer) => {
+            const value = `${(BigInt(transfer.amount) / BigInt(10 ** Number(transfer.decimals))).toString()} ${transfer.symbol}`;
+            const timestamp = new Date(transfer.executedAt).getTime();
+            const date = getDate(timestamp);
+            const image = erc20Metadata.find(
+              (m) =>
+                getChecksumAddress(m.l2_token_address) ===
+                getChecksumAddress(transfer.contractAddress),
+            )?.logo_url;
+            return {
+              variant: "token",
+              key: `${transfer.transactionHash}-${transfer.eventId}`,
+              transactionHash: transfer.transactionHash,
+              amount: value,
+              address:
+                BigInt(transfer.fromAddress) === BigInt(address)
+                  ? transfer.toAddress
+                  : transfer.fromAddress,
+              value: "$-",
+              image: image || "",
+              action:
+                BigInt(transfer.fromAddress) === 0n
+                  ? "mint"
+                  : BigInt(transfer.fromAddress) === BigInt(address)
+                    ? "send"
+                    : "receive",
+              timestamp: timestamp / 1000,
+              date: date,
+            } as CardProps;
+          }),
+      ) || []
+    );
+  }, [transfers, address]);
+
+  const erc721s: CardProps[] = useMemo(() => {
+    return (
+      transfers?.transfers?.items.flatMap((item) =>
+        item.transfers
+          .filter(({ tokenId }) => !!tokenId)
+          .map((transfer) => {
+            const timestamp = new Date(transfer.executedAt).getTime();
+            const date = getDate(timestamp);
+            const metadata = JSON.parse(transfer.metadata ?? "{}");
+            const name =
+              metadata.attributes.find(
+                (attribute: { trait: string; value: string }) =>
+                  attribute.trait.toLowerCase() === "name",
+              )?.value || metadata.name;
+            return {
+              variant: "collectible",
+              key: `${transfer.transactionHash}-${transfer.eventId}`,
+              transactionHash: transfer.transactionHash,
+              name: name || "",
+              collection: transfer.name,
+              amount: "",
+              address:
+                BigInt(transfer.fromAddress) === BigInt(address)
+                  ? transfer.toAddress
+                  : transfer.fromAddress,
+              value: "",
+              image: metadata.image || "",
+              action:
+                BigInt(transfer.fromAddress) === 0n
+                  ? "mint"
+                  : BigInt(transfer.fromAddress) === BigInt(address)
+                    ? "send"
+                    : "receive",
+              timestamp: timestamp / 1000,
+              date: date,
+            } as CardProps;
+          }),
+      ) || []
+    );
+  }, [transfers, address]);
+
+  const actions: CardProps[] = useMemo(() => {
+    return (
+      transactions?.activities?.items?.flatMap((item) =>
+        item.activities?.map(({ transactionHash, entrypoint, executedAt }) => {
+          const timestamp = new Date(executedAt).getTime();
+          const date = getDate(timestamp);
+          return {
+            variant: "game",
+            key: `${transactionHash}-${entrypoint}`,
+            transactionHash: transactionHash,
+            title: entrypoint,
+            image: game?.metadata.image || "",
+            website: game?.socials.website || "",
+            certified: !!game,
+            timestamp: timestamp / 1000,
+            date: date,
+          } as CardProps;
+        }),
+      ) || []
+    );
+  }, [transactions, game]);
+
+  const achievements: CardProps[] = useMemo(() => {
+    return trophies.achievements
+      .filter((item) => item.completed)
+      .map((item) => {
+        const date = getDate(item.timestamp * 1000);
+        return {
+          variant: "achievement",
+          key: item.id,
+          transactionHash: "",
+          title: item.title,
+          image: item.icon,
+          timestamp: item.timestamp,
+          date: date,
+          website: game?.socials.website || "",
+          certified: !!game,
+          points: item.earning,
+          amount: "",
+          address: "",
+          value: "",
+          name: "",
+          collection: "",
+          action: "mint",
+        } as CardProps;
+      });
+  }, [trophies, game]);
+
+  const events = useMemo(() => {
+    return [...erc20s, ...erc721s, ...actions, ...achievements].sort(
+      (a, b) => b.timestamp - a.timestamp,
+    );
+  }, [erc20s, erc721s, actions, achievements]);
+
   return (
-    <DataContext.Provider value={{ trophies, setAccountAddress }}>
+    <DataContext.Provider
+      value={{
+        events,
+        trophies,
+        transfers,
+        transactions,
+        status,
+        setAccountAddress,
+      }}
+    >
       {children}
     </DataContext.Provider>
   );

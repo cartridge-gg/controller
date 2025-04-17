@@ -3,6 +3,8 @@ import {
   ActivityCollectibleCard,
   ActivityGameCard,
   ActivityTokenCard,
+  Button,
+  cn,
   EmptyStateActivityIcon,
   LayoutContainer,
   LayoutContent,
@@ -10,20 +12,14 @@ import {
   LayoutContentLoader,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import { erc20Metadata } from "@cartridge/presets";
-import { useAccount } from "#hooks/account";
 import { VoyagerUrl } from "@cartridge/utils";
 import { useConnection, useData } from "#hooks/context";
 import { LayoutBottomNav } from "#components/bottom-nav";
-import { useCallback, useMemo } from "react";
-import {
-  useActivitiesQuery,
-  useTransfersQuery,
-} from "@cartridge/utils/api/cartridge";
-import { useArcade } from "#hooks/arcade.js";
-import { GameModel } from "@bal7hazar/arcade-sdk";
-import { constants, getChecksumAddress } from "starknet";
+import { useCallback, useMemo, useState } from "react";
+import { constants } from "starknet";
 import { Link } from "react-router-dom";
+
+const OFFSET = 100;
 
 interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
@@ -45,60 +41,10 @@ interface CardProps {
 }
 
 export function Activity() {
-  const { address } = useAccount();
-  const { chainId, project, namespace } = useConnection();
+  const [cap, setCap] = useState(OFFSET);
+  const { chainId } = useConnection();
 
-  const { games } = useArcade();
-  const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find(
-      (game) => game.namespace === namespace && game.config.project === project,
-    );
-  }, [games, project, namespace]);
-
-  const { trophies } = useData();
-
-  const { data: transfers, status: transfersStatus } = useTransfersQuery(
-    {
-      projects: {
-        project: game?.config.project ?? "",
-        address,
-        date: "",
-        limit: 0,
-      },
-    },
-    {
-      enabled: !!address && !!game?.config.project,
-    },
-  );
-
-  const { data: transactions, status: activitiesStatus } = useActivitiesQuery(
-    {
-      projects: {
-        project: game?.config.project ?? "",
-        address,
-        limit: 0,
-      },
-    },
-    {
-      enabled: !!address && !!game?.config.project,
-    },
-  );
-
-  const getDate = useCallback((timestamp: number) => {
-    const date = new Date(timestamp);
-    const today = new Date();
-    if (date.getDate() === today.getDate()) {
-      return "Today";
-    } else if (date.getDate() === today.getDate() - 1) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  }, []);
+  const { events: data, status } = useData();
 
   const to = useCallback(
     (transactionHash: string) => {
@@ -109,180 +55,20 @@ export function Activity() {
     [chainId],
   );
 
-  const { data, dates } = useMemo(() => {
-    const dates: string[] = [];
-    const erc20s: CardProps[] =
-      transfers?.transfers?.items
-        .flatMap((item) =>
-          item.transfers
-            .filter(({ tokenId }) => !tokenId) // Filter ERC20 transfers
-            .map(
-              ({
-                amount,
-                decimals,
-                symbol,
-                executedAt,
-                transactionHash,
-                eventId,
-                fromAddress,
-                toAddress,
-                contractAddress,
-              }) => {
-                const value = `${(BigInt(amount) / BigInt(10 ** Number(decimals))).toString()} ${symbol}`;
-                const timestamp = new Date(executedAt).getTime();
-                const date = getDate(timestamp);
-                const image = erc20Metadata.find(
-                  (m) =>
-                    getChecksumAddress(m.l2_token_address) ===
-                    getChecksumAddress(contractAddress),
-                )?.logo_url;
-                if (!dates.includes(date)) {
-                  dates.push(date);
-                }
-                return {
-                  variant: "token",
-                  key: `${transactionHash}-${eventId}`,
-                  transactionHash: transactionHash,
-                  amount: value,
-                  address:
-                    BigInt(fromAddress) === BigInt(address)
-                      ? toAddress
-                      : fromAddress,
-                  value: "$-",
-                  image: image || "",
-                  action:
-                    BigInt(fromAddress) === 0n
-                      ? "mint"
-                      : BigInt(fromAddress) === BigInt(address)
-                        ? "send"
-                        : "receive",
-                  timestamp: timestamp / 1000,
-                  date: date,
-                } as CardProps;
-              },
-            ),
-        )
-        .filter((i) => i !== undefined) || [];
-    const erc721s: CardProps[] =
-      transfers?.transfers?.items
-        .flatMap((item) =>
-          item.transfers
-            .filter(({ tokenId }) => !!tokenId) // Filter ERC721 transfers
-            .map((transfer) => {
-              console.log({ transfer });
-              const timestamp = new Date(transfer.executedAt).getTime();
-              const date = getDate(timestamp);
-              const metadata = JSON.parse(transfer.metadata ?? "{}");
-              const name =
-                metadata.attributes.find(
-                  (attribute: { trait: string; value: string }) =>
-                    attribute.trait.toLowerCase() === "name",
-                )?.value || metadata.name;
-              if (!dates.includes(date)) {
-                dates.push(date);
-              }
-              return {
-                variant: "collectible",
-                key: `${transfer.transactionHash}-${transfer.eventId}`,
-                transactionHash: transfer.transactionHash,
-                name: name || "",
-                collection: transfer.name,
-                amount: "",
-                address:
-                  BigInt(transfer.fromAddress) === BigInt(address)
-                    ? transfer.toAddress
-                    : transfer.fromAddress,
-                value: "",
-                image: metadata.image || "",
-                action:
-                  BigInt(transfer.fromAddress) === 0n
-                    ? "mint"
-                    : BigInt(transfer.fromAddress) === BigInt(address)
-                      ? "send"
-                      : "receive",
-                timestamp: timestamp / 1000,
-                date: date,
-              } as CardProps;
-            }),
-        )
-        .filter((i) => i !== undefined) || [];
-    const games: CardProps[] =
-      transactions?.activities?.items
-        ?.flatMap((item) =>
-          item.activities?.map(
-            ({ transactionHash, entrypoint, executedAt }) => {
-              const timestamp = new Date(executedAt).getTime();
-              const date = getDate(timestamp);
-              if (!dates.includes(date)) {
-                dates.push(date);
-              }
-              return {
-                variant: "game",
-                key: `${transactionHash}-${entrypoint}`,
-                transactionHash: transactionHash,
-                title: entrypoint,
-                image: game?.metadata.image || "",
-                website: game?.socials.website || "",
-                certified: !!game,
-                timestamp: timestamp / 1000,
-                date: date,
-              } as CardProps;
-            },
-          ),
-        )
-        .filter((i) => i !== undefined) || [];
-
-    const achievements: CardProps[] = trophies.achievements
-      .filter((item) => item.completed)
-      .map((item) => {
-        const date = getDate(item.timestamp * 1000);
-        if (!dates.includes(date)) {
-          dates.push(date);
-        }
-        return {
-          variant: "achievement",
-          key: item.id,
-          transactionHash: "",
-          title: item.title,
-          image: item.icon,
-          timestamp: item.timestamp,
-          date: date,
-          website: game?.socials.website || "",
-          certified: !!game,
-          points: item.earning,
-          amount: "",
-          address: "",
-          value: "",
-          name: "",
-          collection: "",
-          action: "mint",
-        } as CardProps;
-      });
-
-    const sortedDates = dates.sort(
-      (a, b) => new Date(b).getTime() - new Date(a).getTime(),
-    );
-    const uniqueDates = [...new Set(sortedDates)];
+  const { events, dates } = useMemo(() => {
+    const filteredData = data.slice(0, cap);
     return {
-      data: [...erc20s, ...erc721s, ...games, ...achievements].sort(
-        (a, b) => b.timestamp - a.timestamp,
-      ),
-      dates: uniqueDates,
+      events: filteredData,
+      dates: [...new Set(filteredData.map((event) => event.date))],
     };
-  }, [address, transfers, transactions, game, trophies, getDate]);
+  }, [data, cap]);
 
   return (
     <LayoutContainer>
       <LayoutHeader variant="hidden" />
 
       {(() => {
-        switch (
-          transfersStatus === "loading" && activitiesStatus === "loading"
-            ? "loading"
-            : transfersStatus === "error" || activitiesStatus === "error"
-              ? "error"
-              : "success"
-        ) {
+        switch (status) {
           case "loading": {
             return <LayoutContentLoader />;
           }
@@ -299,7 +85,7 @@ export function Activity() {
                         <p className="py-3 text-xs font-semibold text-foreground-400 tracking-wider">
                           {current}
                         </p>
-                        {data
+                        {events
                           .filter(({ date }) => date === current)
                           .map((props: CardProps, index: number) => {
                             switch (props.variant) {
@@ -353,6 +139,7 @@ export function Activity() {
                               case "achievement":
                                 return (
                                   <ActivityAchievementCard
+                                    key={`${index}-${props.key}`}
                                     title={"Achievement"}
                                     topic={props.title}
                                     website={props.website}
@@ -374,6 +161,15 @@ export function Activity() {
                     </p>
                   </div>
                 )}
+                <Button
+                  className={cn(
+                    "w-full my-2",
+                    (cap >= data.length || dates.length === 0) && "hidden",
+                  )}
+                  onClick={() => setCap((prev) => prev + OFFSET)}
+                >
+                  See More
+                </Button>
               </LayoutContent>
             );
           }
