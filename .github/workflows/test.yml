@@ -130,8 +130,8 @@ jobs:
           # Check if there are any changes to commit
           if ! git diff --quiet packages/*/__image_snapshots__/; then
             # Configure committer identity using secrets
-            git config --global user.email "tarrence@cartridge.gg"
-            git config --global user.name "Robot Tarrence"
+            git config --global user.email "tarrence@vanas.family"
+            git config --global user.name "Tarrence van As"
 
             git add packages/*/__image_snapshots__/
             git commit -m "chore: update storybook snapshots"
@@ -141,8 +141,8 @@ jobs:
 
             # Use a personal access token with workflow permissions to trigger CI
             # Pull latest changes before pushing
-            git pull --rebase https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} "${{ github.head_ref }}"
-            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} HEAD:"${{ github.head_ref }}"
+            git pull --rebase https://x-access-token:${{ secrets.STORYBOOK_COMMITTER }}@github.com/${{ github.repository }} "${{ github.head_ref }}"
+            git push https://x-access-token:${{ secrets.STORYBOOK_COMMITTER }}@github.com/${{ github.repository }} HEAD:"${{ github.head_ref }}"
 
             # Set output to indicate we made changes
             echo "changes_committed=true" >> "$GITHUB_ENV"
@@ -292,11 +292,32 @@ jobs:
               body: comment
             });
 
-      # Modify the final check step to not fail when snapshots are updated
+      # Modify the final check step to handle different failure types
       - name: Check for failures
-        if: always()
+        if: always() # Run this step even if previous steps failed
         run: |
-          if [[ "${{ env.snapshot_failed }}" == "true" ]]; then
-            echo "Visual differences detected in Storybook tests - snapshots have been updated automatically"
+          echo "Test Storybook Outcome: ${{ steps.test-storybook.outcome }}"
+          echo "Snapshot Failed (changes detected in PR diff): ${{ env.snapshot_failed }}"
+
+          # Case 1: Storybook tests passed
+          if [[ "${{ steps.test-storybook.outcome }}" == "success" ]]; then
+            echo "Storybook tests passed. Job successful."
             exit 0
           fi
+
+          # Case 2: Storybook tests failed
+          if [[ "${{ steps.test-storybook.outcome }}" == "failure" ]]; then
+            # Subcase 2a: Failure was ONLY due to snapshot differences (which were updated)
+            if [[ "${{ env.snapshot_failed }}" == "true" ]]; then
+              echo "Visual differences detected and snapshots updated. Job successful."
+              exit 0
+            # Subcase 2b: Failure was due to other reasons
+            else
+              echo "Storybook tests failed for reasons other than snapshot differences. Failing job."
+              exit 1 # Explicitly fail the job
+            fi
+          fi
+
+          # Fallback case (should not typically be reached)
+          echo "Unknown state encountered in failure check. Defaulting to success."
+          exit 0
