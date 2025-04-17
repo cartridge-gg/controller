@@ -48,7 +48,6 @@ export function useAchievements(accountAddress?: string) {
   const { project, namespace } = useConnection();
   const { address } = useAccount();
 
-  const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Item[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
 
@@ -56,23 +55,36 @@ export function useAchievements(accountAddress?: string) {
     return accountAddress || address;
   }, [accountAddress, address]);
 
-  const { trophies } = useTrophies({
+  const { trophies, status: trophiesStatus } = useTrophies({
     namespace: namespace ?? "",
     name: TROPHY,
     project: project ?? "",
     parser: Trophy.parse,
   });
 
-  const { progressions } = useProgressions({
+  const { progressions, status: progressionsStatus } = useProgressions({
     namespace: namespace ?? "",
     name: PROGRESS,
     project: project ?? "",
     parser: Progress.parse,
   });
 
+  const status = useMemo(() => {
+    return trophiesStatus === "loading" && progressionsStatus === "loading"
+      ? "loading"
+      : trophiesStatus === "error" || progressionsStatus === "error"
+        ? "error"
+        : "success";
+  }, [trophiesStatus, progressionsStatus]);
+
   // Compute achievements and players
   useEffect(() => {
-    if (!Object.values(trophies).length || !currentAddress) return;
+    if (
+      status !== "success" ||
+      !Object.values(trophies).length ||
+      !currentAddress
+    )
+      return;
 
     // Compute players and achievement stats
     const data: {
@@ -189,9 +201,7 @@ export function useAchievements(accountAddress?: string) {
         .sort((a, b) => b.timestamp - a.timestamp) // Newest to oldest
         .sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0)), // Completed to uncompleted
     );
-    // Update loading state
-    setIsLoading(false);
-  }, [currentAddress, trophies, progressions]);
+  }, [currentAddress, trophies, progressions, status]);
 
-  return { achievements, players, isLoading };
+  return { achievements, players, status };
 }

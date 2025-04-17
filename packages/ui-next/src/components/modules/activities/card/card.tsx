@@ -3,7 +3,7 @@ import { cva, VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 
 export const activityCardVariants = cva(
-  "rounded p-3 pr-4 flex items-center justify-between gap-4 text-foreground-100 data-[loading]:text-foreground-300 data-[error]:text-destructive-100",
+  "select-none rounded p-3 pr-4 flex items-center justify-between gap-4 text-foreground-100 data-[loading]:text-foreground-300 data-[error]:text-destructive-100",
   {
     variants: {
       variant: {

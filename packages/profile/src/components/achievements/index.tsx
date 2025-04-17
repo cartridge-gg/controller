@@ -26,9 +26,10 @@ export function Achievements() {
     "achievements",
   );
   const {
-    trophies: { achievements, players, isLoading },
+    trophies: { achievements, players, status },
     setAccountAddress,
   } = useData();
+
   const navigate = useNavigate();
 
   const addresses = useMemo(() => {
@@ -196,7 +197,7 @@ export function Achievements() {
             </>
           )}
         </LayoutContent>
-      ) : isLoading ? (
+      ) : status === "loading" ? (
         <LayoutContentLoader />
       ) : (
         <LayoutContent className="pb-4 select-none h-full">

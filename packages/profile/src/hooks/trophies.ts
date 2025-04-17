@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Project, useAchievementsQuery } from "@cartridge/utils/api/cartridge";
 import { RawTrophy, Trophy, getSelectorFromTag } from "#models";
+import { useConnection } from "./context";
 
 interface Response {
   items: { achievements: RawTrophy[] }[];
@@ -17,20 +18,21 @@ export function useTrophies({
   project: string;
   parser: (node: RawTrophy) => Trophy;
 }) {
+  const { isVisible } = useConnection();
   const [trophies, setTrophies] = useState<{ [key: string]: Trophy }>({});
 
   // Fetch achievement creations from raw events
   const projects: Project[] = [
     { model: getSelectorFromTag(namespace, name), namespace, project },
   ];
-  useAchievementsQuery(
+  const { status } = useAchievementsQuery(
     {
       projects,
     },
     {
       enabled: !!namespace && !!project,
-      queryKey: ["achievements", namespace, name, project],
-      refetchInterval: 600_000, // Refetch every 10 minutes
+      queryKey: ["achievements", namespace, name, project, isVisible],
+      refetchOnWindowFocus: false,
       onSuccess: ({ achievements }: { achievements: Response }) => {
         const items = achievements.items;
         if (items.length === 0) return;
@@ -58,5 +60,5 @@ export function useTrophies({
     },
   );
 
-  return { trophies };
+  return { trophies, status };
 }
