@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Purchase, PurchaseState } from ".";
 import { WalletsProvider } from "@/hooks/wallets";
-import { PurchaseType } from "@/hooks/payment";
+import { PurchaseType } from "@/hooks/payments/crypto";
 
 const meta = {
   component: Purchase,

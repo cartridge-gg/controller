@@ -20,7 +20,7 @@ import { execute } from "@/utils/connection/execute";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { StarterPack } from "./starterpack";
-import { PurchaseType } from "@/hooks/payment";
+import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function Home() {
   const { context, setContext, controller, policies, origin } = useConnection();

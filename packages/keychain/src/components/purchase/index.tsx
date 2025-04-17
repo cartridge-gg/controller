@@ -14,7 +14,7 @@ import {
 } from "@cartridge/ui-next";
 import { isIframe } from "@cartridge/utils";
 import { Elements } from "@stripe/react-stripe-js";
-import { type Appearance, loadStripe } from "@stripe/stripe-js";
+import { type Appearance } from "@stripe/stripe-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AmountSelection } from "../funding/AmountSelection";
 import CheckoutForm from "./StripeCheckout";
@@ -24,9 +24,9 @@ import { ExternalWallet } from "@cartridge/controller";
 import { Balance, BalanceType } from "./Balance";
 import { StarterPackDetails } from "@/hooks/starterpack";
 import { StarterPackContent } from "../starterpack";
-import { PurchaseType } from "@/hooks/payment";
+import { PurchaseType } from "@/hooks/payments/crypto";
 import { Receiving } from "../starterpack/receiving";
-import { constants } from "starknet";
+import useStripePayment from "@/hooks/payments/stripe";
 
 export enum PurchaseState {
   SELECTION = 0,
@@ -55,6 +55,7 @@ export type StripeResponse = {
   pricing: PricingDetails;
 };
 
+// TODO: I know this is terrible... refactor soon, separate product selection and checkout
 export function Purchase({
   onBack,
   wallets,
@@ -73,8 +74,6 @@ export function Purchase({
   } = useWallets();
 
   const [clientSecret, setClientSecret] = useState("");
-  const [isProcessingPayment, setIsProcessingPayment] =
-    useState<boolean>(false);
   const [pricingDetails, setPricingDetails] = useState<PricingDetails | null>(
     null,
   );
@@ -86,34 +85,16 @@ export function Purchase({
   const [walletAddress, setWalletAddress] = useState<string>();
   const [displayError, setDisplayError] = useState<Error | null>(null);
 
-  const getStripeKey = () => {
-    if (import.meta.env.DEV) {
-      // Always use test mode in local dev
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE;
-    }
-    if (isSlot) {
-      // Slot is live now and should always use live mode
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_LIVE_MODE;
-    }
-    if (
-      import.meta.env.PROD &&
-      controller?.chainId() === constants.StarknetChainId.SN_MAIN
-    ) {
-      // In prod, only use live mode if on mainnet
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_PROD_MODE;
-    }
-    // Default to test mode
-    return import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE;
-  };
-
-  const stripePromise = useMemo(
-    () => loadStripe(getStripeKey()),
-    [controller, isSlot],
-  );
+  const {
+    stripePromise,
+    isLoading: isStripeLoading,
+    error: stripeError,
+    createPaymentIntent,
+  } = useStripePayment({ isSlot });
 
   useEffect(() => {
-    setDisplayError(walletError);
-  }, [walletError]);
+    setDisplayError(walletError || stripeError);
+  }, [walletError, stripeError]);
 
   // Only show phantom for now as Solana is the only supported network
   const availableWallets = useMemo(() => {
@@ -130,39 +111,24 @@ export function Purchase({
     [setCreditsAmount],
   );
 
-  const createPaymentIntent = useCallback(async () => {
+  const onCreditCard = useCallback(async () => {
     if (!controller) {
       return;
     }
 
-    setIsProcessingPayment(true);
-    setDisplayError(null);
-
     try {
-      const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT!, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          credits: creditsAmount,
-          starterpackId: starterpackDetails?.id,
-          username: controller.username(),
-          purchaseType: type,
-        }),
-      });
-      if (!res.ok) {
-        setDisplayError(new Error("Payment intent endpoint failure"));
-        return;
-      }
-      const data: StripeResponse = await res.json();
-      setClientSecret(data.clientSecret);
-      setPricingDetails(data.pricing);
+      const paymentIntent = await createPaymentIntent(
+        creditsAmount,
+        controller.username(),
+        starterpackDetails,
+      );
+      setClientSecret(paymentIntent.clientSecret);
+      setPricingDetails(paymentIntent.pricing);
       setState(PurchaseState.STRIPE_CHECKOUT);
     } catch (e) {
-      setDisplayError(e as unknown as Error);
-    } finally {
-      setIsProcessingPayment(false);
+      setDisplayError(e as Error);
     }
-  }, [controller, creditsAmount]);
+  }, [createPaymentIntent]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet) => {
@@ -259,10 +225,7 @@ export function Purchase({
             case PurchaseState.SUCCESS:
               return;
             case PurchaseState.SELECTION:
-              if (onBack) {
-                return onBack();
-              }
-
+              onBack?.();
               closeModal();
               break;
             default:
@@ -276,7 +239,7 @@ export function Purchase({
             <AmountSelection
               amount={creditsAmount}
               onChange={onAmountChanged}
-              lockSelection={isProcessingPayment || isLoadingWallets}
+              lockSelection={isStripeLoading || isLoadingWallets}
               enableCustom
             />
           )) ||
@@ -329,8 +292,8 @@ export function Purchase({
           <>
             <Button
               className="flex-1"
-              isLoading={isProcessingPayment}
-              onClick={createPaymentIntent}
+              isLoading={isStripeLoading}
+              onClick={onCreditCard}
               disabled={isLoadingWallets}
             >
               <CreditCardIcon
@@ -353,7 +316,7 @@ export function Purchase({
                     disabled={
                       !wallet.available ||
                       isConnecting ||
-                      isProcessingPayment ||
+                      isStripeLoading ||
                       isLoadingWallets
                     }
                     onClick={async () => onExternalConnect(wallet)}

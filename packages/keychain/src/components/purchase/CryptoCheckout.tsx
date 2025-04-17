@@ -26,7 +26,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
-import useCryptoPayment from "@/hooks/payment";
+import { useCryptoPayment } from "@/hooks/payments/crypto";
 import { CostBreakdown } from "./CostBreakdown";
 import { StarterPackDetails } from "@/hooks/starterpack";
 import { Receiving } from "../starterpack/receiving";
@@ -136,7 +136,11 @@ export function CryptoCheckout({
         className="p-6"
         title={getTitle}
         icon={<DepositIcon variant="solid" size="lg" />}
-        onBack={() => onBack()}
+        onBack={() => {
+          if (state === CheckoutState.REVIEW_PURCHASE) {
+            onBack();
+          }
+        }}
       />
       <LayoutContent className="gap-6 px-6">
         {state !== CheckoutState.TRANSACTION_SUBMITTED && (

@@ -7,7 +7,7 @@ import {
   CryptoPaymentDocument,
 } from "@cartridge/utils/api/cartridge";
 import { client } from "@/utils/graphql";
-import { useConnection } from "./connection";
+import { useConnection } from "../connection";
 import { ExternalPlatform } from "@cartridge/controller";
 import {
   clusterApiUrl,
@@ -20,14 +20,14 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
-import { StarterPackDetails } from "./starterpack";
+import { StarterPackDetails } from "../starterpack";
 
 export enum PurchaseType {
   CREDITS = "CREDITS",
   STARTERPACK = "STARTERPACK",
 }
 
-const useCryptoPayment = () => {
+export const useCryptoPayment = () => {
   const { controller, externalSendTransaction } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -272,5 +272,3 @@ const getExplorer = (
       throw new Error(`Unsupported platform: ${platform}`);
   }
 };
-
-export default useCryptoPayment;

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Purchase } from "../purchase";
 import { StarterItemType } from "@/hooks/starterpack";
 import { WalletsProvider } from "@/hooks/wallets";
-import { PurchaseType } from "@/hooks/payment";
+import { PurchaseType } from "@/hooks/payments/crypto";
 
 const meta = {
   component: Purchase,
@@ -34,7 +34,7 @@ export const PurchaseStarterpack: Story = {
           price: 0,
           image: "/ERC-20-Icon.svg",
           type: StarterItemType.CREDIT,
-          value: 50,
+          value: 5,
         },
       ],
     },

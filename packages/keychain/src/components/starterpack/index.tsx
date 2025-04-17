@@ -6,7 +6,7 @@ import {
 } from "../../hooks/starterpack";
 import { Purchase } from "../purchase";
 import { StarterItem } from "./starter-item";
-import { PurchaseType } from "@/hooks/payment";
+import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function StarterPack({ starterpackId }: { starterpackId: string }) {
   const { items, price } = useStarterPack(starterpackId);

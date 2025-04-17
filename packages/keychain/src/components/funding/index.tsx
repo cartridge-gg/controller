@@ -12,7 +12,7 @@ import {
 import { Deposit } from "./Deposit";
 import { Purchase } from "../purchase";
 import { Balance, BalanceType } from "../purchase/Balance";
-import { PurchaseType } from "@/hooks/payment";
+import { PurchaseType } from "@/hooks/payments/crypto";
 
 const enum FundingState {
   SHOW_OPTIONS,
