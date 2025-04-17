@@ -2,7 +2,6 @@ import {
   ActivityCollectibleCard,
   ActivityGameCard,
   ActivityTokenCard,
-  Button,
   EmptyStateActivityIcon,
   LayoutContainer,
   LayoutContent,
@@ -10,20 +9,19 @@ import {
   LayoutContentLoader,
   LayoutHeader,
 } from "@cartridge/ui-next";
-import {
-  Erc20__Token,
-  Erc721__Token,
-  useInfiniteTokenTransfersQuery,
-} from "@cartridge/utils/api/indexer";
+import { erc20Metadata } from "@cartridge/presets";
 import { useAccount } from "#hooks/account";
-import { formatAddress, VoyagerUrl, useIndexerAPI } from "@cartridge/utils";
+import { VoyagerUrl } from "@cartridge/utils";
 import { useConnection } from "#hooks/context";
 import { LayoutBottomNav } from "#components/bottom-nav";
 import { useCallback, useMemo } from "react";
-import { useActivitiesQuery } from "@cartridge/utils/api/cartridge";
+import {
+  useActivitiesQuery,
+  useTransfersQuery,
+} from "@cartridge/utils/api/cartridge";
 import { useArcade } from "#hooks/arcade.js";
 import { GameModel } from "@bal7hazar/arcade-sdk";
-import { constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { Link } from "react-router-dom";
 
 interface CardProps {
@@ -55,41 +53,30 @@ export function Activity() {
     );
   }, [games, project, namespace]);
 
-  const { isReady, indexerUrl } = useIndexerAPI();
-  const {
-    status,
-    data: transfers,
-    fetchNextPage,
-    // hasNextPage,
-  } = useInfiniteTokenTransfersQuery(
+  const { data: transfers, status: transfersStatus } = useTransfersQuery(
     {
-      address,
-      first: 1000,
+      projects: {
+        project: game?.config.project!,
+        address,
+        date: "",
+        limit: 0,
+      },
     },
     {
-      enabled: isReady && !!address,
-      getNextPageParam: (lastPage) => {
-        return lastPage.tokenTransfers?.pageInfo.endCursor;
-      },
+      enabled: !!address && !!game?.config.project,
     },
   );
 
-  // FIXME: The one returned from the query is not correct (always true)
-  const hasNextPage = useMemo(() => {
-    return transfers?.pages[transfers.pages.length - 1].tokenTransfers?.pageInfo
-      .hasNextPage;
-  }, [transfers]);
-
-  const { data: transactions } = useActivitiesQuery(
+  const { data: transactions, status: activitiesStatus } = useActivitiesQuery(
     {
       projects: {
-        project: "dopewarsbal",
+        project: game?.config.project!,
         address,
         limit: 0,
       },
     },
     {
-      enabled: isReady && !!address,
+      enabled: !!address && !!game?.config.project,
     },
   );
 
@@ -120,78 +107,92 @@ export function Activity() {
 
   const { data, dates } = useMemo(() => {
     const dates: string[] = [];
-    if (!indexerUrl) return { data: [], dates };
     const erc20s: CardProps[] =
-      transfers?.pages
-        .flatMap((p) =>
-          p.tokenTransfers?.edges
-            .filter(
-              ({ node: t }) => t.tokenMetadata.__typename === "ERC20__Token",
-            )
-            .map(({ node: token }) => {
-              const metadata = token.tokenMetadata as Erc20__Token;
-              const amount = `${(BigInt(metadata.amount) / BigInt(10 ** Number(metadata.decimals))).toString()} ${metadata.symbol}`;
-              const timestamp = new Date(token.executedAt).getTime();
-              const date = getDate(timestamp);
-              if (!dates.includes(date)) {
-                dates.push(date);
-              }
-              return {
-                variant: "token",
-                key: `${token.transactionHash}-${metadata.amount}`,
-                transactionHash: token.transactionHash,
-                amount: amount,
-                address:
-                  BigInt(token.from) === BigInt(address)
-                    ? token.to
-                    : token.from,
-                value: "$-",
-                image: "",
-                action:
-                  BigInt(token.from) === 0n
-                    ? "mint"
-                    : BigInt(token.from) === BigInt(address)
-                      ? "send"
-                      : "receive",
-                timestamp: timestamp / 1000,
-                date: date,
-              } as CardProps;
-            }),
+      transfers?.transfers?.items
+        .flatMap((item) =>
+          item.transfers
+            .filter(({ tokenId }) => !tokenId) // Filter ERC20 transfers
+            .map(
+              ({
+                amount,
+                decimals,
+                symbol,
+                executedAt,
+                transactionHash,
+                eventId,
+                fromAddress,
+                toAddress,
+                contractAddress,
+              }) => {
+                const value = `${(BigInt(amount) / BigInt(10 ** Number(decimals))).toString()} ${symbol}`;
+                const timestamp = new Date(executedAt).getTime();
+                const date = getDate(timestamp);
+                const image = erc20Metadata.find(
+                  (m) =>
+                    getChecksumAddress(m.l2_token_address) ===
+                    getChecksumAddress(contractAddress),
+                )?.logo_url;
+                if (!dates.includes(date)) {
+                  dates.push(date);
+                }
+                return {
+                  variant: "token",
+                  key: `${transactionHash}-${eventId}`,
+                  transactionHash: transactionHash,
+                  amount: value,
+                  address:
+                    BigInt(fromAddress) === BigInt(address)
+                      ? toAddress
+                      : fromAddress,
+                  value: "$-",
+                  image: image || "",
+                  action:
+                    BigInt(fromAddress) === 0n
+                      ? "mint"
+                      : BigInt(fromAddress) === BigInt(address)
+                        ? "send"
+                        : "receive",
+                  timestamp: timestamp / 1000,
+                  date: date,
+                } as CardProps;
+              },
+            ),
         )
         .filter((i) => i !== undefined) || [];
     const erc721s: CardProps[] =
-      transfers?.pages
-        .flatMap((p) =>
-          p.tokenTransfers?.edges
-            .filter(
-              ({ node: t }) => t.tokenMetadata.__typename === "ERC721__Token",
-            )
-            .map(({ node: token }) => {
-              const metadata = token.tokenMetadata as Erc721__Token;
-              const timestamp = new Date(token.executedAt).getTime();
+      transfers?.transfers?.items
+        .flatMap((item) =>
+          item.transfers
+            .filter(({ tokenId }) => !!tokenId) // Filter ERC721 transfers
+            .map((transfer) => {
+              console.log({ transfer });
+              const timestamp = new Date(transfer.executedAt).getTime();
               const date = getDate(timestamp);
+              const metadata = JSON.parse(transfer.metadata ?? "{}");
+              const name =
+                metadata.attributes.find(
+                  (attribute: any) => attribute.trait.toLowerCase() === "name",
+                )?.value || metadata.name;
               if (!dates.includes(date)) {
                 dates.push(date);
               }
               return {
                 variant: "collectible",
-                key: `${token.transactionHash}-${metadata.tokenId}`,
-                transactionHash: token.transactionHash,
-                name: metadata.metadataName || "",
-                collection: metadata.name,
+                key: `${transfer.transactionHash}-${transfer.eventId}`,
+                transactionHash: transfer.transactionHash,
+                name: name || "",
+                collection: transfer.name,
                 amount: "",
                 address:
-                  BigInt(token.from) === BigInt(address)
-                    ? token.to
-                    : token.from,
+                  BigInt(transfer.fromAddress) === BigInt(address)
+                    ? transfer.toAddress
+                    : transfer.fromAddress,
                 value: "",
-                image: metadata.imagePath
-                  ? `${indexerUrl.replace("/graphql", "")}/static/${metadata.imagePath}`
-                  : "",
+                image: metadata.image || "",
                 action:
-                  BigInt(token.from) === 0n
+                  BigInt(transfer.fromAddress) === 0n
                     ? "mint"
-                    : BigInt(token.from) === BigInt(address)
+                    : BigInt(transfer.fromAddress) === BigInt(address)
                       ? "send"
                       : "receive",
                 timestamp: timestamp / 1000,
@@ -202,36 +203,30 @@ export function Activity() {
         .filter((i) => i !== undefined) || [];
     const games: CardProps[] =
       transactions?.activities?.items
-        ?.flatMap((i) =>
-          i.activities?.map(({ transactionHash, entrypoint, executedAt }) => {
-            const timestamp = new Date(executedAt).getTime();
-            const date = getDate(timestamp);
-            if (!dates.includes(date)) {
-              dates.push(date);
-            }
-            return {
-              variant: "game",
-              key: `${entrypoint}-${transactionHash}`,
-              transactionHash: transactionHash,
-              title:
-                methods.find((m) => m.entrypoint === entrypoint)?.name ||
-                formatAddress(entrypoint, { size: "xs" }),
-              image: game?.metadata.image || "",
-              website: game?.socials.website || "",
-              certified: !!game,
-              timestamp: timestamp / 1000,
-              date: date,
-            } as CardProps;
-          }),
+        ?.flatMap((item) =>
+          item.activities?.map(
+            ({ transactionHash, entrypoint, executedAt }) => {
+              const timestamp = new Date(executedAt).getTime();
+              const date = getDate(timestamp);
+              if (!dates.includes(date)) {
+                dates.push(date);
+              }
+              return {
+                variant: "game",
+                key: `${transactionHash}-${entrypoint}`,
+                transactionHash: transactionHash,
+                title: entrypoint,
+                image: game?.metadata.image || "",
+                website: game?.socials.website || "",
+                certified: !!game,
+                timestamp: timestamp / 1000,
+                date: date,
+              } as CardProps;
+            },
+          ),
         )
         .filter((i) => i !== undefined) || [];
-    const bound = Math.min(
-      ...[...erc20s, ...erc721s].map(({ timestamp }) => timestamp),
-    );
-    const filteredDates = dates.filter(
-      (date) => !hasNextPage || new Date(date).getTime() >= bound * 1000,
-    );
-    const sortedDates = filteredDates.sort(
+    const sortedDates = dates.sort(
       (a, b) => new Date(b).getTime() - new Date(a).getTime(),
     );
     const uniqueDates = [...new Set(sortedDates)];
@@ -241,23 +236,20 @@ export function Activity() {
       ),
       dates: uniqueDates,
     };
-  }, [
-    address,
-    transfers,
-    transactions,
-    methods,
-    game,
-    indexerUrl,
-    hasNextPage,
-    getDate,
-  ]);
+  }, [address, transfers, transactions, methods, game, getDate]);
 
   return (
     <LayoutContainer>
       <LayoutHeader variant="hidden" />
 
       {(() => {
-        switch (status) {
+        switch (
+          transfersStatus === "loading" && activitiesStatus === "loading"
+            ? "loading"
+            : transfersStatus === "error" || activitiesStatus === "error"
+              ? "error"
+              : "success"
+        ) {
           case "loading": {
             return <LayoutContentLoader />;
           }
@@ -337,15 +329,6 @@ export function Activity() {
                       No activity yet
                     </p>
                   </div>
-                )}
-
-                {dates.length > 0 && hasNextPage && (
-                  <Button
-                    className="w-full my-2"
-                    onClick={() => hasNextPage && fetchNextPage()}
-                  >
-                    See More
-                  </Button>
                 )}
               </LayoutContent>
             );
