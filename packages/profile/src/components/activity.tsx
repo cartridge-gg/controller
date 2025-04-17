@@ -60,7 +60,7 @@ export function Activity() {
   const { data: transfers, status: transfersStatus } = useTransfersQuery(
     {
       projects: {
-        project: game?.config.project!,
+        project: game?.config.project ?? "",
         address,
         date: "",
         limit: 0,
@@ -74,7 +74,7 @@ export function Activity() {
   const { data: transactions, status: activitiesStatus } = useActivitiesQuery(
     {
       projects: {
-        project: game?.config.project!,
+        project: game?.config.project ?? "",
         address,
         limit: 0,
       },
