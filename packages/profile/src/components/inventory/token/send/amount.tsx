@@ -1,6 +1,6 @@
 import { useToken } from "#hooks/token";
 import { Amount } from "@cartridge/ui-next";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 export function SendAmount({
@@ -16,6 +16,14 @@ export function SendAmount({
 }) {
   const { address: tokenAddress } = useParams<{ address: string }>();
   const { token } = useToken({ tokenAddress: tokenAddress! });
+
+  const conversion = useMemo(() => {
+    if (!token || !token.balance.value || !amount) return undefined;
+    const value = token.balance.value;
+    const max = token.balance.amount;
+    const total = (value * amount) / max;
+    return `~$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+  }, [token, amount]);
 
   const handleMax = useCallback(
     (e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
@@ -42,11 +50,7 @@ export function SendAmount({
     <Amount
       amount={amount}
       submitted={submitted}
-      conversion={
-        !token.balance.value
-          ? undefined
-          : `~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-      }
+      conversion={conversion}
       balance={parseFloat(token.balance.amount.toString())}
       symbol={token.metadata.symbol}
       decimals={token.metadata.decimals ?? 18}

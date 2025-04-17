@@ -4,6 +4,7 @@ import {
   useLocation,
   useNavigate,
   useParams,
+  useSearchParams,
 } from "react-router-dom";
 import {
   LayoutContainer,
@@ -31,7 +32,7 @@ import {
 import { constants } from "starknet";
 import { useAccount } from "#hooks/account";
 import { useToken } from "#hooks/token";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { compare } from "compare-versions";
 
 export function Token() {
@@ -92,20 +93,28 @@ function Credits() {
 
 function ERC20() {
   const navigate = useNavigate();
+  const { chainId, version, closable, visitor } = useConnection();
   const { address } = useParams<{ address: string }>();
-  const { chainId, version } = useConnection();
   const { token } = useToken({ tokenAddress: address! });
+  const [searchParams] = useSearchParams();
 
   const compatibility = useMemo(() => {
     if (!version) return false;
     return compare(version, "0.5.6", ">=");
   }, [version]);
 
+  const handleBack = useCallback(() => {
+    navigate(`..?${searchParams.toString()}`);
+  }, [navigate, searchParams]);
+
   if (!token) return;
 
   return (
     <LayoutContainer>
-      <LayoutHeader className="hidden" onBack={() => navigate("..")} />
+      <LayoutHeader
+        className="hidden"
+        onBack={closable || visitor ? undefined : handleBack}
+      />
 
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-4">
@@ -156,9 +165,9 @@ function ERC20() {
         </Card>
       </LayoutContent>
 
-      {isIframe() && compatibility && (
+      {isIframe() && compatibility && !visitor && (
         <LayoutFooter>
-          <Link to="send">
+          <Link to={`send?${searchParams.toString()}`}>
             <Button className="w-full">Send</Button>
           </Link>
         </LayoutFooter>

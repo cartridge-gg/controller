@@ -18,7 +18,11 @@ import {
 import BaseProvider from "./provider";
 import { shortString, WalletAccount } from "starknet";
 import { Policy } from "@cartridge/presets";
-import { AddStarknetChainParameters, ChainId } from "@starknet-io/types-js";
+import {
+  AddInvokeTransactionResult,
+  AddStarknetChainParameters,
+  ChainId,
+} from "@starknet-io/types-js";
 import { parseChainId } from "./utils";
 
 export default class ControllerProvider extends BaseProvider {
@@ -343,11 +347,15 @@ export default class ControllerProvider extends BaseProvider {
     if (chainId) {
       this.switchStarknetChain(currentChainId);
     }
-    return !(
+    const status = !(
       res &&
       ((res as ConnectError).code === ResponseCodes.NOT_CONNECTED ||
         (res as ConnectError).code === ResponseCodes.CANCELED)
     );
+    return {
+      status,
+      transactionHash: (res as AddInvokeTransactionResult)?.transaction_hash,
+    };
   }
 
   async delegateAccount() {
