@@ -1,4 +1,5 @@
 import {
+  ActivityAchievementCard,
   ActivityCollectibleCard,
   ActivityGameCard,
   ActivityTokenCard,
@@ -12,7 +13,7 @@ import {
 import { erc20Metadata } from "@cartridge/presets";
 import { useAccount } from "#hooks/account";
 import { VoyagerUrl } from "@cartridge/utils";
-import { useConnection } from "#hooks/context";
+import { useConnection, useData } from "#hooks/context";
 import { LayoutBottomNav } from "#components/bottom-nav";
 import { useCallback, useMemo } from "react";
 import {
@@ -25,7 +26,7 @@ import { constants, getChecksumAddress } from "starknet";
 import { Link } from "react-router-dom";
 
 interface CardProps {
-  variant: "token" | "collectible" | "game";
+  variant: "token" | "collectible" | "game" | "achievement";
   key: string;
   transactionHash: string;
   amount: string;
@@ -40,11 +41,12 @@ interface CardProps {
   action: "send" | "receive" | "mint";
   timestamp: number;
   date: string;
+  points?: number;
 }
 
 export function Activity() {
   const { address } = useAccount();
-  const { chainId, project, namespace, methods } = useConnection();
+  const { chainId, project, namespace } = useConnection();
 
   const { games } = useArcade();
   const game: GameModel | undefined = useMemo(() => {
@@ -52,6 +54,8 @@ export function Activity() {
       (game) => game.namespace === namespace && game.config.project === project,
     );
   }, [games, project, namespace]);
+
+  const { trophies } = useData();
 
   const { data: transfers, status: transfersStatus } = useTransfersQuery(
     {
@@ -226,17 +230,45 @@ export function Activity() {
           ),
         )
         .filter((i) => i !== undefined) || [];
+
+    const achievements: CardProps[] = trophies.achievements
+      .filter((item) => item.completed)
+      .map((item) => {
+        const date = getDate(item.timestamp * 1000);
+        if (!dates.includes(date)) {
+          dates.push(date);
+        }
+        return {
+          variant: "achievement",
+          key: item.id,
+          transactionHash: "",
+          title: item.title,
+          image: item.icon,
+          timestamp: item.timestamp,
+          date: date,
+          website: game?.socials.website || "",
+          certified: !!game,
+          points: item.earning,
+          amount: "",
+          address: "",
+          value: "",
+          name: "",
+          collection: "",
+          action: "mint",
+        } as CardProps;
+      });
+
     const sortedDates = dates.sort(
       (a, b) => new Date(b).getTime() - new Date(a).getTime(),
     );
     const uniqueDates = [...new Set(sortedDates)];
     return {
-      data: [...erc20s, ...erc721s, ...games].sort(
+      data: [...erc20s, ...erc721s, ...games, ...achievements].sort(
         (a, b) => b.timestamp - a.timestamp,
       ),
       dates: uniqueDates,
     };
-  }, [address, transfers, transactions, methods, game, getDate]);
+  }, [address, transfers, transactions, game, trophies, getDate]);
 
   return (
     <LayoutContainer>
@@ -316,6 +348,17 @@ export function Activity() {
                                       certified={props.certified}
                                     />
                                   </Link>
+                                );
+                              case "achievement":
+                                return (
+                                  <ActivityAchievementCard
+                                    title={"Achievement"}
+                                    topic={props.title}
+                                    website={props.website}
+                                    image={props.image}
+                                    certified={props.certified}
+                                    points={props.points || 0}
+                                  />
                                 );
                             }
                           })}
