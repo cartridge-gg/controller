@@ -157,7 +157,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             const name =
               metadata.attributes.find(
                 (attribute: { trait: string; value: string }) =>
-                  attribute.trait.toLowerCase() === "name",
+                  attribute?.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
             return {
               variant: "collectible",
