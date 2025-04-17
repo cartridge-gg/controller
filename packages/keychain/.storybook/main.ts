@@ -36,7 +36,8 @@ const config: StorybookConfig = {
   },
   staticDirs: ["../public"],
   previewHead: process.env.SNAPSHOT
-    ? (head) => `${head}<style>*{animation:none!important;}</style>`
+    ? (head) =>
+        `${head}<style>*{animation:none!important;} .starry-container{background-color:#000!important; opacity:1!important; visibility:hidden!important;}</style>`
     : undefined,
 };
 
