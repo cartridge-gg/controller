@@ -11,13 +11,18 @@ import { useMemo } from "react";
 type BalanceProps = {
   title?: string;
   price: number;
+  unit: "USDC" | "CREDITS";
 };
 
-export function Spending({ title, price }: BalanceProps) {
+export function Spending({ title, price, unit }: BalanceProps) {
   const Logo = useMemo(
     () => (
       <Thumbnail
-        icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
+        icon={
+          unit === "USDC"
+            ? "https://static.cartridge.gg/tokens/usdc.svg"
+            : "https://static.cartridge.gg/presets/credit/icon.svg"
+        }
         size="lg"
         rounded
       />
@@ -34,8 +39,8 @@ export function Spending({ title, price }: BalanceProps) {
       </CardHeader>
       <ActivityCard
         Logo={Logo}
-        title="Credits"
-        subTitle={`${(price * 10).toString()} Credits`}
+        title={unit}
+        subTitle={`${price.toString()} ${unit}`}
         topic={`$${price.toFixed(2).toString()}`}
         subTopic={""}
         variant={"default"}

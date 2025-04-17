@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { StarterItem } from "./starter-item";
-import { StarterItemType } from "@/context/starterpack";
+import { StarterItemType } from "@/hooks/starterpack";
 
 const meta: Meta<typeof StarterItem> = {
   component: StarterItem,

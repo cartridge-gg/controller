@@ -9,6 +9,13 @@ query CryptoPayment($id: ID!) {
   }
 }
 
+query StripePayment($id: ID!) {
+  stripePayment(id: $id) {
+    id
+    paymentStatus
+  }
+}
+
 mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
   createCryptoPayment(input: $input) {
     id
@@ -18,5 +25,17 @@ mutation CreateCryptoPayment($input: CreateCryptoPaymentInput!) {
     tokenAddress
     depositAddress
     expiresAt
+  }
+}
+
+mutation CreateStripePaymentIntent($input: CreateStripePaymentIntentInput!) {
+  createStripePaymentIntent(input: $input) {
+    id
+    clientSecret
+    pricing {
+      baseCostInCents
+      processingFeeInCents
+      totalInCents
+    }
   }
 }

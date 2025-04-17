@@ -62,9 +62,10 @@ export function connectToController<ParentMethods extends object>({
           reject: () => Promise.reject(),
         });
       },
-      openStarterPack: () => () => {
+      openStarterPack: () => (staterpackid: string) => {
         setContext({
           type: "open-starter-pack",
+          starterpackId: staterpackid,
           resolve: () => Promise.resolve(),
           reject: () => Promise.reject(),
         });

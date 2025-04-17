@@ -2,12 +2,17 @@ import { Signature } from "starknet";
 import { useEffect, useState } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
+import {
+  DeployCtx,
+  ExecuteCtx,
+  OpenStarterPackCtx,
+  SignMessageCtx,
+} from "@/utils/connection";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
 import { DeployController } from "./DeployController";
-import { PurchaseCredits } from "./funding/purchase/PurchaseCredits";
+import { Purchase } from "./purchase";
 import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
@@ -15,6 +20,7 @@ import { execute } from "@/utils/connection/execute";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { StarterPack } from "./starterpack";
+import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function Home() {
   const { context, setContext, controller, policies, origin } = useConnection();
@@ -156,10 +162,11 @@ export function Home() {
       return <Settings />;
     }
     case "open-purchase-credits": {
-      return <PurchaseCredits />;
+      return <Purchase type={PurchaseType.CREDITS} />;
     }
     case "open-starter-pack": {
-      return <StarterPack />;
+      const ctx = context as OpenStarterPackCtx;
+      return <StarterPack starterpackId={ctx.starterpackId} />;
     }
     default:
       return <>*Waves*</>;

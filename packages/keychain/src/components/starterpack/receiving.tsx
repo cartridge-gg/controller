@@ -1,38 +1,34 @@
+import { StarterItemData, StarterItemType } from "@/hooks/starterpack";
 import {
   Card,
   CardHeader,
   CardListContent,
   CardListItem,
   CardTitle,
-  Thumbnail,
+  Spinner,
 } from "@cartridge/ui-next";
-import { StarterItemData, StarterItemType } from "../../context/starterpack";
 
 type ReceivingProps = {
   title?: string;
   items: StarterItemData[];
+  isLoading?: boolean;
 };
 
-export function Receiving({ title, items }: ReceivingProps) {
+export function Receiving({ title, items, isLoading }: ReceivingProps) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="normal-case font-semibold text-xs">
           {title ?? "Balance"}
         </CardTitle>
+        {isLoading && <Spinner size="sm" />}
       </CardHeader>
 
       <CardListContent>
         {items.map((item) => (
           <CardListItem className="flex flex-row items-center p-3">
             <div className="flex flex-row items-center gap-3">
-              {/* <img src={item.image} className="size-8" /> */}
-              <Thumbnail
-                rounded={item.type === StarterItemType.CREDIT}
-                icon={item.image}
-                size="lg"
-                className="aspect-square"
-              />
+              <img src={item.image} className="size-8" />
               <div className="flex flex-col gap-0.5">
                 <p className="text-foreground-100 font-medium text-sm">
                   {item.type === StarterItemType.CREDIT

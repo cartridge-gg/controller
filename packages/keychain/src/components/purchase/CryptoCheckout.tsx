@@ -26,8 +26,10 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
-import useCryptoPayment from "@/hooks/payment";
+import { useCryptoPayment } from "@/hooks/payments/crypto";
 import { CostBreakdown } from "./CostBreakdown";
+import { StarterPackDetails } from "@/hooks/starterpack";
+import { Receiving } from "../starterpack/receiving";
 
 export const WALLET_CONFIG = {
   argent: {
@@ -63,6 +65,7 @@ export function CryptoCheckout({
   selectedWallet,
   walletAddress,
   creditsAmount,
+  starterpackDetails,
   initialState = CheckoutState.REVIEW_PURCHASE,
   onBack,
   onComplete,
@@ -70,6 +73,7 @@ export function CryptoCheckout({
   selectedWallet: ExternalWallet;
   walletAddress: string;
   creditsAmount: number;
+  starterpackDetails?: StarterPackDetails;
   initialState?: CheckoutState;
   onBack: () => void;
   onComplete: () => void;
@@ -100,6 +104,7 @@ export function CryptoCheckout({
         walletAddress,
         creditsAmount,
         selectedWallet.platform!,
+        starterpackDetails,
         false,
         (explorer) => {
           setState(CheckoutState.TRANSACTION_SUBMITTED);
@@ -118,13 +123,24 @@ export function CryptoCheckout({
     }
   }, [sendPayment, selectedWallet, creditsAmount, onComplete]);
 
+  const cost = useMemo(() => {
+    if (starterpackDetails) {
+      return starterpackDetails.price;
+    }
+
+    return creditsAmount;
+  }, [starterpackDetails, creditsAmount]);
   return (
     <LayoutContainer>
       <LayoutHeader
         className="p-6"
         title={getTitle}
         icon={<DepositIcon variant="solid" size="lg" />}
-        onBack={() => onBack()}
+        onBack={() => {
+          if (state === CheckoutState.REVIEW_PURCHASE) {
+            onBack();
+          }
+        }}
       />
       <LayoutContent className="gap-6 px-6">
         {state !== CheckoutState.TRANSACTION_SUBMITTED && (
@@ -132,19 +148,27 @@ export function CryptoCheckout({
             title={"Spending"}
             name={"USDC"}
             icon={"https://static.cartridge.gg/tokens/usdc.svg"}
-            amount={creditsAmount.toString() + " USDC"}
-            value={"$" + creditsAmount.toString()}
+            amount={cost.toString() + " USDC"}
+            value={"$" + cost.toString()}
           />
         )}
 
-        <ReviewToken
-          title={"Receiving"}
-          name={"CREDITS"}
-          icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
-          amount={creditsAmount.toString() + " CREDITS"}
-          value={"$" + creditsAmount.toString()}
-          isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
-        />
+        {starterpackDetails ? (
+          <Receiving
+            title={"Receiving"}
+            items={starterpackDetails.starterPackItems}
+            isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
+          />
+        ) : (
+          <ReviewToken
+            title={"Receiving"}
+            name={"Credits"}
+            icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
+            amount={cost.toString() + " Credits"}
+            value={"$" + cost.toString()}
+            isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
+          />
+        )}
       </LayoutContent>
 
       <LayoutFooter>
@@ -163,8 +187,8 @@ export function CryptoCheckout({
             walletType={selectedWallet.type}
             price={{
               processingFeeInCents: 0,
-              baseCostInCents: creditsAmount * 100,
-              totalInCents: creditsAmount * 100,
+              baseCostInCents: cost * 100,
+              totalInCents: cost * 100,
             }}
           />
         )}

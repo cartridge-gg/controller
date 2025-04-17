@@ -6,7 +6,7 @@ import {
   cn,
   Thumbnail,
 } from "@cartridge/ui-next";
-import { StarterItemData, StarterItemType } from "@/context/starterpack";
+import { StarterItemData, StarterItemType } from "@/hooks/starterpack";
 
 export const StarterItem = React.forwardRef<
   HTMLDivElement,

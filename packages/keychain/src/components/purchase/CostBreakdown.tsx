@@ -1,5 +1,5 @@
 import { Card, CardContent, Separator } from "@cartridge/ui-next";
-import { PricingDetails } from "./PurchaseCredits";
+import { PricingDetails } from ".";
 import { ExternalWalletType } from "@cartridge/controller";
 import { WALLET_CONFIG } from "./CryptoCheckout";
 
