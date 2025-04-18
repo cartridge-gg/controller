@@ -81,7 +81,7 @@ const queryClient = new QueryClient({
 const turnkeyConfig = {
   apiBaseUrl: import.meta.env.VITE_TURNKEY_BASE_URL!,
   defaultOrganizationId: import.meta.env.VITE_TURNKEY_ORGANIZATION_ID!,
-  /// This doesn't matter as we never use the WebAuthn 
+  /// This doesn't matter as we never use the WebAuthn
   rpId: "http://localhost",
   iframeUrl: import.meta.env.VITE_TURNKEY_IFRAME_URL,
 };

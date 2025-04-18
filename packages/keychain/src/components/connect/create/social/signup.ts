@@ -24,7 +24,7 @@ export const useSignupWithSocial = () => {
   const [userName, setUserName] = useState("");
   const signaturePromiseRef = useRef<{
     resolve: (value: SignupResponse | PromiseLike<SignupResponse>) => void;
-    reject: (reason?: any) => void;
+    reject: (reason?: Error) => void;
   } | null>(null);
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export const useSignupWithSocial = () => {
           }
         }, intervalMs);
       };
-      return new Promise(async (resolve, reject) => {
+      return new Promise((resolve, reject) => {
         pollIframePublicKey(
           async (iframePublicKey) => {
             signaturePromiseRef.current = { resolve, reject };

@@ -30,7 +30,6 @@ export function useCreateController({
   const { origin, policies, rpcUrl, chainId, setController } = useConnection();
   const { signupWithWebauthn } = useSignupWithWebauthn();
   const { signupWithSocial } = useSignupWithSocial();
-  //   const { mutateAsync: registerMutationFn } = useRegisterMutation();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -138,28 +137,12 @@ export function useCreateController({
       window.controller = controller;
       setController(controller);
 
-      //   const loginResponse = await controller.login(
-      //     NOW + DEFAULT_SESSION_DURATION,
-      //   );
-      //   console.log(loginResponse);
-
-      //   const res = await registerMutationFn({
-      //     username,
-      //     chainId,
-      //     owner: {
-      //       credential: JSON.stringify({ eth_address: signupResponse.address }),
-      //       type: SignerType.Eip191,
-      //     },
-      //     session: {
-      //       expiresAt: loginResponse.session.expiresAt,
-      //       allowedPoliciesRoot: loginResponse.session.policies,
-      //       metadataHash: loginResponse.session.metadataHash,
-      //       sessionKeyGuid: loginResponse.session.sessionKeyGuid,
-      //       guardianKeyGuid: loginResponse.session.guardianKeyGuid,
-      //       authorization: loginResponse.authorization,
-      //     },
-      //   });
-      //   console.log(`Registered controller with res: ${res}`);
+      const loginResponse = await controller.login(
+        NOW + DEFAULT_SESSION_DURATION,
+      );
+      if (!loginResponse.isRegistered) {
+        throw new Error("Failed to login");
+      }
     },
     [
       chainId,
