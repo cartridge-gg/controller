@@ -1,12 +1,9 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import {
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
-  TurnkeyWallet,
   WalletAdapter,
 } from "@cartridge/controller";
-import { useTurnkey } from "@turnkey/sdk-react";
 import React, {
   createContext,
   PropsWithChildren,
@@ -45,25 +42,6 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-  const { isAuthenticated } = useAuth0();
-  const { authIframeClient } = useTurnkey();
-
-  useEffect(() => {
-    if (
-      isAuthenticated &&
-      authIframeClient &&
-      authIframeClient.iframePublicKey
-    ) {
-      setWallets((prevWallets: ExternalWallet[]) => {
-        return [...prevWallets, new TurnkeyWallet(authIframeClient).getInfo()];
-      });
-    }
-  }, [
-    isAuthenticated,
-    setWallets,
-    authIframeClient,
-    authIframeClient?.iframePublicKey,
-  ]);
 
   // Instantiate KeychainWallets once parent is available
   useEffect(() => {
