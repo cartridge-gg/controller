@@ -204,10 +204,11 @@ export const useCryptoPayment = () => {
       await connection.getLatestBlockhash();
     txn.recentBlockhash = blockhash;
 
-    const serializedTxn = txn
-      .serialize({ requireAllSignatures: false })
-      .toString("base64");
-    const res = await externalSendTransaction("phantom", serializedTxn);
+    const serializedTxn = txn.serialize({ requireAllSignatures: false });
+    const res = await externalSendTransaction(
+      "phantom",
+      new Uint8Array(serializedTxn),
+    );
     if (!res.success) {
       throw new Error(res.error);
     }

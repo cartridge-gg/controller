@@ -119,14 +119,14 @@ export class PhantomWallet implements WalletAdapter {
   }
 
   async sendTransaction(
-    serailized_txn: string,
+    serailized_txn: Uint8Array,
   ): Promise<ExternalWalletResponse<any>> {
     if (!this.isAvailable() || !this.account) {
       throw new Error("Phantom is not connected");
     }
 
     try {
-      const txn = Transaction.from(Buffer.from(serailized_txn, "base64"));
+      const txn = Transaction.from(serailized_txn);
       const provider = this.getProvider();
       const result = await provider.signAndSendTransaction(txn);
       return {
