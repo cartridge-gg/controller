@@ -18,6 +18,7 @@ debug = false
 incremental = false
 
 [dependencies]
+alloy-signer.workspace = true
 wee_alloc = { version = "0.4.5", optional = true }
 account_sdk = { workspace = true, features = ["webauthn"] }
 async-trait.workspace = true
@@ -44,13 +45,13 @@ wasm-bindgen = { workspace = true, features = ["serde-serialize"] }
 wasm-bindgen-futures.workspace = true
 webauthn-rs-proto = { workspace = true, features = ["wasm"] }
 web-sys = { version = "0.3", default-features = false, features = [
-    "CredentialCreationOptions",
-    "CredentialRequestOptions",
-    "CredentialsContainer",
-    "Navigator",
-    "PublicKeyCredential",
-    "PublicKeyCredentialCreationOptions",
-    "Storage",
+	"CredentialCreationOptions",
+	"CredentialRequestOptions",
+	"CredentialsContainer",
+	"Navigator",
+	"PublicKeyCredential",
+	"PublicKeyCredentialCreationOptions",
+	"Storage",
 ] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

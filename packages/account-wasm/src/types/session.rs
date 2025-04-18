@@ -40,6 +40,9 @@ impl From<account_sdk::storage::Credentials> for Credentials {
 pub struct Session {
     pub policies: Vec<Policy>,
     pub expires_at: u64,
+    pub metadata_hash: JsFelt,
+    pub session_key_guid: JsFelt,
+    pub guardian_key_guid: JsFelt,
 }
 
 impl TryFrom<JsValue> for Session {
@@ -59,6 +62,9 @@ impl From<account_sdk::account::session::hash::Session> for Session {
                 .map(|p| p.policy.into())
                 .collect::<Vec<_>>(),
             expires_at: value.inner.expires_at,
+            metadata_hash: value.inner.metadata_hash.into(),
+            session_key_guid: value.inner.session_key_guid.into(),
+            guardian_key_guid: value.inner.guardian_key_guid.into(),
         }
     }
 }

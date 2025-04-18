@@ -21,6 +21,9 @@ export default class SessionAccount extends WalletAccount {
       chainId,
       expiresAt,
       policies,
+      guardianKeyGuid,
+      metadataHash,
+      sessionKeyGuid,
     }: {
       rpcUrl: string;
       privateKey: string;
@@ -29,6 +32,9 @@ export default class SessionAccount extends WalletAccount {
       chainId: string;
       expiresAt: number;
       policies: Policy[];
+      guardianKeyGuid: string;
+      metadataHash: string;
+      sessionKeyGuid: string;
     },
   ) {
     super({ nodeUrl: rpcUrl }, provider);
@@ -43,6 +49,9 @@ export default class SessionAccount extends WalletAccount {
       {
         expiresAt,
         policies,
+        guardianKeyGuid,
+        metadataHash,
+        sessionKeyGuid,
       },
     );
   }

@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use starknet::{
-    core::types::Felt,
+    core::types::{EthAddress, Felt},
     signers::{SigningKey, VerifyingKey},
 };
 
@@ -52,11 +52,16 @@ pub struct StarknetSigner {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Eip191Signer {
+    pub address: EthAddress,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Signer {
     Starknet(StarknetSigner),
     #[cfg(feature = "webauthn")]
     Webauthn(WebauthnSigner),
-    Eip191,
+    Eip191(Eip191Signer),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -107,7 +112,7 @@ impl From<&crate::signers::Signer> for Signer {
             crate::signers::Signer::Starknet(s) => Signer::Starknet(s.into()),
             #[cfg(feature = "webauthn")]
             crate::signers::Signer::Webauthn(s) => Signer::Webauthn(s.into()),
-            crate::signers::Signer::Eip191(_) => Signer::Eip191,
+            crate::signers::Signer::Eip191(s) => Signer::Eip191(s.into()),
         }
     }
 }
@@ -138,6 +143,14 @@ impl From<&crate::signers::webauthn::WebauthnSigner> for WebauthnSigner {
     }
 }
 
+impl From<&crate::signers::eip191::Eip191Signer> for Eip191Signer {
+    fn from(signer: &crate::signers::eip191::Eip191Signer) -> Self {
+        Eip191Signer {
+            address: signer.address(),
+        }
+    }
+}
+
 impl TryFrom<Signer> for crate::signers::Signer {
     type Error = ControllerError;
 
@@ -159,11 +172,13 @@ impl TryFrom<Signer> for crate::signers::Signer {
                     crate::signers::webauthn::WebauthnSigner::new(w.rp_id, credential_id, cose),
                 ))
             }
-            Signer::Eip191 => Err(ControllerError::StorageError(
-                StorageError::OperationFailed(
-                    "Cannot restore Eip191 signer from storage".to_string(),
-                ),
-            )),
+
+            Signer::Eip191(s) => Ok(Self::Eip191(crate::signers::eip191::Eip191Signer {
+                // Storage wont work with native signer until this is fixed to properly store the private key
+                #[cfg(not(target_arch = "wasm32"))]
+                signing_key: crate::signers::eip191::Eip191Signer::random().signing_key,
+                address: s.address,
+            })),
         }
     }
 }

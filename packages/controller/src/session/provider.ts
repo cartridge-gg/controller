@@ -14,6 +14,9 @@ interface SessionRegistration {
   ownerGuid: string;
   transactionHash?: string;
   expiresAt: string;
+  guardianKeyGuid: string;
+  metadataHash: string;
+  sessionKeyGuid: string;
 }
 
 export type SessionOptions = {
@@ -251,6 +254,9 @@ export default class SessionProvider extends BaseProvider {
       chainId: this._chainId,
       expiresAt: parseInt(sessionRegistration.expiresAt),
       policies: toWasmPolicies(this._policies),
+      guardianKeyGuid: sessionRegistration.guardianKeyGuid,
+      metadataHash: sessionRegistration.metadataHash,
+      sessionKeyGuid: sessionRegistration.sessionKeyGuid,
     });
 
     return this.account;

@@ -107,6 +107,9 @@ export default class SessionProvider extends BaseProvider {
       chainId: this._chainId,
       expiresAt: parseInt(session.expiresAt),
       policies: toWasmPolicies(this._policies),
+      guardianKeyGuid: session.guardianKeyGuid,
+      metadataHash: session.metadataHash,
+      sessionKeyGuid: session.sessionKeyGuid,
     });
 
     return this.account;

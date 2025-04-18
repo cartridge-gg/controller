@@ -1,17 +1,18 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  PropsWithChildren,
-  useMemo,
-} from "react";
 import {
   ExternalWallet,
-  ExternalWalletType,
   ExternalWalletResponse,
+  ExternalWalletType,
+  WalletAdapter,
 } from "@cartridge/controller";
+import React, {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ParentMethods, useConnection } from "./connection";
 
 interface WalletsContextValue {
@@ -149,11 +150,30 @@ export const useWallets = (): WalletsContextValue => {
  */
 export class KeychainWallets {
   private parent: ParentMethods;
+  private embeddedWalletsByAddress: Map<string, WalletAdapter> = new Map();
 
   // Method to set the parent connection once established
   constructor(parent: ParentMethods) {
     console.log("KeychainWallets: Parent connection set.");
     this.parent = parent;
+  }
+
+  /**
+   * Adds an embedded wallet to the map of embedded wallets.
+   * @param address - The address of the embedded wallet.
+   * @param wallet - The wallet adapter instance.
+   */
+  addEmbeddedWallet(address: string, wallet: WalletAdapter) {
+    this.embeddedWalletsByAddress.set(address, wallet);
+  }
+
+  /**
+   * Gets an embedded wallet from the map of embedded wallets.
+   * @param address - The address of the embedded wallet.
+   * @returns The wallet adapter instance or undefined if not found.
+   */
+  getEmbeddedWallet(address: string): WalletAdapter | undefined {
+    return this.embeddedWalletsByAddress.get(address);
   }
 
   /**
@@ -163,22 +183,30 @@ export class KeychainWallets {
    * @returns Promise resolving to the signature hex string.
    * @throws Error if signing fails or the connection isn't ready.
    */
-  async signMessage(identifier: string, message: string): Promise<string> {
+  async signMessage(
+    identifier: string,
+    message: string,
+  ): Promise<ExternalWalletResponse> {
     console.log(
-      `KeychainWallets: signMessage called for identifier: ${identifier}`,
+      `KeychainWallets: signMessage called for identifier: ${identifier} and message: ${message}`,
     );
 
     // --- Decision Logic ---
     // TODO: Implement logic to check if 'identifier' belongs to an embedded wallet (e.g., Turnkey)
-    const isEmbedded = false; // Placeholder
+    const embeddedWallet = this.getEmbeddedWallet(identifier);
 
-    if (isEmbedded) {
+    if (embeddedWallet) {
       // --- Embedded Wallet Path ---
       console.log(
         `KeychainWallets: Routing to embedded wallet for ${identifier}`,
       );
-      // TODO: Call the sign method of the appropriate embedded wallet instance
-      throw new Error("Embedded wallet signing not yet implemented.");
+      const response = await embeddedWallet.signMessage?.(message);
+      if (!response?.success) {
+        throw new Error(
+          `Failed to sign message with embedded wallet. ${response?.error}`,
+        );
+      }
+      return response;
     } else {
       // --- External Wallet Path ---
       console.log(
@@ -205,7 +233,7 @@ export class KeychainWallets {
           // Assuming response.result is the signature string
           // Ensure it's actually a string before returning
           if (typeof response.result === "string") {
-            return response.result;
+            return response;
           } else {
             console.error(
               "KeychainWallets: Parent response result is not a string:",
