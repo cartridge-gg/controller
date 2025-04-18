@@ -153,7 +153,7 @@ export const useSignupWithSocial = () => {
               setUserName(username);
 
               const popup = openPopup("");
-              const response = await loginWithPopup(
+              await loginWithPopup(
                 {
                   authorizationParams: {
                     connection: SOCIAL_PROVIDER_NAME,
