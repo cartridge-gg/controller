@@ -1,4 +1,5 @@
 import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+import { Buffer } from "buffer";
 import {
   WalletAdapter,
   ExternalWallet,
