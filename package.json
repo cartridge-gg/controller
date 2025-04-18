@@ -36,5 +36,10 @@
   "devDependencies": {
     "turbo": "^2.4.4",
     "vercel": "^37.14.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@radix-ui/react-accordion": "1.2.1"
+    }
   }
 }
