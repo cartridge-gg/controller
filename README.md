@@ -11,8 +11,8 @@ It supports transaction signing using Passkeys and Session Tokens.
 
 The project consists of several subfolders located in the `packages` directory:
 
-- **[account_sdk](packages/account_sdk)** - a rust sdk for interacting
-  interacting with the controller account contract.
+- **[account_sdk](packages/account_sdk)** - a rust sdk for interacting with the
+  controller account contract.
 - **[account-wasm](packages/account-wasm)** - a wasm version of the rust account
   sdk for usage in the browser.
 - **[contracts](packages/contracts)** - a cairo project containing the
