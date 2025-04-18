@@ -1,4 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
+import { TurnkeyWallet } from "@cartridge/controller";
 import { useRegisterMutation } from "@cartridge/utils/api/cartridge";
 import { sha256 } from "@noble/hashes/sha256";
 import { bytesToHex } from "@noble/hashes/utils";
@@ -15,7 +16,9 @@ import { getOrCreateWallet } from "./turnkey";
 
 export const useSignupWithSocial = () => {
   const { authIframeClient } = useTurnkey();
-  const { loginWithPopup, logout, getIdTokenClaims, isAuthenticated, user } =
+  const authIframeClientRef = useRef(authIframeClient);
+
+  const { loginWithPopup, getIdTokenClaims, isAuthenticated, user, error } =
     useAuth0();
   const { mutateAsync: register } = useRegisterMutation();
   const [userName, setUserName] = useState("");
@@ -25,22 +28,42 @@ export const useSignupWithSocial = () => {
   } | null>(null);
 
   useEffect(() => {
+    authIframeClientRef.current = authIframeClient;
+  }, [authIframeClient]);
+
+  useEffect(() => {
+    if (
+      error &&
+      error.message.includes("Popup closed") &&
+      signaturePromiseRef.current
+    ) {
+      signaturePromiseRef.current.reject(error);
+      signaturePromiseRef.current = null;
+    }
+  }, [error]);
+
+  useEffect(() => {
     (async () => {
       if (
         // Sanity check: the userName has already been validated at the previous step
         userName.length === 0 ||
         !isAuthenticated ||
         !user ||
-        !authIframeClient?.iframePublicKey
+        !authIframeClientRef.current?.iframePublicKey ||
+        error
       ) {
-        throw new Error("User is not authenticated");
+        return;
       }
 
       try {
         const oidcTokenString = await getOidcToken(
           getIdTokenClaims,
-          getNonce(authIframeClient.iframePublicKey!),
+          getNonce(authIframeClientRef.current.iframePublicKey!),
         );
+
+        if (!oidcTokenString) {
+          return;
+        }
 
         const subOrganizationId = await getOrCreateTurnkeySuborg(
           oidcTokenString,
@@ -50,14 +73,26 @@ export const useSignupWithSocial = () => {
         await authenticateToTurnkey(
           subOrganizationId,
           oidcTokenString,
-          authIframeClient,
+          authIframeClientRef.current,
         );
 
         const address = await getOrCreateWallet(
           subOrganizationId,
           userName,
-          authIframeClient,
+          authIframeClientRef.current,
         );
+
+        if (window.keychain_wallets) {
+          window.keychain_wallets.addEmbeddedWallet(
+            address.toLowerCase(),
+            new TurnkeyWallet(
+              authIframeClientRef.current,
+              address,
+              subOrganizationId,
+            ),
+          );
+          console.log(`Embedded wallet ${address} added to keychain_wallets`);
+        }
 
         if (signaturePromiseRef.current) {
           signaturePromiseRef.current.resolve({
@@ -71,65 +106,78 @@ export const useSignupWithSocial = () => {
           signaturePromiseRef.current = null;
         }
       } catch (error) {
-        await logout({
-          logoutParams: { returnTo: import.meta.env.VITE_ORIGIN },
-          clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
-        });
         console.error("Error continuing signup:", error);
-        if (signaturePromiseRef.current) {
-          signaturePromiseRef.current.reject(error);
-          signaturePromiseRef.current = null;
-        }
       }
     })();
-  }, [
-    isAuthenticated,
-    user,
-    userName,
-    authIframeClient,
-    logout,
-    getIdTokenClaims,
-    register,
-  ]);
+  }, [isAuthenticated, user, userName, getIdTokenClaims, register]);
 
   const signupWithSocial = useCallback(
     async (username: string): Promise<SignupResponse> => {
-      return new Promise(async (resolve, reject) => {
-        if (!authIframeClient?.iframePublicKey) {
-          console.error("Turnkey iframe client or public key not available.");
-          reject(
-            new Error("Turnkey iframe client or public key not available."),
-          );
+      const pollIframePublicKey = (
+        onSuccess: (key: string) => void,
+        onFailure: (err: Error) => void,
+      ) => {
+        const pollTimeMs = 10000;
+        const intervalMs = 200;
+        let elapsedTime = 0;
+
+        if (authIframeClientRef.current?.iframePublicKey) {
+          onSuccess(authIframeClientRef.current.iframePublicKey);
           return;
         }
 
-        signaturePromiseRef.current = { resolve, reject };
+        const intervalId = setInterval(() => {
+          if (authIframeClientRef.current?.iframePublicKey) {
+            clearInterval(intervalId);
+            onSuccess(authIframeClientRef.current.iframePublicKey);
+          } else {
+            console.log("waiting for the iframe's public key");
+            elapsedTime += intervalMs;
+            if (elapsedTime >= pollTimeMs) {
+              clearInterval(intervalId);
+              console.error("Timeout waiting for Turnkey iframe public key.");
+              onFailure(
+                new Error("Timeout waiting for Turnkey iframe public key."),
+              );
+            }
+          }
+        }, intervalMs);
+      };
+      return new Promise(async (resolve, reject) => {
+        pollIframePublicKey(
+          async (iframePublicKey) => {
+            signaturePromiseRef.current = { resolve, reject };
 
-        try {
-          const nonce = getNonce(authIframeClient.iframePublicKey!);
+            try {
+              const nonce = getNonce(iframePublicKey);
+              setUserName(username);
 
-          setUserName(username);
-
-          await loginWithPopup({
-            authorizationParams: {
-              connection: SOCIAL_PROVIDER_NAME,
-              redirect_uri: import.meta.env.VITE_ORIGIN,
-              nonce,
-              tknonce: nonce,
-            },
-          });
-        } catch (error) {
-          reject(error);
-          signaturePromiseRef.current = null;
-        }
+              const popup = openPopup("");
+              const response = await loginWithPopup(
+                {
+                  authorizationParams: {
+                    connection: SOCIAL_PROVIDER_NAME,
+                    redirect_uri: import.meta.env.VITE_ORIGIN,
+                    nonce,
+                    display: "touch",
+                    tknonce: nonce,
+                  },
+                },
+                { popup },
+              );
+            } catch (error) {
+              reject(error);
+              signaturePromiseRef.current = null;
+            }
+          },
+          (error) => {
+            reject(error);
+            signaturePromiseRef.current = null;
+          },
+        );
       });
     },
-    [
-      authIframeClient,
-      setUserName,
-      loginWithPopup,
-      authIframeClient?.iframePublicKey,
-    ],
+    [setUserName, loginWithPopup],
   );
 
   return { signupWithSocial };
@@ -137,4 +185,17 @@ export const useSignupWithSocial = () => {
 
 const getNonce = (seed: string) => {
   return bytesToHex(sha256(seed));
+};
+
+const openPopup = (url: string) => {
+  const width = 400;
+  const height = 600;
+  const left = window.screenX + (window.innerWidth - width) / 2;
+  const top = window.screenY + (window.innerHeight - height) / 2;
+
+  return window.open(
+    url,
+    "auth0:authorize:popup",
+    `left=${left},top=${top},resizable,scrollbars=no,status=1`,
+  );
 };

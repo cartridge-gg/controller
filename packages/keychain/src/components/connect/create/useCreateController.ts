@@ -30,6 +30,7 @@ export function useCreateController({
   const { origin, policies, rpcUrl, chainId, setController } = useConnection();
   const { signupWithWebauthn } = useSignupWithWebauthn();
   const { signupWithSocial } = useSignupWithSocial();
+  //   const { mutateAsync: registerMutationFn } = useRegisterMutation();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -111,7 +112,7 @@ export function useCreateController({
       switch (authenticationMode) {
         case AuthenticationMode.Webauthn:
           await signupWithWebauthn(username, doPopupFlow);
-          break;
+          return;
         case AuthenticationMode.Social:
           signupResponse = await signupWithSocial(username);
           break;
@@ -134,17 +135,31 @@ export function useCreateController({
           signer: signupResponse.signer,
         },
       });
+      window.controller = controller;
+      setController(controller);
 
-      const ret = await controller.login(NOW + DEFAULT_SESSION_DURATION);
-      console.log(ret);
+      //   const loginResponse = await controller.login(
+      //     NOW + DEFAULT_SESSION_DURATION,
+      //   );
+      //   console.log(loginResponse);
 
-      // const res = await registerController(
-      //   register,
-      //   address,
-      //   signature,
-      //   userName,
-      // );
-      // console.log(`Registered controller with res: ${res}`);
+      //   const res = await registerMutationFn({
+      //     username,
+      //     chainId,
+      //     owner: {
+      //       credential: JSON.stringify({ eth_address: signupResponse.address }),
+      //       type: SignerType.Eip191,
+      //     },
+      //     session: {
+      //       expiresAt: loginResponse.session.expiresAt,
+      //       allowedPoliciesRoot: loginResponse.session.policies,
+      //       metadataHash: loginResponse.session.metadataHash,
+      //       sessionKeyGuid: loginResponse.session.sessionKeyGuid,
+      //       guardianKeyGuid: loginResponse.session.guardianKeyGuid,
+      //       authorization: loginResponse.authorization,
+      //     },
+      //   });
+      //   console.log(`Registered controller with res: ${res}`);
     },
     [
       chainId,

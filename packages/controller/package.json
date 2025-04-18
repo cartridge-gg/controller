@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "build:deps": "pnpm build",
+    "dev": "vite build --watch",
     "build:browser": "vite build",
     "build:node": "tsup --config tsup.node.config.ts",
     "build": "pnpm build:browser && pnpm build:node",
@@ -41,6 +42,7 @@
     "@cartridge/account-wasm": "workspace:*",
     "@cartridge/utils": "workspace:*",
     "@cartridge/penpal": "catalog:",
+    "ethers": "^6.13.5",
     "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
     "@turnkey/sdk-browser": "^4.0.0",

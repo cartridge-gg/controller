@@ -1,14 +1,5 @@
 import { fetchApiCreator } from "@cartridge/utils";
-import {
-  Exact,
-  RegisterMutation,
-  Scalars,
-  SignerInput,
-  SignerType,
-} from "@cartridge/utils/api/cartridge";
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
-import { Signature } from "ethers";
-import { UseMutateAsyncFunction } from "react-query";
 
 export const SOCIAL_PROVIDER_NAME = "discord";
 
@@ -18,36 +9,6 @@ export const fetchApi = fetchApiCreator(
     credentials: "same-origin",
   },
 );
-
-type RegisterMutateFn = UseMutateAsyncFunction<
-  RegisterMutation,
-  unknown,
-  Exact<{
-    chainId: Scalars["String"];
-    owner: SignerInput;
-    signature: Array<Scalars["String"]> | Scalars["String"];
-    username: Scalars["String"];
-  }>,
-  unknown
->;
-
-export const registerController = async (
-  registerMutationFn: RegisterMutateFn,
-  address: string,
-  signature: Signature,
-  userName: string,
-) => {
-  const res = await registerMutationFn({
-    chainId: CHAIN_ID,
-    owner: {
-      credential: JSON.stringify({ eth_address: address }),
-      type: SignerType.Eip191,
-    },
-    signature: [signature.serialized],
-    username: userName,
-  });
-  return res;
-};
 
 export const getOrCreateTurnkeySuborg = async (
   oidcToken: string,
@@ -62,10 +23,7 @@ export const getOrCreateTurnkeySuborg = async (
   }
 
   let targetSubOrgId: string;
-  if (getSuborgsResponse.organizationIds.length > 1) {
-    // Not supported at the moment
-    throw new Error("Multiple suborgs found for user");
-  } else if (getSuborgsResponse.organizationIds.length === 0) {
+  if (getSuborgsResponse.organizationIds.length === 0) {
     const createSuborgResponse = await fetchApi<CreateSuborgResponse>(
       "create-suborg",
       {
@@ -74,8 +32,15 @@ export const getOrCreateTurnkeySuborg = async (
       },
     );
     targetSubOrgId = createSuborgResponse.subOrganizationId;
-  } else {
+  } else if (getSuborgsResponse.organizationIds.length === 1) {
     targetSubOrgId = getSuborgsResponse.organizationIds[0];
+  } else {
+    if (import.meta.env.DEV) {
+      targetSubOrgId = getSuborgsResponse.organizationIds[0];
+    } else {
+      // We don't want to handle multiple suborgs per user at the moment
+      throw new Error("Multiple suborgs found for user");
+    }
   }
 
   return targetSubOrgId;
@@ -106,8 +71,6 @@ export const authenticateToTurnkey = async (
     throw new Error("Failed to inject credentials into Turnkey");
   }
 };
-
-const CHAIN_ID = "SN_MAIN";
 
 type GetSuborgsResponse = {
   organizationIds: string[];

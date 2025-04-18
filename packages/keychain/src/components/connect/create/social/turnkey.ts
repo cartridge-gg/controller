@@ -10,10 +10,10 @@ export const signCreateControllerMessage = async (
   const message = "Hello World!";
   const signedTx = await authIframeClient.signRawPayload({
     organizationId: subOrgId,
+    signWith: address,
     payload: eip191Encode(message),
     encoding: "PAYLOAD_ENCODING_TEXT_UTF8",
     hashFunction: "HASH_FUNCTION_SHA256",
-    signWith: address,
   });
 
   const r = signedTx.r.startsWith("0x") ? signedTx.r : "0x" + signedTx.r;
@@ -42,7 +42,7 @@ export const getOrCreateWallet = async (
   const wallets = await authIframeClient.getWallets({
     organizationId: subOrgId,
   });
-  if (wallets.wallets.length > 1) {
+  if (wallets.wallets.length > 1 && !import.meta.env.DEV) {
     throw new Error(
       "Multiple wallets found" + JSON.stringify(wallets, null, 2),
     );
