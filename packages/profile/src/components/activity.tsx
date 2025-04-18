@@ -1,33 +1,29 @@
 import {
+  ActivityAchievementCard,
   ActivityCollectibleCard,
   ActivityGameCard,
   ActivityTokenCard,
   Button,
+  cn,
   EmptyStateActivityIcon,
   LayoutContainer,
   LayoutContent,
   LayoutContentError,
   LayoutContentLoader,
   LayoutHeader,
+  PlusIcon,
 } from "@cartridge/ui-next";
-import {
-  Erc20__Token,
-  Erc721__Token,
-  useInfiniteTokenTransfersQuery,
-} from "@cartridge/utils/api/indexer";
-import { useAccount } from "#hooks/account";
-import { formatAddress, VoyagerUrl, useIndexerAPI } from "@cartridge/utils";
-import { useConnection } from "#hooks/context";
+import { VoyagerUrl } from "@cartridge/utils";
+import { useConnection, useData } from "#hooks/context";
 import { LayoutBottomNav } from "#components/bottom-nav";
-import { useCallback, useMemo } from "react";
-import { useActivitiesQuery } from "@cartridge/utils/api/cartridge";
-import { useArcade } from "#hooks/arcade.js";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { useCallback, useMemo, useState } from "react";
 import { constants } from "starknet";
 import { Link } from "react-router-dom";
 
+const OFFSET = 100;
+
 interface CardProps {
-  variant: "token" | "collectible" | "game";
+  variant: "token" | "collectible" | "game" | "achievement";
   key: string;
   transactionHash: string;
   amount: string;
@@ -42,72 +38,14 @@ interface CardProps {
   action: "send" | "receive" | "mint";
   timestamp: number;
   date: string;
+  points?: number;
 }
 
 export function Activity() {
-  const { address } = useAccount();
-  const { chainId, project, namespace, methods } = useConnection();
+  const [cap, setCap] = useState(OFFSET);
+  const { chainId } = useConnection();
 
-  const { games } = useArcade();
-  const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find(
-      (game) => game.namespace === namespace && game.config.project === project,
-    );
-  }, [games, project, namespace]);
-
-  const { isReady, indexerUrl } = useIndexerAPI();
-  const {
-    status,
-    data: transfers,
-    fetchNextPage,
-    // hasNextPage,
-  } = useInfiniteTokenTransfersQuery(
-    {
-      address,
-      first: 1000,
-    },
-    {
-      enabled: isReady && !!address,
-      getNextPageParam: (lastPage) => {
-        return lastPage.tokenTransfers?.pageInfo.endCursor;
-      },
-    },
-  );
-
-  // FIXME: The one returned from the query is not correct (always true)
-  const hasNextPage = useMemo(() => {
-    return transfers?.pages[transfers.pages.length - 1].tokenTransfers?.pageInfo
-      .hasNextPage;
-  }, [transfers]);
-
-  const { data: transactions } = useActivitiesQuery(
-    {
-      projects: {
-        project: "dopewarsbal",
-        address,
-        limit: 0,
-      },
-    },
-    {
-      enabled: isReady && !!address,
-    },
-  );
-
-  const getDate = useCallback((timestamp: number) => {
-    const date = new Date(timestamp);
-    const today = new Date();
-    if (date.getDate() === today.getDate()) {
-      return "Today";
-    } else if (date.getDate() === today.getDate() - 1) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  }, []);
+  const { events: data, status } = useData();
 
   const to = useCallback(
     (transactionHash: string) => {
@@ -118,139 +56,13 @@ export function Activity() {
     [chainId],
   );
 
-  const { data, dates } = useMemo(() => {
-    const dates: string[] = [];
-    if (!indexerUrl) return { data: [], dates };
-    const erc20s: CardProps[] =
-      transfers?.pages
-        .flatMap((p) =>
-          p.tokenTransfers?.edges
-            .filter(
-              ({ node: t }) => t.tokenMetadata.__typename === "ERC20__Token",
-            )
-            .map(({ node: token }) => {
-              const metadata = token.tokenMetadata as Erc20__Token;
-              const amount = `${(BigInt(metadata.amount) / BigInt(10 ** Number(metadata.decimals))).toString()} ${metadata.symbol}`;
-              const timestamp = new Date(token.executedAt).getTime();
-              const date = getDate(timestamp);
-              if (!dates.includes(date)) {
-                dates.push(date);
-              }
-              return {
-                variant: "token",
-                key: `${token.transactionHash}-${metadata.amount}`,
-                transactionHash: token.transactionHash,
-                amount: amount,
-                address:
-                  BigInt(token.from) === BigInt(address)
-                    ? token.to
-                    : token.from,
-                value: "$-",
-                image: "",
-                action:
-                  BigInt(token.from) === 0n
-                    ? "mint"
-                    : BigInt(token.from) === BigInt(address)
-                      ? "send"
-                      : "receive",
-                timestamp: timestamp / 1000,
-                date: date,
-              } as CardProps;
-            }),
-        )
-        .filter((i) => i !== undefined) || [];
-    const erc721s: CardProps[] =
-      transfers?.pages
-        .flatMap((p) =>
-          p.tokenTransfers?.edges
-            .filter(
-              ({ node: t }) => t.tokenMetadata.__typename === "ERC721__Token",
-            )
-            .map(({ node: token }) => {
-              const metadata = token.tokenMetadata as Erc721__Token;
-              const timestamp = new Date(token.executedAt).getTime();
-              const date = getDate(timestamp);
-              if (!dates.includes(date)) {
-                dates.push(date);
-              }
-              return {
-                variant: "collectible",
-                key: `${token.transactionHash}-${metadata.tokenId}`,
-                transactionHash: token.transactionHash,
-                name: metadata.metadataName || "",
-                collection: metadata.name,
-                amount: "",
-                address:
-                  BigInt(token.from) === BigInt(address)
-                    ? token.to
-                    : token.from,
-                value: "",
-                image: metadata.imagePath
-                  ? `${indexerUrl.replace("/graphql", "")}/static/${metadata.imagePath}`
-                  : "",
-                action:
-                  BigInt(token.from) === 0n
-                    ? "mint"
-                    : BigInt(token.from) === BigInt(address)
-                      ? "send"
-                      : "receive",
-                timestamp: timestamp / 1000,
-                date: date,
-              } as CardProps;
-            }),
-        )
-        .filter((i) => i !== undefined) || [];
-    const games: CardProps[] =
-      transactions?.activities?.items
-        ?.flatMap((i) =>
-          i.activities?.map(({ transactionHash, entrypoint, executedAt }) => {
-            const timestamp = new Date(executedAt).getTime();
-            const date = getDate(timestamp);
-            if (!dates.includes(date)) {
-              dates.push(date);
-            }
-            return {
-              variant: "game",
-              key: `${entrypoint}-${transactionHash}`,
-              transactionHash: transactionHash,
-              title:
-                methods.find((m) => m.entrypoint === entrypoint)?.name ||
-                formatAddress(entrypoint, { size: "xs" }),
-              image: game?.metadata.image || "",
-              website: game?.socials.website || "",
-              certified: !!game,
-              timestamp: timestamp / 1000,
-              date: date,
-            } as CardProps;
-          }),
-        )
-        .filter((i) => i !== undefined) || [];
-    const bound = Math.min(
-      ...[...erc20s, ...erc721s].map(({ timestamp }) => timestamp),
-    );
-    const filteredDates = dates.filter(
-      (date) => !hasNextPage || new Date(date).getTime() >= bound * 1000,
-    );
-    const sortedDates = filteredDates.sort(
-      (a, b) => new Date(b).getTime() - new Date(a).getTime(),
-    );
-    const uniqueDates = [...new Set(sortedDates)];
+  const { events, dates } = useMemo(() => {
+    const filteredData = data.slice(0, cap);
     return {
-      data: [...erc20s, ...erc721s, ...games].sort(
-        (a, b) => b.timestamp - a.timestamp,
-      ),
-      dates: uniqueDates,
+      events: filteredData,
+      dates: [...new Set(filteredData.map((event) => event.date))],
     };
-  }, [
-    address,
-    transfers,
-    transactions,
-    methods,
-    game,
-    indexerUrl,
-    hasNextPage,
-    getDate,
-  ]);
+  }, [data, cap]);
 
   return (
     <LayoutContainer>
@@ -274,7 +86,7 @@ export function Activity() {
                         <p className="py-3 text-xs font-semibold text-foreground-400 tracking-wider">
                           {current}
                         </p>
-                        {data
+                        {events
                           .filter(({ date }) => date === current)
                           .map((props: CardProps, index: number) => {
                             switch (props.variant) {
@@ -325,6 +137,18 @@ export function Activity() {
                                     />
                                   </Link>
                                 );
+                              case "achievement":
+                                return (
+                                  <ActivityAchievementCard
+                                    key={`${index}-${props.key}`}
+                                    title={"Achievement"}
+                                    topic={props.title}
+                                    website={props.website}
+                                    image={props.image}
+                                    certified={props.certified}
+                                    points={props.points || 0}
+                                  />
+                                );
                             }
                           })}
                       </div>
@@ -338,15 +162,17 @@ export function Activity() {
                     </p>
                   </div>
                 )}
-
-                {dates.length > 0 && hasNextPage && (
-                  <Button
-                    className="w-full my-2"
-                    onClick={() => hasNextPage && fetchNextPage()}
-                  >
-                    See More
-                  </Button>
-                )}
+                <Button
+                  variant="secondary"
+                  className={cn(
+                    "text-foreground-300 hover:text-foreground-200 normal-case text-sm font-medium tracking-normal font-sans",
+                    (cap >= data.length || dates.length === 0) && "hidden",
+                  )}
+                  onClick={() => setCap((prev) => prev + OFFSET)}
+                >
+                  <PlusIcon variant="solid" size="xs" />
+                  See More
+                </Button>
               </LayoutContent>
             );
           }

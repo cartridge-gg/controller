@@ -1,0 +1,20 @@
+query StarterPack($id: ID!) {
+  starterpack(id: $id) {
+    name
+    description
+    active
+    price
+    bonusCredits
+    issuance
+    maxIssuance
+    starterpackContract {
+      edges {
+        node {
+          name
+          description
+          iconURL
+        }
+      }
+    }
+  }
+}

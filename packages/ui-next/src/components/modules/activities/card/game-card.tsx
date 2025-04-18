@@ -59,10 +59,14 @@ export const ActivityGameCard = ({
     return <ActivitySocialWebsite website={website} certified={certified} />;
   }, [website, certified]);
 
+  const formattedTitle = useMemo(() => {
+    return title.replace("_", " ").trim();
+  }, [title]);
+
   return (
     <ActivityCard
       Logo={Logo}
-      title={title}
+      title={formattedTitle}
       subTitle={Social}
       error={error}
       loading={loading}

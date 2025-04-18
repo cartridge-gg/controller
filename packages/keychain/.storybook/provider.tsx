@@ -12,6 +12,7 @@ import {
 } from "./mock";
 import { TokensProvider } from "../src/components/provider/tokens";
 import { PostHogProvider } from "../src/components/provider/posthog";
+import { WalletsProvider } from "../src/hooks/wallets";
 
 export function Provider({
   children,
@@ -27,15 +28,17 @@ export function Provider({
     >
       <QueryClientProvider client={queryClient}>
         <ConnectionContext.Provider value={connection}>
-          <PostHogProvider>
-            <MockUpgradeProvider controller={connection.controller}>
-              <UIProvider>
-                <TokensProvider>
-                  <BrowserRouter>{children}</BrowserRouter>
-                </TokensProvider>
-              </UIProvider>
-            </MockUpgradeProvider>
-          </PostHogProvider>
+          <WalletsProvider>
+            <PostHogProvider>
+              <MockUpgradeProvider controller={connection.controller}>
+                <UIProvider>
+                  <TokensProvider>
+                    <BrowserRouter>{children}</BrowserRouter>
+                  </TokensProvider>
+                </UIProvider>
+              </MockUpgradeProvider>
+            </PostHogProvider>
+          </WalletsProvider>
         </ConnectionContext.Provider>
       </QueryClientProvider>
     </StarknetConfig>

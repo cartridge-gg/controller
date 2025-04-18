@@ -1,11 +1,10 @@
-import { useIndexerAPI } from "@cartridge/utils";
 import {
   useAccountNameQuery,
   useAccountNamesQuery,
   useAddressByUsernameQuery,
 } from "@cartridge/utils/api/cartridge";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useMatch, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useMatch } from "react-router-dom";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
 import { constants, getChecksumAddress } from "starknet";
@@ -174,29 +173,11 @@ export function useAccount(): UseAccountResponse {
   // Ref: https://stackoverflow.com/a/75462921
   const match = useMatch("/account/:username/*");
 
-  const params = useParams<{
-    project?: string;
-  }>();
-  const { setIndexerUrl, isReady } = useIndexerAPI();
   const username = match?.params.username ?? "";
   const { data } = useAddressByUsernameQuery(
     { username },
-    { enabled: isReady && !!username },
+    { enabled: !!username },
   );
-
-  const isFirstRender = useRef(true);
-  useEffect(() => {
-    if (!params.project || !isFirstRender.current) {
-      return;
-    }
-
-    const url = `${import.meta.env.VITE_CARTRIDGE_API_URL}/x/${
-      params.project
-    }/torii/graphql`;
-
-    setIndexerUrl(url);
-    isFirstRender.current = false;
-  }, [params.project, setIndexerUrl]);
 
   const address = useMemo(
     () =>

@@ -139,7 +139,7 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
-  openStarterPack(): void;
+  openStarterPack(starterpackId: string): void;
 
   // External wallet methods
   externalDetectWallets(): Promise<ExternalWallet[]>;

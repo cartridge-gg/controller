@@ -14,14 +14,14 @@ interface InputProps
 }
 
 export const inputVariants = cva(
-  "flex w-full rounded-md border px-4 font-mono ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none",
+  "flex w-full rounded-md border px-4 font-mono ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none caret-primary",
   {
     variants: {
       variant: {
         default:
-          "border bg-background-200 border-background-300 text-foreground-100 hover:border-background-400 focus-visible:border-background-400 focus-visible:bg-background-300 placeholder:text-foreground-400",
+          "border bg-background-200 border-background-300 text-foreground-100 hover:border-background-400 focus-visible:border-primary focus-visible:bg-background-300 placeholder:text-foreground-400",
         username:
-          "border bg-background-200 border-background-300 text-foreground-100 placeholder:text-foreground-400",
+          "border bg-background-200 border-background-300 text-foreground-100 placeholder:text-foreground-400 focus-visible:border-primary",
       },
       size: {
         default: "h-10 text-sm/[18px]",

@@ -24,6 +24,7 @@ import { CopyAddress } from "../copy-address";
 import { Network } from "@/components/network";
 import { useUI } from "@/hooks";
 import { Thumbnail } from "@/index";
+import { StarryHeaderBackground } from "./starry-header";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
@@ -52,7 +53,13 @@ export function LayoutHeader({
           case "expanded":
             return (
               <div className="flex flex-col w-full h-[176px]">
-                <div className="w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none" />
+                {getComputedStyle(document.documentElement)
+                  .getPropertyValue("--theme-cover-url")
+                  .includes("presets/cartridge/") ? (
+                  <StarryHeaderBackground className="w-full h-[136px] relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none" />
+                ) : (
+                  <div className="w-full h-[136px] bg-[image:var(--theme-cover-url)] bg-cover bg-center relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-background before:pointer-events-none" />
+                )}
                 <HeaderInner
                   {...innerProps}
                   className="absolute bottom-0 left-0 right-0"

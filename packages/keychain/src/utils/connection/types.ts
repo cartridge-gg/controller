@@ -81,6 +81,7 @@ export type OpenPurchaseCreditsCtx = {
 
 export type OpenStarterPackCtx = {
   type: "open-starter-pack";
+  starterpackId: string;
   resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;
 };

@@ -7,7 +7,7 @@ import { Success } from "./success";
 import { Pending } from "./pending";
 import { Consent, Slot } from "./slot";
 import { Fund } from "./slot/fund";
-import { StarterPack } from "./starterpack";
+import { StarterPackWrapper } from "./starterpack";
 
 export function App() {
   return (
@@ -23,7 +23,10 @@ export function App() {
         <Route path="success" element={<Success />} />
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />
-        <Route path="starter-pack" element={<StarterPack />} />
+        <Route
+          path="starter-pack/:starterpackId"
+          element={<StarterPackWrapper />}
+        />
         <Route path="*" element={<div>Page not found</div>} />
       </Routes>
     </div>
