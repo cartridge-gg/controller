@@ -3,12 +3,13 @@ use auto_impl::auto_impl;
 use starknet::core::types::{
     BlockHashAndNumber, BlockId, BroadcastedDeclareTransaction,
     BroadcastedDeployAccountTransaction, BroadcastedInvokeTransaction, BroadcastedTransaction,
-    ContractClass, DeclareTransactionResult, DeployAccountTransactionResult, EventFilter,
-    EventsPage, FeeEstimate, Felt, FunctionCall, InvokeTransactionResult,
-    MaybePendingBlockWithReceipts, MaybePendingBlockWithTxHashes, MaybePendingBlockWithTxs,
-    MaybePendingStateUpdate, MsgFromL1, SimulatedTransaction, SimulationFlag,
-    SimulationFlagForEstimateFee, SyncStatusType, Transaction, TransactionReceiptWithBlockInfo,
-    TransactionStatus, TransactionTrace, TransactionTraceWithHash,
+    ConfirmedBlockId, ContractClass, ContractStorageKeys, DeclareTransactionResult,
+    DeployAccountTransactionResult, EventFilter, EventsPage, FeeEstimate, Felt, FunctionCall,
+    Hash256, InvokeTransactionResult, MaybePendingBlockWithReceipts, MaybePendingBlockWithTxHashes,
+    MaybePendingBlockWithTxs, MaybePendingStateUpdate, MessageWithStatus, MsgFromL1,
+    SimulatedTransaction, SimulationFlag, SimulationFlagForEstimateFee, StorageProof,
+    SyncStatusType, Transaction, TransactionReceiptWithBlockInfo, TransactionStatus,
+    TransactionTrace, TransactionTraceWithHash,
 };
 use starknet::providers::jsonrpc::HttpTransport;
 use starknet::providers::{
@@ -104,6 +105,36 @@ impl CartridgeProvider for CartridgeJsonRpcProvider {
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 impl Provider for CartridgeJsonRpcProvider {
+    async fn get_messages_status(
+        &self,
+        transaction_hash: Hash256,
+    ) -> Result<Vec<MessageWithStatus>, ProviderError> {
+        self.inner.get_messages_status(transaction_hash).await
+    }
+
+    async fn get_storage_proof<B, H, A, K>(
+        &self,
+        block_id: B,
+        class_hashes: H,
+        contract_addresses: A,
+        contracts_storage_keys: K,
+    ) -> Result<StorageProof, ProviderError>
+    where
+        B: AsRef<ConfirmedBlockId> + Send + Sync,
+        H: AsRef<[Felt]> + Send + Sync,
+        A: AsRef<[Felt]> + Send + Sync,
+        K: AsRef<[ContractStorageKeys]> + Send + Sync,
+    {
+        self.inner
+            .get_storage_proof(
+                block_id,
+                class_hashes,
+                contract_addresses,
+                contracts_storage_keys,
+            )
+            .await
+    }
+
     async fn spec_version(&self) -> Result<String, ProviderError> {
         self.inner.spec_version().await
     }

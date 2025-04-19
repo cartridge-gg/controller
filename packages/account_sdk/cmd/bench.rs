@@ -11,6 +11,7 @@ use account_sdk::provider::{
     ExecuteFromOutsideResponse,
 };
 use account_sdk::signers::{Owner, Signer};
+use account_sdk::utils::contract_error_contains;
 
 use cainome::cairo_serde::ContractAddress;
 use rand::Rng as _;
@@ -77,10 +78,10 @@ async fn main() {
                 StarknetError::TransactionExecutionError(ref error_data),
             )) = e
             {
-                if !error_data
-                    .execution_error
-                    .contains("is unavailable for deployment")
-                {
+                if !contract_error_contains(
+                    &error_data.execution_error,
+                    "is unavailable for deployment",
+                ) {
                     println!("Deployment failed: {:?}", e);
                 }
             } else {

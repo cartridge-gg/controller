@@ -10,6 +10,7 @@ use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Owner;
 use crate::storage::{ControllerMetadata, Storage, StorageBackend, StorageError};
 use crate::typed_data::TypedData;
+use crate::utils::contract_error_contains;
 use crate::{
     abigen::{self},
     signers::{HashSigner, SignError},
@@ -178,7 +179,7 @@ impl Controller {
             Err(e) => return ControllerError::from(e),
         };
 
-        fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+        fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.l1_gas_price;
         ControllerError::NotDeployed {
             fee_estimate: Box::new(fee_estimate),
             balance,
@@ -205,7 +206,7 @@ impl Controller {
                     .authorized_session_for_policies(&Policy::from_calls(&calls), None)
                     .is_none_or(|metadata| !metadata.is_registered)
                 {
-                    fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.gas_price;
+                    fee_estimate.overall_fee += WEBAUTHN_GAS * fee_estimate.l1_gas_price;
                 }
 
                 if fee_estimate.overall_fee > Felt::from(balance) {
@@ -222,14 +223,15 @@ impl Controller {
                     StarknetError::TransactionExecutionError(data),
                 )) = &e
                 {
-                    if data.execution_error.contains("session/already-registered") {
+                    if contract_error_contains(&data.execution_error, "session/already-registered")
+                    {
                         return Err(ControllerError::SessionAlreadyRegistered);
                     }
 
-                    if data
-                        .execution_error
-                        .contains(&format!("{:x} is not deployed.", self.address))
-                    {
+                    if contract_error_contains(
+                        &data.execution_error,
+                        &format!("{:x} is not deployed.", self.address),
+                    ) {
                         return Err(self.build_not_deployed_err().await);
                     }
                 }
@@ -260,8 +262,8 @@ impl Controller {
             let result = self
                 .execute_v3(calls.clone())
                 .nonce(nonce)
-                .gas(gas)
-                .gas_price(gas_price)
+                .l1_gas(gas)
+                .l1_gas_price(gas_price)
                 .send()
                 .await;
 
@@ -287,9 +289,10 @@ impl Controller {
                     match &e {
                         AccountError::Provider(ProviderError::StarknetError(
                             StarknetError::TransactionExecutionError(data),
-                        )) if data
-                            .execution_error
-                            .contains(&format!("{:x} is not deployed.", self.address)) =>
+                        )) if contract_error_contains(
+                            &data.execution_error,
+                            &format!("{:x} is not deployed.", self.address),
+                        ) =>
                         {
                             return Err(self.build_not_deployed_err().await);
                         }
@@ -528,7 +531,7 @@ pub fn compute_gas_and_price(
     }
     let overall_fee = u64::from_le_bytes(overall_fee_bytes[..8].try_into().unwrap());
 
-    let gas_price_bytes = max_fee.gas_price.to_bytes_le();
+    let gas_price_bytes = max_fee.l1_gas_price.to_bytes_le();
     if gas_price_bytes.iter().skip(8).any(|&x| x != 0) {
         return Err(ControllerError::AccountError(AccountError::FeeOutOfRange));
     }

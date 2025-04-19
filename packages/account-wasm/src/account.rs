@@ -426,7 +426,7 @@ impl CartridgeAccount {
             let gas_estimate_multiplier = 1.5;
             let (gas, gas_price) =
                 compute_gas_and_price(&max_fee.try_into()?, gas_estimate_multiplier)?;
-            deployment = deployment.gas(gas).gas_price(gas_price);
+            deployment = deployment.l1_gas(gas).l1_gas_price(gas_price);
         }
 
         let res = deployment

@@ -4,6 +4,8 @@ use starknet::{
     providers::{jsonrpc::JsonRpcResponse, ProviderError},
 };
 
+use crate::utils::contract_error_contains;
+
 use super::{ExecuteFromOutsideError, ExecuteFromOutsideResponse};
 
 #[test]
@@ -29,7 +31,7 @@ fn test_json_rpc_error_to_outside_execution_error() {
             let paymaster_error = ExecuteFromOutsideError::from(error);
             match paymaster_error {
                 ExecuteFromOutsideError::ProviderError(ProviderError::StarknetError(StarknetError::TransactionExecutionError(data))) => {
-                    assert!(data.execution_error.contains("Transaction reverted: Transaction execution has failed"));
+                    assert!(contract_error_contains(&data.execution_error, "Transaction reverted: Transaction execution has failed"));
                     assert_eq!(data.transaction_index, 0);
                 },
                 _ => panic!("Expected PaymasterError::ProviderError(ProviderError::StarknetError(StarknetError::TransactionExecutionError))"),

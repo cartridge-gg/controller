@@ -14,6 +14,7 @@ use crate::{
     signers::{Owner, Signer},
     tests::runners::katana::KatanaRunner,
     typed_data::{Domain, Field, PrimitiveType, SimpleField, TypedData},
+    utils::contract_error_contains,
 };
 
 const SESSION_TYPED_DATA_MAGIC: Felt = short_string!("session-typed-data");
@@ -105,7 +106,10 @@ pub async fn test_verify_session_off_chain_sig_invalid_policy() {
         .call()
         .await
     {
-        assert!(c.revert_error.contains("session/policy-check-failed"))
+        assert!(contract_error_contains(
+            &c.revert_error,
+            "session/policy-check-failed"
+        ))
     } else {
         panic!("Expected ContractErrorData");
     }

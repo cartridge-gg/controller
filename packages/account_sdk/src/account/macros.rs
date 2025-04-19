@@ -31,21 +31,6 @@ macro_rules! impl_account {
                 self.chain_id
             }
 
-            async fn sign_execution_v1(
-                &self,
-                execution: &starknet::accounts::RawExecutionV1,
-                query_only: bool,
-            ) -> Result<Vec<starknet::core::types::Felt>, Self::SignError> {
-                let tx_hash = execution.transaction_hash(
-                    starknet::accounts::Account::chain_id(self),
-                    starknet::accounts::Account::address(self),
-                    query_only,
-                    self
-                );
-                let calls = execution.calls();
-                self.sign_hash_and_calls(tx_hash, &calls).await
-            }
-
             async fn sign_execution_v3(
                 &self,
                 execution: &starknet::accounts::RawExecutionV3,
@@ -58,26 +43,6 @@ macro_rules! impl_account {
                     self
                 );
                 let calls = execution.calls();
-                self.sign_hash_and_calls(tx_hash, &calls).await
-            }
-
-            async fn sign_declaration_v2(
-                &self,
-                declaration: &starknet::accounts::RawDeclarationV2,
-                query_only: bool,
-            ) -> Result<Vec<starknet::core::types::Felt>, Self::SignError> {
-                let tx_hash = declaration.transaction_hash(
-                    starknet::accounts::Account::chain_id(self),
-                    starknet::accounts::Account::address(self),
-                    query_only,
-                );
-                let calls = vec![starknet::core::types::Call {
-                    to: starknet::accounts::Account::address(self),
-                    selector: $crate::account::DECLARATION_SELECTOR,
-                    calldata: vec![
-                        declaration.compiled_class_hash(),
-                    ]
-                }];
                 self.sign_hash_and_calls(tx_hash, &calls).await
             }
 
@@ -99,14 +64,6 @@ macro_rules! impl_account {
                     ]
                 }];
                 self.sign_hash_and_calls(tx_hash, &calls).await
-            }
-
-            async fn sign_legacy_declaration(
-                &self,
-                _: &starknet::accounts::RawLegacyDeclaration,
-                _: bool,
-            ) -> Result<Vec<starknet::core::types::Felt>, Self::SignError> {
-                unimplemented!("sign_legacy_declaration")
             }
 
             fn execute_v3(&self, calls: Vec<starknet::core::types::Call>) -> starknet::accounts::ExecutionV3<Self> {
