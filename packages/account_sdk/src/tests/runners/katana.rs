@@ -1,10 +1,10 @@
 use cainome::cairo_serde::{ContractAddress, U256};
-use starknet::accounts::{AccountFactory, ExecutionEncoding, SingleOwnerAccount};
+use starknet::accounts::{AccountError, AccountFactory, ExecutionEncoding, SingleOwnerAccount};
 use starknet::contract::ContractFactory;
-use starknet::core::types::{BlockId, BlockTag};
+use starknet::core::types::{BlockId, BlockTag, StarknetError};
 use starknet::core::utils::cairo_short_string_to_felt;
 use starknet::providers::jsonrpc::HttpTransport;
-use starknet::providers::{JsonRpcClient, Provider};
+use starknet::providers::{JsonRpcClient, Provider, ProviderError};
 use starknet::signers::LocalWallet;
 use starknet::{core::types::Felt, macros::felt, signers::SigningKey};
 use std::process::{Command, Stdio};
@@ -21,6 +21,7 @@ use crate::controller::Controller;
 use crate::factory::ControllerFactory;
 use crate::provider::CartridgeJsonRpcProvider;
 use crate::signers::Owner;
+use crate::tests::account::declare::DeclarationError;
 use crate::tests::account::{AccountDeclaration, FEE_TOKEN_ADDRESS, UDC_ADDRESS};
 use crate::tests::transaction_waiter::TransactionWaiter;
 
@@ -176,13 +177,22 @@ impl KatanaRunner {
             .unwrap()
             .wait_for_completion()
             .await;
-
-        AccountDeclaration::cartridge_account(self.client(), version)
+        match AccountDeclaration::cartridge_account(self.client(), version)
             .declare(&prefunded)
             .await
-            .unwrap()
-            .wait_for_completion()
-            .await;
+        {
+            Ok(declaration) => {
+                declaration.wait_for_completion().await;
+            }
+            Err(DeclarationError::AccountError(AccountError::Provider(
+                ProviderError::StarknetError(StarknetError::ClassAlreadyDeclared),
+            ))) => {
+                // Class is already declared, we can continue
+            }
+            Err(e) => {
+                panic!("Failed to declare controller: {}", e);
+            }
+        }
     }
 
     pub async fn deploy_controller(

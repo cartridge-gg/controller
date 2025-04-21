@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
 use starknet::{
-    accounts::ConnectedAccount,
-    core::types::{contract::SierraClass, DeclareTransactionResult},
+    accounts::{AccountError, ConnectedAccount},
+    core::types::{contract::SierraClass, DeclareTransactionResult, Felt},
     macros::felt,
     providers::Provider,
 };
-use starknet_crypto::Felt;
+use thiserror::Error;
 
 use crate::artifacts::{Version, CONTROLLERS};
 use crate::provider::CartridgeJsonRpcProvider;
@@ -75,24 +75,35 @@ impl<'a> AccountDeclaration<'a> {
     }
 }
 
+#[derive(Debug, Error)]
+pub enum DeclarationError<S> {
+    #[error("Failed to flatten Sierra class: {0}")]
+    Flattening(String),
+    #[error(transparent)]
+    AccountError(AccountError<S>),
+}
+
 impl<'a> AccountDeclaration<'a> {
-    pub async fn declare(
+    pub async fn declare<'acc, Acc>(
         self,
-        account: &(impl ConnectedAccount + Send + Sync),
-    ) -> Result<PendingDeclaration<'a>, String> {
+        account: &'acc Acc,
+    ) -> Result<PendingDeclaration<'a>, DeclarationError<Acc::SignError>>
+    where
+        Acc: ConnectedAccount + Send + Sync,
+    {
         // We need to flatten the ABI into a string first
         let flattened_class = self
             .contract_artifact
             .clone()
             .flatten()
-            .map_err(|e| e.to_string())?;
+            .map_err(|e| DeclarationError::Flattening(e.to_string()))?;
 
         let declaration_result = account
             .declare_v3(Arc::new(flattened_class), self.compiled_class_hash)
             .gas_estimate_multiplier(1.5)
             .send()
             .await
-            .unwrap();
+            .map_err(DeclarationError::AccountError)?;
 
         Ok(PendingDeclaration::from((declaration_result, self.client)))
     }
