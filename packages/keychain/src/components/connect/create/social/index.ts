@@ -1,6 +1,9 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { TurnkeyWallet } from "@cartridge/controller";
-import { useRegisterMutation } from "@cartridge/utils/api/cartridge";
+import {
+  AccountQuery,
+  useRegisterMutation,
+} from "@cartridge/utils/api/cartridge";
 import { sha256 } from "@noble/hashes/sha256";
 import { bytesToHex } from "@noble/hashes/utils";
 import { useTurnkey } from "@turnkey/sdk-react";
@@ -14,7 +17,7 @@ import {
 import { getOidcToken } from "./auth0";
 import { getOrCreateWallet } from "./turnkey";
 
-export const useSignupWithSocial = () => {
+export const useSocialAuthentication = () => {
   const { authIframeClient } = useTurnkey();
   const authIframeClientRef = useRef(authIframeClient);
 
@@ -111,7 +114,7 @@ export const useSignupWithSocial = () => {
     })();
   }, [isAuthenticated, user, userName, getIdTokenClaims, register]);
 
-  const signupWithSocial = useCallback(
+  const signup = useCallback(
     async (username: string): Promise<SignupResponse> => {
       const pollIframePublicKey = (
         onSuccess: (key: string) => void,
@@ -180,7 +183,9 @@ export const useSignupWithSocial = () => {
     [setUserName, loginWithPopup],
   );
 
-  return { signupWithSocial };
+  const login = useCallback(async (account: AccountQuery["account"]) => {}, []);
+
+  return { signup, login };
 };
 
 const getNonce = (seed: string) => {
