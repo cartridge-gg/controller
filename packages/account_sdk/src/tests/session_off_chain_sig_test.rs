@@ -102,7 +102,6 @@ pub async fn test_verify_session_off_chain_sig_invalid_policy() {
         .is_session_signature_valid(&typed_data, &signature)
         .call()
         .await;
-    dbg!(&result);
 
     if let Err(cainome::cairo_serde::Error::Provider(ProviderError::StarknetError(
         StarknetError::ContractError(c),

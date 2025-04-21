@@ -171,12 +171,23 @@ impl KatanaRunner {
     pub async fn declare_controller(&self, version: Version) {
         let prefunded = self.executor().await;
 
-        AccountDeclaration::garaga(self.client())
+        match AccountDeclaration::garaga(self.client())
             .declare(&prefunded)
             .await
-            .unwrap()
-            .wait_for_completion()
-            .await;
+        {
+            Ok(declaration) => {
+                declaration.wait_for_completion().await;
+            }
+            Err(DeclarationError::AccountError(AccountError::Provider(
+                ProviderError::StarknetError(StarknetError::TransactionExecutionError(c)),
+            ))) if c.execution_error.contains("is already declared") => {
+                // Class is already declared, we can continue
+            }
+            Err(e) => {
+                panic!("Failed to declare garaga: {}", e);
+            }
+        }
+
         match AccountDeclaration::cartridge_account(self.client(), version)
             .declare(&prefunded)
             .await
@@ -185,8 +196,8 @@ impl KatanaRunner {
                 declaration.wait_for_completion().await;
             }
             Err(DeclarationError::AccountError(AccountError::Provider(
-                ProviderError::StarknetError(StarknetError::ClassAlreadyDeclared),
-            ))) => {
+                ProviderError::StarknetError(StarknetError::TransactionExecutionError(c)),
+            ))) if c.execution_error.contains("is already declared") => {
                 // Class is already declared, we can continue
             }
             Err(e) => {
