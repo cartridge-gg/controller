@@ -1,6 +1,8 @@
+import { UpgradeProvider } from "@/components/provider/upgrade";
 import { useConnectionValue } from "@/hooks/connection";
+import { WalletsProvider } from "@/hooks/wallets";
 import { ENDPOINT } from "@/utils/graphql";
-import { Auth0Provider } from "@auth0/auth0-react";
+import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
@@ -12,8 +14,6 @@ import { constants, num } from "starknet";
 import { ConnectionContext } from "./connection";
 import { PostHogProvider } from "./posthog";
 import { TokensProvider } from "./tokens";
-import { UpgradeProvider } from "@/components/provider/upgrade";
-import { WalletsProvider } from "@/hooks/wallets";
 import { UIProvider } from "./ui";
 
 export function Provider({ children }: PropsWithChildren) {
@@ -81,14 +81,15 @@ const queryClient = new QueryClient({
 const turnkeyConfig = {
   apiBaseUrl: import.meta.env.VITE_TURNKEY_BASE_URL!,
   defaultOrganizationId: import.meta.env.VITE_TURNKEY_ORGANIZATION_ID!,
+  /// This doesn't matter as we never use the WebAuthn
   rpId: "http://localhost",
   iframeUrl: import.meta.env.VITE_TURNKEY_IFRAME_URL,
 };
 
-const auth0Config = {
+const auth0Config: Auth0ProviderOptions = {
   domain: import.meta.env.VITE_AUTH0_DOMAIN!,
   clientId: import.meta.env.VITE_AUTH0_CLIENT_ID!,
   authorizationParams: {
-    redirect_uri: import.meta.env.VITE_ORIGIN!,
+    redirect_uri: window.location.origin,
   },
 };

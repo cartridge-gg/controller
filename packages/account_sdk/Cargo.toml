@@ -62,7 +62,7 @@ serde_json.workspace = true
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio.workspace = true
 alloy-primitives = "0.8.23"
-alloy-signer = "0.12.5"
+alloy-signer.workspace = true
 rand = "0.8"
 
 # Include webauthn dependencies when 'webauthn' feature is enabled

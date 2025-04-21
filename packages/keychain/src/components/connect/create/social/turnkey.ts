@@ -1,16 +1,19 @@
+import { eip191Encode } from "@cartridge/utils";
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
 import { Signature } from "ethers";
 
 export const signCreateControllerMessage = async (
+  subOrgId: string,
   address: string,
   authIframeClient: TurnkeyIframeClient,
 ) => {
   const message = "Hello World!";
   const signedTx = await authIframeClient.signRawPayload({
+    organizationId: subOrgId,
+    signWith: address,
     payload: eip191Encode(message),
     encoding: "PAYLOAD_ENCODING_TEXT_UTF8",
     hashFunction: "HASH_FUNCTION_SHA256",
-    signWith: address,
   });
 
   const r = signedTx.r.startsWith("0x") ? signedTx.r : "0x" + signedTx.r;
@@ -28,31 +31,35 @@ export const signCreateControllerMessage = async (
     v: normalizedV,
   });
 
-  return signature;
+  return signature.serialized;
 };
 
 export const getOrCreateWallet = async (
   subOrgId: string,
   userName: string,
   authIframeClient: TurnkeyIframeClient,
-) => {
+): Promise<string> => {
   const wallets = await authIframeClient.getWallets({
     organizationId: subOrgId,
   });
-  if (wallets.wallets.length > 1) {
+  if (wallets.wallets.length > 1 && !import.meta.env.DEV) {
     throw new Error(
       "Multiple wallets found" + JSON.stringify(wallets, null, 2),
     );
   }
 
   if (wallets.wallets.length === 1) {
-    return wallets.wallets[0].walletId;
+    const wallet = await authIframeClient.getWalletAccount({
+      organizationId: subOrgId,
+      walletId: wallets.wallets[0].walletId,
+    });
+    return refineNonNull(wallet.account.address);
   }
 
   const createWalletResponse = await authIframeClient.createWallet({
     organizationId: subOrgId,
     walletName: userName,
-    accounts: [walletConfig],
+    accounts: [WALLET_CONFIG],
   });
 
   const address = refineNonNull(createWalletResponse.addresses[0]);
@@ -70,14 +77,9 @@ function refineNonNull<T>(
   return input;
 }
 
-const walletConfig = {
+const WALLET_CONFIG = {
   curve: "CURVE_SECP256K1" as const,
   pathFormat: "PATH_FORMAT_BIP32" as const,
   path: "m/44'/60'/0'/0/0" as const,
   addressFormat: "ADDRESS_FORMAT_ETHEREUM" as const,
-};
-
-const eip191Encode = (message: string): string => {
-  const encodedMessage = `\x19Ethereum Signed Message:\n${message.length}${message}`;
-  return encodedMessage;
 };

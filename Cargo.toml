@@ -66,6 +66,8 @@ starknet-types-core = { version = "0.1", features = ["curve", "hash"] }
 
 chrono = { version = "0.4", features = ["wasmbind", "serde"] }
 
+alloy-signer = "0.12.5"
+
 # Compiler optimization when running test to prevent 'locals exceed maximum' error,
 # where a function is using more that the maximum allowed local variables.
 [profile.dev]
