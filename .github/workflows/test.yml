@@ -37,16 +37,10 @@ jobs:
           components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
         if: steps.changes.outputs.rust == 'true'
-      - name: Install OpenSSL
-        run: |
-          apt-get update
-          apt-get install -y openssl libssl-dev
       - run:
           cargo llvm-cov --features webauthn --all-features --lcov --output-path
           lcov.info
         if: steps.changes.outputs.rust == 'true'
-        env:
-          OPENSSL_DIR: /usr
       - uses: codecov/codecov-action@v3
         if: steps.changes.outputs.rust == 'true'
         with:
