@@ -15,19 +15,20 @@ import {
 } from "@cartridge/ui-next";
 import { useEffect, useState } from "react";
 import { AuthenticationMode } from "../types";
+import { AuthenticationStep } from "./useCreateController";
 
 interface ChooseSignupMethodProps {
   isSlot?: boolean;
   isLoading: boolean;
   onSubmit: (authenticationMode?: AuthenticationMode) => void;
-  setAuthenticationMode: (value: AuthenticationMode | undefined) => void;
+  setAuthenticationStep: (value: AuthenticationStep | undefined) => void;
 }
 
-export function ChooseSignupMethod({
+export function ChooseSignupMethodForm({
   isLoading,
   isSlot,
   onSubmit,
-  setAuthenticationMode,
+  setAuthenticationStep,
 }: ChooseSignupMethodProps) {
   const [selectedAuth, setSelectedAuth] = useState<
     AuthenticationMode | undefined
@@ -53,16 +54,16 @@ export function ChooseSignupMethod({
       signupMode: AuthenticationMode.MetaMask,
     },
     {
-      handler: new PhantomWallet(),
-      variant: "secondary" as const,
-      icon: <PhantomColorIcon />,
-      signupMode: AuthenticationMode.Phantom,
-    },
-    {
       handler: new ArgentWallet(),
       variant: "secondary" as const,
       icon: <ArgentColorIcon />,
       signupMode: AuthenticationMode.Argent,
+    },
+    {
+      handler: new PhantomWallet(),
+      variant: "secondary" as const,
+      icon: <PhantomColorIcon />,
+      signupMode: AuthenticationMode.Phantom,
     },
     {
       handler: new AlwaysAvailableAuth("social"),
@@ -71,6 +72,17 @@ export function ChooseSignupMethod({
       signupMode: AuthenticationMode.Social,
     },
   ];
+
+  const handleSelectedOption = (
+    e:
+      | React.KeyboardEvent<HTMLButtonElement>
+      | React.MouseEvent<HTMLButtonElement>,
+    option: AuthenticationMode,
+  ) => {
+    e.preventDefault();
+    setSelectedAuth(option);
+    onSubmit(option);
+  };
 
   return (
     <>
@@ -81,7 +93,9 @@ export function ChooseSignupMethod({
         hideNetwork={isSlot}
         hideSettings
         description={"Choose a sign in method"}
-        onBack={() => !isLoading && setAuthenticationMode(undefined)}
+        onBack={() =>
+          !isLoading && setAuthenticationStep(AuthenticationStep.FillForm)
+        }
       />
       <LayoutContent className="gap-3 justify-end">
         {authOptions.map(
@@ -91,10 +105,14 @@ export function ChooseSignupMethod({
                 key={option.handler.type}
                 icon={option.icon}
                 variant={option.variant}
+                onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+                  if (e.key !== "Enter") {
+                    return;
+                  }
+                  handleSelectedOption(e, option.signupMode);
+                }}
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.preventDefault();
-                  setSelectedAuth(option.signupMode);
-                  onSubmit(option.signupMode);
+                  handleSelectedOption(e, option.signupMode);
                 }}
                 disabled={isLoading && selectedAuth !== option.signupMode}
                 type="submit"

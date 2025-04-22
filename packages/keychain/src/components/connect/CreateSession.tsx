@@ -3,7 +3,7 @@ import { SessionConsent } from "@/components/connect";
 import { Upgrade } from "./Upgrade";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { NOW } from "@/const";
+import { now } from "@/const";
 import { CreateSessionProvider } from "@/context/session";
 import { useConnection } from "@/hooks/connection";
 import {
@@ -65,7 +65,7 @@ const CreateSessionLayout = ({
   const upgrade = useUpgrade();
 
   const expiresAt = useMemo(() => {
-    return duration + NOW;
+    return duration + now();
   }, [duration]);
 
   const onCreateSession = useCallback(async () => {
