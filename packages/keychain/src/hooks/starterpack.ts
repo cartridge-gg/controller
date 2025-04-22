@@ -4,7 +4,7 @@ import {
   StarterPackQuery,
 } from "@cartridge/utils/api/cartridge";
 import { client } from "@/utils/graphql";
-
+import { creditsToUSD } from "./tokens";
 export const enum StarterItemType {
   NFT = "NFT",
   CREDIT = "CREDIT",
@@ -46,7 +46,7 @@ export function useStarterPack(starterpackId: string) {
               items.push({
                 title: edge?.node?.name ?? "",
                 description: edge?.node?.description ?? "",
-                price: result.starterpack.price,
+                price: creditsToUSD(result.starterpack.price),
                 image: edge?.node?.iconURL ?? "",
                 type: StarterItemType.NFT,
               });
