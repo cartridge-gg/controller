@@ -20,6 +20,7 @@ import {
   ExternalIcon,
   Skeleton,
   Thumbnail,
+  DepositIcon,
 } from "@cartridge/ui-next";
 import { useConnection } from "#hooks/context";
 import {
@@ -129,17 +130,19 @@ function ERC20() {
             )}
             {!!token.balance.value && (
               <p className="text-foreground-300 text-xs">
-                {`~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                {`$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
               </p>
             )}
           </div>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Details</CardTitle>
+            <CardTitle className="font-semibold text-xs">Details</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
-            <div className="text-foreground-400">Contract</div>
+            <p className="text-foreground-300 font-normal text-sm">
+              Contract Address
+            </p>
             {isPublicChain(chainId) ? (
               <Link
                 to={`${StarkscanUrl(
@@ -148,28 +151,41 @@ function ERC20() {
                 className="flex items-center gap-1 text-sm"
                 target="_blank"
               >
-                <div className="font-medium">
-                  {formatAddress(token.metadata.address, { size: "sm" })}
-                </div>
+                <p className="font-medium">
+                  {formatAddress(token.metadata.address, {
+                    size: "sm",
+                    first: 4,
+                    last: 4,
+                  })}
+                </p>
                 <ExternalIcon size="sm" />
               </Link>
             ) : (
-              <div>{formatAddress(token.metadata.address)}</div>
+              <p>
+                {formatAddress(token.metadata.address, { first: 4, last: 4 })}
+              </p>
             )}
           </CardContent>
 
           <CardContent className="flex items-center justify-between">
-            <div className="text-foreground-400">Token Standard</div>
-            <div className="font-medium">ERC-20</div>
+            <p className="text-foreground-300 font-normal text-sm">
+              Token Standard
+            </p>
+            <p className="font-medium text-sm text-foreground-100">ERC-20</p>
           </CardContent>
         </Card>
       </LayoutContent>
 
       {isIframe() && compatibility && !visitor && (
         <LayoutFooter>
-          <Link to={`send?${searchParams.toString()}`}>
-            <Button className="w-full">Send</Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" className="pointer-events-none">
+              <DepositIcon variant="solid" size="sm" />
+            </Button>
+            <Link to={`send?${searchParams.toString()}`} className="w-full">
+              <Button className="w-full">Send</Button>
+            </Link>
+          </div>
         </LayoutFooter>
       )}
     </LayoutContainer>
