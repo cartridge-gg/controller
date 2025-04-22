@@ -84,7 +84,9 @@ export function ErrorAlert({
         <AccordionTrigger
           hideIcon={!collapsible}
           color={"text-destructive-100"}
-          className="items-start gap-1"
+          tabIndex={collapsible ? undefined : -1}
+          className={`items-start gap-1`}
+          parentClassName={`${collapsible ? "" : "cursor-auto"}`}
         >
           {variant && variant !== "default" && (
             <div className="w-5">
