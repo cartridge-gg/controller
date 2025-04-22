@@ -46,7 +46,7 @@ export function useStarterPack(starterpackId: string) {
               items.push({
                 title: edge?.node?.name ?? "",
                 description: edge?.node?.description ?? "",
-                price: formatValue(result.starterpack.price),
+                price: result.starterpack.price,
                 image: edge?.node?.iconURL ?? "",
                 type: StarterItemType.NFT,
               });
@@ -54,7 +54,7 @@ export function useStarterPack(starterpackId: string) {
           }
           if (
             result.starterpack.bonusCredits &&
-            parseInt(result.starterpack.bonusCredits) > 0
+            result.starterpack.bonusCredits > 0
           ) {
             items.push({
               title: `${result.starterpack.bonusCredits} Credits`,
@@ -62,12 +62,12 @@ export function useStarterPack(starterpackId: string) {
               price: 0,
               image: "/ERC-20-Icon.svg",
               type: StarterItemType.CREDIT,
-              value: formatValue(result.starterpack.bonusCredits),
+              value: result.starterpack.bonusCredits,
             });
           }
         }
 
-        setPrice(formatValue(result.starterpack?.price ?? "0"));
+        setPrice(result.starterpack?.price ?? 0);
         setItems(items);
       })
       .catch(setError)
@@ -81,7 +81,3 @@ export function useStarterPack(starterpackId: string) {
     error,
   };
 }
-
-const formatValue = (value: string): number => {
-  return parseFloat(value) / 10 ** 18;
-};

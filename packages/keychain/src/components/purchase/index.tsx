@@ -18,7 +18,6 @@ import { type Appearance } from "@stripe/stripe-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AmountSelection } from "../funding/AmountSelection";
 import CheckoutForm from "./StripeCheckout";
-import { DEFAULT_AMOUNT } from "../funding/constants";
 import { CryptoCheckout, walletIcon } from "./CryptoCheckout";
 import { ExternalWallet } from "@cartridge/controller";
 import { Balance, BalanceType } from "./Balance";
@@ -55,6 +54,8 @@ export type StripeResponse = {
   pricing: PricingDetails;
 };
 
+export const DEFAULT_CREDITS_AMOUNT = 5_000;
+
 // TODO: I know this is terrible... refactor soon, separate product selection and checkout
 export function Purchase({
   onBack,
@@ -79,7 +80,7 @@ export function Purchase({
   );
   const [state, setState] = useState<PurchaseState>(initState);
   const [creditsAmount, setCreditsAmount] = useState<number>(
-    starterpackDetails?.price ?? DEFAULT_AMOUNT,
+    starterpackDetails?.price ?? DEFAULT_CREDITS_AMOUNT,
   );
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();

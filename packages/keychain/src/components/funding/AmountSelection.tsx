@@ -1,6 +1,7 @@
 import { Button, DollarIcon, Input, cn } from "@cartridge/ui-next";
 import { useCallback, useRef, useState } from "react";
-import { AMOUNTS } from "./constants";
+
+export const AMOUNTS = [1, 5, 10];
 
 type AmountSelectionProps = {
   amount: number;

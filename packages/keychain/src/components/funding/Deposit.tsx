@@ -34,7 +34,6 @@ import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "../purchase/Balance";
 import { toast } from "sonner";
-import { DEFAULT_AMOUNT } from "./constants";
 import { convertUSDToTokenAmount, useFeeToken } from "@/hooks/tokens";
 
 type DepositProps = {
@@ -56,7 +55,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
   const { account: extAccount } = useAccount();
   const { token: feeToken } = useFeeToken();
 
-  const [dollarAmount, setDollarAmount] = useState<number>(DEFAULT_AMOUNT);
+  const [dollarAmount, setDollarAmount] = useState<number>(5);
   const [state, setState] = useState<"connect" | "fund">("connect");
   const [tokenAmount, setTokenAmount] = useState<bigint>();
   const [isLoading, setIsLoading] = useState(false);
