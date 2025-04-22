@@ -1,0 +1,19 @@
+query TxsHistory($username: String!) {
+  account(username: $username) {
+    activities(where: { type: TRANSACTION }) {
+      edges {
+        node {
+          id
+          accountID
+          paymasterID
+          type
+          status
+          network
+          transactionHash
+          feeSource
+          updatedAt
+        }
+      }
+    }
+  }
+}
