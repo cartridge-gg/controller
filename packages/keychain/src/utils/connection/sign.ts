@@ -38,7 +38,7 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
         }
 
         // If a session call and there is no session available
-        // fallback to manual apporval flow
+        // fallback to manual approval flow
         if (!(await controller.hasAuthorizedPoliciesForMessage(typedData))) {
           setContext({
             type: "sign-message",
