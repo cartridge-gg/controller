@@ -52,13 +52,9 @@ export function Balance({ types, title, amount }: BalanceProps) {
             amount={
               amount
                 ? `${amount.toFixed(2).toString()}`
-                : `${creditBalance.formatted} CREDITS`
+                : `${creditBalance} CREDITS`
             }
-            value={
-              amount
-                ? `$${amount.toFixed(2).toString()}`
-                : `$${creditBalance.formatted}`
-            }
+
           />
         )}
         {types.includes(BalanceType.FEE_TOKEN) && token && (
