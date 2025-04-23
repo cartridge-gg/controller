@@ -21,19 +21,21 @@ import {
   Skeleton,
   Thumbnail,
   DepositIcon,
+  ActivityTokenCard,
 } from "@cartridge/ui-next";
-import { useConnection } from "#hooks/context";
+import { useConnection, useData } from "#hooks/context";
 import {
   formatAddress,
   isIframe,
   isPublicChain,
   StarkscanUrl,
   useCreditBalance,
+  VoyagerUrl,
 } from "@cartridge/utils";
 import { constants } from "starknet";
 import { useAccount } from "#hooks/account";
 import { useToken } from "#hooks/token";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { compare } from "compare-versions";
 
 export function Token() {
@@ -94,8 +96,11 @@ function Credits() {
 
 function ERC20() {
   const navigate = useNavigate();
-  const { chainId, version, closable, visitor } = useConnection();
   const { address } = useParams<{ address: string }>();
+
+  const { transfers } = useData();
+
+  const { chainId, version, closable, visitor } = useConnection();
   const { token } = useToken({ tokenAddress: address! });
   const [searchParams] = useSearchParams();
 
@@ -109,6 +114,65 @@ function ERC20() {
   }, [navigate, searchParams]);
 
   if (!token) return;
+
+  const getDate = useCallback((timestamp: number) => {
+    const date = new Date(timestamp);
+    const today = new Date();
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    } else if (
+      date.toDateString() ===
+      new Date(today.getTime() - 24 * 60 * 60 * 1000).toDateString()
+    ) {
+      return "Yesterday";
+    } else {
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    }
+  }, []);
+
+  const txs = useMemo(() => {
+    if (!transfers) {
+      return [];
+    }
+
+    return transfers.transfers?.items?.flatMap((edge) => {
+      return edge.transfers
+        .filter(({ tokenId }) => !tokenId)
+        .map((transfer, i) => {
+          const value = `${(
+            BigInt(transfer.amount) / BigInt(10 ** Number(transfer.decimals))
+          ).toString()} ${transfer.symbol}`;
+          const timestamp = new Date(transfer.executedAt).getTime();
+          const date = getDate(timestamp);
+          const image = token.metadata.image;
+          return {
+            variant: "token",
+            key: `${transfer.transactionHash}-${transfer.eventId}-${i}`,
+            transactionHash: transfer.transactionHash,
+            amount: value,
+            contractAddress: transfer.contractAddress,
+            symbol: transfer.symbol,
+            eventId: transfer.eventId,
+            date: date,
+            image,
+          };
+        });
+    });
+  }, [transfers]);
+
+  useEffect(() => {
+    console.log("txs: ", txs);
+  }, [txs]);
+
+  const to = useCallback((transactionHash: string) => {
+    return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
+      transactionHash,
+    );
+  }, []);
 
   return (
     <LayoutContainer>
@@ -174,14 +238,52 @@ function ERC20() {
             <p className="font-medium text-sm text-foreground-100">ERC-20</p>
           </CardContent>
         </Card>
+
+        <div className="flex flex-col gap-3">
+          {Object.entries(
+            txs
+              .filter((tx) => tx?.symbol === token.metadata.symbol)
+              .reduce(
+                (acc, tx) => {
+                  if (!acc[tx.date]) {
+                    acc[tx.date] = [];
+                  }
+                  acc[tx.date].push(tx);
+                  return acc;
+                },
+                {} as Record<string, typeof txs>,
+              ),
+          ).map(([date, transactions]) => (
+            <div key={date} className="flex flex-col gap-3">
+              <p className="text-foreground-300 font-medium text-sm py-3">{date}</p>
+              {transactions.map((item) => (
+                <Link
+                  key={item.key}
+                  to={to(item.transactionHash)}
+                  target="_blank"
+                >
+                  <ActivityTokenCard
+                    amount={item.amount}
+                    value={item.amount}
+                    address={item.contractAddress}
+                    image={token.metadata.image!}
+                    action="send"
+                  />
+                </Link>
+              ))}
+            </div>
+          ))}
+        </div>
       </LayoutContent>
 
       {isIframe() && compatibility && !visitor && (
         <LayoutFooter>
           <div className="flex items-center gap-3">
-            <Button variant="secondary" className="pointer-events-none">
-              <DepositIcon variant="solid" size="sm" />
-            </Button>
+            <Thumbnail
+              icon={<DepositIcon variant="solid" size="sm" />}
+              size="lg"
+              className="aspect-square"
+            />
             <Link to={`send?${searchParams.toString()}`} className="w-full">
               <Button className="w-full">Send</Button>
             </Link>
