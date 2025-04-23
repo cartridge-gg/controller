@@ -19,7 +19,7 @@ function getSelectorFromTag(namespace: string, event: string): string {
   ]);
 }
 
-// Poseidon hash of a string representated as a ByteArray
+// Poseidon hash of a string represented as a ByteArray
 function computeByteArrayHash(str: string): string {
   const bytes = byteArray.byteArrayFromString(str);
   return hash.computePoseidonHashOnElements(serializeByteArray(bytes));
