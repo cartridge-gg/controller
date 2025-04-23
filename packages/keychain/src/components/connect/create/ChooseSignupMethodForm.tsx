@@ -38,10 +38,10 @@ export function ChooseSignupMethodForm({
   const authOptions = useMemo(() => {
     return [
       AuthFactory.create("webauthn"),
-      AuthFactory.create("social"),
       ...wallets.map((wallet) => {
         return AuthFactory.create(wallet.type);
       }),
+      AuthFactory.create("social"),
     ];
   }, [wallets]);
 
