@@ -67,10 +67,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const trophies = useAchievements(accountAddress);
 
+  // console.log("project: ", project);
+
   const { data: transfers, status: transfersStatus } = useTransfersQuery(
     {
       projects: {
-        project: project ?? "",
+        // project: project ?? "",
+        project: "dopewarsbal",
         address,
         date: "",
         limit: 0,

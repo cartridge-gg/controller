@@ -37,6 +37,7 @@ import { useAccount } from "#hooks/account";
 import { useToken } from "#hooks/token";
 import { useCallback, useEffect, useMemo } from "react";
 import { compare } from "compare-versions";
+import { useTxsHistoryQuery } from "@cartridge/utils/api/cartridge";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -97,8 +98,10 @@ function Credits() {
 function ERC20() {
   const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
+  const { username } = useAccount();
 
   const { transfers } = useData();
+  const { data } = useTxsHistoryQuery({ username });
 
   const { chainId, version, closable, visitor } = useConnection();
   const { token } = useToken({ tokenAddress: address! });
@@ -150,7 +153,6 @@ function ERC20() {
           const date = getDate(timestamp);
           const image = token.metadata.image;
           return {
-            variant: "token",
             key: `${transfer.transactionHash}-${transfer.eventId}-${i}`,
             transactionHash: transfer.transactionHash,
             amount: value,
@@ -255,7 +257,9 @@ function ERC20() {
               ),
           ).map(([date, transactions]) => (
             <div key={date} className="flex flex-col gap-3">
-              <p className="text-foreground-300 font-medium text-sm py-3">{date}</p>
+              <p className="text-foreground-300 font-medium text-sm py-3">
+                {date}
+              </p>
               {transactions.map((item) => (
                 <Link
                   key={item.key}
