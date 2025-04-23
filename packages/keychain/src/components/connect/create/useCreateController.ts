@@ -10,7 +10,8 @@ import {
   useAccountQuery,
 } from "@cartridge/utils/api/cartridge";
 import { useCallback, useState } from "react";
-import { AuthenticationMode, LoginMode } from "../types";
+import { AuthenticationMethod, LoginMode } from "../types";
+import { useExternalWalletAuthentication } from "./external-wallet";
 import { useSocialAuthentication } from "./social";
 import { fetchAccount } from "./utils";
 import { useWebauthnAuthentication } from "./webauthn";
@@ -45,6 +46,8 @@ export function useCreateController({
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
     useSocialAuthentication();
+  const { signup: signupWithExternalWallet } =
+    useExternalWalletAuthentication();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -117,18 +120,27 @@ export function useCreateController({
   );
 
   const handleSignup = useCallback(
-    async (username: string, authenticationMode: AuthenticationMode) => {
+    async (username: string, authenticationMode: AuthenticationMethod) => {
       if (!origin || !chainId || !rpcUrl) {
         throw new Error("Origin, chainId, or rpcUrl not found");
       }
 
       let signupResponse: SignupResponse | undefined;
       switch (authenticationMode) {
-        case AuthenticationMode.Webauthn:
+        case "webauthn":
           await signupWithWebauthn(username, doPopupFlow);
           return;
-        case AuthenticationMode.Social:
+        case "social":
           signupResponse = await signupWithSocial(username);
+          break;
+        case "metamask":
+        case "phantom":
+        case "argent":
+        case "rabby":
+          signupResponse = await signupWithExternalWallet(
+            username,
+            authenticationMode,
+          );
           break;
         default:
           break;
@@ -149,15 +161,10 @@ export function useCreateController({
           signer: signupResponse.signer,
         },
       });
+
+      await controller.login(now() + DEFAULT_SESSION_DURATION);
       window.controller = controller;
       setController(controller);
-
-      const loginResponse = await controller.login(
-        now() + DEFAULT_SESSION_DURATION,
-      );
-      if (!loginResponse.isRegistered) {
-        throw new Error("Failed to login");
-      }
     },
     [
       chainId,
@@ -195,7 +202,7 @@ export function useCreateController({
     async (
       username: string,
       exists: boolean,
-      authenticationMode?: AuthenticationMode,
+      authenticationMode?: AuthenticationMethod,
     ) => {
       setError(undefined);
       setIsLoading(true);
@@ -204,10 +211,7 @@ export function useCreateController({
         if (exists) {
           await handleLogin(username);
         } else {
-          await handleSignup(
-            username,
-            authenticationMode ?? AuthenticationMode.Webauthn,
-          );
+          await handleSignup(username, authenticationMode ?? "webauthn");
         }
       } catch (e: unknown) {
         if (

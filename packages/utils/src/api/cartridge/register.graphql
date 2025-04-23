@@ -1,13 +1,13 @@
 mutation Register(
+  $username: String!
   $chainId: String!
   $owner: SignerInput!
-  $signature: [String!]!
-  $username: String!
+  $session: SessionInput!
 ) {
   register(
     chainId: $chainId
     owner: $owner
-    signature: $signature
+    session: $session
     username: $username
   ) {
     name
