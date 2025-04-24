@@ -141,16 +141,6 @@ export function CryptoCheckout({
         }}
       />
       <LayoutContent className="gap-6 px-6">
-        {state !== CheckoutState.TRANSACTION_SUBMITTED && (
-          <ReviewToken
-            title={"Spending"}
-            name={"USDC"}
-            icon={"https://static.cartridge.gg/tokens/usdc.svg"}
-            amount={costUSDC.toLocaleString() + " USDC"}
-            value={"$" + costUSDC.toLocaleString()}
-          />
-        )}
-
         {starterpackDetails ? (
           <Receiving
             title={"Receiving"}
@@ -181,6 +171,7 @@ export function CryptoCheckout({
           state === CheckoutState.REQUESTING_PAYMENT) && (
           <CostBreakdown
             rails="crypto"
+            paymentUnit="usdc"
             walletType={selectedWallet.type}
             price={{
               processingFeeInCents: 0,
