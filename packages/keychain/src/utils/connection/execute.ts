@@ -52,7 +52,6 @@ export function execute({
     feeSource?: FeeSource,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
-    console.log("feeSource", feeSource);
     const controller: Controller | undefined = window.controller;
     const calls = normalizeCalls(transactions);
 

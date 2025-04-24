@@ -63,8 +63,8 @@ function Credits() {
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={`${credit.balance.formatted} CREDITS`}
-        description={`$${credit.balance.formatted}`}
+        title={`${credit.balance} CREDITS`}
+        description={`$${credit.balance}`}
         icon={<CoinsIcon variant="solid" size="lg" />}
         onBack={() => {
           navigate("..");
