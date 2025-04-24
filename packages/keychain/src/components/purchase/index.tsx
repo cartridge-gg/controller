@@ -129,7 +129,7 @@ export function Purchase({
     } catch (e) {
       setDisplayError(e as Error);
     }
-  }, [createPaymentIntent]);
+  }, [creditsAmount, createPaymentIntent]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet) => {
@@ -238,7 +238,7 @@ export function Purchase({
         {state === PurchaseState.SELECTION &&
           ((type === PurchaseType.CREDITS && (
             <AmountSelection
-              amount={creditsAmount}
+              creditsAmount={creditsAmount}
               onChange={onAmountChanged}
               lockSelection={isStripeLoading || isLoadingWallets}
               enableCustom
