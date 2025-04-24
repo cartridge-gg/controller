@@ -16,8 +16,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthenticationMode, LoginMode } from "../types";
 import { ChooseSignupMethodForm } from "./ChooseSignupMethodForm";
 import { Legal } from "./Legal";
-import { AuthenticationStep, useCreateController } from "./useCreateController";
+import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
+import { AuthenticationStep } from "./utils";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;

@@ -12,7 +12,7 @@ import {
 import { useCallback, useState } from "react";
 import { AuthenticationMode, LoginMode } from "../types";
 import { useSocialAuthentication } from "./social";
-import { fetchAccount } from "./utils";
+import { AuthenticationStep, fetchAccount } from "./utils";
 import { useWebauthnAuthentication } from "./webauthn";
 
 export interface SignupResponse {
@@ -20,10 +20,6 @@ export interface SignupResponse {
   signer: Signer;
 }
 
-export enum AuthenticationStep {
-  FillForm,
-  ChooseSignupMethod,
-}
 
 export function useCreateController({
   isSlot,

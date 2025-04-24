@@ -15,7 +15,7 @@ import {
 } from "@cartridge/ui-next";
 import { useEffect, useState } from "react";
 import { AuthenticationMode } from "../types";
-import { AuthenticationStep } from "./useCreateController";
+import { AuthenticationStep } from "./utils";
 
 interface ChooseSignupMethodProps {
   isSlot?: boolean;
