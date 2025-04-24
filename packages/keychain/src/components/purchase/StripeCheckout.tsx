@@ -62,6 +62,10 @@ export default function StripeCheckout({
       });
 
       if (res.error) {
+        if (res.error.type === "validation_error") {
+          return;
+        }
+
         setError(new Error(res.error.message));
         return;
       }
