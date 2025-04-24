@@ -4,7 +4,7 @@ import {
   StarterPackQuery,
 } from "@cartridge/utils/api/cartridge";
 import { client } from "@/utils/graphql";
-
+import { creditsToUSD } from "./tokens";
 export const enum StarterItemType {
   NFT = "NFT",
   CREDIT = "CREDIT",
@@ -46,7 +46,7 @@ export function useStarterPack(starterpackId: string) {
               items.push({
                 title: edge?.node?.name ?? "",
                 description: edge?.node?.description ?? "",
-                price: formatValue(result.starterpack.price.toString()),
+                price: creditsToUSD(result.starterpack.price),
                 image: edge?.node?.iconURL ?? "",
                 type: StarterItemType.NFT,
               });
@@ -62,12 +62,12 @@ export function useStarterPack(starterpackId: string) {
               price: 0,
               image: "/ERC-20-Icon.svg",
               type: StarterItemType.CREDIT,
-              value: formatValue(result.starterpack.bonusCredits.toString()),
+              value: result.starterpack.bonusCredits,
             });
           }
         }
 
-        setPrice(formatValue(result.starterpack?.price.toString() ?? "0"));
+        setPrice(result.starterpack?.price ?? 0);
         setItems(items);
       })
       .catch(setError)
@@ -81,7 +81,3 @@ export function useStarterPack(starterpackId: string) {
     error,
   };
 }
-
-const formatValue = (value: string): number => {
-  return parseFloat(value) / 10 ** 18;
-};

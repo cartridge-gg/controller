@@ -52,12 +52,7 @@ export function Balance({ types, title, amount }: BalanceProps) {
             amount={
               amount
                 ? `${amount.toFixed(2).toString()}`
-                : `${creditBalance.formatted} CREDITS`
-            }
-            value={
-              amount
-                ? `$${amount.toFixed(2).toString()}`
-                : `$${creditBalance.formatted}`
+                : `${creditBalance} CREDITS`
             }
           />
         )}
