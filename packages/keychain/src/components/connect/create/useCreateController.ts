@@ -20,7 +20,6 @@ export interface SignupResponse {
   signer: Signer;
 }
 
-
 export function useCreateController({
   isSlot,
   loginMode = LoginMode.Webauthn,
