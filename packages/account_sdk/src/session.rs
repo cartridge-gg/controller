@@ -14,6 +14,7 @@ use crate::hash::MessageHashRev1;
 use crate::signers::{HashSigner, Signer};
 use crate::storage::StorageBackend;
 use crate::storage::{selectors::Selectors, Credentials, SessionMetadata};
+use starknet::core::utils::parse_cairo_short_string;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "session_test.rs"]
@@ -99,7 +100,7 @@ impl Controller {
         let session_props = session::CreateSessionInput {
             username: self.username.clone(),
             app_id: self.app_id.clone(),
-            chain_id: "SN_MAIN".to_string(),
+            chain_id: parse_cairo_short_string(&self.chain_id).unwrap(),
             session: session::SessionInput {
                 expires_at: session.inner.expires_at,
                 allowed_policies_root: session.inner.allowed_policies_root,
