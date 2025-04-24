@@ -12,7 +12,7 @@ export interface TokenCardProps
   image: string;
   title: string;
   amount: string;
-  value: string;
+  value?: string;
   change?: string;
   className?: string;
 }

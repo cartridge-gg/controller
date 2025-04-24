@@ -12,7 +12,7 @@
     "e2e:ui": "turbo build:deps dev e2e:ui",
     "lint": "turbo lint format:check",
     "format": "turbo format lint:fix",
-    "clean": "git clean -xdf && pnpm store prune",
+    "clean": "pnpm store prune",
     "release": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/utils --filter=@cartridge/ui-next --filter=@cartridge/account-wasm publish --tag latest --no-git-checks --access public",
     "release:prerelease": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/utils --filter=@cartridge/ui-next --filter=@cartridge/account-wasm publish --tag prerelease --no-git-checks --access public",
     "keychain": "pnpm --filter @cartridge/keychain",
@@ -31,10 +31,15 @@
     "test:storybook:update": "pnpm turbo build:deps test:storybook:update"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#058f2f0"
+    "@cartridge/presets": "github:cartridge-gg/presets#b0e2c0c"
   },
   "devDependencies": {
     "turbo": "^2.4.4",
     "vercel": "^37.14.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@radix-ui/react-accordion": "1.2.1"
+    }
   }
 }

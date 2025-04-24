@@ -30,7 +30,7 @@ import { useCryptoPayment } from "@/hooks/payments/crypto";
 import { CostBreakdown } from "./CostBreakdown";
 import { StarterPackDetails } from "@/hooks/starterpack";
 import { Receiving } from "../starterpack/receiving";
-
+import { creditsToUSD } from "@/hooks/tokens";
 export const WALLET_CONFIG = {
   argent: {
     icon: ArgentIcon,
@@ -96,6 +96,11 @@ export function CryptoCheckout({
     }
   }, [state]);
 
+  const costUSDC = useMemo(() => {
+    const cost = starterpackDetails?.price ?? creditsAmount;
+    return creditsToUSD(cost);
+  }, [starterpackDetails, creditsAmount]);
+
   const handleSendTransaction = useCallback(async () => {
     setError(undefined);
     try {
@@ -123,13 +128,6 @@ export function CryptoCheckout({
     }
   }, [sendPayment, selectedWallet, creditsAmount, onComplete]);
 
-  const cost = useMemo(() => {
-    if (starterpackDetails) {
-      return starterpackDetails.price;
-    }
-
-    return creditsAmount;
-  }, [starterpackDetails, creditsAmount]);
   return (
     <LayoutContainer>
       <LayoutHeader
@@ -148,8 +146,8 @@ export function CryptoCheckout({
             title={"Spending"}
             name={"USDC"}
             icon={"https://static.cartridge.gg/tokens/usdc.svg"}
-            amount={cost.toString() + " USDC"}
-            value={"$" + cost.toString()}
+            amount={costUSDC.toLocaleString() + " USDC"}
+            value={"$" + costUSDC.toLocaleString()}
           />
         )}
 
@@ -164,8 +162,7 @@ export function CryptoCheckout({
             title={"Receiving"}
             name={"Credits"}
             icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
-            amount={cost.toString() + " Credits"}
-            value={"$" + cost.toString()}
+            amount={creditsAmount.toLocaleString() + " Credits"}
             isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
           />
         )}
@@ -187,8 +184,8 @@ export function CryptoCheckout({
             walletType={selectedWallet.type}
             price={{
               processingFeeInCents: 0,
-              baseCostInCents: cost * 100,
-              totalInCents: cost * 100,
+              baseCostInCents: costUSDC * 100,
+              totalInCents: costUSDC * 100,
             }}
           />
         )}
@@ -254,7 +251,7 @@ const ReviewToken = ({
   name: string;
   icon: string;
   amount: string;
-  value: string;
+  value?: string;
   isLoading?: boolean;
 }) => {
   return (

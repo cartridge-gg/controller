@@ -38,7 +38,7 @@ export function Receiving({ title, items, isLoading }: ReceivingProps) {
                 <p className="text-foreground-300 font-normal text-xs">
                   {item.type === StarterItemType.NFT
                     ? item.collectionName || item.description
-                    : `${item.value} Credits`}
+                    : `${item.value?.toLocaleString()} Credits`}
                 </p>
               </div>
             </div>

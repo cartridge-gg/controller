@@ -5,7 +5,7 @@ import {
 } from "@cartridge/controller";
 import {
   ArgentColorIcon,
-  DiscordIcon,
+  DiscordColorIcon,
   LayoutContent,
   LayoutHeader,
   MetaMaskColorIcon,
@@ -13,6 +13,7 @@ import {
   PasskeyIcon,
   PhantomColorIcon,
 } from "@cartridge/ui-next";
+import { useEffect, useState } from "react";
 import { AuthenticationMode } from "../types";
 
 interface ChooseSignupMethodProps {
@@ -25,10 +26,26 @@ interface ChooseSignupMethodProps {
 export function ChooseSignupMethod({
   isLoading,
   isSlot,
-  setAuthenticationMode,
   onSubmit,
+  setAuthenticationMode,
 }: ChooseSignupMethodProps) {
+  const [selectedAuth, setSelectedAuth] = useState<
+    AuthenticationMode | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setSelectedAuth(undefined);
+    }
+  }, [isLoading]);
+
   const authOptions = [
+    {
+      handler: new AlwaysAvailableAuth("webauthn"),
+      variant: "primary" as const,
+      icon: <PasskeyIcon />,
+      signupMode: AuthenticationMode.Webauthn,
+    },
     {
       handler: new MetaMaskWallet(),
       variant: "secondary" as const,
@@ -50,27 +67,21 @@ export function ChooseSignupMethod({
     {
       handler: new AlwaysAvailableAuth("social"),
       variant: "secondary" as const,
-      icon: <DiscordIcon />,
+      icon: <DiscordColorIcon />,
       signupMode: AuthenticationMode.Social,
-    },
-    {
-      handler: new AlwaysAvailableAuth("webauthn"),
-      variant: "primary" as const,
-      icon: <PasskeyIcon />,
-      signupMode: AuthenticationMode.Webauthn,
     },
   ];
 
   return (
     <>
       <LayoutHeader
-        variant="expanded"
+        variant="compressed"
         title={"Create account"}
         hideUsername
         hideNetwork={isSlot}
         hideSettings
         description={"Choose a sign in method"}
-        onBack={() => setAuthenticationMode(undefined)}
+        onBack={() => !isLoading && setAuthenticationMode(undefined)}
       />
       <LayoutContent className="gap-3 justify-end">
         {authOptions.map(
@@ -82,10 +93,12 @@ export function ChooseSignupMethod({
                 variant={option.variant}
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.preventDefault();
+                  setSelectedAuth(option.signupMode);
                   onSubmit(option.signupMode);
                 }}
+                disabled={isLoading && selectedAuth !== option.signupMode}
                 type="submit"
-                isLoading={isLoading}
+                isLoading={isLoading && selectedAuth === option.signupMode}
                 data-testid="submit-button"
               />
             ),

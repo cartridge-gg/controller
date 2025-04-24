@@ -45,6 +45,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.style.border = "none";
     iframe.sandbox.add("allow-forms");
     iframe.sandbox.add("allow-popups");
+    iframe.sandbox.add("allow-popups-to-escape-sandbox");
     iframe.sandbox.add("allow-scripts");
     iframe.sandbox.add("allow-same-origin");
     iframe.allow =

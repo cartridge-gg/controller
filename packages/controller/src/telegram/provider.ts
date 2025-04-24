@@ -20,6 +20,9 @@ interface SessionRegistration {
   ownerGuid: string;
   transactionHash?: string;
   expiresAt: string;
+  guardianKeyGuid: string;
+  metadataHash: string;
+  sessionKeyGuid: string;
 }
 
 export default class TelegramProvider extends BaseProvider {
@@ -135,6 +138,9 @@ export default class TelegramProvider extends BaseProvider {
       chainId: this._chainId,
       expiresAt: parseInt(sessionRegistration.expiresAt),
       policies: toWasmPolicies(this._policies),
+      guardianKeyGuid: sessionRegistration.guardianKeyGuid,
+      metadataHash: sessionRegistration.metadataHash,
+      sessionKeyGuid: sessionRegistration.sessionKeyGuid,
     });
 
     return this.account;

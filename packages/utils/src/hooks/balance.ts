@@ -4,6 +4,11 @@ import { ERC20, ERC20Metadata } from "../erc20";
 import { CreditQuery, useCreditQuery } from "../api/cartridge";
 import { erc20Metadata } from "@cartridge/presets";
 
+export type Balance = {
+  value: bigint;
+  formatted: string;
+};
+
 export type ERC20Balance = {
   balance: Balance;
   meta: ERC20Metadata;
@@ -109,11 +114,6 @@ export function useERC20Balance({
   };
 }
 
-export type Balance = {
-  value: bigint;
-  formatted: string;
-};
-
 export type FetchState = {
   isFetching: boolean;
   isLoading: boolean;
@@ -121,7 +121,7 @@ export type FetchState = {
 };
 
 export type UseCreditBalanceReturn = {
-  balance: Balance;
+  balance: number;
 } & FetchState;
 
 export function useCreditBalance({
@@ -142,23 +142,10 @@ export function useCreditBalance({
     },
   );
 
-  const credits = data?.account?.credits;
-  const value = credits ? BigInt(credits) : 0n;
-
-  // Do division in bigint space
-  const decimals = 18n;
-  const divisor = 10n ** decimals;
-  const wholePart = value / divisor;
-  const fractionalPart = ((value * 100n) / divisor) % 100n;
-
-  // Only convert to string at the very end for display
-  const formatted = `${wholePart}.${fractionalPart.toString().padStart(2, "0")}`;
+  const balance = data?.account?.credits || 0;
 
   return {
-    balance: {
-      value,
-      formatted,
-    },
+    balance,
     isFetching,
     isLoading,
     error,

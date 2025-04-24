@@ -1,9 +1,12 @@
+use std::str::FromStr;
+
 use account_sdk::signers::webauthn::CredentialID;
 use base64::engine::general_purpose;
 use base64::Engine;
 use coset::CborSerializable;
 use coset::CoseKey;
 use serde::{Deserialize, Serialize};
+use starknet::core::types::EthAddress;
 use starknet::signers::SigningKey;
 use tsify_next::Tsify;
 use wasm_bindgen::prelude::*;
@@ -85,6 +88,18 @@ impl TryFrom<StarknetSigner> for SigningKey {
     }
 }
 
+impl TryFrom<Eip191Signer> for account_sdk::signers::eip191::Eip191Signer {
+    type Error = EncodingError;
+
+    fn try_from(eip191: Eip191Signer) -> Result<Self, Self::Error> {
+        Ok(Self {
+            address: EthAddress::from_str(&eip191.address).unwrap(),
+            #[cfg(not(target_arch = "wasm32"))]
+            signing_key: alloy_signer::k256::ecdsa::SigningKey::random(&mut rand::rngs::OsRng),
+        })
+    }
+}
+
 impl TryFrom<Signer> for account_sdk::signers::Signer {
     type Error = EncodingError;
 
@@ -93,6 +108,8 @@ impl TryFrom<Signer> for account_sdk::signers::Signer {
             Ok(Self::Webauthn(webauthn.try_into()?))
         } else if let Some(starknet) = signer.starknet {
             Ok(Self::Starknet(starknet.try_into()?))
+        } else if let Some(eip191) = signer.eip191 {
+            Ok(Self::Eip191(eip191.try_into()?))
         } else {
             Err(EncodingError::Serialization(
                 serde_wasm_bindgen::Error::new("Missing signer data"),
