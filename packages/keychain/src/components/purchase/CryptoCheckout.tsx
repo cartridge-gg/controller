@@ -163,7 +163,6 @@ export function CryptoCheckout({
             name={"Credits"}
             icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
             amount={creditsAmount.toLocaleString() + " Credits"}
-            value={"$" + costUSDC.toLocaleString()}
             isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
           />
         )}
@@ -252,7 +251,7 @@ const ReviewToken = ({
   name: string;
   icon: string;
   amount: string;
-  value: string;
+  value?: string;
   isLoading?: boolean;
 }) => {
   return (

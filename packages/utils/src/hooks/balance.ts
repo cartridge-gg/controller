@@ -144,8 +144,6 @@ export function useCreditBalance({
 
   const balance = data?.account?.credits || 0;
 
-
-
   return {
     balance,
     isFetching,
