@@ -5,7 +5,7 @@ use starknet::{
     providers::ProviderError,
 };
 
-use crate::{provider::ExecuteFromOutsideError, signers::SignError};
+use crate::{api, provider::ExecuteFromOutsideError, signers::SignError};
 
 #[derive(Debug, thiserror::Error)]
 pub enum ControllerError {
@@ -55,4 +55,10 @@ pub enum ControllerError {
     #[cfg(feature = "webauthn")]
     #[error(transparent)]
     CoseError(#[from] coset::CoseError),
+
+    #[error(transparent)]
+    Api(#[from] api::GraphQLErrors),
+
+    #[error(transparent)]
+    ReqwestError(#[from] reqwest::Error),
 }

@@ -9,10 +9,12 @@ use crate::account::session::hash::Session;
 use crate::account::session::policy::Policy;
 use crate::controller::Controller;
 use crate::errors::ControllerError;
+use crate::graphql::session;
 use crate::hash::MessageHashRev1;
 use crate::signers::{HashSigner, Signer};
 use crate::storage::StorageBackend;
 use crate::storage::{selectors::Selectors, Credentials, SessionMetadata};
+use crate::utils;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 #[path = "session_test.rs"]
@@ -65,6 +67,9 @@ impl Controller {
         session_signer: SigningKey,
         session: Session,
     ) -> Result<SessionAccount, ControllerError> {
+        #[cfg(target_arch = "wasm32")]
+        use web_sys::console;
+
         let hash = session
             .inner
             .get_message_hash_rev_1(self.chain_id, self.address);
@@ -88,9 +93,29 @@ impl Controller {
             Signer::Starknet(session_signer),
             self.address,
             self.chain_id,
-            authorization,
-            session,
+            authorization.clone(),
+            session.clone(),
         );
+
+        let session_props = session::CreateSessionInput {
+            username: self.username.clone(),
+            app_id: self.app_id.clone(),
+            chain_id: utils::normalize_address(&self.chain_id.to_fixed_hex_string()),
+            session: session::SessionInput {
+                expires_at: session.inner.expires_at,
+                allowed_policies_root: session.inner.allowed_policies_root,
+                metadata_hash: session.inner.metadata_hash,
+                session_key_guid: session.inner.session_key_guid,
+                guardian_key_guid: session.inner.guardian_key_guid,
+                authorization,
+            },
+        };
+
+        let created_session = session::create_session(session_props).await;
+
+        // For debugging purposes, print out response from create_session
+        #[cfg(target_arch = "wasm32")]
+        console::log_1(&format!("Created session: {:?}", created_session).into());
 
         Ok(session_account)
     }

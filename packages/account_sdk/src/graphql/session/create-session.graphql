@@ -1,0 +1,12 @@
+mutation CreateSession(
+    $username: String!
+    $appId: String!
+    $chainId: String!
+    $session: SessionInput!
+) { createSession(
+    username: $username
+    appId: $appId
+    chainId: $chainId
+    session: $session
+  )
+}
