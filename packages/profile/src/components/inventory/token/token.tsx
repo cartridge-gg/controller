@@ -269,7 +269,8 @@ function ERC20() {
                 >
                   <ActivityTokenCard
                     amount={item.amount}
-                    value={item.amount}
+                    // no price available from the oracle for $PAPER
+                    value=""
                     address={item.action === "send" ? item.to : item.from}
                     image={token.metadata.image!}
                     action={item.action}
