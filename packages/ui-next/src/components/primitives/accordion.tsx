@@ -20,24 +20,33 @@ const AccordionTrigger = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> & {
     hideIcon?: boolean;
     color?: string;
+    parentClassName?: string;
   }
->(({ className, children, hideIcon, color, ...props }, ref) => (
-  <AccordionPrimitive.Header className="flex">
-    <AccordionPrimitive.Trigger
-      ref={ref}
-      className="w-full flex items-center justify-between text-sm text-foreground-400 transition-all text-left [&[data-state=open]>svg]:rotate-90"
-      {...props}
-    >
-      <div className={cn("flex items-center", className)}>{children}</div>
-      {!hideIcon && (
-        <WedgeIcon
-          variant="right"
-          className={cn("transition-transform duration-200", color)}
-        />
-      )}
-    </AccordionPrimitive.Trigger>
-  </AccordionPrimitive.Header>
-));
+>(
+  (
+    { className, children, hideIcon, color, parentClassName, ...props },
+    ref,
+  ) => (
+    <AccordionPrimitive.Header className="flex">
+      <AccordionPrimitive.Trigger
+        ref={ref}
+        className={cn(
+          "w-full flex items-center justify-between text-sm text-foreground-400 transition-all text-left [&[data-state=open]>svg]:rotate-90",
+          parentClassName,
+        )}
+        {...props}
+      >
+        <div className={cn("flex items-center", className)}>{children}</div>
+        {!hideIcon && (
+          <WedgeIcon
+            variant="right"
+            className={cn("transition-transform duration-200", color)}
+          />
+        )}
+      </AccordionPrimitive.Trigger>
+    </AccordionPrimitive.Header>
+  ),
+);
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 
 const AccordionContent = React.forwardRef<

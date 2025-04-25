@@ -1,16 +1,19 @@
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
-import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
-import { doLogin } from "@/hooks/account";
+import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
 import { Signer } from "@cartridge/account-wasm";
-import { AccountQuery, useAccountQuery } from "@cartridge/utils/api/cartridge";
+import {
+  AccountQuery,
+  SignerType,
+  useAccountQuery,
+} from "@cartridge/utils/api/cartridge";
 import { useCallback, useState } from "react";
 import { AuthenticationMode, LoginMode } from "../types";
-import { useSignupWithSocial } from "./social/signup";
-import { fetchAccount } from "./utils";
-import { useSignupWithWebauthn } from "./webauthn/signup";
+import { useSocialAuthentication } from "./social";
+import { AuthenticationStep, fetchAccount } from "./utils";
+import { useWebauthnAuthentication } from "./webauthn";
 
 export interface SignupResponse {
   address: string;
@@ -27,9 +30,16 @@ export function useCreateController({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
+
+  const [authenticationStep, setAuthenticationStep] = useState<
+    AuthenticationStep | undefined
+  >(AuthenticationStep.FillForm);
+
   const { origin, policies, rpcUrl, chainId, setController } = useConnection();
-  const { signupWithWebauthn } = useSignupWithWebauthn();
-  const { signupWithSocial } = useSignupWithSocial();
+  const { signup: signupWithWebauthn, login: loginWithWebauthn } =
+    useWebauthnAuthentication();
+  const { signup: signupWithSocial, login: loginWithSocial } =
+    useSocialAuthentication();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -138,7 +148,7 @@ export function useCreateController({
       setController(controller);
 
       const loginResponse = await controller.login(
-        NOW + DEFAULT_SESSION_DURATION,
+        now() + DEFAULT_SESSION_DURATION,
       );
       if (!loginResponse.isRegistered) {
         throw new Error("Failed to login");
@@ -159,52 +169,21 @@ export function useCreateController({
   const handleLogin = useCallback(
     async (username: string) => {
       const { account } = await fetchAccount(username);
-      const { credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
-
-      const controllerNode = controllers?.edges?.[0]?.node;
-
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
-
-      if (!controllerNode || !publicKey) {
-        return;
+      if (!account) {
+        throw new Error("Account not found");
       }
 
-      const controller = await createController(
-        origin!,
-        chainId!,
-        rpcUrl!,
-        username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
-        credentialId,
-        publicKey,
-      );
-
-      if (loginMode === LoginMode.Webauthn) {
-        await doLogin({
-          name: username,
-          credentialId,
-          finalize: !!isSlot,
-        });
+      const { controllers } = account ?? {};
+      if (
+        controllers?.edges?.[0]?.node?.signers?.[0]?.type ===
+        SignerType.Webauthn
+      ) {
+        await loginWithWebauthn(account, loginMode, !!isSlot);
       } else {
-        await controller.login(NOW + DEFAULT_SESSION_DURATION);
+        await loginWithSocial(account);
       }
-
-      window.controller = controller;
-      setController(controller);
     },
-    [
-      chainId,
-      rpcUrl,
-      origin,
-      loginMode,
-      policies,
-      isSlot,
-      createController,
-      doPopupFlow,
-    ],
+    [isSlot, loginWithWebauthn, loginWithSocial, loginMode],
   );
 
   const handleSubmit = useCallback(
@@ -245,6 +224,8 @@ export function useCreateController({
 
   return {
     isLoading,
+    authenticationStep,
+    setAuthenticationStep,
     error,
     setError,
     handleSubmit,

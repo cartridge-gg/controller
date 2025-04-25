@@ -2,7 +2,7 @@ import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { SessionConsent } from "@/components/connect";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { NOW } from "@/const";
+import { now } from "@/const";
 import { CreateSessionProvider } from "@/context/session";
 import { useConnection } from "@/hooks/connection";
 import {
@@ -56,7 +56,7 @@ const RegisterSessionLayout = ({
   const { duration, isEditable, onToggleEditable } = useCreateSession();
 
   const expiresAt = useMemo(() => {
-    return duration + NOW;
+    return duration + now();
   }, [duration]);
 
   useEffect(() => {
