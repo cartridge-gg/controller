@@ -1,5 +1,9 @@
 import { ReactNode } from "react";
-import { StarknetConfig, jsonRpcProvider, voyager } from "@starknet-react/core";
+import {
+  StarknetConfig,
+  jsonRpcProvider,
+  cartridge,
+} from "@starknet-react/core";
 import { sepolia, mainnet } from "@starknet-react/chains";
 
 const defaultConfig = {
@@ -10,7 +14,7 @@ const defaultConfig = {
 export function withStarknet(children: ReactNode, config = defaultConfig) {
   return (
     <StarknetConfig
-      explorer={voyager}
+      explorer={cartridge}
       chains={[sepolia, mainnet]}
       defaultChainId={config.defaultChainId}
       provider={jsonRpcProvider({
