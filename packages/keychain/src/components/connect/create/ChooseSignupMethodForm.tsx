@@ -1,26 +1,14 @@
-import {
-  ArgentWallet,
-  MetaMaskWallet,
-  PhantomWallet,
-} from "@cartridge/controller";
-import {
-  ArgentColorIcon,
-  DiscordColorIcon,
-  LayoutContent,
-  LayoutHeader,
-  MetaMaskColorIcon,
-  OptionButton,
-  PasskeyIcon,
-  PhantomColorIcon,
-} from "@cartridge/ui-next";
-import { useEffect, useState } from "react";
-import { AuthenticationMode } from "../types";
+import { useWallets } from "@/hooks/wallets";
+import { LayoutContent, LayoutHeader, OptionButton } from "@cartridge/ui-next";
+import { useEffect, useMemo, useState } from "react";
+import { AuthenticationMethod } from "../types";
+import { AuthFactory } from "./auth-option-factory";
 import { AuthenticationStep } from "./utils";
 
 interface ChooseSignupMethodProps {
   isSlot?: boolean;
   isLoading: boolean;
-  onSubmit: (authenticationMode?: AuthenticationMode) => void;
+  onSubmit: (authenticationMode?: AuthenticationMethod) => void;
   setAuthenticationStep: (value: AuthenticationStep | undefined) => void;
 }
 
@@ -31,8 +19,9 @@ export function ChooseSignupMethodForm({
   setAuthenticationStep,
 }: ChooseSignupMethodProps) {
   const [selectedAuth, setSelectedAuth] = useState<
-    AuthenticationMode | undefined
+    AuthenticationMethod | undefined
   >(undefined);
+  const { wallets } = useWallets();
 
   useEffect(() => {
     if (!isLoading) {
@@ -40,44 +29,23 @@ export function ChooseSignupMethodForm({
     }
   }, [isLoading]);
 
-  const authOptions = [
-    {
-      handler: new AlwaysAvailableAuth("webauthn"),
-      variant: "primary" as const,
-      icon: <PasskeyIcon />,
-      signupMode: AuthenticationMode.Webauthn,
-    },
-    {
-      handler: new MetaMaskWallet(),
-      variant: "secondary" as const,
-      icon: <MetaMaskColorIcon />,
-      signupMode: AuthenticationMode.MetaMask,
-    },
-    {
-      handler: new ArgentWallet(),
-      variant: "secondary" as const,
-      icon: <ArgentColorIcon />,
-      signupMode: AuthenticationMode.Argent,
-    },
-    {
-      handler: new PhantomWallet(),
-      variant: "secondary" as const,
-      icon: <PhantomColorIcon />,
-      signupMode: AuthenticationMode.Phantom,
-    },
-    {
-      handler: new AlwaysAvailableAuth("social"),
-      variant: "secondary" as const,
-      icon: <DiscordColorIcon />,
-      signupMode: AuthenticationMode.Social,
-    },
-  ];
+  const authOptions = useMemo(() => {
+    return [
+      AuthFactory.create("webauthn"),
+      ...wallets
+        .filter(
+          (wallet) => wallet.type !== "argent" && wallet.type !== "phantom",
+        )
+        .map((wallet) => AuthFactory.create(wallet.type)),
+      AuthFactory.create("social"),
+    ];
+  }, [wallets]);
 
   const handleSelectedOption = (
     e:
       | React.KeyboardEvent<HTMLButtonElement>
       | React.MouseEvent<HTMLButtonElement>,
-    option: AuthenticationMode,
+    option: AuthenticationMethod,
   ) => {
     e.preventDefault();
     setSelectedAuth(option);
@@ -98,37 +66,27 @@ export function ChooseSignupMethodForm({
         }
       />
       <LayoutContent className="gap-3 justify-end">
-        {authOptions.map(
-          (option) =>
-            option.handler.isAvailable() && (
-              <OptionButton
-                key={option.handler.type}
-                icon={option.icon}
-                variant={option.variant}
-                onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-                  if (e.key !== "Enter") {
-                    return;
-                  }
-                  handleSelectedOption(e, option.signupMode);
-                }}
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  handleSelectedOption(e, option.signupMode);
-                }}
-                disabled={isLoading && selectedAuth !== option.signupMode}
-                type="submit"
-                isLoading={isLoading && selectedAuth === option.signupMode}
-                data-testid="submit-button"
-              />
-            ),
-        )}
+        {authOptions.map((option) => (
+          <OptionButton
+            key={option.mode}
+            icon={option.icon}
+            variant={option.variant}
+            onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+              if (e.key !== "Enter") {
+                return;
+              }
+              handleSelectedOption(e, option.mode);
+            }}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              handleSelectedOption(e, option.mode);
+            }}
+            disabled={isLoading && selectedAuth !== option.mode}
+            type="submit"
+            isLoading={isLoading && selectedAuth === option.mode}
+            data-testid="submit-button"
+          />
+        ))}
       </LayoutContent>
     </>
   );
-}
-
-class AlwaysAvailableAuth {
-  constructor(public type: string) {}
-  isAvailable() {
-    return true;
-  }
 }

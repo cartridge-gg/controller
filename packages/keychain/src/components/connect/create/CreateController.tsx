@@ -13,7 +13,7 @@ import {
 } from "@cartridge/ui-next";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AuthenticationMode, LoginMode } from "../types";
+import { AuthenticationMethod, LoginMode } from "../types";
 import { ChooseSignupMethodForm } from "./ChooseSignupMethodForm";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
@@ -33,7 +33,7 @@ interface CreateControllerViewProps {
   onUsernameChange: (value: string) => void;
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
-  onSubmit: (authenticationMode?: AuthenticationMode) => void;
+  onSubmit: (authenticationMode?: AuthenticationMethod) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
   isSlot?: boolean;
@@ -231,7 +231,7 @@ export function CreateController({
   });
 
   const handleFormSubmit = useCallback(
-    (authenticationMode?: AuthenticationMode) => {
+    (authenticationMode?: AuthenticationMethod) => {
       if (!usernameField.value) {
         return;
       }
