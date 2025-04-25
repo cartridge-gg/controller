@@ -2,13 +2,15 @@ import { vi } from "vitest";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { CreateController } from "./CreateController";
 import { describe, expect, beforeEach, it } from "vitest";
-import { AuthenticationMode, LoginMode } from "../types";
+import { LoginMode } from "../types";
 import { renderWithProviders } from "@/test/mocks/providers";
+import { AuthenticationStep } from "./utils";
 
 // Create mock functions that we'll use in multiple tests
 const mockUseCreateController = vi.fn();
 const mockUseUsernameValidation = vi.fn();
 const mockUseControllerTheme = vi.fn();
+const mockUseWallets = vi.fn().mockReturnValue({ wallets: [] });
 
 // Mock the hooks
 vi.mock("@/hooks/posthog", () => ({
@@ -16,9 +18,12 @@ vi.mock("@/hooks/posthog", () => ({
     capture: vi.fn(),
   }),
 }));
-
 vi.mock("@/hooks/connection", () => ({
   useControllerTheme: () => mockUseControllerTheme(),
+}));
+
+vi.mock("@/hooks/wallets", () => ({
+  useWallets: () => mockUseWallets(),
 }));
 
 vi.mock("inapp-spy", () => ({
@@ -26,22 +31,18 @@ vi.mock("inapp-spy", () => ({
     isInApp: false,
   }),
 }));
-
 vi.mock("./useUsernameValidation", () => ({
   useUsernameValidation: () => mockUseUsernameValidation(),
 }));
-
 vi.mock("./useCreateController", () => ({
   useCreateController: () => mockUseCreateController(),
 }));
-
 describe("CreateController", () => {
   const defaultProps = {
     isSlot: false,
     loginMode: LoginMode.Webauthn,
     onCreated: vi.fn(),
   };
-
   beforeEach(() => {
     vi.clearAllMocks();
     // Set default mock returns
@@ -50,6 +51,7 @@ describe("CreateController", () => {
       error: undefined,
       setError: vi.fn(),
       handleSubmit: vi.fn().mockResolvedValue(undefined),
+      authenticationStep: AuthenticationStep.FillForm,
     });
     mockUseUsernameValidation.mockReturnValue({
       status: "valid",
@@ -62,53 +64,51 @@ describe("CreateController", () => {
       cover: "cover-url",
     });
   });
-
   const renderComponent = () => {
     return renderWithProviders(<CreateController {...defaultProps} />);
   };
-
   it("renders basic content correctly", () => {
     renderComponent();
     expect(screen.getByText("Connect Controller")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Username")).toBeInTheDocument();
   });
-
   it("handles username input correctly", async () => {
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
-
     fireEvent.change(input, { target: { value: "testuser" } });
     await waitFor(() => {
       expect(input).toHaveValue("testuser");
     });
   });
-
   it("submits form with valid username", async () => {
     const handleSubmit = vi.fn().mockResolvedValue(undefined);
+    const setAuthenticationStep = vi.fn();
     mockUseCreateController.mockReturnValue({
       isLoading: false,
       error: undefined,
       setError: vi.fn(),
       handleSubmit,
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep,
     });
-
     renderComponent();
-
     const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "validuser" } });
-
     const submitButton = screen.getByText("sign up");
     fireEvent.click(submitButton);
-
-    const passkeyButton = screen.getByText("Passkey");
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit,
+      authenticationStep: AuthenticationStep.ChooseSignupMethod,
+      setAuthenticationStep,
+    });
+    const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);
 
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith(
-        "validuser",
-        false,
-        AuthenticationMode.Webauthn,
-      );
+      expect(handleSubmit).toHaveBeenCalledWith("validuser", false, "webauthn");
     });
   });
 
@@ -118,13 +118,13 @@ describe("CreateController", () => {
       error: undefined,
       setError: vi.fn(),
       handleSubmit: vi.fn(),
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep: vi.fn(),
     });
-
     renderComponent();
     const submitButton = screen.getByTestId("submit-button");
     expect(submitButton).toBeDisabled();
   });
-
   it("shows error message when validation fails", async () => {
     const errorMessage = "Username is invalid";
     mockUseUsernameValidation.mockReturnValue({
@@ -132,16 +132,13 @@ describe("CreateController", () => {
       exists: false,
       error: { message: errorMessage },
     });
-
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "invalid@user" } });
-
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
   });
-
   it("shows warning for unverified theme", async () => {
     mockUseControllerTheme.mockReturnValue({
       name: "cartridge",
@@ -149,7 +146,6 @@ describe("CreateController", () => {
       icon: "icon-url",
       cover: "cover-url",
     });
-
     renderComponent();
     expect(screen.getByText("Please proceed with caution")).toBeInTheDocument();
     expect(
@@ -158,36 +154,37 @@ describe("CreateController", () => {
       ),
     ).toBeInTheDocument();
   });
-
   it("calls onCreated callback after successful creation", async () => {
     const handleSubmit = vi.fn().mockImplementation(() => {
       return Promise.resolve();
     });
-
+    const setAuthenticationStep = vi.fn();
     mockUseCreateController.mockReturnValue({
       isLoading: false,
       error: undefined,
       setError: vi.fn(),
       handleSubmit,
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep,
     });
-
     renderWithProviders(<CreateController {...defaultProps} />);
-
     const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "validuser" } });
-
     const submitButton = screen.getByText("sign up");
     fireEvent.click(submitButton);
-
-    const passkeyButton = screen.getByText("Passkey");
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit,
+      authenticationStep: AuthenticationStep.ChooseSignupMethod,
+      setAuthenticationStep,
+    });
+    const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);
 
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith(
-        "validuser",
-        false,
-        AuthenticationMode.Webauthn,
-      );
+      expect(handleSubmit).toHaveBeenCalledWith("validuser", false, "webauthn");
     });
   });
 });

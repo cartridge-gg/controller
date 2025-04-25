@@ -213,7 +213,10 @@ export function CryptoCheckout({
             className="flex-1 text-background-100 hover:brightness-90"
             variant="secondary"
             style={{
-              backgroundColor: WALLET_CONFIG[selectedWallet!.type].bgColor,
+              backgroundColor:
+                WALLET_CONFIG[
+                  selectedWallet!.type as keyof typeof WALLET_CONFIG
+                ].bgColor,
               border: "none",
             }}
             isLoading={state === CheckoutState.REQUESTING_PAYMENT}
@@ -234,8 +237,8 @@ export const walletIcon = (wallet?: ExternalWallet, useColor = false) => {
   }
 
   const Icon = useColor
-    ? WALLET_CONFIG[wallet.type].colorIcon
-    : WALLET_CONFIG[wallet.type].icon;
+    ? WALLET_CONFIG[wallet.type as keyof typeof WALLET_CONFIG].colorIcon
+    : WALLET_CONFIG[wallet.type as keyof typeof WALLET_CONFIG].icon;
   return <Icon />;
 };
 

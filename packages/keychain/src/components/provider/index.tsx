@@ -5,7 +5,11 @@ import { ENDPOINT } from "@/utils/graphql";
 import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { mainnet, sepolia } from "@starknet-react/chains";
-import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
+import {
+  jsonRpcProvider,
+  StarknetConfig,
+  cartridge,
+} from "@starknet-react/core";
 import { TurnkeyProvider } from "@turnkey/sdk-react";
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -52,7 +56,7 @@ export function Provider({ children }: PropsWithChildren) {
                       <UpgradeProvider controller={connection.controller}>
                         <UIProvider>
                           <StarknetConfig
-                            explorer={voyager}
+                            explorer={cartridge}
                             chains={[sepolia, mainnet]}
                             defaultChainId={defaultChainId}
                             provider={jsonRpcProvider({ rpc })}

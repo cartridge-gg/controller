@@ -1,8 +1,8 @@
 mutation Register(
+  $username: String!
   $chainId: String!
   $owner: SignerInput!
   $session: SessionInput!
-  $username: String!
 ) {
   register(
     chainId: $chainId

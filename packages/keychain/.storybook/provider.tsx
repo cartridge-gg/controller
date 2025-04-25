@@ -1,7 +1,11 @@
 import React, { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { mainnet } from "@starknet-react/chains";
-import { StarknetConfig, publicProvider, voyager } from "@starknet-react/core";
+import {
+  StarknetConfig,
+  cartridge,
+  publicProvider,
+} from "@starknet-react/core";
 import { BrowserRouter } from "react-router-dom";
 import { ConnectionContext } from "../src/components/provider/connection";
 import { UIProvider } from "../src/components/provider/ui";
@@ -13,6 +17,7 @@ import {
 import { TokensProvider } from "../src/components/provider/tokens";
 import { PostHogProvider } from "../src/components/provider/posthog";
 import { WalletsProvider } from "../src/hooks/wallets";
+import { FeatureProvider } from "../src/hooks/features";
 
 export function Provider({
   children,
@@ -23,24 +28,26 @@ export function Provider({
   return (
     <StarknetConfig
       chains={[mainnet]}
-      explorer={voyager}
+      explorer={cartridge}
       provider={publicProvider()}
     >
-      <QueryClientProvider client={queryClient}>
-        <ConnectionContext.Provider value={connection}>
-          <WalletsProvider>
-            <PostHogProvider>
-              <MockUpgradeProvider controller={connection.controller}>
-                <UIProvider>
-                  <TokensProvider>
-                    <BrowserRouter>{children}</BrowserRouter>
-                  </TokensProvider>
-                </UIProvider>
-              </MockUpgradeProvider>
-            </PostHogProvider>
-          </WalletsProvider>
-        </ConnectionContext.Provider>
-      </QueryClientProvider>
+      <BrowserRouter>
+        <FeatureProvider>
+          <QueryClientProvider client={queryClient}>
+            <ConnectionContext.Provider value={connection}>
+              <WalletsProvider>
+                <PostHogProvider>
+                  <MockUpgradeProvider controller={connection.controller}>
+                    <UIProvider>
+                      <TokensProvider>{children}</TokensProvider>
+                    </UIProvider>
+                  </MockUpgradeProvider>
+                </PostHogProvider>
+              </WalletsProvider>
+            </ConnectionContext.Provider>
+          </QueryClientProvider>
+        </FeatureProvider>
+      </BrowserRouter>
     </StarknetConfig>
   );
 }

@@ -1,3 +1,5 @@
+import { ExternalWalletType } from "@cartridge/controller";
+
 export type FormInput = {
   username: string;
 };
@@ -24,11 +26,4 @@ export type LoginProps = AuthBaseProps & {
   onSignup: (username: string) => void;
 };
 
-export enum AuthenticationMode {
-  None,
-  Webauthn,
-  Social,
-  MetaMask,
-  Phantom,
-  Argent,
-}
+export type AuthenticationMethod = "webauthn" | "social" | ExternalWalletType;
