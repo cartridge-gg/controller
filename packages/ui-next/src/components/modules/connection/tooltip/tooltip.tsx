@@ -111,6 +111,7 @@ export const ConnectionTooltip = ({
           <TooltipTrigger
             className={cn(
               connectionTooltipVariants({ variant }),
+              className,
               hideUsername && "hidden",
             )}
             onClick={handleClick}
