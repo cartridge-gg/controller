@@ -24,12 +24,12 @@ export function CostBreakdown({
 
   const getNetwork = () => {
     if (rails === "crypto" && walletType) {
-      const NetworkIcon = WALLET_CONFIG[walletType].networkIcon;
+      const NetworkIcon = WALLET_CONFIG[walletType as keyof typeof WALLET_CONFIG].networkIcon;
 
       return (
         <>
           <NetworkIcon size="xs" className="inline-block" />
-          {WALLET_CONFIG[walletType].network}
+          {WALLET_CONFIG[walletType as keyof typeof WALLET_CONFIG].network}
         </>
       );
     }
