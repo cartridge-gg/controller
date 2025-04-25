@@ -1,21 +1,15 @@
 import { useWallets } from "@/hooks/wallets";
 import { LayoutContent, LayoutHeader, OptionButton } from "@cartridge/ui-next";
-import { ReactElement, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AuthenticationMethod } from "../types";
 import { AuthFactory } from "./auth-option-factory";
-import { AuthenticationStep } from "./useCreateController";
+import { AuthenticationStep } from "./utils";
 
 interface ChooseSignupMethodProps {
   isSlot?: boolean;
   isLoading: boolean;
   onSubmit: (authenticationMode?: AuthenticationMethod) => void;
   setAuthenticationStep: (value: AuthenticationStep | undefined) => void;
-}
-
-interface AuthOption {
-  icon: ReactElement;
-  variant: "primary" | "secondary";
-  mode: AuthenticationMethod;
 }
 
 export function ChooseSignupMethodForm({
@@ -71,24 +65,23 @@ export function ChooseSignupMethodForm({
       />
       <LayoutContent className="gap-3 justify-end">
         {authOptions.map((option) => {
-          const typedOption = option as AuthOption;
           return (
             <OptionButton
-              key={typedOption.mode}
-              icon={typedOption.icon}
-              variant={typedOption.variant}
+              key={option.mode}
+              icon={option.icon}
+              variant={option.variant}
               onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
                 if (e.key !== "Enter") {
                   return;
                 }
-                handleSelectedOption(e, typedOption.mode);
+                handleSelectedOption(e, option.mode);
               }}
               onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                handleSelectedOption(e, typedOption.mode);
+                handleSelectedOption(e, option.mode);
               }}
-              disabled={isLoading && selectedAuth !== typedOption.mode}
+              disabled={isLoading && selectedAuth !== option.mode}
               type="submit"
-              isLoading={isLoading && selectedAuth === typedOption.mode}
+              isLoading={isLoading && selectedAuth === option.mode}
               data-testid="submit-button"
             />
           );

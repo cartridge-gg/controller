@@ -115,7 +115,7 @@ export function useConnectionValue() {
     }
   }, [controller]);
 
-  // Check if preset is verified for the current origin
+  // Check if preset is verified for the current origin, supporting wildcards
   useEffect(() => {
     if (
       !urlParams.preset ||
@@ -126,18 +126,7 @@ export function useConnectionValue() {
     }
 
     const allowedOrigins = toArray(controllerConfigs[urlParams.preset].origin);
-    setVerified(
-      !!origin &&
-        allowedOrigins.some((allowedOrigin) => {
-          try {
-            const originUrl = new URL(origin);
-            return originUrl.hostname === allowedOrigin;
-          } catch (e) {
-            console.error("Invalid origin URL:", e);
-            return false;
-          }
-        }),
-    );
+    setVerified(isOriginVerified(origin, allowedOrigins));
   }, [origin, urlParams]);
 
   // Handle theme configuration
@@ -384,4 +373,42 @@ export function useConnection() {
 
 export function useControllerTheme() {
   return useConnection().theme;
+}
+
+/**
+ * Checks if a given origin is allowed based on a list of allowed origins, supporting wildcards.
+ * @param origin - The origin URL string to check.
+ * @param allowedOrigins - An array of allowed origin strings (can include wildcards like *.example.com).
+ * @returns True if the origin is verified, false otherwise.
+ */
+export function isOriginVerified(
+  origin: string,
+  allowedOrigins: string[],
+): boolean {
+  if (!origin) {
+    return false;
+  }
+  try {
+    const originUrl = new URL(origin);
+    const currentHostname = originUrl.hostname;
+
+    return allowedOrigins.some((allowedOrigin) => {
+      // Check for wildcard subdomain matching
+      if (allowedOrigin.startsWith("*.")) {
+        const baseDomain = allowedOrigin.substring(2);
+        // Ensure currentHostname ends with .baseDomain (e.g., sub.example.com matches *.example.com)
+        // Also ensure it's not just the base domain itself matching the wildcard part
+        return (
+          currentHostname.endsWith(`.${baseDomain}`) &&
+          currentHostname !== baseDomain
+        );
+      } else {
+        // Perform exact hostname match
+        return currentHostname === allowedOrigin;
+      }
+    });
+  } catch (e) {
+    console.error("Invalid origin URL:", e);
+    return false;
+  }
 }

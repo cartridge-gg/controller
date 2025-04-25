@@ -1,13 +1,16 @@
-import { renderWithProviders } from "@/test/mocks/providers";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LoginMode } from "../types";
+import { vi } from "vitest";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { CreateController } from "./CreateController";
+import { describe, expect, beforeEach, it } from "vitest";
+import { LoginMode } from "../types";
+import { renderWithProviders } from "@/test/mocks/providers";
+import { AuthenticationStep } from "./utils";
 
 // Create mock functions that we'll use in multiple tests
 const mockUseCreateController = vi.fn();
 const mockUseUsernameValidation = vi.fn();
 const mockUseControllerTheme = vi.fn();
+const mockUseWallets = vi.fn().mockReturnValue({ wallets: [] });
 
 // Mock the hooks
 vi.mock("@/hooks/posthog", () => ({
@@ -18,6 +21,10 @@ vi.mock("@/hooks/posthog", () => ({
 
 vi.mock("@/hooks/connection", () => ({
   useControllerTheme: () => mockUseControllerTheme(),
+}));
+
+vi.mock("@/hooks/wallets", () => ({
+  useWallets: () => mockUseWallets(),
 }));
 
 vi.mock("inapp-spy", () => ({
@@ -49,6 +56,7 @@ describe("CreateController", () => {
       error: undefined,
       setError: vi.fn(),
       handleSubmit: vi.fn().mockResolvedValue(undefined),
+      authenticationStep: AuthenticationStep.FillForm,
     });
     mockUseUsernameValidation.mockReturnValue({
       status: "valid",
@@ -84,11 +92,15 @@ describe("CreateController", () => {
 
   it("submits form with valid username", async () => {
     const handleSubmit = vi.fn().mockResolvedValue(undefined);
+    const setAuthenticationStep = vi.fn();
+
     mockUseCreateController.mockReturnValue({
       isLoading: false,
       error: undefined,
       setError: vi.fn(),
       handleSubmit,
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep,
     });
 
     renderComponent();
@@ -99,7 +111,16 @@ describe("CreateController", () => {
     const submitButton = screen.getByText("sign up");
     fireEvent.click(submitButton);
 
-    const passkeyButton = screen.getByText("Passkey");
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit,
+      authenticationStep: AuthenticationStep.ChooseSignupMethod,
+      setAuthenticationStep,
+    });
+
+    const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);
 
     await waitFor(() => {
@@ -113,6 +134,8 @@ describe("CreateController", () => {
       error: undefined,
       setError: vi.fn(),
       handleSubmit: vi.fn(),
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep: vi.fn(),
     });
 
     renderComponent();
@@ -158,12 +181,15 @@ describe("CreateController", () => {
     const handleSubmit = vi.fn().mockImplementation(() => {
       return Promise.resolve();
     });
+    const setAuthenticationStep = vi.fn();
 
     mockUseCreateController.mockReturnValue({
       isLoading: false,
       error: undefined,
       setError: vi.fn(),
       handleSubmit,
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep,
     });
 
     renderWithProviders(<CreateController {...defaultProps} />);
@@ -174,7 +200,16 @@ describe("CreateController", () => {
     const submitButton = screen.getByText("sign up");
     fireEvent.click(submitButton);
 
-    const passkeyButton = screen.getByText("Passkey");
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit,
+      authenticationStep: AuthenticationStep.ChooseSignupMethod,
+      setAuthenticationStep,
+    });
+
+    const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);
 
     await waitFor(() => {

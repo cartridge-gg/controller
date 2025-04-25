@@ -1,23 +1,26 @@
+import { creditsToUSD, usdToCredits } from "@/hooks/tokens";
 import { Button, DollarIcon, Input, cn } from "@cartridge/ui-next";
 import { useCallback, useRef, useState } from "react";
-import { AMOUNTS } from "./constants";
+
+export const USD_AMOUNTS = [1, 5, 10];
 
 type AmountSelectionProps = {
-  amount: number;
+  creditsAmount: number;
   lockSelection?: boolean;
   enableCustom?: boolean;
   onChange?: (amount: number) => void;
 };
 
 export function AmountSelection({
-  amount,
+  creditsAmount,
   lockSelection,
   enableCustom,
   onChange,
 }: AmountSelectionProps) {
-  const [selected, setSelected] = useState<number>(amount);
+  const [selectedUSD, setSelectedUSD] = useState<number>(
+    creditsToUSD(creditsAmount),
+  );
   const [custom, setCustom] = useState<boolean>(false);
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus on the input
@@ -38,21 +41,21 @@ export function AmountSelection({
       </div>
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          {AMOUNTS.map((value) => (
+          {USD_AMOUNTS.map((value) => (
             <Button
               key={value}
               variant="secondary"
               className={cn(
                 "w-18 text-sm font-sans font-medium flex-1",
-                value === selected && !custom
+                value === selectedUSD && !custom
                   ? "bg-background-400 text-foreground-100 hover:bg-background-400 hover:text-foreground-100 "
                   : "bg-background-200 text-foreground-300 hover:bg-background-300 hover:text-foreground-200 ",
               )}
               disabled={lockSelection}
               onClick={() => {
                 setCustom(false);
-                setSelected(value);
-                onChange?.(value);
+                setSelectedUSD(value);
+                onChange?.(usdToCredits(value));
               }}
             >
               {`$${value}`}
@@ -72,8 +75,8 @@ export function AmountSelection({
                 setCustom(true);
                 onChange?.(0);
 
-                if (selected !== amount) {
-                  setSelected(amount);
+                if (selectedUSD !== creditsToUSD(creditsAmount)) {
+                  setSelectedUSD(creditsToUSD(creditsAmount));
                 }
 
                 setFocus();
@@ -92,7 +95,7 @@ export function AmountSelection({
               inputMode="numeric"
               pattern="[0-9]*"
               step="1"
-              value={amount || ""}
+              value={creditsToUSD(creditsAmount) || ""}
               disabled={lockSelection}
               onChange={(e) => {
                 const value = e.target.value;
@@ -101,7 +104,7 @@ export function AmountSelection({
                 } else {
                   const amount = Number.parseInt(value, 10);
                   if (!isNaN(amount) && amount >= 0) {
-                    onChange?.(amount);
+                    onChange?.(usdToCredits(amount));
                   }
                 }
               }}
