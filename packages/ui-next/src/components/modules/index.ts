@@ -5,6 +5,7 @@ export * from "./arcade";
 export * from "./authentication";
 export * from "./collectibles";
 export * from "./common";
+export * from "./connection";
 export * from "./create-account";
 export * from "./progress-bar";
 export * from "./recipient";
