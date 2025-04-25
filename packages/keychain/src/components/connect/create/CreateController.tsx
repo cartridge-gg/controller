@@ -19,6 +19,7 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
+import { useFeature } from "@/hooks/features";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -201,6 +202,8 @@ export function CreateController({
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
 
+  const isNewSignup = useFeature("new-signup");
+
   const [usernameField, setUsernameField] = useState({
     value: "",
     error: undefined,
@@ -241,11 +244,7 @@ export function CreateController({
       if (validation.status === "valid") {
         const accountExists = !!validation.exists;
 
-        if (
-          authenticationMode === undefined &&
-          !accountExists &&
-          import.meta.env.DEV
-        ) {
+        if (authenticationMode === undefined && !accountExists && isNewSignup) {
           setAuthenticationStep(AuthenticationStep.ChooseSignupMethod);
           return;
         }
