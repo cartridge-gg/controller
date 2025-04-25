@@ -213,7 +213,10 @@ export function CryptoCheckout({
             className="flex-1 text-background-100 hover:brightness-90"
             variant="secondary"
             style={{
-              backgroundColor: WALLET_CONFIG[selectedWallet!.type as keyof typeof WALLET_CONFIG].bgColor,
+              backgroundColor:
+                WALLET_CONFIG[
+                  selectedWallet!.type as keyof typeof WALLET_CONFIG
+                ].bgColor,
               border: "none",
             }}
             isLoading={state === CheckoutState.REQUESTING_PAYMENT}
