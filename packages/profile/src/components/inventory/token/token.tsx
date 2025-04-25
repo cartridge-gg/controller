@@ -32,12 +32,11 @@ import {
   useCreditBalance,
   VoyagerUrl,
 } from "@cartridge/utils";
-import { constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { useAccount } from "#hooks/account";
 import { useToken } from "#hooks/token";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { compare } from "compare-versions";
-import { useTxsHistoryQuery } from "@cartridge/utils/api/cartridge";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -98,10 +97,9 @@ function Credits() {
 function ERC20() {
   const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
-  const { username } = useAccount();
+  const { address: accountAddress } = useAccount();
 
   const { transfers } = useData();
-  const { data } = useTxsHistoryQuery({ username });
 
   const { chainId, version, closable, visitor } = useConnection();
   const { token } = useToken({ tokenAddress: address! });
@@ -156,19 +154,22 @@ function ERC20() {
             key: `${transfer.transactionHash}-${transfer.eventId}-${i}`,
             transactionHash: transfer.transactionHash,
             amount: value,
+            to: transfer.toAddress,
+            from: transfer.fromAddress,
             contractAddress: transfer.contractAddress,
             symbol: transfer.symbol,
             eventId: transfer.eventId,
             date: date,
             image,
+            action:
+              getChecksumAddress(transfer.fromAddress) ===
+              getChecksumAddress(accountAddress)
+                ? "send"
+                : ("receive" as "send" | "receive"),
           };
         });
     });
   }, [transfers]);
-
-  useEffect(() => {
-    console.log("txs: ", txs);
-  }, [txs]);
 
   const to = useCallback((transactionHash: string) => {
     return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
@@ -269,9 +270,9 @@ function ERC20() {
                   <ActivityTokenCard
                     amount={item.amount}
                     value={item.amount}
-                    address={item.contractAddress}
+                    address={item.action === "send" ? item.to : item.from}
                     image={token.metadata.image!}
-                    action="send"
+                    action={item.action}
                   />
                 </Link>
               ))}
