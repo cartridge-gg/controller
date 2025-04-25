@@ -114,8 +114,6 @@ function ERC20() {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
 
-  if (!token) return;
-
   const getDate = useCallback((timestamp: number) => {
     const date = new Date(timestamp);
     const today = new Date();
@@ -136,7 +134,7 @@ function ERC20() {
   }, []);
 
   const txs = useMemo(() => {
-    if (!transfers) {
+    if (!transfers || !token?.metadata?.image) {
       return [];
     }
 
@@ -169,13 +167,15 @@ function ERC20() {
           };
         });
     });
-  }, [transfers]);
+  }, [transfers, accountAddress, getDate, token?.metadata?.image]);
 
   const to = useCallback((transactionHash: string) => {
     return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
       transactionHash,
     );
   }, []);
+
+  if (!token) return;
 
   return (
     <LayoutContainer>
