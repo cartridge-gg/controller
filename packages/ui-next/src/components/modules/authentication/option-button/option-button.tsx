@@ -1,5 +1,6 @@
 import { Button } from "@/components/primitives/button";
 import { Spinner } from "@/components/spinner";
+import { cn } from "@/utils";
 import { isValidElement, JSXElementConstructor, ReactElement } from "react";
 
 interface OptionButtonProps extends React.ComponentProps<typeof Button> {
@@ -38,7 +39,12 @@ export function OptionButton({ icon, ...props }: OptionButtonProps) {
   }
 
   return (
-    <Button {...restProps} isLoading={false} disabled={isLoading || disabled}>
+    <Button
+      {...restProps}
+      className={cn(restProps.className, "gap-2")}
+      isLoading={false}
+      disabled={isLoading || disabled}
+    >
       {isLoading ? <Spinner size="sm" /> : icon}
       {label}
     </Button>

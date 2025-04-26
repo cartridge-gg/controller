@@ -10,7 +10,7 @@ export function Legal() {
         <Link
           to="https://cartridge.gg/legal/terms-of-service"
           target="_blank"
-          className="underline"
+          className="underline focus:text-primary focus:outline-none"
         >
           Terms of Service
         </Link>{" "}
@@ -18,7 +18,7 @@ export function Legal() {
         <Link
           to="https://cartridge.gg/legal/privacy-policy"
           target="_blank"
-          className="underline"
+          className="underline focus:text-primary focus:outline-none"
         >
           Privacy Policy
         </Link>

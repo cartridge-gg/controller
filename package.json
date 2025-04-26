@@ -12,7 +12,8 @@
     "e2e:ui": "turbo build:deps dev e2e:ui",
     "lint": "turbo lint format:check",
     "format": "turbo format lint:fix",
-    "clean": "pnpm store prune",
+    "clean": "git clean -fdX && pnpm store prune",
+    "ci": "pnpm clean && pnpm i",
     "release": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/utils --filter=@cartridge/ui-next --filter=@cartridge/account-wasm publish --tag latest --no-git-checks --access public",
     "release:prerelease": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/utils --filter=@cartridge/ui-next --filter=@cartridge/account-wasm publish --tag prerelease --no-git-checks --access public",
     "keychain": "pnpm --filter @cartridge/keychain",
@@ -31,7 +32,7 @@
     "test:storybook:update": "pnpm turbo build:deps test:storybook:update"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#ce3ac4a"
+    "@cartridge/presets": "github:cartridge-gg/presets#0e7f4cc"
   },
   "devDependencies": {
     "turbo": "^2.4.4",

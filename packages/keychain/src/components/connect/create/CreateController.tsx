@@ -13,11 +13,13 @@ import {
 } from "@cartridge/ui-next";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AuthenticationMode, LoginMode } from "../types";
-import { ChooseSignupMethod } from "./ChooseSignupMethod";
+import { AuthenticationMethod, LoginMode } from "../types";
+import { ChooseSignupMethodForm } from "./ChooseSignupMethodForm";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
+import { AuthenticationStep } from "./utils";
+import { useFeature } from "@/hooks/features";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -31,15 +33,18 @@ interface CreateControllerViewProps {
   onUsernameChange: (value: string) => void;
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
-  onSubmit: (authenticationMode?: AuthenticationMode) => void;
+  onSubmit: (authenticationMode?: AuthenticationMethod) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
   isSlot?: boolean;
-  authenticationMode: AuthenticationMode | undefined;
-  setAuthenticationMode: (value: AuthenticationMode | undefined) => void;
+  authenticationStep: AuthenticationStep | undefined;
+  setAuthenticationStep: (value: AuthenticationStep | undefined) => void;
 }
 
-type CreateControllerFormProps = CreateControllerViewProps;
+type CreateControllerFormProps = Omit<
+  CreateControllerViewProps,
+  "authenticationStep" | "setAuthenticationStep"
+>;
 
 function CreateControllerForm({
   theme,
@@ -54,7 +59,6 @@ function CreateControllerForm({
   onUsernameClear,
   onKeyDown,
   onSubmit,
-  setAuthenticationMode,
 }: CreateControllerFormProps) {
   return (
     <>
@@ -75,15 +79,7 @@ function CreateControllerForm({
         style={{ scrollbarWidth: "none" }}
         onSubmit={(e) => {
           e.preventDefault();
-          if (!import.meta.env.DEV) {
-            onSubmit();
-          } else {
-            if (validation.exists) {
-              onSubmit();
-            } else {
-              setAuthenticationMode(AuthenticationMode.None);
-            }
-          }
+          onSubmit();
         }}
       >
         <LayoutContent className="gap-6">
@@ -145,39 +141,35 @@ export function CreateControllerView({
   onUsernameClear,
   onSubmit,
   onKeyDown,
-  authenticationMode,
-  setAuthenticationMode,
+  authenticationStep,
+  setAuthenticationStep,
 }: CreateControllerViewProps) {
   return (
     <LayoutContainer>
-      {!authenticationMode &&
-        authenticationMode !== AuthenticationMode.None && (
-          <CreateControllerForm
-            theme={theme}
-            usernameField={usernameField}
-            validation={validation}
-            isLoading={isLoading}
-            error={error}
-            isInAppBrowser={isInAppBrowser}
-            isSlot={isSlot}
-            onUsernameChange={onUsernameChange}
-            onUsernameFocus={onUsernameFocus}
-            onUsernameClear={onUsernameClear}
-            onSubmit={onSubmit}
-            onKeyDown={onKeyDown}
-            authenticationMode={authenticationMode}
-            setAuthenticationMode={setAuthenticationMode}
-          />
-        )}
-      {authenticationMode !== null &&
-        authenticationMode === AuthenticationMode.None && (
-          <ChooseSignupMethod
-            isSlot={isSlot}
-            isLoading={isLoading}
-            onSubmit={onSubmit}
-            setAuthenticationMode={setAuthenticationMode}
-          />
-        )}
+      {authenticationStep === AuthenticationStep.FillForm && (
+        <CreateControllerForm
+          theme={theme}
+          usernameField={usernameField}
+          validation={validation}
+          isLoading={isLoading}
+          error={error}
+          isInAppBrowser={isInAppBrowser}
+          isSlot={isSlot}
+          onUsernameChange={onUsernameChange}
+          onUsernameFocus={onUsernameFocus}
+          onUsernameClear={onUsernameClear}
+          onSubmit={onSubmit}
+          onKeyDown={onKeyDown}
+        />
+      )}
+      {authenticationStep === AuthenticationStep.ChooseSignupMethod && (
+        <ChooseSignupMethodForm
+          isSlot={isSlot}
+          isLoading={isLoading}
+          onSubmit={onSubmit}
+          setAuthenticationStep={setAuthenticationStep}
+        />
+      )}
     </LayoutContainer>
   );
 }
@@ -210,9 +202,7 @@ export function CreateController({
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
 
-  const [authenticationMode, setAuthenticationMode] = useState<
-    AuthenticationMode | undefined
-  >(undefined);
+  const isNewSignup = useFeature("new-signup");
 
   const [usernameField, setUsernameField] = useState({
     value: "",
@@ -228,13 +218,20 @@ export function CreateController({
   const validation = useUsernameValidation(validationUsername);
   const { debouncedValue: debouncedValidation } = useDebounce(validation, 200);
 
-  const { isLoading, error, setError, handleSubmit } = useCreateController({
+  const {
+    isLoading,
+    error,
+    setError,
+    handleSubmit,
+    authenticationStep,
+    setAuthenticationStep,
+  } = useCreateController({
     isSlot,
     loginMode,
   });
 
   const handleFormSubmit = useCallback(
-    (authenticationMode?: AuthenticationMode) => {
+    (authenticationMode?: AuthenticationMethod) => {
       if (!usernameField.value) {
         return;
       }
@@ -245,22 +242,30 @@ export function CreateController({
       }
 
       if (validation.status === "valid") {
-        handleSubmit(
-          usernameField.value,
-          !!validation.exists,
-          authenticationMode,
-        );
+        const accountExists = !!validation.exists;
+
+        if (authenticationMode === undefined && !accountExists && isNewSignup) {
+          setAuthenticationStep(AuthenticationStep.ChooseSignupMethod);
+          return;
+        }
+
+        handleSubmit(usernameField.value, accountExists, authenticationMode);
       }
     },
-    [handleSubmit, usernameField.value, validation.exists, validation.status],
+    [
+      handleSubmit,
+      usernameField.value,
+      validation.exists,
+      validation.status,
+      setAuthenticationStep,
+    ],
   );
 
   useEffect(() => {
     if (pendingSubmitRef.current && debouncedValidation.status === "valid") {
-      pendingSubmitRef.current = false;
-      handleFormSubmit(authenticationMode);
+      handleFormSubmit();
     }
-  }, [debouncedValidation.status, handleFormSubmit, authenticationMode]);
+  }, [debouncedValidation.status, handleFormSubmit]);
 
   const [{ isInApp }] = useState(() => InAppSpy());
 
@@ -302,7 +307,7 @@ export function CreateController({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleFormSubmit(authenticationMode);
+      handleFormSubmit();
     }
   };
 
@@ -320,8 +325,8 @@ export function CreateController({
       onUsernameClear={handleUsernameClear}
       onSubmit={handleFormSubmit}
       onKeyDown={handleKeyDown}
-      authenticationMode={authenticationMode}
-      setAuthenticationMode={setAuthenticationMode}
+      authenticationStep={authenticationStep}
+      setAuthenticationStep={setAuthenticationStep}
     />
   );
 }
