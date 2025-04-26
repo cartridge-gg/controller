@@ -142,10 +142,8 @@ const controller = new ControllerConnector({
   profileUrl:
     process.env.NEXT_PUBLIC_PROFILE_DEPLOYMENT_URL ??
     process.env.NEXT_PUBLIC_PROFILE_FRAME_URL,
-  // slot: "eternum",
-  // preset: "eternum",
-  slot: "ryomainnet",
-  preset: "dope-wars",
+  slot: "eternum",
+  preset: "eternum",
   // namespace: "dopewars",
   tokens: {
     erc20: [
