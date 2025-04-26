@@ -5,7 +5,7 @@ import {
 } from "@cartridge/ui-next";
 import { Item } from "#hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
 import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context";
 import { useArcade } from "#hooks/arcade";
@@ -20,6 +20,7 @@ export function Trophies({
   softview,
   enabled,
   game,
+  edition,
   pins,
   earnings,
 }: {
@@ -28,6 +29,7 @@ export function Trophies({
   softview: boolean;
   enabled: boolean;
   game: GameModel | undefined;
+  edition: EditionModel | undefined;
   pins: { [playerId: string]: string[] };
   earnings: number;
 }) {
@@ -88,6 +90,7 @@ export function Trophies({
               softview={softview}
               enabled={enabled}
               game={game}
+              edition={edition}
               pins={pins}
             />
           ))}
@@ -101,6 +104,7 @@ export function Trophies({
           softview={softview}
           enabled={enabled}
           game={game}
+          edition={edition}
           pins={pins}
         />
       </div>
@@ -115,6 +119,7 @@ function Group({
   softview,
   enabled,
   game,
+  edition,
   pins,
 }: {
   group: string;
@@ -123,6 +128,7 @@ function Group({
   softview: boolean;
   enabled: boolean;
   game: GameModel | undefined;
+  edition: EditionModel | undefined;
   pins: { [playerId: string]: string[] };
 }) {
   const { parent } = useConnection();
@@ -192,11 +198,11 @@ function Group({
         share:
           softview ||
           !item.completed ||
-          !game?.socials.website ||
+          !edition?.socials.website ||
           !game?.socials.twitter
             ? undefined
             : {
-                website: game?.socials.website,
+                website: edition?.socials.website,
                 twitter: game?.socials.twitter,
                 timestamp: item.timestamp,
                 points: item.earning,
@@ -205,7 +211,7 @@ function Group({
               },
       };
     });
-  }, [items, pins, address, enabled, softview, game, handlePin]);
+  }, [items, pins, address, enabled, softview, game, edition, handlePin]);
 
   return <AchievementCard name={group} achievements={achievements} />;
 }

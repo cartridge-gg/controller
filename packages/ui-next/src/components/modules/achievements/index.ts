@@ -1,6 +1,5 @@
 export * from "./bit";
 export * from "./bits";
-export * from "./follower-tag";
 export * from "./pagination";
 export * from "./pin";
 export * from "./pin-icon";

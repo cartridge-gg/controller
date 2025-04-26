@@ -7,6 +7,7 @@ export * from "./collectibles";
 export * from "./common";
 export * from "./connection";
 export * from "./create-account";
+export * from "./followers";
 export * from "./progress-bar";
 export * from "./recipient";
 export * from "./thumbnails";

@@ -2,8 +2,10 @@ import { PropsWithChildren } from "react";
 import { UIProvider as Provider } from "@cartridge/ui-next";
 import { useConnection } from "#hooks/context";
 import { useAccount } from "#hooks/account";
+import { useArcade } from "#hooks/arcade.js";
 
 export function UIProvider({ children }: PropsWithChildren) {
+  const { followersCount, followedsCount } = useArcade();
   const { chainId, closeModal, openSettings } = useConnection();
   const account = useAccount();
 
@@ -17,6 +19,8 @@ export function UIProvider({ children }: PropsWithChildren) {
             }
           : undefined,
         chainId,
+        followers: followersCount,
+        followings: followedsCount,
         closeModal,
         openSettings,
       }}

@@ -1,4 +1,4 @@
-import { ArcadeProvider, GameModel } from "@bal7hazar/arcade-sdk";
+import { ArcadeProvider, EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
 import { createContext } from "react";
 
 /**
@@ -9,7 +9,10 @@ interface ArcadeContextType {
   chainId: string;
   provider: ArcadeProvider;
   pins: { [playerId: string]: string[] };
+  followers: { [playerId: string]: string[] };
+  followeds: { [playerId: string]: string[] };
   games: { [gameId: string]: GameModel };
+  editions: { [editionId: string]: EditionModel };
 }
 
 /**

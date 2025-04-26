@@ -18,8 +18,6 @@ import { useCallback } from "react";
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
   onClose?: () => void;
-  followers?: number;
-  followings?: number;
   hideUsername?: boolean;
   hideNetwork?: boolean;
   hideSettings?: boolean;
@@ -31,8 +29,6 @@ export type HeaderProps = HeaderInnerProps & {
 export function LayoutHeader({
   onBack,
   onClose,
-  followers,
-  followings,
   hideUsername,
   hideNetwork,
   hideSettings,
@@ -41,7 +37,8 @@ export function LayoutHeader({
   onFollowingsClick,
   ...innerProps
 }: HeaderProps) {
-  const { account, chainId, closeModal, openSettings } = useUI();
+  const { account, chainId, closeModal, openSettings, followers, followings } =
+    useUI();
   const { setWithBackground } = useLayoutContext();
 
   const handleFollowersClick = useCallback(() => {
