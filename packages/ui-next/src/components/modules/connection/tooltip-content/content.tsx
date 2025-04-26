@@ -107,7 +107,7 @@ export const ConnectionTooltipContent = ({
           <p className="text-sm text-foreground-400 select-none">Address:</p>
           <div onClick={() => setOpen?.(false)}>
             <div
-              className="flex items-center gap-1 cursor-pointer text-foreground-300"
+              className="flex items-center gap-1 cursor-pointer text-foreground-300 hover:text-foreground-200"
               onClick={onCopy}
             >
               <p className="text-sm font-mono font-normal">
@@ -126,26 +126,26 @@ export const ConnectionTooltipContent = ({
       >
         <Button
           variant="secondary"
-          className="w-1/2 normal-case font-sans"
+          className="w-1/2 h-9 normal-case font-sans"
           disabled={!onFollowersClick}
           onClick={onFollowersClick}
         >
-          <p className="text-xs font-medium text-foreground-100">{followers}</p>
-          <span className="text-xs font-normal text-foreground-300">
+          <p className="text-sm font-medium text-foreground-100">{followers}</p>
+          <span className="text-sm font-normal text-foreground-300">
             Followers
           </span>
         </Button>
         <Button
           variant="secondary"
-          className="w-1/2 normal-case font-sans"
+          className="w-1/2 h-9 normal-case font-sans"
           disabled={!onFollowingsClick}
           onClick={onFollowingsClick}
         >
-          <p className="text-xs font-medium text-foreground-100">
+          <p className="text-sm font-medium text-foreground-100">
             {followings}
           </p>
-          <span className="text-xs font-normal text-foreground-300">
-            Followings
+          <span className="text-sm font-normal text-foreground-300">
+            Following
           </span>
         </Button>
       </div>
