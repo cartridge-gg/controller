@@ -5,7 +5,11 @@ import { ENDPOINT } from "@/utils/graphql";
 import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
 import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
 import { mainnet, sepolia } from "@starknet-react/chains";
-import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
+import {
+  jsonRpcProvider,
+  StarknetConfig,
+  cartridge,
+} from "@starknet-react/core";
 import { TurnkeyProvider } from "@turnkey/sdk-react";
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -15,6 +19,7 @@ import { ConnectionContext } from "./connection";
 import { PostHogProvider } from "./posthog";
 import { TokensProvider } from "./tokens";
 import { UIProvider } from "./ui";
+import { FeatureProvider } from "@/hooks/features";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -39,34 +44,36 @@ export function Provider({ children }: PropsWithChildren) {
   }, [connection.controller]);
 
   return (
-    <CartridgeAPIProvider url={ENDPOINT}>
-      <QueryClientProvider client={queryClient}>
-        <ConnectionContext.Provider value={connection}>
-          <TurnkeyProvider config={turnkeyConfig}>
-            <Auth0Provider {...auth0Config}>
-              <WalletsProvider>
-                <PostHogProvider>
-                  <UpgradeProvider controller={connection.controller}>
-                    <UIProvider>
-                      <BrowserRouter>
-                        <StarknetConfig
-                          explorer={voyager}
-                          chains={[sepolia, mainnet]}
-                          defaultChainId={defaultChainId}
-                          provider={jsonRpcProvider({ rpc })}
-                        >
-                          <TokensProvider>{children}</TokensProvider>
-                        </StarknetConfig>
-                      </BrowserRouter>
-                    </UIProvider>
-                  </UpgradeProvider>
-                </PostHogProvider>
-              </WalletsProvider>
-            </Auth0Provider>
-          </TurnkeyProvider>
-        </ConnectionContext.Provider>
-      </QueryClientProvider>
-    </CartridgeAPIProvider>
+    <BrowserRouter>
+      <FeatureProvider>
+        <CartridgeAPIProvider url={ENDPOINT}>
+          <QueryClientProvider client={queryClient}>
+            <ConnectionContext.Provider value={connection}>
+              <TurnkeyProvider config={turnkeyConfig}>
+                <Auth0Provider {...auth0Config}>
+                  <WalletsProvider>
+                    <PostHogProvider>
+                      <UpgradeProvider controller={connection.controller}>
+                        <UIProvider>
+                          <StarknetConfig
+                            explorer={cartridge}
+                            chains={[sepolia, mainnet]}
+                            defaultChainId={defaultChainId}
+                            provider={jsonRpcProvider({ rpc })}
+                          >
+                            <TokensProvider>{children}</TokensProvider>
+                          </StarknetConfig>
+                        </UIProvider>
+                      </UpgradeProvider>
+                    </PostHogProvider>
+                  </WalletsProvider>
+                </Auth0Provider>
+              </TurnkeyProvider>
+            </ConnectionContext.Provider>
+          </QueryClientProvider>
+        </CartridgeAPIProvider>
+      </FeatureProvider>
+    </BrowserRouter>
   );
 }
 

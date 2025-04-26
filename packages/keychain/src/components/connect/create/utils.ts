@@ -41,3 +41,8 @@ export const isPolicyRequired = ({
 };
 
 type Nullable<T> = T | null | undefined;
+
+export enum AuthenticationStep {
+  FillForm,
+  ChooseSignupMethod,
+}

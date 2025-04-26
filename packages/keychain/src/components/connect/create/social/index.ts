@@ -1,11 +1,16 @@
+import { DEFAULT_SESSION_DURATION, now } from "@/const";
+import { useConnection } from "@/hooks/connection";
 import { useAuth0 } from "@auth0/auth0-react";
 import { TurnkeyWallet } from "@cartridge/controller";
-import { useRegisterMutation } from "@cartridge/utils/api/cartridge";
+import {
+  AccountQuery,
+  useRegisterMutation,
+} from "@cartridge/utils/api/cartridge";
 import { sha256 } from "@noble/hashes/sha256";
 import { bytesToHex } from "@noble/hashes/utils";
 import { useTurnkey } from "@turnkey/sdk-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SignupResponse } from "../useCreateController";
+import { createController, SignupResponse } from "../useCreateController";
 import {
   authenticateToTurnkey,
   getOrCreateTurnkeySuborg,
@@ -14,13 +19,14 @@ import {
 import { getOidcToken } from "./auth0";
 import { getOrCreateWallet } from "./turnkey";
 
-export const useSignupWithSocial = () => {
+export const useSocialAuthentication = () => {
   const { authIframeClient } = useTurnkey();
-  const authIframeClientRef = useRef(authIframeClient);
-
+  const { origin, chainId, rpcUrl, setController } = useConnection();
   const { loginWithPopup, getIdTokenClaims, isAuthenticated, user, error } =
     useAuth0();
   const { mutateAsync: register } = useRegisterMutation();
+
+  const authIframeClientRef = useRef(authIframeClient);
   const [userName, setUserName] = useState("");
   const signaturePromiseRef = useRef<{
     resolve: (value: SignupResponse | PromiseLike<SignupResponse>) => void;
@@ -37,7 +43,9 @@ export const useSignupWithSocial = () => {
       error.message.includes("Popup closed") &&
       signaturePromiseRef.current
     ) {
-      signaturePromiseRef.current.reject(error);
+      signaturePromiseRef.current.reject(
+        new Error("Could not sign in with social provider: " + error.message),
+      );
       signaturePromiseRef.current = null;
     }
   }, [error]);
@@ -91,7 +99,6 @@ export const useSignupWithSocial = () => {
               subOrganizationId,
             ),
           );
-          console.log(`Embedded wallet ${address} added to keychain_wallets`);
         }
 
         if (signaturePromiseRef.current) {
@@ -111,7 +118,7 @@ export const useSignupWithSocial = () => {
     })();
   }, [isAuthenticated, user, userName, getIdTokenClaims, register]);
 
-  const signupWithSocial = useCallback(
+  const signup = useCallback(
     async (username: string): Promise<SignupResponse> => {
       const pollIframePublicKey = (
         onSuccess: (key: string) => void,
@@ -180,7 +187,43 @@ export const useSignupWithSocial = () => {
     [setUserName, loginWithPopup],
   );
 
-  return { signupWithSocial };
+  const login = useCallback(
+    async (account: AccountQuery["account"]) => {
+      if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
+      if (!account) throw new Error("No account found");
+
+      const { username, credentials, controllers } = account ?? {};
+      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
+
+      const controllerNode = controllers?.edges?.[0]?.node;
+
+      if (!credentialId)
+        throw new Error("No credential ID found for this account");
+
+      if (!controllerNode || !publicKey) {
+        return;
+      }
+
+      const controller = await createController(
+        origin,
+        chainId,
+        rpcUrl,
+        username,
+        controllerNode.constructorCalldata[0],
+        controllerNode.address,
+        credentialId,
+        publicKey,
+      );
+
+      await controller.login(now() + DEFAULT_SESSION_DURATION);
+
+      window.controller = controller;
+      setController(controller);
+    },
+    [chainId, rpcUrl, origin, setController],
+  );
+
+  return { signup, login };
 };
 
 const getNonce = (seed: string) => {
@@ -188,14 +231,9 @@ const getNonce = (seed: string) => {
 };
 
 const openPopup = (url: string) => {
-  const width = 400;
-  const height = 600;
-  const left = window.screenX + (window.innerWidth - width) / 2;
-  const top = window.screenY + (window.innerHeight - height) / 2;
-
   return window.open(
     url,
     "auth0:authorize:popup",
-    `left=${left},top=${top},resizable,scrollbars=no,status=1`,
+    `resizable,scrollbars=no,status=1`,
   );
 };

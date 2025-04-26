@@ -4,7 +4,7 @@ import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import {
   jsonRpcProvider,
   StarknetConfig,
-  starkscan,
+  cartridge,
 } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
@@ -168,7 +168,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
       autoConnect
       chains={[mainnet, sepolia, localKatana]}
       connectors={[controller, session]}
-      explorer={starkscan}
+      explorer={cartridge}
       provider={provider}
     >
       {children}
