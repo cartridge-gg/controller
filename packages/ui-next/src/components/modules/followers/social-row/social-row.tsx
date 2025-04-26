@@ -1,0 +1,74 @@
+import { HTMLAttributes } from "react";
+import { cva, VariantProps } from "class-variance-authority";
+import { cn } from "@/utils";
+import {
+  AchievementPlayerAvatar,
+  FollowerAction,
+  Separator,
+  SparklesIcon,
+} from "@/index";
+
+interface FollowerSocialRowProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof followerSocialRowVariants> {
+  username: string;
+  points: number;
+  following: boolean;
+  onSocialClick: () => void;
+}
+
+export const followerSocialRowVariants = cva(
+  "select-none flex justify-between items-center gap-4 h-11 pl-3 pr-1.5 py-2.5",
+  {
+    variants: {
+      variant: {
+        darkest: "",
+        darker: "",
+        dark: "",
+        default: "bg-background-200",
+        light: "",
+        lighter: "",
+        lightest: "",
+        ghost: "bg-transparent",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
+export const FollowerSocialRow = ({
+  username,
+  points,
+  following,
+  onSocialClick,
+  variant,
+  className,
+  ...props
+}: FollowerSocialRowProps) => {
+  return (
+    <div
+      className={cn(followerSocialRowVariants({ variant }), className)}
+      {...props}
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-0.5">
+          <AchievementPlayerAvatar username={username} size="sm" />
+          <p className="text-sm font-medium px-0.5">{username}</p>
+        </div>
+        <Separator
+          orientation="vertical"
+          className="w-px h-2 bg-background-400"
+        />
+        <div className="flex items-center gap-1 text-foreground-300">
+          <SparklesIcon variant="line" size="sm" />
+          <p className="text-sm font-medium">{points}</p>
+        </div>
+      </div>
+      <FollowerAction following={following} onClick={onSocialClick} />
+    </div>
+  );
+};
+
+export default FollowerSocialRow;

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AchievementFollowerTag } from "./follower-tag";
+import { FollowerTag } from "./tag";
 
-const meta: Meta<typeof AchievementFollowerTag> = {
-  title: "Modules/Achievements/Follower Tag",
-  component: AchievementFollowerTag,
+const meta: Meta<typeof FollowerTag> = {
+  title: "Modules/Followers/Tag",
+  component: FollowerTag,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -11,7 +11,7 @@ const meta: Meta<typeof AchievementFollowerTag> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof AchievementFollowerTag>;
+type Story = StoryObj<typeof FollowerTag>;
 
 const variants = [
   "darkest",
@@ -29,7 +29,7 @@ export const Default: Story = {
       {variants.map((variant) => (
         <div key={variant} className="grid grid-cols-2 gap-2">
           <p className="text-xs font-medium capitalize">{variant}</p>
-          <AchievementFollowerTag {...args} variant={variant} />
+          <FollowerTag {...args} variant={variant} />
         </div>
       ))}
     </div>

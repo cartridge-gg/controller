@@ -88,7 +88,7 @@ export const ConnectionTooltipContent = ({
     >
       <div className="flex items-center gap-3">
         <AchievementPlayerBadge username={username} size="xl" />
-        <p className="text-lg/[22px] font-semibold select-text">{username}</p>
+        <p className="text-lg/[22px] font-semibold">{username}</p>
       </div>
       <div className="flex flex-col gap-px bg-background-200">
         <div
