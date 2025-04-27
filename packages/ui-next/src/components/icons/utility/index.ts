@@ -3,6 +3,7 @@ export * from "./alert";
 export * from "./arrow-turn-down";
 export * from "./award";
 export * from "./award-simple";
+export * from "./branch";
 export * from "./check";
 export * from "./checkbox-checked";
 export * from "./checkbox-unchecked";
