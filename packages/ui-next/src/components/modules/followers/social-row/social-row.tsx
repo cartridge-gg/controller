@@ -12,10 +12,10 @@ interface FollowerSocialRowProps
   extends HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof followerSocialRowVariants> {
   username: string;
-  points: number;
   following: boolean;
   unfollowable: boolean;
   onSocialClick: () => void;
+  points?: number;
   loading?: boolean;
   disabled?: boolean;
 }
@@ -43,9 +43,9 @@ export const followerSocialRowVariants = cva(
 
 export const FollowerSocialRow = ({
   username,
-  points,
   following,
   unfollowable,
+  points,
   loading,
   disabled,
   onSocialClick,
@@ -65,9 +65,14 @@ export const FollowerSocialRow = ({
         </div>
         <Separator
           orientation="vertical"
-          className="w-px h-2 bg-background-400"
+          className={cn("w-px h-2 bg-background-400", !points && "hidden")}
         />
-        <div className="flex items-center gap-1 text-foreground-300">
+        <div
+          className={cn(
+            "flex items-center gap-1 text-foreground-300",
+            !points && "hidden",
+          )}
+        >
           <SparklesIcon variant="line" size="sm" />
           <p className="text-sm font-medium">{points}</p>
         </div>

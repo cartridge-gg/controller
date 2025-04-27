@@ -12,7 +12,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useArcade } from "#hooks/arcade.js";
 import { BigNumberish, getChecksumAddress } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useConnection, useData } from "#hooks/context.js";
+import { useConnection } from "#hooks/context.js";
 import { toast } from "sonner";
 
 export function Socials() {
@@ -24,9 +24,6 @@ export function Socials() {
     followers: allFollowers,
     followeds: allFolloweds,
   } = useArcade();
-  const {
-    trophies: { players },
-  } = useData();
   const [loading, setLoading] = useState<BigNumberish | null>(null);
 
   const navigate = useNavigate();
@@ -57,14 +54,6 @@ export function Socials() {
 
   const { usernames } = useUsernames({ addresses });
 
-  const points = useMemo(() => {
-    const points: Record<string, number> = {};
-    players.forEach((player) => {
-      points[getChecksumAddress(player.address)] = player.earnings;
-    });
-    return points;
-  }, [players]);
-
   const { followers, followeds } = useMemo(() => {
     const followers = baseFollowers
       .map((follower) => {
@@ -76,11 +65,10 @@ export function Socials() {
           username:
             username?.username ??
             `0x${BigInt(follower).toString(16)}`.slice(0, 9),
-          points: points[getChecksumAddress(follower)] || 0,
           following: baseFolloweds.includes(getChecksumAddress(follower)),
         };
       })
-      .sort((a, b) => b.points - a.points);
+      .sort((a, b) => a.username.localeCompare(b.username));
     const followeds = baseFolloweds
       .map((followee) => {
         const username = usernames.find(
@@ -91,13 +79,12 @@ export function Socials() {
           username:
             username?.username ??
             `0x${BigInt(followee).toString(16)}`.slice(0, 9),
-          points: points[getChecksumAddress(followee)] || 0,
           following: false,
         };
       })
-      .sort((a, b) => b.points - a.points);
+      .sort((a, b) => a.username.localeCompare(b.username));
     return { followers, followeds };
-  }, [baseFollowers, baseFolloweds, address, usernames, points]);
+  }, [baseFollowers, baseFolloweds, address, usernames]);
 
   const handleSocialClick = useCallback(
     (
@@ -153,7 +140,6 @@ export function Socials() {
                 <FollowerSocialRow
                   key={item.address}
                   username={item.username}
-                  points={item.points}
                   following={item.following}
                   unfollowable={false}
                   loading={BigInt(loading || 0) === BigInt(item.address)}
@@ -177,7 +163,6 @@ export function Socials() {
                 <FollowerSocialRow
                   key={item.address}
                   username={item.username}
-                  points={item.points}
                   following={true}
                   unfollowable={true}
                   loading={BigInt(loading || 0) === BigInt(item.address)}

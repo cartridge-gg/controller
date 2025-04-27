@@ -45,21 +45,27 @@ export const FollowerAction = ({
     return (
       <FollowerUnfollow
         onClick={onClick}
-        {...props}
         loading={loading}
         disabled={disabled}
+        variant={variant}
+        className={className}
+        {...props}
       />
     );
   }
   if (following) {
-    return <FollowerFollowing {...props} />;
+    return (
+      <FollowerFollowing variant={variant} className={className} {...props} />
+    );
   }
   return (
     <FollowerFollow
       onClick={onClick}
-      {...props}
       loading={loading}
       disabled={disabled}
+      variant={variant}
+      className={className}
+      {...props}
     />
   );
 };
