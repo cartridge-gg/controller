@@ -108,15 +108,37 @@ const followers = [
   },
 ];
 
-export const Default: Story = {
+export const Followers: Story = {
   render: () => (
-    <FollowerSocialList className="h-[657px]">
+    <FollowerSocialList className="h-[600px]">
       {followers.map((item, index) => (
         <FollowerSocialRow
           key={index}
           username={item.name}
           points={item.points}
           following={item.following}
+          unfollowable={false}
+          disabled={index === 3}
+          loading={index === 6}
+          onSocialClick={fn()}
+        />
+      ))}
+    </FollowerSocialList>
+  ),
+};
+
+export const Following: Story = {
+  render: () => (
+    <FollowerSocialList className="h-[600px]">
+      {followers.map((item, index) => (
+        <FollowerSocialRow
+          key={index}
+          username={item.name}
+          points={item.points}
+          following={true}
+          unfollowable={true}
+          disabled={index === 3}
+          loading={index === 6}
           onSocialClick={fn()}
         />
       ))}

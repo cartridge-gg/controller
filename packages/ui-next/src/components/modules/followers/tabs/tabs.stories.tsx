@@ -16,7 +16,7 @@ type Story = StoryObj<typeof FollowerTabs>;
 
 export const Default: Story = {
   render: () => (
-    <FollowerTabs followers={12} following={6}>
+    <FollowerTabs defaultValue="followers" followers={12} following={6}>
       <TabsContent className="p-0 mt-0" value="followers">
         <h1 className="text-foreground-100 p-4">Followers content</h1>
       </TabsContent>

@@ -13,6 +13,7 @@ const meta: Meta<typeof FollowerSocialRow> = {
     username: "shinobi",
     points: 950,
     following: false,
+    unfollowable: false,
     onSocialClick: fn(),
   },
 };
@@ -25,5 +26,12 @@ export const Default: Story = {};
 export const Following: Story = {
   args: {
     following: true,
+  },
+};
+
+export const Unfollowable: Story = {
+  args: {
+    following: true,
+    unfollowable: true,
   },
 };

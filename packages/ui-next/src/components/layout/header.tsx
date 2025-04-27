@@ -33,12 +33,18 @@ export function LayoutHeader({
   hideNetwork,
   hideSettings,
   onOpenStarterPack,
-  onFollowersClick,
-  onFollowingsClick,
   ...innerProps
 }: HeaderProps) {
-  const { account, chainId, closeModal, openSettings, followers, followings } =
-    useUI();
+  const {
+    account,
+    chainId,
+    closeModal,
+    openSettings,
+    followers,
+    followings,
+    onFollowersClick,
+    onFollowingsClick,
+  } = useUI();
   const { setWithBackground } = useLayoutContext();
 
   const handleFollowersClick = useCallback(() => {

@@ -14,7 +14,10 @@ interface FollowerSocialRowProps
   username: string;
   points: number;
   following: boolean;
+  unfollowable: boolean;
   onSocialClick: () => void;
+  loading?: boolean;
+  disabled?: boolean;
 }
 
 export const followerSocialRowVariants = cva(
@@ -42,6 +45,9 @@ export const FollowerSocialRow = ({
   username,
   points,
   following,
+  unfollowable,
+  loading,
+  disabled,
   onSocialClick,
   variant,
   className,
@@ -66,7 +72,15 @@ export const FollowerSocialRow = ({
           <p className="text-sm font-medium">{points}</p>
         </div>
       </div>
-      <FollowerAction following={following} onClick={onSocialClick} />
+
+      <FollowerAction
+        following={following}
+        unfollowable={unfollowable}
+        onClick={onSocialClick}
+        variant={variant}
+        loading={!!loading}
+        disabled={!!disabled}
+      />
     </div>
   );
 };

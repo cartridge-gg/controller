@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { FollowerAction } from "./action";
+import FollowerFollow from "./follow";
+import FollowerUnfollow from "./unfollow";
+import FollowerFollowing from "./following";
 
 const meta: Meta<typeof FollowerAction> = {
   title: "Modules/Followers/Action",
@@ -8,18 +11,19 @@ const meta: Meta<typeof FollowerAction> = {
   parameters: {
     layout: "centered",
   },
-  args: {
-    following: false,
-  },
 };
 
 export default meta;
 type Story = StoryObj<typeof FollowerAction>;
 
-export const Default: Story = {};
+export const Follow: Story = {
+  render: () => <FollowerFollow loading={false} disabled={false} />,
+};
 
 export const Following: Story = {
-  args: {
-    following: true,
-  },
+  render: () => <FollowerFollowing />,
+};
+
+export const Unfollow: Story = {
+  render: () => <FollowerUnfollow loading={false} disabled={false} />,
 };

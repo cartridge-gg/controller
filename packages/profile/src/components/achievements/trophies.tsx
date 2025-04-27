@@ -151,7 +151,7 @@ function Group({
             Array.isArray(calls) ? calls : [calls],
             chainId,
           );
-          if (res) {
+          if (res && res.transactionHash) {
             toast.success(
               `Trophy ${pinned ? "unpinned" : "pinned"} successfully`,
             );

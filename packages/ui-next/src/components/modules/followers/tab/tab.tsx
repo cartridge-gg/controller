@@ -12,7 +12,7 @@ interface FollowerTabProps
 }
 
 export const followerTabVariants = cva(
-  "group select-none rounded-none cursor-pointer flex justify-between items-center border-b px-3 py-2.5 gap-4 grow data-[state=active]:shadow-none data-[state=active]:rounded data-[state=active]:cursor-default data-[state=active]:text-foreground-100 data-[state=active]:hover:text-foreground-100",
+  "h-10 group select-none rounded-none cursor-pointer flex justify-between items-center border-b px-3 py-2.5 gap-4 grow data-[state=active]:shadow-none data-[state=active]:rounded data-[state=active]:cursor-default data-[state=active]:text-foreground-100 data-[state=active]:hover:text-foreground-100",
   {
     variants: {
       variant: {

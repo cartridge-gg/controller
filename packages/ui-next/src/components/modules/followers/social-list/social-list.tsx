@@ -7,7 +7,7 @@ export const FollowerSocialList = ({
   return (
     <div
       className={cn(
-        "relative flex flex-col gap-y-px rounded overflow-y-scroll",
+        "relative flex flex-col gap-y-px rounded h-full overflow-y-scroll",
         className,
       )}
       style={{

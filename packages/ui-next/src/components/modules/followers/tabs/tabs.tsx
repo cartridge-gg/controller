@@ -1,5 +1,5 @@
 import { cn, FollowerTab, Tabs, TabsList } from "@/index";
-import { HTMLAttributes, useCallback, useState } from "react";
+import { HTMLAttributes, useState } from "react";
 import { cva, VariantProps } from "class-variance-authority";
 
 interface FollowerTabsProps
@@ -7,12 +7,12 @@ interface FollowerTabsProps
     VariantProps<typeof followerTabsVariants> {
   followers: number;
   following: number;
-  value?: string;
+  defaultValue?: string;
   onValueChange?: (value: string) => void;
 }
 
 export const followerTabsVariants = cva(
-  "h-10 grid w-full grid-cols-2 gap-x-4 p-0",
+  "grid w-full grid-cols-2 gap-x-4 p-0 h-10",
   {
     variants: {
       variant: {
@@ -35,35 +35,31 @@ export const followerTabsVariants = cva(
 export const FollowerTabs = ({
   followers,
   following,
-  value,
+  defaultValue,
   variant,
   className,
   children,
-  onValueChange,
 }: FollowerTabsProps) => {
-  const [active, setActive] = useState("followers");
-  const handleChange = useCallback(
-    (value: string) => {
-      setActive(value);
-      onValueChange?.(value);
-    },
-    [setActive, onValueChange],
-  );
+  const [value, setValue] = useState<string>(defaultValue ?? "followers");
 
   return (
-    <Tabs className={className} value={value} onValueChange={handleChange}>
-      <TabsList className={cn(followerTabsVariants({ variant }), className)}>
+    <Tabs
+      className={className}
+      value={value}
+      onValueChange={(value) => setValue(value)}
+    >
+      <TabsList className={cn(followerTabsVariants({ variant }))}>
         <FollowerTab
           value="followers"
           label="Followers"
           counter={followers}
-          active={active === "followers"}
+          active={value === "followers"}
         />
         <FollowerTab
           value="following"
           label="Following"
           counter={following}
-          active={active === "following"}
+          active={value === "following"}
         />
       </TabsList>
       {children}
