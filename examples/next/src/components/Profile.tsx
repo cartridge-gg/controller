@@ -53,17 +53,29 @@ export function Profile() {
             Activity
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfileTo("inventory?social=followers")}
+            onClick={() =>
+              ctrlConnector.controller.openProfileTo(
+                "inventory?social=followers",
+              )
+            }
           >
             Followers
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfileTo("inventory?social=following")}
+            onClick={() =>
+              ctrlConnector.controller.openProfileTo(
+                "inventory?social=following",
+              )
+            }
           >
             Following
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfileTo("inventory?social=followers&closable=true")}
+            onClick={() =>
+              ctrlConnector.controller.openProfileTo(
+                "inventory?social=followers&closable=true",
+              )
+            }
           >
             Followers Closable
           </Button>
