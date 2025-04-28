@@ -1,5 +1,5 @@
 import { CalendarIcon, cn, Separator, SparklesIcon } from "@/index";
-import { useMemo } from "react";
+import { getDate } from "@cartridge/utils";
 
 interface AchievementPointsProps {
   points: number;
@@ -35,26 +35,10 @@ export function AchievementPoints({
 }
 
 function Timestamp({ timestamp }: { timestamp: number }) {
-  const date = useMemo(() => {
-    const date = new Date(timestamp * 1000);
-    const today = new Date();
-    if (date.getDate() === today.getDate()) {
-      return "Today";
-    } else if (date.getDate() === today.getDate() - 1) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  }, [timestamp]);
-
   return (
     <div className="flex items-center gap-1 text-foreground-400">
       <CalendarIcon size="xs" variant="line" />
-      <p className="text-xs">{date}</p>
+      <p className="text-xs">{getDate(timestamp * 1000)}</p>
     </div>
   );
 }

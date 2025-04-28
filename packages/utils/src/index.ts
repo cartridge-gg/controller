@@ -2,6 +2,7 @@ export * from "./account";
 export * from "./api";
 export * from "./color";
 export * from "./context";
+export * from "./date";
 export * from "./eip191";
 export * from "./erc20";
 export * from "./explorer";

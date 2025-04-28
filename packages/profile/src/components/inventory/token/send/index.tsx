@@ -21,6 +21,7 @@ import {
 } from "starknet";
 import { SendRecipient } from "#components/modules/recipient";
 import { SendAmount } from "./amount";
+import { useData } from "#hooks/context";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
@@ -28,7 +29,7 @@ export function SendToken() {
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
   const { token } = useToken({ tokenAddress: tokenAddress! });
-
+  const { refetchTransfers } = useData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -73,6 +74,10 @@ export function SendToken() {
               TransactionFinalityStatus.ACCEPTED_ON_L2,
             ],
           });
+          // Refetch transfers after 5 seconds to leave time to the indexer to take the new tx into account
+          setTimeout(() => {
+            refetchTransfers();
+          }, 5000);
         }
         if (closable) {
           navigate(`..?${searchParams.toString()}`);
@@ -83,7 +88,15 @@ export function SendToken() {
         setLoading(false);
       }
     },
-    [token, provider, parent, closable, navigate, searchParams],
+    [
+      token,
+      provider,
+      parent,
+      closable,
+      navigate,
+      searchParams,
+      refetchTransfers,
+    ],
   );
 
   const handleBack = useCallback(() => {

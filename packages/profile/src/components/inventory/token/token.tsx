@@ -26,6 +26,7 @@ import {
 import { useConnection, useData } from "#hooks/context";
 import {
   formatAddress,
+  getDate,
   isIframe,
   isPublicChain,
   StarkscanUrl,
@@ -113,25 +114,6 @@ function ERC20() {
   const handleBack = useCallback(() => {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
-
-  const getDate = useCallback((timestamp: number) => {
-    const date = new Date(timestamp);
-    const today = new Date();
-    if (date.toDateString() === today.toDateString()) {
-      return "Today";
-    } else if (
-      date.toDateString() ===
-      new Date(today.getTime() - 24 * 60 * 60 * 1000).toDateString()
-    ) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  }, []);
 
   const txs = useMemo(() => {
     if (!transfers || !token?.metadata?.image) {
@@ -258,7 +240,7 @@ function ERC20() {
               ),
           ).map(([date, transactions]) => (
             <div key={date} className="flex flex-col gap-3">
-              <p className="text-foreground-300 font-medium text-sm py-3">
+              <p className="text-foreground-400 font-semibold text-xs py-3 tracking-wider">
                 {date}
               </p>
               {transactions.map((item) => (
