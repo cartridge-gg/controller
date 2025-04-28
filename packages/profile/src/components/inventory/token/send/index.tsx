@@ -141,7 +141,7 @@ export function SendToken() {
             </div>
           ) : (
             <TokenSelect
-              tokens={tokens}
+              tokens={tokens.filter((item) => item.balance.amount > 0)}
               onSelect={onChangeToken}
               defaultToken={selectedToken}
             />
