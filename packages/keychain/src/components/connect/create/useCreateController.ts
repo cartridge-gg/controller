@@ -3,9 +3,10 @@ import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
-import { Signer } from "@cartridge/account-wasm";
+import { Owner, Signer } from "@cartridge/account-wasm";
 import {
   AccountQuery,
+  SignerInput,
   SignerType,
   useAccountQuery,
   useRegisterMutation,
@@ -73,8 +74,15 @@ export function useCreateController({
             username,
             controllerNode.constructorCalldata[0],
             controllerNode.address,
-            credentialId,
-            publicKey,
+            {
+              signer: {
+                webauthn: {
+                  rpId: import.meta.env.VITE_RP_ID!,
+                  credentialId,
+                  publicKey,
+                },
+              },
+            },
           );
 
           window.controller = controller;
@@ -125,28 +133,54 @@ export function useCreateController({
       }
 
       let signupResponse: SignupResponse | undefined;
+      let owner: SignerInput | undefined;
       switch (authenticationMode) {
         case "webauthn":
           await signupWithWebauthn(username, doPopupFlow);
+          owner = {
+            type: SignerType.Webauthn,
+            credential: JSON.stringify({}),
+          };
           return;
         case "social":
           signupResponse = await signupWithSocial(username);
+          owner = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: "discord",
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        case "walletconnect":
+          signupResponse = await signupWithWalletConnect();
+          owner = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: "walletconenct",
+              eth_address: signupResponse.address,
+            }),
+          };
           break;
         case "metamask":
         case "phantom":
         case "argent":
         case "rabby":
-          signupResponse = await signupWithExternalWallet(
-            username,
-            authenticationMode,
-          );
+          signupResponse = await signupWithExternalWallet(username, authenticationMode);
+          owner = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: authenticationMode,
+              eth_address: signupResponse.address,
+            }),
+          };
           break;
         default:
           break;
       }
 
-      if (!signupResponse) {
-        throw new Error("No signature found");
+      if (!signupResponse || !owner) {
+        throw new Error("Signup failed");
       }
 
       const controller = new Controller({
@@ -167,17 +201,7 @@ export function useCreateController({
       const registerRet = await register({
         username,
         chainId: "SN_SEPOLIA",
-        owner: {
-          credential: JSON.stringify({
-            eip191: {
-              eth_address: signupResponse.address,
-              //   metadata: {
-              //     type: "eip191",
-              //   },
-            },
-          }),
-          type: SignerType.Eip191,
-        },
+        owner,
         session: {
           expiresAt: result.session.expiresAt.toString(),
           guardianKeyGuid: result.session.guardianKeyGuid,
@@ -220,18 +244,29 @@ export function useCreateController({
       const controller = controllerRet.controller;
 
       const signer = controller?.signers?.[0];
-      switch (signer?.type) {
-        case SignerType.Webauthn:
+
+      if (!signer || !signer.metadata) {
+        // Handle the case where the signer or metadata is missing
+        // This might involve throwing an error or logging a warning
+        console.error(
+          "Signer or signer metadata not found for controller:",
+          controller,
+        );
+        // Depending on expected behavior, you might want to throw an error:
+        // throw new Error("Signer information is missing.");
+        return; // Or handle appropriately
+      }
+
+      switch (signer.metadata.__typename) {
+        case "WebauthnCredentials":
           await loginWithWebauthn(controller, loginMode, !!isSlot);
           break;
-        case SignerType.Eip191:
-          await loginWithSocial(controller);
+        case "Eip191Credentials":
+          await loginWithSocial(controller, signer.metadata.eip191?.[0]);
           break;
-      }
-      if (signer?.type === SignerType.Webauthn) {
-        await loginWithWebauthn(controller, loginMode, !!isSlot);
-      } else {
-        await loginWithSocial(controller);
+        case "SIWSCredentials": // Assuming SIWS also uses social login flow
+        case "StarknetCredentials": // Assuming Starknet also uses social login flow for now, adjust if needed
+          throw new Error("Login method not supported yet.");
       }
     },
     [isSlot, loginWithWebauthn, loginWithSocial, loginMode, chainId],
@@ -287,8 +322,7 @@ export async function createController(
   username: string,
   classHash: string,
   address: string,
-  credentialId: string,
-  publicKey: string,
+  owner: Owner,
 ) {
   return new Controller({
     appId: origin,
@@ -297,14 +331,6 @@ export async function createController(
     rpcUrl,
     address,
     username,
-    owner: {
-      signer: {
-        webauthn: {
-          rpId: import.meta.env.VITE_RP_ID!,
-          credentialId,
-          publicKey,
-        },
-      },
-    },
+    owner,
   });
 }

@@ -7,19 +7,30 @@ query Controller($username: String!, $chainId: String!) {
     constructorCalldata
     createdAt
     updatedAt
-    account {
-      username
-      credentials {
-        webauthn {
-          id
-          publicKey
+    signers {
+      metadata {
+        ... on WebauthnCredentials {
+          webauthn {
+            id
+            publicKey
+          }
+        }
+        ... on StarknetCredentials {
+          starknet {
+            publicKey
+          }
+        }
+        ... on Eip191Credentials {
+          eip191 {
+            ethAddress
+          }
+        }
+        ... on SIWSCredentials {
+          siws {
+            publicKey
+          }
         }
       }
-    }
-    signers {
-      id
-      controllerID
-      type
     }
   }
 }

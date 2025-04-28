@@ -180,7 +180,11 @@ impl CartridgeAccount {
                     .collect(),
             ),
             is_registered: false,
-            allowed_policies_root: account.session.inner.allowed_policies_root.to_hex_string(),
+            expires_at: account.session.inner.expires_at,
+            allowed_policies_root: account.session.inner.allowed_policies_root.into(),
+            metadata_hash: account.session.inner.metadata_hash.into(),
+            session_key_guid: account.session.inner.session_key_guid.into(),
+            guardian_key_guid: account.session.inner.guardian_key_guid.into(),
         };
 
         Ok(session_metadata)
@@ -214,7 +218,11 @@ impl CartridgeAccount {
                         .collect(),
                 ),
                 is_registered: false,
-                allowed_policies_root: account.session.inner.allowed_policies_root.to_hex_string(),
+                expires_at: account.session.inner.expires_at,
+                allowed_policies_root: account.session.inner.allowed_policies_root.into(),
+                metadata_hash: account.session.inner.metadata_hash.into(),
+                session_key_guid: account.session.inner.session_key_guid.into(),
+                guardian_key_guid: account.session.inner.guardian_key_guid.into(),
             };
             Some(session_metadata)
         } else {

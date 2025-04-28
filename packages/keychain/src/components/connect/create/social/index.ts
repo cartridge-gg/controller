@@ -19,6 +19,12 @@ import {
 import { getOidcToken } from "./auth0";
 import { getOrCreateWallet } from "./turnkey";
 
+// Define a type for the singular credential
+interface Eip191Credential {
+  __typename?: "Eip191Credential";
+  ethAddress: string;
+}
+
 export const useSocialAuthentication = () => {
   const { authIframeClient } = useTurnkey();
   const { origin, chainId, rpcUrl, setController } = useConnection();
@@ -189,30 +195,39 @@ export const useSocialAuthentication = () => {
   );
 
   const login = useCallback(
-    async (controller: ControllerQuery["controller"]) => {
+    async (
+      controller: ControllerQuery["controller"],
+      // Use the defined Eip191Credential type
+      credential: Eip191Credential | undefined, // Allow undefined for checks
+    ) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
       if (!controller) throw new Error("No controller found");
+      if (!credential) throw new Error("No EIP191 credential provided");
 
-      const { account } = controller ?? {};
-      const { id: credentialId, publicKey } =
-        account?.credentials?.webauthn?.[0] ?? {};
+      // Extract the Ethereum address directly from the passed credential
+      const address = credential?.ethAddress;
 
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
-
-      if (!publicKey) {
-        return;
+      if (!address) {
+        throw new Error(
+          "Could not extract ethAddress from provided EIP191 credential",
+        );
       }
 
+      // userName should be available from the outer scope (useState)
       const controllerObject = await createController(
         origin,
         chainId,
         rpcUrl,
         userName,
-        controller.constructorCalldata[0],
+        controller.constructorCalldata[0], // Assuming constructorCalldata is always present and has at least one element
         controller.address,
-        credentialId,
-        publicKey,
+        {
+          signer: {
+            eip191: {
+              address,
+            },
+          },
+        },
       );
 
       await controllerObject.login(now() + DEFAULT_SESSION_DURATION);
