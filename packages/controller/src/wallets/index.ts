@@ -5,4 +5,3 @@ export * from "./phantom";
 export * from "./rabby";
 export * from "./turnkey";
 export * from "./types";
-export * from "./wallet-connect";

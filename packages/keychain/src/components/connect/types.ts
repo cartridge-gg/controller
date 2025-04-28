@@ -26,8 +26,4 @@ export type LoginProps = AuthBaseProps & {
   onSignup: (username: string) => void;
 };
 
-export type AuthenticationMethod =
-  | "webauthn"
-  | "social"
-  | "walletconnect"
-  | ExternalWalletType;
+export type AuthenticationMethod = "webauthn" | "social" | ExternalWalletType;
