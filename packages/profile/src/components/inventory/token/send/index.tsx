@@ -38,9 +38,16 @@ export function SendToken() {
   const [toError, setToError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [recipientLoading, setRecipientLoading] = useState(false);
+
   const disabled = useMemo(() => {
-    return !!toError || !!amountError || (!validated && !!warning);
-  }, [validated, warning, amountError, toError]);
+    return (
+      recipientLoading ||
+      !!toError ||
+      !!amountError ||
+      (!validated && !!warning)
+    );
+  }, [validated, warning, amountError, toError, recipientLoading]);
 
   useEffect(() => {
     setValidated(false);
@@ -49,9 +56,9 @@ export function SendToken() {
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
       setSubmitted(true);
-      setLoading(true);
       if (!token || !to || !amount) return;
 
+      setLoading(true);
       const formattedAmount = uint256.bnToUint256(
         BigInt(amount * 10 ** token.metadata.decimals),
       );
@@ -108,6 +115,7 @@ export function SendToken() {
           setTo={setTo}
           setWarning={setWarning}
           setError={setToError}
+          setParentLoading={setRecipientLoading}
         />
         <SendAmount
           amount={amount}
