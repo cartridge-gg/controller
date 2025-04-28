@@ -1,29 +1,16 @@
 import {
   ArrowIcon,
-  ControllerIcon,
   GearIcon,
   IconProps,
-  QuestionIcon,
-  SlotIcon,
-  StarknetColorIcon,
-  StarknetIcon,
   TimesIcon,
   GiftIcon,
 } from "@/components/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/primitives/tooltip";
 import { cn } from "@/utils";
 import { Button } from "@/components/primitives/button";
-import { getChainName, isIframe, isSlotChain } from "@cartridge/utils";
-import { constants } from "starknet";
-import { CopyAddress } from "../copy-address";
+import { isIframe } from "@cartridge/utils";
 import { Network } from "@/components/network";
 import { useUI } from "@/hooks";
-import { Thumbnail } from "@/index";
+import { ConnectionTooltip, Thumbnail } from "@/index";
 import { StarryHeaderBackground } from "./starry-header";
 
 export type HeaderProps = HeaderInnerProps & {
@@ -33,6 +20,8 @@ export type HeaderProps = HeaderInnerProps & {
   hideNetwork?: boolean;
   hideSettings?: boolean;
   onOpenStarterPack?: () => void;
+  onFollowersClick?: () => void;
+  onFollowingsClick?: () => void;
 };
 
 export function LayoutHeader({
@@ -44,7 +33,16 @@ export function LayoutHeader({
   onOpenStarterPack,
   ...innerProps
 }: HeaderProps) {
-  const { account, chainId, closeModal, openSettings } = useUI();
+  const {
+    account,
+    chainId,
+    closeModal,
+    openSettings,
+    followers,
+    followings,
+    onFollowersClick,
+    onFollowingsClick,
+  } = useUI();
 
   return (
     <div className="sticky top-0 w-full z-10 bg-background">
@@ -108,48 +106,17 @@ export function LayoutHeader({
                     <span>Get Starter Pack</span>
                   </Button>
                 )}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger
-                      className={cn(
-                        "flex items-center gap-1.5 bg-background-200 hover:bg-background-300 rounded px-3 py-2.5",
-                        hideUsername && "hidden",
-                      )}
-                    >
-                      {/* TODO: Replace with avatar */}
-                      <ControllerIcon size="sm" />
-                      <div className="text-sm font-semibold">
-                        {account.username}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="flex items-center gap-8 px-3 py-2.5 bg-spacer">
-                      {!hideNetwork && (
-                        <div className="flex items-center gap-1.5">
-                          {(() => {
-                            switch (chainId) {
-                              case constants.StarknetChainId.SN_MAIN:
-                                return <StarknetColorIcon />;
-                              case constants.StarknetChainId.SN_SEPOLIA:
-                                return <StarknetIcon />;
-                              default:
-                                return isSlotChain(chainId) ? (
-                                  <SlotIcon />
-                                ) : (
-                                  <QuestionIcon />
-                                );
-                            }
-                          })()}
-                          <div className="text-sm">{getChainName(chainId)}</div>
-                        </div>
-                      )}
-                      <CopyAddress
-                        size="xs"
-                        className="text-sm"
-                        address={account.address}
-                      />
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <ConnectionTooltip
+                  username={account.username}
+                  address={account.address}
+                  chainId={chainId}
+                  followers={followers}
+                  followings={followings}
+                  hideNetwork={hideNetwork}
+                  hideUsername={hideUsername}
+                  onFollowersClick={onFollowersClick}
+                  onFollowingsClick={onFollowingsClick}
+                />
               </>
             ) : (
               !hideNetwork && <Network chainId={chainId} />

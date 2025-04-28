@@ -1,4 +1,11 @@
-import { Outlet, Route, Routes, Navigate, useLocation } from "react-router-dom";
+import {
+  Outlet,
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { Account } from "#components/account";
 import {
   Inventory,
@@ -11,8 +18,19 @@ import {
 import { Achievements } from "#components/achievements";
 import { Activity } from "#components/activity";
 import { Slot } from "#components/slot";
+import { useMemo } from "react";
+import { Socials } from "./socials";
 
 export function App() {
+  const [searchParams] = useSearchParams();
+  const social = useMemo(() => {
+    return searchParams.get("social");
+  }, [searchParams]);
+
+  if (social) {
+    return <Socials />;
+  }
+
   return (
     <Routes>
       <Route element={<Outlet />}>

@@ -16,7 +16,7 @@ import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
 import { useConnection, useData } from "#hooks/context";
 import { useArcade } from "#hooks/arcade";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
 import { addAddressPadding } from "starknet";
 import { LayoutBottomNav } from "#components/bottom-nav";
 
@@ -38,17 +38,22 @@ export function Achievements() {
 
   const { usernames } = useUsernames({ addresses });
 
-  const { pins, games } = useArcade();
+  const { pins, games, editions } = useArcade();
 
   const { address } = useParams<{ address: string }>();
   const { username } = useUsername({ address: address || self || "" });
   const { project, namespace } = useConnection();
 
-  const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find(
-      (game) => game.namespace === namespace && game.config.project === project,
+  const edition: EditionModel | undefined = useMemo(() => {
+    return Object.values(editions).find(
+      (edition) =>
+        edition.namespace === namespace && edition.config.project === project,
     );
-  }, [games, project, namespace]);
+  }, [editions, project, namespace]);
+
+  const game: GameModel | undefined = useMemo(() => {
+    return Object.values(games).find((game) => game.id === edition?.gameId);
+  }, [games, edition]);
 
   const { pinneds, count, total } = useMemo(() => {
     const ids = (
@@ -147,6 +152,7 @@ export function Achievements() {
                   softview={!isSelf}
                   enabled={pinneds.length < 3}
                   game={game}
+                  edition={edition}
                   pins={pins}
                   earnings={points}
                 />
@@ -191,6 +197,7 @@ export function Achievements() {
                 softview={!isSelf}
                 enabled={pinneds.length < 3}
                 game={game}
+                edition={edition}
                 pins={pins}
                 earnings={points}
               />
