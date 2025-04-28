@@ -17,7 +17,7 @@ import type { Call, EstimateFee } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { Funding } from "./funding";
-import { OcclusionDetector } from "@/components/OcclusionDetector";
+// import { OcclusionDetector } from "@/components/OcclusionDetector";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -173,7 +173,7 @@ export function ExecutionContainer({
 
   return (
     <>
-      <OcclusionDetector />
+      {/* <OcclusionDetector /> */}
       <LayoutContainer>
         <LayoutHeader
           title={title}
