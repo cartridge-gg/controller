@@ -228,7 +228,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
           name: token.meta.name,
           symbol: token.meta.symbol,
           decimals: token.meta.decimals,
-          address: contractAddress,
+          address: getChecksumAddress(contractAddress),
           image: token.meta.logoUrl,
         },
       };

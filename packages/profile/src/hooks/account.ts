@@ -143,8 +143,18 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
     ) {
       return "Please input a valid Starknet address";
     }
+    if (!!nameOrAddress && !address) {
+      return "Please input a valid Starknet address";
+    }
     return "";
-  }, [starkError, controllerError, address, controllerName, starkName]);
+  }, [
+    starkError,
+    controllerError,
+    address,
+    controllerName,
+    starkName,
+    nameOrAddress,
+  ]);
 
   const warning = useMemo(() => {
     return walletError;

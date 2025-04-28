@@ -8,7 +8,7 @@ import process from "node:process";
 export default defineConfig({
   plugins: [react(), wasm(), topLevelAwait()],
   server: {
-    port: process.env.NODE_ENV === "development" ? 3000 : undefined,
+    port: process.env.NODE_ENV === "development" ? 3003 : undefined,
   },
   root: "./",
   build: {

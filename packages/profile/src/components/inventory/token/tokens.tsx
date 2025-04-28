@@ -12,7 +12,7 @@ export function Tokens() {
       style={{ scrollbarWidth: "none" }}
     >
       {tokens
-        .filter((token) => token.balance.amount !== 0)
+        .filter((token) => token.balance.amount > 0)
         .map((token) => (
           <TokenCardContent key={token.metadata.address} token={token} />
         ))}

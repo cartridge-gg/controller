@@ -18,13 +18,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Call,
-  getChecksumAddress,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
   uint256,
 } from "starknet";
 import { SendRecipient } from "#components/modules/recipient";
 import { SendAmount } from "./amount";
+import { useData } from "#hooks/context";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
@@ -36,6 +36,7 @@ export function SendToken() {
   });
   const { tokens } = useTokens();
 
+  const { refetchTransfers } = useData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -46,24 +47,16 @@ export function SendToken() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedToken, setSelectedToken] = useState<Token | undefined>(token);
+  const [recipientLoading, setRecipientLoading] = useState(false);
+
   const disabled = useMemo(() => {
-    return !!toError || !!amountError || (!validated && !!warning);
-  }, [validated, warning, amountError, toError]);
-
-  const filteredAllTokens: Token[] = useMemo(() => {
-    // Filter out tokens with zero balance
-    const nonEmptyToken = tokens.filter((item) => item.balance.amount > 0);
-
-    // Prevents duplicate tokens
-    const cleanedTokens = nonEmptyToken.map((item) => ({
-      ...item,
-      metadata: {
-        ...item.metadata,
-        address: getChecksumAddress(item.metadata.address),
-      },
-    }));
-    return cleanedTokens;
-  }, [tokens]);
+    return (
+      recipientLoading ||
+      !!toError ||
+      !!amountError ||
+      (!validated && !!warning)
+    );
+  }, [validated, warning, amountError, toError, recipientLoading]);
 
   useEffect(() => {
     setValidated(false);
@@ -79,6 +72,7 @@ export function SendToken() {
       setLoading(true);
       if (!selectedToken || !to || !amount) return;
 
+      setLoading(true);
       const formattedAmount = uint256.bnToUint256(
         BigInt(amount * 10 ** selectedToken.metadata.decimals),
       );
@@ -100,6 +94,10 @@ export function SendToken() {
               TransactionFinalityStatus.ACCEPTED_ON_L2,
             ],
           });
+          // Refetch transfers after 5 seconds to leave time to the indexer to take the new tx into account
+          setTimeout(() => {
+            refetchTransfers();
+          }, 5000);
         }
         if (closable) {
           navigate(`..?${searchParams.toString()}`);
@@ -110,7 +108,15 @@ export function SendToken() {
         setLoading(false);
       }
     },
-    [selectedToken, provider, parent, closable, navigate, searchParams],
+    [
+      selectedToken,
+      provider,
+      parent,
+      closable,
+      navigate,
+      searchParams,
+      refetchTransfers,
+    ],
   );
 
   const handleBack = useCallback(() => {
@@ -135,7 +141,7 @@ export function SendToken() {
             </div>
           ) : (
             <TokenSelect
-              tokens={filteredAllTokens}
+              tokens={tokens}
               onSelect={onChangeToken}
               defaultToken={selectedToken}
             />
@@ -147,6 +153,7 @@ export function SendToken() {
           setTo={setTo}
           setWarning={setWarning}
           setError={setToError}
+          setParentLoading={setRecipientLoading}
         />
         <SendAmount
           token={selectedToken || token}
