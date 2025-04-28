@@ -6,6 +6,7 @@ export * from "./authentication";
 export * from "./collectibles";
 export * from "./common";
 export * from "./create-account";
+export * from "./erc20";
 export * from "./progress-bar";
 export * from "./recipient";
 export * from "./thumbnails";
