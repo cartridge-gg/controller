@@ -16,8 +16,10 @@ import {
   SocialModel,
   SocialOptions,
   RegistryOptions,
+  FollowEvent,
+  EditionModel,
 } from "@bal7hazar/arcade-sdk";
-import { constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { ArcadeContext } from "#context/arcade";
 
 const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
@@ -31,7 +33,16 @@ const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
 export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   const currentValue = useContext(ArcadeContext);
   const [pins, setPins] = useState<{ [playerId: string]: string[] }>({});
+  const [followers, setFollowers] = useState<{ [playerId: string]: string[] }>(
+    {},
+  );
+  const [followeds, setFolloweds] = useState<{ [playerId: string]: string[] }>(
+    {},
+  );
   const [games, setGames] = useState<{ [gameId: string]: GameModel }>({});
+  const [editions, setEditions] = useState<{
+    [editionId: string]: EditionModel;
+  }>({});
   const [initialized, setInitialized] = useState<boolean>(false);
 
   if (currentValue) {
@@ -44,44 +55,79 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
-  const handlePinEvents = useCallback((models: SocialModel[]) => {
+  const handleSocialEvents = useCallback((models: SocialModel[]) => {
     models.forEach((model: SocialModel) => {
       // Return if the model is not a PinEvent
-      if (!PinEvent.isType(model as PinEvent)) return;
-      const event = model as PinEvent;
-      // Return if the event is not a PinEvent
-      if (event.time == 0) {
-        // Remove the achievement from the player's list
-        setPins((prevPins) => {
-          const achievementIds = prevPins[event.playerId] || [];
-          return {
-            ...prevPins,
-            [event.playerId]: achievementIds.filter(
-              (id: string) => id !== event.achievementId,
+      if (PinEvent.isType(model as PinEvent)) {
+        const event = model as PinEvent;
+        // Return if the event is not a PinEvent
+        if (event.time == 0) {
+          // Remove the achievement from the player's list
+          setPins((prevPins) => {
+            const achievementIds = prevPins[event.playerId] || [];
+            return {
+              ...prevPins,
+              [event.playerId]: achievementIds.filter(
+                (id: string) => id !== event.achievementId,
+              ),
+            };
+          });
+        } else {
+          // Otherwise, add the achievement to the player's list
+          setPins((prevPins) => {
+            const achievementIds = prevPins[event.playerId] || [];
+            return {
+              ...prevPins,
+              [event.playerId]: [...achievementIds, event.achievementId],
+            };
+          });
+        }
+      } else if (FollowEvent.isType(model as FollowEvent)) {
+        const event = model as FollowEvent;
+        const follower = getChecksumAddress(event.follower);
+        const followed = getChecksumAddress(event.followed);
+        if (event.time == 0) {
+          setFollowers((prevFollowers) => ({
+            ...prevFollowers,
+            [followed]: (prevFollowers[followed] || []).filter(
+              (id: string) => id !== follower,
             ),
-          };
-        });
-      } else {
-        // Otherwise, add the achievement to the player's list
-        setPins((prevPins) => {
-          const achievementIds = prevPins[event.playerId] || [];
-          return {
-            ...prevPins,
-            [event.playerId]: [...achievementIds, event.achievementId],
-          };
-        });
+          }));
+          setFolloweds((prevFolloweds) => ({
+            ...prevFolloweds,
+            [follower]: (prevFolloweds[follower] || []).filter(
+              (id: string) => id !== followed,
+            ),
+          }));
+        } else {
+          setFollowers((prevFollowers) => ({
+            ...prevFollowers,
+            [followed]: [...(prevFollowers[followed] || []), follower],
+          }));
+          setFolloweds((prevFolloweds) => ({
+            ...prevFolloweds,
+            [follower]: [...(prevFolloweds[follower] || []), followed],
+          }));
+        }
       }
     });
   }, []);
 
-  const handleGameModels = useCallback((models: RegistryModel[]) => {
+  const handleRegistryModels = useCallback((models: RegistryModel[]) => {
     models.forEach((model: RegistryModel) => {
-      if (!GameModel.isType(model as GameModel)) return;
-      const game = model as GameModel;
-      setGames((prevGames) => ({
-        ...prevGames,
-        [`${game.worldAddress}-${game.namespace}`]: game,
-      }));
+      if (GameModel.isType(model as GameModel)) {
+        const game = model as GameModel;
+        setGames((prevGames) => ({
+          ...prevGames,
+          [game.identifier]: game,
+        }));
+      } else if (EditionModel.isType(model as EditionModel)) {
+        const edition = model as EditionModel;
+        setEditions((prevEditions) => ({
+          ...prevEditions,
+          [edition.identifier]: edition,
+        }));
+      }
     });
   }, []);
 
@@ -97,23 +143,23 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!initialized) return;
-    const options: SocialOptions = { pin: true };
-    Social.fetch(handlePinEvents, options);
-    Social.sub(handlePinEvents, options);
+    const options: SocialOptions = { pin: true, follow: true };
+    Social.fetch(handleSocialEvents, options);
+    Social.sub(handleSocialEvents, options);
     return () => {
       Social.unsub();
     };
-  }, [initialized, handlePinEvents]);
+  }, [initialized, handleSocialEvents]);
 
   useEffect(() => {
     if (!initialized) return;
-    const options: RegistryOptions = { game: true };
-    Registry.fetch(handleGameModels, options);
-    Registry.sub(handleGameModels, options);
+    const options: RegistryOptions = { game: true, edition: true };
+    Registry.fetch(handleRegistryModels, options);
+    Registry.sub(handleRegistryModels, options);
     return () => {
       Registry.unsub();
     };
-  }, [initialized, handleGameModels]);
+  }, [initialized, handleRegistryModels]);
 
   return (
     <ArcadeContext.Provider
@@ -121,7 +167,10 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         chainId: CHAIN_ID,
         provider,
         pins,
+        followers,
+        followeds,
         games,
+        editions,
       }}
     >
       {children}

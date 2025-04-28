@@ -19,7 +19,6 @@ const meta: Meta<typeof OptionButton> = {
   args: {
     icon: <PasskeyIcon />,
     variant: "primary",
-    label: "Passkey",
   },
 };
 
@@ -32,7 +31,6 @@ export const MetaMask: Story = {
   args: {
     icon: <MetaMaskColorIcon />,
     variant: "secondary",
-    label: "MetaMask",
   },
 };
 
@@ -40,7 +38,6 @@ export const Discord: Story = {
   args: {
     icon: <DiscordIcon />,
     variant: "secondary",
-    label: "Discord",
   },
 };
 
@@ -48,7 +45,6 @@ export const Rabby: Story = {
   args: {
     icon: <RabbyColorIcon />,
     variant: "secondary",
-    label: "Rabby",
   },
 };
 
@@ -56,7 +52,6 @@ export const Phantom: Story = {
   args: {
     icon: <PhantomColorIcon />,
     variant: "secondary",
-    label: "Phantom",
   },
 };
 
@@ -64,6 +59,5 @@ export const Argent: Story = {
   args: {
     icon: <ArgentColorIcon />,
     variant: "secondary",
-    label: "Argent",
   },
 };

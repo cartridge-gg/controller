@@ -2,7 +2,7 @@ import { HTMLAttributes, useMemo } from "react";
 import { AchievementPlayerLabel } from "../player-label";
 import { cva, VariantProps } from "class-variance-authority";
 import { cn } from "@/utils";
-import { AchievementFollowerTag } from "@/index";
+import { FollowerTag } from "@/index";
 
 interface AchievementPlayerHeaderProps
   extends HTMLAttributes<HTMLDivElement>,
@@ -93,7 +93,7 @@ export const AchievementPlayerHeader = ({
             </strong>
             Points
           </p>
-          {follower && <AchievementFollowerTag variant={variant} />}
+          {follower && <FollowerTag variant={variant} />}
         </div>
         {!compacted && <FollowerDescription followers={followers || []} />}
       </div>
