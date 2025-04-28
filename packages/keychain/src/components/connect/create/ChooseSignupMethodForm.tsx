@@ -38,7 +38,6 @@ export function ChooseSignupMethodForm({
         )
         .map((wallet) => AuthFactory.create(wallet.type)),
       AuthFactory.create("social"),
-      AuthFactory.create("walletconnect"),
     ];
   }, [wallets]);
 
@@ -71,9 +70,7 @@ export function ChooseSignupMethodForm({
           <OptionButton
             key={option.mode}
             icon={option.icon}
-            label={option.label}
             variant={option.variant}
-            className={`${option.mode === "webauthn" && "justify-center"}`}
             onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
               if (e.key !== "Enter") {
                 return;

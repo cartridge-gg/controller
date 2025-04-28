@@ -1,5 +1,5 @@
-import { cn, Separator } from "@cartridge/ui-next";
 import { forwardRef, memo, PropsWithChildren, useEffect } from "react";
+import { cn, Separator } from "@cartridge/ui-next";
 import { useLayoutContext } from "./context";
 
 export function LayoutFooter({
@@ -16,7 +16,7 @@ export function LayoutFooter({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 w-full p-6 pt-0 mt-auto bg-background shrink-0",
+        "flex flex-col gap-3 w-full p-6 pt-3 mt-auto bg-background shrink-0",
         showCatridgeLogo && "pb-2",
         className,
       )}
