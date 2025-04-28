@@ -22,12 +22,14 @@ export const SendRecipient = ({
   setTo,
   setWarning,
   setError,
+  setParentLoading,
 }: {
   to: string;
   submitted: boolean;
   setTo: (to: string) => void;
   setWarning: (warning: string) => void;
   setError: (error: Error | undefined) => void;
+  setParentLoading: (loading: boolean) => void;
 }) => {
   const [focus, setFocus] = useState(false);
   const [value, setValue] = useState("");
@@ -52,18 +54,21 @@ export const SendRecipient = ({
       setError(new Error(message));
       return;
     }
+    setError(undefined);
     setMessage("");
   }, [value, submitted, error, setMessage, setError]);
 
   useEffect(() => {
     setIsLoading(true);
+    setParentLoading(true);
     const handler = debounce(() => {
       setIsLoading(false);
+      setParentLoading(false);
       setNameOrAddress(value);
     }, 500);
     handler();
     return () => handler.cancel();
-  }, [value, setNameOrAddress]);
+  }, [value, setNameOrAddress, setParentLoading, setIsLoading]);
 
   const handleClear = useCallback(() => {
     setValue("");
