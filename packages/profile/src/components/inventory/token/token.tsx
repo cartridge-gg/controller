@@ -14,22 +14,18 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   CoinsIcon,
-  ExternalIcon,
-  Skeleton,
   Thumbnail,
   DepositIcon,
   ActivityTokenCard,
+  ERC20Detail,
+  ERC20Header,
 } from "@cartridge/ui-next";
 import { useConnection, useData } from "#hooks/context";
 import {
-  formatAddress,
   getDate,
   isIframe,
   isPublicChain,
-  StarkscanUrl,
   useCreditBalance,
   VoyagerUrl,
 } from "@cartridge/utils";
@@ -149,7 +145,7 @@ function ERC20() {
           };
         });
     });
-  }, [transfers, accountAddress, getDate, token?.metadata?.image]);
+  }, [transfers, accountAddress, token?.metadata?.image]);
 
   const to = useCallback((transactionHash: string) => {
     return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
@@ -167,62 +163,13 @@ function ERC20() {
       />
 
       <LayoutContent className="pb-4 gap-6">
-        <div className="flex items-center gap-4">
-          <Thumbnail icon={token.metadata.image} size="lg" rounded />
-          <div className="flex flex-col gap-0.5">
-            {token.balance === undefined ? (
-              <Skeleton className="h-[20px] w-[120px] rounded" />
-            ) : (
-              <p className="text-semibold text-lg/[22px]">
-                {`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
-              </p>
-            )}
-            {!!token.balance.value && (
-              <p className="text-foreground-300 text-xs">
-                {`$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
-              </p>
-            )}
-          </div>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-semibold text-xs">Details</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <p className="text-foreground-300 font-normal text-sm">
-              Contract Address
-            </p>
-            {isPublicChain(chainId) ? (
-              <Link
-                to={`${StarkscanUrl(
-                  chainId as constants.StarknetChainId,
-                ).contract(token.metadata.address)} `}
-                className="flex items-center gap-1 text-sm"
-                target="_blank"
-              >
-                <p className="font-medium">
-                  {formatAddress(token.metadata.address, {
-                    size: "sm",
-                    first: 4,
-                    last: 4,
-                  })}
-                </p>
-                <ExternalIcon size="sm" />
-              </Link>
-            ) : (
-              <p>
-                {formatAddress(token.metadata.address, { first: 4, last: 4 })}
-              </p>
-            )}
-          </CardContent>
+        <ERC20Header token={token} />
 
-          <CardContent className="flex items-center justify-between">
-            <p className="text-foreground-300 font-normal text-sm">
-              Token Standard
-            </p>
-            <p className="font-medium text-sm text-foreground-100">ERC-20</p>
-          </CardContent>
-        </Card>
+        <ERC20Detail
+          token={token}
+          isPublicChain={isPublicChain(chainId)}
+          chainId={chainId as constants.StarknetChainId}
+        />
 
         <div className="flex flex-col gap-3">
           {Object.entries(
