@@ -1,5 +1,5 @@
 import { useConnection } from "#hooks/context";
-import { useToken } from "#hooks/token";
+import { Token, useToken, useTokens } from "#hooks/token";
 import {
   LayoutContainer,
   LayoutContent,
@@ -11,11 +11,13 @@ import {
   cn,
   Thumbnail,
   ArrowToLineIcon,
+  TokenSelect,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Call,
+  getChecksumAddress,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
   uint256,
@@ -29,6 +31,7 @@ export function SendToken() {
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
   const { token } = useToken({ tokenAddress: tokenAddress! });
+  const { tokens } = useTokens();
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -39,27 +42,47 @@ export function SendToken() {
   const [toError, setToError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<Token | undefined>(token);
   const disabled = useMemo(() => {
     return !!toError || !!amountError || (!validated && !!warning);
   }, [validated, warning, amountError, toError]);
+
+  const filteredAllTokens: Token[] = useMemo(() => {
+    // Filter out tokens with zero balance
+    const nonEmptyToken = tokens.filter((item) => item.balance.amount > 0);
+
+    // Prevents duplicate tokens
+    const cleanedTokens = nonEmptyToken.map((item) => ({
+      ...item,
+      metadata: {
+        ...item.metadata,
+        address: getChecksumAddress(item.metadata.address),
+      },
+    }));
+    return cleanedTokens;
+  }, [tokens]);
 
   useEffect(() => {
     setValidated(false);
   }, [warning, setValidated]);
 
+  const onChangeToken = useCallback((token: Token) => {
+    setSelectedToken(token);
+  }, []);
+
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
       setSubmitted(true);
       setLoading(true);
-      if (!token || !to || !amount) return;
+      if (!selectedToken || !to || !amount) return;
 
       const formattedAmount = uint256.bnToUint256(
-        BigInt(amount * 10 ** token.metadata.decimals),
+        BigInt(amount * 10 ** selectedToken.metadata.decimals),
       );
 
       const calls: Call[] = [
         {
-          contractAddress: token.metadata.address,
+          contractAddress: selectedToken.metadata.address,
           entrypoint: "transfer",
           calldata: [to, formattedAmount],
         },
@@ -84,12 +107,16 @@ export function SendToken() {
         setLoading(false);
       }
     },
-    [token, provider, parent, closable, navigate, searchParams],
+    [selectedToken, provider, parent, closable, navigate, searchParams],
   );
 
   const handleBack = useCallback(() => {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
+
+  useEffect(() => {
+    console.log("selected token: ", selectedToken);
+  }, [selectedToken]);
 
   if (!token) {
     return null;
@@ -99,9 +126,16 @@ export function SendToken() {
     <LayoutContainer>
       <LayoutHeader className="hidden" onBack={handleBack} />
       <LayoutContent className="pb-4 gap-6">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Thumbnail icon={<ArrowToLineIcon variant="right" />} size="lg" />
           <p className="text-semibold text-lg/[22px]">Send</p>
+          {token && (
+            <TokenSelect
+              tokens={filteredAllTokens}
+              onSelect={onChangeToken}
+              defaultToken={selectedToken}
+            />
+          )}
         </div>
         <SendRecipient
           to={to}
@@ -111,6 +145,7 @@ export function SendToken() {
           setError={setToError}
         />
         <SendAmount
+          token={selectedToken || token}
           amount={amount}
           submitted={submitted}
           setAmount={setAmount}
