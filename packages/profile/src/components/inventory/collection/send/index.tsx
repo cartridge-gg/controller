@@ -92,7 +92,6 @@ export function SendCollection() {
 
   const onSubmit = useCallback(
     async (to: string) => {
-      setLoading(true);
       setSubmitted(true);
       if (
         !contractAddress ||
@@ -103,6 +102,7 @@ export function SendCollection() {
         !entrypoint
       )
         return;
+      setLoading(true);
       // Fill the extra argument in case of safe transfer functions
       const calldata = entrypoint.includes("safe") ? [0] : [];
       const calls: Call[] = (tokenIds as string[]).map((id: string) => {

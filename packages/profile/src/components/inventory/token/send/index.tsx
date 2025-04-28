@@ -56,9 +56,9 @@ export function SendToken() {
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
       setSubmitted(true);
-      setLoading(true);
       if (!token || !to || !amount) return;
 
+      setLoading(true);
       const formattedAmount = uint256.bnToUint256(
         BigInt(amount * 10 ** token.metadata.decimals),
       );
