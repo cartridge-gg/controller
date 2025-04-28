@@ -97,12 +97,14 @@ export const ConnectionTooltip = ({
   const handleFollowersClick = useCallback(() => {
     onFollowersClick?.();
     setOpen(false);
-  }, [onFollowersClick, setOpen]);
+    setWithBackground(false);
+  }, [onFollowersClick, setOpen, setWithBackground]);
 
   const handleFollowingsClick = useCallback(() => {
     onFollowingsClick?.();
     setOpen(false);
-  }, [onFollowingsClick, setOpen]);
+    setWithBackground(false);
+  }, [onFollowingsClick, setOpen, setWithBackground]);
 
   return (
     <TooltipProvider>

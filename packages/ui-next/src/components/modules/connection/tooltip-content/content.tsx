@@ -13,6 +13,7 @@ import { HTMLAttributes, useCallback, useMemo } from "react";
 import { formatAddress, getChainName, isSlotChain } from "@cartridge/utils";
 import { constants, getChecksumAddress } from "starknet";
 import { toast } from "sonner";
+import { useLayoutContext } from "@/components/layout/context";
 
 export const connectionTooltipContentVariants = cva(
   "select-none flex flex-col gap-2 p-4 rounded-lg shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]",
@@ -55,6 +56,7 @@ export const ConnectionTooltipContent = ({
   variant,
   className,
 }: ConnectionTooltipContentProps) => {
+  const { setWithBackground } = useLayoutContext();
   const Icon = useMemo(() => {
     switch (chainId) {
       case constants.StarknetChainId.SN_MAIN:
@@ -69,8 +71,9 @@ export const ConnectionTooltipContent = ({
   const onCopy = useCallback(() => {
     navigator.clipboard.writeText(getChecksumAddress(address));
     toast.success("Address copied");
+    setWithBackground(false);
     if (setOpen) setOpen(false);
-  }, [address, setOpen]);
+  }, [address, setOpen, setWithBackground]);
 
   const formattedAddress = useMemo(
     () =>

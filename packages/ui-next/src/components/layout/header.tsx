@@ -12,8 +12,6 @@ import { Network } from "@/components/network";
 import { useUI } from "@/hooks";
 import { ConnectionTooltip, Thumbnail } from "@/index";
 import { StarryHeaderBackground } from "./starry-header";
-import { useLayoutContext } from "./context";
-import { useCallback } from "react";
 
 export type HeaderProps = HeaderInnerProps & {
   onBack?: () => void;
@@ -45,17 +43,6 @@ export function LayoutHeader({
     onFollowersClick,
     onFollowingsClick,
   } = useUI();
-  const { setWithBackground } = useLayoutContext();
-
-  const handleFollowersClick = useCallback(() => {
-    onFollowersClick?.();
-    setWithBackground(false);
-  }, [onFollowersClick, setWithBackground]);
-
-  const handleFollowingsClick = useCallback(() => {
-    onFollowingsClick?.();
-    setWithBackground(false);
-  }, [onFollowingsClick, setWithBackground]);
 
   return (
     <div className="sticky top-0 w-full z-10 bg-background">
@@ -127,12 +114,8 @@ export function LayoutHeader({
                   followings={followings}
                   hideNetwork={hideNetwork}
                   hideUsername={hideUsername}
-                  onFollowersClick={
-                    onFollowersClick ? handleFollowersClick : undefined
-                  }
-                  onFollowingsClick={
-                    onFollowingsClick ? handleFollowingsClick : undefined
-                  }
+                  onFollowersClick={onFollowersClick}
+                  onFollowingsClick={onFollowingsClick}
                 />
               </>
             ) : (
