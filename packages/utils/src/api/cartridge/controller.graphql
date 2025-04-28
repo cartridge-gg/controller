@@ -1,0 +1,25 @@
+query Controller($username: String!, $chainId: String!) {
+  controller(username: $username, chainId: $chainId) {
+    id
+    accountID
+    address
+    network
+    constructorCalldata
+    createdAt
+    updatedAt
+    account {
+      username
+      credentials {
+        webauthn {
+          id
+          publicKey
+        }
+      }
+    }
+    signers {
+      id
+      controllerID
+      type
+    }
+  }
+}

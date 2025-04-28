@@ -27,6 +27,7 @@ export const useExternalWalletAuthentication = () => {
       return {
         address: connectedWallet.account,
         signer: walletToSigner(connectedWallet),
+        type: authenticationMode,
       };
     },
     [],

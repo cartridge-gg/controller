@@ -8,17 +8,20 @@ import {
   AccountQuery,
   SignerType,
   useAccountQuery,
+  useRegisterMutation,
 } from "@cartridge/utils/api/cartridge";
 import { useCallback, useState } from "react";
 import { AuthenticationMethod, LoginMode } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { useSocialAuthentication } from "./social";
-import { AuthenticationStep, fetchAccount } from "./utils";
+import { AuthenticationStep, fetchController } from "./utils";
+import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
 
 export interface SignupResponse {
   address: string;
   signer: Signer;
+  type: AuthenticationMethod;
 }
 
 export function useCreateController({
@@ -37,6 +40,7 @@ export function useCreateController({
   >(AuthenticationStep.FillForm);
 
   const { origin, policies, rpcUrl, chainId, setController } = useConnection();
+  const { mutateAsync: register } = useRegisterMutation();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -157,9 +161,38 @@ export function useCreateController({
         },
       });
 
-      await controller.login(now() + DEFAULT_SESSION_DURATION);
-      window.controller = controller;
-      setController(controller);
+      const result = await controller.login(now() + DEFAULT_SESSION_DURATION);
+      console.log("login result", result);
+
+      const registerRet = await register({
+        username,
+        chainId: "SN_SEPOLIA",
+        owner: {
+          credential: JSON.stringify({
+            eip191: {
+              eth_address: signupResponse.address,
+              //   metadata: {
+              //     type: "eip191",
+              //   },
+            },
+          }),
+          type: SignerType.Eip191,
+        },
+        session: {
+          expiresAt: result.session.expiresAt.toString(),
+          guardianKeyGuid: result.session.guardianKeyGuid,
+          metadataHash: result.session.metadataHash,
+          sessionKeyGuid: result.session.sessionKeyGuid,
+          allowedPoliciesRoot: result.allowedPoliciesRoot,
+          authorization: result.authorization ?? [],
+        },
+      });
+
+      console.log("register result", registerRet);
+      if (registerRet.register.name) {
+        window.controller = controller;
+        setController(controller);
+      }
     },
     [
       chainId,
@@ -175,22 +208,33 @@ export function useCreateController({
 
   const handleLogin = useCallback(
     async (username: string) => {
-      const { account } = await fetchAccount(username);
-      if (!account) {
-        throw new Error("Account not found");
+      if (!chainId) {
+        throw new Error("No chainId");
       }
 
-      const { controllers } = account ?? {};
-      if (
-        controllers?.edges?.[0]?.node?.signers?.[0]?.type ===
-        SignerType.Webauthn
-      ) {
-        await loginWithWebauthn(account, loginMode, !!isSlot);
+      const controllerRet = await fetchController(chainId, username);
+      if (!controllerRet) {
+        throw new Error("Undefined controller");
+      }
+
+      const controller = controllerRet.controller;
+
+      const signer = controller?.signers?.[0];
+      switch (signer?.type) {
+        case SignerType.Webauthn:
+          await loginWithWebauthn(controller, loginMode, !!isSlot);
+          break;
+        case SignerType.Eip191:
+          await loginWithSocial(controller);
+          break;
+      }
+      if (signer?.type === SignerType.Webauthn) {
+        await loginWithWebauthn(controller, loginMode, !!isSlot);
       } else {
-        await loginWithSocial(account);
+        await loginWithSocial(controller);
       }
     },
-    [isSlot, loginWithWebauthn, loginWithSocial, loginMode],
+    [isSlot, loginWithWebauthn, loginWithSocial, loginMode, chainId],
   );
 
   const handleSubmit = useCallback(

@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
-import { fetchAccount } from "./utils";
+import { useConnection } from "@/hooks/connection";
+import { useEffect, useRef, useState } from "react";
+import { fetchController } from "./utils";
 
 export type ValidationState = {
   status: "idle" | "validating" | "valid" | "invalid";
@@ -8,6 +9,7 @@ export type ValidationState = {
 };
 
 export function useUsernameValidation(username: string) {
+  const { chainId } = useConnection();
   const [validation, setValidation] = useState<ValidationState>({
     status: "idle",
   });
@@ -62,7 +64,15 @@ export function useUsernameValidation(username: string) {
 
     setValidation({ status: "validating" });
 
-    fetchAccount(username, controller.signal)
+    if (!chainId) {
+      setValidation({
+        status: "invalid",
+        error: new Error("No chainId"),
+      });
+      return;
+    }
+
+    fetchController(chainId, username, controller.signal)
       .then(() => {
         if (!controller.signal.aborted) {
           setValidation({
@@ -74,7 +84,7 @@ export function useUsernameValidation(username: string) {
       .catch((e) => {
         if (controller.signal.aborted) return;
 
-        if (e.message === "ent: account not found") {
+        if (e.message === "ent: controller not found") {
           // TEMP: disallow periods for signup
           if (username.includes(".")) {
             setValidation({

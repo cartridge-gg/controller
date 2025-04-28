@@ -180,6 +180,7 @@ impl CartridgeAccount {
                     .collect(),
             ),
             is_registered: false,
+            allowed_policies_root: account.session.inner.allowed_policies_root.to_hex_string(),
         };
 
         Ok(session_metadata)
@@ -213,6 +214,7 @@ impl CartridgeAccount {
                         .collect(),
                 ),
                 is_registered: false,
+                allowed_policies_root: account.session.inner.allowed_policies_root.to_hex_string(),
             };
             Some(session_metadata)
         } else {

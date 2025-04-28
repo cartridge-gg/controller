@@ -2,9 +2,24 @@ import type { ContractType } from "@/hooks/session";
 import { fetchData } from "@/utils/graphql";
 import {
   AccountDocument,
+  ControllerDocument,
+  ControllerQuery,
+  ControllerQueryVariables,
   type AccountQuery,
   type AccountQueryVariables,
 } from "@cartridge/utils/api/cartridge";
+
+export function fetchController(
+  chainId: string,
+  username: string,
+  signal?: AbortSignal,
+) {
+  return fetchData<ControllerQuery, ControllerQueryVariables>(
+    ControllerDocument,
+    { chainId, username },
+    signal,
+  );
+}
 
 export function fetchAccount(username: string, signal?: AbortSignal) {
   return fetchData<AccountQuery, AccountQueryVariables>(

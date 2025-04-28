@@ -3,7 +3,7 @@ import { useConnection } from "@/hooks/connection";
 import { useAuth0 } from "@auth0/auth0-react";
 import { TurnkeyWallet } from "@cartridge/controller";
 import {
-  AccountQuery,
+  ControllerQuery,
   useRegisterMutation,
 } from "@cartridge/utils/api/cartridge";
 import { sha256 } from "@noble/hashes/sha256";
@@ -109,6 +109,7 @@ export const useSocialAuthentication = () => {
                 address,
               },
             },
+            type: "social",
           });
           signaturePromiseRef.current = null;
         }
@@ -188,37 +189,36 @@ export const useSocialAuthentication = () => {
   );
 
   const login = useCallback(
-    async (account: AccountQuery["account"]) => {
+    async (controller: ControllerQuery["controller"]) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
-      if (!account) throw new Error("No account found");
+      if (!controller) throw new Error("No controller found");
 
-      const { username, credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
-
-      const controllerNode = controllers?.edges?.[0]?.node;
+      const { account } = controller ?? {};
+      const { id: credentialId, publicKey } =
+        account?.credentials?.webauthn?.[0] ?? {};
 
       if (!credentialId)
         throw new Error("No credential ID found for this account");
 
-      if (!controllerNode || !publicKey) {
+      if (!publicKey) {
         return;
       }
 
-      const controller = await createController(
+      const controllerObject = await createController(
         origin,
         chainId,
         rpcUrl,
-        username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
+        userName,
+        controller.constructorCalldata[0],
+        controller.address,
         credentialId,
         publicKey,
       );
 
-      await controller.login(now() + DEFAULT_SESSION_DURATION);
+      await controllerObject.login(now() + DEFAULT_SESSION_DURATION);
 
-      window.controller = controller;
-      setController(controller);
+      window.controller = controllerObject;
+      setController(controllerObject);
     },
     [chainId, rpcUrl, origin, setController],
   );

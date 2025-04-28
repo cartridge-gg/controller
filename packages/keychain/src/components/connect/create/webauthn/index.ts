@@ -1,7 +1,7 @@
 import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { doLogin, doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
-import { AccountQuery } from "@cartridge/utils/api/cartridge";
+import { ControllerQuery } from "@cartridge/utils/api/cartridge";
 import { useCallback } from "react";
 import { constants } from "starknet";
 import { LoginMode } from "../../types";
@@ -57,31 +57,30 @@ export function useWebauthnAuthentication() {
 
   const login = useCallback(
     async (
-      account: AccountQuery["account"],
+      controller: ControllerQuery["controller"],
       loginMode: LoginMode,
       isSlot: boolean,
     ) => {
-      if (!account) throw new Error("No account found");
+      if (!controller) throw new Error("No controller found");
 
-      const { credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
-
-      const controllerNode = controllers?.edges?.[0]?.node;
+      const { account } = controller ?? {};
+      const { id: credentialId, publicKey } =
+        account?.credentials?.webauthn?.[0] ?? {};
 
       if (!credentialId)
         throw new Error("No credential ID found for this account");
 
-      if (!controllerNode || !publicKey) {
+      if (!publicKey) {
         return;
       }
 
-      const controller = await createController(
+      const controllerObject = await createController(
         origin!,
         chainId!,
         rpcUrl!,
         account.username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
+        controller.constructorCalldata[0],
+        controller.address,
         credentialId,
         publicKey,
       );
@@ -93,11 +92,11 @@ export function useWebauthnAuthentication() {
           finalize: !!isSlot,
         });
       } else {
-        await controller.login(now() + DEFAULT_SESSION_DURATION);
+        await controllerObject.login(now() + DEFAULT_SESSION_DURATION);
       }
 
-      window.controller = controller;
-      setController(controller);
+      window.controller = controllerObject;
+      setController(controllerObject);
     },
     [chainId, rpcUrl, origin],
   );
