@@ -10,6 +10,7 @@ import {
   CheckboxUncheckedIcon,
   cn,
   Thumbnail,
+  ArrowToLineIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -99,8 +100,8 @@ export function SendToken() {
       <LayoutHeader className="hidden" onBack={handleBack} />
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-4">
-          <Thumbnail icon={token.metadata.image} size="lg" rounded />
-          <p className="text-semibold text-lg/[22px]">{`Send ${token.metadata.symbol ?? "Token"}`}</p>
+          <Thumbnail icon={<ArrowToLineIcon variant="right" />} size="lg" />
+          <p className="text-semibold text-lg/[22px]">Send</p>
         </div>
         <SendRecipient
           to={to}
@@ -133,15 +134,27 @@ export function SendToken() {
           )}
           <p className="text-xs text-destructive-100">{warning}</p>
         </div>
-        <Button
-          disabled={disabled}
-          type="submit"
-          className="w-full"
-          isLoading={loading}
-          onClick={() => onSubmit(to, amount!)}
-        >
-          Review Send
-        </Button>
+        <div className="flex flex-row items-center gap-3">
+          <Button
+            disabled={disabled}
+            variant="secondary"
+            type="button"
+            className="w-fit"
+            isLoading={loading}
+            onClick={handleBack}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={disabled}
+            type="submit"
+            className="w-full"
+            isLoading={loading}
+            onClick={() => onSubmit(to, amount!)}
+          >
+            Review Send
+          </Button>
+        </div>
       </LayoutFooter>
     </LayoutContainer>
   );
