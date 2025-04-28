@@ -12,6 +12,7 @@ import {
   Thumbnail,
   ArrowToLineIcon,
   TokenSelect,
+  Spinner,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -30,7 +31,9 @@ export function SendToken() {
   const { parent, provider, closable } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
-  const { token } = useToken({ tokenAddress: tokenAddress! });
+  const { token, status: tokenFetching } = useToken({
+    tokenAddress: tokenAddress!,
+  });
   const { tokens } = useTokens();
 
   const [searchParams] = useSearchParams();
@@ -114,10 +117,6 @@ export function SendToken() {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
 
-  useEffect(() => {
-    console.log("selected token: ", selectedToken);
-  }, [selectedToken]);
-
   if (!token) {
     return null;
   }
@@ -129,7 +128,12 @@ export function SendToken() {
         <div className="flex items-center gap-3">
           <Thumbnail icon={<ArrowToLineIcon variant="right" />} size="lg" />
           <p className="text-semibold text-lg/[22px]">Send</p>
-          {token && (
+          {tokenFetching === "loading" ? (
+            <div className="flex items-center gap-2">
+              <Spinner size="sm" />
+              <p className="text-sm">Loading...</p>
+            </div>
+          ) : (
             <TokenSelect
               tokens={filteredAllTokens}
               onSelect={onChangeToken}

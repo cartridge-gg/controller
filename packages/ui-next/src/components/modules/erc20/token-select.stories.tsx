@@ -149,7 +149,7 @@ const mockTokens = [
 ];
 
 const meta: Meta<typeof TokenSelect> = {
-  title: "Modules/ERC20",
+  title: "Modules/ERC20/Token Select",
   component: TokenSelect,
   tags: ["autodocs"],
   parameters: {
