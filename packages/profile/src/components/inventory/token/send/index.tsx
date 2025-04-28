@@ -10,9 +10,9 @@ import {
   CheckboxUncheckedIcon,
   cn,
   Thumbnail,
-  ArrowToLineIcon,
   TokenSelect,
   Spinner,
+  PaperPlaneIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -132,8 +132,13 @@ export function SendToken() {
       <LayoutHeader className="hidden" onBack={handleBack} />
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-3">
-          <Thumbnail icon={<ArrowToLineIcon variant="right" />} size="lg" />
-          <p className="text-semibold text-lg/[22px]">Send</p>
+          <Thumbnail
+            icon={
+              <PaperPlaneIcon variant="solid" className="h-[30px] w-[30px]" />
+            }
+            size="lg"
+          />
+          <p className="text-semibold text-lg">Send</p>
           {tokenFetching === "loading" ? (
             <div className="flex items-center gap-2">
               <Spinner size="sm" />
