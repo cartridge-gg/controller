@@ -86,7 +86,7 @@ export const AchievementCard = ({
           <AchievementPagination
             direction="right"
             onClick={handleNext}
-            disabled={page === pages.length - 1}
+            disabled={page === pages[pages.length - 1]}
           />
         )}
         {pages.length > 1 && (
