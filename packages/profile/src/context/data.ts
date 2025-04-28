@@ -13,6 +13,8 @@ export type DataContextType = {
   transactions?: ActivitiesQuery;
   status?: "loading" | "error" | "success";
   setAccountAddress: (address: string | undefined) => void;
+  refetchTransfers: () => void;
+  refetchTransactions: () => void;
 };
 
 const initialState: DataContextType = {
@@ -23,6 +25,8 @@ const initialState: DataContextType = {
     status: "loading",
   },
   setAccountAddress: () => {},
+  refetchTransfers: () => {},
+  refetchTransactions: () => {},
 };
 
 export const DataContext = createContext<DataContextType>(initialState);

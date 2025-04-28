@@ -14,22 +14,22 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   CoinsIcon,
-  ExternalIcon,
-  Skeleton,
   Thumbnail,
+  DepositIcon,
+  ActivityTokenCard,
+  ERC20Detail,
+  ERC20Header,
 } from "@cartridge/ui-next";
-import { useConnection } from "#hooks/context";
+import { useConnection, useData } from "#hooks/context";
 import {
-  formatAddress,
+  getDate,
   isIframe,
   isPublicChain,
-  StarkscanUrl,
   useCreditBalance,
+  VoyagerUrl,
 } from "@cartridge/utils";
-import { constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { useAccount } from "#hooks/account";
 import { useToken } from "#hooks/token";
 import { useCallback, useMemo } from "react";
@@ -93,8 +93,12 @@ function Credits() {
 
 function ERC20() {
   const navigate = useNavigate();
-  const { chainId, version, closable, visitor } = useConnection();
   const { address } = useParams<{ address: string }>();
+  const { address: accountAddress } = useAccount();
+
+  const { transfers } = useData();
+
+  const { chainId, version, closable, visitor } = useConnection();
   const { token } = useToken({ tokenAddress: address! });
   const [searchParams] = useSearchParams();
 
@@ -107,6 +111,48 @@ function ERC20() {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
 
+  const txs = useMemo(() => {
+    if (!transfers || !token?.metadata?.image) {
+      return [];
+    }
+
+    return transfers.transfers?.items?.flatMap((edge) => {
+      return edge.transfers
+        .filter(({ tokenId }) => !tokenId)
+        .map((transfer, i) => {
+          const value = `${(
+            BigInt(transfer.amount) / BigInt(10 ** Number(transfer.decimals))
+          ).toString()} ${transfer.symbol}`;
+          const timestamp = new Date(transfer.executedAt).getTime();
+          const date = getDate(timestamp);
+          const image = token.metadata.image;
+          return {
+            key: `${transfer.transactionHash}-${transfer.eventId}-${i}`,
+            transactionHash: transfer.transactionHash,
+            amount: value,
+            to: transfer.toAddress,
+            from: transfer.fromAddress,
+            contractAddress: transfer.contractAddress,
+            symbol: transfer.symbol,
+            eventId: transfer.eventId,
+            date: date,
+            image,
+            action:
+              getChecksumAddress(transfer.fromAddress) ===
+              getChecksumAddress(accountAddress)
+                ? "send"
+                : ("receive" as "send" | "receive"),
+          };
+        });
+    });
+  }, [transfers, accountAddress, token?.metadata?.image]);
+
+  const to = useCallback((transactionHash: string) => {
+    return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
+      transactionHash,
+    );
+  }, []);
+
   if (!token) return;
 
   return (
@@ -117,59 +163,66 @@ function ERC20() {
       />
 
       <LayoutContent className="pb-4 gap-6">
-        <div className="flex items-center gap-4">
-          <Thumbnail icon={token.metadata.image} size="lg" rounded />
-          <div className="flex flex-col gap-0.5">
-            {token.balance === undefined ? (
-              <Skeleton className="h-[20px] w-[120px] rounded" />
-            ) : (
-              <p className="text-semibold text-lg/[22px]">
-                {`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
-              </p>
-            )}
-            {!!token.balance.value && (
-              <p className="text-foreground-300 text-xs">
-                {`~$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
-              </p>
-            )}
-          </div>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Details</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-foreground-400">Contract</div>
-            {isPublicChain(chainId) ? (
-              <Link
-                to={`${StarkscanUrl(
-                  chainId as constants.StarknetChainId,
-                ).contract(token.metadata.address)} `}
-                className="flex items-center gap-1 text-sm"
-                target="_blank"
-              >
-                <div className="font-medium">
-                  {formatAddress(token.metadata.address, { size: "sm" })}
-                </div>
-                <ExternalIcon size="sm" />
-              </Link>
-            ) : (
-              <div>{formatAddress(token.metadata.address)}</div>
-            )}
-          </CardContent>
+        <ERC20Header token={token} />
 
-          <CardContent className="flex items-center justify-between">
-            <div className="text-foreground-400">Token Standard</div>
-            <div className="font-medium">ERC-20</div>
-          </CardContent>
-        </Card>
+        <ERC20Detail
+          token={token}
+          isPublicChain={isPublicChain(chainId)}
+          chainId={chainId as constants.StarknetChainId}
+        />
+
+        <div className="flex flex-col gap-3">
+          {Object.entries(
+            txs
+              .filter((tx) => tx?.symbol === token.metadata.symbol)
+              .reduce(
+                (acc, tx) => {
+                  if (!acc[tx.date]) {
+                    acc[tx.date] = [];
+                  }
+                  acc[tx.date].push(tx);
+                  return acc;
+                },
+                {} as Record<string, typeof txs>,
+              ),
+          ).map(([date, transactions]) => (
+            <div key={date} className="flex flex-col gap-3">
+              <p className="text-foreground-400 font-semibold text-xs py-3 tracking-wider">
+                {date}
+              </p>
+              {transactions.map((item) => (
+                <Link
+                  key={item.key}
+                  to={to(item.transactionHash)}
+                  target="_blank"
+                >
+                  <ActivityTokenCard
+                    amount={item.amount}
+                    // no price available from the oracle for $PAPER
+                    value=""
+                    address={item.action === "send" ? item.to : item.from}
+                    image={token.metadata.image!}
+                    action={item.action}
+                  />
+                </Link>
+              ))}
+            </div>
+          ))}
+        </div>
       </LayoutContent>
 
       {isIframe() && compatibility && !visitor && (
         <LayoutFooter>
-          <Link to={`send?${searchParams.toString()}`}>
-            <Button className="w-full">Send</Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Thumbnail
+              icon={<DepositIcon variant="solid" size="sm" />}
+              size="lg"
+              className="aspect-square"
+            />
+            <Link to={`send?${searchParams.toString()}`} className="w-full">
+              <Button className="w-full">Send</Button>
+            </Link>
+          </div>
         </LayoutFooter>
       )}
     </LayoutContainer>
