@@ -2,20 +2,35 @@ import { TokenCard } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
 import { Token, useTokens } from "#hooks/token";
 import placeholder from "/public/placeholder.svg";
+import { useMemo } from "react";
+import { getChecksumAddress } from "starknet";
 
 export function Tokens() {
   const { tokens } = useTokens();
+
+  const filteredTokens = useMemo(() => {
+    // Filter out tokens with zero balance
+    const nonEmptyToken = tokens.filter((token) => token.balance.amount !== 0);
+
+    // Prevents duplicate tokens
+    const cleanedTokens = nonEmptyToken.map((token) => ({
+      ...token,
+      metadata: {
+        ...token.metadata,
+        address: getChecksumAddress(token.metadata.address),
+      },
+    }));
+    return cleanedTokens;
+  }, [tokens]);
 
   return (
     <div
       className="rounded overflow-clip w-full flex flex-col gap-y-px"
       style={{ scrollbarWidth: "none" }}
     >
-      {tokens
-        .filter((token) => token.balance.amount !== 0)
-        .map((token) => (
-          <TokenCardContent key={token.metadata.address} token={token} />
-        ))}
+      {filteredTokens.map((token) => (
+        <TokenCardContent key={token.metadata.address} token={token} />
+      ))}
     </div>
   );
 }
