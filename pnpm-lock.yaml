@@ -165,8 +165,8 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#9342156
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/9342156
+        specifier: github:cartridge-gg/presets#051a4aa
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/051a4aa
     devDependencies:
       turbo:
         specifier: ^2.4.4
@@ -1486,8 +1486,8 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/9342156':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/9342156}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/051a4aa':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/051a4aa}
     version: 0.0.1
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
@@ -6828,6 +6828,7 @@ packages:
 
   get-starknet-core@4.0.0:
     resolution: {integrity: sha512-6pLmidQZkC3wZsrHY99grQHoGpuuXqkbSP65F8ov1/JsEI8DDLkhsAuLCKFzNOK56cJp+f1bWWfTJ57e9r5eqQ==}
+    deprecated: Package no longer supported. Please use @starknet-io/get-starknet-core
 
   get-stdin@5.0.1:
     resolution: {integrity: sha512-jZV7n6jGE3Gt7fgSTJoz91Ak5MuTLwMwkoYdjxuJ/AmjIsE1UC03y/IWkZCQGEvVNS9qoRNwy5BCqxImv0FVeA==}
@@ -11243,7 +11244,7 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/9342156':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/051a4aa':
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
