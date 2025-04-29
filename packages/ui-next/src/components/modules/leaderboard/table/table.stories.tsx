@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AchievementLeaderboard } from "./leaderboard";
-import AchievementLeaderboardRow from "../leaderboard-row/leaderboard-row";
+import { LeaderboardTable } from "./table";
+import LeaderboardTableRow from "../row/row";
 
-const meta: Meta<typeof AchievementLeaderboard> = {
-  title: "Modules/Achievements/Leaderboard",
-  component: AchievementLeaderboard,
+const meta: Meta<typeof LeaderboardTable> = {
+  title: "Modules/Leaderboard/Table",
+  component: LeaderboardTable,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -12,98 +12,116 @@ const meta: Meta<typeof AchievementLeaderboard> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof AchievementLeaderboard>;
+type Story = StoryObj<typeof LeaderboardTable>;
 
 const data = [
   {
     name: "bal7hazar",
     points: 950,
     highlight: false,
+    following: true,
   },
   {
     name: "player",
     points: 900,
     highlight: false,
+    following: false,
   },
   {
     name: "player",
     points: 820,
     highlight: false,
+    following: false,
   },
   {
     name: "player",
     points: 800,
     highlight: false,
+    following: true,
   },
   {
     name: "player",
     points: 800,
     highlight: false,
+    following: true,
   },
   {
     name: "player",
     points: 790,
     highlight: false,
+    following: false,
   },
   {
     name: "player",
     points: 775,
     highlight: false,
+    following: false,
   },
   {
     name: "player",
     points: 720,
     highlight: false,
+    following: false,
   },
   {
     name: "player",
     points: 700,
     highlight: false,
+    following: true,
   },
   {
     name: "player",
     points: 690,
     highlight: false,
+    following: true,
   },
   {
     name: "player",
     points: 670,
     highlight: false,
+    following: true,
   },
   {
     name: "player",
     points: 650,
     highlight: false,
+    following: false,
   },
   {
     name: "player",
     points: 650,
     highlight: false,
+    following: false,
   },
   {
     name: "player",
     points: 640,
     highlight: false,
+    following: true,
   },
   {
     name: "player",
     points: 640,
     highlight: false,
+    following: true,
   },
   {
     name: "player",
     points: 640,
     highlight: false,
+    following: true,
   },
   {
     name: "player",
     points: 640,
     highlight: false,
+    following: false,
   },
   {
     name: "shinobi",
     points: 640,
     highlight: true,
+    following: false,
   },
 ];
 Array.from({ length: 100 }).forEach((_, index) => {
@@ -111,25 +129,23 @@ Array.from({ length: 100 }).forEach((_, index) => {
     name: `player ${index}`,
     points: 640,
     highlight: false,
+    following: false,
   });
 });
 
 export const Default: Story = {
   render: () => (
-    <AchievementLeaderboard className="h-[657px]">
+    <LeaderboardTable className="h-[657px]">
       {data.map((item, index) => (
-        <AchievementLeaderboardRow
+        <LeaderboardTableRow
           key={index}
-          pins={[
-            { id: "1", icon: "fa-seedling" },
-            { id: "2", icon: "fa-swords" },
-          ]}
           rank={index + 1}
           name={item.name}
           points={item.points}
           highlight={item.highlight}
+          following={item.following}
         />
       ))}
-    </AchievementLeaderboard>
+    </LeaderboardTable>
   ),
 };
