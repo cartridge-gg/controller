@@ -1,3 +1,3 @@
-export * from "./token-select";
+export * from "./select";
 export * from "./header";
 export * from "./detail";

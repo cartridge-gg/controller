@@ -57,22 +57,6 @@ const mockTokens = [
       change: 0,
     },
     metadata: {
-      name: "Tether USD",
-      symbol: "USDT",
-      decimals: 6,
-      address:
-        "0x068F5c6a61780768455de69077E07e89787839cf8166dEcfBf92B645209c0fB8",
-      image:
-        "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/c8a721d1-07c3-46e4-ab4e-523977c30b00/logo",
-    },
-  },
-  {
-    balance: {
-      amount: 0,
-      value: 0,
-      change: 0,
-    },
-    metadata: {
       name: "Dai Stablecoin",
       symbol: "DAI",
       decimals: 18,
@@ -96,22 +80,6 @@ const mockTokens = [
         "0x0124aeb495b947201f5fac96fd1138e326ad86295b98df6dec9009158a533b49",
       image:
         "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/a3bfe959-50c4-4f89-0aef-b19207d82a00/logo",
-    },
-  },
-  {
-    balance: {
-      amount: 0,
-      value: 0,
-      change: 0,
-    },
-    metadata: {
-      name: "Flip",
-      symbol: "FLIP",
-      decimals: 18,
-      address:
-        "0x01bfe97d729138fc7c2d93c77d6d1d8a24708d6060608017d9b384adf38f04c7",
-      image:
-        "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/275f0fa8-a691-471c-ace6-0eb0315dde00/logo",
     },
   },
   {
