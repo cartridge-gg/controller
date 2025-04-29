@@ -1,4 +1,5 @@
 import {
+  Empty,
   FollowerSocialList,
   FollowerSocialRow,
   FollowerTabs,
@@ -129,56 +130,70 @@ export function Socials() {
           defaultValue={value}
           followers={followers.length}
           following={followeds.length}
-          className="overflow-hidden"
+          className="h-full overflow-hidden"
         >
           <TabsContent
             className="p-0 mt-4 h-[calc(100%-56px)]"
             value="followers"
           >
-            <FollowerSocialList>
-              {followers.map((item) => (
-                <FollowerSocialRow
-                  key={item.address}
-                  username={item.username}
-                  following={item.following}
-                  unfollowable={false}
-                  loading={BigInt(loading || 0) === BigInt(item.address)}
-                  disabled={
-                    loading !== null &&
-                    BigInt(loading || 0) !== BigInt(item.address)
-                  }
-                  onSocialClick={() =>
-                    handleSocialClick(item.address, true, setLoading)
-                  }
-                />
-              ))}
-            </FollowerSocialList>
+            {followers.length === 0 ? (
+              <EmptyState />
+            ) : (
+              <FollowerSocialList>
+                {followers.map((item) => (
+                  <FollowerSocialRow
+                    key={item.address}
+                    username={item.username}
+                    following={item.following}
+                    unfollowable={false}
+                    loading={BigInt(loading || 0) === BigInt(item.address)}
+                    disabled={
+                      loading !== null &&
+                      BigInt(loading || 0) !== BigInt(item.address)
+                    }
+                    onSocialClick={() =>
+                      handleSocialClick(item.address, true, setLoading)
+                    }
+                  />
+                ))}
+              </FollowerSocialList>
+            )}
           </TabsContent>
           <TabsContent
             className="p-0 mt-4 h-[calc(100%-56px)]"
             value="following"
           >
-            <FollowerSocialList>
-              {followeds.map((item) => (
-                <FollowerSocialRow
-                  key={item.address}
-                  username={item.username}
-                  following={true}
-                  unfollowable={true}
-                  loading={BigInt(loading || 0) === BigInt(item.address)}
-                  disabled={
-                    loading !== null &&
-                    BigInt(loading || 0) !== BigInt(item.address)
-                  }
-                  onSocialClick={() =>
-                    handleSocialClick(item.address, false, setLoading)
-                  }
-                />
-              ))}
-            </FollowerSocialList>
+            {followeds.length === 0 ? (
+              <EmptyState />
+            ) : (
+              <FollowerSocialList>
+                {followeds.map((item) => (
+                  <FollowerSocialRow
+                    key={item.address}
+                    username={item.username}
+                    following={true}
+                    unfollowable={true}
+                    loading={BigInt(loading || 0) === BigInt(item.address)}
+                    disabled={
+                      loading !== null &&
+                      BigInt(loading || 0) !== BigInt(item.address)
+                    }
+                    onSocialClick={() =>
+                      handleSocialClick(item.address, false, setLoading)
+                    }
+                  />
+                ))}
+              </FollowerSocialList>
+            )}
           </TabsContent>
         </FollowerTabs>
       </LayoutContent>
     </LayoutContainer>
   );
 }
+
+const EmptyState = () => {
+  return (
+    <Empty title="It's lonely in here..." icon="discover" className="h-full" />
+  );
+};
