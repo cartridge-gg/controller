@@ -3,10 +3,11 @@ import {
   Button,
   cn,
   CopyIcon,
-  QuestionIcon,
+  GlobeIcon,
   SlotIcon,
   StarknetColorIcon,
   StarknetIcon,
+  Thumbnail,
 } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useCallback, useMemo } from "react";
@@ -60,11 +61,15 @@ export const ConnectionTooltipContent = ({
   const Icon = useMemo(() => {
     switch (chainId) {
       case constants.StarknetChainId.SN_MAIN:
-        return <StarknetColorIcon />;
+        return <StarknetColorIcon className="scale-[1.33]" />;
       case constants.StarknetChainId.SN_SEPOLIA:
-        return <StarknetIcon />;
+        return <StarknetIcon className="scale-150" />;
       default:
-        return isSlotChain(chainId) ? <SlotIcon /> : <QuestionIcon />;
+        return isSlotChain(chainId) ? (
+          <SlotIcon className="scale-150" />
+        ) : (
+          <GlobeIcon variant="solid" className="scale-150" />
+        );
     }
   }, [chainId]);
 
@@ -102,8 +107,10 @@ export const ConnectionTooltipContent = ({
         >
           <p className="text-sm text-foreground-400 select-none">Network:</p>
           <div className="flex items-center gap-1.5">
-            {Icon}
-            <p className="text-sm font-medium">{getChainName(chainId)}</p>
+            <Thumbnail size="xs" icon={Icon} rounded />
+            <p className="text-sm font-medium capitalize">
+              {getChainName(chainId).toLowerCase()}
+            </p>
           </div>
         </div>
         <div className="flex items-center justify-between gap-2 px-2 py-2.5 bg-background-150">

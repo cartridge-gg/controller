@@ -25,7 +25,25 @@ const meta: Meta<typeof ConnectionTooltipContent> = {
 export default meta;
 type Story = StoryObj<typeof ConnectionTooltipContent>;
 
-export const Default: Story = {};
+export const Starknet: Story = {};
+
+export const Sepolia: Story = {
+  args: {
+    chainId: constants.StarknetChainId.SN_SEPOLIA,
+  },
+};
+
+export const Slot: Story = {
+  args: {
+    chainId: "0x57505f534c4f54",
+  },
+};
+
+export const Default: Story = {
+  args: {
+    chainId: "0x44454641554c54",
+  },
+};
 
 export const HiddenNetwork: Story = {
   args: {

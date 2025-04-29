@@ -47,8 +47,6 @@ export const FollowerTab = ({
   variant,
   className,
 }: FollowerTabProps) => {
-  if (!counter) return null;
-
   return (
     <TabsTrigger
       data-state={active ? "active" : "inactive"}
