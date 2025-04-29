@@ -45,8 +45,15 @@ export function useWebauthnAuthentication() {
         finalUsername,
         controllerNode.constructorCalldata[0],
         controllerNode.address,
-        credentialId,
-        publicKey,
+        {
+          signer: {
+            webauthn: {
+              rpId: "",
+              credentialId,
+              publicKey,
+            },
+          },
+        },
       );
 
       window.controller = controller;
@@ -81,8 +88,15 @@ export function useWebauthnAuthentication() {
         account.username,
         controller.constructorCalldata[0],
         controller.address,
-        credentialId,
-        publicKey,
+        {
+          signer: {
+            webauthn: {
+              rpId: "",
+              credentialId,
+              publicKey,
+            },
+          },
+        },
       );
 
       if (loginMode === LoginMode.Webauthn) {

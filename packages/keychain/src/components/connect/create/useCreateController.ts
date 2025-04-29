@@ -3,7 +3,7 @@ import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
-import { Owner, Signer } from "@cartridge/account-wasm";
+import { computeAccountAddress, Owner, Signer } from "@cartridge/account-wasm";
 import {
   AccountQuery,
   SignerInput,
@@ -18,6 +18,7 @@ import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
+import { shortString } from "starknet";
 
 export interface SignupResponse {
   address: string;
@@ -133,18 +134,18 @@ export function useCreateController({
       }
 
       let signupResponse: SignupResponse | undefined;
-      let owner: SignerInput | undefined;
+      let signer: SignerInput | undefined;
       switch (authenticationMode) {
         case "webauthn":
           await signupWithWebauthn(username, doPopupFlow);
-          owner = {
+          signer = {
             type: SignerType.Webauthn,
             credential: JSON.stringify({}),
           };
           return;
         case "social":
           signupResponse = await signupWithSocial(username);
-          owner = {
+          signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
               provider: "discord",
@@ -154,7 +155,7 @@ export function useCreateController({
           break;
         case "walletconnect":
           signupResponse = await signupWithWalletConnect();
-          owner = {
+          signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
               provider: "walletconenct",
@@ -166,8 +167,11 @@ export function useCreateController({
         case "phantom":
         case "argent":
         case "rabby":
-          signupResponse = await signupWithExternalWallet(username, authenticationMode);
-          owner = {
+          signupResponse = await signupWithExternalWallet(
+            username,
+            authenticationMode,
+          );
+          signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
               provider: authenticationMode,
@@ -179,29 +183,35 @@ export function useCreateController({
           break;
       }
 
-      if (!signupResponse || !owner) {
+      if (!signupResponse || !signer) {
         throw new Error("Signup failed");
       }
 
+      const classHash = STABLE_CONTROLLER.hash;
+      const owner = {
+        signer: signupResponse.signer,
+      };
+      const salt = shortString.encodeShortString(username);
+      const address = computeAccountAddress(classHash, owner, salt);
+
       const controller = new Controller({
         appId: origin,
-        classHash: STABLE_CONTROLLER.hash,
+        classHash,
         chainId,
         rpcUrl,
-        address: signupResponse.address,
+        address,
         username,
-        owner: {
-          signer: signupResponse.signer,
-        },
+        owner,
       });
 
       const result = await controller.login(now() + DEFAULT_SESSION_DURATION);
       console.log("login result", result);
+      console.log(controller.address());
 
       const registerRet = await register({
         username,
         chainId: "SN_SEPOLIA",
-        owner,
+        owner: signer,
         session: {
           expiresAt: result.session.expiresAt.toString(),
           guardianKeyGuid: result.session.guardianKeyGuid,

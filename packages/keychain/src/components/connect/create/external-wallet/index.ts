@@ -57,8 +57,15 @@ export const useExternalWalletAuthentication = () => {
         username,
         controllerNode.constructorCalldata[0],
         controllerNode.address,
-        credentialId,
-        publicKey,
+        {
+          signer: {
+            webauthn: {
+              rpId: "",
+              credentialId,
+              publicKey,
+            },
+          },
+        },
       );
 
       await controller.login(now() + DEFAULT_SESSION_DURATION);
