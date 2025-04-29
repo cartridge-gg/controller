@@ -3,7 +3,8 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-  LayoutContentLoader,
+  Empty,
+  Skeleton,
 } from "@cartridge/ui-next";
 import { useAccount } from "#hooks/account";
 import { useEffect, useMemo } from "react";
@@ -90,12 +91,24 @@ export function Achievements() {
           />
         </LayoutContent>
       ) : status === "loading" ? (
-        <LayoutContentLoader />
-      ) : (
-        <LayoutContent className="pb-4 select-none h-full">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
-            <p className="text-foreground-400">No trophies available</p>
+        <LayoutContent className="py-6 gap-y-4 select-none h-full overflow-hidden">
+          <div className="flex justify-between">
+            <Skeleton className="min-h-[136px] w-[120px] rounded" />
+            <Skeleton className="min-h-[136px] w-[120px] rounded" />
+            <Skeleton className="min-h-[136px] w-[120px] rounded" />
           </div>
+          <Skeleton className="min-h-10 w-full rounded" />
+          {Array.from({ length: 10 }).map((_, index) => (
+            <Skeleton key={index} className="min-h-[177px] w-full rounded" />
+          ))}
+        </LayoutContent>
+      ) : (
+        <LayoutContent className="select-none h-full">
+          <Empty
+            title="No achievements exist for this game."
+            icon="achievement"
+            className="h-full"
+          />
         </LayoutContent>
       )}
 

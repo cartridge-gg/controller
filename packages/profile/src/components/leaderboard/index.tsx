@@ -3,9 +3,10 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-  LayoutContentLoader,
   LeaderboardTable,
   LeaderboardRow,
+  Empty,
+  Skeleton,
 } from "@cartridge/ui-next";
 import { useAccount, useUsernames } from "#hooks/account";
 import { useEffect, useMemo } from "react";
@@ -84,12 +85,20 @@ export function Leaderboard() {
           </LeaderboardTable>
         </LayoutContent>
       ) : status === "loading" ? (
-        <LayoutContentLoader />
+        <LayoutContent className="py-6 select-none h-full">
+          <LeaderboardTable className="h-full overflow-hidden">
+            {Array.from({ length: 30 }).map((_, index) => (
+              <Skeleton key={index} className="min-h-11 w-full rounded-none" />
+            ))}
+          </LeaderboardTable>
+        </LayoutContent>
       ) : (
-        <LayoutContent className="pb-4 select-none h-full">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
-            <p className="text-foreground-400">No trophies available</p>
-          </div>
+        <LayoutContent className="select-none h-full">
+          <Empty
+            title="No leaderboard available for this game."
+            icon="leaderboard"
+            className="h-full"
+          />
         </LayoutContent>
       )}
 
