@@ -1,13 +1,34 @@
 #!/bin/bash
 
-COMMIT_EXAMPLE_NEXT=$(git merge-base HEAD @{u})
+COMMIT_EXAMPLE_NEXT=$(git merge-base HEAD main)
 COMMIT_KEYCHAIN=$(git rev-parse HEAD)
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --commit-example)
+      COMMIT_EXAMPLE_NEXT="$2"
+      shift 2
+      ;;
+    --commit-keychain)
+      COMMIT_KEYCHAIN="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: $0 [--commit-example COMMIT] [--commit-keychain COMMIT]"
+      exit 1
+      ;;
+  esac
+done
+
+echo "Using example-next commit: $COMMIT_EXAMPLE_NEXT"
+echo "Using keychain commit: $COMMIT_KEYCHAIN"
 
 PACKAGE_EXAMPLE_NEXT="@cartridge/controller-example-next"
 PACKAGE_KEYCHAIN="@cartridge/keychain"
 
-WORKTREE_EXAMPLE_NEXT_PATH="../controller-example-next-commit"
-WORKTREE_KEYCHAIN_PATH="../controller-keychain-commit"
+WORKTREE_EXAMPLE_NEXT_PATH="../controller-example-next"
+WORKTREE_KEYCHAIN_PATH="../controller-keychain"
 
 ORIGINAL_DIR=$(pwd)
 DEV_EXAMPLE_NEXT_PID=""
@@ -16,7 +37,6 @@ DEV_KEYCHAIN_PID=""
 cleanup() {
   echo "Cleaning up..."
   cd "$ORIGINAL_DIR"
-
   if [[ -n "$DEV_EXAMPLE_NEXT_PID" && $(ps -p $DEV_EXAMPLE_NEXT_PID -o comm=) ]]; then
     kill $DEV_EXAMPLE_NEXT_PID
   fi
@@ -64,7 +84,7 @@ if [ $? -ne 0 ]; then echo "ERROR: Failed to cd into worktree example-next."; ex
 pnpm install
 if [ $? -ne 0 ]; then echo "ERROR: pnpm install failed in worktree example-next."; exit 1; fi
 
-pnpm build # Build everything in this commit for simplicity
+pnpm build
 if [ $? -ne 0 ]; then echo "ERROR: pnpm build failed in worktree example-next."; exit 1; fi
 
 pnpm --filter "$PACKAGE_EXAMPLE_NEXT" dev &
@@ -86,7 +106,7 @@ if [ $? -ne 0 ]; then echo "ERROR: pnpm install failed in worktree keychain."; e
 pnpm build
 if [ $? -ne 0 ]; then echo "ERROR: pnpm build failed in worktree keychain."; exit 1; fi
 
-pnpm --filter "$PACKAGE_KEYCHAIN" dev &
+pnpm --filter "$PACKAGE_KEYCHAIN" preview &
 DEV_KEYCHAIN_PID=$!
 echo "$PACKAGE_KEYCHAIN dev server started with PID $DEV_KEYCHAIN_PID."
 sleep 5
