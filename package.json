@@ -29,7 +29,8 @@
     "test": "pnpm keychain test",
     "test:ci": "pnpm keychain test:ci",
     "test:storybook": "pnpm turbo build:deps test:storybook",
-    "test:storybook:update": "pnpm turbo build:deps test:storybook:update"
+    "test:storybook:update": "pnpm turbo build:deps test:storybook:update",
+    "check:regression": "pnpm --filter @cartridge/keychain check:regression"
   },
   "dependencies": {
     "@cartridge/presets": "github:cartridge-gg/presets#051a4aa"
