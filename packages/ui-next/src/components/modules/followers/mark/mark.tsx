@@ -1,13 +1,13 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { cn, UserAddIcon, UserCheckIcon } from "@/index";
+import { cn, UserCheckIcon } from "@/index";
 
 export const followerMarkVariants = cva(
-  "h-6 w-7 flex items-center justify-center rounded",
+  "h-6 w-7 flex items-center justify-center rounded hidden data-[active=true]:flex",
   {
     variants: {
       variant: {
         default:
-          "border border-background-300 group-hover:border-background-400 text-background-400 group-hover:text-background-500 data-[active=true]:text-foreground-100 data-[active=true]:group-hover:text-foreground-100 transition-colors",
+          "text-background-400 group-hover:text-background-500 data-[active=true]:text-foreground-100 data-[active=true]:group-hover:text-foreground-100 transition-colors",
       },
     },
     defaultVariants: {
@@ -34,11 +34,7 @@ export const FollowerMark = ({
       className={cn(followerMarkVariants({ variant, className }))}
       {...props}
     >
-      {active ? (
-        <UserCheckIcon variant="line" size="sm" />
-      ) : (
-        <UserAddIcon variant="line" size="sm" />
-      )}
+      <UserCheckIcon variant="solid" size="sm" />
     </div>
   );
 };
