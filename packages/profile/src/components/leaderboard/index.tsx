@@ -85,12 +85,8 @@ export function Leaderboard() {
           </LeaderboardTable>
         </LayoutContent>
       ) : status === "loading" ? (
-        <LayoutContent className="py-6 select-none h-full">
-          <LeaderboardTable className="h-full overflow-hidden">
-            {Array.from({ length: 30 }).map((_, index) => (
-              <Skeleton key={index} className="min-h-11 w-full rounded-none" />
-            ))}
-          </LeaderboardTable>
+        <LayoutContent className="select-none h-full">
+          <Skeleton className="h-full w-full rounded" />
         </LayoutContent>
       ) : (
         <LayoutContent className="select-none h-full">

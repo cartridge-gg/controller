@@ -91,7 +91,7 @@ export const cartridgeTWPreset: Partial<Config> = {
         },
         shimmer: {
           "0%": { backgroundPosition: "100% 0" },
-          "50%": { backgroundPosition: "-100% 0" },
+          "20%": { backgroundPosition: "-100% 0" },
           "100%": { backgroundPosition: "-100% 0" },
         },
       },

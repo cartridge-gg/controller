@@ -91,7 +91,7 @@ export function Achievements() {
           />
         </LayoutContent>
       ) : status === "loading" ? (
-        <LayoutContent className="py-6 gap-y-4 select-none h-full overflow-hidden">
+        <LayoutContent className="gap-y-4 select-none h-full overflow-hidden">
           <div className="flex justify-between">
             <Skeleton className="min-h-[136px] w-[120px] rounded" />
             <Skeleton className="min-h-[136px] w-[120px] rounded" />
