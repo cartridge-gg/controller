@@ -43,7 +43,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
 
   const createPaymentIntent = useCallback(
     async (
-      credits: number,
+      wholeCredits: number,
       username: string,
       starterpack?: StarterPackDetails,
     ) => {
@@ -59,7 +59,10 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
           {
             input: {
               username,
-              credits,
+              credits: {
+                amount: wholeCredits,
+                decimals: 0,
+              },
               starterpackId: starterpack?.id,
               purchaseType: starterpack
                 ? PurchaseType.STARTERPACK
