@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -19,12 +18,10 @@ import { LayoutBottomNav } from "#components/bottom-nav";
 export function Leaderboard() {
   const { address: self } = useAccount();
   const {
-    trophies: { achievements, players, status },
+    trophies: { players, status },
     setAccountAddress,
   } = useData();
   const { followeds } = useArcade();
-
-  const navigate = useNavigate();
 
   const followings = useMemo(() => {
     return followeds[getChecksumAddress(self)] || [];
@@ -37,10 +34,6 @@ export function Leaderboard() {
   const { usernames } = useUsernames({ addresses });
 
   const { address } = useParams<{ address: string }>();
-
-  const isSelf = useMemo(() => {
-    return !address || address === self;
-  }, [address, self]);
 
   const data = useMemo(() => {
     return players.map((player) => {
@@ -64,12 +57,12 @@ export function Leaderboard() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        variant="hidden"
-        onBack={isSelf ? undefined : () => navigate(".")}
-      />
-
-      {achievements.length ? (
+      <LayoutHeader variant="hidden" />
+      {status === "loading" ? (
+        <LoadingState />
+      ) : status === "error" || !data.length ? (
+        <EmptyState />
+      ) : (
         <LayoutContent className="py-6 gap-y-6 select-none h-full">
           <LeaderboardTable className="h-full">
             {data.map((item, index) => (
@@ -84,21 +77,28 @@ export function Leaderboard() {
             ))}
           </LeaderboardTable>
         </LayoutContent>
-      ) : status === "loading" ? (
-        <LayoutContent className="select-none h-full">
-          <Skeleton className="h-full w-full rounded" />
-        </LayoutContent>
-      ) : (
-        <LayoutContent className="select-none h-full">
-          <Empty
-            title="No leaderboard available for this game."
-            icon="leaderboard"
-            className="h-full"
-          />
-        </LayoutContent>
       )}
-
-      {isSelf && <LayoutBottomNav />}
+      <LayoutBottomNav />
     </LayoutContainer>
   );
 }
+
+const LoadingState = () => {
+  return (
+    <LayoutContent className="select-none h-full">
+      <Skeleton className="h-full w-full rounded" />
+    </LayoutContent>
+  );
+};
+
+const EmptyState = () => {
+  return (
+    <LayoutContent className="select-none h-full">
+      <Empty
+        title="No leaderboard available for this game."
+        icon="leaderboard"
+        className="h-full"
+      />
+    </LayoutContent>
+  );
+};

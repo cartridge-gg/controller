@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -22,8 +21,6 @@ export function Achievements() {
     trophies: { achievements, players, status },
     setAccountAddress,
   } = useData();
-
-  const navigate = useNavigate();
 
   const { pins, games, editions } = useArcade();
 
@@ -62,27 +59,23 @@ export function Achievements() {
     );
   }, [address, self, players]);
 
-  const isSelf = useMemo(() => {
-    return !address || address === self;
-  }, [address, self]);
-
   useEffect(() => {
     setAccountAddress(address || self || "");
   }, [address, self, setAccountAddress]);
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        variant="hidden"
-        onBack={isSelf ? undefined : () => navigate(".")}
-      />
-
-      {achievements.length ? (
+      <LayoutHeader variant="hidden" />
+      {status === "loading" ? (
+        <LoadingState />
+      ) : status === "error" || !achievements.length ? (
+        <EmptyState />
+      ) : (
         <LayoutContent className="py-6 gap-y-6 select-none h-full">
           <Trophies
             achievements={achievements}
             pinneds={pinneds}
-            softview={!isSelf}
+            softview={false}
             enabled={pinneds.length < 3}
             game={game}
             edition={edition}
@@ -90,29 +83,36 @@ export function Achievements() {
             earnings={points}
           />
         </LayoutContent>
-      ) : status === "loading" ? (
-        <LayoutContent className="gap-y-4 select-none h-full overflow-hidden">
-          <div className="flex justify-between">
-            <Skeleton className="min-h-[136px] w-[120px] rounded" />
-            <Skeleton className="min-h-[136px] w-[120px] rounded" />
-            <Skeleton className="min-h-[136px] w-[120px] rounded" />
-          </div>
-          <Skeleton className="min-h-10 w-full rounded" />
-          {Array.from({ length: 10 }).map((_, index) => (
-            <Skeleton key={index} className="min-h-[177px] w-full rounded" />
-          ))}
-        </LayoutContent>
-      ) : (
-        <LayoutContent className="select-none h-full">
-          <Empty
-            title="No achievements exist for this game."
-            icon="achievement"
-            className="h-full"
-          />
-        </LayoutContent>
       )}
-
-      {isSelf && <LayoutBottomNav />}
+      <LayoutBottomNav />
     </LayoutContainer>
   );
 }
+
+const LoadingState = () => {
+  return (
+    <LayoutContent className="gap-y-4 select-none h-full overflow-hidden">
+      <div className="flex justify-between">
+        <Skeleton className="min-h-[136px] w-[120px] rounded" />
+        <Skeleton className="min-h-[136px] w-[120px] rounded" />
+        <Skeleton className="min-h-[136px] w-[120px] rounded" />
+      </div>
+      <Skeleton className="min-h-10 w-full rounded" />
+      {Array.from({ length: 10 }).map((_, index) => (
+        <Skeleton key={index} className="min-h-[177px] w-full rounded" />
+      ))}
+    </LayoutContent>
+  );
+};
+
+const EmptyState = () => {
+  return (
+    <LayoutContent className="select-none h-full">
+      <Empty
+        title="No achievements exist for this game."
+        icon="achievement"
+        className="h-full"
+      />
+    </LayoutContent>
+  );
+};
