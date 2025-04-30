@@ -3,6 +3,7 @@ import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
+import { useFeature } from "@/hooks/features";
 import {
   Button,
   CreateAccount,
@@ -19,7 +20,6 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
-import { useFeature } from "@/hooks/features";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -202,7 +202,7 @@ export function CreateController({
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
 
-  const isNewSignup = useFeature("new-signup");
+  const newLoginFeatureEnabled = useFeature("new-login");
 
   const [usernameField, setUsernameField] = useState({
     value: "",
@@ -244,7 +244,11 @@ export function CreateController({
       if (validation.status === "valid") {
         const accountExists = !!validation.exists;
 
-        if (authenticationMode === undefined && !accountExists && isNewSignup) {
+        if (
+          authenticationMode === undefined &&
+          !accountExists &&
+          newLoginFeatureEnabled
+        ) {
           setAuthenticationStep(AuthenticationStep.ChooseSignupMethod);
           return;
         }
@@ -258,6 +262,7 @@ export function CreateController({
       validation.exists,
       validation.status,
       setAuthenticationStep,
+      newLoginFeatureEnabled,
     ],
   );
 
