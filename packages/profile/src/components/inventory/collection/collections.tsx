@@ -1,13 +1,19 @@
 import { Link } from "react-router-dom";
 import { useCollections } from "#hooks/collection";
 import placeholder from "/public/placeholder.svg";
-import { CollectibleAsset } from "@cartridge/ui-next";
+import { CollectibleAsset, Skeleton } from "@cartridge/ui-next";
 
 export function Collections() {
   const { collections, status } = useCollections();
 
   switch (status) {
     case "loading":
+      return (
+        <div className="flex gap-4">
+          <Skeleton className="w-1/2 h-[184px] rounded" />
+          <Skeleton className="w-1/2 h-[184px] rounded" />
+        </div>
+      );
     case "error": {
       return null;
     }

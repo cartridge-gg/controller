@@ -5,13 +5,13 @@ import {
   ActivityTokenCard,
   Button,
   cn,
+  Empty,
   EmptyStateActivityIcon,
   LayoutContainer,
   LayoutContent,
-  LayoutContentError,
-  LayoutContentLoader,
   LayoutHeader,
   PlusIcon,
+  Skeleton,
 } from "@cartridge/ui-next";
 import { VoyagerUrl } from "@cartridge/utils";
 import { useConnection, useData } from "#hooks/context";
@@ -71,10 +71,27 @@ export function Activity() {
       {(() => {
         switch (status) {
           case "loading": {
-            return <LayoutContentLoader />;
+            return (
+              <LayoutContent className="flex flex-col gap-4 p-6 overflow-hidden">
+                <Skeleton className="w-1/5 h-4 py-4 rounded" />
+                <div className="flex flex-col gap-2">
+                  {Array.from({ length: 20 }).map((_, index) => (
+                    <Skeleton key={index} className="w-full h-16 rounded" />
+                  ))}
+                </div>
+              </LayoutContent>
+            );
           }
           case "error": {
-            return <LayoutContentError />;
+            return (
+              <LayoutContent className="flex flex-col gap-4 p-6">
+                <Empty
+                  title="No activity has been detected for this profile."
+                  icon="activity"
+                  className="h-full"
+                />
+              </LayoutContent>
+            );
           }
           case "success": {
             return (
