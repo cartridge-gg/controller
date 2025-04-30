@@ -5,6 +5,7 @@ import { TransactionSummary } from "@/components/transaction/TransactionSummary"
 import { ExecuteCtx } from "@/utils/connection";
 import { EstimateFee } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { useEffect } from "react";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, setContext } = useConnection();
@@ -25,6 +26,10 @@ export function ConfirmTransaction() {
     // resets execute ui
     setContext(undefined);
   };
+
+  useEffect(() => {
+    console.log("transaction: ", transactions);
+  }, [transactions]);
 
   return (
     <ExecutionContainer

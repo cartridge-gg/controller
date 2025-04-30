@@ -4,8 +4,9 @@ import { ConfirmTransaction } from "./ConfirmTransaction";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
 import { VerifiableControllerTheme } from "@/components/provider/connection";
 
-const meta = {
+const meta: Meta<typeof ConfirmTransaction> = {
   component: ConfirmTransaction,
+  title: "Transaction/Confirm Transaction",
   parameters: {
     connection: {
       controller: {
@@ -42,7 +43,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof ConfirmTransaction>;
+};
 
 export default meta;
 

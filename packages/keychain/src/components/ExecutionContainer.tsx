@@ -9,6 +9,7 @@ import {
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
+  PaperPlaneIcon,
 } from "@cartridge/ui-next";
 import isEqual from "lodash/isEqual";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -178,7 +179,11 @@ export function ExecutionContainer({
         <LayoutHeader
           title={title}
           description={description}
-          icon={icon}
+          icon={
+            icon || (
+              <PaperPlaneIcon variant="solid" className="h-[30px] w-[30px]" />
+            )
+          }
           onClose={onClose}
           right={right}
         />

@@ -8,18 +8,20 @@ import {
 } from "@cartridge/ui-next";
 import { useMemo } from "react";
 
-type BalanceProps = {
-  title?: string;
-  price: number;
-  unit: "USDC" | "CREDITS";
+type TransactionDestinationProps = {
+  address: string;
+  imageURL?: string;
 };
 
-export function Spending({ title, price, unit }: BalanceProps) {
+export function TransactionDestination({
+  address,
+  imageURL,
+}: TransactionDestinationProps) {
   const Logo = useMemo(
     () => (
       <Thumbnail
         icon={
-          unit === "USDC"
+          imageURL
             ? "https://static.cartridge.gg/tokens/usdc.svg"
             : "https://static.cartridge.gg/presets/credit/icon.svg"
         }
@@ -27,21 +29,21 @@ export function Spending({ title, price, unit }: BalanceProps) {
         rounded
       />
     ),
-    [unit],
+    [imageURL],
   );
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="normal-case font-semibold text-xs">
-          {title ?? "Spending"}
+          Destination
         </CardTitle>
       </CardHeader>
       <ActivityCard
         Logo={Logo}
-        title={unit}
-        subTitle={`${price.toString()} ${unit}`}
-        topic={`$${price.toFixed(2).toString()}`}
+        title={address}
+        subTitle={address}
+        topic={address}
         subTopic={""}
         variant={"default"}
         className={cn("rounded-none")}
