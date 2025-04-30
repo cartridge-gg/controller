@@ -3,6 +3,7 @@ import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
+import { useFeature } from "@/hooks/features";
 import {
   Button,
   CreateAccount,
@@ -10,6 +11,7 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
+  Sheet,
 } from "@cartridge/ui-next";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -19,7 +21,6 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
-import { useFeature } from "@/hooks/features";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -37,8 +38,8 @@ interface CreateControllerViewProps {
   onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
   isSlot?: boolean;
-  authenticationStep: AuthenticationStep | undefined;
-  setAuthenticationStep: (value: AuthenticationStep | undefined) => void;
+  authenticationStep: AuthenticationStep;
+  setAuthenticationStep: (value: AuthenticationStep) => void;
 }
 
 type CreateControllerFormProps = Omit<
@@ -61,7 +62,7 @@ function CreateControllerForm({
   onSubmit,
 }: CreateControllerFormProps) {
   return (
-    <>
+    <LayoutContainer>
       <LayoutHeader
         variant="expanded"
         title={
@@ -125,7 +126,7 @@ function CreateControllerForm({
           </Button>
         </LayoutFooter>
       </form>
-    </>
+    </LayoutContainer>
   );
 }
 export function CreateControllerView({
@@ -144,33 +145,37 @@ export function CreateControllerView({
   authenticationStep,
   setAuthenticationStep,
 }: CreateControllerViewProps) {
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setAuthenticationStep(AuthenticationStep.FillForm);
+    }
+  };
+
   return (
-    <LayoutContainer>
-      {authenticationStep === AuthenticationStep.FillForm && (
-        <CreateControllerForm
-          theme={theme}
-          usernameField={usernameField}
-          validation={validation}
-          isLoading={isLoading}
-          error={error}
-          isInAppBrowser={isInAppBrowser}
-          isSlot={isSlot}
-          onUsernameChange={onUsernameChange}
-          onUsernameFocus={onUsernameFocus}
-          onUsernameClear={onUsernameClear}
-          onSubmit={onSubmit}
-          onKeyDown={onKeyDown}
-        />
-      )}
-      {authenticationStep === AuthenticationStep.ChooseSignupMethod && (
-        <ChooseSignupMethodForm
-          isSlot={isSlot}
-          isLoading={isLoading}
-          onSubmit={onSubmit}
-          setAuthenticationStep={setAuthenticationStep}
-        />
-      )}
-    </LayoutContainer>
+    <Sheet
+      open={authenticationStep === AuthenticationStep.ChooseSignupMethod}
+      onOpenChange={handleOpenChange}
+    >
+      <CreateControllerForm
+        theme={theme}
+        usernameField={usernameField}
+        validation={validation}
+        isLoading={isLoading}
+        error={error}
+        isInAppBrowser={isInAppBrowser}
+        isSlot={isSlot}
+        onUsernameChange={onUsernameChange}
+        onUsernameFocus={onUsernameFocus}
+        onUsernameClear={onUsernameClear}
+        onSubmit={onSubmit}
+        onKeyDown={onKeyDown}
+      />
+      <ChooseSignupMethodForm
+        isSlot={isSlot}
+        isLoading={isLoading}
+        onSubmit={onSubmit}
+      />
+    </Sheet>
   );
 }
 

@@ -41,7 +41,7 @@ export function OptionButton({ icon, ...props }: OptionButtonProps) {
   return (
     <Button
       {...restProps}
-      className={cn(restProps.className, "gap-2")}
+      className={cn(restProps.className, "w-full h-fit px-3 py-2.5 gap-2")}
       isLoading={false}
       disabled={isLoading || disabled}
     >
