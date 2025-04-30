@@ -1,10 +1,12 @@
-import { SelectItem, Thumbnail } from "@/index";
+import { cn, SelectItem, Thumbnail } from "@/index";
 import { Token } from "./token-select";
 
 export const TokenSelectRow = ({
+  className,
   token,
   currentToken,
 }: {
+  className?: string;
   token: Token;
   currentToken: Token;
 }) => {
@@ -13,7 +15,10 @@ export const TokenSelectRow = ({
       simplified
       value={token.metadata.address}
       data-active={token.metadata.address === currentToken.metadata.address}
-      className="hover:bg-background-300 hover:text-foreground-100 border-b border-border cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:text-foreground-100"
+      className={cn(
+        "group group-hover:bg-background-300 hover:text-foreground-100 border-b border-border cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:text-foreground-100 rounded-none",
+        className,
+      )}
     >
       <div className="flex items-center gap-2">
         {token.metadata.image ? (
@@ -22,6 +27,7 @@ export const TokenSelectRow = ({
             rounded
             size="sm"
             variant="light"
+            className="group-hover:bg-background-400"
           />
         ) : (
           <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />

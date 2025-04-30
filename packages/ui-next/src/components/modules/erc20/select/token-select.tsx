@@ -2,6 +2,7 @@ import { Select, SelectContent } from "@/components/primitives/select";
 import { useState } from "react";
 import { TokenSelectHeader } from "./header";
 import { TokenSelectRow } from "./row";
+import { cn } from "@/utils";
 
 export type Balance = {
   amount: number;
@@ -57,11 +58,12 @@ export const TokenSelect = ({
     >
       <TokenSelectHeader />
       <SelectContent>
-        {tokens.map((token) => (
+        {tokens.map((token, i) => (
           <TokenSelectRow
             key={token.metadata.address}
             token={token}
             currentToken={currentToken}
+            className={cn(i === tokens.length - 1 && "border-b-0")}
           />
         ))}
       </SelectContent>
