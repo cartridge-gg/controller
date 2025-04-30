@@ -57,7 +57,7 @@ export const TokenSelect = ({
       defaultValue={currentToken.metadata.address}
     >
       <TokenSelectHeader />
-      <SelectContent>
+      <SelectContent viewPortClassName="gap-0">
         {tokens.map((token, i) => (
           <TokenSelectRow
             key={token.metadata.address}
