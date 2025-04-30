@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { TransactionDestination } from "./destination";
+import { WalletType } from "@cartridge/ui-next";
 
 const meta: Meta<typeof TransactionDestination> = {
   component: TransactionDestination,
@@ -8,6 +9,11 @@ const meta: Meta<typeof TransactionDestination> = {
     layout: "centered",
   },
   tags: ["autodocs"],
+  args: {
+    name: "clicksave",
+    wallet: WalletType.ArgentX,
+    address: "0x1234567890abcdef1234567890abcdef12345678",
+  },
   decorators: [
     (Story) => (
       <div className="w-[400px]">
@@ -20,24 +26,4 @@ const meta: Meta<typeof TransactionDestination> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {
-    price: 50,
-    unit: "USDC",
-  },
-};
-
-export const WithCustomTitle: Story = {
-  args: {
-    title: "Total Spending",
-    price: 250.75,
-    unit: "USDC",
-  },
-};
-
-export const LargeAmount: Story = {
-  args: {
-    price: 9999.99,
-    unit: "USDC",
-  },
-};
+export const Default: Story = {};

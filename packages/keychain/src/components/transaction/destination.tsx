@@ -1,36 +1,41 @@
 import {
   ActivityCard,
+  ArgentIcon,
+  BraavosIcon,
   Card,
   CardHeader,
   CardTitle,
   cn,
+  ControllerAccountIcon,
+  OpenZeppelinIcon,
   Thumbnail,
+  WalletIcon,
+  WalletType,
 } from "@cartridge/ui-next";
-import { useMemo } from "react";
+import { formatAddress } from "@cartridge/utils";
+import { useCallback } from "react";
 
-type TransactionDestinationProps = {
+interface Props {
+  wallet: WalletType;
   address: string;
-  imageURL?: string;
-};
+  name?: string;
+}
 
-export function TransactionDestination({
-  address,
-  imageURL,
-}: TransactionDestinationProps) {
-  const Logo = useMemo(
-    () => (
-      <Thumbnail
-        icon={
-          imageURL
-            ? "https://static.cartridge.gg/tokens/usdc.svg"
-            : "https://static.cartridge.gg/presets/credit/icon.svg"
-        }
-        size="lg"
-        rounded
-      />
-    ),
-    [imageURL],
-  );
+export function TransactionDestination({ wallet, address, name }: Props) {
+  const getIcon = useCallback((wallet: WalletType | null) => {
+    switch (wallet) {
+      case WalletType.Controller:
+        return <ControllerAccountIcon className="h-8 w-8" />;
+      case WalletType.ArgentX:
+        return <ArgentIcon className="h-8 w-8" />;
+      case WalletType.Braavos:
+        return <BraavosIcon className="h-8 w-8" />;
+      case WalletType.OpenZeppelin:
+        return <OpenZeppelinIcon className="h-8 w-8" />;
+      default:
+        return <WalletIcon variant="solid" className="h-8 w-8" />;
+    }
+  }, []);
 
   return (
     <Card>
@@ -40,13 +45,15 @@ export function TransactionDestination({
         </CardTitle>
       </CardHeader>
       <ActivityCard
-        Logo={Logo}
-        title={address}
-        subTitle={address}
-        topic={address}
-        subTopic={""}
+        Logo={
+          <Thumbnail icon={getIcon(wallet)} size="lg" variant="light" rounded />
+        }
+        title={name || address}
+        subTitle={formatAddress(address, { first: 4, last: 4 })}
         variant={"default"}
-        className={cn("rounded-none")}
+        className={cn(
+          "rounded-none gap-3 hover:bg-background-200 hover:cursor-default",
+        )}
       />
     </Card>
   );
