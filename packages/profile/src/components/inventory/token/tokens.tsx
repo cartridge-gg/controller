@@ -5,6 +5,7 @@ import placeholder from "/public/placeholder.svg";
 
 export function Tokens() {
   const { tokens, status } = useTokens();
+
   return status === "loading" ? (
     <LoadingState />
   ) : status === "error" || !tokens.length ? (
