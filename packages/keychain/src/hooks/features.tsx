@@ -10,7 +10,7 @@ import React, {
 
 const LOCAL_STORAGE_KEY = "@cartridge/features";
 
-type Feature = "new-login";
+export type Feature = "new-login";
 
 // --- Helper Functions ---
 
