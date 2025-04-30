@@ -197,14 +197,12 @@ export const useSocialAuthentication = () => {
   const login = useCallback(
     async (
       controller: ControllerQuery["controller"],
-      // Use the defined Eip191Credential type
-      credential: Eip191Credential | undefined, // Allow undefined for checks
+      credential: Eip191Credential | undefined,
     ) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
       if (!controller) throw new Error("No controller found");
       if (!credential) throw new Error("No EIP191 credential provided");
 
-      // Extract the Ethereum address directly from the passed credential
       const address = credential?.ethAddress;
 
       if (!address) {

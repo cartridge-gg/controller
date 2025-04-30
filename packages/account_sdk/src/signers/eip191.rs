@@ -1,4 +1,7 @@
 use async_trait::async_trait;
+use cainome_cairo_serde::U256;
+use ecdsa::Signature;
+use k256::Secp256k1;
 use starknet::core::types::{EthAddress, Felt};
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -23,8 +26,6 @@ use crate::abigen::controller::{
 };
 #[cfg(target_arch = "wasm32")]
 use crate::signers::external::external_sign_message;
-#[cfg(target_arch = "wasm32")]
-use cainome::cairo_serde::U256;
 #[cfg(target_arch = "wasm32")]
 use hex;
 
@@ -53,6 +54,41 @@ impl Eip191Signer {
     pub fn address(&self) -> EthAddress {
         self.address.clone()
     }
+
+    fn construct_signature(
+        &self,
+        signature: Signature<Secp256k1>,
+        y_parity: bool,
+    ) -> SignerSignature {
+        // If signature is normalized (s value changed), we need to flip the y_parity
+        let (signature, y_parity) = if let Some(normalized) = signature.normalize_s() {
+            (normalized, !y_parity)
+        } else {
+            (signature, y_parity)
+        };
+
+        // Get r and s values from the signature
+        let r_bytes = signature.r().to_bytes();
+        let s_bytes = signature.s().to_bytes();
+
+        // Convert to the format expected by the controller
+        let mut r_padded = [0u8; 32];
+        r_padded[32 - r_bytes.len()..].copy_from_slice(&r_bytes);
+        let mut s_padded = [0u8; 32];
+        s_padded[32 - s_bytes.len()..].copy_from_slice(&s_bytes);
+
+        let r = U256::from_bytes_be(&r_padded);
+        let s = U256::from_bytes_be(&s_padded);
+
+        // Create the Eip191Signer for the controller
+        let eth_address = cainome::cairo_serde::EthAddress(self.address().into());
+        let controller_signer = ControllerEip191Signer { eth_address };
+
+        // Create the signature with the correct y_parity
+        let signature = ControllerSignature { r, s, y_parity };
+
+        SignerSignature::Eip191((controller_signer, signature))
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -73,34 +109,7 @@ impl HashSigner for Eip191Signer {
         // Extract the signature components
         let (signature, recovery_id) = recoverable_signature;
 
-        // If signature is normalized (s value changed), we need to flip the y_parity
-        let (signature, y_parity) = if let Some(normalized) = signature.normalize_s() {
-            (normalized, !recovery_id.is_y_odd())
-        } else {
-            (signature, recovery_id.is_y_odd())
-        };
-
-        // Get r and s values from the signature
-        let r_bytes = signature.r().to_bytes();
-        let s_bytes = signature.s().to_bytes();
-
-        // Convert to the format expected by the controller
-        let mut r_padded = [0u8; 32];
-        r_padded[32 - r_bytes.len()..].copy_from_slice(&r_bytes);
-        let mut s_padded = [0u8; 32];
-        s_padded[32 - s_bytes.len()..].copy_from_slice(&s_bytes);
-
-        let r = cainome::cairo_serde::U256::from_bytes_be(&r_padded);
-        let s = cainome::cairo_serde::U256::from_bytes_be(&s_padded);
-
-        // Create the Eip191Signer for the controller
-        let eth_address = cainome::cairo_serde::EthAddress(self.address().into());
-        let controller_signer = ControllerEip191Signer { eth_address };
-
-        // Create the signature with the correct y_parity
-        let signature = ControllerSignature { r, s, y_parity };
-
-        Ok(SignerSignature::Eip191((controller_signer, signature)))
+        Ok(self.construct_signature(signature, recovery_id.is_y_odd()))
     }
 }
 
@@ -109,9 +118,7 @@ impl HashSigner for Eip191Signer {
 impl HashSigner for Eip191Signer {
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
         let address_hex = format!("0x{}", hex::encode(self.address.clone().as_bytes()));
-        let message_hex = hex::encode(tx_hash.to_bytes_be());
-
-        let signature_hex = external_sign_message(&address_hex, &message_hex).await?;
+        let signature_hex = external_sign_message(&address_hex, &tx_hash.to_hex_string()).await?;
         let signature_bytes = hex::decode(signature_hex.trim_start_matches("0x")).map_err(|e| {
             SignError::BridgeError(format!("Failed to decode signature hex: {}", e))
         })?;
@@ -123,33 +130,20 @@ impl HashSigner for Eip191Signer {
             )));
         }
 
-        let r_bytes_slice = &signature_bytes[0..32];
-        let s_bytes_slice = &signature_bytes[32..64];
-        let v_byte = signature_bytes[64];
+        let v = signature_bytes[64];
+        let y_parity = match v {
+            0 | 27 => false,                   // y even
+            1 | 28 => true,                    // y odd
+            v if v >= 35 => (v - 35) % 2 == 1, // EIP-155
+            _ => return Err(SignError::BridgeError(format!("unsupported v value {}", v))),
+        };
 
-        // Convert r and s slices to fixed-size arrays
-        let r_bytes: &[u8; 32] = r_bytes_slice.try_into().map_err(|_| {
-            SignError::BridgeError("Failed to convert r bytes to fixed array".to_string())
-        })?;
-        let s_bytes: &[u8; 32] = s_bytes_slice.try_into().map_err(|_| {
-            SignError::BridgeError("Failed to convert s bytes to fixed array".to_string())
-        })?;
+        let signature =
+            Signature::<Secp256k1>::from_bytes(signature_bytes[0..64].into()).map_err(|e| {
+                SignError::BridgeError(format!("Failed to decode signature bytes: {}", e))
+            })?;
 
-        // Convert r and s to U256 using the array reference
-        let r = U256::from_bytes_be(r_bytes);
-        let s = U256::from_bytes_be(s_bytes);
-
-        // Calculate y_parity from v (normalize 27/28 or 0/1 to bool)
-        // Starknet expects y_parity: 0 or 1. Ethereum uses v: 27 or 28.
-        // y_parity is true if v is odd (1 or 27)
-        let y_parity = v_byte % 2 != 0;
-
-        // Create the controller structs
-        let eth_address = cainome::cairo_serde::EthAddress(self.address().into());
-        let controller_signer = ControllerEip191Signer { eth_address };
-        let signature = ControllerSignature { r, s, y_parity };
-
-        Ok(SignerSignature::Eip191((controller_signer, signature)))
+        Ok(self.construct_signature(signature, y_parity))
     }
 }
 
@@ -251,7 +245,7 @@ mod wasm_tests {
                 let expected_s = U256::from_bytes_be(&expected_s_bytes.try_into().unwrap());
                 assert_eq!(signature.s, expected_s, "Signature S mismatch");
 
-                assert!(!signature.y_parity, "Signature Y-Parity mismatch");
+                assert!(signature.y_parity, "Signature Y-Parity mismatch");
             }
             _ => panic!("Unexpected SignerSignature variant"),
         }

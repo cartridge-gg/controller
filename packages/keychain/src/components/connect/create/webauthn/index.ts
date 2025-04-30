@@ -1,7 +1,10 @@
 import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { doLogin, doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
-import { ControllerQuery } from "@cartridge/utils/api/cartridge";
+import {
+  ControllerQuery,
+  WebauthnCredential,
+} from "@cartridge/utils/api/cartridge";
 import { useCallback } from "react";
 import { constants } from "starknet";
 import { LoginMode } from "../../types";
@@ -65,35 +68,25 @@ export function useWebauthnAuthentication() {
   const login = useCallback(
     async (
       controller: ControllerQuery["controller"],
+      credential: WebauthnCredential,
       loginMode: LoginMode,
       isSlot: boolean,
     ) => {
       if (!controller) throw new Error("No controller found");
 
-      const { account } = controller ?? {};
-      const { id: credentialId, publicKey } =
-        account?.credentials?.webauthn?.[0] ?? {};
-
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
-
-      if (!publicKey) {
-        return;
-      }
-
       const controllerObject = await createController(
         origin!,
         chainId!,
         rpcUrl!,
-        account.username,
+        controller.accountID,
         controller.constructorCalldata[0],
         controller.address,
         {
           signer: {
             webauthn: {
               rpId: "",
-              credentialId,
-              publicKey,
+              credentialId: credential.id,
+              publicKey: credential.publicKey,
             },
           },
         },
@@ -101,8 +94,8 @@ export function useWebauthnAuthentication() {
 
       if (loginMode === LoginMode.Webauthn) {
         await doLogin({
-          name: account.username,
-          credentialId,
+          name: controller.accountID,
+          credentialId: credential.id,
           finalize: !!isSlot,
         });
       } else {

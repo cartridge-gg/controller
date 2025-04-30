@@ -16,7 +16,6 @@ import { AuthenticationMethod, LoginMode } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
-import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
 import { shortString } from "starknet";
 
@@ -153,16 +152,6 @@ export function useCreateController({
             }),
           };
           break;
-        case "walletconnect":
-          signupResponse = await signupWithWalletConnect();
-          signer = {
-            type: SignerType.Eip191,
-            credential: JSON.stringify({
-              provider: "walletconenct",
-              eth_address: signupResponse.address,
-            }),
-          };
-          break;
         case "metamask":
         case "phantom":
         case "argent":
@@ -268,12 +257,29 @@ export function useCreateController({
       }
 
       switch (signer.metadata.__typename) {
-        case "WebauthnCredentials":
-          await loginWithWebauthn(controller, loginMode, !!isSlot);
+        case "WebauthnCredentials": {
+          const webauthnCredential = signer.metadata.webauthn?.[0];
+          if (!webauthnCredential) {
+            throw new Error("WebAuthn credential not found for signer.");
+          }
+
+          await loginWithWebauthn(
+            controller,
+            webauthnCredential,
+            loginMode,
+            !!isSlot,
+          );
           break;
-        case "Eip191Credentials":
-          await loginWithSocial(controller, signer.metadata.eip191?.[0]);
+        }
+        case "Eip191Credentials": {
+          const eip191Credential = signer.metadata.eip191?.[0];
+          if (!eip191Credential) {
+            throw new Error("EIP191 credential not found for signer.");
+          }
+
+          await loginWithSocial(controller, eip191Credential);
           break;
+        }
         case "SIWSCredentials": // Assuming SIWS also uses social login flow
         case "StarknetCredentials": // Assuming Starknet also uses social login flow for now, adjust if needed
           throw new Error("Login method not supported yet.");

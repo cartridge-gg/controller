@@ -202,7 +202,7 @@ export function CreateController({
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
 
-  const isNewSignup = useFeature("new-signup");
+  const isNewSignup = true; // useFeature("new-signup");
 
   const [usernameField, setUsernameField] = useState({
     value: "",
