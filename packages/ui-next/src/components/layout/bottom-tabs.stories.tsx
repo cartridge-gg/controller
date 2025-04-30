@@ -34,22 +34,22 @@ export const Default: Story = {
         )}
       >
         <BottomTab>
-          <PulseIcon variant="line" size="lg" />
+          <PulseIcon variant="solid" size="lg" />
         </BottomTab>
         <BottomTab status="active">
           <ChestIcon variant="solid" size="lg" />
         </BottomTab>
         <BottomTab>
-          <TrophyIcon variant="line" size="lg" />
+          <TrophyIcon variant="solid" size="lg" />
         </BottomTab>
         <BottomTab>
-          <SwordsIcon variant="line" size="lg" />
+          <SwordsIcon variant="solid" size="lg" />
         </BottomTab>
         <BottomTab>
-          <UsersIcon variant="line" size="lg" />
+          <UsersIcon variant="solid" size="lg" />
         </BottomTab>
         <BottomTab>
-          <ClockIcon variant="line" size="lg" />
+          <ClockIcon variant="solid" size="lg" />
         </BottomTab>
       </div>
     ),

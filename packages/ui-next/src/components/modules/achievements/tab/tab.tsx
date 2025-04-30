@@ -1,6 +1,9 @@
-import { cn, TabsTrigger } from "@/index";
-import AchievementCounter from "../counter/counter";
-import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
+import {
+  cn,
+  TabsTrigger,
+  AchievementCounter,
+  LeaderboardCounter,
+} from "@/index";
 import React from "react";
 
 export interface AchievementTabProps {
@@ -9,7 +12,7 @@ export interface AchievementTabProps {
   active: boolean;
   counter:
     | ReturnType<typeof AchievementCounter>
-    | ReturnType<typeof AchievementLeaderboardCounter>;
+    | ReturnType<typeof LeaderboardCounter>;
   className?: string;
 }
 

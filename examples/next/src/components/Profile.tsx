@@ -48,6 +48,11 @@ export function Profile() {
             Trophies
           </Button>
           <Button
+            onClick={() => ctrlConnector.controller.openProfile("leaderboard")}
+          >
+            Leaderboard
+          </Button>
+          <Button
             onClick={() => ctrlConnector.controller.openProfile("activity")}
           >
             Activity

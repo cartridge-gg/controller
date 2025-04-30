@@ -1,16 +1,16 @@
 import { cn, LeaderboardIcon } from "@/index";
 
-export interface AchievementLeaderboardCounterProps {
+export interface LeaderboardCounterProps {
   rank: number;
   active?: boolean;
   className?: string;
 }
 
-export const AchievementLeaderboardCounter = ({
+export const LeaderboardCounter = ({
   rank,
   active,
   className,
-}: AchievementLeaderboardCounterProps) => {
+}: LeaderboardCounterProps) => {
   return (
     <div
       className={cn(
@@ -36,4 +36,4 @@ export const AchievementLeaderboardCounter = ({
   );
 };
 
-export default AchievementLeaderboardCounter;
+export default LeaderboardCounter;
