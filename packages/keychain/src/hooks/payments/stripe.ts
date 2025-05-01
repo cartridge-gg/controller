@@ -31,7 +31,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
       controller?.chainId() === constants.StarknetChainId.SN_MAIN
     ) {
       // In prod, only use live mode if on mainnet
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_PROD_MODE;
+      return import.meta.env.VITE_STRIPE_API_PUBKEY_LIVE_MODE;
     }
     // Default to test mode
     return import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE;
