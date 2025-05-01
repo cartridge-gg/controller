@@ -19,7 +19,6 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
-import { useFeature } from "@/hooks/features";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -202,8 +201,6 @@ export function CreateController({
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
 
-  const isNewSignup = true; // useFeature("new-signup");
-
   const [usernameField, setUsernameField] = useState({
     value: "",
     error: undefined,
@@ -225,6 +222,7 @@ export function CreateController({
     handleSubmit,
     authenticationStep,
     setAuthenticationStep,
+    overlay,
   } = useCreateController({
     isSlot,
     loginMode,
@@ -244,7 +242,11 @@ export function CreateController({
       if (validation.status === "valid") {
         const accountExists = !!validation.exists;
 
-        if (authenticationMode === undefined && !accountExists && isNewSignup) {
+        if (
+          authenticationMode === undefined &&
+          !accountExists &&
+          import.meta.env.DEV
+        ) {
           setAuthenticationStep(AuthenticationStep.ChooseSignupMethod);
           return;
         }
@@ -312,21 +314,24 @@ export function CreateController({
   };
 
   return (
-    <CreateControllerView
-      theme={theme}
-      usernameField={usernameField}
-      validation={debouncedValidation}
-      isLoading={isLoading}
-      error={error}
-      isInAppBrowser={isInApp}
-      isSlot={isSlot}
-      onUsernameChange={handleUsernameChange}
-      onUsernameFocus={handleUsernameFocus}
-      onUsernameClear={handleUsernameClear}
-      onSubmit={handleFormSubmit}
-      onKeyDown={handleKeyDown}
-      authenticationStep={authenticationStep}
-      setAuthenticationStep={setAuthenticationStep}
-    />
+    <>
+      <CreateControllerView
+        theme={theme}
+        usernameField={usernameField}
+        validation={debouncedValidation}
+        isLoading={isLoading}
+        error={error}
+        isInAppBrowser={isInApp}
+        isSlot={isSlot}
+        onUsernameChange={handleUsernameChange}
+        onUsernameFocus={handleUsernameFocus}
+        onUsernameClear={handleUsernameClear}
+        onSubmit={handleFormSubmit}
+        onKeyDown={handleKeyDown}
+        authenticationStep={authenticationStep}
+        setAuthenticationStep={setAuthenticationStep}
+      />
+      {overlay}
+    </>
   );
 }

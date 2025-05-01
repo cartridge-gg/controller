@@ -16,7 +16,6 @@ export const useExternalWalletAuthentication = () => {
 
   const signup = useCallback(
     async (
-      _: string,
       authenticationMode: AuthenticationMethod,
     ): Promise<SignupResponse> => {
       const connectedWallet = await connectWallet(
@@ -30,7 +29,7 @@ export const useExternalWalletAuthentication = () => {
         type: authenticationMode,
       };
     },
-    [],
+    [connectWallet],
   );
 
   const login = useCallback(

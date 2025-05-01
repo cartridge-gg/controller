@@ -16,6 +16,7 @@ import { AuthenticationMethod, LoginMode } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
+import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
 import { shortString } from "starknet";
 
@@ -35,6 +36,7 @@ export function useCreateController({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
+  const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
 
   const [authenticationStep, setAuthenticationStep] = useState<
     AuthenticationStep | undefined
@@ -48,6 +50,8 @@ export function useCreateController({
     useSocialAuthentication();
   const { signup: signupWithExternalWallet } =
     useExternalWalletAuthentication();
+  const { signup: signupWithWalletConnect } =
+    useWalletConnectAuthentication(setOverlay);
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -152,12 +156,14 @@ export function useCreateController({
             }),
           };
           break;
+        case "walletconnect":
+          signupResponse = await signupWithWalletConnect();
+          break;
         case "metamask":
         case "phantom":
         case "argent":
         case "rabby":
           signupResponse = await signupWithExternalWallet(
-            username,
             authenticationMode,
           );
           signer = {
@@ -226,6 +232,10 @@ export function useCreateController({
       isSlot,
       createController,
       doPopupFlow,
+      signupWithExternalWallet,
+      signupWithSocial,
+      signupWithWebauthn,
+      signupWithWalletConnect,
     ],
   );
 
@@ -328,6 +338,8 @@ export function useCreateController({
     error,
     setError,
     handleSubmit,
+    overlay,
+    setOverlay,
   };
 }
 

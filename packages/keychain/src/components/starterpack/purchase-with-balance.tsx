@@ -24,7 +24,7 @@ const enum PurchaseState {
 }
 
 export const PurchaseWithBalance = () => {
-  const { items: starterPackItems, price } = useStarterPack("");
+  const { items: starterPackItems, priceUsd } = useStarterPack("");
   const { closeModal } = useUI();
   const [purchaseState, setPurchaseState] = useState<PurchaseState>(
     PurchaseState.REVIEW,
@@ -63,7 +63,7 @@ export const PurchaseWithBalance = () => {
       />
       <LayoutContent>
         {purchaseState === PurchaseState.REVIEW ? (
-          <Spending title="Spending" price={price} unit="USDC" />
+          <Spending title="Spending" price={priceUsd} unit="USDC" />
         ) : purchaseState === PurchaseState.PENDING ? (
           <h1 className="text-xs font-semibold text-foreground-400 pb-4">
             Your starter pack is on the way!
@@ -108,7 +108,7 @@ export const PurchaseWithBalance = () => {
         ) : (
           <>
             <Card className="flex flex-row items-center justify-between gap-2">
-              <TotalCost price={price} />
+              <TotalCost price={priceUsd} />
               <CardContent className="relative bg-background-200 w-9 aspect-square rounded">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-background-300 rounded-full w-6">
                   <img src="https://static.cartridge.gg/tokens/usdc.svg" />
