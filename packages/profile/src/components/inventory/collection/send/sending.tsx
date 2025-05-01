@@ -6,7 +6,7 @@ import {
   CollectiblePill,
 } from "@cartridge/ui-next";
 import { Asset } from "#hooks/collection";
-import { formatName } from "../helper";
+import { formatName } from "../../helper";
 
 import placeholder from "/public/placeholder.svg";
 

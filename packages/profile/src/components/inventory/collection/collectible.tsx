@@ -27,7 +27,7 @@ import { useCollection } from "#hooks/collection";
 import { compare } from "compare-versions";
 import { CollectionHeader } from "./header";
 import placeholder from "/public/placeholder.svg";
-import { formatName } from "./helper";
+import { formatName } from "../helper";
 
 export function Collectible() {
   const { chainId, version, visitor } = useConnection();
@@ -118,9 +118,11 @@ export function Collectible() {
                   <CollectiblePreview
                     image={asset.imageUrl || placeholder}
                     size="lg"
-                    className="w-[240px] self-center"
+                    className="w-full self-center"
                   />
-                  <CollectibleProperties properties={properties} />
+                  {properties.length > 0 && (
+                    <CollectibleProperties properties={properties} />
+                  )}
                   <CollectibleDetails
                     chainId={chainId as constants.StarknetChainId}
                     address={collection.address}

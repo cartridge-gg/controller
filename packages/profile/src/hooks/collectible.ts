@@ -1,15 +1,15 @@
 import { useAccount } from "./account";
 import { useMemo, useState } from "react";
 import {
-  useCollectionQuery,
-  useCollectionsQuery,
+  useCollectibleQuery,
+  useCollectiblesQuery,
 } from "@cartridge/utils/api/cartridge";
 import { useConnection } from "./context";
 
-const TYPE = "ERC-721";
+const TYPE = "ERC-1155";
 const LIMIT = 1000;
 
-export type Collection = {
+export type Collectible = {
   address: string;
   name: string;
   type: string;
@@ -23,72 +23,68 @@ export type Asset = {
   description?: string;
   imageUrl: string;
   attributes: Record<string, unknown>[];
+  amount: number;
 };
 
-export type UseCollectionResponse = {
-  collection?: Collection;
+export type UseCollectibleResponse = {
+  collectible?: Collectible;
   assets?: Asset[];
   status: "success" | "error" | "idle" | "loading";
 };
 
-export function useCollection({
+export function useCollectible({
   contractAddress,
   tokenIds = [],
 }: {
   contractAddress?: string;
   tokenIds?: string[];
-}): UseCollectionResponse {
+}): UseCollectibleResponse {
   const { address } = useAccount();
   const { project } = useConnection();
-  const [collection, setCollection] = useState<Collection | undefined>(
+  const [collectible, setCollectible] = useState<Collectible | undefined>(
     undefined,
   );
   const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
 
-  const { status } = useCollectionQuery(
+  const { status } = useCollectibleQuery(
     {
       projects: [project ?? ""],
       accountAddress: address,
       contractAddress: contractAddress ?? "",
     },
     {
-      queryKey: ["collection"],
+      queryKey: ["collectible"],
       enabled: !!project && !!address,
-      onSuccess: ({ collection }) => {
-        const newCollection: Collection = {
-          address: collection.meta.contractAddress,
-          name: collection.meta.name,
+      onSuccess: ({ collectible }) => {
+        const newCollectible: Collectible = {
+          address: collectible.meta.contractAddress,
+          name: collectible.meta.name,
           type: TYPE,
-          imageUrl: collection.meta.imagePath,
-          totalCount: collection.meta.assetCount,
+          imageUrl: collectible.meta.imagePath,
+          totalCount: collectible.meta.assetCount,
         };
 
         const newAssets: { [key: string]: Asset } = {};
-        collection.assets.forEach((a) => {
+        collectible.assets.forEach((a) => {
           let imageUrl = a.imageUrl;
           if (!imageUrl.includes("://")) {
-            imageUrl = newCollection.imageUrl.replace(
+            imageUrl = newCollectible.imageUrl.replace(
               /0x[a-fA-F0-9]+(?=\/image$)/,
               a.tokenId,
             );
-          }
-          let attributes = [];
-          try {
-            attributes = JSON.parse(a.attributes ?? "{}");
-          } catch (error) {
-            console.warn(error);
           }
           const asset: Asset = {
             tokenId: a.tokenId,
             name: a.name,
             description: a.description ?? "",
             imageUrl: imageUrl,
-            attributes: attributes,
+            attributes: JSON.parse(a.attributes ?? "{}"),
+            amount: a.amount,
           };
-          newAssets[`${newCollection.address}-${a.tokenId}`] = asset;
+          newAssets[`${newCollectible.address}-${a.tokenId}`] = asset;
         });
 
-        setCollection(newCollection);
+        setCollectible(newCollectible);
         setAssets(newAssets);
       },
     },
@@ -99,15 +95,15 @@ export function useCollection({
     return Object.values(assets).filter((a) => tokenIds.includes(a.tokenId));
   }, [assets, tokenIds]);
 
-  return { collection, assets: filteredAssets, status };
+  return { collectible, assets: filteredAssets, status };
 }
 
-export type UseCollectionsResponse = {
-  collections: Collection[];
+export type UseCollectiblesResponse = {
+  collectibles: Collectible[];
   status: "success" | "error" | "idle" | "loading";
 };
 
-export type CollectionType = {
+export type CollectibleType = {
   contractAddress: string;
   imagePath: string;
   metadataAttributes: string;
@@ -118,15 +114,15 @@ export type CollectionType = {
   count: number;
 };
 
-export function useCollections(): UseCollectionsResponse {
+export function useCollectibles(): UseCollectiblesResponse {
   const { address } = useAccount();
   const { project } = useConnection();
   const [offset, setOffset] = useState(0);
-  const [collections, setCollections] = useState<{ [key: string]: Collection }>(
-    {},
-  );
+  const [collectibles, setCollectibles] = useState<{
+    [key: string]: Collectible;
+  }>({});
 
-  const { status } = useCollectionsQuery(
+  const { status } = useCollectiblesQuery(
     {
       accountAddress: address,
       projects: [project ?? ""],
@@ -134,16 +130,16 @@ export function useCollections(): UseCollectionsResponse {
       offset: offset,
     },
     {
-      queryKey: ["collections", offset],
+      queryKey: ["collectibles", offset],
       enabled: !!project && !!address,
-      onSuccess: ({ collections }) => {
-        const newCollections: { [key: string]: Collection } = {};
-        collections?.edges.forEach((e) => {
+      onSuccess: ({ collectibles }) => {
+        const newCollectibles: { [key: string]: Collectible } = {};
+        collectibles?.edges.forEach((e) => {
           const contractAddress = e.node.meta.contractAddress;
           const imagePath = e.node.meta.imagePath;
           const name = e.node.meta.name;
           const count = e.node.meta.assetCount;
-          newCollections[`${contractAddress}`] = {
+          newCollectibles[`${contractAddress}`] = {
             address: contractAddress,
             imageUrl: imagePath,
             name,
@@ -151,13 +147,13 @@ export function useCollections(): UseCollectionsResponse {
             type: TYPE,
           };
         });
-        if (collections?.edges.length === LIMIT) {
+        if (collectibles?.edges.length === LIMIT) {
           setOffset(offset + LIMIT);
         }
-        setCollections((prev) => ({ ...prev, ...newCollections }));
+        setCollectibles((prev) => ({ ...prev, ...newCollectibles }));
       },
     },
   );
 
-  return { collections: Object.values(collections), status };
+  return { collectibles: Object.values(collectibles), status };
 }

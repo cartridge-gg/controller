@@ -24,7 +24,7 @@ import { Sending } from "./sending";
 import { useEntrypoints } from "#hooks/entrypoints";
 import { CollectionHeader } from "../header";
 import placeholder from "/public/placeholder.svg";
-import { formatName } from "../helper";
+import { formatName } from "../../helper";
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
 const TRANSFER_FROM_CAMEL_CASE = "transferFrom";

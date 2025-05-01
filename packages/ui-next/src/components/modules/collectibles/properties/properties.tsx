@@ -48,9 +48,9 @@ export function CollectibleProperties({
       </CardHeader>
 
       <CardContent className="bg-background grid grid-cols-3 p-0 gap-px">
-        {properties.map((property) => (
+        {properties.map((property, index) => (
           <CollectibleProperty
-            key={property.name}
+            key={`${property.name}-${index}`}
             name={property.name}
             value={
               property.value || property.value === 0

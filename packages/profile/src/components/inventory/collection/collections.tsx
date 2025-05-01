@@ -2,13 +2,26 @@ import { Link } from "react-router-dom";
 import { useCollections } from "#hooks/collection";
 import placeholder from "/public/placeholder.svg";
 import { CollectibleAsset, Skeleton } from "@cartridge/ui-next";
+import { useMemo } from "react";
+import { useCollectibles } from "#hooks/collectible.js";
 
 export function Collections() {
-  const { collections, status } = useCollections();
+  const { collections, status: CollectionsStatus } = useCollections();
+  const { collectibles, status: CollectiblesStatus } = useCollectibles();
+
+  const status = useMemo(() => {
+    if (CollectionsStatus === "loading" && CollectiblesStatus === "loading") {
+      return "loading";
+    }
+    if (CollectionsStatus === "error" || CollectiblesStatus === "error") {
+      return "error";
+    }
+    return "success";
+  }, [CollectionsStatus, CollectiblesStatus]);
 
   return status === "loading" ? (
     <LoadingState />
-  ) : status === "error" || !collections.length ? (
+  ) : status === "error" || (!collections.length && !collectibles.length) ? (
     <EmptyState />
   ) : (
     <div className="grid grid-cols-2 gap-4 place-items-center select-none">
@@ -23,6 +36,20 @@ export function Collections() {
             title={collection.name}
             image={collection.imageUrl || placeholder}
             count={collection.totalCount}
+          />
+        </Link>
+      ))}
+      {collectibles.map((collectible) => (
+        <Link
+          className="w-full aspect-square group select-none"
+          draggable={false}
+          to={`./collection/${collectible.address}`}
+          key={collectible.address}
+        >
+          <CollectibleAsset
+            title={collectible.name}
+            image={collectible.imageUrl || placeholder}
+            count={collectible.totalCount}
           />
         </Link>
       ))}

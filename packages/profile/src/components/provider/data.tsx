@@ -149,9 +149,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
           .map((transfer) => {
             const timestamp = new Date(transfer.executedAt).getTime();
             const date = getDate(timestamp);
-            const metadata = JSON.parse(transfer.metadata ?? "{}");
+            let metadata = [];
+            try {
+              metadata = JSON.parse(transfer.metadata);
+            } catch (error) {
+              console.warn(error);
+            }
             const name =
-              metadata.attributes.find(
+              metadata.attributes?.find(
                 (attribute: { trait: string; value: string }) =>
                   attribute?.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
