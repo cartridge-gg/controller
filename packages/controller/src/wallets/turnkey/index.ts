@@ -1,5 +1,5 @@
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
-import { Signature } from "ethers";
+import { hashMessage, recoverAddress, Signature } from "ethers";
 import {
   ExternalPlatform,
   ExternalWallet,
@@ -102,28 +102,41 @@ export class TurnkeyWallet implements WalletAdapter {
         throw new Error("Turnkey is not connected");
       }
 
-      const signedTx = await this.turnkeyIframeClient.signRawPayload({
+      const messageHash = hashMessage(message);
+
+      const { r, s, v } = await this.turnkeyIframeClient.signRawPayload({
         organizationId: this.organizationId,
         signWith: this.account,
-        payload: message,
-        encoding: "PAYLOAD_ENCODING_TEXT_UTF8",
-        hashFunction: "HASH_FUNCTION_SHA256",
+        payload: messageHash,
+        encoding: "PAYLOAD_ENCODING_HEXADECIMAL",
+        hashFunction: "HASH_FUNCTION_NO_OP",
       });
 
-      const r = signedTx.r.startsWith("0x") ? signedTx.r : "0x" + signedTx.r;
-      const s = signedTx.s.startsWith("0x") ? signedTx.s : "0x" + signedTx.s;
+      const rHex = r.startsWith("0x") ? r : "0x" + r;
+      const sHex = s.startsWith("0x") ? s : "0x" + s;
 
-      const vNumber = parseInt(signedTx.v, 16);
-      if (isNaN(vNumber) || (vNumber !== 0 && vNumber !== 1)) {
-        throw new Error(`Invalid recovery ID (v) received: ${signedTx.v}`);
+      const vNumber = parseInt(v, 16);
+
+      if (isNaN(vNumber)) {
+        console.error(`Invalid recovery ID (v) received from Turnkey: ${v}`);
+        throw new Error(`Invalid recovery ID (v) received: ${v}`);
       }
-      const normalizedV = Signature.getNormalizedV(vNumber);
 
       const signature = Signature.from({
-        r,
-        s,
-        v: normalizedV,
+        r: rHex,
+        s: sHex,
+        v: vNumber,
       });
+      console.log("r", r);
+      console.log("s", s);
+      console.log("v", v);
+
+      const recoveredAddress = recoverAddress(messageHash, signature);
+
+      if (recoveredAddress.toLowerCase() !== this.account.toLowerCase()) {
+        throw new Error("Invalid signature");
+      }
+
       return {
         success: true,
         wallet: this.type,

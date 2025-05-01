@@ -59,7 +59,7 @@ export const useExternalWalletAuthentication = () => {
         {
           signer: {
             webauthn: {
-              rpId: "",
+              rpId: import.meta.env.VITE_RP_ID!,
               credentialId,
               publicKey,
             },

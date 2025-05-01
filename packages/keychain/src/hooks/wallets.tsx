@@ -206,6 +206,10 @@ export class KeychainWallets {
           `Failed to sign message with embedded wallet. ${response?.error}`,
         );
       }
+      console.log(
+        "KeychainWallets: Received response from embedded wallet:",
+        response,
+      );
       return response;
     } else {
       // --- External Wallet Path ---

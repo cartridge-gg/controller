@@ -173,8 +173,8 @@ mod wasm_tests {
                 console.log(`Mock bridge called: signMessage(${identifier}, ${message})`);
 
                 // --- Define Expected Test Values ---
-                const expectedIdentifier = "0xa517d17bc2cca98e94f9975efd295ec70bfb3cf7";
-                const mockSignature = "0xc4c387bf41b6aea0711abf8305bcd16d9a78fac00abc343066a1f2b23e35c16241801f2354ab277a16cfd1d70fa66b1b0891549eec1370ba43967cb414b3fae01c";
+                const expectedIdentifier = "0x396cf17b3f4c1a60f359b50d5bd5e86c526ed9d2";
+                const mockSignature = "0xf40140b1a1eb091bfd93a95a5866608bde74526f5c6b9c5a82c5b2c2e04a581a7b758f993096756b5ee65651706c1ede3561b84b621971438c5eb8a10ddca6e31b";
 
                 return new Promise((resolve, reject) => {
                     // Check if the identifier matches the expected one for the success test
@@ -211,9 +211,11 @@ mod wasm_tests {
         // Setup the mock bridge in the JS environment
         setup_mock_keychain_wallets();
 
-        let address_hex = "0xa517d17bc2cca98e94f9975efd295ec70bfb3cf7";
+        let address_hex = "0x396cf17b3f4c1a60f359b50d5bd5e86c526ed9d2";
         let address = EthAddress::from_str(address_hex).expect("Failed to parse test address");
-        let tx_hash = Felt::from_hex_unchecked("0x48656c6c6f20576f726c6421");
+        let tx_hash = Felt::from_hex_unchecked(
+            "0x4e4348a70772249a289fc6c08aa81333fc020eda8f5cb0f3d6e503c1af89f8e",
+        );
 
         // Create the signer instance
         let signer = Eip191Signer { address };
@@ -233,19 +235,19 @@ mod wasm_tests {
 
                 // Create expected r from bytes
                 let expected_r_bytes =
-                    hex::decode("c4c387bf41b6aea0711abf8305bcd16d9a78fac00abc343066a1f2b23e35c162")
+                    hex::decode("f40140b1a1eb091bfd93a95a5866608bde74526f5c6b9c5a82c5b2c2e04a581a")
                         .unwrap();
                 let expected_r = U256::from_bytes_be(&expected_r_bytes.try_into().unwrap());
                 assert_eq!(signature.r, expected_r, "Signature R mismatch");
 
                 // Create expected s from bytes
                 let expected_s_bytes =
-                    hex::decode("41801f2354ab277a16cfd1d70fa66b1b0891549eec1370ba43967cb414b3fae0")
+                    hex::decode("7b758f993096756b5ee65651706c1ede3561b84b621971438c5eb8a10ddca6e3")
                         .unwrap();
                 let expected_s = U256::from_bytes_be(&expected_s_bytes.try_into().unwrap());
                 assert_eq!(signature.s, expected_s, "Signature S mismatch");
 
-                assert!(signature.y_parity, "Signature Y-Parity mismatch");
+                assert!(!signature.y_parity, "Signature Y-Parity mismatch");
             }
             _ => panic!("Unexpected SignerSignature variant"),
         }

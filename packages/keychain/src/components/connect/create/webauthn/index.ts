@@ -51,7 +51,7 @@ export function useWebauthnAuthentication() {
         {
           signer: {
             webauthn: {
-              rpId: "",
+              rpId: import.meta.env.VITE_RP_ID!,
               credentialId,
               publicKey,
             },
@@ -84,7 +84,7 @@ export function useWebauthnAuthentication() {
         {
           signer: {
             webauthn: {
-              rpId: "",
+              rpId: import.meta.env.VITE_RP_ID!,
               credentialId: credential.id,
               publicKey: credential.publicKey,
             },

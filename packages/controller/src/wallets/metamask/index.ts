@@ -1,11 +1,11 @@
+import { MetaMaskSDK } from "@metamask/sdk";
 import {
-  WalletAdapter,
+  ExternalPlatform,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
-  ExternalPlatform,
+  WalletAdapter,
 } from "../types";
-import { MetaMaskSDK } from "@metamask/sdk";
 
 export class MetaMaskWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "metamask";
@@ -101,8 +101,9 @@ export class MetaMaskWallet implements WalletAdapter {
         throw new Error("MetaMask is not connected");
       }
 
-      const result = await this.MMSDK.connectAndSign({
-        msg: message,
+      const result = await this.MMSDK.getProvider()?.request({
+        method: "personal_sign",
+        params: [this.account!, message],
       });
 
       return { success: true, wallet: this.type, result };

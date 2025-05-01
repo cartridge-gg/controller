@@ -5,20 +5,20 @@ import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
 import { computeAccountAddress, Owner, Signer } from "@cartridge/account-wasm";
 import {
-  AccountQuery,
-  SignerInput,
-  SignerType,
-  useAccountQuery,
-  useRegisterMutation,
+	AccountQuery,
+	SignerInput,
+	SignerType,
+	useAccountQuery,
+	useRegisterMutation,
 } from "@cartridge/utils/api/cartridge";
 import { useCallback, useState } from "react";
+import { shortString } from "starknet";
 import { AuthenticationMethod, LoginMode } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
-import { shortString } from "starknet";
 
 export interface SignupResponse {
   address: string;
@@ -158,14 +158,19 @@ export function useCreateController({
           break;
         case "walletconnect":
           signupResponse = await signupWithWalletConnect();
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: authenticationMode,
+              eth_address: signupResponse.address,
+            }),
+          };
           break;
         case "metamask":
         case "phantom":
         case "argent":
         case "rabby":
-          signupResponse = await signupWithExternalWallet(
-            authenticationMode,
-          );
+          signupResponse = await signupWithExternalWallet(authenticationMode);
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
@@ -200,8 +205,6 @@ export function useCreateController({
       });
 
       const result = await controller.login(now() + DEFAULT_SESSION_DURATION);
-      console.log("login result", result);
-      console.log(controller.address());
 
       const registerRet = await register({
         username,
@@ -216,8 +219,8 @@ export function useCreateController({
           authorization: result.authorization ?? [],
         },
       });
+      console.log("registerRet", registerRet);
 
-      console.log("register result", registerRet);
       if (registerRet.register.name) {
         window.controller = controller;
         setController(controller);
