@@ -10,26 +10,8 @@ import { useConnection } from "#hooks/context.js";
 import { getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { useArcade } from "#hooks/arcade.js";
-import { GameModel } from "@bal7hazar/arcade-sdk";
-
-const getDate = (timestamp: number) => {
-  const date = new Date(timestamp);
-  const today = new Date();
-  if (date.toDateString() === today.toDateString()) {
-    return "Today";
-  } else if (
-    date.toDateString() ===
-    new Date(today.getTime() - 24 * 60 * 60 * 1000).toDateString()
-  ) {
-    return "Yesterday";
-  } else {
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
-};
+import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
+import { getDate } from "@cartridge/utils";
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
@@ -58,16 +40,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const { address } = useAccount();
   const { project, namespace, isVisible } = useConnection();
 
-  const { games } = useArcade();
-  const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find(
-      (game) => game.namespace === namespace && game.config.project === project,
+  const { games, editions } = useArcade();
+
+  const edition: EditionModel | undefined = useMemo(() => {
+    return Object.values(editions).find(
+      (edition) =>
+        edition.namespace === namespace && edition.config.project === project,
     );
-  }, [games, project, namespace]);
+  }, [editions, project, namespace]);
+
+  const game: GameModel | undefined = useMemo(() => {
+    return Object.values(games).find((game) => game.id === edition?.gameId);
+  }, [games, edition]);
 
   const trophies = useAchievements(accountAddress);
 
-  const { data: transfers, status: transfersStatus } = useTransfersQuery(
+  const {
+    data: transfers,
+    status: transfersStatus,
+    refetch: refetchTransfers,
+  } = useTransfersQuery(
     {
       projects: {
         project: project ?? "",
@@ -83,7 +75,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     },
   );
 
-  const { data: transactions, status: activitiesStatus } = useActivitiesQuery(
+  const {
+    data: transactions,
+    status: activitiesStatus,
+    refetch: refetchTransactions,
+  } = useActivitiesQuery(
     {
       projects: {
         project: project ?? "",
@@ -197,8 +193,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
             key: `${transactionHash}-${entrypoint}`,
             transactionHash: transactionHash,
             title: entrypoint,
-            image: game?.metadata.image || "",
-            website: game?.socials.website || "",
+            image: game?.properties.icon || "",
+            website: edition?.socials.website || "",
             certified: !!game,
             timestamp: timestamp / 1000,
             date: date,
@@ -206,7 +202,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }),
       ) || []
     );
-  }, [transactions, game]);
+  }, [transactions, game, edition]);
 
   const achievements: CardProps[] = useMemo(() => {
     return trophies.achievements
@@ -249,6 +245,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         transactions,
         status,
         setAccountAddress,
+        refetchTransfers,
+        refetchTransactions,
       }}
     >
       {children}

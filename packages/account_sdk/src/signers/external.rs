@@ -31,7 +31,7 @@ struct SignatureResult {
     result: String,
     error: Option<String>,
     #[allow(unused)]
-    account: String,
+    account: Option<String>,
 }
 
 /// Signs a message using the KeychainWalletService, which routes to the appropriate

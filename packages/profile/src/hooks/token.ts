@@ -203,22 +203,23 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   // Merge data
   const data = useMemo(() => {
     const newData: UseBalancesResponse = { tokens: [], status: "success" };
+    // Use a map to track tokens by their normalized address
+    const tokenMap: Record<string, Token> = {};
+
+    // Process tokens from rpcData
     rpcData.forEach((token) => {
       const contractAddress = token.meta.address;
-      // If already exists in torii data, skip
-      if (
-        newData.tokens?.find(
-          (token) => BigInt(token.metadata.address) === BigInt(contractAddress),
-        )
-      )
-        return;
+      // Normalize the address by converting to BigInt and back to string
+      const normalizedAddress = BigInt(contractAddress).toString();
 
-      // Otherwise, add to data
+      // Skip if we already have this token
+      if (tokenMap[normalizedAddress]) return;
+
       const value = countervalues.find(
         (v) => BigInt(v?.address || "0x0") === BigInt(contractAddress),
       );
       const change = value ? value.current.value - value.period.value : 0;
-      const newToken: Token = {
+      tokenMap[normalizedAddress] = {
         balance: {
           amount: Number(token.balance.value) / 10 ** token.meta.decimals,
           value: value?.current.value || 0,
@@ -228,13 +229,23 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
           name: token.meta.name,
           symbol: token.meta.symbol,
           decimals: token.meta.decimals,
-          address: contractAddress,
+          address: getChecksumAddress(contractAddress),
           image: token.meta.logoUrl,
         },
       };
-      newData.tokens?.push(newToken);
     });
-    newData.tokens?.push(...toriiData.tokens);
+
+    // Process tokens from toriiData
+    toriiData.tokens.forEach((token) => {
+      const normalizedAddress = BigInt(token.metadata.address).toString();
+      // Only add if we don't already have this token
+      if (!tokenMap[normalizedAddress]) {
+        tokenMap[normalizedAddress] = token;
+      }
+    });
+
+    // Convert the map back to an array
+    newData.tokens = Object.values(tokenMap);
     newData.status = toriiData.status;
     return newData;
   }, [rpcData, toriiData, countervalues]);

@@ -47,7 +47,8 @@
     "@telegram-apps/sdk": "^2.4.0",
     "@turnkey/sdk-browser": "^4.0.0",
     "cbor-x": "^1.5.0",
-    "fast-deep-equal": "catalog:"
+    "mipd": "^0.0.7",
+    "@walletconnect/ethereum-provider": "^2.20.0"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",

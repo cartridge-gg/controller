@@ -46,6 +46,8 @@ export function SendCollection() {
   const [recipientError, setRecipientError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [recipientLoading, setRecipientLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const [to, setTo] = useState("");
@@ -77,8 +79,12 @@ export function SendCollection() {
   }, [entrypoints]);
 
   const disabled = useMemo(() => {
-    return (!recipientValidated && !!recipientWarning) || !!recipientError;
-  }, [recipientValidated, recipientWarning, recipientError]);
+    return (
+      recipientLoading ||
+      (!recipientValidated && !!recipientWarning) ||
+      !!recipientError
+    );
+  }, [recipientValidated, recipientWarning, recipientError, recipientLoading]);
 
   useEffect(() => {
     setRecipientValidated(false);
@@ -86,7 +92,6 @@ export function SendCollection() {
 
   const onSubmit = useCallback(
     async (to: string) => {
-      setLoading(true);
       setSubmitted(true);
       if (
         !contractAddress ||
@@ -97,6 +102,7 @@ export function SendCollection() {
         !entrypoint
       )
         return;
+      setLoading(true);
       // Fill the extra argument in case of safe transfer functions
       const calldata = entrypoint.includes("safe") ? [0] : [];
       const calls: Call[] = (tokenIds as string[]).map((id: string) => {
@@ -168,6 +174,7 @@ export function SendCollection() {
           submitted={submitted}
           setWarning={setRecipientWarning}
           setError={setRecipientError}
+          setParentLoading={setRecipientLoading}
         />
         <Sending assets={assets} description={collection.name} />
       </LayoutContent>

@@ -12,7 +12,8 @@
     "e2e:ui": "turbo build:deps dev e2e:ui",
     "lint": "turbo lint format:check",
     "format": "turbo format lint:fix",
-    "clean": "pnpm store prune",
+    "clean": "git clean -fdX && pnpm store prune",
+    "ci": "pnpm clean && pnpm i",
     "release": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/utils --filter=@cartridge/ui-next --filter=@cartridge/account-wasm publish --tag latest --no-git-checks --access public",
     "release:prerelease": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/utils --filter=@cartridge/ui-next --filter=@cartridge/account-wasm publish --tag prerelease --no-git-checks --access public",
     "keychain": "pnpm --filter @cartridge/keychain",
@@ -28,10 +29,11 @@
     "test": "pnpm keychain test",
     "test:ci": "pnpm keychain test:ci",
     "test:storybook": "pnpm turbo build:deps test:storybook",
-    "test:storybook:update": "pnpm turbo build:deps test:storybook:update"
+    "test:storybook:update": "pnpm turbo build:deps test:storybook:update",
+    "check:regression": "pnpm ./scripts/check_regression.sh"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#88479ce"
+    "@cartridge/presets": "github:cartridge-gg/presets#f57e6cc"
   },
   "devDependencies": {
     "turbo": "^2.4.4",

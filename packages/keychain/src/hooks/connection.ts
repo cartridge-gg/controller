@@ -137,10 +137,9 @@ export function useConnectionValue() {
       try {
         const decodedPreset = decodeURIComponent(urlTheme);
         if (controllerConfigs?.[decodedPreset]?.theme) {
-          setVerified(true);
           setTheme({
             ...controllerConfigs[decodedPreset].theme,
-            verified: true,
+            verified,
           });
         } else {
           console.error("Theme preset not valid");
@@ -385,6 +384,11 @@ export function isOriginVerified(
   origin: string,
   allowedOrigins: string[],
 ): boolean {
+  // If "*" is an allowed origin, always return true
+  if (allowedOrigins.includes("*")) {
+    return true;
+  }
+
   if (!origin) {
     return false;
   }

@@ -64,7 +64,7 @@ export enum CheckoutState {
 export function CryptoCheckout({
   selectedWallet,
   walletAddress,
-  creditsAmount,
+  wholeCredits,
   starterpackDetails,
   initialState = CheckoutState.REVIEW_PURCHASE,
   onBack,
@@ -72,7 +72,7 @@ export function CryptoCheckout({
 }: {
   selectedWallet: ExternalWallet;
   walletAddress: string;
-  creditsAmount: number;
+  wholeCredits: number;
   starterpackDetails?: StarterPackDetails;
   initialState?: CheckoutState;
   onBack: () => void;
@@ -97,9 +97,10 @@ export function CryptoCheckout({
   }, [state]);
 
   const costUSDC = useMemo(() => {
-    const cost = starterpackDetails?.price ?? creditsAmount;
-    return creditsToUSD(cost);
-  }, [starterpackDetails, creditsAmount]);
+    return starterpackDetails
+      ? starterpackDetails.priceUsd
+      : creditsToUSD(wholeCredits);
+  }, [starterpackDetails, wholeCredits]);
 
   const handleSendTransaction = useCallback(async () => {
     setError(undefined);
@@ -107,7 +108,7 @@ export function CryptoCheckout({
       setState(CheckoutState.REQUESTING_PAYMENT);
       const paymentId = await sendPayment(
         walletAddress,
-        creditsAmount,
+        wholeCredits,
         selectedWallet.platform!,
         starterpackDetails,
         false,
@@ -126,7 +127,7 @@ export function CryptoCheckout({
     } finally {
       setState(CheckoutState.REVIEW_PURCHASE);
     }
-  }, [sendPayment, selectedWallet, creditsAmount, onComplete]);
+  }, [sendPayment, selectedWallet, wholeCredits, onComplete]);
 
   return (
     <LayoutContainer>
@@ -152,7 +153,7 @@ export function CryptoCheckout({
             title={"Receiving"}
             name={"Credits"}
             icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
-            amount={creditsAmount.toLocaleString() + " Credits"}
+            amount={wholeCredits.toLocaleString() + " Credits"}
             isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
           />
         )}
@@ -204,7 +205,10 @@ export function CryptoCheckout({
             className="flex-1 text-background-100 hover:brightness-90"
             variant="secondary"
             style={{
-              backgroundColor: WALLET_CONFIG[selectedWallet!.type].bgColor,
+              backgroundColor:
+                WALLET_CONFIG[
+                  selectedWallet!.type as keyof typeof WALLET_CONFIG
+                ].bgColor,
               border: "none",
             }}
             isLoading={state === CheckoutState.REQUESTING_PAYMENT}
@@ -225,8 +229,8 @@ export const walletIcon = (wallet?: ExternalWallet, useColor = false) => {
   }
 
   const Icon = useColor
-    ? WALLET_CONFIG[wallet.type].colorIcon
-    : WALLET_CONFIG[wallet.type].icon;
+    ? WALLET_CONFIG[wallet.type as keyof typeof WALLET_CONFIG].colorIcon
+    : WALLET_CONFIG[wallet.type as keyof typeof WALLET_CONFIG].icon;
   return <Icon />;
 };
 

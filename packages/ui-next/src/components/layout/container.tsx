@@ -24,18 +24,40 @@ export function useMediaQuery(query: string) {
 export function LayoutContainer({
   children,
   className,
-}: PropsWithChildren & { className?: string }) {
+}: PropsWithChildren & {
+  className?: string;
+  modal?: boolean;
+  onModalClick?: () => void;
+}) {
+  const [withBackground, setWithBackground] = useState(false);
   const [withBottomTabs, setWithBottomTabs] = useState(false);
   const [withFooter, setWithFooter] = useState(false);
 
   return (
     <LayoutContext.Provider
-      value={{ withBottomTabs, setWithBottomTabs, withFooter, setWithFooter }}
+      value={{
+        withBackground,
+        setWithBackground,
+        withBottomTabs,
+        setWithBottomTabs,
+        withFooter,
+        setWithFooter,
+      }}
     >
       <ResponsiveWrapper>
         <div
           className={cn(
-            "flex flex-col flex-1 min-h-0 overflow-x-hidden",
+            "fixed inset-0 bg-translucent-200 opacity-0 z-50",
+            "transition-opacity duration-150", // This duration manage the modal fade in
+            withBackground
+              ? "opacity-100 visible"
+              : "invisible pointer-events-none",
+          )}
+          onClick={() => setWithBackground(false)}
+        />
+        <div
+          className={cn(
+            "flex flex-col flex-1 min-h-0 overflow-x-hidden z-10",
             className,
           )}
           style={{ scrollbarWidth: "none" }}

@@ -6,6 +6,10 @@ type UIContextValue = {
     address: string;
   };
   chainId?: string;
+  followers?: number;
+  followings?: number;
+  onFollowersClick?: () => void;
+  onFollowingsClick?: () => void;
   closeModal?: () => void;
   openSettings?: () => void;
 };
