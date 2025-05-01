@@ -1,5 +1,5 @@
 import { useConnection } from "#hooks/context";
-import { useToken } from "#hooks/token";
+import { Token, useToken, useTokens } from "#hooks/token";
 import {
   LayoutContainer,
   LayoutContent,
@@ -10,6 +10,9 @@ import {
   CheckboxUncheckedIcon,
   cn,
   Thumbnail,
+  TokenSelect,
+  Spinner,
+  PaperPlaneIcon,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -28,7 +31,11 @@ export function SendToken() {
   const { parent, provider, closable } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
-  const { token } = useToken({ tokenAddress: tokenAddress! });
+  const { token, status: tokenFetching } = useToken({
+    tokenAddress: tokenAddress!,
+  });
+  const { tokens } = useTokens();
+
   const { refetchTransfers } = useData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -39,6 +46,7 @@ export function SendToken() {
   const [toError, setToError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<Token | undefined>();
   const [recipientLoading, setRecipientLoading] = useState(false);
 
   const disabled = useMemo(() => {
@@ -54,19 +62,29 @@ export function SendToken() {
     setValidated(false);
   }, [warning, setValidated]);
 
+  const onChangeToken = useCallback(
+    (token: Token) => {
+      setSelectedToken(token);
+      // Reset amount when token changes
+      setAmount(undefined);
+    },
+    [setSelectedToken, setAmount],
+  );
+
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
       setSubmitted(true);
-      if (!token || !to || !amount) return;
+      setLoading(true);
+      if (!selectedToken || !to || !amount) return;
 
       setLoading(true);
       const formattedAmount = uint256.bnToUint256(
-        BigInt(amount * 10 ** token.metadata.decimals),
+        BigInt(amount * 10 ** selectedToken.metadata.decimals),
       );
 
       const calls: Call[] = [
         {
-          contractAddress: token.metadata.address,
+          contractAddress: selectedToken.metadata.address,
           entrypoint: "transfer",
           calldata: [to, formattedAmount],
         },
@@ -96,7 +114,7 @@ export function SendToken() {
       }
     },
     [
-      token,
+      selectedToken,
       provider,
       parent,
       closable,
@@ -118,9 +136,26 @@ export function SendToken() {
     <LayoutContainer>
       <LayoutHeader className="hidden" onBack={handleBack} />
       <LayoutContent className="pb-4 gap-6">
-        <div className="flex items-center gap-4">
-          <Thumbnail icon={token.metadata.image} size="lg" rounded />
-          <p className="text-semibold text-lg/[22px]">{`Send ${token.metadata.symbol ?? "Token"}`}</p>
+        <div className="flex items-center gap-3">
+          <Thumbnail
+            icon={
+              <PaperPlaneIcon variant="solid" className="h-[30px] w-[30px]" />
+            }
+            size="lg"
+          />
+          <p className="text-semibold text-lg">Send</p>
+          {tokenFetching === "loading" ? (
+            <div className="flex items-center gap-2">
+              <Spinner size="sm" />
+              <p className="text-sm">Loading...</p>
+            </div>
+          ) : (
+            <TokenSelect
+              tokens={tokens.filter((item) => item.balance.amount > 0)}
+              onSelect={onChangeToken}
+              defaultToken={selectedToken}
+            />
+          )}
         </div>
         <SendRecipient
           to={to}
@@ -131,6 +166,7 @@ export function SendToken() {
           setParentLoading={setRecipientLoading}
         />
         <SendAmount
+          token={selectedToken || token}
           amount={amount}
           submitted={submitted}
           setAmount={setAmount}
@@ -154,15 +190,27 @@ export function SendToken() {
           )}
           <p className="text-xs text-destructive-100">{warning}</p>
         </div>
-        <Button
-          disabled={disabled}
-          type="submit"
-          className="w-full"
-          isLoading={loading}
-          onClick={() => onSubmit(to, amount!)}
-        >
-          Review Send
-        </Button>
+        <div className="flex flex-row items-center gap-3">
+          <Button
+            disabled={disabled}
+            variant="secondary"
+            type="button"
+            className="w-fit"
+            isLoading={loading}
+            onClick={handleBack}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={disabled}
+            type="submit"
+            className="w-full"
+            isLoading={loading}
+            onClick={() => onSubmit(to, amount!)}
+          >
+            Review Send
+          </Button>
+        </div>
       </LayoutFooter>
     </LayoutContainer>
   );
