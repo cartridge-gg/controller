@@ -1,5 +1,5 @@
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
-import { hashMessage, recoverAddress, Signature } from "ethers";
+import { ethers, getBytes, recoverAddress, Signature } from "ethers";
 import {
   ExternalPlatform,
   ExternalWallet,
@@ -102,7 +102,9 @@ export class TurnkeyWallet implements WalletAdapter {
         throw new Error("Turnkey is not connected");
       }
 
-      const messageHash = hashMessage(message);
+      const paddedMessage = `0x${message.replace("0x", "").padStart(64, "0")}`;
+      const messageBytes = getBytes(paddedMessage);
+      const messageHash = ethers.hashMessage(messageBytes);
 
       const { r, s, v } = await this.turnkeyIframeClient.signRawPayload({
         organizationId: this.organizationId,
@@ -127,9 +129,6 @@ export class TurnkeyWallet implements WalletAdapter {
         s: sHex,
         v: vNumber,
       });
-      console.log("r", r);
-      console.log("s", s);
-      console.log("v", v);
 
       const recoveredAddress = recoverAddress(messageHash, signature);
 
