@@ -16,7 +16,7 @@ export const TokenSelectRow = ({
       value={token.metadata.address}
       data-active={token.metadata.address === currentToken.metadata.address}
       className={cn(
-        "group hover:bg-background-300 hover:text-foreground-100 border-b border-border cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:text-foreground-100 rounded-none",
+        "group hover:bg-background-300 hover:text-foreground-100 border-b border-border cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:hover:bg-background-300 data-[active=true]:text-foreground-100 rounded-none",
         className,
       )}
     >

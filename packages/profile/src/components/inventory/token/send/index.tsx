@@ -46,7 +46,7 @@ export function SendToken() {
   const [toError, setToError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<Token | undefined>(token);
+  const [selectedToken, setSelectedToken] = useState<Token | undefined>();
   const [recipientLoading, setRecipientLoading] = useState(false);
 
   const disabled = useMemo(() => {
@@ -62,9 +62,14 @@ export function SendToken() {
     setValidated(false);
   }, [warning, setValidated]);
 
-  const onChangeToken = useCallback((token: Token) => {
-    setSelectedToken(token);
-  }, []);
+  const onChangeToken = useCallback(
+    (token: Token) => {
+      setSelectedToken(token);
+      // Reset amount when token changes
+      setAmount(undefined);
+    },
+    [setSelectedToken, setAmount],
+  );
 
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
