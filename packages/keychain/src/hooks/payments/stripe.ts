@@ -76,8 +76,8 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
               purchaseType: starterpack
                 ? PurchaseType.STARTERPACK
                 : PurchaseType.CREDITS,
+              isMainnet: isLiveMode,
             },
-            isMainnet: isLiveMode,
           },
         );
 
