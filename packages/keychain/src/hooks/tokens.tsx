@@ -146,7 +146,7 @@ export function convertUSDToTokenAmount(
   return tokenAmount;
 }
 
-export const CREDITS_PER_USD = 1000;
+export const CREDITS_PER_USD = 100;
 
 export function creditsToUSD(credits: number) {
   return credits / CREDITS_PER_USD;

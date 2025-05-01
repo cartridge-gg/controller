@@ -1,12 +1,16 @@
-import { TokenCard } from "@cartridge/ui-next";
+import { Empty, Skeleton, TokenCard } from "@cartridge/ui-next";
 import { Link } from "react-router-dom";
 import { Token, useTokens } from "#hooks/token";
 import placeholder from "/public/placeholder.svg";
 
 export function Tokens() {
-  const { tokens } = useTokens();
+  const { tokens, status } = useTokens();
 
-  return (
+  return status === "loading" ? (
+    <LoadingState />
+  ) : status === "error" || !tokens.length ? (
+    <EmptyState />
+  ) : (
     <div
       className="rounded overflow-clip w-full flex flex-col gap-y-px"
       style={{ scrollbarWidth: "none" }}
@@ -43,3 +47,17 @@ function TokenCardContent({ token }: { token: Token }) {
     </Link>
   );
 }
+
+const LoadingState = () => {
+  return <Skeleton className="w-full h-[259px] rounded" />;
+};
+
+const EmptyState = () => {
+  return (
+    <Empty
+      title="No asset has been found in your inventory."
+      icon="inventory"
+      className="h-full"
+    />
+  );
+};

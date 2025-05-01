@@ -4,43 +4,43 @@ import {
   GoldTagIcon,
   SilverTagIcon,
   SparklesIcon,
+  LeaderboardUsername,
 } from "@/index";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AchievementPinIcons } from "../pin-icons";
-import AchievementLeaderboardUsername from "../leaderboard-username/leaderboard-username";
+import { FollowerMark } from "../../followers/mark";
 
-export interface AchievementLeaderboardRowProps
+export interface LeaderboardRowProps
   extends React.HTMLAttributes<HTMLDivElement> {
-  pins: { id: string; icon: string }[];
   rank: number;
   name: string;
   points: number;
   icon?: string;
   highlight?: boolean;
+  following?: boolean;
 }
 
-export const AchievementLeaderboardRow = ({
-  pins,
+export const LeaderboardRow = ({
   rank,
   name,
   points,
   icon,
   highlight,
+  following,
   className,
+  onClick,
   ...props
-}: AchievementLeaderboardRowProps) => {
-  const [hover, setHover] = useState(false);
+}: LeaderboardRowProps) => {
   const [sticky, setSticky] = useState(false);
   const ref = useRef(null);
 
   const Tag = useMemo(() => {
     switch (rank) {
       case 1:
-        return <GoldTagIcon />;
+        return <GoldTagIcon size="sm" />;
       case 2:
-        return <SilverTagIcon />;
+        return <SilverTagIcon size="sm" />;
       case 3:
-        return <BronzeTagIcon />;
+        return <BronzeTagIcon size="sm" />;
       default:
         return null;
     }
@@ -65,35 +65,38 @@ export const AchievementLeaderboardRow = ({
     <div
       ref={ref}
       className={cn(
-        "flex select-none py-2.5 px-3 justify-between bg-background-200 text-foreground-400 hover:bg-background-300 hover:text-foreground-300 cursor-pointer transition-colors",
+        "min-h-11 flex select-none py-2.5 px-3 justify-between bg-background-200 text-foreground-400 transition-colors border-y border-transparent",
+        !!onClick &&
+          "group hover:bg-background-300 hover:text-foreground-300 cursor-pointer",
         highlight &&
           "bg-background-300 text-foreground-300 sticky top-[-1px] bottom-[-1px] z-10",
-        highlight && sticky && "border-y border-spacer-100",
+        highlight && sticky && "border-spacer-100",
         className,
       )}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
       {...props}
     >
-      <div className="flex gap-x-1.5 items-center">
-        <p className="w-9 text-sm">{`${rank}.`}</p>
-        <AchievementLeaderboardUsername
+      <div className="flex gap-x-2 items-center">
+        <div className="flex w-11 justify-between items-center">
+          <p className="text-sm">{`${rank}.`}</p>
+          {Tag}
+        </div>
+        <LeaderboardUsername
           username={name}
           icon={icon}
           highlight={highlight}
         />
-        {Tag}
       </div>
       <div className="flex gap-x-3 items-center">
-        <AchievementPinIcons
-          pins={pins}
-          variant={highlight || hover ? "light" : "default"}
-          size="md"
-          theme={highlight}
-        />
+        {following !== undefined && (
+          <FollowerMark
+            active={following}
+            variant="default"
+            className={highlight ? "hidden" : ""}
+          />
+        )}
         <div
           className={cn(
-            "flex gap-1",
+            "flex gap-1 min-w-14 justify-end",
             highlight ? "text-primary" : "text-foreground-100",
           )}
         >
@@ -105,4 +108,4 @@ export const AchievementLeaderboardRow = ({
   );
 };
 
-export default AchievementLeaderboardRow;
+export default LeaderboardRow;

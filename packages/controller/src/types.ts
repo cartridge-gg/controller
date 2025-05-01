@@ -223,6 +223,7 @@ export type ProfileContextTypeVariant =
   | "inventory"
   | "trophies"
   | "achievements"
+  | "leaderboard"
   | "activity";
 
 export type Tokens = {

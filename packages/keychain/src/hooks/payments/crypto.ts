@@ -35,7 +35,7 @@ export const useCryptoPayment = () => {
   const sendPayment = useCallback(
     async (
       walletAddress: string,
-      credits: number,
+      wholeCredits: number,
       platform: ExternalPlatform,
       starterpack?: StarterPackDetails,
       isMainnet: boolean = false,
@@ -56,7 +56,7 @@ export const useCryptoPayment = () => {
           tokenAddress,
         } = await createCryptoPayment(
           controller.username(),
-          credits,
+          wholeCredits,
           platform,
           starterpack,
           isMainnet,
@@ -136,7 +136,7 @@ export const useCryptoPayment = () => {
 
   async function createCryptoPayment(
     username: string,
-    credits: number,
+    wholeCredits: number,
     platform: ExternalPlatform,
     starterpack?: StarterPackDetails,
     isMainnet: boolean = false,
@@ -146,7 +146,10 @@ export const useCryptoPayment = () => {
       {
         input: {
           username,
-          credits,
+          credits: {
+            amount: wholeCredits,
+            decimals: 0,
+          },
           network: platform.toUpperCase() as Network,
           purchaseType: starterpack
             ? PurchaseType.STARTERPACK

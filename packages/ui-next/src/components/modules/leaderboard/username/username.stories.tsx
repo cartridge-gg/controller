@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AchievementLeaderboardUsername } from "./leaderboard-username";
+import { LeaderboardUsername } from "./username";
 
-const meta: Meta<typeof AchievementLeaderboardUsername> = {
-  title: "Modules/Achievements/Leaderboard Username",
-  component: AchievementLeaderboardUsername,
+const meta: Meta<typeof LeaderboardUsername> = {
+  title: "Modules/Leaderboard/Username",
+  component: LeaderboardUsername,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -15,7 +15,7 @@ const meta: Meta<typeof AchievementLeaderboardUsername> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof AchievementLeaderboardUsername>;
+type Story = StoryObj<typeof LeaderboardUsername>;
 
 export const Default: Story = {};
 
