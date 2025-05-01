@@ -20,6 +20,7 @@ import { Activity } from "#components/activity";
 import { Slot } from "#components/slot";
 import { useMemo } from "react";
 import { Socials } from "./socials";
+import { Leaderboard } from "./leaderboard";
 
 export function App() {
   const [searchParams] = useSearchParams();
@@ -56,6 +57,9 @@ export function App() {
             </Route>
             <Route path="achievements" element={<Achievements />}>
               <Route path=":address" element={<Achievements />} />
+            </Route>
+            <Route path="leaderboard" element={<Leaderboard />}>
+              <Route path=":address" element={<Leaderboard />} />
             </Route>
             <Route path="trophies" element={<RedirectAchievements />}>
               <Route path=":address" element={<RedirectAchievements />} />

@@ -5,13 +5,12 @@ import {
   ActivityTokenCard,
   Button,
   cn,
-  EmptyStateActivityIcon,
+  Empty,
   LayoutContainer,
   LayoutContent,
-  LayoutContentError,
-  LayoutContentLoader,
   LayoutHeader,
   PlusIcon,
+  Skeleton,
 } from "@cartridge/ui-next";
 import { VoyagerUrl } from "@cartridge/utils";
 import { useConnection, useData } from "#hooks/context";
@@ -68,118 +67,125 @@ export function Activity() {
     <LayoutContainer>
       <LayoutHeader variant="hidden" />
 
-      {(() => {
-        switch (status) {
-          case "loading": {
-            return <LayoutContentLoader />;
-          }
-          case "error": {
-            return <LayoutContentError />;
-          }
-          case "success": {
+      {status === "loading" ? (
+        <LoadingState />
+      ) : status === "error" || !data.length ? (
+        <EmptyState />
+      ) : (
+        <LayoutContent className="flex flex-col gap-4 p-6">
+          {dates.map((current) => {
             return (
-              <LayoutContent className="flex flex-col gap-4 p-6">
-                {dates.length > 0 ? (
-                  dates.map((current) => {
-                    return (
-                      <div className="flex flex-col gap-2" key={current}>
-                        <p className="py-3 text-xs font-semibold text-foreground-400 tracking-wider">
-                          {current}
-                        </p>
-                        {events
-                          .filter(({ date }) => date === current)
-                          .map((props: CardProps, index: number) => {
-                            switch (props.variant) {
-                              case "token":
-                                return (
-                                  <Link
-                                    key={`${index}-${props.key}`}
-                                    to={to(props.transactionHash)}
-                                    target="_blank"
-                                  >
-                                    <ActivityTokenCard
-                                      amount={props.amount}
-                                      address={props.address}
-                                      value={props.value}
-                                      image={props.image}
-                                      action={props.action}
-                                    />
-                                  </Link>
-                                );
-                              case "collectible":
-                                return (
-                                  <Link
-                                    key={`${index}-${props.key}`}
-                                    to={to(props.transactionHash)}
-                                    target="_blank"
-                                  >
-                                    <ActivityCollectibleCard
-                                      name={props.name}
-                                      collection={props.collection}
-                                      address={props.address}
-                                      image={props.image}
-                                      action={props.action}
-                                    />
-                                  </Link>
-                                );
-                              case "game":
-                                return (
-                                  <Link
-                                    key={`${index}-${props.key}`}
-                                    to={to(props.transactionHash)}
-                                    target="_blank"
-                                  >
-                                    <ActivityGameCard
-                                      title={props.title}
-                                      website={props.website}
-                                      image={props.image}
-                                      certified={props.certified}
-                                    />
-                                  </Link>
-                                );
-                              case "achievement":
-                                return (
-                                  <ActivityAchievementCard
-                                    key={`${index}-${props.key}`}
-                                    title={"Achievement"}
-                                    topic={props.title}
-                                    website={props.website}
-                                    image={props.image}
-                                    certified={props.certified}
-                                    points={props.points || 0}
-                                  />
-                                );
-                            }
-                          })}
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="select-none flex flex-col justify-center items-center gap-3 grow">
-                    <EmptyStateActivityIcon className="h-[120px] w-[120px]" />
-                    <p className="text-sm text-background-500">
-                      No activity yet
-                    </p>
-                  </div>
-                )}
-                <Button
-                  variant="secondary"
-                  className={cn(
-                    "text-foreground-300 hover:text-foreground-200 normal-case text-sm font-medium tracking-normal font-sans",
-                    (cap >= data.length || dates.length === 0) && "hidden",
-                  )}
-                  onClick={() => setCap((prev) => prev + OFFSET)}
-                >
-                  <PlusIcon variant="solid" size="xs" />
-                  See More
-                </Button>
-              </LayoutContent>
+              <div className="flex flex-col gap-2" key={current}>
+                <p className="py-3 text-xs font-semibold text-foreground-400 tracking-wider">
+                  {current}
+                </p>
+                {events
+                  .filter(({ date }) => date === current)
+                  .map((props: CardProps, index: number) => {
+                    switch (props.variant) {
+                      case "token":
+                        return (
+                          <Link
+                            key={`${index}-${props.key}`}
+                            to={to(props.transactionHash)}
+                            target="_blank"
+                          >
+                            <ActivityTokenCard
+                              amount={props.amount}
+                              address={props.address}
+                              value={props.value}
+                              image={props.image}
+                              action={props.action}
+                            />
+                          </Link>
+                        );
+                      case "collectible":
+                        return (
+                          <Link
+                            key={`${index}-${props.key}`}
+                            to={to(props.transactionHash)}
+                            target="_blank"
+                          >
+                            <ActivityCollectibleCard
+                              name={props.name}
+                              collection={props.collection}
+                              address={props.address}
+                              image={props.image}
+                              action={props.action}
+                            />
+                          </Link>
+                        );
+                      case "game":
+                        return (
+                          <Link
+                            key={`${index}-${props.key}`}
+                            to={to(props.transactionHash)}
+                            target="_blank"
+                          >
+                            <ActivityGameCard
+                              title={props.title}
+                              website={props.website}
+                              image={props.image}
+                              certified={props.certified}
+                            />
+                          </Link>
+                        );
+                      case "achievement":
+                        return (
+                          <ActivityAchievementCard
+                            key={`${index}-${props.key}`}
+                            title={"Achievement"}
+                            topic={props.title}
+                            website={props.website}
+                            image={props.image}
+                            certified={props.certified}
+                            points={props.points || 0}
+                          />
+                        );
+                    }
+                  })}
+              </div>
             );
-          }
-        }
-      })()}
-
+          })}
+          <Button
+            variant="secondary"
+            className={cn(
+              "text-foreground-300 hover:text-foreground-200 normal-case text-sm font-medium tracking-normal font-sans",
+              (cap >= data.length || dates.length === 0) && "hidden",
+            )}
+            onClick={() => setCap((prev) => prev + OFFSET)}
+          >
+            <PlusIcon variant="solid" size="xs" />
+            See More
+          </Button>
+        </LayoutContent>
+      )}
       <LayoutBottomNav />
     </LayoutContainer>
   );
 }
+
+const LoadingState = () => {
+  return (
+    <LayoutContent className="flex flex-col gap-4 p-6 overflow-hidden">
+      <Skeleton className="w-1/5 h-4 py-4 rounded" />
+      <div className="flex flex-col gap-2">
+        {Array.from({ length: 20 }).map((_, index) => (
+          <Skeleton key={index} className="w-full h-16 rounded" />
+        ))}
+      </div>
+    </LayoutContent>
+  );
+};
+
+const EmptyState = () => {
+  return (
+    <LayoutContent className="flex flex-col gap-4 p-6">
+      <Empty
+        title="No activity has been detected for this profile."
+        icon="activity"
+        className="h-full"
+      />
+    </LayoutContent>
+  );
+};

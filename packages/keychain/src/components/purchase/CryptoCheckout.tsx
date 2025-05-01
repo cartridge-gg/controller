@@ -64,7 +64,7 @@ export enum CheckoutState {
 export function CryptoCheckout({
   selectedWallet,
   walletAddress,
-  creditsAmount,
+  wholeCredits,
   starterpackDetails,
   initialState = CheckoutState.REVIEW_PURCHASE,
   onBack,
@@ -72,7 +72,7 @@ export function CryptoCheckout({
 }: {
   selectedWallet: ExternalWallet;
   walletAddress: string;
-  creditsAmount: number;
+  wholeCredits: number;
   starterpackDetails?: StarterPackDetails;
   initialState?: CheckoutState;
   onBack: () => void;
@@ -97,9 +97,10 @@ export function CryptoCheckout({
   }, [state]);
 
   const costUSDC = useMemo(() => {
-    const cost = starterpackDetails?.price ?? creditsAmount;
-    return creditsToUSD(cost);
-  }, [starterpackDetails, creditsAmount]);
+    return starterpackDetails
+      ? starterpackDetails.priceUsd
+      : creditsToUSD(wholeCredits);
+  }, [starterpackDetails, wholeCredits]);
 
   const handleSendTransaction = useCallback(async () => {
     setError(undefined);
@@ -107,7 +108,7 @@ export function CryptoCheckout({
       setState(CheckoutState.REQUESTING_PAYMENT);
       const paymentId = await sendPayment(
         walletAddress,
-        creditsAmount,
+        wholeCredits,
         selectedWallet.platform!,
         starterpackDetails,
         false,
@@ -126,7 +127,7 @@ export function CryptoCheckout({
     } finally {
       setState(CheckoutState.REVIEW_PURCHASE);
     }
-  }, [sendPayment, selectedWallet, creditsAmount, onComplete]);
+  }, [sendPayment, selectedWallet, wholeCredits, onComplete]);
 
   return (
     <LayoutContainer>
@@ -162,7 +163,7 @@ export function CryptoCheckout({
             title={"Receiving"}
             name={"Credits"}
             icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
-            amount={creditsAmount.toLocaleString() + " Credits"}
+            amount={wholeCredits.toLocaleString() + " Credits"}
             isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
           />
         )}
