@@ -40,7 +40,7 @@ export const PurchaseWithoutBalance = () => {
   const { closeModal } = useUI();
 
   const { controller } = useConnection();
-  const { price, items: starterPackItems } = useStarterPack("");
+  const { priceUsd, items: starterPackItems } = useStarterPack("");
 
   const stripePromise = useMemo(
     () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
@@ -72,7 +72,7 @@ export const PurchaseWithoutBalance = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          credits: price,
+          credits: priceUsd,
           username: controller?.username(),
         }),
       });
@@ -119,9 +119,9 @@ export const PurchaseWithoutBalance = () => {
           onBack={() => setPurchaseState(PurchaseState.BACK)}
           onComplete={() => setPurchaseState(PurchaseState.PENDING)}
           price={{
-            baseCostInCents: price,
+            baseCostInCents: priceUsd,
             processingFeeInCents: 0,
-            totalInCents: price,
+            totalInCents: priceUsd,
           }}
         />
       </Elements>

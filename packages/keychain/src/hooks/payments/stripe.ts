@@ -17,33 +17,42 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const getStripeKey = () => {
+  const isLiveMode = useMemo(() => {
     if (import.meta.env.DEV) {
       // Always use test mode in local dev
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE;
+      return false;
     }
+
     if (isSlot) {
       // Slot is live now and should always use live mode
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_LIVE_MODE;
+      return true;
     }
+
     if (
       import.meta.env.PROD &&
       controller?.chainId() === constants.StarknetChainId.SN_MAIN
     ) {
       // In prod, only use live mode if on mainnet
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_PROD_MODE;
+      return true;
     }
+
     // Default to test mode
-    return import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE;
-  };
+    return false;
+  }, [controller, isSlot]);
+
   const stripePromise = useMemo(
-    () => loadStripe(getStripeKey()),
-    [controller, isSlot],
+    () =>
+      loadStripe(
+        isLiveMode
+          ? import.meta.env.VITE_STRIPE_API_PUBKEY_LIVE_MODE
+          : import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE,
+      ),
+    [isLiveMode],
   );
 
   const createPaymentIntent = useCallback(
     async (
-      credits: number,
+      wholeCredits: number,
       username: string,
       starterpack?: StarterPackDetails,
     ) => {
@@ -59,11 +68,15 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
           {
             input: {
               username,
-              credits,
+              credits: {
+                amount: wholeCredits,
+                decimals: 0,
+              },
               starterpackId: starterpack?.id,
               purchaseType: starterpack
                 ? PurchaseType.STARTERPACK
                 : PurchaseType.CREDITS,
+              isMainnet: isLiveMode,
             },
           },
         );
@@ -76,7 +89,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
         setIsLoading(false);
       }
     },
-    [controller],
+    [controller, isLiveMode],
   );
 
   const waitForPayment = useCallback(async (paymentIntentId: string) => {

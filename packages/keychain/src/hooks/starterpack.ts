@@ -22,7 +22,7 @@ export interface StarterItemData {
 
 export interface StarterPackDetails {
   id: string;
-  price: number;
+  priceUsd: number;
   starterPackItems: StarterItemData[];
 }
 
@@ -30,7 +30,7 @@ export function useStarterPack(starterpackId: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<StarterItemData[]>([]);
   const [error, setError] = useState<Error | null>(null);
-  const [price, setPrice] = useState<number>(0);
+  const [priceUsd, setPriceUsd] = useState<number>(0);
   useEffect(() => {
     setIsLoading(true);
     setError(null);
@@ -38,15 +38,19 @@ export function useStarterPack(starterpackId: string) {
     client
       .request<StarterPackQuery>(StarterPackDocument, { id: starterpackId })
       .then((result) => {
-        const items: StarterItemData[] = [];
+        const price = result.starterpack!.price.amount;
+        const factor = 10 ** result.starterpack!.price.decimals;
+        const priceUSD = creditsToUSD(Number(price) / factor);
+        setPriceUsd(priceUSD);
 
+        const items: StarterItemData[] = [];
         if (result.starterpack) {
           if (result.starterpack.starterpackContract?.edges) {
             for (const edge of result.starterpack.starterpackContract.edges) {
               items.push({
                 title: edge?.node?.name ?? "",
                 description: edge?.node?.description ?? "",
-                price: creditsToUSD(result.starterpack.price),
+                price: priceUSD,
                 image: edge?.node?.iconURL ?? "",
                 type: StarterItemType.NFT,
               });
@@ -54,20 +58,20 @@ export function useStarterPack(starterpackId: string) {
           }
           if (
             result.starterpack.bonusCredits &&
-            result.starterpack.bonusCredits > 0
+            Number(result.starterpack.bonusCredits.amount) > 0
           ) {
+            const factor = 10 ** result.starterpack.bonusCredits.decimals;
             items.push({
               title: `${result.starterpack.bonusCredits} Credits`,
               description: "Credits cover service fee(s).",
               price: 0,
               image: "/ERC-20-Icon.svg",
               type: StarterItemType.CREDIT,
-              value: result.starterpack.bonusCredits,
+              value: Number(result.starterpack.bonusCredits.amount) / factor,
             });
           }
         }
 
-        setPrice(result.starterpack?.price ?? 0);
         setItems(items);
       })
       .catch(setError)
@@ -76,7 +80,7 @@ export function useStarterPack(starterpackId: string) {
 
   return {
     items,
-    price,
+    priceUsd,
     isLoading,
     error,
   };

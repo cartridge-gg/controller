@@ -45,7 +45,7 @@ export const PurchaseStarterpack: Story = {
     ],
     starterpackDetails: {
       id: "1",
-      price: 100,
+      priceUsd: 100,
       starterPackItems: [
         {
           title: "Village",
@@ -100,7 +100,7 @@ export const SuccessStarterpack: Story = {
     initState: PurchaseState.SUCCESS,
     starterpackDetails: {
       id: "1",
-      price: 100,
+      priceUsd: 100,
       starterPackItems: [
         {
           title: "Village",

@@ -201,7 +201,6 @@ export function CreateController({
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
-
   const newLoginFeatureEnabled = useFeature("new-login");
 
   const [usernameField, setUsernameField] = useState({
@@ -225,6 +224,7 @@ export function CreateController({
     handleSubmit,
     authenticationStep,
     setAuthenticationStep,
+    overlay,
   } = useCreateController({
     isSlot,
     loginMode,
@@ -317,21 +317,24 @@ export function CreateController({
   };
 
   return (
-    <CreateControllerView
-      theme={theme}
-      usernameField={usernameField}
-      validation={debouncedValidation}
-      isLoading={isLoading}
-      error={error}
-      isInAppBrowser={isInApp}
-      isSlot={isSlot}
-      onUsernameChange={handleUsernameChange}
-      onUsernameFocus={handleUsernameFocus}
-      onUsernameClear={handleUsernameClear}
-      onSubmit={handleFormSubmit}
-      onKeyDown={handleKeyDown}
-      authenticationStep={authenticationStep}
-      setAuthenticationStep={setAuthenticationStep}
-    />
+    <>
+      <CreateControllerView
+        theme={theme}
+        usernameField={usernameField}
+        validation={debouncedValidation}
+        isLoading={isLoading}
+        error={error}
+        isInAppBrowser={isInApp}
+        isSlot={isSlot}
+        onUsernameChange={handleUsernameChange}
+        onUsernameFocus={handleUsernameFocus}
+        onUsernameClear={handleUsernameClear}
+        onSubmit={handleFormSubmit}
+        onKeyDown={handleKeyDown}
+        authenticationStep={authenticationStep}
+        setAuthenticationStep={setAuthenticationStep}
+      />
+      {overlay}
+    </>
   );
 }
