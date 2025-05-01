@@ -121,7 +121,7 @@ export type FetchState = {
 };
 
 export type UseCreditBalanceReturn = {
-  balance: number;
+  balance: Balance;
 } & FetchState;
 
 export function useCreditBalance({
@@ -142,7 +142,24 @@ export function useCreditBalance({
     },
   );
 
-  const balance = data?.account?.credits || 0;
+  let balance: Balance = {
+    value: 0n,
+    formatted: "0",
+  };
+
+  if (data?.account?.credits) {
+    const value = BigInt(data?.account?.credits?.amount!);
+    const factor = 10 ** data?.account?.credits?.decimals!;
+    const adjusted = parseFloat(value.toString()) / factor;
+    // Round and remove insignificant trailing zeros
+    const rounded = parseFloat(adjusted.toFixed(2));
+    const formatted =
+      adjusted === rounded ? adjusted.toString() : `~${rounded}`;
+    balance = {
+      value,
+      formatted,
+    };
+  }
 
   return {
     balance,

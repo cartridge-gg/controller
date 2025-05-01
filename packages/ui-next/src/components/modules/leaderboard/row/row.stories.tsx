@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AchievementLeaderboardRow } from "./leaderboard-row";
+import { LeaderboardRow } from "./row";
+import { fn } from "@storybook/test";
 
-const meta: Meta<typeof AchievementLeaderboardRow> = {
-  title: "Modules/Achievements/Leaderboard Row",
-  component: AchievementLeaderboardRow,
+const meta: Meta<typeof LeaderboardRow> = {
+  title: "Modules/Leaderboard/Row",
+  component: LeaderboardRow,
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
@@ -13,15 +14,13 @@ const meta: Meta<typeof AchievementLeaderboardRow> = {
     name: "player",
     highlight: false,
     points: 690,
-    pins: [
-      { id: "1", icon: "fa-seedling" },
-      { id: "2", icon: "fa-swords" },
-    ],
+    following: true,
+    onClick: fn(),
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof AchievementLeaderboardRow>;
+type Story = StoryObj<typeof LeaderboardRow>;
 
 export const Default: Story = {};
 

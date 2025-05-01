@@ -165,8 +165,8 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#051a4aa
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/051a4aa
+        specifier: github:cartridge-gg/presets#f57e6cc
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/f57e6cc
     devDependencies:
       turbo:
         specifier: ^2.4.4
@@ -567,6 +567,9 @@ importers:
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
+      lit:
+        specifier: ^3.3.0
+        version: 3.3.0
       lodash:
         specifier: 'catalog:'
         version: 4.17.21
@@ -1498,8 +1501,8 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/051a4aa':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/051a4aa}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/f57e6cc':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/f57e6cc}
     version: 0.0.1
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
@@ -7895,6 +7898,9 @@ packages:
   lit@3.1.0:
     resolution: {integrity: sha512-rzo/hmUqX8zmOdamDAeydfjsGXbbdtAFqMhmocnh2j9aDYqbu0fjXygjCa0T99Od9VQ/2itwaGrjZz/ZELVl7w==}
 
+  lit@3.3.0:
+    resolution: {integrity: sha512-DGVsqsOIHBww2DqnuZzW7QsuCdahp50ojuDaBPC7jUDRpYoH0z7kHBBYZewRzer75FwtrkmkKk7iOAwSaWdBmw==}
+
   load-json-file@4.0.0:
     resolution: {integrity: sha512-Kx8hMakjX03tiGTLAIdJ+lL0htKnXjEZN6hk/tozf/WOuYGdZBJrZ+rCJRbVCugsjB3jMLn9746NsQIf5VjBMw==}
     engines: {node: '>=4'}
@@ -11372,7 +11378,7 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/051a4aa':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/f57e6cc':
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
@@ -20268,6 +20274,12 @@ snapshots:
       '@types/trusted-types': 2.0.7
 
   lit@3.1.0:
+    dependencies:
+      '@lit/reactive-element': 2.1.0
+      lit-element: 4.2.0
+      lit-html: 3.3.0
+
+  lit@3.3.0:
     dependencies:
       '@lit/reactive-element': 2.1.0
       lit-element: 4.2.0

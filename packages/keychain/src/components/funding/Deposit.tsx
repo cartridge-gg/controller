@@ -174,7 +174,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
 
       <LayoutFooter>
         <AmountSelection
-          creditsAmount={usdToCredits(usdAmount)}
+          wholeCredits={usdToCredits(usdAmount)}
           lockSelection={isLoading}
           onChange={onAmountChanged}
         />

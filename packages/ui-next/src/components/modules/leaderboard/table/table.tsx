@@ -1,6 +1,6 @@
 import { cn } from "@/index";
 
-export const AchievementLeaderboard = ({
+export const LeaderboardTable = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => {
@@ -18,4 +18,4 @@ export const AchievementLeaderboard = ({
   );
 };
 
-export default AchievementLeaderboard;
+export default LeaderboardTable;

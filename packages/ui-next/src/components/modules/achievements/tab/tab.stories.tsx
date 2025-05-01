@@ -1,8 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AchievementTab } from "./tab";
-import AchievementCounter from "../counter/counter";
-import { Tabs, TabsList } from "@/index";
-import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
+import {
+  Tabs,
+  TabsList,
+  AchievementTab,
+  AchievementCounter,
+  LeaderboardCounter,
+} from "@/index";
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <Tabs defaultValue="achievements">
@@ -48,7 +51,7 @@ export const Inactive: Story = {
         value="leaderboard"
         label="Leaderboard"
         active={false}
-        counter={<AchievementLeaderboardCounter rank={16} />}
+        counter={<LeaderboardCounter rank={16} />}
       />
     </Wrapper>
   ),

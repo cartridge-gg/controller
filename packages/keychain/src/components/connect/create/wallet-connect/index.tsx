@@ -45,7 +45,6 @@ export const useWalletConnectAuthentication = (
           />,
         );
       };
-
       const provider = await EthereumProvider.init({
         projectId: REOWN_PROJECT_ID,
         metadata: {
