@@ -1,7 +1,6 @@
-import { CloneIcon, WalletConnectColorIcon } from "@cartridge/ui-next";
-import { render } from "lit";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { QrCodeUtil } from "./qr-code-utils";
+import { CloneIcon } from "@cartridge/ui-next";
+import { QRCodeSVG } from "qrcode.react";
+import { useEffect, useState } from "react";
 
 export const QRCodeOverlay = ({
   uri,
@@ -15,7 +14,6 @@ export const QRCodeOverlay = ({
   const paddingSize = 6;
   const size = 260 - paddingSize * 2;
   const logoSize = 54;
-  const qrContainerRef = useRef<SVGSVGElement>(null);
 
   const logoX = (size - logoSize) / 2;
   const logoY = (size - logoSize) / 2;
@@ -36,22 +34,6 @@ export const QRCodeOverlay = ({
     };
   }, [copyLinkClicked, setCopyLinkClicked]);
 
-  const qrCodeContent = useMemo(() => {
-    return QrCodeUtil.generate({
-      uri,
-      size,
-      logoSize,
-      dotColor: "#ffffff",
-      errorCorrectionLevel: "medium",
-    });
-  }, [uri]);
-
-  useEffect(() => {
-    if (qrContainerRef.current) {
-      render(qrCodeContent, qrContainerRef.current as unknown as HTMLElement);
-    }
-  }, [qrCodeContent]);
-
   return (
     <div
       id="overlay"
@@ -62,18 +44,24 @@ export const QRCodeOverlay = ({
         className="w-fit h-fit rounded-[16px] p-4 bg-translucent-500 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
       >
         <div id="qr-and-copy-link" className="flex flex-col gap-[1px]">
-          <svg
-            id="qr"
-            className="p-[6px] w-[260px] h-[260px] flex items-center justify-center bg-background-200 rounded-t-[12px]"
-            ref={qrContainerRef}
-          >
-            <WalletConnectColorIcon
-              width={logoSize}
-              height={logoSize}
-              x={logoX}
-              y={logoY}
+          <div className="p-[12px] bg-background-200 rounded-t-[12px]">
+            <QRCodeSVG
+              level="L"
+              value={uri}
+              size={size}
+              bgColor="#00000000"
+              fgColor="#ffffff"
+              boostLevel={true}
+              imageSettings={{
+                src: "/logos/wallet-connect.svg",
+                x: logoX,
+                y: logoY,
+                height: logoSize,
+                width: logoSize,
+                excavate: true,
+              }}
             />
-          </svg>
+          </div>
           <button
             id="copy-link"
             className="relative w-full h-[44px] flex p-3 items-center justify-between rounded-b-[12px]

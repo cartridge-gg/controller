@@ -25,7 +25,9 @@ export const useWalletConnectAuthentication = (
     PromiseWithResolvers<{ chainId: string }> | undefined
   >(promiseWithResolvers());
 
-  const [ethereumProvider, setEthereumProvider] = useState<Provider>();
+  const [ethereumProvider, setEthereumProvider] = useState<
+    Provider | undefined
+  >(undefined);
   const { origin, chainId, rpcUrl, setController } = useConnection();
 
   useEffect(() => {
@@ -73,7 +75,7 @@ export const useWalletConnectAuthentication = (
 
       setEthereumProvider(provider);
     })();
-  }, [ethereumProvider, setOverlay]);
+  }, [ethereumProvider, setOverlay, setEthereumProvider]);
 
   const signup = useCallback(async (): Promise<SignupResponse> => {
     if (!ethereumProvider) throw new Error("No Ethereum provider");
