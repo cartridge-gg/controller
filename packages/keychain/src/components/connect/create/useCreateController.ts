@@ -5,11 +5,11 @@ import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
 import { computeAccountAddress, Owner, Signer } from "@cartridge/account-wasm";
 import {
-	AccountQuery,
-	SignerInput,
-	SignerType,
-	useAccountQuery,
-	useRegisterMutation,
+  AccountQuery,
+  SignerInput,
+  SignerType,
+  useAccountQuery,
+  useRegisterMutation,
 } from "@cartridge/utils/api/cartridge";
 import { useCallback, useState } from "react";
 import { shortString } from "starknet";
