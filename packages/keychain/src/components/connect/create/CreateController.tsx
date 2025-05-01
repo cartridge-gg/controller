@@ -3,6 +3,7 @@ import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
+import { useFeature } from "@/hooks/features";
 import {
   Button,
   CreateAccount,
@@ -200,6 +201,7 @@ export function CreateController({
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
+  const newLoginFeatureEnabled = useFeature("new-login");
 
   const [usernameField, setUsernameField] = useState({
     value: "",
@@ -245,7 +247,7 @@ export function CreateController({
         if (
           authenticationMode === undefined &&
           !accountExists &&
-          import.meta.env.DEV
+          newLoginFeatureEnabled
         ) {
           setAuthenticationStep(AuthenticationStep.ChooseSignupMethod);
           return;
@@ -260,6 +262,7 @@ export function CreateController({
       validation.exists,
       validation.status,
       setAuthenticationStep,
+      newLoginFeatureEnabled,
     ],
   );
 
