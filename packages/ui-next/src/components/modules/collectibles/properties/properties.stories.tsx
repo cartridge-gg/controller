@@ -41,3 +41,28 @@ export default meta;
 type Story = StoryObj<typeof CollectibleProperties>;
 
 export const Default: Story = {};
+
+export const One: Story = {
+  args: {
+    properties: [{ name: "Name", value: "Bibliomancer" }],
+  },
+};
+
+export const Two: Story = {
+  args: {
+    properties: [
+      { name: "Name", value: "Bibliomancer" },
+      { name: "XP", value: "0" },
+    ],
+  },
+};
+
+export const Three: Story = {
+  args: {
+    properties: [
+      { name: "Name", value: "Bibliomancer" },
+      { name: "XP", value: "0" },
+      { name: "Level", value: 1 },
+    ],
+  },
+};
