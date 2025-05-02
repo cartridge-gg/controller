@@ -1,14 +1,16 @@
 import React, {
   createContext,
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
   PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
   useMemo,
+  useState,
 } from "react";
 
 const LOCAL_STORAGE_KEY = "@cartridge/features";
+
+export type Feature = "new-login";
 
 // --- Helper Functions ---
 
@@ -101,7 +103,7 @@ export function useFeatures(): FeaturesContextValue {
   return context;
 }
 
-export function useFeature(name: string): boolean {
+export function useFeature(name: Feature): boolean {
   const { isFeatureEnabled } = useFeatures();
   return isFeatureEnabled(name);
 }

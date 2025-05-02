@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import React, { PropsWithChildren, act } from "react";
 import { vi } from "vitest"; // Import vi
-import { FeatureProvider, useFeatures, useFeature } from "./features"; // Adjust path as needed
+import { FeatureProvider, useFeatures, useFeature, Feature } from "./features"; // Adjust path as needed
 
 const LOCAL_STORAGE_KEY = "@cartridge/features";
 
@@ -67,15 +67,15 @@ describe("Feature Flags Hooks and Provider", () => {
     );
 
     const { result: enabledResult } = renderHook(
-      () => useFeature("enabledFeat"),
+      () => useFeature("enabledFeat" as Feature),
       { wrapper },
     );
     const { result: disabledResult } = renderHook(
-      () => useFeature("disabledFeat"),
+      () => useFeature("disabledFeat" as Feature),
       { wrapper },
     );
     const { result: nonExistentResult } = renderHook(
-      () => useFeature("nonExistent"),
+      () => useFeature("nonExistent" as Feature),
       { wrapper },
     );
 
@@ -89,7 +89,7 @@ describe("Feature Flags Hooks and Provider", () => {
     const { result } = renderHook(
       () => {
         const featuresHook = useFeatures(); // Get controls
-        const featureValue = useFeature("dynamicFeature"); // Get specific value
+        const featureValue = useFeature("dynamicFeature" as Feature); // Get specific value
         return { featuresHook, featureValue }; // Return both
       },
       { wrapper },

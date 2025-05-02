@@ -1,38 +1,4 @@
-import { eip191Encode } from "@cartridge/utils";
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
-import { Signature } from "ethers";
-
-export const signCreateControllerMessage = async (
-  subOrgId: string,
-  address: string,
-  authIframeClient: TurnkeyIframeClient,
-) => {
-  const message = "Hello World!";
-  const signedTx = await authIframeClient.signRawPayload({
-    organizationId: subOrgId,
-    signWith: address,
-    payload: eip191Encode(message),
-    encoding: "PAYLOAD_ENCODING_TEXT_UTF8",
-    hashFunction: "HASH_FUNCTION_SHA256",
-  });
-
-  const r = signedTx.r.startsWith("0x") ? signedTx.r : "0x" + signedTx.r;
-  const s = signedTx.s.startsWith("0x") ? signedTx.s : "0x" + signedTx.s;
-
-  const vNumber = parseInt(signedTx.v, 16);
-  if (isNaN(vNumber) || (vNumber !== 0 && vNumber !== 1)) {
-    throw new Error(`Invalid recovery ID (v) received: ${signedTx.v}`);
-  }
-  const normalizedV = Signature.getNormalizedV(vNumber);
-
-  const signature = Signature.from({
-    r,
-    s,
-    v: normalizedV,
-  });
-
-  return signature.serialized;
-};
 
 export const getOrCreateWallet = async (
   subOrgId: string,

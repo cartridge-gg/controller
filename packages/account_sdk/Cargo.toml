@@ -14,8 +14,10 @@ async-trait.workspace = true
 auto_impl = "1.0"
 cainome.workspace = true
 cainome-cairo-serde.workspace = true
+ecdsa = { workspace = true }
 futures.workspace = true
 hex.workspace = true
+k256 = "0.13.4"
 lazy_static.workspace = true
 primitive-types.workspace = true
 reqwest.workspace = true
@@ -40,7 +42,6 @@ chrono = { workspace = true }
 base64 = { workspace = true, optional = true }
 base64urlsafedata = { workspace = true, optional = true }
 coset = { workspace = true, optional = true }
-ecdsa = { workspace = true, optional = true }
 nom = { version = "7.1", optional = true }
 p256 = { workspace = true, optional = true }
 serde_cbor_2 = { version = "0.12.0-dev", optional = true }
@@ -96,7 +97,6 @@ webauthn = [
     "base64",
     "base64urlsafedata",
     "coset",
-    "ecdsa",
     "nom",
     "p256",
     "serde_cbor_2",
