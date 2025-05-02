@@ -40,7 +40,10 @@ export const useSocialAuthentication = () => {
   useEffect(() => {
     if (
       error &&
-      error.message.includes("Popup closed") &&
+      (error.message.includes("Popup closed") ||
+        error.message.includes(
+          "The resource owner or authorization server denied the request",
+        )) &&
       signaturePromiseRef.current
     ) {
       signaturePromiseRef.current.reject(

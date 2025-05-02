@@ -36,8 +36,8 @@ export const QRCodeOverlay = ({
 
   return (
     <div
-      id="overlay"
-      className="w-full h-full fixed top-0 left-0 flex flex-col items-center justify-center bg-translucent-200 backdrop-blur-sm z-[10001] gap-4 p-8"
+      id="wallet-connect-overlay"
+      className="w-full h-full fixed top-0 left-0 flex flex-col items-center justify-center bg-translucent-200 backdrop-blur-sm z-[10001] pointer-events-auto gap-4 p-8"
     >
       <div
         id="qr-code-parent-container"

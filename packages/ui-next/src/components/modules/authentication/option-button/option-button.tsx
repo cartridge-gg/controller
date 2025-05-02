@@ -14,7 +14,7 @@ export function OptionButton({ icon, label, ...props }: OptionButtonProps) {
   return (
     <Button
       {...restProps}
-      className={cn("gap-2 justify-start", restProps.className)}
+      className={cn(restProps.className, "w-full h-fit px-3 py-2.5 gap-2")}
       isLoading={false}
       disabled={isLoading || disabled}
     >

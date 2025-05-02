@@ -34,9 +34,8 @@ export function useCreateController({
   const [pendingUsername, setPendingUsername] = useState<string>();
   const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
 
-  const [authenticationStep, setAuthenticationStep] = useState<
-    AuthenticationStep | undefined
-  >(AuthenticationStep.FillForm);
+  const [authenticationStep, setAuthenticationStep] =
+    useState<AuthenticationStep>(AuthenticationStep.FillForm);
 
   const { origin, policies, rpcUrl, chainId, setController } = useConnection();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
