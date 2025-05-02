@@ -60,7 +60,7 @@ export function CollectibleAsset({
       <CollectibleHeader
         title={title}
         icon={icon}
-        label={`${count}`}
+        label={count ? `${count}` : undefined}
         hover={hover}
         variant={variant}
       />

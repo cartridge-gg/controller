@@ -261,7 +261,7 @@ const LoadingState = () => {
       <Skeleton className="min-h-10 w-full rounded" />
       <div className="flex flex-col">
         <Skeleton className="min-h-4 my-3 w-8 rounded" />
-        <Skeleton className="min-h-12 w-full rounded" />
+        <Skeleton className="min-h-10 w-full rounded" />
       </div>
       <div className="flex flex-col">
         <Skeleton className="min-h-4 my-3 w-8 rounded" />

@@ -43,7 +43,7 @@ export const Preview = ({
 
   return (
     <div
-      className="bg-spacer h-16 rounded-md flex items-center gap-x-3 px-2.5 py-3 cursor-pointer w-full shadow-md"
+      className="bg-spacer h-16 rounded-md flex items-center gap-x-3 px-2.5 py-3 cursor-pointer w-full shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

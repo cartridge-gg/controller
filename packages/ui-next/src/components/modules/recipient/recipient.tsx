@@ -61,7 +61,6 @@ export const Recipient = ({
       </div>
       <div className="relative flex flex-col gap-y-3">
         <Textarea
-          size="lg"
           spellCheck={false}
           placeholder={"Recipient Address or Username"}
           value={value}
