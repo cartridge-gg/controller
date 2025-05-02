@@ -90,8 +90,10 @@ export function SendToken() {
         },
       ];
       try {
+        console.log("executing");
         const res = await parent.openExecute(calls);
         if (res?.transactionHash) {
+          console.log("txs hash: ", res.transactionHash);
           await provider.waitForTransaction(res.transactionHash, {
             retryInterval: 1000,
             successStates: [
@@ -105,8 +107,12 @@ export function SendToken() {
           }, 5000);
         }
         if (closable) {
+          console.log("closable");
+          console.log(`navigating to: ..?${searchParams.toString()}`);
           navigate(`..?${searchParams.toString()}`);
         } else {
+          console.log("not closable");
+          console.log(`navigating to: ../../..?${searchParams.toString()}`);
           navigate(`../../..?${searchParams.toString()}`);
         }
       } finally {
