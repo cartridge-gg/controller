@@ -6,7 +6,7 @@ import {
 import { client } from "@/utils/graphql";
 import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
-import { RpcProvider, uint256 } from "starknet";
+import { uint256 } from "starknet";
 
 export const enum StarterItemType {
   NFT = "NFT",
@@ -25,18 +25,22 @@ export interface StarterItemData {
 
 export interface StarterPackDetails {
   id: string;
-  price: number;
-  supply: bigint | null;
+  name: string;
+  description: string;
+  priceUsd: number;
+  supply: number | null;
   starterPackItems: StarterItemData[];
 }
 
 export function useStarterPack(starterpackId: string) {
   const { controller } = useController();
   const [isLoading, setIsLoading] = useState(true);
-  const [supply, setSupply] = useState<bigint | null>(null);
+  const [supply, setSupply] = useState<number | null>(null);
   const [items, setItems] = useState<StarterItemData[]>([]);
   const [error, setError] = useState<Error | null>(null);
-  const [price, setPrice] = useState<number>(0);
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [priceUsd, setPriceUsd] = useState<number>(0);
 
   const checkSupply = useCallback(
     async (contractAddress: string, entrypoint: string, calldata: string[]) => {
@@ -55,7 +59,7 @@ export function useStarterPack(starterpackId: string) {
         high: result[1],
       });
 
-      return supply;
+      return Number(supply);
     },
     [controller],
   );
@@ -67,6 +71,13 @@ export function useStarterPack(starterpackId: string) {
     client
       .request<StarterPackQuery>(StarterPackDocument, { id: starterpackId })
       .then(async (result) => {
+        const price = result.starterpack!.price.amount;
+        const factor = 10 ** result.starterpack!.price.decimals;
+        const priceUSD = creditsToUSD(Number(price) / factor);
+        setPriceUsd(priceUSD);
+        setName(result.starterpack!.name);
+        setDescription(result.starterpack!.description ?? "");
+
         const items: StarterItemData[] = [];
         if (result.starterpack) {
           let minSupply = null;
@@ -75,7 +86,7 @@ export function useStarterPack(starterpackId: string) {
               items.push({
                 title: edge?.node?.name ?? "",
                 description: edge?.node?.description ?? "",
-                price: creditsToUSD(result.starterpack.price),
+                price: priceUSD,
                 image: edge?.node?.iconURL ?? "",
                 type: StarterItemType.NFT,
               });
@@ -84,7 +95,7 @@ export function useStarterPack(starterpackId: string) {
                 const newSupply = await checkSupply(
                   edge?.node?.contractAddress,
                   edge?.node?.supplyEntryPoint,
-                  edge?.node?.supplyCalldata,
+                  edge?.node?.supplyCalldata || [],
                 );
                 if (!minSupply || newSupply < minSupply) {
                   minSupply = newSupply;
@@ -95,15 +106,16 @@ export function useStarterPack(starterpackId: string) {
 
           if (
             result.starterpack.bonusCredits &&
-            result.starterpack.bonusCredits > 0
+            Number(result.starterpack.bonusCredits.amount) > 0
           ) {
+            const factor = 10 ** result.starterpack.bonusCredits.decimals;
             items.push({
               title: `${result.starterpack.bonusCredits} Credits`,
               description: "Credits cover service fee(s).",
               price: 0,
               image: "/ERC-20-Icon.svg",
               type: StarterItemType.CREDIT,
-              value: result.starterpack.bonusCredits,
+              value: Number(result.starterpack.bonusCredits.amount) / factor,
             });
           }
 
@@ -112,7 +124,6 @@ export function useStarterPack(starterpackId: string) {
           }
         }
 
-        setPrice(result.starterpack?.price ?? 0);
         setItems(items);
       })
       .catch(setError)
@@ -120,8 +131,10 @@ export function useStarterPack(starterpackId: string) {
   }, [starterpackId]);
 
   return {
+    name,
+    description,
     items,
-    price,
+    priceUsd,
     supply,
     isLoading,
     error,

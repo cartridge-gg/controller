@@ -1,5 +1,5 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { useConnection } from "@/hooks/connection";
+import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import {
   Button,
@@ -11,6 +11,7 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
+  TagIcon,
 } from "@cartridge/ui-next";
 import { isIframe } from "@cartridge/utils";
 import { Elements } from "@stripe/react-stripe-js";
@@ -26,6 +27,7 @@ import { StarterPackContent } from "../starterpack";
 import { PurchaseType } from "@/hooks/payments/crypto";
 import { Receiving } from "../starterpack/receiving";
 import useStripePayment from "@/hooks/payments/stripe";
+import { usdToCredits } from "@/hooks/tokens";
 
 export enum PurchaseState {
   SELECTION = 0,
@@ -54,7 +56,7 @@ export type StripeResponse = {
   pricing: PricingDetails;
 };
 
-export const DEFAULT_CREDITS_AMOUNT = 5_000;
+export const DEFAULT_WHOLE_CREDITS = 500;
 
 // TODO: I know this is terrible... refactor soon, separate product selection and checkout
 export function Purchase({
@@ -79,8 +81,10 @@ export function Purchase({
     null,
   );
   const [state, setState] = useState<PurchaseState>(initState);
-  const [creditsAmount, setCreditsAmount] = useState<number>(
-    starterpackDetails?.price ?? DEFAULT_CREDITS_AMOUNT,
+  const [wholeCredits, setWholeCredits] = useState<number>(
+    starterpackDetails?.priceUsd
+      ? usdToCredits(starterpackDetails?.priceUsd)
+      : DEFAULT_WHOLE_CREDITS,
   );
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
@@ -107,9 +111,9 @@ export function Purchase({
   const onAmountChanged = useCallback(
     (amount: number) => {
       setDisplayError(null);
-      setCreditsAmount(amount);
+      setWholeCredits(amount);
     },
-    [setCreditsAmount],
+    [setWholeCredits],
   );
 
   const onCreditCard = useCallback(async () => {
@@ -119,7 +123,7 @@ export function Purchase({
 
     try {
       const paymentIntent = await createPaymentIntent(
-        creditsAmount,
+        wholeCredits,
         controller.username(),
         starterpackDetails,
       );
@@ -129,7 +133,7 @@ export function Purchase({
     } catch (e) {
       setDisplayError(e as Error);
     }
-  }, [creditsAmount, createPaymentIntent]);
+  }, [wholeCredits, createPaymentIntent]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet) => {
@@ -162,13 +166,13 @@ export function Purchase({
       case PurchaseState.SELECTION:
         return type === PurchaseType.CREDITS
           ? "Purchase Credits"
-          : "Purchase Starter Pack";
+          : (starterpackDetails?.name ?? "Purchase Starter Pack");
       case PurchaseState.STRIPE_CHECKOUT:
         return "Credit Card";
       case PurchaseState.SUCCESS:
         return "Purchase Complete";
     }
-  }, [state]);
+  }, [state, starterpackDetails]);
 
   const appearance = {
     theme: "flat",
@@ -208,7 +212,7 @@ export function Purchase({
       <CryptoCheckout
         walletAddress={walletAddress!}
         selectedWallet={selectedWallet!}
-        creditsAmount={creditsAmount}
+        wholeCredits={wholeCredits}
         starterpackDetails={starterpackDetails}
         onBack={() => setState(PurchaseState.SELECTION)}
         onComplete={() => setState(PurchaseState.SUCCESS)}
@@ -233,12 +237,17 @@ export function Purchase({
               setState(PurchaseState.SELECTION);
           }
         }}
+        right={
+          type === PurchaseType.STARTERPACK ? (
+            <Supply amount={starterpackDetails!.supply} />
+          ) : undefined
+        }
       />
       <LayoutContent className="gap-6 px-6">
         {state === PurchaseState.SELECTION &&
           ((type === PurchaseType.CREDITS && (
             <AmountSelection
-              creditsAmount={creditsAmount}
+              wholeCredits={wholeCredits}
               onChange={onAmountChanged}
               lockSelection={isStripeLoading || isLoadingWallets}
               enableCustom
@@ -334,3 +343,34 @@ export function Purchase({
     </LayoutContainer>
   );
 }
+
+const Supply = ({ amount }: { amount: number | null }) => {
+  const theme = useControllerTheme();
+  const color = () => {
+    if (amount === 0) {
+      return "text-destructive-100";
+    }
+
+    return theme.colors?.primary
+      ? `color-${theme.colors?.primary}`
+      : "text-primary-200";
+  };
+
+  if (amount === null) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`flex gap-1 py-[2px] px-[8px] rounded-full bg-background-200 text-sm font-semibold ${color()}`}
+    >
+      {amount > 0 ? (
+        <>
+          <TagIcon size="sm" variant="solid" /> {amount} left
+        </>
+      ) : (
+        <>Out of stock</>
+      )}
+    </div>
+  );
+};

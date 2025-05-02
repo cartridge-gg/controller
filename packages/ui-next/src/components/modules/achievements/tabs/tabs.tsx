@@ -1,7 +1,10 @@
-import { Tabs, TabsList } from "@/index";
-import AchievementTab from "../tab/tab";
-import AchievementCounter from "../counter/counter";
-import AchievementLeaderboardCounter from "../leaderboard-counter/leaderboard-counter";
+import {
+  Tabs,
+  TabsList,
+  AchievementTab,
+  AchievementCounter,
+  LeaderboardCounter,
+} from "@/index";
 import { useCallback, useState } from "react";
 
 export interface AchievementTabsProps
@@ -49,7 +52,7 @@ export const AchievementTabs = ({
         <AchievementTab
           value="leaderboard"
           label="Leaderboard"
-          counter={<AchievementLeaderboardCounter rank={rank} />}
+          counter={<LeaderboardCounter rank={rank} />}
           active={active === "leaderboard"}
         />
       </TabsList>

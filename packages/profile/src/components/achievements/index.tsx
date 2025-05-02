@@ -1,17 +1,12 @@
-import { useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-  LayoutContentLoader,
-  AchievementTabs,
-  TabsContent,
-  AchievementLeaderboard,
-  AchievementLeaderboardRow,
-  AchievementPlayerLabel,
+  Empty,
+  Skeleton,
 } from "@cartridge/ui-next";
-import { useAccount, useUsername, useUsernames } from "#hooks/account";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAccount } from "#hooks/account";
+import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
 import { useConnection, useData } from "#hooks/context";
@@ -22,26 +17,14 @@ import { LayoutBottomNav } from "#components/bottom-nav";
 
 export function Achievements() {
   const { address: self } = useAccount();
-  const [tab, setTab] = useState<"achievements" | "leaderboard">(
-    "achievements",
-  );
   const {
     trophies: { achievements, players, status },
     setAccountAddress,
   } = useData();
 
-  const navigate = useNavigate();
-
-  const addresses = useMemo(() => {
-    return players.map((player) => player.address);
-  }, [players]);
-
-  const { usernames } = useUsernames({ addresses });
-
   const { pins, games, editions } = useArcade();
 
   const { address } = useParams<{ address: string }>();
-  const { username } = useUsername({ address: address || self || "" });
   const { project, namespace } = useConnection();
 
   const edition: EditionModel | undefined = useMemo(() => {
@@ -55,7 +38,7 @@ export function Achievements() {
     return Object.values(games).find((game) => game.id === edition?.gameId);
   }, [games, edition]);
 
-  const { pinneds, count, total } = useMemo(() => {
+  const pinneds = useMemo(() => {
     const ids = (
       pins[addAddressPadding(address || self || "0x0")] || []
     ).filter((id) => achievements.find((item) => item.id === id)?.completed);
@@ -66,60 +49,15 @@ export function Achievements() {
       .sort((a, b) => a.id.localeCompare(b.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
-    const count = achievements.filter((item) => item.completed).length;
-    const total = achievements.length;
-    return { pinneds, count, total };
+    return pinneds;
   }, [achievements, pins, address, self]);
 
-  const { rank, points } = useMemo(() => {
-    const rank =
-      players.findIndex((player) => player.address === (address || self)) + 1;
-    const points =
+  const points = useMemo(() => {
+    return (
       players.find((player) => player.address === (address || self))
-        ?.earnings || 0;
-    return { rank, points };
+        ?.earnings || 0
+    );
   }, [address, self, players]);
-
-  const isSelf = useMemo(() => {
-    return !address || address === self;
-  }, [address, self]);
-
-  const location = useLocation();
-  const to = useCallback(
-    (address: string) => {
-      if (address === self) return navigate(location.pathname);
-      navigate([...location.pathname.split("/"), address].join("/"));
-    },
-    [location.pathname, self, navigate],
-  );
-
-  const data = useMemo(() => {
-    return players.map((player) => {
-      const ids = (pins[addAddressPadding(player.address)] || []).filter((id) =>
-        player.completeds.includes(id),
-      );
-      const pinneds = achievements
-        .filter(
-          (item) =>
-            player.completeds.includes(item.id) &&
-            (ids.length === 0 || ids.includes(item.id)),
-        )
-        .sort((a, b) => a.id.localeCompare(b.id))
-        .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
-        .slice(0, 3);
-      return {
-        address: player.address,
-        name:
-          usernames.find(
-            (username) =>
-              BigInt(username.address || "0x0") === BigInt(player.address),
-          )?.username || player.address.slice(0, 9),
-        points: player.earnings,
-        highlight: player.address === (address || self),
-        pins: pinneds,
-      };
-    });
-  }, [players, address, self, pins, usernames, achievements]);
 
   useEffect(() => {
     setAccountAddress(address || self || "");
@@ -127,94 +65,54 @@ export function Achievements() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        variant="hidden"
-        onBack={isSelf ? undefined : () => navigate(".")}
-      />
-
-      {achievements.length ? (
-        <LayoutContent className="py-6 gap-y-6 select-none h-full">
-          {isSelf ? (
-            <AchievementTabs
-              value={tab}
-              onValueChange={(value) =>
-                setTab(value as "achievements" | "leaderboard")
-              }
-              count={count}
-              total={total}
-              rank={rank}
-              className="h-full flex flex-col justify-between gap-y-6"
-            >
-              <TabsContent className="p-0 mt-0 pb-6" value="achievements">
-                <Trophies
-                  achievements={achievements}
-                  pinneds={pinneds}
-                  softview={!isSelf}
-                  enabled={pinneds.length < 3}
-                  game={game}
-                  edition={edition}
-                  pins={pins}
-                  earnings={points}
-                />
-              </TabsContent>
-              <TabsContent
-                className="p-0 mt-0 h-[calc(100%-69px)]"
-                value="leaderboard"
-              >
-                <AchievementLeaderboard className="h-full">
-                  {data.map((item, index) => (
-                    <AchievementLeaderboardRow
-                      key={index}
-                      pins={item.pins || []}
-                      rank={index + 1}
-                      name={item.name}
-                      points={item.points}
-                      highlight={item.highlight}
-                      onClick={() => to(item.address)}
-                    />
-                  ))}
-                </AchievementLeaderboard>
-              </TabsContent>
-            </AchievementTabs>
-          ) : (
-            <>
-              <AchievementPlayerLabel
-                username={username}
-                address={address || self}
-                rank={
-                  rank === 1
-                    ? "gold"
-                    : rank === 2
-                      ? "silver"
-                      : rank === 3
-                        ? "bronze"
-                        : "default"
-                }
-              />
-              <Trophies
-                achievements={achievements}
-                pinneds={pinneds}
-                softview={!isSelf}
-                enabled={pinneds.length < 3}
-                game={game}
-                edition={edition}
-                pins={pins}
-                earnings={points}
-              />
-            </>
-          )}
-        </LayoutContent>
-      ) : status === "loading" ? (
-        <LayoutContentLoader />
+      <LayoutHeader variant="hidden" />
+      {status === "loading" ? (
+        <LoadingState />
+      ) : status === "error" || !achievements.length ? (
+        <EmptyState />
       ) : (
-        <LayoutContent className="pb-4 select-none h-full">
-          <div className="flex justify-center items-center h-full border border-dashed rounded-md border-background-400 mb-4">
-            <p className="text-foreground-400">No trophies available</p>
-          </div>
+        <LayoutContent className="py-6 gap-y-6 select-none h-full">
+          <Trophies
+            achievements={achievements}
+            pinneds={pinneds}
+            softview={false}
+            enabled={pinneds.length < 3}
+            game={game}
+            edition={edition}
+            pins={pins}
+            earnings={points}
+          />
         </LayoutContent>
       )}
-
-      {isSelf && <LayoutBottomNav />}
+      <LayoutBottomNav />
     </LayoutContainer>
   );
 }
+
+const LoadingState = () => {
+  return (
+    <LayoutContent className="gap-y-4 select-none h-full overflow-hidden">
+      <div className="flex justify-between">
+        <Skeleton className="min-h-[136px] w-[120px] rounded" />
+        <Skeleton className="min-h-[136px] w-[120px] rounded" />
+        <Skeleton className="min-h-[136px] w-[120px] rounded" />
+      </div>
+      <Skeleton className="min-h-10 w-full rounded" />
+      {Array.from({ length: 10 }).map((_, index) => (
+        <Skeleton key={index} className="min-h-[177px] w-full rounded" />
+      ))}
+    </LayoutContent>
+  );
+};
+
+const EmptyState = () => {
+  return (
+    <LayoutContent className="select-none h-full">
+      <Empty
+        title="No achievements exist for this game."
+        icon="achievement"
+        className="h-full"
+      />
+    </LayoutContent>
+  );
+};

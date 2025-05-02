@@ -9,14 +9,18 @@ import { StarterItem } from "./starter-item";
 import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function StarterPack({ starterpackId }: { starterpackId: string }) {
-  const { items, price } = useStarterPack(starterpackId);
+  const { name, description, items, supply, priceUsd } =
+    useStarterPack(starterpackId);
 
   return (
     <Purchase
       type={PurchaseType.STARTERPACK}
       starterpackDetails={{
         id: starterpackId,
-        price,
+        name,
+        description,
+        priceUsd,
+        supply,
         starterPackItems: items,
       }}
     />
