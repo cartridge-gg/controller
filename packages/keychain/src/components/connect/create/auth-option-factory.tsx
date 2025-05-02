@@ -13,44 +13,44 @@ import { AuthenticationMethod } from "../types";
 
 type AuthConfig = {
   variant: "primary" | "secondary";
-  IconComponent: React.ComponentType<IconProps>;
+  Icon: React.ComponentType<IconProps>;
   label: string;
 };
 
 const AUTH_CONFIG: Partial<Record<AuthenticationMethod, AuthConfig>> = {
   webauthn: {
     variant: "primary",
-    IconComponent: PasskeyIcon,
+    Icon: PasskeyIcon,
     label: "Passkey",
   },
   metamask: {
     variant: "secondary",
-    IconComponent: MetaMaskColorIcon,
+    Icon: MetaMaskColorIcon,
     label: "MetaMask",
   },
   argent: {
     variant: "secondary",
-    IconComponent: ArgentColorIcon,
+    Icon: ArgentColorIcon,
     label: "Argent",
   },
   rabby: {
     variant: "secondary",
-    IconComponent: RabbyColorIcon,
+    Icon: RabbyColorIcon,
     label: "Rabby",
   },
   phantom: {
     variant: "secondary",
-    IconComponent: PhantomColorIcon,
+    Icon: PhantomColorIcon,
     label: "Phantom",
   },
   social: {
     variant: "secondary",
-    IconComponent: DiscordColorIcon,
+    Icon: DiscordColorIcon,
     label: "Discord",
   },
   walletconnect: {
     variant: "secondary",
-    IconComponent: WalletConnectColorIcon,
+    Icon: WalletConnectColorIcon,
     label: "Wallet Connect",
   },
 };
@@ -63,12 +63,12 @@ export class AuthFactory {
       throw new Error(`Unknown authentication mode: ${mode}`);
     }
 
-    const { IconComponent } = config;
+    const { Icon, ...rest } = config;
 
     return {
-      icon: <IconComponent size="sm" />,
+      icon: <Icon size="sm" />,
       mode,
-      ...config,
+      ...rest,
     };
   }
 }
