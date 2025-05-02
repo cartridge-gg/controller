@@ -1,5 +1,5 @@
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
-import { ethers, getBytes, recoverAddress, Signature } from "ethers";
+import { ethers, getBytes, Signature } from "ethers";
 import {
   ExternalPlatform,
   ExternalWallet,
