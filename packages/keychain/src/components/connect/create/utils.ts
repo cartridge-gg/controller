@@ -8,15 +8,16 @@ import {
   type AccountQuery,
   type AccountQueryVariables,
 } from "@cartridge/utils/api/cartridge";
+import { constants } from "starknet";
 
 export function fetchController(
-  chainId: string,
+  _chainId: string,
   username: string,
   signal?: AbortSignal,
 ) {
   return fetchData<ControllerQuery, ControllerQueryVariables>(
     ControllerDocument,
-    { chainId, username },
+    { chainId: constants.NetworkName.SN_MAIN, username },
     signal,
   );
 }

@@ -109,7 +109,7 @@ export function useUsernameValidation(username: string) {
       });
 
     return () => controller.abort();
-  }, [username]);
+  }, [username, chainId]);
 
   return validation;
 }

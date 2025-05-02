@@ -208,7 +208,7 @@ export function useCreateController({
 
       const registerRet = await register({
         username,
-        chainId: "SN_SEPOLIA",
+        chainId,
         owner: signer,
         session: {
           expiresAt: result.session.expiresAt.toString(),
@@ -296,6 +296,8 @@ export function useCreateController({
         case "SIWSCredentials": // Assuming SIWS also uses social login flow
         case "StarknetCredentials": // Assuming Starknet also uses social login flow for now, adjust if needed
           throw new Error("Login method not supported yet.");
+        default:
+          throw new Error("Unknown login method");
       }
     },
     [isSlot, loginWithWebauthn, loginWithSocial, loginMode, chainId],

@@ -10,22 +10,26 @@ query Controller($username: String!, $chainId: String!) {
     signers {
       metadata {
         ... on WebauthnCredentials {
+          __typename
           webauthn {
             id
             publicKey
           }
         }
         ... on StarknetCredentials {
+          __typename
           starknet {
             publicKey
           }
         }
         ... on Eip191Credentials {
+          __typename
           eip191 {
             ethAddress
           }
         }
         ... on SIWSCredentials {
+          __typename
           siws {
             publicKey
           }
