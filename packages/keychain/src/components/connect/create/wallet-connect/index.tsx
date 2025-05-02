@@ -100,7 +100,7 @@ export const useWalletConnectAuthentication = (
     const accounts = await ethereumProvider.request<string[]>({
       method: "eth_requestAccounts",
     });
-    console.log("accounts", accounts);
+
     const address = accounts[0];
 
     const wallet = new WalletConnectWallet(ethereumProvider);

@@ -207,7 +207,7 @@ export function useCreateController({
 
       const registerRet = await register({
         username,
-        chainId,
+        chainId: shortString.decodeShortString(chainId),
         owner: signer,
         session: {
           expiresAt: result.session.expiresAt.toString(),
