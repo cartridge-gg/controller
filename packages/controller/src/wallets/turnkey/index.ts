@@ -130,12 +130,6 @@ export class TurnkeyWallet implements WalletAdapter {
         v: vNumber,
       });
 
-      const recoveredAddress = recoverAddress(messageHash, signature);
-
-      if (recoveredAddress.toLowerCase() !== this.account.toLowerCase()) {
-        throw new Error("Invalid signature");
-      }
-
       return {
         success: true,
         wallet: this.type,

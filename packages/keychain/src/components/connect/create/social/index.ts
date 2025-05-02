@@ -33,7 +33,7 @@ export const useSocialAuthentication = () => {
   const { mutateAsync: register } = useRegisterMutation();
 
   const authIframeClientRef = useRef(authIframeClient);
-  const [userName, setUserName] = useState("");
+  const [username, setUsername] = useState("");
   const signaturePromiseRef = useRef<{
     resolve: (value: SignupResponse | PromiseLike<SignupResponse>) => void;
     reject: (reason?: Error) => void;
@@ -59,8 +59,8 @@ export const useSocialAuthentication = () => {
   useEffect(() => {
     (async () => {
       if (
-        // Sanity check: the userName has already been validated at the previous step
-        userName.length === 0 ||
+        // Sanity check: the username has already been validated at the previous step
+        username.length === 0 ||
         !isAuthenticated ||
         !user ||
         !authIframeClientRef.current?.iframePublicKey ||
@@ -81,7 +81,7 @@ export const useSocialAuthentication = () => {
 
         const subOrganizationId = await getOrCreateTurnkeySuborg(
           oidcTokenString,
-          userName,
+          username,
         );
 
         await authenticateToTurnkey(
@@ -92,7 +92,7 @@ export const useSocialAuthentication = () => {
 
         const address = await getOrCreateWallet(
           subOrganizationId,
-          userName,
+          username,
           authIframeClientRef.current,
         );
 
@@ -123,7 +123,7 @@ export const useSocialAuthentication = () => {
         console.error("Error continuing signup:", error);
       }
     })();
-  }, [isAuthenticated, user, userName, getIdTokenClaims, register]);
+  }, [isAuthenticated, user, username, getIdTokenClaims, register, error]);
 
   const signup = useCallback(
     async (username: string): Promise<SignupResponse> => {
@@ -164,7 +164,7 @@ export const useSocialAuthentication = () => {
 
             try {
               const nonce = getNonce(iframePublicKey);
-              setUserName(username);
+              setUsername(username);
 
               const popup = openPopup("");
               await loginWithPopup(
@@ -191,7 +191,7 @@ export const useSocialAuthentication = () => {
         );
       });
     },
-    [setUserName, loginWithPopup],
+    [setUsername, loginWithPopup],
   );
 
   const login = useCallback(
@@ -211,12 +211,12 @@ export const useSocialAuthentication = () => {
         );
       }
 
-      // userName should be available from the outer scope (useState)
+      // username should be available from the outer scope (useState)
       const controllerObject = await createController(
         origin,
         chainId,
         rpcUrl,
-        userName,
+        username,
         controller.constructorCalldata[0], // Assuming constructorCalldata is always present and has at least one element
         controller.address,
         {
@@ -233,7 +233,7 @@ export const useSocialAuthentication = () => {
       window.controller = controllerObject;
       setController(controllerObject);
     },
-    [chainId, rpcUrl, origin, setController],
+    [chainId, rpcUrl, origin, setController, username],
   );
 
   return { signup, login };
