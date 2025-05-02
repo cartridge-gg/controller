@@ -89,8 +89,8 @@ export function ChooseSignupMethodForm({
       <div className="flex flex-col gap-3">
         {authOptions.map((option) => (
           <OptionButton
-            key={option.mode}
             {...option}
+            key={option.mode}
             className="justify-start"
             onKeyDown={(e) => handleSelectedOption(e, option.mode)}
             onClick={(e) => handleSelectedOption(e, option.mode)}

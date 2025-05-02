@@ -100,7 +100,7 @@ export const useWalletConnectAuthentication = (
     const accounts = await ethereumProvider.request<string[]>({
       method: "eth_requestAccounts",
     });
-    console.log("accounts", accounts);
+
     const address = accounts[0];
 
     const wallet = new WalletConnectWallet(ethereumProvider);
@@ -110,6 +110,7 @@ export const useWalletConnectAuthentication = (
     return {
       address,
       signer: { eip191: { address } },
+      type: "walletconnect",
     };
   }, [ethereumProvider, setOverlay]);
 
@@ -137,8 +138,15 @@ export const useWalletConnectAuthentication = (
         username,
         controllerNode.constructorCalldata[0],
         controllerNode.address,
-        credentialId,
-        publicKey,
+        {
+          signer: {
+            webauthn: {
+              rpId: import.meta.env.VITE_RP_ID!,
+              credentialId,
+              publicKey,
+            },
+          },
+        },
       );
 
       await controller.login(now() + DEFAULT_SESSION_DURATION);

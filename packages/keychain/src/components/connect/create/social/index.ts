@@ -3,7 +3,7 @@ import { useConnection } from "@/hooks/connection";
 import { useAuth0 } from "@auth0/auth0-react";
 import { TurnkeyWallet } from "@cartridge/controller";
 import {
-  AccountQuery,
+  ControllerQuery,
   useRegisterMutation,
 } from "@cartridge/utils/api/cartridge";
 import { sha256 } from "@noble/hashes/sha256";
@@ -19,6 +19,12 @@ import {
 import { getOidcToken } from "./auth0";
 import { getOrCreateWallet } from "./turnkey";
 
+// Define a type for the singular credential
+interface Eip191Credential {
+  __typename?: "Eip191Credential";
+  ethAddress: string;
+}
+
 export const useSocialAuthentication = () => {
   const { authIframeClient } = useTurnkey();
   const { origin, chainId, rpcUrl, setController } = useConnection();
@@ -27,7 +33,7 @@ export const useSocialAuthentication = () => {
   const { mutateAsync: register } = useRegisterMutation();
 
   const authIframeClientRef = useRef(authIframeClient);
-  const [userName, setUserName] = useState("");
+  const [username, setUsername] = useState("");
   const signaturePromiseRef = useRef<{
     resolve: (value: SignupResponse | PromiseLike<SignupResponse>) => void;
     reject: (reason?: Error) => void;
@@ -56,8 +62,8 @@ export const useSocialAuthentication = () => {
   useEffect(() => {
     (async () => {
       if (
-        // Sanity check: the userName has already been validated at the previous step
-        userName.length === 0 ||
+        // Sanity check: the username has already been validated at the previous step
+        username.length === 0 ||
         !isAuthenticated ||
         !user ||
         !authIframeClientRef.current?.iframePublicKey ||
@@ -78,7 +84,7 @@ export const useSocialAuthentication = () => {
 
         const subOrganizationId = await getOrCreateTurnkeySuborg(
           oidcTokenString,
-          userName,
+          username,
         );
 
         await authenticateToTurnkey(
@@ -89,7 +95,7 @@ export const useSocialAuthentication = () => {
 
         const address = await getOrCreateWallet(
           subOrganizationId,
-          userName,
+          username,
           authIframeClientRef.current,
         );
 
@@ -112,6 +118,7 @@ export const useSocialAuthentication = () => {
                 address,
               },
             },
+            type: "social",
           });
           signaturePromiseRef.current = null;
         }
@@ -119,7 +126,7 @@ export const useSocialAuthentication = () => {
         console.error("Error continuing signup:", error);
       }
     })();
-  }, [isAuthenticated, user, userName, getIdTokenClaims, register]);
+  }, [isAuthenticated, user, username, getIdTokenClaims, register, error]);
 
   const signup = useCallback(
     async (username: string): Promise<SignupResponse> => {
@@ -160,7 +167,7 @@ export const useSocialAuthentication = () => {
 
             try {
               const nonce = getNonce(iframePublicKey);
-              setUserName(username);
+              setUsername(username);
 
               const popup = openPopup("");
               await loginWithPopup(
@@ -187,43 +194,49 @@ export const useSocialAuthentication = () => {
         );
       });
     },
-    [setUserName, loginWithPopup],
+    [setUsername, loginWithPopup],
   );
 
   const login = useCallback(
-    async (account: AccountQuery["account"]) => {
+    async (
+      controller: ControllerQuery["controller"],
+      credential: Eip191Credential | undefined,
+    ) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
-      if (!account) throw new Error("No account found");
+      if (!controller) throw new Error("No controller found");
+      if (!credential) throw new Error("No EIP191 credential provided");
 
-      const { username, credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
+      const address = credential?.ethAddress;
 
-      const controllerNode = controllers?.edges?.[0]?.node;
-
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
-
-      if (!controllerNode || !publicKey) {
-        return;
+      if (!address) {
+        throw new Error(
+          "Could not extract ethAddress from provided EIP191 credential",
+        );
       }
 
-      const controller = await createController(
+      // username should be available from the outer scope (useState)
+      const controllerObject = await createController(
         origin,
         chainId,
         rpcUrl,
         username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
-        credentialId,
-        publicKey,
+        controller.constructorCalldata[0], // Assuming constructorCalldata is always present and has at least one element
+        controller.address,
+        {
+          signer: {
+            eip191: {
+              address,
+            },
+          },
+        },
       );
 
-      await controller.login(now() + DEFAULT_SESSION_DURATION);
+      await controllerObject.login(now() + DEFAULT_SESSION_DURATION);
 
-      window.controller = controller;
-      setController(controller);
+      window.controller = controllerObject;
+      setController(controllerObject);
     },
-    [chainId, rpcUrl, origin, setController],
+    [chainId, rpcUrl, origin, setController, username],
   );
 
   return { signup, login };
