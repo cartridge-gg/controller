@@ -16,7 +16,6 @@ export const useExternalWalletAuthentication = () => {
 
   const signup = useCallback(
     async (
-      _: string,
       authenticationMode: AuthenticationMethod,
     ): Promise<SignupResponse> => {
       const connectedWallet = await connectWallet(
@@ -27,9 +26,10 @@ export const useExternalWalletAuthentication = () => {
       return {
         address: connectedWallet.account,
         signer: walletToSigner(connectedWallet),
+        type: authenticationMode,
       };
     },
-    [],
+    [connectWallet],
   );
 
   const login = useCallback(
@@ -56,8 +56,15 @@ export const useExternalWalletAuthentication = () => {
         username,
         controllerNode.constructorCalldata[0],
         controllerNode.address,
-        credentialId,
-        publicKey,
+        {
+          signer: {
+            webauthn: {
+              rpId: import.meta.env.VITE_RP_ID!,
+              credentialId,
+              publicKey,
+            },
+          },
+        },
       );
 
       await controller.login(now() + DEFAULT_SESSION_DURATION);

@@ -76,6 +76,11 @@ pub struct AuthorizedSession {
     pub session: Session,
     pub authorization: Option<Vec<JsFelt>>,
     pub is_registered: bool,
+    pub expires_at: u64,
+    pub allowed_policies_root: JsFelt,
+    pub metadata_hash: JsFelt,
+    pub session_key_guid: JsFelt,
+    pub guardian_key_guid: JsFelt,
 }
 
 impl TryFrom<JsValue> for AuthorizedSession {
@@ -89,11 +94,16 @@ impl TryFrom<JsValue> for AuthorizedSession {
 impl From<account_sdk::storage::SessionMetadata> for AuthorizedSession {
     fn from(value: account_sdk::storage::SessionMetadata) -> Self {
         AuthorizedSession {
-            session: value.session.into(),
+            session: value.session.clone().into(),
             authorization: value
                 .credentials
                 .map(|c| c.authorization.into_iter().map(Into::into).collect()),
             is_registered: value.is_registered,
+            expires_at: value.session.inner.expires_at,
+            allowed_policies_root: value.session.inner.allowed_policies_root.into(),
+            metadata_hash: value.session.inner.allowed_policies_root.into(),
+            session_key_guid: value.session.inner.session_key_guid.into(),
+            guardian_key_guid: value.session.inner.allowed_policies_root.into(),
         }
     }
 }

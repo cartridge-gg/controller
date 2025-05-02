@@ -180,6 +180,11 @@ impl CartridgeAccount {
                     .collect(),
             ),
             is_registered: false,
+            expires_at: account.session.inner.expires_at,
+            allowed_policies_root: account.session.inner.allowed_policies_root.into(),
+            metadata_hash: account.session.inner.metadata_hash.into(),
+            session_key_guid: account.session.inner.session_key_guid.into(),
+            guardian_key_guid: account.session.inner.guardian_key_guid.into(),
         };
 
         Ok(session_metadata)
@@ -213,6 +218,11 @@ impl CartridgeAccount {
                         .collect(),
                 ),
                 is_registered: false,
+                expires_at: account.session.inner.expires_at,
+                allowed_policies_root: account.session.inner.allowed_policies_root.into(),
+                metadata_hash: account.session.inner.metadata_hash.into(),
+                session_key_guid: account.session.inner.session_key_guid.into(),
+                guardian_key_guid: account.session.inner.guardian_key_guid.into(),
             };
             Some(session_metadata)
         } else {
@@ -608,4 +618,27 @@ impl CartridgeAccountWithMeta {
     pub fn into_account(self) -> CartridgeAccount {
         self.account
     }
+}
+
+/// Computes the Starknet contract address for a controller account without needing a full instance.
+///
+/// # Arguments
+///
+/// * `class_hash` - The class hash of the account contract (JsFelt).
+/// * `owner` - The owner configuration for the account.
+/// * `salt` - The salt used for address calculation (JsFelt).
+///
+/// # Returns
+///
+/// The computed Starknet contract address as a `JsFelt`.
+#[wasm_bindgen(js_name = computeAccountAddress)]
+pub fn compute_account_address(class_hash: JsFelt, owner: Owner, salt: JsFelt) -> Result<JsFelt> {
+    let class_hash_felt: Felt = class_hash.try_into()?;
+    let salt_felt: Felt = salt.try_into()?;
+
+    // The owner type from WASM is directly usable here
+    let address =
+        account_sdk::factory::compute_account_address(class_hash_felt, owner.into(), salt_felt);
+
+    Ok(address.into())
 }
