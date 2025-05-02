@@ -14,6 +14,7 @@ import { AuthenticationMethod, LoginMode } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchAccount } from "./utils";
+import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
 
 export interface SignupResponse {
@@ -31,6 +32,7 @@ export function useCreateController({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
+  const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
 
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
@@ -42,6 +44,8 @@ export function useCreateController({
     useSocialAuthentication();
   const { signup: signupWithExternalWallet } =
     useExternalWalletAuthentication();
+  const { signup: signupWithWalletConnect } =
+    useWalletConnectAuthentication(setOverlay);
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -127,14 +131,14 @@ export function useCreateController({
         case "social":
           signupResponse = await signupWithSocial(username);
           break;
+        case "walletconnect":
+          signupResponse = await signupWithWalletConnect();
+          break;
         case "metamask":
         case "phantom":
         case "argent":
         case "rabby":
-          signupResponse = await signupWithExternalWallet(
-            username,
-            authenticationMode,
-          );
+          signupResponse = await signupWithExternalWallet(authenticationMode);
           break;
         default:
           break;
@@ -156,7 +160,8 @@ export function useCreateController({
         },
       });
 
-      await controller.login(now() + DEFAULT_SESSION_DURATION);
+      const result = await controller.login(now() + DEFAULT_SESSION_DURATION);
+      console.log("login result", result);
       window.controller = controller;
       setController(controller);
     },
@@ -169,6 +174,10 @@ export function useCreateController({
       isSlot,
       createController,
       doPopupFlow,
+      signupWithExternalWallet,
+      signupWithSocial,
+      signupWithWebauthn,
+      signupWithWalletConnect,
     ],
   );
 
@@ -232,6 +241,8 @@ export function useCreateController({
     error,
     setError,
     handleSubmit,
+    overlay,
+    setOverlay,
   };
 }
 

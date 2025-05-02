@@ -26,6 +26,7 @@ import { StarterPackContent } from "../starterpack";
 import { PurchaseType } from "@/hooks/payments/crypto";
 import { Receiving } from "../starterpack/receiving";
 import useStripePayment from "@/hooks/payments/stripe";
+import { usdToCredits } from "@/hooks/tokens";
 
 export enum PurchaseState {
   SELECTION = 0,
@@ -54,7 +55,7 @@ export type StripeResponse = {
   pricing: PricingDetails;
 };
 
-export const DEFAULT_CREDITS_AMOUNT = 5_000;
+export const DEFAULT_WHOLE_CREDITS = 500;
 
 // TODO: I know this is terrible... refactor soon, separate product selection and checkout
 export function Purchase({
@@ -79,8 +80,10 @@ export function Purchase({
     null,
   );
   const [state, setState] = useState<PurchaseState>(initState);
-  const [creditsAmount, setCreditsAmount] = useState<number>(
-    starterpackDetails?.price ?? DEFAULT_CREDITS_AMOUNT,
+  const [wholeCredits, setWholeCredits] = useState<number>(
+    starterpackDetails?.priceUsd
+      ? usdToCredits(starterpackDetails?.priceUsd)
+      : DEFAULT_WHOLE_CREDITS,
   );
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
@@ -107,9 +110,9 @@ export function Purchase({
   const onAmountChanged = useCallback(
     (amount: number) => {
       setDisplayError(null);
-      setCreditsAmount(amount);
+      setWholeCredits(amount);
     },
-    [setCreditsAmount],
+    [setWholeCredits],
   );
 
   const onCreditCard = useCallback(async () => {
@@ -119,7 +122,7 @@ export function Purchase({
 
     try {
       const paymentIntent = await createPaymentIntent(
-        creditsAmount,
+        wholeCredits,
         controller.username(),
         starterpackDetails,
       );
@@ -129,7 +132,7 @@ export function Purchase({
     } catch (e) {
       setDisplayError(e as Error);
     }
-  }, [creditsAmount, createPaymentIntent]);
+  }, [wholeCredits, createPaymentIntent]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet) => {
@@ -208,7 +211,7 @@ export function Purchase({
       <CryptoCheckout
         walletAddress={walletAddress!}
         selectedWallet={selectedWallet!}
-        creditsAmount={creditsAmount}
+        wholeCredits={wholeCredits}
         starterpackDetails={starterpackDetails}
         onBack={() => setState(PurchaseState.SELECTION)}
         onComplete={() => setState(PurchaseState.SUCCESS)}
@@ -238,7 +241,7 @@ export function Purchase({
         {state === PurchaseState.SELECTION &&
           ((type === PurchaseType.CREDITS && (
             <AmountSelection
-              creditsAmount={creditsAmount}
+              wholeCredits={wholeCredits}
               onChange={onAmountChanged}
               lockSelection={isStripeLoading || isLoadingWallets}
               enableCustom

@@ -19,11 +19,25 @@ export function ChooseSignupMethodForm({
   >(undefined);
 
   const { wallets } = useWallets();
+
   useEffect(() => {
     if (!isLoading) {
       setSelectedAuth(undefined);
     }
   }, [isLoading]);
+
+  // Function to handle interaction outside the sheet
+  const handleInteractOutside = (
+    event: CustomEvent<{ originalEvent: Event }>,
+  ) => {
+    // Find the overlay element by its ID
+    const overlayElement = document.getElementById("wallet-connect-overlay");
+    // Check if the event target is the overlay or inside it
+    if (overlayElement && overlayElement.contains(event.target as Node)) {
+      // If the interaction was inside our QR code overlay, prevent the sheet from closing
+      event.preventDefault();
+    }
+  };
 
   const passkeyOption = AuthFactory.create("webauthn");
 
@@ -35,6 +49,7 @@ export function ChooseSignupMethodForm({
         )
         .map((wallet) => AuthFactory.create(wallet.type)),
       AuthFactory.create("social"),
+      AuthFactory.create("walletconnect"),
     ];
   }, [wallets]);
 
@@ -60,6 +75,7 @@ export function ChooseSignupMethodForm({
       side="bottom"
       className="flex flex-col bg-spacer-100 w-fill h-fit justify-end p-6 gap-4 border-t-0 rounded-tl-[16px] rounded-tr-[16px]"
       showClose={false}
+      onInteractOutside={handleInteractOutside}
     >
       <SheetTitle className="hidden"></SheetTitle>
       <div className="border-b border-background-125 pb-4">
