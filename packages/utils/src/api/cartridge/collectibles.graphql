@@ -27,6 +27,7 @@ query Collectibles(
           name
           tokenId
           amount
+          metadata
         }
         meta {
           project
@@ -57,6 +58,7 @@ query Collectible(
       name
       tokenId
       amount
+      metadata
     }
     meta {
       assetCount

@@ -7,27 +7,25 @@ import {
 } from "@/index";
 import { VariantProps } from "class-variance-authority";
 import { useMemo, useState } from "react";
-import ActivityCard, { activityCardVariants } from "./card";
-import { formatAddress } from "@cartridge/utils";
-import { getChecksumAddress } from "starknet";
+import TraceabilityCard, { traceabilityCardVariants } from "./card";
 
-export interface ActivityCollectibleCardProps
+export interface TraceabilityCollectibleCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof activityCardVariants> {
-  name: string;
-  address: string;
-  collection: string;
+    VariantProps<typeof traceabilityCardVariants> {
+  from: string;
+  to: string;
   image: string;
   action: "send" | "receive" | "mint";
+  amount?: number;
   error?: boolean;
   loading?: boolean;
   className?: string;
 }
 
-export const ActivityCollectibleCard = ({
-  name,
-  address,
-  collection,
+export const TraceabilityCollectibleCard = ({
+  from,
+  to,
+  amount,
   image,
   action,
   error,
@@ -35,7 +33,7 @@ export const ActivityCollectibleCard = ({
   variant,
   className,
   ...props
-}: ActivityCollectibleCardProps) => {
+}: TraceabilityCollectibleCardProps) => {
   const [hover, setHover] = useState(false);
 
   const Icon = useMemo(() => {
@@ -52,11 +50,10 @@ export const ActivityCollectibleCard = ({
   const title = useMemo(() => {
     switch (action) {
       case "send":
-        return loading ? "Sending" : "Sent";
       case "receive":
-        return loading ? "Receiving" : "Received";
+        return loading ? "Transfering" : "Transfer";
       default:
-        return loading ? "Minting" : "Minted";
+        return loading ? "Minting" : "Mint";
     }
   }, [loading, action]);
 
@@ -79,34 +76,19 @@ export const ActivityCollectibleCard = ({
     [image, error, loading, hover, Icon],
   );
 
-  const Address = useMemo(() => {
-    switch (action) {
-      case "send":
-        return (
-          <p>{`To ${formatAddress(getChecksumAddress(address), {
-            size: "xs",
-          })}`}</p>
-        );
-      default:
-        return (
-          <p>{`From ${formatAddress(getChecksumAddress(address), {
-            size: "xs",
-          })}`}</p>
-        );
-    }
-  }, [address, action]);
-
-  const Collection = useMemo(() => {
-    return <p>{collection}</p>;
-  }, [collection]);
+  const { fromAddress, toAddress } = useMemo(() => {
+    const fromAddress = `From: ${from}`;
+    const toAddress = `To: ${to}`;
+    return { fromAddress, toAddress };
+  }, [from, to]);
 
   return (
-    <ActivityCard
+    <TraceabilityCard
       Logo={Logo}
       title={title}
-      subTitle={Address}
-      topic={name}
-      subTopic={Collection}
+      count={amount}
+      from={fromAddress}
+      to={toAddress}
       error={error}
       loading={loading}
       variant={variant}
@@ -118,4 +100,4 @@ export const ActivityCollectibleCard = ({
   );
 };
 
-export default ActivityCollectibleCard;
+export default TraceabilityCollectibleCard;

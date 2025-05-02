@@ -56,11 +56,21 @@ export function useCollectible({
       queryKey: ["collectible"],
       enabled: !!project && !!address,
       onSuccess: ({ collectible }) => {
+        const assets = collectible.assets;
+        const first = assets.length > 0 ? assets[0] : undefined;
+        let metadata: { image?: string } = {};
+        try {
+          metadata = JSON.parse(first?.metadata ?? "{}");
+        } catch (error) {
+          console.warn(error);
+        }
+        const imageUrl = metadata?.image || collectible.meta.imagePath;
+        const name = collectible.meta.name;
         const newCollectible: Collectible = {
           address: collectible.meta.contractAddress,
-          name: collectible.meta.name,
+          name: name ? name : "---",
           type: TYPE,
-          imageUrl: collectible.meta.imagePath,
+          imageUrl: imageUrl,
           totalCount: collectible.meta.assetCount,
         };
 
@@ -73,12 +83,25 @@ export function useCollectible({
               a.tokenId,
             );
           }
+          let attributes: Record<string, unknown>[] = [];
+          try {
+            attributes = JSON.parse(a.attributes ?? "[]");
+          } catch (error) {
+            console.error(error);
+          }
+          let metadata: { image?: string } = {};
+          try {
+            metadata = JSON.parse(a.metadata ?? "{}");
+          } catch (error) {
+            console.warn(error);
+          }
+          const name = a.name;
           const asset: Asset = {
             tokenId: a.tokenId,
-            name: a.name,
+            name: name ? name : "---",
             description: a.description ?? "",
-            imageUrl: imageUrl,
-            attributes: JSON.parse(a.attributes ?? "{}"),
+            imageUrl: metadata?.image ?? imageUrl,
+            attributes: attributes,
             amount: a.amount,
           };
           newAssets[`${newCollectible.address}-${a.tokenId}`] = asset;
@@ -139,10 +162,17 @@ export function useCollectibles(): UseCollectiblesResponse {
           const imagePath = e.node.meta.imagePath;
           const name = e.node.meta.name;
           const count = e.node.meta.assetCount;
+          const first = e.node.assets.length > 0 ? e.node.assets[0] : undefined;
+          let metadata: { image?: string } = {};
+          try {
+            metadata = JSON.parse(first?.metadata ?? "{}");
+          } catch (error) {
+            console.warn(error);
+          }
           newCollectibles[`${contractAddress}`] = {
             address: contractAddress,
-            imageUrl: imagePath,
-            name,
+            imageUrl: metadata?.image ?? imagePath,
+            name: name ? name : "---",
             totalCount: count,
             type: TYPE,
           };

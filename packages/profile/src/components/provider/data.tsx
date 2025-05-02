@@ -16,6 +16,7 @@ import { getDate } from "@cartridge/utils";
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
   key: string;
+  contractAddress: string;
   transactionHash: string;
   amount: string;
   address: string;
@@ -119,6 +120,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             return {
               variant: "token",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
+              contractAddress: transfer.contractAddress,
               transactionHash: transfer.transactionHash,
               amount: value,
               address:
@@ -163,6 +165,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             return {
               variant: "collectible",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
+              contractAddress: transfer.contractAddress,
               transactionHash: transfer.transactionHash,
               name: name || "",
               collection: transfer.name,
@@ -190,21 +193,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const actions: CardProps[] = useMemo(() => {
     return (
       transactions?.activities?.items?.flatMap((item) =>
-        item.activities?.map(({ transactionHash, entrypoint, executedAt }) => {
-          const timestamp = new Date(executedAt).getTime();
-          const date = getDate(timestamp);
-          return {
-            variant: "game",
-            key: `${transactionHash}-${entrypoint}`,
-            transactionHash: transactionHash,
-            title: entrypoint,
-            image: game?.properties.icon || "",
-            website: edition?.socials.website || "",
-            certified: !!game,
-            timestamp: timestamp / 1000,
-            date: date,
-          } as CardProps;
-        }),
+        item.activities?.map(
+          ({ transactionHash, contractAddress, entrypoint, executedAt }) => {
+            const timestamp = new Date(executedAt).getTime();
+            const date = getDate(timestamp);
+            return {
+              variant: "game",
+              key: `${transactionHash}-${entrypoint}`,
+              contractAddress: contractAddress,
+              transactionHash: transactionHash,
+              title: entrypoint,
+              image: game?.properties.icon || "",
+              website: edition?.socials.website || "",
+              certified: !!game,
+              timestamp: timestamp / 1000,
+              date: date,
+            } as CardProps;
+          },
+        ),
       ) || []
     );
   }, [transactions, game, edition]);
@@ -218,6 +224,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           variant: "achievement",
           key: item.id,
           transactionHash: "",
+          contractAddress: "",
           title: item.title,
           image: item.icon,
           timestamp: item.timestamp,

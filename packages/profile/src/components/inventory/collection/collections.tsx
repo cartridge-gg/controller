@@ -27,12 +27,13 @@ export function Collections() {
     <div className="grid grid-cols-2 gap-4 place-items-center select-none">
       {collections.map((collection) => (
         <Link
-          className="w-full aspect-square group select-none"
+          className="w-full group select-none"
           draggable={false}
           to={`./collection/${collection.address}`}
           key={collection.address}
         >
           <CollectibleAsset
+            icon={null}
             title={collection.name}
             image={collection.imageUrl || placeholder}
             count={collection.totalCount}
@@ -41,12 +42,13 @@ export function Collections() {
       ))}
       {collectibles.map((collectible) => (
         <Link
-          className="w-full aspect-square group select-none"
+          className="w-full group select-none"
           draggable={false}
-          to={`./collection/${collectible.address}`}
+          to={`./collectible/${collectible.address}`}
           key={collectible.address}
         >
           <CollectibleAsset
+            icon={null}
             title={collectible.name}
             image={collectible.imageUrl || placeholder}
             count={collectible.totalCount}

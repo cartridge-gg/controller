@@ -13,7 +13,8 @@ const meta: Meta<typeof CollectibleAsset> = {
     image:
       "https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/cover.png",
     title: "Beasts",
-    count: 9,
+    quantity: 9,
+    sales: 100,
     onClick: fn(),
   },
 };
@@ -26,5 +27,11 @@ export const Default: Story = {};
 export const Faded: Story = {
   args: {
     variant: "faded",
+  },
+};
+
+export const Icon: Story = {
+  args: {
+    icon: "https://placehold.co/100x100",
   },
 };

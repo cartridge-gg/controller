@@ -63,7 +63,7 @@ export function CollectibleProperties({
           (_, i) => (
             <div
               key={`fill-${i}`}
-              className="bg-background-200 p-3 flex flex-col gap-1"
+              className="bg-background-150 p-3 flex flex-col gap-1"
             />
           ),
         )}

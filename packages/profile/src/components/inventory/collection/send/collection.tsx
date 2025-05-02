@@ -9,6 +9,8 @@ import {
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
+  Skeleton,
+  Empty,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -20,11 +22,11 @@ import {
 } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
 import { useCollection } from "#hooks/collection";
-import { Sending } from "./sending";
+import { Sending } from "./collection-sending";
 import { useEntrypoints } from "#hooks/entrypoints";
-import { CollectionHeader } from "../header";
 import placeholder from "/public/placeholder.svg";
 import { formatName } from "../../helper";
+import { SendHeader } from "./header";
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
 const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
@@ -57,7 +59,7 @@ export function SendCollection() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collection, assets } = useCollection({
+  const { collection, assets, status } = useCollection({
     contractAddress: contractAddress,
     tokenIds,
   });
@@ -146,9 +148,9 @@ export function SendCollection() {
 
   const title = useMemo(() => {
     if (!collection || !assets || assets.length === 0) return "";
-    if (assets.length > 1) return `Send (${assets.length}) ${collection.name}`;
+    if (assets.length > 1) return `${assets.length} ${collection.name}(s)`;
     const asset = assets[0];
-    return `Send ${formatName(asset.name, asset.tokenId)}`;
+    return formatName(asset.name, asset.tokenId);
   }, [collection, assets]);
 
   const image = useMemo(() => {
@@ -161,44 +163,50 @@ export function SendCollection() {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
 
-  if (!collection || !assets) return null;
-
   return (
     <LayoutContainer>
       <LayoutHeader className="hidden" onBack={handleBack} />
-      <LayoutContent className="p-6 flex flex-col gap-6">
-        <CollectionHeader image={image} title={title} />
-        <SendRecipient
-          to={to}
-          setTo={setTo}
-          submitted={submitted}
-          setWarning={setRecipientWarning}
-          setError={setRecipientError}
-          setParentLoading={setRecipientLoading}
-        />
-        <Sending assets={assets} description={collection.name} />
-      </LayoutContent>
+      {status === "loading" || !collection || !assets ? (
+        <LoadingState />
+      ) : status === "error" ? (
+        <EmptyState />
+      ) : (
+        <>
+          <LayoutContent className="p-6 flex flex-col gap-6">
+            <SendHeader image={image} title={title} />
+            <SendRecipient
+              to={to}
+              setTo={setTo}
+              submitted={submitted}
+              setWarning={setRecipientWarning}
+              setError={setRecipientError}
+              setParentLoading={setRecipientLoading}
+            />
+            <Sending assets={assets} description={collection.name} />
+          </LayoutContent>
 
-      <LayoutFooter
-        className={cn(
-          "relative flex flex-col items-center justify-center gap-y-4 bg-background",
-        )}
-      >
-        <Warning
-          warning={recipientWarning}
-          validated={recipientValidated}
-          setValidated={setRecipientValidated}
-        />
-        <Button
-          disabled={disabled}
-          type="submit"
-          className="w-full"
-          isLoading={loading}
-          onClick={() => onSubmit(to)}
-        >
-          Review Send
-        </Button>
-      </LayoutFooter>
+          <LayoutFooter
+            className={cn(
+              "relative flex flex-col items-center justify-center gap-y-4 bg-background",
+            )}
+          >
+            <Warning
+              warning={recipientWarning}
+              validated={recipientValidated}
+              setValidated={setRecipientValidated}
+            />
+            <Button
+              disabled={disabled}
+              type="submit"
+              className="w-full"
+              isLoading={loading}
+              onClick={() => onSubmit(to)}
+            >
+              Review Send
+            </Button>
+          </LayoutFooter>
+        </>
+      )}
     </LayoutContainer>
   );
 }
@@ -228,5 +236,30 @@ const Warning = ({
       )}
       <p className="text-xs text-destructive-100">{warning}</p>
     </div>
+  );
+};
+
+const LoadingState = () => {
+  return (
+    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+      <Skeleton className="min-h-10 w-full rounded" />
+      <div className="flex flex-col">
+        <Skeleton className="min-h-4 my-3 w-8 rounded" />
+        <Skeleton className="min-h-12 w-full rounded" />
+      </div>
+      <Skeleton className="min-h-[109px] w-full rounded" />
+    </LayoutContent>
+  );
+};
+
+const EmptyState = () => {
+  return (
+    <LayoutContent className="select-none h-full">
+      <Empty
+        title="No information found for this asset."
+        icon="inventory"
+        className="h-full"
+      />
+    </LayoutContent>
   );
 };

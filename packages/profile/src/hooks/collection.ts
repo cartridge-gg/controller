@@ -55,11 +55,20 @@ export function useCollection({
       queryKey: ["collection"],
       enabled: !!project && !!address,
       onSuccess: ({ collection }) => {
+        const assets = collection.assets;
+        const first = assets.length > 0 ? assets[0] : undefined;
+        let metadata: { image?: string } = {};
+        try {
+          metadata = JSON.parse(first?.metadata ?? "{}");
+        } catch (error) {
+          console.warn(error);
+        }
+        const name = collection.meta.name;
         const newCollection: Collection = {
           address: collection.meta.contractAddress,
-          name: collection.meta.name,
+          name: name ? name : "---",
           type: TYPE,
-          imageUrl: collection.meta.imagePath,
+          imageUrl: metadata?.image ?? collection.meta.imagePath,
           totalCount: collection.meta.assetCount,
         };
 
@@ -78,11 +87,17 @@ export function useCollection({
           } catch (error) {
             console.warn(error);
           }
+          let metadata: { image?: string } = {};
+          try {
+            metadata = JSON.parse(a.metadata ?? "{}");
+          } catch (error) {
+            console.warn(error);
+          }
           const asset: Asset = {
             tokenId: a.tokenId,
             name: a.name,
             description: a.description ?? "",
-            imageUrl: imageUrl,
+            imageUrl: metadata?.image ?? imageUrl,
             attributes: attributes,
           };
           newAssets[`${newCollection.address}-${a.tokenId}`] = asset;
@@ -143,10 +158,17 @@ export function useCollections(): UseCollectionsResponse {
           const imagePath = e.node.meta.imagePath;
           const name = e.node.meta.name;
           const count = e.node.meta.assetCount;
+          const first = e.node.assets.length > 0 ? e.node.assets[0] : undefined;
+          let metadata: { image?: string } = {};
+          try {
+            metadata = JSON.parse(first?.metadata ?? "{}");
+          } catch (error) {
+            console.warn(error);
+          }
           newCollections[`${contractAddress}`] = {
             address: contractAddress,
-            imageUrl: imagePath,
-            name,
+            imageUrl: metadata?.image ?? imagePath,
+            name: name ? name : "---",
             totalCount: count,
             type: TYPE,
           };
