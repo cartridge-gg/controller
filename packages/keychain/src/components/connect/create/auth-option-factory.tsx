@@ -1,68 +1,74 @@
 import {
   ArgentColorIcon,
   DiscordColorIcon,
+  IconProps,
   MetaMaskColorIcon,
   PasskeyIcon,
   PhantomColorIcon,
   RabbyColorIcon,
   WalletConnectColorIcon,
 } from "@cartridge/ui-next";
+import React from "react";
 import { AuthenticationMethod } from "../types";
+
+type AuthConfig = {
+  variant: "primary" | "secondary";
+  IconComponent: React.ComponentType<IconProps>;
+  label: string;
+};
+
+const AUTH_CONFIG: Partial<Record<AuthenticationMethod, AuthConfig>> = {
+  webauthn: {
+    variant: "primary",
+    IconComponent: PasskeyIcon,
+    label: "Passkey",
+  },
+  metamask: {
+    variant: "secondary",
+    IconComponent: MetaMaskColorIcon,
+    label: "MetaMask",
+  },
+  argent: {
+    variant: "secondary",
+    IconComponent: ArgentColorIcon,
+    label: "Argent",
+  },
+  rabby: {
+    variant: "secondary",
+    IconComponent: RabbyColorIcon,
+    label: "Rabby",
+  },
+  phantom: {
+    variant: "secondary",
+    IconComponent: PhantomColorIcon,
+    label: "Phantom",
+  },
+  social: {
+    variant: "secondary",
+    IconComponent: DiscordColorIcon,
+    label: "Discord",
+  },
+  walletconnect: {
+    variant: "secondary",
+    IconComponent: WalletConnectColorIcon,
+    label: "Wallet Connect",
+  },
+};
 
 export class AuthFactory {
   static create(mode: AuthenticationMethod) {
-    switch (mode) {
-      case "webauthn":
-        return {
-          variant: "primary" as const,
-          icon: <PasskeyIcon />,
-          mode,
-          label: "Passkey",
-        };
-      case "metamask":
-        return {
-          variant: "secondary" as const,
-          icon: <MetaMaskColorIcon />,
-          mode,
-          label: "MetaMask",
-        };
-      case "argent":
-        return {
-          variant: "secondary" as const,
-          icon: <ArgentColorIcon />,
-          mode,
-          label: "Argent",
-        };
-      case "rabby":
-        return {
-          variant: "secondary" as const,
-          icon: <RabbyColorIcon />,
-          mode,
-          label: "Rabby",
-        };
-      case "phantom":
-        return {
-          variant: "secondary" as const,
-          icon: <PhantomColorIcon />,
-          mode,
-          label: "Phantom",
-        };
-      case "social":
-        return {
-          variant: "secondary" as const,
-          icon: <DiscordColorIcon />,
-          mode,
-          label: "Discord",
-        };
-      case "walletconnect":
-        return {
-          variant: "secondary" as const,
-          icon: <WalletConnectColorIcon />,
-          mode,
-          label: "Wallet Connect",
-        };
-      default:
-        throw new Error(`Unknown authentication mode: ${mode}`);
+    const config = AUTH_CONFIG[mode];
+
+    if (!config) {
+      throw new Error(`Unknown authentication mode: ${mode}`);
     }
+
+    const { IconComponent } = config;
+
+    return {
+      icon: <IconComponent size="sm" />,
+      mode,
+      ...config,
+    };
   }
 }

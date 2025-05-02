@@ -1,26 +1,23 @@
 import { useWallets } from "@/hooks/wallets";
-import { LayoutContent, LayoutHeader, OptionButton } from "@cartridge/ui-next";
+import { OptionButton, SheetContent, SheetTitle } from "@cartridge/ui-next";
 import { useEffect, useMemo, useState } from "react";
 import { AuthenticationMethod } from "../types";
 import { AuthFactory } from "./auth-option-factory";
-import { AuthenticationStep } from "./utils";
 
 interface ChooseSignupMethodProps {
   isSlot?: boolean;
   isLoading: boolean;
   onSubmit: (authenticationMode?: AuthenticationMethod) => void;
-  setAuthenticationStep: (value: AuthenticationStep | undefined) => void;
 }
 
 export function ChooseSignupMethodForm({
   isLoading,
-  isSlot,
   onSubmit,
-  setAuthenticationStep,
 }: ChooseSignupMethodProps) {
   const [selectedAuth, setSelectedAuth] = useState<
     AuthenticationMethod | undefined
   >(undefined);
+
   const { wallets } = useWallets();
 
   useEffect(() => {
@@ -29,9 +26,23 @@ export function ChooseSignupMethodForm({
     }
   }, [isLoading]);
 
+  // Function to handle interaction outside the sheet
+  const handleInteractOutside = (
+    event: CustomEvent<{ originalEvent: Event }>,
+  ) => {
+    // Find the overlay element by its ID
+    const overlayElement = document.getElementById("wallet-connect-overlay");
+    // Check if the event target is the overlay or inside it
+    if (overlayElement && overlayElement.contains(event.target as Node)) {
+      // If the interaction was inside our QR code overlay, prevent the sheet from closing
+      event.preventDefault();
+    }
+  };
+
+  const passkeyOption = AuthFactory.create("webauthn");
+
   const authOptions = useMemo(() => {
     return [
-      AuthFactory.create("webauthn"),
       ...wallets
         .filter(
           (wallet) => wallet.type !== "argent" && wallet.type !== "phantom",
@@ -48,48 +59,46 @@ export function ChooseSignupMethodForm({
       | React.MouseEvent<HTMLButtonElement>,
     option: AuthenticationMethod,
   ) => {
+    if (
+      e.type === "keydown" &&
+      (e as React.KeyboardEvent<HTMLButtonElement>).key !== "Enter"
+    ) {
+      return;
+    }
     e.preventDefault();
     setSelectedAuth(option);
     onSubmit(option);
   };
 
   return (
-    <>
-      <LayoutHeader
-        variant="compressed"
-        title={"Create account"}
-        hideUsername
-        hideNetwork={isSlot}
-        hideSettings
-        description={"Choose a sign in method"}
-        onBack={() =>
-          !isLoading && setAuthenticationStep(AuthenticationStep.FillForm)
-        }
-      />
-      <LayoutContent className="gap-3 justify-end">
+    <SheetContent
+      side="bottom"
+      className="flex flex-col bg-spacer-100 w-fill h-fit justify-end p-6 gap-4 border-t-0 rounded-tl-[16px] rounded-tr-[16px]"
+      showClose={false}
+      onInteractOutside={handleInteractOutside}
+    >
+      <SheetTitle className="hidden"></SheetTitle>
+      <div className="border-b border-background-125 pb-4">
+        <OptionButton
+          {...passkeyOption}
+          className="justify-center"
+          onClick={(e) => handleSelectedOption(e, passkeyOption.mode)}
+          onKeyDown={(e) => handleSelectedOption(e, passkeyOption.mode)}
+        />
+      </div>
+      <div className="flex flex-col gap-3">
         {authOptions.map((option) => (
           <OptionButton
             key={option.mode}
-            icon={option.icon}
-            label={option.label}
-            variant={option.variant}
-            className={`${option.mode === "webauthn" && "justify-center"}`}
-            onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-              if (e.key !== "Enter") {
-                return;
-              }
-              handleSelectedOption(e, option.mode);
-            }}
-            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-              handleSelectedOption(e, option.mode);
-            }}
+            {...option}
+            className="justify-start"
+            onKeyDown={(e) => handleSelectedOption(e, option.mode)}
+            onClick={(e) => handleSelectedOption(e, option.mode)}
             disabled={isLoading && selectedAuth !== option.mode}
-            type="submit"
             isLoading={isLoading && selectedAuth === option.mode}
-            data-testid="submit-button"
           />
         ))}
-      </LayoutContent>
-    </>
+      </div>
+    </SheetContent>
   );
 }
