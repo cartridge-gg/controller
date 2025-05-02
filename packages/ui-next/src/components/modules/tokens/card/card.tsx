@@ -28,7 +28,7 @@ export const TokenCard = ({
   ...props
 }: TokenCardProps) => {
   const Logo = useMemo(
-    () => <Thumbnail icon={image} size="lg" rounded />,
+    () => <Thumbnail icon={image} size="lg" variant="light" rounded />,
     [image],
   );
 
