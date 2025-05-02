@@ -132,7 +132,6 @@ export function CryptoCheckout({
   return (
     <LayoutContainer>
       <LayoutHeader
-        className="p-6"
         title={getTitle}
         icon={<DepositIcon variant="solid" size="lg" />}
         onBack={() => {
@@ -141,7 +140,7 @@ export function CryptoCheckout({
           }
         }}
       />
-      <LayoutContent className="gap-6 px-6">
+      <LayoutContent className="gap-6">
         {starterpackDetails ? (
           <Receiving
             title={"Receiving"}
@@ -258,7 +257,13 @@ const ReviewToken = ({
         {isLoading && <Spinner size="sm" />}
       </CardHeader>
       <TokenSummary className="rounded-tl-none rounded-tr-none">
-        <TokenCard title={name} image={icon} amount={amount} value={value} />
+        <TokenCard
+          title={name}
+          image={icon}
+          amount={amount}
+          value={value}
+          className={"pointer-events-none"}
+        />
       </TokenSummary>
     </Card>
   );

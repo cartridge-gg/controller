@@ -32,7 +32,7 @@ export const FeesTooltip = ({
             </div>
           )}
           <div className="flex flex-row justify-between text-foreground-300">
-            Cartridge Processing Fee: <div>{isStripe ? "10%" : "2.5%"}</div>
+            Cartridge Processing Fee: <div>{isStripe ? "5%" : "2.5%"}</div>
           </div>
         </TooltipContent>
       </Tooltip>

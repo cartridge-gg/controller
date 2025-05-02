@@ -80,7 +80,8 @@ export function CostBreakdown({
 
 const Network = ({ walletType }: { walletType?: ExternalWalletType }) => {
   if (walletType) {
-    const NetworkIcon = WALLET_CONFIG[walletType as keyof typeof WALLET_CONFIG].networkIcon;
+    const NetworkIcon =
+      WALLET_CONFIG[walletType as keyof typeof WALLET_CONFIG].networkIcon;
 
     return (
       <>
