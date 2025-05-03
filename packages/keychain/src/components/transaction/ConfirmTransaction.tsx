@@ -4,7 +4,7 @@ import { useConnection } from "@/hooks/connection";
 import { ExecuteCtx } from "@/utils/connection";
 import { Call, EstimateFee } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { TransactionDestination } from "./destination";
 import { TransactionSending } from "./sending";
 import { useToken } from "@/hooks/tokens";
@@ -28,10 +28,6 @@ export function ConfirmTransaction() {
     // resets execute ui
     setContext(undefined);
   };
-
-  useEffect(() => {
-    console.log("transaction: ", transactions);
-  }, [transactions]);
 
   const call = useMemo(() => {
     const _call = transactions.find((tx) => tx.entrypoint === "transfer");
@@ -63,16 +59,13 @@ export function ConfirmTransaction() {
       balance: {
         // Convert bigint into number
         amount: Number(token.balance) / Math.pow(10, token.decimals),
-        value: token.decimals,
+        // Not sure how to convert
+        value: Number(token.price?.amount) / Math.pow(10, token.decimals),
         change: token.decimals,
       },
     }),
     [token],
   );
-
-  useEffect(() => {
-    console.log("token: ", _token);
-  }, [_token]);
 
   if (!call) {
     return undefined;
@@ -87,7 +80,7 @@ export function ConfirmTransaction() {
       feeEstimate={ctx.feeEstimate}
       onSubmit={onSubmit}
     >
-      <LayoutContent>
+      <LayoutContent className="gap-4">
         <TransactionDestination
           address={call.destinationAddress}
           wallet={WalletType.Controller}

@@ -7,13 +7,18 @@ import {
   Thumbnail,
   Token,
 } from "@cartridge/ui-next";
-import { formatAddress } from "@cartridge/utils";
 
 interface Props {
   token: Token;
 }
 
 export function TransactionSending({ token }: Props) {
+  // Format the price above to USD using the locale, style, and currency.
+  const USDollar = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -32,6 +37,7 @@ export function TransactionSending({ token }: Props) {
         }
         title={token.metadata.symbol}
         subTitle={`${token.balance.amount} ${token.metadata.symbol}`}
+        topic={USDollar.format(token.balance.value)}
         variant={"default"}
         className={cn(
           "rounded-none gap-3 hover:bg-background-200 hover:cursor-default",
