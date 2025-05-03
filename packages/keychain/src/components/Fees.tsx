@@ -1,10 +1,15 @@
-import { useEffect, useState } from "react";
-import { cn, Spinner } from "@cartridge/ui-next";
+import { useEffect, useMemo, useState } from "react";
+import { cn, Spinner, Token } from "@cartridge/ui-next";
 import { EstimateFee } from "starknet";
 
-import { convertTokenAmountToUSD, useFeeToken } from "@/hooks/tokens";
+import {
+  convertTokenAmountToUSD,
+  useFeeToken,
+  useTokens,
+} from "@/hooks/tokens";
 import { ErrorAlert } from "./ErrorAlert";
 import { ERC20 } from "./provider/tokens";
+import { FeeTokenSelect } from "./transaction/fee-token-select";
 
 interface FeesProps {
   isLoading: boolean;
@@ -22,6 +27,20 @@ export function Fees({
   const { isLoading: isPriceLoading, token, error } = useFeeToken();
   const [formattedFee, setFormattedFee] = useState<string>();
   const isLoading = isEstimating || isPriceLoading;
+  const { tokens: _tokens } = useTokens();
+
+  const tokens: Token[] = useMemo(() => {
+    return Object.values(_tokens).map((t) => ({
+      metadata: { ...t, image: t.icon },
+      balance: {
+        // Convert bigint into number
+        amount: Number(t.balance) / Math.pow(10, t.decimals),
+        // Not sure how to convert
+        value: Number(t.price?.amount) / Math.pow(10, t.decimals),
+        change: t.decimals,
+      },
+    }));
+  }, [_tokens]);
 
   useEffect(() => {
     if (isLoading || error || !token) {
@@ -51,7 +70,12 @@ export function Fees({
   }
 
   return (
-    <div className={cn("w-full overflow-hidden rounded", className)}>
+    <div
+      className={cn(
+        "flex items-center gap-3 w-full overflow-hidden rounded",
+        className,
+      )}
+    >
       {formattedFee ? (
         <LineItem
           name="Network Fee"
@@ -63,7 +87,9 @@ export function Fees({
       ) : (
         <LineItem name="Calculating Fees" isLoading />
       )}
-      {/* <TokenSelect tokens={[]} defaultToken={_token} onSelect={() => {}} /> */}
+      <div>
+        <FeeTokenSelect tokens={tokens} onSelect={() => {}} />
+      </div>
     </div>
   );
 }
@@ -82,8 +108,8 @@ function LineItem({
   discount?: string;
 }) {
   return (
-    <div className="flex items-center w-full h-10 p-4 my-1 bg-background-200 text-foreground-400">
-      <p className="text-xs">{name}</p>
+    <div className="flex items-center w-full h-10 py-2.5 px-3 my-1 bg-background-125 border border-background-200 rounded">
+      <p className="text-sm text-foreground-400 font-medium">{name}</p>
       <div className="flex-1" />
 
       {isLoading || !token ? (
@@ -95,10 +121,7 @@ function LineItem({
               <Union value={discount} variant="secondary" />
             </div>
           )}
-          <p className="text-sm text-foreground">{amount}</p>
-          {amount !== "FREE" && (
-            <p className="text-sm text-foreground pl-1">{token.symbol}</p>
-          )}
+          <p className="text-sm text-foreground">{`~${amount}`}</p>
         </div>
       )}
     </div>
