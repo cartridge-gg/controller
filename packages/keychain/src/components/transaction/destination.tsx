@@ -48,7 +48,7 @@ export function TransactionDestination({ wallet, address, name }: Props) {
         Logo={
           <Thumbnail icon={getIcon(wallet)} size="lg" variant="light" rounded />
         }
-        title={name || address}
+        title={name || formatAddress(address, { first: 4, last: 4 })}
         subTitle={formatAddress(address, { first: 4, last: 4 })}
         variant={"default"}
         className={cn(

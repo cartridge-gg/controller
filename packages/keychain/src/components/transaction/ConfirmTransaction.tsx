@@ -1,17 +1,17 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
-import { LayoutContent } from "@cartridge/ui-next";
+import { LayoutContent, WalletType } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
-import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ExecuteCtx } from "@/utils/connection";
-import { EstimateFee } from "starknet";
+import { Call, EstimateFee } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { TransactionDestination } from "./destination";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, setContext } = useConnection();
   const ctx = context as ExecuteCtx;
   const account = controller;
-  const transactions = toArray(ctx.transactions);
+  const transactions = toArray(ctx.transactions) as Call[];
 
   const onSubmit = async (maxFee?: EstimateFee) => {
     if (maxFee === undefined || !account) {
@@ -31,6 +31,18 @@ export function ConfirmTransaction() {
     console.log("transaction: ", transactions);
   }, [transactions]);
 
+  const destinationAddress = useMemo(() => {
+    const cd = transactions.find(
+      (tx) => tx.entrypoint === "transfer",
+    )?.calldata;
+
+    if (Array.isArray(cd)) {
+      return String(cd[0]);
+    }
+
+    return "";
+  }, [transactions]);
+
   return (
     <ExecutionContainer
       title={`Review Transaction${transactions.length > 1 ? "s" : ""}`}
@@ -41,7 +53,10 @@ export function ConfirmTransaction() {
       onSubmit={onSubmit}
     >
       <LayoutContent>
-        <TransactionSummary calls={transactions} />
+        <TransactionDestination
+          address={destinationAddress}
+          wallet={WalletType.Controller}
+        />
       </LayoutContent>
     </ExecutionContainer>
   );
