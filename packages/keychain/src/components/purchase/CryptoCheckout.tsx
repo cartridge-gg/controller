@@ -132,7 +132,6 @@ export function CryptoCheckout({
   return (
     <LayoutContainer>
       <LayoutHeader
-        className="p-6"
         title={getTitle}
         icon={<DepositIcon variant="solid" size="lg" />}
         onBack={() => {
@@ -141,17 +140,7 @@ export function CryptoCheckout({
           }
         }}
       />
-      <LayoutContent className="gap-6 px-6">
-        {state !== CheckoutState.TRANSACTION_SUBMITTED && (
-          <ReviewToken
-            title={"Spending"}
-            name={"USDC"}
-            icon={"https://static.cartridge.gg/tokens/usdc.svg"}
-            amount={costUSDC.toLocaleString() + " USDC"}
-            value={"$" + costUSDC.toLocaleString()}
-          />
-        )}
-
+      <LayoutContent className="gap-6">
         {starterpackDetails ? (
           <Receiving
             title={"Receiving"}
@@ -182,6 +171,7 @@ export function CryptoCheckout({
           state === CheckoutState.REQUESTING_PAYMENT) && (
           <CostBreakdown
             rails="crypto"
+            paymentUnit="usdc"
             walletType={selectedWallet.type}
             price={{
               processingFeeInCents: 0,
@@ -267,7 +257,13 @@ const ReviewToken = ({
         {isLoading && <Spinner size="sm" />}
       </CardHeader>
       <TokenSummary className="rounded-tl-none rounded-tr-none">
-        <TokenCard title={name} image={icon} amount={amount} value={value} />
+        <TokenCard
+          title={name}
+          image={icon}
+          amount={amount}
+          value={value}
+          className={"pointer-events-none"}
+        />
       </TokenSummary>
     </Card>
   );
