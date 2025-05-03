@@ -271,17 +271,37 @@ export function ExecutionContainer({
                     {!ctrlError && (
                       <Fees isLoading={isEstimating} maxFee={maxFee} />
                     )}
-                    <Button
-                      onClick={handleSubmit}
-                      isLoading={isLoading}
-                      disabled={
-                        !!ctrlError ||
-                        !transactions ||
-                        !!(maxFee === null && transactions?.length)
-                      }
-                    >
-                      {buttonText}
-                    </Button>
+                    <div className="flex gap-3 w-full">
+                      <Button
+                        onClick={() => {}}
+                        isLoading={isLoading}
+                        disabled={
+                          !!ctrlError ||
+                          !transactions ||
+                          !!(maxFee === null && transactions?.length)
+                        }
+                        variant="secondary"
+                        className="w-fit"
+                      >
+                        <span className="text-[16px]/[20px] font-semibold text-foreground-100">
+                          REJECT
+                        </span>
+                      </Button>
+                      <Button
+                        onClick={handleSubmit}
+                        isLoading={isLoading}
+                        disabled={
+                          !!ctrlError ||
+                          !transactions ||
+                          !!(maxFee === null && transactions?.length)
+                        }
+                        className="w-full"
+                      >
+                        <span className="text-[16px]/[20px] font-semibold text-spacer-100">
+                          {buttonText}
+                        </span>
+                      </Button>
+                    </div>
                   </>
                 );
             }
