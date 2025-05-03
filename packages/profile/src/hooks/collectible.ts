@@ -60,7 +60,7 @@ export function useCollectible({
         const first = assets.length > 0 ? assets[0] : undefined;
         let metadata: { image?: string } = {};
         try {
-          metadata = JSON.parse(first?.metadata ?? "{}");
+          metadata = JSON.parse(!first?.metadata ? "{}" : first.metadata);
         } catch (error) {
           console.warn(error);
         }
@@ -85,13 +85,13 @@ export function useCollectible({
           }
           let attributes: Record<string, unknown>[] = [];
           try {
-            attributes = JSON.parse(a.attributes ?? "[]");
+            attributes = JSON.parse(!a.attributes ? "[]" : a.attributes);
           } catch (error) {
             console.error(error);
           }
           let metadata: { image?: string } = {};
           try {
-            metadata = JSON.parse(a.metadata ?? "{}");
+            metadata = JSON.parse(!a.metadata ? "{}" : a.metadata);
           } catch (error) {
             console.warn(error);
           }
@@ -165,7 +165,7 @@ export function useCollectibles(): UseCollectiblesResponse {
           const first = e.node.assets.length > 0 ? e.node.assets[0] : undefined;
           let metadata: { image?: string } = {};
           try {
-            metadata = JSON.parse(first?.metadata ?? "{}");
+            metadata = JSON.parse(!first?.metadata ? "{}" : first.metadata);
           } catch (error) {
             console.warn(error);
           }

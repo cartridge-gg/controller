@@ -135,7 +135,9 @@ export function useTraceabilities({
       const date = getDate(timestamp);
       let metadata = [];
       try {
-        metadata = JSON.parse(traceability.metadata);
+        metadata = JSON.parse(
+          !traceability.metadata ? "[]" : traceability.metadata,
+        );
       } catch (error) {
         console.warn(error);
       }

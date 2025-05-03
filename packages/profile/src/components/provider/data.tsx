@@ -151,9 +151,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
           .map((transfer) => {
             const timestamp = new Date(transfer.executedAt).getTime();
             const date = getDate(timestamp);
-            let metadata = [];
+            let metadata;
             try {
-              metadata = JSON.parse(transfer.metadata);
+              metadata = JSON.parse(
+                !transfer.metadata ? "{}" : transfer.metadata,
+              );
             } catch (error) {
               console.warn(error);
             }

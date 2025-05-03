@@ -86,16 +86,6 @@ export function Amount({
               <Max onClick={onMax} />
             </div>
           </div>
-          {!!onPlus && max !== undefined && (
-            <Button
-              variant="secondary"
-              className="h-10 w-10 p-2.5"
-              onClick={onPlus}
-              disabled={(amount || 0) >= max}
-            >
-              <PlusIcon variant="solid" size="xs" />
-            </Button>
-          )}
           {!!onMinus && min !== undefined && (
             <Button
               variant="secondary"
@@ -104,6 +94,16 @@ export function Amount({
               disabled={(amount || 0) <= min}
             >
               <MinusIcon size="xs" />
+            </Button>
+          )}
+          {!!onPlus && max !== undefined && (
+            <Button
+              variant="secondary"
+              className="h-10 w-10 p-2.5"
+              onClick={onPlus}
+              disabled={(amount || 0) >= max}
+            >
+              <PlusIcon variant="solid" size="xs" />
             </Button>
           )}
         </div>

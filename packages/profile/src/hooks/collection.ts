@@ -59,9 +59,9 @@ export function useCollection({
         const first = assets.length > 0 ? assets[0] : undefined;
         let metadata: { image?: string } = {};
         try {
-          metadata = JSON.parse(first?.metadata ?? "{}");
+          metadata = JSON.parse(!first?.metadata ? "{}" : first.metadata);
         } catch (error) {
-          console.warn(error);
+          console.warn(error, { data: first?.metadata });
         }
         const name = collection.meta.name;
         const newCollection: Collection = {
@@ -83,15 +83,15 @@ export function useCollection({
           }
           let attributes = [];
           try {
-            attributes = JSON.parse(a.attributes ?? "{}");
+            attributes = JSON.parse(!a.attributes ? "[]" : a.attributes);
           } catch (error) {
-            console.warn(error);
+            console.warn(error, { data: attributes });
           }
           let metadata: { image?: string } = {};
           try {
-            metadata = JSON.parse(a.metadata ?? "{}");
+            metadata = JSON.parse(!a.metadata ? "{}" : a.metadata);
           } catch (error) {
-            console.warn(error);
+            console.warn(error, { data: a.metadata });
           }
           const asset: Asset = {
             tokenId: a.tokenId,
@@ -161,9 +161,9 @@ export function useCollections(): UseCollectionsResponse {
           const first = e.node.assets.length > 0 ? e.node.assets[0] : undefined;
           let metadata: { image?: string } = {};
           try {
-            metadata = JSON.parse(first?.metadata ?? "{}");
+            metadata = JSON.parse(!first?.metadata ? "{}" : first?.metadata);
           } catch (error) {
-            console.warn(error);
+            console.warn(error, { data: first?.metadata });
           }
           newCollections[`${contractAddress}`] = {
             address: contractAddress,
