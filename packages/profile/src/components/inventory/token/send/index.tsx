@@ -74,7 +74,6 @@ export function SendToken() {
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
       setSubmitted(true);
-      setLoading(true);
       if (!selectedToken || !to || !amount) return;
 
       setLoading(true);
