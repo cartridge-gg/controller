@@ -59,6 +59,12 @@ export function SendToken() {
   }, [validated, warning, amountError, toError, recipientLoading]);
 
   useEffect(() => {
+    if (token) {
+      setSelectedToken(token);
+    }
+  }, [token]);
+
+  useEffect(() => {
     setValidated(false);
   }, [warning, setValidated]);
 

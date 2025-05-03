@@ -1,5 +1,5 @@
 import { Select, SelectContent } from "@/components/primitives/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TokenSelectHeader } from "./header";
 import { TokenSelectRow } from "./row";
 import { cn } from "@/utils";
@@ -38,6 +38,12 @@ export const TokenSelect = ({
   const [currentToken, setCurrentToken] = useState<Token>(
     defaultToken || tokens[0],
   );
+
+  useEffect(() => {
+    if (defaultToken) {
+      setCurrentToken(defaultToken);
+    }
+  }, [defaultToken]);
 
   const handleChangeToken = (address: string) => {
     const selectedToken = tokens.find(
