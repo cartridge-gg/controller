@@ -1,11 +1,13 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
-import { LayoutContent, WalletType } from "@cartridge/ui-next";
+import { LayoutContent, Token, WalletType } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ExecuteCtx } from "@/utils/connection";
 import { Call, EstimateFee } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useEffect, useMemo } from "react";
 import { TransactionDestination } from "./destination";
+import { TransactionSending } from "./sending";
+import { useToken } from "@/hooks/tokens";
 
 export function ConfirmTransaction() {
   const { controller, context, origin, setContext } = useConnection();
@@ -31,17 +33,50 @@ export function ConfirmTransaction() {
     console.log("transaction: ", transactions);
   }, [transactions]);
 
-  const destinationAddress = useMemo(() => {
-    const cd = transactions.find(
-      (tx) => tx.entrypoint === "transfer",
-    )?.calldata;
+  const call = useMemo(() => {
+    const _call = transactions.find((tx) => tx.entrypoint === "transfer");
 
-    if (Array.isArray(cd)) {
-      return String(cd[0]);
+    if (_call) {
+      const tokenAddress = _call.contractAddress;
+
+      if (Array.isArray(_call.calldata)) {
+        const destinationAddress = String(_call.calldata[0]);
+        const amount = String(_call.calldata[1]);
+
+        return {
+          tokenAddress,
+          destinationAddress,
+          amount,
+        };
+      }
     }
 
-    return "";
+    return undefined;
   }, [transactions]);
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+  const { token } = useToken(call?.tokenAddress!);
+
+  const _token: Token = useMemo(
+    () => ({
+      metadata: { ...token, image: token.icon },
+      balance: {
+        // Convert bigint into number
+        amount: Number(token.balance) / Math.pow(10, token.decimals),
+        value: token.decimals,
+        change: token.decimals,
+      },
+    }),
+    [token],
+  );
+
+  useEffect(() => {
+    console.log("token: ", _token);
+  }, [_token]);
+
+  if (!call) {
+    return undefined;
+  }
 
   return (
     <ExecutionContainer
@@ -54,9 +89,11 @@ export function ConfirmTransaction() {
     >
       <LayoutContent>
         <TransactionDestination
-          address={destinationAddress}
+          address={call.destinationAddress}
           wallet={WalletType.Controller}
         />
+
+        <TransactionSending token={_token} />
       </LayoutContent>
     </ExecutionContainer>
   );

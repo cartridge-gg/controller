@@ -31,7 +31,7 @@ export function TransactionSending({ token }: Props) {
           />
         }
         title={token.metadata.symbol}
-        subTitle={formatAddress(token.metadata.address, { first: 4, last: 4 })}
+        subTitle={`${token.balance.amount} ${token.metadata.symbol}`}
         variant={"default"}
         className={cn(
           "rounded-none gap-3 hover:bg-background-200 hover:cursor-default",
