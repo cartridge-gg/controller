@@ -2,7 +2,7 @@ import { ResponseCodes, toArray } from "@cartridge/controller";
 import { LayoutContent, Token, WalletType } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ExecuteCtx } from "@/utils/connection";
-import { Call, EstimateFee } from "starknet";
+import { Call, EstimateFee, Uint256, uint256 } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useMemo } from "react";
 import { TransactionDestination } from "./destination";
@@ -37,7 +37,9 @@ export function ConfirmTransaction() {
 
       if (Array.isArray(_call.calldata)) {
         const destinationAddress = String(_call.calldata[0]);
-        const amount = String(_call.calldata[1]);
+        const _amount = _call.calldata[1] as Uint256;
+
+        const amount = uint256.uint256ToBN(_amount);
 
         return {
           tokenAddress,
@@ -67,6 +69,12 @@ export function ConfirmTransaction() {
     [token],
   );
 
+  const amount = useMemo(() => {
+    // convert "0x38d7ea4c68000" into number
+    const result = Number(call?.amount) / Math.pow(10, token.decimals);
+    return result;
+  }, [call, token]);
+
   if (!call) {
     return undefined;
   }
@@ -86,7 +94,7 @@ export function ConfirmTransaction() {
           wallet={WalletType.Controller}
         />
 
-        <TransactionSending token={_token} />
+        <TransactionSending token={_token} amount={amount} />
       </LayoutContent>
     </ExecutionContainer>
   );

@@ -10,9 +10,10 @@ import {
 
 interface Props {
   token: Token;
+  amount: number;
 }
 
-export function TransactionSending({ token }: Props) {
+export function TransactionSending({ token, amount }: Props) {
   // Format the price above to USD using the locale, style, and currency.
   const USDollar = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -36,7 +37,7 @@ export function TransactionSending({ token }: Props) {
           />
         }
         title={token.metadata.symbol}
-        subTitle={`${token.balance.amount} ${token.metadata.symbol}`}
+        subTitle={`${amount} ${token.metadata.symbol}`}
         topic={USDollar.format(token.balance.value)}
         variant={"default"}
         className={cn(

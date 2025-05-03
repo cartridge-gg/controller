@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { TransactionDestination } from "./destination";
-import { WalletType } from "@cartridge/ui-next";
 
 const meta: Meta<typeof TransactionDestination> = {
   component: TransactionDestination,
@@ -11,7 +10,6 @@ const meta: Meta<typeof TransactionDestination> = {
   tags: ["autodocs"],
   args: {
     name: "clicksave",
-    wallet: WalletType.ArgentX,
     address: "0x1234567890abcdef1234567890abcdef12345678",
   },
   decorators: [
