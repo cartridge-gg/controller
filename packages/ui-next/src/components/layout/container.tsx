@@ -47,7 +47,7 @@ export function LayoutContainer({
       <ResponsiveWrapper>
         <div
           className={cn(
-            "fixed inset-0 bg-translucent-200 opacity-0 z-50",
+            "fixed inset-0 bg-translucent-dark-200 opacity-0 z-50",
             "transition-opacity duration-150", // This duration manage the modal fade in
             withBackground
               ? "opacity-100 visible"
