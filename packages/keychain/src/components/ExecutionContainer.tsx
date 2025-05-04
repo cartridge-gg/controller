@@ -10,6 +10,7 @@ import {
   LayoutFooter,
   LayoutHeader,
   PaperPlaneIcon,
+  useUI,
 } from "@cartridge/ui-next";
 import isEqual from "lodash/isEqual";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -61,6 +62,8 @@ export function ExecutionContainer({
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
   );
+
+  const { closeModal } = useUI();
 
   // Prevent unnecessary estimate fee calls.
   const prevTransactionsRef = useRef<{
@@ -273,7 +276,8 @@ export function ExecutionContainer({
                     )}
                     <div className="flex gap-3 w-full">
                       <Button
-                        onClick={() => {}}
+                        onClick={closeModal}
+                        type="button"
                         isLoading={isLoading}
                         disabled={
                           !!ctrlError ||
