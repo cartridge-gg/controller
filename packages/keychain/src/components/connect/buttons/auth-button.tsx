@@ -70,6 +70,7 @@ export function AuthButton({
 }: AuthButtonProps) {
   const { isLoading, disabled, ...restProps } = props;
 
+  // TODO(tedison) add a check for if the user has the wallet extension
   const option = useMemo(
     () => OPTIONS[getControllerSignerProvider(validation.signer) ?? ""],
     [validation.signer],
