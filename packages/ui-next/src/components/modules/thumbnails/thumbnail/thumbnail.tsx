@@ -8,18 +8,18 @@ export const thumbnailVariants = cva(
     variants: {
       variant: {
         darkest:
-          "bg-background-100 data-[transdark=true]:bg-translucent-dark-300",
+          "bg-background-100 data-[transdark=true]:bg-translucent-dark-300 data-[translight=true]:bg-translucent-light-100",
         darker:
-          "bg-background-100 data-[transdark=true]:bg-translucent-dark-200",
-        dark: "bg-background-100 data-[transdark=true]:bg-translucent-dark-150",
+          "bg-background-100 data-[transdark=true]:bg-translucent-dark-200 data-[translight=true]:bg-translucent-light-100",
+        dark: "bg-background-100 data-[transdark=true]:bg-translucent-dark-200 data-[translight=true]:bg-translucent-light-150",
         default:
-          "bg-background-200 data-[transdark=true]:bg-translucent-dark-100 data-[translight=true]:bg-translucent-light-100",
+          "bg-background-200 data-[transdark=true]:bg-translucent-dark-150 data-[translight=true]:bg-translucent-light-150",
         light:
-          "bg-background-300 data-[translight=true]:bg-translucent-light-150",
+          "bg-background-300 data-[transdark=true]:bg-translucent-dark-150 data-[translight=true]:bg-translucent-light-200",
         lighter:
-          "bg-background-400 data-[translight=true]:bg-translucent-light-200",
+          "bg-background-400 data-[transdark=true]:bg-translucent-dark-100 data-[translight=true]:bg-translucent-light-200",
         lightest:
-          "bg-background-500 data-[translight=true]:bg-translucent-light-300",
+          "bg-background-500 data-[transdark=true]:bg-translucent-dark-100  data-[translight=true]:bg-translucent-light-300",
         ghost: "bg-transparent",
       },
       size: {
