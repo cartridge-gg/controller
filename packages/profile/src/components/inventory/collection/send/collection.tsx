@@ -196,13 +196,23 @@ export function SendCollection() {
               setValidated={setRecipientValidated}
             />
             <Button
+              variant="secondary"
+              disabled={disabled}
+              type="button"
+              className="flex-1 lg:w-fit"
+              isLoading={loading}
+              onClick={handleBack}
+            >
+              Cancel
+            </Button>
+            <Button
               disabled={disabled}
               type="submit"
-              className="w-full"
+              className="flex-[2] lg:w-full"
               isLoading={loading}
               onClick={() => onSubmit(to)}
             >
-              Review Send
+              Review
             </Button>
           </LayoutFooter>
         </>

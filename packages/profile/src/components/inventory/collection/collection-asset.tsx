@@ -23,6 +23,7 @@ import {
   TabsContent,
   PlusIcon,
   TraceabilityCollectibleCard,
+  PaperPlaneIcon,
 } from "@cartridge/ui-next";
 import { constants } from "starknet";
 import { useConnection, useTheme } from "#hooks/context";
@@ -234,7 +235,10 @@ export function CollectionAsset() {
               className="flex items-center justify-center gap-x-4 w-full"
               to={`send?${searchParams.toString()}`}
             >
-              <Button className="h-10 w-full">Send</Button>
+              <Button variant="secondary" className="h-10 w-full space-x-2">
+                <PaperPlaneIcon variant="solid" />
+                <span>Send</span>
+              </Button>
             </Link>
           </LayoutFooter>
         </>

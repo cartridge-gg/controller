@@ -211,15 +211,27 @@ export function SendCollectible() {
               validated={recipientValidated}
               setValidated={setRecipientValidated}
             />
-            <Button
-              disabled={disabled}
-              type="submit"
-              className="w-full"
-              isLoading={loading}
-              onClick={() => onSubmit(to)}
-            >
-              Review Send
-            </Button>
+            <div className="w-full flex items-center gap-3">
+              <Button
+                variant="secondary"
+                disabled={disabled}
+                type="button"
+                className="flex-1 lg:w-fit"
+                isLoading={loading}
+                onClick={handleBack}
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={disabled}
+                type="submit"
+                className="flex-[2] lg:w-fit"
+                isLoading={loading}
+                onClick={() => onSubmit(to)}
+              >
+                Review
+              </Button>
+            </div>
           </LayoutFooter>
         </>
       )}
