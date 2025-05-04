@@ -281,7 +281,7 @@ export function ExecutionContainer({
                           !!(maxFee === null && transactions?.length)
                         }
                         variant="secondary"
-                        className="w-fit"
+                        className="w-1/3"
                       >
                         <span className="text-[16px]/[20px] font-semibold text-foreground-100">
                           REJECT
@@ -295,7 +295,7 @@ export function ExecutionContainer({
                           !transactions ||
                           !!(maxFee === null && transactions?.length)
                         }
-                        className="w-full"
+                        className="w-2/3"
                       >
                         <span className="text-[16px]/[20px] font-semibold text-spacer-100">
                           {buttonText}
