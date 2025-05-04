@@ -87,6 +87,7 @@ export function ConfirmTransaction() {
       transactions={transactions}
       feeEstimate={ctx.feeEstimate}
       onSubmit={onSubmit}
+      buttonText="CONFIRM"
     >
       <LayoutContent className="gap-4 pt-2">
         <TransactionDestination
