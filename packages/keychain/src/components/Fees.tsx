@@ -42,9 +42,19 @@ export function Fees({
     }));
   }, [_tokens]);
 
-  const defaultToken: Token = useMemo(() => {
-    return tokens.find((t) => t.metadata.symbol === "STRK") || tokens[0];
-  }, [tokens]);
+  const defaultToken: Token | null = useMemo(() => {
+    if (!token) return null;
+
+    return {
+      metadata: { ...token, image: token?.icon },
+      balance: {
+        amount: Number(token?.balance) / Math.pow(10, token?.decimals || 0),
+        value:
+          Number(token?.price?.amount) / Math.pow(10, token?.decimals || 0),
+        change: token?.decimals || 0,
+      },
+    };
+  }, [token]);
 
   useEffect(() => {
     if (isLoading || error || !token) {
@@ -91,14 +101,16 @@ export function Fees({
       ) : (
         <LineItem name="Calculating Fees" isLoading />
       )}
-      <div>
-        <FeeTokenSelect
-          tokens={tokens}
-          defaultToken={defaultToken}
-          onSelect={() => {}}
-          disabled={true}
-        />
-      </div>
+      {defaultToken && (
+        <div>
+          <FeeTokenSelect
+            tokens={tokens}
+            defaultToken={defaultToken}
+            onSelect={() => {}}
+            disabled={true}
+          />
+        </div>
+      )}
     </div>
   );
 }
