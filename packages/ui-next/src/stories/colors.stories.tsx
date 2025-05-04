@@ -123,14 +123,53 @@ export const Secondary: Story = {
   },
 };
 
-export const Translucent: Story = {
+export const TranslucentDark: Story = {
   args: {
     children: (
       <>
-        <Palette color="bg-translucent" label="bg-translucent" />
-        <Palette color="bg-translucent-100" label="bg-translucent-100" />
-        <Palette color="bg-translucent-200" label="bg-translucent-200" />
-        <Palette color="bg-translucent-300" label="bg-translucent-300" />
+        <Palette color="bg-translucent-dark" label="bg-translucent-dark" />
+        <Palette
+          color="bg-translucent-dark-100"
+          label="bg-translucent-dark-100"
+        />
+        <Palette
+          color="bg-translucent-dark-150"
+          label="bg-translucent-dark-150"
+        />
+        <Palette
+          color="bg-translucent-dark-200"
+          label="bg-translucent-dark-200"
+        />
+        <Palette
+          color="bg-translucent-dark-300"
+          label="bg-translucent-dark-300"
+        />
+      </>
+    ),
+  },
+};
+
+export const TranslucentLight: Story = {
+  args: {
+    children: (
+      <>
+        <Palette color="bg-translucent-light" label="bg-translucent-light" />
+        <Palette
+          color="bg-translucent-light-100"
+          label="bg-translucent-light-100"
+        />
+        <Palette
+          color="bg-translucent-light-150"
+          label="bg-translucent-light-150"
+        />
+        <Palette
+          color="bg-translucent-light-200"
+          label="bg-translucent-light-200"
+        />
+        <Palette
+          color="bg-translucent-light-300"
+          label="bg-translucent-light-300"
+        />
       </>
     ),
   },

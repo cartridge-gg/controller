@@ -7,13 +7,19 @@ export const thumbnailVariants = cva(
   {
     variants: {
       variant: {
-        darkest: "bg-background-100",
-        darker: "bg-background-100",
-        dark: "bg-background-100",
-        default: "bg-background-200",
-        light: "bg-background-300",
-        lighter: "bg-background-400",
-        lightest: "bg-background-500",
+        darkest:
+          "bg-background-100 data-[transdark=true]:bg-translucent-dark-300",
+        darker:
+          "bg-background-100 data-[transdark=true]:bg-translucent-dark-200",
+        dark: "bg-background-100 data-[transdark=true]:bg-translucent-dark-150",
+        default:
+          "bg-background-200 data-[transdark=true]:bg-translucent-dark-100 data-[translight=true]:bg-translucent-light-100",
+        light:
+          "bg-background-300 data-[translight=true]:bg-translucent-light-150",
+        lighter:
+          "bg-background-400 data-[translight=true]:bg-translucent-light-200",
+        lightest:
+          "bg-background-500 data-[translight=true]:bg-translucent-light-300",
         ghost: "bg-transparent",
       },
       size: {
@@ -39,6 +45,8 @@ export interface ThumbnailProps extends VariantProps<typeof thumbnailVariants> {
   centered?: boolean;
   loading?: boolean;
   error?: boolean;
+  transdark?: boolean;
+  translight?: boolean;
   className?: string;
 }
 
@@ -49,6 +57,8 @@ export const Thumbnail = ({
   centered,
   loading,
   error,
+  transdark,
+  translight,
   variant,
   size,
   className,
@@ -58,6 +68,8 @@ export const Thumbnail = ({
       <div
         data-error={error}
         data-centered
+        data-transdark={transdark}
+        data-translight={translight}
         className={cn(thumbnailVariants({ variant, size }), className)}
       >
         <ErrorAlertIcon className="w-full h-full" variant="error" />
@@ -68,6 +80,8 @@ export const Thumbnail = ({
     return (
       <div
         data-centered
+        data-transdark={transdark}
+        data-translight={translight}
         className={cn(thumbnailVariants({ variant, size }), className)}
       >
         <SpinnerIcon className="w-full h-full animate-spin" />
@@ -78,6 +92,8 @@ export const Thumbnail = ({
     <div
       data-rounded={rounded}
       data-centered={centered}
+      data-transdark={transdark}
+      data-translight={translight}
       className={cn(thumbnailVariants({ variant, size }), className)}
     >
       {icon === undefined || null ? (
