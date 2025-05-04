@@ -2,7 +2,7 @@ import { forwardRef, memo } from "react";
 import { IconProps } from "../types";
 import { iconVariants } from "../utils";
 
-export const RabbyIcon= memo(
+export const RabbyIcon = memo(
   forwardRef<SVGSVGElement, IconProps>(
     ({ className, size, ...props }, forwardedRef) => (
       <svg

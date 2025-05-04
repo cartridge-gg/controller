@@ -308,7 +308,7 @@ export function useCreateController({
           break;
         }
         case "rabby":
-        case "metamask":
+        case "metamask": {
           setWaitingForConfirmation(true);
           const credential = (signer.metadata as Eip191Credentials).eip191?.[0];
           if (!credential) {
@@ -320,6 +320,7 @@ export function useCreateController({
             credential,
           )) as LoginResponse;
           break;
+        }
         case "walletconnect":
           setWaitingForConfirmation(true);
           loginResponse = (await loginWithWalletConnect(
