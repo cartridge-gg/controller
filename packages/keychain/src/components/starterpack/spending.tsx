@@ -27,7 +27,7 @@ export function Spending({ title, price, unit }: BalanceProps) {
         rounded
       />
     ),
-    [unit],
+    [],
   );
 
   return (
