@@ -88,7 +88,7 @@ export function ConfirmTransaction() {
       feeEstimate={ctx.feeEstimate}
       onSubmit={onSubmit}
     >
-      <LayoutContent className="gap-4">
+      <LayoutContent className="gap-4 pt-2">
         <TransactionDestination
           address={call.destinationAddress}
           wallet={WalletType.Controller}

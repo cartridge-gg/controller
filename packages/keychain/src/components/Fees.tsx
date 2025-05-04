@@ -1,15 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { cn, Spinner, Token } from "@cartridge/ui-next";
+import { useEffect, useState } from "react";
+import { cn, Spinner } from "@cartridge/ui-next";
 import { EstimateFee } from "starknet";
-
-import {
-  convertTokenAmountToUSD,
-  useFeeToken,
-  useTokens,
-} from "@/hooks/tokens";
+import { convertTokenAmountToUSD, useFeeToken } from "@/hooks/tokens";
 import { ErrorAlert } from "./ErrorAlert";
 import { ERC20 } from "./provider/tokens";
-import { FeeTokenSelect } from "./transaction/fee-token-select";
 
 interface FeesProps {
   isLoading: boolean;
@@ -27,20 +21,6 @@ export function Fees({
   const { isLoading: isPriceLoading, token, error } = useFeeToken();
   const [formattedFee, setFormattedFee] = useState<string>();
   const isLoading = isEstimating || isPriceLoading;
-  const { tokens: _tokens } = useTokens();
-
-  const tokens: Token[] = useMemo(() => {
-    return Object.values(_tokens).map((t) => ({
-      metadata: { ...t, image: t.icon },
-      balance: {
-        // Convert bigint into number
-        amount: Number(t.balance) / Math.pow(10, t.decimals),
-        // Not sure how to convert
-        value: Number(t.price?.amount) / Math.pow(10, t.decimals),
-        change: t.decimals,
-      },
-    }));
-  }, [_tokens]);
 
   useEffect(() => {
     if (isLoading || error || !token) {
@@ -87,9 +67,6 @@ export function Fees({
       ) : (
         <LineItem name="Calculating Fees" isLoading />
       )}
-      <div>
-        <FeeTokenSelect tokens={tokens} onSelect={() => {}} />
-      </div>
     </div>
   );
 }
@@ -121,7 +98,7 @@ function LineItem({
               <Union value={discount} variant="secondary" />
             </div>
           )}
-          <p className="text-sm text-foreground">{`~${amount}`}</p>
+          <p className="text-sm text-foreground">{amount}</p>
         </div>
       )}
     </div>
