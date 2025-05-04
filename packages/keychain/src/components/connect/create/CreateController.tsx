@@ -5,7 +5,6 @@ import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
 import { useFeature } from "@/hooks/features";
 import {
-  Button,
   CreateAccount,
   LayoutContainer,
   LayoutContent,
@@ -15,7 +14,13 @@ import {
 } from "@cartridge/ui-next";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AuthenticationMethod, LoginMode } from "../types";
+import { AuthButton } from "../buttons/auth-button";
+import { ChangeWallet } from "../buttons/change-wallet";
+import {
+  AuthenticationMethod,
+  getControllerSignerProvider,
+  LoginMode,
+} from "../types";
 import { ChooseSignupMethodForm } from "./ChooseSignupMethodForm";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
@@ -40,6 +45,7 @@ interface CreateControllerViewProps {
   isSlot?: boolean;
   authenticationStep: AuthenticationStep;
   setAuthenticationStep: (value: AuthenticationStep) => void;
+  waitingForConfirmation: boolean;
 }
 
 type CreateControllerFormProps = Omit<
@@ -60,6 +66,7 @@ function CreateControllerForm({
   onUsernameClear,
   onKeyDown,
   onSubmit,
+  waitingForConfirmation,
 }: CreateControllerFormProps) {
   return (
     <LayoutContainer>
@@ -80,7 +87,7 @@ function CreateControllerForm({
         style={{ scrollbarWidth: "none" }}
         onSubmit={(e) => {
           e.preventDefault();
-          onSubmit();
+          onSubmit(getControllerSignerProvider(validation.signer));
         }}
       >
         <LayoutContent className="gap-6">
@@ -116,14 +123,17 @@ function CreateControllerForm({
             />
           )}
 
-          <Button
+          <ChangeWallet validation={validation} />
+
+          <AuthButton
             type="submit"
             isLoading={isLoading}
             disabled={validation.status !== "valid"}
             data-testid="submit-button"
-          >
-            {validation.exists || !usernameField.value ? "log in" : "sign up"}
-          </Button>
+            validation={validation}
+            waitingForConfirmation={waitingForConfirmation}
+            username={usernameField.value}
+          />
         </LayoutFooter>
       </form>
     </LayoutContainer>
@@ -144,6 +154,7 @@ export function CreateControllerView({
   onKeyDown,
   authenticationStep,
   setAuthenticationStep,
+  waitingForConfirmation,
 }: CreateControllerViewProps) {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -169,6 +180,7 @@ export function CreateControllerView({
         onUsernameClear={onUsernameClear}
         onSubmit={onSubmit}
         onKeyDown={onKeyDown}
+        waitingForConfirmation={waitingForConfirmation}
       />
       <ChooseSignupMethodForm
         isSlot={isSlot}
@@ -230,6 +242,7 @@ export function CreateController({
     authenticationStep,
     setAuthenticationStep,
     overlay,
+    waitingForConfirmation,
   } = useCreateController({
     isSlot,
     loginMode,
@@ -338,6 +351,7 @@ export function CreateController({
         onKeyDown={handleKeyDown}
         authenticationStep={authenticationStep}
         setAuthenticationStep={setAuthenticationStep}
+        waitingForConfirmation={waitingForConfirmation}
       />
       {overlay}
     </>

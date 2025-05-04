@@ -12,7 +12,12 @@ export class WalletConnectWallet implements WalletAdapter {
   readonly platform: ExternalPlatform = "ethereum";
   private account: string | undefined = undefined;
 
-  constructor(private provider: Provider) {}
+  constructor(
+    private provider: Provider,
+    account?: string,
+  ) {
+    this.account = account;
+  }
 
   isAvailable(): boolean {
     return !!this.provider;

@@ -1,14 +1,16 @@
-import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import {
   ExternalWalletResponse,
   ExternalWalletType,
 } from "@cartridge/controller";
-import { AccountQuery } from "@cartridge/utils/api/cartridge";
+import {
+  ControllerQuery,
+  Eip191Credential,
+} from "@cartridge/utils/api/cartridge";
 import { useCallback } from "react";
 import { AuthenticationMethod } from "../../types";
-import { createController, SignupResponse } from "../useCreateController";
+import { SignupResponse } from "../useCreateController";
 
 export const useExternalWalletAuthentication = () => {
   const { origin, chainId, rpcUrl, setController } = useConnection();
@@ -33,44 +35,38 @@ export const useExternalWalletAuthentication = () => {
   );
 
   const login = useCallback(
-    async (account: AccountQuery["account"]) => {
+    async (
+      controller: ControllerQuery["controller"],
+      credential: Eip191Credential | undefined,
+    ) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
-      if (!account) throw new Error("No account found");
+      if (!controller) throw new Error("No controller found");
+      if (!credential) throw new Error("No EIP191 credential provided");
 
-      const { username, credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
+      const address = credential?.ethAddress;
 
-      const controllerNode = controllers?.edges?.[0]?.node;
-
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
-
-      if (!controllerNode || !publicKey) {
-        return;
+      if (!address) {
+        throw new Error(
+          "Could not extract ethAddress from provided EIP191 credential",
+        );
       }
 
-      const controller = await createController(
-        origin,
-        chainId,
-        rpcUrl,
-        username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
-        {
-          signer: {
-            webauthn: {
-              rpId: import.meta.env.VITE_RP_ID!,
-              credentialId,
-              publicKey,
-            },
-          },
-        },
+      const connectedWallet = await connectWallet(
+        credential.provider as ExternalWalletType,
       );
 
-      await controller.login(now() + DEFAULT_SESSION_DURATION);
+      if (!connectedWallet || !connectedWallet.account)
+        throw new Error("No wallet found for address: " + address);
 
-      window.controller = controller;
-      setController(controller);
+      if (connectedWallet.account !== address) {
+        // TODO(tedison) this might be the place where we want to
+        // set the change wallet message instead of throwing an error
+        throw new Error("Switch to the correct wallet");
+      }
+
+      return {
+        signer: walletToSigner(connectedWallet),
+      };
     },
     [chainId, rpcUrl, origin, setController],
   );

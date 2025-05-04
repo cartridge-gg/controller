@@ -64,6 +64,15 @@ export const cartridgeTWPreset: Partial<Config> = {
         100: "var(--constructive-100)",
         foreground: "var(--spacer-100)",
       },
+      "wallet-theme": {
+        DEFAULT: "var(--wallet-theme-100)",
+        100: "var(--wallet-theme-100)",
+        200: "var(--wallet-theme-200)",
+        300: "var(--wallet-theme-300)",
+        400: "var(--wallet-theme-400)",
+        500: "var(--wallet-theme-500)",
+        600: "var(--wallet-theme-600)",
+      },
       // TODO: Should not be used
       border: "var(--background-100)",
       input: "var(--background-300)",

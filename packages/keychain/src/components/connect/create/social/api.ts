@@ -10,6 +10,26 @@ export const fetchApi = fetchApiCreator(
   },
 );
 
+export const getTurnkeySuborg = async (oidcToken: string) => {
+  const getSuborgsResponse = await fetchApi<GetSuborgsResponse>("suborgs", {
+    filterType: "OIDC_TOKEN",
+    filterValue: oidcToken,
+  });
+  if (!getSuborgsResponse) {
+    throw new Error("No suborgs response found");
+  }
+
+  if (getSuborgsResponse.organizationIds.length === 0) {
+    throw new Error("No suborgs found");
+  }
+
+  if (getSuborgsResponse.organizationIds.length > 1) {
+    throw new Error("Multiple suborgs found");
+  }
+
+  return getSuborgsResponse.organizationIds[0];
+};
+
 export const getOrCreateTurnkeySuborg = async (
   oidcToken: string,
   username: string,

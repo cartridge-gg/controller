@@ -12,6 +12,7 @@ export class MetaMaskWallet implements WalletAdapter {
   readonly platform: ExternalPlatform = "ethereum";
   private MMSDK: MetaMaskSDK;
   private account: string | undefined = undefined;
+  private connectedAccounts: string[] = [];
 
   constructor() {
     this.MMSDK = new MetaMaskSDK({
@@ -19,6 +20,19 @@ export class MetaMaskWallet implements WalletAdapter {
         name: "Cartridge Controller",
         url: window.location.href,
       },
+    });
+    this.MMSDK.sdkInitPromise?.then(() => {
+      this.MMSDK.getProvider()
+        ?.request({
+          method: "eth_accounts",
+        })
+        .then((accounts: any) => {
+          if (accounts && accounts.length > 0) {
+            console.log(accounts);
+            this.account = accounts[0];
+            this.connectedAccounts = accounts;
+          }
+        });
     });
   }
 
@@ -36,6 +50,7 @@ export class MetaMaskWallet implements WalletAdapter {
       chainId: available ? window.ethereum?.chainId : undefined,
       name: "MetaMask",
       platform: this.platform,
+      connectedAccounts: this.connectedAccounts,
     };
   }
 
@@ -52,6 +67,7 @@ export class MetaMaskWallet implements WalletAdapter {
       const accounts = await this.MMSDK.connect();
       if (accounts && accounts.length > 0) {
         this.account = accounts[0];
+        this.connectedAccounts = accounts;
         return { success: true, wallet: this.type, account: this.account };
       }
 

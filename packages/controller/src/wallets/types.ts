@@ -8,6 +8,7 @@ export interface ExternalWallet {
   chainId?: string;
   name?: string;
   platform?: ExternalPlatform;
+  connectedAccounts?: string[];
 }
 
 export interface ExternalWalletResponse<T = unknown> {

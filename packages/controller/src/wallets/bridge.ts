@@ -20,10 +20,14 @@ export class WalletBridge {
 
   constructor() {
     this.walletAdapters = new Map<ExternalWalletType, WalletAdapter>();
-    this.walletAdapters.set("metamask", new MetaMaskWallet());
-    this.walletAdapters.set("phantom", new PhantomWallet());
-    this.walletAdapters.set("argent", new ArgentWallet());
-    this.walletAdapters.set("rabby", new RabbyWallet());
+    const metamask = new MetaMaskWallet();
+    metamask.isAvailable() && this.walletAdapters.set("metamask", metamask);
+    const phantom = new PhantomWallet();
+    phantom.isAvailable() && this.walletAdapters.set("phantom", phantom);
+    const argent = new ArgentWallet();
+    argent.isAvailable() && this.walletAdapters.set("argent", argent);
+    const rabby = new RabbyWallet();
+    rabby.isAvailable() && this.walletAdapters.set("rabby", rabby);
 
     if (typeof window !== "undefined") {
       window.wallet_bridge = this;

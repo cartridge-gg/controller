@@ -15,19 +15,19 @@ export class RabbyWallet implements WalletAdapter {
   private account: string | undefined = undefined;
   private store = createStore();
   private provider: EIP6963ProviderDetail | undefined;
+  private connectedAccounts: string[] = [];
 
   constructor() {
     this.provider = this.store
       .getProviders()
       .find((provider) => provider.info.rdns === RABBY_RDNS);
-    this.store.subscribe((providerDetails) => {
-      const rabbyProvider = providerDetails.find(
-        (provider) => provider.info.rdns === RABBY_RDNS,
-      );
-      if (rabbyProvider) {
-        this.provider = rabbyProvider;
-      }
-    });
+    this.provider?.provider
+      .request({
+        method: "eth_accounts",
+      })
+      .then((accounts) => {
+        this.connectedAccounts = accounts;
+      });
   }
 
   isAvailable(): boolean {
@@ -44,6 +44,7 @@ export class RabbyWallet implements WalletAdapter {
       chainId: available ? window.ethereum?.chainId : undefined,
       name: "Rabby",
       platform: this.platform,
+      connectedAccounts: this.connectedAccounts,
     };
   }
 
@@ -62,6 +63,7 @@ export class RabbyWallet implements WalletAdapter {
       });
       if (accounts && accounts.length > 0) {
         this.account = accounts[0];
+        this.connectedAccounts = accounts;
         return { success: true, wallet: this.type, account: this.account };
       }
 

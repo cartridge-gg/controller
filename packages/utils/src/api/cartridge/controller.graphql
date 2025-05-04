@@ -25,6 +25,7 @@ query Controller($username: String!, $chainId: String!) {
         ... on Eip191Credentials {
           __typename
           eip191 {
+            provider
             ethAddress
           }
         }
@@ -38,3 +39,9 @@ query Controller($username: String!, $chainId: String!) {
     }
   }
 }
+
+union CredentialMetadata =
+    WebauthnCredentials
+  | StarknetCredentials
+  | Eip191Credentials
+  | SIWSCredentials
