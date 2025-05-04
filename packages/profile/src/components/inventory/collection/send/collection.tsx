@@ -25,7 +25,6 @@ import { useCollection } from "#hooks/collection";
 import { Sending } from "./collection-sending";
 import { useEntrypoints } from "#hooks/entrypoints";
 import placeholder from "/public/placeholder.svg";
-import { formatName } from "../../helper";
 import { SendHeader } from "./header";
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
@@ -149,8 +148,7 @@ export function SendCollection() {
   const title = useMemo(() => {
     if (!collection || !assets || assets.length === 0) return "";
     if (assets.length > 1) return `${assets.length} ${collection.name}(s)`;
-    const asset = assets[0];
-    return formatName(asset.name, asset.tokenId);
+    return assets[0].name;
   }, [collection, assets]);
 
   const image = useMemo(() => {
@@ -195,25 +193,26 @@ export function SendCollection() {
               validated={recipientValidated}
               setValidated={setRecipientValidated}
             />
-            <Button
-              variant="secondary"
-              disabled={disabled}
-              type="button"
-              className="flex-1 lg:w-fit"
-              isLoading={loading}
-              onClick={handleBack}
-            >
-              Cancel
-            </Button>
-            <Button
-              disabled={disabled}
-              type="submit"
-              className="flex-[2] lg:w-full"
-              isLoading={loading}
-              onClick={() => onSubmit(to)}
-            >
-              Review
-            </Button>
+            <div className="w-full flex items-center gap-3">
+              <Button
+                variant="secondary"
+                type="button"
+                className="w-1/3"
+                isLoading={loading}
+                onClick={() => navigate(`../../..?${searchParams.toString()}`)}
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={disabled}
+                type="submit"
+                className="w-2/3"
+                isLoading={loading}
+                onClick={() => onSubmit(to)}
+              >
+                Review
+              </Button>
+            </div>
           </LayoutFooter>
         </>
       )}

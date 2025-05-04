@@ -31,7 +31,6 @@ import { useCallback, useMemo, useState } from "react";
 import { useCollectible } from "#hooks/collectible";
 import { CollectionHeader } from "./header";
 import placeholder from "/public/placeholder.svg";
-import { formatName } from "../helper";
 import { VoyagerUrl } from "@cartridge/utils";
 import { CardProps, useTraceabilities } from "#hooks/traceabilities.js";
 import { useArcade } from "#hooks/arcade.js";
@@ -88,7 +87,7 @@ export function CollectibleAsset() {
 
   const title = useMemo(() => {
     if (!asset) return "";
-    return formatName(asset.name, asset.tokenId);
+    return asset.name;
   }, [asset]);
 
   const properties: Property[] = useMemo(() => {
@@ -237,8 +236,8 @@ export function CollectibleAsset() {
               className="flex items-center justify-center gap-x-4 w-full"
               to={`send?${searchParams.toString()}`}
             >
-              <Button variant="secondary" className="h-10 w-full space-x-2">
-                <PaperPlaneIcon variant="solid" />
+              <Button className="h-10 w-full gap-2">
+                <PaperPlaneIcon variant="solid" size="sm" />
                 <span className="font-semibold text-base/5">Send</span>
               </Button>
             </Link>

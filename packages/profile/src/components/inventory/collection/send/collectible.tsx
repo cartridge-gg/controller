@@ -153,8 +153,7 @@ export function SendCollectible() {
   const title = useMemo(() => {
     if (!collectible || !assets || assets.length === 0) return "";
     if (assets.length > 1) return `${assets.length} ${collectible.name}(s)`;
-    const asset = assets[0];
-    return asset.name;
+    return assets[0].name;
   }, [collectible, assets]);
 
   const image = useMemo(() => {
@@ -214,18 +213,17 @@ export function SendCollectible() {
             <div className="w-full flex items-center gap-3">
               <Button
                 variant="secondary"
-                disabled={disabled}
                 type="button"
-                className="flex-1 lg:w-fit"
+                className="w-1/3"
                 isLoading={loading}
-                onClick={handleBack}
+                onClick={() => navigate(`../../..?${searchParams.toString()}`)}
               >
                 Cancel
               </Button>
               <Button
                 disabled={disabled}
                 type="submit"
-                className="flex-[2] lg:w-fit"
+                className="w-2/3"
                 isLoading={loading}
                 onClick={() => onSubmit(to)}
               >
