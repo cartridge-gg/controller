@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SendCollection } from "./index";
+import { SendCollection } from "./collection";
 
 const meta = {
   component: SendCollection,

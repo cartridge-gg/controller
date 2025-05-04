@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Collectible } from "./collectible";
+import { CollectionAsset } from "./collection-asset";
 
 const meta = {
-  component: Collectible,
-} satisfies Meta<typeof Collectible>;
+  component: CollectionAsset,
+} satisfies Meta<typeof CollectionAsset>;
 
 export default meta;
 

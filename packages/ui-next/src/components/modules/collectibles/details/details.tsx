@@ -1,7 +1,12 @@
-import { ActivityDetail, cn, ExternalIcon } from "@/index";
+import {
+  AchievementPlayerAvatar,
+  ActivityDetail,
+  cn,
+  ExternalIcon,
+} from "@/index";
 import { formatAddress, isPublicChain, VoyagerUrl } from "@cartridge/utils";
 import { cva, VariantProps } from "class-variance-authority";
-import { addAddressPadding, constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { ActivityDetails } from "../../activities/details";
 import { Hex, hexToNumber } from "viem";
 
@@ -12,6 +17,7 @@ export interface CollectibleDetailsProps
   tokenId: string;
   standard: string;
   chainId: constants.StarknetChainId;
+  owner?: string;
 }
 
 const collectibleDetailsVariants = cva("", {
@@ -30,6 +36,7 @@ export function CollectibleDetails({
   tokenId,
   standard,
   chainId,
+  owner,
   variant,
   className,
   ...props
@@ -39,6 +46,14 @@ export function CollectibleDetails({
       {...props}
       className={cn(collectibleDetailsVariants({ variant }), className)}
     >
+      {owner && (
+        <ActivityDetail label="Owner">
+          <div className="flex gap-1.5">
+            <AchievementPlayerAvatar username={owner} size="sm" />
+            <p className="text-sm font-medium">{owner}</p>
+          </div>
+        </ActivityDetail>
+      )}
       <ActivityDetail label="Contract Address">
         {isPublicChain(chainId) ? (
           <a
@@ -47,13 +62,15 @@ export function CollectibleDetails({
             className="flex items-center gap-x-1.5 text-sm"
             target="_blank"
           >
-            <div className="font-medium">
-              {formatAddress(addAddressPadding(address), { size: "xs" })}
+            <div className="font-medium text-sm">
+              {formatAddress(getChecksumAddress(address), { size: "xs" })}
             </div>
             <ExternalIcon size="sm" />
           </a>
         ) : (
-          <div>{formatAddress(addAddressPadding(address), { size: "sm" })}</div>
+          <div className="text-sm">
+            {formatAddress(getChecksumAddress(address), { size: "xs" })}
+          </div>
         )}
       </ActivityDetail>
       <ActivityDetail label="Token ID">

@@ -48,6 +48,7 @@ export * from "./stack-oval";
 export * from "./stack-shape";
 export * from "./sun";
 export * from "./swords";
+export * from "./tag";
 export * from "./terminal";
 export * from "./track";
 export * from "./trophy";

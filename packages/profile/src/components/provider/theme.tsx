@@ -17,7 +17,7 @@ export type ThemeProviderProps = {
 
 export function ThemeProvider({
   children,
-  defaultScheme = "system",
+  defaultScheme = "dark",
   storageKey = "vite-ui-colorScheme",
   ...props
 }: ThemeProviderProps) {

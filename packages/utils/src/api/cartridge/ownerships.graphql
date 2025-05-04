@@ -1,0 +1,20 @@
+query Ownerships($projects: [OwnershipProject!]!) {
+  ownerships(projects: $projects) {
+    items {
+      ownerships {
+        accountAddress
+        contractAddress
+        tokenId
+        balance
+      }
+      meta {
+        project
+        tokenIds
+        contractAddresses
+        limit
+        error
+        count
+      }
+    }
+  }
+}

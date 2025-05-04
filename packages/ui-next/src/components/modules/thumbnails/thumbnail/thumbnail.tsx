@@ -23,12 +23,12 @@ export const thumbnailVariants = cva(
         ghost: "bg-transparent",
       },
       size: {
-        xs: "w-5 h-5 p-0.5 data-[centered=true]:p-[2px]",
-        sm: "w-6 h-6 p-0.5 data-[centered=true]:p-[3px]",
-        md: "w-8 h-8 p-0.5 data-[centered=true]:p-[4px]",
-        lg: "w-10 h-10 p-[3px] data-[centered=true]:p-[5px]",
-        xl: "w-12 h-12 p-[3px] data-[centered=true]:p-1.5",
-        xxl: "w-20 h-20 p-1 data-[centered=true]:p-1.5",
+        xs: "w-5 h-5 min-w-5 min-h-5 p-0.5 data-[centered=true]:p-[2px]",
+        sm: "w-6 h-6 min-w-6 min-h-6 p-0.5 data-[centered=true]:p-[3px]",
+        md: "w-8 h-8 min-w-8 min-h-8 p-0.5 data-[centered=true]:p-[4px]",
+        lg: "w-10 h-10 min-w-10 min-h-10 p-[3px] data-[centered=true]:p-[5px]",
+        xl: "w-12 h-12 min-w-12 min-h-12 p-[3px] data-[centered=true]:p-1.5",
+        xxl: "w-20 h-20 min-w-20 min-h-20 p-1 data-[centered=true]:p-1.5",
       },
     },
     defaultVariants: {

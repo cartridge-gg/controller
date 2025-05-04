@@ -6,7 +6,6 @@ import {
   CollectiblePill,
 } from "@cartridge/ui-next";
 import { Asset } from "#hooks/collection";
-import { formatName } from "../helper";
 
 import placeholder from "/public/placeholder.svg";
 
@@ -33,7 +32,7 @@ export function Sending({
         <CollectibleAssetCard
           key={asset.tokenId}
           image={asset.imageUrl || placeholder}
-          title={formatName(asset.name, asset.tokenId)}
+          title={asset.name}
           description={description}
         />
       ))}
