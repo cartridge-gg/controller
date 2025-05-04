@@ -49,13 +49,13 @@ export const ActivityCard = ({
       {...props}
     >
       {Logo}
-      <div className="flex flex-col gap-0.5 items-stretch grow">
+      <div className="flex flex-col gap-0.5 items-stretch grow overflow-hidden">
         <div
           data-error={error}
-          className="flex items-center gap-1 justify-between text-sm font-medium capitalize data-[error]:text-destructive-100"
+          className="flex items-center gap-6 justify-between text-sm font-medium capitalize data-[error]:text-destructive-100"
         >
           <p>{title}</p>
-          {!!topic && <p>{topic}</p>}
+          {!!topic && <p className="truncate">{topic}</p>}
         </div>
         <div
           data-error={error}

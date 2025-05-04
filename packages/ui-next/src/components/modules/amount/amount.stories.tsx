@@ -53,3 +53,12 @@ export const ZeroDecimals: Story = {
     decimals: 0,
   },
 };
+
+export const IncrementButtons: Story = {
+  args: {
+    onPlus: fn(),
+    onMinus: fn(),
+    min: 0,
+    max: 100,
+  },
+};

@@ -6,6 +6,7 @@ import {
 } from "@cartridge/utils/api/cartridge";
 import { useConnection } from "./context";
 
+const TYPE = "ERC-721";
 const LIMIT = 1000;
 
 export type Collection = {
@@ -54,11 +55,20 @@ export function useCollection({
       queryKey: ["collection"],
       enabled: !!project && !!address,
       onSuccess: ({ collection }) => {
+        const assets = collection.assets;
+        const first = assets.length > 0 ? assets[0] : undefined;
+        let metadata: { image?: string } = {};
+        try {
+          metadata = JSON.parse(!first?.metadata ? "{}" : first.metadata);
+        } catch (error) {
+          console.warn(error, { data: first?.metadata });
+        }
+        const name = collection.meta.name;
         const newCollection: Collection = {
           address: collection.meta.contractAddress,
-          name: collection.meta.name,
-          type: "ERC-721",
-          imageUrl: collection.meta.imagePath,
+          name: name ? name : "---",
+          type: TYPE,
+          imageUrl: metadata?.image ?? collection.meta.imagePath,
           totalCount: collection.meta.assetCount,
         };
 
@@ -71,12 +81,24 @@ export function useCollection({
               a.tokenId,
             );
           }
+          let attributes = [];
+          try {
+            attributes = JSON.parse(!a.attributes ? "[]" : a.attributes);
+          } catch (error) {
+            console.warn(error, { data: attributes });
+          }
+          let metadata: { image?: string } = {};
+          try {
+            metadata = JSON.parse(!a.metadata ? "{}" : a.metadata);
+          } catch (error) {
+            console.warn(error, { data: a.metadata });
+          }
           const asset: Asset = {
             tokenId: a.tokenId,
             name: a.name,
             description: a.description ?? "",
-            imageUrl: imageUrl,
-            attributes: JSON.parse(a.attributes ?? "{}"),
+            imageUrl: metadata?.image ?? imageUrl,
+            attributes: attributes,
           };
           newAssets[`${newCollection.address}-${a.tokenId}`] = asset;
         });
@@ -136,12 +158,19 @@ export function useCollections(): UseCollectionsResponse {
           const imagePath = e.node.meta.imagePath;
           const name = e.node.meta.name;
           const count = e.node.meta.assetCount;
+          const first = e.node.assets.length > 0 ? e.node.assets[0] : undefined;
+          let metadata: { image?: string } = {};
+          try {
+            metadata = JSON.parse(!first?.metadata ? "{}" : first?.metadata);
+          } catch (error) {
+            console.warn(error, { data: first?.metadata });
+          }
           newCollections[`${contractAddress}`] = {
             address: contractAddress,
-            imageUrl: imagePath,
-            name,
+            imageUrl: metadata?.image ?? imagePath,
+            name: name ? name : "---",
             totalCount: count,
-            type: "ERC-721",
+            type: TYPE,
           };
         });
         if (collections?.edges.length === LIMIT) {

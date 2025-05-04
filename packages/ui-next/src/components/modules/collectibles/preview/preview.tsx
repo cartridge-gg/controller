@@ -1,6 +1,7 @@
 import { PLACEHOLDER } from "@/assets";
 import { cn } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
+import { useMemo } from "react";
 
 export interface CollectiblePreviewProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -19,7 +20,7 @@ const collectiblePreviewVariants = cva(
       size: {
         sm: "p-2 h-[128px]",
         md: "p-2 h-[128px]",
-        lg: "p-5 h-[240px] rounded-lg",
+        lg: "p-2 h-[200px] rounded-lg",
       },
     },
     defaultVariants: {
@@ -37,23 +38,36 @@ export const CollectiblePreview = ({
   className,
   ...props
 }: CollectiblePreviewProps) => {
+  const uri = useMemo(() => {
+    if (!image) return PLACEHOLDER;
+    return image;
+  }, [image]);
+
   return (
     <div
       className={cn(collectiblePreviewVariants({ variant, size }), className)}
       {...props}
     >
-      <div className="absolute grow inset-0">
+      <div
+        className="absolute grow inset-0 blur-[8px] transition-opacity duration-150"
+        style={{
+          opacity: hover ? 1 : 0.75,
+        }}
+      >
+        <img
+          src={uri}
+          className={cn("object-cover absolute inset-0 w-full h-full")}
+        />
         <div
-          className="bg-center bg-cover blur-[8px] h-full w-full transition-all duration-150"
+          className="bg-center bg-cover h-full w-full relative"
           style={{
-            backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.64), rgba(0, 0, 0, 0.64)), url(${image}), url(${PLACEHOLDER})`,
-            opacity: hover ? 1 : 0.75,
+            backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.64), rgba(0, 0, 0, 0.64))`,
           }}
         />
       </div>
       <img
         data-hover={hover}
-        className="object-contain max-h-full max-w-full z-10 transition duration-150 ease-in-out data-[hover=true]:scale-[1.02]"
+        className="object-contain max-h-full max-w-full relative transition duration-150 ease-in-out data-[hover=true]:scale-[1.02]"
         draggable={false}
         src={image}
         onError={(e) => {
