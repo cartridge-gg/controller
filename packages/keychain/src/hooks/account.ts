@@ -5,6 +5,7 @@ import {
   FinalizeRegistrationDocument,
   FinalizeLoginMutation,
   FinalizeRegistrationMutation,
+  useAccountNameQuery,
 } from "@cartridge/utils/api/cartridge";
 import { Buffer } from "buffer";
 
@@ -237,4 +238,12 @@ export function useAccount() {
       username: controller.username(),
     };
   }, [controller]);
+}
+
+export function useUsername(address: string) {
+  const { data } = useAccountNameQuery({
+    address,
+  });
+
+  return { username: data?.accounts?.edges?.[0]?.node?.username || "" };
 }

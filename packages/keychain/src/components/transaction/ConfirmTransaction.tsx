@@ -8,6 +8,8 @@ import { useMemo } from "react";
 import { TransactionDestination } from "./destination";
 import { TransactionSending } from "./sending";
 import { useToken } from "@/hooks/tokens";
+import { useUsername } from "@/hooks/account";
+import { normalizeAddress } from "@/utils/address";
 
 export function ConfirmTransaction() {
   const { controller, context, setContext } = useConnection();
@@ -36,7 +38,8 @@ export function ConfirmTransaction() {
       const tokenAddress = _call.contractAddress;
 
       if (Array.isArray(_call.calldata)) {
-        const destinationAddress = String(_call.calldata[0]);
+        const destinationAddress = normalizeAddress(String(_call.calldata[0]));
+
         const _amount = _call.calldata[1] as Uint256;
 
         const amount = uint256.uint256ToBN(_amount);
@@ -69,6 +72,11 @@ export function ConfirmTransaction() {
     [token],
   );
 
+  const { username: destinationUsername } = useUsername(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+    call?.destinationAddress!,
+  );
+
   const amount = useMemo(() => {
     // convert "0x38d7ea4c68000" into number
     const result = Number(call?.amount) / Math.pow(10, token.decimals);
@@ -91,6 +99,7 @@ export function ConfirmTransaction() {
     >
       <LayoutContent className="gap-4 pt-1">
         <TransactionDestination
+          name={destinationUsername}
           address={call.destinationAddress}
           wallet={WalletType.Controller}
         />
