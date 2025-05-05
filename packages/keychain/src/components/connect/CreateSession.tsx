@@ -23,7 +23,7 @@ import {
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish } from "starknet";
-import { OcclusionDetector } from "../OcclusionDetector";
+// import { OcclusionDetector } from "../OcclusionDetector";
 import { useUpgrade } from "../provider/upgrade";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
@@ -109,7 +109,7 @@ const CreateSessionLayout = ({
 
   return (
     <>
-      <OcclusionDetector />
+      {/* <OcclusionDetector /> */}
       <LayoutContainer>
         <LayoutHeader
           className="px-6 pt-6 pb-0"
