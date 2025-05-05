@@ -36,6 +36,7 @@ export function TransactionDestination({ address, name }: Props) {
         title={name || formatAddress(address, { first: 4, last: 4 })}
         subTitle={name ? formatAddress(address, { first: 4, last: 4 }) : ""}
         variant={"default"}
+        titleClassName="normal-case"
         className={cn(
           "rounded-none gap-3 hover:bg-background-200 hover:cursor-default",
         )}

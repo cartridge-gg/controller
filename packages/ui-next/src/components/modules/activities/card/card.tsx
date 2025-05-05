@@ -27,6 +27,7 @@ export interface ActivityCardProps
   error?: boolean;
   loading?: boolean;
   className?: string;
+  titleClassName?: string;
 }
 
 export const ActivityCard = ({
@@ -39,6 +40,7 @@ export const ActivityCard = ({
   loading,
   variant,
   className,
+  titleClassName,
   ...props
 }: ActivityCardProps) => {
   return (
@@ -54,7 +56,7 @@ export const ActivityCard = ({
           data-error={error}
           className="flex items-center gap-6 justify-between text-sm font-medium capitalize data-[error]:text-destructive-100"
         >
-          <p>{title}</p>
+          <p className={cn(titleClassName)}>{title}</p>
           {!!topic && <p className="truncate">{topic}</p>}
         </div>
         <div
