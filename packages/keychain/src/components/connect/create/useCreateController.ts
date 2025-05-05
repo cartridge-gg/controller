@@ -6,10 +6,12 @@ import { PopupCenter } from "@/utils/url";
 import { computeAccountAddress, Owner, Signer } from "@cartridge/account-wasm";
 import {
   AccountQuery,
+  Eip191Credentials,
   SignerInput,
   SignerType,
   useAccountQuery,
   useRegisterMutation,
+  WebauthnCredentials,
 } from "@cartridge/utils/api/cartridge";
 import { useCallback, useState } from "react";
 import { shortString } from "starknet";
@@ -26,6 +28,10 @@ export interface SignupResponse {
   type: AuthenticationMethod;
 }
 
+export interface LoginResponse {
+  signer: Signer;
+}
+
 export function useCreateController({
   isSlot,
   loginMode = LoginMode.Webauthn,
@@ -33,6 +39,7 @@ export function useCreateController({
   isSlot?: boolean;
   loginMode?: LoginMode;
 }) {
+  const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
@@ -47,9 +54,9 @@ export function useCreateController({
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
     useSocialAuthentication();
-  const { signup: signupWithExternalWallet } =
+  const { signup: signupWithExternalWallet, login: loginWithExternalWallet } =
     useExternalWalletAuthentication();
-  const { signup: signupWithWalletConnect } =
+  const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication(setOverlay);
 
   const handleAccountQuerySuccess = useCallback(
@@ -145,8 +152,10 @@ export function useCreateController({
             credential: JSON.stringify({}),
           };
           return;
-        case "social":
-          signupResponse = await signupWithSocial(username);
+        case "discord":
+          signupResponse = (await signupWithSocial({
+            username,
+          })) as SignupResponse;
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
@@ -218,9 +227,8 @@ export function useCreateController({
           authorization: result.authorization ?? [],
         },
       });
-      console.log("registerRet", registerRet);
 
-      if (registerRet.register.name) {
+      if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
       }
@@ -233,6 +241,7 @@ export function useCreateController({
       policies,
       isSlot,
       createController,
+      setController,
       doPopupFlow,
       signupWithExternalWallet,
       signupWithSocial,
@@ -242,7 +251,7 @@ export function useCreateController({
   );
 
   const handleLogin = useCallback(
-    async (username: string) => {
+    async (username: string, authenticationMethod: AuthenticationMethod) => {
       if (!chainId) {
         throw new Error("No chainId");
       }
@@ -268,9 +277,11 @@ export function useCreateController({
         return; // Or handle appropriately
       }
 
-      switch (signer.metadata.__typename) {
-        case "WebauthnCredentials": {
-          const webauthnCredential = signer.metadata.webauthn?.[0];
+      let loginResponse: LoginResponse | undefined;
+      switch (authenticationMethod) {
+        case "webauthn": {
+          const webauthnCredential = (signer.metadata as WebauthnCredentials)
+            .webauthn?.[0];
           if (!webauthnCredential) {
             throw new Error("WebAuthn credential not found for signer.");
           }
@@ -281,41 +292,91 @@ export function useCreateController({
             loginMode,
             !!isSlot,
           );
-          break;
+          return;
         }
-        case "Eip191Credentials": {
-          const eip191Credential = signer.metadata.eip191?.[0];
+        case "discord": {
+          setWaitingForConfirmation(true);
+          const eip191Credential = (signer.metadata as Eip191Credentials)
+            .eip191?.[0];
           if (!eip191Credential) {
             throw new Error("EIP191 credential not found for signer.");
           }
 
-          await loginWithSocial(controller, eip191Credential);
+          loginResponse = (await loginWithSocial({
+            address: eip191Credential.ethAddress,
+          })) as LoginResponse;
           break;
         }
-        case "SIWSCredentials": // Assuming SIWS also uses social login flow
-        case "StarknetCredentials": // Assuming Starknet also uses social login flow for now, adjust if needed
-          throw new Error("Login method not supported yet.");
+        case "rabby":
+        case "metamask": {
+          setWaitingForConfirmation(true);
+          const credential = (signer.metadata as Eip191Credentials).eip191?.[0];
+          if (!credential) {
+            throw new Error("EIP191 credential not found for signer.");
+          }
+
+          loginResponse = (await loginWithExternalWallet(
+            controller,
+            credential,
+          )) as LoginResponse;
+          break;
+        }
+        case "walletconnect":
+          setWaitingForConfirmation(true);
+          loginResponse = (await loginWithWalletConnect(
+            controller,
+          )) as LoginResponse;
+          break;
+        case "phantom":
+        case "argent":
         default:
           throw new Error("Unknown login method");
       }
+
+      const controllerObject = await createController(
+        origin,
+        chainId,
+        rpcUrl,
+        username,
+        controller.constructorCalldata[0],
+        controller.address,
+        {
+          signer: loginResponse?.signer,
+        },
+      );
+
+      await controllerObject.login(now() + DEFAULT_SESSION_DURATION);
+
+      window.controller = controllerObject;
+      setController(controllerObject);
     },
-    [isSlot, loginWithWebauthn, loginWithSocial, loginMode, chainId],
+    [
+      isSlot,
+      loginWithWebauthn,
+      loginWithSocial,
+      loginWithWalletConnect,
+      loginWithExternalWallet,
+      loginMode,
+      chainId,
+      setWaitingForConfirmation,
+      setController,
+    ],
   );
 
   const handleSubmit = useCallback(
     async (
       username: string,
       exists: boolean,
-      authenticationMode?: AuthenticationMethod,
+      authenticationMethod?: AuthenticationMethod,
     ) => {
       setError(undefined);
       setIsLoading(true);
 
       try {
         if (exists) {
-          await handleLogin(username);
+          await handleLogin(username, authenticationMethod ?? "webauthn");
         } else {
-          await handleSignup(username, authenticationMode ?? "webauthn");
+          await handleSignup(username, authenticationMethod ?? "webauthn");
         }
       } catch (e: unknown) {
         if (
@@ -329,6 +390,10 @@ export function useCreateController({
 
         console.error(e);
         setError(e as Error);
+      } finally {
+        if (exists) {
+          setWaitingForConfirmation(false);
+        }
       }
       setIsLoading(false);
     },
@@ -337,6 +402,8 @@ export function useCreateController({
 
   return {
     isLoading,
+    waitingForConfirmation,
+    setWaitingForConfirmation,
     authenticationStep,
     setAuthenticationStep,
     error,

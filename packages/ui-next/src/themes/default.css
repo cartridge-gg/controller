@@ -30,6 +30,13 @@
 
     --primary-foreground-100: #0f1410;
 
+    --wallet-theme-100: #ab9ff2;
+    --wallet-theme-200: #7483f7;
+    --wallet-theme-300: #e88a39;
+    --wallet-theme-400: #ff875b;
+    --wallet-theme-500: #7289da;
+    --wallet-theme-600: #3b99fc;
+
     --secondary-100: #a7e7a7;
 
     --destructive-100: #e66666;

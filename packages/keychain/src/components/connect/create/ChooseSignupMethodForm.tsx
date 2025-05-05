@@ -1,8 +1,8 @@
 import { useWallets } from "@/hooks/wallets";
-import { OptionButton, SheetContent, SheetTitle } from "@cartridge/ui-next";
+import { SheetContent, SheetTitle } from "@cartridge/ui-next";
 import { useEffect, useMemo, useState } from "react";
+import { SignupButton } from "../buttons/signup-button";
 import { AuthenticationMethod } from "../types";
-import { AuthFactory } from "./auth-option-factory";
 
 interface ChooseSignupMethodProps {
   isSlot?: boolean;
@@ -26,30 +26,24 @@ export function ChooseSignupMethodForm({
     }
   }, [isLoading]);
 
-  // Function to handle interaction outside the sheet
   const handleInteractOutside = (
     event: CustomEvent<{ originalEvent: Event }>,
   ) => {
-    // Find the overlay element by its ID
     const overlayElement = document.getElementById("wallet-connect-overlay");
-    // Check if the event target is the overlay or inside it
     if (overlayElement && overlayElement.contains(event.target as Node)) {
-      // If the interaction was inside our QR code overlay, prevent the sheet from closing
       event.preventDefault();
     }
   };
 
-  const passkeyOption = AuthFactory.create("webauthn");
-
-  const authOptions = useMemo(() => {
+  const authOptions: AuthenticationMethod[] = useMemo(() => {
     return [
       ...wallets
         .filter(
           (wallet) => wallet.type !== "argent" && wallet.type !== "phantom",
         )
-        .map((wallet) => AuthFactory.create(wallet.type)),
-      AuthFactory.create("social"),
-      AuthFactory.create("walletconnect"),
+        .map((wallet) => wallet.type),
+      "discord",
+      "walletconnect",
     ];
   }, [wallets]);
 
@@ -79,23 +73,23 @@ export function ChooseSignupMethodForm({
     >
       <SheetTitle className="hidden"></SheetTitle>
       <div className="border-b border-background-125 pb-4">
-        <OptionButton
-          {...passkeyOption}
+        <SignupButton
+          authMethod="webauthn"
           className="justify-center"
-          onClick={(e) => handleSelectedOption(e, passkeyOption.mode)}
-          onKeyDown={(e) => handleSelectedOption(e, passkeyOption.mode)}
+          onClick={(e) => handleSelectedOption(e, "webauthn")}
+          onKeyDown={(e) => handleSelectedOption(e, "webauthn")}
         />
       </div>
       <div className="flex flex-col gap-3">
         {authOptions.map((option) => (
-          <OptionButton
-            {...option}
-            key={option.mode}
+          <SignupButton
+            authMethod={option}
+            key={option}
             className="justify-start"
-            onKeyDown={(e) => handleSelectedOption(e, option.mode)}
-            onClick={(e) => handleSelectedOption(e, option.mode)}
-            disabled={isLoading && selectedAuth !== option.mode}
-            isLoading={isLoading && selectedAuth === option.mode}
+            onKeyDown={(e) => handleSelectedOption(e, option)}
+            onClick={(e) => handleSelectedOption(e, option)}
+            disabled={isLoading && selectedAuth !== option}
+            isLoading={isLoading && selectedAuth === option}
           />
         ))}
       </div>

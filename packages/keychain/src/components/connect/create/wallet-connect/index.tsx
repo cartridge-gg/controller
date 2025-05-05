@@ -1,13 +1,15 @@
-import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { useConnection } from "@/hooks/connection";
 import { WalletConnectWallet } from "@cartridge/controller";
-import { AccountQuery } from "@cartridge/utils/api/cartridge";
+import {
+  ControllerQuery,
+  Eip191Credentials,
+} from "@cartridge/utils/api/cartridge";
 import {
   EthereumProvider,
   default as Provider,
 } from "@walletconnect/ethereum-provider";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createController, SignupResponse } from "../useCreateController";
+import { SignupResponse } from "../useCreateController";
 import { QRCodeOverlay } from "./qr-code-overlay";
 
 export interface PromiseWithResolvers<T> {
@@ -115,46 +117,53 @@ export const useWalletConnectAuthentication = (
   }, [ethereumProvider, setOverlay]);
 
   const login = useCallback(
-    async (account: AccountQuery["account"]) => {
+    async (controller: ControllerQuery["controller"]) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
-      if (!account) throw new Error("No account found");
+      if (!controller) throw new Error("No controller found");
+      if (!ethereumProvider) throw new Error("No Ethereum provider");
 
-      const { username, credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
+      const signerAddress = (
+        controller.signers?.[0]?.metadata as Eip191Credentials
+      )?.eip191?.[0]?.ethAddress;
+      if (!signerAddress) throw new Error("No address found");
 
-      const controllerNode = controllers?.edges?.[0]?.node;
+      connectionPromiseRef.current = promiseWithResolvers();
 
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
+      const { promise, reject } = connectionPromiseRef.current;
 
-      if (!controllerNode || !publicKey) {
-        return;
+      const timeoutId = setTimeout(() => {
+        setOverlay(null);
+        reject(new Error("Timeout waiting for WalletConnect connection"));
+        connectionPromiseRef.current = undefined;
+      }, 120_000);
+
+      try {
+        ethereumProvider.connect();
+        await promise;
+      } finally {
+        clearTimeout(timeoutId);
       }
 
-      const controller = await createController(
-        origin,
-        chainId,
-        rpcUrl,
-        username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
-        {
-          signer: {
-            webauthn: {
-              rpId: import.meta.env.VITE_RP_ID!,
-              credentialId,
-              publicKey,
-            },
-          },
-        },
-      );
+      const accounts = await ethereumProvider.request<string[]>({
+        method: "eth_requestAccounts",
+      });
 
-      await controller.login(now() + DEFAULT_SESSION_DURATION);
+      // TODO(tedison) might be the place where we set the change wallet here
+      if (!accounts.find((a) => BigInt(a) === BigInt(signerAddress))) {
+        throw new Error(
+          `Please connect with the same address you used to sign up: ${signerAddress}`,
+        );
+      }
 
-      window.controller = controller;
-      setController(controller);
+      const wallet = new WalletConnectWallet(ethereumProvider);
+      await wallet.connect();
+      window.keychain_wallets?.addEmbeddedWallet(signerAddress, wallet);
+
+      return {
+        signer: { eip191: { address: signerAddress } },
+      };
     },
-    [chainId, rpcUrl, origin, setController],
+    [chainId, rpcUrl, origin, setController, ethereumProvider],
   );
 
   return { signup, login };

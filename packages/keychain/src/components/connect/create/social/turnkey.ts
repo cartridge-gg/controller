@@ -1,5 +1,29 @@
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
 
+export const getWallet = async (
+  subOrgId: string,
+  authIframeClient: TurnkeyIframeClient,
+) => {
+  const wallets = await authIframeClient.getWallets({
+    organizationId: subOrgId,
+  });
+  if (wallets.wallets.length > 1) {
+    throw new Error(
+      "Multiple wallets found" + JSON.stringify(wallets, null, 2),
+    );
+  }
+  if (wallets.wallets.length === 0) {
+    throw new Error("No wallets found");
+  }
+
+  const wallet = await authIframeClient.getWalletAccount({
+    organizationId: subOrgId,
+    walletId: wallets.wallets[0].walletId,
+  });
+
+  return refineNonNull(wallet.account.address);
+};
+
 export const getOrCreateWallet = async (
   subOrgId: string,
   userName: string,
