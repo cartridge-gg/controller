@@ -271,7 +271,11 @@ export function ExecutionContainer({
                   <>
                     {ctrlError && <ControllerErrorAlert error={ctrlError} />}
                     {!ctrlError && (
-                      <Fees isLoading={isEstimating} maxFee={maxFee} />
+                      <Fees
+                        isLoading={isEstimating}
+                        maxFee={maxFee}
+                        className="mt-1"
+                      />
                     )}
                     <div className="flex gap-3 w-full">
                       <Button
