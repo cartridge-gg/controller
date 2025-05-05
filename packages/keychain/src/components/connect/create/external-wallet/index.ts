@@ -38,7 +38,6 @@ export const useExternalWalletAuthentication = () => {
     async (
       controller: ControllerQuery["controller"],
       credential: Eip191Credential | undefined,
-      setChangeWallet: (changeWallet: boolean) => void,
     ) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
       if (!controller) throw new Error("No controller found");
@@ -61,7 +60,6 @@ export const useExternalWalletAuthentication = () => {
         throw new Error("No wallet found for address: " + address);
 
       if (BigInt(connectedWallet.account) !== BigInt(address)) {
-        setChangeWallet(true);
         return undefined;
       }
 

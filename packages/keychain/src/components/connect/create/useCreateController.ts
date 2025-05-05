@@ -319,7 +319,6 @@ export function useCreateController({
           loginResponse = (await loginWithExternalWallet(
             controller,
             credential,
-            setChangeWallet,
           )) as LoginResponse;
           break;
         }

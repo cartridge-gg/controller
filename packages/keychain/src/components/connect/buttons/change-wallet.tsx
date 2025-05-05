@@ -98,18 +98,17 @@ export function ChangeWallet({
     if (validation.signer.__typename === "WebauthnCredentials") {
       return false;
     }
+    const walletProvider = wallets.find(
+      (wallet) =>
+        wallet.type === getControllerSignerProvider(validation.signer),
+    );
 
-    return !wallets
-      .find(
-        (wallet) =>
-          wallet.type === getControllerSignerProvider(validation.signer),
-      )
-      ?.connectedAccounts?.find(
-        (account) =>
-          BigInt(account) ===
-          BigInt(getControllerSignerAddress(validation.signer) || 0),
-      );
-  }, [validation.signer]);
+    return !walletProvider?.connectedAccounts?.find(
+      (account) =>
+        BigInt(account) ===
+        BigInt(getControllerSignerAddress(validation.signer) || 0),
+    );
+  }, [validation.signer, wallets]);
 
   return (
     (shouldChangeWallet ||
@@ -120,16 +119,17 @@ export function ChangeWallet({
           extensionMissingForSigner
             ? `${option?.label} wallet missing`
             : shouldChangeWallet
-              ? `Change ${option?.label} Account to ${truncateAddress(getControllerSignerAddress(validation.signer) || "")}`
+              ? `Connect to ${option?.label} Account ${truncateAddress(getControllerSignerAddress(validation.signer) || "")}`
               : `Change ${option?.label} Account`
         }
+        allowToggle={false}
         isExpanded={false}
         variant="error"
         description={
           extensionMissingForSigner
             ? `We weren't able to detect the ${option?.label} wallet on your browser. Please install it to continue.`
             : shouldChangeWallet
-              ? `Please change your signer to ${truncateAddress(getControllerSignerAddress(validation.signer) || "")} to continue.`
+              ? `Please connect to ${option?.label} Account ${truncateAddress(getControllerSignerAddress(validation.signer) || "")} to continue.`
               : `Please change your ${option?.label} account to continue.`
         }
       />

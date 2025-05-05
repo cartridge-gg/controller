@@ -34,7 +34,7 @@ export class RabbyWallet implements WalletAdapter {
         this.connectedAccounts = accounts.map((account) =>
           account.toLowerCase(),
         );
-        this.account = accounts?.[0].toLowerCase();
+        this.account = accounts?.[0]?.toLowerCase();
       }
     });
   }

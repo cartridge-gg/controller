@@ -108,6 +108,15 @@ export function AuthButton({
       return false;
     }
 
+    const walletProvider = wallets.find(
+      (wallet) =>
+        wallet.type === getControllerSignerProvider(validation.signer),
+    );
+
+    if (walletProvider?.connectedAccounts?.length === 0) {
+      return false;
+    }
+
     return !wallets
       .find(
         (wallet) =>
@@ -118,7 +127,7 @@ export function AuthButton({
           BigInt(account) ===
           BigInt(getControllerSignerAddress(validation.signer) || 0),
       );
-  }, [validation.signer]);
+  }, [validation.signer, wallets]);
 
   const icon = useMemo(() => {
     if (isLoading || waitingForConfirmation) {
