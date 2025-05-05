@@ -58,9 +58,12 @@ export function ConfirmTransaction() {
   // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
   const { token } = useToken(call?.tokenAddress!);
 
-  const _token: Token = useMemo(
-    () => ({
-      metadata: { ...token, image: token.icon },
+  const _token: Token = useMemo(() => {
+    return {
+      metadata: {
+        ...token,
+        image: token.icon || token.contract.metadata().logoUrl || "",
+      },
       balance: {
         // Convert bigint into number
         amount: Number(token.balance) / Math.pow(10, token.decimals),
@@ -68,9 +71,8 @@ export function ConfirmTransaction() {
         value: Number(token.price?.amount) / Math.pow(10, token.decimals),
         change: token.decimals,
       },
-    }),
-    [token],
-  );
+    };
+  }, [token]);
 
   const { username: destinationUsername } = useUsername(
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain

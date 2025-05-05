@@ -46,7 +46,10 @@ export function Fees({
     if (!token) return null;
 
     return {
-      metadata: { ...token, image: token?.icon },
+      metadata: {
+        ...token,
+        image: token.icon || token.contract.metadata().logoUrl || "",
+      },
       balance: {
         amount: Number(token?.balance) / Math.pow(10, token?.decimals || 0),
         value:
