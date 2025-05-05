@@ -13,7 +13,7 @@ import {
   LayoutHeader,
 } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
-import { OcclusionDetector } from "@/components/OcclusionDetector";
+// import { OcclusionDetector } from "@/components/OcclusionDetector";
 
 export function SignMessage({
   typedData,
@@ -66,7 +66,7 @@ export function SignMessage({
 
   return (
     <>
-      <OcclusionDetector />
+      {/* <OcclusionDetector /> */}
       <LayoutContainer>
         <LayoutHeader
           title="Signature Request"
