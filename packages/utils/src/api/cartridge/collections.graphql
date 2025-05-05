@@ -26,6 +26,7 @@ query Collections(
           imageUrl
           name
           tokenId
+          metadata
         }
         meta {
           project
@@ -55,6 +56,7 @@ query Collection(
       imageUrl
       name
       tokenId
+      metadata
     }
     meta {
       assetCount

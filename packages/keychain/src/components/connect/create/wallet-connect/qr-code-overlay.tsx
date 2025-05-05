@@ -37,11 +37,11 @@ export const QRCodeOverlay = ({
   return (
     <div
       id="wallet-connect-overlay"
-      className="w-full h-full fixed top-0 left-0 flex flex-col items-center justify-center bg-translucent-200 backdrop-blur-sm z-[10001] pointer-events-auto gap-4 p-8"
+      className="w-full h-full fixed top-0 left-0 flex flex-col items-center justify-center bg-translucent-dark-200 backdrop-blur-sm z-[10001] pointer-events-auto gap-4 p-8"
     >
       <div
         id="qr-code-parent-container"
-        className="w-fit h-fit rounded-[16px] p-4 bg-translucent-500 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
+        className="w-fit h-fit rounded-[16px] p-4 bg-translucent-light-200 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
       >
         <div id="qr-and-copy-link" className="flex flex-col gap-[1px]">
           <div className="p-[12px] bg-background-200 rounded-t-[12px]">
@@ -98,7 +98,7 @@ export const QRCodeOverlay = ({
       </div>
       <button
         className="w-fit h-fit py-[10px] px-6 gap-2 rounded-[20px] text-foreground-100
-		bg-translucent-500 hover:bg-translucent-600
+		bg-translucent-light-200 hover:bg-translucent-light-200
 		transition-colors duration-200 ease-in-out"
         onClick={onCancel}
       >

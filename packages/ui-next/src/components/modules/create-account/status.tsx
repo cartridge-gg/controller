@@ -46,7 +46,7 @@ export function Status({ username, validation, error }: StatusProps) {
   }, [validation, errorMessage, username, isError]);
 
   return (
-    <div className="flex flex-col bg-translucent-100 gap-y-px">
+    <div className="flex flex-col bg-translucent-dark-100 gap-y-px">
       <Block error={!!isError}>{message}</Block>
 
       {isTimeoutError && <HelpBlock />}

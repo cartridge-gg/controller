@@ -1,4 +1,10 @@
-import { cn, CollectiblePreview } from "@/index";
+import {
+  cn,
+  CollectiblePreview,
+  CollectibleTag,
+  StackDiamondIcon,
+  TagIcon,
+} from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { CollectibleHeader } from "../header";
 import { useState } from "react";
@@ -8,26 +14,35 @@ export interface CollectibleAssetProps
     VariantProps<typeof collectibleAssetVariants> {
   title: string;
   image: string;
-  count: number;
+  count?: number;
+  quantity?: number;
+  sales?: number;
+  icon?: string | null;
   onSelect?: () => void;
 }
 
-const collectibleAssetVariants = cva("rounded overflow-hidden cursor-pointer", {
-  variants: {
-    variant: {
-      default: "",
-      faded: "",
+const collectibleAssetVariants = cva(
+  "relative rounded overflow-hidden cursor-pointer",
+  {
+    variants: {
+      variant: {
+        default: "",
+        faded: "",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
     },
   },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+);
 
 export function CollectibleAsset({
   title,
   image,
   count,
+  quantity,
+  sales,
+  icon,
   variant,
   className,
   ...props
@@ -44,11 +59,24 @@ export function CollectibleAsset({
     >
       <CollectibleHeader
         title={title}
-        label={`${count}`}
+        icon={icon}
+        label={count ? `${count}` : undefined}
         hover={hover}
         variant={variant}
       />
       <CollectiblePreview image={image} hover={hover} size="sm" />
+      <div className="flex gap-1 items-center justify-end absolute bottom-1 right-1">
+        {!!quantity && (
+          <CollectibleTag label={`${quantity}`}>
+            <StackDiamondIcon variant="solid" size="sm" />
+          </CollectibleTag>
+        )}
+        {!!sales && (
+          <CollectibleTag label={`${sales}`}>
+            <TagIcon variant="solid" size="sm" />
+          </CollectibleTag>
+        )}
+      </div>
     </div>
   );
 }

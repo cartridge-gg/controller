@@ -25,13 +25,19 @@ export const cartridgeTWPreset: Partial<Config> = {
         400: "var(--background-400)",
         500: "var(--background-500)",
       },
-      translucent: {
-        DEFAULT: "var(--translucent-100)",
-        100: "var(--translucent-100)",
-        200: "var(--translucent-200)",
-        300: "var(--translucent-300)",
-        500: "var(--translucent-500)",
-        600: "var(--translucent-600)",
+      "translucent-dark": {
+        DEFAULT: "var(--translucent-dark-100)",
+        100: "var(--translucent-dark-100)",
+        150: "var(--translucent-dark-150)",
+        200: "var(--translucent-dark-200)",
+        300: "var(--translucent-dark-300)",
+      },
+      "translucent-light": {
+        DEFAULT: "var(--translucent-light-100)",
+        100: "var(--translucent-light-100)",
+        150: "var(--translucent-light-150)",
+        200: "var(--translucent-light-200)",
+        300: "var(--translucent-light-300)",
       },
       spacer: {
         DEFAULT: "var(--spacer-100)",

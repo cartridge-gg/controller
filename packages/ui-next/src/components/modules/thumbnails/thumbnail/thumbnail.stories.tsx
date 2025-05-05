@@ -61,6 +61,78 @@ export const Default: Story = {
   ),
 };
 
+export const Transdark: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      {sizes.map((size) => (
+        <div className="flex gap-3">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+              transdark
+              size={size}
+              variant={variant}
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+              transdark
+              size={size}
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
+              }
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const Translight: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      {sizes.map((size) => (
+        <div className="flex gap-3">
+          {variants.map((variant) => (
+            <Thumbnail
+              key={`${size}-${variant}`}
+              icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+              translight
+              size={size}
+              variant={variant}
+            />
+          ))}
+          {["lg", "xl"].includes(size) && (
+            <Thumbnail
+              key={`${size}-subicon`}
+              icon="https://raw.githubusercontent.com/cartridge-gg/presets/refs/heads/main/configs/loot-survivor/icon.png"
+              translight
+              size={size}
+              subIcon={
+                <ThumbnailsSubIcon
+                  Icon={
+                    <PaperPlaneIcon className="w-full h-full" variant="solid" />
+                  }
+                  size={size as "lg" | "xl"}
+                />
+              }
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  ),
+};
+
 export const Rounded: Story = {
   render: () => (
     <div className="flex flex-col gap-3 ">

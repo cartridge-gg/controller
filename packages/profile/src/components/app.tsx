@@ -11,7 +11,10 @@ import {
   Inventory,
   Collection,
   Collectible,
+  CollectionAsset,
+  CollectibleAsset,
   SendCollection,
+  SendCollectible,
   SendToken,
   Token,
 } from "#components/inventory";
@@ -49,10 +52,15 @@ export function App() {
                 <Route path="send" element={<SendToken />} />
               </Route>
               <Route path="collection/:address" element={<Collection />}>
-                <Route path="token/:tokenId" element={<Collectible />}>
+                <Route path="token/:tokenId" element={<CollectionAsset />}>
                   <Route path="send" element={<SendCollection />} />
                 </Route>
                 <Route path="send" element={<SendCollection />} />
+              </Route>
+              <Route path="collectible/:address" element={<Collectible />}>
+                <Route path="token/:tokenId" element={<CollectibleAsset />}>
+                  <Route path="send" element={<SendCollectible />} />
+                </Route>
               </Route>
             </Route>
             <Route path="achievements" element={<Achievements />}>

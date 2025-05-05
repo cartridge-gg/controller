@@ -7,7 +7,7 @@ export const activityDetailVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-background-200 text-foreground-300",
+        default: "bg-background-200 text-foreground-400",
       },
     },
     defaultVariants: {
