@@ -107,6 +107,7 @@ export function Fees({
             tokens={tokens}
             defaultToken={defaultToken}
             onSelect={() => {}}
+            headerClassName="h-full"
             disabled={true}
           />
         </div>
@@ -129,7 +130,7 @@ function LineItem({
   discount?: string;
 }) {
   return (
-    <div className="flex items-center w-full h-10 py-2.5 px-3 my-1 bg-background-125 border border-background-200 rounded">
+    <div className="flex items-center w-full h-10 py-2.5 px-3 bg-background-125 border border-background-200 rounded">
       <p className="text-sm text-foreground-400 font-medium">{name}</p>
       <div className="flex-1" />
 

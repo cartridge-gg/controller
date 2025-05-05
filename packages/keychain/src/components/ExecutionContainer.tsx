@@ -5,6 +5,7 @@ import { parseControllerError } from "@/utils/connection/execute";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   Button,
+  cn,
   type HeaderProps,
   LayoutContainer,
   LayoutFooter,
@@ -33,6 +34,7 @@ interface ExecutionContainerProps {
   buttonText?: string;
   children: React.ReactNode;
   right?: React.ReactElement;
+  className?: string;
 }
 
 export function ExecutionContainer({
@@ -50,6 +52,7 @@ export function ExecutionContainer({
   buttonText = "SUBMIT",
   right,
   children,
+  className,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
   const { controller } = useConnection();
@@ -178,15 +181,11 @@ export function ExecutionContainer({
   return (
     <>
       {/* <OcclusionDetector /> */}
-      <LayoutContainer>
+      <LayoutContainer className={cn(className)}>
         <LayoutHeader
           title={title}
           description={description}
-          icon={
-            icon || (
-              <PaperPlaneIcon variant="solid" className="h-[30px] w-[30px]" />
-            )
-          }
+          icon={icon || <PaperPlaneIcon variant="solid" size="lg" />}
           onClose={onClose}
           right={right}
         />

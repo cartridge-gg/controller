@@ -30,12 +30,14 @@ interface TokenSelectProps {
   tokens: Token[];
   defaultToken?: Token;
   onSelect: (token: Token) => void;
+  headerClassName?: string;
 }
 
 export const FeeTokenSelect = ({
   tokens,
   defaultToken,
   onSelect,
+  headerClassName,
   ...props
 }: TokenSelectProps & React.ComponentProps<typeof Select>) => {
   const [currentToken, setCurrentToken] = useState<Token>(
@@ -65,7 +67,7 @@ export const FeeTokenSelect = ({
       onValueChange={handleChangeToken}
       defaultValue={currentToken.metadata.address}
     >
-      <TokenSelectHeader className="rounded" />
+      <TokenSelectHeader className={cn("rounded", headerClassName)} />
       <SelectContent viewPortClassName="gap-0">
         {tokens.map((token, i) => (
           <TokenSelectRow

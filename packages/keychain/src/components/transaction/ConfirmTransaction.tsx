@@ -10,7 +10,7 @@ import { TransactionSending } from "./sending";
 import { useToken } from "@/hooks/tokens";
 
 export function ConfirmTransaction() {
-  const { controller, context, origin, setContext } = useConnection();
+  const { controller, context, setContext } = useConnection();
   const ctx = context as ExecuteCtx;
   const account = controller;
   const transactions = toArray(ctx.transactions) as Call[];
@@ -82,14 +82,14 @@ export function ConfirmTransaction() {
   return (
     <ExecutionContainer
       title={`Review Transaction${transactions.length > 1 ? "s" : ""}`}
-      description={origin}
       executionError={ctx.error}
       transactions={transactions}
       feeEstimate={ctx.feeEstimate}
       onSubmit={onSubmit}
       buttonText="CONFIRM"
+      className="select-none"
     >
-      <LayoutContent className="gap-4 pt-2">
+      <LayoutContent className="gap-4 pt-1">
         <TransactionDestination
           address={call.destinationAddress}
           wallet={WalletType.Controller}
