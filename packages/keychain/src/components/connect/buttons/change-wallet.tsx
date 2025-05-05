@@ -1,6 +1,7 @@
+import { ErrorAlert } from "@/components/ErrorAlert";
 import { useWallets } from "@/hooks/wallets";
-import { cn, WalletIcon } from "@cartridge/ui-next";
-import { useMemo } from "react";
+import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
+import { useEffect, useMemo } from "react";
 import { useUsernameValidation } from "../create/useUsernameValidation";
 import {
   AuthenticationMethod,
@@ -10,6 +11,8 @@ import {
 
 interface ChangeWalletProps {
   validation: ReturnType<typeof useUsernameValidation>;
+  changeWallet: boolean;
+  setChangeWallet: (value: boolean) => void;
 }
 
 const OPTIONS: Partial<
@@ -18,43 +21,77 @@ const OPTIONS: Partial<
     {
       label: string;
       color: string;
+      isExtension: boolean;
     }
   >
 > = {
   metamask: {
     color: "text-wallet-theme-300",
-    label: "MetaMask",
+    label: AUTH_METHODS_LABELS.metamask,
+    isExtension: true,
   },
   argent: {
     color: "text-wallet-theme-400",
-    label: "Argent",
+    label: AUTH_METHODS_LABELS.argent,
+    isExtension: true,
   },
   rabby: {
     color: "text-wallet-theme-200",
-    label: "Rabby",
+    label: AUTH_METHODS_LABELS.rabby,
+    isExtension: true,
   },
   phantom: {
     color: "text-wallet-theme-100",
-    label: "Phantom",
+    label: AUTH_METHODS_LABELS.phantom,
+    isExtension: true,
   },
   discord: {
     color: "text-wallet-theme-500",
-    label: "Discord",
+    label: AUTH_METHODS_LABELS.discord,
+    isExtension: false,
   },
   walletconnect: {
     color: "text-wallet-theme-600",
-    label: "Wallet Connect",
+    label: AUTH_METHODS_LABELS.walletconnect,
+    isExtension: false,
   },
 };
 
-export function ChangeWallet({ validation }: ChangeWalletProps) {
+export function ChangeWallet({
+  validation,
+  changeWallet: externalChangeWallet,
+  setChangeWallet,
+}: ChangeWalletProps) {
   const { wallets } = useWallets();
+
+  useEffect(() => {
+    setChangeWallet(false);
+  }, [validation.status]);
 
   const signerProvider: AuthenticationMethod | undefined = useMemo(
     () => getControllerSignerProvider(validation.signer),
     [validation.signer],
   );
+
+  const option = useMemo(
+    () => OPTIONS[signerProvider as AuthenticationMethod],
+    [signerProvider],
+  );
+
+  const extensionMissingForSigner = useMemo(() => {
+    if (option?.isExtension) {
+      return !wallets.some(
+        (wallet) =>
+          wallet.type === getControllerSignerProvider(validation.signer),
+      );
+    }
+    return false;
+  }, [option?.isExtension, wallets, validation.signer]);
+
   const shouldChangeWallet = useMemo(() => {
+    if (!option?.isExtension) {
+      return false;
+    }
     if (!validation.signer) {
       return false;
     }
@@ -75,23 +112,31 @@ export function ChangeWallet({ validation }: ChangeWalletProps) {
   }, [validation.signer]);
 
   return (
-    shouldChangeWallet && (
-      <div
-        className={cn(
-          "w-fill h-[40px] flex items-center justify-between",
-          "rounded border border-background-200 bg-background-125",
-          "px-3 py-2.5 font-sans text-sm",
-          OPTIONS[signerProvider as AuthenticationMethod]?.color,
-        )}
-      >
-        <div className="w-fit h-fit flex items-center gap-1">
-          <WalletIcon variant="solid" size="sm" />
-          <div>
-            Change {OPTIONS[signerProvider as AuthenticationMethod]?.label}{" "}
-            Signer
-          </div>
-        </div>
-      </div>
+    (shouldChangeWallet ||
+      extensionMissingForSigner ||
+      externalChangeWallet) && (
+      <ErrorAlert
+        title={
+          extensionMissingForSigner
+            ? `${option?.label} wallet missing`
+            : shouldChangeWallet
+              ? `Change ${option?.label} Account to ${truncateAddress(getControllerSignerAddress(validation.signer) || "")}`
+              : `Change ${option?.label} Account`
+        }
+        isExpanded={false}
+        variant="error"
+        description={
+          extensionMissingForSigner
+            ? `We weren't able to detect the ${option?.label} wallet on your browser. Please install it to continue.`
+            : shouldChangeWallet
+              ? `Please change your signer to ${truncateAddress(getControllerSignerAddress(validation.signer) || "")} to continue.`
+              : `Please change your ${option?.label} account to continue.`
+        }
+      />
     )
   );
 }
+
+const truncateAddress = (address: string) => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};

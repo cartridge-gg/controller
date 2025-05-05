@@ -68,6 +68,10 @@ export class TurnkeyWallet implements WalletAdapter {
     }
   }
 
+  getConnectedAccounts(): string[] {
+    return this.account ? [this.account] : [];
+  }
+
   async signTransaction(
     transaction: any,
   ): Promise<ExternalWalletResponse<any>> {

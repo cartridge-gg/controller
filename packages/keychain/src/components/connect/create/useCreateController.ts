@@ -44,6 +44,7 @@ export function useCreateController({
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
   const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
+  const [changeWallet, setChangeWallet] = useState<boolean>(false);
 
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
@@ -53,7 +54,7 @@ export function useCreateController({
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
-    useSocialAuthentication();
+    useSocialAuthentication(setChangeWallet);
   const { signup: signupWithExternalWallet, login: loginWithExternalWallet } =
     useExternalWalletAuthentication();
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
@@ -304,7 +305,7 @@ export function useCreateController({
 
           loginResponse = (await loginWithSocial({
             address: eip191Credential.ethAddress,
-          })) as LoginResponse;
+          })) as LoginResponse | undefined;
           break;
         }
         case "rabby":
@@ -318,6 +319,7 @@ export function useCreateController({
           loginResponse = (await loginWithExternalWallet(
             controller,
             credential,
+            setChangeWallet,
           )) as LoginResponse;
           break;
         }
@@ -325,12 +327,17 @@ export function useCreateController({
           setWaitingForConfirmation(true);
           loginResponse = (await loginWithWalletConnect(
             controller,
-          )) as LoginResponse;
+            setChangeWallet,
+          )) as LoginResponse | undefined;
           break;
         case "phantom":
         case "argent":
         default:
           throw new Error("Unknown login method");
+      }
+
+      if (!loginResponse) {
+        return;
       }
 
       const controllerObject = await createController(
@@ -360,6 +367,8 @@ export function useCreateController({
       chainId,
       setWaitingForConfirmation,
       setController,
+      changeWallet,
+      setChangeWallet,
     ],
   );
 
@@ -411,6 +420,8 @@ export function useCreateController({
     handleSubmit,
     overlay,
     setOverlay,
+    changeWallet,
+    setChangeWallet,
   };
 }
 

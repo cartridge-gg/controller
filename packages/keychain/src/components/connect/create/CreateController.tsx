@@ -46,6 +46,8 @@ interface CreateControllerViewProps {
   authenticationStep: AuthenticationStep;
   setAuthenticationStep: (value: AuthenticationStep) => void;
   waitingForConfirmation: boolean;
+  changeWallet: boolean;
+  setChangeWallet: (value: boolean) => void;
 }
 
 type CreateControllerFormProps = Omit<
@@ -67,6 +69,8 @@ function CreateControllerForm({
   onKeyDown,
   onSubmit,
   waitingForConfirmation,
+  changeWallet,
+  setChangeWallet,
 }: CreateControllerFormProps) {
   return (
     <LayoutContainer>
@@ -90,7 +94,7 @@ function CreateControllerForm({
           onSubmit(getControllerSignerProvider(validation.signer));
         }}
       >
-        <LayoutContent className="gap-6">
+        <LayoutContent className="gap-6 overflow-y-hidden">
           <CreateAccount
             usernameField={usernameField}
             validation={validation}
@@ -110,20 +114,24 @@ function CreateControllerForm({
               title="Browser not supported"
               description="Please open this page in your device's native browser (Safari/Chrome) to continue."
               variant="error"
-              isExpanded
+              isExpanded={false}
             />
           )}
 
           {!theme.verified && (
             <ErrorAlert
               title="Please proceed with caution"
+              isExpanded={false}
               description="Application domain does not match the configured domain."
               variant="error"
-              isExpanded
             />
           )}
 
-          <ChangeWallet validation={validation} />
+          <ChangeWallet
+            validation={validation}
+            changeWallet={changeWallet}
+            setChangeWallet={setChangeWallet}
+          />
 
           <AuthButton
             type="submit"
@@ -155,6 +163,8 @@ export function CreateControllerView({
   authenticationStep,
   setAuthenticationStep,
   waitingForConfirmation,
+  changeWallet,
+  setChangeWallet,
 }: CreateControllerViewProps) {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -181,6 +191,8 @@ export function CreateControllerView({
         onSubmit={onSubmit}
         onKeyDown={onKeyDown}
         waitingForConfirmation={waitingForConfirmation}
+        changeWallet={changeWallet}
+        setChangeWallet={setChangeWallet}
       />
       <ChooseSignupMethodForm
         isSlot={isSlot}
@@ -243,6 +255,8 @@ export function CreateController({
     setAuthenticationStep,
     overlay,
     waitingForConfirmation,
+    changeWallet,
+    setChangeWallet,
   } = useCreateController({
     isSlot,
     loginMode,
@@ -330,7 +344,7 @@ export function CreateController({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleFormSubmit();
+      handleFormSubmit(getControllerSignerProvider(validation.signer));
     }
   };
 
@@ -352,6 +366,8 @@ export function CreateController({
         authenticationStep={authenticationStep}
         setAuthenticationStep={setAuthenticationStep}
         waitingForConfirmation={waitingForConfirmation}
+        changeWallet={changeWallet}
+        setChangeWallet={setChangeWallet}
       />
       {overlay}
     </>

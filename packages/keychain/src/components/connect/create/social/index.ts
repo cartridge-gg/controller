@@ -14,7 +14,9 @@ import {
 import { getOidcToken } from "./auth0";
 import { getOrCreateWallet, getWallet } from "./turnkey";
 
-export const useSocialAuthentication = () => {
+export const useSocialAuthentication = (
+  setChangeWallet: (changeWallet: boolean) => void,
+) => {
   const [signupOrLogin, setSignupOrLogin] = useState<
     { username: string } | { address: string } | undefined
   >(undefined);
@@ -28,7 +30,8 @@ export const useSocialAuthentication = () => {
       value:
         | SignupResponse
         | LoginResponse
-        | PromiseLike<SignupResponse | LoginResponse>,
+        | undefined
+        | PromiseLike<SignupResponse | LoginResponse | undefined>,
     ) => void;
     reject: (reason?: Error) => void;
   } | null>(null);
@@ -55,7 +58,6 @@ export const useSocialAuthentication = () => {
 
   // TODO(tedison) put this in a useCallback
   const internalSignup = async () => {
-    console.log("internalSignup", signupOrLogin);
     if (!(signupOrLogin as { username: string }).username) {
       throw new Error("Unreachable");
     }
@@ -113,61 +115,71 @@ export const useSocialAuthentication = () => {
 
   // TODO(tedison) put this in a useCallback
   const internalLogin = async () => {
-    console.log("internalLogin", signupOrLogin);
     if (!(signupOrLogin as { address: string }).address) {
       throw new Error("Unreachable");
     }
 
-    const oidcTokenString = await getOidcToken(
-      getIdTokenClaims,
-      getNonce(authIframeClientRef.current!.iframePublicKey!),
-    );
-
-    if (!oidcTokenString) {
-      return;
-    }
-
-    const subOrganizationId = await getTurnkeySuborg(oidcTokenString);
-
-    await authenticateToTurnkey(
-      subOrganizationId,
-      oidcTokenString,
-      authIframeClientRef.current!,
-    );
-
-    const address = await getWallet(
-      subOrganizationId,
-      authIframeClientRef.current!,
-    );
-
-    if (
-      BigInt(address) !== BigInt((signupOrLogin as { address: string }).address)
-    ) {
-      throw new Error(
-        "Please connect with the same account you used to sign up",
+    try {
+      const oidcTokenString = await getOidcToken(
+        getIdTokenClaims,
+        getNonce(authIframeClientRef.current!.iframePublicKey!),
       );
-    }
 
-    if (window.keychain_wallets) {
-      window.keychain_wallets.addEmbeddedWallet(
-        address.toLowerCase(),
-        new TurnkeyWallet(
-          authIframeClientRef.current!,
-          address,
-          subOrganizationId,
-        ),
+      if (!oidcTokenString) {
+        return;
+      }
+
+      const subOrganizationId = await getTurnkeySuborg(oidcTokenString);
+
+      await authenticateToTurnkey(
+        subOrganizationId,
+        oidcTokenString,
+        authIframeClientRef.current!,
       );
-    }
 
-    if (signaturePromiseRef.current) {
-      signaturePromiseRef.current.resolve({
-        signer: {
-          eip191: {
+      const address = await getWallet(
+        subOrganizationId,
+        authIframeClientRef.current!,
+      );
+      if (
+        BigInt(address) !==
+        BigInt((signupOrLogin as { address: string }).address)
+      ) {
+        setChangeWallet(true);
+        signaturePromiseRef.current?.resolve(undefined);
+        signaturePromiseRef.current = null;
+        return;
+      }
+
+      if (window.keychain_wallets) {
+        window.keychain_wallets.addEmbeddedWallet(
+          address.toLowerCase(),
+          new TurnkeyWallet(
+            authIframeClientRef.current!,
             address,
+            subOrganizationId,
+          ),
+        );
+      }
+
+      if (signaturePromiseRef.current) {
+        signaturePromiseRef.current.resolve({
+          signer: {
+            eip191: {
+              address,
+            },
           },
-        },
-      });
-      signaturePromiseRef.current = null;
+        });
+        signaturePromiseRef.current = null;
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message.includes("No suborgs found")) {
+        setChangeWallet(true);
+        signaturePromiseRef.current?.resolve(undefined);
+        signaturePromiseRef.current = null;
+        return;
+      }
+      throw e;
     }
   };
 

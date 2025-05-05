@@ -1,19 +1,20 @@
+import { TypedData } from "@starknet-io/types-js";
+import { connect, StarknetWindowObject } from "starknetkit";
+import { InjectedConnector } from "starknetkit/injected";
 import {
-  WalletAdapter,
+  ExternalPlatform,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
-  ExternalPlatform,
+  WalletAdapter,
 } from "../types";
-import { connect, StarknetWindowObject } from "starknetkit";
-import { InjectedConnector } from "starknetkit/injected";
-import { TypedData } from "@starknet-io/types-js";
 
 export class ArgentWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "argent";
   readonly platform: ExternalPlatform = "starknet";
   private wallet: StarknetWindowObject | undefined = undefined;
   private account: string | undefined = undefined;
+  private connectedAccounts: string[] = [];
 
   isAvailable(): boolean {
     return typeof window !== "undefined" && !!window.starknet_argentX;
@@ -63,6 +64,10 @@ export class ArgentWallet implements WalletAdapter {
         error: (error as Error).message || "Unknown error",
       };
     }
+  }
+
+  getConnectedAccounts(): string[] {
+    return this.connectedAccounts;
   }
 
   async signTypedData(data: TypedData): Promise<ExternalWalletResponse<any>> {

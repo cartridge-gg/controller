@@ -56,8 +56,15 @@ export const useWalletConnectAuthentication = (
           icons: ["https://avatars.githubusercontent.com/u/37784886"],
         },
         showQrModal: false,
-        optionalChains: [1],
-        methods: ["eth_requestAccounts"],
+        chains: [1],
+        methods: [
+          "eth_requestAccounts",
+          "eth_sendTransaction",
+          "personal_sign",
+          "eth_signTypedData_v4",
+          "wallet_switchEthereumChain",
+          "eth_getBalance",
+        ],
       });
 
       await provider.disconnect();
@@ -93,7 +100,7 @@ export const useWalletConnectAuthentication = (
     }, 120_000);
 
     try {
-      ethereumProvider.connect({});
+      ethereumProvider.connect();
       await promise;
     } finally {
       clearTimeout(timeoutId);
@@ -105,8 +112,7 @@ export const useWalletConnectAuthentication = (
 
     const address = accounts[0];
 
-    const wallet = new WalletConnectWallet(ethereumProvider);
-    await wallet.connect();
+    const wallet = new WalletConnectWallet(ethereumProvider, address);
     window.keychain_wallets?.addEmbeddedWallet(address, wallet);
 
     return {
@@ -117,7 +123,10 @@ export const useWalletConnectAuthentication = (
   }, [ethereumProvider, setOverlay]);
 
   const login = useCallback(
-    async (controller: ControllerQuery["controller"]) => {
+    async (
+      controller: ControllerQuery["controller"],
+      setChangeWallet: (changeWallet: boolean) => void,
+    ) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
       if (!controller) throw new Error("No controller found");
       if (!ethereumProvider) throw new Error("No Ethereum provider");
@@ -148,14 +157,12 @@ export const useWalletConnectAuthentication = (
         method: "eth_requestAccounts",
       });
 
-      // TODO(tedison) might be the place where we set the change wallet here
       if (!accounts.find((a) => BigInt(a) === BigInt(signerAddress))) {
-        throw new Error(
-          `Please connect with the same address you used to sign up: ${signerAddress}`,
-        );
+        setChangeWallet(true);
+        return;
       }
 
-      const wallet = new WalletConnectWallet(ethereumProvider);
+      const wallet = new WalletConnectWallet(ethereumProvider, signerAddress);
       await wallet.connect();
       window.keychain_wallets?.addEmbeddedWallet(signerAddress, wallet);
 

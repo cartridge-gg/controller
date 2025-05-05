@@ -11,21 +11,19 @@ import {
 
 export class WalletBridge {
   private readonly walletAdapters: Map<ExternalWalletType, WalletAdapter>;
-  private readonly connectedWalletsByType: Map<
-    ExternalWalletType,
-    WalletAdapter
-  > = new Map();
-  private readonly connectedWalletsByAddress: Map<string, WalletAdapter> =
-    new Map();
 
   constructor() {
     this.walletAdapters = new Map<ExternalWalletType, WalletAdapter>();
+
     const metamask = new MetaMaskWallet();
     metamask.isAvailable() && this.walletAdapters.set("metamask", metamask);
+
     const phantom = new PhantomWallet();
     phantom.isAvailable() && this.walletAdapters.set("phantom", phantom);
+
     const argent = new ArgentWallet();
     argent.isAvailable() && this.walletAdapters.set("argent", argent);
+
     const rabby = new RabbyWallet();
     rabby.isAvailable() && this.walletAdapters.set("rabby", rabby);
 
@@ -37,8 +35,9 @@ export class WalletBridge {
   getIFrameMethods() {
     return {
       externalDetectWallets: (_origin: string) => () => this.detectWallets(),
-      externalConnectWallet: (_origin: string) => (type: ExternalWalletType) =>
-        this.connectWallet(type),
+      externalConnectWallet:
+        (_origin: string) => (type: ExternalWalletType, address?: string) =>
+          this.connectWallet(type, address),
       externalSignMessage:
         (_origin: string) =>
         (identifier: ExternalWalletType | string, message: string) =>
@@ -84,7 +83,7 @@ export class WalletBridge {
       error instanceof Error ? error.message : "Unknown error";
     let walletType: ExternalWalletType | string = "unknown";
     if (typeof identifier === "string") {
-      const adapter = this.connectedWalletsByAddress.get(identifier);
+      const adapter = this.getConnectedWalletAdapter(identifier);
       walletType = responseType ?? adapter?.type ?? identifier;
     } else {
       walletType = identifier;
@@ -100,14 +99,13 @@ export class WalletBridge {
 
   async connectWallet(
     type: ExternalWalletType,
+    address?: string,
   ): Promise<ExternalWalletResponse> {
     try {
       const wallet = this.getWalletAdapterByType(type);
-      const response = await wallet.connect();
+      const response = await wallet.connect(address);
 
       if (response.success && response.account) {
-        this.connectedWalletsByType.set(type, wallet);
-        this.connectedWalletsByAddress.set(response.account, wallet);
         console.log(
           `Wallet ${type} connected with address ${response.account}`,
         );
@@ -133,15 +131,22 @@ export class WalletBridge {
   ): WalletAdapter {
     let wallet: WalletAdapter | undefined;
     if (typeof identifier === "string") {
-      wallet = this.connectedWalletsByAddress.get(identifier);
+      // this is an address
+      wallet = this.walletAdapters
+        .values()
+        .find((adapter) =>
+          adapter.getConnectedAccounts().includes(identifier.toLowerCase()),
+        );
     } else {
-      wallet = this.connectedWalletsByType.get(identifier);
+      wallet = this.walletAdapters.get(identifier);
     }
 
     if (!wallet && typeof identifier === "string") {
-      wallet = this.connectedWalletsByType.get(
-        identifier as ExternalWalletType,
-      );
+      wallet = this.walletAdapters
+        .values()
+        .find((adapter) =>
+          adapter.getConnectedAccounts().includes(identifier.toLowerCase()),
+        );
     }
 
     if (!wallet) {
