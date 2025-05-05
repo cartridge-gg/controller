@@ -52,6 +52,7 @@ describe("CreateController", () => {
       setError: vi.fn(),
       handleSubmit: vi.fn().mockResolvedValue(undefined),
       authenticationStep: AuthenticationStep.FillForm,
+      setChangeWallet: vi.fn(),
     });
     mockUseUsernameValidation.mockReturnValue({
       status: "valid",
@@ -90,6 +91,7 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep,
+      setChangeWallet: vi.fn(),
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
@@ -120,6 +122,7 @@ describe("CreateController", () => {
       handleSubmit: vi.fn(),
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep: vi.fn(),
+      setChangeWallet: vi.fn(),
     });
     renderComponent();
     const submitButton = screen.getByTestId("submit-button");
@@ -147,7 +150,9 @@ describe("CreateController", () => {
       cover: "cover-url",
     });
     renderComponent();
-    expect(screen.getByText("Please proceed with caution")).toBeInTheDocument();
+    const changeWalletButton = screen.getByText("Please proceed with caution");
+    expect(changeWalletButton).toBeInTheDocument();
+    fireEvent.click(changeWalletButton);
     expect(
       screen.getByText(
         "Application domain does not match the configured domain.",
@@ -166,6 +171,7 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep,
+      setChangeWallet: vi.fn(),
     });
     renderWithProviders(<CreateController {...defaultProps} />);
     const input = screen.getByPlaceholderText("Username");
@@ -179,6 +185,7 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.ChooseSignupMethod,
       setAuthenticationStep,
+      setChangeWallet: vi.fn(),
     });
     const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);

@@ -2,7 +2,7 @@ import { AuthenticationMethod } from "@/components/connect/types";
 
 export const AUTH_METHODS_LABELS: Record<AuthenticationMethod, string> = {
   argent: "Argent",
-  webauthn: "WebAuthn",
+  webauthn: "Passkey",
   phantom: "Phantom",
   rabby: "Rabby",
   metamask: "MetaMask",

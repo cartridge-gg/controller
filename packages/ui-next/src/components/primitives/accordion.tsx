@@ -25,7 +25,15 @@ const AccordionTrigger = React.forwardRef<
   }
 >(
   (
-    { className, children, hideIcon, color, parentClassName, wedgeIconSize, ...props },
+    {
+      className,
+      children,
+      hideIcon,
+      color,
+      parentClassName,
+      wedgeIconSize,
+      ...props
+    },
     ref,
   ) => (
     <AccordionPrimitive.Header className="flex">
@@ -66,4 +74,3 @@ const AccordionContent = React.forwardRef<
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 
 export { Accordion, AccordionContent, AccordionItem, AccordionTrigger };
-
