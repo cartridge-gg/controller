@@ -15,6 +15,10 @@ export class WalletBridge {
   constructor() {
     this.walletAdapters = new Map<ExternalWalletType, WalletAdapter>();
 
+    if (typeof window == "undefined") {
+      return;
+    }
+
     const metamask = new MetaMaskWallet();
     metamask.isAvailable() && this.walletAdapters.set("metamask", metamask);
 
@@ -27,9 +31,7 @@ export class WalletBridge {
     const rabby = new RabbyWallet();
     rabby.isAvailable() && this.walletAdapters.set("rabby", rabby);
 
-    if (typeof window !== "undefined") {
-      window.wallet_bridge = this;
-    }
+    window.wallet_bridge = this;
   }
 
   getIFrameMethods() {
