@@ -10,7 +10,8 @@
     "start": "next start -p 3002",
     "lint": "next lint",
     "format": "prettier --write ./src",
-    "format:check": "prettier --check ./src"
+    "format:check": "prettier --check ./src",
+    "preview": "next -p 3002"
   },
   "dependencies": {
     "@cartridge/connector": "workspace:*",

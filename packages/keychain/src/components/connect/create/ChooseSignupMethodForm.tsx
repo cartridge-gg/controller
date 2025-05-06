@@ -43,7 +43,6 @@ export function ChooseSignupMethodForm({
         )
         .map((wallet) => wallet.type),
       "discord",
-      "walletconnect",
     ];
   }, [wallets]);
 

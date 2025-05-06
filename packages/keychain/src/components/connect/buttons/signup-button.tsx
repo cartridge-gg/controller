@@ -1,3 +1,4 @@
+import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
 import {
   ArgentColorIcon,
   Button,
@@ -30,38 +31,38 @@ const OPTIONS: Partial<
   webauthn: {
     variant: "primary",
     Icon: PasskeyIcon,
-    label: "Passkey",
+    label: AUTH_METHODS_LABELS.webauthn,
     className: "justify-center",
   },
   metamask: {
     variant: "secondary",
     Icon: MetaMaskColorIcon,
-    label: "MetaMask",
+    label: AUTH_METHODS_LABELS.metamask,
   },
   argent: {
     variant: "secondary",
     Icon: ArgentColorIcon,
-    label: "Argent",
+    label: AUTH_METHODS_LABELS.argent,
   },
   rabby: {
     variant: "secondary",
     Icon: RabbyColorIcon,
-    label: "Rabby",
+    label: AUTH_METHODS_LABELS.rabby,
   },
   phantom: {
     variant: "secondary",
     Icon: PhantomColorIcon,
-    label: "Phantom",
+    label: AUTH_METHODS_LABELS.phantom,
   },
   discord: {
     variant: "secondary",
     Icon: DiscordColorIcon,
-    label: "Discord",
+    label: AUTH_METHODS_LABELS.discord,
   },
   walletconnect: {
     variant: "secondary",
     Icon: WalletConnectColorIcon,
-    label: "Wallet Connect",
+    label: AUTH_METHODS_LABELS.walletconnect,
   },
 };
 

@@ -28,11 +28,16 @@ export class MetaMaskWallet implements WalletAdapter {
         })
         .then((accounts: any) => {
           if (accounts && accounts.length > 0) {
-            console.log(accounts);
             this.account = accounts[0];
             this.connectedAccounts = accounts;
           }
         });
+      this.MMSDK.getProvider()?.on("accountsChanged", (accounts: any) => {
+        if (Array.isArray(accounts)) {
+          this.account = accounts?.[0];
+          this.connectedAccounts = accounts;
+        }
+      });
     });
   }
 
@@ -54,7 +59,11 @@ export class MetaMaskWallet implements WalletAdapter {
     };
   }
 
-  async connect(): Promise<ExternalWalletResponse<any>> {
+  async connect(address?: string): Promise<ExternalWalletResponse<any>> {
+    if (address && this.connectedAccounts.includes(address)) {
+      this.account = address;
+    }
+
     if (this.account) {
       return { success: true, wallet: this.type, account: this.account };
     }
@@ -80,6 +89,10 @@ export class MetaMaskWallet implements WalletAdapter {
         error: (error as Error).message || "Unknown error",
       };
     }
+  }
+
+  getConnectedAccounts(): string[] {
+    return this.connectedAccounts;
   }
 
   async signTransaction(

@@ -145,6 +145,7 @@ export interface Keychain {
   externalDetectWallets(): Promise<ExternalWallet[]>;
   externalConnectWallet(
     type: ExternalWalletType,
+    address?: string,
   ): Promise<ExternalWalletResponse>;
   externalSignMessage(
     type: ExternalWalletType,

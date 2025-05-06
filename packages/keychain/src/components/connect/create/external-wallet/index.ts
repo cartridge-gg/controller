@@ -14,7 +14,7 @@ import { SignupResponse } from "../useCreateController";
 
 export const useExternalWalletAuthentication = () => {
   const { origin, chainId, rpcUrl, setController } = useConnection();
-  const { connectWallet } = useWallets();
+  const { connectWallet, wallets } = useWallets();
 
   const signup = useCallback(
     async (
@@ -53,22 +53,21 @@ export const useExternalWalletAuthentication = () => {
 
       const connectedWallet = await connectWallet(
         credential.provider as ExternalWalletType,
+        address,
       );
 
       if (!connectedWallet || !connectedWallet.account)
         throw new Error("No wallet found for address: " + address);
 
-      if (connectedWallet.account !== address) {
-        // TODO(tedison) this might be the place where we want to
-        // set the change wallet message instead of throwing an error
-        throw new Error("Switch to the correct wallet");
+      if (BigInt(connectedWallet.account) !== BigInt(address)) {
+        return undefined;
       }
 
       return {
         signer: walletToSigner(connectedWallet),
       };
     },
-    [chainId, rpcUrl, origin, setController],
+    [chainId, rpcUrl, origin, setController, wallets],
   );
 
   return { signup, login };
@@ -79,6 +78,6 @@ const walletToSigner = (wallet: ExternalWalletResponse) => {
     throw new Error("Unsupported wallet");
   }
   return {
-    eip191: { address: wallet.account! },
+    eip191: { address: wallet.account!.toLowerCase() },
   };
 };

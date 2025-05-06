@@ -1,3 +1,5 @@
+import { useWallets } from "@/hooks/wallets";
+import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
 import {
   ArgentIcon,
   Button,
@@ -12,7 +14,10 @@ import {
 } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { useUsernameValidation } from "../create/useUsernameValidation";
-import { getControllerSignerProvider } from "../types";
+import {
+  getControllerSignerAddress,
+  getControllerSignerProvider,
+} from "../types";
 
 interface AuthButtonProps extends React.ComponentProps<typeof Button> {
   waitingForConfirmation: boolean;
@@ -24,41 +29,46 @@ export type LoginAuthConfig = {
   Icon?: React.ComponentType<IconProps>;
   bgColor?: string;
   label: string;
+  isExtension?: boolean;
 };
 
-export const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
+const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
   webauthn: {
-    label: "Passkey",
+    label: AUTH_METHODS_LABELS.webauthn,
   },
   metamask: {
     Icon: MetaMaskIcon,
     bgColor: "bg-wallet-theme-300",
-    label: "MetaMask",
+    label: AUTH_METHODS_LABELS.metamask,
+    isExtension: true,
   },
   argent: {
     Icon: ArgentIcon,
     bgColor: "bg-wallet-theme-400",
-    label: "Argent",
+    label: AUTH_METHODS_LABELS.argent,
+    isExtension: true,
   },
   rabby: {
     Icon: RabbyIcon,
     bgColor: "bg-wallet-theme-200",
-    label: "Rabby",
+    label: AUTH_METHODS_LABELS.rabby,
+    isExtension: true,
   },
   phantom: {
     Icon: PhantomIcon,
     bgColor: "bg-wallet-theme-100",
-    label: "Phantom",
+    label: AUTH_METHODS_LABELS.phantom,
+    isExtension: true,
   },
   discord: {
     Icon: DiscordIcon,
     bgColor: "bg-wallet-theme-500",
-    label: "Discord",
+    label: AUTH_METHODS_LABELS.discord,
   },
   walletconnect: {
     Icon: WalletConnectIcon,
     bgColor: "bg-wallet-theme-600",
-    label: "Wallet Connect",
+    label: AUTH_METHODS_LABELS.walletconnect,
   },
 };
 
@@ -68,13 +78,56 @@ export function AuthButton({
   username,
   ...props
 }: AuthButtonProps) {
+  const { wallets } = useWallets();
+
   const { isLoading, disabled, ...restProps } = props;
 
-  // TODO(tedison) add a check for if the user has the wallet extension
   const option = useMemo(
     () => OPTIONS[getControllerSignerProvider(validation.signer) ?? ""],
     [validation.signer],
   );
+
+  const extensionMissingForSigner = useMemo(() => {
+    if (option?.isExtension) {
+      return !wallets.some(
+        (wallet) =>
+          wallet.type === getControllerSignerProvider(validation.signer),
+      );
+    }
+    return false;
+  }, [option?.isExtension, wallets, validation.signer]);
+
+  const shouldChangeWallet = useMemo(() => {
+    if (!option?.isExtension) {
+      return false;
+    }
+    if (!validation.signer) {
+      return false;
+    }
+    if (validation.signer.__typename === "WebauthnCredentials") {
+      return false;
+    }
+
+    const walletProvider = wallets.find(
+      (wallet) =>
+        wallet.type === getControllerSignerProvider(validation.signer),
+    );
+
+    if (walletProvider?.connectedAccounts?.length === 0) {
+      return false;
+    }
+
+    return !wallets
+      .find(
+        (wallet) =>
+          wallet.type === getControllerSignerProvider(validation.signer),
+      )
+      ?.connectedAccounts?.find(
+        (account) =>
+          BigInt(account) ===
+          BigInt(getControllerSignerAddress(validation.signer) || 0),
+      );
+  }, [validation.signer, wallets]);
 
   const icon = useMemo(() => {
     if (isLoading || waitingForConfirmation) {
@@ -115,7 +168,13 @@ export function AuthButton({
         ],
       )}
       isLoading={false}
-      disabled={isLoading || disabled || waitingForConfirmation}
+      disabled={
+        isLoading ||
+        disabled ||
+        waitingForConfirmation ||
+        extensionMissingForSigner ||
+        shouldChangeWallet
+      }
     >
       {icon}
       {text}
