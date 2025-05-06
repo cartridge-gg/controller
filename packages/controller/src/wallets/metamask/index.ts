@@ -20,7 +20,7 @@ export class MetaMaskWallet implements WalletAdapter {
     this.MMSDK = new MetaMaskSDK({
       dappMetadata: {
         name: "Cartridge Controller",
-        url: typeof window !== "undefined" ? window.location.href : "",
+        url: window.location.href,
       },
     });
     if (this.isAvailable()) {
