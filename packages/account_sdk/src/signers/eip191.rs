@@ -57,13 +57,14 @@ impl Eip191Signer {
 
     fn construct_signature(
         &self,
-        mut signature: Signature<Secp256k1>,
+        signature: Signature<Secp256k1>,
         y_parity: bool,
     ) -> SignerSignature {
-        if let Some(normalized) = signature.normalize_s() {
-            signature = normalized;
-        }
-
+        let (signature, y_parity) = if let Some(normalized) = signature.normalize_s() {
+            (normalized, !y_parity)
+        } else {
+            (signature, y_parity)
+        };
         let r_bytes = signature.r().to_bytes();
         let s_bytes = signature.s().to_bytes();
 
