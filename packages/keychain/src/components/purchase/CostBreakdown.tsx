@@ -1,18 +1,31 @@
-import { Card, CardContent, Separator } from "@cartridge/ui-next";
+import {
+  Card,
+  CardContent,
+  CreditIcon,
+  InfoIcon,
+  Separator,
+  Thumbnail,
+} from "@cartridge/ui-next";
 import { PricingDetails } from ".";
 import { ExternalWalletType } from "@cartridge/controller";
 import { WALLET_CONFIG } from "./CryptoCheckout";
+import { FeesTooltip } from "./FeesTooltip";
 
 type PaymentRails = "stripe" | "crypto";
+type PaymentUnit = "usdc" | "credits";
 
 export function CostBreakdown({
   rails,
   price,
   walletType,
+  paymentUnit,
+  openFeesTooltip = false,
 }: {
   rails: PaymentRails;
   price: PricingDetails;
   walletType?: ExternalWalletType;
+  paymentUnit?: PaymentUnit;
+  openFeesTooltip?: boolean;
 }) {
   const formatCurrency = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
@@ -22,53 +35,85 @@ export function CostBreakdown({
     return;
   }
 
-  const getNetwork = () => {
-    if (rails === "crypto" && walletType) {
-      const NetworkIcon = WALLET_CONFIG[walletType].networkIcon;
-
-      return (
-        <>
-          <NetworkIcon size="xs" className="inline-block" />
-          {WALLET_CONFIG[walletType].network}
-        </>
-      );
-    }
-
-    return null;
-  };
-
   return (
-    <Card>
+    <Card className="gap-3">
       <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
-        {rails === "stripe" && (
+        {rails === "crypto" && (
           <>
-            <div className="flex justify-between">
-              <div>Cost</div>
-              <div>{formatCurrency(price.baseCostInCents)}</div>
+            <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
+              Purchase funds on <Network walletType={walletType} />
             </div>
-
-            <div className="flex justify-between">
-              <div className="flex gap-1">Stripe Vendor Fee (2.9% + $0.30)</div>
-              <div>{formatCurrency(price.processingFeeInCents)}</div>
-            </div>
+            <Separator className="bg-background-200" />
           </>
         )}
 
-        {rails === "crypto" && (
-          <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
-            Purchase funds on {getNetwork()}
+        <div className="flex justify-between text-xs font-medium">
+          Cost
+          <div>{formatCurrency(price.baseCostInCents)}</div>
+        </div>
+        <div className="flex justify-between text-xs font-medium">
+          <div className="flex gap-2  text-xs font-medium">
+            Fees
+            <FeesTooltip
+              trigger={<InfoIcon size="xs" />}
+              isStripe={rails === "stripe"}
+              defaultOpen={openFeesTooltip}
+            />
           </div>
-        )}
-
-        <Separator className="bg-background-200" />
-
-        <div className="flex justify-between text-sm font-medium">
-          <div>Total</div>
-          <div className="text-foreground-100">
-            {formatCurrency(price.totalInCents)}
-          </div>
+          <div>{formatCurrency(price.processingFeeInCents)}</div>
         </div>
       </CardContent>
+      <div className="flex flex-row gap-3 h-[40px]">
+        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+          <div className="flex justify-between text-sm font-medium w-full">
+            Total
+            <div className="text-foreground-100">
+              {formatCurrency(price.totalInCents)}
+            </div>
+          </div>
+        </CardContent>
+        <PaymentType unit={paymentUnit} />
+      </div>
     </Card>
   );
 }
+
+const Network = ({ walletType }: { walletType?: ExternalWalletType }) => {
+  if (walletType) {
+    const NetworkIcon =
+      WALLET_CONFIG[walletType as keyof typeof WALLET_CONFIG].networkIcon;
+
+    return (
+      <>
+        <NetworkIcon size="xs" className="inline-block" />
+        {WALLET_CONFIG[walletType as keyof typeof WALLET_CONFIG].network}
+      </>
+    );
+  }
+
+  return null;
+};
+
+const PaymentType = ({ unit }: { unit?: PaymentUnit }) => {
+  if (!unit) {
+    return <></>;
+  }
+
+  return (
+    <CardContent className="flex items-center px-3 bg-background-200 gap-2 rounded-[4px] text-sm font-medium">
+      <Thumbnail
+        size="sm"
+        icon={
+          unit === "usdc" ? (
+            "https://static.cartridge.gg/tokens/usdc.svg"
+          ) : (
+            <CreditIcon />
+          )
+        }
+        variant="light"
+        rounded
+      />
+      {unit.toUpperCase()}
+    </CardContent>
+  );
+};

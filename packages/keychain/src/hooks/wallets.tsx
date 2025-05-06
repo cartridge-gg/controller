@@ -187,19 +187,12 @@ export class KeychainWallets {
     identifier: string,
     message: string,
   ): Promise<ExternalWalletResponse> {
-    console.log(
-      `KeychainWallets: signMessage called for identifier: ${identifier} and message: ${message}`,
-    );
-
     // --- Decision Logic ---
     // TODO: Implement logic to check if 'identifier' belongs to an embedded wallet (e.g., Turnkey)
     const embeddedWallet = this.getEmbeddedWallet(identifier);
 
     if (embeddedWallet) {
       // --- Embedded Wallet Path ---
-      console.log(
-        `KeychainWallets: Routing to embedded wallet for ${identifier}`,
-      );
       const response = await embeddedWallet.signMessage?.(message);
       if (!response?.success) {
         throw new Error(
@@ -209,9 +202,6 @@ export class KeychainWallets {
       return response;
     } else {
       // --- External Wallet Path ---
-      console.log(
-        `KeychainWallets: Routing to external wallet bridge for ${identifier}`,
-      );
       if (!this.parent) {
         console.error("KeychainWallets: Parent connection not available.");
         throw new Error("Wallet connection not ready.");
@@ -223,10 +213,6 @@ export class KeychainWallets {
         const response = await this.parent.externalSignMessage(
           identifier,
           message,
-        );
-        console.log(
-          "KeychainWallets: Received response from parent:",
-          response,
         );
 
         if (response.success && response.result) {

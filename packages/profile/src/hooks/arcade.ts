@@ -1,5 +1,7 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { ArcadeContext } from "#context/arcade";
+import { useAccount } from "./account";
+import { getChecksumAddress } from "starknet";
 
 /**
  * Custom hook to access the Arcade context and account information.
@@ -13,6 +15,7 @@ import { ArcadeContext } from "#context/arcade";
  * @throws {Error} If used outside of a ArcadeProvider context
  */
 export const useArcade = () => {
+  const { address } = useAccount();
   const context = useContext(ArcadeContext);
 
   if (!context) {
@@ -21,7 +24,31 @@ export const useArcade = () => {
     );
   }
 
-  const { chainId, provider, pins, games } = context;
+  const { chainId, provider, pins, followers, followeds, games, editions } =
+    context;
 
-  return { chainId, provider, pins, games };
+  const { followersCount, followedsCount } = useMemo(() => {
+    if (!address) {
+      return {
+        followersCount: 0,
+        followedsCount: 0,
+      };
+    }
+    return {
+      followersCount: followers[getChecksumAddress(address)]?.length || 0,
+      followedsCount: followeds[getChecksumAddress(address)]?.length || 0,
+    };
+  }, [followers, followeds, address]);
+
+  return {
+    chainId,
+    provider,
+    pins,
+    followers,
+    followeds,
+    games,
+    editions,
+    followersCount,
+    followedsCount,
+  };
 };

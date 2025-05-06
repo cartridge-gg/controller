@@ -1,12 +1,13 @@
-import {
-  ExternalWalletType,
-  WalletAdapter,
-  ExternalWallet,
-  ExternalWalletResponse,
-} from "./types";
+import { ArgentWallet } from "./argent";
 import { MetaMaskWallet } from "./metamask";
 import { PhantomWallet } from "./phantom";
-import { ArgentWallet } from "./argent";
+import { RabbyWallet } from "./rabby";
+import {
+  ExternalWallet,
+  ExternalWalletResponse,
+  ExternalWalletType,
+  WalletAdapter,
+} from "./types";
 
 export class WalletBridge {
   private readonly walletAdapters: Map<ExternalWalletType, WalletAdapter>;
@@ -19,9 +20,14 @@ export class WalletBridge {
 
   constructor() {
     this.walletAdapters = new Map<ExternalWalletType, WalletAdapter>();
-    this.walletAdapters.set("metamask", new MetaMaskWallet());
-    this.walletAdapters.set("phantom", new PhantomWallet());
-    this.walletAdapters.set("argent", new ArgentWallet());
+    const metamask = new MetaMaskWallet();
+    metamask.isAvailable() && this.walletAdapters.set("metamask", metamask);
+    const phantom = new PhantomWallet();
+    phantom.isAvailable() && this.walletAdapters.set("phantom", phantom);
+    const argent = new ArgentWallet();
+    argent.isAvailable() && this.walletAdapters.set("argent", argent);
+    const rabby = new RabbyWallet();
+    rabby.isAvailable() && this.walletAdapters.set("rabby", rabby);
 
     if (typeof window !== "undefined") {
       window.wallet_bridge = this;
@@ -239,8 +245,8 @@ declare global {
 }
 
 export type {
-  ExternalWalletType,
   ExternalWallet,
   ExternalWalletResponse,
+  ExternalWalletType,
   WalletAdapter,
 } from "./types";

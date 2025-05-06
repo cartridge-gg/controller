@@ -7,22 +7,28 @@ export const thumbnailVariants = cva(
   {
     variants: {
       variant: {
-        darkest: "bg-background-100",
-        darker: "bg-background-100",
-        dark: "bg-background-100",
-        default: "bg-background-200",
-        light: "bg-background-300",
-        lighter: "bg-background-400",
-        lightest: "bg-background-500",
+        darkest:
+          "bg-background-100 data-[transdark=true]:bg-translucent-dark-300 data-[translight=true]:bg-translucent-light-100",
+        darker:
+          "bg-background-100 data-[transdark=true]:bg-translucent-dark-200 data-[translight=true]:bg-translucent-light-100",
+        dark: "bg-background-100 data-[transdark=true]:bg-translucent-dark-200 data-[translight=true]:bg-translucent-light-150",
+        default:
+          "bg-background-200 data-[transdark=true]:bg-translucent-dark-150 data-[translight=true]:bg-translucent-light-150",
+        light:
+          "bg-background-300 data-[transdark=true]:bg-translucent-dark-150 data-[translight=true]:bg-translucent-light-200",
+        lighter:
+          "bg-background-400 data-[transdark=true]:bg-translucent-dark-100 data-[translight=true]:bg-translucent-light-200",
+        lightest:
+          "bg-background-500 data-[transdark=true]:bg-translucent-dark-100  data-[translight=true]:bg-translucent-light-300",
         ghost: "bg-transparent",
       },
       size: {
-        xs: "w-5 h-5 p-0.5 data-[centered=true]:p-[2px]",
-        sm: "w-6 h-6 p-0.5 data-[centered=true]:p-[3px]",
-        md: "w-8 h-8 p-0.5 data-[centered=true]:p-[4px]",
-        lg: "w-10 h-10 p-[3px] data-[centered=true]:p-[5px]",
-        xl: "w-12 h-12 p-[3px] data-[centered=true]:p-1.5",
-        xxl: "w-20 h-20 p-1 data-[centered=true]:p-1.5",
+        xs: "w-5 h-5 min-w-5 min-h-5 p-0.5 data-[centered=true]:p-[2px]",
+        sm: "w-6 h-6 min-w-6 min-h-6 p-0.5 data-[centered=true]:p-[3px]",
+        md: "w-8 h-8 min-w-8 min-h-8 p-0.5 data-[centered=true]:p-[4px]",
+        lg: "w-10 h-10 min-w-10 min-h-10 p-[3px] data-[centered=true]:p-[5px]",
+        xl: "w-12 h-12 min-w-12 min-h-12 p-[3px] data-[centered=true]:p-1.5",
+        xxl: "w-20 h-20 min-w-20 min-h-20 p-1 data-[centered=true]:p-1.5",
       },
     },
     defaultVariants: {
@@ -39,6 +45,8 @@ export interface ThumbnailProps extends VariantProps<typeof thumbnailVariants> {
   centered?: boolean;
   loading?: boolean;
   error?: boolean;
+  transdark?: boolean;
+  translight?: boolean;
   className?: string;
 }
 
@@ -49,6 +57,8 @@ export const Thumbnail = ({
   centered,
   loading,
   error,
+  transdark,
+  translight,
   variant,
   size,
   className,
@@ -58,6 +68,8 @@ export const Thumbnail = ({
       <div
         data-error={error}
         data-centered
+        data-transdark={transdark}
+        data-translight={translight}
         className={cn(thumbnailVariants({ variant, size }), className)}
       >
         <ErrorAlertIcon className="w-full h-full" variant="error" />
@@ -68,6 +80,8 @@ export const Thumbnail = ({
     return (
       <div
         data-centered
+        data-transdark={transdark}
+        data-translight={translight}
         className={cn(thumbnailVariants({ variant, size }), className)}
       >
         <SpinnerIcon className="w-full h-full animate-spin" />
@@ -78,6 +92,8 @@ export const Thumbnail = ({
     <div
       data-rounded={rounded}
       data-centered={centered}
+      data-transdark={transdark}
+      data-translight={translight}
       className={cn(thumbnailVariants({ variant, size }), className)}
     >
       {icon === undefined || null ? (

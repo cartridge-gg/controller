@@ -1,37 +1,27 @@
-import { eip191Encode } from "@cartridge/utils";
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
-import { Signature } from "ethers";
 
-export const signCreateControllerMessage = async (
+export const getWallet = async (
   subOrgId: string,
-  address: string,
   authIframeClient: TurnkeyIframeClient,
 ) => {
-  const message = "Hello World!";
-  const signedTx = await authIframeClient.signRawPayload({
+  const wallets = await authIframeClient.getWallets({
     organizationId: subOrgId,
-    signWith: address,
-    payload: eip191Encode(message),
-    encoding: "PAYLOAD_ENCODING_TEXT_UTF8",
-    hashFunction: "HASH_FUNCTION_SHA256",
   });
-
-  const r = signedTx.r.startsWith("0x") ? signedTx.r : "0x" + signedTx.r;
-  const s = signedTx.s.startsWith("0x") ? signedTx.s : "0x" + signedTx.s;
-
-  const vNumber = parseInt(signedTx.v, 16);
-  if (isNaN(vNumber) || (vNumber !== 0 && vNumber !== 1)) {
-    throw new Error(`Invalid recovery ID (v) received: ${signedTx.v}`);
+  if (wallets.wallets.length > 1) {
+    throw new Error(
+      "Multiple wallets found" + JSON.stringify(wallets, null, 2),
+    );
   }
-  const normalizedV = Signature.getNormalizedV(vNumber);
+  if (wallets.wallets.length === 0) {
+    throw new Error("No wallets found");
+  }
 
-  const signature = Signature.from({
-    r,
-    s,
-    v: normalizedV,
+  const wallet = await authIframeClient.getWalletAccount({
+    organizationId: subOrgId,
+    walletId: wallets.wallets[0].walletId,
   });
 
-  return signature.serialized;
+  return refineNonNull(wallet.account.address);
 };
 
 export const getOrCreateWallet = async (

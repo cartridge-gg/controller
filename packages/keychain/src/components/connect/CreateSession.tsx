@@ -3,7 +3,7 @@ import { SessionConsent } from "@/components/connect";
 import { Upgrade } from "./Upgrade";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { NOW } from "@/const";
+import { now } from "@/const";
 import { CreateSessionProvider } from "@/context/session";
 import { useConnection } from "@/hooks/connection";
 import {
@@ -23,7 +23,7 @@ import {
 } from "@cartridge/ui-next";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish } from "starknet";
-import { OcclusionDetector } from "../OcclusionDetector";
+// import { OcclusionDetector } from "../OcclusionDetector";
 import { useUpgrade } from "../provider/upgrade";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
@@ -65,7 +65,7 @@ const CreateSessionLayout = ({
   const upgrade = useUpgrade();
 
   const expiresAt = useMemo(() => {
-    return duration + NOW;
+    return duration + now();
   }, [duration]);
 
   const onCreateSession = useCallback(async () => {
@@ -109,7 +109,7 @@ const CreateSessionLayout = ({
 
   return (
     <>
-      <OcclusionDetector />
+      {/* <OcclusionDetector /> */}
       <LayoutContainer>
         <LayoutHeader
           className="px-6 pt-6 pb-0"

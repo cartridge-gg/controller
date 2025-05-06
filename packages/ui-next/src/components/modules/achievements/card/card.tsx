@@ -79,14 +79,14 @@ export const AchievementCard = ({
           <AchievementPagination
             direction="left"
             onClick={handlePrevious}
-            disabled={page === 0}
+            disabled={page === pages[0]}
           />
         )}
         {pages.length > 1 && (
           <AchievementPagination
             direction="right"
             onClick={handleNext}
-            disabled={page === pages.length - 1}
+            disabled={page === pages[pages.length - 1]}
           />
         )}
         {pages.length > 1 && (

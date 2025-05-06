@@ -480,3 +480,30 @@ async fn test_verify_session_signature_valid() {
 
     assert!(!is_valid.is_zero(), "Session signature should be valid");
 }
+
+#[tokio::test]
+async fn test_verify_eip191_session_signature_valid() {
+    let owner = Owner::Signer(Signer::new_eip191_random());
+    let runner = KatanaRunner::load();
+    let mut controller = runner
+        .deploy_controller("username".to_owned(), owner, Version::V1_0_9)
+        .await;
+
+    // Create a session
+    let session_account = controller.create_wildcard_session(u64::MAX).await.unwrap();
+
+    // Get the session hash
+    let session_hash = session_account
+        .session
+        .inner
+        .get_message_hash_rev_1(controller.chain_id, controller.address);
+
+    // Check if the session signature is valid using the contract's is_session_signature_valid method
+    let is_valid = abigen::controller::ControllerReader::new(controller.address(), runner.client())
+        .is_valid_signature(&session_hash, &session_account.session_authorization)
+        .call()
+        .await
+        .unwrap();
+
+    assert!(!is_valid.is_zero(), "Session signature should be valid");
+}

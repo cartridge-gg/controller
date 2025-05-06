@@ -8,6 +8,7 @@ import { Pending } from "./pending";
 import { Consent, Slot } from "./slot";
 import { Fund } from "./slot/fund";
 import { StarterPackWrapper } from "./starterpack";
+import { FeatureToggle } from "./feature-toggle";
 
 export function App() {
   return (
@@ -27,6 +28,7 @@ export function App() {
           path="starter-pack/:starterpackId"
           element={<StarterPackWrapper />}
         />
+        <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="*" element={<div>Page not found</div>} />
       </Routes>
     </div>

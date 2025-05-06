@@ -23,7 +23,7 @@ const variants = [
   "lightest",
   "ghost",
 ] as const;
-const sizes = ["xl", "2xl"] as const;
+const sizes = ["xl", "2xl", "3xl"] as const;
 const ranks = ["bronze", "silver", "gold"] as const;
 
 export const Default: Story = {

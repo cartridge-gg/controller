@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.7.11",
+  "version": "0.7.13-alpha.2",
   "description": "Cartridge Controller",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -47,7 +47,8 @@
     "@telegram-apps/sdk": "^2.4.0",
     "@turnkey/sdk-browser": "^4.0.0",
     "cbor-x": "^1.5.0",
-    "fast-deep-equal": "catalog:"
+    "mipd": "^0.0.7",
+    "@walletconnect/ethereum-provider": "^2.20.0"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",

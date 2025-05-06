@@ -25,11 +25,19 @@ export const cartridgeTWPreset: Partial<Config> = {
         400: "var(--background-400)",
         500: "var(--background-500)",
       },
-      translucent: {
-        DEFAULT: "var(--translucent-100)",
-        100: "var(--translucent-100)",
-        200: "var(--translucent-200)",
-        300: "var(--translucent-300)",
+      "translucent-dark": {
+        DEFAULT: "var(--translucent-dark-100)",
+        100: "var(--translucent-dark-100)",
+        150: "var(--translucent-dark-150)",
+        200: "var(--translucent-dark-200)",
+        300: "var(--translucent-dark-300)",
+      },
+      "translucent-light": {
+        DEFAULT: "var(--translucent-light-100)",
+        100: "var(--translucent-light-100)",
+        150: "var(--translucent-light-150)",
+        200: "var(--translucent-light-200)",
+        300: "var(--translucent-light-300)",
       },
       spacer: {
         DEFAULT: "var(--spacer-100)",
@@ -62,6 +70,15 @@ export const cartridgeTWPreset: Partial<Config> = {
         100: "var(--constructive-100)",
         foreground: "var(--spacer-100)",
       },
+      "wallet-theme": {
+        DEFAULT: "var(--wallet-theme-100)",
+        100: "var(--wallet-theme-100)",
+        200: "var(--wallet-theme-200)",
+        300: "var(--wallet-theme-300)",
+        400: "var(--wallet-theme-400)",
+        500: "var(--wallet-theme-500)",
+        600: "var(--wallet-theme-600)",
+      },
       // TODO: Should not be used
       border: "var(--background-100)",
       input: "var(--background-300)",
@@ -89,10 +106,16 @@ export const cartridgeTWPreset: Partial<Config> = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        shimmer: {
+          "0%": { backgroundPosition: "100% 0" },
+          "20%": { backgroundPosition: "-100% 0" },
+          "100%": { backgroundPosition: "-100% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        shimmer: "shimmer 2s linear infinite",
       },
     },
   },

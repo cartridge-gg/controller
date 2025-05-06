@@ -76,6 +76,7 @@ export function Settings() {
     }),
     [],
   );
+
   const data = useSignerQuery({
     username:
       process.env.NODE_ENV === "development"

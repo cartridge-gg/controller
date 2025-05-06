@@ -6,7 +6,7 @@ import {
   useAccount,
   useConnect,
   useInjectedConnectors,
-  voyager,
+  cartridge,
 } from "@starknet-react/core";
 import {
   CallData,
@@ -174,7 +174,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
 
       <LayoutFooter>
         <AmountSelection
-          creditsAmount={usdToCredits(usdAmount)}
+          wholeCredits={usdToCredits(usdAmount)}
           lockSelection={isLoading}
           onChange={onAmountChanged}
         />
@@ -259,7 +259,7 @@ function ExternalWalletProvider({ children }: PropsWithChildren) {
       chains={[sepolia, mainnet]}
       provider={() => controller.provider}
       connectors={connectors}
-      explorer={voyager}
+      explorer={cartridge}
     >
       {children}
     </StarknetConfig>

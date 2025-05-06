@@ -14,7 +14,7 @@ export function Max({
   return (
     <Button
       className={cn(
-        "px-2.5 py-1.5 h-7 rounded-full bg-background-400 text-foreground-100 text-xs font-semibold tracking-wider normal-case hover:bg-background-500 shadow-none font-sans",
+        "px-2.5 py-1.5 h-7 rounded bg-background-400 text-foreground-100 text-xs font-semibold tracking-wider normal-case hover:bg-background-500 shadow-none font-sans",
         className,
       )}
       onClick={onClick}

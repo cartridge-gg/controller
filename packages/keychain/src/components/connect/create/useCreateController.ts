@@ -1,19 +1,34 @@
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
-import { DEFAULT_SESSION_DURATION, NOW } from "@/const";
-import { doLogin } from "@/hooks/account";
+import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { useConnection } from "@/hooks/connection";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
-import { Signer } from "@cartridge/account-wasm";
-import { AccountQuery, useAccountQuery } from "@cartridge/utils/api/cartridge";
+import { computeAccountAddress, Owner, Signer } from "@cartridge/account-wasm";
+import {
+  AccountQuery,
+  Eip191Credentials,
+  SignerInput,
+  SignerType,
+  useAccountQuery,
+  useRegisterMutation,
+  WebauthnCredentials,
+} from "@cartridge/utils/api/cartridge";
 import { useCallback, useState } from "react";
-import { AuthenticationMode, LoginMode } from "../types";
-import { useSignupWithSocial } from "./social/signup";
-import { fetchAccount } from "./utils";
-import { useSignupWithWebauthn } from "./webauthn/signup";
+import { shortString } from "starknet";
+import { AuthenticationMethod, LoginMode } from "../types";
+import { useExternalWalletAuthentication } from "./external-wallet";
+import { useSocialAuthentication } from "./social";
+import { AuthenticationStep, fetchController } from "./utils";
+import { useWalletConnectAuthentication } from "./wallet-connect";
+import { useWebauthnAuthentication } from "./webauthn";
 
 export interface SignupResponse {
   address: string;
+  signer: Signer;
+  type: AuthenticationMethod;
+}
+
+export interface LoginResponse {
   signer: Signer;
 }
 
@@ -24,12 +39,25 @@ export function useCreateController({
   isSlot?: boolean;
   loginMode?: LoginMode;
 }) {
+  const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
   const [pendingUsername, setPendingUsername] = useState<string>();
+  const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
+
+  const [authenticationStep, setAuthenticationStep] =
+    useState<AuthenticationStep>(AuthenticationStep.FillForm);
+
   const { origin, policies, rpcUrl, chainId, setController } = useConnection();
-  const { signupWithWebauthn } = useSignupWithWebauthn();
-  const { signupWithSocial } = useSignupWithSocial();
+  const { mutateAsync: register } = useRegisterMutation();
+  const { signup: signupWithWebauthn, login: loginWithWebauthn } =
+    useWebauthnAuthentication();
+  const { signup: signupWithSocial, login: loginWithSocial } =
+    useSocialAuthentication();
+  const { signup: signupWithExternalWallet, login: loginWithExternalWallet } =
+    useExternalWalletAuthentication();
+  const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
+    useWalletConnectAuthentication(setOverlay);
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -56,8 +84,15 @@ export function useCreateController({
             username,
             controllerNode.constructorCalldata[0],
             controllerNode.address,
-            credentialId,
-            publicKey,
+            {
+              signer: {
+                webauthn: {
+                  rpId: import.meta.env.VITE_RP_ID!,
+                  credentialId,
+                  publicKey,
+                },
+              },
+            },
           );
 
           window.controller = controller;
@@ -102,46 +137,100 @@ export function useCreateController({
   );
 
   const handleSignup = useCallback(
-    async (username: string, authenticationMode: AuthenticationMode) => {
+    async (username: string, authenticationMode: AuthenticationMethod) => {
       if (!origin || !chainId || !rpcUrl) {
         throw new Error("Origin, chainId, or rpcUrl not found");
       }
 
       let signupResponse: SignupResponse | undefined;
+      let signer: SignerInput | undefined;
       switch (authenticationMode) {
-        case AuthenticationMode.Webauthn:
+        case "webauthn":
           await signupWithWebauthn(username, doPopupFlow);
+          signer = {
+            type: SignerType.Webauthn,
+            credential: JSON.stringify({}),
+          };
           return;
-        case AuthenticationMode.Social:
-          signupResponse = await signupWithSocial(username);
+        case "discord":
+          signupResponse = (await signupWithSocial({
+            username,
+          })) as SignupResponse;
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: "discord",
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        case "walletconnect":
+          signupResponse = await signupWithWalletConnect();
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: authenticationMode,
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        case "metamask":
+        case "phantom":
+        case "argent":
+        case "rabby":
+          signupResponse = await signupWithExternalWallet(authenticationMode);
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: authenticationMode,
+              eth_address: signupResponse.address,
+            }),
+          };
           break;
         default:
           break;
       }
 
-      if (!signupResponse) {
-        throw new Error("No signature found");
+      if (!signupResponse || !signer) {
+        throw new Error("Signup failed");
       }
+
+      const classHash = STABLE_CONTROLLER.hash;
+      const owner = {
+        signer: signupResponse.signer,
+      };
+      const salt = shortString.encodeShortString(username);
+      const address = computeAccountAddress(classHash, owner, salt);
 
       const controller = new Controller({
         appId: origin,
-        classHash: STABLE_CONTROLLER.hash,
+        classHash,
         chainId,
         rpcUrl,
-        address: signupResponse.address,
+        address,
         username,
-        owner: {
-          signer: signupResponse.signer,
+        owner,
+      });
+
+      const result = await controller.login(now() + DEFAULT_SESSION_DURATION);
+
+      const registerRet = await register({
+        username,
+        chainId: shortString.decodeShortString(chainId),
+        owner: signer,
+        session: {
+          expiresAt: result.session.expiresAt.toString(),
+          guardianKeyGuid: result.session.guardianKeyGuid,
+          metadataHash: result.session.metadataHash,
+          sessionKeyGuid: result.session.sessionKeyGuid,
+          allowedPoliciesRoot: result.allowedPoliciesRoot,
+          authorization: result.authorization ?? [],
         },
       });
-      window.controller = controller;
-      setController(controller);
 
-      const loginResponse = await controller.login(
-        NOW + DEFAULT_SESSION_DURATION,
-      );
-      if (!loginResponse.isRegistered) {
-        throw new Error("Failed to login");
+      if (registerRet.register.username) {
+        window.controller = controller;
+        setController(controller);
       }
     },
     [
@@ -152,58 +241,125 @@ export function useCreateController({
       policies,
       isSlot,
       createController,
+      setController,
       doPopupFlow,
+      signupWithExternalWallet,
+      signupWithSocial,
+      signupWithWebauthn,
+      signupWithWalletConnect,
     ],
   );
 
   const handleLogin = useCallback(
-    async (username: string) => {
-      const { account } = await fetchAccount(username);
-      const { credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
-
-      const controllerNode = controllers?.edges?.[0]?.node;
-
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
-
-      if (!controllerNode || !publicKey) {
-        return;
+    async (username: string, authenticationMethod: AuthenticationMethod) => {
+      if (!chainId) {
+        throw new Error("No chainId");
       }
 
-      const controller = await createController(
-        origin!,
-        chainId!,
-        rpcUrl!,
+      const controllerRet = await fetchController(chainId, username);
+      if (!controllerRet) {
+        throw new Error("Undefined controller");
+      }
+
+      const controller = controllerRet.controller;
+
+      const signer = controller?.signers?.[0];
+
+      if (!signer || !signer.metadata) {
+        // Handle the case where the signer or metadata is missing
+        // This might involve throwing an error or logging a warning
+        console.error(
+          "Signer or signer metadata not found for controller:",
+          controller,
+        );
+        // Depending on expected behavior, you might want to throw an error:
+        // throw new Error("Signer information is missing.");
+        return; // Or handle appropriately
+      }
+
+      let loginResponse: LoginResponse | undefined;
+      switch (authenticationMethod) {
+        case "webauthn": {
+          const webauthnCredential = (signer.metadata as WebauthnCredentials)
+            .webauthn?.[0];
+          if (!webauthnCredential) {
+            throw new Error("WebAuthn credential not found for signer.");
+          }
+
+          await loginWithWebauthn(
+            controller,
+            webauthnCredential,
+            loginMode,
+            !!isSlot,
+          );
+          return;
+        }
+        case "discord": {
+          setWaitingForConfirmation(true);
+          const eip191Credential = (signer.metadata as Eip191Credentials)
+            .eip191?.[0];
+          if (!eip191Credential) {
+            throw new Error("EIP191 credential not found for signer.");
+          }
+
+          loginResponse = (await loginWithSocial({
+            address: eip191Credential.ethAddress,
+          })) as LoginResponse;
+          break;
+        }
+        case "rabby":
+        case "metamask": {
+          setWaitingForConfirmation(true);
+          const credential = (signer.metadata as Eip191Credentials).eip191?.[0];
+          if (!credential) {
+            throw new Error("EIP191 credential not found for signer.");
+          }
+
+          loginResponse = (await loginWithExternalWallet(
+            controller,
+            credential,
+          )) as LoginResponse;
+          break;
+        }
+        case "walletconnect":
+          setWaitingForConfirmation(true);
+          loginResponse = (await loginWithWalletConnect(
+            controller,
+          )) as LoginResponse;
+          break;
+        case "phantom":
+        case "argent":
+        default:
+          throw new Error("Unknown login method");
+      }
+
+      const controllerObject = await createController(
+        origin,
+        chainId,
+        rpcUrl,
         username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
-        credentialId,
-        publicKey,
+        controller.constructorCalldata[0],
+        controller.address,
+        {
+          signer: loginResponse?.signer,
+        },
       );
 
-      if (loginMode === LoginMode.Webauthn) {
-        await doLogin({
-          name: username,
-          credentialId,
-          finalize: !!isSlot,
-        });
-      } else {
-        await controller.login(NOW + DEFAULT_SESSION_DURATION);
-      }
+      await controllerObject.login(now() + DEFAULT_SESSION_DURATION);
 
-      window.controller = controller;
-      setController(controller);
+      window.controller = controllerObject;
+      setController(controllerObject);
     },
     [
-      chainId,
-      rpcUrl,
-      origin,
-      loginMode,
-      policies,
       isSlot,
-      createController,
-      doPopupFlow,
+      loginWithWebauthn,
+      loginWithSocial,
+      loginWithWalletConnect,
+      loginWithExternalWallet,
+      loginMode,
+      chainId,
+      setWaitingForConfirmation,
+      setController,
     ],
   );
 
@@ -211,19 +367,16 @@ export function useCreateController({
     async (
       username: string,
       exists: boolean,
-      authenticationMode?: AuthenticationMode,
+      authenticationMethod?: AuthenticationMethod,
     ) => {
       setError(undefined);
       setIsLoading(true);
 
       try {
         if (exists) {
-          await handleLogin(username);
+          await handleLogin(username, authenticationMethod ?? "webauthn");
         } else {
-          await handleSignup(
-            username,
-            authenticationMode ?? AuthenticationMode.Webauthn,
-          );
+          await handleSignup(username, authenticationMethod ?? "webauthn");
         }
       } catch (e: unknown) {
         if (
@@ -237,6 +390,10 @@ export function useCreateController({
 
         console.error(e);
         setError(e as Error);
+      } finally {
+        if (exists) {
+          setWaitingForConfirmation(false);
+        }
       }
       setIsLoading(false);
     },
@@ -245,9 +402,15 @@ export function useCreateController({
 
   return {
     isLoading,
+    waitingForConfirmation,
+    setWaitingForConfirmation,
+    authenticationStep,
+    setAuthenticationStep,
     error,
     setError,
     handleSubmit,
+    overlay,
+    setOverlay,
   };
 }
 
@@ -258,8 +421,7 @@ export async function createController(
   username: string,
   classHash: string,
   address: string,
-  credentialId: string,
-  publicKey: string,
+  owner: Owner,
 ) {
   return new Controller({
     appId: origin,
@@ -268,14 +430,6 @@ export async function createController(
     rpcUrl,
     address,
     username,
-    owner: {
-      signer: {
-        webauthn: {
-          rpId: import.meta.env.VITE_RP_ID!,
-          credentialId,
-          publicKey,
-        },
-      },
-    },
+    owner,
   });
 }

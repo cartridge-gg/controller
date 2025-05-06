@@ -1,6 +1,8 @@
 import { createContext, useContext } from "react";
 
 const initialState = {
+  withBackground: false,
+  setWithBackground: () => {},
   withBottomTabs: false,
   setWithBottomTabs: () => {},
   withFooter: false,
@@ -8,6 +10,8 @@ const initialState = {
 };
 
 type LayoutContextType = {
+  withBackground: boolean;
+  setWithBackground: (withBackground: boolean) => void;
   withBottomTabs: boolean;
   setWithBottomTabs: (withBottomTabs: boolean) => void;
   withFooter: boolean;

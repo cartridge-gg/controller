@@ -1,4 +1,4 @@
-export type ExternalWalletType = "argent" | "metamask" | "phantom";
+export type ExternalWalletType = "argent" | "metamask" | "phantom" | "rabby";
 export type ExternalPlatform = "starknet" | "ethereum" | "solana";
 
 export interface ExternalWallet {
@@ -8,6 +8,7 @@ export interface ExternalWallet {
   chainId?: string;
   name?: string;
   platform?: ExternalPlatform;
+  connectedAccounts?: string[];
 }
 
 export interface ExternalWalletResponse<T = unknown> {

@@ -1,17 +1,18 @@
+import { MetaMaskSDK } from "@metamask/sdk";
 import {
-  WalletAdapter,
+  ExternalPlatform,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
-  ExternalPlatform,
+  WalletAdapter,
 } from "../types";
-import { MetaMaskSDK } from "@metamask/sdk";
 
 export class MetaMaskWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "metamask";
   readonly platform: ExternalPlatform = "ethereum";
   private MMSDK: MetaMaskSDK;
   private account: string | undefined = undefined;
+  private connectedAccounts: string[] = [];
 
   constructor() {
     this.MMSDK = new MetaMaskSDK({
@@ -19,6 +20,19 @@ export class MetaMaskWallet implements WalletAdapter {
         name: "Cartridge Controller",
         url: window.location.href,
       },
+    });
+    this.MMSDK.sdkInitPromise?.then(() => {
+      this.MMSDK.getProvider()
+        ?.request({
+          method: "eth_accounts",
+        })
+        .then((accounts: any) => {
+          if (accounts && accounts.length > 0) {
+            console.log(accounts);
+            this.account = accounts[0];
+            this.connectedAccounts = accounts;
+          }
+        });
     });
   }
 
@@ -36,6 +50,7 @@ export class MetaMaskWallet implements WalletAdapter {
       chainId: available ? window.ethereum?.chainId : undefined,
       name: "MetaMask",
       platform: this.platform,
+      connectedAccounts: this.connectedAccounts,
     };
   }
 
@@ -52,6 +67,7 @@ export class MetaMaskWallet implements WalletAdapter {
       const accounts = await this.MMSDK.connect();
       if (accounts && accounts.length > 0) {
         this.account = accounts[0];
+        this.connectedAccounts = accounts;
         return { success: true, wallet: this.type, account: this.account };
       }
 
@@ -101,8 +117,9 @@ export class MetaMaskWallet implements WalletAdapter {
         throw new Error("MetaMask is not connected");
       }
 
-      const result = await this.MMSDK.connectAndSign({
-        msg: message,
+      const result = await this.MMSDK.getProvider()?.request({
+        method: "personal_sign",
+        params: [this.account!, message],
       });
 
       return { success: true, wallet: this.type, result };

@@ -1,18 +1,40 @@
-import { Outlet, Route, Routes, Navigate, useLocation } from "react-router-dom";
+import {
+  Outlet,
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { Account } from "#components/account";
 import {
   Inventory,
   Collection,
   Collectible,
+  CollectionAsset,
+  CollectibleAsset,
   SendCollection,
+  SendCollectible,
   SendToken,
   Token,
 } from "#components/inventory";
 import { Achievements } from "#components/achievements";
 import { Activity } from "#components/activity";
 import { Slot } from "#components/slot";
+import { useMemo } from "react";
+import { Socials } from "./socials";
+import { Leaderboard } from "./leaderboard";
 
 export function App() {
+  const [searchParams] = useSearchParams();
+  const social = useMemo(() => {
+    return searchParams.get("social");
+  }, [searchParams]);
+
+  if (social) {
+    return <Socials />;
+  }
+
   return (
     <Routes>
       <Route element={<Outlet />}>
@@ -30,14 +52,22 @@ export function App() {
                 <Route path="send" element={<SendToken />} />
               </Route>
               <Route path="collection/:address" element={<Collection />}>
-                <Route path="token/:tokenId" element={<Collectible />}>
+                <Route path="token/:tokenId" element={<CollectionAsset />}>
                   <Route path="send" element={<SendCollection />} />
                 </Route>
                 <Route path="send" element={<SendCollection />} />
               </Route>
+              <Route path="collectible/:address" element={<Collectible />}>
+                <Route path="token/:tokenId" element={<CollectibleAsset />}>
+                  <Route path="send" element={<SendCollectible />} />
+                </Route>
+              </Route>
             </Route>
             <Route path="achievements" element={<Achievements />}>
               <Route path=":address" element={<Achievements />} />
+            </Route>
+            <Route path="leaderboard" element={<Leaderboard />}>
+              <Route path=":address" element={<Leaderboard />} />
             </Route>
             <Route path="trophies" element={<RedirectAchievements />}>
               <Route path=":address" element={<RedirectAchievements />} />

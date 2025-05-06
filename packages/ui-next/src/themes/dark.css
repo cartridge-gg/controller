@@ -6,9 +6,15 @@
     --background-400: #2a2f2a;
     --background-500: #373c38;
 
-    --translucent-100: #00000014;
-    --translucent-200: #0000007a;
-    --translucent-300: #000000a3;
+    --translucent-dark-100: #00000014;
+    --translucent-dark-150: #00000029;
+    --translucent-dark-200: #0000007a;
+    --translucent-dark-300: #000000a3;
+
+    --translucent-light-100: #ffffff0a;
+    --translucent-light-150: #ffffff29;
+    --translucent-light-200: #ffffff7a;
+    --translucent-light-300: #ffffffa3;
 
     --spacer-100: #0f1410;
 

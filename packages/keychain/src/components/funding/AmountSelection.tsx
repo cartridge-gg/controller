@@ -5,20 +5,20 @@ import { useCallback, useRef, useState } from "react";
 export const USD_AMOUNTS = [1, 5, 10];
 
 type AmountSelectionProps = {
-  creditsAmount: number;
+  wholeCredits: number;
   lockSelection?: boolean;
   enableCustom?: boolean;
   onChange?: (amount: number) => void;
 };
 
 export function AmountSelection({
-  creditsAmount,
+  wholeCredits,
   lockSelection,
   enableCustom,
   onChange,
 }: AmountSelectionProps) {
   const [selectedUSD, setSelectedUSD] = useState<number>(
-    creditsToUSD(creditsAmount),
+    creditsToUSD(wholeCredits),
   );
   const [custom, setCustom] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -74,11 +74,10 @@ export function AmountSelection({
               onClick={() => {
                 setCustom(true);
                 onChange?.(0);
-
-                if (selectedUSD !== creditsToUSD(creditsAmount)) {
-                  setSelectedUSD(creditsToUSD(creditsAmount));
+                const usd = creditsToUSD(wholeCredits);
+                if (selectedUSD !== usd) {
+                  setSelectedUSD(usd);
                 }
-
                 setFocus();
               }}
             >
@@ -95,7 +94,7 @@ export function AmountSelection({
               inputMode="numeric"
               pattern="[0-9]*"
               step="1"
-              value={creditsToUSD(creditsAmount) || ""}
+              value={creditsToUSD(wholeCredits) || ""}
               disabled={lockSelection}
               onChange={(e) => {
                 const value = e.target.value;
