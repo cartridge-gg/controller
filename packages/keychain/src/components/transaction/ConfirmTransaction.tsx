@@ -1,5 +1,5 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
-import { LayoutContent, Token, WalletType } from "@cartridge/ui-next";
+import { LayoutContent, WalletType } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ExecuteCtx } from "@/utils/connection";
 import { Call, EstimateFee, Uint256, uint256 } from "starknet";
@@ -58,22 +58,6 @@ export function ConfirmTransaction() {
   // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
   const { token } = useToken(call?.tokenAddress!);
 
-  const _token: Token = useMemo(() => {
-    return {
-      metadata: {
-        ...token,
-        image: token.icon || token.contract.metadata().logoUrl || "",
-      },
-      balance: {
-        // Convert bigint into number
-        amount: Number(token.balance) / Math.pow(10, token.decimals),
-        // Not sure how to convert
-        value: Number(token.price?.amount) / Math.pow(10, token.decimals),
-        change: token.decimals,
-      },
-    };
-  }, [token]);
-
   const { username: destinationUsername } = useUsername(
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     call?.destinationAddress!,
@@ -106,7 +90,7 @@ export function ConfirmTransaction() {
           wallet={WalletType.Controller}
         />
 
-        <TransactionSending token={_token} amount={amount} />
+        <TransactionSending token={token} amount={amount} />
       </LayoutContent>
     </ExecutionContainer>
   );

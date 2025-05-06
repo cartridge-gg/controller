@@ -1,22 +1,29 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { TransactionSending } from "./sending";
-import type { Token } from "@cartridge/ui-next";
+import { ERC20 } from "../provider/tokens";
 
-const mockToken: Token = {
-  balance: {
-    amount: 1275,
-    value: 0,
-    change: 0,
-  },
-  metadata: {
-    name: "Paper",
-    symbol: "PAPER",
-    decimals: 18,
+const mockToken: ERC20 = {
+  address: "0x0124aeb495b947201f5faC96fD1138E326AD86195B98df6DEc9009158A533B49",
+  balance: 10000000000000000000n,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-expect-error
+  contract: {
     address:
-      "0x0410466536b5ae074f7fea81e5533b8134a9fa18b3dd077dd9db08f64997d113",
-    image:
-      "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/811f019a-0461-4cff-6c1e-442102863f00/logo",
+      "0x0124aeb495b947201f5faC96fD1138E326AD86195B98df6DEc9009158A533B49",
+    decimals: undefined,
+    logoUrl: undefined,
+    name: undefined,
   },
+  decimals: 18,
+  icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/a3bfe959-50c4-4f89-0aef-b19207d82a00/logo",
+  name: "LORDS",
+  price: {
+    amount: "27172434262725432",
+    base: "0x0124aeb495b947201f5faC96fD1138E326AD86195B98df6DEc9009158A533B49",
+    decimals: 18,
+    quote: "USDC",
+  },
+  symbol: "LORDS",
 };
 
 const meta: Meta<typeof TransactionSending> = {
