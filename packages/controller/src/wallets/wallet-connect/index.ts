@@ -105,7 +105,7 @@ export class WalletConnectWallet implements WalletAdapter {
 
       const result = await this.provider.request({
         method: "personal_sign",
-        params: [this.account!, message] as any,
+        params: [message, this.account!],
       });
 
       return { success: true, wallet: this.type, result };

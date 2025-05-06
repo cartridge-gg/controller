@@ -51,20 +51,17 @@ export const useWalletConnectAuthentication = (
         projectId: REOWN_PROJECT_ID,
         metadata: {
           name: "Cartridge",
-          description: "Cartridge",
+          description: "Cartridge Controller, a wallet designed for gamers",
           url: "https://cartridge.gg",
-          icons: ["https://avatars.githubusercontent.com/u/37784886"],
+          icons: [
+            "https://avatars.githubusercontent.com/u/101216134?s=200&v=4",
+          ],
         },
         showQrModal: false,
         chains: [1],
-        methods: [
-          "eth_requestAccounts",
-          "eth_sendTransaction",
-          "personal_sign",
-          "eth_signTypedData_v4",
-          "wallet_switchEthereumChain",
-          "eth_getBalance",
-        ],
+        optionalChains: [1],
+        optionalMethods: ["eth_requestAccounts", "personal_sign"],
+        methods: [],
       });
 
       await provider.disconnect();
@@ -100,7 +97,11 @@ export const useWalletConnectAuthentication = (
     }, 120_000);
 
     try {
-      ethereumProvider.connect();
+      ethereumProvider.connect().catch((error) => {
+        setOverlay(null);
+        reject(error as Error);
+        connectionPromiseRef.current = undefined;
+      });
       await promise;
     } finally {
       clearTimeout(timeoutId);
@@ -114,6 +115,8 @@ export const useWalletConnectAuthentication = (
 
     const wallet = new WalletConnectWallet(ethereumProvider, address);
     window.keychain_wallets?.addEmbeddedWallet(address, wallet);
+
+    connectionPromiseRef.current = undefined;
 
     return {
       address,
@@ -147,7 +150,11 @@ export const useWalletConnectAuthentication = (
       }, 120_000);
 
       try {
-        ethereumProvider.connect();
+        ethereumProvider.connect().catch((error) => {
+          setOverlay(null);
+          reject(error as Error);
+          connectionPromiseRef.current = undefined;
+        });
         await promise;
       } finally {
         clearTimeout(timeoutId);
@@ -157,17 +164,18 @@ export const useWalletConnectAuthentication = (
         method: "eth_requestAccounts",
       });
 
+      const address = accounts[0];
       if (!accounts.find((a) => BigInt(a) === BigInt(signerAddress))) {
         setChangeWallet(true);
         return;
       }
 
-      const wallet = new WalletConnectWallet(ethereumProvider, signerAddress);
+      const wallet = new WalletConnectWallet(ethereumProvider, address);
       await wallet.connect();
-      window.keychain_wallets?.addEmbeddedWallet(signerAddress, wallet);
+      window.keychain_wallets?.addEmbeddedWallet(address, wallet);
 
       return {
-        signer: { eip191: { address: signerAddress } },
+        signer: { eip191: { address } },
       };
     },
     [chainId, rpcUrl, origin, setController, ethereumProvider],
