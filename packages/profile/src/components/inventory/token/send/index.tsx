@@ -14,7 +14,7 @@ import {
   Spinner,
   PaperPlaneIcon,
 } from "@cartridge/ui-next";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Call,
@@ -35,6 +35,7 @@ export function SendToken() {
     tokenAddress: tokenAddress!,
   });
   const { tokens } = useTokens();
+  const userSelectedToken = useRef(false);
 
   const { refetchTransfers } = useData();
   const [searchParams] = useSearchParams();
@@ -46,7 +47,7 @@ export function SendToken() {
   const [toError, setToError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<Token | undefined>();
+  const [selectedToken, setSelectedToken] = useState<Token | undefined>(token);
   const [recipientLoading, setRecipientLoading] = useState(false);
 
   const disabled = useMemo(() => {
@@ -62,11 +63,17 @@ export function SendToken() {
     setValidated(false);
   }, [warning, setValidated]);
 
+  useEffect(() => {
+    if (!userSelectedToken.current && token) {
+      setSelectedToken(token);
+    }
+  }, [token]);
+
   const onChangeToken = useCallback(
     (token: Token) => {
       setSelectedToken(token);
-      // Reset amount when token changes
       setAmount(undefined);
+      userSelectedToken.current = true;
     },
     [setSelectedToken, setAmount],
   );
@@ -74,7 +81,6 @@ export function SendToken() {
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
       setSubmitted(true);
-      setLoading(true);
       if (!selectedToken || !to || !amount) return;
 
       setLoading(true);
@@ -99,7 +105,7 @@ export function SendToken() {
               TransactionFinalityStatus.ACCEPTED_ON_L2,
             ],
           });
-          // Refetch transfers after 5 seconds to leave time to the indexer to take the new tx into account
+          // Refetch transfers 5 seconds after to leave time to the indexer to take the new tx into account
           setTimeout(() => {
             refetchTransfers();
           }, 5000);
@@ -165,13 +171,15 @@ export function SendToken() {
           setError={setToError}
           setParentLoading={setRecipientLoading}
         />
-        <SendAmount
-          token={selectedToken || token}
-          amount={amount}
-          submitted={submitted}
-          setAmount={setAmount}
-          setError={setAmountError}
-        />
+        {selectedToken && (
+          <SendAmount
+            token={selectedToken}
+            amount={amount}
+            submitted={submitted}
+            setAmount={setAmount}
+            setError={setAmountError}
+          />
+        )}
       </LayoutContent>
 
       <LayoutFooter>
@@ -195,7 +203,7 @@ export function SendToken() {
             disabled={disabled}
             variant="secondary"
             type="button"
-            className="w-fit"
+            className="w-1/3"
             isLoading={loading}
             onClick={handleBack}
           >
@@ -204,7 +212,7 @@ export function SendToken() {
           <Button
             disabled={disabled}
             type="submit"
-            className="w-full"
+            className="w-2/3"
             isLoading={loading}
             onClick={() => onSubmit(to, amount!)}
           >
