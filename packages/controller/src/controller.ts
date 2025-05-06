@@ -116,7 +116,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (!!document.hasStorageAccess) {
+    if (typeof document !== "undefined" && !!document.hasStorageAccess) {
       const ok = await document.hasStorageAccess();
       if (!ok) {
         await document.requestStorageAccess();
@@ -187,7 +187,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (!!document.hasStorageAccess) {
+    if (typeof document !== "undefined" && !!document.hasStorageAccess) {
       const ok = await document.hasStorageAccess();
       if (!ok) {
         await document.requestStorageAccess();
