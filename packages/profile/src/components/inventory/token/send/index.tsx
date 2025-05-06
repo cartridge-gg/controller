@@ -46,7 +46,9 @@ export function SendToken() {
   const [toError, setToError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<Token | undefined>();
+  const [selectedToken, setSelectedToken] = useState<Token | undefined>(
+    tokenFetching === "loading" ? undefined : token,
+  );
   const [recipientLoading, setRecipientLoading] = useState(false);
 
   const disabled = useMemo(() => {
@@ -57,12 +59,6 @@ export function SendToken() {
       (!validated && !!warning)
     );
   }, [validated, warning, amountError, toError, recipientLoading]);
-
-  useEffect(() => {
-    if (token) {
-      setSelectedToken(token);
-    }
-  }, [token]);
 
   useEffect(() => {
     setValidated(false);
