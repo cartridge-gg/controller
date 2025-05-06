@@ -11,7 +11,8 @@ jobs:
   publish:
     if:
       (github.event.pull_request.merged == true &&
-      github.event.pull_request.head.ref == 'prepare-release') ||
+      (github.event.pull_request.head.ref == 'prepare-release' ||
+      github.event.pull_request.head.ref == 'prepare-prerelease')) ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -32,8 +33,16 @@ jobs:
         run: |
           echo "VERSION=$(jq -r '.version' packages/controller/package.json)" >> $GITHUB_OUTPUT
 
-      - name: Publish to npm
+      - name: Publish release to npm
+        if: ${{ github.event.pull_request.head.ref == 'prepare-release' }}
         run: |
           pnpm release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish prerelease to npm
+        if: ${{ github.event.pull_request.head.ref == 'prepare-prerelease' }}
+        run: |
+          pnpm release:prerelease
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

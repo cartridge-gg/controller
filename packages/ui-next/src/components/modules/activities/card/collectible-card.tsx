@@ -9,6 +9,7 @@ import { VariantProps } from "class-variance-authority";
 import { useMemo, useState } from "react";
 import ActivityCard, { activityCardVariants } from "./card";
 import { formatAddress } from "@cartridge/utils";
+import { getChecksumAddress } from "starknet";
 
 export interface ActivityCollectibleCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -81,9 +82,17 @@ export const ActivityCollectibleCard = ({
   const Address = useMemo(() => {
     switch (action) {
       case "send":
-        return <p>{`To ${formatAddress(address, { size: "xs" })}`}</p>;
+        return (
+          <p>{`To ${formatAddress(getChecksumAddress(address), {
+            size: "xs",
+          })}`}</p>
+        );
       default:
-        return <p>{`From ${formatAddress(address, { size: "xs" })}`}</p>;
+        return (
+          <p>{`From ${formatAddress(getChecksumAddress(address), {
+            size: "xs",
+          })}`}</p>
+        );
     }
   }, [address, action]);
 

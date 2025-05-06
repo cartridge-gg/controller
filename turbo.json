@@ -76,6 +76,18 @@
         "^build:deps"
       ],
       "persistent": true
+    },
+    "preview": {
+      "persistent": true,
+      "dependsOn": [
+        "^build:deps"
+      ],
+      "outputs": [
+        ".next/**",
+        "dist/**",
+        "**/pkg-controller/**",
+        "**/pkg-session/**"
+      ]
     }
   },
   "globalDependencies": [

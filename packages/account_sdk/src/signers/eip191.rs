@@ -60,18 +60,14 @@ impl Eip191Signer {
         signature: Signature<Secp256k1>,
         y_parity: bool,
     ) -> SignerSignature {
-        // If signature is normalized (s value changed), we need to flip the y_parity
         let (signature, y_parity) = if let Some(normalized) = signature.normalize_s() {
             (normalized, !y_parity)
         } else {
             (signature, y_parity)
         };
-
-        // Get r and s values from the signature
         let r_bytes = signature.r().to_bytes();
         let s_bytes = signature.s().to_bytes();
 
-        // Convert to the format expected by the controller
         let mut r_padded = [0u8; 32];
         r_padded[32 - r_bytes.len()..].copy_from_slice(&r_bytes);
         let mut s_padded = [0u8; 32];
@@ -80,11 +76,9 @@ impl Eip191Signer {
         let r = U256::from_bytes_be(&r_padded);
         let s = U256::from_bytes_be(&s_padded);
 
-        // Create the Eip191Signer for the controller
         let eth_address = cainome::cairo_serde::EthAddress(self.address().into());
         let controller_signer = ControllerEip191Signer { eth_address };
 
-        // Create the signature with the correct y_parity
         let signature = ControllerSignature { r, s, y_parity };
 
         SignerSignature::Eip191((controller_signer, signature))
@@ -118,7 +112,10 @@ impl HashSigner for Eip191Signer {
 impl HashSigner for Eip191Signer {
     async fn sign(&self, tx_hash: &Felt) -> Result<SignerSignature, SignError> {
         let address_hex = format!("0x{}", hex::encode(self.address.clone().as_bytes()));
-        let signature_hex = external_sign_message(&address_hex, &tx_hash.to_hex_string()).await?;
+
+        let tx_hash_prefixed = format!("0x{:0>63}", hex::encode(tx_hash.to_bytes_be()));
+
+        let signature_hex = external_sign_message(&address_hex, &tx_hash_prefixed).await?;
         let signature_bytes = hex::decode(signature_hex.trim_start_matches("0x")).map_err(|e| {
             SignError::BridgeError(format!("Failed to decode signature hex: {}", e))
         })?;
@@ -173,8 +170,8 @@ mod wasm_tests {
                 console.log(`Mock bridge called: signMessage(${identifier}, ${message})`);
 
                 // --- Define Expected Test Values ---
-                const expectedIdentifier = "0x396cf17b3f4c1a60f359b50d5bd5e86c526ed9d2";
-                const mockSignature = "0xf40140b1a1eb091bfd93a95a5866608bde74526f5c6b9c5a82c5b2c2e04a581a7b758f993096756b5ee65651706c1ede3561b84b621971438c5eb8a10ddca6e31b";
+                const expectedIdentifier = "0xa517d17bc2cca98e94f9975efd295ec70bfb3cf7";
+                const mockSignature = "0xbbd22f35065dbb1af67c2ff18da7b16f70df83f428a4fbfb84552b857307654e320be9840b7cd53a0f6997784a76afa4f2eb07d2caa6f4330c90a81585ee059b1c";
 
                 return new Promise((resolve, reject) => {
                     // Check if the identifier matches the expected one for the success test
@@ -211,10 +208,10 @@ mod wasm_tests {
         // Setup the mock bridge in the JS environment
         setup_mock_keychain_wallets();
 
-        let address_hex = "0x396cf17b3f4c1a60f359b50d5bd5e86c526ed9d2";
+        let address_hex = "0xa517d17bc2cca98e94f9975efd295ec70bfb3cf7";
         let address = EthAddress::from_str(address_hex).expect("Failed to parse test address");
         let tx_hash = Felt::from_hex_unchecked(
-            "0x4e4348a70772249a289fc6c08aa81333fc020eda8f5cb0f3d6e503c1af89f8e",
+            "0x5468500fa6b5e101a5d59da8003f3b4fc0789f1f629437d411cff1af236ac9",
         );
 
         // Create the signer instance
@@ -235,19 +232,19 @@ mod wasm_tests {
 
                 // Create expected r from bytes
                 let expected_r_bytes =
-                    hex::decode("f40140b1a1eb091bfd93a95a5866608bde74526f5c6b9c5a82c5b2c2e04a581a")
+                    hex::decode("bbd22f35065dbb1af67c2ff18da7b16f70df83f428a4fbfb84552b857307654e")
                         .unwrap();
                 let expected_r = U256::from_bytes_be(&expected_r_bytes.try_into().unwrap());
                 assert_eq!(signature.r, expected_r, "Signature R mismatch");
 
                 // Create expected s from bytes
                 let expected_s_bytes =
-                    hex::decode("7b758f993096756b5ee65651706c1ede3561b84b621971438c5eb8a10ddca6e3")
+                    hex::decode("320be9840b7cd53a0f6997784a76afa4f2eb07d2caa6f4330c90a81585ee059b")
                         .unwrap();
                 let expected_s = U256::from_bytes_be(&expected_s_bytes.try_into().unwrap());
                 assert_eq!(signature.s, expected_s, "Signature S mismatch");
 
-                assert!(!signature.y_parity, "Signature Y-Parity mismatch");
+                assert!(signature.y_parity, "Signature Y-Parity mismatch");
             }
             _ => panic!("Unexpected SignerSignature variant"),
         }

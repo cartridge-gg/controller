@@ -45,3 +45,9 @@ export const Selected: Story = {
     selected: true,
   },
 };
+
+export const Icon: Story = {
+  args: {
+    icon: "https://placehold.co/100x100",
+  },
+};

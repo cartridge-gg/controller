@@ -22,3 +22,9 @@ export default meta;
 type Story = StoryObj<typeof CollectibleDetails>;
 
 export const Default: Story = {};
+
+export const Owner: Story = {
+  args: {
+    owner: "bal7hazar",
+  },
+};

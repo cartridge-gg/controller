@@ -9,6 +9,8 @@ import {
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   cn,
+  Skeleton,
+  Empty,
 } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -19,18 +21,16 @@ import {
   uint256,
 } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
-import { useCollection } from "#hooks/collection";
-import { Sending } from "./sending";
+import { useCollectible } from "#hooks/collectible";
+import { Sending } from "./collectible-sending";
 import { useEntrypoints } from "#hooks/entrypoints";
-import { CollectionHeader } from "../header";
 import placeholder from "/public/placeholder.svg";
-import { formatName } from "../helper";
+import { SendAmount } from "./amount";
+import { SendHeader } from "./header";
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
-const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
-const TRANSFER_FROM_SNAKE_CASE = "transfer_from";
 
-export function SendCollection() {
+export function SendCollectible() {
   const { address: contractAddress, tokenId } = useParams();
 
   const [searchParams] = useSearchParams();
@@ -44,6 +44,8 @@ export function SendCollection() {
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
   const [recipientError, setRecipientError] = useState<Error | undefined>();
+  const [amount, setAmount] = useState<number | undefined>(1);
+  const [amountError, setAmountError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recipientLoading, setRecipientLoading] = useState(false);
@@ -57,7 +59,7 @@ export function SendCollection() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collection, assets } = useCollection({
+  const { collectible, assets, status } = useCollectible({
     contractAddress: contractAddress,
     tokenIds,
   });
@@ -69,12 +71,6 @@ export function SendCollection() {
     if (entrypoints.includes(SAFE_TRANSFER_FROM_CAMEL_CASE)) {
       return SAFE_TRANSFER_FROM_CAMEL_CASE;
     }
-    if (entrypoints.includes(TRANSFER_FROM_SNAKE_CASE)) {
-      return TRANSFER_FROM_SNAKE_CASE;
-    }
-    if (entrypoints.includes(TRANSFER_FROM_CAMEL_CASE)) {
-      return TRANSFER_FROM_CAMEL_CASE;
-    }
     return null;
   }, [entrypoints]);
 
@@ -82,9 +78,16 @@ export function SendCollection() {
     return (
       recipientLoading ||
       (!recipientValidated && !!recipientWarning) ||
-      !!recipientError
+      !!recipientError ||
+      !!amountError
     );
-  }, [recipientValidated, recipientWarning, recipientError, recipientLoading]);
+  }, [
+    recipientValidated,
+    recipientWarning,
+    recipientError,
+    amountError,
+    recipientLoading,
+  ]);
 
   useEffect(() => {
     setRecipientValidated(false);
@@ -99,10 +102,13 @@ export function SendCollection() {
         !tokenIds.length ||
         !to ||
         !!recipientError ||
-        !entrypoint
+        !entrypoint ||
+        !amount ||
+        !!amountError
       )
         return;
       setLoading(true);
+      const formattedAmount = uint256.bnToUint256(BigInt(amount));
       // Fill the extra argument in case of safe transfer functions
       const calldata = entrypoint.includes("safe") ? [0] : [];
       const calls: Call[] = (tokenIds as string[]).map((id: string) => {
@@ -110,7 +116,7 @@ export function SendCollection() {
         return {
           contractAddress: contractAddress,
           entrypoint,
-          calldata: [address, to, tokenId, ...calldata],
+          calldata: [address, to, tokenId, formattedAmount, ...calldata],
         };
       });
       const res = await parent.openExecute(calls);
@@ -145,60 +151,88 @@ export function SendCollection() {
   );
 
   const title = useMemo(() => {
-    if (!collection || !assets || assets.length === 0) return "";
-    if (assets.length > 1) return `Send (${assets.length}) ${collection.name}`;
-    const asset = assets[0];
-    return `Send ${formatName(asset.name, asset.tokenId)}`;
-  }, [collection, assets]);
+    if (!collectible || !assets || assets.length === 0) return "";
+    if (assets.length > 1) return `${assets.length} ${collectible.name}(s)`;
+    return assets[0].name;
+  }, [collectible, assets]);
 
   const image = useMemo(() => {
-    if (!collection || !assets) return placeholder;
-    if (assets.length > 1) return collection.imageUrl || placeholder;
+    if (!collectible || !assets) return placeholder;
+    if (assets.length > 1) return collectible.imageUrl || placeholder;
     return assets[0].imageUrl || placeholder;
-  }, [collection, assets]);
+  }, [collectible, assets]);
+
+  const balance = useMemo(() => {
+    if (!collectible || !assets || assets.length !== 1) return 0;
+    return assets[0].amount;
+  }, [collectible, assets]);
 
   const handleBack = useCallback(() => {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
 
-  if (!collection || !assets) return null;
-
   return (
     <LayoutContainer>
       <LayoutHeader className="hidden" onBack={handleBack} />
-      <LayoutContent className="p-6 flex flex-col gap-6">
-        <CollectionHeader image={image} title={title} />
-        <SendRecipient
-          to={to}
-          setTo={setTo}
-          submitted={submitted}
-          setWarning={setRecipientWarning}
-          setError={setRecipientError}
-          setParentLoading={setRecipientLoading}
-        />
-        <Sending assets={assets} description={collection.name} />
-      </LayoutContent>
+      {status === "loading" || !collectible || !assets ? (
+        <LoadingState />
+      ) : status === "error" ? (
+        <EmptyState />
+      ) : (
+        <>
+          <LayoutContent className="p-6 flex flex-col gap-6">
+            <SendHeader image={image} title={title} />
+            <SendRecipient
+              to={to}
+              setTo={setTo}
+              submitted={submitted}
+              setWarning={setRecipientWarning}
+              setError={setRecipientError}
+              setParentLoading={setRecipientLoading}
+            />
+            <SendAmount
+              amount={amount}
+              balance={balance}
+              submitted={submitted}
+              setAmount={setAmount}
+              setError={setAmountError}
+            />
+            <Sending assets={assets} description={collectible.name} />
+          </LayoutContent>
 
-      <LayoutFooter
-        className={cn(
-          "relative flex flex-col items-center justify-center gap-y-4 bg-background",
-        )}
-      >
-        <Warning
-          warning={recipientWarning}
-          validated={recipientValidated}
-          setValidated={setRecipientValidated}
-        />
-        <Button
-          disabled={disabled}
-          type="submit"
-          className="w-full"
-          isLoading={loading}
-          onClick={() => onSubmit(to)}
-        >
-          Review Send
-        </Button>
-      </LayoutFooter>
+          <LayoutFooter
+            className={cn(
+              "relative flex flex-col items-center justify-center gap-y-4 bg-background",
+            )}
+          >
+            <Warning
+              warning={recipientWarning}
+              validated={recipientValidated}
+              setValidated={setRecipientValidated}
+            />
+            <div className="w-full flex items-center gap-3">
+              <Button
+                variant="secondary"
+                type="button"
+                className="w-1/3"
+                isLoading={loading}
+                onClick={() => navigate(`../../..?${searchParams.toString()}`)}
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={disabled}
+                type="submit"
+                className="w-2/3"
+                isLoading={loading}
+                onClick={() => onSubmit(to)}
+              >
+                Review
+              </Button>
+            </div>
+          </LayoutFooter>
+        </>
+      )}
     </LayoutContainer>
   );
 }
@@ -228,5 +262,34 @@ const Warning = ({
       )}
       <p className="text-xs text-destructive-100">{warning}</p>
     </div>
+  );
+};
+
+const LoadingState = () => {
+  return (
+    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+      <Skeleton className="min-h-10 w-full rounded" />
+      <div className="flex flex-col">
+        <Skeleton className="min-h-4 my-3 w-8 rounded" />
+        <Skeleton className="min-h-10 w-full rounded" />
+      </div>
+      <div className="flex flex-col">
+        <Skeleton className="min-h-4 my-3 w-8 rounded" />
+        <Skeleton className="min-h-10 w-full rounded" />
+      </div>
+      <Skeleton className="min-h-[109px] w-full rounded" />
+    </LayoutContent>
+  );
+};
+
+const EmptyState = () => {
+  return (
+    <LayoutContent className="select-none h-full">
+      <Empty
+        title="No information found for this asset."
+        icon="inventory"
+        className="h-full"
+      />
+    </LayoutContent>
   );
 };

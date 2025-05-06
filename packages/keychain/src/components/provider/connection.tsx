@@ -1,14 +1,14 @@
-import { createContext } from "react";
-import Controller from "@/utils/controller";
-import { ConnectionCtx } from "@/utils/connection";
+import { ParentMethods } from "@/hooks/connection";
 import { ParsedSessionPolicies } from "@/hooks/session";
-import { ControllerTheme } from "@cartridge/ui-next";
+import { ConnectionCtx } from "@/utils/connection";
+import Controller from "@/utils/controller";
 import {
-  ExternalWalletType,
   ExternalWallet,
   ExternalWalletResponse,
+  ExternalWalletType,
 } from "@cartridge/controller";
-import { ParentMethods } from "@/hooks/connection";
+import { ControllerTheme } from "@cartridge/ui-next";
+import { createContext } from "react";
 
 export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
@@ -33,6 +33,7 @@ export type ConnectionContextValue = {
   externalDetectWallets: () => Promise<ExternalWallet[]>;
   externalConnectWallet: (
     type: ExternalWalletType,
+    address?: string,
   ) => Promise<ExternalWalletResponse>;
   externalSignTypedData: (
     identifier: string,

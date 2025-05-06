@@ -1,32 +1,28 @@
-import { AsyncMethodReturns } from "@cartridge/penpal";
-import { useContext, useState, useEffect, useCallback, useMemo } from "react";
-import {
-  connectToController,
-  ConnectionCtx,
-  OpenSettingsCtx,
-} from "@/utils/connection";
-import { isIframe, normalizeOrigin } from "@cartridge/utils";
-import {
-  ResponseCodes,
-  toArray,
-  toSessionPolicies,
-} from "@cartridge/controller";
 import {
   ConnectionContext,
   ConnectionContextValue,
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
 import {
-  ExternalWalletType,
+  ConnectionCtx,
+  connectToController,
+  OpenSettingsCtx,
+} from "@/utils/connection";
+import {
   ExternalWallet,
   ExternalWalletResponse,
+  ExternalWalletType,
+  ResponseCodes,
+  toArray,
+  toSessionPolicies,
 } from "@cartridge/controller";
-import { Policies } from "@cartridge/presets";
-import { defaultTheme, controllerConfigs } from "@cartridge/presets";
-import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
+import { AsyncMethodReturns } from "@cartridge/penpal";
+import { controllerConfigs, defaultTheme, Policies } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
-import { shortString } from "starknet";
-import { RpcProvider } from "starknet";
+import { isIframe, normalizeOrigin } from "@cartridge/utils";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { RpcProvider, shortString } from "starknet";
+import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 
 export type ParentMethods = AsyncMethodReturns<{
   close: () => Promise<void>;
@@ -37,6 +33,7 @@ export type ParentMethods = AsyncMethodReturns<{
   externalDetectWallets: () => Promise<ExternalWallet[]>;
   externalConnectWallet: (
     type: ExternalWalletType,
+    address?: string,
   ) => Promise<ExternalWalletResponse>;
   externalSignTypedData: (
     identifier: string,
@@ -285,11 +282,11 @@ export function useConnectionValue() {
   }, [parent]);
 
   const externalConnectWallet = useCallback(
-    (type: ExternalWalletType) => {
+    (type: ExternalWalletType, address?: string) => {
       if (!parent) {
         return Promise.reject(new Error("Parent connection not ready."));
       }
-      return parent.externalConnectWallet(type);
+      return parent.externalConnectWallet(type, address);
     },
     [parent],
   );

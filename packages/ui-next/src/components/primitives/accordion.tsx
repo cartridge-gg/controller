@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { cn } from "@/utils";
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
+import * as React from "react";
 import { WedgeIcon } from "../icons";
 
 const Accordion = AccordionPrimitive.Root;
@@ -21,10 +21,19 @@ const AccordionTrigger = React.forwardRef<
     hideIcon?: boolean;
     color?: string;
     parentClassName?: string;
+    wedgeIconSize?: "2xs" | "xs" | "sm" | "default" | "lg" | "xl" | "2xl";
   }
 >(
   (
-    { className, children, hideIcon, color, parentClassName, ...props },
+    {
+      className,
+      children,
+      hideIcon,
+      color,
+      parentClassName,
+      wedgeIconSize,
+      ...props
+    },
     ref,
   ) => (
     <AccordionPrimitive.Header className="flex">
@@ -40,6 +49,7 @@ const AccordionTrigger = React.forwardRef<
         {!hideIcon && (
           <WedgeIcon
             variant="right"
+            size={wedgeIconSize}
             className={cn("transition-transform duration-200", color)}
           />
         )}
@@ -63,4 +73,4 @@ const AccordionContent = React.forwardRef<
 ));
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };
+export { Accordion, AccordionContent, AccordionItem, AccordionTrigger };

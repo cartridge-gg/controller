@@ -1,4 +1,4 @@
-import { CheckboxIcon, cn } from "@/index";
+import { CheckboxIcon, cn, Thumbnail } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { CollectiblePill } from "../pill";
 import { useCallback } from "react";
@@ -7,6 +7,7 @@ export interface CollectibleHeaderProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof collectibleHeaderVariants> {
   title: string;
+  icon?: string | null;
   label?: string;
   hover?: boolean;
   selectable?: boolean;
@@ -15,7 +16,7 @@ export interface CollectibleHeaderProps
 }
 
 const collectibleHeaderVariants = cva(
-  "relative flex gap-2 px-3 py-2 justify-between items-center text-sm font-medium transition-all duration-150",
+  "h-9 relative flex gap-2 px-2 py-1.5 justify-between items-center text-sm font-medium transition-all duration-150",
   {
     variants: {
       variant: {
@@ -33,6 +34,7 @@ const collectibleHeaderVariants = cva(
 
 export function CollectibleHeader({
   title,
+  icon,
   label,
   hover,
   selectable,
@@ -54,15 +56,27 @@ export function CollectibleHeader({
   return (
     <div
       data-hover={hover}
-      className={cn(collectibleHeaderVariants({ variant }), className)}
+      className={cn(
+        collectibleHeaderVariants({ variant }),
+        className,
+        icon === undefined && "pl-2.5",
+      )}
       {...props}
     >
-      <p className={cn("truncate", (selected || selectable) && "pr-6")}>
-        {title}
-      </p>
+      <div className="flex items-center gap-1.5 overflow-hidden">
+        <Thumbnail
+          variant="light"
+          size="sm"
+          icon={icon === null ? undefined : icon}
+          className={icon === undefined ? "hidden" : ""}
+        />
+        <p className={cn("truncate", (selected || selectable) && "pr-6")}>
+          {title}
+        </p>
+      </div>
       {selected && (
         <div
-          className="absolute right-1 top-1/2 -translate-y-1/2 px-2 py-2 text-foreground-100 cursor-pointer"
+          className="absolute right-[9px] top-1/2 -translate-y-1/2 text-foreground-100 cursor-pointer"
           onClick={handleClick}
         >
           <CheckboxIcon variant="line" size="sm" />
@@ -70,7 +84,7 @@ export function CollectibleHeader({
       )}
       {selectable && !selected && (
         <div
-          className="absolute right-1 top-1/2 -translate-y-1/2 px-2 py-2 text-background-500 hover:text-foreground-200 cursor-pointer"
+          className="absolute right-[9px] top-1/2 -translate-y-1/2 text-background-500 hover:text-foreground-200 cursor-pointer"
           onClick={handleClick}
         >
           <CheckboxIcon variant="unchecked-line" size="sm" />

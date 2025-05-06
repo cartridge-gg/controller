@@ -1,9 +1,11 @@
 import { useConnection } from "@/hooks/connection";
+import { CredentialMetadata } from "@cartridge/utils/api/cartridge";
 import { useEffect, useRef, useState } from "react";
 import { fetchController } from "./utils";
 
 export type ValidationState = {
   status: "idle" | "validating" | "valid" | "invalid";
+  signer?: CredentialMetadata;
   error?: Error;
   exists?: boolean;
 };
@@ -58,9 +60,9 @@ export function useUsernameValidation(username: string) {
     }
 
     // Network validation
-    const controller = new AbortController();
+    const abortController = new AbortController();
     validationController.current?.abort();
-    validationController.current = controller;
+    validationController.current = abortController;
 
     setValidation({ status: "validating" });
 
@@ -72,17 +74,19 @@ export function useUsernameValidation(username: string) {
       return;
     }
 
-    fetchController(chainId, username, controller.signal)
-      .then(() => {
-        if (!controller.signal.aborted) {
+    fetchController(chainId, username, abortController.signal)
+      .then((controller) => {
+        if (!abortController.signal.aborted) {
           setValidation({
             status: "valid",
             exists: true,
+            signer: controller.controller?.signers?.[0]
+              .metadata as CredentialMetadata,
           });
         }
       })
       .catch((e) => {
-        if (controller.signal.aborted) return;
+        if (abortController.signal.aborted) return;
 
         if (e.message === "ent: controller not found") {
           // TEMP: disallow periods for signup
@@ -108,7 +112,7 @@ export function useUsernameValidation(username: string) {
         }
       });
 
-    return () => controller.abort();
+    return () => abortController.abort();
   }, [username, chainId]);
 
   return validation;

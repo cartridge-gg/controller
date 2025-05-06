@@ -1,7 +1,7 @@
 {
   "name": "@cartridge/controller-example-next",
   "private": true,
-  "version": "0.7.11",
+  "version": "0.7.14-alpha.1",
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
@@ -10,7 +10,8 @@
     "start": "next start -p 3002",
     "lint": "next lint",
     "format": "prettier --write ./src",
-    "format:check": "prettier --check ./src"
+    "format:check": "prettier --check ./src",
+    "preview": "next -p 3002"
   },
   "dependencies": {
     "@cartridge/connector": "workspace:*",

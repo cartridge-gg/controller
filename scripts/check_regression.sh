@@ -106,7 +106,7 @@ if [ $? -ne 0 ]; then echo "ERROR: pnpm install failed in worktree keychain."; e
 pnpm build
 if [ $? -ne 0 ]; then echo "ERROR: pnpm build failed in worktree keychain."; exit 1; fi
 
-pnpm --filter "$PACKAGE_KEYCHAIN" preview &
+pnpm --filter "$PACKAGE_KEYCHAIN" dev &
 DEV_KEYCHAIN_PID=$!
 echo "$PACKAGE_KEYCHAIN dev server started with PID $DEV_KEYCHAIN_PID."
 sleep 5
