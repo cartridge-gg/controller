@@ -14,7 +14,7 @@ import {
   Spinner,
   PaperPlaneIcon,
 } from "@cartridge/ui-next";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Call,
@@ -35,6 +35,7 @@ export function SendToken() {
     tokenAddress: tokenAddress!,
   });
   const { tokens } = useTokens();
+  const userSelectedToken = useRef(false);
 
   const { refetchTransfers } = useData();
   const [searchParams] = useSearchParams();
@@ -46,9 +47,7 @@ export function SendToken() {
   const [toError, setToError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<Token | undefined>(
-    tokenFetching === "loading" ? undefined : token,
-  );
+  const [selectedToken, setSelectedToken] = useState<Token | undefined>(token);
   const [recipientLoading, setRecipientLoading] = useState(false);
 
   const disabled = useMemo(() => {
@@ -64,11 +63,17 @@ export function SendToken() {
     setValidated(false);
   }, [warning, setValidated]);
 
+  useEffect(() => {
+    if (!userSelectedToken.current && token) {
+      setSelectedToken(token);
+    }
+  }, [token]);
+
   const onChangeToken = useCallback(
     (token: Token) => {
       setSelectedToken(token);
-      // Reset amount when token changes
       setAmount(undefined);
+      userSelectedToken.current = true;
     },
     [setSelectedToken, setAmount],
   );
@@ -166,13 +171,15 @@ export function SendToken() {
           setError={setToError}
           setParentLoading={setRecipientLoading}
         />
-        <SendAmount
-          token={selectedToken || token}
-          amount={amount}
-          submitted={submitted}
-          setAmount={setAmount}
-          setError={setAmountError}
-        />
+        {selectedToken && (
+          <SendAmount
+            token={selectedToken}
+            amount={amount}
+            submitted={submitted}
+            setAmount={setAmount}
+            setError={setAmountError}
+          />
+        )}
       </LayoutContent>
 
       <LayoutFooter>
