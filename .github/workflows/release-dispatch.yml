@@ -6,6 +6,14 @@ on:
         description: Version to release
         required: true
         type: string
+      tag:
+        description: Release tag
+        required: true
+        default: latest
+        type: choice
+        options:
+          - latest
+          - prerelease
 
 jobs:
   propose-release:
@@ -30,7 +38,8 @@ jobs:
         run: |
           VERSION=${{ github.event.inputs.version }}
           pnpm -r exec -- bash -c "npm version $VERSION --no-git-tag-version"
-      - name: Create Pull Request
+      - name: Create Release Pull Request
+        if: ${{ github.event.inputs.tag == 'latest' }}
         id: cpr
         uses: peter-evans/create-pull-request@v5
         with:
@@ -38,5 +47,17 @@ jobs:
           title: "Prepare release: ${{ github.event.inputs.version }}"
           commit-message: "Prepare release: ${{ github.event.inputs.version }}"
           branch: "prepare-release"
+          base: main
+          delete-branch: true
+
+      - name: Prepare Prerelease Pull Request
+        if: ${{ github.event.inputs.tag == 'prerelease' }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.CREATE_PR_TOKEN }}
+          title: "Prepare prerelease: ${{ github.event.inputs.version }}"
+          commit-message:
+            "Prepare prerelease: ${{ github.event.inputs.version }}"
+          branch: "prepare-prerelease"
           base: main
           delete-branch: true
