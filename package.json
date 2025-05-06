@@ -34,7 +34,7 @@
 	"preview": "turbo build:deps preview"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#f57e6cc"
+    "@cartridge/presets": "github:cartridge-gg/presets#11ee3b8"
   },
   "devDependencies": {
     "turbo": "^2.4.4",
