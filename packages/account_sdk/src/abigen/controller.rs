@@ -146,6 +146,195 @@ impl DelegateAccountChanged {
     }
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub struct DerivePointFromXHint {
+    pub y_last_attempt: U384,
+    pub g_rhs_sqrt: Vec<U384>,
+}
+impl cainome::cairo_serde::CairoSerde for DerivePointFromXHint {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += U384::cairo_serialized_size(&__rust.y_last_attempt);
+        __size += Vec::<U384>::cairo_serialized_size(&__rust.g_rhs_sqrt);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(U384::cairo_serialize(&__rust.y_last_attempt));
+        __out.extend(Vec::<U384>::cairo_serialize(&__rust.g_rhs_sqrt));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let y_last_attempt = U384::cairo_deserialize(__felts, __offset)?;
+        __offset += U384::cairo_serialized_size(&y_last_attempt);
+        let g_rhs_sqrt = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<U384>::cairo_serialized_size(&g_rhs_sqrt);
+        Ok(DerivePointFromXHint {
+            y_last_attempt,
+            g_rhs_sqrt,
+        })
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub struct Ed25519Signer {
+    pub pubkey: cainome::cairo_serde::NonZero<cainome::cairo_serde::U256>,
+}
+impl cainome::cairo_serde::CairoSerde for Ed25519Signer {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size +=
+            cainome::cairo_serde::NonZero::<cainome::cairo_serde::U256>::cairo_serialized_size(
+                &__rust.pubkey,
+            );
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(
+            cainome::cairo_serde::NonZero::<cainome::cairo_serde::U256>::cairo_serialize(
+                &__rust.pubkey,
+            ),
+        );
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let pubkey =
+            cainome::cairo_serde::NonZero::<cainome::cairo_serde::U256>::cairo_deserialize(
+                __felts, __offset,
+            )?;
+        __offset +=
+            cainome::cairo_serde::NonZero::<cainome::cairo_serde::U256>::cairo_serialized_size(
+                &pubkey,
+            );
+        Ok(Ed25519Signer { pubkey })
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub struct EdDSASignature {
+    pub Ry_twisted: cainome::cairo_serde::U256,
+    pub s: cainome::cairo_serde::U256,
+    pub Py_twisted: cainome::cairo_serde::U256,
+    pub msg: Vec<u8>,
+}
+impl cainome::cairo_serde::CairoSerde for EdDSASignature {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.Ry_twisted);
+        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.s);
+        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.Py_twisted);
+        __size += Vec::<u8>::cairo_serialized_size(&__rust.msg);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(cainome::cairo_serde::U256::cairo_serialize(
+            &__rust.Ry_twisted,
+        ));
+        __out.extend(cainome::cairo_serde::U256::cairo_serialize(&__rust.s));
+        __out.extend(cainome::cairo_serde::U256::cairo_serialize(
+            &__rust.Py_twisted,
+        ));
+        __out.extend(Vec::<u8>::cairo_serialize(&__rust.msg));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let Ry_twisted = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&Ry_twisted);
+        let s = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&s);
+        let Py_twisted = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&Py_twisted);
+        let msg = Vec::<u8>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<u8>::cairo_serialized_size(&msg);
+        Ok(EdDSASignature {
+            Ry_twisted,
+            s,
+            Py_twisted,
+            msg,
+        })
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub struct EdDSASignatureWithHint {
+    pub signature: EdDSASignature,
+    pub msm_hint: MSMHint,
+    pub msm_derive_hint: DerivePointFromXHint,
+    pub sqrt_Rx_hint: cainome::cairo_serde::U256,
+    pub sqrt_Px_hint: cainome::cairo_serde::U256,
+}
+impl cainome::cairo_serde::CairoSerde for EdDSASignatureWithHint {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += EdDSASignature::cairo_serialized_size(&__rust.signature);
+        __size += MSMHint::cairo_serialized_size(&__rust.msm_hint);
+        __size += DerivePointFromXHint::cairo_serialized_size(&__rust.msm_derive_hint);
+        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.sqrt_Rx_hint);
+        __size += cainome::cairo_serde::U256::cairo_serialized_size(&__rust.sqrt_Px_hint);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(EdDSASignature::cairo_serialize(&__rust.signature));
+        __out.extend(MSMHint::cairo_serialize(&__rust.msm_hint));
+        __out.extend(DerivePointFromXHint::cairo_serialize(
+            &__rust.msm_derive_hint,
+        ));
+        __out.extend(cainome::cairo_serde::U256::cairo_serialize(
+            &__rust.sqrt_Rx_hint,
+        ));
+        __out.extend(cainome::cairo_serde::U256::cairo_serialize(
+            &__rust.sqrt_Px_hint,
+        ));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let signature = EdDSASignature::cairo_deserialize(__felts, __offset)?;
+        __offset += EdDSASignature::cairo_serialized_size(&signature);
+        let msm_hint = MSMHint::cairo_deserialize(__felts, __offset)?;
+        __offset += MSMHint::cairo_serialized_size(&msm_hint);
+        let msm_derive_hint = DerivePointFromXHint::cairo_deserialize(__felts, __offset)?;
+        __offset += DerivePointFromXHint::cairo_serialized_size(&msm_derive_hint);
+        let sqrt_Rx_hint = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&sqrt_Rx_hint);
+        let sqrt_Px_hint = cainome::cairo_serde::U256::cairo_deserialize(__felts, __offset)?;
+        __offset += cainome::cairo_serde::U256::cairo_serialized_size(&sqrt_Px_hint);
+        Ok(EdDSASignatureWithHint {
+            signature,
+            msm_hint,
+            msm_derive_hint,
+            sqrt_Rx_hint,
+            sqrt_Px_hint,
+        })
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
 pub struct Eip191Signer {
     pub eth_address: cainome::cairo_serde::EthAddress,
 }
@@ -249,6 +438,135 @@ impl ExternalOwnerRemoved {
     }
     pub fn event_name() -> &'static str {
         "ExternalOwnerRemoved"
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub struct FunctionFelt {
+    pub a_num: Vec<U384>,
+    pub a_den: Vec<U384>,
+    pub b_num: Vec<U384>,
+    pub b_den: Vec<U384>,
+}
+impl cainome::cairo_serde::CairoSerde for FunctionFelt {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += Vec::<U384>::cairo_serialized_size(&__rust.a_num);
+        __size += Vec::<U384>::cairo_serialized_size(&__rust.a_den);
+        __size += Vec::<U384>::cairo_serialized_size(&__rust.b_num);
+        __size += Vec::<U384>::cairo_serialized_size(&__rust.b_den);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(Vec::<U384>::cairo_serialize(&__rust.a_num));
+        __out.extend(Vec::<U384>::cairo_serialize(&__rust.a_den));
+        __out.extend(Vec::<U384>::cairo_serialize(&__rust.b_num));
+        __out.extend(Vec::<U384>::cairo_serialize(&__rust.b_den));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let a_num = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<U384>::cairo_serialized_size(&a_num);
+        let a_den = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<U384>::cairo_serialized_size(&a_den);
+        let b_num = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<U384>::cairo_serialized_size(&b_num);
+        let b_den = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<U384>::cairo_serialized_size(&b_den);
+        Ok(FunctionFelt {
+            a_num,
+            a_den,
+            b_num,
+            b_den,
+        })
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub struct G1Point {
+    pub x: U384,
+    pub y: U384,
+}
+impl cainome::cairo_serde::CairoSerde for G1Point {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += U384::cairo_serialized_size(&__rust.x);
+        __size += U384::cairo_serialized_size(&__rust.y);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(U384::cairo_serialize(&__rust.x));
+        __out.extend(U384::cairo_serialize(&__rust.y));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let x = U384::cairo_deserialize(__felts, __offset)?;
+        __offset += U384::cairo_serialized_size(&x);
+        let y = U384::cairo_deserialize(__felts, __offset)?;
+        __offset += U384::cairo_serialized_size(&y);
+        Ok(G1Point { x, y })
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub struct MSMHint {
+    pub Q_low: G1Point,
+    pub Q_high: G1Point,
+    pub Q_high_shifted: G1Point,
+    pub RLCSumDlogDiv: FunctionFelt,
+}
+impl cainome::cairo_serde::CairoSerde for MSMHint {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += G1Point::cairo_serialized_size(&__rust.Q_low);
+        __size += G1Point::cairo_serialized_size(&__rust.Q_high);
+        __size += G1Point::cairo_serialized_size(&__rust.Q_high_shifted);
+        __size += FunctionFelt::cairo_serialized_size(&__rust.RLCSumDlogDiv);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(G1Point::cairo_serialize(&__rust.Q_low));
+        __out.extend(G1Point::cairo_serialize(&__rust.Q_high));
+        __out.extend(G1Point::cairo_serialize(&__rust.Q_high_shifted));
+        __out.extend(FunctionFelt::cairo_serialize(&__rust.RLCSumDlogDiv));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let Q_low = G1Point::cairo_deserialize(__felts, __offset)?;
+        __offset += G1Point::cairo_serialized_size(&Q_low);
+        let Q_high = G1Point::cairo_deserialize(__felts, __offset)?;
+        __offset += G1Point::cairo_serialized_size(&Q_high);
+        let Q_high_shifted = G1Point::cairo_deserialize(__felts, __offset)?;
+        __offset += G1Point::cairo_serialized_size(&Q_high_shifted);
+        let RLCSumDlogDiv = FunctionFelt::cairo_deserialize(__felts, __offset)?;
+        __offset += FunctionFelt::cairo_serialized_size(&RLCSumDlogDiv);
+        Ok(MSMHint {
+            Q_low,
+            Q_high,
+            Q_high_shifted,
+            RLCSumDlogDiv,
+        })
     }
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
@@ -391,6 +709,44 @@ impl OwnerRemoved {
     }
     pub fn event_name() -> &'static str {
         "OwnerRemoved"
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub struct SIWSSignature {
+    pub domain: Vec<u8>,
+    pub signature_with_hint: EdDSASignatureWithHint,
+}
+impl cainome::cairo_serde::CairoSerde for SIWSSignature {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += Vec::<u8>::cairo_serialized_size(&__rust.domain);
+        __size += EdDSASignatureWithHint::cairo_serialized_size(&__rust.signature_with_hint);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(Vec::<u8>::cairo_serialize(&__rust.domain));
+        __out.extend(EdDSASignatureWithHint::cairo_serialize(
+            &__rust.signature_with_hint,
+        ));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let domain = Vec::<u8>::cairo_deserialize(__felts, __offset)?;
+        __offset += Vec::<u8>::cairo_serialized_size(&domain);
+        let signature_with_hint = EdDSASignatureWithHint::cairo_deserialize(__felts, __offset)?;
+        __offset += EdDSASignatureWithHint::cairo_serialized_size(&signature_with_hint);
+        Ok(SIWSSignature {
+            domain,
+            signature_with_hint,
+        })
     }
 }
 #[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
@@ -868,6 +1224,54 @@ impl cainome::cairo_serde::CairoSerde for TypedData {
         Ok(TypedData {
             scope_hash,
             typed_data_hash,
+        })
+    }
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+pub struct U384 {
+    pub limb0: starknet::core::types::Felt,
+    pub limb1: starknet::core::types::Felt,
+    pub limb2: starknet::core::types::Felt,
+    pub limb3: starknet::core::types::Felt,
+}
+impl cainome::cairo_serde::CairoSerde for U384 {
+    type RustType = Self;
+    const SERIALIZED_SIZE: std::option::Option<usize> = None;
+    #[inline]
+    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
+        let mut __size = 0;
+        __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.limb0);
+        __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.limb1);
+        __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.limb2);
+        __size += starknet::core::types::Felt::cairo_serialized_size(&__rust.limb3);
+        __size
+    }
+    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
+        let mut __out: Vec<starknet::core::types::Felt> = vec![];
+        __out.extend(starknet::core::types::Felt::cairo_serialize(&__rust.limb0));
+        __out.extend(starknet::core::types::Felt::cairo_serialize(&__rust.limb1));
+        __out.extend(starknet::core::types::Felt::cairo_serialize(&__rust.limb2));
+        __out.extend(starknet::core::types::Felt::cairo_serialize(&__rust.limb3));
+        __out
+    }
+    fn cairo_deserialize(
+        __felts: &[starknet::core::types::Felt],
+        __offset: usize,
+    ) -> cainome::cairo_serde::Result<Self::RustType> {
+        let mut __offset = __offset;
+        let limb0 = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::Felt::cairo_serialized_size(&limb0);
+        let limb1 = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::Felt::cairo_serialized_size(&limb1);
+        let limb2 = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::Felt::cairo_serialized_size(&limb2);
+        let limb3 = starknet::core::types::Felt::cairo_deserialize(__felts, __offset)?;
+        __offset += starknet::core::types::Felt::cairo_serialized_size(&limb3);
+        Ok(U384 {
+            limb0,
+            limb1,
+            limb2,
+            limb3,
         })
     }
 }
@@ -2443,6 +2847,7 @@ pub enum Signer {
     Secp256r1(Secp256r1Signer),
     Eip191(Eip191Signer),
     Webauthn(WebauthnSigner),
+    SIWS(Ed25519Signer),
 }
 impl cainome::cairo_serde::CairoSerde for Signer {
     type RustType = Self;
@@ -2455,6 +2860,7 @@ impl cainome::cairo_serde::CairoSerde for Signer {
             Signer::Secp256r1(val) => Secp256r1Signer::cairo_serialized_size(val) + 1,
             Signer::Eip191(val) => Eip191Signer::cairo_serialized_size(val) + 1,
             Signer::Webauthn(val) => WebauthnSigner::cairo_serialized_size(val) + 1,
+            Signer::SIWS(val) => Ed25519Signer::cairo_serialized_size(val) + 1,
             _ => 0,
         }
     }
@@ -2490,6 +2896,12 @@ impl cainome::cairo_serde::CairoSerde for Signer {
                 temp.extend(WebauthnSigner::cairo_serialize(val));
                 temp
             }
+            Signer::SIWS(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&5usize));
+                temp.extend(Ed25519Signer::cairo_serialize(val));
+                temp
+            }
             _ => vec![],
         }
     }
@@ -2520,6 +2932,10 @@ impl cainome::cairo_serde::CairoSerde for Signer {
                 __felts,
                 __offset + 1,
             )?)),
+            5usize => Ok(Signer::SIWS(Ed25519Signer::cairo_deserialize(
+                __felts,
+                __offset + 1,
+            )?)),
             _ => {
                 return Err(cainome::cairo_serde::Error::Deserialize(format!(
                     "Index not handle for enum {}",
@@ -2536,6 +2952,7 @@ pub enum SignerSignature {
     Secp256r1((Secp256r1Signer, Signature)),
     Eip191((Eip191Signer, Signature)),
     Webauthn((WebauthnSigner, WebauthnSignature)),
+    SIWS((Ed25519Signer, SIWSSignature)),
 }
 impl cainome::cairo_serde::CairoSerde for SignerSignature {
     type RustType = Self;
@@ -2557,6 +2974,9 @@ impl cainome::cairo_serde::CairoSerde for SignerSignature {
             }
             SignerSignature::Webauthn(val) => {
                 <(WebauthnSigner, WebauthnSignature)>::cairo_serialized_size(val) + 1
+            }
+            SignerSignature::SIWS(val) => {
+                <(Ed25519Signer, SIWSSignature)>::cairo_serialized_size(val) + 1
             }
             _ => 0,
         }
@@ -2593,6 +3013,12 @@ impl cainome::cairo_serde::CairoSerde for SignerSignature {
                 temp.extend(<(WebauthnSigner, WebauthnSignature)>::cairo_serialize(val));
                 temp
             }
+            SignerSignature::SIWS(val) => {
+                let mut temp = vec![];
+                temp.extend(usize::cairo_serialize(&5usize));
+                temp.extend(<(Ed25519Signer, SIWSSignature)>::cairo_serialize(val));
+                temp
+            }
             _ => vec![],
         }
     }
@@ -2624,6 +3050,9 @@ impl cainome::cairo_serde::CairoSerde for SignerSignature {
             )>::cairo_deserialize(
                 __felts, __offset + 1
             )?)),
+            5usize => Ok(SignerSignature::SIWS(
+                <(Ed25519Signer, SIWSSignature)>::cairo_deserialize(__felts, __offset + 1)?,
+            )),
             _ => {
                 return Err(cainome::cairo_serde::Error::Deserialize(format!(
                     "Index not handle for enum {}",

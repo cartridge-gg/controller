@@ -62,6 +62,7 @@ pub enum Signer {
     #[cfg(feature = "webauthn")]
     Webauthn(WebauthnSigner),
     Eip191(Eip191Signer),
+    SIWS,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -113,6 +114,7 @@ impl From<&crate::signers::Signer> for Signer {
             #[cfg(feature = "webauthn")]
             crate::signers::Signer::Webauthn(s) => Signer::Webauthn(s.into()),
             crate::signers::Signer::Eip191(s) => Signer::Eip191(s.into()),
+            crate::signers::Signer::SIWS(_) => Signer::SIWS,
         }
     }
 }
@@ -179,6 +181,11 @@ impl TryFrom<Signer> for crate::signers::Signer {
                 signing_key: crate::signers::eip191::Eip191Signer::random().signing_key,
                 address: s.address,
             })),
+            Signer::SIWS => Err(ControllerError::StorageError(
+                StorageError::OperationFailed(
+                    "Cannot restore SIWS signer from storage".to_string(),
+                ),
+            )),
         }
     }
 }

@@ -19,7 +19,7 @@ jobs:
   rust:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/dojoengine/dojo-dev:v1.0.9
+      image: ghcr.io/dojoengine/dojo-dev:v1.5.0-alpha.0
     steps:
       - uses: actions/checkout@v4
       - run: git config --global --add safe.directory '*'
@@ -36,8 +36,6 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
           components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
-        if: steps.changes.outputs.rust == 'true'
-      - uses: taiki-e/install-action@cargo-llvm-cov
         if: steps.changes.outputs.rust == 'true'
       - run:
           cargo llvm-cov --features webauthn --all-features --lcov --output-path
