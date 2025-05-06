@@ -1,4 +1,5 @@
 import { MetaMaskSDK } from "@metamask/sdk";
+import { createStore } from "mipd";
 import {
   ExternalPlatform,
   ExternalWallet,
@@ -11,6 +12,7 @@ export class MetaMaskWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "metamask";
   readonly platform: ExternalPlatform = "ethereum";
   private MMSDK: MetaMaskSDK;
+  private store = createStore();
   private account: string | undefined = undefined;
   private connectedAccounts: string[] = [];
 
@@ -21,28 +23,35 @@ export class MetaMaskWallet implements WalletAdapter {
         url: window.location.href,
       },
     });
-    this.MMSDK.sdkInitPromise?.then(() => {
-      this.MMSDK.getProvider()
-        ?.request({
-          method: "eth_accounts",
-        })
-        .then((accounts: any) => {
-          if (accounts && accounts.length > 0) {
-            this.account = accounts[0];
+    if (this.isAvailable()) {
+      this.MMSDK.sdkInitPromise?.then(() => {
+        this.MMSDK.getProvider()
+          ?.request({
+            method: "eth_accounts",
+          })
+          .then((accounts: any) => {
+            if (accounts && accounts.length > 0) {
+              this.account = accounts[0];
+              this.connectedAccounts = accounts;
+            }
+          });
+        this.MMSDK.getProvider()?.on("accountsChanged", (accounts: any) => {
+          if (Array.isArray(accounts)) {
+            this.account = accounts?.[0];
             this.connectedAccounts = accounts;
           }
         });
-      this.MMSDK.getProvider()?.on("accountsChanged", (accounts: any) => {
-        if (Array.isArray(accounts)) {
-          this.account = accounts?.[0];
-          this.connectedAccounts = accounts;
-        }
       });
-    });
+    }
   }
 
   isAvailable(): boolean {
-    return typeof window !== "undefined" && !!window.ethereum?.isMetaMask;
+    return (
+      typeof window !== "undefined" &&
+      this.store
+        .getProviders()
+        .some((provider) => provider.info.rdns === "io.metamask")
+    );
   }
 
   getInfo(): ExternalWallet {
