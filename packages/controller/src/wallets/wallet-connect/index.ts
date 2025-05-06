@@ -25,7 +25,7 @@ export class WalletConnectWallet implements WalletAdapter {
   }
 
   isAvailable(): boolean {
-    return !!this.provider;
+    return typeof window !== "undefined" && !!this.provider;
   }
 
   getInfo(): ExternalWallet {
