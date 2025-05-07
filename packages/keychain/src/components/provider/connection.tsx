@@ -3,7 +3,7 @@ import { ParsedSessionPolicies } from "@/hooks/session";
 import { ConnectionCtx } from "@/utils/connection";
 import Controller from "@/utils/controller";
 import {
-  AuthOption,
+  AuthOptions,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -23,7 +23,7 @@ export type ConnectionContextValue = {
   rpcUrl: string;
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
-  configSignupOptions?: AuthOption[];
+  configSignupOptions?: AuthOptions;
   verified: boolean;
   chainId?: string;
   setController: (controller?: Controller) => void;

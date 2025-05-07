@@ -9,7 +9,7 @@ import {
   OpenSettingsCtx,
 } from "@/utils/connection";
 import {
-  AuthOption,
+  AuthOptions,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -70,7 +70,7 @@ export function useConnectionValue() {
     ...defaultTheme,
   });
   const [configSignupOptions, setConfigSignupOptions] = useState<
-    AuthOption[] | undefined
+    AuthOptions | undefined
   >();
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();

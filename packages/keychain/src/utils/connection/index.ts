@@ -1,18 +1,18 @@
 export * from "./types";
 
-import { connectToParent } from "@cartridge/penpal";
 import Controller from "@/utils/controller";
-import { connect } from "./connect";
-import { execute } from "./execute";
-import { estimateInvokeFee } from "./estimate";
-import { probe } from "./probe";
-import { signMessageFactory } from "./sign";
-import { ConnectionCtx } from "./types";
-import { deployFactory } from "./deploy";
-import { openSettingsFactory } from "./settings";
+import { AuthOptions } from "@cartridge/controller";
+import { connectToParent } from "@cartridge/penpal";
 import { normalize } from "@cartridge/utils";
+import { connect } from "./connect";
+import { deployFactory } from "./deploy";
+import { estimateInvokeFee } from "./estimate";
+import { execute } from "./execute";
+import { probe } from "./probe";
+import { openSettingsFactory } from "./settings";
+import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
-import { AuthOption, AuthOptions } from "@cartridge/controller";
+import { ConnectionCtx } from "./types";
 
 export function connectToController<ParentMethods extends object>({
   setRpcUrl,
@@ -23,7 +23,7 @@ export function connectToController<ParentMethods extends object>({
   setRpcUrl: (url: string) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller?: Controller) => void;
-  setConfigSignupOptions: (options: AuthOption[] | undefined) => void;
+  setConfigSignupOptions: (options: AuthOptions | undefined) => void;
 }) {
   return connectToParent<ParentMethods>({
     methods: {
@@ -31,8 +31,7 @@ export function connectToController<ParentMethods extends object>({
         connect({
           setRpcUrl,
           setContext,
-          setConfigSignupOptions: (options: AuthOptions | undefined) =>
-            setConfigSignupOptions(options as AuthOption[] | undefined),
+          setConfigSignupOptions,
         }),
       ),
       deploy: () => deployFactory(setContext),
