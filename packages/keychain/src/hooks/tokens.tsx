@@ -1,9 +1,14 @@
 import { useContext } from "react";
 import {
+  ERC20,
   TokensContext,
   TokensContextValue,
 } from "@/components/provider/tokens";
 import { getChecksumAddress } from "starknet";
+import { useConnection } from "./connection";
+import { ERC20 as CustomERC20 } from "@cartridge/utils";
+import { Token } from "@cartridge/ui-next";
+import { useQuery } from "react-query";
 
 export function useTokens(): TokensContextValue {
   const context = useContext(TokensContext);
@@ -14,13 +19,72 @@ export function useTokens(): TokensContextValue {
   return context;
 }
 
+export type UseBalancesResponse = {
+  tokens: Token[];
+  status: "success" | "error" | "idle" | "loading";
+};
+
 export function useToken(address: string) {
   const { tokens, isLoading, error } = useTokens();
-  const token = tokens[getChecksumAddress(address)];
+  const { controller } = useConnection();
+  const tokenFromCtx = tokens[getChecksumAddress(address)];
+
+  const newToken = useQuery({
+    queryKey: ["token", address],
+    queryFn: async () => {
+      if (!controller) {
+        return;
+      }
+
+      const customToken = new CustomERC20({
+        address: getChecksumAddress(address),
+        provider: controller.provider,
+        logoUrl: undefined,
+      });
+
+      const newToken = await customToken.init();
+
+      const balance = await newToken.balanceOf(controller.address());
+
+      const formattedToken: ERC20 = {
+        name: newToken.metadata().name,
+        icon: newToken.metadata().logoUrl,
+        symbol: newToken.metadata().symbol,
+        decimals: newToken.metadata().decimals,
+        address: newToken.metadata().address,
+        contract: newToken,
+        balance,
+      };
+
+      return formattedToken;
+    },
+    enabled: !tokenFromCtx,
+  });
+
+  console.log("rpcURL: ", controller?.rpcUrl());
+  console.log("newToken from hook: ", newToken);
+  console.log("tokenFromCtx from hook: ", tokenFromCtx);
+
+  if (tokenFromCtx !== undefined) {
+    return {
+      token: tokenFromCtx,
+      isLoading,
+      error,
+    };
+  }
+
+  if (newToken.data) {
+    return {
+      token: newToken.data,
+      isLoading: newToken.isLoading,
+      error,
+    };
+  }
+
   return {
-    token,
-    isLoading,
-    error,
+    token: undefined,
+    isLoading: false,
+    error: error || newToken.error || undefined,
   };
 }
 

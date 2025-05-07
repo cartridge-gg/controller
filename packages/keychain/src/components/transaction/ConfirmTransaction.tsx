@@ -56,18 +56,18 @@ export function ConfirmTransaction() {
   }, [transactions]);
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-  const { token } = useToken(call?.tokenAddress!);
+  const { token, isLoading } = useToken(call?.tokenAddress!);
 
   const { username: destinationUsername } = useUsername(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-    call?.destinationAddress!,
+    call?.destinationAddress || "",
   );
 
   const amount = useMemo(() => {
-    // convert "0x38d7ea4c68000" into number
-    const result = Number(call?.amount) / Math.pow(10, token.decimals);
-    return result;
-  }, [call, token]);
+    if (!isLoading && call?.amount && token?.decimals) {
+      const result = Number(call.amount) / Math.pow(10, token.decimals);
+      return result;
+    }
+  }, [call, token, isLoading]);
 
   if (!call) {
     return undefined;
@@ -90,7 +90,9 @@ export function ConfirmTransaction() {
           wallet={WalletType.Controller}
         />
 
-        <TransactionSending token={token} amount={amount} />
+        {token && amount && (
+          <TransactionSending token={token} amount={amount} />
+        )}
       </LayoutContent>
     </ExecutionContainer>
   );
