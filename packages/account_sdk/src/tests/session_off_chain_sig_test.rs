@@ -1,7 +1,7 @@
 use core::panic;
 
 use starknet::{
-    core::{types::StarknetError, utils::get_selector_from_name},
+    core::{types::{StarknetError, TypedData}, utils::get_selector_from_name},
     macros::{selector, short_string},
     providers::ProviderError,
 };
@@ -119,8 +119,8 @@ pub async fn test_session_off_chain_sig_via_controller() {
         .deploy_controller("username".to_owned(), owner.clone(), Version::LATEST)
         .await;
 
-    let typed_data = TypedData {
-        types: [
+    let typed_data = TypedData::new(
+        [
             (
                 "StarknetDomain".into(),
                 vec![
@@ -175,14 +175,14 @@ pub async fn test_session_off_chain_sig_via_controller() {
         ]
         .into_iter()
         .collect(),
-        primary_type: "Mail".into(),
-        domain: Domain {
+        "Mail",
+        Domain {
             name: "StarkNet Mail".into(),
             version: "1".into(),
             chain_id: "1".into(),
             revision: Some("1".into()),
         },
-        message: [
+        [
             (
                 "from".into(),
                 PrimitiveType::Object(
@@ -222,9 +222,9 @@ pub async fn test_session_off_chain_sig_via_controller() {
         ]
         .into_iter()
         .collect(),
-    };
+        ).unwrap();
 
-    let hashes = typed_data.encode(controller.address).unwrap();
+    let hashes = typed_data.message_hash(controller.address).unwrap();
     controller
         .create_session(
             vec![Policy::new_typed_data(poseidon_hash(
