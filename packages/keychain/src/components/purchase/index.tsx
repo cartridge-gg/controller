@@ -90,15 +90,6 @@ export function Purchase({
   const [walletAddress, setWalletAddress] = useState<string>();
   const [displayError, setDisplayError] = useState<Error | null>(null);
 
-  const isOos = () => {
-    const supply = starterpackDetails?.supply;
-    if (supply !== undefined && supply !== null) {
-      return supply <= 0;
-    }
-
-    return false;
-  };
-
   const {
     stripePromise,
     isLoading: isStripeLoading,
@@ -309,51 +300,43 @@ export function Purchase({
         )}
         {state === PurchaseState.SELECTION && (
           <>
-            {isOos() ? (
-              <Button className="flex-1" disabled>
-                Check again soon
-              </Button>
-            ) : (
-              <>
-                <Button
-                  className="flex-1"
-                  isLoading={isStripeLoading}
-                  onClick={onCreditCard}
-                  disabled={isLoadingWallets}
-                >
-                  <CreditCardIcon
-                    size="sm"
-                    variant="solid"
-                    className="text-background-100 flex-shrink-0"
-                  />
-                  <span>Credit Card</span>
-                </Button>
-                <div className="flex flex-row gap-4">
-                  {availableWallets.map((wallet: ExternalWallet) => {
-                    return (
-                      <Button
-                        key={wallet.type}
-                        className="flex-1"
-                        variant="secondary"
-                        isLoading={
-                          isConnecting && wallet.type === selectedWallet?.type
-                        }
-                        disabled={
-                          !wallet.available ||
-                          isConnecting ||
-                          isStripeLoading ||
-                          isLoadingWallets
-                        }
-                        onClick={async () => onExternalConnect(wallet)}
-                      >
-                        {walletIcon(wallet, true)}{" "}
-                        {availableWallets.length < 2 && wallet.type}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
+            <Button
+              className="flex-1"
+              isLoading={isStripeLoading}
+              onClick={onCreditCard}
+              disabled={isLoadingWallets}
+            >
+              <CreditCardIcon
+                size="sm"
+                variant="solid"
+                className="text-background-100 flex-shrink-0"
+              />
+              <span>Credit Card</span>
+            </Button>
+            <div className="flex flex-row gap-4">
+              {availableWallets.map((wallet: ExternalWallet) => {
+                return (
+                  <Button
+                    key={wallet.type}
+                    className="flex-1"
+                    variant="secondary"
+                    isLoading={
+                      isConnecting && wallet.type === selectedWallet?.type
+                    }
+                    disabled={
+                      !wallet.available ||
+                      isConnecting ||
+                      isStripeLoading ||
+                      isLoadingWallets
+                    }
+                    onClick={async () => onExternalConnect(wallet)}
+                  >
+                    {walletIcon(wallet, true)}{" "}
+                    {availableWallets.length < 2 && wallet.type}
+                  </Button>
+                );
+              })}
+            </div>
           </>
         )}
       </LayoutFooter>
@@ -361,7 +344,7 @@ export function Purchase({
   );
 }
 
-const Supply = ({ amount }: { amount: number | null | undefined }) => {
+const Supply = ({ amount }: { amount: number | undefined }) => {
   const theme = useControllerTheme();
   const color = () => {
     if (amount === 0) {
@@ -373,8 +356,8 @@ const Supply = ({ amount }: { amount: number | null | undefined }) => {
       : "text-primary-200";
   };
 
-  if (amount === null || amount === undefined) {
-    return null;
+  if (amount === undefined) {
+    return <></>;
   }
 
   return (

@@ -193,6 +193,7 @@ export const SuccessStarterpack: Story = {
     initState: PurchaseState.SUCCESS,
     starterpackDetails: {
       id: "1",
+      name: "Starter Pack Name",
       priceUsd: 100,
       starterPackItems: [
         {

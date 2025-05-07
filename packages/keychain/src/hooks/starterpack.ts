@@ -26,16 +26,16 @@ export interface StarterItemData {
 export interface StarterPackDetails {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   priceUsd: number;
-  supply: number | null;
+  supply?: number;
   starterPackItems: StarterItemData[];
 }
 
 export function useStarterPack(starterpackId: string) {
   const { controller } = useController();
   const [isLoading, setIsLoading] = useState(true);
-  const [supply, setSupply] = useState<number | null>(null);
+  const [supply, setSupply] = useState<number | undefined>(undefined);
   const [items, setItems] = useState<StarterItemData[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [name, setName] = useState<string>("");
@@ -80,7 +80,7 @@ export function useStarterPack(starterpackId: string) {
 
         const items: StarterItemData[] = [];
         if (result.starterpack) {
-          let minSupply = null;
+          let minSupply;
           if (result.starterpack.starterpackContract?.edges) {
             for (const edge of result.starterpack.starterpackContract.edges) {
               items.push({
