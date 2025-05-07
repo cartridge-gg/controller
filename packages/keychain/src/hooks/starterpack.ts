@@ -97,6 +97,7 @@ export function useStarterPack(starterpackId: string) {
                   edge?.node?.supplyEntryPoint,
                   edge?.node?.supplyCalldata || [],
                 );
+
                 if (!minSupply || newSupply < minSupply) {
                   minSupply = newSupply;
                 }
@@ -119,7 +120,7 @@ export function useStarterPack(starterpackId: string) {
             });
           }
 
-          if (minSupply) {
+          if (minSupply !== undefined) {
             setSupply(minSupply);
           }
         }

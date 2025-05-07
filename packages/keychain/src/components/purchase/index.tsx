@@ -90,6 +90,16 @@ export function Purchase({
   const [walletAddress, setWalletAddress] = useState<string>();
   const [displayError, setDisplayError] = useState<Error | null>(null);
 
+  const isOos = () => {
+    console.log({ starterpackDetails });
+    const supply = starterpackDetails?.supply;
+    if (supply !== undefined && supply !== null) {
+      return supply <= 0;
+    }
+
+    return false;
+  };
+
   const {
     stripePromise,
     isLoading: isStripeLoading,
@@ -223,7 +233,6 @@ export function Purchase({
   return (
     <LayoutContainer>
       <LayoutHeader
-        className="p-6"
         title={title}
         onBack={() => {
           switch (state) {
@@ -243,7 +252,7 @@ export function Purchase({
           ) : undefined
         }
       />
-      <LayoutContent className="gap-6 px-6">
+      <LayoutContent>
         {state === PurchaseState.SELECTION &&
           ((type === PurchaseType.CREDITS && (
             <AmountSelection
@@ -300,43 +309,51 @@ export function Purchase({
         )}
         {state === PurchaseState.SELECTION && (
           <>
-            <Button
-              className="flex-1"
-              isLoading={isStripeLoading}
-              onClick={onCreditCard}
-              disabled={isLoadingWallets}
-            >
-              <CreditCardIcon
-                size="sm"
-                variant="solid"
-                className="text-background-100 flex-shrink-0"
-              />
-              <span>Credit Card</span>
-            </Button>
-            <div className="flex flex-row gap-4">
-              {availableWallets.map((wallet: ExternalWallet) => {
-                return (
-                  <Button
-                    key={wallet.type}
-                    className="flex-1"
-                    variant="secondary"
-                    isLoading={
-                      isConnecting && wallet.type === selectedWallet?.type
-                    }
-                    disabled={
-                      !wallet.available ||
-                      isConnecting ||
-                      isStripeLoading ||
-                      isLoadingWallets
-                    }
-                    onClick={async () => onExternalConnect(wallet)}
-                  >
-                    {walletIcon(wallet, true)}{" "}
-                    {availableWallets.length < 2 && wallet.type}
-                  </Button>
-                );
-              })}
-            </div>
+            {isOos() ? (
+              <Button className="flex-1" disabled>
+                Check again soon
+              </Button>
+            ) : (
+              <>
+                <Button
+                  className="flex-1"
+                  isLoading={isStripeLoading}
+                  onClick={onCreditCard}
+                  disabled={isLoadingWallets}
+                >
+                  <CreditCardIcon
+                    size="sm"
+                    variant="solid"
+                    className="text-background-100 flex-shrink-0"
+                  />
+                  <span>Credit Card</span>
+                </Button>
+                <div className="flex flex-row gap-4">
+                  {availableWallets.map((wallet: ExternalWallet) => {
+                    return (
+                      <Button
+                        key={wallet.type}
+                        className="flex-1"
+                        variant="secondary"
+                        isLoading={
+                          isConnecting && wallet.type === selectedWallet?.type
+                        }
+                        disabled={
+                          !wallet.available ||
+                          isConnecting ||
+                          isStripeLoading ||
+                          isLoadingWallets
+                        }
+                        onClick={async () => onExternalConnect(wallet)}
+                      >
+                        {walletIcon(wallet, true)}{" "}
+                        {availableWallets.length < 2 && wallet.type}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </>
         )}
       </LayoutFooter>
