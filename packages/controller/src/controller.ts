@@ -129,6 +129,7 @@ export default class ControllerProvider extends BaseProvider {
       let response = await this.keychain.connect(
         this.options.policies || {},
         this.rpcUrl(),
+        this.options.signupOptions,
       );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);

@@ -1,18 +1,18 @@
-import {
-  constants,
-  BigNumberish,
-  Call,
-  Abi,
-  InvocationsDetails,
-} from "starknet";
+import { Policy, SessionPolicies } from "@cartridge/presets";
 import {
   AddInvokeTransactionResult,
   ChainId,
   Signature,
   TypedData,
 } from "@starknet-io/types-js";
+import {
+  Abi,
+  BigNumberish,
+  Call,
+  constants,
+  InvocationsDetails,
+} from "starknet";
 import { KeychainIFrame, ProfileIFrame } from "./iframe";
-import { Policy, SessionPolicies } from "@cartridge/presets";
 import {
   ExternalWallet,
   ExternalWalletResponse,
@@ -29,6 +29,14 @@ export type Session = {
     privateKey: string;
   };
 };
+
+export type AuthOption =
+  | "webauthn"
+  | "discord"
+  | "walletconnect"
+  | ExternalWalletType;
+
+export type AuthOptions = Omit<AuthOption, "phantom" | "argent">[];
 
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
@@ -109,6 +117,7 @@ export interface Keychain {
   connect(
     policies: SessionPolicies,
     rpcUrl: string,
+    signupOptions?: AuthOptions,
   ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
@@ -205,6 +214,8 @@ export type KeychainOptions = IFrameOptions & {
   propagateSessionErrors?: boolean;
   /** The fee source to use for execute from outside */
   feeSource?: FeeSource;
+  /** Signup options (the order of the options is reflected in the UI. It's recommended to group socials and wallets together ) */
+  signupOptions?: AuthOptions;
 };
 
 export type ProfileOptions = IFrameOptions & {

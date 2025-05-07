@@ -12,15 +12,18 @@ import { deployFactory } from "./deploy";
 import { openSettingsFactory } from "./settings";
 import { normalize } from "@cartridge/utils";
 import { switchChain } from "./switchChain";
+import { AuthOption, AuthOptions } from "@cartridge/controller";
 
 export function connectToController<ParentMethods extends object>({
   setRpcUrl,
   setContext,
   setController,
+  setConfigSignupOptions,
 }: {
   setRpcUrl: (url: string) => void;
   setContext: (ctx: ConnectionCtx) => void;
   setController: (controller?: Controller) => void;
+  setConfigSignupOptions: (options: AuthOption[] | undefined) => void;
 }) {
   return connectToParent<ParentMethods>({
     methods: {
@@ -28,6 +31,8 @@ export function connectToController<ParentMethods extends object>({
         connect({
           setRpcUrl,
           setContext,
+          setConfigSignupOptions: (options: AuthOptions | undefined) =>
+            setConfigSignupOptions(options as AuthOption[] | undefined),
         }),
       ),
       deploy: () => deployFactory(setContext),

@@ -9,6 +9,7 @@ import {
   OpenSettingsCtx,
 } from "@/utils/connection";
 import {
+  AuthOption,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -68,6 +69,9 @@ export function useConnectionValue() {
     verified: true,
     ...defaultTheme,
   });
+  const [configSignupOptions, setConfigSignupOptions] = useState<
+    AuthOption[] | undefined
+  >();
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
 
@@ -199,6 +203,7 @@ export function useConnectionValue() {
       setRpcUrl,
       setContext,
       setController,
+      setConfigSignupOptions,
     });
 
     connection.promise
@@ -213,7 +218,7 @@ export function useConnectionValue() {
     return () => {
       connection.destroy();
     };
-  }, [setOrigin, setRpcUrl, setContext, setController]);
+  }, [setOrigin, setRpcUrl, setContext, setController, setConfigSignupOptions]);
 
   const logout = useCallback(async () => {
     if (!parent || !context?.resolve) return;
@@ -343,6 +348,7 @@ export function useConnectionValue() {
     theme,
     verified,
     chainId,
+    configSignupOptions,
     setController,
     setContext,
     closeModal,

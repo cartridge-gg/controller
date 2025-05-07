@@ -53,6 +53,7 @@ describe("CreateController", () => {
       handleSubmit: vi.fn().mockResolvedValue(undefined),
       authenticationStep: AuthenticationStep.FillForm,
       setChangeWallet: vi.fn(),
+      signupOptions: ["webauthn"],
     });
     mockUseUsernameValidation.mockReturnValue({
       status: "valid",
@@ -92,6 +93,7 @@ describe("CreateController", () => {
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep,
       setChangeWallet: vi.fn(),
+      signupOptions: ["webauthn"],
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
@@ -105,6 +107,7 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.ChooseSignupMethod,
       setAuthenticationStep,
+      signupOptions: ["webauthn"],
     });
     const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);
@@ -123,6 +126,7 @@ describe("CreateController", () => {
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep: vi.fn(),
       setChangeWallet: vi.fn(),
+      signupOptions: ["webauthn"],
     });
     renderComponent();
     const submitButton = screen.getByTestId("submit-button");
@@ -172,6 +176,7 @@ describe("CreateController", () => {
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep,
       setChangeWallet: vi.fn(),
+      signupOptions: ["webauthn"],
     });
     renderWithProviders(<CreateController {...defaultProps} />);
     const input = screen.getByPlaceholderText("Username");
@@ -186,6 +191,7 @@ describe("CreateController", () => {
       authenticationStep: AuthenticationStep.ChooseSignupMethod,
       setAuthenticationStep,
       setChangeWallet: vi.fn(),
+      signupOptions: ["webauthn"],
     });
     const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);
