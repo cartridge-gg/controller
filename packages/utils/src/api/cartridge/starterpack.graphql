@@ -19,6 +19,9 @@ query StarterPack($id: ID!) {
           name
           description
           iconURL
+          contractAddress
+          supplyEntryPoint
+          supplyCalldata
         }
       }
     }
