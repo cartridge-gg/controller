@@ -1,5 +1,5 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { useConnection, useControllerTheme } from "@/hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import {
   Button,
@@ -42,6 +42,7 @@ export type PurchaseCreditsProps = {
   type: PurchaseType;
   starterpackDetails?: StarterPackDetails;
   initState?: PurchaseState;
+  isLoading?: boolean;
   onBack?: () => void;
 };
 
@@ -65,6 +66,7 @@ export function Purchase({
   type,
   isSlot,
   starterpackDetails,
+  isLoading,
   initState = PurchaseState.SELECTION,
 }: PurchaseCreditsProps) {
   const { controller, closeModal } = useConnection();
@@ -91,9 +93,8 @@ export function Purchase({
   const [displayError, setDisplayError] = useState<Error | null>(null);
 
   const isOos = () => {
-    console.log({ starterpackDetails });
     const supply = starterpackDetails?.supply;
-    if (supply !== undefined && supply !== null) {
+    if (supply !== undefined) {
       return supply <= 0;
     }
 
@@ -247,7 +248,7 @@ export function Purchase({
           }
         }}
         right={
-          type === PurchaseType.STARTERPACK ? (
+          starterpackDetails?.supply !== undefined ? (
             <Supply amount={starterpackDetails!.supply} />
           ) : undefined
         }
@@ -307,7 +308,7 @@ export function Purchase({
             Close
           </Button>
         )}
-        {state === PurchaseState.SELECTION && (
+        {state === PurchaseState.SELECTION && !isLoading && (
           <>
             {isOos() ? (
               <Button className="flex-1" disabled>
@@ -361,21 +362,14 @@ export function Purchase({
   );
 }
 
-const Supply = ({ amount }: { amount: number | undefined }) => {
-  const theme = useControllerTheme();
+const Supply = ({ amount }: { amount: number }) => {
   const color = () => {
-    if (amount === 0) {
+    if (amount <= 0) {
       return "text-destructive-100";
     }
 
-    return theme.colors?.primary
-      ? `color-${theme.colors?.primary}`
-      : "text-primary-200";
+    return `text-primary-100`;
   };
-
-  if (amount === undefined) {
-    return <></>;
-  }
 
   return (
     <div
