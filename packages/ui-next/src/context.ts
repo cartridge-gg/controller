@@ -12,6 +12,7 @@ type UIContextValue = {
   onFollowingsClick?: () => void;
   closeModal?: () => void;
   openSettings?: () => void;
+  showQrCode?: (show: boolean) => void;
 };
 
 export const UIContext = createContext<UIContextValue>({});
