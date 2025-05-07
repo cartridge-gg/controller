@@ -67,7 +67,9 @@ export const FeeTokenSelect = ({
       onValueChange={handleChangeToken}
       defaultValue={currentToken.metadata.address}
     >
-      <TokenSelectHeader className={cn("rounded", headerClassName)} />
+      <TokenSelectHeader
+        className={cn("rounded disabled:bg-background-200", headerClassName)}
+      />
       <SelectContent viewPortClassName="gap-0">
         {tokens.map((token, i) => (
           <TokenSelectRow

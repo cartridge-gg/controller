@@ -5,7 +5,7 @@ export const TokenSelectHeader = (
 ) => {
   return (
     <SelectTrigger
-      className="h-10 w-fit rounded-full flex gap-2 items-center p-2"
+      className="h-10 w-fit rounded-full flex gap-2 items-center p-2 disabled:bg-background-200"
       {...props}
     >
       <SelectValue placeholder="Select Token" />

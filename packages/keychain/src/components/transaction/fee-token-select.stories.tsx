@@ -117,7 +117,7 @@ const mockTokens = [
 ];
 
 const meta: Meta<typeof FeeTokenSelect> = {
-  title: "Modules/ERC20/Token Select",
+  title: "Transaction/Token Select",
   component: FeeTokenSelect,
   tags: ["autodocs"],
   parameters: {
@@ -132,3 +132,9 @@ export default meta;
 type Story = StoryObj<typeof FeeTokenSelect>;
 
 export const Default: Story = {};
+
+export const Disabled: Story = {
+  args: {
+    disabled: true,
+  },
+};
