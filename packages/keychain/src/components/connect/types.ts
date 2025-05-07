@@ -1,4 +1,4 @@
-import { ExternalWalletType } from "@cartridge/controller";
+import { AuthOption } from "@cartridge/controller";
 import { CredentialMetadata } from "@cartridge/utils/api/cartridge";
 
 export type FormInput = {
@@ -27,21 +27,15 @@ export type LoginProps = AuthBaseProps & {
   onSignup: (username: string) => void;
 };
 
-export type AuthenticationMethod =
-  | "webauthn"
-  | "discord"
-  | "walletconnect"
-  | ExternalWalletType;
-
 export function getControllerSignerProvider(
   signer: CredentialMetadata | undefined,
-): AuthenticationMethod | undefined {
+): AuthOption | undefined {
   if (!signer) {
     return undefined;
   }
   switch (signer.__typename) {
     case "Eip191Credentials":
-      return signer.eip191?.[0].provider as AuthenticationMethod;
+      return signer.eip191?.[0].provider as AuthOption;
     case "WebauthnCredentials":
       return "webauthn";
     case "SIWSCredentials":
