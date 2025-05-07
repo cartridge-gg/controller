@@ -8,6 +8,7 @@ import {
   StarknetColorIcon,
   StarknetIcon,
   Thumbnail,
+  useUI,
 } from "@/index";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useCallback, useMemo } from "react";
@@ -15,6 +16,7 @@ import { formatAddress, getChainName, isSlotChain } from "@cartridge/utils";
 import { constants, getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import { useLayoutContext } from "@/components/layout/context";
+import QrCodeIcon from "@/components/icons/utility/qr-code";
 
 export const connectionTooltipContentVariants = cva(
   "select-none flex flex-col gap-2 p-4 rounded-lg shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]",
@@ -58,6 +60,8 @@ export const ConnectionTooltipContent = ({
   className,
 }: ConnectionTooltipContentProps) => {
   const { setWithBackground } = useLayoutContext();
+  const { showQrCode } = useUI();
+
   const Icon = useMemo(() => {
     switch (chainId) {
       case constants.StarknetChainId.SN_MAIN:
@@ -90,13 +94,28 @@ export const ConnectionTooltipContent = ({
     [address],
   );
 
+  const handleShowQrCode = useCallback(() => {
+    if (!showQrCode) return;
+    showQrCode(true);
+  }, [showQrCode]);
+
   return (
     <div
       className={cn(connectionTooltipContentVariants({ variant }), className)}
     >
-      <div className="flex items-center gap-3">
-        <AchievementPlayerBadge username={username} size="xl" />
-        <p className="text-lg/[22px] font-semibold">{username}</p>
+      <div className="flex items-center w-full gap-3 justify-between">
+        <div className="flex items-center gap-3">
+          <AchievementPlayerBadge username={username} size="xl" />
+          <p className="text-lg/[22px] font-semibold">{username}</p>
+        </div>
+        {address && (
+          <div
+            onClick={handleShowQrCode}
+            className="flex items-center gap-3 w-9 h-9 bg-background-200 rounded-full justify-center cursor-pointer hover:bg-background-300 transition-all"
+          >
+            <QrCodeIcon />
+          </div>
+        )}
       </div>
       <div className="flex flex-col gap-px bg-background-200">
         <div
