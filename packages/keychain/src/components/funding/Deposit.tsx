@@ -12,6 +12,7 @@ import {
   CallData,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
+  addAddressPadding,
   cairo,
   num,
   wallet,
@@ -151,7 +152,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
   const onCopy = useCallback(() => {
     if (!controller) return;
 
-    navigator.clipboard.writeText(controller.address());
+    navigator.clipboard.writeText(addAddressPadding(controller.address()));
     toast.success("Address copied");
   }, [controller]);
 
