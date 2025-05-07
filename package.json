@@ -22,7 +22,7 @@
     "account-wasm": "pnpm --filter @cartridge/account-wasm",
     "book": "pnpm --filter @cartridge/documentation",
     "ui:next": "pnpm --filter @cartridge/ui-next",
-    "profile": "pnpm --filter @cartridge/profile",
+    "profil": "pnpm --filter @cartridge/profile",
     "utils": "pnpm --filter @cartridge/utils",
     "example:next": "pnpm --filter @cartridge/controller-example-next",
     "example:svelte": "pnpm --filter @cartridge/controller-example-svelte",
