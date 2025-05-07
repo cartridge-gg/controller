@@ -9,6 +9,7 @@ import { useConnection } from "./connection";
 import { ERC20 as CustomERC20 } from "@cartridge/utils";
 import { Token } from "@cartridge/ui-next";
 import { useQuery } from "react-query";
+import { usePriceByAddressesQuery } from "@cartridge/utils/api/cartridge";
 
 export function useTokens(): TokensContextValue {
   const context = useContext(TokensContext);
@@ -61,9 +62,19 @@ export function useToken(address: string) {
     enabled: !tokenFromCtx,
   });
 
-  console.log("rpcURL: ", controller?.rpcUrl());
-  console.log("newToken from hook: ", newToken);
-  console.log("tokenFromCtx from hook: ", tokenFromCtx);
+  const {
+    data: priceData,
+    isLoading: isPriceLoading,
+    error: priceError,
+  } = usePriceByAddressesQuery(
+    {
+      addresses: address,
+    },
+    {
+      refetchInterval: 3000,
+      enabled: !tokenFromCtx && !!newToken,
+    },
+  );
 
   if (tokenFromCtx !== undefined) {
     return {
@@ -74,11 +85,15 @@ export function useToken(address: string) {
   }
 
   if (newToken.data) {
-    return {
-      token: newToken.data,
-      isLoading: newToken.isLoading,
-      error,
-    };
+    if (!isPriceLoading) {
+      const price = priceData?.priceByAddresses[0];
+      const result = { ...newToken.data, price };
+      return {
+        token: result,
+        isLoading: newToken.isLoading,
+        error: priceError,
+      };
+    }
   }
 
   return {
