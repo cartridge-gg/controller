@@ -16,7 +16,7 @@ import { isIframe } from "@cartridge/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AmountSelection } from "../funding/AmountSelection";
+import { AmountSelection, USD_AMOUNTS } from "../funding/AmountSelection";
 import CheckoutForm from "./StripeCheckout";
 import { CryptoCheckout, walletIcon } from "./CryptoCheckout";
 import { ExternalWallet } from "@cartridge/controller";
@@ -55,8 +55,6 @@ export type StripeResponse = {
   pricing: PricingDetails;
 };
 
-export const DEFAULT_WHOLE_CREDITS = 500;
-
 // TODO: I know this is terrible... refactor soon, separate product selection and checkout
 export function Purchase({
   onBack,
@@ -81,9 +79,7 @@ export function Purchase({
   );
   const [state, setState] = useState<PurchaseState>(initState);
   const [wholeCredits, setWholeCredits] = useState<number>(
-    starterpackDetails?.priceUsd
-      ? usdToCredits(starterpackDetails?.priceUsd)
-      : DEFAULT_WHOLE_CREDITS,
+    usdToCredits(starterpackDetails?.priceUsd || USD_AMOUNTS[0]),
   );
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
@@ -108,9 +104,9 @@ export function Purchase({
   }, [wallets, detectedWallets]);
 
   const onAmountChanged = useCallback(
-    (amount: number) => {
+    (usdAmount: number) => {
       setDisplayError(null);
-      setWholeCredits(amount);
+      setWholeCredits(usdToCredits(usdAmount));
     },
     [setWholeCredits],
   );
@@ -241,7 +237,6 @@ export function Purchase({
         {state === PurchaseState.SELECTION &&
           ((type === PurchaseType.CREDITS && (
             <AmountSelection
-              wholeCredits={wholeCredits}
               onChange={onAmountChanged}
               lockSelection={isStripeLoading || isLoadingWallets}
               enableCustom
@@ -298,7 +293,7 @@ export function Purchase({
               className="flex-1"
               isLoading={isStripeLoading}
               onClick={onCreditCard}
-              disabled={isLoadingWallets}
+              disabled={isLoadingWallets || !wholeCredits}
             >
               <CreditCardIcon
                 size="sm"
