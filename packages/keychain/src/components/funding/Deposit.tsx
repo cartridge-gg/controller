@@ -35,11 +35,7 @@ import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
 import { Balance, BalanceType } from "../purchase/Balance";
 import { toast } from "sonner";
-import {
-  convertUSDToTokenAmount,
-  usdToCredits,
-  useFeeToken,
-} from "@/hooks/tokens";
+import { convertUSDToTokenAmount, useFeeToken } from "@/hooks/tokens";
 
 type DepositProps = {
   onComplete?: (deployHash?: string) => void;
@@ -60,22 +56,20 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
   const { account: extAccount } = useAccount();
   const { token: feeToken } = useFeeToken();
 
-  const [usdAmount, setUsdAmount] = useState<number>(5);
   const [state, setState] = useState<"connect" | "fund">("connect");
   const [tokenAmount, setTokenAmount] = useState<bigint>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
   const onAmountChanged = useCallback(
-    (amount: number) => {
+    (usdAmount: number) => {
       if (!feeToken?.price) return;
       const tokenAmount = convertUSDToTokenAmount(
-        amount,
+        usdAmount,
         feeToken?.decimals,
         feeToken?.price,
       );
       setTokenAmount(tokenAmount);
-      setUsdAmount(amount);
     },
     [feeToken?.price, feeToken?.decimals],
   );
@@ -174,11 +168,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
       </LayoutContent>
 
       <LayoutFooter>
-        <AmountSelection
-          wholeCredits={usdToCredits(usdAmount)}
-          lockSelection={isLoading}
-          onChange={onAmountChanged}
-        />
+        <AmountSelection lockSelection={isLoading} onChange={onAmountChanged} />
         <Separator className="bg-spacer m-1" />
         {error && (
           <ErrorAlert
