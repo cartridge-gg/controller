@@ -1,0 +1,47 @@
+query Controller($username: String!, $chainId: String!) {
+  controller(username: $username, chainId: $chainId) {
+    id
+    accountID
+    address
+    network
+    constructorCalldata
+    createdAt
+    updatedAt
+    signers {
+      metadata {
+        ... on WebauthnCredentials {
+          __typename
+          webauthn {
+            id
+            publicKey
+          }
+        }
+        ... on StarknetCredentials {
+          __typename
+          starknet {
+            publicKey
+          }
+        }
+        ... on Eip191Credentials {
+          __typename
+          eip191 {
+            provider
+            ethAddress
+          }
+        }
+        ... on SIWSCredentials {
+          __typename
+          siws {
+            publicKey
+          }
+        }
+      }
+    }
+  }
+}
+
+union CredentialMetadata =
+  | WebauthnCredentials
+  | StarknetCredentials
+  | Eip191Credentials
+  | SIWSCredentials

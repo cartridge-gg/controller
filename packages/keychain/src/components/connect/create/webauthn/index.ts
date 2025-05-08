@@ -4,7 +4,7 @@ import { useConnection } from "@/hooks/connection";
 import {
   ControllerQuery,
   WebauthnCredential,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
 import { constants } from "starknet";
 import { LoginMode } from "../../types";

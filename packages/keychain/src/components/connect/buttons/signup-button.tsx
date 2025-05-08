@@ -2,7 +2,6 @@ import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
 import {
   ArgentColorIcon,
   Button,
-  cn,
   DiscordColorIcon,
   IconProps,
   MetaMaskColorIcon,
@@ -11,7 +10,8 @@ import {
   RabbyColorIcon,
   Spinner,
   WalletConnectColorIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 
 interface SignupButtonProps extends React.ComponentProps<typeof Button> {
   authMethod: string;

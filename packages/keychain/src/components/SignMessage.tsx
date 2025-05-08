@@ -11,7 +11,7 @@ import {
   CardListContent,
   CardListItem,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 // import { OcclusionDetector } from "@/components/OcclusionDetector";
 

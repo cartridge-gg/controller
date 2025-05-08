@@ -20,7 +20,7 @@ import {
   ActivityTokenCard,
   ERC20Detail,
   ERC20Header,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useConnection, useData } from "#hooks/context";
 import {
   getDate,
@@ -28,7 +28,7 @@ import {
   isPublicChain,
   useCreditBalance,
   VoyagerUrl,
-} from "@cartridge/utils";
+} from "@cartridge/ui/utils";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount } from "#hooks/account";
 import { useToken } from "#hooks/token";

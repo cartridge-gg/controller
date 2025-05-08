@@ -4,12 +4,12 @@ import {
   DialogContent,
   UIProvider as Provider,
   TimesIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useConnection } from "#hooks/context";
 import { useAccount } from "#hooks/account";
 import { useArcade } from "#hooks/arcade.js";
 import { useNavigate } from "react-router-dom";
-import { QrCode } from "@cartridge/ui-next";
+import { QrCode } from "@cartridge/ui";
 
 function QrCodeDisplay({
   address,

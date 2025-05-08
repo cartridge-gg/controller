@@ -1,5 +1,5 @@
 import { AuthOption } from "@cartridge/controller";
-import { CredentialMetadata } from "@cartridge/utils/api/cartridge";
+import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 
 export type FormInput = {
   username: string;

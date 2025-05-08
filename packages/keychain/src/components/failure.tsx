@@ -3,7 +3,7 @@ import {
   AlertIcon,
   ExternalIcon,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { Link } from "react-router-dom";
 

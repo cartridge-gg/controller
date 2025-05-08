@@ -3,9 +3,9 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  cn,
   Thumbnail,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
 
 type BalanceProps = {

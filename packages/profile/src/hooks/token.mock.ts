@@ -1,4 +1,4 @@
-import { tokens } from "@cartridge/utils/mock/data";
+import { tokens } from "@cartridge/ui/utils/mock/data";
 import { fn, Mock } from "@storybook/test";
 import { UseTokensResponse, UseTokenResponse, Token } from "./token";
 

@@ -19,8 +19,8 @@ import {
 } from "@cartridge/controller";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import { controllerConfigs, defaultTheme, Policies } from "@cartridge/presets";
-import { useThemeEffect } from "@cartridge/ui-next";
-import { isIframe, normalizeOrigin } from "@cartridge/utils";
+import { useThemeEffect } from "@cartridge/ui";
+import { isIframe, normalizeOrigin } from "@cartridge/ui/utils";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { RpcProvider, shortString } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";

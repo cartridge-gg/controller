@@ -11,7 +11,7 @@ import {
   LayoutFooter,
   LayoutHeader,
   Sheet,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";

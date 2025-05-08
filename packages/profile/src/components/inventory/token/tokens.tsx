@@ -1,4 +1,4 @@
-import { Empty, Skeleton, TokenCard } from "@cartridge/ui-next";
+import { Empty, Skeleton, TokenCard } from "@cartridge/ui";
 import { Link } from "react-router-dom";
 import { Token, useTokens } from "#hooks/token";
 import placeholder from "/public/placeholder.svg";

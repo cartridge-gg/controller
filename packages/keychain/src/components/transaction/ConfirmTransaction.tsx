@@ -1,5 +1,5 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
-import { LayoutContent } from "@cartridge/ui-next";
+import { LayoutContent } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ExecuteCtx } from "@/utils/connection";

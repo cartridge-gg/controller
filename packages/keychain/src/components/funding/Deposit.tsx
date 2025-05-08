@@ -29,7 +29,7 @@ import {
   CopyAddress,
   Separator,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";

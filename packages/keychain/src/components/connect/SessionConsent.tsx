@@ -1,5 +1,5 @@
 import { useConnection } from "@/hooks/connection";
-import { LockIcon, VerifiedIcon } from "@cartridge/ui-next";
+import { LockIcon, VerifiedIcon } from "@cartridge/ui";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 

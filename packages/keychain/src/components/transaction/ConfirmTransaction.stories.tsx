@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { ConfirmTransaction } from "./ConfirmTransaction";
-import { ETH_CONTRACT_ADDRESS } from "@cartridge/utils";
+import { ETH_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
 import { VerifiableControllerTheme } from "@/components/provider/connection";
 
 const meta = {

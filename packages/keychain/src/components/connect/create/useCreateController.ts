@@ -14,7 +14,7 @@ import {
   useAccountQuery,
   useRegisterMutation,
   WebauthnCredentials,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo, useState } from "react";
 import { shortString } from "starknet";
 import { LoginMode } from "../types";

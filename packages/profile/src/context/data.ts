@@ -3,7 +3,7 @@ import { useAchievements } from "#hooks/achievements";
 import {
   ActivitiesQuery,
   TransfersQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { createContext } from "react";
 
 export type DataContextType = {
