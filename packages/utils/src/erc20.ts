@@ -7,6 +7,7 @@ import {
   shortString,
   uint256,
 } from "starknet";
+import { erc20Metadata } from "@cartridge/presets";
 
 export type ERC20Metadata = {
   name: string;
@@ -72,6 +73,11 @@ export class ERC20 {
     this.name = name;
     this.symbol = symbol;
     this.decimals = decimals;
+    this.logoUrl = erc20Metadata.find(
+      (token) =>
+        getChecksumAddress(token.l2_token_address) ===
+        getChecksumAddress(this.address),
+    )?.logo_url;
 
     return this;
   }

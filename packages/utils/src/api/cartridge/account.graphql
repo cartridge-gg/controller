@@ -24,7 +24,7 @@ query Account($username: String!) {
 query Credit($username: String!) {
   account(username: $username) {
     credits {
-      amount 
+      amount
       decimals
     }
   }
