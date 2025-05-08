@@ -82,7 +82,7 @@ const Union = ({ price }: { price: number }) => {
       </svg>
       <span
         className={cn(
-          "absolute font-semibold text-xs -translate-y-1/4",
+          "absolute font-semibold text-sm -translate-y-1/4",
           price === 0 ? "text-constructive-100" : "text-primary-200",
         )}
       >

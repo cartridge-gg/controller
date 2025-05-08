@@ -15,3 +15,4 @@ export * from "./thumbnails";
 export * from "./tokens";
 export * from "./universals";
 export * from "./traceabilities";
+export * from "./qr-code";
