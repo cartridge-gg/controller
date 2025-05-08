@@ -1,5 +1,5 @@
 import { cn, FollowerTab, Tabs, TabsList } from "@/index";
-import { HTMLAttributes, useState } from "react";
+import { HTMLAttributes } from "react";
 import { cva, VariantProps } from "class-variance-authority";
 
 interface FollowerTabsProps
@@ -7,7 +7,7 @@ interface FollowerTabsProps
     VariantProps<typeof followerTabsVariants> {
   followers: number;
   following: number;
-  defaultValue?: string;
+  value?: string;
   onValueChange?: (value: string) => void;
 }
 
@@ -35,19 +35,14 @@ export const followerTabsVariants = cva(
 export const FollowerTabs = ({
   followers,
   following,
-  defaultValue,
+  value,
+  onValueChange,
   variant,
   className,
   children,
 }: FollowerTabsProps) => {
-  const [value, setValue] = useState<string>(defaultValue ?? "followers");
-
   return (
-    <Tabs
-      className={className}
-      value={value}
-      onValueChange={(value) => setValue(value)}
-    >
+    <Tabs className={className} value={value} onValueChange={onValueChange}>
       <TabsList className={cn(followerTabsVariants({ variant }))}>
         <FollowerTab
           value="followers"
