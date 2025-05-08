@@ -40,7 +40,6 @@ export function useToken(address: string) {
       const customToken = new CustomERC20({
         address: getChecksumAddress(address),
         provider: controller.provider,
-        logoUrl: undefined,
       });
 
       const newToken = await customToken.init();
@@ -49,7 +48,7 @@ export function useToken(address: string) {
 
       const formattedToken: ERC20 = {
         name: newToken.metadata().name,
-        icon: newToken.metadata().logoUrl,
+        icon: newToken.metadata().logoUrl || "/placeholder.svg",
         symbol: newToken.metadata().symbol,
         decimals: newToken.metadata().decimals,
         address: newToken.metadata().address,

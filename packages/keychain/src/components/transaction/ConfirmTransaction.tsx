@@ -1,5 +1,5 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
-import { LayoutContent, WalletType } from "@cartridge/ui-next";
+import { LayoutContent, Skeleton, WalletType } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ExecuteCtx } from "@/utils/connection";
 import { Call, EstimateFee, Uint256, uint256 } from "starknet";
@@ -89,10 +89,11 @@ export function ConfirmTransaction() {
           address={call.destinationAddress}
           wallet={WalletType.Controller}
         />
-
-        {token && amount && (
+        {isLoading ? (
+          <Skeleton className="w-full h-[384px]" />
+        ) : token && amount ? (
           <TransactionSending token={token} amount={amount} />
-        )}
+        ) : null}
       </LayoutContent>
     </ExecutionContainer>
   );
