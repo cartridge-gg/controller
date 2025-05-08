@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogContent,
   UIProvider as Provider,
-  TimesIcon,
 } from "@cartridge/ui-next";
 import { useConnection } from "#hooks/context";
 import { useAccount } from "#hooks/account";
