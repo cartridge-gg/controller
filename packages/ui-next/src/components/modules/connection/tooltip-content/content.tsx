@@ -96,8 +96,10 @@ export const ConnectionTooltipContent = ({
 
   const handleShowQrCode = useCallback(() => {
     if (!showQrCode) return;
+    setOpen?.(false);
+    setWithBackground(false);
     showQrCode(true);
-  }, [showQrCode]);
+  }, [showQrCode, setOpen, setWithBackground]);
 
   return (
     <div

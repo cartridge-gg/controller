@@ -1,10 +1,9 @@
 import { useEffect, useRef } from "react";
 import QRCodeStyling from "qr-code-styling";
 
-const qrCode = new QRCodeStyling({
+const defaultQrCode: QRCodeStyling = new QRCodeStyling({
   width: 192,
   height: 192,
-  image: "https://cardpack-demo.preview.cartridge.gg/qr-logo.png",
   dotsOptions: {
     color: "#fff",
     type: "rounded",
@@ -26,13 +25,20 @@ const qrCode = new QRCodeStyling({
   },
 });
 
-export function QrCode(props: { data: string }) {
+type QrCodeProps = {
+  data: string;
+  image: string;
+  width?: number;
+  height?: number;
+};
+
+export function QrCode(props: QrCodeProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   // Update the useEffect for QR code initialization
   useEffect(() => {
     if (ref.current) {
-      qrCode.append(ref.current);
+      defaultQrCode.append(ref.current);
     }
 
     // Cleanup function
@@ -46,11 +52,14 @@ export function QrCode(props: { data: string }) {
   // Update the useEffect for QR code data
   useEffect(() => {
     if (ref.current) {
-      qrCode.update({
+      defaultQrCode.update({
         data: props.data,
+        image: props.image,
+        width: props.width || 192,
+        height: props.height || 192,
       });
     }
-  }, [props.data, ref]);
+  }, [props.data, props.image, props.width, props.height, ref]);
 
   return <div ref={ref} />;
 }
