@@ -105,7 +105,7 @@ fn check_is_authorized(stored_policies: &[Policy], policies: &[Policy]) -> bool 
 
 #[cfg(test)]
 mod policy_check_tests {
-    use crate::types::policy::CallPolicy;
+    use crate::types::policy::{CallPolicy, TypedDataPolicy};
     use crate::types::JsFelt;
     use starknet::{
         core::types::{Call, Felt},
@@ -237,6 +237,298 @@ mod policy_check_tests {
 
         // Test that the policy created from non-matching Call is not authorized
         assert!(!check_is_authorized(&stored, &[non_matching_policy]));
+    }
+
+    #[test]
+    fn test_check_is_requested_repro() {
+        let stored_policies: StoredPolicies = serde_json::from_value(serde_json::json!({
+            "policies": [
+                {
+                    "target": "0x02c6a7c98a9dea8322b51018eef7be99ebedd209cebdaacb9f4c5bbf661c1cc9",
+                    "method": "0x03e3206846c6af283e7cc32535cedc907baa136cabe6e16b99293a5f2cc4c779",
+                    "authorized": true
+                },
+                {
+                    "target": "0x02c6a7c98a9dea8322b51018eef7be99ebedd209cebdaacb9f4c5bbf661c1cc9",
+                    "method": "0x0288e0008b7fa613946f762581bef0c72122c2783566b66733fcaac3a343aaa2",
+                    "authorized": true
+                },
+                {
+                    "target": "0x02c6a7c98a9dea8322b51018eef7be99ebedd209cebdaacb9f4c5bbf661c1cc9",
+                    "method": "0x0289a7f6b881efee2716d96340d21bb015be817b4168a22bec667c012d15e3d8",
+                    "authorized": true
+                },
+                {
+                    "target": "0x02c6a7c98a9dea8322b51018eef7be99ebedd209cebdaacb9f4c5bbf661c1cc9",
+                    "method": "0x01230f2b389bbf1393d72c54025de3fbe2d15da89dba1da28fc10f2d2736aaa6",
+                    "authorized": true
+                },
+                {
+                    "target": "0x0426c16fe76f12586718c07e47c8e4312e9fee5e7dc849a75f3c587ad9e70b4f",
+                    "method": "0x01ec68d1d7dbfcae6df48fdb695f26c68db6c5efa4dbd8d895a55e571b0423ad",
+                    "authorized": true
+                },
+                {
+                    "target": "0x0426c16fe76f12586718c07e47c8e4312e9fee5e7dc849a75f3c587ad9e70b4f",
+                    "method": "0x02de582fa8b711fd2f57fc168a6af91869489b862a010a1fafe445369007158d",
+                    "authorized": true
+                },
+                {
+                    "target": "0x0426c16fe76f12586718c07e47c8e4312e9fee5e7dc849a75f3c587ad9e70b4f",
+                    "method": "0x03baff2a04cb4464b9195e3604d1d855aa80ceb2bcef4972679a1ca6fb7fce01",
+                    "authorized": true
+                },
+                {
+                    "target": "0x0426c16fe76f12586718c07e47c8e4312e9fee5e7dc849a75f3c587ad9e70b4f",
+                    "method": "0x01dba2c96ccf742f3800b726f4ea062327c1553c984b5139c6a85be2c29d46a3",
+                    "authorized": true
+                },
+                {
+                    "target": "0x071333ac75b7d5ba89a2d0c2b67d5b955258a4d46eb42f3428da6137bbbfdfd9",
+                    "method": "0x03491cd21465d81cd71cfe493d1f25a3e75010b8e5a977501b7d8be21c05f0d6",
+                    "authorized": true
+                },
+                {
+                    "target": "0x071333ac75b7d5ba89a2d0c2b67d5b955258a4d46eb42f3428da6137bbbfdfd9",
+                    "method": "0x00c6a0de5d1564818f952de797305656d38babed74a2b5f644bb6976c7610641",
+                    "authorized": true
+                },
+                {
+                    "target": "0x071333ac75b7d5ba89a2d0c2b67d5b955258a4d46eb42f3428da6137bbbfdfd9",
+                    "method": "0x01a54c395fa140984a9b0a773962386ef9665bf65bb9734960d63d151542c541",
+                    "authorized": true
+                },
+                {
+                    "target": "0x071333ac75b7d5ba89a2d0c2b67d5b955258a4d46eb42f3428da6137bbbfdfd9",
+                    "method": "0x01f30275ab70dd1890c0789c4570632b6f0b0284d11c2d9e587d0368f7027018",
+                    "authorized": true
+                },
+                {
+                    "target": "0x02e9c711b1a7e2784570b1bda5082a92606044e836ba392d2b977d280fb74b3c",
+                    "method": "0x019ea283db64e3a83e53c412d66546500dd977b94142973d0f80ac94b72c2715",
+                    "authorized": true
+                },
+                {
+                    "target": "0x02e9c711b1a7e2784570b1bda5082a92606044e836ba392d2b977d280fb74b3c",
+                    "method": "0x01a22a89434dc797d2a046d637279d7ce9d103342577a47f4f601d5af8aeed1c",
+                    "authorized": true
+                },
+                {
+                    "target": "0x07aaa9866750a0db82a54ba8674c38620fa2f967d2fbb31133def48e0527c87f",
+                    "method": "0x0380d7871eeaf3ee2c177c082d5fbf08989da3b8ce22fa3938d225e48d757660",
+                    "authorized": true
+                },
+                {
+                    "target": "0x07aaa9866750a0db82a54ba8674c38620fa2f967d2fbb31133def48e0527c87f",
+                    "method": "0x03ac39951327ee0119f6df38e1d0c60d6aa39417505feebf6031d5fad95f918a",
+                    "authorized": true
+                },
+                {
+                    "target": "0x07aaa9866750a0db82a54ba8674c38620fa2f967d2fbb31133def48e0527c87f",
+                    "method": "0x000048fe78e79ebecbd877704f88298e32d69bda4f2513476d6375cfbbeb0d85",
+                    "authorized": true
+                },
+                {
+                    "target": "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f",
+                    "method": "0x012a5a2e008479001f8f1a5f6c61ab6536d5ce46571fcdc0c9300dca0a9e532f",
+                    "authorized": true
+                },
+                {
+                    "scope_hash": "0x0649eea1a5c0f7a3e3d66b63b3738d31e528227e0c7d13c9003aae2fd5ba8723",
+                    "authorized": true
+                },
+                {
+                    "scope_hash": "0x0693820fcb2060cf1227fbc4a0445bc0dd2d4c4aac7591967e78d3a69a8f2fe0",
+                    "authorized": true
+                },
+                {
+                    "scope_hash": "0x06006848edd66a8a926df6eb19e4bb912c7fab3dae650f5d2b2d798c686310a6",
+                    "authorized": true
+                }
+            ]
+        })).unwrap();
+
+        let requested_policies = vec![
+            // Contracts
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x02c6a7c98a9dea8322b51018eef7be99ebedd209cebdaacb9f4c5bbf661c1cc9"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("commit_moves").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x02c6a7c98a9dea8322b51018eef7be99ebedd209cebdaacb9f4c5bbf661c1cc9"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("reveal_moves").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x02c6a7c98a9dea8322b51018eef7be99ebedd209cebdaacb9f4c5bbf661c1cc9"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("collect_duel").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x02c6a7c98a9dea8322b51018eef7be99ebedd209cebdaacb9f4c5bbf661c1cc9"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("clear_call_to_action").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x0426c16fe76f12586718c07e47c8e4312e9fee5e7dc849a75f3c587ad9e70b4f"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("sponsor_duelists").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x0426c16fe76f12586718c07e47c8e4312e9fee5e7dc849a75f3c587ad9e70b4f"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("sponsor_season").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x0426c16fe76f12586718c07e47c8e4312e9fee5e7dc849a75f3c587ad9e70b4f"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("sponsor_tournament").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x0426c16fe76f12586718c07e47c8e4312e9fee5e7dc849a75f3c587ad9e70b4f"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("collect_season").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x071333ac75b7d5ba89a2d0c2b67d5b955258a4d46eb42f3428da6137bbbfdfd9"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("claim_starter_pack").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x071333ac75b7d5ba89a2d0c2b67d5b955258a4d46eb42f3428da6137bbbfdfd9"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("claim_gift").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x071333ac75b7d5ba89a2d0c2b67d5b955258a4d46eb42f3428da6137bbbfdfd9"
+                )),
+                method: JsFelt(starknet::core::utils::get_selector_from_name("purchase").unwrap()),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x071333ac75b7d5ba89a2d0c2b67d5b955258a4d46eb42f3428da6137bbbfdfd9"
+                )),
+                method: JsFelt(starknet::core::utils::get_selector_from_name("open").unwrap()),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x02e9c711b1a7e2784570b1bda5082a92606044e836ba392d2b977d280fb74b3c"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("create_duel").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x02e9c711b1a7e2784570b1bda5082a92606044e836ba392d2b977d280fb74b3c"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("reply_duel").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x07aaa9866750a0db82a54ba8674c38620fa2f967d2fbb31133def48e0527c87f"
+                )),
+                method: JsFelt(starknet::core::utils::get_selector_from_name("poke").unwrap()),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x07aaa9866750a0db82a54ba8674c38620fa2f967d2fbb31133def48e0527c87f"
+                )),
+                method: JsFelt(starknet::core::utils::get_selector_from_name("sacrifice").unwrap()),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x07aaa9866750a0db82a54ba8674c38620fa2f967d2fbb31133def48e0527c87f"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("memorialize").unwrap(),
+                ),
+                authorized: None,
+            }),
+            Policy::Call(CallPolicy {
+                target: JsFelt(felt!(
+                    "0x051fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f"
+                )),
+                method: JsFelt(
+                    starknet::core::utils::get_selector_from_name("request_random").unwrap(),
+                ),
+                authorized: None,
+            }),
+            // Messages - using scope_hash from stored_policies for simplicity in this test
+            Policy::TypedData(TypedDataPolicy {
+                scope_hash: JsFelt(felt!(
+                    "0x0649eea1a5c0f7a3e3d66b63b3738d31e528227e0c7d13c9003aae2fd5ba8723"
+                )),
+                authorized: None,
+            }),
+            Policy::TypedData(TypedDataPolicy {
+                scope_hash: JsFelt(felt!(
+                    "0x0693820fcb2060cf1227fbc4a0445bc0dd2d4c4aac7591967e78d3a69a8f2fe0"
+                )),
+                authorized: None,
+            }),
+            Policy::TypedData(TypedDataPolicy {
+                scope_hash: JsFelt(felt!(
+                    "0x06006848edd66a8a926df6eb19e4bb912c7fab3dae650f5d2b2d798c686310a6"
+                )),
+                authorized: None,
+            }),
+        ];
+
+        assert!(
+            check_is_requested(&stored_policies.policies, &requested_policies),
+            "check_is_requested should return true for the given policies"
+        );
     }
 }
 
