@@ -32,15 +32,14 @@ function QrCodeDisplay({
         aria-describedby="Your account address"
         className="border-none h-full w-full flex flex-col items-center justify-center bg-translucent-dark-150 backdrop-blur-lg gap-12"
       >
-        <div className=" absolute left-4 top-4 p-2 bg-background-200 hover:bg-background-300 rounded-md">
-          <TimesIcon />
-        </div>
-
         <p className="text-center text-md bg-translucent-light-150 px-8 py-2 rounded-lg h-fit">
           {username}
         </p>
         <div className="p-5 bg-translucent-light-150 rounded-3xl">
-          <QrCode data={`https://arcade.cartridge.gg/?address=${address}`} />
+          <QrCode
+            image="https://cardpack-demo.preview.cartridge.gg/qr-logo.png"
+            data={`https://arcade.cartridge.gg/?address=${address}`}
+          />
         </div>
       </DialogContent>
     </Dialog>
