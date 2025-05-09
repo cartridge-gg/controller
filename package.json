@@ -14,14 +14,13 @@
     "format": "turbo format lint:fix",
     "clean": "git clean -fdX && pnpm store prune",
     "ci": "pnpm clean && pnpm i",
-    "release": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/ui --filter=@cartridge/account-wasm publish --tag latest --no-git-checks --access public",
-    "release:prerelease": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/ui --filter=@cartridge/account-wasm publish --tag prerelease --no-git-checks --access public",
+    "release": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/account-wasm publish --tag latest --no-git-checks --access public",
+    "release:prerelease": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector --filter=@cartridge/account-wasm publish --tag prerelease --no-git-checks --access public",
     "keychain": "pnpm --filter @cartridge/keychain",
     "controller": "pnpm --filter @cartridge/controller",
     "connector": "pnpm --filter @cartridge/connector",
     "account-wasm": "pnpm --filter @cartridge/account-wasm",
     "book": "pnpm --filter @cartridge/documentation",
-    "ui:next": "pnpm --filter @cartridge/ui",
     "profil": "pnpm --filter @cartridge/profile",
     "example:next": "pnpm --filter @cartridge/controller-example-next",
     "example:svelte": "pnpm --filter @cartridge/controller-example-svelte",
@@ -34,7 +33,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#45e176d"
+    "@cartridge/presets": "github:cartridge-gg/presets#45e176d",
+    "@cartridge/ui": "github:cartridge-gg/ui#ed0a35c"
   },
   "devDependencies": {
     "husky": "^9.1.7",

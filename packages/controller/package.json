@@ -40,7 +40,6 @@
   },
   "dependencies": {
     "@cartridge/account-wasm": "workspace:*",
-    "@cartridge/ui": "workspace:*",
     "@cartridge/penpal": "catalog:",
     "ethers": "^6.13.5",
     "@starknet-io/types-js": "catalog:",
