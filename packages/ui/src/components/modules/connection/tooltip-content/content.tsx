@@ -102,7 +102,11 @@ export const ConnectionTooltipContent = ({
 
   return (
     <div
-      className={cn(connectionTooltipContentVariants({ variant }), className)}
+      className={cn(
+        connectionTooltipContentVariants({ variant }),
+        className,
+        "relative",
+      )}
     >
       <div className="flex items-start w-full gap-3 justify-between">
         <div className="flex items-center gap-3">
@@ -112,7 +116,7 @@ export const ConnectionTooltipContent = ({
         {address && (
           <div
             onClick={handleShowQrCode}
-            className="flex items-center gap-3 w-10 h-10 bg-background-200 rounded-full justify-center cursor-pointer hover:bg-background-300 transition-all"
+            className=" absolute flex top-4 right-4 items-center gap-3 w-10 h-10 bg-background-200 rounded-full justify-center cursor-pointer hover:bg-background-300 transition-all"
           >
             <QrCodeIcon />
           </div>

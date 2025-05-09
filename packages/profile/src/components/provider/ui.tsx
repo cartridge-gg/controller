@@ -25,7 +25,7 @@ function QrCodeDisplay({
         aria-describedby="Your account address"
         className="border-none h-full w-full flex flex-col items-center justify-center bg-translucent-dark-150 backdrop-blur-sm gap-12"
       >
-        <p className="text-center text-md bg-translucent-light-150 px-8 py-2 rounded-lg h-fit">
+        <p className="text-center select-none text-md bg-translucent-light-150 px-8 py-2 rounded-lg h-fit">
           {username}
         </p>
         <div className="p-5 bg-translucent-light-150 backdrop-blur-sm rounded-3xl">
