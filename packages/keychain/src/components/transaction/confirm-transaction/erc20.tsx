@@ -72,7 +72,7 @@ export const ERC20ConfirmTransaction = ({
       buttonText="CONFIRM"
       className="select-none"
     >
-      <LayoutContent className="gap-4 pt-1">
+      <LayoutContent className="gap-4">
         <TransactionDestination
           name={destinationUsername}
           address={tokenData.destinationAddress}
