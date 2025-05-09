@@ -1,4 +1,4 @@
-import { LayoutContent, BoltIcon, CircleIcon } from "@cartridge/ui-next";
+import { LayoutContent, BoltIcon, CircleIcon } from "@cartridge/ui";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useConnection } from "@/hooks/connection";
 import { useUpgrade } from "../provider/upgrade";

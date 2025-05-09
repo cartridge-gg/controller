@@ -1,4 +1,4 @@
-import { accounts } from "@cartridge/utils/mock/data";
+import { accounts } from "@cartridge/ui/utils/mock/data";
 import { fn, Mock } from "@storybook/test";
 import { UseAccountInfoResponse, UseAccountResponse } from "#hooks/account";
 

@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import { UIProvider as Provider } from "@cartridge/ui-next";
+import { UIProvider as Provider } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { useAccount } from "@/hooks/account";
 

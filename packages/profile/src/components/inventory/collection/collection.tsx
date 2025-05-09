@@ -13,11 +13,11 @@ import {
   LayoutHeader,
   Button,
   CheckboxIcon,
-  cn,
   CollectibleCard,
   Skeleton,
   Empty,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useCallback, useMemo } from "react";
 import { useCollection } from "#hooks/collection";
 import placeholder from "/public/placeholder.svg";

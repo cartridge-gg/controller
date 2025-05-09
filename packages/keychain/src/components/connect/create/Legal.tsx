@@ -1,4 +1,4 @@
-import { LockIcon } from "@cartridge/ui-next";
+import { LockIcon } from "@cartridge/ui";
 import { Link } from "react-router-dom";
 
 export function Legal() {

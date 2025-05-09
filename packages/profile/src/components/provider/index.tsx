@@ -3,10 +3,10 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ArcadeProvider } from "./arcade";
 import { ThemeProvider } from "./theme";
 import { ConnectionProvider } from "./connection";
-import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
-import { IndexerAPIProvider } from "@cartridge/utils/api/indexer";
+import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
+import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { DataProvider } from "./data";
-import { PostHogContext, PostHogWrapper } from "@cartridge/utils";
+import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
 import { UIProvider } from "./ui";
 
 const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {

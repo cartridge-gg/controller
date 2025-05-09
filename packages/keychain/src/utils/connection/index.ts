@@ -3,7 +3,7 @@ export * from "./types";
 import Controller from "@/utils/controller";
 import { AuthOptions } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
-import { normalize } from "@cartridge/utils";
+import { normalize } from "@cartridge/ui/utils";
 import { connect } from "./connect";
 import { deployFactory } from "./deploy";
 import { estimateInvokeFee } from "./estimate";

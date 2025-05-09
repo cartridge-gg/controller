@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
-import { Event, EventNode, useEventsQuery } from "@cartridge/utils/api/indexer";
+import {
+  Event,
+  EventNode,
+  useEventsQuery,
+} from "@cartridge/ui/utils/api/indexer";
 import { Trophy, Progress } from "#models";
 import { hash, byteArray, ByteArray } from "starknet";
-import { useIndexerAPI } from "@cartridge/utils";
+import { useIndexerAPI } from "@cartridge/ui/utils";
 
 const EVENT_WRAPPER = "EventEmitted";
 

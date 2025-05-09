@@ -2,7 +2,7 @@ import {
   useAccountNameQuery,
   useAccountNamesQuery,
   useAddressByUsernameQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useEffect, useMemo, useState } from "react";
 import { useMatch } from "react-router-dom";
 import { useStarkAddress } from "./starknetid";

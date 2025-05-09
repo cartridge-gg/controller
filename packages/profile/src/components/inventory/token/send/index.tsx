@@ -8,12 +8,12 @@ import {
   Button,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
-  cn,
   Thumbnail,
   TokenSelect,
   Spinner,
   PaperPlaneIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {

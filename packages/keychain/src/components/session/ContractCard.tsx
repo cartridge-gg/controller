@@ -9,9 +9,9 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  cn,
-} from "@cartridge/ui-next";
-import { formatAddress } from "@cartridge/utils";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
+import { formatAddress } from "@cartridge/ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import { constants } from "starknet";
 import { AccordionCard } from "./AccordionCard";

@@ -2,11 +2,11 @@ import {
   useCountervalue,
   useERC20Balance,
   UseERC20BalanceResponse,
-} from "@cartridge/utils";
+} from "@cartridge/ui/utils";
 import {
   useBalanceQuery,
   useBalancesQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "./account";
 import { useConnection } from "./context";
 import { getChecksumAddress } from "starknet";
