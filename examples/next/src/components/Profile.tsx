@@ -84,6 +84,15 @@ export function Profile() {
           >
             Followers Closable
           </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileTo(
+                "inventory?social=following&closable=true",
+              )
+            }
+          >
+            Following Closable
+          </Button>
         </div>
         <div className="flex flex-wrap gap-1">
           <Button

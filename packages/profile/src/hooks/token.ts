@@ -12,7 +12,6 @@ import { useConnection } from "./context";
 import { getChecksumAddress } from "starknet";
 import { useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
-import { formatEther } from "viem";
 
 const LIMIT = 1000;
 
@@ -189,7 +188,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
             ),
         )
         .map((token) => ({
-          balance: formatEther(token.balance.value || 0n),
+          balance: `${Number(token.balance.value) / Math.pow(10, token.meta.decimals)}`,
           address: token.meta.address,
         })),
     [rpcData, toriiData],
