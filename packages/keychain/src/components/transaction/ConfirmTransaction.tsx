@@ -27,6 +27,7 @@ export function ConfirmTransaction() {
   };
 
   const isERC20 = useMemo(() => {
+    if (transactions.length !== 1) return false;
     return transactions.find((tx) => tx.entrypoint === "transfer");
   }, [transactions]);
 
