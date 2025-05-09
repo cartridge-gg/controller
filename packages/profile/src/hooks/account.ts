@@ -10,7 +10,7 @@ import { useWallet } from "./wallet";
 import { constants, getChecksumAddress } from "starknet";
 
 export function useUsername({ address }: { address: string }) {
-  const { data } = useAccountNameQuery({ address });
+  const { data } = useAccountNameQuery({ address }, { enabled: !!address });
 
   return { username: data?.accounts?.edges?.[0]?.node?.username ?? "" };
 }
