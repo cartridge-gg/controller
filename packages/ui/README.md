@@ -1,4 +1,4 @@
-# @cartridge/ui-next
+# @cartridge/ui
 
 ## Usage
 
@@ -11,7 +11,7 @@ pnpm ui:next storybook
 ### Generate shadcn component
 
 ```sh
-cd packages/ui-next
+cd packages/ui
 pnpm dlx shadcn-ui@latest add <component-name>
 pnpm format
 ```

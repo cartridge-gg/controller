@@ -673,6 +673,11 @@ export type BalanceEdge = {
   node: Balance;
 };
 
+export type ClaimFreeStarterpackInput = {
+  accountId: Scalars["ID"];
+  starterpackId: Scalars["ID"];
+};
+
 export type Collectible = {
   __typename?: "Collectible";
   assets: Array<AssetEdge>;
@@ -1725,6 +1730,7 @@ export type Mutation = {
   addToTeam: Scalars["Boolean"];
   beginLogin: Scalars["JSON"];
   beginRegistration: Scalars["JSON"];
+  claimFreeStarterpack: Scalars["String"];
   createCryptoPayment: CryptoPayment;
   createDeployment: Deployment;
   createPaymaster: Paymaster;
@@ -1766,6 +1772,10 @@ export type MutationBeginLoginArgs = {
 
 export type MutationBeginRegistrationArgs = {
   username: Scalars["String"];
+};
+
+export type MutationClaimFreeStarterpackArgs = {
+  input: ClaimFreeStarterpackInput;
 };
 
 export type MutationCreateCryptoPaymentArgs = {
@@ -2972,6 +2982,8 @@ export type Starterpack = Node & {
   id: Scalars["ID"];
   issuance: Scalars["Int"];
   maxIssuance?: Maybe<Scalars["Int"]>;
+  /** Maximum number of issuances per account */
+  maxPerAccount?: Maybe<Scalars["Int"]>;
   name: Scalars["String"];
   paymaster?: Maybe<Paymaster>;
   paymasterID?: Maybe<Scalars["ID"]>;
@@ -3458,6 +3470,17 @@ export type StarterpackWhereInput = {
   maxIssuanceNEQ?: InputMaybe<Scalars["Int"]>;
   maxIssuanceNotIn?: InputMaybe<Array<Scalars["Int"]>>;
   maxIssuanceNotNil?: InputMaybe<Scalars["Boolean"]>;
+  /** max_per_account field predicates */
+  maxPerAccount?: InputMaybe<Scalars["Int"]>;
+  maxPerAccountGT?: InputMaybe<Scalars["Int"]>;
+  maxPerAccountGTE?: InputMaybe<Scalars["Int"]>;
+  maxPerAccountIn?: InputMaybe<Array<Scalars["Int"]>>;
+  maxPerAccountIsNil?: InputMaybe<Scalars["Boolean"]>;
+  maxPerAccountLT?: InputMaybe<Scalars["Int"]>;
+  maxPerAccountLTE?: InputMaybe<Scalars["Int"]>;
+  maxPerAccountNEQ?: InputMaybe<Scalars["Int"]>;
+  maxPerAccountNotIn?: InputMaybe<Array<Scalars["Int"]>>;
+  maxPerAccountNotNil?: InputMaybe<Scalars["Boolean"]>;
   /** name field predicates */
   name?: InputMaybe<Scalars["String"]>;
   nameContains?: InputMaybe<Scalars["String"]>;
