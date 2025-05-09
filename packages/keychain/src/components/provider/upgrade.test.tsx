@@ -12,7 +12,7 @@ import {
   useUpgrade,
 } from "./upgrade";
 import { ReactNode } from "react";
-import { PostHogContext, PostHogWrapper } from "@cartridge/utils";
+import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
 import Controller from "@/utils/controller";
 
 // Mock the usePostHog hook

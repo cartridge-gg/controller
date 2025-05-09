@@ -1,5 +1,5 @@
 import { AuthOption } from "@cartridge/controller";
-import { SheetContent, SheetTitle } from "@cartridge/ui-next";
+import { SheetContent, SheetTitle } from "@cartridge/ui";
 import { useEffect, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 

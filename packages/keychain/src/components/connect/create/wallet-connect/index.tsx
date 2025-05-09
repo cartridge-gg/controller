@@ -3,7 +3,7 @@ import { WalletConnectWallet } from "@cartridge/controller";
 import {
   ControllerQuery,
   Eip191Credentials,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import {
   EthereumProvider,
   default as Provider,

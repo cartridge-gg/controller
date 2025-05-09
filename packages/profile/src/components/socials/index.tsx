@@ -7,9 +7,9 @@ import {
   LayoutContent,
   LayoutHeader,
   TabsContent,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useAccount, useUsernames } from "#hooks/account";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "#hooks/arcade.js";
 import { BigNumberish, getChecksumAddress } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -30,9 +30,7 @@ export function Socials() {
   const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
-  const value = useMemo(() => {
-    return searchParams.get("social") ?? "followers";
-  }, [searchParams]);
+  const [tab, setTab] = useState(searchParams.get("social") ?? "followers");
 
   const onBack = useCallback(() => {
     const url = new URL(window.location.href);
@@ -119,6 +117,10 @@ export function Socials() {
     [chainId, provider, parent],
   );
 
+  useEffect(() => {
+    setTab(searchParams.get("social") ?? "followers");
+  }, [searchParams]);
+
   return (
     <LayoutContainer>
       <LayoutHeader
@@ -127,9 +129,10 @@ export function Socials() {
       />
       <LayoutContent className="py-6 gap-y-6 select-none overflow-hidden">
         <FollowerTabs
-          defaultValue={value}
           followers={followers.length}
           following={followeds.length}
+          value={tab}
+          onValueChange={(value) => setTab(value)}
           className="h-full overflow-hidden"
         >
           <TabsContent

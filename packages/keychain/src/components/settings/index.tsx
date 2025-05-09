@@ -16,11 +16,11 @@ import {
   SheetTrigger,
   SignOutIcon,
   Skeleton,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import {
   CredentialMetadata,
   useControllerQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo, useState } from "react";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";

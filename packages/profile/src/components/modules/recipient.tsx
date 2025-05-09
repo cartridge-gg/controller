@@ -1,6 +1,6 @@
 import { useAccountInfo } from "#hooks/account";
-import { Recipient, WalletType } from "@cartridge/ui-next";
-import { formatAddress } from "@cartridge/utils";
+import { Recipient, WalletType } from "@cartridge/ui";
+import { formatAddress } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useState } from "react";
 import { debounce } from "lodash";
 

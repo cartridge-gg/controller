@@ -1,6 +1,6 @@
 import { ConnectCtx } from "@/utils/connection";
 import { PACKAGE_VERSION } from "@/version";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import eq from "semver/functions/eq";
 import gt from "semver/functions/gt";
 import gte from "semver/functions/gte";
@@ -9,72 +9,56 @@ import lte from "semver/functions/lte";
 import { useConnection } from "./connection";
 
 export const useVersion = () => {
+  const [ready, setReady] = useState(false);
+
   const { context } = useConnection();
 
   const controllerPackageVersion = (context as ConnectCtx)
     ?.controllerPackageVersion;
 
+  useEffect(() => {
+    if (context) {
+      setReady(true);
+    }
+  }, [context]);
+
   const isControllerGt = useCallback(
     (version: string) => {
-      try {
-        return gt(controllerPackageVersion, version);
-      } catch (error) {
-        // either controllerPackagerVersion is undefined or invalid or version is invalid
-        return false;
-      }
+      return gt(controllerPackageVersion, version);
     },
     [controllerPackageVersion],
   );
 
   const isControllerGte = useCallback(
     (version: string) => {
-      try {
-        return gte(controllerPackageVersion, version);
-      } catch (error) {
-        // either controllerPackagerVersion is undefined or invalid or version is invalid
-        return false;
-      }
+      return gte(controllerPackageVersion, version);
     },
     [controllerPackageVersion],
   );
 
   const isControllerLt = useCallback(
     (version: string) => {
-      try {
-        return lt(controllerPackageVersion, version);
-      } catch (error) {
-        // either controllerPackagerVersion is undefined or invalid or version is invalid
-        return false;
-      }
+      return lt(controllerPackageVersion, version);
     },
     [controllerPackageVersion],
   );
 
   const isControllerLte = useCallback(
     (version: string) => {
-      try {
-        return lte(controllerPackageVersion, version);
-      } catch (error) {
-        // either controllerPackagerVersion is undefined or invalid or version is invalid
-        return false;
-      }
+      return lte(controllerPackageVersion, version);
     },
     [controllerPackageVersion],
   );
 
   const isControllerEq = useCallback(
     (version: string) => {
-      try {
-        return eq(controllerPackageVersion, version);
-      } catch (error) {
-        // either controllerPackagerVersion is undefined or invalid or version is invalid
-        return false;
-      }
+      return eq(controllerPackageVersion, version);
     },
     [controllerPackageVersion],
   );
 
   return {
+    ready,
     controllerVersion: controllerPackageVersion,
     keychainVersion: PACKAGE_VERSION,
     isControllerGt,

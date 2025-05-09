@@ -1,5 +1,5 @@
 import { useCreateSession } from "@/hooks/session";
-import { ClockIcon, ToggleGroup, ToggleGroupItem } from "@cartridge/ui-next";
+import { ClockIcon, ToggleGroup, ToggleGroupItem } from "@cartridge/ui";
 
 export function ExpirationCard() {
   const { isEditable, duration, onDurationChange } = useCreateSession();

@@ -7,7 +7,7 @@ import {
   CardTitle,
   Spinner,
   Thumbnail,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 
 type ReceivingProps = {
   title?: string;

@@ -7,7 +7,7 @@ import {
   ControllerQueryVariables,
   type AccountQuery,
   type AccountQueryVariables,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { constants } from "starknet";
 
 export function fetchController(

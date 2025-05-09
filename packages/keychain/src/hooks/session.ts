@@ -6,7 +6,7 @@ import {
   type TypedDataPolicy,
   erc20Metadata,
 } from "@cartridge/presets";
-import { CartridgeIcon, CoinsIcon } from "@cartridge/ui-next";
+import { CartridgeIcon, CoinsIcon } from "@cartridge/ui";
 import React, { createContext, useContext } from "react";
 import {
   TypedDataRevision,
