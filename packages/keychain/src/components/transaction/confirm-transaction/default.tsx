@@ -24,7 +24,7 @@ export const DefaultConfirmTransaction = ({
 
     if (_call) {
       if (Array.isArray(_call.calldata)) {
-        const destinationAddress = normalizeAddress(String(_call.calldata[0]));
+        const destinationAddress = normalizeAddress(String(_call.calldata[1]));
         return {
           destinationAddress,
         };
