@@ -7,12 +7,10 @@ import { useNavigate } from "react-router-dom";
 import { QrCode } from "@cartridge/ui";
 
 function QrCodeDisplay({
-  address,
   showQrCode,
   setShowQrCode,
   username,
 }: {
-  address: string;
   showQrCode: boolean;
   username: string;
   setShowQrCode: (value: boolean) => void;
@@ -33,7 +31,7 @@ function QrCodeDisplay({
         <div className="p-5 bg-translucent-light-150 backdrop-blur-sm rounded-3xl">
           <QrCode
             image="https://cardpack-demo.preview.cartridge.gg/qr-logo.png"
-            data={`${address}`}
+            data={`https://play.cartridge.gg/${username}`}
           />
         </div>
       </DialogContent>
@@ -82,7 +80,6 @@ export function UIProvider({ children }: PropsWithChildren) {
     >
       {children}
       <QrCodeDisplay
-        address={account?.address}
         username={account?.username}
         showQrCode={showQrCode}
         setShowQrCode={setShowQrCode}
