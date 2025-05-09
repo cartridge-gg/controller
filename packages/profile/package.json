@@ -53,7 +53,8 @@
     "starknet": "catalog:",
     "viem": "catalog:",
     "vite-plugin-top-level-await": "catalog:",
-    "vite-plugin-wasm": "catalog:"
+    "vite-plugin-wasm": "catalog:",
+    "qrcode.react": "catalog:"
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",

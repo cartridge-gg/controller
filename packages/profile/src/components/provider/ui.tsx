@@ -1,10 +1,15 @@
 import { PropsWithChildren, useCallback, useState } from "react";
-import { Dialog, DialogContent, UIProvider as Provider } from "@cartridge/ui";
+import {
+  AchievementPlayerAvatar,
+  Dialog,
+  DialogContent,
+  UIProvider as Provider,
+} from "@cartridge/ui";
 import { useConnection } from "#hooks/context";
 import { useAccount } from "#hooks/account";
 import { useArcade } from "#hooks/arcade.js";
 import { useNavigate } from "react-router-dom";
-import { QrCode } from "@cartridge/ui";
+import { QRCodeSVG } from "qrcode.react";
 
 function QrCodeDisplay({
   showQrCode,
@@ -29,10 +34,19 @@ function QrCodeDisplay({
           {username}
         </p>
         <div className="p-5 bg-translucent-light-150 backdrop-blur-sm rounded-3xl">
-          <QrCode
-            image="https://cardpack-demo.preview.cartridge.gg/qr-logo.png"
-            data={`https://play.cartridge.gg/${username}`}
-          />
+          <div className="flex items-center justify-center relative">
+            <div className="absolute top-1/2 left-1/2 p-2 bg-[#373837] -translate-x-1/2 -translate-y-1/2 rounded-lg">
+              <AchievementPlayerAvatar username={username} size="xl" />
+            </div>
+            <QRCodeSVG
+              level="L"
+              value={`https://play.cartridge.gg/${username}`}
+              size={192}
+              bgColor="#00000000"
+              fgColor="#ffffff"
+              boostLevel={true}
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>
