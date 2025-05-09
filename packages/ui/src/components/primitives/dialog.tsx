@@ -44,10 +44,8 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute left-4 top-4 rounded-sm transition-opacity focus:outline-none disabled:pointer-events-none data-[state=open]:bg-background-500 data-[state=open]:text-foreground-400">
-        <div className=" absolute cursor-pointer left-4 top-4 p-2 bg-background-200 hover:bg-background-300 rounded-md">
-          <TimesIcon />
-        </div>
+      <DialogPrimitive.Close className="absolute left-2 top-2 p-2 bg-background-200 hover:bg-background-300 rounded-md transition-opacity focus:outline-none disabled:pointer-events-none data-[state=open]:bg-background-500 data-[state=open]:text-foreground-400">
+        <TimesIcon />
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
