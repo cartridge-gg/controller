@@ -34,7 +34,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#11ee3b8"
+    "@cartridge/presets": "github:cartridge-gg/presets#0928da3"
   },
   "devDependencies": {
     "husky": "^9.1.7",
