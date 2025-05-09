@@ -12,10 +12,12 @@ import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 
 function QrCodeDisplay({
+  address,
   showQrCode,
   setShowQrCode,
   username,
 }: {
+  address: string;
   showQrCode: boolean;
   username: string;
   setShowQrCode: (value: boolean) => void;
@@ -40,7 +42,7 @@ function QrCodeDisplay({
             </div>
             <QRCodeSVG
               level="L"
-              value={`https://play.cartridge.gg/${username}`}
+              value={`https://play.cartridge.gg/?address=${address}`}
               size={192}
               bgColor="#00000000"
               fgColor="#ffffff"
@@ -94,6 +96,7 @@ export function UIProvider({ children }: PropsWithChildren) {
     >
       {children}
       <QrCodeDisplay
+        address={account?.address}
         username={account?.username}
         showQrCode={showQrCode}
         setShowQrCode={setShowQrCode}
