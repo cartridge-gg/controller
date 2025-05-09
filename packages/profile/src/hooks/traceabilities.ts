@@ -2,9 +2,9 @@ import { useMemo, useState } from "react";
 import {
   TraceabilityProject,
   useTraceabilitiesQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useConnection } from "./context";
-import { formatAddress, getDate } from "@cartridge/utils";
+import { formatAddress, getDate } from "@cartridge/ui/utils";
 import { useUsernames } from "./account";
 import { getChecksumAddress } from "starknet";
 

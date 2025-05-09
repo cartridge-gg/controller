@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import {
   useCollectionQuery,
   useCollectionsQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useConnection } from "./context";
 
 const TYPE = "ERC-721";

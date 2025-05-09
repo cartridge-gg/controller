@@ -7,7 +7,7 @@ import {
   LayoutContent,
   LayoutHeader,
   TabsContent,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useAccount, useUsernames } from "#hooks/account";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "#hooks/arcade.js";

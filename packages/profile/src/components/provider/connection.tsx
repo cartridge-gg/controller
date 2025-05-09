@@ -7,7 +7,7 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
   DAI_CONTRACT_ADDRESS,
-} from "@cartridge/utils";
+} from "@cartridge/ui/utils";
 import { constants, getChecksumAddress, hash, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {

@@ -1,5 +1,5 @@
 import { GraphQLClient } from "graphql-request";
-import { fetchDataCreator } from "@cartridge/utils";
+import { fetchDataCreator } from "@cartridge/ui/utils";
 
 export const ENDPOINT = `${import.meta.env.VITE_CARTRIDGE_API_URL}/query`;
 

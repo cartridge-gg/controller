@@ -8,9 +8,9 @@ import {
   CheckboxIcon,
   PencilIcon,
   Switch,
-  cn,
-} from "@cartridge/ui-next";
-import { ArrowTurnDownIcon, Badge } from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
+import { ArrowTurnDownIcon, Badge } from "@cartridge/ui";
 import type {
   StarknetEnumType,
   StarknetMerkleType,

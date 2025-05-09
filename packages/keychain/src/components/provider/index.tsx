@@ -3,7 +3,7 @@ import { useConnectionValue } from "@/hooks/connection";
 import { WalletsProvider } from "@/hooks/wallets";
 import { ENDPOINT } from "@/utils/graphql";
 import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
-import { CartridgeAPIProvider } from "@cartridge/utils/api/cartridge";
+import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
   jsonRpcProvider,

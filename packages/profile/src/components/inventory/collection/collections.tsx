@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useCollections } from "#hooks/collection";
 import placeholder from "/public/placeholder.svg";
-import { CollectibleAsset, Skeleton } from "@cartridge/ui-next";
+import { CollectibleAsset, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { useCollectibles } from "#hooks/collectible.js";
 

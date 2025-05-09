@@ -1,4 +1,4 @@
-import { Amount } from "@cartridge/ui-next";
+import { Amount } from "@cartridge/ui";
 import { useCallback } from "react";
 
 export function SendAmount({

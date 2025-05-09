@@ -8,7 +8,7 @@ import {
 import {
   ControllerQuery,
   Eip191Credential,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
 import { SignupResponse } from "../useCreateController";
 

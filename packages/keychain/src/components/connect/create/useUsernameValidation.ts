@@ -1,5 +1,5 @@
 import { useConnection } from "@/hooks/connection";
-import { CredentialMetadata } from "@cartridge/utils/api/cartridge";
+import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { useEffect, useRef, useState } from "react";
 import { fetchController } from "./utils";
 

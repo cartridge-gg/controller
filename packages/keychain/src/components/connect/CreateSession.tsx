@@ -20,7 +20,7 @@ import {
   LayoutFooter,
   LayoutHeader,
   SliderIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish } from "starknet";
 // import { OcclusionDetector } from "../OcclusionDetector";

@@ -10,7 +10,7 @@ import {
   type ParsedSessionPolicies,
   useCreateSession,
 } from "@/hooks/session";
-import { Button, LayoutContent, SliderIcon } from "@cartridge/ui-next";
+import { Button, LayoutContent, SliderIcon } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type Call,

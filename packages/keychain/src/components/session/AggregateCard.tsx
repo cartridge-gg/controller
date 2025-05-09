@@ -12,9 +12,8 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  cn,
-} from "@cartridge/ui-next";
-import { formatAddress } from "@cartridge/utils";
+} from "@cartridge/ui";
+import { formatAddress, cn } from "@cartridge/ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import { Link } from "react-router-dom";
 import { constants } from "starknet";

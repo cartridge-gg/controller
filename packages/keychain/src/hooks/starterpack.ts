@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   StarterPackDocument,
   StarterPackQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
