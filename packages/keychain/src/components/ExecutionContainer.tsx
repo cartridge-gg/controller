@@ -9,7 +9,10 @@ import {
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
+  PaperPlaneIcon,
+  useUI,
 } from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import isEqual from "lodash/isEqual";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -31,6 +34,7 @@ interface ExecutionContainerProps {
   buttonText?: string;
   children: React.ReactNode;
   right?: React.ReactElement;
+  className?: string;
 }
 
 export function ExecutionContainer({
@@ -48,6 +52,7 @@ export function ExecutionContainer({
   buttonText = "SUBMIT",
   right,
   children,
+  className,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
   const { controller } = useConnection();
@@ -60,6 +65,8 @@ export function ExecutionContainer({
   const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
     "execute",
   );
+
+  const { closeModal } = useUI();
 
   // Prevent unnecessary estimate fee calls.
   const prevTransactionsRef = useRef<{
@@ -174,11 +181,11 @@ export function ExecutionContainer({
   return (
     <>
       {/* <OcclusionDetector /> */}
-      <LayoutContainer>
+      <LayoutContainer className={cn(className)}>
         <LayoutHeader
           title={title}
           description={description}
-          icon={icon}
+          icon={icon || <PaperPlaneIcon variant="solid" size="lg" />}
           onClose={onClose}
           right={right}
         />
@@ -264,19 +271,44 @@ export function ExecutionContainer({
                   <>
                     {ctrlError && <ControllerErrorAlert error={ctrlError} />}
                     {!ctrlError && (
-                      <Fees isLoading={isEstimating} maxFee={maxFee} />
+                      <Fees
+                        isLoading={isEstimating}
+                        maxFee={maxFee}
+                        className="mt-1"
+                      />
                     )}
-                    <Button
-                      onClick={handleSubmit}
-                      isLoading={isLoading}
-                      disabled={
-                        !!ctrlError ||
-                        !transactions ||
-                        !!(maxFee === null && transactions?.length)
-                      }
-                    >
-                      {buttonText}
-                    </Button>
+                    <div className="flex gap-3 w-full">
+                      <Button
+                        onClick={closeModal}
+                        type="button"
+                        isLoading={isLoading}
+                        disabled={
+                          !!ctrlError ||
+                          !transactions ||
+                          !!(maxFee === null && transactions?.length)
+                        }
+                        variant="secondary"
+                        className="w-1/3"
+                      >
+                        <span className="text-[16px]/[20px] font-semibold text-foreground-100">
+                          REJECT
+                        </span>
+                      </Button>
+                      <Button
+                        onClick={handleSubmit}
+                        isLoading={isLoading}
+                        disabled={
+                          !!ctrlError ||
+                          !transactions ||
+                          !!(maxFee === null && transactions?.length)
+                        }
+                        className="w-2/3"
+                      >
+                        <span className="text-[16px]/[20px] font-semibold text-spacer-100">
+                          {buttonText}
+                        </span>
+                      </Button>
+                    </div>
                   </>
                 );
             }

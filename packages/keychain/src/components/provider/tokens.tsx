@@ -14,25 +14,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
-
-const DEFAULT_TOKENS = [
-  {
-    address:
-      "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-    name: "Ether",
-    symbol: "ETH",
-    decimals: 18,
-    icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/e07829b7-0382-4e03-7ecd-a478c5aa9f00/logo",
-  },
-  {
-    address:
-      "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D",
-    name: "Starknet Token",
-    symbol: "STRK",
-    decimals: 18,
-    icon: "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/1b126320-367c-48ed-cf5a-ba7580e49600/logo",
-  },
-];
+import { erc20Metadata } from "@cartridge/presets";
 
 const DEFAULT_FEE_TOKEN =
   "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
@@ -44,6 +26,14 @@ export type ERC20Metadata = {
   decimals: number;
   icon: string;
 };
+
+const DEFAULT_TOKENS: ERC20Metadata[] = erc20Metadata.map((token) => ({
+  address: getChecksumAddress(token.l2_token_address),
+  name: token.name,
+  symbol: token.symbol,
+  decimals: token.decimals,
+  icon: token.logo_url || "",
+}));
 
 export type ERC20 = {
   name: string;

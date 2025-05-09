@@ -1,9 +1,15 @@
 import { useContext } from "react";
 import {
+  ERC20,
   TokensContext,
   TokensContextValue,
 } from "@/components/provider/tokens";
 import { getChecksumAddress } from "starknet";
+import { useConnection } from "./connection";
+import { ERC20 as CustomERC20 } from "@cartridge/ui/utils";
+import { Token } from "@cartridge/ui";
+import { useQuery } from "react-query";
+import { usePriceByAddressesQuery } from "@cartridge/ui/utils/api/cartridge";
 
 export function useTokens(): TokensContextValue {
   const context = useContext(TokensContext);
@@ -14,13 +20,85 @@ export function useTokens(): TokensContextValue {
   return context;
 }
 
+export type UseBalancesResponse = {
+  tokens: Token[];
+  status: "success" | "error" | "idle" | "loading";
+};
+
 export function useToken(address: string) {
   const { tokens, isLoading, error } = useTokens();
-  const token = tokens[getChecksumAddress(address)];
+  const { controller } = useConnection();
+  const tokenFromCtx = tokens[getChecksumAddress(address)];
+
+  const newToken = useQuery({
+    queryKey: ["token", address],
+    queryFn: async () => {
+      if (!controller) {
+        return;
+      }
+
+      const customToken = new CustomERC20({
+        address: getChecksumAddress(address),
+        provider: controller.provider,
+      });
+
+      const newToken = await customToken.init();
+
+      const balance = await newToken.balanceOf(controller.address());
+
+      const formattedToken: ERC20 = {
+        name: newToken.metadata().name,
+        icon: newToken.metadata().logoUrl || "/placeholder.svg",
+        symbol: newToken.metadata().symbol,
+        decimals: newToken.metadata().decimals,
+        address: newToken.metadata().address,
+        contract: newToken,
+        balance,
+      };
+
+      return formattedToken;
+    },
+    enabled: !tokenFromCtx,
+  });
+
+  const {
+    data: priceData,
+    isLoading: isPriceLoading,
+    error: priceError,
+  } = usePriceByAddressesQuery(
+    {
+      addresses: address,
+    },
+    {
+      refetchInterval: 3000,
+      enabled: !tokenFromCtx && !!newToken,
+    },
+  );
+
+  if (tokenFromCtx !== undefined) {
+    return {
+      token: tokenFromCtx,
+      isLoading,
+      error,
+    };
+  }
+
+  if (newToken.data) {
+    if (!isPriceLoading) {
+      const price = priceData?.priceByAddresses[0];
+      const result: ERC20 = { ...newToken.data, price };
+      return {
+        token: result,
+        isLoading: newToken.isLoading,
+        error: priceError,
+      };
+    }
+  }
+
   return {
-    token,
-    isLoading,
-    error,
+    token: undefined,
+    isLoading: false,
+    error: error || newToken.error || undefined,
   };
 }
 

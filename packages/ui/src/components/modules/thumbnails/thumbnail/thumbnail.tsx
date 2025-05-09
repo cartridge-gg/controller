@@ -115,6 +115,7 @@ export const Thumbnail = ({
             onError={(e) => {
               e.currentTarget.src = PLACEHOLDER;
             }}
+            draggable={false}
           />
         )
       ) : (
