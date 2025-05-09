@@ -15,23 +15,32 @@ export class RabbyWallet implements WalletAdapter {
   private account: string | undefined = undefined;
   private store = createStore();
   private provider: EIP6963ProviderDetail | undefined;
+  private connectedAccounts: string[] = [];
 
   constructor() {
     this.provider = this.store
       .getProviders()
       .find((provider) => provider.info.rdns === RABBY_RDNS);
-    this.store.subscribe((providerDetails) => {
-      const rabbyProvider = providerDetails.find(
-        (provider) => provider.info.rdns === RABBY_RDNS,
-      );
-      if (rabbyProvider) {
-        this.provider = rabbyProvider;
+    this.provider?.provider
+      .request({
+        method: "eth_accounts",
+      })
+      .then((accounts) => {
+        this.connectedAccounts = accounts;
+      });
+    this.provider?.provider?.on("accountsChanged", (accounts: string[]) => {
+      if (accounts) {
+        // rabby doesn't allow multiple accounts to be connected at the same time
+        this.connectedAccounts = accounts.map((account) =>
+          account.toLowerCase(),
+        );
+        this.account = accounts?.[0]?.toLowerCase();
       }
     });
   }
 
   isAvailable(): boolean {
-    return !!this.provider;
+    return typeof window !== "undefined" && !!this.provider;
   }
 
   getInfo(): ExternalWallet {
@@ -44,10 +53,15 @@ export class RabbyWallet implements WalletAdapter {
       chainId: available ? window.ethereum?.chainId : undefined,
       name: "Rabby",
       platform: this.platform,
+      connectedAccounts: this.connectedAccounts,
     };
   }
 
-  async connect(): Promise<ExternalWalletResponse<any>> {
+  async connect(address?: string): Promise<ExternalWalletResponse<any>> {
+    if (address && this.connectedAccounts.includes(address.toLowerCase())) {
+      this.account = address.toLowerCase();
+    }
+
     if (this.account) {
       return { success: true, wallet: this.type, account: this.account };
     }
@@ -62,6 +76,7 @@ export class RabbyWallet implements WalletAdapter {
       });
       if (accounts && accounts.length > 0) {
         this.account = accounts[0];
+        this.connectedAccounts = accounts;
         return { success: true, wallet: this.type, account: this.account };
       }
 
@@ -74,6 +89,10 @@ export class RabbyWallet implements WalletAdapter {
         error: (error as Error).message || "Unknown error",
       };
     }
+  }
+
+  getConnectedAccounts(): string[] {
+    return this.connectedAccounts;
   }
 
   async signTransaction(
@@ -112,7 +131,6 @@ export class RabbyWallet implements WalletAdapter {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Rabby is not connected");
       }
-
       const result = await this.provider?.provider.request({
         method: "personal_sign",
         params: [this.account!, message] as any,

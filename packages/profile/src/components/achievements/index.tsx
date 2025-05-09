@@ -4,7 +4,7 @@ import {
   LayoutHeader,
   Empty,
   Skeleton,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useAccount } from "#hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";

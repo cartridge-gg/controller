@@ -1,0 +1,48 @@
+@layer base {
+  :root {
+    --background-100: #161a17;
+    --background-125: #181c19;
+    --background-150: #1a1e1b;
+    --background-200: #1e221f;
+    --background-300: #242824;
+    --background-400: #2a2f2a;
+    --background-500: #373c38;
+
+    --translucent-dark-100: #00000014;
+    --translucent-dark-150: #00000029;
+    --translucent-dark-200: #0000007a;
+    --translucent-dark-300: #000000a3;
+
+    --translucent-light-100: #ffffff0a;
+    --translucent-light-150: #ffffff29;
+    --translucent-light-200: #ffffff7a;
+    --translucent-light-300: #ffffffa3;
+
+    --spacer-100: #0f1410;
+
+    --foreground-100: #ffffff;
+    --foreground-200: #9c9c9c;
+    --foreground-300: #808080;
+    --foreground-400: #505050;
+
+    --primary-100: #fbcb4a;
+    --primary-200: #cca63e;
+
+    --primary-foreground-100: #0f1410;
+
+    --wallet-theme-100: #ab9ff2;
+    --wallet-theme-200: #7483f7;
+    --wallet-theme-300: #e88a39;
+    --wallet-theme-400: #ff875b;
+    --wallet-theme-500: #7289da;
+    --wallet-theme-600: #3b99fc;
+
+    --secondary-100: #a7e7a7;
+
+    --destructive-100: #e66666;
+
+    --constructive-100: #6de27c;
+
+    --radius: 0.5rem;
+  }
+}

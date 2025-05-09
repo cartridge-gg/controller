@@ -1,24 +1,23 @@
-import { useWallets } from "@/hooks/wallets";
-import { OptionButton, SheetContent, SheetTitle } from "@cartridge/ui-next";
-import { useEffect, useMemo, useState } from "react";
-import { AuthenticationMethod } from "../types";
-import { AuthFactory } from "./auth-option-factory";
+import { AuthOption } from "@cartridge/controller";
+import { SheetContent, SheetTitle } from "@cartridge/ui";
+import { useEffect, useState } from "react";
+import { SignupButton } from "../buttons/signup-button";
 
 interface ChooseSignupMethodProps {
   isSlot?: boolean;
   isLoading: boolean;
-  onSubmit: (authenticationMode?: AuthenticationMethod) => void;
+  onSubmit: (authenticationMode?: AuthOption) => void;
+  signupOptions: AuthOption[];
 }
 
 export function ChooseSignupMethodForm({
   isLoading,
   onSubmit,
+  signupOptions,
 }: ChooseSignupMethodProps) {
-  const [selectedAuth, setSelectedAuth] = useState<
-    AuthenticationMethod | undefined
-  >(undefined);
-
-  const { wallets } = useWallets();
+  const [selectedAuth, setSelectedAuth] = useState<AuthOption | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (!isLoading) {
@@ -26,38 +25,20 @@ export function ChooseSignupMethodForm({
     }
   }, [isLoading]);
 
-  // Function to handle interaction outside the sheet
   const handleInteractOutside = (
     event: CustomEvent<{ originalEvent: Event }>,
   ) => {
-    // Find the overlay element by its ID
     const overlayElement = document.getElementById("wallet-connect-overlay");
-    // Check if the event target is the overlay or inside it
     if (overlayElement && overlayElement.contains(event.target as Node)) {
-      // If the interaction was inside our QR code overlay, prevent the sheet from closing
       event.preventDefault();
     }
   };
-
-  const passkeyOption = AuthFactory.create("webauthn");
-
-  const authOptions = useMemo(() => {
-    return [
-      ...wallets
-        .filter(
-          (wallet) => wallet.type !== "argent" && wallet.type !== "phantom",
-        )
-        .map((wallet) => AuthFactory.create(wallet.type)),
-      AuthFactory.create("social"),
-      AuthFactory.create("walletconnect"),
-    ];
-  }, [wallets]);
 
   const handleSelectedOption = (
     e:
       | React.KeyboardEvent<HTMLButtonElement>
       | React.MouseEvent<HTMLButtonElement>,
-    option: AuthenticationMethod,
+    option: AuthOption,
   ) => {
     if (
       e.type === "keydown" &&
@@ -78,26 +59,30 @@ export function ChooseSignupMethodForm({
       onInteractOutside={handleInteractOutside}
     >
       <SheetTitle className="hidden"></SheetTitle>
-      <div className="border-b border-background-125 pb-4">
-        <OptionButton
-          {...passkeyOption}
-          className="justify-center"
-          onClick={(e) => handleSelectedOption(e, passkeyOption.mode)}
-          onKeyDown={(e) => handleSelectedOption(e, passkeyOption.mode)}
-        />
-      </div>
-      <div className="flex flex-col gap-3">
-        {authOptions.map((option) => (
-          <OptionButton
-            {...option}
-            key={option.mode}
-            className="justify-start"
-            onKeyDown={(e) => handleSelectedOption(e, option.mode)}
-            onClick={(e) => handleSelectedOption(e, option.mode)}
-            disabled={isLoading && selectedAuth !== option.mode}
-            isLoading={isLoading && selectedAuth === option.mode}
+      {signupOptions.includes("webauthn") && (
+        <div className="border-b border-background-125 pb-4">
+          <SignupButton
+            authMethod="webauthn"
+            className="justify-center"
+            onClick={(e) => handleSelectedOption(e, "webauthn")}
+            onKeyDown={(e) => handleSelectedOption(e, "webauthn")}
           />
-        ))}
+        </div>
+      )}
+      <div className="flex flex-col gap-3">
+        {signupOptions
+          .filter((option) => option !== "webauthn")
+          .map((option) => (
+            <SignupButton
+              authMethod={option}
+              key={option}
+              className="justify-start"
+              onKeyDown={(e) => handleSelectedOption(e, option)}
+              onClick={(e) => handleSelectedOption(e, option)}
+              disabled={isLoading && selectedAuth !== option}
+              isLoading={isLoading && selectedAuth === option}
+            />
+          ))}
       </div>
     </SheetContent>
   );

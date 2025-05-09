@@ -8,6 +8,7 @@ export interface ExternalWallet {
   chainId?: string;
   name?: string;
   platform?: ExternalPlatform;
+  connectedAccounts?: string[];
 }
 
 export interface ExternalWalletResponse<T = unknown> {
@@ -25,7 +26,8 @@ export interface WalletAdapter {
   // Methods
   isAvailable(): boolean;
   getInfo(): ExternalWallet;
-  connect(): Promise<ExternalWalletResponse<any>>;
+  getConnectedAccounts(): string[];
+  connect(address?: string): Promise<ExternalWalletResponse<any>>;
   signMessage?(message: string): Promise<ExternalWalletResponse<any>>;
   signTypedData?(data: any): Promise<ExternalWalletResponse<any>>;
   sendTransaction(tx: any): Promise<ExternalWalletResponse<any>>;

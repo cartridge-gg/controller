@@ -2,17 +2,16 @@ import {
   useCountervalue,
   useERC20Balance,
   UseERC20BalanceResponse,
-} from "@cartridge/utils";
+} from "@cartridge/ui/utils";
 import {
   useBalanceQuery,
   useBalancesQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "./account";
 import { useConnection } from "./context";
 import { getChecksumAddress } from "starknet";
 import { useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
-import { formatEther } from "viem";
 
 const LIMIT = 1000;
 
@@ -189,7 +188,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
             ),
         )
         .map((token) => ({
-          balance: formatEther(token.balance.value || 0n),
+          balance: `${Number(token.balance.value) / Math.pow(10, token.meta.decimals)}`,
           address: token.meta.address,
         })),
     [rpcData, toriiData],

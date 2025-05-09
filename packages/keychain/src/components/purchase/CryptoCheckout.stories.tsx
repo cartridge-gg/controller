@@ -21,6 +21,7 @@ export const PurchaseStarterpack: Story = {
     wholeCredits: 5,
     starterpackDetails: {
       id: "1",
+      name: "Starter Pack Name",
       priceUsd: 5,
       starterPackItems: [
         {
@@ -58,6 +59,7 @@ export const StarterpackTxnSubmitted: Story = {
     wholeCredits: 10,
     starterpackDetails: {
       id: "1",
+      name: "Starter Pack Name",
       priceUsd: 5,
       starterPackItems: [
         {

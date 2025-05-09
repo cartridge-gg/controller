@@ -6,7 +6,7 @@ import {
   LeaderboardRow,
   Empty,
   Skeleton,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useAccount, useUsernames } from "#hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";

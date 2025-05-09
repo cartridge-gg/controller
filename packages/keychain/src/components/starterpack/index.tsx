@@ -9,14 +9,19 @@ import { StarterItem } from "./starter-item";
 import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function StarterPack({ starterpackId }: { starterpackId: string }) {
-  const { items, priceUsd } = useStarterPack(starterpackId);
+  const { name, description, items, supply, priceUsd, isLoading } =
+    useStarterPack(starterpackId);
 
   return (
     <Purchase
       type={PurchaseType.STARTERPACK}
+      isLoading={isLoading}
       starterpackDetails={{
         id: starterpackId,
+        name,
+        description,
         priceUsd,
+        supply,
         starterPackItems: items,
       }}
     />
@@ -39,9 +44,9 @@ export function StarterPackContent({
   starterpackItems?: StarterItemData[];
 }) {
   return (
-    <>
+    <div className="flex flex-col gap-2">
       <h1 className="text-xs font-semibold text-foreground-400">You receive</h1>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         {starterpackItems
           .filter((item) => item.type === StarterItemType.NFT)
           .map((item, index) => (
@@ -53,6 +58,6 @@ export function StarterPackContent({
             <StarterItem key={index} {...item} />
           ))}
       </div>
-    </>
+    </div>
   );
 }

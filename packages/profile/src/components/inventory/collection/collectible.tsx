@@ -10,11 +10,11 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-  cn,
   CollectibleAsset,
   Skeleton,
   Empty,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useCallback, useMemo } from "react";
 import placeholder from "/public/placeholder.svg";
 import { CollectionHeader } from "./header";

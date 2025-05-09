@@ -8,12 +8,12 @@ import {
   Button,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
-  cn,
   Thumbnail,
   TokenSelect,
   Spinner,
   PaperPlaneIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
@@ -105,7 +105,7 @@ export function SendToken() {
               TransactionFinalityStatus.ACCEPTED_ON_L2,
             ],
           });
-          // Refetch transfers after 5 seconds to leave time to the indexer to take the new tx into account
+          // Refetch transfers 5 seconds after to leave time to the indexer to take the new tx into account
           setTimeout(() => {
             refetchTransfers();
           }, 5000);

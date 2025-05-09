@@ -116,7 +116,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (!!document.hasStorageAccess) {
+    if (typeof document !== "undefined" && !!document.hasStorageAccess) {
       const ok = await document.hasStorageAccess();
       if (!ok) {
         await document.requestStorageAccess();
@@ -129,6 +129,7 @@ export default class ControllerProvider extends BaseProvider {
       let response = await this.keychain.connect(
         this.options.policies || {},
         this.rpcUrl(),
+        this.options.signupOptions,
       );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
@@ -187,7 +188,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (!!document.hasStorageAccess) {
+    if (typeof document !== "undefined" && !!document.hasStorageAccess) {
       const ok = await document.hasStorageAccess();
       if (!ok) {
         await document.requestStorageAccess();

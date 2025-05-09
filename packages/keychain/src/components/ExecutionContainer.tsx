@@ -5,14 +5,14 @@ import { parseControllerError } from "@/utils/connection/execute";
 import { ErrorCode } from "@cartridge/account-wasm/controller";
 import {
   Button,
-  cn,
   type HeaderProps,
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
   PaperPlaneIcon,
   useUI,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import isEqual from "lodash/isEqual";
 import { useCallback, useEffect, useRef, useState } from "react";
 

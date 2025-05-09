@@ -11,12 +11,13 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-} from "@cartridge/ui-next";
-import { isIframe } from "@cartridge/utils";
+  TagIcon,
+} from "@cartridge/ui";
+import { isIframe } from "@cartridge/ui/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AmountSelection } from "../funding/AmountSelection";
+import { AmountSelection, USD_AMOUNTS } from "../funding/AmountSelection";
 import CheckoutForm from "./StripeCheckout";
 import { CryptoCheckout, walletIcon } from "./CryptoCheckout";
 import { ExternalWallet } from "@cartridge/controller";
@@ -41,6 +42,7 @@ export type PurchaseCreditsProps = {
   type: PurchaseType;
   starterpackDetails?: StarterPackDetails;
   initState?: PurchaseState;
+  isLoading?: boolean;
   onBack?: () => void;
 };
 
@@ -55,8 +57,6 @@ export type StripeResponse = {
   pricing: PricingDetails;
 };
 
-export const DEFAULT_WHOLE_CREDITS = 500;
-
 // TODO: I know this is terrible... refactor soon, separate product selection and checkout
 export function Purchase({
   onBack,
@@ -64,6 +64,7 @@ export function Purchase({
   type,
   isSlot,
   starterpackDetails,
+  isLoading,
   initState = PurchaseState.SELECTION,
 }: PurchaseCreditsProps) {
   const { controller, closeModal } = useConnection();
@@ -81,13 +82,20 @@ export function Purchase({
   );
   const [state, setState] = useState<PurchaseState>(initState);
   const [wholeCredits, setWholeCredits] = useState<number>(
-    starterpackDetails?.priceUsd
-      ? usdToCredits(starterpackDetails?.priceUsd)
-      : DEFAULT_WHOLE_CREDITS,
+    usdToCredits(starterpackDetails?.priceUsd || USD_AMOUNTS[0]),
   );
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
   const [displayError, setDisplayError] = useState<Error | null>(null);
+
+  const isOos = () => {
+    const supply = starterpackDetails?.supply;
+    if (supply !== undefined) {
+      return supply <= 0;
+    }
+
+    return false;
+  };
 
   const {
     stripePromise,
@@ -108,9 +116,9 @@ export function Purchase({
   }, [wallets, detectedWallets]);
 
   const onAmountChanged = useCallback(
-    (amount: number) => {
+    (usdAmount: number) => {
       setDisplayError(null);
-      setWholeCredits(amount);
+      setWholeCredits(usdToCredits(usdAmount));
     },
     [setWholeCredits],
   );
@@ -165,13 +173,13 @@ export function Purchase({
       case PurchaseState.SELECTION:
         return type === PurchaseType.CREDITS
           ? "Purchase Credits"
-          : "Purchase Starter Pack";
+          : (starterpackDetails?.name ?? "Purchase Starter Pack");
       case PurchaseState.STRIPE_CHECKOUT:
         return "Credit Card";
       case PurchaseState.SUCCESS:
         return "Purchase Complete";
     }
-  }, [state]);
+  }, [state, starterpackDetails]);
 
   const appearance = {
     theme: "flat",
@@ -222,7 +230,6 @@ export function Purchase({
   return (
     <LayoutContainer>
       <LayoutHeader
-        className="p-6"
         title={title}
         onBack={() => {
           switch (state) {
@@ -236,12 +243,17 @@ export function Purchase({
               setState(PurchaseState.SELECTION);
           }
         }}
+        right={
+          state === PurchaseState.SELECTION &&
+          starterpackDetails?.supply !== undefined ? (
+            <Supply amount={starterpackDetails!.supply} />
+          ) : undefined
+        }
       />
-      <LayoutContent className="gap-6 px-6">
+      <LayoutContent>
         {state === PurchaseState.SELECTION &&
           ((type === PurchaseType.CREDITS && (
             <AmountSelection
-              wholeCredits={wholeCredits}
               onChange={onAmountChanged}
               lockSelection={isStripeLoading || isLoadingWallets}
               enableCustom
@@ -292,48 +304,80 @@ export function Purchase({
             Close
           </Button>
         )}
-        {state === PurchaseState.SELECTION && (
+        {state === PurchaseState.SELECTION && !isLoading && (
           <>
-            <Button
-              className="flex-1"
-              isLoading={isStripeLoading}
-              onClick={onCreditCard}
-              disabled={isLoadingWallets}
-            >
-              <CreditCardIcon
-                size="sm"
-                variant="solid"
-                className="text-background-100 flex-shrink-0"
-              />
-              <span>Credit Card</span>
-            </Button>
-            <div className="flex flex-row gap-4">
-              {availableWallets.map((wallet: ExternalWallet) => {
-                return (
-                  <Button
-                    key={wallet.type}
-                    className="flex-1"
-                    variant="secondary"
-                    isLoading={
-                      isConnecting && wallet.type === selectedWallet?.type
-                    }
-                    disabled={
-                      !wallet.available ||
-                      isConnecting ||
-                      isStripeLoading ||
-                      isLoadingWallets
-                    }
-                    onClick={async () => onExternalConnect(wallet)}
-                  >
-                    {walletIcon(wallet, true)}{" "}
-                    {availableWallets.length < 2 && wallet.type}
-                  </Button>
-                );
-              })}
-            </div>
+            {isOos() ? (
+              <Button className="flex-1" disabled>
+                Check again soon
+              </Button>
+            ) : (
+              <>
+                <Button
+                  className="flex-1"
+                  isLoading={isStripeLoading}
+                  onClick={onCreditCard}
+                  disabled={isLoadingWallets}
+                >
+                  <CreditCardIcon
+                    size="sm"
+                    variant="solid"
+                    className="text-background-100 flex-shrink-0"
+                  />
+                  <span>Credit Card</span>
+                </Button>
+                <div className="flex flex-row gap-4">
+                  {availableWallets.map((wallet: ExternalWallet) => {
+                    return (
+                      <Button
+                        key={wallet.type}
+                        className="flex-1"
+                        variant="secondary"
+                        isLoading={
+                          isConnecting && wallet.type === selectedWallet?.type
+                        }
+                        disabled={
+                          !wallet.available ||
+                          isConnecting ||
+                          isStripeLoading ||
+                          isLoadingWallets
+                        }
+                        onClick={async () => onExternalConnect(wallet)}
+                      >
+                        {walletIcon(wallet, true)}{" "}
+                        {availableWallets.length < 2 && wallet.type}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </>
         )}
       </LayoutFooter>
     </LayoutContainer>
   );
 }
+
+const Supply = ({ amount }: { amount: number }) => {
+  const color = () => {
+    if (amount <= 0) {
+      return "text-destructive-100";
+    }
+
+    return `text-primary-100`;
+  };
+
+  return (
+    <div
+      className={`flex gap-1 py-[2px] px-[8px] rounded-full bg-background-200 text-sm font-semibold ${color()}`}
+    >
+      {amount > 0 ? (
+        <>
+          <TagIcon size="sm" variant="solid" /> {amount} left
+        </>
+      ) : (
+        <>Out of stock</>
+      )}
+    </div>
+  );
+};

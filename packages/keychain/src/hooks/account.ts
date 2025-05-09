@@ -6,7 +6,7 @@ import {
   FinalizeLoginMutation,
   FinalizeRegistrationMutation,
   useAccountNameQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { Buffer } from "buffer";
 
 import { client, ENDPOINT } from "@/utils/graphql";

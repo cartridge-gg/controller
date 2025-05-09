@@ -1,4 +1,4 @@
-import { StackDiamondIcon, Thumbnail, VerifiedIcon } from "@cartridge/ui-next";
+import { StackDiamondIcon, Thumbnail, VerifiedIcon } from "@cartridge/ui";
 
 export function CollectionHeader({
   title,

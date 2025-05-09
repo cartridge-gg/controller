@@ -3,12 +3,11 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  cn,
   OlmechIcon,
   Thumbnail,
   WalletType,
-} from "@cartridge/ui-next";
-import { formatAddress } from "@cartridge/utils";
+} from "@cartridge/ui";
+import { formatAddress, cn } from "@cartridge/ui/utils";
 
 interface Props {
   wallet: WalletType;

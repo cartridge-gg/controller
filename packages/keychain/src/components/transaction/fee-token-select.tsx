@@ -3,8 +3,8 @@ import {
   SelectContent,
   TokenSelectHeader,
   TokenSelectRow,
-  cn,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useEffect, useState } from "react";
 
 export type Balance = {

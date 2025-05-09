@@ -3,7 +3,7 @@ import {
   controllerConfigs,
   ControllerTheme,
 } from "@cartridge/presets";
-import { useThemeEffect } from "@cartridge/ui-next";
+import { useThemeEffect } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useConnection } from "#hooks/context";

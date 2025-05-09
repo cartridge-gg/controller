@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { cn, Spinner, Token } from "@cartridge/ui-next";
+import { Spinner, Token } from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { EstimateFee } from "starknet";
 
 import {

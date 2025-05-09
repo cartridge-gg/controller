@@ -1,20 +1,27 @@
-import React from "react";
+import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
+import { AuthOption } from "@cartridge/controller";
 import {
-  cn,
   Button,
   Card,
-  TrashIcon,
+  DiscordIcon,
+  MetaMaskIcon,
+  PhantomIcon,
+  RabbyIcon,
   Sheet,
   SheetClose,
   SheetContent,
   SheetFooter,
   StarknetIcon,
   TouchIcon,
-} from "@cartridge/ui-next";
-import { SignerType } from "@cartridge/utils/api/cartridge";
-
+  TrashIcon,
+  WalletConnectIcon,
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
+import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
+import React from "react";
+import { getControllerSignerProvider } from "../connect/types";
 export interface Signer {
-  signerType: SignerType;
+  signer: CredentialMetadata;
 }
 
 export interface SignerCardProps extends Signer {
@@ -24,7 +31,8 @@ export interface SignerCardProps extends Signer {
 export const SignerCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SignerCardProps
->(({ className, signerType, onDelete, ...props }, ref) => {
+>(({ className, signer, onDelete, ...props }, ref) => {
+  const signerType = getControllerSignerProvider(signer);
   return (
     <Sheet>
       <div
@@ -35,11 +43,7 @@ export const SignerCard = React.forwardRef<
         <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-center bg-background-200">
           <DeviceIcon signerType={signerType} />
           <p className="flex-1 text-sm font-normal">
-            {signerType === SignerType.Starknet
-              ? "Starknet Account"
-              : signerType === SignerType.Webauthn
-                ? "WebAuthn"
-                : "Unknown"}
+            {signerType ? AUTH_METHODS_LABELS[signerType] : "Unknown"}
           </p>
         </Card>
         {/* disabled until delete signer functionality is implemented */}
@@ -67,11 +71,7 @@ export const SignerCard = React.forwardRef<
           </Button>
           <div className="flex flex-col items-start gap-1">
             <h3 className="text-lg font-semibold text-foreground-100">
-              {signerType === SignerType.Starknet
-                ? "Starknet Account"
-                : signerType === SignerType.Webauthn
-                  ? "WebAuthn"
-                  : "Unknown"}
+              {signerType ? AUTH_METHODS_LABELS[signerType] : "Unknown"}
             </h3>
           </div>
         </div>
@@ -95,12 +95,29 @@ export const SignerCard = React.forwardRef<
 
 SignerCard.displayName = "SignerCard";
 
-const DeviceIcon = React.memo(({ signerType }: { signerType: SignerType }) => {
-  return signerType === SignerType.Starknet ? (
-    <StarknetIcon size="default" />
-  ) : signerType === SignerType.Webauthn ? (
-    <TouchIcon size="default" />
-  ) : (
-    <TouchIcon size="default" />
-  );
-});
+const DeviceIcon = React.memo(
+  ({ signerType }: { signerType: AuthOption | undefined }) => {
+    if (!signerType) {
+      return <TouchIcon size="sm" />;
+    }
+
+    switch (signerType) {
+      case "argent":
+        return <StarknetIcon size="sm" />;
+      case "webauthn":
+        return <TouchIcon size="sm" />;
+      case "phantom":
+        return <PhantomIcon size="sm" />;
+      case "rabby":
+        return <RabbyIcon size="sm" />;
+      case "metamask":
+        return <MetaMaskIcon size="sm" />;
+      case "discord":
+        return <DiscordIcon size="sm" />;
+      case "walletconnect":
+        return <WalletConnectIcon size="sm" />;
+      default:
+        return <TouchIcon size="sm" />;
+    }
+  },
+);

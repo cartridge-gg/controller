@@ -1,7 +1,7 @@
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { useUsername } from "@/hooks/account";
 import { normalizeAddress } from "@/utils/address";
-import { LayoutContent, WalletType } from "@cartridge/ui-next";
+import { LayoutContent, WalletType } from "@cartridge/ui";
 import { useMemo } from "react";
 import { Call, EstimateFee } from "starknet";
 import { TransactionDestination } from "../destination";

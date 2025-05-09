@@ -16,7 +16,6 @@ import {
   CollectibleProperties,
   CollectibleDetails,
   LayoutFooter,
-  cn,
   Skeleton,
   Empty,
   CollectibleTabs,
@@ -24,14 +23,15 @@ import {
   PlusIcon,
   TraceabilityCollectibleCard,
   PaperPlaneIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { constants } from "starknet";
 import { useConnection, useTheme } from "#hooks/context";
 import { useCallback, useMemo, useState } from "react";
 import { useCollectible } from "#hooks/collectible";
 import { CollectionHeader } from "./header";
 import placeholder from "/public/placeholder.svg";
-import { VoyagerUrl } from "@cartridge/utils";
+import { VoyagerUrl } from "@cartridge/ui/utils";
 import { CardProps, useTraceabilities } from "#hooks/traceabilities.js";
 import { useArcade } from "#hooks/arcade.js";
 import { EditionModel } from "@bal7hazar/arcade-sdk";

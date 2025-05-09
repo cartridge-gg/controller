@@ -6,7 +6,7 @@ import {
   LayoutContent,
   ClockIcon,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 
 export function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);

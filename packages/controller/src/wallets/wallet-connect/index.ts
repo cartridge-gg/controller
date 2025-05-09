@@ -7,15 +7,25 @@ import {
   WalletAdapter,
 } from "../types";
 
+// TODO(tedison): move wallet to inside the keychain
 export class WalletConnectWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "walletconnect" as ExternalWalletType;
   readonly platform: ExternalPlatform = "ethereum";
   private account: string | undefined = undefined;
 
-  constructor(private provider: Provider) {}
+  constructor(
+    private provider: Provider,
+    address?: string,
+  ) {
+    this.account = address?.toLowerCase();
+  }
+
+  getConnectedAccounts(): string[] {
+    return this.account ? [this.account] : [];
+  }
 
   isAvailable(): boolean {
-    return !!this.provider;
+    return typeof window !== "undefined" && !!this.provider;
   }
 
   getInfo(): ExternalWallet {
@@ -95,7 +105,7 @@ export class WalletConnectWallet implements WalletAdapter {
 
       const result = await this.provider.request({
         method: "personal_sign",
-        params: [this.account!, message] as any,
+        params: [message, this.account!],
       });
 
       return { success: true, wallet: this.type, result };

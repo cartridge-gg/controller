@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   OwnershipProject,
   useOwnershipsQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useConnection } from "./context";
 
 const LIMIT = 0;

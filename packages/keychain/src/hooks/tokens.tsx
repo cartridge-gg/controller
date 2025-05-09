@@ -6,10 +6,10 @@ import {
 } from "@/components/provider/tokens";
 import { getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
-import { ERC20 as CustomERC20 } from "@cartridge/utils";
-import { Token } from "@cartridge/ui-next";
+import { ERC20 as CustomERC20 } from "@cartridge/ui/utils";
+import { Token } from "@cartridge/ui";
 import { useQuery } from "react-query";
-import { usePriceByAddressesQuery } from "@cartridge/utils/api/cartridge";
+import { usePriceByAddressesQuery } from "@cartridge/ui/utils/api/cartridge";
 
 export function useTokens(): TokensContextValue {
   const context = useContext(TokensContext);

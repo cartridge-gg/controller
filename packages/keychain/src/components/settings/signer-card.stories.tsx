@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { SignerCard } from "./signer-card";
-import { SignerType } from "@cartridge/utils/api/cartridge";
 
 const meta = {
   title: "components/settings/Signer Card",
@@ -10,7 +9,16 @@ const meta = {
     layout: "centered",
   },
   args: {
-    signerType: SignerType.Starknet,
+    signer: {
+      __typename: "Eip191Credentials",
+      eip191: [
+        {
+          __typename: "Eip191Credential",
+          ethAddress: "0x123",
+          provider: "metamask",
+        },
+      ],
+    },
   },
 } satisfies Meta<typeof SignerCard>;
 
