@@ -37,8 +37,8 @@ function QrCodeDisplay({
         </p>
         <div className="p-5 bg-translucent-light-150 backdrop-blur-sm rounded-3xl">
           <div className="flex items-center justify-center relative">
-            <div className="absolute top-1/2 left-1/2 p-2 bg-[#373837] -translate-x-1/2 -translate-y-1/2 rounded-lg">
-              <AchievementPlayerAvatar username={username} size="xl" />
+            <div className="absolute top-1/2 left-1/2 p-1 bg-[#373837] -translate-x-1/2 -translate-y-1/2 rounded-lg">
+              <AchievementPlayerAvatar username={username} size="lg" />
             </div>
             <QRCodeSVG
               level="L"
