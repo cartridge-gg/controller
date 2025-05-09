@@ -72,6 +72,13 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.pointerEvents = "auto";
     container.appendChild(iframe);
 
+    // Add click event listener to close iframe when clicking outside
+    container.addEventListener("click", (e) => {
+      if (e.target === container) {
+        this.close();
+      }
+    });
+
     this.iframe = iframe;
     this.container = container;
 
