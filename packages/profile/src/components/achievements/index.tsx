@@ -17,12 +17,11 @@ import { LayoutBottomNav } from "#components/bottom-nav";
 
 export function Achievements() {
   const { address: self } = useAccount();
+  const { pins, games, editions } = useArcade();
   const {
     trophies: { achievements, players, status },
     setAccountAddress,
   } = useData();
-
-  const { pins, games, editions } = useArcade();
 
   const { address } = useParams<{ address: string }>();
   const { project, namespace } = useConnection();
