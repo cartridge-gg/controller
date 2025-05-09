@@ -86,7 +86,7 @@ export function useToken(address: string) {
   if (newToken.data) {
     if (!isPriceLoading) {
       const price = priceData?.priceByAddresses[0];
-      const result = { ...newToken.data, price };
+      const result: ERC20 = { ...newToken.data, price };
       return {
         token: result,
         isLoading: newToken.isLoading,

@@ -1,15 +1,10 @@
 import { ResponseCodes, toArray } from "@cartridge/controller";
-import { LayoutContent, Skeleton, WalletType } from "@cartridge/ui-next";
 import { useConnection } from "@/hooks/connection";
 import { ExecuteCtx } from "@/utils/connection";
-import { Call, EstimateFee, Uint256, uint256 } from "starknet";
-import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { Call, EstimateFee } from "starknet";
 import { useMemo } from "react";
-import { TransactionDestination } from "./destination";
-import { TransactionSending } from "./sending";
-import { useToken } from "@/hooks/tokens";
-import { useUsername } from "@/hooks/account";
-import { normalizeAddress } from "@/utils/address";
+import { ERC20ConfirmTransaction } from "./confirm-transaction/erc20";
+import { DefaultConfirmTransaction } from "./confirm-transaction/default";
 
 export function ConfirmTransaction() {
   const { controller, context, setContext } = useConnection();
@@ -31,70 +26,23 @@ export function ConfirmTransaction() {
     setContext(undefined);
   };
 
-  const call = useMemo(() => {
-    const _call = transactions.find((tx) => tx.entrypoint === "transfer");
-
-    if (_call) {
-      const tokenAddress = _call.contractAddress;
-
-      if (Array.isArray(_call.calldata)) {
-        const destinationAddress = normalizeAddress(String(_call.calldata[0]));
-
-        const _amount = _call.calldata[1] as Uint256;
-
-        const amount = uint256.uint256ToBN(_amount);
-
-        return {
-          tokenAddress,
-          destinationAddress,
-          amount,
-        };
-      }
-    }
-
-    return undefined;
+  const isERC20 = useMemo(() => {
+    return transactions.find((tx) => tx.entrypoint === "transfer");
   }, [transactions]);
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-  const { token, isLoading } = useToken(call?.tokenAddress!);
-
-  const { username: destinationUsername } = useUsername(
-    call?.destinationAddress || "",
-  );
-
-  const amount = useMemo(() => {
-    if (!isLoading && call?.amount && token?.decimals) {
-      const result = Number(call.amount) / Math.pow(10, token.decimals);
-      return result;
-    }
-  }, [call, token, isLoading]);
-
-  if (!call) {
-    return undefined;
+  if (isERC20) {
+    return (
+      <ERC20ConfirmTransaction
+        transactions={transactions}
+        onSubmit={onSubmit}
+      />
+    );
   }
 
   return (
-    <ExecutionContainer
-      title={`Review Transaction${transactions.length > 1 ? "s" : ""}`}
-      executionError={ctx.error}
+    <DefaultConfirmTransaction
       transactions={transactions}
-      feeEstimate={ctx.feeEstimate}
       onSubmit={onSubmit}
-      buttonText="CONFIRM"
-      className="select-none"
-    >
-      <LayoutContent className="gap-4 pt-1">
-        <TransactionDestination
-          name={destinationUsername}
-          address={call.destinationAddress}
-          wallet={WalletType.Controller}
-        />
-        {isLoading ? (
-          <Skeleton className="w-full h-[384px]" />
-        ) : token && amount ? (
-          <TransactionSending token={token} amount={amount} />
-        ) : null}
-      </LayoutContent>
-    </ExecutionContainer>
+    />
   );
 }
