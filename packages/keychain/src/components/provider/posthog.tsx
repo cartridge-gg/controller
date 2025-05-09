@@ -1,6 +1,7 @@
-import { PropsWithChildren, useEffect, useState, useContext } from "react";
-import { PostHogContext, PostHogWrapper } from "@cartridge/utils";
 import { useConnection } from "@/hooks/connection";
+import { useVersion } from "@/hooks/version";
+import { PostHogContext, PostHogWrapper } from "@cartridge/utils";
+import { PropsWithChildren, useContext, useEffect, useState } from "react";
 
 const posthog = new PostHogWrapper(
   import.meta.env.VITE_POSTHOG_KEY ?? "api key",
@@ -12,9 +13,21 @@ const posthog = new PostHogWrapper(
 
 export function PostHogProvider({ children }: PropsWithChildren) {
   const { controller, origin } = useConnection();
+  const { controllerVersion } = useVersion();
 
   // Track the last identified address
   const [lastIdentifiedAddress, setLastIdentifiedAddress] = useState<string>();
+
+  const [registered, setRegistered] = useState(false);
+
+  useEffect(() => {
+    if (!registered && controllerVersion) {
+      posthog.registerForSession({
+        controllerVersion: controllerVersion.version,
+      });
+      setRegistered(true);
+    }
+  }, [registered, controllerVersion]);
 
   useEffect(() => {
     if (controller) {
