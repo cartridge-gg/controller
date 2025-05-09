@@ -1,8 +1,28 @@
-query StarterPack($id: ID!) {
-  starterpack(id: $id) {
-    name
-    description
-    active
+mutation ClaimFreeStarterpack($input: StarterpackInput!) {
+  claimFreeStarterpack(input: $input)
+}
+
+query StarterPack($input: StarterpackInput!) {
+  starterpack(input: $input) {
+    starterpack {
+      name
+      description
+      active
+      issuance
+      maxIssuance
+      starterpackContract {
+        edges {
+          node {
+            name
+            description
+            iconURL
+            contractAddress
+            supplyEntryPoint
+            supplyCalldata
+          }
+        }
+      }
+    }
     price {
       amount
       decimals
@@ -11,19 +31,9 @@ query StarterPack($id: ID!) {
       amount
       decimals
     }
-    issuance
-    maxIssuance
-    starterpackContract {
-      edges {
-        node {
-          name
-          description
-          iconURL
-          contractAddress
-          supplyEntryPoint
-          supplyCalldata
-        }
-      }
+    mintAllowance {
+      count
+      limit
     }
   }
 }

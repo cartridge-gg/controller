@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  ClaimFreeStarterpackDocument,
+  ClaimFreeStarterpackMutation,
   StarterPackDocument,
+  StarterpackInput,
   StarterPackQuery,
 } from "@cartridge/utils/api/cartridge";
 import { client } from "@/utils/graphql";
@@ -29,18 +32,28 @@ export interface StarterPackDetails {
   description?: string;
   priceUsd: number;
   supply?: number;
+  mintAllowance?: MintAllowance;
   starterPackItems: StarterItemData[];
 }
 
-export function useStarterPack(starterpackId: string) {
+export interface MintAllowance {
+  count: number;
+  limit: number;
+}
+
+export function useStarterPack(starterpackId?: string) {
   const { controller } = useController();
   const [isLoading, setIsLoading] = useState(true);
+  const [isClaiming, setIsClaiming] = useState(false);
   const [supply, setSupply] = useState<number | undefined>(undefined);
   const [items, setItems] = useState<StarterItemData[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [priceUsd, setPriceUsd] = useState<number>(0);
+  const [mintAllowance, setMintAllowance] = useState<MintAllowance | undefined>(
+    undefined,
+  );
 
   const checkSupply = useCallback(
     async (contractAddress: string, entrypoint: string, calldata: string[]) => {
@@ -68,21 +81,35 @@ export function useStarterPack(starterpackId: string) {
     setIsLoading(true);
     setError(null);
 
+    if (!controller || !starterpackId) {
+      return;
+    }
+
     client
-      .request<StarterPackQuery>(StarterPackDocument, { id: starterpackId })
+      .request<StarterPackQuery>(StarterPackDocument, {
+        input: {
+          starterpackId: starterpackId,
+          accountId: controller?.username(),
+        },
+      })
       .then(async (result) => {
-        const price = result.starterpack!.price.amount;
-        const factor = 10 ** result.starterpack!.price.decimals;
+        const details = result.starterpack!;
+        const price = details.price.amount;
+        const factor = 10 ** details.price.decimals;
         const priceUSD = creditsToUSD(Number(price) / factor);
         setPriceUsd(priceUSD);
-        setName(result.starterpack!.name);
-        setDescription(result.starterpack!.description ?? "");
+        setName(details.starterpack!.name);
+        setDescription(details.starterpack!.description ?? "");
+
+        if (details.mintAllowance) {
+          setMintAllowance(details.mintAllowance);
+        }
 
         const items: StarterItemData[] = [];
-        if (result.starterpack) {
+        if (details.starterpack) {
           let minSupply;
-          if (result.starterpack.starterpackContract?.edges) {
-            for (const edge of result.starterpack.starterpackContract.edges) {
+          if (details.starterpack.starterpackContract?.edges) {
+            for (const edge of details.starterpack.starterpackContract.edges) {
               items.push({
                 title: edge?.node?.name ?? "",
                 description: edge?.node?.description ?? "",
@@ -105,18 +132,15 @@ export function useStarterPack(starterpackId: string) {
             }
           }
 
-          if (
-            result.starterpack.bonusCredits &&
-            Number(result.starterpack.bonusCredits.amount) > 0
-          ) {
-            const factor = 10 ** result.starterpack.bonusCredits.decimals;
+          if (Number(details.bonusCredits.amount) > 0) {
+            const factor = 10 ** details.bonusCredits.decimals;
             items.push({
-              title: `${result.starterpack.bonusCredits} Credits`,
+              title: `${details.bonusCredits} Credits`,
               description: "Credits cover service fee(s).",
               price: 0,
               image: "/ERC-20-Icon.svg",
               type: StarterItemType.CREDIT,
-              value: Number(result.starterpack.bonusCredits.amount) / factor,
+              value: Number(details.bonusCredits.amount) / factor,
             });
           }
 
@@ -129,7 +153,39 @@ export function useStarterPack(starterpackId: string) {
       })
       .catch(setError)
       .finally(() => setIsLoading(false));
-  }, [starterpackId]);
+  }, [starterpackId, controller]);
+
+  const claim = useCallback(async () => {
+    if (!controller || !starterpackId) {
+      throw new Error("Controller or starterpack ID not found");
+    }
+
+    setIsClaiming(true);
+    setError(null);
+
+    const input: StarterpackInput = {
+      starterpackId: starterpackId,
+      accountId: controller.username(),
+    };
+
+    try {
+      const { claimFreeStarterpack: trannsactionHash } =
+        await client.request<ClaimFreeStarterpackMutation>(
+          ClaimFreeStarterpackDocument,
+          {
+            input: input,
+          },
+        );
+
+      return trannsactionHash;
+    } catch (error) {
+      console.error(error);
+      setError(error as Error);
+      throw error;
+    } finally {
+      setIsClaiming(false);
+    }
+  }, [starterpackId, controller]);
 
   return {
     name,
@@ -137,7 +193,10 @@ export function useStarterPack(starterpackId: string) {
     items,
     priceUsd,
     supply,
+    mintAllowance,
     isLoading,
+    isClaiming,
     error,
+    claim,
   };
 }
