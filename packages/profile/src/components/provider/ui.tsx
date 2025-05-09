@@ -12,12 +12,10 @@ import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 
 function QrCodeDisplay({
-  address,
   showQrCode,
   setShowQrCode,
   username,
 }: {
-  address: string;
   showQrCode: boolean;
   username: string;
   setShowQrCode: (value: boolean) => void;
@@ -96,7 +94,6 @@ export function UIProvider({ children }: PropsWithChildren) {
     >
       {children}
       <QrCodeDisplay
-        address={account?.address}
         username={account?.username}
         showQrCode={showQrCode}
         setShowQrCode={setShowQrCode}
