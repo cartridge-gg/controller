@@ -1,10 +1,5 @@
 import { PropsWithChildren, useCallback, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  UIProvider as Provider,
-  TimesIcon,
-} from "@cartridge/ui";
+import { Dialog, DialogContent, UIProvider as Provider } from "@cartridge/ui";
 import { useConnection } from "#hooks/context";
 import { useAccount } from "#hooks/account";
 import { useArcade } from "#hooks/arcade.js";
