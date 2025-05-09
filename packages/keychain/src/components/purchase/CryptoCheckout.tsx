@@ -111,7 +111,6 @@ export function CryptoCheckout({
         wholeCredits,
         selectedWallet.platform!,
         starterpackDetails,
-        false,
         (explorer) => {
           setState(CheckoutState.TRANSACTION_SUBMITTED);
           setExplorer(explorer);
