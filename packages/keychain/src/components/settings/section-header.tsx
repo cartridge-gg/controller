@@ -1,6 +1,6 @@
 import React from "react";
 import { Status } from "./status";
-import { cn } from "@cartridge/ui-next";
+import { cn } from "@cartridge/ui/utils";
 
 export interface SectionHeaderProps {
   title: string;

@@ -16,7 +16,8 @@ import {
   Button,
   LayoutHeader,
   ControllerIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { getChainName } from "@cartridge/ui/utils";
 import { Funding } from "./funding";
 import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
@@ -26,7 +27,6 @@ import { ControllerError } from "@/utils/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { Link } from "react-router-dom";
 import { useFeeToken } from "@/hooks/tokens";
-import { getChainName } from "@cartridge/utils";
 
 export function DeployController({
   onClose,

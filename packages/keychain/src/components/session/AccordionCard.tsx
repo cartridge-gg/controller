@@ -7,8 +7,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  cn,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 
 interface AccordionCardProps {
   icon: React.ReactNode;

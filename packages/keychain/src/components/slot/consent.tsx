@@ -4,7 +4,7 @@ import {
   LayoutFooter,
   LayoutHeader,
   Button,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useCallback, useEffect } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 

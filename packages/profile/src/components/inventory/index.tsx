@@ -9,11 +9,7 @@ export {
 export { Token } from "./token";
 export { SendToken } from "./token/send";
 
-import {
-  LayoutContainer,
-  LayoutContent,
-  LayoutHeader,
-} from "@cartridge/ui-next";
+import { LayoutContainer, LayoutContent, LayoutHeader } from "@cartridge/ui";
 import { LayoutBottomNav } from "#components/bottom-nav";
 import { Outlet, useParams } from "react-router-dom";
 import { Collections } from "./collection";

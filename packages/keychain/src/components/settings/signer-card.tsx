@@ -1,8 +1,8 @@
 import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
+import { AuthOption } from "@cartridge/controller";
 import {
   Button,
   Card,
-  cn,
   DiscordIcon,
   MetaMaskIcon,
   PhantomIcon,
@@ -15,13 +15,11 @@ import {
   TouchIcon,
   TrashIcon,
   WalletConnectIcon,
-} from "@cartridge/ui-next";
-import { CredentialMetadata } from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
+import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import React from "react";
-import {
-  AuthenticationMethod,
-  getControllerSignerProvider,
-} from "../connect/types";
+import { getControllerSignerProvider } from "../connect/types";
 export interface Signer {
   signer: CredentialMetadata;
 }
@@ -98,7 +96,7 @@ export const SignerCard = React.forwardRef<
 SignerCard.displayName = "SignerCard";
 
 const DeviceIcon = React.memo(
-  ({ signerType }: { signerType: AuthenticationMethod | undefined }) => {
+  ({ signerType }: { signerType: AuthOption | undefined }) => {
     if (!signerType) {
       return <TouchIcon size="sm" />;
     }

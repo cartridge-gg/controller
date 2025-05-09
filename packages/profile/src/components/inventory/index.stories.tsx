@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react";
 import { Inventory } from ".";
 import { useAccount } from "#hooks/account.mock";
-import { accounts } from "@cartridge/utils/mock/data";
+import { accounts } from "@cartridge/ui/utils/mock/data";
 
 const meta = {
   component: Inventory,

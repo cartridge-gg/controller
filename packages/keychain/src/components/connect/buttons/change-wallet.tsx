@@ -1,10 +1,10 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useWallets } from "@/hooks/wallets";
 import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
+import { AuthOption } from "@cartridge/controller";
 import { useEffect, useMemo } from "react";
 import { useUsernameValidation } from "../create/useUsernameValidation";
 import {
-  AuthenticationMethod,
   getControllerSignerAddress,
   getControllerSignerProvider,
 } from "../types";
@@ -17,7 +17,7 @@ interface ChangeWalletProps {
 
 const OPTIONS: Partial<
   Record<
-    AuthenticationMethod,
+    AuthOption,
     {
       label: string;
       color: string;
@@ -68,13 +68,13 @@ export function ChangeWallet({
     setChangeWallet(false);
   }, [validation.status]);
 
-  const signerProvider: AuthenticationMethod | undefined = useMemo(
+  const signerProvider: AuthOption | undefined = useMemo(
     () => getControllerSignerProvider(validation.signer),
     [validation.signer],
   );
 
   const option = useMemo(
-    () => OPTIONS[signerProvider as AuthenticationMethod],
+    () => OPTIONS[signerProvider as AuthOption],
     [signerProvider],
   );
 

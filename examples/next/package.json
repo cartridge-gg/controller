@@ -1,7 +1,7 @@
 {
   "name": "@cartridge/controller-example-next",
   "private": true,
-  "version": "0.7.13",
+  "version": "0.7.14-alpha.2",
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@cartridge/connector": "workspace:*",
     "@cartridge/controller": "workspace:*",
-    "@cartridge/ui-next": "workspace:*",
+    "@cartridge/ui": "workspace:*",
     "@starknet-react/chains": "catalog:",
     "@starknet-react/core": "catalog:",
     "next": "^15.1.5",

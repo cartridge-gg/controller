@@ -1,15 +1,15 @@
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import {
+  AuthOption,
   ExternalWalletResponse,
   ExternalWalletType,
 } from "@cartridge/controller";
 import {
   ControllerQuery,
   Eip191Credential,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
-import { AuthenticationMethod } from "../../types";
 import { SignupResponse } from "../useCreateController";
 
 export const useExternalWalletAuthentication = () => {
@@ -17,9 +17,7 @@ export const useExternalWalletAuthentication = () => {
   const { connectWallet, wallets } = useWallets();
 
   const signup = useCallback(
-    async (
-      authenticationMode: AuthenticationMethod,
-    ): Promise<SignupResponse> => {
+    async (authenticationMode: AuthOption): Promise<SignupResponse> => {
       const connectedWallet = await connectWallet(
         authenticationMode as ExternalWalletType,
       );

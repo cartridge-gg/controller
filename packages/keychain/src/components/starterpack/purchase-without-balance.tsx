@@ -9,8 +9,8 @@ import {
   LayoutHeader,
   Spinner,
   useUI,
-} from "@cartridge/ui-next";
-import { LayoutContainer } from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { LayoutContainer } from "@cartridge/ui";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { useEffect, useMemo, useState } from "react";

@@ -1,9 +1,11 @@
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { useConnection } from "@/hooks/connection";
+import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
 import { computeAccountAddress, Owner, Signer } from "@cartridge/account-wasm";
+import { AuthOption } from "@cartridge/controller";
 import {
   AccountQuery,
   Eip191Credentials,
@@ -12,10 +14,10 @@ import {
   useAccountQuery,
   useRegisterMutation,
   WebauthnCredentials,
-} from "@cartridge/utils/api/cartridge";
-import { useCallback, useState } from "react";
+} from "@cartridge/ui/utils/api/cartridge";
+import { useCallback, useMemo, useState } from "react";
 import { shortString } from "starknet";
-import { AuthenticationMethod, LoginMode } from "../types";
+import { LoginMode } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
@@ -25,7 +27,7 @@ import { useWebauthnAuthentication } from "./webauthn";
 export interface SignupResponse {
   address: string;
   signer: Signer;
-  type: AuthenticationMethod;
+  type: AuthOption;
 }
 
 export interface LoginResponse {
@@ -49,7 +51,14 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
 
-  const { origin, policies, rpcUrl, chainId, setController } = useConnection();
+  const {
+    origin,
+    policies,
+    rpcUrl,
+    chainId,
+    setController,
+    configSignupOptions,
+  } = useConnection();
   const { mutateAsync: register } = useRegisterMutation();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
@@ -59,6 +68,7 @@ export function useCreateController({
     useExternalWalletAuthentication();
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication(setOverlay);
+  const { wallets } = useWallets();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -137,8 +147,23 @@ export function useCreateController({
     [setPendingUsername],
   );
 
+  const signupOptions: AuthOption[] = useMemo(() => {
+    return [
+      "webauthn" as AuthOption,
+      ...wallets
+        .filter(
+          (wallet) => wallet.type !== "argent" && wallet.type !== "phantom",
+        )
+        .map((wallet) => wallet.type),
+      "discord" as AuthOption,
+      "walletconnect" as AuthOption,
+    ].filter(
+      (option) => !configSignupOptions || configSignupOptions.includes(option),
+    );
+  }, [wallets, configSignupOptions]);
+
   const handleSignup = useCallback(
-    async (username: string, authenticationMode: AuthenticationMethod) => {
+    async (username: string, authenticationMode: AuthOption) => {
       if (!origin || !chainId || !rpcUrl) {
         throw new Error("Origin, chainId, or rpcUrl not found");
       }
@@ -252,7 +277,7 @@ export function useCreateController({
   );
 
   const handleLogin = useCallback(
-    async (username: string, authenticationMethod: AuthenticationMethod) => {
+    async (username: string, authenticationMethod: AuthOption) => {
       if (!chainId) {
         throw new Error("No chainId");
       }
@@ -375,7 +400,7 @@ export function useCreateController({
     async (
       username: string,
       exists: boolean,
-      authenticationMethod?: AuthenticationMethod,
+      authenticationMethod?: AuthOption,
     ) => {
       setError(undefined);
       setIsLoading(true);
@@ -421,6 +446,7 @@ export function useCreateController({
     setOverlay,
     changeWallet,
     setChangeWallet,
+    signupOptions,
   };
 }
 

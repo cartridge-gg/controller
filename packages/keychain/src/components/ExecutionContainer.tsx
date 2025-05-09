@@ -9,7 +9,7 @@ import {
   LayoutContainer,
   LayoutFooter,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import isEqual from "lodash/isEqual";
 import { useCallback, useEffect, useRef, useState } from "react";
 

@@ -1,24 +1,23 @@
-import { useWallets } from "@/hooks/wallets";
-import { SheetContent, SheetTitle } from "@cartridge/ui-next";
-import { useEffect, useMemo, useState } from "react";
+import { AuthOption } from "@cartridge/controller";
+import { SheetContent, SheetTitle } from "@cartridge/ui";
+import { useEffect, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
-import { AuthenticationMethod } from "../types";
 
 interface ChooseSignupMethodProps {
   isSlot?: boolean;
   isLoading: boolean;
-  onSubmit: (authenticationMode?: AuthenticationMethod) => void;
+  onSubmit: (authenticationMode?: AuthOption) => void;
+  signupOptions: AuthOption[];
 }
 
 export function ChooseSignupMethodForm({
   isLoading,
   onSubmit,
+  signupOptions,
 }: ChooseSignupMethodProps) {
-  const [selectedAuth, setSelectedAuth] = useState<
-    AuthenticationMethod | undefined
-  >(undefined);
-
-  const { wallets } = useWallets();
+  const [selectedAuth, setSelectedAuth] = useState<AuthOption | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (!isLoading) {
@@ -35,23 +34,11 @@ export function ChooseSignupMethodForm({
     }
   };
 
-  const authOptions: AuthenticationMethod[] = useMemo(() => {
-    return [
-      ...wallets
-        .filter(
-          (wallet) => wallet.type !== "argent" && wallet.type !== "phantom",
-        )
-        .map((wallet) => wallet.type),
-      "discord",
-      "walletconnect",
-    ];
-  }, [wallets]);
-
   const handleSelectedOption = (
     e:
       | React.KeyboardEvent<HTMLButtonElement>
       | React.MouseEvent<HTMLButtonElement>,
-    option: AuthenticationMethod,
+    option: AuthOption,
   ) => {
     if (
       e.type === "keydown" &&
@@ -72,26 +59,30 @@ export function ChooseSignupMethodForm({
       onInteractOutside={handleInteractOutside}
     >
       <SheetTitle className="hidden"></SheetTitle>
-      <div className="border-b border-background-125 pb-4">
-        <SignupButton
-          authMethod="webauthn"
-          className="justify-center"
-          onClick={(e) => handleSelectedOption(e, "webauthn")}
-          onKeyDown={(e) => handleSelectedOption(e, "webauthn")}
-        />
-      </div>
-      <div className="flex flex-col gap-3">
-        {authOptions.map((option) => (
+      {signupOptions.includes("webauthn") && (
+        <div className="border-b border-background-125 pb-4">
           <SignupButton
-            authMethod={option}
-            key={option}
-            className="justify-start"
-            onKeyDown={(e) => handleSelectedOption(e, option)}
-            onClick={(e) => handleSelectedOption(e, option)}
-            disabled={isLoading && selectedAuth !== option}
-            isLoading={isLoading && selectedAuth === option}
+            authMethod="webauthn"
+            className="justify-center"
+            onClick={(e) => handleSelectedOption(e, "webauthn")}
+            onKeyDown={(e) => handleSelectedOption(e, "webauthn")}
           />
-        ))}
+        </div>
+      )}
+      <div className="flex flex-col gap-3">
+        {signupOptions
+          .filter((option) => option !== "webauthn")
+          .map((option) => (
+            <SignupButton
+              authMethod={option}
+              key={option}
+              className="justify-start"
+              onKeyDown={(e) => handleSelectedOption(e, option)}
+              onClick={(e) => handleSelectedOption(e, option)}
+              disabled={isLoading && selectedAuth !== option}
+              isLoading={isLoading && selectedAuth === option}
+            />
+          ))}
       </div>
     </SheetContent>
   );

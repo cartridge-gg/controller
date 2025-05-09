@@ -10,8 +10,8 @@ import {
   LayoutHeader,
   Spinner,
   useUI,
-} from "@cartridge/ui-next";
-import { LayoutContainer } from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { LayoutContainer } from "@cartridge/ui";
 import { useState, useEffect } from "react";
 import { Receiving } from "./receiving";
 import { useStarterPack } from "@/hooks/starterpack";

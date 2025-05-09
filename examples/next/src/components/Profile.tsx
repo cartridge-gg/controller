@@ -2,7 +2,7 @@
 
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button } from "@cartridge/ui-next";
+import { Button } from "@cartridge/ui";
 import { STRK_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
 import { useEffect, useState } from "react";
 

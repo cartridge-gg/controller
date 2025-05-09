@@ -1,4 +1,4 @@
-import { Thumbnail, PaperPlaneIcon } from "@cartridge/ui-next";
+import { Thumbnail, PaperPlaneIcon } from "@cartridge/ui";
 
 interface SendHeaderProps {
   image: string;

@@ -1,6 +1,6 @@
-import { AuthenticationMethod } from "@/components/connect/types";
+import { AuthOption } from "@cartridge/controller";
 
-export const AUTH_METHODS_LABELS: Record<AuthenticationMethod, string> = {
+export const AUTH_METHODS_LABELS: Record<AuthOption, string> = {
   argent: "Argent",
   webauthn: "Passkey",
   phantom: "Phantom",

@@ -3,7 +3,7 @@ import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
-import { useFeature } from "@/hooks/features";
+import { AuthOption } from "@cartridge/controller";
 import {
   CreateAccount,
   LayoutContainer,
@@ -11,16 +11,12 @@ import {
   LayoutFooter,
   LayoutHeader,
   Sheet,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
 import { ChangeWallet } from "../buttons/change-wallet";
-import {
-  AuthenticationMethod,
-  getControllerSignerProvider,
-  LoginMode,
-} from "../types";
+import { getControllerSignerProvider, LoginMode } from "../types";
 import { ChooseSignupMethodForm } from "./ChooseSignupMethodForm";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
@@ -39,7 +35,7 @@ interface CreateControllerViewProps {
   onUsernameChange: (value: string) => void;
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
-  onSubmit: (authenticationMode?: AuthenticationMethod) => void;
+  onSubmit: (authenticationMode?: AuthOption) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
   isSlot?: boolean;
@@ -48,11 +44,12 @@ interface CreateControllerViewProps {
   waitingForConfirmation: boolean;
   changeWallet: boolean;
   setChangeWallet: (value: boolean) => void;
+  signupOptions: AuthOption[];
 }
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
-  "authenticationStep" | "setAuthenticationStep"
+  "authenticationStep" | "setAuthenticationStep" | "signupOptions"
 >;
 
 function CreateControllerForm({
@@ -165,6 +162,7 @@ export function CreateControllerView({
   waitingForConfirmation,
   changeWallet,
   setChangeWallet,
+  signupOptions,
 }: CreateControllerViewProps) {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -198,6 +196,7 @@ export function CreateControllerView({
         isSlot={isSlot}
         isLoading={isLoading}
         onSubmit={onSubmit}
+        signupOptions={signupOptions}
       />
     </Sheet>
   );
@@ -230,7 +229,7 @@ export function CreateController({
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
-  const newLoginFeatureEnabled = useFeature("new-login");
+  const newLoginFeatureEnabled = true;
 
   const [usernameField, setUsernameField] = useState({
     value: "",
@@ -257,13 +256,14 @@ export function CreateController({
     waitingForConfirmation,
     changeWallet,
     setChangeWallet,
+    signupOptions,
   } = useCreateController({
     isSlot,
     loginMode,
   });
 
   const handleFormSubmit = useCallback(
-    (authenticationMode?: AuthenticationMethod) => {
+    (authenticationMode?: AuthOption) => {
       if (!usernameField.value) {
         return;
       }
@@ -279,13 +279,20 @@ export function CreateController({
         if (
           authenticationMode === undefined &&
           !accountExists &&
-          newLoginFeatureEnabled
+          newLoginFeatureEnabled &&
+          signupOptions.length > 1
         ) {
           setAuthenticationStep(AuthenticationStep.ChooseSignupMethod);
           return;
         }
 
-        handleSubmit(usernameField.value, accountExists, authenticationMode);
+        handleSubmit(
+          usernameField.value,
+          accountExists,
+          signupOptions.length === 1 && !accountExists
+            ? signupOptions[0]
+            : authenticationMode,
+        );
       }
     },
     [
@@ -295,6 +302,7 @@ export function CreateController({
       validation.status,
       setAuthenticationStep,
       newLoginFeatureEnabled,
+      signupOptions,
     ],
   );
 
@@ -368,6 +376,7 @@ export function CreateController({
         waitingForConfirmation={waitingForConfirmation}
         changeWallet={changeWallet}
         setChangeWallet={setChangeWallet}
+        signupOptions={signupOptions}
       />
       {overlay}
     </>

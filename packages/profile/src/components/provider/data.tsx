@@ -4,14 +4,14 @@ import { DataContext } from "#context/data";
 import {
   useActivitiesQuery,
   useTransfersQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context.js";
 import { getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { useArcade } from "#hooks/arcade.js";
 import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
-import { getDate } from "@cartridge/utils";
+import { getDate } from "@cartridge/ui/utils";
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";

@@ -1,0 +1,29 @@
+query StarterPack($id: ID!) {
+  starterpack(id: $id) {
+    name
+    description
+    active
+    price {
+      amount
+      decimals
+    }
+    bonusCredits {
+      amount
+      decimals
+    }
+    issuance
+    maxIssuance
+    starterpackContract {
+      edges {
+        node {
+          name
+          description
+          iconURL
+          contractAddress
+          supplyEntryPoint
+          supplyCalldata
+        }
+      }
+    }
+  }
+}
