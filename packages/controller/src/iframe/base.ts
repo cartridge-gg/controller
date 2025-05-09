@@ -14,6 +14,7 @@ export class IFrame<CallSender extends {}> implements Modal {
   private iframe?: HTMLIFrameElement;
   private container?: HTMLDivElement;
   private onClose?: () => void;
+  private child?: AsyncMethodReturns<CallSender>;
 
   constructor({
     id,
@@ -75,6 +76,13 @@ export class IFrame<CallSender extends {}> implements Modal {
     // Add click event listener to close iframe when clicking outside
     container.addEventListener("click", (e) => {
       if (e.target === container) {
+        // Attempting to reset(clear context) for keychain iframe (identified by ID)
+        if (id === "controller-keychain" && this.child) {
+          // Type assertion for keychain child only
+          (this.child as any)
+            .reset?.()
+            .catch((e: any) => console.error("Error resetting context:", e));
+        }
         this.close();
       }
     });
@@ -105,7 +113,10 @@ export class IFrame<CallSender extends {}> implements Modal {
         reload: (_origin: string) => () => window.location.reload(),
         ...methods,
       },
-    }).promise.then(onConnect);
+    }).promise.then((child) => {
+      this.child = child;
+      onConnect(child);
+    });
 
     this.resize();
     window.addEventListener("resize", () => this.resize());
