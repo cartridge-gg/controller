@@ -16,7 +16,6 @@
   "dependencies": {
     "@cartridge/connector": "workspace:*",
     "@cartridge/controller": "workspace:*",
-    "@cartridge/ui": "workspace:*",
     "@starknet-react/chains": "catalog:",
     "@starknet-react/core": "catalog:",
     "next": "^15.1.5",
