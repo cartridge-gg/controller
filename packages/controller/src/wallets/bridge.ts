@@ -134,11 +134,13 @@ export class WalletBridge {
     let wallet: WalletAdapter | undefined;
     if (typeof identifier === "string") {
       // this is an address
-      wallet = this.walletAdapters
-        .values()
-        .find((adapter) =>
-          adapter.getConnectedAccounts().includes(identifier.toLowerCase()),
+      wallet = this.walletAdapters.values().find((adapter) => {
+        const ident = identifier.toLowerCase();
+        return (
+          adapter.getConnectedAccounts().includes(ident) ||
+          adapter.type === ident
         );
+      });
     } else {
       wallet = this.walletAdapters.get(identifier);
     }
