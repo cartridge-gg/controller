@@ -33,44 +33,50 @@ export class IFrame<CallSender extends {}> implements Modal {
       return;
     }
 
+    // Check if an iframe with this ID already exists
+    let iframe = document.getElementById(id) as HTMLIFrameElement | null;
+    let container = iframe?.parentElement as HTMLDivElement | null;
+
     if (preset) {
       url.searchParams.set("preset", preset);
     }
 
     this.url = url;
 
-    const iframe = document.createElement("iframe");
-    iframe.src = url.toString();
-    iframe.id = id;
-    iframe.style.border = "none";
-    iframe.sandbox.add("allow-forms");
-    iframe.sandbox.add("allow-popups");
-    iframe.sandbox.add("allow-popups-to-escape-sandbox");
-    iframe.sandbox.add("allow-scripts");
-    iframe.sandbox.add("allow-same-origin");
-    iframe.allow =
-      "publickey-credentials-create *; publickey-credentials-get *; clipboard-write";
-    if (!!document.hasStorageAccess) {
-      iframe.sandbox.add("allow-storage-access-by-user-activation");
-    }
+    if (!iframe || !container) {
+      iframe = document.createElement("iframe");
+      iframe.src = url.toString();
+      iframe.id = id;
+      iframe.style.border = "none";
+      iframe.sandbox.add("allow-forms");
+      iframe.sandbox.add("allow-popups");
+      iframe.sandbox.add("allow-popups-to-escape-sandbox");
+      iframe.sandbox.add("allow-scripts");
+      iframe.sandbox.add("allow-same-origin");
+      iframe.allow =
+        "publickey-credentials-create *; publickey-credentials-get *; clipboard-write";
+      if (!!document.hasStorageAccess) {
+        iframe.sandbox.add("allow-storage-access-by-user-activation");
+      }
 
-    const container = document.createElement("div");
-    container.id = "controller";
-    container.style.position = "fixed";
-    container.style.height = "100%";
-    container.style.width = "100%";
-    container.style.top = "0";
-    container.style.left = "0";
-    container.style.zIndex = "10000";
-    container.style.backgroundColor = "rgba(0,0,0,0.6)";
-    container.style.display = "flex";
-    container.style.alignItems = "center";
-    container.style.justifyContent = "center";
-    container.style.visibility = "hidden";
-    container.style.opacity = "0";
-    container.style.transition = "opacity 0.2s ease";
-    container.style.pointerEvents = "auto";
-    container.appendChild(iframe);
+      container = document.createElement("div");
+      container.id = "controller";
+      container.style.position = "fixed";
+      container.style.height = "100%";
+      container.style.width = "100%";
+      container.style.top = "0";
+      container.style.left = "0";
+      container.style.zIndex = "10000";
+      container.style.backgroundColor = "rgba(0,0,0,0.6)";
+      container.style.display = "flex";
+      container.style.alignItems = "center";
+      container.style.justifyContent = "center";
+      container.style.visibility = "hidden";
+      container.style.opacity = "0";
+      container.style.transition = "opacity 0.2s ease";
+      container.style.pointerEvents = "auto";
+      container.appendChild(iframe);
+    }
 
     this.iframe = iframe;
     this.container = container;
@@ -84,11 +90,11 @@ export class IFrame<CallSender extends {}> implements Modal {
           const iframes = document.querySelectorAll(
             'iframe[id^="controller-"]',
           );
-          iframes.forEach((iframe) => {
-            const container = iframe.parentElement;
-            if (container) {
-              container.style.visibility = "hidden";
-              container.style.opacity = "0";
+          iframes.forEach((iframeElement) => {
+            const parentContainer = iframeElement.parentElement;
+            if (parentContainer) {
+              parentContainer.style.visibility = "hidden";
+              parentContainer.style.opacity = "0";
             }
           });
           if (document.body) {
@@ -103,32 +109,38 @@ export class IFrame<CallSender extends {}> implements Modal {
     this.resize();
     window.addEventListener("resize", () => this.resize());
 
-    const observer = new MutationObserver(() => {
-      if (typeof document === "undefined") return;
-      const existingController = document.getElementById("controller");
-      if (document.body) {
+    // Only set up the observer and append if the container is not already in the body.
+    if (!container.parentElement || container.parentElement !== document.body) {
+      const observer = new MutationObserver(() => {
+        if (typeof document === "undefined") return;
+        // Check if the specific container associated with this iframe instance is in the body
+        if (document.body && !this.container?.parentElement && this.container) {
+          if (
+            (id === "controller-keychain" &&
+              !document.getElementById("controller")) || // This condition might need refinement
+            id === "controller-profile"
+          ) {
+            document.body.appendChild(this.container);
+            observer.disconnect();
+          }
+        }
+      });
+
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
+
+      // Initial append check, also ensuring this specific container isn't already there.
+      const existingControllerContainerById =
+        document.getElementById("controller");
+      if (document.body && this.container && !this.container.parentElement) {
         if (
-          (id === "controller-keychain" && !existingController) ||
+          (id === "controller-keychain" && !existingControllerContainerById) || // This condition might need refinement
           id === "controller-profile"
         ) {
-          document.body.appendChild(container);
-          observer.disconnect();
+          document.body.appendChild(this.container);
         }
-      }
-    });
-
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-    });
-
-    const existingController = document.getElementById("controller");
-    if (document.body) {
-      if (
-        (id === "controller-keychain" && !existingController) ||
-        id === "controller-profile"
-      ) {
-        document.body.appendChild(container);
       }
     }
 
