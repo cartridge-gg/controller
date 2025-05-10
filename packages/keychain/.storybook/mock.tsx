@@ -1,18 +1,21 @@
-import { constants, RpcProvider } from "starknet";
 import Controller from "@cartridge/controller";
-import { controllerConfigs, SessionPolicies } from "@cartridge/presets";
-import { Parameters } from "@storybook/react";
-import { ConnectionContextValue } from "../src/components/provider/connection";
-import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
-import { defaultTheme } from "@cartridge/presets";
-import { useThemeEffect } from "@cartridge/ui-next";
 import {
-  UpgradeContext,
-  UpgradeProviderProps,
-  UpgradeInterface,
-  CONTROLLER_VERSIONS,
-} from "../src/components/provider/upgrade";
+  controllerConfigs,
+  defaultTheme,
+  SessionPolicies,
+} from "@cartridge/presets";
+import { useThemeEffect } from "@cartridge/ui-next";
+import { Parameters } from "@storybook/react";
 import React from "react";
+import { constants, RpcProvider } from "starknet";
+import { ConnectionContextValue } from "../src/components/provider/connection";
+import {
+  CONTROLLER_VERSIONS,
+  UpgradeContext,
+  UpgradeInterface,
+  UpgradeProviderProps,
+} from "../src/components/provider/upgrade";
+import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 
 export interface StoryParameters extends Parameters {
   connection?: {
@@ -35,6 +38,7 @@ export function useMockedConnection(
       policies: [],
       resolve: () => {},
       reject: () => {},
+      controllerPackageVersion: "1.0.0",
     } as ConnectCtx,
     controller,
     ...rest
@@ -69,9 +73,9 @@ export function useMockedConnection(
     theme: { ...theme, verified: true },
     setContext: () => {},
     setController: () => {},
-    closeModal: () => {},
-    openModal: () => {},
-    logout: () => {},
+    closeModal: () => Promise.resolve(),
+    openModal: () => Promise.resolve(),
+    logout: () => Promise.resolve(),
     openSettings: () => {},
     ...rest,
   };
