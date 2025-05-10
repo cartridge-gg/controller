@@ -82,6 +82,7 @@ export function useStarterPack(starterpackId?: string) {
     setError(null);
 
     if (!controller || !starterpackId) {
+      setIsLoading(false);
       return;
     }
 

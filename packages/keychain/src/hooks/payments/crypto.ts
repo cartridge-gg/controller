@@ -180,9 +180,11 @@ export const useCryptoPayment = () => {
     tokenAddress: string,
     isMainnet: boolean = false,
   ) {
-    const connection = new Connection(
-      isMainnet ? clusterApiUrl("mainnet-beta") : clusterApiUrl("devnet"),
-    );
+    const rpcUrl = isMainnet
+      ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL ||
+        clusterApiUrl("mainnet-beta")
+      : import.meta.env.VITE_SOLANA_DEVNET_RPC_URL || clusterApiUrl("devnet");
+    const connection = new Connection(rpcUrl);
     const senderPublicKey = new PublicKey(walletAddress);
     const recipientPublicKey = new PublicKey(depositAddress);
     const tokenMint = new PublicKey(tokenAddress);
