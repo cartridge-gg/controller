@@ -110,7 +110,7 @@ export function CryptoCheckout({
         walletAddress,
         wholeCredits,
         selectedWallet.platform!,
-        starterpackDetails,
+        starterpackDetails?.id,
         false,
         (explorer) => {
           setState(CheckoutState.TRANSACTION_SUBMITTED);
