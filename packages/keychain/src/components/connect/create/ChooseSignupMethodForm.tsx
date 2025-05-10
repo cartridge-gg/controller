@@ -1,5 +1,5 @@
 import { AuthOption } from "@cartridge/controller";
-import { SheetContent, SheetTitle } from "@cartridge/ui-next";
+import { SheetContent, SheetTitle } from "@cartridge/ui";
 import { useEffect, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 
@@ -66,6 +66,8 @@ export function ChooseSignupMethodForm({
             className="justify-center"
             onClick={(e) => handleSelectedOption(e, "webauthn")}
             onKeyDown={(e) => handleSelectedOption(e, "webauthn")}
+            disabled={isLoading && selectedAuth !== "webauthn"}
+            isLoading={isLoading && selectedAuth === "webauthn"}
           />
         </div>
       )}

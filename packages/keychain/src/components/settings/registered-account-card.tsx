@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  cn,
   Button,
   Card,
   CardContent,
@@ -12,8 +11,9 @@ import {
   SheetTrigger,
   ArgentIcon,
   CopyAddress,
-} from "@cartridge/ui-next";
-import { formatAddress } from "@cartridge/utils";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
+import { formatAddress } from "@cartridge/ui/utils";
 
 export interface RegisteredAccount {
   accountName: string;

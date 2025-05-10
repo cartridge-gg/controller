@@ -1,11 +1,6 @@
 import * as React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  cn,
-  Thumbnail,
-} from "@cartridge/ui-next";
+import { Card, CardContent, CardDescription, Thumbnail } from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { StarterItemData, StarterItemType } from "@/hooks/starterpack";
 
 export const StarterItem = React.forwardRef<

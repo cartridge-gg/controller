@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@cartridge/ui-next";
+import { Button } from "@cartridge/ui";
 import { useAccount, useSendTransaction } from "@starknet-react/core";
 
 const ETH_CONTRACT =

@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
-import { Project, useProgressionsQuery } from "@cartridge/utils/api/cartridge";
+import {
+  Project,
+  useProgressionsQuery,
+} from "@cartridge/ui/utils/api/cartridge";
 import { Progress, RawProgress, getSelectorFromTag } from "#models";
 import { useConnection } from "./context";
 

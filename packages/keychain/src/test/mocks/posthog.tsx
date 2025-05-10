@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { PostHogContext, PostHogWrapper } from "@cartridge/utils";
+import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
 
 const defaultMockPosthog = new PostHogWrapper("test-key", {
   host: "test-host",

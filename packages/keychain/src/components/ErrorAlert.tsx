@@ -8,13 +8,12 @@ import {
   AccordionTrigger,
   Button,
   CheckIcon,
-  cn,
   CopyIcon,
   ErrorAlertIcon,
   ErrorAlertIconProps,
   Separator,
-} from "@cartridge/ui-next";
-import { formatAddress } from "@cartridge/utils";
+} from "@cartridge/ui";
+import { cn, formatAddress } from "@cartridge/ui/utils";
 import { useExplorer } from "@starknet-react/core";
 import React, {
   ReactElement,

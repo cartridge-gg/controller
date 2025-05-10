@@ -1,15 +1,15 @@
 import { PropsWithChildren, useCallback, useState } from "react";
 import {
+  AchievementPlayerAvatar,
   Dialog,
   DialogContent,
   UIProvider as Provider,
-  TimesIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useConnection } from "#hooks/context";
 import { useAccount } from "#hooks/account";
 import { useArcade } from "#hooks/arcade.js";
 import { useNavigate } from "react-router-dom";
-import { QrCode } from "@cartridge/ui-next";
+import { QRCodeSVG } from "qrcode.react";
 
 function QrCodeDisplay({
   address,
@@ -30,17 +30,25 @@ function QrCodeDisplay({
     <Dialog open={showQrCode} onOpenChange={handleOpenChange}>
       <DialogContent
         aria-describedby="Your account address"
-        className="border-none h-full w-full flex flex-col items-center justify-center bg-translucent-dark-150 backdrop-blur-lg gap-12"
+        className="border-none h-full w-full flex flex-col items-center justify-center bg-translucent-dark-150 backdrop-blur-sm gap-12"
       >
-        <div className=" absolute left-4 top-4 p-2 bg-background-200 hover:bg-background-300 rounded-md">
-          <TimesIcon />
-        </div>
-
-        <p className="text-center text-md bg-translucent-light-150 px-8 py-2 rounded-lg h-fit">
+        <p className="text-center select-none text-md bg-translucent-light-150 px-8 py-2 rounded-lg h-fit">
           {username}
         </p>
-        <div className="p-5 bg-translucent-light-150 rounded-3xl">
-          <QrCode data={`https://arcade.cartridge.gg/?address=${address}`} />
+        <div className="p-5 bg-translucent-light-150 backdrop-blur-sm rounded-3xl">
+          <div className="flex items-center justify-center relative">
+            <div className="absolute top-1/2 left-1/2 p-1 bg-[#373837] -translate-x-1/2 -translate-y-1/2 rounded-lg">
+              <AchievementPlayerAvatar username={username} size="lg" />
+            </div>
+            <QRCodeSVG
+              level="L"
+              value={`https://play.cartridge.gg/?address=${address}`}
+              size={192}
+              bgColor="#00000000"
+              fgColor="#ffffff"
+              boostLevel={true}
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

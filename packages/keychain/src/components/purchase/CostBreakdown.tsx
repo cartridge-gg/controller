@@ -5,7 +5,7 @@ import {
   InfoIcon,
   Separator,
   Thumbnail,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { PricingDetails } from ".";
 import { ExternalWalletType } from "@cartridge/controller";
 import { WALLET_CONFIG } from "./CryptoCheckout";

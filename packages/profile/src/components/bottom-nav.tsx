@@ -4,10 +4,10 @@ import {
   ChestIcon,
   TrophyIcon,
   BottomTab,
-  cn,
   PulseIcon,
   LeaderboardIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
 import { useConnection } from "#hooks/context.js";
 

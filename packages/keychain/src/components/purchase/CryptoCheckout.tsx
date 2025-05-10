@@ -22,7 +22,7 @@ import {
   TokenSummary,
   TokenCard,
   Spinner,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";

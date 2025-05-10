@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  cn,
   Button,
   Card,
   CardContent,
@@ -12,7 +11,8 @@ import {
   SheetFooter,
   SheetTrigger,
   ClockIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 
 export interface Session {
   sessionName: string;

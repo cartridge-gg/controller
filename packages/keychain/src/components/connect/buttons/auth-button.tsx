@@ -3,7 +3,6 @@ import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
 import {
   ArgentIcon,
   Button,
-  cn,
   DiscordIcon,
   IconProps,
   MetaMaskIcon,
@@ -11,7 +10,8 @@ import {
   RabbyIcon,
   Spinner,
   WalletConnectIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
 import { useUsernameValidation } from "../create/useUsernameValidation";
 import {

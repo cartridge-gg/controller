@@ -8,10 +8,10 @@ import {
   Button,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
-  cn,
   Skeleton,
   Empty,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {

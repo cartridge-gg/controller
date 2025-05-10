@@ -8,7 +8,7 @@ import {
   CreateStripePaymentIntentMutation,
   StripePaymentDocument,
   StripePaymentQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { PurchaseType } from "./crypto";
 
 const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {

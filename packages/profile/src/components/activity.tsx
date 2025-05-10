@@ -4,15 +4,14 @@ import {
   ActivityGameCard,
   ActivityTokenCard,
   Button,
-  cn,
   Empty,
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
   PlusIcon,
   Skeleton,
-} from "@cartridge/ui-next";
-import { VoyagerUrl } from "@cartridge/utils";
+} from "@cartridge/ui";
+import { VoyagerUrl, cn } from "@cartridge/ui/utils";
 import { useConnection, useData } from "#hooks/context";
 import { LayoutBottomNav } from "#components/bottom-nav";
 import { useCallback, useMemo, useState } from "react";

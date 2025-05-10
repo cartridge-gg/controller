@@ -16,7 +16,7 @@ import {
   Button,
   LayoutHeader,
   CreditCardIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { PricingDetails } from ".";
 import { CostBreakdown } from "./CostBreakdown";

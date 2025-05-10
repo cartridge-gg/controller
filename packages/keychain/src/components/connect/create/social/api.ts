@@ -1,4 +1,4 @@
-import { fetchApiCreator } from "@cartridge/utils";
+import { fetchApiCreator } from "@cartridge/ui/utils";
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
 
 export const SOCIAL_PROVIDER_NAME = "discord";

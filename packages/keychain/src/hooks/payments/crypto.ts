@@ -5,7 +5,7 @@ import {
   Network,
   CryptoPaymentQuery,
   CryptoPaymentDocument,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
 import { ExternalPlatform } from "@cartridge/controller";

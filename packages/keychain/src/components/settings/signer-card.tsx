@@ -3,7 +3,6 @@ import { AuthOption } from "@cartridge/controller";
 import {
   Button,
   Card,
-  cn,
   DiscordIcon,
   MetaMaskIcon,
   PhantomIcon,
@@ -16,8 +15,9 @@ import {
   TouchIcon,
   TrashIcon,
   WalletConnectIcon,
-} from "@cartridge/ui-next";
-import { CredentialMetadata } from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
+import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import React from "react";
 import { getControllerSignerProvider } from "../connect/types";
 export interface Signer {

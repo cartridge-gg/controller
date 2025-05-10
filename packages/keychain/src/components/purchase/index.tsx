@@ -13,8 +13,8 @@ import {
   LayoutHeader,
   SparklesIcon,
   TagIcon,
-} from "@cartridge/ui-next";
-import { isIframe } from "@cartridge/utils";
+} from "@cartridge/ui";
+import { isIframe } from "@cartridge/ui/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import { useCallback, useEffect, useMemo, useState } from "react";

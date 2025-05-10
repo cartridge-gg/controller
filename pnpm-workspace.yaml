@@ -57,3 +57,4 @@ catalog:
   vite-plugin-wasm: "^3.4.1"
   vite-tsconfig-paths: "^5.1.4"
   wasm-pack: "^0.13.0"
+  "qrcode.react": "^4.2.0"

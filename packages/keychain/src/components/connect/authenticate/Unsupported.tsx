@@ -1,4 +1,4 @@
-import { LayoutContainer, LayoutHeader, AlertIcon } from "@cartridge/ui-next";
+import { LayoutContainer, LayoutHeader, AlertIcon } from "@cartridge/ui";
 
 export function Unsupported({ message }: { message: string }) {
   return (

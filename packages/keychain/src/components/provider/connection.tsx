@@ -8,7 +8,7 @@ import {
   ExternalWalletResponse,
   ExternalWalletType,
 } from "@cartridge/controller";
-import { ControllerTheme } from "@cartridge/ui-next";
+import { ControllerTheme } from "@cartridge/ui";
 import { createContext } from "react";
 
 export const ConnectionContext = createContext<

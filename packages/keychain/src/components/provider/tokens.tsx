@@ -7,11 +7,11 @@ import {
   useCallback,
 } from "react";
 import { useConnection } from "@/hooks/connection";
-import { ERC20 as ERC20Contract } from "@cartridge/utils";
+import { ERC20 as ERC20Contract } from "@cartridge/ui/utils";
 import {
   Price,
   usePriceByAddressesQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
 

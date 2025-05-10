@@ -4,7 +4,7 @@ import { useAccount } from "@starknet-react/core";
 import { useCallback, useEffect, useState } from "react";
 import { constants } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button, Input } from "@cartridge/ui-next";
+import { Button, Input } from "@cartridge/ui";
 
 export const DelegateAccount = () => {
   const [chainId] = useState<constants.StarknetChainId>(
