@@ -215,8 +215,7 @@ export const useCryptoPayment = () => {
 
     const txn = new Transaction().add(createAtaIx, transferInstruction);
     txn.feePayer = senderPublicKey;
-    const { blockhash, lastValidBlockHeight } =
-      await connection.getLatestBlockhash();
+    const { blockhash } = await connection.getLatestBlockhash();
     txn.recentBlockhash = blockhash;
 
     const serializedTxn = txn.serialize({ requireAllSignatures: false });
@@ -233,11 +232,7 @@ export const useCryptoPayment = () => {
     return {
       signature,
       confirmTransaction: async () => {
-        await connection.confirmTransaction({
-          signature,
-          blockhash,
-          lastValidBlockHeight,
-        });
+        await pollForFinalization(connection, signature);
       },
     };
   }
@@ -249,6 +244,32 @@ export const useCryptoPayment = () => {
     error,
   };
 };
+
+async function pollForFinalization(
+  connection: Connection,
+  signature: string,
+  timeoutMs: number = 30000,
+  pollIntervalMs: number = 2000,
+): Promise<void> {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    const status = await connection.getSignatureStatus(signature);
+    const value = status?.value;
+
+    if (value?.confirmationStatus === "finalized") {
+      return;
+    }
+
+    if (value?.err) {
+      throw new Error(`Transaction failed: ${JSON.stringify(value.err)}`);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
+
+  throw new Error("Transaction confirmation timed out");
+}
 
 export interface Explorer {
   name: string;
