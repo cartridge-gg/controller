@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/ui",
-  "version": "0.7.14-alpha.2",
+  "version": "0.7.14-alpha.3",
   "description": "Catridge UI component library, backend utils for apps spread accross org",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
