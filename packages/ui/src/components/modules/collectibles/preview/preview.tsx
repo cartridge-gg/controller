@@ -2,7 +2,6 @@ import { PLACEHOLDER } from "@/assets";
 import { cn } from "@/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import React, { useMemo } from "react";
-import DynamicAssetRenderer from "../asset-renderer/dynamicAssetRenderer";
 
 export interface CollectiblePreviewProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -55,7 +54,7 @@ export const CollectiblePreview = ({
           opacity: hover ? 1 : 0.75,
         }}
       >
-        <DynamicAssetRenderer
+        <img
           src={uri}
           className={cn("object-cover absolute inset-0 w-full h-full")}
         />
@@ -66,7 +65,7 @@ export const CollectiblePreview = ({
           }}
         />
       </div>
-      <DynamicAssetRenderer
+      <img
         src={uri}
         data-hover={hover}
         className="object-contain max-h-full max-w-full relative transition duration-150 ease-in-out data-[hover=true]:scale-[1.02]"
