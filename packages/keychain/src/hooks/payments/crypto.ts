@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   CreateCryptoPaymentDocument,
   CreateCryptoPaymentMutation,
@@ -20,6 +20,7 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
+import { constants } from "starknet";
 
 export enum PurchaseType {
   CREDITS = "CREDITS",
@@ -31,13 +32,23 @@ export const useCryptoPayment = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
+  const isMainnet = useMemo(() => {
+    if (
+      import.meta.env.PROD &&
+      controller?.chainId() === constants.StarknetChainId.SN_MAIN
+    ) {
+      return true;
+    }
+
+    return false;
+  }, [controller]);
+
   const sendPayment = useCallback(
     async (
       walletAddress: string,
       wholeCredits: number,
       platform: ExternalPlatform,
       starterpackId?: string,
-      isMainnet: boolean = false,
       onSubmitted?: (explorer: Explorer) => void,
     ): Promise<string> => {
       if (!controller) {
@@ -94,7 +105,7 @@ export const useCryptoPayment = () => {
         setIsLoading(false);
       }
     },
-    [controller, externalSendTransaction],
+    [controller, externalSendTransaction, isMainnet],
   );
 
   const waitForPayment = useCallback(async (paymentId: string) => {
