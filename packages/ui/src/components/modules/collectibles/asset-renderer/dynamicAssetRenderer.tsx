@@ -42,11 +42,32 @@ const DynamicAssetRenderer = ({
     // Omit className and style because we don't want to apply any styles to the embed
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { className, style, ...rest } = props;
-    return <embed type="image/svg+xml" {...(rest as EmbedProps)} src={src} />;
+    return (
+      <embed
+        className="pointer-events-none"
+        type="image/svg+xml"
+        {...(rest as EmbedProps)}
+        src={src}
+      />
+    );
   } else if (tagType === "embed") {
-    return <embed type="image/svg+xml" {...(props as EmbedProps)} src={src} />;
+    return (
+      <embed
+        className="pointer-events-none"
+        type="image/svg+xml"
+        {...(props as EmbedProps)}
+        src={src}
+      />
+    );
   } else {
-    return <img alt="Asset Image" {...(props as ImgProps)} src={src} />;
+    return (
+      <img
+        className="pointer-events-none"
+        alt="Asset Image"
+        {...(props as ImgProps)}
+        src={src}
+      />
+    );
   }
 };
 
