@@ -33,6 +33,88 @@ export const PurchaseCredits: Story = {
   ],
 };
 
+export const FreeStarterpack: Story = {
+  args: {
+    type: PurchaseType.STARTERPACK,
+    wallets: [
+      {
+        type: "phantom",
+        platform: "solana",
+        available: true,
+      },
+    ],
+    starterpackDetails: {
+      id: "1",
+      name: "Booster Pack",
+      priceUsd: 0,
+      mintAllowance: {
+        count: 0,
+        limit: 1,
+      },
+      starterPackItems: [
+        {
+          title: "Booster Pack",
+          collectionName: "Chaos Surfers",
+          description: "Contains five random playable agents",
+          price: 0,
+          image:
+            "https://storage.googleapis.com/c7e-prod-static/media/chaos.png",
+          type: StarterItemType.NFT,
+        },
+      ],
+    },
+  },
+
+  decorators: [
+    (Story) => (
+      <WalletsProvider>
+        <Story />
+      </WalletsProvider>
+    ),
+  ],
+};
+
+export const FreeStarterpackLimitReached: Story = {
+  args: {
+    type: PurchaseType.STARTERPACK,
+    wallets: [
+      {
+        type: "phantom",
+        platform: "solana",
+        available: true,
+      },
+    ],
+    starterpackDetails: {
+      id: "1",
+      name: "Booster Pack",
+      priceUsd: 0,
+      mintAllowance: {
+        count: 1,
+        limit: 1,
+      },
+      starterPackItems: [
+        {
+          title: "Booster Pack",
+          collectionName: "Chaos Surfers",
+          description: "Contains five random playable agents",
+          price: 0,
+          image:
+            "https://storage.googleapis.com/c7e-prod-static/media/chaos.png",
+          type: StarterItemType.NFT,
+        },
+      ],
+    },
+  },
+
+  decorators: [
+    (Story) => (
+      <WalletsProvider>
+        <Story />
+      </WalletsProvider>
+    ),
+  ],
+};
+
 export const PurchaseStarterpack: Story = {
   args: {
     type: PurchaseType.STARTERPACK,

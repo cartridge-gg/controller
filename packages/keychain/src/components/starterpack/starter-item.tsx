@@ -30,9 +30,7 @@ export const StarterItem = React.forwardRef<
               <h3 className="text-sm font-medium text-foreground-100 truncate">
                 {type === StarterItemType.CREDIT && value
                   ? `${value} Credits`
-                  : price === 0
-                    ? "FREE"
-                    : title}
+                  : title}
               </h3>
               <CardDescription className="font-normal text-xs text-foreground-200 line-clamp-2">
                 {description}
