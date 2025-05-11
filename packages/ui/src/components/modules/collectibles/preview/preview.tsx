@@ -70,7 +70,7 @@ export const CollectiblePreview = ({
       <DynamicAssetRenderer
         src={uri}
         data-hover={hover}
-        className="pointer-events-none object-contain max-h-full max-w-full relative transition duration-150 ease-in-out data-[hover=true]:scale-[1.02]"
+        className="object-contain max-h-full max-w-full relative transition duration-150 ease-in-out data-[hover=true]:scale-[1.02]"
         draggable={false}
         onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
           e.currentTarget.src = PLACEHOLDER;
