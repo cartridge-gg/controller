@@ -2,7 +2,6 @@ import { Thumbnail } from "@/index";
 import { cn } from "@/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { PLACEHOLDER } from "@/assets";
-import DynamicAssetRenderer from "../../collectibles/asset-renderer/dynamicAssetRenderer";
 
 const thumbnailCollectibleVariants = cva("border-transparent", {
   variants: {
@@ -60,11 +59,11 @@ export const ThumbnailCollectible = ({
               }}
             />
           </div>
-          <DynamicAssetRenderer
-            className="object-contain max-h-full max-w-full z-10 pointer-events-none"
+          <img
+            className="object-contain max-h-full max-w-full z-10"
             draggable={false}
             src={image}
-            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+            onError={(e) => {
               e.currentTarget.src = PLACEHOLDER;
             }}
           />

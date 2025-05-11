@@ -1,8 +1,7 @@
 import { PLACEHOLDER } from "@/assets";
 import { cn } from "@/utils";
 import { cva, VariantProps } from "class-variance-authority";
-import React, { useMemo } from "react";
-import DynamicAssetRenderer from "../asset-renderer/dynamicAssetRenderer";
+import { useMemo } from "react";
 
 export interface CollectiblePreviewProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -55,9 +54,8 @@ export const CollectiblePreview = ({
           opacity: hover ? 1 : 0.75,
         }}
       >
-        <DynamicAssetRenderer
+        <img
           src={uri}
-          enableEmbedStylings={false}
           className={cn("object-cover absolute inset-0 w-full h-full")}
         />
         <div
@@ -67,12 +65,12 @@ export const CollectiblePreview = ({
           }}
         />
       </div>
-      <DynamicAssetRenderer
-        src={uri}
+      <img
         data-hover={hover}
-        className="pointer-events-none object-contain max-h-full max-w-full relative transition duration-150 ease-in-out data-[hover=true]:scale-[1.02]"
+        className="object-contain max-h-full max-w-full relative transition duration-150 ease-in-out data-[hover=true]:scale-[1.02]"
         draggable={false}
-        onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+        src={image}
+        onError={(e) => {
           e.currentTarget.src = PLACEHOLDER;
         }}
       />
