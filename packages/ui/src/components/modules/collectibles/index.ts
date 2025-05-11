@@ -10,4 +10,3 @@ export * from "./property";
 export * from "./tabs";
 export * from "./tab";
 export * from "./tag";
-export * from "./asset-renderer";

@@ -2,7 +2,6 @@ import { ErrorAlertIcon, SpinnerIcon } from "@/index";
 import { cn } from "@/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { PLACEHOLDER } from "@/assets";
-import DynamicAssetRenderer from "../../collectibles/asset-renderer/dynamicAssetRenderer";
 
 export const thumbnailVariants = cva(
   "relative flex items-center justify-center text-foreground-100 rounded-md data-[rounded=true]:rounded-full data-[error=true]:text-destructive-100",
@@ -106,14 +105,14 @@ export const Thumbnail = ({
             <div className={cn("w-4/5 h-4/5 fa-solid", icon)} />
           </div>
         ) : (
-          <DynamicAssetRenderer
+          <img
             src={icon}
             alt="icon"
             className={cn(
               "w-full h-full aspect-square",
               rounded ? "rounded-full" : "rounded-sm",
             )}
-            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+            onError={(e) => {
               e.currentTarget.src = PLACEHOLDER;
             }}
           />
