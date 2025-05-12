@@ -14,7 +14,7 @@ import {
   addAddressPadding,
 } from "starknet";
 import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
-import { ErrorCode, JsCall } from "@cartridge/account-wasm/controller";
+import { ErrorCode, JsCall } from "@cartridge/controller-wasm/controller";
 import { mutex } from "./sync";
 import Controller from "../controller";
 

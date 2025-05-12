@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
-    "@cartridge/account-wasm": "workspace:*",
+    "@cartridge/controller-wasm": "catalog:",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "catalog:",
     "@noble/hashes": "^1.7.1",

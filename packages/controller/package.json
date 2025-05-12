@@ -39,7 +39,7 @@
     "starknetkit": "^2.6.1"
   },
   "dependencies": {
-    "@cartridge/account-wasm": "workspace:*",
+    "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
     "ethers": "^6.13.5",
     "@starknet-io/types-js": "catalog:",

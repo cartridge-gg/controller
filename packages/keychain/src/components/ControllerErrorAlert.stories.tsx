@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ControllerErrorAlert as CtrlErrAlert } from "./ErrorAlert";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
+import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
   starknetTransactionExecutionErrorTestCases,
   starknetTransactionValidationErrorTestCases,

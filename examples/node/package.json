@@ -9,7 +9,7 @@
     "dev": "node --experimental-wasm-modules --import tsx src/session.ts"
   },
   "dependencies": {
-    "@cartridge/account-wasm": "workspace:*",
+    "@cartridge/controller-wasm": "catalog:",
     "@cartridge/controller": "workspace:*",
     "starknet": "catalog:"
   },

@@ -4,7 +4,11 @@ import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
-import { computeAccountAddress, Owner, Signer } from "@cartridge/account-wasm";
+import {
+  computeAccountAddress,
+  Owner,
+  Signer,
+} from "@cartridge/controller-wasm";
 import { AuthOption } from "@cartridge/controller";
 import {
   AccountQuery,

@@ -19,7 +19,6 @@
     "keychain": "pnpm --filter @cartridge/keychain",
     "controller": "pnpm --filter @cartridge/controller",
     "connector": "pnpm --filter @cartridge/connector",
-    "account-wasm": "pnpm --filter @cartridge/account-wasm",
     "book": "pnpm --filter @cartridge/documentation",
     "profil": "pnpm --filter @cartridge/profile",
     "example:next": "pnpm --filter @cartridge/controller-example-next",
@@ -45,5 +44,10 @@
     "overrides": {
       "@radix-ui/react-accordion": "1.2.1"
     }
-  }
+  },
+  "files": [
+    "*.js",
+    "*.wasm",
+    "*.d.ts"
+  ]
 }

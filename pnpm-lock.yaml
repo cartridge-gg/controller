@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@cartridge/controller-wasm':
+      specifier: 0.1.3
+      version: 0.1.3
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -250,12 +253,12 @@ importers:
 
   examples/node:
     dependencies:
-      '@cartridge/account-wasm':
-        specifier: workspace:*
-        version: link:../../packages/account-wasm
       '@cartridge/controller':
         specifier: workspace:*
         version: link:../../packages/controller
+      '@cartridge/controller-wasm':
+        specifier: 'catalog:'
+        version: 0.1.3
       starknet:
         specifier: 'catalog:'
         version: 6.24.1
@@ -337,12 +340,6 @@ importers:
         specifier: 'catalog:'
         version: 3.4.1(vite@6.3.4(@types/node@22.15.3)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
 
-  packages/account-wasm:
-    devDependencies:
-      wasm-pack:
-        specifier: ^0.13.0
-        version: 0.13.1
-
   packages/connector:
     dependencies:
       '@cartridge/controller':
@@ -367,9 +364,9 @@ importers:
 
   packages/controller:
     dependencies:
-      '@cartridge/account-wasm':
-        specifier: workspace:*
-        version: link:../account-wasm
+      '@cartridge/controller-wasm':
+        specifier: 'catalog:'
+        version: 0.1.3
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -486,12 +483,12 @@ importers:
       '@auth0/auth0-react':
         specifier: ^2.3.0
         version: 2.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@cartridge/account-wasm':
-        specifier: workspace:*
-        version: link:../account-wasm
       '@cartridge/controller':
         specifier: workspace:*
         version: link:../controller
+      '@cartridge/controller-wasm':
+        specifier: 'catalog:'
+        version: 0.1.3
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -1055,6 +1052,9 @@ packages:
 
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+
+  '@cartridge/controller-wasm@0.1.3':
+    resolution: {integrity: sha512-/cvtBWhvzrY2mh/EbghbVd0fPff7iP1LnlNboG2Urtgw3RDqzjwJbKU9XYDN21JLvAWmkpBJojdqyBmKIIiQ2g==}
 
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
@@ -4762,9 +4762,6 @@ packages:
     resolution: {integrity: sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==}
     engines: {node: '>=4'}
 
-  axios@0.26.1:
-    resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
-
   axios@1.9.0:
     resolution: {integrity: sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==}
 
@@ -4845,10 +4842,6 @@ packages:
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
-
-  binary-install@1.1.0:
-    resolution: {integrity: sha512-rkwNGW+3aQVSZoD0/o3mfPN6Yxh3Id0R/xzTVBVVpGNlVz8EGwusksxRlbk/A5iKTZt9zkMn3qIqmAt3vpfbzg==}
-    engines: {node: '>=10'}
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
@@ -6339,6 +6332,7 @@ packages:
 
   get-starknet-core@4.0.0:
     resolution: {integrity: sha512-6pLmidQZkC3wZsrHY99grQHoGpuuXqkbSP65F8ov1/JsEI8DDLkhsAuLCKFzNOK56cJp+f1bWWfTJ57e9r5eqQ==}
+    deprecated: Package no longer supported. Please use @starknet-io/get-starknet-core
 
   get-stdin@5.0.1:
     resolution: {integrity: sha512-jZV7n6jGE3Gt7fgSTJoz91Ak5MuTLwMwkoYdjxuJ/AmjIsE1UC03y/IWkZCQGEvVNS9qoRNwy5BCqxImv0FVeA==}
@@ -9619,10 +9613,6 @@ packages:
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
 
-  wasm-pack@0.13.1:
-    resolution: {integrity: sha512-P9exD4YkjpDbw68xUhF3MDm/CC/3eTmmthyG5bHJ56kalxOTewOunxTke4SyF8MTXV6jUtNjXggPgrGmMtczGg==}
-    hasBin: true
-
   web-vitals@0.2.4:
     resolution: {integrity: sha512-6BjspCO9VriYy12z356nL6JBS0GYeEcA457YyRzD+dD6XYCQ75NKhcOHUMHentOE7OcVCIXXDvOm0jKFfQG2Gg==}
 
@@ -10156,6 +10146,8 @@ snapshots:
       - zod
 
   '@bcoe/v8-coverage@0.2.3': {}
+
+  '@cartridge/controller-wasm@0.1.3': {}
 
   '@cartridge/penpal@6.2.4': {}
 
@@ -14923,12 +14915,6 @@ snapshots:
 
   axe-core@4.10.3: {}
 
-  axios@0.26.1:
-    dependencies:
-      follow-redirects: 1.15.9(debug@4.4.0)
-    transitivePeerDependencies:
-      - debug
-
   axios@1.9.0(debug@4.4.0):
     dependencies:
       follow-redirects: 1.15.9(debug@4.4.0)
@@ -15033,14 +15019,6 @@ snapshots:
   bignumber.js@9.3.0: {}
 
   binary-extensions@2.3.0: {}
-
-  binary-install@1.1.0:
-    dependencies:
-      axios: 0.26.1
-      rimraf: 3.0.2
-      tar: 6.2.1
-    transitivePeerDependencies:
-      - debug
 
   bindings@1.5.0:
     dependencies:
@@ -20822,12 +20800,6 @@ snapshots:
   walker@1.0.8:
     dependencies:
       makeerror: 1.0.12
-
-  wasm-pack@0.13.1:
-    dependencies:
-      binary-install: 1.1.0
-    transitivePeerDependencies:
-      - debug
 
   web-vitals@0.2.4: {}
 
