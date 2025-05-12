@@ -42,7 +42,6 @@
     "@bal7hazar/arcade-sdk": "0.0.86",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "catalog:",
-    "@cartridge/ui": "workspace:*",
     "compare-versions": "^6.1.1",
     "lodash": "catalog:",
     "react": "catalog:",
