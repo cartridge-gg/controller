@@ -33,7 +33,6 @@ import { PurchaseType } from "@/hooks/payments/crypto";
 import { Receiving } from "../starterpack/receiving";
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
-import { constants } from "starknet";
 
 export enum PurchaseState {
   SELECTION = 0,
@@ -348,22 +347,16 @@ const PurchaseActions = ({
     wallets: detectedWallets,
   } = useWallets();
 
-  const { controller } = useConnection();
-
   const { isClaiming, isLoading: isStarterpackLoading } = useStarterPack(
     starterpackDetails?.id,
   );
 
   // Only show phantom for now as Solana is the only supported network
   const availableWallets = useMemo(() => {
-    if (controller?.chainId() === constants.StarknetChainId.SN_MAIN) {
-      return []; // temp disable crypto payments
-    }
-
     const list = wallets ?? detectedWallets;
     const phantom = list.find((w) => w.type === "phantom");
     return phantom ? [phantom] : [];
-  }, [wallets, detectedWallets, controller]);
+  }, [wallets, detectedWallets]);
 
   const isOutOfStock = () => {
     if (starterpackDetails?.supply !== undefined) {
@@ -406,14 +399,14 @@ const PurchaseActions = ({
             className="flex-1"
             isLoading={isStripeLoading}
             onClick={onCreditCard}
-            disabled={true}
+            disabled={isLoadingWallets}
           >
             <CreditCardIcon
               size="sm"
               variant="solid"
               className="text-background-100 flex-shrink-0"
             />
-            <span>Temporarily disabled</span>
+            <span>Credit Card</span>
           </Button>
           <div className="flex flex-row gap-4">
             {availableWallets.map((wallet: ExternalWallet) => {
