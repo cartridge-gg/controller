@@ -33,6 +33,7 @@ import { PurchaseType } from "@/hooks/payments/crypto";
 import { Receiving } from "../starterpack/receiving";
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
+import { constants } from "starknet";
 
 export enum PurchaseState {
   SELECTION = 0,
@@ -347,16 +348,22 @@ const PurchaseActions = ({
     wallets: detectedWallets,
   } = useWallets();
 
+  const { controller } = useConnection();
+
   const { isClaiming, isLoading: isStarterpackLoading } = useStarterPack(
     starterpackDetails?.id,
   );
 
   // Only show phantom for now as Solana is the only supported network
   const availableWallets = useMemo(() => {
+    if (controller?.chainId() === constants.StarknetChainId.SN_MAIN) {
+      return []; // temp disable crypto payments
+    }
+
     const list = wallets ?? detectedWallets;
     const phantom = list.find((w) => w.type === "phantom");
     return phantom ? [phantom] : [];
-  }, [wallets, detectedWallets]);
+  }, [wallets, detectedWallets, controller]);
 
   const isOutOfStock = () => {
     if (starterpackDetails?.supply !== undefined) {
