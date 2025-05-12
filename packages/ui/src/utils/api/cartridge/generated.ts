@@ -673,11 +673,6 @@ export type BalanceEdge = {
   node: Balance;
 };
 
-export type ClaimFreeStarterpackInput = {
-  accountId: Scalars["ID"];
-  starterpackId: Scalars["ID"];
-};
-
 export type Collectible = {
   __typename?: "Collectible";
   assets: Array<AssetEdge>;
@@ -881,22 +876,6 @@ export type CreateServiceInput = {
   torii?: InputMaybe<ToriiCreateInput>;
   type: DeploymentService;
   version?: InputMaybe<Scalars["String"]>;
-};
-
-export type CreateStarterpackContractInput = {
-  calldata: Scalars["JSON"];
-  contractAddress: Scalars["String"];
-  description?: InputMaybe<Scalars["String"]>;
-  entryPoint: Scalars["String"];
-  iconUrl?: InputMaybe<Scalars["String"]>;
-  name: Scalars["String"];
-};
-
-export type CreateStarterpackInput = {
-  contracts: Array<CreateStarterpackContractInput>;
-  cost: Scalars["Int"];
-  description?: InputMaybe<Scalars["String"]>;
-  name: Scalars["String"];
 };
 
 export type CreateStripePaymentIntentInput = {
@@ -1724,6 +1703,12 @@ export type MetricsResult = {
   items: Array<MetricsItem>;
 };
 
+export type MintAllowance = {
+  __typename?: "MintAllowance";
+  count: Scalars["Int"];
+  limit: Scalars["Int"];
+};
+
 export type Mutation = {
   __typename?: "Mutation";
   addPaymasterPolicies?: Maybe<Array<PaymasterPolicy>>;
@@ -1735,7 +1720,6 @@ export type Mutation = {
   createDeployment: Deployment;
   createPaymaster: Paymaster;
   createSession: Scalars["String"];
-  createStarterpack: Starterpack;
   createStripePaymentIntent: StripePaymentIntent;
   createTeam: Team;
   decreaseBudget: Paymaster;
@@ -1775,7 +1759,7 @@ export type MutationBeginRegistrationArgs = {
 };
 
 export type MutationClaimFreeStarterpackArgs = {
-  input: ClaimFreeStarterpackInput;
+  input: StarterpackInput;
 };
 
 export type MutationCreateCryptoPaymentArgs = {
@@ -1802,10 +1786,6 @@ export type MutationCreateSessionArgs = {
   chainId: Scalars["String"];
   session: SessionInput;
   username: Scalars["String"];
-};
-
-export type MutationCreateStarterpackArgs = {
-  input: CreateStarterpackInput;
 };
 
 export type MutationCreateStripePaymentIntentArgs = {
@@ -2374,7 +2354,7 @@ export type Query = {
   pricePeriodByAddresses: Array<Price>;
   session?: Maybe<Session>;
   sessions?: Maybe<SessionConnection>;
-  starterpack?: Maybe<Starterpack>;
+  starterpack?: Maybe<StarterpackDetails>;
   streaks: StreakResult;
   stripePayment: StripePayment;
   team?: Maybe<Team>;
@@ -2548,7 +2528,7 @@ export type QuerySessionsArgs = {
 };
 
 export type QueryStarterpackArgs = {
-  id: Scalars["ID"];
+  input: StarterpackInput;
 };
 
 export type QueryStreaksArgs = {
@@ -2975,7 +2955,6 @@ export type StarknetCredentials = {
 export type Starterpack = Node & {
   __typename?: "Starterpack";
   active: Scalars["Boolean"];
-  bonusCredits: Credits;
   chainID: Scalars["String"];
   createdAt: Scalars["Time"];
   description?: Maybe<Scalars["String"]>;
@@ -2987,7 +2966,6 @@ export type Starterpack = Node & {
   name: Scalars["String"];
   paymaster?: Maybe<Paymaster>;
   paymasterID?: Maybe<Scalars["ID"]>;
-  price: Credits;
   starterpackContract: StarterpackContractConnection;
   starterpackMint: StarterpackMintConnection;
   updatedAt: Scalars["Time"];
@@ -3222,6 +3200,14 @@ export type StarterpackContractWhereInput = {
   updatedAtNotIn?: InputMaybe<Array<Scalars["Time"]>>;
 };
 
+export type StarterpackDetails = {
+  __typename?: "StarterpackDetails";
+  bonusCredits: Credits;
+  mintAllowance?: Maybe<MintAllowance>;
+  price: Credits;
+  starterpack: Starterpack;
+};
+
 /** An edge in a connection. */
 export type StarterpackEdge = {
   __typename?: "StarterpackEdge";
@@ -3229,6 +3215,11 @@ export type StarterpackEdge = {
   cursor: Scalars["Cursor"];
   /** The item at the end of the edge. */
   node?: Maybe<Starterpack>;
+};
+
+export type StarterpackInput = {
+  accountId: Scalars["ID"];
+  starterpackId: Scalars["ID"];
 };
 
 export type StarterpackMint = Node & {
@@ -4738,36 +4729,53 @@ export type SignerQuery = {
   } | null;
 };
 
+export type ClaimFreeStarterpackMutationVariables = Exact<{
+  input: StarterpackInput;
+}>;
+
+export type ClaimFreeStarterpackMutation = {
+  __typename?: "Mutation";
+  claimFreeStarterpack: string;
+};
+
 export type StarterPackQueryVariables = Exact<{
-  id: Scalars["ID"];
+  input: StarterpackInput;
 }>;
 
 export type StarterPackQuery = {
   __typename?: "Query";
   starterpack?: {
-    __typename?: "Starterpack";
-    name: string;
-    description?: string | null;
-    active: boolean;
-    issuance: number;
-    maxIssuance?: number | null;
+    __typename?: "StarterpackDetails";
+    starterpack: {
+      __typename?: "Starterpack";
+      name: string;
+      description?: string | null;
+      active: boolean;
+      issuance: number;
+      maxIssuance?: number | null;
+      starterpackContract: {
+        __typename?: "StarterpackContractConnection";
+        edges?: Array<{
+          __typename?: "StarterpackContractEdge";
+          node?: {
+            __typename?: "StarterpackContract";
+            name: string;
+            description?: string | null;
+            iconURL?: string | null;
+            contractAddress: string;
+            supplyEntryPoint?: string | null;
+            supplyCalldata?: Array<string> | null;
+          } | null;
+        } | null> | null;
+      };
+    };
     price: { __typename?: "Credits"; amount: string; decimals: number };
     bonusCredits: { __typename?: "Credits"; amount: string; decimals: number };
-    starterpackContract: {
-      __typename?: "StarterpackContractConnection";
-      edges?: Array<{
-        __typename?: "StarterpackContractEdge";
-        node?: {
-          __typename?: "StarterpackContract";
-          name: string;
-          description?: string | null;
-          iconURL?: string | null;
-          contractAddress: string;
-          supplyEntryPoint?: string | null;
-          supplyCalldata?: Array<string> | null;
-        } | null;
-      } | null> | null;
-    };
+    mintAllowance?: {
+      __typename?: "MintAllowance";
+      count: number;
+      limit: number;
+    } | null;
   } | null;
 };
 
@@ -5883,12 +5891,57 @@ export const useSignerQuery = <TData = SignerQuery, TError = unknown>(
     ),
     options,
   );
+export const ClaimFreeStarterpackDocument = `
+    mutation ClaimFreeStarterpack($input: StarterpackInput!) {
+  claimFreeStarterpack(input: $input)
+}
+    `;
+export const useClaimFreeStarterpackMutation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: UseMutationOptions<
+    ClaimFreeStarterpackMutation,
+    TError,
+    ClaimFreeStarterpackMutationVariables,
+    TContext
+  >,
+) =>
+  useMutation<
+    ClaimFreeStarterpackMutation,
+    TError,
+    ClaimFreeStarterpackMutationVariables,
+    TContext
+  >(
+    ["ClaimFreeStarterpack"],
+    useFetchData<
+      ClaimFreeStarterpackMutation,
+      ClaimFreeStarterpackMutationVariables
+    >(ClaimFreeStarterpackDocument),
+    options,
+  );
 export const StarterPackDocument = `
-    query StarterPack($id: ID!) {
-  starterpack(id: $id) {
-    name
-    description
-    active
+    query StarterPack($input: StarterpackInput!) {
+  starterpack(input: $input) {
+    starterpack {
+      name
+      description
+      active
+      issuance
+      maxIssuance
+      starterpackContract {
+        edges {
+          node {
+            name
+            description
+            iconURL
+            contractAddress
+            supplyEntryPoint
+            supplyCalldata
+          }
+        }
+      }
+    }
     price {
       amount
       decimals
@@ -5897,19 +5950,9 @@ export const StarterPackDocument = `
       amount
       decimals
     }
-    issuance
-    maxIssuance
-    starterpackContract {
-      edges {
-        node {
-          name
-          description
-          iconURL
-          contractAddress
-          supplyEntryPoint
-          supplyCalldata
-        }
-      }
+    mintAllowance {
+      count
+      limit
     }
   }
 }

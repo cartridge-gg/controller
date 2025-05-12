@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import { StarterPackDetails } from "../starterpack";
 import { useConnection } from "../connection";
 import { constants } from "starknet";
 import { loadStripe } from "@stripe/stripe-js";
@@ -51,11 +50,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   );
 
   const createPaymentIntent = useCallback(
-    async (
-      wholeCredits: number,
-      username: string,
-      starterpack?: StarterPackDetails,
-    ) => {
+    async (wholeCredits: number, username: string, starterpackId?: string) => {
       if (!controller) {
         throw new Error("Controller not connected");
       }
@@ -72,8 +67,8 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
                 amount: wholeCredits,
                 decimals: 0,
               },
-              starterpackId: starterpack?.id,
-              purchaseType: starterpack
+              starterpackId,
+              purchaseType: starterpackId
                 ? PurchaseType.STARTERPACK
                 : PurchaseType.CREDITS,
               isMainnet: isLiveMode,
