@@ -22,7 +22,7 @@ export function useThemeEffect({
 
       // Set cover
       const coverValue =
-        typeof theme.cover === "string" ? theme.cover : theme.cover[colorMode];
+        typeof theme.cover === "string" ? theme.cover : theme.cover["dark"];
       const coverUrl = coverValue.startsWith("http")
         ? `url("${coverValue}")`
         : `url("${assetUrl}${coverValue}")`;
