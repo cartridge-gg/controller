@@ -406,14 +406,14 @@ const PurchaseActions = ({
             className="flex-1"
             isLoading={isStripeLoading}
             onClick={onCreditCard}
-            disabled={isLoadingWallets}
+            disabled={true}
           >
             <CreditCardIcon
               size="sm"
               variant="solid"
               className="text-background-100 flex-shrink-0"
             />
-            <span>Credit Card</span>
+            <span>Temporarily disabled</span>
           </Button>
           <div className="flex flex-row gap-4">
             {availableWallets.map((wallet: ExternalWallet) => {
