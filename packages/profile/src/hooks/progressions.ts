@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Project,
   useProgressionsQuery,
@@ -32,13 +32,13 @@ export function useProgressions({
     [namespace, name, project],
   );
 
-  const { status } = useProgressionsQuery(
+  const { status, refetch } = useProgressionsQuery(
     {
       projects,
     },
     {
       enabled: !!namespace && !!project,
-      queryKey: ["progressions", namespace, name, project, isVisible],
+      queryKey: ["progressions", namespace, name, project],
       refetchOnWindowFocus: false,
       onSuccess: ({ playerAchievements }: { playerAchievements: Response }) => {
         const items = playerAchievements.items;
@@ -53,6 +53,12 @@ export function useProgressions({
       },
     },
   );
+
+  useEffect(() => {
+    if (isVisible) {
+      refetch();
+    }
+  }, [isVisible, refetch]);
 
   return { progressions, status };
 }
