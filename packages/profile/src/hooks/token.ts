@@ -174,7 +174,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     address: accountAddress ?? address,
     contractAddress: options,
     provider,
-    interval: isVisible ? 3000 : undefined,
+    interval: isVisible ? 30000 : undefined,
   });
 
   // Get tokens list from rpc that are not in torii
@@ -184,7 +184,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
         .filter(
           (token) =>
             !toriiData.tokens.find(
-              (t) => t.metadata.address === token.meta.address,
+              (t) => BigInt(t.metadata.address) === BigInt(token.meta.address),
             ),
         )
         .map((token) => ({
