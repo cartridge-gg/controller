@@ -61,6 +61,8 @@ export enum CheckoutState {
   TRANSACTION_SUBMITTED = 2,
 }
 
+const CARTRIDGE_FEE = 0.025;
+
 export function CryptoCheckout({
   selectedWallet,
   walletAddress,
@@ -173,9 +175,10 @@ export function CryptoCheckout({
             paymentUnit="usdc"
             walletType={selectedWallet.type}
             price={{
-              processingFeeInCents: 0,
+              // TODO: hardcoding this for now, will come from backend
+              processingFeeInCents: costUSDC * 100 * CARTRIDGE_FEE,
               baseCostInCents: costUSDC * 100,
-              totalInCents: costUSDC * 100,
+              totalInCents: costUSDC * 100 * (1 + CARTRIDGE_FEE),
             }}
           />
         )}
