@@ -41,7 +41,6 @@ export function useProgressions({
       queryKey: ["progressions", namespace, name, project],
       refetchOnWindowFocus: false,
       onSuccess: ({ playerAchievements }: { playerAchievements: Response }) => {
-        console.log("call");
         const items = playerAchievements.items;
         if (items.length === 0) return;
         const progressions = items[0].achievements
