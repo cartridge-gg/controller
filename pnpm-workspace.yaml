@@ -6,6 +6,7 @@ packages:
 
 catalog:
   "@cartridge/penpal": "^6.2.4"
+  "@cartridge/ui": "github:cartridge-gg/ui#ed0a35c"
   "@eslint/js": "^9.18.0"
   "@starknet-io/types-js": "^0.7.7"
   "@starknet-react/chains": "^3.1.3"

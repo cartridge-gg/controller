@@ -5,7 +5,7 @@ import { Parameters } from "@storybook/react";
 import { ConnectionContextValue } from "../src/components/provider/connection";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 import { defaultTheme } from "@cartridge/presets";
-import { useThemeEffect } from "@cartridge/ui-next";
+import { useThemeEffect } from "@cartridge/ui";
 import {
   UpgradeContext,
   UpgradeProviderProps,
