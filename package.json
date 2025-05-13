@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@cartridge/presets": "github:cartridge-gg/presets#4c2c210",
-    "@cartridge/ui": "github:cartridge-gg/ui#ed0a35c"
+    "@cartridge/ui": "github:cartridge-gg/ui#b61546f"
   },
   "devDependencies": {
     "husky": "^9.1.7",
