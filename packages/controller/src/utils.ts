@@ -10,7 +10,7 @@ import {
   typedData,
   TypedDataRevision,
 } from "starknet";
-import wasm from "@cartridge/account-wasm/controller";
+import { Policy } from "@cartridge/controller-wasm/controller";
 import { Policies, SessionPolicies } from "@cartridge/presets";
 import { ChainId } from "@starknet-io/types-js";
 import { ParsedSessionPolicies } from "./policies";
@@ -92,7 +92,7 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
     : policies;
 }
 
-export function toWasmPolicies(policies: ParsedSessionPolicies): wasm.Policy[] {
+export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
   return [
     ...Object.entries(policies.contracts ?? {}).flatMap(
       ([target, { methods }]) =>

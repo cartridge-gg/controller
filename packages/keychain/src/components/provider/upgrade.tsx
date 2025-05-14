@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { JsCall } from "@cartridge/account-wasm";
+import { JsCall } from "@cartridge/controller-wasm";
 import { addAddressPadding, Call } from "starknet";
 import { ControllerError } from "@/utils/connection";
 import Controller from "@/utils/controller";

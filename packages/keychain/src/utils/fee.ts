@@ -1,5 +1,5 @@
 import { EstimateFee } from "starknet";
-import { JsFeeEstimate } from "@cartridge/account-wasm/controller";
+import { JsFeeEstimate } from "@cartridge/controller-wasm/controller";
 
 export function toJsFeeEstimate(fee?: EstimateFee): JsFeeEstimate | undefined {
   // If the overall_fee is 0n then it is a free txn

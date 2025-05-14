@@ -83,7 +83,7 @@ export default defineConfig(({ mode }) => ({
     globals: true,
     server: {
       deps: {
-        inline: ["@cartridge/ui"],
+        inline: ["@cartridge/ui", "@cartridge/controller-wasm"],
       },
     },
   },

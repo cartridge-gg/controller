@@ -5,7 +5,6 @@ on: push
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   CARGO_TERM_COLOR: always
-  RUST_VERSION: 1.85.0
 
 jobs:
   keychain:
@@ -15,7 +14,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Get pnpm store directory
@@ -34,11 +32,8 @@ jobs:
         with:
           path: |
             .turbo
-            packages/account-wasm/pkg-controller
-            packages/account-wasm/pkg-session
           key:
-            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha
-            }}
+            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
@@ -71,8 +66,7 @@ jobs:
       - name: Deploy to Vercel (Production)
         if: github.ref == 'refs/heads/main'
         run:
-          pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN
-          }}
+          pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Set outputs
         id: vars
         run: |
@@ -92,7 +86,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Get pnpm store directory
@@ -111,11 +104,8 @@ jobs:
         with:
           path: |
             .turbo
-            packages/account-wasm/pkg-controller
-            packages/account-wasm/pkg-session
           key:
-            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha
-            }}
+            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
@@ -148,8 +138,7 @@ jobs:
       - name: Deploy to Vercel (Production)
         if: github.ref == 'refs/heads/main'
         run:
-          pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN
-          }}
+          pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Set outputs
         id: vars
         run: |
@@ -169,7 +158,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Get pnpm store directory
@@ -188,11 +176,8 @@ jobs:
         with:
           path: |
             .turbo
-            packages/account-wasm/pkg-controller
-            packages/account-wasm/pkg-session
           key:
-            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha
-            }}
+            ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-cache-${{ github.ref_name }}-
             ${{ runner.os }}-turbo-cache-
@@ -230,5 +215,4 @@ jobs:
       - name: Deploy to Vercel (Production)
         if: github.ref == 'refs/heads/main'
         run:
-          pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN
-          }}
+          pnpm vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

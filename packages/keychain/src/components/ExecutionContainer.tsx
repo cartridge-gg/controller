@@ -2,7 +2,7 @@ import { ControllerErrorAlert, ErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import type { ControllerError } from "@/utils/connection";
 import { parseControllerError } from "@/utils/connection/execute";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
+import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
   Button,
   type HeaderProps,
