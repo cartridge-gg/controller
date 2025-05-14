@@ -1,7 +1,10 @@
 import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { doLogin, doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
-import { AccountQuery } from "@cartridge/utils/api/cartridge";
+import {
+  ControllerQuery,
+  WebauthnCredential,
+} from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
 import { constants } from "starknet";
 import { LoginMode } from "../../types";
@@ -45,8 +48,15 @@ export function useWebauthnAuthentication() {
         finalUsername,
         controllerNode.constructorCalldata[0],
         controllerNode.address,
-        credentialId,
-        publicKey,
+        {
+          signer: {
+            webauthn: {
+              rpId: import.meta.env.VITE_RP_ID!,
+              credentialId,
+              publicKey,
+            },
+          },
+        },
       );
 
       window.controller = controller;
@@ -57,47 +67,43 @@ export function useWebauthnAuthentication() {
 
   const login = useCallback(
     async (
-      account: AccountQuery["account"],
+      controller: ControllerQuery["controller"],
+      credential: WebauthnCredential,
       loginMode: LoginMode,
       isSlot: boolean,
     ) => {
-      if (!account) throw new Error("No account found");
+      if (!controller) throw new Error("No controller found");
 
-      const { credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
-
-      const controllerNode = controllers?.edges?.[0]?.node;
-
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
-
-      if (!controllerNode || !publicKey) {
-        return;
-      }
-
-      const controller = await createController(
+      const controllerObject = await createController(
         origin!,
         chainId!,
         rpcUrl!,
-        account.username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
-        credentialId,
-        publicKey,
+        controller.accountID,
+        controller.constructorCalldata[0],
+        controller.address,
+        {
+          signer: {
+            webauthn: {
+              rpId: import.meta.env.VITE_RP_ID!,
+              credentialId: credential.id,
+              publicKey: credential.publicKey,
+            },
+          },
+        },
       );
 
       if (loginMode === LoginMode.Webauthn) {
         await doLogin({
-          name: account.username,
-          credentialId,
+          name: controller.accountID,
+          credentialId: credential.id,
           finalize: !!isSlot,
         });
       } else {
-        await controller.login(now() + DEFAULT_SESSION_DURATION);
+        await controllerObject.login(now() + DEFAULT_SESSION_DURATION);
       }
 
-      window.controller = controller;
-      setController(controller);
+      window.controller = controllerObject;
+      setController(controllerObject);
     },
     [chainId, rpcUrl, origin],
   );

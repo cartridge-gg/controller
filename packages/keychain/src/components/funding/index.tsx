@@ -8,7 +8,7 @@ import {
   CoinsIcon,
   LayoutHeader,
   ControllerIcon,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { Deposit } from "./Deposit";
 import { Purchase } from "../purchase";
 import { Balance, BalanceType } from "../purchase/Balance";

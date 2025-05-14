@@ -5,7 +5,6 @@ import { AmountSelection } from "./AmountSelection";
 const meta = {
   component: AmountSelection,
   args: {
-    creditsAmount: 5000,
     enableCustom: true,
   },
 } satisfies Meta<typeof AmountSelection>;

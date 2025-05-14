@@ -3,23 +3,25 @@ import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
+import { AuthOption } from "@cartridge/controller";
 import {
-  Button,
   CreateAccount,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-} from "@cartridge/ui-next";
+  Sheet,
+} from "@cartridge/ui";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AuthenticationMethod, LoginMode } from "../types";
+import { AuthButton } from "../buttons/auth-button";
+import { ChangeWallet } from "../buttons/change-wallet";
+import { getControllerSignerProvider, LoginMode } from "../types";
 import { ChooseSignupMethodForm } from "./ChooseSignupMethodForm";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
-import { useFeature } from "@/hooks/features";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -33,17 +35,21 @@ interface CreateControllerViewProps {
   onUsernameChange: (value: string) => void;
   onUsernameFocus: () => void;
   onUsernameClear: () => void;
-  onSubmit: (authenticationMode?: AuthenticationMethod) => void;
+  onSubmit: (authenticationMode?: AuthOption) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   isInAppBrowser?: boolean;
   isSlot?: boolean;
-  authenticationStep: AuthenticationStep | undefined;
-  setAuthenticationStep: (value: AuthenticationStep | undefined) => void;
+  authenticationStep: AuthenticationStep;
+  setAuthenticationStep: (value: AuthenticationStep) => void;
+  waitingForConfirmation: boolean;
+  changeWallet: boolean;
+  setChangeWallet: (value: boolean) => void;
+  signupOptions: AuthOption[];
 }
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
-  "authenticationStep" | "setAuthenticationStep"
+  "authenticationStep" | "setAuthenticationStep" | "signupOptions"
 >;
 
 function CreateControllerForm({
@@ -59,9 +65,12 @@ function CreateControllerForm({
   onUsernameClear,
   onKeyDown,
   onSubmit,
+  waitingForConfirmation,
+  changeWallet,
+  setChangeWallet,
 }: CreateControllerFormProps) {
   return (
-    <>
+    <LayoutContainer>
       <LayoutHeader
         variant="expanded"
         title={
@@ -79,10 +88,10 @@ function CreateControllerForm({
         style={{ scrollbarWidth: "none" }}
         onSubmit={(e) => {
           e.preventDefault();
-          onSubmit();
+          onSubmit(getControllerSignerProvider(validation.signer));
         }}
       >
-        <LayoutContent className="gap-6">
+        <LayoutContent className="gap-6 overflow-y-hidden">
           <CreateAccount
             usernameField={usernameField}
             validation={validation}
@@ -102,30 +111,37 @@ function CreateControllerForm({
               title="Browser not supported"
               description="Please open this page in your device's native browser (Safari/Chrome) to continue."
               variant="error"
-              isExpanded
+              isExpanded={false}
             />
           )}
 
           {!theme.verified && (
             <ErrorAlert
               title="Please proceed with caution"
+              isExpanded={false}
               description="Application domain does not match the configured domain."
               variant="error"
-              isExpanded
             />
           )}
 
-          <Button
+          <ChangeWallet
+            validation={validation}
+            changeWallet={changeWallet}
+            setChangeWallet={setChangeWallet}
+          />
+
+          <AuthButton
             type="submit"
             isLoading={isLoading}
             disabled={validation.status !== "valid"}
             data-testid="submit-button"
-          >
-            {validation.exists || !usernameField.value ? "log in" : "sign up"}
-          </Button>
+            validation={validation}
+            waitingForConfirmation={waitingForConfirmation}
+            username={usernameField.value}
+          />
         </LayoutFooter>
       </form>
-    </>
+    </LayoutContainer>
   );
 }
 export function CreateControllerView({
@@ -143,34 +159,46 @@ export function CreateControllerView({
   onKeyDown,
   authenticationStep,
   setAuthenticationStep,
+  waitingForConfirmation,
+  changeWallet,
+  setChangeWallet,
+  signupOptions,
 }: CreateControllerViewProps) {
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setAuthenticationStep(AuthenticationStep.FillForm);
+    }
+  };
+
   return (
-    <LayoutContainer>
-      {authenticationStep === AuthenticationStep.FillForm && (
-        <CreateControllerForm
-          theme={theme}
-          usernameField={usernameField}
-          validation={validation}
-          isLoading={isLoading}
-          error={error}
-          isInAppBrowser={isInAppBrowser}
-          isSlot={isSlot}
-          onUsernameChange={onUsernameChange}
-          onUsernameFocus={onUsernameFocus}
-          onUsernameClear={onUsernameClear}
-          onSubmit={onSubmit}
-          onKeyDown={onKeyDown}
-        />
-      )}
-      {authenticationStep === AuthenticationStep.ChooseSignupMethod && (
-        <ChooseSignupMethodForm
-          isSlot={isSlot}
-          isLoading={isLoading}
-          onSubmit={onSubmit}
-          setAuthenticationStep={setAuthenticationStep}
-        />
-      )}
-    </LayoutContainer>
+    <Sheet
+      open={authenticationStep === AuthenticationStep.ChooseSignupMethod}
+      onOpenChange={handleOpenChange}
+    >
+      <CreateControllerForm
+        theme={theme}
+        usernameField={usernameField}
+        validation={validation}
+        isLoading={isLoading}
+        error={error}
+        isInAppBrowser={isInAppBrowser}
+        isSlot={isSlot}
+        onUsernameChange={onUsernameChange}
+        onUsernameFocus={onUsernameFocus}
+        onUsernameClear={onUsernameClear}
+        onSubmit={onSubmit}
+        onKeyDown={onKeyDown}
+        waitingForConfirmation={waitingForConfirmation}
+        changeWallet={changeWallet}
+        setChangeWallet={setChangeWallet}
+      />
+      <ChooseSignupMethodForm
+        isSlot={isSlot}
+        isLoading={isLoading}
+        onSubmit={onSubmit}
+        signupOptions={signupOptions}
+      />
+    </Sheet>
   );
 }
 
@@ -201,8 +229,7 @@ export function CreateController({
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
-
-  const isNewSignup = useFeature("new-signup");
+  const newLoginFeatureEnabled = true;
 
   const [usernameField, setUsernameField] = useState({
     value: "",
@@ -225,13 +252,18 @@ export function CreateController({
     handleSubmit,
     authenticationStep,
     setAuthenticationStep,
+    overlay,
+    waitingForConfirmation,
+    changeWallet,
+    setChangeWallet,
+    signupOptions,
   } = useCreateController({
     isSlot,
     loginMode,
   });
 
   const handleFormSubmit = useCallback(
-    (authenticationMode?: AuthenticationMethod) => {
+    (authenticationMode?: AuthOption) => {
       if (!usernameField.value) {
         return;
       }
@@ -244,12 +276,23 @@ export function CreateController({
       if (validation.status === "valid") {
         const accountExists = !!validation.exists;
 
-        if (authenticationMode === undefined && !accountExists && isNewSignup) {
+        if (
+          authenticationMode === undefined &&
+          !accountExists &&
+          newLoginFeatureEnabled &&
+          signupOptions.length > 1
+        ) {
           setAuthenticationStep(AuthenticationStep.ChooseSignupMethod);
           return;
         }
 
-        handleSubmit(usernameField.value, accountExists, authenticationMode);
+        handleSubmit(
+          usernameField.value,
+          accountExists,
+          signupOptions.length === 1 && !accountExists
+            ? signupOptions[0]
+            : authenticationMode,
+        );
       }
     },
     [
@@ -258,6 +301,8 @@ export function CreateController({
       validation.exists,
       validation.status,
       setAuthenticationStep,
+      newLoginFeatureEnabled,
+      signupOptions,
     ],
   );
 
@@ -307,26 +352,33 @@ export function CreateController({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleFormSubmit();
+      handleFormSubmit(getControllerSignerProvider(validation.signer));
     }
   };
 
   return (
-    <CreateControllerView
-      theme={theme}
-      usernameField={usernameField}
-      validation={debouncedValidation}
-      isLoading={isLoading}
-      error={error}
-      isInAppBrowser={isInApp}
-      isSlot={isSlot}
-      onUsernameChange={handleUsernameChange}
-      onUsernameFocus={handleUsernameFocus}
-      onUsernameClear={handleUsernameClear}
-      onSubmit={handleFormSubmit}
-      onKeyDown={handleKeyDown}
-      authenticationStep={authenticationStep}
-      setAuthenticationStep={setAuthenticationStep}
-    />
+    <>
+      <CreateControllerView
+        theme={theme}
+        usernameField={usernameField}
+        validation={debouncedValidation}
+        isLoading={isLoading}
+        error={error}
+        isInAppBrowser={isInApp}
+        isSlot={isSlot}
+        onUsernameChange={handleUsernameChange}
+        onUsernameFocus={handleUsernameFocus}
+        onUsernameClear={handleUsernameClear}
+        onSubmit={handleFormSubmit}
+        onKeyDown={handleKeyDown}
+        authenticationStep={authenticationStep}
+        setAuthenticationStep={setAuthenticationStep}
+        waitingForConfirmation={waitingForConfirmation}
+        changeWallet={changeWallet}
+        setChangeWallet={setChangeWallet}
+        signupOptions={signupOptions}
+      />
+      {overlay}
+    </>
   );
 }

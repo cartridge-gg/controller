@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import { StarterPackDetails } from "../starterpack";
 import { useConnection } from "../connection";
 import { constants } from "starknet";
 import { loadStripe } from "@stripe/stripe-js";
@@ -9,7 +8,7 @@ import {
   CreateStripePaymentIntentMutation,
   StripePaymentDocument,
   StripePaymentQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { PurchaseType } from "./crypto";
 
 const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
@@ -17,36 +16,41 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const getStripeKey = () => {
+  const isLiveMode = useMemo(() => {
     if (import.meta.env.DEV) {
       // Always use test mode in local dev
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE;
+      return false;
     }
+
     if (isSlot) {
       // Slot is live now and should always use live mode
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_LIVE_MODE;
+      return true;
     }
+
     if (
       import.meta.env.PROD &&
       controller?.chainId() === constants.StarknetChainId.SN_MAIN
     ) {
       // In prod, only use live mode if on mainnet
-      return import.meta.env.VITE_STRIPE_API_PUBKEY_PROD_MODE;
+      return true;
     }
+
     // Default to test mode
-    return import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE;
-  };
+    return false;
+  }, [controller, isSlot]);
+
   const stripePromise = useMemo(
-    () => loadStripe(getStripeKey()),
-    [controller, isSlot],
+    () =>
+      loadStripe(
+        isLiveMode
+          ? import.meta.env.VITE_STRIPE_API_PUBKEY_LIVE_MODE
+          : import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE,
+      ),
+    [isLiveMode],
   );
 
   const createPaymentIntent = useCallback(
-    async (
-      credits: number,
-      username: string,
-      starterpack?: StarterPackDetails,
-    ) => {
+    async (wholeCredits: number, username: string, starterpackId?: string) => {
       if (!controller) {
         throw new Error("Controller not connected");
       }
@@ -59,11 +63,15 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
           {
             input: {
               username,
-              credits,
-              starterpackId: starterpack?.id,
-              purchaseType: starterpack
+              credits: {
+                amount: wholeCredits,
+                decimals: 0,
+              },
+              starterpackId,
+              purchaseType: starterpackId
                 ? PurchaseType.STARTERPACK
                 : PurchaseType.CREDITS,
+              isMainnet: isLiveMode,
             },
           },
         );
@@ -76,7 +84,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
         setIsLoading(false);
       }
     },
-    [controller],
+    [controller, isLiveMode],
   );
 
   const waitForPayment = useCallback(async (paymentIntentId: string) => {

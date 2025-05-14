@@ -5,7 +5,7 @@ import {
   LayoutFooter,
   Button,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { Unsupported } from "./Unsupported";
 import { doSignup } from "@/hooks/account";
 import { useIsSupported } from "./useIsSupported";

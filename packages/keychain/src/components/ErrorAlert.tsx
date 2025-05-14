@@ -1,16 +1,20 @@
+import { ControllerError } from "@/utils/connection";
+import { parseExecutionError, parseValidationError } from "@/utils/errors";
+import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
-  CopyIcon,
-  CheckIcon,
-  ErrorAlertIcon,
-  ErrorAlertIconProps,
-  Button,
   Accordion,
+  AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  AccordionContent,
-  cn,
+  Button,
+  CheckIcon,
+  CopyIcon,
+  ErrorAlertIcon,
+  ErrorAlertIconProps,
   Separator,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
+import { cn, formatAddress } from "@cartridge/ui/utils";
+import { useExplorer } from "@starknet-react/core";
 import React, {
   ReactElement,
   useCallback,
@@ -18,12 +22,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
-import { ControllerError } from "@/utils/connection";
-import { parseExecutionError, parseValidationError } from "@/utils/errors";
-import { formatAddress } from "@cartridge/utils";
 import { Link } from "react-router-dom";
-import { useExplorer } from "@starknet-react/core";
 
 export function ErrorAlert({
   title,
@@ -60,7 +59,10 @@ export function ErrorAlert({
       case "warning":
         return { bg: "bg-[#1f2320]", text: "text-[white]" };
       case "error":
-        return { bg: "border border-destructive", text: "text-destructive" };
+        return {
+          bg: "shadow-[inset_0_0_0_1px] shadow-destructive",
+          text: "text-destructive",
+        };
       default:
         return { bg: "bg-background-200", text: "text-foreground" };
     }
@@ -76,7 +78,7 @@ export function ErrorAlert({
       <AccordionItem
         value="item-1"
         className={cn(
-          "flex flex-col rounded p-3 gap-3",
+          "flex flex-col rounded px-3 py-2.5 gap-3 h-fit box-border",
           styles.bg,
           styles.text,
         )}
@@ -87,6 +89,7 @@ export function ErrorAlert({
           tabIndex={collapsible ? undefined : -1}
           className={`items-start gap-1`}
           parentClassName={`${collapsible ? "" : "cursor-auto"}`}
+          wedgeIconSize={"sm"}
         >
           {variant && variant !== "default" && (
             <div className="w-5">

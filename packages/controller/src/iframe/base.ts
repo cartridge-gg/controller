@@ -29,7 +29,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     onConnect: (child: AsyncMethodReturns<CallSender>) => void;
     methods?: { [key: string]: (...args: any[]) => void };
   }) {
-    if (typeof document === "undefined") {
+    if (typeof document === "undefined" || typeof window === "undefined") {
       return;
     }
 
@@ -91,7 +91,9 @@ export class IFrame<CallSender extends {}> implements Modal {
               container.style.opacity = "0";
             }
           });
-          document.body.style.overflow = "auto";
+          if (document.body) {
+            document.body.style.overflow = "auto";
+          }
         },
         reload: (_origin: string) => () => window.location.reload(),
         ...methods,
@@ -102,6 +104,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     window.addEventListener("resize", () => this.resize());
 
     const observer = new MutationObserver(() => {
+      if (typeof document === "undefined") return;
       const existingController = document.getElementById("controller");
       if (document.body) {
         if (
@@ -133,7 +136,8 @@ export class IFrame<CallSender extends {}> implements Modal {
   }
 
   open() {
-    if (!this.container) return;
+    if (!this.container || typeof document === "undefined" || !document.body)
+      return;
     document.body.style.overflow = "hidden";
 
     this.container.style.visibility = "visible";
@@ -141,7 +145,8 @@ export class IFrame<CallSender extends {}> implements Modal {
   }
 
   close() {
-    if (!this.container) return;
+    if (!this.container || typeof document === "undefined" || !document.body)
+      return;
     this.onClose?.();
 
     document.body.style.overflow = "auto";
@@ -161,7 +166,7 @@ export class IFrame<CallSender extends {}> implements Modal {
   }
 
   private resize() {
-    if (!this.iframe) return;
+    if (!this.iframe || typeof window === "undefined") return;
 
     this.iframe.style.userSelect = "none";
 

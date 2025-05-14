@@ -1,11 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   CreateCryptoPaymentDocument,
   CreateCryptoPaymentMutation,
   Network,
   CryptoPaymentQuery,
   CryptoPaymentDocument,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
 import { ExternalPlatform } from "@cartridge/controller";
@@ -20,7 +20,7 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
-import { StarterPackDetails } from "../starterpack";
+import { constants } from "starknet";
 
 export enum PurchaseType {
   CREDITS = "CREDITS",
@@ -32,13 +32,23 @@ export const useCryptoPayment = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
+  const isMainnet = useMemo(() => {
+    if (
+      import.meta.env.PROD &&
+      controller?.chainId() === constants.StarknetChainId.SN_MAIN
+    ) {
+      return true;
+    }
+
+    return false;
+  }, [controller]);
+
   const sendPayment = useCallback(
     async (
       walletAddress: string,
-      credits: number,
+      wholeCredits: number,
       platform: ExternalPlatform,
-      starterpack?: StarterPackDetails,
-      isMainnet: boolean = false,
+      starterpackId?: string,
       onSubmitted?: (explorer: Explorer) => void,
     ): Promise<string> => {
       if (!controller) {
@@ -56,9 +66,9 @@ export const useCryptoPayment = () => {
           tokenAddress,
         } = await createCryptoPayment(
           controller.username(),
-          credits,
+          wholeCredits,
           platform,
-          starterpack,
+          starterpackId,
           isMainnet,
         );
 
@@ -95,7 +105,7 @@ export const useCryptoPayment = () => {
         setIsLoading(false);
       }
     },
-    [controller, externalSendTransaction],
+    [controller, externalSendTransaction, isMainnet],
   );
 
   const waitForPayment = useCallback(async (paymentId: string) => {
@@ -136,9 +146,9 @@ export const useCryptoPayment = () => {
 
   async function createCryptoPayment(
     username: string,
-    credits: number,
+    wholeCredits: number,
     platform: ExternalPlatform,
-    starterpack?: StarterPackDetails,
+    starterpackId?: string,
     isMainnet: boolean = false,
   ) {
     const result = await client.request<CreateCryptoPaymentMutation>(
@@ -146,12 +156,15 @@ export const useCryptoPayment = () => {
       {
         input: {
           username,
-          credits,
+          credits: {
+            amount: wholeCredits,
+            decimals: 0,
+          },
           network: platform.toUpperCase() as Network,
-          purchaseType: starterpack
+          purchaseType: starterpackId
             ? PurchaseType.STARTERPACK
             : PurchaseType.CREDITS,
-          starterpackId: starterpack?.id,
+          starterpackId,
           isMainnet,
         },
       },
@@ -167,9 +180,11 @@ export const useCryptoPayment = () => {
     tokenAddress: string,
     isMainnet: boolean = false,
   ) {
-    const connection = new Connection(
-      isMainnet ? clusterApiUrl("mainnet-beta") : clusterApiUrl("devnet"),
-    );
+    const rpcUrl = isMainnet
+      ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL ||
+        clusterApiUrl("mainnet-beta")
+      : import.meta.env.VITE_SOLANA_DEVNET_RPC_URL || clusterApiUrl("devnet");
+    const connection = new Connection(rpcUrl);
     const senderPublicKey = new PublicKey(walletAddress);
     const recipientPublicKey = new PublicKey(depositAddress);
     const tokenMint = new PublicKey(tokenAddress);
@@ -200,8 +215,7 @@ export const useCryptoPayment = () => {
 
     const txn = new Transaction().add(createAtaIx, transferInstruction);
     txn.feePayer = senderPublicKey;
-    const { blockhash, lastValidBlockHeight } =
-      await connection.getLatestBlockhash();
+    const { blockhash } = await connection.getLatestBlockhash();
     txn.recentBlockhash = blockhash;
 
     const serializedTxn = txn.serialize({ requireAllSignatures: false });
@@ -218,11 +232,7 @@ export const useCryptoPayment = () => {
     return {
       signature,
       confirmTransaction: async () => {
-        await connection.confirmTransaction({
-          signature,
-          blockhash,
-          lastValidBlockHeight,
-        });
+        await pollForFinalization(connection, signature);
       },
     };
   }
@@ -234,6 +244,32 @@ export const useCryptoPayment = () => {
     error,
   };
 };
+
+async function pollForFinalization(
+  connection: Connection,
+  signature: string,
+  timeoutMs: number = 30000,
+  pollIntervalMs: number = 2000,
+): Promise<void> {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    const status = await connection.getSignatureStatus(signature);
+    const value = status?.value;
+
+    if (value?.confirmationStatus === "finalized") {
+      return;
+    }
+
+    if (value?.err) {
+      throw new Error(`Transaction failed: ${JSON.stringify(value.err)}`);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
+
+  throw new Error("Transaction confirmation timed out");
+}
 
 export interface Explorer {
   name: string;

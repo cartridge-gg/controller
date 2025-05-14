@@ -4,18 +4,19 @@ import { DataContext } from "#context/data";
 import {
   useActivitiesQuery,
   useTransfersQuery,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context.js";
 import { getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { useArcade } from "#hooks/arcade.js";
 import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
-import { getDate } from "@cartridge/utils";
+import { getDate } from "@cartridge/ui/utils";
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
   key: string;
+  contractAddress: string;
   transactionHash: string;
   amount: string;
   address: string;
@@ -119,6 +120,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
             return {
               variant: "token",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
+              contractAddress: transfer.contractAddress,
               transactionHash: transfer.transactionHash,
               amount: value,
               address:
@@ -149,15 +151,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
           .map((transfer) => {
             const timestamp = new Date(transfer.executedAt).getTime();
             const date = getDate(timestamp);
-            const metadata = JSON.parse(transfer.metadata ?? "{}");
+            let metadata;
+            try {
+              metadata = JSON.parse(
+                !transfer.metadata ? "{}" : transfer.metadata,
+              );
+            } catch (error) {
+              console.warn(error);
+            }
             const name =
-              metadata.attributes.find(
+              metadata.attributes?.find(
                 (attribute: { trait: string; value: string }) =>
                   attribute?.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
             return {
               variant: "collectible",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
+              contractAddress: transfer.contractAddress,
               transactionHash: transfer.transactionHash,
               name: name || "",
               collection: transfer.name,
@@ -185,21 +195,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const actions: CardProps[] = useMemo(() => {
     return (
       transactions?.activities?.items?.flatMap((item) =>
-        item.activities?.map(({ transactionHash, entrypoint, executedAt }) => {
-          const timestamp = new Date(executedAt).getTime();
-          const date = getDate(timestamp);
-          return {
-            variant: "game",
-            key: `${transactionHash}-${entrypoint}`,
-            transactionHash: transactionHash,
-            title: entrypoint,
-            image: game?.properties.icon || "",
-            website: edition?.socials.website || "",
-            certified: !!game,
-            timestamp: timestamp / 1000,
-            date: date,
-          } as CardProps;
-        }),
+        item.activities?.map(
+          ({ transactionHash, contractAddress, entrypoint, executedAt }) => {
+            const timestamp = new Date(executedAt).getTime();
+            const date = getDate(timestamp);
+            return {
+              variant: "game",
+              key: `${transactionHash}-${entrypoint}`,
+              contractAddress: contractAddress,
+              transactionHash: transactionHash,
+              title: entrypoint,
+              image: game?.properties.icon || "",
+              website: edition?.socials.website || "",
+              certified: !!game,
+              timestamp: timestamp / 1000,
+              date: date,
+            } as CardProps;
+          },
+        ),
       ) || []
     );
   }, [transactions, game, edition]);
@@ -213,6 +226,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           variant: "achievement",
           key: item.id,
           transactionHash: "",
+          contractAddress: "",
           title: item.title,
           image: item.icon,
           timestamp: item.timestamp,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Spinner } from "@cartridge/ui-next";
+import { Spinner } from "@cartridge/ui";
 import { EstimateFee } from "starknet";
 
 import { convertTokenAmountToUSD, useFeeToken } from "@/hooks/tokens";

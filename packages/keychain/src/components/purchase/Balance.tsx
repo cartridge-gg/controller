@@ -10,8 +10,8 @@ import {
   CardTitle,
   TokenCard,
   TokenSummary,
-} from "@cartridge/ui-next";
-import { useCreditBalance } from "@cartridge/utils";
+} from "@cartridge/ui";
+import { useCreditBalance } from "@cartridge/ui/utils";
 
 export enum BalanceType {
   CREDITS = "credits",
@@ -52,7 +52,7 @@ export function Balance({ types, title, amount }: BalanceProps) {
             amount={
               amount
                 ? `${amount.toFixed(2).toString()}`
-                : `${creditBalance} CREDITS`
+                : `${creditBalance.formatted} CREDITS`
             }
           />
         )}

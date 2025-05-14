@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@cartridge/ui-next";
+import { Button } from "@cartridge/ui";
 import ControllerConnector from "@cartridge/connector/controller";
 import {
   useAccount,

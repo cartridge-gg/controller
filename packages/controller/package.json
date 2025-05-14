@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.7.11",
+  "version": "0.7.14-alpha.3",
   "description": "Cartridge Controller",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -39,15 +39,15 @@
     "starknetkit": "^2.6.1"
   },
   "dependencies": {
-    "@cartridge/account-wasm": "workspace:*",
-    "@cartridge/utils": "workspace:*",
+    "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
     "ethers": "^6.13.5",
     "@starknet-io/types-js": "catalog:",
     "@telegram-apps/sdk": "^2.4.0",
     "@turnkey/sdk-browser": "^4.0.0",
     "cbor-x": "^1.5.0",
-    "mipd": "^0.0.7"
+    "mipd": "^0.0.7",
+    "@walletconnect/ethereum-provider": "^2.20.0"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",

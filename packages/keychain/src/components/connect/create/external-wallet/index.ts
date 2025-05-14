@@ -1,24 +1,23 @@
-import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import {
+  AuthOption,
   ExternalWalletResponse,
   ExternalWalletType,
 } from "@cartridge/controller";
-import { AccountQuery } from "@cartridge/utils/api/cartridge";
+import {
+  ControllerQuery,
+  Eip191Credential,
+} from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
-import { AuthenticationMethod } from "../../types";
-import { createController, SignupResponse } from "../useCreateController";
+import { SignupResponse } from "../useCreateController";
 
 export const useExternalWalletAuthentication = () => {
   const { origin, chainId, rpcUrl, setController } = useConnection();
-  const { connectWallet } = useWallets();
+  const { connectWallet, wallets } = useWallets();
 
   const signup = useCallback(
-    async (
-      _: string,
-      authenticationMode: AuthenticationMethod,
-    ): Promise<SignupResponse> => {
+    async (authenticationMode: AuthOption): Promise<SignupResponse> => {
       const connectedWallet = await connectWallet(
         authenticationMode as ExternalWalletType,
       );
@@ -27,45 +26,46 @@ export const useExternalWalletAuthentication = () => {
       return {
         address: connectedWallet.account,
         signer: walletToSigner(connectedWallet),
+        type: authenticationMode,
       };
     },
-    [],
+    [connectWallet],
   );
 
   const login = useCallback(
-    async (account: AccountQuery["account"]) => {
+    async (
+      controller: ControllerQuery["controller"],
+      credential: Eip191Credential | undefined,
+    ) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
-      if (!account) throw new Error("No account found");
+      if (!controller) throw new Error("No controller found");
+      if (!credential) throw new Error("No EIP191 credential provided");
 
-      const { username, credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
+      const address = credential?.ethAddress;
 
-      const controllerNode = controllers?.edges?.[0]?.node;
-
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
-
-      if (!controllerNode || !publicKey) {
-        return;
+      if (!address) {
+        throw new Error(
+          "Could not extract ethAddress from provided EIP191 credential",
+        );
       }
 
-      const controller = await createController(
-        origin,
-        chainId,
-        rpcUrl,
-        username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
-        credentialId,
-        publicKey,
+      const connectedWallet = await connectWallet(
+        credential.provider as ExternalWalletType,
+        address,
       );
 
-      await controller.login(now() + DEFAULT_SESSION_DURATION);
+      if (!connectedWallet || !connectedWallet.account)
+        throw new Error("No wallet found for address: " + address);
 
-      window.controller = controller;
-      setController(controller);
+      if (BigInt(connectedWallet.account) !== BigInt(address)) {
+        return undefined;
+      }
+
+      return {
+        signer: walletToSigner(connectedWallet),
+      };
     },
-    [chainId, rpcUrl, origin, setController],
+    [chainId, rpcUrl, origin, setController, wallets],
   );
 
   return { signup, login };
@@ -76,6 +76,6 @@ const walletToSigner = (wallet: ExternalWalletResponse) => {
     throw new Error("Unsupported wallet");
   }
   return {
-    eip191: { address: wallet.account! },
+    eip191: { address: wallet.account!.toLowerCase() },
   };
 };

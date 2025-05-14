@@ -2,7 +2,7 @@ export { Consent } from "./consent";
 
 import { PageLoading } from "@/components/Loading";
 import { CreateController } from "@/components/connect";
-import { useMeQuery } from "@cartridge/utils/api/cartridge";
+import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useController } from "@/hooks/controller";
 import { useEffect } from "react";
 import {

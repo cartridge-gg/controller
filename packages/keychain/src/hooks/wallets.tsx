@@ -23,6 +23,7 @@ interface WalletsContextValue {
   detectWallets: () => Promise<void>;
   connectWallet: (
     type: ExternalWalletType,
+    address?: string,
   ) => Promise<ExternalWalletResponse | null>;
 }
 
@@ -54,6 +55,34 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       };
     }
   }, [parent]);
+
+  useEffect(() => {
+    if (!parent) {
+      return;
+    }
+
+    const intervalId = setInterval(async () => {
+      const detected = await parent.externalDetectWallets();
+
+      const getWalletIdentifier = (wallet: ExternalWallet) => {
+        const sortedAccounts = [...(wallet.connectedAccounts || [])]
+          .sort()
+          .join(",");
+        return `${wallet.type}:${sortedAccounts}`;
+      };
+
+      const currentWalletIds = new Set(wallets.map(getWalletIdentifier));
+      const detectedWalletIds = new Set(detected.map(getWalletIdentifier));
+
+      if (
+        currentWalletIds.size !== detectedWalletIds.size ||
+        !Array.from(detectedWalletIds).every((id) => currentWalletIds.has(id))
+      ) {
+        setWallets(detected);
+      }
+    }, 300);
+    return () => clearInterval(intervalId);
+  }, [parent, wallets]);
 
   // Function to detect external wallets
   const detectWallets = useCallback(async () => {
@@ -87,7 +116,8 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   // Function to connect to an external wallet
   const connectWallet = useCallback(
     async (
-      type: ExternalWalletType,
+      identifier: ExternalWalletType,
+      address?: string,
     ): Promise<ExternalWalletResponse | null> => {
       if (!parent) {
         setError(new Error("Connection not ready."));
@@ -98,7 +128,10 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       setError(null);
 
       try {
-        const response = await parent.externalConnectWallet(type);
+        const response = await parent.externalConnectWallet(
+          identifier,
+          address,
+        );
         if (!response.success) {
           setError(new Error(response.error || "Failed to connect wallet."));
           return response; // Return response even on failure
@@ -106,7 +139,7 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
         // Optionally re-detect wallets or update state based on response
         return response;
       } catch (err) {
-        console.error(`Failed to connect to wallet ${type}:`, err);
+        console.error(`Failed to connect to wallet ${identifier}:`, err);
         setError(
           err instanceof Error ? err : new Error("Failed to connect wallet"),
         );
@@ -164,7 +197,7 @@ export class KeychainWallets {
    * @param wallet - The wallet adapter instance.
    */
   addEmbeddedWallet(address: string, wallet: WalletAdapter) {
-    this.embeddedWalletsByAddress.set(address, wallet);
+    this.embeddedWalletsByAddress.set(address.toLowerCase(), wallet);
   }
 
   /**
@@ -173,7 +206,7 @@ export class KeychainWallets {
    * @returns The wallet adapter instance or undefined if not found.
    */
   getEmbeddedWallet(address: string): WalletAdapter | undefined {
-    return this.embeddedWalletsByAddress.get(address);
+    return this.embeddedWalletsByAddress.get(address.toLowerCase());
   }
 
   /**
@@ -187,19 +220,12 @@ export class KeychainWallets {
     identifier: string,
     message: string,
   ): Promise<ExternalWalletResponse> {
-    console.log(
-      `KeychainWallets: signMessage called for identifier: ${identifier} and message: ${message}`,
-    );
-
     // --- Decision Logic ---
     // TODO: Implement logic to check if 'identifier' belongs to an embedded wallet (e.g., Turnkey)
     const embeddedWallet = this.getEmbeddedWallet(identifier);
 
     if (embeddedWallet) {
       // --- Embedded Wallet Path ---
-      console.log(
-        `KeychainWallets: Routing to embedded wallet for ${identifier}`,
-      );
       const response = await embeddedWallet.signMessage?.(message);
       if (!response?.success) {
         throw new Error(
@@ -209,9 +235,6 @@ export class KeychainWallets {
       return response;
     } else {
       // --- External Wallet Path ---
-      console.log(
-        `KeychainWallets: Routing to external wallet bridge for ${identifier}`,
-      );
       if (!this.parent) {
         console.error("KeychainWallets: Parent connection not available.");
         throw new Error("Wallet connection not ready.");
@@ -223,10 +246,6 @@ export class KeychainWallets {
         const response = await this.parent.externalSignMessage(
           identifier,
           message,
-        );
-        console.log(
-          "KeychainWallets: Received response from parent:",
-          response,
         );
 
         if (response.success && response.result) {

@@ -10,7 +10,7 @@ type ThemeProviderContextType = {
 };
 
 export const initialState: ThemeProviderContextType = {
-  colorScheme: "system",
+  colorScheme: "dark",
   setColorScheme: () => null,
   theme: defaultTheme,
 };

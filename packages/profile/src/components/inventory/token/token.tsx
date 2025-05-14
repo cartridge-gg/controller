@@ -15,12 +15,11 @@ import {
   Card,
   CardContent,
   CoinsIcon,
-  Thumbnail,
-  DepositIcon,
   ActivityTokenCard,
   ERC20Detail,
   ERC20Header,
-} from "@cartridge/ui-next";
+  PaperPlaneIcon,
+} from "@cartridge/ui";
 import { useConnection, useData } from "#hooks/context";
 import {
   getDate,
@@ -28,7 +27,7 @@ import {
   isPublicChain,
   useCreditBalance,
   VoyagerUrl,
-} from "@cartridge/utils";
+} from "@cartridge/ui/utils";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount } from "#hooks/account";
 import { useToken } from "#hooks/token";
@@ -213,16 +212,12 @@ function ERC20() {
 
       {isIframe() && compatibility && !visitor && (
         <LayoutFooter>
-          <div className="flex items-center gap-3">
-            <Thumbnail
-              icon={<DepositIcon variant="solid" size="sm" />}
-              size="lg"
-              className="aspect-square"
-            />
-            <Link to={`send?${searchParams.toString()}`} className="w-full">
-              <Button className="w-full">Send</Button>
-            </Link>
-          </div>
+          <Link to={`send?${searchParams.toString()}`} className="w-full">
+            <Button className="w-full space-x-2">
+              <PaperPlaneIcon variant="solid" />
+              Send
+            </Button>
+          </Link>
         </LayoutFooter>
       )}
     </LayoutContainer>

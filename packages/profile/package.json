@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/profile",
-  "version": "0.7.11",
+  "version": "0.7.14-alpha.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -42,8 +42,7 @@
     "@bal7hazar/arcade-sdk": "0.0.86",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "catalog:",
-    "@cartridge/ui-next": "workspace:*",
-    "@cartridge/utils": "workspace:*",
+    "@cartridge/ui": "catalog:",
     "compare-versions": "^6.1.1",
     "lodash": "catalog:",
     "react": "catalog:",
@@ -54,7 +53,8 @@
     "starknet": "catalog:",
     "viem": "catalog:",
     "vite-plugin-top-level-await": "catalog:",
-    "vite-plugin-wasm": "catalog:"
+    "vite-plugin-wasm": "catalog:",
+    "qrcode.react": "catalog:"
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",

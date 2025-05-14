@@ -1,10 +1,10 @@
 import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import {
-  WalletAdapter,
+  ExternalPlatform,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
-  ExternalPlatform,
+  WalletAdapter,
 } from "../types";
 
 interface PhantomProvider {
@@ -38,6 +38,7 @@ export class PhantomWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "phantom";
   readonly platform: ExternalPlatform = "solana";
   private account: string | undefined = undefined;
+  private connectedAccounts: string[] = [];
 
   private getProvider(): PhantomProvider {
     if (typeof window === "undefined") {
@@ -94,6 +95,10 @@ export class PhantomWallet implements WalletAdapter {
         error: (error as Error).message || "Unknown error",
       };
     }
+  }
+
+  getConnectedAccounts(): string[] {
+    return this.connectedAccounts;
   }
 
   async signMessage(message: string): Promise<ExternalWalletResponse<any>> {

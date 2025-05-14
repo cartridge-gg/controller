@@ -2,9 +2,25 @@ import type { ContractType } from "@/hooks/session";
 import { fetchData } from "@/utils/graphql";
 import {
   AccountDocument,
+  ControllerDocument,
+  ControllerQuery,
+  ControllerQueryVariables,
   type AccountQuery,
   type AccountQueryVariables,
-} from "@cartridge/utils/api/cartridge";
+} from "@cartridge/ui/utils/api/cartridge";
+import { constants } from "starknet";
+
+export function fetchController(
+  _chainId: string,
+  username: string,
+  signal?: AbortSignal,
+) {
+  return fetchData<ControllerQuery, ControllerQueryVariables>(
+    ControllerDocument,
+    { chainId: constants.NetworkName.SN_MAIN, username },
+    signal,
+  );
+}
 
 export function fetchAccount(username: string, signal?: AbortSignal) {
   return fetchData<AccountQuery, AccountQueryVariables>(

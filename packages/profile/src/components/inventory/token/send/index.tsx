@@ -1,5 +1,5 @@
 import { useConnection } from "#hooks/context";
-import { useToken } from "#hooks/token";
+import { Token, useToken, useTokens } from "#hooks/token";
 import {
   LayoutContainer,
   LayoutContent,
@@ -8,10 +8,13 @@ import {
   Button,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
-  cn,
   Thumbnail,
-} from "@cartridge/ui-next";
-import { useCallback, useEffect, useMemo, useState } from "react";
+  TokenSelect,
+  Spinner,
+  PaperPlaneIcon,
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Call,
@@ -28,7 +31,12 @@ export function SendToken() {
   const { parent, provider, closable } = useConnection();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
-  const { token } = useToken({ tokenAddress: tokenAddress! });
+  const { token, status: tokenFetching } = useToken({
+    tokenAddress: tokenAddress!,
+  });
+  const { tokens } = useTokens();
+  const userSelectedToken = useRef(false);
+
   const { refetchTransfers } = useData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -39,6 +47,7 @@ export function SendToken() {
   const [toError, setToError] = useState<Error | undefined>();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<Token | undefined>(token);
   const [recipientLoading, setRecipientLoading] = useState(false);
 
   const disabled = useMemo(() => {
@@ -54,19 +63,34 @@ export function SendToken() {
     setValidated(false);
   }, [warning, setValidated]);
 
+  useEffect(() => {
+    if (!userSelectedToken.current && token) {
+      setSelectedToken(token);
+    }
+  }, [token]);
+
+  const onChangeToken = useCallback(
+    (token: Token) => {
+      setSelectedToken(token);
+      setAmount(undefined);
+      userSelectedToken.current = true;
+    },
+    [setSelectedToken, setAmount],
+  );
+
   const onSubmit = useCallback(
     async (to: string, amount: number) => {
       setSubmitted(true);
-      if (!token || !to || !amount) return;
+      if (!selectedToken || !to || !amount) return;
 
       setLoading(true);
       const formattedAmount = uint256.bnToUint256(
-        BigInt(amount * 10 ** token.metadata.decimals),
+        BigInt(amount * 10 ** selectedToken.metadata.decimals),
       );
 
       const calls: Call[] = [
         {
-          contractAddress: token.metadata.address,
+          contractAddress: selectedToken.metadata.address,
           entrypoint: "transfer",
           calldata: [to, formattedAmount],
         },
@@ -81,7 +105,7 @@ export function SendToken() {
               TransactionFinalityStatus.ACCEPTED_ON_L2,
             ],
           });
-          // Refetch transfers after 5 seconds to leave time to the indexer to take the new tx into account
+          // Refetch transfers 5 seconds after to leave time to the indexer to take the new tx into account
           setTimeout(() => {
             refetchTransfers();
           }, 5000);
@@ -96,7 +120,7 @@ export function SendToken() {
       }
     },
     [
-      token,
+      selectedToken,
       provider,
       parent,
       closable,
@@ -118,9 +142,26 @@ export function SendToken() {
     <LayoutContainer>
       <LayoutHeader className="hidden" onBack={handleBack} />
       <LayoutContent className="pb-4 gap-6">
-        <div className="flex items-center gap-4">
-          <Thumbnail icon={token.metadata.image} size="lg" rounded />
-          <p className="text-semibold text-lg/[22px]">{`Send ${token.metadata.symbol ?? "Token"}`}</p>
+        <div className="flex items-center gap-3">
+          <Thumbnail
+            icon={
+              <PaperPlaneIcon variant="solid" className="h-[30px] w-[30px]" />
+            }
+            size="lg"
+          />
+          <p className="text-semibold text-lg">Send</p>
+          {tokenFetching === "loading" ? (
+            <div className="flex items-center gap-2">
+              <Spinner size="sm" />
+              <p className="text-sm">Loading...</p>
+            </div>
+          ) : (
+            <TokenSelect
+              tokens={tokens.filter((item) => item.balance.amount > 0)}
+              onSelect={onChangeToken}
+              defaultToken={selectedToken}
+            />
+          )}
         </div>
         <SendRecipient
           to={to}
@@ -130,12 +171,15 @@ export function SendToken() {
           setError={setToError}
           setParentLoading={setRecipientLoading}
         />
-        <SendAmount
-          amount={amount}
-          submitted={submitted}
-          setAmount={setAmount}
-          setError={setAmountError}
-        />
+        {selectedToken && (
+          <SendAmount
+            token={selectedToken}
+            amount={amount}
+            submitted={submitted}
+            setAmount={setAmount}
+            setError={setAmountError}
+          />
+        )}
       </LayoutContent>
 
       <LayoutFooter>
@@ -154,15 +198,27 @@ export function SendToken() {
           )}
           <p className="text-xs text-destructive-100">{warning}</p>
         </div>
-        <Button
-          disabled={disabled}
-          type="submit"
-          className="w-full"
-          isLoading={loading}
-          onClick={() => onSubmit(to, amount!)}
-        >
-          Review Send
-        </Button>
+        <div className="flex flex-row items-center gap-3">
+          <Button
+            disabled={disabled}
+            variant="secondary"
+            type="button"
+            className="w-1/3"
+            isLoading={loading}
+            onClick={handleBack}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={disabled}
+            type="submit"
+            className="w-2/3"
+            isLoading={loading}
+            onClick={() => onSubmit(to, amount!)}
+          >
+            Review Send
+          </Button>
+        </div>
       </LayoutFooter>
     </LayoutContainer>
   );

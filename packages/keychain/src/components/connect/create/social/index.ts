@@ -1,35 +1,38 @@
-import { DEFAULT_SESSION_DURATION, now } from "@/const";
-import { useConnection } from "@/hooks/connection";
 import { useAuth0 } from "@auth0/auth0-react";
 import { TurnkeyWallet } from "@cartridge/controller";
-import {
-  AccountQuery,
-  useRegisterMutation,
-} from "@cartridge/utils/api/cartridge";
-import { sha256 } from "@noble/hashes/sha256";
+import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
 import { useTurnkey } from "@turnkey/sdk-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createController, SignupResponse } from "../useCreateController";
+import { LoginResponse, SignupResponse } from "../useCreateController";
 import {
   authenticateToTurnkey,
   getOrCreateTurnkeySuborg,
+  getTurnkeySuborg,
   SOCIAL_PROVIDER_NAME,
 } from "./api";
 import { getOidcToken } from "./auth0";
-import { getOrCreateWallet } from "./turnkey";
+import { getOrCreateWallet, getWallet } from "./turnkey";
 
-export const useSocialAuthentication = () => {
+export const useSocialAuthentication = (
+  setChangeWallet: (changeWallet: boolean) => void,
+) => {
+  const [signupOrLogin, setSignupOrLogin] = useState<
+    { username: string } | { address: string } | undefined
+  >(undefined);
   const { authIframeClient } = useTurnkey();
-  const { origin, chainId, rpcUrl, setController } = useConnection();
   const { loginWithPopup, getIdTokenClaims, isAuthenticated, user, error } =
     useAuth0();
-  const { mutateAsync: register } = useRegisterMutation();
 
   const authIframeClientRef = useRef(authIframeClient);
-  const [userName, setUserName] = useState("");
   const signaturePromiseRef = useRef<{
-    resolve: (value: SignupResponse | PromiseLike<SignupResponse>) => void;
+    resolve: (
+      value:
+        | SignupResponse
+        | LoginResponse
+        | undefined
+        | PromiseLike<SignupResponse | LoginResponse | undefined>,
+    ) => void;
     reject: (reason?: Error) => void;
   } | null>(null);
 
@@ -40,7 +43,10 @@ export const useSocialAuthentication = () => {
   useEffect(() => {
     if (
       error &&
-      error.message.includes("Popup closed") &&
+      (error.message.includes("Popup closed") ||
+        error.message.includes(
+          "The resource owner or authorization server denied the request",
+        )) &&
       signaturePromiseRef.current
     ) {
       signaturePromiseRef.current.reject(
@@ -50,106 +56,194 @@ export const useSocialAuthentication = () => {
     }
   }, [error]);
 
+  // TODO(tedison) put this in a useCallback
+  const internalSignup = async () => {
+    if (!(signupOrLogin as { username: string }).username) {
+      throw new Error("Unreachable");
+    }
+
+    const oidcTokenString = await getOidcToken(
+      getIdTokenClaims,
+      getNonce(authIframeClientRef.current!.iframePublicKey!),
+    );
+
+    if (!oidcTokenString) {
+      return;
+    }
+
+    const subOrganizationId = await getOrCreateTurnkeySuborg(
+      oidcTokenString,
+      (signupOrLogin as { username: string }).username,
+    );
+
+    await authenticateToTurnkey(
+      subOrganizationId,
+      oidcTokenString,
+      authIframeClientRef.current!,
+    );
+
+    const address = await getOrCreateWallet(
+      subOrganizationId,
+      (signupOrLogin as { username: string }).username,
+      authIframeClientRef.current!,
+    );
+
+    if (window.keychain_wallets) {
+      window.keychain_wallets.addEmbeddedWallet(
+        address.toLowerCase(),
+        new TurnkeyWallet(
+          authIframeClientRef.current!,
+          address,
+          subOrganizationId,
+        ),
+      );
+    }
+
+    if (signaturePromiseRef.current) {
+      signaturePromiseRef.current.resolve({
+        address,
+        signer: {
+          eip191: {
+            address,
+          },
+        },
+        type: "discord",
+      });
+      signaturePromiseRef.current = null;
+    }
+  };
+
+  // TODO(tedison) put this in a useCallback
+  const internalLogin = async () => {
+    if (!(signupOrLogin as { address: string }).address) {
+      throw new Error("Unreachable");
+    }
+
+    try {
+      const oidcTokenString = await getOidcToken(
+        getIdTokenClaims,
+        getNonce(authIframeClientRef.current!.iframePublicKey!),
+      );
+
+      if (!oidcTokenString) {
+        return;
+      }
+
+      const subOrganizationId = await getTurnkeySuborg(oidcTokenString);
+
+      await authenticateToTurnkey(
+        subOrganizationId,
+        oidcTokenString,
+        authIframeClientRef.current!,
+      );
+
+      const address = await getWallet(
+        subOrganizationId,
+        authIframeClientRef.current!,
+      );
+      if (
+        BigInt(address) !==
+        BigInt((signupOrLogin as { address: string }).address)
+      ) {
+        setChangeWallet(true);
+        signaturePromiseRef.current?.resolve(undefined);
+        signaturePromiseRef.current = null;
+        return;
+      }
+
+      if (window.keychain_wallets) {
+        window.keychain_wallets.addEmbeddedWallet(
+          address.toLowerCase(),
+          new TurnkeyWallet(
+            authIframeClientRef.current!,
+            address,
+            subOrganizationId,
+          ),
+        );
+      }
+
+      if (signaturePromiseRef.current) {
+        signaturePromiseRef.current.resolve({
+          signer: {
+            eip191: {
+              address,
+            },
+          },
+        });
+        signaturePromiseRef.current = null;
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message.includes("No suborgs found")) {
+        setChangeWallet(true);
+        signaturePromiseRef.current?.resolve(undefined);
+        signaturePromiseRef.current = null;
+        return;
+      }
+      throw e;
+    }
+  };
+
   useEffect(() => {
     (async () => {
       if (
-        // Sanity check: the userName has already been validated at the previous step
-        userName.length === 0 ||
+        // Sanity check: the username has already been validated at the previous step
         !isAuthenticated ||
         !user ||
         !authIframeClientRef.current?.iframePublicKey ||
-        error
+        error ||
+        signupOrLogin === undefined
       ) {
         return;
       }
 
       try {
-        const oidcTokenString = await getOidcToken(
-          getIdTokenClaims,
-          getNonce(authIframeClientRef.current.iframePublicKey!),
-        );
-
-        if (!oidcTokenString) {
-          return;
-        }
-
-        const subOrganizationId = await getOrCreateTurnkeySuborg(
-          oidcTokenString,
-          userName,
-        );
-
-        await authenticateToTurnkey(
-          subOrganizationId,
-          oidcTokenString,
-          authIframeClientRef.current,
-        );
-
-        const address = await getOrCreateWallet(
-          subOrganizationId,
-          userName,
-          authIframeClientRef.current,
-        );
-
-        if (window.keychain_wallets) {
-          window.keychain_wallets.addEmbeddedWallet(
-            address.toLowerCase(),
-            new TurnkeyWallet(
-              authIframeClientRef.current,
-              address,
-              subOrganizationId,
-            ),
-          );
-        }
-
-        if (signaturePromiseRef.current) {
-          signaturePromiseRef.current.resolve({
-            address,
-            signer: {
-              eip191: {
-                address,
-              },
-            },
-          });
-          signaturePromiseRef.current = null;
+        if ((signupOrLogin as { username: string }).username) {
+          if ((signupOrLogin as { username: string }).username.length === 0) {
+            throw new Error("Username is required");
+          }
+          await internalSignup();
+        } else {
+          await internalLogin();
         }
       } catch (error) {
         console.error("Error continuing signup:", error);
       }
     })();
-  }, [isAuthenticated, user, userName, getIdTokenClaims, register]);
+  }, [isAuthenticated, user, signupOrLogin, error]);
+
+  const pollIframePublicKey = (
+    onSuccess: (key: string) => void,
+    onFailure: (err: Error) => void,
+  ) => {
+    const pollTimeMs = 10000;
+    const intervalMs = 200;
+    let elapsedTime = 0;
+
+    if (authIframeClientRef.current?.iframePublicKey) {
+      onSuccess(authIframeClientRef.current.iframePublicKey);
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      if (authIframeClientRef.current?.iframePublicKey) {
+        clearInterval(intervalId);
+        onSuccess(authIframeClientRef.current.iframePublicKey);
+      } else {
+        console.log("waiting for the iframe's public key");
+        elapsedTime += intervalMs;
+        if (elapsedTime >= pollTimeMs) {
+          clearInterval(intervalId);
+          console.error("Timeout waiting for Turnkey iframe public key.");
+          onFailure(
+            new Error("Timeout waiting for Turnkey iframe public key."),
+          );
+        }
+      }
+    }, intervalMs);
+  };
 
   const signup = useCallback(
-    async (username: string): Promise<SignupResponse> => {
-      const pollIframePublicKey = (
-        onSuccess: (key: string) => void,
-        onFailure: (err: Error) => void,
-      ) => {
-        const pollTimeMs = 10000;
-        const intervalMs = 200;
-        let elapsedTime = 0;
-
-        if (authIframeClientRef.current?.iframePublicKey) {
-          onSuccess(authIframeClientRef.current.iframePublicKey);
-          return;
-        }
-
-        const intervalId = setInterval(() => {
-          if (authIframeClientRef.current?.iframePublicKey) {
-            clearInterval(intervalId);
-            onSuccess(authIframeClientRef.current.iframePublicKey);
-          } else {
-            console.log("waiting for the iframe's public key");
-            elapsedTime += intervalMs;
-            if (elapsedTime >= pollTimeMs) {
-              clearInterval(intervalId);
-              console.error("Timeout waiting for Turnkey iframe public key.");
-              onFailure(
-                new Error("Timeout waiting for Turnkey iframe public key."),
-              );
-            }
-          }
-        }, intervalMs);
-      };
+    async (signupOrLogin: { username: string } | { address: string }) => {
       return new Promise((resolve, reject) => {
         pollIframePublicKey(
           async (iframePublicKey) => {
@@ -157,7 +251,7 @@ export const useSocialAuthentication = () => {
 
             try {
               const nonce = getNonce(iframePublicKey);
-              setUserName(username);
+              setSignupOrLogin(signupOrLogin);
 
               const popup = openPopup("");
               await loginWithPopup(
@@ -184,46 +278,10 @@ export const useSocialAuthentication = () => {
         );
       });
     },
-    [setUserName, loginWithPopup],
+    [loginWithPopup, setSignupOrLogin],
   );
 
-  const login = useCallback(
-    async (account: AccountQuery["account"]) => {
-      if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
-      if (!account) throw new Error("No account found");
-
-      const { username, credentials, controllers } = account ?? {};
-      const { id: credentialId, publicKey } = credentials?.webauthn?.[0] ?? {};
-
-      const controllerNode = controllers?.edges?.[0]?.node;
-
-      if (!credentialId)
-        throw new Error("No credential ID found for this account");
-
-      if (!controllerNode || !publicKey) {
-        return;
-      }
-
-      const controller = await createController(
-        origin,
-        chainId,
-        rpcUrl,
-        username,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
-        credentialId,
-        publicKey,
-      );
-
-      await controller.login(now() + DEFAULT_SESSION_DURATION);
-
-      window.controller = controller;
-      setController(controller);
-    },
-    [chainId, rpcUrl, origin, setController],
-  );
-
-  return { signup, login };
+  return { signup, login: signup };
 };
 
 const getNonce = (seed: string) => {

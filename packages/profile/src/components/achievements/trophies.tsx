@@ -2,14 +2,13 @@ import {
   AchievementCard,
   AchievementFeatured,
   AchievementProgress,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { Item } from "#hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
 import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context";
 import { useArcade } from "#hooks/arcade";
-import { addAddressPadding } from "starknet";
 import { toast } from "sonner";
 
 const HIDDEN_GROUP = "Hidden";
@@ -170,8 +169,6 @@ function Group({
 
   const achievements = useMemo(() => {
     return items.map((item) => {
-      const pinned =
-        pins[addAddressPadding(address)]?.includes(item.id) && item.completed;
       return {
         id: item.id,
         index: item.index,
@@ -186,15 +183,6 @@ function Group({
           tasks: item.tasks,
           timestamp: item.completed ? item.timestamp : undefined,
         },
-        pin:
-          softview || !item.completed
-            ? undefined
-            : {
-                pinned: pinned,
-                achievementId: item.id,
-                disabled: !pinned && !enabled,
-                onClick: handlePin,
-              },
         share:
           softview ||
           !item.completed ||

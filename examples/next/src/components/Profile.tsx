@@ -2,7 +2,7 @@
 
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button } from "@cartridge/ui-next";
+import { Button } from "@cartridge/ui";
 import { STRK_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
 import { useEffect, useState } from "react";
 
@@ -48,6 +48,11 @@ export function Profile() {
             Trophies
           </Button>
           <Button
+            onClick={() => ctrlConnector.controller.openProfile("leaderboard")}
+          >
+            Leaderboard
+          </Button>
+          <Button
             onClick={() => ctrlConnector.controller.openProfile("activity")}
           >
             Activity
@@ -78,6 +83,15 @@ export function Profile() {
             }
           >
             Followers Closable
+          </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileTo(
+                "inventory?social=following&closable=true",
+              )
+            }
+          >
+            Following Closable
           </Button>
         </div>
         <div className="flex flex-wrap gap-1">

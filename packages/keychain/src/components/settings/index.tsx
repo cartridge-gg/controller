@@ -1,34 +1,38 @@
+import { useConnection } from "@/hooks/connection";
 import {
+  Button,
+  ControllerIcon,
+  CopyAddress,
+  GearIcon,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-  Button,
-  GearIcon,
-  SignOutIcon,
+  PlusIcon,
   Sheet,
   SheetClose,
   SheetContent,
   SheetFooter,
   SheetTrigger,
-  PlusIcon,
-  ControllerIcon,
-  CopyAddress,
+  SignOutIcon,
   Skeleton,
-} from "@cartridge/ui-next";
-import { useCallback, useState, useMemo } from "react";
-import { Recovery } from "./Recovery";
+} from "@cartridge/ui";
+import {
+  CredentialMetadata,
+  useControllerQuery,
+} from "@cartridge/ui/utils/api/cartridge";
+import { useCallback, useMemo, useState } from "react";
+import { constants } from "starknet";
+import CurrencySelect from "./currency-select";
 import { Delegate } from "./Delegate";
-import { useConnection } from "@/hooks/connection";
-import { Session, SessionCard } from "./session-card";
-import { SignerCard } from "./signer-card";
+import { Recovery } from "./Recovery";
 import {
   RegisteredAccount,
   RegisteredAccountCard,
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
-import CurrencySelect from "./currency-select";
-import { useSignerQuery } from "@cartridge/utils/api/cartridge";
+import { Session, SessionCard } from "./session-card";
+import { SignerCard } from "./signer-card";
 
 enum State {
   SETTINGS,
@@ -62,6 +66,7 @@ const registeredAccounts: RegisteredAccount[] = [
   },
 ];
 
+// TODO(tedison): Add signer address
 export function Settings() {
   const { logout, controller } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
@@ -77,11 +82,9 @@ export function Settings() {
     [],
   );
 
-  const data = useSignerQuery({
-    username:
-      process.env.NODE_ENV === "development"
-        ? "slot-auth-local"
-        : (controller?.username() as string),
+  const data = useControllerQuery({
+    username: controller?.username() ?? "",
+    chainId: constants.NetworkName.SN_MAIN,
   });
 
   const handleLogout = useCallback(() => {
@@ -154,16 +157,14 @@ export function Settings() {
                 ) : data.isError ? (
                   <div>Error</div>
                 ) : data.isSuccess && data.data ? (
-                  data.data?.account?.controllers.edges?.map((i, edgeIndex) =>
-                    i?.node?.signers?.map((j, signerIndex) => {
-                      return (
-                        <SignerCard
-                          key={`${edgeIndex}-${signerIndex}`}
-                          signerType={j.type}
-                        />
-                      );
-                    }),
-                  )
+                  data.data?.controller?.signers?.map((i, signerIndex) => {
+                    return (
+                      <SignerCard
+                        key={`${signerIndex}`}
+                        signer={i.metadata as CredentialMetadata}
+                      />
+                    );
+                  })
                 ) : (
                   <div>No data</div>
                 )}

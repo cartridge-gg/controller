@@ -1,22 +1,20 @@
-import { useToken } from "#hooks/token";
-import { Amount } from "@cartridge/ui-next";
+import { Token } from "#hooks/token";
+import { Amount } from "@cartridge/ui";
 import { useCallback, useMemo } from "react";
-import { useParams } from "react-router-dom";
 
 export function SendAmount({
+  token,
   amount,
   submitted,
   setAmount,
   setError,
 }: {
+  token: Token;
   amount: number | undefined;
   submitted: boolean;
   setAmount: (amount: number | undefined) => void;
   setError: (error: Error | undefined) => void;
 }) {
-  const { address: tokenAddress } = useParams<{ address: string }>();
-  const { token } = useToken({ tokenAddress: tokenAddress! });
-
   const conversion = useMemo(() => {
     if (!token || !token.balance.value || !amount) return undefined;
     const value = token.balance.value;

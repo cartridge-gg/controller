@@ -3,10 +3,11 @@ import {
   LayoutBottomTabs,
   ChestIcon,
   TrophyIcon,
-  ClockIcon,
   BottomTab,
-  cn,
-} from "@cartridge/ui-next";
+  PulseIcon,
+  LeaderboardIcon,
+} from "@cartridge/ui";
+import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
 import { useConnection } from "#hooks/context.js";
 
@@ -15,10 +16,11 @@ export function LayoutBottomNav() {
   const { namespace } = useConnection();
 
   const active = useMemo<
-    "inventory" | "trophies" | "achievements" | "activity"
+    "inventory" | "trophies" | "achievements" | "leaderboard" | "activity"
   >(() => {
     if (pathname.includes("inventory")) return "inventory";
     if (pathname.includes("achievements")) return "achievements";
+    if (pathname.includes("leaderboard")) return "leaderboard";
     if (pathname.includes("activity")) return "activity";
 
     return "inventory";
@@ -31,10 +33,7 @@ export function LayoutBottomNav() {
           to="../inventory"
           className="h-full w-full flex items-center justify-center"
         >
-          <ChestIcon
-            variant={active === "inventory" ? "solid" : "line"}
-            size="lg"
-          />
+          <ChestIcon variant="solid" size="lg" />
         </Link>
       </BottomTab>
       <BottomTab
@@ -45,10 +44,18 @@ export function LayoutBottomNav() {
           to="../achievements"
           className="h-full w-full flex items-center justify-center"
         >
-          <TrophyIcon
-            size="lg"
-            variant={active === "achievements" ? "solid" : "line"}
-          />
+          <TrophyIcon size="lg" variant="solid" />
+        </Link>
+      </BottomTab>
+      <BottomTab
+        status={active === "leaderboard" ? "active" : undefined}
+        className={cn(!namespace && "hidden")}
+      >
+        <Link
+          to="../leaderboard"
+          className="h-full w-full flex items-center justify-center"
+        >
+          <LeaderboardIcon size="lg" variant="solid" />
         </Link>
       </BottomTab>
       <BottomTab status={active === "activity" ? "active" : undefined}>
@@ -56,10 +63,7 @@ export function LayoutBottomNav() {
           to="../activity"
           className="h-full w-full flex items-center justify-center"
         >
-          <ClockIcon
-            size="lg"
-            variant={active === "activity" ? "solid" : "line"}
-          />
+          <PulseIcon size="lg" variant="solid" />
         </Link>
       </BottomTab>
     </LayoutBottomTabs>

@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import {
+  MintAllowance,
   StarterItemData,
   StarterItemType,
   useStarterPack,
@@ -9,14 +10,19 @@ import { StarterItem } from "./starter-item";
 import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function StarterPack({ starterpackId }: { starterpackId: string }) {
-  const { items, price } = useStarterPack(starterpackId);
+  const { name, description, items, supply, priceUsd, mintAllowance } =
+    useStarterPack(starterpackId);
 
   return (
     <Purchase
       type={PurchaseType.STARTERPACK}
       starterpackDetails={{
         id: starterpackId,
-        price,
+        name,
+        description,
+        priceUsd,
+        supply,
+        mintAllowance,
         starterPackItems: items,
       }}
     />
@@ -34,14 +40,26 @@ export function StarterPackWrapper() {
 }
 
 export function StarterPackContent({
+  mintAllowance,
   starterpackItems = [],
 }: {
+  mintAllowance?: MintAllowance;
   starterpackItems?: StarterItemData[];
 }) {
   return (
-    <>
-      <h1 className="text-xs font-semibold text-foreground-400">You receive</h1>
-      <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-row justify-between">
+        <h1 className="text-xs font-semibold text-foreground-400">
+          You receive
+        </h1>
+        {mintAllowance && (
+          <h1 className="text-xs font-semibold text-foreground-400">
+            Mints Remaining: {mintAllowance.limit - mintAllowance.count} /{" "}
+            {mintAllowance.limit}
+          </h1>
+        )}
+      </div>
+      <div className="flex flex-col gap-4">
         {starterpackItems
           .filter((item) => item.type === StarterItemType.NFT)
           .map((item, index) => (
@@ -53,6 +71,6 @@ export function StarterPackContent({
             <StarterItem key={index} {...item} />
           ))}
       </div>
-    </>
+    </div>
   );
 }

@@ -6,7 +6,8 @@ import {
   CardListItem,
   CardTitle,
   Spinner,
-} from "@cartridge/ui-next";
+  Thumbnail,
+} from "@cartridge/ui";
 
 type ReceivingProps = {
   title?: string;
@@ -28,7 +29,12 @@ export function Receiving({ title, items, isLoading }: ReceivingProps) {
         {items.map((item) => (
           <CardListItem className="flex flex-row items-center p-3">
             <div className="flex flex-row items-center gap-3">
-              <img src={item.image} className="size-8" />
+              <Thumbnail
+                size="lg"
+                icon={item.image}
+                variant="light"
+                rounded={item.type === StarterItemType.CREDIT}
+              />
               <div className="flex flex-col gap-0.5">
                 <p className="text-foreground-100 font-medium text-sm">
                   {item.type === StarterItemType.CREDIT

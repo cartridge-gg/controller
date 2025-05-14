@@ -1,4 +1,4 @@
-import { LayoutContainer, CheckIcon, LayoutHeader } from "@cartridge/ui-next";
+import { LayoutContainer, CheckIcon, LayoutHeader } from "@cartridge/ui";
 
 export function Success() {
   return (

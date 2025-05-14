@@ -18,7 +18,7 @@ import {
   Owner,
   AuthorizedSession,
   JsFeeSource,
-} from "@cartridge/account-wasm/controller";
+} from "@cartridge/controller-wasm/controller";
 
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";

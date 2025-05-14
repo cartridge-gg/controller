@@ -11,9 +11,9 @@ import {
   CardListContent,
   CardListItem,
   LayoutHeader,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
-import { OcclusionDetector } from "@/components/OcclusionDetector";
+// import { OcclusionDetector } from "@/components/OcclusionDetector";
 
 export function SignMessage({
   typedData,
@@ -38,13 +38,20 @@ export function SignMessage({
       initial: any,
       messageType: Array<{ name: string; type: string }>,
     ) => {
+      // Ensure messageType is actually an array before iterating
+      if (!Array.isArray(messageType)) {
+        return;
+      }
       for (const typeMember of messageType) {
         if (typeMember.type === "felt*") {
           const stringArray: Array<string> = initial[typeMember.name].map(
             (hex: string) => shortString.decodeShortString(hex),
           );
           initial[typeMember.name] = stringArray.join("");
-        } else if (typeMember.type !== "felt" && typeMember.type !== "string") {
+        } else if (
+          typedData.types[typeMember.type] && // Check if the type exists as a key in typedData.types
+          Array.isArray(typedData.types[typeMember.type]) // And ensure it's an array (a struct definition)
+        ) {
           convertFeltArraysToString(
             initial[typeMember.name],
             typedData.types[typeMember.type],
@@ -53,8 +60,13 @@ export function SignMessage({
       }
     };
 
-    convertFeltArraysToString(typedData.message, primaryTypeData);
-    setMessageData(typedData);
+    const messageCopy = JSON.parse(JSON.stringify(typedData.message));
+    convertFeltArraysToString(messageCopy, primaryTypeData);
+
+    setMessageData({
+      ...typedData,
+      message: messageCopy,
+    });
   }, [typedData]);
 
   const onConfirm = useCallback(async () => {
@@ -66,7 +78,7 @@ export function SignMessage({
 
   return (
     <>
-      <OcclusionDetector />
+      {/* <OcclusionDetector /> */}
       <LayoutContainer>
         <LayoutHeader
           title="Signature Request"

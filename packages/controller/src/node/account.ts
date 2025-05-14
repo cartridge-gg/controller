@@ -1,5 +1,5 @@
-import { Policy } from "@cartridge/account-wasm";
-import { CartridgeSessionAccount } from "@cartridge/account-wasm/session";
+import { Policy } from "@cartridge/controller-wasm";
+import { CartridgeSessionAccount } from "@cartridge/controller-wasm/session";
 import { Call, InvokeFunctionResponse, WalletAccount } from "starknet";
 
 import { normalizeCalls } from "../utils";

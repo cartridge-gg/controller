@@ -8,7 +8,7 @@ import {
   AccordionTrigger,
   Badge,
   Address,
-} from "@cartridge/ui-next";
+} from "@cartridge/ui";
 import { useExplorer } from "@starknet-react/core";
 import { constants, Call } from "starknet";
 import { useState, useEffect } from "react";

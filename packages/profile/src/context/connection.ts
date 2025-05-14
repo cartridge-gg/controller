@@ -1,4 +1,4 @@
-import { isIframe } from "@cartridge/utils";
+import { isIframe } from "@cartridge/ui/utils";
 import { createContext } from "react";
 import { Call, RpcProvider } from "starknet";
 

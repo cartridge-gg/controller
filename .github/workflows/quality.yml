@@ -7,53 +7,9 @@ on:
   pull_request:
 
 env:
-  CARGO_TERM_COLOR: always
-  RUST_VERSION: 1.85.0
   VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
 
 jobs:
-  ensure-wasm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_VERSION }}
-          target: wasm32-unknown-unknown
-      - run: |
-          cd packages/account_sdk
-          cargo build -r --target wasm32-unknown-unknown -p account_sdk
-
-  ensure-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_VERSION }}
-          target: x86_64-pc-windows-msvc
-      - run: cargo build --target x86_64-pc-windows-msvc -p account_sdk
-
-  clippy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_VERSION }}
-          components: clippy
-      - run: cargo clippy --all-targets --all-features
-
-  rust-fmt:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_VERSION }}
-          components: rustfmt
-      - uses: actions-rust-lang/rustfmt@v1
-
   ts-lint:
     runs-on: ubuntu-latest
     steps:
