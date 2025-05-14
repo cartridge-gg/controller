@@ -70,7 +70,7 @@ export function Purchase({
   starterpackDetails,
   initState = PurchaseState.SELECTION,
 }: PurchaseCreditsProps) {
-  const { controller, closeModal } = useConnection();
+  const { controller, closeModal, policies } = useConnection();
   const {
     isLoading: isLoadingWallets,
     error: walletError,
@@ -90,6 +90,22 @@ export function Purchase({
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
   const [displayError, setDisplayError] = useState<Error | null>(null);
+  const [hasValidSession, setHasValidSession] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!controller || !policies) {
+      return;
+    }
+    controller.isRequestedSession(policies).then((isValid) => {
+      setHasValidSession(isValid);
+
+      if (!isValid) {
+        setDisplayError(
+          new Error("No active session, please logout and login again"),
+        );
+      }
+    });
+  }, [controller, policies]);
 
   const {
     stripePromise,
@@ -305,7 +321,7 @@ export function Purchase({
             Close
           </Button>
         )}
-        {state === PurchaseState.SELECTION && (
+        {state === PurchaseState.SELECTION && hasValidSession && (
           <PurchaseActions
             starterpackDetails={starterpackDetails}
             isStripeLoading={isStripeLoading}
