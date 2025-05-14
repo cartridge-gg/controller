@@ -45,6 +45,10 @@ export default defineConfig(({ mode }) => ({
       external: [],
       output: {
         manualChunks(id) {
+          if (id.includes("commonjsHelpers.js")) {
+            return "commonjs";
+          }
+
           // Chunk splitting logic
           if (id.includes("node_modules")) {
             if (id.includes("react")) {
