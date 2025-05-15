@@ -61,7 +61,7 @@ export async function loadConfig(
 
     return await response.json();
   } catch (error) {
-    console.error(`Error loading config ${configName}:`, error);
+    console.error("Error loading config %s:", configName, error);
     return null;
   }
 }
@@ -87,7 +87,7 @@ export async function loadAllConfigs(): Promise<
           configsMap[configName] = config;
         }
       } catch (error) {
-        console.error(`Error loading config ${configName}:`, error);
+        console.error("Error loading config %s:", configName, error);
       }
     }),
   );
