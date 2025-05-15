@@ -185,14 +185,16 @@ const CreateSessionLayout = ({
           {error && <ControllerErrorAlert className="mb-3" error={error} />}
 
           <div className="flex items-center gap-4">
-            <Button
-              variant="secondary"
-              onClick={onSkipSession}
-              disabled={isConnecting || hasRequiredPolicy}
-              className="px-8"
-            >
-              Skip
-            </Button>
+            {!hasRequiredPolicy && (
+              <Button
+                variant="secondary"
+                onClick={onSkipSession}
+                disabled={isConnecting}
+                className="px-8"
+              >
+                Skip
+              </Button>
+            )}
             <Button
               className="flex-1"
               disabled={isConnecting || (!policies?.verified && !isConsent)}
