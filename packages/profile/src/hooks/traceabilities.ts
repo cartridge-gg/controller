@@ -6,7 +6,7 @@ import {
 import { useConnection } from "./context";
 import { formatAddress, getDate } from "@cartridge/ui/utils";
 import { useUsernames } from "./account";
-import { getChecksumAddress } from "starknet";
+import { addAddressPadding, getChecksumAddress } from "starknet";
 
 const LIMIT = 0;
 
@@ -25,6 +25,7 @@ export interface CardProps {
 }
 
 export type Traceability = {
+  project: string;
   amount: number;
   contractAddress: string;
   decimals: number;
@@ -98,6 +99,7 @@ export function useTraceabilities({
             }) => {
               const key = `${transactionHash}-${eventId}`;
               const traceability: Traceability = {
+                project: item.meta.project,
                 amount: Number(amount),
                 contractAddress,
                 decimals: Number(decimals),
@@ -133,14 +135,6 @@ export function useTraceabilities({
     const results = Object.values(traceabilities).map((traceability) => {
       const timestamp = new Date(traceability.executedAt).getTime();
       const date = getDate(timestamp);
-      let metadata = [];
-      try {
-        metadata = JSON.parse(
-          !traceability.metadata ? "[]" : traceability.metadata,
-        );
-      } catch (error) {
-        console.warn(error);
-      }
       const from = `0x${BigInt(traceability.fromAddress).toString(16)}`;
       const fromName =
         usernames.find((username) => username.address === from)?.username ??
@@ -153,6 +147,7 @@ export function useTraceabilities({
         formatAddress(getChecksumAddress(to), {
           size: "xs",
         });
+      const image = `https://api.cartridge.gg/x/${traceability.project}/torii/static/0x${BigInt(traceability.contractAddress).toString(16)}/${addAddressPadding(traceability.tokenId)}/image`;
       return {
         key: `${traceability.transactionHash}-${traceability.eventId}`,
         contractAddress: traceability.contractAddress,
@@ -160,7 +155,7 @@ export function useTraceabilities({
         amount: traceability.amount,
         from: fromName,
         to: toName,
-        image: metadata.image || "",
+        image: image,
         action: BigInt(traceability.fromAddress) === 0n ? "mint" : "send",
         timestamp: timestamp / 1000,
         date: date,
