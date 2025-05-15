@@ -18,7 +18,8 @@ import {
   toSessionPolicies,
 } from "@cartridge/controller";
 import { AsyncMethodReturns } from "@cartridge/penpal";
-import { controllerConfigs, defaultTheme, Policies } from "@cartridge/presets";
+import { defaultTheme, Policies, ControllerTheme } from "@cartridge/presets";
+import { loadConfig } from "@cartridge/presets/config-loader";
 import { useThemeEffect } from "@cartridge/ui";
 import { isIframe, normalizeOrigin } from "@cartridge/ui/utils";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -65,6 +66,10 @@ export function useConnectionValue() {
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [verified, setVerified] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [configData, setConfigData] = useState<Record<string, unknown> | null>(
+    null,
+  );
   const [theme, setTheme] = useState<VerifiableControllerTheme>({
     verified: true,
     ...defaultTheme,
@@ -118,16 +123,25 @@ export function useConnectionValue() {
 
   // Check if preset is verified for the current origin, supporting wildcards
   useEffect(() => {
-    if (
-      !urlParams.preset ||
-      !controllerConfigs?.[urlParams.preset] ||
-      !controllerConfigs?.[urlParams.preset]?.origin
-    ) {
+    if (!urlParams.preset) {
       return;
     }
 
-    const allowedOrigins = toArray(controllerConfigs[urlParams.preset].origin);
-    setVerified(isOriginVerified(origin, allowedOrigins));
+    setLoading(true);
+    loadConfig(urlParams.preset)
+      .then((config: Record<string, unknown>) => {
+        if (config && config.origin) {
+          const allowedOrigins = toArray(config.origin as string | string[]);
+          setVerified(isOriginVerified(origin, allowedOrigins));
+          setConfigData(config);
+        }
+      })
+      .catch((error: Error) => {
+        console.error("Failed to load config:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [origin, urlParams]);
 
   // Handle theme configuration
@@ -137,24 +151,71 @@ export function useConnectionValue() {
     if (urlTheme) {
       try {
         const decodedPreset = decodeURIComponent(urlTheme);
-        if (controllerConfigs?.[decodedPreset]?.theme) {
+        if (loading) {
+          return; // Wait for loading to complete
+        }
+
+        if (
+          configData &&
+          typeof configData[decodedPreset] === "object" &&
+          configData[decodedPreset] &&
+          "theme" in (configData[decodedPreset] as object)
+        ) {
+          const presetConfig = configData[decodedPreset] as Record<
+            string,
+            unknown
+          >;
           setTheme({
-            ...controllerConfigs[decodedPreset].theme,
+            ...(presetConfig.theme as ControllerTheme),
             verified,
           });
         } else {
-          console.error("Theme preset not valid");
+          setLoading(true);
+          loadConfig(decodedPreset)
+            .then((config: Record<string, unknown>) => {
+              if (config?.theme) {
+                setTheme({
+                  ...(config.theme as ControllerTheme),
+                  verified,
+                });
+              } else {
+                setTheme({
+                  verified: true,
+                  ...defaultTheme,
+                });
+              }
+            })
+            .catch(() => {
+              setTheme({
+                verified: true,
+                ...defaultTheme,
+              });
+            })
+            .finally(() => {
+              setLoading(false);
+            });
         }
       } catch (e) {
         console.error("Failed to decode theme preset:", e);
+        setTheme({
+          verified: true,
+          ...defaultTheme,
+        });
       }
-    } else if (preset && controllerConfigs?.[preset]?.theme) {
-      setTheme({
-        verified,
-        ...controllerConfigs[preset].theme,
-      });
+    } else if (preset && !loading && configData) {
+      if (configData && "theme" in configData) {
+        setTheme({
+          verified,
+          ...(configData.theme as ControllerTheme),
+        });
+      } else {
+        setTheme({
+          verified: true,
+          ...defaultTheme,
+        });
+      }
     }
-  }, [urlParams, verified]);
+  }, [urlParams, verified, configData, loading]);
 
   // Handle policies configuration
   useEffect(() => {
@@ -176,17 +237,33 @@ export function useConnectionValue() {
       } catch (e) {
         console.error("Failed to parse policies:", e);
       }
-    } else if (chainId && preset && controllerConfigs?.[preset]?.chains) {
+    } else if (chainId && preset && !loading && configData) {
       try {
         const decodedChainId = shortString.decodeShortString(chainId);
-        const presetChains = controllerConfigs[preset].chains;
 
-        if (presetChains?.[decodedChainId]?.policies) {
-          // Set policies from preset if no URL policies
+        if (
+          configData &&
+          "chains" in configData &&
+          typeof configData.chains === "object" &&
+          configData.chains &&
+          decodedChainId in (configData.chains as object) &&
+          (configData.chains as Record<string, unknown>)[decodedChainId] &&
+          typeof (configData.chains as Record<string, unknown>)[
+            decodedChainId
+          ] === "object" &&
+          "policies" in
+            ((configData.chains as Record<string, unknown>)[
+              decodedChainId
+            ] as object)
+        ) {
+          const chainConfig = (
+            configData.chains as Record<string, Record<string, unknown>>
+          )[decodedChainId];
+          // Set policies from loaded config if no URL policies
           setPolicies(
             parseSessionPolicies({
               verified,
-              policies: presetChains[decodedChainId].policies,
+              policies: toSessionPolicies(chainConfig.policies as Policies),
             }),
           );
         }
@@ -194,7 +271,7 @@ export function useConnectionValue() {
         console.error("Failed to process chain policies:", e);
       }
     }
-  }, [urlParams, chainId, verified]);
+  }, [urlParams, chainId, verified, configData, loading]);
 
   useThemeEffect({ theme, assetUrl: "" });
 
@@ -346,6 +423,7 @@ export function useConnectionValue() {
     rpcUrl,
     policies,
     theme,
+    loading,
     verified,
     chainId,
     configSignupOptions,

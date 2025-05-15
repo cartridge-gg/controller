@@ -1,8 +1,5 @@
-import {
-  defaultTheme,
-  controllerConfigs,
-  ControllerTheme,
-} from "@cartridge/presets";
+import { defaultTheme, ControllerTheme } from "@cartridge/presets";
+import { loadConfig } from "@cartridge/presets/config-loader";
 import { useThemeEffect } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -48,6 +45,7 @@ export function ThemeProvider({
     [storageKey],
   );
   const [theme, setTheme] = useState<ControllerTheme>(initialState.theme);
+  const [loading, setLoading] = useState<boolean>(false);
   const themeParam = searchParams.get("theme");
   const presetParam = searchParams.get("preset");
   const { origin } = useConnection();
@@ -60,13 +58,41 @@ export function ThemeProvider({
         const parsedTheme = JSON.parse(decodedPreset) as ControllerTheme;
         setTheme(parsedTheme);
       } catch {
-        setTheme(controllerConfigs[decodedPreset].theme || defaultTheme);
+        setLoading(true);
+        loadConfig(decodedPreset)
+          .then((config) => {
+            if (config?.theme) {
+              setTheme(config.theme || defaultTheme);
+            } else {
+              setTheme(defaultTheme);
+            }
+          })
+          .catch(() => {
+            setTheme(defaultTheme);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
       }
     }
 
     // Handle theme from preset param
-    if (presetParam && presetParam in controllerConfigs) {
-      setTheme(controllerConfigs[presetParam].theme || defaultTheme);
+    if (presetParam) {
+      setLoading(true);
+      loadConfig(presetParam)
+        .then((config) => {
+          if (config?.theme) {
+            setTheme(config.theme || defaultTheme);
+          } else {
+            setTheme(defaultTheme);
+          }
+        })
+        .catch(() => {
+          setTheme(defaultTheme);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [themeParam, presetParam, origin]);
 
@@ -76,6 +102,7 @@ export function ThemeProvider({
     colorScheme,
     setColorScheme,
     theme,
+    loading,
   };
 
   return (
