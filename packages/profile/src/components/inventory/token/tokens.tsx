@@ -25,7 +25,7 @@ export function Tokens() {
 
   return status === "loading" ? (
     <LoadingState />
-  ) : status === "error" || !tokens.length ? (
+  ) : status === "error" ? (
     <EmptyState />
   ) : (
     <div
