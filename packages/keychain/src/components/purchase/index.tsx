@@ -1,5 +1,5 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { useConnection } from "@/hooks/connection";
+import { useConnection, useConnectionValue } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import {
   Button,
@@ -71,6 +71,11 @@ export function Purchase({
   initState = PurchaseState.SELECTION,
 }: PurchaseCreditsProps) {
   const { controller, closeModal } = useConnection();
+  const { policies, chainId } = useConnectionValue();
+
+  console.log("broody - policies", policies);
+  console.log("broody - chainId", chainId);
+
   const {
     isLoading: isLoadingWallets,
     error: walletError,
