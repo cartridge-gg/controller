@@ -23,7 +23,7 @@ export type ConnectionContextValue = {
   rpcUrl: string;
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
-  loading: boolean;
+  isConfigLoading: boolean;
   configSignupOptions?: AuthOptions;
   verified: boolean;
   chainId?: string;

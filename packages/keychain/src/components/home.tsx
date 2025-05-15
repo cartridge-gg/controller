@@ -23,7 +23,7 @@ import { StarterPack } from "./starterpack";
 import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function Home() {
-  const { context, setContext, controller, policies, origin, loading } =
+  const { context, setContext, controller, policies, origin, isConfigLoading } =
     useConnection();
   const upgrade = useUpgrade();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
@@ -58,7 +58,11 @@ export function Home() {
     return <CreateController loginMode={LoginMode.Controller} />;
   }
 
-  if (!upgrade.isSynced || hasSessionForPolicies === undefined || loading) {
+  if (
+    !upgrade.isSynced ||
+    hasSessionForPolicies === undefined ||
+    isConfigLoading
+  ) {
     // This is likely never observable in a real application but just in case.
     return <PageLoading />;
   }
