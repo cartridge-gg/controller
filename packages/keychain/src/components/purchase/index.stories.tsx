@@ -55,7 +55,7 @@ export const FreeStarterpack: Story = {
         {
           title: "Booster Pack",
           collectionName: "Chaos Surfers",
-          description: "Contains five random playable agents",
+          description: "Contains random playable agents",
           price: 0,
           image:
             "https://storage.googleapis.com/c7e-prod-static/media/chaos.png",
@@ -96,7 +96,7 @@ export const FreeStarterpackLimitReached: Story = {
         {
           title: "Booster Pack",
           collectionName: "Chaos Surfers",
-          description: "Contains five random playable agents",
+          description: "Contains random playable agents",
           price: 0,
           image:
             "https://storage.googleapis.com/c7e-prod-static/media/chaos.png",
