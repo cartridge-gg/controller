@@ -4,8 +4,24 @@ import { UseTokensResponse, UseTokenResponse, Token } from "./token";
 
 export * from "./token";
 
+export const credits = {
+  balance: {
+    amount: 1,
+    value: 0,
+    change: 0,
+  },
+  metadata: {
+    address: "credits",
+    name: "Credits",
+    symbol: "CREDITS",
+    image: "https://static.cartridge.gg/presets/credit/icon.svg",
+    decimals: 18,
+  },
+};
+
 export const useTokens: Mock<() => UseTokensResponse> = fn(() => ({
   tokens: Object.values(tokens) as Token[],
+  credits: credits,
   status: "success" as const,
 })).mockName("useTokens");
 
