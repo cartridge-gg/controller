@@ -1,4 +1,4 @@
-import { useState, ReactNode, useMemo } from "react";
+import { useState, ReactNode, useMemo, useEffect } from "react";
 import { useAchievements } from "#hooks/achievements";
 import { DataContext } from "#context/data";
 import {
@@ -54,6 +54,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return Object.values(games).find((game) => game.id === edition?.gameId);
   }, [games, edition]);
 
+  const projects = useMemo(() => {
+    const projects = project ? [project] : [];
+    return projects.map((proejct) => {
+      return {
+        project: proejct,
+        address,
+        limit: 0,
+      };
+    });
+  }, [project, address]);
+
   const trophies = useAchievements(accountAddress);
 
   const {
@@ -62,16 +73,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refetch: refetchTransfers,
   } = useTransfersQuery(
     {
-      projects: {
-        project: project ?? "",
-        address,
-        date: "",
-        limit: 0,
-      },
+      projects: projects.map((p) => ({ ...p, date: "" })),
     },
     {
-      queryKey: ["transfers", address, project, isVisible],
-      enabled: !!address && !!project,
+      queryKey: ["transfers", address, project],
+      enabled: !!address && projects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
@@ -82,15 +88,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refetch: refetchTransactions,
   } = useActivitiesQuery(
     {
-      projects: {
-        project: project ?? "",
-        address,
-        limit: 0,
-      },
+      projects,
     },
     {
-      queryKey: ["activities", address, project, isVisible],
-      enabled: !!address && !!project,
+      queryKey: ["activities", address, project],
+      enabled: !!address && projects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
@@ -249,6 +251,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       (a, b) => b.timestamp - a.timestamp,
     );
   }, [erc20s, erc721s, actions, achievements]);
+
+  useEffect(() => {
+    if (isVisible) {
+      refetchTransactions();
+      refetchTransfers();
+    }
+  }, [isVisible, refetchTransactions, refetchTransfers]);
 
   return (
     <DataContext.Provider
