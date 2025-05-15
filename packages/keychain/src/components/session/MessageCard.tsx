@@ -81,6 +81,7 @@ export function MessageContent({
                 onCheckedChange={(enabled) =>
                   m.id ? onToggleMessage(m.id, enabled) : null
                 }
+                disabled={m.isRequired}
                 className={cn(
                   isEditable ? "visible" : "invisible pointer-events-none", // use visible class to prevent layout shift
                 )}
