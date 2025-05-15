@@ -99,7 +99,7 @@ export type UseBalancesResponse = {
 
 export function useBalances(accountAddress?: string): UseBalancesResponse {
   const { address: connectedAddress } = useAccount();
-  const { project, erc20 } = useConnection();
+  const { project } = useConnection();
   const [offset, setOffset] = useState(0);
   const [tokens, setTokens] = useState<{ [key: string]: Token }>({});
   const address = useMemo(
@@ -109,7 +109,7 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
 
   const projects = useMemo(() => {
     return project ? [project, TOKENS_TORII_INSTANCE] : [];
-  }, [project, erc20]);
+  }, [project]);
 
   const { status } = useBalancesQuery(
     {
