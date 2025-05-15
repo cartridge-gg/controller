@@ -49,6 +49,7 @@ export function MessageCard({ messages, isExpanded }: MessageCardProps) {
 type SignMessagePolicyWithEnabled = SignMessagePolicy & {
   authorized?: boolean;
   id?: string;
+  isRequired?: boolean;
 };
 
 export function MessageContent({

@@ -47,6 +47,7 @@ export type SessionContracts = Record<
 export type SessionMessages = (SignMessagePolicy & {
   authorized?: boolean;
   id?: string;
+  isRequired?: boolean;
 })[];
 
 const VRF_ADDRESS = getChecksumAddress(
