@@ -1,5 +1,5 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { useConnection } from "@/hooks/connection";
+import { useConnection, useConnectionValue } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import {
   Button,
@@ -70,7 +70,8 @@ export function Purchase({
   starterpackDetails,
   initState = PurchaseState.SELECTION,
 }: PurchaseCreditsProps) {
-  const { controller, closeModal, policies } = useConnection();
+  const { controller, closeModal } = useConnection();
+  const { policies } = useConnectionValue();
   const {
     isLoading: isLoadingWallets,
     error: walletError,
@@ -96,6 +97,7 @@ export function Purchase({
     if (!controller || !policies) {
       return;
     }
+
     controller.isRequestedSession(policies).then((isValid) => {
       setHasValidSession(isValid);
 
