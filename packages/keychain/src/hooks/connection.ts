@@ -129,11 +129,11 @@ export function useConnectionValue() {
 
     setLoading(true);
     loadConfig(urlParams.preset)
-      .then((config: Record<string, unknown>) => {
+      .then((config) => {
         if (config && config.origin) {
           const allowedOrigins = toArray(config.origin as string | string[]);
           setVerified(isOriginVerified(origin, allowedOrigins));
-          setConfigData(config);
+          setConfigData(config as Record<string, unknown>);
         }
       })
       .catch((error: Error) => {
@@ -172,7 +172,7 @@ export function useConnectionValue() {
         } else {
           setLoading(true);
           loadConfig(decodedPreset)
-            .then((config: Record<string, unknown>) => {
+            .then((config) => {
               if (config?.theme) {
                 setTheme({
                   ...(config.theme as ControllerTheme),
