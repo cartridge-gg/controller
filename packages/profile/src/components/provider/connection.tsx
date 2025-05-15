@@ -1,13 +1,6 @@
 import { connectToParent } from "@cartridge/penpal";
 import { useState, ReactNode, useEffect, useCallback } from "react";
-import {
-  ETH_CONTRACT_ADDRESS,
-  normalize,
-  STRK_CONTRACT_ADDRESS,
-  USDC_CONTRACT_ADDRESS,
-  USDT_CONTRACT_ADDRESS,
-  DAI_CONTRACT_ADDRESS,
-} from "@cartridge/ui/utils";
+import { normalize, STRK_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
 import { constants, getChecksumAddress, hash, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -62,23 +55,15 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       if (!state.erc20.length) {
         const erc20Param = searchParams.get("erc20");
         state.erc20 = [
-          ETH_CONTRACT_ADDRESS,
           STRK_CONTRACT_ADDRESS,
-          USDC_CONTRACT_ADDRESS,
-          USDT_CONTRACT_ADDRESS,
-          DAI_CONTRACT_ADDRESS,
           ...(erc20Param
             ? decodeURIComponent(erc20Param)
                 .split(",")
                 .filter(
                   (address) =>
-                    ![
-                      ETH_CONTRACT_ADDRESS,
-                      STRK_CONTRACT_ADDRESS,
-                      USDC_CONTRACT_ADDRESS,
-                      USDT_CONTRACT_ADDRESS,
-                      DAI_CONTRACT_ADDRESS,
-                    ].includes(getChecksumAddress(address)),
+                    ![STRK_CONTRACT_ADDRESS].includes(
+                      getChecksumAddress(address),
+                    ),
                 )
             : []),
         ];
