@@ -6,7 +6,7 @@ export * from "./token";
 
 export const credits = {
   balance: {
-    amount: 1,
+    amount: 1.234567,
     value: 0,
     change: 0,
   },
@@ -15,7 +15,7 @@ export const credits = {
     name: "Credits",
     symbol: "CREDITS",
     image: "https://static.cartridge.gg/presets/credit/icon.svg",
-    decimals: 18,
+    decimals: 6,
   },
 };
 

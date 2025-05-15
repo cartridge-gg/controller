@@ -193,7 +193,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
       metadata: {
         name: "Credits",
         symbol: "Credits",
-        decimals: 0,
+        decimals: 6,
         address: "credit",
         image: "https://static.cartridge.gg/presets/credit/icon.svg",
       },
