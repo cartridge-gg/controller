@@ -25,6 +25,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   chainId: "SN_MAIN",
   parent: undefined,
   verified: false,
+  isConfigLoading: false,
   theme: {
     verified: true,
     name: "test",

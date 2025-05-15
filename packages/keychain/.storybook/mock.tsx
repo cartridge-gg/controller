@@ -1,10 +1,11 @@
 import { constants, RpcProvider } from "starknet";
 import Controller from "@cartridge/controller";
-import { controllerConfigs, SessionPolicies } from "@cartridge/presets";
+import { ResponseCodes } from "@cartridge/controller";
+import { SessionPolicies } from "@cartridge/presets";
+import { defaultTheme } from "@cartridge/presets";
 import { Parameters } from "@storybook/react";
 import { ConnectionContextValue } from "../src/components/provider/connection";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
-import { defaultTheme } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
 import {
   UpgradeContext,
@@ -40,7 +41,9 @@ export function useMockedConnection(
     ...rest
   } = parameters.connection ?? {};
   const theme = parameters.preset
-    ? (controllerConfigs[parameters.preset].theme ?? defaultTheme)
+    ? parameters.preset === "default"
+      ? defaultTheme
+      : defaultTheme // We'll use default theme since we can't load dynamically in this mock
     : defaultTheme;
 
   useThemeEffect({
@@ -49,6 +52,7 @@ export function useMockedConnection(
   });
 
   return {
+    parent: undefined,
     context,
     controller: {
       address: () =>
@@ -67,12 +71,50 @@ export function useMockedConnection(
     rpcUrl: "http://api.cartridge.gg/x/starknet/mainnet",
     policies: {},
     theme: { ...theme, verified: true },
+    loading: false,
+    verified: true,
     setContext: () => {},
     setController: () => {},
-    closeModal: () => {},
-    openModal: () => {},
-    logout: () => {},
+    closeModal: () => Promise.resolve(),
+    openModal: () => Promise.resolve(),
+    logout: () => Promise.resolve(),
     openSettings: () => {},
+    externalDetectWallets: () => Promise.resolve([]),
+    externalConnectWallet: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalSignMessage: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalSignTypedData: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalSendTransaction: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalGetBalance: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
     ...rest,
   };
 }
