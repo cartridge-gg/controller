@@ -7,7 +7,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context.js";
-import { getChecksumAddress } from "starknet";
+import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { useArcade } from "#hooks/arcade.js";
 import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
@@ -147,8 +147,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const erc721s: CardProps[] = useMemo(() => {
     return (
-      transfers?.transfers?.items.flatMap((item) =>
-        item.transfers
+      transfers?.transfers?.items.flatMap((item) => {
+        return item.transfers
           .filter(({ tokenId }) => !!tokenId)
           .map((transfer) => {
             const timestamp = new Date(transfer.executedAt).getTime();
@@ -166,6 +166,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 (attribute: { trait: string; value: string }) =>
                   attribute?.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
+            const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/0x${BigInt(transfer.contractAddress).toString(16)}/${addAddressPadding(transfer.tokenId)}/image`;
             return {
               variant: "collectible",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
@@ -179,7 +180,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                   ? transfer.toAddress
                   : transfer.fromAddress,
               value: "",
-              image: metadata.image || "",
+              image: image,
               action:
                 BigInt(transfer.fromAddress) === 0n
                   ? "mint"
@@ -189,8 +190,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
               timestamp: timestamp / 1000,
               date: date,
             } as CardProps;
-          }),
-      ) || []
+          });
+      }) || []
     );
   }, [transfers, address]);
 
