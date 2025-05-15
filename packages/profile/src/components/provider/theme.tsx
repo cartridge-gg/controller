@@ -1,5 +1,5 @@
 import { defaultTheme, ControllerTheme } from "@cartridge/presets";
-import { loadConfig } from "@cartridge/presets/config-loader";
+import { loadConfig } from "../../utils/config-loader";
 import { useThemeEffect } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";

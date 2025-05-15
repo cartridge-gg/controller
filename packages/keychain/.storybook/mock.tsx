@@ -1,5 +1,6 @@
 import { constants, RpcProvider } from "starknet";
 import Controller from "@cartridge/controller";
+import { ResponseCodes } from "@cartridge/controller";
 import { SessionPolicies } from "@cartridge/presets";
 import { defaultTheme } from "@cartridge/presets";
 import { Parameters } from "@storybook/react";
@@ -79,11 +80,41 @@ export function useMockedConnection(
     logout: () => Promise.resolve(),
     openSettings: () => {},
     externalDetectWallets: () => Promise.resolve([]),
-    externalConnectWallet: () => Promise.resolve({}),
-    externalSignMessage: () => Promise.resolve({}),
-    externalSignTypedData: () => Promise.resolve({}),
-    externalSendTransaction: () => Promise.resolve({}),
-    externalGetBalance: () => Promise.resolve({}),
+    externalConnectWallet: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalSignMessage: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalSignTypedData: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalSendTransaction: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalGetBalance: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
     ...rest,
   };
 }

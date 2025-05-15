@@ -19,7 +19,7 @@ import {
 } from "@cartridge/controller";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import { defaultTheme, Policies, ControllerTheme } from "@cartridge/presets";
-import { loadConfig } from "@cartridge/presets/config-loader";
+import { loadConfig } from "../utils/config-loader";
 import { useThemeEffect } from "@cartridge/ui";
 import { isIframe, normalizeOrigin } from "@cartridge/ui/utils";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
