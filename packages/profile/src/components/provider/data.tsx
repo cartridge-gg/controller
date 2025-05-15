@@ -1,4 +1,4 @@
-import { useState, ReactNode, useMemo } from "react";
+import { useState, ReactNode, useMemo, useEffect } from "react";
 import { useAchievements } from "#hooks/achievements";
 import { DataContext } from "#context/data";
 import {
@@ -7,7 +7,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context.js";
-import { getChecksumAddress } from "starknet";
+import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { useArcade } from "#hooks/arcade.js";
 import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
@@ -54,6 +54,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return Object.values(games).find((game) => game.id === edition?.gameId);
   }, [games, edition]);
 
+  const projects = useMemo(() => {
+    const projects = project ? [project] : [];
+    return projects.map((proejct) => {
+      return {
+        project: proejct,
+        address,
+        limit: 0,
+      };
+    });
+  }, [project, address]);
+
   const trophies = useAchievements(accountAddress);
 
   const {
@@ -62,16 +73,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refetch: refetchTransfers,
   } = useTransfersQuery(
     {
-      projects: {
-        project: project ?? "",
-        address,
-        date: "",
-        limit: 0,
-      },
+      projects: projects.map((p) => ({ ...p, date: "" })),
     },
     {
-      queryKey: ["transfers", address, project, isVisible],
-      enabled: !!address && !!project,
+      queryKey: ["transfers", address, project],
+      enabled: !!address && projects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
@@ -82,15 +88,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refetch: refetchTransactions,
   } = useActivitiesQuery(
     {
-      projects: {
-        project: project ?? "",
-        address,
-        limit: 0,
-      },
+      projects,
     },
     {
-      queryKey: ["activities", address, project, isVisible],
-      enabled: !!address && !!project,
+      queryKey: ["activities", address, project],
+      enabled: !!address && projects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
@@ -145,8 +147,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const erc721s: CardProps[] = useMemo(() => {
     return (
-      transfers?.transfers?.items.flatMap((item) =>
-        item.transfers
+      transfers?.transfers?.items.flatMap((item) => {
+        return item.transfers
           .filter(({ tokenId }) => !!tokenId)
           .map((transfer) => {
             const timestamp = new Date(transfer.executedAt).getTime();
@@ -164,6 +166,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 (attribute: { trait: string; value: string }) =>
                   attribute?.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
+            const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/0x${BigInt(transfer.contractAddress).toString(16)}/${addAddressPadding(transfer.tokenId)}/image`;
             return {
               variant: "collectible",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
@@ -177,7 +180,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                   ? transfer.toAddress
                   : transfer.fromAddress,
               value: "",
-              image: metadata.image || "",
+              image: image,
               action:
                 BigInt(transfer.fromAddress) === 0n
                   ? "mint"
@@ -187,8 +190,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
               timestamp: timestamp / 1000,
               date: date,
             } as CardProps;
-          }),
-      ) || []
+          });
+      }) || []
     );
   }, [transfers, address]);
 
@@ -249,6 +252,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       (a, b) => b.timestamp - a.timestamp,
     );
   }, [erc20s, erc721s, actions, achievements]);
+
+  useEffect(() => {
+    if (isVisible) {
+      refetchTransactions();
+      refetchTransfers();
+    }
+  }, [isVisible, refetchTransactions, refetchTransfers]);
 
   return (
     <DataContext.Provider

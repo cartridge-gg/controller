@@ -56,15 +56,7 @@ export function useCollectible({
       queryKey: ["collectible"],
       enabled: !!project && !!address,
       onSuccess: ({ collectible }) => {
-        const assets = collectible.assets;
-        const first = assets.length > 0 ? assets[0] : undefined;
-        let metadata: { image?: string } = {};
-        try {
-          metadata = JSON.parse(!first?.metadata ? "{}" : first.metadata);
-        } catch (error) {
-          console.warn(error);
-        }
-        const imageUrl = metadata?.image || collectible.meta.imagePath;
+        const imageUrl = collectible.meta.imagePath;
         const name = collectible.meta.name;
         const newCollectible: Collectible = {
           address: collectible.meta.contractAddress,
@@ -89,18 +81,12 @@ export function useCollectible({
           } catch (error) {
             console.error(error);
           }
-          let metadata: { image?: string } = {};
-          try {
-            metadata = JSON.parse(!a.metadata ? "{}" : a.metadata);
-          } catch (error) {
-            console.warn(error);
-          }
           const name = a.name;
           const asset: Asset = {
             tokenId: a.tokenId,
             name: name ? name : "---",
             description: a.description ?? "",
-            imageUrl: metadata?.image ?? imageUrl,
+            imageUrl: imageUrl,
             attributes: attributes,
             amount: a.amount,
           };

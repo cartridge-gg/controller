@@ -1,25 +1,60 @@
-import { Empty, Skeleton, TokenCard } from "@cartridge/ui";
+import { Empty, MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
 import { Link } from "react-router-dom";
 import { Token, useTokens } from "#hooks/token";
 import placeholder from "/public/placeholder.svg";
+import { useEffect, useMemo, useState } from "react";
+import { useConnection } from "#hooks/context.js";
+import { cn } from "@cartridge/ui/utils";
+
+const DEFAULT_TOKENS_COUNT = 2;
 
 export function Tokens() {
-  const { tokens, status } = useTokens();
+  const { isVisible } = useConnection();
+  const { tokens, credits, status } = useTokens();
+  const [unfolded, setUnfolded] = useState(false);
+
+  const filteredTokens = useMemo(() => {
+    return tokens
+      .filter((token) => token.balance.amount > 0)
+      .sort((a, b) => b.balance.value - a.balance.value);
+  }, [tokens]);
+
+  useEffect(() => {
+    setUnfolded(false);
+  }, [isVisible]);
 
   return status === "loading" ? (
     <LoadingState />
-  ) : status === "error" || !tokens.length ? (
+  ) : status === "error" ? (
     <EmptyState />
   ) : (
     <div
       className="rounded overflow-clip w-full flex flex-col gap-y-px"
       style={{ scrollbarWidth: "none" }}
     >
-      {tokens
-        .filter((token) => token.balance.amount > 0)
+      <TokenCardContent token={credits} />
+      {filteredTokens
+        .slice(0, unfolded ? tokens.length : DEFAULT_TOKENS_COUNT)
         .map((token) => (
           <TokenCardContent key={token.metadata.address} token={token} />
         ))}
+      <div
+        className={cn(
+          "flex justify-center items-center gap-1 p-2 rounded-b cursor-pointer",
+          "bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-200",
+          tokens.length <= DEFAULT_TOKENS_COUNT && "hidden",
+        )}
+        onClick={() => setUnfolded(!unfolded)}
+      >
+        {unfolded ? (
+          <MinusIcon size="xs" />
+        ) : (
+          <PlusIcon variant="solid" size="xs" />
+        )}
+        <p className="text-sm font-medium">
+          {unfolded ? "Show Less" : "View All"}
+        </p>
+      </div>
     </div>
   );
 }

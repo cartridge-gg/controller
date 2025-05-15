@@ -12,18 +12,16 @@ import {
   LayoutFooter,
   LayoutHeader,
   Button,
-  Card,
-  CardContent,
-  CoinsIcon,
   ActivityTokenCard,
   ERC20Detail,
   ERC20Header,
   PaperPlaneIcon,
+  Thumbnail,
+  InfoIcon,
 } from "@cartridge/ui";
 import { useConnection, useData } from "#hooks/context";
 import {
   getDate,
-  isIframe,
   isPublicChain,
   useCreditBalance,
   VoyagerUrl,
@@ -56,36 +54,40 @@ function Credits() {
   const { username } = useAccount();
   const credit = useCreditBalance({
     username,
-    interval: isVisible ? 3000 : undefined,
+    interval: isVisible ? 30000 : undefined,
   });
 
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={`${credit.balance} CREDITS`}
-        description={`$${credit.balance}`}
-        icon={<CoinsIcon variant="solid" size="lg" />}
+        variant="hidden"
         onBack={() => {
           navigate("..");
         }}
       />
 
-      <LayoutContent className="pb-4">
-        <Card>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-foreground-400">
-              Credits are used to pay for network activity. They are not tokens
-              and cannot be transferred or refunded.
-            </div>
-          </CardContent>
-        </Card>
+      <LayoutContent className="pb-4 gap-6">
+        <div className="flex gap-4 items-center">
+          <Thumbnail
+            icon="https://static.cartridge.gg/presets/credit/icon.svg"
+            size="lg"
+            rounded
+          />
+          <p className="text-foreground-100 text-lg/6 font-semibold">{`${credit.balance.value} CREDITS`}</p>
+        </div>
+
+        <div className="flex gap-1 bg-background-125 border border-background-200 px-3 py-2.5 rounded text-foreground-300">
+          <InfoIcon size="sm" className="min-w-5" />
+          <p className="px-1 text-xs">
+            Credits are used to pay for network activity. They are not tokens
+            and cannot be transferred or refunded.
+          </p>
+        </div>
       </LayoutContent>
 
-      {isIframe() && (
-        <LayoutFooter>
-          <Button onClick={() => parent.openPurchaseCredits()}>Purchase</Button>
-        </LayoutFooter>
-      )}
+      <LayoutFooter className="gap-4">
+        <Button onClick={() => parent.openPurchaseCredits()}>Purchase</Button>
+      </LayoutFooter>
     </LayoutContainer>
   );
 }
@@ -210,7 +212,7 @@ function ERC20() {
         </div>
       </LayoutContent>
 
-      {isIframe() && compatibility && !visitor && (
+      {compatibility && !visitor && (
         <LayoutFooter>
           <Link to={`send?${searchParams.toString()}`} className="w-full">
             <Button className="w-full space-x-2">

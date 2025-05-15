@@ -55,24 +55,17 @@ export function useCollection({
       queryKey: ["collection"],
       enabled: !!project && !!address,
       onSuccess: ({ collection }) => {
-        const assets = collection.assets;
-        const first = assets.length > 0 ? assets[0] : undefined;
-        let metadata: { image?: string } = {};
-        try {
-          metadata = JSON.parse(!first?.metadata ? "{}" : first.metadata);
-        } catch (error) {
-          console.warn(error, { data: first?.metadata });
-        }
         const name = collection.meta.name;
         const newCollection: Collection = {
           address: collection.meta.contractAddress,
           name: name ? name : "---",
           type: TYPE,
-          imageUrl: metadata?.image ?? collection.meta.imagePath,
+          imageUrl: collection.meta.imagePath,
           totalCount: collection.meta.assetCount,
         };
 
         const newAssets: { [key: string]: Asset } = {};
+
         collection.assets.forEach((a) => {
           let imageUrl = a.imageUrl;
           if (!imageUrl.includes("://")) {
@@ -97,7 +90,7 @@ export function useCollection({
             tokenId: a.tokenId,
             name: a.name,
             description: a.description ?? "",
-            imageUrl: metadata?.image ?? imageUrl,
+            imageUrl: imageUrl || metadata?.image || "",
             attributes: attributes,
           };
           newAssets[`${newCollection.address}-${a.tokenId}`] = asset;
@@ -158,16 +151,9 @@ export function useCollections(): UseCollectionsResponse {
           const imagePath = e.node.meta.imagePath;
           const name = e.node.meta.name;
           const count = e.node.meta.assetCount;
-          const first = e.node.assets.length > 0 ? e.node.assets[0] : undefined;
-          let metadata: { image?: string } = {};
-          try {
-            metadata = JSON.parse(!first?.metadata ? "{}" : first?.metadata);
-          } catch (error) {
-            console.warn(error, { data: first?.metadata });
-          }
           newCollections[`${contractAddress}`] = {
             address: contractAddress,
-            imageUrl: metadata?.image ?? imagePath,
+            imageUrl: imagePath,
             name: name ? name : "---",
             totalCount: count,
             type: TYPE,
