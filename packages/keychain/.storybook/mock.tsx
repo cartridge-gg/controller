@@ -1,19 +1,17 @@
-import { constants, RpcProvider } from "starknet";
-import Controller from "@cartridge/controller";
-import { ResponseCodes } from "@cartridge/controller";
-import { SessionPolicies } from "@cartridge/presets";
-import { defaultTheme } from "@cartridge/presets";
-import { Parameters } from "@storybook/react";
-import { ConnectionContextValue } from "../src/components/provider/connection";
-import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
+import Controller, { ResponseCodes } from "@cartridge/controller";
+import { defaultTheme, SessionPolicies } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
-import {
-  UpgradeContext,
-  UpgradeProviderProps,
-  UpgradeInterface,
-  CONTROLLER_VERSIONS,
-} from "../src/components/provider/upgrade";
+import { Parameters } from "@storybook/react";
 import React from "react";
+import { constants, RpcProvider } from "starknet";
+import { ConnectionContextValue } from "../src/components/provider/connection";
+import {
+  CONTROLLER_VERSIONS,
+  UpgradeContext,
+  UpgradeInterface,
+  UpgradeProviderProps,
+} from "../src/components/provider/upgrade";
+import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 
 export interface StoryParameters extends Parameters {
   connection?: {
@@ -36,6 +34,7 @@ export function useMockedConnection(
       policies: [],
       resolve: () => {},
       reject: () => {},
+      controllerPackageVersion: "1.0.0",
     } as ConnectCtx,
     controller,
     ...rest

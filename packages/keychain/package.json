@@ -54,6 +54,7 @@
     "react-dom": "catalog:",
     "react-query": "catalog:",
     "react-router-dom": "catalog:",
+    "semver": "^7.7.1",
     "sonner": "catalog:"
   },
   "devDependencies": {
@@ -74,6 +75,7 @@
     "@types/qrcode": "^1.5.5",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/semver": "^7.7.0",
     "@vitejs/plugin-react-swc": "catalog:",
     "@vitest/coverage-v8": "2.1.8",
     "autoprefixer": "catalog:",
