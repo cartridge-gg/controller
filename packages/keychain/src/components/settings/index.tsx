@@ -31,7 +31,7 @@ import {
   RegisteredAccountCard,
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
-import { Session, SessionCard } from "./session-card";
+import { SessionCard } from "./session-card";
 import { SignerCard } from "./signer-card";
 
 enum State {
@@ -48,17 +48,6 @@ interface FeatureFlags {
   currency: boolean;
 }
 
-// MOCK DATA
-const sessions: Session[] = [
-  {
-    sessionName: "Session 1",
-    expiresAt: BigInt(14400), // 4 hours in seconds
-  },
-  {
-    sessionName: "Session 2",
-    expiresAt: BigInt(7200), // 2 hours in seconds
-  },
-];
 const registeredAccounts: RegisteredAccount[] = [
   {
     accountName: "clicksave.stark",
@@ -74,7 +63,7 @@ export function Settings() {
   // Feature flags - can be moved to environment variables or API config later
   const featureFlags = useMemo<FeatureFlags>(
     () => ({
-      sessions: false,
+      sessions: true,
       signers: true,
       registeredAccounts: false,
       currency: false,
@@ -121,15 +110,20 @@ export function Settings() {
                 title="Session Key(s)"
                 description="Sessions grant permission to your Controller to perform certain game actions on your behalf"
                 showStatus={true}
+                isActive={true}
               />
               <div className="space-y-3">
-                {sessions.map((i, index) => (
-                  <SessionCard
-                    key={index}
-                    sessionName={i.sessionName}
-                    expiresAt={i.expiresAt}
-                  />
-                ))}
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {(data.data?.controller as any)?.sessions?.map(
+                  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                  (session: any, index: number) => (
+                    <SessionCard
+                      key={index}
+                      sessionName={session.appID}
+                      expiresAt={BigInt(session.expiresAt)}
+                    />
+                  ),
+                )}
               </div>
               <Button
                 type="button"
