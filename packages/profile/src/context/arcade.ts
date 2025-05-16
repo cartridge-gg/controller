@@ -1,4 +1,4 @@
-import { ArcadeProvider, EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
+import { ArcadeProvider, EditionModel, GameModel } from "@cartridge/arcade";
 import { createContext } from "react";
 
 /**

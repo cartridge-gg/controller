@@ -83,7 +83,7 @@ export function Socials() {
       })
       .sort((a, b) => a.username.localeCompare(b.username));
     return { followers, followeds };
-  }, [baseFollowers, baseFolloweds, address, usernames]);
+  }, [baseFollowers, baseFolloweds, usernames]);
 
   const handleSocialClick = useCallback(
     (

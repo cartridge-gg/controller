@@ -10,7 +10,7 @@ import { useConnection } from "#hooks/context.js";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { useArcade } from "#hooks/arcade.js";
-import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel } from "@cartridge/arcade";
 import { getDate } from "@cartridge/ui/utils";
 
 export interface CardProps {
