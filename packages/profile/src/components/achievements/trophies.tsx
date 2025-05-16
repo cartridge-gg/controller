@@ -5,7 +5,7 @@ import {
 } from "@cartridge/ui";
 import { Item } from "#hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel } from "@cartridge/arcade";
 import { useAccount } from "#hooks/account";
 import { useConnection } from "#hooks/context";
 import { useArcade } from "#hooks/arcade";

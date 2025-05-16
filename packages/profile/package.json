@@ -39,7 +39,7 @@
     ]
   },
   "dependencies": {
-    "@bal7hazar/arcade-sdk": "0.0.86",
+    "@cartridge/arcade": "0.0.0",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",

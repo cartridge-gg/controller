@@ -11,7 +11,7 @@ import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
 import { useConnection, useData } from "#hooks/context";
 import { useArcade } from "#hooks/arcade";
-import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel } from "@cartridge/arcade";
 import { addAddressPadding } from "starknet";
 import { LayoutBottomNav } from "#components/bottom-nav";
 

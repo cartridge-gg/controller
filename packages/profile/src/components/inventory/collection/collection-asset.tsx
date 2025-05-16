@@ -34,7 +34,7 @@ import placeholder from "/public/placeholder.svg";
 import { VoyagerUrl } from "@cartridge/ui/utils";
 import { CardProps, useTraceabilities } from "#hooks/traceabilities.js";
 import { useArcade } from "#hooks/arcade.js";
-import { EditionModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel } from "@cartridge/arcade";
 import { useOwnership } from "#hooks/ownerships.js";
 import { useUsername } from "#hooks/username.js";
 
