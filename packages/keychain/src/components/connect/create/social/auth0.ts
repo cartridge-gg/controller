@@ -4,7 +4,7 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 export const getOidcToken = async (
   getIdTokenClaims: () => Promise<IdToken | undefined>,
   expectedNonce: string,
-): Promise<string | undefined> => {
+) => {
   const tokenClaims = await getIdTokenClaims();
   if (!tokenClaims) {
     throw new Error("Not authenticated with Auth0 yet");
