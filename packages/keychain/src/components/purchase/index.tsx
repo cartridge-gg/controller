@@ -226,23 +226,23 @@ export function Purchase({
       />
     );
   }
+  const isCloseable = isSlot
+    ? false
+    : state === PurchaseState.SELECTION || state === PurchaseState.SUCCESS;
 
   return (
     <LayoutContainer>
       <LayoutHeader
         title={title}
-        onBack={() => {
-          switch (state) {
-            case PurchaseState.SUCCESS:
-              return;
-            case PurchaseState.SELECTION:
-              onBack?.();
-              closeModal();
-              break;
-            default:
-              setState(PurchaseState.SELECTION);
-          }
-        }}
+        onClose={closeModal}
+        onBack={
+          !isCloseable
+            ? () => {
+                onBack?.();
+                setState(PurchaseState.SELECTION);
+              }
+            : undefined
+        }
         right={
           state === PurchaseState.SELECTION &&
           starterpackDetails?.supply !== undefined ? (
