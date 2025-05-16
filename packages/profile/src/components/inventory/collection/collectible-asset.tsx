@@ -110,7 +110,7 @@ export function CollectibleAsset() {
       events: filteredData,
       dates: [...new Set(filteredData.map((event) => event.date))],
     };
-  }, [data, cap, contractAddress]);
+  }, [data, cap]);
 
   const to = useCallback((transactionHash: string) => {
     return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(

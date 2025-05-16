@@ -4,12 +4,9 @@ import {
   AchievementProgress,
 } from "@cartridge/ui";
 import { Item } from "#hooks/achievements";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import { useAccount } from "#hooks/account";
-import { useConnection } from "#hooks/context";
-import { useArcade } from "#hooks/arcade";
-import { toast } from "sonner";
 
 const HIDDEN_GROUP = "Hidden";
 
@@ -113,13 +110,10 @@ export function Trophies({
 
 function Group({
   group,
-  address,
   items,
   softview,
-  enabled,
   game,
   edition,
-  pins,
 }: {
   group: string;
   address: string;
@@ -130,43 +124,6 @@ function Group({
   edition: EditionModel | undefined;
   pins: { [playerId: string]: string[] };
 }) {
-  const { parent } = useConnection();
-  const { chainId, provider } = useArcade();
-
-  const handlePin = useCallback(
-    (
-      pinned: boolean,
-      achievementId: string,
-      setLoading: (loading: boolean) => void,
-    ) => {
-      if (!enabled && !pinned) return;
-      const process = async () => {
-        setLoading(true);
-        try {
-          const calls = pinned
-            ? provider.social.unpin({ achievementId })
-            : provider.social.pin({ achievementId });
-          const res = await parent.openExecute(
-            Array.isArray(calls) ? calls : [calls],
-            chainId,
-          );
-          if (res && res.transactionHash) {
-            toast.success(
-              `Trophy ${pinned ? "unpinned" : "pinned"} successfully`,
-            );
-          }
-        } catch (error) {
-          console.error(error);
-          toast.error(`Failed to ${pinned ? "unpin" : "pin"} trophy`);
-        } finally {
-          setLoading(false);
-        }
-      };
-      process();
-    },
-    [enabled, chainId, provider, parent],
-  );
-
   const achievements = useMemo(() => {
     return items.map((item) => {
       return {
@@ -199,7 +156,7 @@ function Group({
               },
       };
     });
-  }, [items, pins, address, enabled, softview, game, edition, handlePin]);
+  }, [items, softview, game, edition]);
 
   return <AchievementCard name={group} achievements={achievements} />;
 }
