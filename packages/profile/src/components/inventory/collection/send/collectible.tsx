@@ -147,6 +147,8 @@ export function SendCollectible() {
       closable,
       navigate,
       searchParams,
+      amount,
+      amountError,
     ],
   );
 
