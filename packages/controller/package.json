@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.7.14-alpha.2",
+  "version": "0.7.14-alpha.3",
   "description": "Cartridge Controller",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -39,8 +39,7 @@
     "starknetkit": "^2.6.1"
   },
   "dependencies": {
-    "@cartridge/account-wasm": "workspace:*",
-    "@cartridge/ui": "workspace:*",
+    "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
     "ethers": "^6.13.5",
     "@starknet-io/types-js": "catalog:",

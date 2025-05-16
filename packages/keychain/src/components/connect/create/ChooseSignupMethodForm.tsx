@@ -66,6 +66,8 @@ export function ChooseSignupMethodForm({
             className="justify-center"
             onClick={(e) => handleSelectedOption(e, "webauthn")}
             onKeyDown={(e) => handleSelectedOption(e, "webauthn")}
+            disabled={isLoading && selectedAuth !== "webauthn"}
+            isLoading={isLoading && selectedAuth === "webauthn"}
           />
         </div>
       )}

@@ -1,4 +1,4 @@
-import { ErrorCode } from "@cartridge/account-wasm/controller";
+import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
   ConnectError,
   ConnectReply,

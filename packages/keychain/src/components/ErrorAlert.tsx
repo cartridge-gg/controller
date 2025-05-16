@@ -1,6 +1,6 @@
 import { ControllerError } from "@/utils/connection";
 import { parseExecutionError, parseValidationError } from "@/utils/errors";
-import { ErrorCode } from "@cartridge/account-wasm/controller";
+import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
   Accordion,
   AccordionContent,

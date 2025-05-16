@@ -1,5 +1,6 @@
 import {
   useCountervalue,
+  useCreditBalance,
   useERC20Balance,
   UseERC20BalanceResponse,
 } from "@cartridge/ui/utils";
@@ -12,8 +13,10 @@ import { useConnection } from "./context";
 import { getChecksumAddress } from "starknet";
 import { useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
+import { useUsername } from "./username";
 
 const LIMIT = 1000;
+export const TOKENS_TORII_INSTANCE = "c7e-arcade-tokens";
 
 export type Balance = {
   amount: number;
@@ -104,16 +107,20 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
     [accountAddress, connectedAddress],
   );
 
+  const projects = useMemo(() => {
+    return project ? [project, TOKENS_TORII_INSTANCE] : [];
+  }, [project]);
+
   const { status } = useBalancesQuery(
     {
       accountAddress: address,
-      projects: [project ?? ""],
+      projects: projects,
       limit: LIMIT,
       offset: offset,
     },
     {
-      queryKey: ["balances", offset],
-      enabled: !!project && !!address,
+      queryKey: ["balances", offset, projects],
+      enabled: projects.length > 0 && !!address,
       onSuccess: ({ balances }) => {
         const newTokens: { [key: string]: Token } = {};
         balances?.edges.forEach((e) => {
@@ -160,21 +167,58 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
   return { tokens: Object.values(tokens), status };
 }
 
-export type UseTokensResponse = UseBalancesResponse;
+export type UseTokensResponse = {
+  tokens: Token[];
+  credits: Token;
+  status: "success" | "error" | "idle" | "loading";
+};
 
 export function useTokens(accountAddress?: string): UseTokensResponse {
   const { erc20: options, provider, isVisible } = useConnection();
   const { address } = useAccount();
 
+  // Fetch credits
+  const { username } = useUsername({ address });
+  const creditBalance = useCreditBalance({
+    username,
+    interval: isVisible ? 30000 : undefined,
+  });
+  const credits: Token = useMemo(() => {
+    return {
+      balance: {
+        amount: Number(creditBalance.balance.value),
+        value: 0,
+        change: 0,
+      },
+      metadata: {
+        name: "Credits",
+        symbol: "Credits",
+        decimals: 6,
+        address: "credit",
+        image: "https://static.cartridge.gg/presets/credit/icon.svg",
+      },
+    };
+  }, [creditBalance]);
+
   // Get token data from torii
   const toriiData = useBalances(accountAddress);
 
-  // Get token data from rpc (based on url options)
+  // Get token data from rpc (based on url options without those fetched from torii)
+  const contractAddress = useMemo(() => {
+    if (toriiData.status !== "success") return [];
+    return options.filter(
+      (token) =>
+        !toriiData.tokens.find(
+          (t) => BigInt(t.metadata.address || "0x0") === BigInt(token),
+        ),
+    );
+  }, [options, toriiData]);
+
   const { data: rpcData }: UseERC20BalanceResponse = useERC20Balance({
     address: accountAddress ?? address,
-    contractAddress: options,
+    contractAddress: contractAddress,
     provider,
-    interval: isVisible ? 3000 : undefined,
+    interval: isVisible ? 30000 : undefined,
   });
 
   // Get tokens list from rpc that are not in torii
@@ -184,7 +228,9 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
         .filter(
           (token) =>
             !toriiData.tokens.find(
-              (t) => t.metadata.address === token.meta.address,
+              (t) =>
+                BigInt(t.metadata.address || "0x0") ===
+                BigInt(token.meta.address),
             ),
         )
         .map((token) => ({
@@ -195,12 +241,15 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   );
 
   // Get prices for filtered tokens
-  const { countervalues } = useCountervalue({
-    tokens: tokenData,
-  });
+  const { countervalues } = useCountervalue(
+    {
+      tokens: tokenData,
+    },
+    { enabled: isVisible },
+  );
 
   // Merge data
-  const data = useMemo(() => {
+  const tokens = useMemo(() => {
     const newData: UseBalancesResponse = { tokens: [], status: "success" };
     // Use a map to track tokens by their normalized address
     const tokenMap: Record<string, Token> = {};
@@ -236,7 +285,9 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
 
     // Process tokens from toriiData
     toriiData.tokens.forEach((token) => {
-      const normalizedAddress = BigInt(token.metadata.address).toString();
+      const normalizedAddress = BigInt(
+        token.metadata.address || "0x0",
+      ).toString();
       // Only add if we don't already have this token
       if (!tokenMap[normalizedAddress]) {
         tokenMap[normalizedAddress] = token;
@@ -248,7 +299,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     newData.status = toriiData.status;
     return newData;
   }, [rpcData, toriiData, countervalues]);
-  return data;
+  return { tokens: tokens.tokens, credits, status: tokens.status };
 }
 
 export type UseTokenResponse = UseBalanceResponse;
@@ -264,7 +315,7 @@ export function useToken({
   return {
     token: tokens.find(
       (token) =>
-        getChecksumAddress(token.metadata.address) ===
+        getChecksumAddress(token.metadata.address || "0x0") ===
         getChecksumAddress(tokenAddress),
     ),
     status,

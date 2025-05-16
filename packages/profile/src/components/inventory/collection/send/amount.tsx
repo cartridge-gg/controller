@@ -19,7 +19,7 @@ export function SendAmount({
       e.preventDefault();
       setAmount(balance);
     },
-    [setAmount],
+    [setAmount, balance],
   );
 
   const handleChange = useCallback(

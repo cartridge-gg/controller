@@ -34,7 +34,7 @@ import placeholder from "/public/placeholder.svg";
 import { VoyagerUrl } from "@cartridge/ui/utils";
 import { CardProps, useTraceabilities } from "#hooks/traceabilities.js";
 import { useArcade } from "#hooks/arcade.js";
-import { EditionModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel } from "@cartridge/arcade";
 import { useOwnership } from "#hooks/ownerships.js";
 import { useUsername } from "#hooks/username.js";
 
@@ -110,7 +110,7 @@ export function CollectibleAsset() {
       events: filteredData,
       dates: [...new Set(filteredData.map((event) => event.date))],
     };
-  }, [data, cap, contractAddress]);
+  }, [data, cap]);
 
   const to = useCallback((transactionHash: string) => {
     return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(

@@ -228,8 +228,6 @@ export type ProfileOptions = IFrameOptions & {
   namespace?: string;
   /** The tokens to be listed on Inventory modal */
   tokens?: Tokens;
-  /** The policies to use for the profile */
-  policies?: SessionPolicies;
 };
 
 export type ProfileContextTypeVariant =
@@ -239,6 +237,8 @@ export type ProfileContextTypeVariant =
   | "leaderboard"
   | "activity";
 
+export type Token = "eth" | "strk" | "lords" | "usdc" | "usdt";
+
 export type Tokens = {
-  erc20?: string[];
+  erc20?: Token[];
 };

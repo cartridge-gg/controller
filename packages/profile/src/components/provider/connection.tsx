@@ -1,14 +1,13 @@
 import { connectToParent } from "@cartridge/penpal";
 import { useState, ReactNode, useEffect, useCallback } from "react";
 import {
-  ETH_CONTRACT_ADDRESS,
   normalize,
   STRK_CONTRACT_ADDRESS,
+  ETH_CONTRACT_ADDRESS,
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
-  DAI_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
-import { constants, getChecksumAddress, hash, RpcProvider } from "starknet";
+import { constants, getChecksumAddress, RpcProvider } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ConnectionContext,
@@ -16,7 +15,20 @@ import {
   ParentMethods,
   initialState,
 } from "#context/connection";
-import { Method } from "@cartridge/presets";
+import { Token } from "@cartridge/controller";
+
+// FIXME: rely on the one in ui once available
+const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
+  "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+);
+
+const TOKEN_ADDRESSES: Record<Token, string> = {
+  eth: ETH_CONTRACT_ADDRESS,
+  strk: STRK_CONTRACT_ADDRESS,
+  lords: LORDS_CONTRACT_ADDRESS,
+  usdc: USDC_CONTRACT_ADDRESS,
+  usdt: USDT_CONTRACT_ADDRESS,
+};
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConnectionContextType>(initialState);
@@ -61,42 +73,14 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       // Only update when erc20 state hasn't been set
       if (!state.erc20.length) {
         const erc20Param = searchParams.get("erc20");
-        state.erc20 = [
-          ETH_CONTRACT_ADDRESS,
-          STRK_CONTRACT_ADDRESS,
-          USDC_CONTRACT_ADDRESS,
-          USDT_CONTRACT_ADDRESS,
-          DAI_CONTRACT_ADDRESS,
-          ...(erc20Param
-            ? decodeURIComponent(erc20Param)
-                .split(",")
-                .filter(
-                  (address) =>
-                    ![
-                      ETH_CONTRACT_ADDRESS,
-                      STRK_CONTRACT_ADDRESS,
-                      USDC_CONTRACT_ADDRESS,
-                      USDT_CONTRACT_ADDRESS,
-                      DAI_CONTRACT_ADDRESS,
-                    ].includes(getChecksumAddress(address)),
-                )
-            : []),
-        ];
+        const addresses = erc20Param
+          ? decodeURIComponent(erc20Param)
+              .split(",")
+              .map((token) => TOKEN_ADDRESSES[token as Token] || null)
+              .filter((address) => address !== null)
+          : [STRK_CONTRACT_ADDRESS];
+        state.erc20 = addresses;
       }
-
-      if (!state.methods.length) {
-        const methodsParam = searchParams.get("methods");
-        if (methodsParam) {
-          const methods: Method[] = JSON.parse(
-            decodeURIComponent(methodsParam),
-          );
-          state.methods = methods.map((method) => ({
-            name: method.name || method.entrypoint,
-            entrypoint: `0x${hash.starknetKeccak(method.entrypoint).toString(16)}`,
-          }));
-        }
-      }
-
       return state;
     });
   }, [searchParams]);

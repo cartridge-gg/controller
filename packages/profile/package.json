@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/profile",
-  "version": "0.7.14-alpha.2",
+  "version": "0.7.14-alpha.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -39,10 +39,10 @@
     ]
   },
   "dependencies": {
-    "@bal7hazar/arcade-sdk": "0.0.86",
+    "@cartridge/arcade": "0.0.0",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "catalog:",
-    "@cartridge/ui": "workspace:*",
+    "@cartridge/ui": "catalog:",
     "compare-versions": "^6.1.1",
     "lodash": "catalog:",
     "react": "catalog:",

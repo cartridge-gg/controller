@@ -45,6 +45,10 @@ export default defineConfig(({ mode }) => ({
       external: [],
       output: {
         manualChunks(id) {
+          if (id.includes("commonjsHelpers.js")) {
+            return "commonjs";
+          }
+
           // Chunk splitting logic
           if (id.includes("node_modules")) {
             if (id.includes("react")) {
@@ -82,5 +86,10 @@ export default defineConfig(({ mode }) => ({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     globals: true,
+    server: {
+      deps: {
+        inline: ["@cartridge/ui", "@cartridge/controller-wasm"],
+      },
+    },
   },
 }));

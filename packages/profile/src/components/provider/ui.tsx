@@ -28,24 +28,30 @@ function QrCodeDisplay({
     <Dialog open={showQrCode} onOpenChange={handleOpenChange}>
       <DialogContent
         aria-describedby="Your account address"
-        className="border-none h-full w-full flex flex-col items-center justify-center bg-translucent-dark-150 backdrop-blur-sm gap-12"
+        className="border-none h-full w-full flex flex-col items-center justify-center bg-translucent-dark-150 backdrop-blur-sm gap-8"
       >
         <p className="text-center select-none text-md bg-translucent-light-150 px-8 py-2 rounded-lg h-fit">
           {username}
         </p>
-        <div className="p-5 bg-translucent-light-150 backdrop-blur-sm rounded-3xl">
+        <div className="p-4 bg-translucent-light-150 backdrop-blur-sm rounded-3xl">
           <div className="flex items-center justify-center relative">
-            <div className="absolute top-1/2 left-1/2 p-2 bg-[#373837] -translate-x-1/2 -translate-y-1/2 rounded-lg">
-              <AchievementPlayerAvatar username={username} size="xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg">
+              <AchievementPlayerAvatar
+                username={username}
+                size="xl"
+                className="bg-background-100"
+              />
             </div>
-            <QRCodeSVG
-              level="L"
-              value={`https://play.cartridge.gg/${username}`}
-              size={192}
-              bgColor="#00000000"
-              fgColor="#ffffff"
-              boostLevel={true}
-            />
+            <div className="flex items-center justify-center w-[160px] h-[160px] bg-background-100">
+              <QRCodeSVG
+                level="L"
+                value={`https://play.cartridge.gg/player/${username}`}
+                size={144}
+                bgColor="#00000000"
+                fgColor="#ffffff"
+                boostLevel={true}
+              />
+            </div>
           </div>
         </div>
       </DialogContent>

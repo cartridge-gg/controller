@@ -18,7 +18,7 @@ import {
   RegistryOptions,
   FollowEvent,
   EditionModel,
-} from "@bal7hazar/arcade-sdk";
+} from "@cartridge/arcade";
 import { constants, getChecksumAddress } from "starknet";
 import { ArcadeContext } from "#context/arcade";
 
