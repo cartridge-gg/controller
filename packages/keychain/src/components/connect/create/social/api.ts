@@ -1,5 +1,6 @@
 import { fetchApiCreator } from "@cartridge/ui/utils";
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
+import { getIframePublicKey } from "./index";
 
 export const SOCIAL_PROVIDER_NAME = "discord";
 
@@ -10,17 +11,15 @@ export const fetchApi = fetchApiCreator(
   },
 );
 
-export const getTurnkeySuborg = async (oidcToken: string) => {
+export const getTurnkeySuborg = async (
+  oidcToken: string,
+): Promise<string | undefined> => {
   const getSuborgsResponse = await fetchApi<GetSuborgsResponse>("suborgs", {
     filterType: "OIDC_TOKEN",
     filterValue: oidcToken,
   });
   if (!getSuborgsResponse) {
     throw new Error("No suborgs response found");
-  }
-
-  if (getSuborgsResponse.organizationIds.length === 0) {
-    throw new Error("No suborgs found");
   }
 
   if (getSuborgsResponse.organizationIds.length > 1) {
@@ -71,11 +70,13 @@ export const authenticateToTurnkey = async (
   oidcToken: string,
   authIframeClient: TurnkeyIframeClient,
 ) => {
+  const iframePublicKey = await getIframePublicKey(authIframeClient);
+
   const authResponse = await fetchApi<AuthResponse>(
     `auth`,
     {
       suborgID: subOrgId,
-      targetPublicKey: authIframeClient.iframePublicKey,
+      targetPublicKey: iframePublicKey,
       oidcToken,
       invalidateExisting: true,
     },

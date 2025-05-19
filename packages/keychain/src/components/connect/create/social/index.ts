@@ -2,6 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { TurnkeyWallet } from "@cartridge/controller";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
+import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
 import { useTurnkey } from "@turnkey/sdk-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LoginResponse, SignupResponse } from "../useCreateController";
@@ -21,11 +22,18 @@ export const useSocialAuthentication = (
     { username: string } | { address: string } | undefined
   >(undefined);
   const { authIframeClient } = useTurnkey();
-  const { loginWithPopup, getIdTokenClaims, isAuthenticated, user, error } =
-    useAuth0();
+  const {
+    loginWithPopup,
+    getIdTokenClaims,
+    isAuthenticated,
+    user,
+    error,
+    logout,
+    isLoading,
+  } = useAuth0();
 
   const authIframeClientRef = useRef(authIframeClient);
-  const signaturePromiseRef = useRef<{
+  const signerPromiseRef = useRef<{
     resolve: (
       value:
         | SignupResponse
@@ -35,6 +43,11 @@ export const useSocialAuthentication = (
     ) => void;
     reject: (reason?: Error) => void;
   } | null>(null);
+
+  const resetState = useCallback(async () => {
+    setSignupOrLogin(undefined);
+    signerPromiseRef.current = null;
+  }, [setSignupOrLogin]);
 
   useEffect(() => {
     authIframeClientRef.current = authIframeClient;
@@ -46,34 +59,43 @@ export const useSocialAuthentication = (
       (error.message.includes("Popup closed") ||
         error.message.includes(
           "The resource owner or authorization server denied the request",
-        )) &&
-      signaturePromiseRef.current
+        ) ||
+        error.message.includes("rate limited")) &&
+      signerPromiseRef.current
     ) {
-      signaturePromiseRef.current.reject(
+      signerPromiseRef.current.reject(
         new Error("Could not sign in with social provider: " + error.message),
       );
-      signaturePromiseRef.current = null;
+      console.log("setting signer promise to null2", error);
+      signerPromiseRef.current = null;
     }
   }, [error]);
 
-  // TODO(tedison) put this in a useCallback
-  const internalSignup = async () => {
-    if (!(signupOrLogin as { username: string }).username) {
-      throw new Error("Unreachable");
+  const resolveForAccountChange = useCallback(() => {
+    setChangeWallet(true);
+    signerPromiseRef.current?.resolve(undefined);
+    resetState();
+  }, [setChangeWallet, resetState]);
+
+  const internalSignup = useCallback(async () => {
+    const username = (signupOrLogin as { username: string }).username;
+    if (username.length === 0) {
+      throw new Error("Username not found");
     }
 
-    const oidcTokenString = await getOidcToken(
-      getIdTokenClaims,
-      getNonce(authIframeClientRef.current!.iframePublicKey!),
+    const iFramePublicKey = await getIframePublicKey(
+      authIframeClientRef.current!,
     );
 
+    const iFrameNonce = getNonce(iFramePublicKey);
+    const oidcTokenString = await getOidcToken(getIdTokenClaims, iFrameNonce);
     if (!oidcTokenString) {
       return;
     }
 
     const subOrganizationId = await getOrCreateTurnkeySuborg(
       oidcTokenString,
-      (signupOrLogin as { username: string }).username,
+      username,
     );
 
     await authenticateToTurnkey(
@@ -84,7 +106,7 @@ export const useSocialAuthentication = (
 
     const address = await getOrCreateWallet(
       subOrganizationId,
-      (signupOrLogin as { username: string }).username,
+      username,
       authIframeClientRef.current!,
     );
 
@@ -97,10 +119,12 @@ export const useSocialAuthentication = (
           subOrganizationId,
         ),
       );
+    } else {
+      throw new Error("No keychain_wallets found");
     }
 
-    if (signaturePromiseRef.current) {
-      signaturePromiseRef.current.resolve({
+    if (signerPromiseRef.current) {
+      signerPromiseRef.current.resolve({
         address,
         signer: {
           eip191: {
@@ -109,131 +133,142 @@ export const useSocialAuthentication = (
         },
         type: "discord",
       });
-      signaturePromiseRef.current = null;
+      resetState();
+    } else {
+      console.error("No signer promise found");
     }
-  };
+  }, [signupOrLogin, getIdTokenClaims, resetState]);
 
-  // TODO(tedison) put this in a useCallback
-  const internalLogin = async () => {
-    if (!(signupOrLogin as { address: string }).address) {
-      throw new Error("Unreachable");
+  const internalLogin = useCallback(async () => {
+    const signerAddress = (signupOrLogin as { address: string }).address;
+    if (!signerAddress) {
+      throw new Error("Signer address is required");
     }
 
-    try {
-      const oidcTokenString = await getOidcToken(
-        getIdTokenClaims,
-        getNonce(authIframeClientRef.current!.iframePublicKey!),
+    const iFramePublicKey =
+      await authIframeClientRef.current!.getEmbeddedPublicKey();
+    if (!iFramePublicKey) {
+      await resetIframePublicKey(authIframeClientRef.current!);
+      throw new Error("No iFrame public key, please try again");
+    }
+
+    const oidcTokenString = await getOidcToken(
+      getIdTokenClaims,
+      getNonce(iFramePublicKey),
+    );
+
+    if (!oidcTokenString) {
+      return;
+    }
+
+    const subOrganizationId = await getTurnkeySuborg(oidcTokenString);
+    if (!subOrganizationId) {
+      resolveForAccountChange();
+      return;
+    }
+
+    await authenticateToTurnkey(
+      subOrganizationId,
+      oidcTokenString,
+      authIframeClientRef.current!,
+    );
+
+    const address = await getWallet(
+      subOrganizationId,
+      authIframeClientRef.current!,
+    );
+    if (BigInt(address) !== BigInt(signerAddress)) {
+      resolveForAccountChange();
+      return;
+    }
+
+    if (window.keychain_wallets) {
+      window.keychain_wallets.addEmbeddedWallet(
+        address.toLowerCase(),
+        new TurnkeyWallet(
+          authIframeClientRef.current!,
+          address,
+          subOrganizationId,
+        ),
       );
+    } else {
+      throw new Error("No keychain_wallets found");
+    }
 
-      if (!oidcTokenString) {
-        return;
-      }
-
-      const subOrganizationId = await getTurnkeySuborg(oidcTokenString);
-
-      await authenticateToTurnkey(
-        subOrganizationId,
-        oidcTokenString,
-        authIframeClientRef.current!,
-      );
-
-      const address = await getWallet(
-        subOrganizationId,
-        authIframeClientRef.current!,
-      );
-      if (
-        BigInt(address) !==
-        BigInt((signupOrLogin as { address: string }).address)
-      ) {
-        setChangeWallet(true);
-        signaturePromiseRef.current?.resolve(undefined);
-        signaturePromiseRef.current = null;
-        return;
-      }
-
-      if (window.keychain_wallets) {
-        window.keychain_wallets.addEmbeddedWallet(
-          address.toLowerCase(),
-          new TurnkeyWallet(
-            authIframeClientRef.current!,
+    if (signerPromiseRef.current) {
+      signerPromiseRef.current.resolve({
+        signer: {
+          eip191: {
             address,
-            subOrganizationId,
-          ),
-        );
-      }
-
-      if (signaturePromiseRef.current) {
-        signaturePromiseRef.current.resolve({
-          signer: {
-            eip191: {
-              address,
-            },
           },
-        });
-        signaturePromiseRef.current = null;
-      }
-    } catch (e) {
-      if (e instanceof Error && e.message.includes("No suborgs found")) {
-        setChangeWallet(true);
-        signaturePromiseRef.current?.resolve(undefined);
-        signaturePromiseRef.current = null;
-        return;
-      }
-      throw e;
+        },
+      });
+      resetState();
+    } else {
+      console.error("No signer promise");
     }
-  };
+  }, [resolveForAccountChange, signupOrLogin, getIdTokenClaims, resetState]);
 
   useEffect(() => {
     (async () => {
       if (
-        // Sanity check: the username has already been validated at the previous step
         !isAuthenticated ||
         !user ||
         !authIframeClientRef.current?.iframePublicKey ||
         error ||
-        signupOrLogin === undefined
+        signupOrLogin === undefined ||
+        isLoading
       ) {
         return;
       }
 
       try {
         if ((signupOrLogin as { username: string }).username) {
-          if ((signupOrLogin as { username: string }).username.length === 0) {
-            throw new Error("Username is required");
-          }
           await internalSignup();
         } else {
           await internalLogin();
         }
       } catch (error) {
-        console.error("Error continuing signup:", error);
+        signerPromiseRef.current?.reject(error as Error);
+        resetState();
       }
     })();
-  }, [isAuthenticated, user, signupOrLogin, error]);
+  }, [
+    isAuthenticated,
+    user,
+    signupOrLogin,
+    error,
+    internalSignup,
+    internalLogin,
+    resetState,
+  ]);
 
-  const pollIframePublicKey = (
+  const pollIframePublicKey = async (
     onSuccess: (key: string) => void,
-    onFailure: (err: Error) => void,
+    onFailure: (err: Error) => Promise<void>,
   ) => {
     const pollTimeMs = 10000;
     const intervalMs = 200;
     let elapsedTime = 0;
 
-    if (authIframeClientRef.current?.iframePublicKey) {
-      onSuccess(authIframeClientRef.current.iframePublicKey);
+    const iFramePublicKey =
+      await authIframeClientRef.current?.getEmbeddedPublicKey();
+    if (iFramePublicKey) {
+      onSuccess(iFramePublicKey);
       return;
     }
 
-    const intervalId = setInterval(() => {
-      if (authIframeClientRef.current?.iframePublicKey) {
+    const intervalId = setInterval(async () => {
+      const iFramePublicKey =
+        await authIframeClientRef.current?.getEmbeddedPublicKey();
+      if (iFramePublicKey) {
         clearInterval(intervalId);
-        onSuccess(authIframeClientRef.current.iframePublicKey);
+        onSuccess(iFramePublicKey);
       } else {
-        console.log("waiting for the iframe's public key");
+        console.debug("waiting for iframe public key");
         elapsedTime += intervalMs;
         if (elapsedTime >= pollTimeMs) {
           clearInterval(intervalId);
-          console.error("Timeout waiting for Turnkey iframe public key.");
           onFailure(
             new Error("Timeout waiting for Turnkey iframe public key."),
           );
@@ -247,11 +282,10 @@ export const useSocialAuthentication = (
       return new Promise((resolve, reject) => {
         pollIframePublicKey(
           async (iframePublicKey) => {
-            signaturePromiseRef.current = { resolve, reject };
+            signerPromiseRef.current = { resolve, reject };
 
             try {
               const nonce = getNonce(iframePublicKey);
-              setSignupOrLogin(signupOrLogin);
 
               const popup = openPopup("");
               await loginWithPopup(
@@ -266,19 +300,24 @@ export const useSocialAuthentication = (
                 },
                 { popup },
               );
+
+              setSignupOrLogin(signupOrLogin);
             } catch (error) {
               reject(error);
-              signaturePromiseRef.current = null;
+              resetState();
             }
           },
-          (error) => {
+          async (error) => {
+            if (authIframeClientRef.current) {
+              await resetIframePublicKey(authIframeClientRef.current);
+            }
             reject(error);
-            signaturePromiseRef.current = null;
+            resetState();
           },
         );
       });
     },
-    [loginWithPopup, setSignupOrLogin],
+    [loginWithPopup, setSignupOrLogin, resetState, logout, isAuthenticated],
   );
 
   return { signup, login: signup };
@@ -294,4 +333,20 @@ const openPopup = (url: string) => {
     "auth0:authorize:popup",
     `resizable,scrollbars=no,status=1`,
   );
+};
+
+const resetIframePublicKey = async (authIframeClient: TurnkeyIframeClient) => {
+  await authIframeClient.clearEmbeddedKey();
+  await authIframeClient.initEmbeddedKey();
+};
+
+export const getIframePublicKey = async (
+  authIframeClient: TurnkeyIframeClient,
+) => {
+  const iframePublicKey = await authIframeClient.getEmbeddedPublicKey();
+  if (!iframePublicKey) {
+    await resetIframePublicKey(authIframeClient);
+    throw new Error("No iframe public key, please try again");
+  }
+  return iframePublicKey;
 };
