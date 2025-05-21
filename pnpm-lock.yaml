@@ -168,8 +168,8 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#0d47718
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/0d47718
+        specifier: github:cartridge-gg/presets#138149a
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/138149a
       '@cartridge/ui':
         specifier: github:cartridge-gg/ui#3fa3547
         version: https://codeload.github.com/cartridge-gg/ui/tar.gz/3fa3547(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(viem@2.28.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)(zod@3.24.4))
@@ -1077,12 +1077,12 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/0d47718':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/0d47718}
-    version: 0.0.1
-
   '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/11ee3b8':
     resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/11ee3b8}
+    version: 0.0.1
+
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/138149a':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/138149a}
     version: 0.0.1
 
   '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/3fa3547':
@@ -9916,11 +9916,11 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/0d47718':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/11ee3b8':
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/11ee3b8':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/138149a':
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
