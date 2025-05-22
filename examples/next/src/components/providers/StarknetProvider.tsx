@@ -89,9 +89,9 @@ const policies: SessionPolicies = {
 let localKatanaChain: Chain | undefined = undefined;
 if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
   localKatanaChain = {
-    id: num.toBigInt(shortString.encodeShortString("KATANA")),
-    network: "local",
-    name: "Katana",
+    id: num.toBigInt(shortString.encodeShortString("WP_SLOT")),
+    network: "Slot",
+    name: "Slot",
     rpcUrls: {
       default: {
         http: [process.env.NEXT_PUBLIC_RPC_LOCAL],
