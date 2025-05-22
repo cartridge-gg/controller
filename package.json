@@ -32,7 +32,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#a02fcfc",
+    "@cartridge/presets": "github:cartridge-gg/presets#00f8bce",
     "@cartridge/ui": "github:cartridge-gg/ui#3fa3547"
   },
   "devDependencies": {
