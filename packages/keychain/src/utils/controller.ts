@@ -99,12 +99,12 @@ export default class Controller {
     delete window.controller;
   }
 
-  async login(expiresAt: bigint) {
+  async login(expiresAt: bigint, isCreate?: boolean) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
 
-    return await this.cartridge.login(expiresAt);
+    return await this.cartridge.login(expiresAt, isCreate);
   }
 
   async createSession(
