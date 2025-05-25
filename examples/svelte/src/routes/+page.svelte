@@ -58,6 +58,7 @@
 	});
 
 	let loading: boolean = true;
+	let isControllerReady: boolean = false;
 
 	async function connect() {
 		try {
@@ -77,12 +78,30 @@
 		username.set(undefined);
 	}
 
+	// Function to check if controller is ready
+	function checkControllerReady() {
+		try {
+			isControllerReady = controller.isReady();
+		} catch (e) {
+			console.error('Error checking controller readiness:', e);
+			isControllerReady = false;
+		}
+	}
+
 	onMount(async () => {
+		// Initial check
+		checkControllerReady();
+
+		// Set up interval to check periodically
+		const interval = setInterval(checkControllerReady, 1000);
+
 		if (await controller.probe()) {
 			// auto connect
 			await connect();
 		}
 		loading = false;
+
+		return () => clearInterval(interval);
 	});
 </script>
 
@@ -94,7 +113,13 @@
 	{:else if $account}
 		<button on:click={disconnect}>Disconnect</button>
 	{:else}
-		<button on:click={connect}>Connect</button>
+		<button on:click={connect} disabled={!isControllerReady}>
+			{#if isControllerReady}
+				Connect
+			{:else}
+				Waiting for keychain...
+			{/if}
+		</button>
 	{/if}
 </div>
 
