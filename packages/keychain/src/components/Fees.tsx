@@ -27,6 +27,7 @@ export function Fees({
         maxFee.overall_fee,
         18,
         token.price,
+        true, // Enable exact precision for fees
       );
       setFormattedFee(formatted);
     } else {
