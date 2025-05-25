@@ -20,6 +20,7 @@ export type SessionContracts = Record<
 
 export type SessionMessages = (SignMessagePolicy & {
   authorized?: boolean;
+  isRequired?: boolean;
 })[];
 
 export function parsePolicies(
