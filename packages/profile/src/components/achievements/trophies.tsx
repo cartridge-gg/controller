@@ -125,10 +125,11 @@ function Group({
   pins: { [playerId: string]: string[] };
 }) {
   const achievements = useMemo(() => {
+    const pages = new Set(items.map((item) => item.index)).size;
     return items.map((item) => {
       return {
         id: item.id,
-        index: item.index,
+        index: items.length % pages === 0 ? item.index : 0,
         completed: item.completed,
         content: {
           points: item.earning,
