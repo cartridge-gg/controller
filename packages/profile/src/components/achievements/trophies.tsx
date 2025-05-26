@@ -125,10 +125,18 @@ function Group({
   pins: { [playerId: string]: string[] };
 }) {
   const achievements = useMemo(() => {
+    // Ensure pagination is allowed only for consistent page content
+    const uniquePages = Array.from(new Set(items.map((item) => item.index)));
+    const countPerPages = new Set(
+      uniquePages.map(
+        (page) => items.filter((item) => item.index === page).length,
+      ),
+    );
+    const paginationAllowed = countPerPages.size === 1;
     return items.map((item) => {
       return {
         id: item.id,
-        index: item.index,
+        index: paginationAllowed ? item.index : 0,
         completed: item.completed,
         content: {
           points: item.earning,
