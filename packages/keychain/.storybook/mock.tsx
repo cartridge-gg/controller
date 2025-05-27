@@ -1,18 +1,17 @@
-import { constants, RpcProvider } from "starknet";
-import Controller from "@cartridge/controller";
-import { controllerConfigs, SessionPolicies } from "@cartridge/presets";
-import { Parameters } from "@storybook/react";
-import { ConnectionContextValue } from "../src/components/provider/connection";
-import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
-import { defaultTheme } from "@cartridge/presets";
+import Controller, { ResponseCodes } from "@cartridge/controller";
+import { defaultTheme, SessionPolicies } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
-import {
-  UpgradeContext,
-  UpgradeProviderProps,
-  UpgradeInterface,
-  CONTROLLER_VERSIONS,
-} from "../src/components/provider/upgrade";
+import { Parameters } from "@storybook/react";
 import React from "react";
+import { constants, RpcProvider } from "starknet";
+import { ConnectionContextValue } from "../src/components/provider/connection";
+import {
+  CONTROLLER_VERSIONS,
+  UpgradeContext,
+  UpgradeInterface,
+  UpgradeProviderProps,
+} from "../src/components/provider/upgrade";
+import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
 
 export interface StoryParameters extends Parameters {
   connection?: {
@@ -35,12 +34,15 @@ export function useMockedConnection(
       policies: [],
       resolve: () => {},
       reject: () => {},
+      controllerPackageVersion: "1.0.0",
     } as ConnectCtx,
     controller,
     ...rest
   } = parameters.connection ?? {};
   const theme = parameters.preset
-    ? (controllerConfigs[parameters.preset].theme ?? defaultTheme)
+    ? parameters.preset === "default"
+      ? defaultTheme
+      : defaultTheme // We'll use default theme since we can't load dynamically in this mock
     : defaultTheme;
 
   useThemeEffect({
@@ -49,6 +51,7 @@ export function useMockedConnection(
   });
 
   return {
+    parent: undefined,
     context,
     controller: {
       address: () =>
@@ -67,12 +70,50 @@ export function useMockedConnection(
     rpcUrl: "http://api.cartridge.gg/x/starknet/mainnet",
     policies: {},
     theme: { ...theme, verified: true },
+    loading: false,
+    verified: true,
     setContext: () => {},
     setController: () => {},
-    closeModal: () => {},
-    openModal: () => {},
-    logout: () => {},
+    closeModal: () => Promise.resolve(),
+    openModal: () => Promise.resolve(),
+    logout: () => Promise.resolve(),
     openSettings: () => {},
+    externalDetectWallets: () => Promise.resolve([]),
+    externalConnectWallet: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalSignMessage: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalSignTypedData: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalSendTransaction: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
+    externalGetBalance: () =>
+      Promise.resolve({
+        success: true,
+        wallet: "metamask",
+        result: { code: ResponseCodes.SUCCESS, message: "Success" },
+        account: "0x0000000000000000000000000000000000000000",
+      }),
     ...rest,
   };
 }

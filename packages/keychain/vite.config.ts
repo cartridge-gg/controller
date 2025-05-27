@@ -1,9 +1,9 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
 import { visualizer } from "rollup-plugin-visualizer";
+import { defineConfig } from "vite";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+import topLevelAwait from "vite-plugin-top-level-await";
+import wasm from "vite-plugin-wasm";
 
 export default defineConfig(({ mode }) => ({
   plugins: [
@@ -80,6 +80,7 @@ export default defineConfig(({ mode }) => ({
   // Add this to ensure polyfills are properly included
   define: {
     global: "globalThis",
+    __PACKAGE_VERSION__: JSON.stringify(process.env.npm_package_version),
   },
   test: {
     environment: "jsdom",

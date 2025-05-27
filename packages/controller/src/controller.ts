@@ -1,28 +1,29 @@
 import { AsyncMethodReturns } from "@cartridge/penpal";
 
-import ControllerAccount from "./account";
-import { KeychainIFrame, ProfileIFrame } from "./iframe";
-import { NotReadyToConnect } from "./errors";
-import {
-  Keychain,
-  ResponseCodes,
-  ConnectReply,
-  ProbeReply,
-  ControllerOptions,
-  ConnectError,
-  Profile,
-  IFrames,
-  ProfileContextTypeVariant,
-  Chain,
-} from "./types";
-import BaseProvider from "./provider";
-import { shortString, WalletAccount } from "starknet";
 import { Policy } from "@cartridge/presets";
 import {
   AddInvokeTransactionResult,
   AddStarknetChainParameters,
   ChainId,
 } from "@starknet-io/types-js";
+import { shortString, WalletAccount } from "starknet";
+import { version } from "../package.json";
+import ControllerAccount from "./account";
+import { NotReadyToConnect } from "./errors";
+import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import BaseProvider from "./provider";
+import {
+  Chain,
+  ConnectError,
+  ConnectReply,
+  ControllerOptions,
+  IFrames,
+  Keychain,
+  ProbeReply,
+  Profile,
+  ProfileContextTypeVariant,
+  ResponseCodes,
+} from "./types";
 import { parseChainId } from "./utils";
 
 export default class ControllerProvider extends BaseProvider {
@@ -130,6 +131,7 @@ export default class ControllerProvider extends BaseProvider {
         this.options.policies || {},
         this.rpcUrl(),
         this.options.signupOptions,
+        version,
       );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);

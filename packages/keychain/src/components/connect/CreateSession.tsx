@@ -136,9 +136,13 @@ const CreateSessionLayout = ({
             <VerifiedSessionSummary
               game={theme.name}
               contracts={policies.contracts}
+              messages={policies.messages}
             />
           ) : (
-            <UnverifiedSessionSummary contracts={policies.contracts} />
+            <UnverifiedSessionSummary
+              contracts={policies.contracts}
+              messages={policies.messages}
+            />
           )}
         </LayoutContent>
         <LayoutFooter>

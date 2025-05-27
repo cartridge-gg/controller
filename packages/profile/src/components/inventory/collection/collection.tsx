@@ -24,7 +24,7 @@ import placeholder from "/public/placeholder.svg";
 import { CollectionHeader } from "./header";
 import { useConnection, useTheme } from "#hooks/context.js";
 import { useArcade } from "#hooks/arcade.js";
-import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel } from "@cartridge/arcade";
 
 export function Collection() {
   const { games, editions } = useArcade();
