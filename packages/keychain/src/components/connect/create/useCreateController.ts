@@ -258,6 +258,7 @@ export function useCreateController({
           sessionKeyGuid: result.session.sessionKeyGuid,
           allowedPoliciesRoot: result.allowedPoliciesRoot,
           authorization: result.authorization ?? [],
+          appId: origin,
         },
       });
 

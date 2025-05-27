@@ -15,12 +15,8 @@ import {
   SheetFooter,
   SheetTrigger,
   SignOutIcon,
-  Skeleton,
 } from "@cartridge/ui";
-import {
-  CredentialMetadata,
-  useControllerQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo, useState } from "react";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";
@@ -31,8 +27,8 @@ import {
   RegisteredAccountCard,
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
-import { SessionCard } from "./session-card";
-import { SignerCard } from "./signer-card";
+import { SessionsSection } from "./sessions/sessions-section";
+import { SignersSection } from "./signers/signers-section";
 
 enum State {
   SETTINGS,
@@ -71,10 +67,13 @@ export function Settings() {
     [],
   );
 
-  const data = useControllerQuery({
-    username: controller?.username() ?? "",
-    chainId: constants.NetworkName.SN_MAIN,
-  });
+  const controllerQuery = useControllerQuery(
+    {
+      username: controller?.username() ?? "",
+      chainId: constants.NetworkName.SN_MAIN,
+    },
+    { refetchOnMount: "always" },
+  );
 
   const handleLogout = useCallback(() => {
     try {
@@ -103,81 +102,10 @@ export function Settings() {
         />
 
         <LayoutContent className="gap-6">
-          {/* SESSION */}
-          {featureFlags.sessions && (
-            <section className="space-y-4">
-              <SectionHeader
-                title="Session Key(s)"
-                description="Sessions grant permission to your Controller to perform certain game actions on your behalf"
-                showStatus={true}
-                isActive={true}
-              />
-              <div className="space-y-3">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {(data.data?.controller as any)?.sessions?.map(
-                  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                  (session: any, index: number) => (
-                    <SessionCard
-                      key={index}
-                      sessionName={session.appID}
-                      expiresAt={BigInt(session.expiresAt)}
-                    />
-                  ),
-                )}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="py-2.5 px-3 text-foreground-300 gap-1"
-              >
-                <PlusIcon size="sm" variant="line" />
-                <span className="normal-case font-normal font-sans text-sm">
-                  Create Session
-                </span>
-              </Button>
-            </section>
-          )}
-
-          {/* SIGNER */}
           {featureFlags.signers && (
-            <section className="space-y-4">
-              <SectionHeader
-                title="Signer(s)"
-                description="Information associated with registered accounts can be made available to games and applications."
-              />
-              <div className="space-y-3">
-                {data.isLoading ? (
-                  <Skeleton className="w-full h-10 bg-background-200" />
-                ) : data.isError ? (
-                  <div>Error</div>
-                ) : data.isSuccess && data.data ? (
-                  data.data?.controller?.signers?.map((i, signerIndex) => {
-                    return (
-                      <SignerCard
-                        key={`${signerIndex}`}
-                        signer={i.metadata as CredentialMetadata}
-                      />
-                    );
-                  })
-                ) : (
-                  <div>No data</div>
-                )}
-              </div>
-              {/* disabled until add signer functionality is implemented */}
-              {/* <Button */}
-              {/*   type="button" */}
-              {/*   variant="outline" */}
-              {/*   className="py-2.5 px-3 text-foreground-300 gap-1" */}
-              {/* > */}
-              {/*   <PlusIcon size="sm" variant="line" /> */}
-              {/*   <span className="normal-case font-normal font-sans text-sm"> */}
-              {/*     Add Signer */}
-              {/*   </span> */}
-              {/* </Button> */}
-            </section>
+            <SignersSection controllerQuery={controllerQuery} />
           )}
 
-          {/* REGISTERED ACCOUNT */}
           {featureFlags.registeredAccounts && (
             <section className="space-y-4">
               <SectionHeader
@@ -206,7 +134,6 @@ export function Settings() {
             </section>
           )}
 
-          {/* CURRENCY */}
           {featureFlags.currency && (
             <section className="space-y-4">
               <SectionHeader
@@ -215,6 +142,10 @@ export function Settings() {
               />
               <CurrencySelect />
             </section>
+          )}
+
+          {featureFlags.sessions && (
+            <SessionsSection controllerQuery={controllerQuery} />
           )}
         </LayoutContent>
 

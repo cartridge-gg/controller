@@ -1,29 +1,30 @@
 import {
   BigNumberish,
-  InvokeFunctionResponse,
-  Signature,
-  EstimateFee,
-  TypedData,
   Call,
   CallData,
+  EstimateFee,
+  InvokeFunctionResponse,
   Provider,
   RpcProvider,
+  Signature,
+  TypedData,
 } from "starknet";
 
 import {
+  AuthorizedSession,
   CartridgeAccount,
   CartridgeAccountMeta,
   JsCall,
+  JsFeeSource,
   JsFelt,
   Owner,
-  AuthorizedSession,
-  JsFeeSource,
+  RevokableSession,
 } from "@cartridge/controller-wasm/controller";
 
-import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
-import { toJsFeeEstimate, fromJsFeeEstimate } from "./fee";
 import { FeeSource } from "@cartridge/controller";
+import { DeployedAccountTransaction } from "@starknet-io/types-js";
+import { fromJsFeeEstimate, toJsFeeEstimate } from "./fee";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -240,10 +241,12 @@ export default class Controller {
     return this.cartridge.delegateAccount();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  revoke(_origin: string) {
-    // TODO: Cartridge Account SDK to implement revoke session tokens
-    console.error("revoke unimplemented");
+  async revokeSession(session: RevokableSession) {
+    return await this.cartridge.revokeSession(session);
+  }
+
+  async revokeSessions(sessions: RevokableSession[]) {
+    return await this.cartridge.revokeSessions(sessions);
   }
 
   static fromStore(appId: string) {
