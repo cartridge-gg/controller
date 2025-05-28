@@ -13,6 +13,7 @@ import {
   Collectible,
   CollectionAsset,
   CollectibleAsset,
+  CollectionListing,
   SendCollection,
   SendCollectible,
   SendToken,
@@ -54,12 +55,15 @@ export function App() {
               <Route path="collection/:address" element={<Collection />}>
                 <Route path="token/:tokenId" element={<CollectionAsset />}>
                   <Route path="send" element={<SendCollection />} />
+                  <Route path="list" element={<CollectionListing />} />
                 </Route>
                 <Route path="send" element={<SendCollection />} />
+                <Route path="list" element={<CollectionListing />} />
               </Route>
               <Route path="collectible/:address" element={<Collectible />}>
                 <Route path="token/:tokenId" element={<CollectibleAsset />}>
                   <Route path="send" element={<SendCollectible />} />
+                  {/* <Route path="list" element={<ListCollectible />} /> */}
                 </Route>
               </Route>
             </Route>

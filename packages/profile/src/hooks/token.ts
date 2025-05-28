@@ -100,8 +100,6 @@ export type UseBalancesResponse = {
 export function useBalances(accountAddress?: string): UseBalancesResponse {
   const { address: connectedAddress } = useAccount();
   const { project } = useConnection();
-  const [offset, setOffset] = useState(0);
-  const [tokens, setTokens] = useState<{ [key: string]: Token }>({});
   const address = useMemo(
     () => accountAddress ?? connectedAddress,
     [accountAddress, connectedAddress],
@@ -111,60 +109,51 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
     return project ? [project, TOKENS_TORII_INSTANCE] : [];
   }, [project]);
 
-  const { status } = useBalancesQuery(
+  const { data, status } = useBalancesQuery(
     {
       accountAddress: address,
       projects: projects,
       limit: LIMIT,
-      offset: offset,
     },
     {
-      queryKey: ["balances", offset, projects],
+      queryKey: ["balances", projects],
       enabled: projects.length > 0 && !!address,
-      onSuccess: ({ balances }) => {
-        const newTokens: { [key: string]: Token } = {};
-        balances?.edges.forEach((e) => {
-          const { amount, value, meta } = e.node;
-          const {
-            decimals,
-            contractAddress,
-            name,
-            symbol,
-            price,
-            periodPrice,
-          } = meta;
-          const previous = price !== 0 ? (value * periodPrice) / price : 0;
-          const change = value - previous;
-          const image = erc20Metadata.find(
-            (m) =>
-              getChecksumAddress(m.l2_token_address) ===
-              getChecksumAddress(contractAddress),
-          )?.logo_url;
-          const token: Token = {
-            balance: {
-              amount: amount,
-              value: value,
-              change,
-            },
-            metadata: {
-              name,
-              symbol,
-              decimals,
-              address: contractAddress,
-              image,
-            },
-          };
-          newTokens[`${contractAddress}`] = token;
-        });
-        if (balances?.edges.length === LIMIT) {
-          setOffset(offset + LIMIT);
-        }
-        setTokens((prev) => ({ ...prev, ...newTokens }));
-      },
     },
   );
 
-  return { tokens: Object.values(tokens), status };
+  const tokens = useMemo(() => {
+    const newTokens: { [key: string]: Token } = {};
+    data?.balances.edges.forEach((e) => {
+      const { amount, value, meta } = e.node;
+      const { decimals, contractAddress, name, symbol, price, periodPrice } =
+        meta;
+      const previous = price !== 0 ? (value * periodPrice) / price : 0;
+      const change = value - previous;
+      const image = erc20Metadata.find(
+        (m) =>
+          getChecksumAddress(m.l2_token_address) ===
+          getChecksumAddress(contractAddress),
+      )?.logo_url;
+      const token: Token = {
+        balance: {
+          amount: amount,
+          value: value,
+          change,
+        },
+        metadata: {
+          name,
+          symbol,
+          decimals,
+          address: contractAddress,
+          image,
+        },
+      };
+      newTokens[`${contractAddress}`] = token;
+    });
+    return Object.values(newTokens);
+  }, [data]);
+
+  return { tokens, status };
 }
 
 export type UseTokensResponse = {
@@ -201,18 +190,19 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   }, [creditBalance]);
 
   // Get token data from torii
-  const toriiData = useBalances(accountAddress);
+  const { tokens: toriiTokens, status: toriiStatus } =
+    useBalances(accountAddress);
 
   // Get token data from rpc (based on url options without those fetched from torii)
   const contractAddress = useMemo(() => {
-    if (toriiData.status !== "success") return [];
+    if (toriiStatus !== "success") return [];
     return options.filter(
       (token) =>
-        !toriiData.tokens.find(
+        !toriiTokens.find(
           (t) => BigInt(t.metadata.address || "0x0") === BigInt(token),
         ),
     );
-  }, [options, toriiData]);
+  }, [options, toriiTokens]);
 
   const { data: rpcData }: UseERC20BalanceResponse = useERC20Balance({
     address: accountAddress ?? address,
@@ -227,7 +217,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
       rpcData
         .filter(
           (token) =>
-            !toriiData.tokens.find(
+            !toriiTokens.find(
               (t) =>
                 BigInt(t.metadata.address || "0x0") ===
                 BigInt(token.meta.address),
@@ -237,7 +227,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
           balance: `${Number(token.balance.value) / Math.pow(10, token.meta.decimals)}`,
           address: token.meta.address,
         })),
-    [rpcData, toriiData],
+    [rpcData, toriiTokens],
   );
 
   // Get prices for filtered tokens
@@ -284,7 +274,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     });
 
     // Process tokens from toriiData
-    toriiData.tokens.forEach((token) => {
+    toriiTokens.forEach((token) => {
       const normalizedAddress = BigInt(
         token.metadata.address || "0x0",
       ).toString();
@@ -296,10 +286,10 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
 
     // Convert the map back to an array
     newData.tokens = Object.values(tokenMap);
-    newData.status = toriiData.status;
     return newData;
-  }, [rpcData, toriiData, countervalues]);
-  return { tokens: tokens.tokens, credits, status: tokens.status };
+  }, [rpcData, toriiTokens, countervalues]);
+
+  return { tokens: tokens.tokens, credits, status: toriiStatus };
 }
 
 export type UseTokenResponse = UseBalanceResponse;

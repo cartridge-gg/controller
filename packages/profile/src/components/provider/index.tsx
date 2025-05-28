@@ -24,15 +24,15 @@ export function Provider({ children }: PropsWithChildren) {
       >
         <IndexerAPIProvider credentials="omit">
           <QueryClientProvider client={queryClient}>
-            <ArcadeProvider>
-              <ConnectionProvider>
+            <ConnectionProvider>
+              <ArcadeProvider>
                 <UIProvider>
                   <ThemeProvider defaultScheme="system">
                     <DataProvider>{children}</DataProvider>
                   </ThemeProvider>
                 </UIProvider>
-              </ConnectionProvider>
-            </ArcadeProvider>
+              </ArcadeProvider>
+            </ConnectionProvider>
           </QueryClientProvider>
         </IndexerAPIProvider>
       </CartridgeAPIProvider>
