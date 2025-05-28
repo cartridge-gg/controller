@@ -1,13 +1,26 @@
 import { Link } from "react-router-dom";
 import { useCollections } from "#hooks/collection";
 import placeholder from "/public/placeholder.svg";
-import { CollectibleAsset, Skeleton } from "@cartridge/ui";
+import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { useCollectibles } from "#hooks/collectible.js";
+import { useArcade } from "#hooks/arcade.js";
+import { useConnection, useTheme } from "#hooks/context.js";
+import { EditionModel } from "@cartridge/arcade";
 
 export function Collections() {
   const { collections, status: CollectionsStatus } = useCollections();
   const { collectibles, status: CollectiblesStatus } = useCollectibles();
+  const { editions } = useArcade();
+  const { project, namespace } = useConnection();
+  const { theme } = useTheme();
+
+  const edition: EditionModel | undefined = useMemo(() => {
+    return Object.values(editions).find(
+      (edition) =>
+        edition.namespace === namespace && edition.config.project === project,
+    );
+  }, [editions, project, namespace]);
 
   const status = useMemo(() => {
     if (CollectionsStatus === "loading" && CollectiblesStatus === "loading") {
@@ -32,11 +45,12 @@ export function Collections() {
           to={`./collection/${collection.address}`}
           key={collection.address}
         >
-          <CollectibleAsset
-            icon={null}
+          <CollectibleCard
+            icon={edition?.properties.icon || theme?.icon || undefined}
             title={collection.name}
             image={collection.imageUrl || placeholder}
-            count={collection.totalCount}
+            totalCount={collection.totalCount}
+            selectable={false}
           />
         </Link>
       ))}
@@ -47,11 +61,11 @@ export function Collections() {
           to={`./collectible/${collectible.address}`}
           key={collectible.address}
         >
-          <CollectibleAsset
-            icon={null}
+          <CollectibleCard
             title={collectible.name}
             image={collectible.imageUrl || placeholder}
-            count={collectible.totalCount}
+            totalCount={collectible.totalCount}
+            selectable={false}
           />
         </Link>
       ))}

@@ -10,7 +10,7 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
-  CollectibleAsset,
+  CollectibleCard,
   Skeleton,
   Empty,
 } from "@cartridge/ui";
@@ -83,7 +83,7 @@ export function Collectible() {
                     state={location.state}
                     key={asset.tokenId}
                   >
-                    <CollectibleAsset
+                    <CollectibleCard
                       title={
                         asset.name.includes(
                           `${parseInt(BigInt(asset.tokenId).toString())}`,
@@ -91,9 +91,9 @@ export function Collectible() {
                           ? asset.name
                           : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
                       }
+                      selectable={false}
                       image={asset.imageUrl || placeholder}
-                      quantity={asset.amount}
-                      sales={0}
+                      totalCount={asset.amount}
                       className="rounded overflow-hidden"
                     />
                   </Link>
