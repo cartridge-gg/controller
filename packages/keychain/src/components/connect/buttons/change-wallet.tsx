@@ -111,16 +111,12 @@ export function ChangeWallet({
   }, [validation.signer, wallets]);
 
   return (
-    (shouldChangeWallet ||
-      extensionMissingForSigner ||
-      externalChangeWallet) && (
+    (extensionMissingForSigner || externalChangeWallet) && (
       <ErrorAlert
         title={
           extensionMissingForSigner
             ? `${option?.label} wallet missing`
-            : shouldChangeWallet
-              ? `Connect to ${option?.label} Account ${truncateAddress(getControllerSignerAddress(validation.signer) || "")}`
-              : `Change ${option?.label} Account`
+            : `Change ${option?.label} Account`
         }
         allowToggle={false}
         isExpanded={false}
@@ -128,9 +124,7 @@ export function ChangeWallet({
         description={
           extensionMissingForSigner
             ? `We weren't able to detect the ${option?.label} wallet on your browser. Please install it to continue.`
-            : shouldChangeWallet
-              ? `Please connect to ${option?.label} Account ${truncateAddress(getControllerSignerAddress(validation.signer) || "")} to continue.`
-              : `Please change your ${option?.label} account to continue.`
+            : `Please change your ${option?.label} account to continue.`
         }
       />
     )
