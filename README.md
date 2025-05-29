@@ -56,7 +56,7 @@ This command builds all workspace dependencies first and start these servers:
 The simplest way to then develop with your cartridge account is to port it over
 from the production keychain:
 
-- Login to your account at https://x.cartridge.gg/login
+- Login to your account at https://x.com/cartridge_gg
 - Open your console, dump your account with `window.cartridge.exportAccount()`
   and copy it
 - Visting your local keychain at http://localhost:3001/
