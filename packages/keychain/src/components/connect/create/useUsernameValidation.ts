@@ -104,7 +104,7 @@ export function useUsernameValidation(username: string) {
           if (username.length > 19) {
             setValidation({
               status: "invalid",
-              error: new Error("Username cannot be longer than 19 characters"),
+              error: new Error("Username cannot exceed 19 characters"),
             });
             return;
           }
