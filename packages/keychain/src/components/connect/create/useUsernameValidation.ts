@@ -41,7 +41,7 @@ export function useUsernameValidation(username: string) {
         return;
       }
 
-      // TEMP: allow periods for login and disabllow for signup below
+      // TEMP: allow periods for login and disallow for signup below
       if (!/^[a-zA-Z0-9-.]+$/.test(username)) {
         setValidation({
           status: "invalid",
@@ -96,6 +96,15 @@ export function useUsernameValidation(username: string) {
               error: new Error(
                 "Username can only contain letters, numbers, and hyphens",
               ),
+            });
+            return;
+          }
+
+          // TEMP: disallow longer than 19 characters for signup
+          if (username.length > 19) {
+            setValidation({
+              status: "invalid",
+              error: new Error("Username cannot exceed 19 characters"),
             });
             return;
           }
