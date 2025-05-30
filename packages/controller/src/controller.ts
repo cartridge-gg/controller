@@ -34,6 +34,10 @@ export default class ControllerProvider extends BaseProvider {
   private selectedChain: ChainId;
   private chains: Map<ChainId, Chain>;
 
+  isReady(): boolean {
+    return !!this.keychain;
+  }
+
   constructor(options: ControllerOptions) {
     super();
 
