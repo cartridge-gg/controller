@@ -4,7 +4,6 @@ import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import {
   DeployCtx,
-  ExecuteCtx,
   OpenStarterPackCtx,
   SignMessageCtx,
 } from "@/utils/connection";
@@ -16,14 +15,13 @@ import { Purchase } from "./purchase";
 import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
-import { execute } from "@/utils/connection/execute";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { StarterPack } from "./starterpack";
 import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function Home() {
-  const { context, setContext, controller, policies, origin, isConfigLoading } =
+  const { context, controller, policies, origin, isConfigLoading } =
     useConnection();
   const upgrade = useUpgrade();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
@@ -119,30 +117,12 @@ export function Home() {
     }
 
     case "execute": {
-      const ctx = context as ExecuteCtx;
       if (!hasSessionForPolicies) {
         return (
           <CreateSession
             isUpdate
             policies={policies!}
-            onConnect={async () => {
-              const res = await execute({
-                setContext: (nextCtx) => {
-                  setContext(nextCtx);
-                },
-              })(ctx.transactions, undefined, undefined, false);
-
-              setHasSessionForPolicies(true);
-
-              if ("transaction_hash" in res) {
-                // resets execute ui
-                setContext(undefined);
-                return ctx.resolve?.({
-                  code: ResponseCodes.SUCCESS,
-                  transaction_hash: res.transaction_hash,
-                });
-              }
-            }}
+            onConnect={() => setHasSessionForPolicies(true)}
           />
         );
       }
