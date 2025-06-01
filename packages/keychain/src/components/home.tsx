@@ -4,6 +4,7 @@ import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import {
   DeployCtx,
+  ExecuteCtx,
   OpenStarterPackCtx,
   SignMessageCtx,
 } from "@/utils/connection";
@@ -19,6 +20,7 @@ import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { StarterPack } from "./starterpack";
 import { PurchaseType } from "@/hooks/payments/crypto";
+import { executeCore } from "@/utils/connection/execute";
 
 export function Home() {
   const { context, controller, policies, origin, isConfigLoading } =
@@ -117,12 +119,30 @@ export function Home() {
     }
 
     case "execute": {
+      const ctx = context as ExecuteCtx;
       if (!hasSessionForPolicies) {
         return (
           <CreateSession
             isUpdate
             policies={policies!}
-            onConnect={() => setHasSessionForPolicies(true)}
+            onConnect={async () => {
+              const authorized = await controller.hasAuthorizedPoliciesForCalls(
+                ctx.transactions,
+              );
+
+              // If calls are authorized, resolve immediately
+              if (authorized) {
+                const transaction_hash = await executeCore(ctx.transactions);
+
+                return ctx.resolve?.({
+                  code: ResponseCodes.SUCCESS,
+                  transaction_hash,
+                });
+              }
+
+              // If not authorized, fall through to confirm transaction
+              setHasSessionForPolicies(true);
+            }}
           />
         );
       }
