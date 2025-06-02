@@ -28,7 +28,7 @@ const MESSAGE: TypedData = {
       { name: "contents", type: "felt" },
     ],
   },
-  primaryType: "StarknetDomain",
+  primaryType: "Mail",
   domain: {
     name: "StarkNet Mail",
     version: "1",
@@ -36,10 +36,15 @@ const MESSAGE: TypedData = {
     chainId: "SN_SEPOLIA",
   },
   message: {
-    name: "My DApp",
-    version: "1.0",
-    chainId: "SN_SEPOLIA",
-    revision: "1",
+    from: {
+      name: "Cow",
+      wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+    },
+    to: {
+      name: "Bob",
+      wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+    },
+    contents: "Hello, Bob!",
   },
 };
 
