@@ -19,6 +19,7 @@ import { Link } from "react-router-dom";
 import { constants } from "starknet";
 import { AccordionCard } from "./AccordionCard";
 import { MessageContent } from "./MessageCard";
+import { humanizeString } from "@cartridge/controller";
 
 interface AggregateCardProps {
   title: string;
@@ -86,7 +87,7 @@ export function AggregateCard({
               .filter((method) => (isEditable ? true : method.authorized))
               .map((method) => (
                 <div
-                  key={method.name}
+                  key={method.entrypoint}
                   className="flex flex-col p-3 gap-3 text-xs"
                 >
                   <div className="flex items-center justify-between">
@@ -98,7 +99,9 @@ export function AggregateCard({
                           : "text-background-500",
                       )}
                     >
-                      <p className="font-medium text-xs">{method.name}</p>
+                      <p className="font-medium text-xs">
+                        {method.name ?? humanizeString(method.entrypoint)}
+                      </p>
                       {method.description && (
                         <TooltipProvider>
                           <Tooltip>
