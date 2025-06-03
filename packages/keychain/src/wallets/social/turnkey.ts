@@ -3,11 +3,6 @@ import {
   getOrCreateTurnkeySuborg,
   getTurnkeySuborg,
 } from "@/components/connect/create/social/api";
-import { getOidcToken } from "@/components/connect/create/social/auth0";
-import {
-  getOrCreateWallet,
-  getWallet,
-} from "@/components/connect/create/social/turnkey";
 import { Auth0Client, createAuth0Client } from "@auth0/auth0-spa-js";
 import {
   ExternalPlatform,
@@ -19,6 +14,11 @@ import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
 import { Turnkey, TurnkeyIframeClient } from "@turnkey/sdk-browser";
 import { ethers, getAddress, getBytes, Signature } from "ethers";
+import {
+  getAuth0OidcToken,
+  getOrCreateWallet,
+  getWallet,
+} from "./turnkey_utils";
 
 const SOCIAL_PROVIDER_NAME = "discord";
 
@@ -115,7 +115,7 @@ export class TurnkeyWallet {
 
       const iFrameNonce = getNonce(iFramePublicKey);
       const tokenClaims = await auth0Client.getIdTokenClaims();
-      const oidcTokenString = await getOidcToken(tokenClaims, iFrameNonce);
+      const oidcTokenString = await getAuth0OidcToken(tokenClaims, iFrameNonce);
       if (!oidcTokenString) {
         throw new Error("No oidcTokenString");
       }
