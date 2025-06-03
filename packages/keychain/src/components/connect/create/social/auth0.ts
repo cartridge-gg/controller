@@ -2,10 +2,9 @@ import { IdToken } from "@auth0/auth0-react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
 export const getOidcToken = async (
-  getIdTokenClaims: () => Promise<IdToken | undefined>,
+  tokenClaims: IdToken | undefined,
   expectedNonce: string,
 ) => {
-  const tokenClaims = await getIdTokenClaims();
   if (!tokenClaims) {
     throw new Error("Not authenticated with Auth0 yet");
   }
