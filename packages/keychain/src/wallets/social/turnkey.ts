@@ -1,8 +1,3 @@
-import {
-  authenticateToTurnkey,
-  getOrCreateTurnkeySuborg,
-  getTurnkeySuborg,
-} from "@/components/connect/create/social/api";
 import { Auth0Client, createAuth0Client } from "@auth0/auth0-spa-js";
 import {
   ExternalPlatform,
@@ -15,8 +10,11 @@ import { bytesToHex } from "@noble/hashes/utils";
 import { Turnkey, TurnkeyIframeClient } from "@turnkey/sdk-browser";
 import { ethers, getAddress, getBytes, Signature } from "ethers";
 import {
+  authenticateToTurnkey,
   getAuth0OidcToken,
+  getOrCreateTurnkeySuborg,
   getOrCreateWallet,
+  getTurnkeySuborg,
   getWallet,
 } from "./turnkey_utils";
 
