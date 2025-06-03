@@ -1,3 +1,4 @@
+import { getAddress } from "ethers";
 import { ArgentWallet } from "./argent";
 import { MetaMaskWallet } from "./metamask";
 import { PhantomWallet } from "./phantom";
@@ -134,11 +135,12 @@ export class WalletBridge {
     let wallet: WalletAdapter | undefined;
     if (typeof identifier === "string") {
       // this is an address
+      const checkSummedAddress = getAddress(identifier);
+
       wallet = this.walletAdapters.values().find((adapter) => {
-        const ident = identifier.toLowerCase();
         return (
-          adapter.getConnectedAccounts().includes(ident) ||
-          adapter.type === ident
+          adapter.getConnectedAccounts().includes(checkSummedAddress) ||
+          adapter.type === checkSummedAddress
         );
       });
     } else {
@@ -149,7 +151,7 @@ export class WalletBridge {
       wallet = this.walletAdapters
         .values()
         .find((adapter) =>
-          adapter.getConnectedAccounts().includes(identifier.toLowerCase()),
+          adapter.getConnectedAccounts().includes(getAddress(identifier)),
         );
     }
 

@@ -1,3 +1,4 @@
+import { fetchController } from "@/components/connect/create/utils";
 import {
   ConnectionContext,
   ConnectionContextValue,
@@ -16,6 +17,7 @@ import {
   ResponseCodes,
   toArray,
   toSessionPolicies,
+  WalletAdapter,
   WalletBridge,
 } from "@cartridge/controller";
 import { AsyncMethodReturns } from "@cartridge/penpal";
@@ -27,6 +29,7 @@ import {
 } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
 import { isIframe, normalizeOrigin } from "@cartridge/ui/utils";
+import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { RpcProvider, shortString } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
@@ -188,6 +191,80 @@ export function useConnectionValue() {
       fetchChainId();
     }
   }, [rpcUrl]);
+
+  useEffect(() => {
+    if (!controller?.username() || !chainId) return;
+
+    (async () => {
+      try {
+        const controllerResponse = await fetchController(
+          chainId,
+          controller.username(),
+          new AbortController().signal,
+        );
+
+        if (
+          controllerResponse.controller?.signers?.some(
+            (signer) =>
+              signer.metadata.__typename !== "Eip191Credentials" ||
+              signer.metadata.eip191?.[0]?.provider !== "discord",
+          )
+        ) {
+          return;
+        }
+
+        // At this point we know that all the signers are Eip191Credentials and that the provider is discord
+        // So we need to check if at least one of the signers here has an attached embedded wallet in the keychain_wallets
+        const hasEmbeddedWallet = controllerResponse.controller?.signers?.some(
+          (signer) => {
+            if (signer.metadata.__typename !== "Eip191Credentials")
+              return false;
+
+            const ethAddress = signer.metadata.eip191?.[0]?.ethAddress;
+            if (!ethAddress) return false;
+
+            try {
+              return (
+                window.keychain_wallets?.getEmbeddedWallet(ethAddress) !==
+                undefined
+              );
+            } catch (error) {
+              console.warn("Invalid eth address:", ethAddress, error);
+              return false;
+            }
+          },
+        );
+
+        if (hasEmbeddedWallet) {
+          return;
+        }
+
+        const signer = controllerResponse.controller?.signers?.[0];
+        if (!signer || signer.metadata.__typename !== "Eip191Credentials") {
+          return;
+        }
+        const ethAddress = signer.metadata.eip191?.[0]?.ethAddress;
+        if (!ethAddress) {
+          return;
+        }
+
+        const turnkeyWallet = window.keychain_wallets?.turnkeyWallet;
+        if (!turnkeyWallet) {
+          return;
+        }
+
+        turnkeyWallet.account = getAddress(ethAddress);
+        turnkeyWallet.subOrganizationId = undefined;
+
+        window.keychain_wallets?.addEmbeddedWallet(
+          ethAddress,
+          turnkeyWallet as WalletAdapter,
+        );
+      } catch {
+        // ignore
+      }
+    })();
+  }, [controller?.username, chainId]);
 
   // Handle controller initialization
   useEffect(() => {
