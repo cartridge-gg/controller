@@ -25,6 +25,10 @@ export default class ControllerConnector extends InjectedConnector {
     return this.controller.username();
   }
 
+  isReady(): boolean {
+    return this.controller.isReady();
+  }
+
   async delegateAccount() {
     return await this.controller.delegateAccount();
   }
