@@ -150,17 +150,21 @@ const CreateSessionLayout = ({
           {!policies?.verified && (
             <div
               className={cn(
-                "flex items-center p-2 mb-3 gap-2.5 border border-solid-primary rounded-md cursor-pointer text-destructive-100 bg-background-100",
+                "flex items-center p-2 mb-3 gap-2 border border-solid-primary rounded-md cursor-pointer text-destructive-100 bg-background-100",
                 isConsent ? "border-background-200" : "border-destructive-100",
               )}
               onClick={() => !isConnecting && setIsConsent(!isConsent)}
             >
               <Checkbox
                 variant="solid"
+                size="sm"
                 checked={isConsent}
                 disabled={isConnecting}
                 onCheckedChange={() => setIsConsent(!isConsent)}
-                className="pointer-events-none"
+                className="pointer-events-none !w-5 !h-5"
+                style={{
+                  margin: "6px",
+                }}
               />
               <h1 className="text-xs font-normal select-none">
                 These contracts are not verified. I agree to grant this game
