@@ -5,7 +5,6 @@ import { AuthOption } from "@cartridge/controller";
 import { useEffect, useMemo } from "react";
 import { useUsernameValidation } from "../create/useUsernameValidation";
 import {
-  getControllerSignerAddress,
   getControllerSignerProvider,
 } from "../types";
 
@@ -88,39 +87,13 @@ export function ChangeWallet({
     return false;
   }, [option?.isExtension, wallets, validation.signer]);
 
-  const shouldChangeWallet = useMemo(() => {
-    if (!option?.isExtension) {
-      return false;
-    }
-    if (!validation.signer) {
-      return false;
-    }
-    if (validation.signer.__typename === "WebauthnCredentials") {
-      return false;
-    }
-    const walletProvider = wallets.find(
-      (wallet) =>
-        wallet.type === getControllerSignerProvider(validation.signer),
-    );
-
-    return !walletProvider?.connectedAccounts?.find(
-      (account) =>
-        BigInt(account) ===
-        BigInt(getControllerSignerAddress(validation.signer) || 0),
-    );
-  }, [validation.signer, wallets]);
-
   return (
-    (shouldChangeWallet ||
-      extensionMissingForSigner ||
-      externalChangeWallet) && (
+    (extensionMissingForSigner || externalChangeWallet) && (
       <ErrorAlert
         title={
           extensionMissingForSigner
             ? `${option?.label} wallet missing`
-            : shouldChangeWallet
-              ? `Connect to ${option?.label} Account ${truncateAddress(getControllerSignerAddress(validation.signer) || "")}`
-              : `Change ${option?.label} Account`
+            : `Change ${option?.label} Account`
         }
         allowToggle={false}
         isExpanded={false}
@@ -128,15 +101,9 @@ export function ChangeWallet({
         description={
           extensionMissingForSigner
             ? `We weren't able to detect the ${option?.label} wallet on your browser. Please install it to continue.`
-            : shouldChangeWallet
-              ? `Please connect to ${option?.label} Account ${truncateAddress(getControllerSignerAddress(validation.signer) || "")} to continue.`
-              : `Please change your ${option?.label} account to continue.`
+            : `Please change your ${option?.label} account to continue.`
         }
       />
     )
   );
 }
-
-const truncateAddress = (address: string) => {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-};
