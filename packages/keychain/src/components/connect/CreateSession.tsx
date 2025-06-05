@@ -162,10 +162,10 @@ const CreateSessionLayout = ({
                 onCheckedChange={() => setIsConsent(!isConsent)}
                 className="pointer-events-none"
               />
-              <div className="text-xs font-normal">
+              <h1 className="text-xs font-normal select-none">
                 These contracts are not verified. I agree to grant this game
                 permission to execute the actions listed above.
-              </div>
+              </h1>
             </div>
           )}
 
