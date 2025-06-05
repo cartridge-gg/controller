@@ -21,6 +21,7 @@ const Header = () => {
   const { address, status } = useAccount();
   const [networkOpen, setNetworkOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isControllerReady, setIsControllerReady] = useState(false);
   const { switchChain } = useSwitchChain({
     params: {
       chainId: constants.StarknetChainId.SN_SEPOLIA,
@@ -32,6 +33,24 @@ const Header = () => {
     () => ControllerConnector.fromConnectors(connectors),
     [connectors],
   );
+
+  useEffect(() => {
+    const checkReady = () => {
+      try {
+        if (controllerConnector) {
+          setIsControllerReady(controllerConnector.isReady());
+        }
+      } catch (e) {
+        console.error("Error checking controller readiness:", e);
+      }
+    };
+
+    checkReady();
+
+    const interval = setInterval(checkReady, 1000);
+
+    return () => clearInterval(interval);
+  }, [controllerConnector]);
 
   const sessionConnector = useMemo(() => {
     try {
@@ -173,11 +192,15 @@ const Header = () => {
             onClick={() => {
               connect({ connector: controllerConnector });
             }}
+            disabled={!isControllerReady}
           >
-            Connect
+            {isControllerReady ? "Connect" : "Waiting for keychain..."}
           </Button>
           {sessionConnector && (
-            <Button onClick={() => connect({ connector: sessionConnector })}>
+            <Button
+              onClick={() => connect({ connector: sessionConnector })}
+              disabled={!isControllerReady}
+            >
               Register Session
             </Button>
           )}
