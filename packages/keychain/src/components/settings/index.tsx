@@ -38,7 +38,6 @@ enum State {
 
 // Feature flag configuration
 interface FeatureFlags {
-  sessions: boolean;
   signers: boolean;
   registeredAccounts: boolean;
   currency: boolean;
@@ -59,7 +58,6 @@ export function Settings() {
   // Feature flags - can be moved to environment variables or API config later
   const featureFlags = useMemo<FeatureFlags>(
     () => ({
-      sessions: true,
       signers: true,
       registeredAccounts: false,
       currency: false,
@@ -144,9 +142,7 @@ export function Settings() {
             </section>
           )}
 
-          {featureFlags.sessions && (
-            <SessionsSection controllerQuery={controllerQuery} />
-          )}
+          <SessionsSection controllerQuery={controllerQuery} />
         </LayoutContent>
 
         <LayoutFooter>
