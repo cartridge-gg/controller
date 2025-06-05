@@ -39,6 +39,42 @@ export function parseControllerError(
   }
 }
 
+export async function executeCore(
+  transactions: AllowArray<Call>,
+  feeSource?: FeeSource,
+): Promise<string> {
+  const controller: Controller | undefined = window.controller;
+
+  if (!controller) {
+    throw new Error("Controller not found");
+  }
+
+  const calls = normalizeCalls(transactions);
+
+  // Try paymaster flow
+  try {
+    const { transaction_hash } = await controller.executeFromOutsideV3(
+      calls,
+      feeSource,
+    );
+    return transaction_hash;
+  } catch (e) {
+    const error = e as ControllerError;
+    if (error.code !== ErrorCode.PaymasterNotSupported) {
+      throw error;
+    }
+  }
+
+  // User pays flow
+  const estimate = await controller.estimateInvokeFee(calls);
+  const { transaction_hash } = await controller.execute(
+    transactions as Call[],
+    estimate,
+    feeSource,
+  );
+  return transaction_hash;
+}
+
 export function execute({
   setContext,
 }: {
@@ -52,7 +88,6 @@ export function execute({
     feeSource?: FeeSource,
     error?: ControllerError,
   ): Promise<InvokeFunctionResponse | ConnectError> => {
-    const controller: Controller | undefined = window.controller;
     const calls = normalizeCalls(transactions);
 
     if (sync) {
@@ -71,6 +106,8 @@ export function execute({
     return await new Promise<InvokeFunctionResponse | ConnectError>(
       // eslint-disable-next-line no-async-promise-executor
       async (resolve, reject) => {
+        const controller: Controller | undefined = window.controller;
+
         if (!controller) {
           setContext(undefined);
           return reject({
@@ -93,63 +130,27 @@ export function execute({
           });
         }
 
-        // Try paymaster flow
+        // Use the consolidated execution logic
         try {
-          const { transaction_hash } = await controller.executeFromOutsideV3(
-            calls,
-            feeSource,
-          );
+          const transaction_hash = await executeCore(calls, feeSource);
           setContext(undefined);
           return resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,
           });
         } catch (e) {
-          // Continue with user pays flow if paymaster not supported
           const error = e as ControllerError;
-          if (error.code !== ErrorCode.PaymasterNotSupported) {
-            setContext({
-              type: "execute",
-              transactions,
-              error: parseControllerError(error),
-              resolve,
-              reject,
-            } as ExecuteCtx);
-            return resolve({
-              code: ResponseCodes.ERROR,
-              message: error.message,
-              error: parseControllerError(error),
-            });
-          }
-        }
-
-        // User pays flow
-        try {
-          const estimate = await controller.estimateInvokeFee(calls);
-          const { transaction_hash } = await controller.execute(
-            transactions as Call[],
-            estimate,
-            feeSource,
-          );
-
-          setContext(undefined);
-          return resolve({
-            code: ResponseCodes.SUCCESS,
-            transaction_hash,
-          });
-        } catch (e) {
-          console.log(e);
           setContext({
             type: "execute",
             transactions,
-            error: parseControllerError(e as ControllerError),
+            error: parseControllerError(error),
             resolve,
             reject,
           } as ExecuteCtx);
           return resolve({
             code: ResponseCodes.ERROR,
-            message: (e as Error).message,
-            error: parseControllerError(e as ControllerError),
+            message: error.message,
+            error: parseControllerError(error),
           });
         }
       },

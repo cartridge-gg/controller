@@ -16,14 +16,14 @@ import { Purchase } from "./purchase";
 import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
-import { execute } from "@/utils/connection/execute";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { StarterPack } from "./starterpack";
 import { PurchaseType } from "@/hooks/payments/crypto";
+import { executeCore } from "@/utils/connection/execute";
 
 export function Home() {
-  const { context, setContext, controller, policies, origin, isConfigLoading } =
+  const { context, controller, policies, origin, isConfigLoading } =
     useConnection();
   const upgrade = useUpgrade();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
@@ -126,22 +126,22 @@ export function Home() {
             isUpdate
             policies={policies!}
             onConnect={async () => {
-              const res = await execute({
-                setContext: (nextCtx) => {
-                  setContext(nextCtx);
-                },
-              })(ctx.transactions, undefined, undefined, false);
+              const authorized = await controller.hasAuthorizedPoliciesForCalls(
+                ctx.transactions,
+              );
 
-              setHasSessionForPolicies(true);
+              // If calls are authorized, resolve immediately
+              if (authorized) {
+                const transaction_hash = await executeCore(ctx.transactions);
 
-              if ("transaction_hash" in res) {
-                // resets execute ui
-                setContext(undefined);
                 return ctx.resolve?.({
                   code: ResponseCodes.SUCCESS,
-                  transaction_hash: res.transaction_hash,
+                  transaction_hash,
                 });
               }
+
+              // If not authorized, fall through to confirm transaction
+              setHasSessionForPolicies(true);
             }}
           />
         );
