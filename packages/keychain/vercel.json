@@ -45,6 +45,10 @@
   ],
   "rewrites": [
     {
+      "source": "/.well-known/:path(.*)",
+      "destination": "https://static.cartridge.gg/x/.well-known/:path*"
+    },
+    {
       "source": "/ingest/static/:path(.*)",
       "destination": "https://us-assets.i.posthog.com/static/:path*"
     },
