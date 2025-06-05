@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { CreateSession } from "./CreateSession";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
 import { parseSessionPolicies } from "@/hooks/session";
-import { controllerConfigs } from "@cartridge/presets";
 
 const meta: Meta<typeof CreateSession> = {
   component: CreateSession,
@@ -184,7 +183,83 @@ export const WithPreset: Story = {
     policies: parseSessionPolicies({
       verified: true,
       policies: {
-        ...controllerConfigs["dope-wars"].chains!["SN_MAIN"]?.policies,
+        ...{
+          contracts: {
+            "0x051Fea4450Da9D6aeE758BDEbA88B2f665bCbf549D2C61421AA724E9AC0Ced8F":
+              {
+                name: "VRF Provider",
+                description: "Provides verifiable random functions",
+                methods: [
+                  {
+                    name: "Request Random",
+                    description: "Request a random number",
+                    entrypoint: "request_random",
+                  },
+                ],
+              },
+            "0x0410466536b5ae074f7fea81e5533b8134a9fa08b3dd077dd9db08f64997d113":
+              {
+                name: "Paper Token",
+                description: "Manages paper approvals",
+                methods: [
+                  {
+                    name: "Approve",
+                    description: "Approve paper usage",
+                    entrypoint: "approve",
+                  },
+                ],
+              },
+            "0x044a23BbfE03FFe90D3C23Fb6e5A8AD0341036C039363DfA6F3513278Aa51fCA":
+              {
+                name: "Game Contract",
+                description: "Core game mechanics",
+                methods: [
+                  {
+                    name: "Create Game",
+                    description: "Start a new game",
+                    entrypoint: "create_game",
+                  },
+                  {
+                    name: "Travel",
+                    description: "Travel to a new location",
+                    entrypoint: "travel",
+                  },
+                  {
+                    name: "Decide",
+                    description: "Make a game decision",
+                    entrypoint: "decide",
+                  },
+                  {
+                    name: "End Game",
+                    description: "End the current game",
+                    entrypoint: "end_game",
+                  },
+                ],
+              },
+            "0x0412445e644070C69fEa16b964cC81Cd6dEBF6A4DBf683E2E9686a45ad088de8":
+              {
+                name: "Laundromat Contract",
+                description: "Manages game scoring and laundering",
+                methods: [
+                  {
+                    name: "Register Score",
+                    description: "Register a game score",
+                    entrypoint: "register_score",
+                  },
+                  {
+                    name: "Claim",
+                    description: "Claim rewards",
+                    entrypoint: "claim",
+                  },
+                  {
+                    name: "Launder",
+                    description: "Launder resources",
+                    entrypoint: "launder",
+                  },
+                ],
+              },
+          },
+        },
         messages,
       },
     }),
