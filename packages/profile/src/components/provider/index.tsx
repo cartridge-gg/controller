@@ -8,6 +8,7 @@ import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { DataProvider } from "./data";
 import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
 import { UIProvider } from "./ui";
+import { MarketplaceProvider } from "./marketplace";
 
 const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
   host: import.meta.env.VITE_POSTHOG_HOST,
@@ -26,11 +27,13 @@ export function Provider({ children }: PropsWithChildren) {
           <QueryClientProvider client={queryClient}>
             <ConnectionProvider>
               <ArcadeProvider>
-                <UIProvider>
-                  <ThemeProvider defaultScheme="system">
-                    <DataProvider>{children}</DataProvider>
-                  </ThemeProvider>
-                </UIProvider>
+                <MarketplaceProvider>
+                  <UIProvider>
+                    <ThemeProvider defaultScheme="system">
+                      <DataProvider>{children}</DataProvider>
+                    </ThemeProvider>
+                  </UIProvider>
+                </MarketplaceProvider>
               </ArcadeProvider>
             </ConnectionProvider>
           </QueryClientProvider>
