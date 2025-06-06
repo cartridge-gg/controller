@@ -3,6 +3,7 @@ export {
   CollectionAsset,
   Collectible,
   CollectibleAsset,
+  CollectionListing,
   SendCollection,
   SendCollectible,
 } from "./collection";
