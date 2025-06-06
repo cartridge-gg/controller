@@ -19,7 +19,7 @@ import {
 import { cn } from "@cartridge/ui/utils";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import React from "react";
-import { getControllerSignerProvider } from "../connect/types";
+import { getControllerSignerProvider } from "../../connect/types";
 export interface Signer {
   signer: CredentialMetadata;
 }
@@ -41,7 +41,7 @@ export const SignerCard = React.forwardRef<
         {...props}
       >
         <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-center bg-background-200">
-          <DeviceIcon signerType={signerType} />
+          <SignerIcon signerType={signerType} />
           <p className="flex-1 text-sm font-normal">
             {signerType ? AUTH_METHODS_LABELS[signerType] : "Unknown"}
           </p>
@@ -67,7 +67,7 @@ export const SignerCard = React.forwardRef<
             size="icon"
             className="flex items-center justify-center"
           >
-            <DeviceIcon signerType={signerType} />
+            <SignerIcon signerType={signerType} />
           </Button>
           <div className="flex flex-col items-start gap-1">
             <h3 className="text-lg font-semibold text-foreground-100">
@@ -95,7 +95,7 @@ export const SignerCard = React.forwardRef<
 
 SignerCard.displayName = "SignerCard";
 
-const DeviceIcon = React.memo(
+const SignerIcon = React.memo(
   ({ signerType }: { signerType: AuthOption | undefined }) => {
     if (!signerType) {
       return <TouchIcon size="sm" />;
