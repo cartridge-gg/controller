@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 
 interface ChooseSignupMethodProps {
-  isSlot?: boolean;
   isLoading: boolean;
   onSubmit: (authenticationMode?: AuthOption) => void;
   signupOptions: AuthOption[];
