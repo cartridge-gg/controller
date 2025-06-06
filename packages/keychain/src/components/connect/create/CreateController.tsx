@@ -74,9 +74,11 @@ function CreateControllerForm({
       <LayoutHeader
         variant="expanded"
         title={
-          theme.name.toLowerCase() === "cartridge"
-            ? "Connect Controller"
-            : `Connect to ${theme.name}`
+          isSlot
+            ? "Connect to Slot"
+            : theme.name.toLowerCase() === "cartridge"
+              ? "Connect Controller"
+              : `Connect to ${theme.name}`
         }
         hideUsername
         hideNetwork={isSlot}
@@ -193,7 +195,6 @@ export function CreateControllerView({
         setChangeWallet={setChangeWallet}
       />
       <ChooseSignupMethodForm
-        isSlot={isSlot}
         isLoading={isLoading}
         onSubmit={onSubmit}
         signupOptions={signupOptions}
