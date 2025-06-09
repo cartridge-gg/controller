@@ -6,7 +6,6 @@ import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useController } from "@/hooks/controller";
 import { useEffect } from "react";
 import {
-  Link,
   Navigate,
   Outlet,
   useLocation,
@@ -78,20 +77,23 @@ export function Success() {
         hideNetwork
       />
       <LayoutContent className="gap-4">
-        <div className="flex w-full px-4 py-6 bg-background-200 border border-background-300 rounded">
+        <div className="flex w-full px-4 py-5 bg-background-200 border border-background-300 rounded">
           <p className="w-full text-sm">
-            You have successfully authenticated with Slot.
+            You have successfully authenticated with Slot!
+            <br />
             <br />
             You can now close this window and return to the terminal.
             <br />
             <br />
             For more information on using Slot, please refer to our{" "}
-            <Link
-              to="https://docs.cartridge.gg/slot/getting-started#usage"
+            <a
+              href="https://docs.cartridge.gg/slot/getting-started#usage"
+              className="underline hover:text-primary-100"
               target="_blank"
+              rel="noopener noreferrer"
             >
               documentation
-            </Link>
+            </a>
           </p>
         </div>
       </LayoutContent>
