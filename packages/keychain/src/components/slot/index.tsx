@@ -6,12 +6,19 @@ import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useController } from "@/hooks/controller";
 import { useEffect } from "react";
 import {
+  Link,
   Navigate,
   Outlet,
   useLocation,
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
+import {
+  CheckIcon,
+  LayoutContainer,
+  LayoutContent,
+  LayoutHeader,
+} from "@cartridge/ui";
 
 export function Slot() {
   const { pathname } = useLocation();
@@ -19,7 +26,7 @@ export function Slot() {
     case "/slot/auth":
       return <Navigate to="/slot" replace />;
     case "/slot/auth/success":
-      return <Navigate to="/success" replace />;
+      return <Success />;
     case "/slot/auth/failure":
       return <Navigate to="/failure" replace />;
     case "/slot/consent":
@@ -59,4 +66,35 @@ function Auth() {
   }
 
   return <CreateController isSlot={true} />;
+}
+
+function Success() {
+  return (
+    <LayoutContainer className="pb-12">
+      <LayoutHeader
+        variant="expanded"
+        Icon={CheckIcon}
+        title="Success!"
+        hideNetwork
+      />
+      <LayoutContent className="gap-4">
+        <div className="flex w-full px-4 py-6 bg-background-200 border border-background-300 rounded">
+          <p className="w-full text-sm">
+            You have successfully authenticated with Slot.
+            <br />
+            You can now close this window and return to the terminal.
+            <br />
+            <br />
+            For more information on using Slot, please refer to our{" "}
+            <Link
+              to="https://docs.cartridge.gg/slot/getting-started#usage"
+              target="_blank"
+            >
+              documentation
+            </Link>
+          </p>
+        </div>
+      </LayoutContent>
+    </LayoutContainer>
+  );
 }

@@ -3,7 +3,6 @@ import { Home } from "./home";
 import { Authenticate } from "./authenticate";
 import { Session } from "./session";
 import { Failure } from "./failure";
-import { Success } from "./success";
 import { Pending } from "./pending";
 import { Consent, Slot } from "./slot";
 import { Fund } from "./slot/fund";
@@ -21,7 +20,6 @@ export function App() {
           <Route path="consent" element={<Consent />} />
           <Route path="fund" element={<Fund />} />
         </Route>
-        <Route path="success" element={<Success />} />
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />
         <Route
