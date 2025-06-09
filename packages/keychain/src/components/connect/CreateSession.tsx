@@ -167,7 +167,7 @@ const CreateSessionLayout = ({
                 }}
               />
               <h1 className="text-xs font-normal select-none">
-                These contracts are not verified. I agree to grant this game
+                I agree to grant this application
                 permission to execute the actions listed above.
               </h1>
             </div>
