@@ -4,7 +4,7 @@ import { Authenticate } from "./authenticate";
 import { Session } from "./session";
 import { Failure } from "./failure";
 import { Pending } from "./pending";
-import { Consent, Slot } from "./slot";
+import { Consent, Slot, Success } from "./slot";
 import { Fund } from "./slot/fund";
 import { StarterPackWrapper } from "./starterpack";
 import { FeatureToggle } from "./feature-toggle";
@@ -20,6 +20,7 @@ export function App() {
           <Route path="consent" element={<Consent />} />
           <Route path="fund" element={<Fund />} />
         </Route>
+        <Route path="success" element={<Success />} />
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />
         <Route
