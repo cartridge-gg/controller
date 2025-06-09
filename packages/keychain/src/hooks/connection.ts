@@ -158,7 +158,9 @@ export function useConnectionValue() {
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const theme = urlParams.get("theme");
-    const preset = urlParams.get("preset");
+    const preset = window.location.pathname.startsWith("/slot")
+      ? "slot"
+      : urlParams.get("preset");
     const rpcUrl = urlParams.get("rpc_url");
     const policies = urlParams.get("policies");
 
