@@ -419,7 +419,7 @@ export function useConnectionValue() {
     configSignupOptions,
     setController,
     setContext,
-    closeModal,
+    closeModal: parent ? closeModal : undefined,
     openModal,
     logout,
     openSettings,

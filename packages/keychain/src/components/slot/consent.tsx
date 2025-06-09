@@ -4,7 +4,6 @@ import {
   LayoutFooter,
   LayoutHeader,
   Button,
-  SlotIcon,
   Checkbox,
 } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
@@ -96,10 +95,7 @@ export function Consent() {
       <LayoutHeader
         onClose={onDeny}
         variant="expanded"
-        icon={
-          <SlotIcon scale="2xl" className="w-[50px] h-[50px]" color="#FBCB4A" />
-        }
-        title="Signing in to Slot"
+        title="Sign in to Slot"
         description={
           <>
             <span className="font-bold">Slot</span> is requesting permission to
