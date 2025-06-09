@@ -68,7 +68,7 @@ function Auth() {
   return <CreateController isSlot={true} />;
 }
 
-function Success() {
+export function Success() {
   return (
     <LayoutContainer className="pb-12">
       <LayoutHeader
