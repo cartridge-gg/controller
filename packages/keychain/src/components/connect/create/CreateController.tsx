@@ -59,7 +59,6 @@ function CreateControllerForm({
   isLoading,
   error,
   isInAppBrowser,
-  isSlot,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -74,14 +73,12 @@ function CreateControllerForm({
       <LayoutHeader
         variant="expanded"
         title={
-          isSlot
-            ? "Connect to Slot"
-            : theme.name.toLowerCase() === "cartridge"
-              ? "Connect Controller"
-              : `Connect to ${theme.name}`
+          theme.name.toLowerCase() === "cartridge"
+            ? "Connect Controller"
+            : `Connect to ${theme.name}`
         }
+        hideNetwork
         hideUsername
-        hideNetwork={isSlot}
         hideSettings
       />
 
@@ -153,7 +150,6 @@ export function CreateControllerView({
   isLoading,
   error,
   isInAppBrowser,
-  isSlot,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -184,7 +180,6 @@ export function CreateControllerView({
         isLoading={isLoading}
         error={error}
         isInAppBrowser={isInAppBrowser}
-        isSlot={isSlot}
         onUsernameChange={onUsernameChange}
         onUsernameFocus={onUsernameFocus}
         onUsernameClear={onUsernameClear}

@@ -13,11 +13,7 @@ catalogs:
       specifier: ^6.2.4
       version: 6.2.4
     '@cartridge/ui':
-<<<<<<< HEAD
       specifier: github:cartridge-gg/ui#54415c0
-=======
-      specifier: github:cartridge-gg/ui#9044ddf
->>>>>>> b4553aed8 (chore: update @cartridge/ui to 9044ddf)
       version: 0.7.14-alpha.2
     '@eslint/js':
       specifier: ^9.18.0
@@ -172,16 +168,11 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#758ee48
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/758ee48
+        specifier: github:cartridge-gg/presets#e6a5022
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022
       '@cartridge/ui':
-<<<<<<< HEAD
         specifier: github:cartridge-gg/ui#54415c0
         version: https://codeload.github.com/cartridge-gg/ui/tar.gz/54415c0(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(viem@2.28.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)(zod@3.24.4))
-=======
-        specifier: github:cartridge-gg/ui#9044ddf
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/9044ddf(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(viem@2.28.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)(zod@3.24.4))
->>>>>>> b4553aed8 (chore: update @cartridge/ui to 9044ddf)
     devDependencies:
       husky:
         specifier: ^9.1.7
@@ -203,11 +194,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/ui':
         specifier: 'catalog:'
-<<<<<<< HEAD
         version: https://codeload.github.com/cartridge-gg/ui/tar.gz/54415c0(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
-=======
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/9044ddf(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
->>>>>>> b4553aed8 (chore: update @cartridge/ui to 9044ddf)
       '@starknet-react/chains':
         specifier: 'catalog:'
         version: 3.1.3
@@ -513,11 +500,7 @@ importers:
         version: 6.2.4
       '@cartridge/ui':
         specifier: 'catalog:'
-<<<<<<< HEAD
         version: https://codeload.github.com/cartridge-gg/ui/tar.gz/54415c0(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
-=======
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/9044ddf(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
->>>>>>> b4553aed8 (chore: update @cartridge/ui to 9044ddf)
       '@noble/hashes':
         specifier: ^1.7.1
         version: 1.8.0
@@ -749,11 +732,7 @@ importers:
         version: 6.2.4
       '@cartridge/ui':
         specifier: 'catalog:'
-<<<<<<< HEAD
         version: https://codeload.github.com/cartridge-gg/ui/tar.gz/54415c0(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
-=======
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/9044ddf(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
->>>>>>> b4553aed8 (chore: update @cartridge/ui to 9044ddf)
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
@@ -1098,21 +1077,12 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/758ee48':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/758ee48}
-    version: 0.0.1
-
-<<<<<<< HEAD
   '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022':
     resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022}
     version: 0.0.1
 
   '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/54415c0':
     resolution: {tarball: https://codeload.github.com/cartridge-gg/ui/tar.gz/54415c0}
-=======
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/9044ddf':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/ui/tar.gz/9044ddf}
->>>>>>> b4553aed8 (chore: update @cartridge/ui to 9044ddf)
     version: 0.7.14-alpha.2
     peerDependencies:
       react: ^18.2.0
@@ -9942,15 +9912,7 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/758ee48':
-    dependencies:
-      '@starknet-io/types-js': 0.7.7
-
-<<<<<<< HEAD
   '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022':
-=======
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/9044ddf(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))':
->>>>>>> b4553aed8 (chore: update @cartridge/ui to 9044ddf)
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
@@ -9999,11 +9961,7 @@ snapshots:
       - react-native
       - tailwindcss
 
-<<<<<<< HEAD
   '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/54415c0(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(viem@2.28.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)(zod@3.24.4))':
-=======
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/9044ddf(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(viem@2.28.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)(zod@3.24.4))':
->>>>>>> b4553aed8 (chore: update @cartridge/ui to 9044ddf)
     dependencies:
       '@cartridge/presets': https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022
       '@radix-ui/react-accordion': 1.2.1(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
