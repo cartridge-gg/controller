@@ -167,8 +167,8 @@ const CreateSessionLayout = ({
                 }}
               />
               <h1 className="text-xs font-normal select-none">
-                I agree to grant this application
-                permission to execute the actions listed above.
+                I agree to grant this application permission to execute the
+                actions listed above.
               </h1>
             </div>
           )}
