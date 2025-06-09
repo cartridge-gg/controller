@@ -34,7 +34,7 @@ function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { controller } = useController();
-  const { data: user, isFetched } = useMeQuery();
+  const { data: user, isFetched } = useMeQuery(undefined, { retry: false });
 
   useEffect(() => {
     if (user && controller) {
