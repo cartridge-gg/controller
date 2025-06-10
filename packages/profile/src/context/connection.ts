@@ -18,10 +18,12 @@ export type ConnectionContextType = {
   setIsVisible: (isVisible: boolean) => void;
   closeModal: () => void;
   openSettings: () => void;
+  logout: () => Promise<void>;
 };
 
 export type ParentMethods = {
   close: () => void;
+  logout: () => Promise<void>;
   openSettings: () => void;
   openPurchaseCredits: () => void;
   openExecute: (
@@ -33,6 +35,7 @@ export type ParentMethods = {
 export const initialState: ConnectionContextType = {
   origin: location.origin,
   parent: {
+    logout: async () => {},
     close: () => {},
     openSettings: () => {},
     openPurchaseCredits: () => {},
@@ -46,6 +49,7 @@ export const initialState: ConnectionContextType = {
   setIsVisible: () => {},
   closeModal: () => {},
   openSettings: () => {},
+  logout: async () => {},
 };
 
 export const ConnectionContext =
