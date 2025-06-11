@@ -168,33 +168,57 @@ export function CreateControllerView({
     }
   };
 
+  // Apply styles to constrain the Sheet within the iframe
+  useEffect(() => {
+    if (authenticationStep === AuthenticationStep.ChooseSignupMethod) {
+      // Add CSS to ensure the dialog overlay stays within bounds
+      const style = document.createElement('style');
+      style.textContent = `
+        [data-radix-dialog-overlay] {
+          position: absolute !important;
+          inset: 0 !important;
+        }
+        [data-radix-dialog-content] {
+          position: absolute !important;
+        }
+      `;
+      document.head.appendChild(style);
+      
+      return () => {
+        document.head.removeChild(style);
+      };
+    }
+  }, [authenticationStep]);
+
   return (
-    <Sheet
-      open={authenticationStep === AuthenticationStep.ChooseSignupMethod}
-      onOpenChange={handleOpenChange}
-    >
-      <CreateControllerForm
-        theme={theme}
-        usernameField={usernameField}
-        validation={validation}
-        isLoading={isLoading}
-        error={error}
-        isInAppBrowser={isInAppBrowser}
-        onUsernameChange={onUsernameChange}
-        onUsernameFocus={onUsernameFocus}
-        onUsernameClear={onUsernameClear}
-        onSubmit={onSubmit}
-        onKeyDown={onKeyDown}
-        waitingForConfirmation={waitingForConfirmation}
-        changeWallet={changeWallet}
-        setChangeWallet={setChangeWallet}
-      />
-      <ChooseSignupMethodForm
-        isLoading={isLoading}
-        onSubmit={onSubmit}
-        signupOptions={signupOptions}
-      />
-    </Sheet>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+      <Sheet
+        open={authenticationStep === AuthenticationStep.ChooseSignupMethod}
+        onOpenChange={handleOpenChange}
+      >
+        <CreateControllerForm
+          theme={theme}
+          usernameField={usernameField}
+          validation={validation}
+          isLoading={isLoading}
+          error={error}
+          isInAppBrowser={isInAppBrowser}
+          onUsernameChange={onUsernameChange}
+          onUsernameFocus={onUsernameFocus}
+          onUsernameClear={onUsernameClear}
+          onSubmit={onSubmit}
+          onKeyDown={onKeyDown}
+          waitingForConfirmation={waitingForConfirmation}
+          changeWallet={changeWallet}
+          setChangeWallet={setChangeWallet}
+        />
+        <ChooseSignupMethodForm
+          isLoading={isLoading}
+          onSubmit={onSubmit}
+          signupOptions={signupOptions}
+        />
+      </Sheet>
+    </div>
   );
 }
 
