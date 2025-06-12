@@ -103,6 +103,10 @@ export function ChangeWallet({
         wallet.type === getControllerSignerProvider(validation.signer),
     );
 
+    if (walletProvider?.connectedAccounts?.length === 0) {
+      return false;
+    }
+
     return !walletProvider?.connectedAccounts?.find(
       (account) =>
         BigInt(account) ===
