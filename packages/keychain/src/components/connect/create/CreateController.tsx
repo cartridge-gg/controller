@@ -69,7 +69,7 @@ function CreateControllerForm({
   setChangeWallet,
 }: CreateControllerFormProps) {
   return (
-    <LayoutContainer>
+    <>
       <LayoutHeader
         variant="expanded"
         title={
@@ -140,7 +140,7 @@ function CreateControllerForm({
           />
         </LayoutFooter>
       </form>
-    </LayoutContainer>
+    </>
   );
 }
 export function CreateControllerView({
@@ -169,32 +169,34 @@ export function CreateControllerView({
   };
 
   return (
-    <Sheet
-      open={authenticationStep === AuthenticationStep.ChooseSignupMethod}
-      onOpenChange={handleOpenChange}
-    >
-      <CreateControllerForm
-        theme={theme}
-        usernameField={usernameField}
-        validation={validation}
-        isLoading={isLoading}
-        error={error}
-        isInAppBrowser={isInAppBrowser}
-        onUsernameChange={onUsernameChange}
-        onUsernameFocus={onUsernameFocus}
-        onUsernameClear={onUsernameClear}
-        onSubmit={onSubmit}
-        onKeyDown={onKeyDown}
-        waitingForConfirmation={waitingForConfirmation}
-        changeWallet={changeWallet}
-        setChangeWallet={setChangeWallet}
-      />
-      <ChooseSignupMethodForm
-        isLoading={isLoading}
-        onSubmit={onSubmit}
-        signupOptions={signupOptions}
-      />
-    </Sheet>
+    <LayoutContainer>
+      <Sheet
+        open={authenticationStep === AuthenticationStep.ChooseSignupMethod}
+        onOpenChange={handleOpenChange}
+      >
+        <CreateControllerForm
+          theme={theme}
+          usernameField={usernameField}
+          validation={validation}
+          isLoading={isLoading}
+          error={error}
+          isInAppBrowser={isInAppBrowser}
+          onUsernameChange={onUsernameChange}
+          onUsernameFocus={onUsernameFocus}
+          onUsernameClear={onUsernameClear}
+          onSubmit={onSubmit}
+          onKeyDown={onKeyDown}
+          waitingForConfirmation={waitingForConfirmation}
+          changeWallet={changeWallet}
+          setChangeWallet={setChangeWallet}
+        />
+        <ChooseSignupMethodForm
+          isLoading={isLoading}
+          onSubmit={onSubmit}
+          signupOptions={signupOptions}
+        />
+      </Sheet>
+    </LayoutContainer>
   );
 }
 
