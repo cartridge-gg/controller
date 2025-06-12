@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@cartridge/controller-wasm':
-      specifier: 0.1.6
-      version: 0.1.6
+      specifier: 0.1.7
+      version: 0.1.7
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -264,7 +264,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.1.6
+        version: 0.1.7
       starknet:
         specifier: 'catalog:'
         version: 6.24.1
@@ -372,7 +372,7 @@ importers:
     dependencies:
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.1.6
+        version: 0.1.7
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -494,7 +494,7 @@ importers:
         version: link:../controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.1.6
+        version: 0.1.7
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -1066,8 +1066,8 @@ packages:
   '@cartridge/arcade@0.0.0':
     resolution: {integrity: sha512-Kab7xBDgP3IphVrkGGyh7Qq9OAa6mnPwiecR31OO0JC6dfRtLCMuELOIlJD75+UhLW0NE7/Z30xF7tx6zhUXWw==}
 
-  '@cartridge/controller-wasm@0.1.6':
-    resolution: {integrity: sha512-kQcYj2MINEEkClLccsVovxP3xRTE90jl+m6p5/H7sJAw1y0pMDks07g+kXPn9b2W5IyKpdp0LENxhQgiTqsjPA==}
+  '@cartridge/controller-wasm@0.1.7':
+    resolution: {integrity: sha512-X6GPJHr79caTvklxIzA6dckiNEgOMzg6ElaDlFg1ieSc3hUYaz1/HFDQwWYun/Ra2DIMlEiEUoS01xj445qkWA==}
 
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
@@ -9940,7 +9940,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/controller-wasm@0.1.6': {}
+  '@cartridge/controller-wasm@0.1.7': {}
 
   '@cartridge/penpal@6.2.4': {}
 
@@ -18241,7 +18241,7 @@ snapshots:
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
       '@noble/curves': 1.8.1
-      '@noble/hashes': 1.8.0
+      '@noble/hashes': 1.7.1
       '@scure/bip32': 1.6.2
       '@scure/bip39': 1.5.4
       abitype: 1.0.8(typescript@5.8.3)(zod@3.25.63)
