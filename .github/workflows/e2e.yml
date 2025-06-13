@@ -5,6 +5,16 @@ on:
     types:
       - 'vercel.deployment.success'
 jobs:
+  debug-event:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug Event Information
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Event action: ${{ github.event.action }}"
+          echo "Client payload: ${{ toJson(github.event.client_payload) }}"
+          echo "Full event: ${{ toJson(github.event) }}"
+  
   run-e2es:
     permissions:
       contents: read
