@@ -4,7 +4,7 @@ packages:
   - examples/svelte
   - packages/*
 catalog:
-  "@cartridge/controller-wasm": "0.1.3"
+  "@cartridge/controller-wasm": "0.1.7"
   "@cartridge/penpal": "^6.2.4"
   "@cartridge/ui": "github:cartridge-gg/ui#22b3ba1"
   "@eslint/js": "^9.18.0"
