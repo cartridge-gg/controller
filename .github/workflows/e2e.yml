@@ -4,6 +4,12 @@ on:
   repository_dispatch:
     types:
       - 'vercel.deployment.success'
+  workflow_dispatch:
+    inputs:
+      test_url:
+        description: 'URL for the E2E tests'
+        required: true
+
 jobs:
   debug-event:
     runs-on: ubuntu-latest
@@ -16,12 +22,14 @@ jobs:
           echo "Full event: ${{ toJson(github.event) }}"
   
   run-e2es:
-    if:  github.event_name == 'repository_dispatch' && contains(github.event.client_payload.url, 'controller-example-next')
+    if: |
+      (github.event_name == 'repository_dispatch' && contains(github.event.client_payload.url, 'controller-example-next')) ||
+      (github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.client_payload.git.sha }}
+          ref: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.git.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
@@ -32,7 +40,7 @@ jobs:
       - name: Run Playwright tests
         run: pnpm exec playwright test
         env:
-          BASE_URL: ${{ github.event.client_payload.url }}
+          BASE_URL: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.url || github.event.inputs.test_url }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
