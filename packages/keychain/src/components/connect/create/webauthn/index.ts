@@ -6,7 +6,7 @@ import {
   WebauthnCredential,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
-import { constants } from "starknet";
+import { shortString } from "starknet";
 import { LoginMode } from "../../types";
 import { createController } from "../useCreateController";
 
@@ -15,6 +15,8 @@ export function useWebauthnAuthentication() {
 
   const signup = useCallback(
     async (username: string, doPopupFlow: (username: string) => void) => {
+      if (!chainId) throw new Error("No chainId found");
+
       // Signup flow
       const isSafari = /^((?!chrome|android).)*safari/i.test(
         navigator.userAgent,
@@ -25,7 +27,10 @@ export function useWebauthnAuthentication() {
         return;
       }
 
-      const data = await doSignup(username, constants.NetworkName.SN_MAIN);
+      const data = await doSignup(
+        username,
+        shortString.decodeShortString(chainId),
+      );
 
       const {
         username: finalUsername,
@@ -99,7 +104,7 @@ export function useWebauthnAuthentication() {
           finalize: !!isSlot,
         });
       } else {
-        await controllerObject.login(now() + DEFAULT_SESSION_DURATION);
+        await controllerObject.login(now() + DEFAULT_SESSION_DURATION, true);
       }
 
       window.controller = controllerObject;
