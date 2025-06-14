@@ -16,13 +16,14 @@ import {
   ResponseCodes,
   toArray,
   toSessionPolicies,
+  WalletBridge,
 } from "@cartridge/controller";
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import {
-  defaultTheme,
-  Policies,
   ControllerTheme,
+  defaultTheme,
   loadConfig,
+  Policies,
 } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
 import { isIframe, normalizeOrigin } from "@cartridge/ui/utils";
@@ -268,25 +269,53 @@ export function useConnectionValue() {
   useThemeEffect({ theme, assetUrl: "" });
 
   useEffect(() => {
-    const connection = connectToController<ParentMethods>({
-      setRpcUrl,
-      setContext,
-      setController,
-      setConfigSignupOptions,
-    });
-
-    connection.promise
-      .then((parentConnection) => {
-        setOrigin(normalizeOrigin(parentConnection.origin));
-        setParent(parentConnection);
-      })
-      .catch((error) => {
-        console.error("Penpal connection failed:", error);
+    if (isIframe()) {
+      const connection = connectToController<ParentMethods>({
+        setRpcUrl,
+        setContext,
+        setController,
+        setConfigSignupOptions,
       });
 
-    return () => {
-      connection.destroy();
-    };
+      connection.promise
+        .then((parentConnection) => {
+          setOrigin(normalizeOrigin(parentConnection.origin));
+          setParent(parentConnection);
+        })
+        .catch((error) => {
+          console.error("Penpal connection failed:", error);
+        });
+
+      return () => {
+        connection.destroy();
+      };
+    } else {
+      const localWalletBridge = new WalletBridge();
+      const iframeMethods = localWalletBridge.getIFrameMethods();
+      const currentOrigin = window.location.origin;
+
+      setParent({
+        close: () => {
+          throw new Error("Can't call this function when not in an iFrame");
+        },
+        closeAll: () => {
+          throw new Error("Can't call this function when not in an iFrame");
+        },
+        reload: () => {
+          throw new Error("Can't call this function when not in an iFrame");
+        },
+        externalDetectWallets:
+          iframeMethods.externalDetectWallets(currentOrigin),
+        externalConnectWallet:
+          iframeMethods.externalConnectWallet(currentOrigin),
+        externalSignMessage: iframeMethods.externalSignMessage(currentOrigin),
+        externalSignTypedData:
+          iframeMethods.externalSignTypedData(currentOrigin),
+        externalSendTransaction:
+          iframeMethods.externalSendTransaction(currentOrigin),
+        externalGetBalance: iframeMethods.externalGetBalance(currentOrigin),
+      });
+    }
   }, [setOrigin, setRpcUrl, setContext, setController, setConfigSignupOptions]);
 
   const logout = useCallback(async () => {
