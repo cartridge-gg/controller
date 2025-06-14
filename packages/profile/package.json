@@ -41,10 +41,12 @@
   "dependencies": {
     "@cartridge/arcade": "0.0.0",
     "@cartridge/controller": "workspace:*",
+    "@cartridge/marketplace": "0.0.2",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",
     "compare-versions": "^6.1.1",
     "lodash": "catalog:",
+    "qrcode.react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-query": "catalog:",
@@ -53,8 +55,7 @@
     "starknet": "catalog:",
     "viem": "catalog:",
     "vite-plugin-top-level-await": "catalog:",
-    "vite-plugin-wasm": "catalog:",
-    "qrcode.react": "catalog:"
+    "vite-plugin-wasm": "catalog:"
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",
@@ -66,8 +67,8 @@
     "@storybook/react-vite": "catalog:",
     "@storybook/test": "catalog:",
     "@storybook/test-runner": "catalog:",
-    "@types/lodash": "catalog:",
     "@types/jest-image-snapshot": "catalog:",
+    "@types/lodash": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

@@ -23,6 +23,7 @@ import {
   PlusIcon,
   TraceabilityCollectibleCard,
   PaperPlaneIcon,
+  TagIcon,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { constants } from "starknet";
@@ -51,8 +52,7 @@ export function CollectionAsset() {
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
-      (edition) =>
-        edition.namespace === namespace && edition.config.project === project,
+      (edition) => edition.config.project === project,
     );
   }, [editions, project, namespace]);
 
@@ -134,7 +134,10 @@ export function CollectionAsset() {
     return "success";
   }, [collectionStatus, traceabilitiesStatus, ownershipStatus]);
 
-  if (location.pathname.includes("/send")) {
+  if (
+    location.pathname.includes("/send") ||
+    location.pathname.includes("/list")
+  ) {
     return <Outlet />;
   }
 
@@ -230,15 +233,26 @@ export function CollectionAsset() {
               visitor && "hidden",
             )}
           >
-            <Link
-              className="flex items-center justify-center gap-x-4 w-full"
-              to={`send?${searchParams.toString()}`}
-            >
-              <Button className="h-10 w-full gap-2">
-                <PaperPlaneIcon variant="solid" size="sm" />
-                <span className="font-semibold text-base/5">Send</span>
-              </Button>
-            </Link>
+            <div className="flex gap-3 w-full">
+              <Link
+                className="flex items-center justify-center gap-x-4 w-full"
+                to={`list?${searchParams.toString()}`}
+              >
+                <Button variant="secondary" className="w-full gap-2">
+                  <TagIcon variant="solid" size="sm" />
+                  List
+                </Button>
+              </Link>
+              <Link
+                className="flex items-center justify-center gap-x-4 w-full"
+                to={`send?${searchParams.toString()}`}
+              >
+                <Button variant="secondary" className="w-full gap-2">
+                  <PaperPlaneIcon variant="solid" size="sm" />
+                  Send
+                </Button>
+              </Link>
+            </div>
           </LayoutFooter>
         </>
       )}
