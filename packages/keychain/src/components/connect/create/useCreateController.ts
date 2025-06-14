@@ -4,12 +4,12 @@ import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
+import { AuthOption } from "@cartridge/controller";
 import {
   computeAccountAddress,
   Owner,
   Signer,
 } from "@cartridge/controller-wasm";
-import { AuthOption } from "@cartridge/controller";
 import {
   AccountQuery,
   Eip191Credentials,
@@ -242,7 +242,10 @@ export function useCreateController({
         owner,
       });
 
-      const result = await controller.login(now() + DEFAULT_SESSION_DURATION);
+      const result = await controller.login(
+        now() + DEFAULT_SESSION_DURATION,
+        false,
+      );
 
       const registerRet = await register({
         username,
@@ -255,6 +258,7 @@ export function useCreateController({
           sessionKeyGuid: result.session.sessionKeyGuid,
           allowedPoliciesRoot: result.allowedPoliciesRoot,
           authorization: result.authorization ?? [],
+          appId: origin,
         },
       });
 
@@ -380,7 +384,7 @@ export function useCreateController({
         },
       );
 
-      await controllerObject.login(now() + DEFAULT_SESSION_DURATION);
+      await controllerObject.login(now() + DEFAULT_SESSION_DURATION, true);
 
       window.controller = controllerObject;
       setController(controllerObject);

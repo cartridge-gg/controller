@@ -1,29 +1,30 @@
 import {
   BigNumberish,
-  InvokeFunctionResponse,
-  Signature,
-  EstimateFee,
-  TypedData,
   Call,
   CallData,
+  EstimateFee,
+  InvokeFunctionResponse,
   Provider,
   RpcProvider,
+  Signature,
+  TypedData,
 } from "starknet";
 
 import {
+  AuthorizedSession,
   CartridgeAccount,
   CartridgeAccountMeta,
   JsCall,
-  JsFelt,
-  Owner,
-  AuthorizedSession,
   JsFeeSource,
+  JsFelt,
+  JsRevokableSession,
+  Owner,
 } from "@cartridge/controller-wasm/controller";
 
-import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
-import { toJsFeeEstimate, fromJsFeeEstimate } from "./fee";
 import { FeeSource } from "@cartridge/controller";
+import { DeployedAccountTransaction } from "@starknet-io/types-js";
+import { fromJsFeeEstimate, toJsFeeEstimate } from "./fee";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -55,6 +56,7 @@ export default class Controller {
       address,
       username,
       owner,
+      import.meta.env.VITE_CARTRIDGE_API_URL,
     );
 
     this.provider = new RpcProvider({ nodeUrl: rpcUrl });
@@ -99,12 +101,12 @@ export default class Controller {
     delete window.controller;
   }
 
-  async login(expiresAt: bigint) {
+  async login(expiresAt: bigint, isControllerRegistered?: boolean) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
 
-    return await this.cartridge.login(expiresAt);
+    return await this.cartridge.login(expiresAt, isControllerRegistered);
   }
 
   async createSession(
@@ -240,14 +242,19 @@ export default class Controller {
     return this.cartridge.delegateAccount();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  revoke(_origin: string) {
-    // TODO: Cartridge Account SDK to implement revoke session tokens
-    console.error("revoke unimplemented");
+  async revokeSession(session: JsRevokableSession) {
+    return await this.cartridge.revokeSession(session);
+  }
+
+  async revokeSessions(sessions: JsRevokableSession[]) {
+    return await this.cartridge.revokeSessions(sessions);
   }
 
   static fromStore(appId: string) {
-    const cartridgeWithMeta = CartridgeAccount.fromStorage(appId);
+    const cartridgeWithMeta = CartridgeAccount.fromStorage(
+      appId,
+      import.meta.env.VITE_CARTRIDGE_API_URL,
+    );
     if (!cartridgeWithMeta) {
       return;
     }
