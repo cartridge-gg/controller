@@ -61,7 +61,7 @@ function QrCodeDisplay({
 
 export function UIProvider({ children }: PropsWithChildren) {
   const { followersCount, followedsCount } = useArcade();
-  const { chainId, closeModal, openSettings } = useConnection();
+  const { chainId, closeModal, openSettings, logout } = useConnection();
   const account = useAccount();
   const [showQrCode, setShowQrCode] = useState(false);
 
@@ -96,6 +96,7 @@ export function UIProvider({ children }: PropsWithChildren) {
         closeModal,
         openSettings,
         showQrCode: setShowQrCode,
+        onLogout: logout,
       }}
     >
       {children}
