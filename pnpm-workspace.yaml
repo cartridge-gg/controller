@@ -6,7 +6,7 @@ packages:
 catalog:
   "@cartridge/controller-wasm": "0.1.7"
   "@cartridge/penpal": "^6.2.4"
-  "@cartridge/ui": "github:cartridge-gg/ui#3216f02"
+  "@cartridge/ui": "github:cartridge-gg/ui#2cc43b8"
   "@eslint/js": "^9.18.0"
   "@starknet-io/types-js": "^0.7.7"
   "@starknet-react/chains": "^3.1.3"
