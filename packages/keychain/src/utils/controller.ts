@@ -17,6 +17,8 @@ import {
   JsCall,
   JsFeeSource,
   JsFelt,
+  JsRegister,
+  JsRegisterResponse,
   JsRevokableSession,
   Owner,
 } from "@cartridge/controller-wasm/controller";
@@ -107,6 +109,13 @@ export default class Controller {
     }
 
     return await this.cartridge.login(expiresAt, isControllerRegistered);
+  }
+
+  async register(registerInput: JsRegister): Promise<JsRegisterResponse> {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+    return await this.cartridge.register(registerInput);
   }
 
   async createSession(
