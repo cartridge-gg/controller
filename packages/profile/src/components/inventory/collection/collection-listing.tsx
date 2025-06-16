@@ -23,6 +23,21 @@ import { useCollection } from "#hooks/collection";
 import placeholder from "/public/placeholder.svg";
 import { ListHeader } from "./send/header";
 import { useTokens } from "#hooks/token";
+import { useConnection } from "#hooks/context.js";
+import {
+  AllowArray,
+  cairo,
+  Call,
+  CallData,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
+import { useMarketplace } from "#hooks/marketplace.js";
+import { toast } from "sonner";
+import { useEntrypoints } from "#hooks/entrypoints.js";
+
+const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
+const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
 
 const WEEK = 60 * 60 * 24 * 7;
 const MONTH = 60 * 60 * 24 * 30;
@@ -36,6 +51,8 @@ const EXPIRATIONS = [
 ];
 
 export function CollectionListing() {
+  const { chainId, provider } = useMarketplace();
+  const { parent, closable, provider: mainProvider } = useConnection();
   const { address: contractAddress, tokenId } = useParams();
   const [searchParams] = useSearchParams();
   const paramsTokenIds = searchParams.getAll("tokenIds");
@@ -60,6 +77,10 @@ export function CollectionListing() {
     tokenIds,
   });
 
+  const { entrypoints } = useEntrypoints({
+    address: contractAddress || "0x0",
+  });
+
   const disabled = useMemo(() => {
     return !!priceError;
   }, [priceError]);
@@ -76,6 +97,16 @@ export function CollectionListing() {
     return assets[0].imageUrl || placeholder;
   }, [collection, assets]);
 
+  const entrypoint: string | null = useMemo(() => {
+    if (entrypoints.includes(SET_APPROVAL_FOR_ALL_SNAKE_CASE)) {
+      return SET_APPROVAL_FOR_ALL_SNAKE_CASE;
+    }
+    if (entrypoints.includes(SET_APPROVAL_FOR_ALL_CAMEL_CASE)) {
+      return SET_APPROVAL_FOR_ALL_CAMEL_CASE;
+    }
+    return null;
+  }, [entrypoints]);
+
   const handleBack = useCallback(() => {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
@@ -88,24 +119,92 @@ export function CollectionListing() {
     [setSelected],
   );
 
-  const onSubmit = useCallback(
-    async (price: number) => {
-      setSubmitted(true);
-      if (
-        !contractAddress ||
-        !tokenIds ||
-        !tokenIds.length ||
-        !price ||
-        price === 0
-      )
-        return;
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-      }, 2000);
-    },
-    [tokenIds, contractAddress, navigate, searchParams],
-  );
+  const handleList = useCallback(async () => {
+    setSubmitted(true);
+    if (
+      !contractAddress ||
+      !tokenIds ||
+      !tokenIds.length ||
+      !selected ||
+      !price ||
+      price === 0 ||
+      !entrypoint
+    )
+      return;
+    setLoading(true);
+    try {
+      const expiration = Math.floor(
+        new Date(Date.now() + duration * 1000).getTime() / 1000,
+      );
+      const marketplaceAddress: string = provider.manifest.contracts.find(
+        (c: { tag: string }) => c.tag?.includes("Marketplace"),
+      )?.address;
+      const amount =
+        BigInt(price) * BigInt(10n ** BigInt(selected.metadata.decimals));
+
+      const calls: AllowArray<Call> = [
+        {
+          contractAddress: contractAddress,
+          entrypoint: entrypoint,
+          calldata: CallData.compile({
+            operator: marketplaceAddress,
+            approved: true,
+          }),
+        },
+        ...tokenIds.map((tokenId) => ({
+          contractAddress: marketplaceAddress,
+          entrypoint: "list",
+          calldata: CallData.compile({
+            collection: contractAddress,
+            tokenId: cairo.uint256(tokenId),
+            quantity: 0, // 0 for ERC721
+            price: amount.toString(),
+            currency: selected.metadata.address,
+            expiration: expiration,
+            royalties: true,
+          }),
+        })),
+      ];
+      const res = await parent.openExecute(
+        Array.isArray(calls) ? calls : [calls],
+        chainId,
+      );
+      if (res?.transactionHash) {
+        await mainProvider.waitForTransaction(res.transactionHash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+      }
+      if (res) {
+        toast.success(`Asset(s) listed successfully`);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(`Failed to list asset(s)`);
+    } finally {
+      setLoading(false);
+    }
+    if (closable) {
+      navigate(`../..?${searchParams.toString()}`);
+    } else {
+      navigate(`..?${searchParams.toString()}`);
+    }
+  }, [
+    tokenIds,
+    contractAddress,
+    price,
+    selected,
+    duration,
+    closable,
+    navigate,
+    searchParams,
+    chainId,
+    parent,
+    entrypoint,
+  ]);
 
   useEffect(() => {
     if (userSelected || tokens.length === 0) return;
@@ -158,7 +257,7 @@ export function CollectionListing() {
                 type="submit"
                 className="w-2/3"
                 isLoading={loading}
-                onClick={() => onSubmit(price || 0)}
+                onClick={handleList}
               >
                 Review
               </Button>

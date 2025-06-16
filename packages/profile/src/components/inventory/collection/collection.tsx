@@ -27,12 +27,14 @@ import { CollectionHeader } from "./header";
 import { useConnection, useTheme } from "#hooks/context.js";
 import { useArcade } from "#hooks/arcade.js";
 import { EditionModel, GameModel } from "@cartridge/arcade";
+import { useMarketplace } from "#hooks/marketplace.js";
 
 export function Collection() {
   const { games, editions } = useArcade();
   const { address: contractAddress, tokenId } = useParams();
   const { closable, visitor, project, namespace } = useConnection();
   const { theme } = useTheme();
+  const { collectionOrders: orders } = useMarketplace();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -53,6 +55,11 @@ export function Collection() {
   const selection = useMemo(() => {
     return tokenIds.length > 0;
   }, [tokenIds]);
+
+  const allUnlisted = useMemo(() => {
+    if (tokenIds.length === 0) return false;
+    return tokenIds.every((tokenId) => !orders[BigInt(tokenId).toString()]);
+  }, [orders, tokenIds]);
 
   const handleSelectAll = useCallback(() => {
     if (!assets) return;
@@ -129,6 +136,8 @@ export function Collection() {
             <div className="grid grid-cols-2 gap-4 place-items-center">
               {assets.map((asset) => {
                 const isSelected = tokenIds.includes(asset.tokenId);
+                const tokenId = BigInt(asset.tokenId).toString();
+                const listingCount = orders[tokenId]?.length || undefined;
                 return (
                   <Link
                     className="w-full select-none"
@@ -154,6 +163,7 @@ export function Collection() {
                       image={asset.imageUrl || placeholder}
                       selectable={!visitor}
                       selected={isSelected}
+                      listingCount={listingCount}
                       onSelect={() => handleSelect(asset.tokenId)}
                       className="rounded overflow-hidden"
                     />
@@ -172,9 +182,13 @@ export function Collection() {
             <div className="flex gap-3 w-full">
               <Link
                 className="flex items-center justify-center gap-x-4 w-full"
-                to={`list?${searchParams.toString()}`}
+                to={allUnlisted ? `list?${searchParams.toString()}` : ""}
               >
-                <Button variant="secondary" className="w-full gap-2">
+                <Button
+                  variant="secondary"
+                  className={cn("w-full gap-2")}
+                  disabled={!allUnlisted}
+                >
                   <TagIcon variant="solid" size="sm" />
                   List
                 </Button>

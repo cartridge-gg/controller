@@ -24,11 +24,22 @@ import {
   TraceabilityCollectibleCard,
   PaperPlaneIcon,
   TagIcon,
+  Token,
+  Spinner,
+  Thumbnail,
 } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
-import { constants } from "starknet";
+import { cn, useCountervalue } from "@cartridge/ui/utils";
+import {
+  AllowArray,
+  cairo,
+  Call,
+  CallData,
+  constants,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
 import { useConnection, useTheme } from "#hooks/context";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "#hooks/collection";
 import { CollectionHeader } from "./header";
 import placeholder from "/public/placeholder.svg";
@@ -38,17 +49,30 @@ import { useArcade } from "#hooks/arcade.js";
 import { EditionModel } from "@cartridge/arcade";
 import { useOwnership } from "#hooks/ownerships.js";
 import { useUsername } from "#hooks/username.js";
+import { useMarketplace } from "#hooks/marketplace.js";
+import { toast } from "sonner";
+import { useTokens } from "#hooks/token";
 
 const OFFSET = 10;
 
 export function CollectionAsset() {
-  const { chainId, visitor, namespace, project } = useConnection();
+  const {
+    chainId,
+    visitor,
+    namespace,
+    project,
+    parent,
+    provider: mainProvider,
+  } = useConnection();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [cap, setCap] = useState(OFFSET);
   const { theme } = useTheme();
   const { editions } = useArcade();
+  const { tokens } = useTokens();
+  const { isListed, provider, selfOrders, order } = useMarketplace();
+  const [loading, setLoading] = useState(false);
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -100,9 +124,89 @@ export function CollectionAsset() {
       }));
   }, [asset]);
 
+  const token: Token | undefined = useMemo(() => {
+    if (!order) return;
+    return tokens.find(
+      (token) => BigInt(token.metadata.address) === BigInt(order.currency),
+    );
+  }, [tokens, order]);
+
+  const amount = useMemo(() => {
+    if (!order) return 0;
+    return Number(order?.price) / Math.pow(10, token?.metadata.decimals || 0);
+  }, [order, token]);
+
+  const { countervalues } = useCountervalue(
+    {
+      tokens: [
+        {
+          balance: `${amount}`,
+          address: token?.metadata.address || "",
+        },
+      ],
+    },
+    { enabled: !!amount && !!token },
+  );
+
+  const price: number = useMemo(() => {
+    if (!countervalues) return 0;
+    return countervalues[0]?.current.value || 0;
+  }, [countervalues]);
+
   const handleBack = useCallback(() => {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
+
+  const handleUnlist = useCallback(async () => {
+    if (!contractAddress || !asset || !isListed) return;
+    setLoading(true);
+    try {
+      const marketplaceAddress: string = provider.manifest.contracts.find(
+        (c: { tag: string }) => c.tag?.includes("Marketplace"),
+      )?.address;
+      const orderIds = selfOrders.map((order) => order.id);
+      const calls: AllowArray<Call> = [
+        ...orderIds.map((orderId) => ({
+          contractAddress: marketplaceAddress,
+          entrypoint: "cancel",
+          calldata: CallData.compile({
+            orderId: orderId,
+            collection: contractAddress,
+            tokenId: cairo.uint256(asset.tokenId),
+          }),
+        })),
+      ];
+      const res = await parent.openExecute(
+        Array.isArray(calls) ? calls : [calls],
+        chainId,
+      );
+      if (res?.transactionHash) {
+        await mainProvider.waitForTransaction(res.transactionHash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+      }
+      if (res) {
+        toast.success(`Asset unlisted successfully`);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(`Failed to unlist asset(s)`);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    contractAddress,
+    asset,
+    isListed,
+    chainId,
+    parent,
+    provider,
+    mainProvider,
+  ]);
 
   const { events, dates } = useMemo(() => {
     const filteredData = data.slice(0, cap);
@@ -156,9 +260,18 @@ export function CollectionAsset() {
               image={edition?.properties.icon || theme?.icon}
               title={title}
               subtitle={collection.name}
+              expiration={
+                isListed && selfOrders.length > 0
+                  ? selfOrders[0].expiration
+                  : undefined
+              }
+              listingCount={isListed ? selfOrders.length : undefined}
             />
             <div
-              className="flex flex-col gap-6 overflow-scroll relative"
+              className={cn(
+                "flex flex-col gap-6 overflow-scroll relative",
+                order && "pt-0.5",
+              )}
               style={{ scrollbarWidth: "none" }}
             >
               <CollectiblePreview
@@ -166,6 +279,15 @@ export function CollectionAsset() {
                 size="lg"
                 className="w-full self-center"
               />
+              {!!order && (
+                <div className="absolute top-[-2px] right-2">
+                  <Price
+                    price={price || 0}
+                    amount={amount}
+                    image={token?.metadata.image}
+                  />
+                </div>
+              )}
               <CollectibleTabs order={["details", "activity"]} className="pb-6">
                 <TabsContent
                   className="m-0 p-0 flex flex-col gap-y-4"
@@ -234,15 +356,27 @@ export function CollectionAsset() {
             )}
           >
             <div className="flex gap-3 w-full">
-              <Link
-                className="flex items-center justify-center gap-x-4 w-full"
-                to={`list?${searchParams.toString()}`}
-              >
-                <Button variant="secondary" className="w-full gap-2">
+              {isListed ? (
+                <Button
+                  variant="secondary"
+                  isLoading={loading}
+                  onClick={handleUnlist}
+                  className={cn("w-full gap-2 text-destructive-100")}
+                >
                   <TagIcon variant="solid" size="sm" />
-                  List
+                  Unlist
                 </Button>
-              </Link>
+              ) : (
+                <Link
+                  className="flex items-center justify-center gap-x-4 w-full"
+                  to={`list?${searchParams.toString()}`}
+                >
+                  <Button variant="secondary" className={cn("w-full gap-2")}>
+                    <TagIcon variant="solid" size="sm" />
+                    List
+                  </Button>
+                </Link>
+              )}
               <Link
                 className="flex items-center justify-center gap-x-4 w-full"
                 to={`send?${searchParams.toString()}`}
@@ -259,6 +393,57 @@ export function CollectionAsset() {
     </LayoutContainer>
   );
 }
+
+const Price = ({
+  amount,
+  image,
+}: {
+  price?: number;
+  amount?: number;
+  image?: string;
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setWidth(containerRef.current.offsetWidth);
+    }
+  }, [containerRef, amount, image]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-fit rounded overflow-hidden flex flex-col select-none"
+    >
+      <div className="px-2.5 pt-[5px] pb-[3px] w-full bg-primary-100 flex items-center justify-center">
+        {amount === undefined ? (
+          <Spinner size="sm" />
+        ) : (
+          <div className="flex gap-1 items-center">
+            <Thumbnail
+              icon={image}
+              rounded
+              size="xs"
+              className="bg-translucent-dark-100"
+            />
+            <p className="text-sm font-medium text-spacer-100">{`${amount.toLocaleString()}`}</p>
+          </div>
+        )}
+      </div>
+      <div className="flex justify-between w-full">
+        <div
+          className="h-0 w-0 border-t-[8px] border-t-primary-100 border-r-transparent"
+          style={{ borderRightWidth: `${width / 2}px` }}
+        />
+        <div
+          className="h-0 w-0 border-t-[8px] border-t-primary-100 border-l-transparent"
+          style={{ borderLeftWidth: `${width / 2}px` }}
+        />
+      </div>
+    </div>
+  );
+};
 
 const LoadingState = () => {
   return (

@@ -1,4 +1,9 @@
-import { MarketplaceProvider, OrderModel } from "@cartridge/marketplace";
+import {
+  ListingEvent,
+  MarketplaceProvider,
+  OrderModel,
+  SaleEvent,
+} from "@cartridge/marketplace";
 import { createContext } from "react";
 
 /**
@@ -8,7 +13,17 @@ interface MarketplaceContextType {
   /** The Marketplace client instance */
   chainId: string;
   provider: MarketplaceProvider;
-  orders: { [collection: string]: { [token: string]: OrderModel[] } };
+  orders: {
+    [collection: string]: { [token: string]: { [order: string]: OrderModel } };
+  };
+  sales: {
+    [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
+  };
+  listings: {
+    [collection: string]: {
+      [token: string]: { [listing: string]: ListingEvent };
+    };
+  };
 }
 
 /**
