@@ -1,28 +1,43 @@
- name: End-to-End tests
- on:
-   push:
-     branches: [main]
-   pull_request:
-     branches: [main]
- jobs:
-   test:
-     if: always() == 'skip' # temporarily skip cc @jun
-     timeout-minutes: 60
-     runs-on: ubuntu-latest
-     steps:
-       - uses: actions/checkout@v4
-       - uses: actions/setup-node@v4
-         with:
-           node-version: lts/*
-       - name: Install dependencies
-         run: npm install -g pnpm && pnpm install
-       - name: Install Playwright Browsers
-         run: pnpm exec playwright install --with-deps
-       - name: Run Playwright tests
-         run: pnpm exec playwright test
-       - uses: actions/upload-artifact@v4
-         if: always()
-         with:
-           name: playwright-report
-           path: playwright-report/
-           retention-days: 30
+name: E2E Tests
+
+on:
+  repository_dispatch:
+    types:
+      - 'vercel.deployment.success'
+jobs:
+  debug-event:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug Event Information
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Event action: ${{ github.event.action }}"
+          echo "Client payload: ${{ toJson(github.event.client_payload) }}"
+          echo "Full event: ${{ toJson(github.event) }}"
+  
+  run-e2es:
+    permissions:
+      contents: read
+    if:  github.event_name == 'repository_dispatch' && contains(github.event.client_payload.url, 'controller-example-next')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.git.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+        env:
+          BASE_URL: ${{ github.event.client_payload.url }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
