@@ -305,34 +305,26 @@ export function CollectionAsset() {
                   />
                 </TabsContent>
                 <TabsContent
-                  className="m-0 p-0 flex flex-col gap-y-4"
+                  className="m-0 p-0 flex flex-col gap-px"
                   value="activity"
                 >
-                  {dates.map((current) => {
-                    return (
-                      <div className="flex flex-col gap-2" key={current}>
-                        <p className="py-3 text-xs font-semibold text-foreground-400 tracking-wider">
-                          {current}
-                        </p>
-                        {events
-                          .filter(({ date }) => date === current)
-                          .map((props: CardProps, index: number) => (
-                            <Link
-                              key={`${index}-${props.key}`}
-                              to={to(props.transactionHash)}
-                              target="_blank"
-                            >
-                              <TraceabilityCollectibleCard
-                                from={props.from}
-                                to={props.to}
-                                image={props.image}
-                                action={props.action}
-                              />
-                            </Link>
-                          ))}
-                      </div>
-                    );
-                  })}
+                  {events.map((props: CardProps, index: number) => (
+                    <Link
+                      key={`${index}-${props.key}`}
+                      to={to(props.transactionHash)}
+                      target="_blank"
+                    >
+                      <TraceabilityCollectibleCard
+                        username={props.username}
+                        timestamp={props.timestamp}
+                        category={props.category}
+                        collectibleImage={props.image}
+                        collectibleName={title || collection.name}
+                        currencyImage={props.currencyImage}
+                        quantity={props.amount}
+                      />
+                    </Link>
+                  ))}
                   <Button
                     variant="secondary"
                     className={cn(

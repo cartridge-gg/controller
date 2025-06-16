@@ -10,7 +10,9 @@ import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LoginMode } from "@/components/connect/types";
 import { PageLoading } from "@/components/Loading";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { CheckIcon, LayoutContainer, LayoutHeader } from "@cartridge/ui";
+import { Failure } from "./failure";
 
 type SessionResponse = {
   username: string;
@@ -32,7 +34,6 @@ type SessionQueryParams = {
     This page is for registering session
 */
 export function Session() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const queries: SessionQueryParams = useMemo(
     () => ({
@@ -46,6 +47,8 @@ export function Session() {
 
   const { controller, policies } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [isFailure, setIsFailure] = useState<boolean>(false);
 
   // Handler for calling the callback uri.
   // Send the session details to the callback uri in the body of the
@@ -54,7 +57,7 @@ export function Session() {
   const onCallback = useCallback(
     async (response: SessionResponse) => {
       if (!queries.callback_uri && !queries.redirect_uri) {
-        navigate("/failure", { replace: true });
+        setIsFailure(true);
         return;
       }
 
@@ -81,18 +84,12 @@ export function Session() {
           });
 
           if (res.ok) {
-            navigate(
-              `/success?${{
-                title: "Session Registered!",
-                description: "Return to your terminal to continue",
-              }.toString()}`,
-              { replace: true },
-            );
+            setIsSuccess(true);
             return;
           }
         } catch (e) {
           console.error("failed to call the callback url", e);
-          navigate("/failure", { replace: true });
+          setIsFailure(true);
         }
 
         return;
@@ -102,9 +99,10 @@ export function Session() {
         const url = decodeURIComponent(queries.redirect_uri);
         const query_name = queries.redirect_query_name ?? "session";
         window.location.href = `${url}?${query_name}=${encodedResponse}`;
+        return;
       }
     },
-    [navigate, queries],
+    [queries],
   );
 
   // Handler when user clicks the Create button
@@ -162,6 +160,24 @@ export function Session() {
 
   if (isLoading) {
     return <PageLoading />;
+  }
+
+  if (isSuccess) {
+    return (
+      <LayoutContainer className="pb-12">
+        <LayoutHeader
+          variant="expanded"
+          Icon={CheckIcon}
+          title="Session Registered!"
+          description="Return to the application to continue"
+          hideNetwork
+        />
+      </LayoutContainer>
+    );
+  }
+
+  if (isFailure) {
+    return <Failure />;
   }
 
   if (!policies) {

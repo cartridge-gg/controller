@@ -15,6 +15,7 @@ import type { ControllerError } from "@/utils/connection";
 import {
   Button,
   Checkbox,
+  cn,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
@@ -148,20 +149,27 @@ const CreateSessionLayout = ({
         <LayoutFooter>
           {!policies?.verified && (
             <div
-              className="flex items-center p-3 mb-3 gap-5 border border-solid-primary rounded-md cursor-pointer border-destructive-100 text-destructive-100"
+              className={cn(
+                "flex items-center p-2 mb-3 gap-2 border border-solid-primary rounded-md cursor-pointer text-destructive-100 bg-background-100",
+                isConsent ? "border-background-200" : "border-destructive-100",
+              )}
               onClick={() => !isConnecting && setIsConsent(!isConsent)}
             >
               <Checkbox
                 variant="solid"
+                size="sm"
                 checked={isConsent}
                 disabled={isConnecting}
                 onCheckedChange={() => setIsConsent(!isConsent)}
-                className="pointer-events-none"
+                className="pointer-events-none !w-5 !h-5"
+                style={{
+                  margin: "6px",
+                }}
               />
-              <div className="text-xs">
-                I understand and agree to grant permission for this application
-                to execute these actions.
-              </div>
+              <h1 className="text-xs font-normal select-none">
+                I agree to grant this application permission to execute the
+                actions listed above.
+              </h1>
             </div>
           )}
 

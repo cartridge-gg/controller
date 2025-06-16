@@ -12,6 +12,12 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
+import {
+  CheckIcon,
+  LayoutContainer,
+  LayoutContent,
+  LayoutHeader,
+} from "@cartridge/ui";
 
 export function Slot() {
   const { pathname } = useLocation();
@@ -19,7 +25,7 @@ export function Slot() {
     case "/slot/auth":
       return <Navigate to="/slot" replace />;
     case "/slot/auth/success":
-      return <Navigate to="/success" replace />;
+      return <Success />;
     case "/slot/auth/failure":
       return <Navigate to="/failure" replace />;
     case "/slot/consent":
@@ -34,7 +40,7 @@ function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { controller } = useController();
-  const { data: user, isFetched } = useMeQuery();
+  const { data: user, isFetched } = useMeQuery(undefined, { retry: false });
 
   useEffect(() => {
     if (user && controller) {
@@ -59,4 +65,38 @@ function Auth() {
   }
 
   return <CreateController isSlot={true} />;
+}
+
+export function Success() {
+  return (
+    <LayoutContainer className="pb-12">
+      <LayoutHeader
+        variant="expanded"
+        Icon={CheckIcon}
+        title="Success!"
+        hideNetwork
+      />
+      <LayoutContent className="gap-4">
+        <div className="flex w-full px-4 py-5 bg-background-200 border border-background-300 rounded">
+          <p className="w-full text-sm">
+            You have successfully authenticated with Slot!
+            <br />
+            <br />
+            You can now close this window and return to the terminal.
+            <br />
+            <br />
+            For more information on using Slot, please refer to our{" "}
+            <a
+              href="https://docs.cartridge.gg/slot/getting-started#usage"
+              className="underline hover:text-primary-100"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              documentation
+            </a>
+          </p>
+        </div>
+      </LayoutContent>
+    </LayoutContainer>
+  );
 }

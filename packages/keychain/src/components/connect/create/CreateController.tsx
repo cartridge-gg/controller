@@ -59,7 +59,6 @@ function CreateControllerForm({
   isLoading,
   error,
   isInAppBrowser,
-  isSlot,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -70,7 +69,7 @@ function CreateControllerForm({
   setChangeWallet,
 }: CreateControllerFormProps) {
   return (
-    <LayoutContainer>
+    <>
       <LayoutHeader
         variant="expanded"
         title={
@@ -78,8 +77,8 @@ function CreateControllerForm({
             ? "Connect Controller"
             : `Connect to ${theme.name}`
         }
+        hideNetwork
         hideUsername
-        hideNetwork={isSlot}
         hideSettings
       />
 
@@ -141,7 +140,7 @@ function CreateControllerForm({
           />
         </LayoutFooter>
       </form>
-    </LayoutContainer>
+    </>
   );
 }
 export function CreateControllerView({
@@ -151,7 +150,6 @@ export function CreateControllerView({
   isLoading,
   error,
   isInAppBrowser,
-  isSlot,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -171,34 +169,34 @@ export function CreateControllerView({
   };
 
   return (
-    <Sheet
-      open={authenticationStep === AuthenticationStep.ChooseSignupMethod}
-      onOpenChange={handleOpenChange}
-    >
-      <CreateControllerForm
-        theme={theme}
-        usernameField={usernameField}
-        validation={validation}
-        isLoading={isLoading}
-        error={error}
-        isInAppBrowser={isInAppBrowser}
-        isSlot={isSlot}
-        onUsernameChange={onUsernameChange}
-        onUsernameFocus={onUsernameFocus}
-        onUsernameClear={onUsernameClear}
-        onSubmit={onSubmit}
-        onKeyDown={onKeyDown}
-        waitingForConfirmation={waitingForConfirmation}
-        changeWallet={changeWallet}
-        setChangeWallet={setChangeWallet}
-      />
-      <ChooseSignupMethodForm
-        isSlot={isSlot}
-        isLoading={isLoading}
-        onSubmit={onSubmit}
-        signupOptions={signupOptions}
-      />
-    </Sheet>
+    <LayoutContainer>
+      <Sheet
+        open={authenticationStep === AuthenticationStep.ChooseSignupMethod}
+        onOpenChange={handleOpenChange}
+      >
+        <CreateControllerForm
+          theme={theme}
+          usernameField={usernameField}
+          validation={validation}
+          isLoading={isLoading}
+          error={error}
+          isInAppBrowser={isInAppBrowser}
+          onUsernameChange={onUsernameChange}
+          onUsernameFocus={onUsernameFocus}
+          onUsernameClear={onUsernameClear}
+          onSubmit={onSubmit}
+          onKeyDown={onKeyDown}
+          waitingForConfirmation={waitingForConfirmation}
+          changeWallet={changeWallet}
+          setChangeWallet={setChangeWallet}
+        />
+        <ChooseSignupMethodForm
+          isLoading={isLoading}
+          onSubmit={onSubmit}
+          signupOptions={signupOptions}
+        />
+      </Sheet>
+    </LayoutContainer>
   );
 }
 

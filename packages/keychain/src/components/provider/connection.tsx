@@ -29,7 +29,7 @@ export type ConnectionContextValue = {
   chainId?: string;
   setController: (controller?: Controller) => void;
   setContext: (ctx: ConnectionCtx | undefined) => void;
-  closeModal: () => Promise<void>;
+  closeModal?: () => Promise<void>;
   openModal: () => Promise<void>;
   logout: () => Promise<void>;
   openSettings: () => void;

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 
 interface ChooseSignupMethodProps {
-  isSlot?: boolean;
   isLoading: boolean;
   onSubmit: (authenticationMode?: AuthOption) => void;
   signupOptions: AuthOption[];
@@ -54,8 +53,9 @@ export function ChooseSignupMethodForm({
   return (
     <SheetContent
       side="bottom"
-      className="flex flex-col bg-spacer-100 w-fill h-fit justify-end p-6 gap-4 border-t-0 rounded-tl-[16px] rounded-tr-[16px]"
+      className="absolute flex flex-col bg-spacer-100 w-fill h-fit justify-end p-6 gap-4 border-t-0 rounded-tl-[16px] rounded-tr-[16px]"
       showClose={false}
+      portal={false}
       onInteractOutside={handleInteractOutside}
     >
       <SheetTitle className="hidden"></SheetTitle>

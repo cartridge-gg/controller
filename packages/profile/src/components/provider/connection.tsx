@@ -119,6 +119,12 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     state.parent.openSettings();
   }, [state.parent]);
 
+  const logout = useCallback(async () => {
+    if (state.parent && state.parent.logout) {
+      await state.parent.logout();
+    }
+  }, [state.parent]);
+
   useEffect(() => {
     const connection = connectToParent<ParentMethods>({
       methods: {
@@ -145,7 +151,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
 
   return (
     <ConnectionContext.Provider
-      value={{ ...state, setIsVisible, closeModal, openSettings }}
+      value={{ ...state, setIsVisible, closeModal, openSettings, logout }}
     >
       {children}
     </ConnectionContext.Provider>

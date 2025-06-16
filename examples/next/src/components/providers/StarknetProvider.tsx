@@ -1,16 +1,16 @@
 "use client";
 
+import ControllerConnector from "@cartridge/connector/controller";
+import SessionConnector from "@cartridge/connector/session";
+import { SessionPolicies } from "@cartridge/controller";
 import { Chain, mainnet, sepolia } from "@starknet-react/chains";
 import {
+  cartridge,
   jsonRpcProvider,
   StarknetConfig,
-  cartridge,
 } from "@starknet-react/core";
 import { PropsWithChildren } from "react";
-import ControllerConnector from "@cartridge/connector/controller";
-import { SessionPolicies } from "@cartridge/controller";
 import { constants, num, shortString } from "starknet";
-import SessionConnector from "@cartridge/connector/session";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";

@@ -58,7 +58,7 @@ function QrCodeDisplay({
 }
 
 export function UIProvider({ children }: PropsWithChildren) {
-  const { controller, closeModal, openSettings } = useConnection();
+  const { controller, closeModal, openSettings, logout } = useConnection();
   const account = useAccount();
   const [showQrCode, setShowQrCode] = useState(false);
 
@@ -76,6 +76,7 @@ export function UIProvider({ children }: PropsWithChildren) {
         closeModal,
         openSettings,
         showQrCode: setShowQrCode,
+        onLogout: logout,
       }}
     >
       {children}
