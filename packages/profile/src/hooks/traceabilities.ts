@@ -15,13 +15,14 @@ export interface CardProps {
   contractAddress: string;
   transactionHash: string;
   amount: number;
-  from: string;
-  to: string;
+  username: string;
   image: string;
-  action: "send" | "mint";
+  title: string;
+  category: "send" | "receive" | "mint" | "sale" | "list";
   timestamp: number;
   date: string;
   points?: number;
+  currencyImage?: string;
 }
 
 export type Traceability = {
@@ -131,7 +132,7 @@ export function useTraceabilities({
 
   const { usernames } = useUsernames({ addresses });
 
-  const transfers: CardProps[] = useMemo(() => {
+  const transfers: CardProps[][] = useMemo(() => {
     const results = Object.values(traceabilities).map((traceability) => {
       const timestamp = new Date(traceability.executedAt).getTime();
       const date = getDate(timestamp);
@@ -148,21 +149,37 @@ export function useTraceabilities({
           size: "xs",
         });
       const image = `https://api.cartridge.gg/x/${traceability.project}/torii/static/0x${BigInt(traceability.contractAddress).toString(16)}/${addAddressPadding(traceability.tokenId)}/image`;
-      return {
+      const sender = {
         key: `${traceability.transactionHash}-${traceability.eventId}`,
         contractAddress: traceability.contractAddress,
         transactionHash: traceability.transactionHash,
         amount: traceability.amount,
-        from: fromName,
-        to: toName,
+        username: fromName,
         image: image,
-        action: BigInt(traceability.fromAddress) === 0n ? "mint" : "send",
+        category: "send",
         timestamp: timestamp / 1000,
         date: date,
+        title: traceability.name,
       } as CardProps;
+      const receiver = {
+        key: `${traceability.transactionHash}-${traceability.eventId}`,
+        contractAddress: traceability.contractAddress,
+        transactionHash: traceability.transactionHash,
+        amount: traceability.amount,
+        username: toName,
+        image: image,
+        category: BigInt(traceability.fromAddress) === 0n ? "mint" : "receive",
+        timestamp: timestamp / 1000,
+        date: date,
+        title: traceability.name,
+      } as CardProps;
+      if (BigInt(traceability.fromAddress) === 0n) {
+        return [receiver];
+      }
+      return [receiver, sender];
     });
     return results;
   }, [traceabilities, usernames]);
 
-  return { traceabilities: transfers, status };
+  return { traceabilities: transfers.flat(), status };
 }
