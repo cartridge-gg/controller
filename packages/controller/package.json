@@ -51,7 +51,8 @@
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
-    "@types/jest": "^29.5.14",
+    "@types/jest": "catalog:",
+    "@types/mocha": "catalog:",
     "@types/node": "catalog:",
     "jest": "^29.7.0",
     "prettier": "catalog:",

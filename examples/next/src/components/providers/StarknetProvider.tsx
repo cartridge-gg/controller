@@ -167,7 +167,7 @@ if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
 
 const controller = new ControllerConnector({
   policies,
-  // With the new defaults, you can omit chains and defaultChainId if you want to use:
+  // With the defaults, you can omit chains and defaultChainId if you want to use:
   // - chains: [
   //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia" },
   //     { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet" },

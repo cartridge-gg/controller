@@ -68,7 +68,7 @@ export default class ControllerProvider extends BaseProvider {
 
     this.options = { ...options, chains, defaultChainId };
 
-    this.validateChains(chains);
+    this.initializeChains(chains);
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;
@@ -428,11 +428,11 @@ export default class ControllerProvider extends BaseProvider {
     return await this.keychain.delegateAccount();
   }
 
-  private async validateChains(chains: Chain[]) {
+  private initializeChains(chains: Chain[]) {
     for (const chain of chains) {
       try {
         const url = new URL(chain.rpcUrl);
-        const chainId = await parseChainId(url);
+        const chainId = parseChainId(url);
 
         // Validate that mainnet and sepolia must use Cartridge RPC
         const isMainnet = chainId === constants.StarknetChainId.SN_MAIN;
