@@ -11,6 +11,10 @@ const meta = {
   args: {
     sessionName: "Session 1",
     expiresAt: 1630000000000n,
+    sessionOs: "macOS",
+    onDelete: async () => {
+      console.log("Delete session");
+    },
   },
 } satisfies Meta<typeof SessionCard>;
 
