@@ -16,6 +16,8 @@ jobs:
           echo "Full event: ${{ toJson(github.event) }}"
   
   run-e2es:
+    permissions:
+      contents: read
     if:  github.event_name == 'repository_dispatch' && contains(github.event.client_payload.url, 'controller-example-next')
     runs-on: ubuntu-latest
     steps:
