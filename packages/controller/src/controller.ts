@@ -63,6 +63,39 @@ export default class ControllerProvider extends BaseProvider {
     }
   }
 
+  async logout() {
+    if (!this.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    try {
+      // Disconnect the controller/keychain first
+      await this.disconnect();
+
+      // Close all controller iframes
+      const iframes = document.querySelectorAll('iframe[id^="controller-"]');
+      iframes.forEach((iframe) => {
+        const container = iframe.parentElement;
+        if (container) {
+          container.style.visibility = "hidden";
+          container.style.opacity = "0";
+        }
+      });
+
+      // Reset body overflow
+      if (document.body) {
+        document.body.style.overflow = "auto";
+      }
+
+      // Reload the page to complete logout
+      window.location.reload();
+    } catch (err) {
+      console.error("Logout failed:", err);
+      throw err;
+    }
+  }
+
   async probe(): Promise<WalletAccount | undefined> {
     try {
       await this.waitForKeychain();
@@ -101,6 +134,7 @@ export default class ControllerProvider extends BaseProvider {
           openSettings: () => this.openSettings.bind(this),
           openPurchaseCredits: () => this.openPurchaseCredits.bind(this),
           openExecute: () => this.openExecute.bind(this),
+          logout: () => this.logout.bind(this),
         },
         rpcUrl: this.rpcUrl(),
         username,
