@@ -168,7 +168,7 @@ if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
 const controller = new ControllerConnector({
   policies,
   chains: controllerConnectorChains,
-  defaultChainId: constants.StarknetChainId.SN_MAIN,
+  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
   url: keychainUrl,
   profileUrl: profileUrl,
   slot: "eternum",
