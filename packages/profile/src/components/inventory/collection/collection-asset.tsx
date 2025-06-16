@@ -321,7 +321,6 @@ export function CollectionAsset() {
                         collectibleImage={props.image}
                         collectibleName={title || collection.name}
                         currencyImage={props.currencyImage}
-                        quantity={props.amount}
                       />
                     </Link>
                   ))}
