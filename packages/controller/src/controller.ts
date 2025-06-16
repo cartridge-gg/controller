@@ -6,7 +6,7 @@ import {
   AddStarknetChainParameters,
   ChainId,
 } from "@starknet-io/types-js";
-import { shortString, WalletAccount } from "starknet";
+import { constants, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { NotReadyToConnect } from "./errors";
@@ -41,7 +41,19 @@ export default class ControllerProvider extends BaseProvider {
   constructor(options: ControllerOptions) {
     super();
 
-    this.selectedChain = options.defaultChainId;
+    // Default Cartridge chains that are always available
+    const cartridgeChains: Chain[] = [
+      { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia" },
+      { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet" },
+    ];
+
+    // Merge user chains with default chains
+    // User chains take precedence if they specify the same network
+    const chains = [...(options.chains || []), ...cartridgeChains];
+    const defaultChainId =
+      options.defaultChainId || constants.StarknetChainId.SN_MAIN;
+
+    this.selectedChain = defaultChainId;
     this.chains = new Map<ChainId, Chain>();
 
     this.iframes = {
@@ -54,9 +66,9 @@ export default class ControllerProvider extends BaseProvider {
       }),
     };
 
-    this.options = options;
+    this.options = { ...options, chains, defaultChainId };
 
-    this.validateChains(options.chains);
+    this.validateChains(chains);
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;
@@ -166,7 +178,15 @@ export default class ControllerProvider extends BaseProvider {
 
     try {
       let response = await this.keychain.connect(
-        this.options.policies || {},
+        // Policy precedence logic:
+        // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
+        // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
+        // 3. Otherwise, use provided policies or empty object
+        this.options.shouldOverridePresetPolicies && this.options.policies
+          ? this.options.policies
+          : this.options.preset
+            ? {}
+            : this.options.policies || {},
         this.rpcUrl(),
         this.options.signupOptions,
         version,
@@ -413,9 +433,23 @@ export default class ControllerProvider extends BaseProvider {
       try {
         const url = new URL(chain.rpcUrl);
         const chainId = await parseChainId(url);
+
+        // Validate that mainnet and sepolia must use Cartridge RPC
+        const isMainnet = chainId === constants.StarknetChainId.SN_MAIN;
+        const isSepolia = chainId === constants.StarknetChainId.SN_SEPOLIA;
+        const isCartridgeRpc = url.hostname === "api.cartridge.gg";
+
+        if ((isMainnet || isSepolia) && !isCartridgeRpc) {
+          throw new Error(
+            `Only Cartridge RPC providers are allowed for ${isMainnet ? "mainnet" : "sepolia"}. ` +
+              `Please use: https://api.cartridge.gg/x/starknet/${isMainnet ? "mainnet" : "sepolia"}`,
+          );
+        }
+
         this.chains.set(chainId, chain);
       } catch (error) {
         console.error(`Failed to parse chainId for ${chain.rpcUrl}:`, error);
+        throw error; // Re-throw to ensure invalid chains fail fast
       }
     }
 

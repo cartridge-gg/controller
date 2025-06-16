@@ -167,12 +167,24 @@ if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
 
 const controller = new ControllerConnector({
   policies,
+  // With the new defaults, you can omit chains and defaultChainId if you want to use:
+  // - chains: [
+  //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia" },
+  //     { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet" },
+  //   ]
+  // - defaultChainId: constants.StarknetChainId.SN_MAIN
+  //
+  // However, if you want to use custom RPC URLs or a different default chain,
+  // you can still specify them:
   chains: controllerConnectorChains,
   defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
   url: keychainUrl,
   profileUrl: profileUrl,
   slot: "eternum",
   preset: "eternum",
+  // By default, preset policies take precedence over manually provided policies
+  // Set shouldOverridePresetPolicies to true if you want your policies to override preset
+  // shouldOverridePresetPolicies: true,
   tokens: {
     erc20: ["lords"],
   },

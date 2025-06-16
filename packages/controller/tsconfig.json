@@ -7,6 +7,6 @@
     "composite": false,
     "incremental": false
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../connector/controllerDefaults.test.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }
