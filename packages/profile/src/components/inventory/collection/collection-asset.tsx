@@ -71,7 +71,8 @@ export function CollectionAsset() {
   const { theme } = useTheme();
   const { editions } = useArcade();
   const { tokens } = useTokens();
-  const { isListed, provider, selfOrders, order } = useMarketplace();
+  const { isListed, provider, selfOrders, order, removeOrder } =
+    useMarketplace();
   const [loading, setLoading] = useState(false);
 
   const edition: EditionModel | undefined = useMemo(() => {
@@ -158,7 +159,7 @@ export function CollectionAsset() {
   }, [navigate, searchParams]);
 
   const handleUnlist = useCallback(async () => {
-    if (!contractAddress || !asset || !isListed) return;
+    if (!contractAddress || !asset || !isListed || !order) return;
     setLoading(true);
     try {
       const marketplaceAddress: string = provider.manifest.contracts.find(
@@ -192,6 +193,8 @@ export function CollectionAsset() {
       if (res) {
         toast.success(`Asset unlisted successfully`);
       }
+      // Removing the order optimistically
+      removeOrder(order);
     } catch (error) {
       console.error(error);
       toast.error(`Failed to unlist asset(s)`);
@@ -206,14 +209,12 @@ export function CollectionAsset() {
     parent,
     provider,
     mainProvider,
+    order,
+    removeOrder,
   ]);
 
-  const { events, dates } = useMemo(() => {
-    const filteredData = data.slice(0, cap);
-    return {
-      events: filteredData,
-      dates: [...new Set(filteredData.map((event) => event.date))],
-    };
+  const events = useMemo(() => {
+    return data.slice(0, cap);
   }, [data, cap]);
 
   const to = useCallback((transactionHash: string) => {
@@ -275,7 +276,7 @@ export function CollectionAsset() {
               style={{ scrollbarWidth: "none" }}
             >
               <CollectiblePreview
-                image={asset.imageUrl || placeholder}
+                image={asset.imageUrl || collection.imageUrl || placeholder}
                 size="lg"
                 className="w-full self-center"
               />
@@ -318,7 +319,10 @@ export function CollectionAsset() {
                         username={props.username}
                         timestamp={props.timestamp}
                         category={props.category}
-                        collectibleImage={props.image}
+                        amount={props.amount}
+                        collectibleImage={
+                          asset.imageUrl || collection.imageUrl || placeholder
+                        }
                         collectibleName={title || collection.name}
                         currencyImage={props.currencyImage}
                       />
@@ -328,7 +332,7 @@ export function CollectionAsset() {
                     variant="secondary"
                     className={cn(
                       "text-foreground-300 hover:text-foreground-200 normal-case text-sm font-medium tracking-normal font-sans",
-                      (cap >= data.length || dates.length === 0) && "hidden",
+                      cap >= data.length && "hidden",
                     )}
                     onClick={() => setCap((prev) => prev + OFFSET)}
                   >

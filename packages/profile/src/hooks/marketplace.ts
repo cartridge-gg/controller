@@ -26,7 +26,8 @@ export const useMarketplace = () => {
 
   const { address } = useAccount();
   const { address: contractAddress, tokenId } = useParams();
-  const { chainId, provider, orders, listings, sales } = context;
+  const { chainId, provider, orders, addOrder, removeOrder, listings, sales } =
+    context;
 
   const collectionOrders: { [token: string]: OrderModel[] } = useMemo(() => {
     const collection = getChecksumAddress(contractAddress || "0x0");
@@ -86,6 +87,8 @@ export const useMarketplace = () => {
     listings,
     sales,
     orders,
+    addOrder,
+    removeOrder,
     order,
     collectionOrders,
     tokenOrders,

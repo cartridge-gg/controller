@@ -16,6 +16,8 @@ interface MarketplaceContextType {
   orders: {
     [collection: string]: { [token: string]: { [order: string]: OrderModel } };
   };
+  addOrder: (order: OrderModel) => void;
+  removeOrder: (order: OrderModel) => void;
   sales: {
     [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
   };

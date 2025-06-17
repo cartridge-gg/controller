@@ -15,6 +15,7 @@ import {
   CategoryType,
   ListingEvent,
   SaleEvent,
+  StatusType,
 } from "@cartridge/marketplace";
 import { constants, getChecksumAddress } from "starknet";
 import { MarketplaceContext } from "#context/marketplace";
@@ -52,6 +53,39 @@ export const MarketplaceProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
+  const removeOrder = useCallback(
+    (order: OrderModel) => {
+      const collection = getChecksumAddress(order.collection);
+      const token = order.tokenId.toString();
+      setOrders((prev) => {
+        const newOrders = { ...prev };
+        if (newOrders[collection]?.[token]?.[order.id]) {
+          delete newOrders[collection][token][order.id];
+        }
+        return newOrders;
+      });
+    },
+    [setOrders],
+  );
+
+  const addOrder = useCallback(
+    (order: OrderModel) => {
+      const collection = getChecksumAddress(order.collection);
+      const token = order.tokenId.toString();
+      setOrders((prev) => ({
+        ...prev,
+        [collection]: {
+          ...(prev[collection] || {}),
+          [token]: {
+            ...(prev[collection]?.[token] || {}),
+            [order.id]: order,
+          },
+        },
+      }));
+    },
+    [setOrders],
+  );
+
   const handleMarketplaceEntities = useCallback(
     (entities: MarketplaceModel[]) => {
       const now = Date.now();
@@ -59,19 +93,11 @@ export const MarketplaceProvider = ({ children }: { children: ReactNode }) => {
         if (OrderModel.isType(entity as OrderModel)) {
           const order = entity as OrderModel;
           if (order.expiration * 1000 < now) return;
-          const collection = getChecksumAddress(order.collection);
-          const token = order.tokenId.toString();
-          if (order.category.value === CategoryType.Sell) {
-            setOrders((prev) => ({
-              ...prev,
-              [collection]: {
-                ...(prev[collection] || {}),
-                [token]: {
-                  ...(prev[collection]?.[token] || {}),
-                  [order.id]: order,
-                },
-              },
-            }));
+          if (order.category.value !== CategoryType.Sell) return;
+          if (order.status.value === StatusType.Placed) {
+            addOrder(order);
+          } else {
+            removeOrder(order);
           }
         } else if (SaleEvent.isType(entity as SaleEvent)) {
           const sale = entity as SaleEvent;
@@ -140,6 +166,8 @@ export const MarketplaceProvider = ({ children }: { children: ReactNode }) => {
         orders,
         listings,
         sales,
+        addOrder,
+        removeOrder,
       }}
     >
       {children}

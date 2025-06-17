@@ -58,7 +58,11 @@ export function Collection() {
 
   const allUnlisted = useMemo(() => {
     if (tokenIds.length === 0) return false;
-    return tokenIds.every((tokenId) => !orders[BigInt(tokenId).toString()]);
+    return tokenIds.every(
+      (tokenId) =>
+        !orders[BigInt(tokenId).toString()] ||
+        !orders[BigInt(tokenId).toString()].length,
+    );
   }, [orders, tokenIds]);
 
   const handleSelectAll = useCallback(() => {
