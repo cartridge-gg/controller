@@ -4,10 +4,16 @@ on:
   pull_request:
     types: [closed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to analyze for documentation updates'
+        required: true
+        type: string
 
 jobs:
   docs-sync:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,10 +28,18 @@ jobs:
 
       - name: Get changed files
         id: changed-files
+        env:
+          COMMIT_SHA: ${{ github.event.inputs.commit_sha }}
         run: |
-          # Get list of changed files in the merged PR
-          git fetch origin main
-          CHANGED_FILES=$(git diff --name-only origin/main~1 origin/main)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Get changed files for the specified commit
+            git fetch origin
+            CHANGED_FILES=$(git diff --name-only "$COMMIT_SHA"~1 "$COMMIT_SHA")
+          else
+            # Get list of changed files in the merged PR
+            git fetch origin main
+            CHANGED_FILES=$(git diff --name-only origin/main~1 origin/main)
+          fi
           echo "changed_files<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -73,15 +87,21 @@ jobs:
       - name: Analyze changes and update docs
         if: steps.check-docs.outputs.needs_update == 'true'
         uses: anthropics/claude-code-action@beta
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          COMMIT_SHA: ${{ github.event.inputs.commit_sha }}
+          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           direct_prompt: |
             I need you to analyze the changes in this controller repository PR and update the documentation in the cartridge-gg/docs repository accordingly.
 
-            **PR Information:**
-            - Title: ${{ github.event.pull_request.title }}
-            - Description: ${{ github.event.pull_request.body }}
+            **Change Information:**
+            - Title: ${{ env.PR_TITLE || format('Manual trigger for commit {0}', env.COMMIT_SHA) }}
+            - Description: ${{ env.PR_BODY || 'Manually triggered documentation sync' }}
             - Files changed: ${{ steps.changed-files.outputs.changed_files }}
+            - Commit SHA: ${{ env.MERGE_COMMIT_SHA || env.COMMIT_SHA }}
 
             **Your tasks:**
             1. Review the changed files and PR description to understand what functionality was added, modified, or removed
@@ -106,6 +126,12 @@ jobs:
       - name: Create branch and commit changes
         if: steps.check-docs.outputs.needs_update == 'true'
         working-directory: docs-repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.CREATE_PR_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMIT_SHA: ${{ github.event.inputs.commit_sha }}
+          CHANGED_FILES: ${{ steps.changed-files.outputs.changed_files }}
         run: |
           # Configure git
           git config user.name "github-actions[bot]"
@@ -119,31 +145,51 @@ jobs:
             
             # Add and commit changes
             git add .
-            git commit -m "docs: Update documentation for controller PR #${{ github.event.pull_request.number }}
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              git commit -m "docs: Update documentation for controller commit $COMMIT_SHA
 
-            Updates documentation to reflect changes made in:
-            ${{ github.event.pull_request.title }}
-            
-            Related controller PR: cartridge-gg/controller#${{ github.event.pull_request.number }}"
+Updates documentation to reflect changes made in commit:
+$COMMIT_SHA
+
+Manually triggered documentation sync"
+            else
+              git commit -m "docs: Update documentation for controller PR #$PR_NUMBER
+
+Updates documentation to reflect changes made in:
+$PR_TITLE
+
+Related controller PR: cartridge-gg/controller#$PR_NUMBER"
+            fi
             
             # Push branch
             git push origin "$BRANCH_NAME"
             
             # Create PR
-            gh pr create \
-              --title "docs: Update documentation for controller PR #${{ github.event.pull_request.number }}" \
-              --body "This PR updates the documentation to reflect changes made in cartridge-gg/controller#${{ github.event.pull_request.number }}
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              gh pr create \
+                --title "docs: Update documentation for controller commit $COMMIT_SHA" \
+                --body "This PR updates the documentation to reflect changes made in cartridge-gg/controller commit $COMMIT_SHA
 
-            **Original PR Details:**
-            - Title: ${{ github.event.pull_request.title }}
-            - Files changed: ${{ steps.changed-files.outputs.changed_files }}
+**Commit Details:**
+- Commit SHA: $COMMIT_SHA
+- Files changed: $CHANGED_FILES
+- Trigger: Manual documentation sync
 
-            Please review the documentation changes to ensure they accurately reflect the controller updates."
+Please review the documentation changes to ensure they accurately reflect the controller updates."
+            else
+              gh pr create \
+                --title "docs: Update documentation for controller PR #$PR_NUMBER" \
+                --body "This PR updates the documentation to reflect changes made in cartridge-gg/controller#$PR_NUMBER
+
+**Original PR Details:**
+- Title: $PR_TITLE
+- Files changed: $CHANGED_FILES
+
+Please review the documentation changes to ensure they accurately reflect the controller updates."
+            fi
           else
             echo "No documentation changes were made by Claude"
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.CREATE_PR_TOKEN }}
 
       - name: Cleanup
         if: always()
