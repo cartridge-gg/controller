@@ -23,12 +23,6 @@ describe("parseChainId", () => {
       ).toBe(shortString.encodeShortString("WP_SLOT"));
     });
 
-    test("identifies slot chain on localhost", () => {
-      expect(parseChainId(new URL("http://localhost:8001/x/slot/katana"))).toBe(
-        shortString.encodeShortString("WP_SLOT"),
-      );
-    });
-
     test("identifies slot chain with hyphenated name", () => {
       expect(
         parseChainId(

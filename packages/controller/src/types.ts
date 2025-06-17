@@ -201,8 +201,8 @@ export type Chain = {
 };
 
 export type ProviderOptions = {
-  defaultChainId: ChainId;
-  chains: Chain[];
+  defaultChainId?: ChainId;
+  chains?: Chain[];
 };
 
 export type KeychainOptions = IFrameOptions & {
@@ -217,6 +217,8 @@ export type KeychainOptions = IFrameOptions & {
   feeSource?: FeeSource;
   /** Signup options (the order of the options is reflected in the UI. It's recommended to group socials and wallets together ) */
   signupOptions?: AuthOptions;
+  /** When true, manually provided policies will override preset policies. Default is false. */
+  shouldOverridePresetPolicies?: boolean;
 };
 
 export type ProfileOptions = IFrameOptions & {
