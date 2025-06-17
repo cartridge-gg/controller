@@ -15,12 +15,8 @@ import {
   SheetFooter,
   SheetTrigger,
   SignOutIcon,
-  Skeleton,
 } from "@cartridge/ui";
-import {
-  CredentialMetadata,
-  useControllerQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo, useState } from "react";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";
@@ -31,8 +27,8 @@ import {
   RegisteredAccountCard,
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
-import { Session, SessionCard } from "./session-card";
-import { SignerCard } from "./signer-card";
+import { SessionsSection } from "./sessions/sessions-section";
+import { SignersSection } from "./signers/signers-section";
 
 enum State {
   SETTINGS,
@@ -42,23 +38,11 @@ enum State {
 
 // Feature flag configuration
 interface FeatureFlags {
-  sessions: boolean;
   signers: boolean;
   registeredAccounts: boolean;
   currency: boolean;
 }
 
-// MOCK DATA
-const sessions: Session[] = [
-  {
-    sessionName: "Session 1",
-    expiresAt: BigInt(14400), // 4 hours in seconds
-  },
-  {
-    sessionName: "Session 2",
-    expiresAt: BigInt(7200), // 2 hours in seconds
-  },
-];
 const registeredAccounts: RegisteredAccount[] = [
   {
     accountName: "clicksave.stark",
@@ -74,7 +58,6 @@ export function Settings() {
   // Feature flags - can be moved to environment variables or API config later
   const featureFlags = useMemo<FeatureFlags>(
     () => ({
-      sessions: false,
       signers: true,
       registeredAccounts: false,
       currency: false,
@@ -82,10 +65,13 @@ export function Settings() {
     [],
   );
 
-  const data = useControllerQuery({
-    username: controller?.username() ?? "",
-    chainId: constants.NetworkName.SN_MAIN,
-  });
+  const controllerQuery = useControllerQuery(
+    {
+      username: controller?.username() ?? "",
+      chainId: constants.NetworkName.SN_MAIN,
+    },
+    { refetchOnMount: "always" },
+  );
 
   const handleLogout = useCallback(() => {
     try {
@@ -114,76 +100,10 @@ export function Settings() {
         />
 
         <LayoutContent className="gap-6">
-          {/* SESSION */}
-          {featureFlags.sessions && (
-            <section className="space-y-4">
-              <SectionHeader
-                title="Session Key(s)"
-                description="Sessions grant permission to your Controller to perform certain game actions on your behalf"
-                showStatus={true}
-              />
-              <div className="space-y-3">
-                {sessions.map((i, index) => (
-                  <SessionCard
-                    key={index}
-                    sessionName={i.sessionName}
-                    expiresAt={i.expiresAt}
-                  />
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="py-2.5 px-3 text-foreground-300 gap-1"
-              >
-                <PlusIcon size="sm" variant="line" />
-                <span className="normal-case font-normal font-sans text-sm">
-                  Create Session
-                </span>
-              </Button>
-            </section>
-          )}
-
-          {/* SIGNER */}
           {featureFlags.signers && (
-            <section className="space-y-4">
-              <SectionHeader
-                title="Signer(s)"
-                description="Information associated with registered accounts can be made available to games and applications."
-              />
-              <div className="space-y-3">
-                {data.isLoading ? (
-                  <Skeleton className="w-full h-10 bg-background-200" />
-                ) : data.isError ? (
-                  <div>Error</div>
-                ) : data.isSuccess && data.data ? (
-                  data.data?.controller?.signers?.map((i, signerIndex) => {
-                    return (
-                      <SignerCard
-                        key={`${signerIndex}`}
-                        signer={i.metadata as CredentialMetadata}
-                      />
-                    );
-                  })
-                ) : (
-                  <div>No data</div>
-                )}
-              </div>
-              {/* disabled until add signer functionality is implemented */}
-              {/* <Button */}
-              {/*   type="button" */}
-              {/*   variant="outline" */}
-              {/*   className="py-2.5 px-3 text-foreground-300 gap-1" */}
-              {/* > */}
-              {/*   <PlusIcon size="sm" variant="line" /> */}
-              {/*   <span className="normal-case font-normal font-sans text-sm"> */}
-              {/*     Add Signer */}
-              {/*   </span> */}
-              {/* </Button> */}
-            </section>
+            <SignersSection controllerQuery={controllerQuery} />
           )}
 
-          {/* REGISTERED ACCOUNT */}
           {featureFlags.registeredAccounts && (
             <section className="space-y-4">
               <SectionHeader
@@ -212,7 +132,6 @@ export function Settings() {
             </section>
           )}
 
-          {/* CURRENCY */}
           {featureFlags.currency && (
             <section className="space-y-4">
               <SectionHeader
@@ -222,6 +141,8 @@ export function Settings() {
               <CurrencySelect />
             </section>
           )}
+
+          <SessionsSection controllerQuery={controllerQuery} />
         </LayoutContent>
 
         <LayoutFooter>
