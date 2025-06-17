@@ -1,0 +1,112 @@
+name: Documentation Sync
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  docs-sync:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
+
+    steps:
+      - name: Checkout controller repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          # Get list of changed files in the merged PR
+          git fetch origin main
+          CHANGED_FILES=$(git diff --name-only origin/main~1 origin/main)
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Check if docs update needed
+        id: check-docs
+        run: |
+          # Check if changes require documentation updates
+          NEEDS_DOCS_UPDATE=false
+          
+          # Define patterns that typically require docs updates
+          DOCS_PATTERNS=(
+            "^src/.*\.ts$"
+            "^src/.*\.tsx$"
+            "^packages/.*/src/.*\.ts$"
+            "^packages/.*/src/.*\.tsx$"
+            "^README\.md$"
+            "^CHANGELOG\.md$"
+            "^docs/"
+            "package\.json$"
+            "^api/"
+            "^schema/"
+          )
+          
+          while IFS= read -r file; do
+            for pattern in "${DOCS_PATTERNS[@]}"; do
+              if [[ $file =~ $pattern ]]; then
+                NEEDS_DOCS_UPDATE=true
+                break 2
+              fi
+            done
+          done <<< "${{ steps.changed-files.outputs.changed_files }}"
+          
+          echo "needs_update=$NEEDS_DOCS_UPDATE" >> $GITHUB_OUTPUT
+          echo "Files that may need docs updates: ${{ steps.changed-files.outputs.changed_files }}"
+
+      - name: Checkout docs repository
+        if: steps.check-docs.outputs.needs_update == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: cartridge-gg/docs
+          token: ${{ secrets.CREATE_PR_TOKEN }}
+          path: docs-repo
+
+      - name: Analyze changes and create docs PR
+        if: steps.check-docs.outputs.needs_update == 'true'
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          direct_prompt: |
+            I need you to analyze the changes in this controller repository PR and determine if the documentation in the cartridge-gg/docs repository needs to be updated.
+
+            **PR Information:**
+            - Title: ${{ github.event.pull_request.title }}
+            - Description: ${{ github.event.pull_request.body }}
+            - Files changed: ${{ steps.changed-files.outputs.changed_files }}
+
+            **Your tasks:**
+            1. Review the changed files and PR description to understand what functionality was added, modified, or removed
+            2. Check the docs-repo directory to see what documentation currently exists
+            3. Determine if any existing documentation needs updates or if new documentation should be created
+            4. If updates are needed:
+               - Create or update the appropriate documentation files
+               - Ensure the documentation accurately reflects the current state of the controller
+               - Follow the existing documentation style and structure
+               - Create a new branch in the docs repo
+               - Commit the changes with a descriptive message
+               - Create a pull request in the docs repository
+
+            **Important guidelines:**
+            - Only create documentation updates if they are actually needed
+            - Focus on user-facing changes, API changes, new features, or breaking changes
+            - Don't document internal implementation details unless they affect usage
+            - If no documentation updates are needed, simply state that and exit
+
+            The docs repository is checked out in the `docs-repo` directory. Please analyze the controller changes and update the documentation accordingly.
+
+          allowed_tools: "Bash(git *),Bash(cd *),Read,Write,Edit,MultiEdit,Glob,Grep"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Clean up any temporary files or directories
+          rm -rf docs-repo || true
