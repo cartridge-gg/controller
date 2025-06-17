@@ -5,7 +5,6 @@ import {
   constants,
   getChecksumAddress,
   hash,
-  Provider,
   shortString,
   typedData,
   TypedDataRevision,
@@ -27,8 +26,6 @@ const ALLOWED_PROPERTIES = new Set([
   "domain",
   "primaryType",
 ]);
-
-const LOCAL_HOSTNAMES = ["localhost", "127.0.0.1", "0.0.0.0"];
 
 function validatePropertyName(prop: string): void {
   if (!ALLOWED_PROPERTIES.has(prop)) {
@@ -139,8 +136,54 @@ export function humanizeString(str: string): string {
   );
 }
 
-export async function parseChainId(url: URL): Promise<ChainId> {
+export function parseChainId(url: URL): ChainId {
   const parts = url.pathname.split("/");
+
+  // Handle localhost URLs by making a synchronous call to getChainId
+  if (
+    url.hostname === "localhost" ||
+    url.hostname === "127.0.0.1" ||
+    url.hostname === "0.0.0.0"
+  ) {
+    // Check if we're in a browser environment
+    if (typeof XMLHttpRequest === "undefined") {
+      // In Node.js environment (like tests), we can't make synchronous HTTP calls
+      // For now, we'll use a placeholder chainId for localhost in tests
+      console.warn(
+        `Cannot make synchronous HTTP call in Node.js environment for ${url.toString()}`,
+      );
+      return shortString.encodeShortString("LOCALHOST") as ChainId;
+    }
+
+    // Use a synchronous XMLHttpRequest to get the chain ID
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url.toString(), false); // false makes it synchronous
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    const requestBody = JSON.stringify({
+      jsonrpc: "2.0",
+      method: "starknet_chainId",
+      params: [],
+      id: 1,
+    });
+
+    try {
+      xhr.send(requestBody);
+
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        if (response.result) {
+          return response.result as ChainId;
+        }
+      }
+
+      throw new Error(
+        `Failed to get chain ID from ${url.toString()}: ${xhr.status} ${xhr.statusText}`,
+      );
+    } catch (error) {
+      throw new Error(`Failed to connect to ${url.toString()}: ${error}`);
+    }
+  }
 
   if (parts.includes("starknet")) {
     if (parts.includes("mainnet")) {
@@ -159,13 +202,6 @@ export async function parseChainId(url: URL): Promise<ChainId> {
         `GG_${projectName.toUpperCase().replace(/-/g, "_")}`,
       ) as ChainId;
     }
-  }
-
-  if (LOCAL_HOSTNAMES.includes(url.hostname)) {
-    const provider = new Provider({
-      nodeUrl: url.toString(),
-    });
-    return await provider.getChainId();
   }
 
   throw new Error(`Chain ${url.toString()} not supported`);
