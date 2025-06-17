@@ -1,0 +1,58 @@
+{
+  "name": "Cartridge Controller Development",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "latest",
+      "profile": "default"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "anthropic.claude-dev"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.preferences.importModuleSpecifier": "relative"
+      }
+    }
+  },
+  "postCreateCommand": "corepack enable && pnpm install",
+  "forwardPorts": [3001, 3002, 6006, 8080],
+  "portsAttributes": {
+    "3001": {
+      "label": "Keychain",
+      "onAutoForward": "notify"
+    },
+    "3002": {
+      "label": "Example App",
+      "onAutoForward": "notify"
+    },
+    "6006": {
+      "label": "Storybook",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Development Server",
+      "onAutoForward": "notify"
+    }
+  },
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "remoteEnv": {
+    "VSCODE_SERVER_DISABLE_GLIBC_CHECK": "1"
+  },
+  "containerEnv": {
+    "VSCODE_SERVER_DISABLE_GLIBC_CHECK": "1"
+  },
+  "runArgs": ["--security-opt", "seccomp=unconfined"]
+}
