@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
+    "@cartridge/arcade": "0.0.0",
     "@cartridge/controller-wasm": "catalog:",
     "@cartridge/controller": "workspace:*",
     "@cartridge/penpal": "catalog:",
@@ -39,6 +40,7 @@
     "caip": "^1.1.0",
     "cbor": "^8.1.0",
     "class-variance-authority": "^0.7.1",
+    "compare-versions": "^6.1.1",
     "data-uri-to-buffer": "^4.0.0",
     "embla-carousel-react": "^7.0.5",
     "ethers": "^6.13.5",
@@ -55,7 +57,11 @@
     "react-query": "catalog:",
     "react-router-dom": "catalog:",
     "semver": "^7.7.1",
-    "sonner": "catalog:"
+    "sonner": "catalog:",
+    "starknet": "catalog:",
+    "viem": "catalog:",
+    "vite-plugin-top-level-await": "catalog:",
+    "vite-plugin-wasm": "catalog:"
   },
   "devDependencies": {
     "@cartridge/eslint": "workspace:*",
@@ -98,9 +104,29 @@
     "vite-plugin-wasm": "catalog:",
     "vitest": "^2.1.8"
   },
+  "imports": {
+    "#profile/hooks/account": {
+      "storybook": "./src/profile/hooks/account.mock.ts",
+      "default": "./src/profile/hooks/account.ts"
+    },
+    "#profile/hooks/collection": {
+      "storybook": "./src/profile/hooks/collection.mock.ts",
+      "default": "./src/profile/hooks/collection.ts"
+    },
+    "#profile/hooks/token": {
+      "storybook": "./src/profile/hooks/token.mock.ts",
+      "default": "./src/profile/hooks/token.ts"
+    },
+    "#profile/*": [
+      "./src/profile/*",
+      "./src/profile/*.ts",
+      "./src/profile/*.tsx",
+      "./src/profile/*/index.ts",
+      "./src/profile/*/index.tsx"
+    ]
+  },
   "peerDependencies": {
     "@starknet-react/chains": "catalog:",
-    "@starknet-react/core": "catalog:",
-    "starknet": "catalog:"
+    "@starknet-react/core": "catalog:"
   }
 }

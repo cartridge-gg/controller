@@ -8,6 +8,7 @@ import { Consent, Slot, Success } from "./slot";
 import { Fund } from "./slot/fund";
 import { StarterPackWrapper } from "./starterpack";
 import { FeatureToggle } from "./feature-toggle";
+import { ProfileApp } from "./profile/app";
 
 export function App() {
   return (
@@ -28,6 +29,7 @@ export function App() {
           element={<StarterPackWrapper />}
         />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
+        <Route path="profile/*" element={<ProfileApp />} />
         <Route path="*" element={<div>Page not found</div>} />
       </Routes>
     </div>
