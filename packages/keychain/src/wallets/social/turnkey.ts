@@ -53,7 +53,7 @@ export class TurnkeyWallet {
         iframeContainer: iframeContainer,
         iframeUrl: import.meta.env.VITE_TURNKEY_IFRAME_URL,
       })
-      .then(async (turnkeyIframeClient) => {
+      .then(async (turnkeyIframeClient: TurnkeyIframeClient) => {
         await turnkeyIframeClient.initEmbeddedKey();
         return turnkeyIframeClient;
       });
@@ -94,8 +94,8 @@ export class TurnkeyWallet {
 
       const nonce = getNonce(iframePublicKey);
 
-      const popup = openPopup("");
       const auth0Client = await this.getAuth0Client(10_000);
+      const popup = await openPopup("");
       await auth0Client.loginWithPopup(
         {
           authorizationParams: {
@@ -351,7 +351,7 @@ export class TurnkeyWallet {
 
   private async getAuth0Client(timeoutMs: number): Promise<Auth0Client> {
     if (!this.auth0ClientPromise) {
-      throw new Error("Auth0 client promise not initialized");
+      throw new Error("Auth0 client not initialized");
     }
     return this.getPromiseResult(this.auth0ClientPromise, timeoutMs);
   }

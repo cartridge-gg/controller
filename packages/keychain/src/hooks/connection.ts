@@ -204,7 +204,9 @@ export function useConnectionValue() {
         );
 
         if (
-          controllerResponse.controller?.signers?.some(
+          !controllerResponse.controller ||
+          !controllerResponse.controller.signers ||
+          controllerResponse.controller.signers.some(
             (signer) =>
               signer.metadata.__typename !== "Eip191Credentials" ||
               signer.metadata.eip191?.[0]?.provider !== "discord",
@@ -217,10 +219,9 @@ export function useConnectionValue() {
         // So we need to check if at least one of the signers here has an attached embedded wallet in the keychain_wallets
         const hasEmbeddedWallet = controllerResponse.controller?.signers?.some(
           (signer) => {
-            if (signer.metadata.__typename !== "Eip191Credentials")
-              return false;
-
-            const ethAddress = signer.metadata.eip191?.[0]?.ethAddress;
+            const ethAddress = (
+              signer.metadata as { eip191?: Array<{ ethAddress: string }> }
+            ).eip191?.[0]?.ethAddress;
             if (!ethAddress) return false;
 
             try {
@@ -229,7 +230,7 @@ export function useConnectionValue() {
                 undefined
               );
             } catch (error) {
-              console.warn("Invalid eth address:", ethAddress, error);
+              console.error("Invalid eth address:", ethAddress, error);
               return false;
             }
           },
@@ -240,17 +241,16 @@ export function useConnectionValue() {
         }
 
         const signer = controllerResponse.controller?.signers?.[0];
-        if (!signer || signer.metadata.__typename !== "Eip191Credentials") {
-          return;
-        }
-        const ethAddress = signer.metadata.eip191?.[0]?.ethAddress;
+        const ethAddress = (
+          signer?.metadata as { eip191?: Array<{ ethAddress: string }> }
+        ).eip191?.[0]?.ethAddress;
         if (!ethAddress) {
-          return;
+          throw new Error("No eth address found");
         }
 
         const turnkeyWallet = window.keychain_wallets?.turnkeyWallet;
         if (!turnkeyWallet) {
-          return;
+          throw new Error("Embedded Turnkey wallet not found");
         }
 
         turnkeyWallet.account = getAddress(ethAddress);
@@ -260,8 +260,8 @@ export function useConnectionValue() {
           ethAddress,
           turnkeyWallet as WalletAdapter,
         );
-      } catch {
-        // ignore
+      } catch (error) {
+        console.error("Failed to add embedded wallet:", error);
       }
     })();
   }, [controller?.username, chainId]);
