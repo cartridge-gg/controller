@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@cartridge/controller-wasm':
-      specifier: 0.1.7
-      version: 0.1.7
+      specifier: 0.1.8
+      version: 0.1.8
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -270,7 +270,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.1.7
+        version: 0.1.8
       starknet:
         specifier: 'catalog:'
         version: 6.24.1
@@ -378,7 +378,7 @@ importers:
     dependencies:
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.1.7
+        version: 0.1.8
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -503,7 +503,7 @@ importers:
         version: link:../controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.1.7
+        version: 0.1.8
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -1075,8 +1075,8 @@ packages:
   '@cartridge/arcade@0.0.0':
     resolution: {integrity: sha512-Kab7xBDgP3IphVrkGGyh7Qq9OAa6mnPwiecR31OO0JC6dfRtLCMuELOIlJD75+UhLW0NE7/Z30xF7tx6zhUXWw==}
 
-  '@cartridge/controller-wasm@0.1.7':
-    resolution: {integrity: sha512-X6GPJHr79caTvklxIzA6dckiNEgOMzg6ElaDlFg1ieSc3hUYaz1/HFDQwWYun/Ra2DIMlEiEUoS01xj445qkWA==}
+  '@cartridge/controller-wasm@0.1.8':
+    resolution: {integrity: sha512-xmbYRw2Fhp4PUHcYFWfUKmZ3pKRrfL3UQN7L0p6v69w0xgsRLj/3kknCeGv+2o6bhWI4azEH7snAtBthnzDU9w==}
 
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
@@ -10026,7 +10026,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/controller-wasm@0.1.7': {}
+  '@cartridge/controller-wasm@0.1.8': {}
 
   '@cartridge/penpal@6.2.4': {}
 
