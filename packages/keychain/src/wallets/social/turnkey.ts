@@ -388,11 +388,15 @@ export const getIframePublicKey = async (
 };
 
 const openPopup = (url: string) => {
-  return window.open(
+  const popup = window.open(
     url,
     "auth0:authorize:popup",
     `resizable,scrollbars=no,status=1`,
   );
+  if (!popup || popup.closed) {
+    throw new Error("Failed to open authentication popup - may be blocked");
+  }
+  return popup;
 };
 
 const getNonce = (seed: string) => {
