@@ -1,9 +1,14 @@
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import { MarketplaceContext } from "#context/marketplace";
 import { useParams } from "react-router-dom";
-import { getChecksumAddress } from "starknet";
+import { cairo, getChecksumAddress } from "starknet";
 import { useAccount } from "./account";
 import { OrderModel, StatusType } from "@cartridge/marketplace";
+import { useQuery } from "react-query";
+import { useConnection } from "./context";
+import { useEntrypoints } from "./entrypoints";
+
+const FEE_ENTRYPOINT = "royalty_info";
 
 /**
  * Custom hook to access the Marketplace context and account information.
@@ -26,8 +31,18 @@ export const useMarketplace = () => {
 
   const { address } = useAccount();
   const { address: contractAddress, tokenId } = useParams();
-  const { chainId, provider, orders, addOrder, removeOrder, listings, sales } =
-    context;
+  const { provider: straknet } = useConnection();
+  const {
+    chainId,
+    provider,
+    orders,
+    addOrder,
+    removeOrder,
+    listings,
+    sales,
+    book,
+  } = context;
+  const [amount, setAmount] = useState<number>(0);
 
   const collectionOrders: { [token: string]: OrderModel[] } = useMemo(() => {
     const collection = getChecksumAddress(contractAddress || "0x0");
@@ -81,18 +96,55 @@ export const useMarketplace = () => {
     );
   }, [address, tokenOrders]);
 
+  const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
+
+  const { data: royalties, isFetching: isLoading } = useQuery({
+    enabled: !!contractAddress && !!book && !!tokenId && !!amount,
+    queryKey: ["fee", contractAddress, tokenId, amount],
+    queryFn: async () => {
+      if (!entrypoints || !entrypoints.includes(FEE_ENTRYPOINT)) return;
+      try {
+        return await straknet.callContract({
+          contractAddress: contractAddress ?? "",
+          entrypoint: FEE_ENTRYPOINT,
+          calldata: [
+            cairo.uint256(tokenId ?? "0x0"),
+            cairo.uint256(amount || 0),
+          ],
+        });
+      } catch (error: unknown) {
+        console.log(error);
+      }
+    },
+  });
+
+  const marketplaceFee = useMemo(() => {
+    if (!book) return 0;
+    return (book.fee_num * amount) / 10000;
+  }, [book, amount]);
+
+  const royaltyFee = useMemo(() => {
+    if (!royalties) return 0;
+    return royalties[1];
+  }, [royalties]);
+
   return {
     chainId,
     provider,
     listings,
     sales,
     orders,
+    marketplaceFee,
+    royaltyFee,
     addOrder,
     removeOrder,
+    setAmount,
     order,
     collectionOrders,
     tokenOrders,
     selfOrders,
     isListed,
+    royalties,
+    isLoading,
   };
 };

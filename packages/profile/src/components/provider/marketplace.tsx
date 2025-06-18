@@ -16,6 +16,7 @@ import {
   ListingEvent,
   SaleEvent,
   StatusType,
+  BookModel,
 } from "@cartridge/marketplace";
 import { constants, getChecksumAddress } from "starknet";
 import { MarketplaceContext } from "#context/marketplace";
@@ -30,6 +31,7 @@ const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
  */
 export const MarketplaceProvider = ({ children }: { children: ReactNode }) => {
   const currentValue = useContext(MarketplaceContext);
+  const [book, setBook] = useState<BookModel | null>(null);
   const [orders, setOrders] = useState<{
     [collection: string]: { [token: string]: { [order: string]: OrderModel } };
   }>({});
@@ -90,7 +92,11 @@ export const MarketplaceProvider = ({ children }: { children: ReactNode }) => {
     (entities: MarketplaceModel[]) => {
       const now = Date.now();
       entities.forEach((entity: MarketplaceModel) => {
-        if (OrderModel.isType(entity as OrderModel)) {
+        if (BookModel.isType(entity as BookModel)) {
+          const book = entity as BookModel;
+          if (book.version === 0) return;
+          setBook(book);
+        } else if (OrderModel.isType(entity as OrderModel)) {
           const order = entity as OrderModel;
           if (order.expiration * 1000 < now) return;
           if (order.category.value !== CategoryType.Sell) return;
@@ -132,7 +138,7 @@ export const MarketplaceProvider = ({ children }: { children: ReactNode }) => {
         }
       });
     },
-    [],
+    [addOrder, removeOrder, setBook, setListings, setSales],
   );
 
   useEffect(() => {
@@ -147,6 +153,7 @@ export const MarketplaceProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!initialized) return;
     const options: MarketplaceOptions = {
+      book: true,
       order: true,
       sale: true,
       listing: true,
@@ -163,6 +170,7 @@ export const MarketplaceProvider = ({ children }: { children: ReactNode }) => {
       value={{
         chainId: CHAIN_ID,
         provider,
+        book,
         orders,
         listings,
         sales,

@@ -1,4 +1,5 @@
 import {
+  BookModel,
   ListingEvent,
   MarketplaceProvider,
   OrderModel,
@@ -13,6 +14,7 @@ interface MarketplaceContextType {
   /** The Marketplace client instance */
   chainId: string;
   provider: MarketplaceProvider;
+  book: BookModel | null;
   orders: {
     [collection: string]: { [token: string]: { [order: string]: OrderModel } };
   };

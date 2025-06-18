@@ -178,8 +178,7 @@ export function CollectionListing() {
       const marketplaceAddress: string = provider.manifest.contracts.find(
         (c: { tag: string }) => c.tag?.includes("Marketplace"),
       )?.address;
-      const amount =
-        BigInt(price) * BigInt(10n ** BigInt(selected.metadata.decimals));
+      const amount = BigInt(price * 10 ** selected.metadata.decimals);
 
       const calls: AllowArray<Call> = [
         {
@@ -350,7 +349,7 @@ const ListingConfirmation = ({
 }) => {
   return (
     <>
-      <LayoutContent className="p-6 pb-0 flex flex-col gap-4 overflow-hidden">
+      <LayoutContent className="p-6 pb-0 flex flex-col gap-4 overflow-hidden select-none">
         <div className="h-10 flex items-center justify-start gap-3 select-none">
           <Thumbnail
             icon={
@@ -364,7 +363,10 @@ const ListingConfirmation = ({
           />
           <p className="text-lg/[24px] font-semibold">Review Listings</p>
         </div>
-        <div className="grow flex flex-col gap-px rounded overflow-y-scroll pb-6">
+        <div
+          className="grow flex flex-col gap-px rounded overflow-y-scroll pb-6"
+          style={{ scrollbarWidth: "none" }}
+        >
           <div className="h-10 flex items-center justify-between bg-background-200 px-3 py-2.5">
             <p className="text-xs tracking-wider text-foreground-400 font-semibold">
               Listing
