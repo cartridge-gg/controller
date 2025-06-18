@@ -49,7 +49,7 @@ export default class ControllerProvider extends BaseProvider {
 
     // Merge user chains with default chains
     // User chains take precedence if they specify the same network
-    const chains = [...(options.chains || []), ...cartridgeChains];
+    const chains = [...cartridgeChains, ...(options.chains || [])];
     const defaultChainId =
       options.defaultChainId || constants.StarknetChainId.SN_MAIN;
 
@@ -438,8 +438,10 @@ export default class ControllerProvider extends BaseProvider {
         const isMainnet = chainId === constants.StarknetChainId.SN_MAIN;
         const isSepolia = chainId === constants.StarknetChainId.SN_SEPOLIA;
         const isCartridgeRpc = url.hostname === "api.cartridge.gg";
+        const isLocalhost =
+          url.hostname === "localhost" || url.hostname === "127.0.0.1";
 
-        if ((isMainnet || isSepolia) && !isCartridgeRpc) {
+        if ((isMainnet || isSepolia) && !(isCartridgeRpc || isLocalhost)) {
           throw new Error(
             `Only Cartridge RPC providers are allowed for ${isMainnet ? "mainnet" : "sepolia"}. ` +
               `Please use: https://api.cartridge.gg/x/starknet/${isMainnet ? "mainnet" : "sepolia"}`,
