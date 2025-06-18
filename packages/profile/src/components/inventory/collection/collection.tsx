@@ -95,7 +95,8 @@ export function Collection() {
   if (
     tokenId ||
     location.pathname.includes("/send") ||
-    location.pathname.includes("/list")
+    location.pathname.includes("/list") ||
+    location.pathname.includes("/purchase")
   ) {
     return <Outlet />;
   }
