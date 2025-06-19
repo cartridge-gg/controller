@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-       - name: Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -56,23 +56,11 @@ jobs:
           assignee_trigger: "claude-bot"
 
           # Customize allowed tools and commands for your repository
-          allowed_tools: "mcp__github__create_pull_request,Bash,Glob,Grep,LS,Read,Edit,MultiEdit,Write,Bash(pnpm install),Bash(pnpm run build),Bash(pnpm run test:*),Bash(pnpm run lint:*),Bash(pnpm run format),Bash(pnpm run dev),Bash(pnpm run storybook),Bash(pnpm run e2e:*),Bash(pnpm --filter *),Bash(pnpm run clean),Bash(corepack enable pnpm)"
+          allowed_tools: "mcp__github__create_pull_request,Bash,Glob,Grep,LS,Read,Edit,MultiEdit,Write"
 
           # Add custom instructions specific to your codebase
           custom_instructions: |
             Always review the instructions in the CLAUDE.md file before proceeding.
-
-            This is a TypeScript/React gaming wallet codebase using a monorepo structure for blockchain gaming platform components.
-            Key guidelines:
-            - Use pnpm for package management and script execution
-            - Use pnpm run build for building the project
-            - Use pnpm run test:* for running specific test suites
-            - Use pnpm run lint:* for linting specific packages
-            - Follow TypeScript best practices and React patterns
-            - For component changes, update Storybook stories and tests
-            - Always test changes with appropriate pnpm commands before suggesting code
-            - Use Turbo for build orchestration in the monorepo
-            - Focus on type safety and proper React patterns
 
             IMPORTANT: When you make changes to files, you must create a Pull Request:
             1. Use mcp__github__create_pull_request to create a PR

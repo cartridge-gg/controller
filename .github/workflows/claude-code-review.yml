@@ -58,11 +58,14 @@ jobs:
             6. **Add inline comments**: Use `mcp__github__add_pull_request_review_comment_to_pending_review` for each specific piece of feedback on particular lines, including code change suggestions where appropriate using multiline comments and the suggestion syntax:
 
             ```suggestion
-              // Fixed: Use proper TypeScript interface
-              interface WalletConfig {
-                address: string;
-                chainId: number;
-              }
+              const [isLoading, setIsLoading] = useState<boolean>(false);
+              
+              useEffect(() => {
+                return () => {
+                  // Cleanup on unmount
+                  setIsLoading(false);
+                };
+              }, []);
             ```
 
             7. **Submit the review**: Use `mcp__github__submit_pending_pull_request_review` with event type "COMMENT" (not "REQUEST_CHANGES") to publish all comments as a non-blocking review
@@ -77,35 +80,35 @@ jobs:
             - Component composition and reusability
             - Props interface design and validation
             - State management patterns
-            
+
             **Wallet & Blockchain Integration:**
             - StarkNet integration best practices
             - Account abstraction implementation
             - Session token management
             - WebAuthn/Passkeys security patterns
             - Iframe communication security
-            
+
             **UI/UX & Accessibility:**
             - Component API consistency
             - Storybook story completeness
             - TailwindCSS usage patterns
             - Responsive design considerations
             - Accessibility best practices
-            
+
             **Testing & Quality:**
             - Jest unit test coverage and quality
             - Storybook visual regression tests
             - Playwright E2E test completeness
             - Mock usage and test isolation
             - Error boundary implementation
-            
+
             **Monorepo & Build:**
             - Package interdependencies
             - Turbo build configuration
             - Workspace protocol usage
             - Bundle size considerations
             - Performance optimizations
-            
+
             **Security:**
             - Input validation and sanitization
             - XSS prevention
