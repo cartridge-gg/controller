@@ -123,7 +123,7 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
 
   const tokens = useMemo(() => {
     const newTokens: { [key: string]: Token } = {};
-    data?.balances.edges.forEach((e) => {
+    data?.balances?.edges?.forEach((e) => {
       const { amount, value, meta } = e.node;
       const { decimals, contractAddress, name, symbol, price, periodPrice } =
         meta;

@@ -32,7 +32,7 @@ import { useMarketplace } from "#hooks/marketplace.js";
 export function Collection() {
   const { games, editions } = useArcade();
   const { address: contractAddress, tokenId } = useParams();
-  const { closable, visitor, project, namespace } = useConnection();
+  const { closable, project, namespace } = useConnection();
   const { theme } = useTheme();
   const { collectionOrders: orders } = useMarketplace();
 
@@ -105,7 +105,7 @@ export function Collection() {
     <LayoutContainer>
       <LayoutHeader
         className="hidden"
-        onBack={closable || visitor ? undefined : handleBack}
+        onBack={closable ? undefined : handleBack}
       />
       {status === "loading" ? (
         <LoadingState />
@@ -124,7 +124,6 @@ export function Collection() {
             <div
               className={cn(
                 "flex items-center gap-x-1.5 text-xs cursor-pointer self-start text-foreground-300",
-                visitor && "invisible",
               )}
               onClick={handleSelectAll}
             >
@@ -166,7 +165,7 @@ export function Collection() {
                           : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
                       }
                       image={asset.imageUrl || placeholder}
-                      selectable={!visitor}
+                      selectable
                       selected={isSelected}
                       listingCount={listingCount}
                       onSelect={() => handleSelect(asset.tokenId)}
@@ -181,7 +180,7 @@ export function Collection() {
           <LayoutFooter
             className={cn(
               "relative flex flex-col items-center justify-center gap-y-4 bg-background",
-              (!selection || visitor) && "hidden",
+              !selection && "hidden",
             )}
           >
             <div className="flex gap-3 w-full">
