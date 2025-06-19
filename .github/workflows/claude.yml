@@ -19,41 +19,52 @@ jobs:
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      contents: write
+      pull-requests: write
+      issues: write
       id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install ast-grep
+        run: |
+          npm install -g @ast-grep/cli
+          ast-grep --version
 
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          
+
           # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
           # model: "claude-opus-4-20250514"
-          
+
           # Optional: Customize the trigger phrase (default: @claude)
           # trigger_phrase: "/claude"
-          
-          # Optional: Trigger when specific user is assigned to an issue
-          # assignee_trigger: "claude-bot"
-          
-          # Optional: Allow Claude to run specific commands
-          # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
-          
-          # Optional: Add custom instructions for Claude to customize its behavior for your project
-          # custom_instructions: |
-          #   Follow our coding standards
-          #   Ensure all new code has tests
-          #   Use TypeScript for new files
-          
-          # Optional: Custom environment variables for Claude
-          # claude_env: |
-          #   NODE_ENV: test
 
+          # Optional: Trigger when specific user is assigned to an issue
+          assignee_trigger: "claude-bot"
+
+          # Customize allowed tools and commands for your repository
+          allowed_tools: "mcp__github__create_pull_request,Bash,Glob,Grep,LS,Read,Edit,MultiEdit,Write"
+
+          # Add custom instructions specific to your codebase
+          custom_instructions: |
+            Always review the instructions in the CLAUDE.md file before proceeding.
+
+            IMPORTANT: When you make changes to files, you must create a Pull Request:
+            1. Use mcp__github__create_pull_request to create a PR
+            2. If responding to an issue, include "Closes #[ISSUE_NUMBER]" in the PR description
+            3. Provide a clear title and description explaining what was changed and why
+
+            Never commit directly to main branch. Always create PRs for changes.
