@@ -28,7 +28,6 @@ import { Leaderboard } from "./leaderboard";
 import { CollectionPurchase } from "./inventory/collection/collection-purchase";
 
 export function App() {
-  console.log({ url: window.location.href });
   const [searchParams] = useSearchParams();
   const social = useMemo(() => {
     return searchParams.get("social");

@@ -66,7 +66,7 @@ export function CollectionAsset() {
     provider: mainProvider,
   } = useConnection();
   const { address } = useAccount();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [cap, setCap] = useState(OFFSET);
@@ -234,7 +234,11 @@ export function CollectionAsset() {
   useEffect(() => {
     if (!order) return;
     setAmount(Number(order.price));
-  }, [order, setAmount]);
+    setSearchParams({
+      ...searchParams,
+      orders: order.id.toString(),
+    });
+  }, [order, searchParams, setAmount, setSearchParams]);
 
   if (
     location.pathname.includes("/send") ||
@@ -257,7 +261,7 @@ export function CollectionAsset() {
           <LayoutContent
             className={cn(
               "p-6 flex flex-col gap-6 overflow-hidden",
-              isListed || (isOwner && "pb-0"),
+              (isListed || isOwner) && "pb-0",
             )}
           >
             <CollectionHeader

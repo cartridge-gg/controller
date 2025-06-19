@@ -1,7 +1,5 @@
 import {
   Link,
-  Outlet,
-  useLocation,
   useNavigate,
   useParams,
   useSearchParams,
@@ -27,8 +25,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
   InfoIcon,
+  useUI,
 } from "@cartridge/ui";
-
 import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
   AllowArray,
@@ -46,25 +44,33 @@ import placeholder from "/public/placeholder.svg";
 import { useMarketplace } from "#hooks/marketplace.js";
 import { toast } from "sonner";
 import { useTokens } from "#hooks/token";
+import { useQuery } from "react-query";
+import { useEntrypoints } from "#hooks/entrypoints.js";
+
+const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectionPurchase() {
-  const { chainId, parent, provider: mainProvider } = useConnection();
-  const [searchParams] = useSearchParams();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { tokens } = useTokens();
-  const {
-    isListed,
-    provider,
-    order,
-    removeOrder,
-    marketplaceFee,
-    royaltyFee,
-    setAmount,
-  } = useMarketplace();
-  const [loading, setLoading] = useState(false);
-
+  const { closeModal } = useUI();
   const { address: contractAddress, tokenId } = useParams();
+  const { chainId, parent, provider: starknet, closable } = useConnection();
+  const { tokens } = useTokens();
+  const [loading, setLoading] = useState(false);
+  const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
+  const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
+  const { provider, orders, marketplaceFee, removeOrder, setAmount } =
+    useMarketplace();
+
+  const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+  const paramsOrders = searchParams.get("orders")?.split(",").map(Number) || [];
+  const tokenOrders = useMemo(() => {
+    const allOrders = Object.values(orders).flatMap((orders) =>
+      Object.values(orders).flatMap((orders) => Object.values(orders)),
+    );
+    return allOrders.filter((order) => paramsOrders.includes(order.id));
+  }, [orders, paramsOrders]);
+
   const {
     collection,
     assets,
@@ -79,82 +85,89 @@ export function CollectionPurchase() {
   }, [assets]);
 
   const token: Token | undefined = useMemo(() => {
-    if (!order) return;
+    if (!tokenOrders || tokenOrders.length === 0) return;
+    // [Check] if all currencies are the same
+    const allCurrencies = tokenOrders.map((order) => order.currency);
+    const unicity = new Set(allCurrencies).size === 1;
+    if (!unicity) return;
     return tokens.find(
-      (token) => BigInt(token.metadata.address) === BigInt(order.currency),
+      (token) =>
+        BigInt(token.metadata.address) === BigInt(tokenOrders[0].currency),
     );
-  }, [tokens, order]);
-
-  const amount = useMemo(() => {
-    if (!order) return 0;
-    return Number(order?.price) / Math.pow(10, token?.metadata.decimals || 0);
-  }, [order, token]);
+  }, [tokens, tokenOrders]);
 
   const { total, fees } = useMemo(() => {
-    const price = Number(order?.price);
+    const price = tokenOrders.reduce(
+      (acc, order) => acc + Number(order?.price),
+      0,
+    );
+    const royaltyFee = Object.values(royalties).reduce(
+      (acc, royalty) => acc + royalty,
+      0,
+    );
     const formattedMarketplaceFee =
       marketplaceFee / Math.pow(10, token?.metadata.decimals || 0);
     const formattedRoyaltyFee =
-      Number(royaltyFee) / Math.pow(10, token?.metadata.decimals || 0);
+      royaltyFee / Math.pow(10, token?.metadata.decimals || 0);
     const total = formattedMarketplaceFee + formattedRoyaltyFee;
     const fees = [
       {
         label: "Marketplace Fee",
-        amount: `${formattedMarketplaceFee} ${token?.metadata.symbol}`,
+        amount: `${formattedMarketplaceFee.toFixed(2)} ${token?.metadata.symbol}`,
         percentage: `${(price ? (marketplaceFee / price) * 100 : 0).toFixed(2)}%`,
       },
       {
         label: "Creator Royalties",
-        amount: `${formattedRoyaltyFee} ${token?.metadata.symbol}`,
+        amount: `${formattedRoyaltyFee.toFixed(2)} ${token?.metadata.symbol}`,
         percentage: `${(price ? (Number(royaltyFee) / price) * 100 : 0).toFixed(2)}%`,
       },
     ];
     return { total, fees };
-  }, [marketplaceFee, royaltyFee, token]);
-
-  const { countervalues } = useCountervalue(
-    {
-      tokens: [
-        {
-          balance: `${amount}`,
-          address: token?.metadata.address || "",
-        },
-      ],
-    },
-    { enabled: !!amount && !!token },
-  );
-
-  const price: number = useMemo(() => {
-    if (!countervalues) return 0;
-    return countervalues[0]?.current.value || 0;
-  }, [countervalues]);
+  }, [marketplaceFee, royalties, token]);
 
   const props = useMemo(() => {
-    if (!assets || !collection || !price || !token || !order || !amount)
-      return {
-        assets: [],
-        currency: { name: "", image: "", price: 0, value: "" },
-      };
-    const tokens = assets.map((asset) => ({
-      name: asset.name,
-      image: asset.imageUrl || collection.imageUrl || placeholder,
-      collection: collection.name,
-    }));
-    const currency = {
-      name: token.metadata.symbol,
-      image: token.metadata.image || "",
-      price: amount,
-      value: price ? `~$${price.toFixed(2)}` : "",
-    };
-    return { assets: tokens, currency };
-  }, [assets, collection, price, token, order, amount, placeholder]);
+    if (!assets || !collection || !tokenOrders) return [];
+    return tokenOrders
+      .map((order) => {
+        const asset = assets.find(
+          (asset) => BigInt(asset.tokenId) === BigInt(order.tokenId),
+        );
+        if (!asset) return;
+        return {
+          orderId: order.id,
+          image: asset.imageUrl || collection.imageUrl || placeholder,
+          name: asset.name,
+          collection: collection.name,
+          collectionAddress: collection.address,
+          price: order.price,
+          tokenId: asset.tokenId,
+        };
+      })
+      .filter((value) => value !== undefined);
+  }, [assets, collection, tokenOrders, placeholder]);
+
+  const { totalPrice, floatPrice } = useMemo(() => {
+    const total = tokenOrders.reduce(
+      (acc, order) => acc + Number(order?.price),
+      0,
+    );
+    const formatted = total / Math.pow(10, token?.metadata.decimals || 0);
+    return { totalPrice: total, floatPrice: formatted };
+  }, [tokenOrders]);
+
+  const addRoyalties = useCallback(
+    (orderId: number, royaltyFee: number) => {
+      setRoyalties((prev) => ({ ...prev, [orderId]: royaltyFee }));
+    },
+    [setRoyalties],
+  );
 
   const handleBack = useCallback(() => {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
 
   const handlePurchase = useCallback(async () => {
-    if (!contractAddress || !asset || !isListed || !order) return;
+    if (!token || !tokenOrders || tokenOrders.length === 0) return;
     setLoading(true);
     try {
       const marketplaceAddress: string = provider.manifest.contracts.find(
@@ -162,32 +175,32 @@ export function CollectionPurchase() {
       )?.address;
       const calls: AllowArray<Call> = [
         {
-          contractAddress: getChecksumAddress(order.currency),
+          contractAddress: getChecksumAddress(token?.metadata.address || ""),
           entrypoint: "approve",
           calldata: CallData.compile({
             spender: marketplaceAddress,
-            amount: cairo.uint256(order.price),
+            amount: cairo.uint256(totalPrice),
           }),
         },
-        {
+        ...tokenOrders.map((order) => ({
           contractAddress: marketplaceAddress,
           entrypoint: "execute",
           calldata: CallData.compile({
             orderId: order.id,
-            collection: contractAddress,
-            tokenId: cairo.uint256(asset.tokenId),
-            assetId: cairo.uint256(asset.tokenId),
+            collection: order.collection,
+            tokenId: cairo.uint256(order.tokenId),
+            assetId: cairo.uint256(order.tokenId),
             quantity: 0, // 0 for ERC721
             royalties: true,
           }),
-        },
+        })),
       ];
       const res = await parent.openExecute(
         Array.isArray(calls) ? calls : [calls],
         chainId,
       );
       if (res?.transactionHash) {
-        await mainProvider.waitForTransaction(res.transactionHash, {
+        await starknet.waitForTransaction(res.transactionHash, {
           retryInterval: 1000,
           successStates: [
             TransactionExecutionStatus.SUCCEEDED,
@@ -199,8 +212,14 @@ export function CollectionPurchase() {
         toast.success(`Asset purchased successfully`);
       }
       // Removing the order optimistically
-      removeOrder(order);
-      navigate(`..?${searchParams.toString()}`);
+      tokenOrders.forEach((order) => {
+        removeOrder(order);
+      });
+      if (closable) {
+        closeModal?.();
+      } else {
+        navigate(`../../..?${searchParams.toString()}`);
+      }
     } catch (error) {
       console.error(error);
       toast.error(`Failed to purchase asset(s)`);
@@ -208,14 +227,15 @@ export function CollectionPurchase() {
       setLoading(false);
     }
   }, [
-    contractAddress,
-    asset,
-    isListed,
+    closable,
+    closeModal,
+    token,
+    tokenOrders,
     chainId,
+    totalPrice,
     parent,
     provider,
-    mainProvider,
-    order,
+    starknet,
     removeOrder,
     navigate,
     searchParams,
@@ -228,24 +248,24 @@ export function CollectionPurchase() {
   }, [collectionStatus]);
 
   useEffect(() => {
-    if (!order) return;
-    setAmount(Number(order.price));
-  }, [order, setAmount]);
-
-  if (
-    location.pathname.includes("/send") ||
-    location.pathname.includes("/list")
-  ) {
-    return <Outlet />;
-  }
+    if (!tokenOrders || tokenOrders.length === 0) return;
+    const amount = tokenOrders.reduce(
+      (acc, order) => acc + Number(order?.price),
+      0,
+    );
+    setAmount(amount);
+  }, [tokenOrders, setAmount]);
 
   return (
     <LayoutContainer>
-      <LayoutHeader className="hidden" onBack={handleBack} />
+      <LayoutHeader
+        className="hidden"
+        onBack={closable ? undefined : handleBack}
+      />
 
       {status === "loading" || !collection || !asset ? (
         <LoadingState />
-      ) : status === "error" || (isListed && !token) ? (
+      ) : status === "error" || !token ? (
         <EmptyState />
       ) : (
         <>
@@ -274,35 +294,24 @@ export function CollectionPurchase() {
                 <p
                   className={cn(
                     "px-1.5 py-0.5 text-xs bg-background-300 rounded-full font-medium text-foreground-300",
-                    props.assets.length <= 1 && "hidden",
+                    props.length <= 1 && "hidden",
                   )}
-                >{`${props.assets.length} total`}</p>
+                >{`${props.length} total`}</p>
               </div>
-              {props.assets.map((asset, index) => (
-                <div
-                  key={`${asset.name}-${index}`}
-                  className="h-16 flex items-center justify-between bg-background-200 px-4 py-3 gap-3"
-                >
-                  <ThumbnailCollectible
-                    image={asset.image}
-                    size="lg"
-                    variant="light"
-                    className="p-0"
-                  />
-                  <div className="flex flex-col gap-0.5 items-stretch grow overflow-hidden">
-                    <div className="flex items-center gap-6 justify-between text-sm font-medium capitalize">
-                      <p>{asset.name}</p>
-                      <div className="flex items-center gap-1">
-                        <Thumbnail icon={props.currency.image} size="sm" />
-                        <p>{props.currency.price}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 justify-between text-xs text-foreground-300">
-                      <p className="truncate">{asset.collection}</p>
-                      <p>{props.currency.value}</p>
-                    </div>
-                  </div>
-                </div>
+              {props.map((args) => (
+                <Order
+                  key={args.orderId}
+                  orderId={args.orderId}
+                  image={args.image}
+                  name={args.name}
+                  collection={args.collection}
+                  collectionAddress={args.collectionAddress}
+                  price={args.price}
+                  token={token}
+                  entrypoints={entrypoints}
+                  tokenId={args.tokenId}
+                  addRoyalties={addRoyalties}
+                />
               ))}
             </div>
           </LayoutContent>
@@ -312,14 +321,14 @@ export function CollectionPurchase() {
               <div className="w-full px-3 py-2.5 flex flex-col gap-1 bg-background-125 border border-background-200 rounded">
                 <div className="flex items-center justify-between text-xs text-foreground-400">
                   <p>Cost</p>
-                  <p>{`${amount - total} ${props.currency.name}`}</p>
+                  <p>{`${(floatPrice - total).toFixed(2)} ${token.metadata.symbol}`}</p>
                 </div>
                 <div className="flex items-center justify-between text-xs text-foreground-400">
                   <div className="flex gap-2  text-xs font-medium">
                     Fees
                     <FeesTooltip trigger={<InfoIcon size="xs" />} fees={fees} />
                   </div>
-                  <p>{`${total} ${props.currency.name}`}</p>
+                  <p>{`${total.toFixed(2)} ${token.metadata.symbol}`}</p>
                 </div>
               </div>
               <div className="flex gap-3 w-full">
@@ -327,7 +336,7 @@ export function CollectionPurchase() {
                   <p className="text-sm font-medium text-foreground-400">
                     Total
                   </p>
-                  <p className="text-sm font-medium text-foreground-100">{`${props.currency.price * props.assets.length}`}</p>
+                  <p className="text-sm font-medium text-foreground-100">{`${floatPrice}`}</p>
                 </div>
                 <TokenSelect
                   tokens={tokens}
@@ -341,6 +350,7 @@ export function CollectionPurchase() {
                 <Link
                   className="w-1/3"
                   to={`../../..?${searchParams.toString()}`}
+                  onClick={closable ? closeModal : undefined}
                 >
                   <Button variant="secondary" type="button" className="w-full">
                     Cancel
@@ -362,6 +372,107 @@ export function CollectionPurchase() {
     </LayoutContainer>
   );
 }
+
+const Order = ({
+  orderId,
+  image,
+  name,
+  collection,
+  collectionAddress,
+  price,
+  token,
+  entrypoints,
+  tokenId,
+  addRoyalties,
+}: {
+  orderId: number;
+  image: string;
+  name: string;
+  collection: string;
+  collectionAddress: string;
+  price: number;
+  token: Token;
+  entrypoints: string[];
+  tokenId: string;
+  addRoyalties: (orderId: number, royaltyFee: number) => void;
+}) => {
+  const { provider: starknet } = useConnection();
+  const { data: royalties } = useQuery({
+    enabled: !!collectionAddress && !!tokenId && !!price,
+    queryKey: ["fee", collectionAddress, tokenId, price],
+    queryFn: async () => {
+      if (!entrypoints || !entrypoints.includes(FEE_ENTRYPOINT)) return;
+      try {
+        return await starknet.callContract({
+          contractAddress: collectionAddress,
+          entrypoint: FEE_ENTRYPOINT,
+          calldata: [
+            cairo.uint256(tokenId ?? "0x0"),
+            cairo.uint256(price || 0),
+          ],
+        });
+      } catch (error: unknown) {
+        console.log(error);
+      }
+    },
+  });
+
+  const floatPrice = useMemo(() => {
+    if (!token) return 0;
+    return Number(price) / Math.pow(10, token.metadata.decimals);
+  }, [price, token]);
+
+  const royaltyFee = useMemo(() => {
+    if (!royalties) return 0;
+    return Number(royalties[1]);
+  }, [royalties]);
+
+  useEffect(() => {
+    if (!royalties) return;
+    addRoyalties(orderId, royaltyFee);
+  }, [addRoyalties, orderId, royaltyFee]);
+
+  const { countervalues } = useCountervalue(
+    {
+      tokens: [
+        {
+          balance: `${floatPrice}`,
+          address: token?.metadata.address || "",
+        },
+      ],
+    },
+    { enabled: !!floatPrice && !!token },
+  );
+
+  const value = useMemo(() => {
+    if (!countervalues) return 0;
+    return countervalues[0]?.current.value || 0;
+  }, [countervalues]);
+
+  return (
+    <div className="h-16 flex items-center justify-between bg-background-200 px-4 py-3 gap-3">
+      <ThumbnailCollectible
+        image={image}
+        size="lg"
+        variant="light"
+        className="p-0"
+      />
+      <div className="flex flex-col gap-0.5 items-stretch grow overflow-hidden">
+        <div className="flex items-center gap-6 justify-between text-sm font-medium capitalize">
+          <p>{name}</p>
+          <div className="flex items-center gap-1">
+            <Thumbnail icon={token.metadata.image} size="sm" />
+            <p>{floatPrice}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 justify-between text-xs text-foreground-300">
+          <p className="truncate">{collection}</p>
+          <p>{`$${value.toFixed(2)}`}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const TokenSelect = ({
   tokens,
@@ -447,7 +558,7 @@ export const FeesTooltip = ({
           {fees.map((fee) => (
             <div
               key={fee.label}
-              className="flex flex-row justify-between text-foreground-300"
+              className="flex flex-row gap-2 justify-between text-foreground-300"
             >
               {fee.label}:{" "}
               <div>

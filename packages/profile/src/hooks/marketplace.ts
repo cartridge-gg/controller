@@ -31,7 +31,7 @@ export const useMarketplace = () => {
 
   const { address } = useAccount();
   const { address: contractAddress, tokenId } = useParams();
-  const { provider: straknet } = useConnection();
+  const { provider: starknet } = useConnection();
   const {
     chainId,
     provider,
@@ -104,7 +104,7 @@ export const useMarketplace = () => {
     queryFn: async () => {
       if (!entrypoints || !entrypoints.includes(FEE_ENTRYPOINT)) return;
       try {
-        return await straknet.callContract({
+        return await starknet.callContract({
           contractAddress: contractAddress ?? "",
           entrypoint: FEE_ENTRYPOINT,
           calldata: [

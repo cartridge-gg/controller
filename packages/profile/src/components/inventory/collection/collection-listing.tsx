@@ -54,10 +54,8 @@ const EXPIRATIONS = [
 
 export function CollectionListing() {
   const { chainId, provider } = useMarketplace();
-  const { parent, closable, provider: mainProvider } = useConnection();
+  const { parent, provider: mainProvider } = useConnection();
   const { address: contractAddress, tokenId } = useParams();
-  const [searchParams] = useSearchParams();
-  const paramsTokenIds = searchParams.getAll("tokenIds");
   const { tokens } = useTokens();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -70,6 +68,8 @@ export function CollectionListing() {
 
   const navigate = useNavigate();
 
+  const [searchParams] = useSearchParams();
+  const paramsTokenIds = searchParams.getAll("tokenIds");
   const tokenIds = useMemo(() => {
     if (!tokenId) return [...paramsTokenIds];
     return [tokenId, ...paramsTokenIds];
@@ -225,18 +225,13 @@ export function CollectionListing() {
     } finally {
       setLoading(false);
     }
-    if (closable) {
-      navigate(`../..?${searchParams.toString()}`);
-    } else {
-      navigate(`..?${searchParams.toString()}`);
-    }
+    navigate(`..?${searchParams.toString()}`);
   }, [
     tokenIds,
     contractAddress,
     price,
     selected,
     duration,
-    closable,
     navigate,
     searchParams,
     chainId,
