@@ -192,14 +192,7 @@ export function CollectionListing() {
       const marketplaceAddress: string = provider.manifest.contracts.find(
         (c: { tag: string }) => c.tag?.includes("Marketplace"),
       )?.address;
-      const decimals = selected.metadata.decimals;
-      if (decimals > 18) {
-        throw new Error('Unsupported token decimals');
-      }
-      if (price > Number.MAX_SAFE_INTEGER / Math.pow(10, decimals)) {
-        throw new Error('Price too large');
-      }
-      const amount = BigInt(price * 10 ** decimals);
+      const amount = BigInt(price * 10 ** selected.metadata.decimals);
 
       const calls: AllowArray<Call> = [
         {
