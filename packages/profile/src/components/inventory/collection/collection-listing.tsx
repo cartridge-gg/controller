@@ -41,7 +41,20 @@ import { useEntrypoints } from "#hooks/entrypoints.js";
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
 
-const WEEK = 60 * 60 * 24 * 7;
+// Create: packages/profile/src/constants/time.ts
+export const TIME_CONSTANTS = {
+  WEEK: 60 * 60 * 24 * 7,
+  MONTH: 60 * 60 * 24 * 30,
+  THREE_MONTHS: 60 * 60 * 24 * 90,
+  NEVER: 0,
+} as const;
+
+export const EXPIRATIONS = [
+  { duration: TIME_CONSTANTS.WEEK, label: "1w" },
+  { duration: TIME_CONSTANTS.MONTH, label: "1mo" },
+  { duration: TIME_CONSTANTS.THREE_MONTHS, label: "3mo" },
+  { duration: TIME_CONSTANTS.NEVER, label: "Never" },
+] as const;
 const MONTH = 60 * 60 * 24 * 30;
 const THREE_MONTHS = 60 * 60 * 24 * 90;
 const NEVER = 0;
