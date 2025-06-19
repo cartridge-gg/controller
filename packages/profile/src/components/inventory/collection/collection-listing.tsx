@@ -111,7 +111,8 @@ export function CollectionListing() {
   }, [entrypoints]);
 
   const conversion = useMemo(() => {
-    if (!selected || !selected.balance.value || !price) return undefined;
+    if (!selected?.balance?.value || !selected?.balance?.amount || !price)
+      return undefined;
     const value = selected.balance.value;
     const max = selected.balance.amount;
     const total = (value * price) / max;

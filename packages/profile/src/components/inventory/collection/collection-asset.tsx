@@ -109,7 +109,8 @@ export function CollectionAsset() {
   });
 
   const isOwner = useMemo(() => {
-    return BigInt(ownership?.accountAddress || "0x0") === BigInt(address);
+    if (!address || !ownership?.accountAddress) return false;
+    return BigInt(ownership.accountAddress) === BigInt(address);
   }, [ownership, address]);
 
   const asset = useMemo(() => {
