@@ -107,9 +107,9 @@ export function Collection() {
         className="hidden"
         onBack={closable ? undefined : handleBack}
       />
-      {status === "loading" ? (
+      {status === "loading" || !collection || !assets ? (
         <LoadingState />
-      ) : status === "error" || !collection || !assets ? (
+      ) : status === "error" ? (
         <EmptyState />
       ) : (
         <>
