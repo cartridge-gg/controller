@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { MarketplaceContext } from "#context/marketplace";
 import { useParams } from "react-router-dom";
 import { cairo, getChecksumAddress } from "starknet";
@@ -44,20 +44,28 @@ export const useMarketplace = () => {
   } = context;
   const [amount, setAmount] = useState<number>(0);
 
+  const getCollectionOrders = useCallback(
+    (contractAddress: string) => {
+      const collection = getChecksumAddress(contractAddress);
+      const collectionOrders = orders[collection];
+      if (!collectionOrders) return {};
+      return Object.entries(collectionOrders).reduce(
+        (acc, [token, orders]) => {
+          if (Object.values(orders).length === 0) return acc;
+          acc[token] = Object.values(orders).filter(
+            (order) => !!order && order.status.value === StatusType.Placed,
+          );
+          return acc;
+        },
+        {} as { [token: string]: OrderModel[] },
+      );
+    },
+    [orders],
+  );
+
   const collectionOrders: { [token: string]: OrderModel[] } = useMemo(() => {
-    const collection = getChecksumAddress(contractAddress || "0x0");
-    const collectionOrders = orders[collection];
-    if (!collectionOrders) return {};
-    return Object.entries(collectionOrders).reduce(
-      (acc, [token, orders]) => {
-        acc[token] = Object.values(orders).filter(
-          (order) => order.status.value === StatusType.Placed,
-        );
-        return acc;
-      },
-      {} as { [token: string]: OrderModel[] },
-    );
-  }, [orders, contractAddress]);
+    return getCollectionOrders(contractAddress || "0x0");
+  }, [getCollectionOrders, contractAddress]);
 
   const tokenOrders = useMemo(() => {
     const collection = getChecksumAddress(contractAddress || "0x0");
@@ -146,5 +154,6 @@ export const useMarketplace = () => {
     isListed,
     royalties,
     isLoading,
+    getCollectionOrders,
   };
 };

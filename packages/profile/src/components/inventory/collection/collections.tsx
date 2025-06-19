@@ -14,7 +14,7 @@ export function Collections() {
   const { collections, status: CollectionsStatus } = useCollections();
   const { collectibles, status: CollectiblesStatus } = useCollectibles();
   const { editions } = useArcade();
-  const { orders } = useMarketplace();
+  const { getCollectionOrders } = useMarketplace();
   const { project, namespace } = useConnection();
   const { theme } = useTheme();
 
@@ -44,7 +44,7 @@ export function Collections() {
         const collectionAddress = getChecksumAddress(
           collection.address || "0x0",
         );
-        const collectionOrders = orders[collectionAddress] || {};
+        const collectionOrders = getCollectionOrders(collectionAddress);
         const listingCount =
           Object.entries(collectionOrders).length || undefined;
         return (
@@ -69,7 +69,7 @@ export function Collections() {
         const collectionAddress = getChecksumAddress(
           collectible.address || "0x0",
         );
-        const collectionOrders = orders[collectionAddress] || {};
+        const collectionOrders = getCollectionOrders(collectionAddress);
         const listingCount =
           Object.entries(collectionOrders).length || undefined;
         return (

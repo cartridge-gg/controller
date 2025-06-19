@@ -54,7 +54,7 @@ const EXPIRATIONS = [
 
 export function CollectionListing() {
   const { chainId, provider } = useMarketplace();
-  const { parent, provider: mainProvider } = useConnection();
+  const { parent, provider: starknet } = useConnection();
   const { address: contractAddress, tokenId } = useParams();
   const { tokens } = useTokens();
   const [submitted, setSubmitted] = useState(false);
@@ -208,7 +208,7 @@ export function CollectionListing() {
         chainId,
       );
       if (res?.transactionHash) {
-        await mainProvider.waitForTransaction(res.transactionHash, {
+        await starknet.waitForTransaction(res.transactionHash, {
           retryInterval: 1000,
           successStates: [
             TransactionExecutionStatus.SUCCEEDED,
@@ -225,7 +225,10 @@ export function CollectionListing() {
     } finally {
       setLoading(false);
     }
-    navigate(`..?${searchParams.toString()}`);
+    // Remove tokenIds from search params
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete("tokenIds");
+    navigate(`..?${newSearchParams.toString()}`);
   }, [
     tokenIds,
     contractAddress,

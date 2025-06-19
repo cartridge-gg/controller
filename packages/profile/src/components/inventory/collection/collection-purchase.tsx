@@ -201,7 +201,7 @@ export function CollectionPurchase() {
       );
       if (res?.transactionHash) {
         await starknet.waitForTransaction(res.transactionHash, {
-          retryInterval: 1000,
+          retryInterval: 100,
           successStates: [
             TransactionExecutionStatus.SUCCEEDED,
             TransactionFinalityStatus.ACCEPTED_ON_L2,
@@ -215,11 +215,7 @@ export function CollectionPurchase() {
       tokenOrders.forEach((order) => {
         removeOrder(order);
       });
-      if (closable) {
-        closeModal?.();
-      } else {
-        navigate(`../../..?${searchParams.toString()}`);
-      }
+      closeModal?.();
     } catch (error) {
       console.error(error);
       toast.error(`Failed to purchase asset(s)`);
@@ -263,7 +259,10 @@ export function CollectionPurchase() {
         onBack={closable ? undefined : handleBack}
       />
 
-      {status === "loading" || !collection || !asset ? (
+      {status === "loading" ||
+      !collection ||
+      !asset ||
+      tokenOrders.length === 0 ? (
         <LoadingState />
       ) : status === "error" || !token ? (
         <EmptyState />
