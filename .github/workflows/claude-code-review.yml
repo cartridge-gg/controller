@@ -1,4 +1,4 @@
-name: claude-code-review
+name: claude
 
 on:
   pull_request:
@@ -6,10 +6,16 @@ on:
 
 jobs:
   claude-review:
+    # Optional: Filter by PR author
+    # if: |
+    #   github.event.pull_request.user.login == 'external-contributor' ||
+    #   github.event.pull_request.user.login == 'new-developer' ||
+    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
 
@@ -17,10 +23,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 2
+
+      - name: Check if commit is from Claude
+        id: check-author
+        run: |
+          AUTHOR_EMAIL=$(git log -1 --pretty=format:'%ae')
+          AUTHOR_NAME=$(git log -1 --pretty=format:'%an')
+          if [[ "$AUTHOR_EMAIL" == *"claude[bot]"* ]] || [[ "$AUTHOR_NAME" == *"claude[bot]"* ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Run Claude Code Review
         id: claude-review
+        if: steps.check-author.outputs.skip != 'true'
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -30,33 +48,62 @@ jobs:
 
           # Direct prompt for automated review (no @claude mention needed)
           direct_prompt: |
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
+            Please review this TypeScript/React PR and provide inline feedback using the GitHub review system. Follow these steps:
 
-            Be constructive and helpful in your feedback.
+            1. **Check for existing reviews**: First, use `mcp__github__get_pull_request_reviews` to check if you have any existing pending or submitted reviews on this PR
+            2. **Check existing comments**: Use `mcp__github__get_pull_request_comments` to see what comments have already been made to avoid redundancy
+            3. **Start a fresh review**: Use `mcp__github__create_pending_pull_request_review` to begin a new pending review
+            4. **Get diff information**: Use `mcp__github__get_pull_request_diff` to understand the code changes
+            5. **Add unique inline comments**: Only add comments for issues that haven't been addressed in existing reviews
+            6. **Add inline comments**: Use `mcp__github__add_pull_request_review_comment_to_pending_review` for each specific piece of feedback on particular lines, including code change suggestions where appropriate using multiline comments and the suggestion syntax:
 
-          # Optional: Customize review based on file types
-          # direct_prompt: |
-          #   Review this PR focusing on:
-          #   - For TypeScript files: Type safety and proper interface usage
-          #   - For API endpoints: Security, input validation, and error handling
-          #   - For React components: Performance, accessibility, and best practices
-          #   - For tests: Coverage, edge cases, and test quality
+            ```suggestion
+            const handleSubmit = useCallback(async (data: FormData) => {
+              // Implementation here
+            }, []);
+            ```
 
-          # Optional: Different prompts for different authors
-          # direct_prompt: |
-          #   ${{ github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' &&
-          #   'Welcome! Please review this PR from a first-time contributor. Be encouraging and provide detailed explanations for any suggestions.' ||
-          #   'Please provide a thorough code review focusing on our coding standards and best practices.' }}
+            7. **Submit the review**: Use `mcp__github__submit_pending_pull_request_review` with event type "COMMENT" (not "REQUEST_CHANGES") to publish all comments as a non-blocking review
 
-          # Optional: Add specific tools for running tests or linting
-          # allowed_tools: "Bash(npm run test),Bash(npm run lint),Bash(npm run typecheck)"
+            Only comment when something is off, wrong, or could be improved but don't be overly pedantic; if a given implementation is already good, do not comment on it.
 
-          # Optional: Skip review for certain conditions
-          # if: |
-          #   !contains(github.event.pull_request.title, '[skip-review]') &&
-          #   !contains(github.event.pull_request.title, '[WIP]')
+            Focus your review on:
+
+            **TypeScript & Code Quality:**
+            - Type safety and proper interface/type definitions
+            - Proper use of TypeScript features (generics, union types, etc.)
+            - Code organization and module structure
+            - Import/export patterns and dependency management
+
+            **React & Frontend Best Practices:**
+            - Component design and reusability
+            - Hook usage patterns and custom hooks
+            - State management and data flow
+            - Performance optimizations (memoization, lazy loading)
+            - Proper cleanup and memory leak prevention
+
+            **Gaming & Web3 Integration:**
+            - Starknet integration best practices
+            - WebAuthn implementation security
+            - iframe security considerations
+            - Gaming API integrations and error handling
+
+            **Security & Performance:**
+            - Input validation and sanitization
+            - XSS prevention and secure coding practices
+            - Bundle size and loading performance
+            - Accessibility (a11y) compliance
+            - Mobile responsiveness and touch interactions
+
+            **Testing & Quality:**
+            - Test coverage and quality
+            - Component testing strategies
+            - Integration test completeness
+            - Mock and fixture appropriateness
+
+            Provide specific, actionable feedback with inline comments and suggestions for line-specific issues. Include an concise overall summary when submitting the review.
+
+            **Important**: Submit as "COMMENT" type so the review doesn't block the PR.
+
+          # Add MCP GitHub tools for inline comments and project-specific testing
+          allowed_tools: "mcp__github__create_pending_pull_request_review,mcp__github__get_pull_request_comments,mcp__github__get_pull_request_reviews,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff,Bash(pnpm test),Bash(pnpm lint),Bash(pnpm build)"
