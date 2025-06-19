@@ -63,24 +63,7 @@ export const useMarketplace = () => {
     [orders],
   );
 
-const getCollectionOrders = useCallback(
-  (contractAddress: string) => {
-    const collection = getChecksumAddress(contractAddress);
-    const collectionOrders = orders[collection];
-    if (!collectionOrders) return {};
-    return Object.entries(collectionOrders).reduce(
-      (acc, [token, orders]) => {
-        if (Object.values(orders).length === 0) return acc;
-        acc[token] = Object.values(orders).filter(
-          (order) => !!order && order.status.value === StatusType.Placed,
-        );
-        return acc;
-      },
-      {} as { [token: string]: OrderModel[] },
-    );
-  },
-  [orders], // Add dependency array
-);
+  const collectionOrders: { [token: string]: OrderModel[] } = useMemo(() => {
     return getCollectionOrders(contractAddress || "0x0");
   }, [getCollectionOrders, contractAddress]);
 
