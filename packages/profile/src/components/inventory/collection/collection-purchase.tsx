@@ -17,7 +17,6 @@ import {
   Thumbnail,
   ThumbnailCollectible,
   Select,
-  TokenSelectHeader,
   SelectContent,
   SelectItem,
   Tooltip,
@@ -26,6 +25,9 @@ import {
   TooltipTrigger,
   InfoIcon,
   useUI,
+  SelectValue,
+  CaratIcon,
+  SelectTrigger,
 } from "@cartridge/ui";
 import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
@@ -331,7 +333,7 @@ export function CollectionPurchase() {
                 </div>
               </div>
               <div className="flex gap-3 w-full">
-                <div className="w-full px-3 py-2.5 flex items-center justify-between bg-background-125 border border-background-200 rounded">
+                <div className="w-full px-3 py-2.5 h-10 flex items-center justify-between bg-background-125 border border-background-200 rounded">
                   <p className="text-sm font-medium text-foreground-400">
                     Total
                   </p>
@@ -492,6 +494,10 @@ const TokenSelect = ({
     [setSelected, tokens],
   );
 
+  const disabled = useMemo(() => {
+    return true;
+  }, []);
+
   if (tokens.length === 0) return null;
 
   return (
@@ -499,9 +505,19 @@ const TokenSelect = ({
       value={selected?.metadata.address}
       onValueChange={onChangeToken}
       defaultValue={selected?.metadata.address}
-      disabled // TODO: enable when swap is implemented
+      disabled={disabled} // TODO: enable when swap is implemented
     >
-      <TokenSelectHeader className="h-10 w-fit rounded flex gap-2 items-center p-2 bg-background-200 hover:bg-background-200 disabled:opacity-100" />
+      <SelectTrigger className="h-10 w-fit rounded flex gap-2 items-center p-2 bg-background-200 hover:bg-background-200 disabled:opacity-100 disabled:cursor-default">
+        <SelectValue placeholder="Select Token" />
+        <CaratIcon
+          variant="down"
+          size="sm"
+          className={cn(
+            "text-foreground-300",
+            disabled && "text-foreground-400",
+          )}
+        />
+      </SelectTrigger>
       <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
         {tokens.map((token) => (
           <SelectItem
