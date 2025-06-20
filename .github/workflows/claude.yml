@@ -1,4 +1,4 @@
-name: Claude Code
+name: claude
 
 on:
   issue_comment:
@@ -11,7 +11,7 @@ on:
     types: [submitted]
 
 jobs:
-  claude:
+  code:
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
@@ -23,12 +23,26 @@ jobs:
       pull-requests: write
       issues: write
       id-token: write
+      actions: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CLAUDE_GITHUB }}
+
+      - name: Setup environment
+        env:
+          GITHUB_TOKEN: ${{ secrets.CLAUDE_GITHUB }}
+        run: |
+          # Install jq for workspace.json parsing
+          sudo apt-get update && sudo apt-get install -y jq
+
+          # Configure git for Claude operations with authentication
+          git config --global user.name "Claude Code Bot"
+          git config --global user.email "claude-code@anthropic.com"
+          git config --global init.defaultBranch main
+          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,8 +57,11 @@ jobs:
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@beta
+        env:
+          GITHUB_TOKEN: ${{ secrets.CLAUDE_GITHUB }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CLAUDE_GITHUB }}
 
           # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
           # model: "claude-opus-4-20250514"
@@ -56,7 +73,7 @@ jobs:
           assignee_trigger: "claude-bot"
 
           # Customize allowed tools and commands for your repository
-          allowed_tools: "mcp__github__create_pull_request,Bash,Glob,Grep,LS,Read,Edit,MultiEdit,Write"
+          allowed_tools: "mcp__github__create_pending_pull_request_review,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff,mcp__github__create_issue,mcp__github__create_pull_request,mcp__github__list_repositories,mcp__github__get_repository,mcp__github__get_repository_content,mcp__github__create_or_update_file_contents,mcp__github__create_or_update_file,mcp__github__delete_file,mcp__github__create_or_update_file,mcp__github__push_files,mcp__github__create_branch,mcp__github__search_code,mcp__github__get_commit,mcp__github__get_file_contents,Bash,Glob,Grep,LS,Read,Edit,MultiEdit,Write"
 
           # Add custom instructions specific to your codebase
           custom_instructions: |
