@@ -1,4 +1,5 @@
 import Provider from "@walletconnect/ethereum-provider";
+import { getAddress } from "ethers/address";
 import {
   ExternalPlatform,
   ExternalWallet,
@@ -17,7 +18,7 @@ export class WalletConnectWallet implements WalletAdapter {
     private provider: Provider,
     address?: string,
   ) {
-    this.account = address?.toLowerCase();
+    this.account = address ? getAddress(address) : undefined;
   }
 
   getConnectedAccounts(): string[] {

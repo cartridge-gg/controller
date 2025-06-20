@@ -1,3 +1,4 @@
+import { getAddress } from "ethers/address";
 import { createStore, EIP6963ProviderDetail } from "mipd";
 import {
   ExternalPlatform,
@@ -31,10 +32,8 @@ export class RabbyWallet implements WalletAdapter {
     this.provider?.provider?.on("accountsChanged", (accounts: string[]) => {
       if (accounts) {
         // rabby doesn't allow multiple accounts to be connected at the same time
-        this.connectedAccounts = accounts.map((account) =>
-          account.toLowerCase(),
-        );
-        this.account = accounts?.[0]?.toLowerCase();
+        this.connectedAccounts = accounts.map((account) => getAddress(account));
+        this.account = getAddress(accounts?.[0]);
       }
     });
   }
@@ -58,8 +57,8 @@ export class RabbyWallet implements WalletAdapter {
   }
 
   async connect(address?: string): Promise<ExternalWalletResponse<any>> {
-    if (address && this.connectedAccounts.includes(address.toLowerCase())) {
-      this.account = address.toLowerCase();
+    if (address && this.connectedAccounts.includes(getAddress(address))) {
+      this.account = getAddress(address);
     }
 
     if (this.account) {
