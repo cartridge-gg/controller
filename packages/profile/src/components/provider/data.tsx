@@ -45,8 +45,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
-      (edition) =>
-        edition.namespace === namespace && edition.config.project === project,
+      (edition) => edition.config.project === project,
     );
   }, [editions, project, namespace]);
 
@@ -207,8 +206,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
               key: `${transactionHash}-${entrypoint}`,
               contractAddress: contractAddress,
               transactionHash: transactionHash,
-              title: entrypoint,
-              image: game?.properties.icon || "",
+              title: entrypoint.replace(/_/g, " "),
+              image: edition?.properties.icon || game?.properties.icon || "",
               website: edition?.socials.website || "",
               certified: !!game,
               timestamp: timestamp / 1000,

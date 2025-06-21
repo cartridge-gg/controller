@@ -23,11 +23,24 @@ import {
   PlusIcon,
   TraceabilityCollectibleCard,
   PaperPlaneIcon,
+  TagIcon,
+  Token,
+  Spinner,
+  Thumbnail,
 } from "@cartridge/ui";
+
 import { cn } from "@cartridge/ui/utils";
-import { constants } from "starknet";
+import {
+  AllowArray,
+  cairo,
+  Call,
+  CallData,
+  constants,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
 import { useConnection, useTheme } from "#hooks/context";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "#hooks/collection";
 import { CollectionHeader } from "./header";
 import placeholder from "/public/placeholder.svg";
@@ -37,22 +50,36 @@ import { useArcade } from "#hooks/arcade.js";
 import { EditionModel } from "@cartridge/arcade";
 import { useOwnership } from "#hooks/ownerships.js";
 import { useUsername } from "#hooks/username.js";
+import { useMarketplace } from "#hooks/marketplace.js";
+import { toast } from "sonner";
+import { useTokens } from "#hooks/token";
+import { useAccount } from "#hooks/account";
 
 const OFFSET = 10;
 
 export function CollectionAsset() {
-  const { chainId, visitor, namespace, project } = useConnection();
-  const [searchParams] = useSearchParams();
+  const {
+    chainId,
+    namespace,
+    project,
+    parent,
+    provider: mainProvider,
+  } = useConnection();
+  const { address } = useAccount();
+  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [cap, setCap] = useState(OFFSET);
   const { theme } = useTheme();
   const { editions } = useArcade();
+  const { tokens } = useTokens();
+  const { isListed, provider, selfOrders, order, removeOrder, setAmount } =
+    useMarketplace();
+  const [loading, setLoading] = useState(false);
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
-      (edition) =>
-        edition.namespace === namespace && edition.config.project === project,
+      (edition) => edition.config.project === project,
     );
   }, [editions, project, namespace]);
 
@@ -81,6 +108,11 @@ export function CollectionAsset() {
     address: ownership?.accountAddress ?? "",
   });
 
+  const isOwner = useMemo(() => {
+    if (!address || !ownership?.accountAddress) return false;
+    return BigInt(ownership.accountAddress) === BigInt(address);
+  }, [ownership, address]);
+
   const asset = useMemo(() => {
     return assets?.[0];
   }, [assets]);
@@ -100,16 +132,82 @@ export function CollectionAsset() {
       }));
   }, [asset]);
 
+  const token: Token | undefined = useMemo(() => {
+    if (!order) return;
+    return tokens.find(
+      (token) => BigInt(token.metadata.address) === BigInt(order.currency),
+    );
+  }, [tokens, order]);
+
+  const amount = useMemo(() => {
+    if (!order) return 0;
+    return Number(order?.price) / Math.pow(10, token?.metadata.decimals || 0);
+  }, [order, token]);
+
   const handleBack = useCallback(() => {
     navigate(`..?${searchParams.toString()}`);
   }, [navigate, searchParams]);
 
-  const { events, dates } = useMemo(() => {
-    const filteredData = data.slice(0, cap);
-    return {
-      events: filteredData,
-      dates: [...new Set(filteredData.map((event) => event.date))],
-    };
+  const handleUnlist = useCallback(async () => {
+    if (!contractAddress || !asset || !isListed || !order || !isOwner) return;
+    setLoading(true);
+    try {
+      const marketplaceAddress: string = provider.manifest.contracts.find(
+        (c: { tag: string }) => c.tag?.includes("Marketplace"),
+      )?.address;
+      const orderIds = selfOrders.map((order) => order.id);
+      const calls: AllowArray<Call> = [
+        ...orderIds.map((orderId) => ({
+          contractAddress: marketplaceAddress,
+          entrypoint: "cancel",
+          calldata: CallData.compile({
+            orderId: orderId,
+            collection: contractAddress,
+            tokenId: cairo.uint256(asset.tokenId),
+          }),
+        })),
+      ];
+      const res = await parent.openExecute(
+        Array.isArray(calls) ? calls : [calls],
+        chainId,
+      );
+      if (res?.transactionHash) {
+        await mainProvider.waitForTransaction(res.transactionHash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+      }
+      if (res) {
+        toast.success(`Asset unlisted successfully`);
+      }
+      // Removing the order optimistically
+      removeOrder(order);
+    } catch (error) {
+      console.error(error);
+      toast.error(`Failed to unlist asset(s)`);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    contractAddress,
+    asset,
+    isListed,
+    chainId,
+    parent,
+    provider,
+    mainProvider,
+    order,
+    isOwner,
+    removeOrder,
+    navigate,
+    searchParams,
+  ]);
+
+  const events = useMemo(() => {
+    return data.slice(0, cap);
   }, [data, cap]);
 
   const to = useCallback((transactionHash: string) => {
@@ -134,7 +232,20 @@ export function CollectionAsset() {
     return "success";
   }, [collectionStatus, traceabilitiesStatus, ownershipStatus]);
 
-  if (location.pathname.includes("/send")) {
+  useEffect(() => {
+    if (!order) return;
+    setAmount(Number(order.price));
+    setSearchParams({
+      ...searchParams,
+      orders: order.id.toString(),
+    });
+  }, [order, searchParams, setAmount, setSearchParams]);
+
+  if (
+    location.pathname.includes("/send") ||
+    location.pathname.includes("/list") ||
+    location.pathname.includes("/purchase")
+  ) {
     return <Outlet />;
   }
 
@@ -144,26 +255,45 @@ export function CollectionAsset() {
 
       {status === "loading" || !collection || !asset ? (
         <LoadingState />
-      ) : status === "error" ? (
+      ) : status === "error" || (isListed && !token) ? (
         <EmptyState />
       ) : (
         <>
-          <LayoutContent className="p-6 pb-0 flex flex-col gap-6 overflow-hidden">
+          <LayoutContent
+            className={cn(
+              "p-6 flex flex-col gap-6 overflow-hidden",
+              (isListed || isOwner) && "pb-0",
+            )}
+          >
             <CollectionHeader
               image={edition?.properties.icon || theme?.icon}
               title={title}
               subtitle={collection.name}
+              expiration={
+                isListed && selfOrders.length > 0
+                  ? selfOrders[0].expiration
+                  : undefined
+              }
+              listingCount={isListed ? selfOrders.length : undefined}
             />
             <div
               className="flex flex-col gap-6 overflow-scroll relative"
               style={{ scrollbarWidth: "none" }}
             >
               <CollectiblePreview
-                image={asset.imageUrl || placeholder}
+                image={asset.imageUrl || collection.imageUrl || placeholder}
                 size="lg"
-                className="w-full self-center"
+                className="w-full self-center mt-0.5"
               />
-              <CollectibleTabs order={["details", "activity"]} className="pb-6">
+              {!!order && (
+                <div className="absolute top-[-2px] right-2">
+                  <Price amount={amount} image={token?.metadata.image} />
+                </div>
+              )}
+              <CollectibleTabs
+                order={["details", "activity"]}
+                className={cn("pb-0", isListed || (isOwner && "pb-6"))}
+              >
                 <TabsContent
                   className="m-0 p-0 flex flex-col gap-y-4"
                   value="details"
@@ -193,10 +323,12 @@ export function CollectionAsset() {
                         username={props.username}
                         timestamp={props.timestamp}
                         category={props.category}
-                        collectibleImage={props.image}
+                        amount={props.amount}
+                        collectibleImage={
+                          asset.imageUrl || collection.imageUrl || placeholder
+                        }
                         collectibleName={title || collection.name}
                         currencyImage={props.currencyImage}
-                        quantity={props.amount}
                       />
                     </Link>
                   ))}
@@ -204,7 +336,7 @@ export function CollectionAsset() {
                     variant="secondary"
                     className={cn(
                       "text-foreground-300 hover:text-foreground-200 normal-case text-sm font-medium tracking-normal font-sans",
-                      (cap >= data.length || dates.length === 0) && "hidden",
+                      cap >= data.length && "hidden",
                     )}
                     onClick={() => setCap((prev) => prev + OFFSET)}
                   >
@@ -218,25 +350,113 @@ export function CollectionAsset() {
 
           <LayoutFooter
             className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-0",
-              visitor && "hidden",
+              "relative flex flex-col items-center justify-center gap-y-4 bg-background-100 pt-0 select-none",
+              !isListed && !isOwner && "hidden",
             )}
           >
-            <Link
-              className="flex items-center justify-center gap-x-4 w-full"
-              to={`send?${searchParams.toString()}`}
-            >
-              <Button className="h-10 w-full gap-2">
-                <PaperPlaneIcon variant="solid" size="sm" />
-                <span className="font-semibold text-base/5">Send</span>
+            <div className="flex gap-3 w-full">
+              <Button
+                variant="secondary"
+                isLoading={loading}
+                onClick={handleUnlist}
+                className={cn(
+                  "w-full gap-2 text-destructive-100",
+                  (!isListed || !isOwner) && "hidden",
+                )}
+              >
+                <TagIcon variant="solid" size="sm" />
+                Unlist
               </Button>
-            </Link>
+              <Link
+                className={cn(
+                  "flex items-center justify-center gap-x-4 w-full",
+                  (isListed || !isOwner) && "hidden",
+                )}
+                to={`list?${searchParams.toString()}`}
+              >
+                <Button variant="secondary" className={cn("w-full gap-2")}>
+                  <TagIcon variant="solid" size="sm" />
+                  List
+                </Button>
+              </Link>
+              <Link
+                className={cn(
+                  "flex items-center justify-center gap-x-4 w-full",
+                  (!isListed || isOwner) && "hidden",
+                )}
+                to={`purchase?${searchParams.toString()}`}
+              >
+                <Button
+                  isLoading={loading}
+                  variant="primary"
+                  className="w-full gap-2"
+                >
+                  Purchase
+                </Button>
+              </Link>
+              <Link
+                className={cn(
+                  "flex items-center justify-center gap-x-4 w-full",
+                  !isOwner && "hidden",
+                )}
+                to={`send?${searchParams.toString()}`}
+              >
+                <Button variant="secondary" className="w-full gap-2">
+                  <PaperPlaneIcon variant="solid" size="sm" />
+                  Send
+                </Button>
+              </Link>
+            </div>
           </LayoutFooter>
         </>
       )}
     </LayoutContainer>
   );
 }
+
+const Price = ({ amount, image }: { amount?: number; image?: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setWidth(containerRef.current.offsetWidth);
+    }
+  }, [containerRef, amount, image]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-fit rounded overflow-hidden flex flex-col select-none"
+    >
+      <div className="px-2.5 pt-[5px] pb-[3px] w-full bg-primary-100 flex items-center justify-center">
+        {amount === undefined ? (
+          <Spinner size="sm" />
+        ) : (
+          <div className="flex gap-1 items-center">
+            <Thumbnail
+              icon={image}
+              rounded
+              size="xs"
+              className="bg-translucent-dark-100"
+            />
+            <p className="text-sm font-medium text-spacer-100">{`${amount.toLocaleString()}`}</p>
+          </div>
+        )}
+      </div>
+      <div className="flex justify-between w-full">
+        <div
+          className="h-0 w-0 border-t-[8px] border-t-primary-100 border-r-transparent"
+          style={{ borderRightWidth: `${width / 2}px` }}
+        />
+        <div
+          className="h-0 w-0 border-t-[8px] border-t-primary-100 border-l-transparent"
+          style={{ borderLeftWidth: `${width / 2}px` }}
+        />
+      </div>
+    </div>
+  );
+};
 
 const LoadingState = () => {
   return (

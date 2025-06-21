@@ -199,7 +199,7 @@ export function SendCollection() {
                 type="button"
                 className="w-1/3"
                 isLoading={loading}
-                onClick={() => navigate(`../../..?${searchParams.toString()}`)}
+                onClick={() => navigate(`../..?${searchParams.toString()}`)}
               >
                 Cancel
               </Button>

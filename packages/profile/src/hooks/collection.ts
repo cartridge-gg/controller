@@ -167,5 +167,10 @@ export function useCollections(): UseCollectionsResponse {
     },
   );
 
-  return { collections: Object.values(collections), status };
+  return {
+    collections: Object.values(collections).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    ),
+    status,
+  };
 }
