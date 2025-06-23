@@ -4,6 +4,7 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "@cartridge/controller";
+import { getAddress } from "ethers/address";
 import React, {
   createContext,
   PropsWithChildren,
@@ -13,6 +14,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { TurnkeyWallet } from "../wallets/social/turnkey";
 import { ParentMethods, useConnection } from "./connection";
 
 interface WalletsContextValue {
@@ -184,11 +186,13 @@ export const useWallets = (): WalletsContextValue => {
 export class KeychainWallets {
   private parent: ParentMethods;
   private embeddedWalletsByAddress: Map<string, WalletAdapter> = new Map();
+  turnkeyWallet: TurnkeyWallet;
 
   // Method to set the parent connection once established
   constructor(parent: ParentMethods) {
-    console.log("KeychainWallets: Parent connection set.");
     this.parent = parent;
+
+    this.turnkeyWallet = new TurnkeyWallet();
   }
 
   /**
@@ -197,7 +201,7 @@ export class KeychainWallets {
    * @param wallet - The wallet adapter instance.
    */
   addEmbeddedWallet(address: string, wallet: WalletAdapter) {
-    this.embeddedWalletsByAddress.set(address.toLowerCase(), wallet);
+    this.embeddedWalletsByAddress.set(getAddress(address), wallet);
   }
 
   /**
@@ -206,7 +210,7 @@ export class KeychainWallets {
    * @returns The wallet adapter instance or undefined if not found.
    */
   getEmbeddedWallet(address: string): WalletAdapter | undefined {
-    return this.embeddedWalletsByAddress.get(address.toLowerCase());
+    return this.embeddedWalletsByAddress.get(getAddress(address));
   }
 
   /**
@@ -221,7 +225,6 @@ export class KeychainWallets {
     message: string,
   ): Promise<ExternalWalletResponse> {
     // --- Decision Logic ---
-    // TODO: Implement logic to check if 'identifier' belongs to an embedded wallet (e.g., Turnkey)
     const embeddedWallet = this.getEmbeddedWallet(identifier);
 
     if (embeddedWallet) {
