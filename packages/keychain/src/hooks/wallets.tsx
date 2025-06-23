@@ -16,6 +16,7 @@ import React, {
 } from "react";
 import { TurnkeyWallet } from "../wallets/social/turnkey";
 import { ParentMethods, useConnection } from "./connection";
+import { WalletConnectWallet } from "@/wallets/wallet-connect";
 
 interface WalletsContextValue {
   wallets: ExternalWallet[];
@@ -187,12 +188,14 @@ export class KeychainWallets {
   private parent: ParentMethods;
   private embeddedWalletsByAddress: Map<string, WalletAdapter> = new Map();
   turnkeyWallet: TurnkeyWallet;
+  walletConnectWallet: WalletConnectWallet;
 
   // Method to set the parent connection once established
   constructor(parent: ParentMethods) {
     this.parent = parent;
 
     this.turnkeyWallet = new TurnkeyWallet();
+    this.walletConnectWallet = new WalletConnectWallet();
   }
 
   /**

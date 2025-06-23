@@ -71,7 +71,7 @@ export function useCreateController({
   const { signup: signupWithExternalWallet, login: loginWithExternalWallet } =
     useExternalWalletAuthentication();
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
-    useWalletConnectAuthentication(setOverlay);
+    useWalletConnectAuthentication();
   const { wallets } = useWallets();
 
   const handleAccountQuerySuccess = useCallback(
