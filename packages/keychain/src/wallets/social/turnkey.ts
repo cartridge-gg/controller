@@ -60,12 +60,10 @@ export class TurnkeyWallet {
   }
 
   isAvailable(): boolean {
-    const turnkeyIframeClient = this.getTurnkeyIframeClient(10_000);
-    const auth0Client = this.getAuth0Client(10_000);
     return (
       typeof window !== "undefined" &&
-      turnkeyIframeClient !== undefined &&
-      auth0Client !== undefined
+      !!this.turnkeyIframePromise &&
+      !!this.auth0ClientPromise
     );
   }
 

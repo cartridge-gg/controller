@@ -1,13 +1,15 @@
-import { PropsWithChildren, useState } from "react";
+import { useAccount } from "@/hooks/account";
+import { useConnection } from "@/hooks/connection";
+import { OpenQrCodeEvent } from "@/wallets/wallet-connect";
 import {
   AchievementPlayerAvatar,
   Dialog,
   DialogContent,
   UIProvider as Provider,
 } from "@cartridge/ui";
-import { useConnection } from "@/hooks/connection";
-import { useAccount } from "@/hooks/account";
 import { QRCodeSVG } from "qrcode.react";
+import { PropsWithChildren, useEffect, useState } from "react";
+import { QRCodeOverlay } from "../connect/create/wallet-connect/qr-code-overlay";
 
 function QrCodeDisplay({
   showQrCode,
@@ -61,6 +63,30 @@ export function UIProvider({ children }: PropsWithChildren) {
   const { controller, closeModal, openSettings, logout } = useConnection();
   const account = useAccount();
   const [showQrCode, setShowQrCode] = useState(false);
+  const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
+
+  useEffect(() => {
+    window.addEventListener(
+      "open-qr-code",
+      (event: CustomEventInit<OpenQrCodeEvent>) => {
+        const openQrCodeEvent = event.detail;
+        if (openQrCodeEvent?.uri) {
+          setOverlay(
+            <QRCodeOverlay
+              uri={openQrCodeEvent?.uri}
+              onCancel={() => setOverlay(null)}
+            />,
+          );
+        }
+      },
+    );
+  }, [setOverlay]);
+
+  useEffect(() => {
+    window.addEventListener("close-qr-code", () => {
+      setOverlay(null);
+    });
+  }, [setOverlay]);
 
   return (
     <Provider
@@ -87,6 +113,7 @@ export function UIProvider({ children }: PropsWithChildren) {
           setShowQrCode={setShowQrCode}
         />
       ) : null}
+      {overlay}
     </Provider>
   );
 }

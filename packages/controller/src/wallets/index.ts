@@ -4,4 +4,3 @@ export * from "./metamask";
 export * from "./phantom";
 export * from "./rabby";
 export * from "./types";
-export * from "./wallet-connect";
