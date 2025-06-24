@@ -1,6 +1,6 @@
 {
 	"name": "@cartridge/controller-example-svelte",
-	"version": "0.7.14-alpha.3",
+	"version": "0.2.0",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
