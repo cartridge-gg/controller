@@ -38,7 +38,7 @@ export default class ControllerProvider extends BaseProvider {
     return !!this.keychain;
   }
 
-  constructor(options: ControllerOptions) {
+  constructor(options: ControllerOptions = {}) {
     super();
 
     // Default Cartridge chains that are always available

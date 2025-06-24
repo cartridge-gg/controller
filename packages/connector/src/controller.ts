@@ -4,7 +4,7 @@ import { Connector, InjectedConnector } from "@starknet-react/core";
 export default class ControllerConnector extends InjectedConnector {
   public controller: ControllerProvider;
 
-  constructor(options: ControllerOptions) {
+  constructor(options: ControllerOptions = {}) {
     const controller = new ControllerProvider(options);
 
     super({
