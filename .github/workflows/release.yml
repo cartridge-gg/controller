@@ -54,8 +54,11 @@ jobs:
           if [ -f "CHANGELOG.md" ]; then
             # Extract the changelog section for this version
             # Find the start of this version's section and the start of the next version
+            echo "Looking for version: $VERSION"
             START_LINE=$(grep -n "## \[$VERSION\]" CHANGELOG.md | cut -d: -f1 | head -1)
+            
             if [ -n "$START_LINE" ]; then
+              echo "Found version at line: $START_LINE"
               # Find the next version section or end of file
               NEXT_LINE=$(tail -n +$((START_LINE + 1)) CHANGELOG.md | grep -n "^## \[" | head -1 | cut -d: -f1)
               if [ -n "$NEXT_LINE" ]; then
@@ -66,13 +69,17 @@ jobs:
                 tail -n +$START_LINE CHANGELOG.md > version-changelog.md
               fi
               
-              echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+              # Use a unique delimiter that won't appear in changelog content
+              delimiter="END_OF_RELEASE_NOTES_$(date +%s)"
+              echo "RELEASE_NOTES<<$delimiter" >> $GITHUB_OUTPUT
               cat version-changelog.md >> $GITHUB_OUTPUT
-              echo "EOF" >> $GITHUB_OUTPUT
+              echo "$delimiter" >> $GITHUB_OUTPUT
             else
+              echo "Version $VERSION not found in CHANGELOG.md"
               echo "RELEASE_NOTES=## Release v$VERSION" >> $GITHUB_OUTPUT
             fi
           else
+            echo "CHANGELOG.md not found"
             echo "RELEASE_NOTES=## Release v$VERSION" >> $GITHUB_OUTPUT
           fi
 
