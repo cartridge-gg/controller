@@ -1,0 +1,142 @@
+name: changelog-generation
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+
+jobs:
+  generate-changelog:
+    # Only run for release preparation PRs
+    if: |
+      github.event.pull_request.head.ref == 'prepare-release' ||
+      github.event.pull_request.head.ref == 'prepare-prerelease'
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CREATE_PR_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          echo "VERSION=$(jq -r '.version' packages/controller/package.json)" >> $GITHUB_OUTPUT
+
+      - name: Get latest release tag
+        id: latest_release
+        run: |
+          LATEST_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' || echo "")
+          echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get commit range for changelog
+        id: commit_range
+        run: |
+          PREVIOUS_TAG="${{ steps.latest_release.outputs.LATEST_TAG }}"
+          if [ -z "$PREVIOUS_TAG" ]; then
+            PREVIOUS_TAG=$(git log --oneline -n 50 | tail -1 | cut -d' ' -f1)
+          fi
+          echo "RANGE=${PREVIOUS_TAG}..HEAD" >> $GITHUB_OUTPUT
+
+      - name: Generate Changelog with Claude
+        id: changelog
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          direct_prompt: |
+            Generate a changelog entry for version ${{ steps.get_version.outputs.VERSION }} of the Cartridge Controller SDK.
+
+            This is a monorepo containing:
+            - @cartridge/controller - Main SDK implementing Starknet account interfaces  
+            - @cartridge/connector - Lightweight connector interface for Starknet React applications
+
+            Analyze the git commit range: ${{ steps.commit_range.outputs.RANGE }}
+
+            Create a changelog entry in this format and save it to a file called new-changelog-entry.md:
+
+            ## [${{ steps.get_version.outputs.VERSION }}] - $(date +%Y-%m-%d)
+
+            ### ✨ New Features
+            - [List new features with brief descriptions]
+
+            ### 🚀 Improvements  
+            - [List improvements and enhancements]
+
+            ### 🐛 Bug Fixes
+            - [List bug fixes]
+
+            ### ⚠️ Breaking Changes
+            - [List any breaking changes with migration guidance]
+
+            ### 📦 Dependencies
+            - [List significant dependency updates]
+
+            Focus on user-facing changes and be professional. Group changes by package (@cartridge/controller vs @cartridge/connector) when relevant.
+
+          allowed_tools: "Read,Write,Bash"
+
+      - name: Check if CHANGELOG.md exists
+        id: check_changelog
+        run: |
+          if [ -f "CHANGELOG.md" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create or update CHANGELOG.md
+        run: |
+          if [ "${{ steps.check_changelog.outputs.exists }}" == "true" ]; then
+            # Insert new entry after the header
+            if [ -f "new-changelog-entry.md" ]; then
+              # Create temp file with header, new entry, and existing content
+              echo "# Changelog" > temp-changelog.md
+              echo "" >> temp-changelog.md
+              cat new-changelog-entry.md >> temp-changelog.md
+              echo "" >> temp-changelog.md
+              # Skip the header line and add existing content
+              tail -n +3 CHANGELOG.md >> temp-changelog.md
+              mv temp-changelog.md CHANGELOG.md
+            fi
+          else
+            # Create new CHANGELOG.md
+            echo "# Changelog" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            if [ -f "new-changelog-entry.md" ]; then
+              cat new-changelog-entry.md >> CHANGELOG.md
+            fi
+          fi
+
+      - name: Commit changelog changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Generate changelog for v${{ steps.get_version.outputs.VERSION }}"
+            git push
+          fi
+
+      - name: Clean up temporary files
+        run: |
+          rm -f new-changelog-entry.md
