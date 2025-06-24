@@ -107,13 +107,37 @@ jobs:
           if [ "${{ steps.check_changelog.outputs.exists }}" == "true" ]; then
             # Insert new entry after the header
             if [ -f "new-changelog-entry.md" ]; then
-              # Create temp file with header, new entry, and existing content
-              echo "# Changelog" > temp-changelog.md
-              echo "" >> temp-changelog.md
-              cat new-changelog-entry.md >> temp-changelog.md
-              echo "" >> temp-changelog.md
-              # Skip the header line and add existing content
-              tail -n +3 CHANGELOG.md >> temp-changelog.md
+              # Create a temporary file
+              touch temp-changelog.md
+              
+              # Process the file line by line
+              header_found=false
+              first_version_found=false
+              
+              while IFS= read -r line; do
+                if [[ "$line" =~ ^#[[:space:]]Changelog ]]; then
+                  # Found the header
+                  echo "$line" >> temp-changelog.md
+                  echo "" >> temp-changelog.md
+                  header_found=true
+                elif [[ "$header_found" == "true" && "$first_version_found" == "false" && "$line" =~ ^##[[:space:]]\[ ]]; then
+                  # Found the first version entry, insert new content before it
+                  cat new-changelog-entry.md >> temp-changelog.md
+                  echo "" >> temp-changelog.md
+                  echo "$line" >> temp-changelog.md
+                  first_version_found=true
+                else
+                  # Copy all other lines as-is
+                  echo "$line" >> temp-changelog.md
+                fi
+              done < CHANGELOG.md
+              
+              # If no version entries were found (empty changelog), append the new entry
+              if [[ "$first_version_found" == "false" && "$header_found" == "true" ]]; then
+                cat new-changelog-entry.md >> temp-changelog.md
+              fi
+              
+              # Replace the original file
               mv temp-changelog.md CHANGELOG.md
             fi
           else
