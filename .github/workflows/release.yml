@@ -69,23 +69,29 @@ jobs:
                 tail -n +$START_LINE CHANGELOG.md > version-changelog.md
               fi
               
-              # Use a unique delimiter that won't appear in changelog content
-              delimiter="END_OF_RELEASE_NOTES_$(date +%s)"
-              echo "RELEASE_NOTES<<$delimiter" >> $GITHUB_OUTPUT
-              cat version-changelog.md >> $GITHUB_OUTPUT
-              echo "$delimiter" >> $GITHUB_OUTPUT
+              # Debug: Show content length
+              echo "Changelog content size: $(wc -c < version-changelog.md) bytes"
+              
+              # Save the changelog file path for use in the next step
+              echo "CHANGELOG_FILE=version-changelog.md" >> $GITHUB_OUTPUT
             else
               echo "Version $VERSION not found in CHANGELOG.md"
-              echo "RELEASE_NOTES=## Release v$VERSION" >> $GITHUB_OUTPUT
+              echo "## Release v$VERSION" > version-changelog.md
+              echo "CHANGELOG_FILE=version-changelog.md" >> $GITHUB_OUTPUT
             fi
           else
             echo "CHANGELOG.md not found"
-            echo "RELEASE_NOTES=## Release v$VERSION" >> $GITHUB_OUTPUT
+            echo "## Release v$VERSION" > version-changelog.md
+            echo "CHANGELOG_FILE=version-changelog.md" >> $GITHUB_OUTPUT
           fi
 
       - name: Finalize GitHub Release
         if: success()
         run: |
-          gh release edit v${{ steps.get_version.outputs.VERSION }} --notes "${{ steps.get_changelog.outputs.RELEASE_NOTES }}" --draft=false
+          if [ -f "${{ steps.get_changelog.outputs.CHANGELOG_FILE }}" ]; then
+            gh release edit v${{ steps.get_version.outputs.VERSION }} --notes-file "${{ steps.get_changelog.outputs.CHANGELOG_FILE }}" --draft=false
+          else
+            gh release edit v${{ steps.get_version.outputs.VERSION }} --notes "## Release v${{ steps.get_version.outputs.VERSION }}" --draft=false
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
