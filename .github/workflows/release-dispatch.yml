@@ -62,77 +62,6 @@ jobs:
           base: main
           delete-branch: true
 
-      - name: Get latest release tag
-        id: latest_release
-        run: |
-          LATEST_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' || echo "")
-          echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get commit range for release notes
-        id: commit_range
-        run: |
-          PREVIOUS_TAG="${{ steps.latest_release.outputs.LATEST_TAG }}"
-          if [ -z "$PREVIOUS_TAG" ]; then
-            PREVIOUS_TAG=$(git log --oneline -n 50 | tail -1 | cut -d' ' -f1)
-          fi
-          echo "RANGE=${PREVIOUS_TAG}..HEAD" >> $GITHUB_OUTPUT
-
-      - name: Generate Release Notes with Claude
-        id: release_notes
-        uses: anthropics/claude-code-action@beta
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_instructions: |
-            Generate professional release notes for version ${{ github.event.inputs.version }} of the Cartridge Controller SDK.
-
-            This is a monorepo containing:
-            - @cartridge/controller - Main SDK implementing Starknet account interfaces  
-            - @cartridge/connector - Lightweight connector interface for Starknet React applications
-
-            Analyze the git commit range: ${{ steps.commit_range.outputs.RANGE }}
-
-            Create release notes in this format:
-
-            ## What's New
-            [Key features and improvements - focus on user-facing changes]
-
-            ## Changes
-            ### @cartridge/controller
-            - [List changes to controller package]
-
-            ### @cartridge/connector
-            - [List changes to connector package]
-
-            ## Bug Fixes
-            - [List bug fixes]
-
-            ## Breaking Changes
-            ⚠️ [List any breaking changes with migration guidance]
-
-            ## Installation
-            ```bash
-            npm install @cartridge/controller@${{ github.event.inputs.version }}
-            npm install @cartridge/connector@${{ github.event.inputs.version }}
-            ```
-
-            Focus on user-facing changes and be professional. Save the result to release-notes.md and output the content.
-
-      - name: Read generated release notes
-        id: get_notes
-        run: |
-          if [ -f "release-notes.md" ]; then
-            echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
-            cat release-notes.md >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "RELEASE_NOTES=## Release v${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Create Draft Release
         uses: actions/create-release@v1
         env:
@@ -140,6 +69,9 @@ jobs:
         with:
           tag_name: v${{ github.event.inputs.version }}
           release_name: Release v${{ github.event.inputs.version }}
-          body: ${{ steps.get_notes.outputs.RELEASE_NOTES }}
+          body: |
+            ## Release v${{ github.event.inputs.version }}
+
+            Release notes will be generated automatically when the release PR is merged.
           draft: true
           prerelease: ${{ github.event.inputs.tag == 'prerelease' }}
