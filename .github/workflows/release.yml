@@ -47,80 +47,38 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Get latest release tag
-        id: latest_release
+      - name: Extract changelog for version
+        id: get_changelog
         run: |
-          LATEST_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' || echo "")
-          echo "LATEST_TAG=${LATEST_TAG}" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get commit range for release notes
-        id: commit_range
-        run: |
-          PREVIOUS_TAG="${{ steps.latest_release.outputs.LATEST_TAG }}"
-          if [ -z "$PREVIOUS_TAG" ]; then
-            PREVIOUS_TAG=$(git log --oneline -n 50 | tail -1 | cut -d' ' -f1)
-          fi
-          echo "RANGE=${PREVIOUS_TAG}..HEAD" >> $GITHUB_OUTPUT
-
-      - name: Generate Release Notes with Claude
-        id: release_notes
-        uses: anthropics/claude-code-action@beta
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_instructions: |
-            Generate professional release notes for version ${{ steps.get_version.outputs.VERSION }} of the Cartridge Controller SDK.
-
-            This is a monorepo containing:
-            - @cartridge/controller - Main SDK implementing Starknet account interfaces  
-            - @cartridge/connector - Lightweight connector interface for Starknet React applications
-
-            Analyze the git commit range: ${{ steps.commit_range.outputs.RANGE }}
-
-            Create release notes in this format:
-
-            ## What's New
-            [Key features and improvements - focus on user-facing changes]
-
-            ## Changes
-            ### @cartridge/controller
-            - [List changes to controller package]
-
-            ### @cartridge/connector
-            - [List changes to connector package]
-
-            ## Bug Fixes
-            - [List bug fixes]
-
-            ## Breaking Changes
-            ⚠️ [List any breaking changes with migration guidance]
-
-            ## Installation
-            ```bash
-            npm install @cartridge/controller@${{ steps.get_version.outputs.VERSION }}
-            npm install @cartridge/connector@${{ steps.get_version.outputs.VERSION }}
-            ```
-
-            Focus on user-facing changes and be professional. Save the result to release-notes.md and output the content.
-
-      - name: Read generated release notes
-        id: get_notes
-        run: |
-          if [ -f "release-notes.md" ]; then
-            echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
-            cat release-notes.md >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          if [ -f "CHANGELOG.md" ]; then
+            # Extract the changelog section for this version
+            # Find the start of this version's section and the start of the next version
+            START_LINE=$(grep -n "## \[$VERSION\]" CHANGELOG.md | cut -d: -f1 | head -1)
+            if [ -n "$START_LINE" ]; then
+              # Find the next version section or end of file
+              NEXT_LINE=$(tail -n +$((START_LINE + 1)) CHANGELOG.md | grep -n "^## \[" | head -1 | cut -d: -f1)
+              if [ -n "$NEXT_LINE" ]; then
+                END_LINE=$((START_LINE + NEXT_LINE - 1))
+                sed -n "${START_LINE},${END_LINE}p" CHANGELOG.md | head -n -1 > version-changelog.md
+              else
+                # No next version, take to end of file
+                tail -n +$START_LINE CHANGELOG.md > version-changelog.md
+              fi
+              
+              echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+              cat version-changelog.md >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "RELEASE_NOTES=## Release v$VERSION" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "RELEASE_NOTES=## Release v${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_OUTPUT
+            echo "RELEASE_NOTES=## Release v$VERSION" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update GitHub Release with Notes
+      - name: Finalize GitHub Release
         if: success()
         run: |
-          gh release edit v${{ steps.get_version.outputs.VERSION }} --notes "${{ steps.get_notes.outputs.RELEASE_NOTES }}" --draft=false
+          gh release edit v${{ steps.get_version.outputs.VERSION }} --notes "${{ steps.get_changelog.outputs.RELEASE_NOTES }}" --draft=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
