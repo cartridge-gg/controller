@@ -61,3 +61,17 @@ jobs:
           branch: "prepare-prerelease"
           base: main
           delete-branch: true
+
+      - name: Create Draft Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: Release v${{ github.event.inputs.version }}
+          body: |
+            ## Release v${{ github.event.inputs.version }}
+
+            Release notes will be generated automatically when the release PR is merged.
+          draft: true
+          prerelease: ${{ github.event.inputs.tag == 'prerelease' }}

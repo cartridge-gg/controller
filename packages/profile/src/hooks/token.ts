@@ -175,7 +175,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   const credits: Token = useMemo(() => {
     return {
       balance: {
-        amount: Number(creditBalance.balance.value),
+        amount: Number(creditBalance.balance.value) / 10 ** 6,
         value: 0,
         change: 0,
       },

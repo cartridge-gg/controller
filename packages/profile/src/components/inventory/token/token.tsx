@@ -73,7 +73,7 @@ function Credits() {
             size="lg"
             rounded
           />
-          <p className="text-foreground-100 text-lg/6 font-semibold">{`${credit.balance.value} CREDITS`}</p>
+          <p className="text-foreground-100 text-lg/6 font-semibold">{`${Number(credit.balance.value) / 10 ** 6} CREDITS`}</p>
         </div>
 
         <div className="flex gap-1 bg-background-125 border border-background-200 px-3 py-2.5 rounded text-foreground-300">

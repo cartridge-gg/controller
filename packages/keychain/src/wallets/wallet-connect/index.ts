@@ -1,23 +1,58 @@
-import Provider from "@walletconnect/ethereum-provider";
 import {
   ExternalPlatform,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
   WalletAdapter,
-} from "../types";
+} from "@cartridge/controller";
+import {
+  EthereumProvider,
+  default as Provider,
+} from "@walletconnect/ethereum-provider";
+import { getAddress } from "ethers";
 
-// TODO(tedison): move wallet to inside the keychain
+export type OpenQrCodeEvent = {
+  uri: string;
+};
+
+const REOWN_PROJECT_ID = "9e74c94c62b9f42303d951e0b8375c14";
 export class WalletConnectWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "walletconnect" as ExternalWalletType;
   readonly platform: ExternalPlatform = "ethereum";
   private account: string | undefined = undefined;
+  private providerPromise: Promise<Provider> | undefined = undefined;
 
-  constructor(
-    private provider: Provider,
-    address?: string,
-  ) {
-    this.account = address?.toLowerCase();
+  constructor() {
+    this.providerPromise = EthereumProvider.init({
+      projectId: REOWN_PROJECT_ID,
+      metadata: {
+        name: "Cartridge",
+        description: "Cartridge Controller, a wallet designed for gamers",
+        url: "https://cartridge.gg",
+        icons: ["https://avatars.githubusercontent.com/u/101216134?s=200&v=4"],
+      },
+      showQrModal: false,
+      chains: [1],
+      optionalChains: [1],
+      optionalMethods: ["eth_requestAccounts", "personal_sign"],
+      methods: [],
+    }).then((provider) => {
+      provider.disconnect();
+
+      provider.on("display_uri", (uri: string) => {
+        window.dispatchEvent(
+          new CustomEvent("open-qr-code", { detail: { uri } }),
+        );
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      provider.on("connect", (_: { chainId: string }) => {
+        window.dispatchEvent(new CustomEvent("close-qr-code"));
+      });
+      provider.on("disconnect", () => {
+        window.dispatchEvent(new CustomEvent("close-qr-code"));
+      });
+      return provider;
+    });
   }
 
   getConnectedAccounts(): string[] {
@@ -25,7 +60,7 @@ export class WalletConnectWallet implements WalletAdapter {
   }
 
   isAvailable(): boolean {
-    return typeof window !== "undefined" && !!this.provider;
+    return typeof window !== "undefined" && !!this.providerPromise;
   }
 
   getInfo(): ExternalWallet {
@@ -41,22 +76,26 @@ export class WalletConnectWallet implements WalletAdapter {
     };
   }
 
-  async connect(): Promise<ExternalWalletResponse<any>> {
-    if (this.account) {
-      return { success: true, wallet: this.type, account: this.account };
-    }
-
+  async connect(): Promise<ExternalWalletResponse<never>> {
     try {
       if (!this.isAvailable()) {
         throw new Error("WalletConnect is not available");
       }
 
-      const accounts = await this.provider.request<string[]>({
+      const provider = await this.getProvider(10_000);
+
+      await provider.disconnect();
+      await provider.connect().catch((error: Error) => {
+        throw new Error("Error connecting to WalletConnect: " + error.message);
+      });
+      const accounts = await provider.request<string[]>({
         method: "eth_requestAccounts",
       });
 
       if (accounts && accounts.length > 0) {
-        this.account = accounts[0];
+        console.log("accounts", accounts);
+        const address = getAddress(accounts[0]);
+        this.account = address;
         return { success: true, wallet: this.type, account: this.account };
       }
 
@@ -72,14 +111,16 @@ export class WalletConnectWallet implements WalletAdapter {
   }
 
   async signTransaction(
-    transaction: any,
-  ): Promise<ExternalWalletResponse<any>> {
+    transaction: string,
+  ): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("WalletConnect is not connected");
       }
 
-      const result = await this.provider.request({
+      const provider = await this.getProvider(10_000);
+
+      const result = await provider.request<string>({
         method: "eth_sendTransaction",
         params: [transaction],
       });
@@ -97,13 +138,15 @@ export class WalletConnectWallet implements WalletAdapter {
 
   async signMessage(
     message: `0x${string}`,
-  ): Promise<ExternalWalletResponse<any>> {
+  ): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("WalletConnect is not connected");
       }
 
-      const result = await this.provider.request({
+      const provider = await this.getProvider(10_000);
+
+      const result = await provider.request<string>({
         method: "personal_sign",
         params: [message, this.account!],
       });
@@ -119,15 +162,17 @@ export class WalletConnectWallet implements WalletAdapter {
     }
   }
 
-  async signTypedData(data: any): Promise<ExternalWalletResponse<any>> {
+  async signTypedData(data: string): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("WalletConnect is not connected");
       }
 
-      const result = await this.provider.request({
+      const provider = await this.getProvider(10_000);
+
+      const result = await provider.request<string>({
         method: "eth_signTypedData_v4",
-        params: [this.account, JSON.stringify(data)] as any,
+        params: [this.account, JSON.stringify(data)],
       });
 
       return { success: true, wallet: this.type, result };
@@ -141,12 +186,9 @@ export class WalletConnectWallet implements WalletAdapter {
     }
   }
 
-  async sendTransaction(_txn: any): Promise<ExternalWalletResponse<any>> {
-    return {
-      success: false,
-      wallet: this.type,
-      error: "Not implemented",
-    };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async sendTransaction(_txn: string): Promise<ExternalWalletResponse<string>> {
+    throw new Error("Not implemented");
   }
 
   async switchChain(chainId: string): Promise<boolean> {
@@ -156,13 +198,15 @@ export class WalletConnectWallet implements WalletAdapter {
       }
 
       try {
-        await this.provider.request({
+        const provider = await this.getProvider(10_000);
+
+        await provider.request<boolean>({
           method: "wallet_switchEthereumChain",
           params: [{ chainId }],
         });
         return true;
       } catch (error) {
-        if ((error as any).code === 4902) {
+        if ((error as { code: number }).code === 4902) {
           console.warn("Chain not added to WalletConnect");
         }
         throw error;
@@ -175,7 +219,7 @@ export class WalletConnectWallet implements WalletAdapter {
 
   async getBalance(
     tokenAddress?: string,
-  ): Promise<ExternalWalletResponse<any>> {
+  ): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("WalletConnect is not connected");
@@ -188,9 +232,11 @@ export class WalletConnectWallet implements WalletAdapter {
           error: "Not implemented for ERC20",
         };
       } else {
-        const balance = await this.provider.request({
+        const provider = await this.getProvider(10_000);
+
+        const balance = await provider.request<string>({
           method: "eth_getBalance",
-          params: [this.account, "latest"] as any,
+          params: [this.account, "latest"],
         });
         return { success: true, wallet: this.type, result: balance };
       }
@@ -202,5 +248,26 @@ export class WalletConnectWallet implements WalletAdapter {
         error: (error as Error).message || "Unknown error",
       };
     }
+  }
+
+  private async getProvider(timeoutMs: number): Promise<Provider> {
+    if (!this.providerPromise) {
+      throw new Error("Provider not initialized");
+    }
+    return this.getPromiseResult(this.providerPromise, timeoutMs);
+  }
+
+  private async getPromiseResult<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+  ): Promise<T> {
+    const timeoutId = setTimeout(() => {
+      throw new Error("Timeout waiting for promise");
+    }, timeoutMs);
+
+    const result = await promise;
+    clearTimeout(timeoutId);
+
+    return result;
   }
 }
