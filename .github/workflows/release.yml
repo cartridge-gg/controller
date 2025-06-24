@@ -46,3 +46,10 @@ jobs:
           pnpm release:prerelease
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Finalize GitHub Release
+        if: success()
+        run: |
+          gh release edit v${{ steps.get_version.outputs.VERSION }} --draft=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
