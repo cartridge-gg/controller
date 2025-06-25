@@ -20,7 +20,6 @@ import BaseProvider from "./provider";
 import { toArray } from "./utils";
 
 class ControllerAccount extends WalletAccount {
-  address: string;
   private keychain: AsyncMethodReturns<Keychain>;
   private modal: Modal;
   private options?: KeychainOptions;
@@ -33,9 +32,8 @@ class ControllerAccount extends WalletAccount {
     options: KeychainOptions,
     modal: Modal,
   ) {
-    super({ nodeUrl: rpcUrl }, provider);
+    super({ nodeUrl: rpcUrl }, provider, address);
 
-    this.address = address;
     this.keychain = keychain;
     this.options = options;
     this.modal = modal;
