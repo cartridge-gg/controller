@@ -51,8 +51,7 @@ export function CollectibleAsset() {
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
-      (edition) =>
-        edition.namespace === namespace && edition.config.project === project,
+      (edition) => edition.config.project === project,
     );
   }, [editions, project, namespace]);
 
@@ -108,7 +107,7 @@ export function CollectibleAsset() {
     const filteredData = data.slice(0, cap);
     return {
       events: filteredData,
-      dates: [...new Set(filteredData.map((event) => event.date))],
+      dates: [...new Set(filteredData.map((event) => event.timestamp))],
     };
   }, [data, cap]);
 
@@ -194,7 +193,9 @@ export function CollectibleAsset() {
                         username={props.username}
                         timestamp={props.timestamp}
                         category={props.category}
-                        collectibleImage={props.image}
+                        collectibleImage={
+                          asset.imageUrl || collectible.imageUrl || placeholder
+                        }
                         collectibleName={title || collectible.name}
                         currencyImage={props.currencyImage}
                         quantity={props.amount}

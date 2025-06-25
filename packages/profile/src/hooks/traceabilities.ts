@@ -4,9 +4,11 @@ import {
   useTraceabilitiesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useConnection } from "./context";
-import { formatAddress, getDate } from "@cartridge/ui/utils";
+import { formatAddress } from "@cartridge/ui/utils";
 import { useUsernames } from "./account";
-import { addAddressPadding, getChecksumAddress } from "starknet";
+import { getChecksumAddress } from "starknet";
+import { useMarketplace } from "./marketplace";
+import { erc20Metadata } from "@cartridge/presets";
 
 const LIMIT = 0;
 
@@ -16,12 +18,8 @@ export interface CardProps {
   transactionHash: string;
   amount: number;
   username: string;
-  image: string;
-  title: string;
   category: "send" | "receive" | "mint" | "sale" | "list";
   timestamp: number;
-  date: string;
-  points?: number;
   currencyImage?: string;
 }
 
@@ -55,6 +53,7 @@ export function useTraceabilities({
   contractAddress,
   tokenId,
 }: TraceabilitiesProps): UseTraceabilitiesResponse {
+  const { sales: salesData, listings: listingsData } = useMarketplace();
   const { project } = useConnection();
   const [traceabilities, setTraceabilities] = useState<{
     [key: string]: Traceability;
@@ -132,10 +131,71 @@ export function useTraceabilities({
 
   const { usernames } = useUsernames({ addresses });
 
+  const sales: CardProps[] = useMemo(() => {
+    if (!contractAddress || !tokenId) return [];
+    const collectionSales = salesData[getChecksumAddress(contractAddress)];
+    if (!collectionSales) return [];
+    const tokenSales = collectionSales[`${BigInt(tokenId).toString()}`];
+    if (!tokenSales) return [];
+    return Object.values(tokenSales).map((sale) => {
+      const username = usernames.find(
+        (username) => BigInt(username.address ?? "0x0") === BigInt(sale.from),
+      )?.username;
+      const token = erc20Metadata.find(
+        (metadata) =>
+          BigInt(metadata.l2_token_address) === BigInt(sale.order.currency),
+      );
+      const currencyImage = token?.logo_url;
+      const decimals = token?.decimals;
+      const amount = sale.order.price / 10 ** (decimals || 0);
+      return {
+        key: `${sale.order.id}`,
+        contractAddress: contractAddress,
+        transactionHash: contractAddress,
+        amount: amount,
+        username: username,
+        category: "sale",
+        timestamp: sale.time,
+        currencyImage: currencyImage,
+      } as CardProps;
+    });
+  }, [salesData, usernames, project, contractAddress, tokenId]);
+
+  const listings: CardProps[] = useMemo(() => {
+    if (!contractAddress || !tokenId) return [];
+    const collectionListings =
+      listingsData[getChecksumAddress(contractAddress)];
+    if (!collectionListings) return [];
+    const tokenListings = collectionListings[`${BigInt(tokenId).toString()}`];
+    if (!tokenListings) return [];
+    return Object.values(tokenListings).map((listing) => {
+      const username = usernames.find(
+        (username) =>
+          BigInt(username.address ?? "0x0") === BigInt(listing.order.owner),
+      )?.username;
+      const token = erc20Metadata.find(
+        (metadata) =>
+          BigInt(metadata.l2_token_address) === BigInt(listing.order.currency),
+      );
+      const currencyImage = token?.logo_url;
+      const decimals = token?.decimals;
+      const amount = listing.order.price / 10 ** (decimals || 0);
+      return {
+        key: `${listing.order.id}`,
+        contractAddress: contractAddress,
+        transactionHash: contractAddress,
+        amount: amount,
+        username: username,
+        category: "list",
+        timestamp: listing.time,
+        currencyImage: currencyImage,
+      } as CardProps;
+    });
+  }, [salesData, usernames, project, contractAddress, tokenId]);
+
   const transfers: CardProps[][] = useMemo(() => {
     const results = Object.values(traceabilities).map((traceability) => {
-      const timestamp = new Date(traceability.executedAt).getTime();
-      const date = getDate(timestamp);
+      const timestamp = new Date(traceability.executedAt).getTime() / 1000;
       const from = `0x${BigInt(traceability.fromAddress).toString(16)}`;
       const fromName =
         usernames.find((username) => username.address === from)?.username ??
@@ -148,30 +208,21 @@ export function useTraceabilities({
         formatAddress(getChecksumAddress(to), {
           size: "xs",
         });
-      const image = `https://api.cartridge.gg/x/${traceability.project}/torii/static/0x${BigInt(traceability.contractAddress).toString(16)}/${addAddressPadding(traceability.tokenId)}/image`;
       const sender = {
         key: `${traceability.transactionHash}-${traceability.eventId}`,
         contractAddress: traceability.contractAddress,
         transactionHash: traceability.transactionHash,
-        amount: traceability.amount,
         username: fromName,
-        image: image,
         category: "send",
-        timestamp: timestamp / 1000,
-        date: date,
-        title: traceability.name,
+        timestamp: timestamp,
       } as CardProps;
       const receiver = {
         key: `${traceability.transactionHash}-${traceability.eventId}`,
         contractAddress: traceability.contractAddress,
         transactionHash: traceability.transactionHash,
-        amount: traceability.amount,
         username: toName,
-        image: image,
         category: BigInt(traceability.fromAddress) === 0n ? "mint" : "receive",
-        timestamp: timestamp / 1000,
-        date: date,
-        title: traceability.name,
+        timestamp: timestamp,
       } as CardProps;
       if (BigInt(traceability.fromAddress) === 0n) {
         return [receiver];
@@ -181,5 +232,10 @@ export function useTraceabilities({
     return results;
   }, [traceabilities, usernames]);
 
-  return { traceabilities: transfers.flat(), status };
+  return {
+    traceabilities: [...transfers.flat(), ...sales, ...listings].sort(
+      (a, b) => b.timestamp - a.timestamp,
+    ),
+    status,
+  };
 }

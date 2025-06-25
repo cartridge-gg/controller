@@ -31,8 +31,7 @@ export function Collectible() {
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
-      (edition) =>
-        edition.namespace === namespace && edition.config.project === project,
+      (edition) => edition.config.project === project,
     );
   }, [editions, project, namespace]);
 

@@ -13,6 +13,7 @@ import {
   Collectible,
   CollectionAsset,
   CollectibleAsset,
+  CollectionListing,
   SendCollection,
   SendCollectible,
   SendToken,
@@ -24,6 +25,7 @@ import { Slot } from "#components/slot";
 import { useMemo } from "react";
 import { Socials } from "./socials";
 import { Leaderboard } from "./leaderboard";
+import { CollectionPurchase } from "./inventory/collection/collection-purchase";
 
 export function App() {
   const [searchParams] = useSearchParams();
@@ -54,12 +56,17 @@ export function App() {
               <Route path="collection/:address" element={<Collection />}>
                 <Route path="token/:tokenId" element={<CollectionAsset />}>
                   <Route path="send" element={<SendCollection />} />
+                  <Route path="list" element={<CollectionListing />} />
+                  <Route path="purchase" element={<CollectionPurchase />} />
                 </Route>
                 <Route path="send" element={<SendCollection />} />
+                <Route path="list" element={<CollectionListing />} />
+                <Route path="purchase" element={<CollectionPurchase />} />
               </Route>
               <Route path="collectible/:address" element={<Collectible />}>
                 <Route path="token/:tokenId" element={<CollectibleAsset />}>
                   <Route path="send" element={<SendCollectible />} />
+                  {/* <Route path="list" element={<ListCollectible />} /> */}
                 </Route>
               </Route>
             </Route>

@@ -6,6 +6,8 @@ import { Button } from "@cartridge/ui";
 import { STRK_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
 import { useEffect, useState } from "react";
 
+const ORDERS: number[] = [];
+
 export function Profile() {
   const { account, connector } = useAccount();
   const [username, setUsername] = useState<string | null>(null);
@@ -179,6 +181,15 @@ export function Profile() {
             }
           >
             Open at Pistols Collection
+          </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                `account/${username}/slot/pistols-mainnet/inventory/collection/0x7aaa9866750a0db82a54ba8674c38620fa2f967d2fbb31133def48e0527c87f/purchase?&orders=${ORDERS.join(",")}`,
+              )
+            }
+          >
+            Open at Pistols Collection Purchase Orders
           </Button>
         </div>
       </div>
