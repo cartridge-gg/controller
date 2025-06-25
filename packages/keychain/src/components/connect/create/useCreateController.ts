@@ -16,7 +16,6 @@ import {
   SignerInput,
   SignerType,
   useAccountQuery,
-  useRegisterMutation,
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo, useState } from "react";
@@ -63,7 +62,6 @@ export function useCreateController({
     setController,
     configSignupOptions,
   } = useConnection();
-  const { mutateAsync: register } = useRegisterMutation();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -247,12 +245,12 @@ export function useCreateController({
         false,
       );
 
-      const registerRet = await register({
+      const registerRet = await controller.register({
         username,
         chainId: shortString.decodeShortString(chainId),
         owner: signer,
         session: {
-          expiresAt: result.session.expiresAt.toString(),
+          expiresAt: result.session.expiresAt,
           guardianKeyGuid: result.session.guardianKeyGuid,
           metadataHash: result.session.metadataHash,
           sessionKeyGuid: result.session.sessionKeyGuid,
