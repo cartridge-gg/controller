@@ -156,6 +156,9 @@ export interface Keychain {
     type: ExternalWalletType,
     address?: string,
   ): Promise<ExternalWalletResponse>;
+  externalDisconnectWallet(
+    type: ExternalWalletType,
+  ): Promise<ExternalWalletResponse>;
   externalSignMessage(
     type: ExternalWalletType,
     message: string,

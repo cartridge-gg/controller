@@ -41,6 +41,9 @@ export class WalletBridge {
       externalConnectWallet:
         (_origin: string) => (type: ExternalWalletType, address?: string) =>
           this.connectWallet(type, address),
+      externalDisconnectWallet:
+        (_origin: string) => (type: ExternalWalletType) =>
+          this.disconnectWallet(type),
       externalSignMessage:
         (_origin: string) =>
         (identifier: ExternalWalletType | string, message: string) =>
@@ -126,6 +129,17 @@ export class WalletBridge {
       return response;
     } catch (error) {
       return this.handleError(type, error, "connecting to");
+    }
+  }
+
+  async disconnectWallet(
+    type: ExternalWalletType,
+  ): Promise<ExternalWalletResponse> {
+    try {
+      const wallet = this.getWalletAdapterByType(type);
+      return await wallet.disconnect();
+    } catch (error) {
+      return this.handleError(type, error, "disconnecting from");
     }
   }
 

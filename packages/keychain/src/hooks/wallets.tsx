@@ -28,6 +28,9 @@ interface WalletsContextValue {
     type: ExternalWalletType,
     address?: string,
   ) => Promise<ExternalWalletResponse | null>;
+  disconnectWallet: (
+    type: ExternalWalletType,
+  ) => Promise<ExternalWalletResponse | null>;
 }
 
 declare global {
@@ -154,6 +157,19 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
     [parent],
   );
 
+  const disconnectWallet = useCallback(
+    async (
+      type: ExternalWalletType,
+    ): Promise<ExternalWalletResponse | null> => {
+      if (!parent) {
+        setError(new Error("Connection not ready."));
+        return null;
+      }
+      return await parent.externalDisconnectWallet(type);
+    },
+    [parent],
+  );
+
   const value = useMemo(
     () => ({
       wallets,
@@ -162,8 +178,9 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       error,
       detectWallets,
       connectWallet,
+      disconnectWallet,
     }),
-    [wallets, isLoading, isConnecting, error, detectWallets, connectWallet],
+    [wallets, isLoading, isConnecting, error, detectWallets, connectWallet, disconnectWallet],
   );
 
   return (

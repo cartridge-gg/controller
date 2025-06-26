@@ -110,6 +110,11 @@ export class WalletConnectWallet implements WalletAdapter {
     }
   }
 
+  async disconnect(): Promise<ExternalWalletResponse<never>> {
+    this.account = undefined;
+    return { success: true, wallet: this.type };
+  }
+
   async signTransaction(
     transaction: string,
   ): Promise<ExternalWalletResponse<string>> {

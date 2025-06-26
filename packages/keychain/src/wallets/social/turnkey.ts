@@ -166,6 +166,12 @@ export class TurnkeyWallet {
     }
   }
 
+  async disconnect(): Promise<ExternalWalletResponse<never>> {
+    this.account = undefined;
+    this.subOrganizationId = undefined;
+    return { success: true, wallet: this.type };
+  }
+
   getConnectedAccounts(): string[] {
     return this.account ? [this.account] : [];
   }

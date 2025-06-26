@@ -46,6 +46,9 @@ export type ParentMethods = AsyncMethodReturns<{
     type: ExternalWalletType,
     address?: string,
   ) => Promise<ExternalWalletResponse>;
+  externalDisconnectWallet: (
+    type: ExternalWalletType,
+  ) => Promise<ExternalWalletResponse>;
   externalSignTypedData: (
     identifier: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -398,6 +401,8 @@ export function useConnectionValue() {
           iframeMethods.externalDetectWallets(currentOrigin),
         externalConnectWallet:
           iframeMethods.externalConnectWallet(currentOrigin),
+        externalDisconnectWallet:
+          iframeMethods.externalDisconnectWallet(currentOrigin),
         externalSignMessage: iframeMethods.externalSignMessage(currentOrigin),
         externalSignTypedData:
           iframeMethods.externalSignTypedData(currentOrigin),
