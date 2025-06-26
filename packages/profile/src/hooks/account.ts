@@ -205,10 +205,21 @@ export function useAccount({
   const addressParam = searchParams.get("address");
   const { data: addressData } = useAccountNameQuery(
     { address: addressParam || "" },
-    { enabled: !!addressParam && overridable },
+    {
+      enabled:
+        !!addressParam &&
+        addressParam.startsWith("0x") &&
+        !!addressParam.replace("0x", "").match(/^[0-9a-fA-F]+$/) &&
+        overridable,
+    },
   );
   const usernameParam = useMemo(() => {
-    if (!addressParam) return;
+    if (
+      !addressParam ||
+      !addressParam.startsWith("0x") ||
+      !addressParam.replace("0x", "").match(/^[0-9a-fA-F]+$/)
+    )
+      return;
     const username = addressData?.accounts?.edges?.[0]?.node?.username;
     if (!username) return `0x${BigInt(addressParam).toString(16)}`.slice(0, 9);
     return username;

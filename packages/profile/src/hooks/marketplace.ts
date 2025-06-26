@@ -51,14 +51,14 @@ export const useMarketplace = () => {
       if (!collectionOrders) return {};
       return Object.entries(collectionOrders).reduce(
         (acc, [token, orders]) => {
-          const filetered = Object.values(orders).filter(
+          const filtered = Object.values(orders).filter(
             (order) =>
               !!order &&
               order.status.value === StatusType.Placed &&
               BigInt(order.owner) === BigInt(address),
           );
-          if (filetered.length === 0) return acc;
-          acc[token] = filetered;
+          if (filtered.length === 0) return acc;
+          acc[token] = filtered;
           return acc;
         },
         {} as { [token: string]: OrderModel[] },
