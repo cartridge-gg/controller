@@ -58,7 +58,7 @@ export function SendCollection() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collection, assets, status } = useCollection({
+  const { collection, assets, status, refetch } = useCollection({
     contractAddress: contractAddress,
     tokenIds,
   });
@@ -124,6 +124,9 @@ export function SendCollection() {
           ],
         });
       }
+      if (res) {
+        refetch();
+      }
       if (closable) {
         navigate(`../..?${searchParams.toString()}`);
       } else {
@@ -142,6 +145,7 @@ export function SendCollection() {
       closable,
       navigate,
       searchParams,
+      refetch,
     ],
   );
 

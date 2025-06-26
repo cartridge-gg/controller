@@ -235,8 +235,9 @@ export function CollectionAsset() {
   useEffect(() => {
     if (!order) return;
     setAmount(Number(order.price));
+    const params = Object.fromEntries(searchParams.entries());
     setSearchParams({
-      ...searchParams,
+      ...params,
       orders: order.id.toString(),
     });
   }, [order, searchParams, setAmount, setSearchParams]);

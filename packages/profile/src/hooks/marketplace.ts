@@ -29,7 +29,7 @@ export const useMarketplace = () => {
     );
   }
 
-  const { address } = useAccount();
+  const { address } = useAccount({ overridable: true });
   const { address: contractAddress, tokenId } = useParams();
   const { provider: starknet } = useConnection();
   const {
@@ -51,16 +51,20 @@ export const useMarketplace = () => {
       if (!collectionOrders) return {};
       return Object.entries(collectionOrders).reduce(
         (acc, [token, orders]) => {
-          if (Object.values(orders).length === 0) return acc;
-          acc[token] = Object.values(orders).filter(
-            (order) => !!order && order.status.value === StatusType.Placed,
+          const filetered = Object.values(orders).filter(
+            (order) =>
+              !!order &&
+              order.status.value === StatusType.Placed &&
+              BigInt(order.owner) === BigInt(address),
           );
+          if (filetered.length === 0) return acc;
+          acc[token] = filetered;
           return acc;
         },
         {} as { [token: string]: OrderModel[] },
       );
     },
-    [orders],
+    [orders, address],
   );
 
   const collectionOrders: { [token: string]: OrderModel[] } = useMemo(() => {

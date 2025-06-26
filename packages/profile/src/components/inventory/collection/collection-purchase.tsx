@@ -77,6 +77,7 @@ export function CollectionPurchase() {
     collection,
     assets,
     status: collectionStatus,
+    refetch,
   } = useCollection({
     contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
@@ -212,6 +213,7 @@ export function CollectionPurchase() {
       }
       if (res) {
         toast.success(`Asset purchased successfully`);
+        refetch();
       }
       // Removing the order optimistically
       tokenOrders.forEach((order) => {
@@ -237,6 +239,7 @@ export function CollectionPurchase() {
     removeOrder,
     navigate,
     searchParams,
+    refetch,
   ]);
 
   const status = useMemo(() => {
