@@ -43,10 +43,12 @@ const assets = [
 export const useCollections: Mock<() => UseCollectionsResponse> = fn(() => ({
   collections: Object.values(collections),
   status: "success" as const,
+  refetch: fn().mockName("refetch"),
 })).mockName("useCollections");
 
 export const useCollection: Mock<() => UseCollectionResponse> = fn(() => ({
   collection: collections.collection1,
   assets,
   status: "success" as const,
+  refetch: fn().mockName("refetch"),
 })).mockName("useCollection");

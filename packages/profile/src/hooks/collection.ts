@@ -29,6 +29,7 @@ export type UseCollectionResponse = {
   collection?: Collection;
   assets?: Asset[];
   status: "success" | "error" | "idle" | "loading";
+  refetch: () => void;
 };
 
 export function useCollection({
@@ -38,14 +39,14 @@ export function useCollection({
   contractAddress?: string;
   tokenIds?: string[];
 }): UseCollectionResponse {
-  const { address } = useAccount();
+  const { address } = useAccount({ overridable: true });
   const { project } = useConnection();
   const [collection, setCollection] = useState<Collection | undefined>(
     undefined,
   );
   const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
 
-  const { status } = useCollectionQuery(
+  const { status, refetch } = useCollectionQuery(
     {
       projects: [project ?? ""],
       accountAddress: address,
@@ -107,12 +108,13 @@ export function useCollection({
     return Object.values(assets).filter((a) => tokenIds.includes(a.tokenId));
   }, [assets, tokenIds]);
 
-  return { collection, assets: filteredAssets, status };
+  return { collection, assets: filteredAssets, status, refetch };
 }
 
 export type UseCollectionsResponse = {
   collections: Collection[];
   status: "success" | "error" | "idle" | "loading";
+  refetch: () => void;
 };
 
 export type CollectionType = {
@@ -134,7 +136,7 @@ export function useCollections(): UseCollectionsResponse {
     {},
   );
 
-  const { status } = useCollectionsQuery(
+  const { status, refetch } = useCollectionsQuery(
     {
       accountAddress: address,
       projects: [project ?? ""],
@@ -172,5 +174,6 @@ export function useCollections(): UseCollectionsResponse {
       a.name.localeCompare(b.name),
     ),
     status,
+    refetch,
   };
 }
