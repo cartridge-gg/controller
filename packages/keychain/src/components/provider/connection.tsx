@@ -10,6 +10,7 @@ import {
 } from "@cartridge/controller";
 import { ControllerTheme } from "@cartridge/ui";
 import { createContext } from "react";
+import { SemVer } from "semver";
 
 export const ConnectionContext = createContext<
   ConnectionContextValue | undefined
@@ -28,6 +29,7 @@ export type ConnectionContextValue = {
   verified: boolean;
   chainId?: string;
   setController: (controller?: Controller) => void;
+  controllerVersion: SemVer | undefined;
   setContext: (ctx: ConnectionCtx | undefined) => void;
   closeModal?: () => Promise<void>;
   openModal: () => Promise<void>;

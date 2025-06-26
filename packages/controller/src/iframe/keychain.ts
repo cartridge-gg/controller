@@ -3,12 +3,20 @@ import { Keychain, KeychainOptions } from "../types";
 import { WalletBridge } from "../wallets/bridge";
 import { IFrame, IFrameOptions } from "./base";
 
-type KeychainIframeOptions = IFrameOptions<Keychain> & KeychainOptions;
+type KeychainIframeOptions = IFrameOptions<Keychain> &
+  KeychainOptions & {
+    version?: string;
+  };
 
 export class KeychainIFrame extends IFrame<Keychain> {
   private walletBridge: WalletBridge;
 
-  constructor({ url, policies, ...iframeOptions }: KeychainIframeOptions) {
+  constructor({
+    url,
+    policies,
+    version,
+    ...iframeOptions
+  }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
     const walletBridge = new WalletBridge();
 
@@ -17,6 +25,10 @@ export class KeychainIFrame extends IFrame<Keychain> {
         "policies",
         encodeURIComponent(JSON.stringify(policies)),
       );
+    }
+
+    if (version) {
+      _url.searchParams.set("v", encodeURIComponent(version));
     }
 
     super({

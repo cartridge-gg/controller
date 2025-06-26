@@ -31,6 +31,7 @@ import { useThemeEffect } from "@cartridge/ui";
 import { isIframe, normalizeOrigin } from "@cartridge/ui/utils";
 import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { SemVer } from "semver";
 import { RpcProvider, shortString } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 
@@ -158,6 +159,7 @@ export function useConnectionValue() {
   >();
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
+  const [controllerVersion, setControllerVersion] = useState<SemVer>();
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -167,12 +169,13 @@ export function useConnectionValue() {
       : urlParams.get("preset");
     const rpcUrl = urlParams.get("rpc_url");
     const policies = urlParams.get("policies");
+    const version = urlParams.get("v");
 
     if (rpcUrl) {
       setRpcUrl(rpcUrl);
     }
 
-    return { theme, preset, policies };
+    return { theme, preset, policies, version };
   }, []);
 
   // Fetch chain ID from RPC provider when rpcUrl changes
@@ -321,6 +324,16 @@ export function useConnectionValue() {
       });
     }
   }, [urlParams, verified, configData, isConfigLoading]);
+
+  useEffect(() => {
+    if (urlParams.version) {
+      const validatedControllerVersion = new SemVer(
+        urlParams.version ?? "0.0.0",
+      );
+
+      setControllerVersion(validatedControllerVersion);
+    }
+  }, [urlParams.version]);
 
   // Handle policies configuration
   useEffect(() => {
@@ -527,6 +540,7 @@ export function useConnectionValue() {
     configSignupOptions,
     setController,
     setContext,
+    controllerVersion,
     closeModal: parent ? closeModal : undefined,
     openModal,
     logout,
