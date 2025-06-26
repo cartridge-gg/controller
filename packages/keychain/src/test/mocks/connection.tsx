@@ -6,6 +6,7 @@ import {
 } from "@/components/provider/connection";
 import { render, RenderResult } from "@testing-library/react";
 import { constants } from "starknet";
+import { SemVer } from "semver";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const defaultMockController: any = {
@@ -42,6 +43,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   externalSignTypedData: vi.fn(),
   externalSendTransaction: vi.fn(),
   externalGetBalance: vi.fn(),
+  controllerVersion: new SemVer("1.0.0"),
 };
 
 export function createMockConnection(
