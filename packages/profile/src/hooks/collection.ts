@@ -221,10 +221,8 @@ export function useToriiCollections(): UseToriiCollectionsResponse {
   }, [provider, project]);
 
   useEffect(() => {
-  useEffect(() => {
     refetch();
   }, [client, refetch]);
-  }, [client]);
 
   return {
     collections: collections,
