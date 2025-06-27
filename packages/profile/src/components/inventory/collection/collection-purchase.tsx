@@ -47,7 +47,6 @@ import {
   useToriiCollection,
   useToriiCollections,
 } from "#hooks/collection";
-import placeholder from "/public/placeholder.svg";
 import { useMarketplace } from "#hooks/marketplace.js";
 import { toast } from "sonner";
 import { useTokens } from "#hooks/token";
@@ -164,7 +163,7 @@ export function CollectionPurchase() {
         };
       })
       .filter((value) => value !== undefined);
-  }, [assets, collection, tokenOrders, placeholder]);
+  }, [assets, collection, tokenOrders]);
 
   const { totalPrice, floatPrice } = useMemo(() => {
     const total = tokenOrders.reduce(
