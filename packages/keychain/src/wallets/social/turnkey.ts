@@ -166,7 +166,7 @@ export class TurnkeyWallet {
     }
   }
 
-  async disconnect(): Promise<ExternalWalletResponse<never>> {
+  async disconnect(): Promise<ExternalWalletResponse<void>> {
     this.account = undefined;
     this.subOrganizationId = undefined;
     return { success: true, wallet: this.type };
