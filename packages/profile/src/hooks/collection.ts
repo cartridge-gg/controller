@@ -1,10 +1,13 @@
 import { useAccount } from "./account";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useCollectionQuery,
   useCollectionsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useConnection } from "./context";
+import { Collections, Marketplace } from "@cartridge/marketplace";
+import { Token, ToriiClient } from "@dojoengine/torii-wasm";
+import { useMarketplace } from "./marketplace";
 
 const TYPE = "ERC-721";
 const LIMIT = 1000;
@@ -135,7 +138,6 @@ export function useCollections(): UseCollectionsResponse {
   const [collections, setCollections] = useState<{ [key: string]: Collection }>(
     {},
   );
-
   const { status, refetch } = useCollectionsQuery(
     {
       accountAddress: address,
@@ -173,6 +175,113 @@ export function useCollections(): UseCollectionsResponse {
     collections: Object.values(collections).sort((a, b) =>
       a.name.localeCompare(b.name),
     ),
+    status,
+    refetch,
+  };
+}
+
+export type UseToriiCollectionsResponse = {
+  collections: Collections;
+  status: "success" | "error" | "idle" | "loading";
+  refetch: () => void;
+};
+
+export function useToriiCollections(): UseToriiCollectionsResponse {
+  const { provider } = useMarketplace();
+  const { project } = useConnection();
+  const [client, setClient] = useState<ToriiClient | undefined>(undefined);
+  const [status, setStatus] = useState<
+    "success" | "error" | "idle" | "loading"
+  >("idle");
+  const [collections, setCollections] = useState<Collections>({});
+
+  const refetch = useCallback(() => {
+    if (!client || !project) return;
+    setStatus("loading");
+    Marketplace.fetchCollections({ [project]: client })
+      .then((collections) => {
+        setCollections(collections);
+        setStatus("success");
+      })
+      .catch((error) => {
+        setStatus("error");
+        console.error(error);
+      });
+  }, [project, client, setStatus, setCollections]);
+
+  useEffect(() => {
+    if (!project) return;
+    const getClients = async () => {
+      const url = `https://api.cartridge.gg/x/${project}/torii`;
+      const client = await provider.getToriiClient(url);
+      setClient(client);
+    };
+    getClients();
+  }, [provider, project]);
+
+  useEffect(() => {
+    refetch();
+  }, [client]);
+
+  return {
+    collections: collections,
+    status,
+    refetch,
+  };
+}
+
+export type UseToriiCollectionResponse = {
+  tokens: Token[];
+  status: "success" | "error" | "idle" | "loading";
+  refetch: () => void;
+};
+
+export function useToriiCollection({
+  contractAddress,
+  tokenIds,
+}: {
+  contractAddress: string;
+  tokenIds: string[];
+}): UseToriiCollectionResponse {
+  const { provider } = useMarketplace();
+  const { project } = useConnection();
+  const [client, setClient] = useState<ToriiClient | undefined>(undefined);
+  const [status, setStatus] = useState<
+    "success" | "error" | "idle" | "loading"
+  >("idle");
+  const [tokens, setTokens] = useState<Token[]>([]);
+
+  useEffect(() => {
+    if (!project) return;
+    const getClients = async () => {
+      const url = `https://api.cartridge.gg/x/${project}/torii`;
+      const client = await provider.getToriiClient(url);
+      setClient(client);
+    };
+    getClients();
+  }, [provider, project]);
+
+  const refetch = useCallback(() => {
+    if (!client) return;
+    setStatus("loading");
+    client
+      .getTokens([contractAddress], tokenIds)
+      .then((tokens) => {
+        setTokens(tokens.items || []);
+        setStatus("success");
+      })
+      .catch((error) => {
+        setStatus("error");
+        console.error(error);
+      });
+  }, [client, setStatus, setTokens]);
+
+  useEffect(() => {
+    refetch();
+  }, [client]);
+
+  return {
+    tokens: tokens,
     status,
     refetch,
   };

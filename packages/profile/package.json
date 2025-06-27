@@ -41,9 +41,10 @@
   "dependencies": {
     "@cartridge/arcade": "0.0.0",
     "@cartridge/controller": "workspace:*",
-    "@cartridge/marketplace": "0.0.6",
+    "@cartridge/marketplace": "0.0.9",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",
+    "@dojoengine/torii-wasm": "1.5.16",
     "compare-versions": "^6.1.1",
     "lodash": "catalog:",
     "qrcode.react": "catalog:",
