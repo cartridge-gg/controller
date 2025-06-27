@@ -138,7 +138,7 @@ export function useCollections(): UseCollectionsResponse {
   const [collections, setCollections] = useState<{ [key: string]: Collection }>(
     {},
   );
-  
+
   const { status, refetch } = useCollectionsQuery(
     {
       accountAddress: address,
