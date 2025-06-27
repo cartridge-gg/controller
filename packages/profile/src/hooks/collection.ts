@@ -275,7 +275,7 @@ export function useToriiCollection({
         setStatus("error");
         console.error(error);
       });
-  }, [client, setStatus, setTokens]);
+  }, [client, setStatus, setTokens, contractAddress, tokenIds]);
 
   useEffect(() => {
     refetch();
