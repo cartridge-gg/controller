@@ -1,4 +1,3 @@
-import { ConnectCtx } from "@/utils/connection";
 import { PACKAGE_VERSION } from "@/version";
 import { useCallback, useEffect, useState } from "react";
 import eq from "semver/functions/eq";
@@ -11,55 +10,52 @@ import { useConnection } from "./connection";
 export const useVersion = () => {
   const [ready, setReady] = useState(false);
 
-  const { context } = useConnection();
-
-  const controllerPackageVersion = (context as ConnectCtx)
-    ?.controllerPackageVersion;
+  const { controllerVersion } = useConnection();
 
   useEffect(() => {
-    if (context) {
+    if (controllerVersion) {
       setReady(true);
     }
-  }, [context]);
+  }, [controllerVersion]);
 
   const isControllerGt = useCallback(
     (version: string) => {
-      return gt(controllerPackageVersion, version);
+      return gt(controllerVersion!, version);
     },
-    [controllerPackageVersion],
+    [controllerVersion],
   );
 
   const isControllerGte = useCallback(
     (version: string) => {
-      return gte(controllerPackageVersion, version);
+      return gte(controllerVersion!, version);
     },
-    [controllerPackageVersion],
+    [controllerVersion],
   );
 
   const isControllerLt = useCallback(
     (version: string) => {
-      return lt(controllerPackageVersion, version);
+      return lt(controllerVersion!, version);
     },
-    [controllerPackageVersion],
+    [controllerVersion],
   );
 
   const isControllerLte = useCallback(
     (version: string) => {
-      return lte(controllerPackageVersion, version);
+      return lte(controllerVersion!, version);
     },
-    [controllerPackageVersion],
+    [controllerVersion],
   );
 
   const isControllerEq = useCallback(
     (version: string) => {
-      return eq(controllerPackageVersion, version);
+      return eq(controllerVersion!, version);
     },
-    [controllerPackageVersion],
+    [controllerVersion],
   );
 
   return {
     ready,
-    controllerVersion: controllerPackageVersion,
+    controllerVersion,
     keychainVersion: PACKAGE_VERSION,
     isControllerGt,
     isControllerLt,

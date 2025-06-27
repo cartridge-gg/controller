@@ -6,7 +6,6 @@ import {
   ExecuteReply,
 } from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
-import SemVer from "semver/classes/semver";
 import { Call, EstimateFee, Signature, TypedData } from "starknet";
 
 export type ConnectionCtx =
@@ -24,7 +23,6 @@ export type ConnectCtx = {
   origin: string;
   type: "connect";
   policies: Policies;
-  controllerPackageVersion: SemVer;
   resolve: (res: ConnectReply | ConnectError) => void;
   reject: (reason?: unknown) => void;
 };

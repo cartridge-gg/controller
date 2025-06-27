@@ -63,6 +63,7 @@ export default class ControllerProvider extends BaseProvider {
         onConnect: (keychain) => {
           this.keychain = keychain;
         },
+        version: version,
       }),
     };
 
@@ -189,7 +190,6 @@ export default class ControllerProvider extends BaseProvider {
             : this.options.policies || {},
         this.rpcUrl(),
         this.options.signupOptions,
-        version,
       );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);

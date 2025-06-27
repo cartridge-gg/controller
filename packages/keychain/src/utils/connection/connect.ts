@@ -1,6 +1,5 @@
 import { AuthOptions, ConnectReply } from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
-import { SemVer } from "semver";
 import { ConnectCtx, ConnectionCtx } from "./types";
 
 export function connect({
@@ -17,17 +16,12 @@ export function connect({
       policies: Policies,
       rpcUrl: string,
       signupOptions?: AuthOptions,
-      controllerPackageVersion?: string,
     ): Promise<ConnectReply> => {
       setRpcUrl(rpcUrl);
 
       if (signupOptions && signupOptions.length === 0) {
         throw new Error("If defined, signup options cannot be empty");
       }
-
-      const validatedControllerVersion = new SemVer(
-        controllerPackageVersion ?? "0.0.0",
-      );
 
       setConfigSignupOptions(signupOptions);
 
@@ -38,7 +32,6 @@ export function connect({
           policies,
           resolve,
           reject,
-          controllerPackageVersion: validatedControllerVersion,
         } as ConnectCtx);
       }).finally(() => {
         setContext(undefined);
