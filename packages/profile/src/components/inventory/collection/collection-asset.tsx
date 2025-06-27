@@ -63,7 +63,8 @@ export function CollectionAsset() {
     namespace,
     project,
     parent,
-    provider: mainProvider,
+    provider: starknet,
+    closable,
   } = useConnection();
   const { address } = useAccount();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -172,7 +173,7 @@ export function CollectionAsset() {
         chainId,
       );
       if (res?.transactionHash) {
-        await mainProvider.waitForTransaction(res.transactionHash, {
+        await starknet.waitForTransaction(res.transactionHash, {
           retryInterval: 1000,
           successStates: [
             TransactionExecutionStatus.SUCCEEDED,
@@ -198,7 +199,7 @@ export function CollectionAsset() {
     chainId,
     parent,
     provider,
-    mainProvider,
+    starknet,
     order,
     isOwner,
     removeOrder,
@@ -252,7 +253,10 @@ export function CollectionAsset() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader className="hidden" onBack={handleBack} />
+      <LayoutHeader
+        className="hidden"
+        onBack={closable ? undefined : handleBack}
+      />
 
       {status === "loading" || !collection || !asset ? (
         <LoadingState />

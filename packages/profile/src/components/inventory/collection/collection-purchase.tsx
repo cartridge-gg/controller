@@ -31,6 +31,7 @@ import {
 } from "@cartridge/ui";
 import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
+  addAddressPadding,
   AllowArray,
   cairo,
   Call,
@@ -41,8 +42,11 @@ import {
 } from "starknet";
 import { useConnection } from "#hooks/context";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useCollection } from "#hooks/collection";
-import placeholder from "/public/placeholder.svg";
+import {
+  useCollection,
+  useToriiCollection,
+  useToriiCollections,
+} from "#hooks/collection";
 import { useMarketplace } from "#hooks/marketplace.js";
 import { toast } from "sonner";
 import { useTokens } from "#hooks/token";
@@ -53,7 +57,7 @@ const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectionPurchase() {
   const { closeModal } = useUI();
-  const { address: contractAddress, tokenId } = useParams();
+  const { address: contractAddress, tokenId, project } = useParams();
   const { chainId, parent, provider: starknet, closable } = useConnection();
   const { tokens } = useTokens();
   const [loading, setLoading] = useState(false);
@@ -73,19 +77,30 @@ export function CollectionPurchase() {
     return allOrders.filter((order) => paramsOrders.includes(order.id));
   }, [orders, paramsOrders]);
 
-  const {
-    collection,
-    assets,
-    status: collectionStatus,
-    refetch,
-  } = useCollection({
+  const tokenIds = useMemo(() => {
+    return tokenOrders.map((order) =>
+      addAddressPadding(order.tokenId.toString(16)),
+    );
+  }, [tokenOrders]);
+
+  const { refetch } = useCollection({
     contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
   });
 
-  const asset = useMemo(() => {
-    return assets?.[0];
-  }, [assets]);
+  const { collections, status: collectionStatus } = useToriiCollections();
+
+  const collection = useMemo(() => {
+    if (!project || !collections || !contractAddress) return;
+    const projectCollections = collections[project];
+    if (!projectCollections) return;
+    return projectCollections[getChecksumAddress(contractAddress)];
+  }, [collections, contractAddress, project]);
+
+  const { tokens: assets, status: assetsStatus } = useToriiCollection({
+    contractAddress: contractAddress || "",
+    tokenIds: tokenIds,
+  });
 
   const token: Token | undefined = useMemo(() => {
     if (!tokenOrders || tokenOrders.length === 0) return;
@@ -133,21 +148,22 @@ export function CollectionPurchase() {
     return tokenOrders
       .map((order) => {
         const asset = assets.find(
-          (asset) => BigInt(asset.tokenId) === BigInt(order.tokenId),
+          (asset) => BigInt(asset.token_id) === BigInt(order.tokenId),
         );
         if (!asset) return;
+        const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
         return {
           orderId: order.id,
-          image: asset.imageUrl || collection.imageUrl || placeholder,
+          image: image,
           name: asset.name,
           collection: collection.name,
-          collectionAddress: collection.address,
+          collectionAddress: collection.contract_address,
           price: order.price,
-          tokenId: asset.tokenId,
+          tokenId: asset.token_id,
         };
       })
       .filter((value) => value !== undefined);
-  }, [assets, collection, tokenOrders, placeholder]);
+  }, [assets, collection, tokenOrders]);
 
   const { totalPrice, floatPrice } = useMemo(() => {
     const total = tokenOrders.reduce(
@@ -243,10 +259,12 @@ export function CollectionPurchase() {
   ]);
 
   const status = useMemo(() => {
-    if (collectionStatus === "error") return "error";
-    if (collectionStatus === "loading") return "loading";
+    if (collectionStatus === "error" || assetsStatus === "error")
+      return "error";
+    if (collectionStatus === "loading" && assetsStatus === "loading")
+      return "loading";
     return "success";
-  }, [collectionStatus]);
+  }, [collectionStatus, assetsStatus]);
 
   useEffect(() => {
     if (!tokenOrders || tokenOrders.length === 0) return;
@@ -264,10 +282,7 @@ export function CollectionPurchase() {
         onBack={closable ? undefined : handleBack}
       />
 
-      {status === "loading" ||
-      !collection ||
-      !asset ||
-      tokenOrders.length === 0 ? (
+      {status === "loading" || !collection || tokenOrders.length === 0 ? (
         <LoadingState />
       ) : status === "error" || !token ? (
         <EmptyState />
