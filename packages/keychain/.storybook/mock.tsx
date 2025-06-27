@@ -12,6 +12,7 @@ import {
   UpgradeProviderProps,
 } from "../src/components/provider/upgrade";
 import { ConnectCtx, ConnectionCtx } from "../src/utils/connection/types";
+import { SemVer } from "semver";
 
 export interface StoryParameters extends Parameters {
   connection?: {
@@ -34,7 +35,6 @@ export function useMockedConnection(
       policies: [],
       resolve: () => {},
       reject: () => {},
-      controllerPackageVersion: "1.0.0",
     } as ConnectCtx,
     controller,
     ...rest
@@ -70,7 +70,8 @@ export function useMockedConnection(
     rpcUrl: "http://api.cartridge.gg/x/starknet/mainnet",
     policies: {},
     theme: { ...theme, verified: true },
-    loading: false,
+    isConfigLoading: false,
+    controllerVersion: new SemVer("1.0.0"),
     verified: true,
     setContext: () => {},
     setController: () => {},

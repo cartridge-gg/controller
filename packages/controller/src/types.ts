@@ -118,7 +118,6 @@ export interface Keychain {
     policies: SessionPolicies,
     rpcUrl: string,
     signupOptions?: AuthOptions,
-    version?: string,
   ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
