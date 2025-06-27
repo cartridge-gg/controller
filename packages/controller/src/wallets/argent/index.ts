@@ -66,7 +66,7 @@ export class ArgentWallet implements WalletAdapter {
     }
   }
 
-  async disconnect(): Promise<ExternalWalletResponse<any>> {
+  async disconnect(): Promise<ExternalWalletResponse<void>> {
     this.account = undefined;
     this.connectedAccounts = [];
     return { success: true, wallet: this.type };

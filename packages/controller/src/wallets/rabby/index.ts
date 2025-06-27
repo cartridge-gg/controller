@@ -210,7 +210,7 @@ export class RabbyWallet implements WalletAdapter {
     }
   }
 
-  async disconnect(): Promise<ExternalWalletResponse<any>> {
+  async disconnect(): Promise<ExternalWalletResponse<void>> {
     await this.provider?.provider.request({
       method: "wallet_requestPermissions",
       params: [{ eth_accounts: {} }],

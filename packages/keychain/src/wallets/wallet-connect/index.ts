@@ -16,6 +16,7 @@ export type OpenQrCodeEvent = {
 };
 
 const REOWN_PROJECT_ID = "9e74c94c62b9f42303d951e0b8375c14";
+
 export class WalletConnectWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "walletconnect" as ExternalWalletType;
   readonly platform: ExternalPlatform = "ethereum";
@@ -110,7 +111,7 @@ export class WalletConnectWallet implements WalletAdapter {
     }
   }
 
-  async disconnect(): Promise<ExternalWalletResponse<never>> {
+  async disconnect(): Promise<ExternalWalletResponse<void>> {
     this.account = undefined;
     return { success: true, wallet: this.type };
   }

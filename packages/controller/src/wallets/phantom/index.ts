@@ -97,7 +97,7 @@ export class PhantomWallet implements WalletAdapter {
     }
   }
 
-  async disconnect(): Promise<ExternalWalletResponse<any>> {
+  async disconnect(): Promise<ExternalWalletResponse<void>> {
     await this.getProvider().disconnect();
     this.account = undefined;
     this.connectedAccounts = [];

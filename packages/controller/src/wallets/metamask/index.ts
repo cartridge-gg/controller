@@ -109,7 +109,7 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
-  async disconnect(): Promise<ExternalWalletResponse<any>> {
+  async disconnect(): Promise<ExternalWalletResponse<void>> {
     await this.MMSDK.getProvider()?.request({
       method: "wallet_requestPermissions",
       params: [{ eth_accounts: {} }],
