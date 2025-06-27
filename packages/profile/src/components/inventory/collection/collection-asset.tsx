@@ -63,7 +63,7 @@ export function CollectionAsset() {
     namespace,
     project,
     parent,
-    provider: straknet,
+    provider: starknet,
     closable,
   } = useConnection();
   const { address } = useAccount();
@@ -173,7 +173,7 @@ export function CollectionAsset() {
         chainId,
       );
       if (res?.transactionHash) {
-        await straknet.waitForTransaction(res.transactionHash, {
+        await starknet.waitForTransaction(res.transactionHash, {
           retryInterval: 1000,
           successStates: [
             TransactionExecutionStatus.SUCCEEDED,
@@ -199,7 +199,7 @@ export function CollectionAsset() {
     chainId,
     parent,
     provider,
-    straknet,
+    starknet,
     order,
     isOwner,
     removeOrder,
