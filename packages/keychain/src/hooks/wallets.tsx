@@ -180,7 +180,15 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       connectWallet,
       disconnectWallet,
     }),
-    [wallets, isLoading, isConnecting, error, detectWallets, connectWallet, disconnectWallet],
+    [
+      wallets,
+      isLoading,
+      isConnecting,
+      error,
+      detectWallets,
+      connectWallet,
+      disconnectWallet,
+    ],
   );
 
   return (
