@@ -4,11 +4,11 @@ packages:
   - examples/svelte
   - packages/*
 catalog:
-  "@cartridge/controller-wasm": "0.1.8"
+  "@cartridge/controller-wasm": "0.2.0"
   "@cartridge/penpal": "^6.2.4"
   "@cartridge/ui": "github:cartridge-gg/ui#c61400e"
   "@eslint/js": "^9.18.0"
-  "@starknet-io/types-js": "^0.7.7"
+  "@starknet-io/types-js": "^0.8.4"
   "@starknet-react/chains": "4.0.1-beta.3"
   "@starknet-react/core": "4.0.1-beta.4"
   "@storybook/addon-essentials": "^8.5.0"
