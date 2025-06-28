@@ -6,8 +6,6 @@ import {
   AllowArray,
 } from "starknet";
 
-import { SPEC } from "@starknet-io/types-js";
-
 import {
   ConnectError,
   Keychain,
@@ -18,9 +16,9 @@ import {
 import { AsyncMethodReturns } from "@cartridge/penpal";
 import BaseProvider from "./provider";
 import { toArray } from "./utils";
+import { SIGNATURE } from "@starknet-io/types-js";
 
 class ControllerAccount extends WalletAccount {
-  address: string;
   private keychain: AsyncMethodReturns<Keychain>;
   private modal: Modal;
   private options?: KeychainOptions;
@@ -33,9 +31,8 @@ class ControllerAccount extends WalletAccount {
     options: KeychainOptions,
     modal: Modal,
   ) {
-    super({ nodeUrl: rpcUrl }, provider);
+    super({ nodeUrl: rpcUrl }, provider, address);
 
-    this.address = address;
     this.keychain = keychain;
     this.options = options;
     this.modal = modal;
@@ -111,13 +108,13 @@ class ControllerAccount extends WalletAccount {
    * @returns the signature of the JSON object
    * @throws {Error} if the JSON object is not a valid JSON
    */
-  async signMessage(typedData: TypedData): Promise<SPEC.SIGNATURE> {
+  async signMessage(typedData: TypedData): Promise<SIGNATURE> {
     return new Promise(async (resolve, reject) => {
       const sessionSign = await this.keychain.signMessage(typedData, "", true);
 
       // Session sign succeeded
       if (!("code" in sessionSign)) {
-        resolve(sessionSign as SPEC.SIGNATURE);
+        resolve(sessionSign as SIGNATURE);
         return;
       }
 
@@ -126,7 +123,7 @@ class ControllerAccount extends WalletAccount {
       const manualSign = await this.keychain.signMessage(typedData, "", false);
 
       if (!("code" in manualSign)) {
-        resolve(manualSign as SPEC.SIGNATURE);
+        resolve(manualSign as SIGNATURE);
       } else {
         reject((manualSign as ConnectError).error);
       }

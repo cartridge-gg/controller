@@ -1,18 +1,18 @@
-import { WalletAccount } from "starknet";
 import {
   AddInvokeTransactionParameters,
   AddStarknetChainParameters,
-  Errors,
   Permission,
   RequestAccountsParameters,
   RequestFn,
   StarknetWindowObject,
   SwitchStarknetChainParameters,
   TypedData,
+  UNEXPECTED_ERROR,
   WalletEventHandlers,
   WalletEventListener,
   WalletEvents,
 } from "@starknet-io/types-js";
+import { WalletAccount } from "starknet";
 import manifest from "../package.json";
 
 import { icon } from "./icon";
@@ -93,7 +93,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           code: 63,
           message: "An unexpected error occurred",
           data: "wallet_watchAsset not implemented",
-        } as Errors.UNEXPECTED_ERROR;
+        } as UNEXPECTED_ERROR;
 
       case "wallet_addStarknetChain": {
         let params = call.params as AddStarknetChainParameters;
@@ -111,7 +111,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
             code: 63,
             message: "An unexpected error occurred",
             data: "Account not initialized",
-          } as Errors.UNEXPECTED_ERROR;
+          } as UNEXPECTED_ERROR;
         }
 
         return await this.account.getChainId();
@@ -121,7 +121,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           code: 63,
           message: "An unexpected error occurred",
           data: "wallet_deploymentData not implemented",
-        } as Errors.UNEXPECTED_ERROR;
+        } as UNEXPECTED_ERROR;
 
       case "wallet_addInvokeTransaction":
         if (!this.account) {
@@ -129,7 +129,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
             code: 63,
             message: "An unexpected error occurred",
             data: "Account not initialized",
-          } as Errors.UNEXPECTED_ERROR;
+          } as UNEXPECTED_ERROR;
         }
 
         let params = call.params as AddInvokeTransactionParameters;
@@ -146,7 +146,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           code: 63,
           message: "An unexpected error occurred",
           data: "wallet_addDeclareTransaction not implemented",
-        } as Errors.UNEXPECTED_ERROR;
+        } as UNEXPECTED_ERROR;
 
       case "wallet_signTypedData": {
         if (!this.account) {
@@ -154,7 +154,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
             code: 63,
             message: "An unexpected error occurred",
             data: "Account not initialized",
-          } as Errors.UNEXPECTED_ERROR;
+          } as UNEXPECTED_ERROR;
         }
 
         return await this.account.signMessage(call.params as TypedData);
@@ -169,7 +169,7 @@ export default abstract class BaseProvider implements StarknetWindowObject {
           code: 63,
           message: "An unexpected error occurred",
           data: `Unknown RPC call type: ${call.type}`,
-        } as Errors.UNEXPECTED_ERROR;
+        } as UNEXPECTED_ERROR;
     }
   };
 

@@ -1,3 +1,22 @@
+import { TransactionSummary } from "@/components/transaction/TransactionSummary";
+import { useConnection } from "@/hooks/connection";
+import { useDeploy } from "@/hooks/deploy";
+import { useFeeToken } from "@/hooks/tokens";
+import { ControllerError } from "@/utils/connection";
+import {
+  Button,
+  CheckIcon,
+  ControllerIcon,
+  ExternalIcon,
+  LayoutContainer,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+  Spinner,
+} from "@cartridge/ui";
+import { getChainName } from "@cartridge/ui/utils";
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   constants,
   EstimateFee,
@@ -5,28 +24,9 @@ import {
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
-import { useCallback, useEffect, useState } from "react";
-import {
-  LayoutContainer,
-  LayoutFooter,
-  LayoutContent,
-  CheckIcon,
-  ExternalIcon,
-  Spinner,
-  Button,
-  LayoutHeader,
-  ControllerIcon,
-} from "@cartridge/ui";
-import { getChainName } from "@cartridge/ui/utils";
-import { Funding } from "./funding";
-import { useConnection } from "@/hooks/connection";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
-import { useDeploy } from "@/hooks/deploy";
 import { Fees } from "./Fees";
-import { ControllerError } from "@/utils/connection";
-import { TransactionSummary } from "@/components/transaction/TransactionSummary";
-import { Link } from "react-router-dom";
-import { useFeeToken } from "@/hooks/tokens";
+import { Funding } from "./funding";
 
 export function DeployController({
   onClose,
@@ -48,28 +48,33 @@ export function DeployController({
   const chainName = chainId ? getChainName(chainId) : "Unknown";
 
   // What is this cancer
+  // Update: this is still cancer
   const feeEstimate: FeeEstimate | undefined = ctrlError?.data?.fee_estimate;
   const estimateFee: EstimateFee | undefined = feeEstimate
     ? {
-        gas_consumed: BigInt(feeEstimate.gas_consumed),
+        l2_gas_consumed: BigInt(feeEstimate.l2_gas_consumed ?? 0),
+        l2_gas_price: BigInt(feeEstimate.l2_gas_price ?? 0),
         overall_fee: BigInt(feeEstimate.overall_fee),
-        gas_price: BigInt(feeEstimate.gas_price),
         unit: feeEstimate.unit,
         suggestedMaxFee: BigInt(feeEstimate.overall_fee),
-        data_gas_consumed: BigInt(
-          feeEstimate.data_gas_consumed ? feeEstimate.data_gas_consumed : "0x0",
-        ),
-        data_gas_price: BigInt(
-          feeEstimate.data_gas_price ? feeEstimate.data_gas_price : "0x0",
-        ),
+        l1_data_gas_consumed: BigInt(feeEstimate.l1_data_gas_consumed ?? 0),
+        l1_data_gas_price: BigInt(feeEstimate.l1_data_gas_price ?? 0),
+        l1_gas_consumed: BigInt(feeEstimate.l1_gas_consumed ?? 0),
+        l1_gas_price: BigInt(feeEstimate.l1_gas_price ?? 0),
         resourceBounds: {
           l1_gas: {
-            max_amount: feeEstimate.overall_fee,
-            max_price_per_unit: feeEstimate.gas_price,
+            max_amount:
+              typeof feeEstimate.overall_fee === "string"
+                ? feeEstimate.overall_fee
+                : feeEstimate.overall_fee.toString(),
+            max_price_per_unit: feeEstimate.l1_gas_price?.toString() ?? "",
           },
           l2_gas: {
-            max_amount: feeEstimate.overall_fee,
-            max_price_per_unit: feeEstimate.gas_price,
+            max_amount:
+              typeof feeEstimate.overall_fee === "string"
+                ? feeEstimate.overall_fee
+                : feeEstimate.overall_fee.toString(),
+            max_price_per_unit: feeEstimate.gas_price?.toString() ?? "",
           },
         },
       }

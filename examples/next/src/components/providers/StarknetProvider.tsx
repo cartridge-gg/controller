@@ -106,6 +106,11 @@ if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
       decimals: 18,
       address: STRK_CONTRACT_ADDRESS,
     },
+    paymasterRpcUrls: {
+      default: {
+        http: [],
+      },
+    },
   };
 }
 

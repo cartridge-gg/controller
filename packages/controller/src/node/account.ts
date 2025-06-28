@@ -37,7 +37,7 @@ export default class SessionAccount extends WalletAccount {
       sessionKeyGuid: string;
     },
   ) {
-    super({ nodeUrl: rpcUrl }, provider);
+    super({ nodeUrl: rpcUrl }, provider, address);
 
     this.address = address;
     this.controller = CartridgeSessionAccount.newAsRegistered(
