@@ -51,6 +51,7 @@ export const CreateSessionProvider = ({
       initialPolicies.messages.forEach((message, i) => {
         message.id = `${i}-${message.domain.name}-${message.name}`;
         message.authorized = true;
+        message.isRequired = message.isRequired || false;
       });
     }
 
