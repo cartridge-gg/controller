@@ -74,7 +74,7 @@ export function DeployController({
               typeof feeEstimate.overall_fee === "string"
                 ? feeEstimate.overall_fee
                 : feeEstimate.overall_fee.toString(),
-            max_price_per_unit: feeEstimate.gas_price?.toString() ?? "",
+            max_price_per_unit: feeEstimate.l2_gas_price?.toString() ?? "",
           },
         },
       }
