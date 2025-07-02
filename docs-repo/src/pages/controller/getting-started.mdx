@@ -1,0 +1,174 @@
+---
+description: Get started with Cartridge Controller by learning how to install, initialize, and integrate it into your application with various frameworks.
+title: Controller Getting Started
+---
+
+# Getting Started
+
+Controller implements a standard StarkNet account interface and can be
+seamlessly integrated into your application like any other wallet.
+
+## Quick Start
+
+The fastest way to get started is to install the controller package and connect to Cartridge:
+
+```ts twoslash
+import Controller from "@cartridge/controller";
+
+const controller = new Controller({});
+const account = await controller.connect();
+
+// You're ready to execute transactions!
+```
+
+## Installation
+
+:::code-group
+
+```bash [npm]
+npm install @cartridge/controller starknet@^7.6.2 @starknet-io/types-js@^0.8.4
+```
+
+```bash [pnpm]
+pnpm install @cartridge/controller starknet@^7.6.2 @starknet-io/types-js@^0.8.4
+```
+
+```bash [yarn]
+yarn add @cartridge/controller starknet@^7.6.2 @starknet-io/types-js@^0.8.4
+```
+
+```bash [bun]
+bun add @cartridge/controller starknet@^7.6.2 @starknet-io/types-js@^0.8.4
+```
+
+:::
+
+> **Important**: Cartridge Controller requires StarkNet.js v7.6.2 or later. If you're upgrading from an earlier version, see our [Migration Guide](/controller/migration-guide.md).
+
+## Basic Usage
+
+Here's a simple example of how to initialize and use the controller:
+
+```ts
+import Controller from "@cartridge/controller";
+
+// Initialize the controller with basic configuration
+const controller = new Controller();
+
+// Connect to get an account instance
+const account = await controller.connect();
+
+// Execute transactions
+const tx = await account.execute([
+  {
+    contractAddress: "0x...",
+    entrypoint: "my_function",
+    calldata: ["0x1", "0x2"],
+  }
+]);
+```
+
+## Configuration with Session Policies
+
+For games that need gasless transactions and session management:
+
+```ts
+import Controller from "@cartridge/controller";
+
+const controller = new Controller({
+  policies: {
+    contracts: {
+      // Your game contract
+      "0x1234...": {
+        name: "My Game Contract",
+        methods: [
+          {
+            name: "move_player",
+            entrypoint: "move_player",
+            description: "Move player character",
+          },
+          {
+            name: "attack",
+            entrypoint: "attack", 
+            description: "Attack enemy",
+          },
+        ],
+      },
+    },
+  },
+});
+```
+
+## Usage with Starknet React
+
+```tsx
+import React from "react";
+import { sepolia, mainnet } from "@starknet-react/chains";
+import {
+  StarknetConfig,
+  jsonRpcProvider,
+  starkscan,
+} from "@starknet-react/core";
+import ControllerConnector from "@cartridge/connector/controller";
+
+// Create the connector outside the component to avoid recreation on renders
+const connector = new ControllerConnector();
+
+// Configure the JSON RPC provider
+const provider = jsonRpcProvider({
+  rpc: (chain) => {
+    switch (chain) {
+      case mainnet:
+        return { nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet" };
+      case sepolia:
+      default:
+        return { nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia" };
+    }
+  },
+});
+
+export function StarknetProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <StarknetConfig
+      chains={[mainnet, sepolia]}
+      provider={provider}
+      connectors={[connector]}
+      explorer={starkscan}
+    >
+      {children}
+    </StarknetConfig>
+  );
+}
+```
+
+## Examples
+
+For more detailed examples of how to use Cartridge Controller in different
+environments, check out our integration guides:
+
+1. [React](/controller/examples/react.md)
+
+   - Integration with `starknet-react`
+   - Hooks and components
+   - State management
+
+2. [Svelte](/controller/examples/svelte.md)
+
+   - Svelte stores and reactivity
+   - Component lifecycle
+   - Event handling
+
+3. [Rust](/controller/examples/rust.md)
+   - Native integration
+   - Error handling
+   - Async operations
+
+Each guide provides comprehensive examples and best practices for integrating
+Cartridge Controller in your preferred environment.
+
+## Next Steps
+
+- Learn about [Session Keys](/controller/sessions.md)
+- Customize your [Controller](/controller/presets.md)
+- Set up [Usernames](/controller/usernames.md)
+- Configure [Paymaster](/controller/configuration.md)
