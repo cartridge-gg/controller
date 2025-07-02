@@ -258,7 +258,6 @@ export function ControllerErrorAlert({
     case ErrorCode.AccountSigning:
     case ErrorCode.AccountProvider:
     case ErrorCode.AccountClassHashCalculation:
-    case ErrorCode.AccountClassCompression:
     case ErrorCode.AccountFeeOutOfRange:
       title = "Account Error";
       break;

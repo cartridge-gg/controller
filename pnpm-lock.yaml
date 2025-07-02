@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@cartridge/controller-wasm':
-      specifier: 0.1.8
-      version: 0.1.8
+      specifier: 0.2.0
+      version: 0.2.0
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -25,14 +25,14 @@ catalogs:
       specifier: ^1.98.0
       version: 1.98.2
     '@starknet-io/types-js':
-      specifier: ^0.7.7
-      version: 0.7.10
+      specifier: ^0.8.4
+      version: 0.8.4
     '@starknet-react/chains':
-      specifier: ^3.1.3
-      version: 3.1.3
+      specifier: 4.0.1-beta.3
+      version: 4.0.1-beta.3
     '@starknet-react/core':
-      specifier: ^3.7.3
-      version: 3.7.4
+      specifier: 4.0.1-beta.4
+      version: 4.0.1-beta.4
     '@storybook/addon-essentials':
       specifier: ^8.5.0
       version: 8.6.12
@@ -132,9 +132,6 @@ catalogs:
     sonner:
       specifier: ^1.4.41
       version: 1.7.4
-    starknet:
-      specifier: ^6.21.0
-      version: 6.24.1
     start-server-and-test:
       specifier: ^2.0.9
       version: 2.0.11
@@ -147,9 +144,6 @@ catalogs:
     tsup:
       specifier: ^8.0.1
       version: 8.4.0
-    typescript:
-      specifier: ^5.7.3
-      version: 5.8.3
     typescript-eslint:
       specifier: ^8.20.0
       version: 8.31.1
@@ -168,6 +162,8 @@ catalogs:
 
 overrides:
   '@radix-ui/react-accordion': 1.2.1
+  typescript: ^5.7.3
+  starknet: ^7.6.2
 
 importers:
 
@@ -178,7 +174,10 @@ importers:
         version: https://codeload.github.com/cartridge-gg/presets/tar.gz/d246ec1
       '@cartridge/ui':
         specifier: github:cartridge-gg/ui#bfcc1bd
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(viem@2.28.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)(zod@3.24.4))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@7.6.2)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3))
     devDependencies:
       husky:
         specifier: ^9.1.7
@@ -200,13 +199,13 @@ importers:
         version: link:../../packages/controller
       '@cartridge/ui':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@7.6.2)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
       '@starknet-react/chains':
         specifier: 'catalog:'
-        version: 3.1.3
+        version: 4.0.1-beta.3
       '@starknet-react/core':
         specifier: 'catalog:'
-        version: 3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.24.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)
+        version: 4.0.1-beta.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)
       next:
         specifier: ^15.1.5
         version: 15.3.1(@babel/core@7.27.1)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -223,8 +222,8 @@ importers:
         specifier: 'catalog:'
         version: 18.3.1(react@18.3.1)
       starknet:
-        specifier: 'catalog:'
-        version: 6.24.1(encoding@0.1.13)
+        specifier: ^7.6.2
+        version: 7.6.2
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:*
@@ -260,7 +259,7 @@ importers:
         specifier: 'catalog:'
         version: 3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3))
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.7.3
         version: 5.8.3
 
   examples/node:
@@ -270,10 +269,10 @@ importers:
         version: link:../../packages/controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.1.8
+        version: 0.2.0
       starknet:
-        specifier: 'catalog:'
-        version: 6.24.1(encoding@0.1.13)
+        specifier: ^7.6.2
+        version: 7.6.2
     devDependencies:
       '@types/node':
         specifier: ^22.12.0
@@ -282,7 +281,7 @@ importers:
         specifier: ^4.7.0
         version: 4.19.4
       typescript:
-        specifier: ^5.3.3
+        specifier: ^5.7.3
         version: 5.8.3
 
   examples/svelte:
@@ -291,8 +290,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/controller
       starknet:
-        specifier: 'catalog:'
-        version: 6.24.1(encoding@0.1.13)
+        specifier: ^7.6.2
+        version: 7.6.2
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:*
@@ -337,7 +336,7 @@ importers:
         specifier: ^4.1.4
         version: 4.1.6(picomatch@4.0.2)(svelte@5.28.2)(typescript@5.8.3)
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.7.3
         version: 5.8.3
       typescript-eslint:
         specifier: 'catalog:'
@@ -359,7 +358,7 @@ importers:
         version: link:../controller
       '@starknet-react/core':
         specifier: 'catalog:'
-        version: 3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.24.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)
+        version: 4.0.1-beta.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:*
@@ -371,14 +370,14 @@ importers:
         specifier: 'catalog:'
         version: 8.4.0(@microsoft/api-extractor@7.52.6(@types/node@22.15.3))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@1.21.7)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.7.1)
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.7.3
         version: 5.8.3
 
   packages/controller:
     dependencies:
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.1.8
+        version: 0.2.0
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -390,7 +389,7 @@ importers:
         version: 1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@starknet-io/types-js':
         specifier: 'catalog:'
-        version: 0.7.10
+        version: 0.8.4
       '@telegram-apps/sdk':
         specifier: ^2.4.0
         version: 2.11.3
@@ -413,11 +412,11 @@ importers:
         specifier: ^10.1.0
         version: 10.1.2
       starknet:
-        specifier: 'catalog:'
-        version: 6.24.1(encoding@0.1.13)
+        specifier: ^7.6.2
+        version: 7.6.2
       starknetkit:
         specifier: ^2.6.1
-        version: 2.10.4(bufferutil@4.0.9)(starknet@6.24.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+        version: 2.10.4(bufferutil@4.0.9)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:*
@@ -447,7 +446,7 @@ importers:
         specifier: 'catalog:'
         version: 8.4.0(@microsoft/api-extractor@7.52.6(@types/node@18.19.87))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@1.21.7)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.7.1)
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.7.3
         version: 5.8.3
       vite:
         specifier: 'catalog:'
@@ -456,8 +455,8 @@ importers:
         specifier: ^4.5.3
         version: 4.5.3(@types/node@18.19.87)(rollup@4.40.2)(typescript@5.8.3)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       vite-plugin-node-polyfills:
-        specifier: ^0.22.0
-        version: 0.22.0(rollup@4.40.2)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+        specifier: ^0.23.0
+        version: 0.23.0(rollup@4.40.2)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       vite-plugin-top-level-await:
         specifier: 'catalog:'
         version: 1.5.0(@swc/helpers@0.5.17)(rollup@4.40.2)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
@@ -487,7 +486,7 @@ importers:
         specifier: 'catalog:'
         version: 15.15.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.7.3
         version: 5.8.3
       typescript-eslint:
         specifier: 'catalog:'
@@ -506,13 +505,13 @@ importers:
         version: link:../controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.1.8
+        version: 0.2.0
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
       '@cartridge/ui':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@7.6.2)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
       '@noble/hashes':
         specifier: ^1.7.1
         version: 1.8.0
@@ -524,13 +523,13 @@ importers:
         version: 1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@starknet-io/types-js':
         specifier: 'catalog:'
-        version: 0.7.10
+        version: 0.8.4
       '@starknet-react/chains':
         specifier: 'catalog:'
-        version: 3.1.3
+        version: 4.0.1-beta.3
       '@starknet-react/core':
         specifier: 'catalog:'
-        version: 3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.24.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)
+        version: 4.0.1-beta.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@stripe/react-stripe-js':
         specifier: ^2.8.1
         version: 2.9.0(@stripe/stripe-js@4.10.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -610,8 +609,8 @@ importers:
         specifier: 'catalog:'
         version: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       starknet:
-        specifier: 'catalog:'
-        version: 6.24.1(encoding@0.1.13)
+        specifier: ^7.6.2
+        version: 7.6.2
     devDependencies:
       '@cartridge/eslint':
         specifier: workspace:*
@@ -672,7 +671,7 @@ importers:
         version: 3.9.0(@swc/helpers@0.5.17)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       '@vitest/coverage-v8':
         specifier: 2.1.8
-        version: 2.1.8(vitest@2.1.9(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
+        version: 2.1.8(vitest@2.1.8(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
       autoprefixer:
         specifier: 'catalog:'
         version: 10.4.21(postcss@8.5.3)
@@ -713,14 +712,14 @@ importers:
         specifier: 'catalog:'
         version: 3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3))
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.7.3
         version: 5.8.3
       vite:
         specifier: 'catalog:'
         version: 6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
       vite-plugin-node-polyfills:
-        specifier: ^0.22.0
-        version: 0.22.0(rollup@4.40.2)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+        specifier: ^0.23.0
+        version: 0.23.0(rollup@4.40.2)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       vite-plugin-top-level-await:
         specifier: 'catalog:'
         version: 1.5.0(@swc/helpers@0.5.17)(rollup@4.40.2)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
@@ -728,26 +727,29 @@ importers:
         specifier: 'catalog:'
         version: 3.4.1(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       vitest:
-        specifier: ^2.1.8
-        version: 2.1.9(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 2.1.8
+        version: 2.1.8(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      ws:
+        specifier: ^8.18.3
+        version: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
   packages/profile:
     dependencies:
       '@cartridge/arcade':
         specifier: 0.0.0
-        version: 0.0.0(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+        version: 0.0.0(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@cartridge/controller':
         specifier: workspace:*
         version: link:../controller
       '@cartridge/marketplace':
         specifier: 0.0.9
-        version: 0.0.9(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+        version: 0.0.9(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
       '@cartridge/ui':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@7.6.2)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
       '@dojoengine/torii-wasm':
         specifier: 1.5.16
         version: 1.5.16
@@ -776,8 +778,8 @@ importers:
         specifier: 'catalog:'
         version: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       starknet:
-        specifier: 'catalog:'
-        version: 6.24.1(encoding@0.1.13)
+        specifier: ^7.6.2
+        version: 7.6.2
       viem:
         specifier: 'catalog:'
         version: 2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
@@ -867,7 +869,7 @@ importers:
         specifier: 'catalog:'
         version: 3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3))
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.7.3
         version: 5.8.3
       typescript-eslint:
         specifier: 'catalog:'
@@ -879,7 +881,7 @@ importers:
   packages/tsconfig:
     devDependencies:
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.7.3
         version: 5.8.3
 
 packages:
@@ -1089,8 +1091,8 @@ packages:
   '@cartridge/arcade@0.0.0':
     resolution: {integrity: sha512-Kab7xBDgP3IphVrkGGyh7Qq9OAa6mnPwiecR31OO0JC6dfRtLCMuELOIlJD75+UhLW0NE7/Z30xF7tx6zhUXWw==}
 
-  '@cartridge/controller-wasm@0.1.8':
-    resolution: {integrity: sha512-xmbYRw2Fhp4PUHcYFWfUKmZ3pKRrfL3UQN7L0p6v69w0xgsRLj/3kknCeGv+2o6bhWI4azEH7snAtBthnzDU9w==}
+  '@cartridge/controller-wasm@0.2.0':
+    resolution: {integrity: sha512-KhsoQEERG3xbGNhgNB6gnKL8uaiy5TrI0/OZOWlDDPYXrWWTIGURNFdWj1H88j/8VGWUepFj4pss8ACIbQbTBg==}
 
   '@cartridge/marketplace@0.0.9':
     resolution: {integrity: sha512-kKS+jhTKWo6U1v+3OxFWyQr4VHLIiXlgKvDkNvvgnbgJAnReg6NP9yaP/Gq3VoP/1i9elyzpo3HqCVU4Z33bhg==}
@@ -1121,7 +1123,7 @@ packages:
       react: ^18.2.0
       react-dom: ^18.2.0
       sonner: ^1.4.41
-      starknet: ^6.21.0
+      starknet: ^7.6.2
       viem: ^2.21.32
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
@@ -1204,7 +1206,7 @@ packages:
       '@types/react-dom': ^18.3.1
       react: ^18.3.1
       react-dom: ^18.3.1
-      starknet: 6.23.1
+      starknet: ^7.6.2
 
   '@dojoengine/sdk@1.5.5':
     resolution: {integrity: sha512-4XPZ9ezc848bna7JhqTGSz5L45q+16UldK1OuRMIO0cS5BwDH5dQA8azP88eluAin3NiujZCu/UmvBoF2KKGQg==}
@@ -1215,7 +1217,7 @@ packages:
       '@types/react-dom': ^18.3.1
       react: ^18.3.1
       react-dom: ^18.3.1
-      starknet: 6.23.1
+      starknet: ^7.6.2
 
   '@dojoengine/torii-client@1.5.16':
     resolution: {integrity: sha512-6Z0/f/nmjB7wb35ClENUPtvRQI31I/N+6xuYTvFMU5lvJiquvqtsSzSC7qYqERHdxGz/VnkXaIf48+yx8/M71A==}
@@ -1232,12 +1234,12 @@ packages:
   '@dojoengine/utils@1.5.16':
     resolution: {integrity: sha512-cawAOWNMfL+290W+J0v3QaJJjpoShgAl+c8buG9FFbFzm9UiBXYBuKBgrGyMEhVfdiGC/iQq0O8l9QwHg8TmfQ==}
     peerDependencies:
-      starknet: 6.23.1
+      starknet: ^7.6.2
 
   '@dojoengine/utils@1.5.5':
     resolution: {integrity: sha512-isx5TyuizvIxLq4bTFSVsy+/lxPXvRY0+sQFTHoHQa+GW8cFhm7+yNeXTNLGPYvCwSVA9fDUeHUCd3Xc7thi8Q==}
     peerDependencies:
-      starknet: 6.23.1
+      starknet: ^7.6.2
 
   '@ecies/ciphers@0.2.3':
     resolution: {integrity: sha512-tapn6XhOueMwht3E2UzY0ZZjYokdaw9XtL9kEyjhQ/Fb9vL9xTFbOaI+fV0AWvTpYu4BNloC6getKW6NtSg4mA==}
@@ -1946,7 +1948,7 @@ packages:
   '@joshwooding/vite-plugin-react-docgen-typescript@0.5.0':
     resolution: {integrity: sha512-qYDdL7fPwLRI+bJNurVcis+tNgJmvWjH4YTBGXTA8xMuxFrnAz6E5o35iyzyKbq5J5Lr8mJGfrR5GXl+WGwhgQ==}
     peerDependencies:
-      typescript: '>= 4.3.x'
+      typescript: ^5.7.3
       vite: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
     peerDependenciesMeta:
       typescript:
@@ -3279,58 +3281,58 @@ packages:
   '@solana/codecs-core@2.0.0-rc.1':
     resolution: {integrity: sha512-bauxqMfSs8EHD0JKESaNmNuNvkvHSuN3bbWAF5RjOfDu2PugxHrvRebmYauvSumZ3cTfQ4HJJX6PG5rN852qyQ==}
     peerDependencies:
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/codecs-core@2.1.0':
     resolution: {integrity: sha512-SR7pKtmJBg2mhmkel2NeHA1pz06QeQXdMv8WJoIR9m8F/hw80K/612uaYbwTt2nkK0jg/Qn/rNSd7EcJ4SBGjw==}
     engines: {node: '>=20.18.0'}
     peerDependencies:
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/codecs-data-structures@2.0.0-rc.1':
     resolution: {integrity: sha512-rinCv0RrAVJ9rE/rmaibWJQxMwC5lSaORSZuwjopSUE6T0nb/MVg6Z1siNCXhh/HFTOg0l8bNvZHgBcN/yvXog==}
     peerDependencies:
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/codecs-numbers@2.0.0-rc.1':
     resolution: {integrity: sha512-J5i5mOkvukXn8E3Z7sGIPxsThRCgSdgTWJDQeZvucQ9PT6Y3HiVXJ0pcWiOWAoQ3RX8e/f4I3IC+wE6pZiJzDQ==}
     peerDependencies:
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/codecs-numbers@2.1.0':
     resolution: {integrity: sha512-XMu4yw5iCgQnMKsxSWPPOrGgtaohmupN3eyAtYv3K3C/MJEc5V90h74k5B1GUCiHvcrdUDO9RclNjD9lgbjFag==}
     engines: {node: '>=20.18.0'}
     peerDependencies:
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/codecs-strings@2.0.0-rc.1':
     resolution: {integrity: sha512-9/wPhw8TbGRTt6mHC4Zz1RqOnuPTqq1Nb4EyuvpZ39GW6O2t2Q7Q0XxiB3+BdoEjwA2XgPw6e2iRfvYgqty44g==}
     peerDependencies:
       fastestsmallesttextencoderdecoder: ^1.0.22
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/codecs@2.0.0-rc.1':
     resolution: {integrity: sha512-qxoR7VybNJixV51L0G1RD2boZTcxmwUWnKCaJJExQ5qNKwbpSyDdWfFJfM5JhGyKe9DnPVOZB+JHWXnpbZBqrQ==}
     peerDependencies:
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/errors@2.0.0-rc.1':
     resolution: {integrity: sha512-ejNvQ2oJ7+bcFAYWj225lyRkHnixuAeb7RQCixm+5mH4n1IA4Qya/9Bmfy5RAAHQzxK43clu3kZmL5eF9VGtYQ==}
     hasBin: true
     peerDependencies:
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/errors@2.1.0':
     resolution: {integrity: sha512-l+GxAv0Ar4d3c3PlZdA9G++wFYZREEbbRyAFP8+n8HSg0vudCuzogh/13io6hYuUhG/9Ve8ARZNamhV7UScKNw==}
     engines: {node: '>=20.18.0'}
     hasBin: true
     peerDependencies:
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/options@2.0.0-rc.1':
     resolution: {integrity: sha512-mLUcR9mZ3qfHlmMnREdIFPf9dpMc/Bl66tLSOOWxw4ml5xMT2ohFn7WGqoKcu/UHkT9CrC6+amEdqCNvUqI7AA==}
     peerDependencies:
-      typescript: '>=5'
+      typescript: ^5.7.3
 
   '@solana/spl-token-group@0.0.7':
     resolution: {integrity: sha512-V1N/iX7Cr7H0uazWUT2uk27TMqlqedpXHRqqAbVO2gvmJyT0E0ummMEAVQeXZ05ZhQ/xF39DLSdBp90XebWEug==}
@@ -3365,15 +3367,28 @@ packages:
   '@starknet-io/types-js@0.7.7':
     resolution: {integrity: sha512-WLrpK7LIaIb8Ymxu6KF/6JkGW1sso988DweWu7p5QY/3y7waBIiPvzh27D9bX5KIJNRDyOoOVoHVEKYUYWZ/RQ==}
 
+  '@starknet-io/types-js@0.8.4':
+    resolution: {integrity: sha512-0RZ3TZHcLsUTQaq1JhDSCM8chnzO4/XNsSCozwDET64JK5bjFDIf2ZUkta+tl5Nlbf4usoU7uZiDI/Q57kt2SQ==}
+
   '@starknet-react/chains@3.1.3':
     resolution: {integrity: sha512-b16VQyxqZXfiVmlKEkjfg+Oj8fdSnGWh1KU87O/unn6NpmaD9h511az1Cs6aW/j3qCIF1o5CrqfEnU1NWV7MVA==}
+
+  '@starknet-react/chains@4.0.1-beta.3':
+    resolution: {integrity: sha512-Lzq+AJuKSBHZbt+fAwvibCMfLSO5QPIoFDe+0ScC8UgYDzPDg+h+cA4ubmqBfY4HOT86Micyqx5PogVhZ2RWGA==}
 
   '@starknet-react/core@3.7.4':
     resolution: {integrity: sha512-fHzme/TLyhSJRIo3BarehiM23IZuLeT0gM0jvTpz8w1/Y05tK+UywpyzBCkueU+iHEwhopsICDpOFhFtqaJJZA==}
     peerDependencies:
       get-starknet-core: ^4.0.0
       react: ^18.0
-      starknet: ^6.11.0
+      starknet: ^7.6.2
+
+  '@starknet-react/core@4.0.1-beta.4':
+    resolution: {integrity: sha512-/XF60jXFmIbfWW5DcjPI8uVTEdba0ZdUuvIi0ezagAKtCBr55HVwIu9h/A59FolZnpXm0LWp031CXglwjfCyng==}
+    peerDependencies:
+      get-starknet-core: ^4.0.0
+      react: ^18.0
+      starknet: ^7.6.2
 
   '@storybook/addon-actions@8.6.12':
     resolution: {integrity: sha512-B5kfiRvi35oJ0NIo53CGH66H471A3XTzrfaa6SxXEJsgxxSeKScG5YeXcCvLiZfvANRQ7QDsmzPUgg0o3hdMXw==}
@@ -3522,7 +3537,7 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
       storybook: ^8.6.12
-      typescript: '>= 4.2.x'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       '@storybook/test':
         optional: true
@@ -3959,14 +3974,14 @@ packages:
     peerDependencies:
       '@typescript-eslint/parser': ^8.0.0 || ^8.0.0-alpha.0
       eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: ^5.7.3
 
   '@typescript-eslint/parser@8.31.1':
     resolution: {integrity: sha512-oU/OtYVydhXnumd0BobL9rkJg7wFJ9bFFPmSmB/bf/XWN85hlViji59ko6bSKBXyseT9V8l+CN1nwmlbiN0G7Q==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: ^5.7.3
 
   '@typescript-eslint/scope-manager@8.31.1':
     resolution: {integrity: sha512-BMNLOElPxrtNQMIsFHE+3P0Yf1z0dJqV9zLdDxN/xLlWMlXK/ApEsVEKzpizg9oal8bAT5Sc7+ocal7AC1HCVw==}
@@ -3977,7 +3992,7 @@ packages:
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: ^5.7.3
 
   '@typescript-eslint/types@8.31.1':
     resolution: {integrity: sha512-SfepaEFUDQYRoA70DD9GtytljBePSj17qPxFHA/h3eg6lPTqGJ5mWOtbXCk1YrVU1cTJRd14nhaXWFu0l2troQ==}
@@ -3987,14 +4002,14 @@ packages:
     resolution: {integrity: sha512-kaA0ueLe2v7KunYOyWYtlf/QhhZb7+qh4Yw6Ni5kgukMIG+iP773tjgBiLWIXYumWCwEq3nLW+TUywEp8uEeag==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: ^5.7.3
 
   '@typescript-eslint/utils@8.31.1':
     resolution: {integrity: sha512-2DSI4SNfF5T4oRveQ4nUrSjUqjMND0nLq9rEkz0gfGr3tg0S5KB6DhwR+WZPCjzkZl3cH+4x2ce3EsL50FubjQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <5.9.0'
+      typescript: ^5.7.3
 
   '@typescript-eslint/visitor-keys@8.31.1':
     resolution: {integrity: sha512-I+/rgqOVBn6f0o7NDTmAPWWC6NuqhV174lfYvAm9fUaWeiefLdux9/YI3/nLugEn9L8fcSi0XmpKi/r5u0nmpw==}
@@ -4156,11 +4171,11 @@ packages:
   '@vitest/expect@2.0.5':
     resolution: {integrity: sha512-yHZtwuP7JZivj65Gxoi8upUN2OzHTi3zVfjwdpu2WrvCZPLwsJ2Ey5ILIPccoW23dd/zQBlJ4/dhi7DWNyXCpA==}
 
-  '@vitest/expect@2.1.9':
-    resolution: {integrity: sha512-UJCIkTBenHeKT1TTlKMJWy1laZewsRIzYighyYiJKZreqtdxSos/S1t+ktRMQWu2CKqaarrkeszJx1cgC5tGZw==}
+  '@vitest/expect@2.1.8':
+    resolution: {integrity: sha512-8ytZ/fFHq2g4PJVAtDX57mayemKgDR6X3Oa2Foro+EygiOJHUXhCqBAAKQYYajZpFoIfvBCF1j6R6IYRSIUFuw==}
 
-  '@vitest/mocker@2.1.9':
-    resolution: {integrity: sha512-tVL6uJgoUdi6icpxmdrn5YNo3g3Dxv+IHJBr0GXHaEdTcw3F+cPKnsXFhli6nO+f/6SDKPHEK1UN+k+TQv0Ehg==}
+  '@vitest/mocker@2.1.8':
+    resolution: {integrity: sha512-7guJ/47I6uqfttp33mgo6ga5Gr1VnL58rcqYKyShoRK9ebu8T5Rs6HN3s1NABiBeVTdWNrwUMcHH54uXZBN4zA==}
     peerDependencies:
       msw: ^2.4.9
       vite: ^5.0.0
@@ -4173,23 +4188,29 @@ packages:
   '@vitest/pretty-format@2.0.5':
     resolution: {integrity: sha512-h8k+1oWHfwTkyTkb9egzwNMfJAEx4veaPSnMeKbVSjp4euqGSbQlm5+6VHwTr7u4FJslVVsUG5nopCaAYdOmSQ==}
 
+  '@vitest/pretty-format@2.1.8':
+    resolution: {integrity: sha512-9HiSZ9zpqNLKlbIDRWOnAWqgcA7xu+8YxXSekhr0Ykab7PAYFkhkwoqVArPOtJhPmYeE2YHgKZlj3CP36z2AJQ==}
+
   '@vitest/pretty-format@2.1.9':
     resolution: {integrity: sha512-KhRIdGV2U9HOUzxfiHmY8IFHTdqtOhIzCpd8WRdJiE7D/HUcZVD0EgQCVjm+Q9gkUXWgBvMmTtZgIG48wq7sOQ==}
 
-  '@vitest/runner@2.1.9':
-    resolution: {integrity: sha512-ZXSSqTFIrzduD63btIfEyOmNcBmQvgOVsPNPe0jYtESiXkhd8u2erDLnMxmGrDCwHCCHE7hxwRDCT3pt0esT4g==}
+  '@vitest/runner@2.1.8':
+    resolution: {integrity: sha512-17ub8vQstRnRlIU5k50bG+QOMLHRhYPAna5tw8tYbj+jzjcspnwnwtPtiOlkuKC4+ixDPTuLZiqiWWQ2PSXHVg==}
 
-  '@vitest/snapshot@2.1.9':
-    resolution: {integrity: sha512-oBO82rEjsxLNJincVhLhaxxZdEtV0EFHMK5Kmx5sJ6H9L183dHECjiefOAdnqpIgT5eZwT04PoggUnW88vOBNQ==}
+  '@vitest/snapshot@2.1.8':
+    resolution: {integrity: sha512-20T7xRFbmnkfcmgVEz+z3AU/3b0cEzZOt/zmnvZEctg64/QZbSDJEVm9fLnnlSi74KibmRsO9/Qabi+t0vCRPg==}
 
   '@vitest/spy@2.0.5':
     resolution: {integrity: sha512-c/jdthAhvJdpfVuaexSrnawxZz6pywlTPe84LUB2m/4t3rl2fTo9NFGBG4oWgaD+FTgDDV8hJ/nibT7IfH3JfA==}
 
-  '@vitest/spy@2.1.9':
-    resolution: {integrity: sha512-E1B35FwzXXTs9FHNK6bDszs7mtydNi5MIfUWpceJ8Xbfb1gBMscAnwLbEu+B44ed6W3XjL9/ehLPHR1fkf1KLQ==}
+  '@vitest/spy@2.1.8':
+    resolution: {integrity: sha512-5swjf2q95gXeYPevtW0BLk6H8+bPlMb4Vw/9Em4hFxDcaOxS+e0LOX4yqNxoHzMR2akEB2xfpnWUzkZokmgWDg==}
 
   '@vitest/utils@2.0.5':
     resolution: {integrity: sha512-d8HKbqIcya+GR67mkZbrzhS5kKhtp8dQLcmRZLGTscGVg7yImT82cIrhtn2L8+VujWcy6KZweApgNmPsTAO/UQ==}
+
+  '@vitest/utils@2.1.8':
+    resolution: {integrity: sha512-dwSoui6djdwbfFmIgbIjX2ZhIoG7Ex/+xpxyiEgIGzjliY8xGkcpITKTlp6B4MgtGkF2ilvm97cPM96XZaAgcA==}
 
   '@vitest/utils@2.1.9':
     resolution: {integrity: sha512-v0psaMSkNJ3A2NMrUEHFRzJtDPFn+/VWZ5WxImB21T9fjucJRmS7xCS3ppEnARb9y11OAzaD+P2Ps+b+BGX5iQ==}
@@ -4215,7 +4236,7 @@ packages:
   '@vue/language-core@2.2.0':
     resolution: {integrity: sha512-O1ZZFaaBGkKbsRfnVH1ifOK1/1BUkyK+3SQsfnh6PmMmD4qJcTU8godCeA96jjDRTL6zgnK7YzCHfaUlH2r0Mw==}
     peerDependencies:
-      typescript: '*'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -4321,7 +4342,7 @@ packages:
   abitype@1.0.0:
     resolution: {integrity: sha512-NMeMah//6bJ56H5XRj8QCV4AwuW6hB6zqz2LnhhLdcWVQOsXki6/Pn3APeqxCma62nXIcmZWdu1DlHWS74umVQ==}
     peerDependencies:
-      typescript: '>=5.0.4'
+      typescript: ^5.7.3
       zod: ^3 >=3.22.0
     peerDependenciesMeta:
       typescript:
@@ -4332,7 +4353,7 @@ packages:
   abitype@1.0.8:
     resolution: {integrity: sha512-ZeiI6h3GnW06uYDLx0etQtX/p8E24UaHHBj57RSjK7YBFe7iuVn07EDpOeP451D06sF27VOz9JJPlIKJmXgkEg==}
     peerDependencies:
-      typescript: '>=5.0.4'
+      typescript: ^5.7.3
       zod: ^3 >=3.22.0
     peerDependenciesMeta:
       typescript:
@@ -5683,7 +5704,7 @@ packages:
     resolution: {integrity: sha512-GnmyVd9TE/Ihe3RrvcafFhXErErtr2jS0JDeCSp3vWvy86AXwHsRBt0E3MqP/m8ACS1ivcsi5uaqjbhsG18qKw==}
     peerDependencies:
       eslint: ^7.23.0 || ^8.0.0 || ^9.0.0
-      typescript: '>=3.3.1'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -5971,9 +5992,6 @@ packages:
     peerDependenciesMeta:
       picomatch:
         optional: true
-
-  fetch-cookie@3.0.1:
-    resolution: {integrity: sha512-ZGXe8Y5Z/1FWqQ9q/CrJhkUD73DyBU9VF0hBQmEO/wPHe4A9PKTjplFDLeFX8aOsYypZUcX5Ji/eByn3VCVO3Q==}
 
   file-entry-cache@8.0.0:
     resolution: {integrity: sha512-XXTUwCvisa5oacNGRP9SfNtYBNAMi+RPwBFmblZEF7N7swHYQS6/Zfk7SRwx4D5j3CH211YNRco1DEMNVfZCnQ==}
@@ -6621,9 +6639,6 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
-  isomorphic-fetch@3.0.0:
-    resolution: {integrity: sha512-qvUtwJ3j6qwsF3jLxkZ72qCgjMysPzDfeV240JHiGZsANBYd+EEuu35v7dfrJ9Up0Ak07D7GGSkGhCHTqg/5wA==}
-
   isomorphic-timers-promises@1.0.1:
     resolution: {integrity: sha512-u4sej9B1LPSxTGKB/HiuzvEQnXH0ECYkSVQU39koSwmFAxhlEAFl9RdTvLv4TOTQUgBS5O3O5fwUxk6byBZ+IQ==}
     engines: {node: '>=10'}
@@ -7234,7 +7249,7 @@ packages:
   mipd@0.0.7:
     resolution: {integrity: sha512-aAPZPNDQ3uMTdKbuO2YmAw2TxLHO0moa4YKAyETM/DTj5FloZo+a+8tU+iv4GmW+sOxKLSRwcSFuczk+Cpt6fg==}
     peerDependencies:
-      typescript: '>=5.0.4'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -7508,7 +7523,7 @@ packages:
   ox@0.6.7:
     resolution: {integrity: sha512-17Gk/eFsFRAZ80p5eKqv89a57uXjd3NgIf1CaXojATPBuujVc/fQSVhBeAU9JCRB+k7J50WQAyWTxK19T9GgbA==}
     peerDependencies:
-      typescript: '>=5.4.0'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -7516,7 +7531,7 @@ packages:
   ox@0.6.9:
     resolution: {integrity: sha512-wi5ShvzE4eOcTwQVsIPdFr+8ycyX+5le/96iAJutaZAvCes1J0+RvpEPg5QDPDiaR0XQQAvZVl7AwqQcINuUug==}
     peerDependencies:
-      typescript: '>=5.4.0'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -7897,9 +7912,6 @@ packages:
     engines: {node: '>= 0.10'}
     hasBin: true
 
-  psl@1.15.0:
-    resolution: {integrity: sha512-JZd3gMVBAVQkSs6HdNZo9Sdo0LNcQeMNP3CozBJb3JYC/QUYZTnKxP+f8oWRX4rHP5EurWxqAHTSwUCjlNKa1w==}
-
   public-encrypt@4.0.3:
     resolution: {integrity: sha512-zVpa8oKZSz5bTMTFClc1fQOnyyEzpl5ozpi1B5YcvBrdohMjH2rfsBtyXcuNuwjsDIXmBYlF2N5FlJYhR29t8Q==}
 
@@ -7941,9 +7953,6 @@ packages:
     resolution: {integrity: sha512-773xhDQnZBMFobEiztv8LIl70ch5MSF/jUQVlhwFyBILqq96anmoctVIYz+ZRp0qbCKATTn6ev02M3r7Ga5vqA==}
     engines: {node: '>=0.4.x'}
 
-  querystringify@2.2.0:
-    resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
-
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
@@ -7974,7 +7983,7 @@ packages:
   react-docgen-typescript@2.2.2:
     resolution: {integrity: sha512-tvg2ZtOpOi6QDwsb3GZhOjDkkX0h8Z2gipvTg6OVMUyoYoURhEiRNePT8NZItTVCDh39JJHnLdfCOkzoLbFnTg==}
     peerDependencies:
-      typescript: '>= 4.3.x'
+      typescript: ^5.7.3
 
   react-docgen@7.1.1:
     resolution: {integrity: sha512-hlSJDQ2synMPKFZOsKo9Hi8WWZTC7POR8EmWvTSjow+VDgKzkmjQvFm2fk0tmRw+f0vTOIYKlarR0iL4996pdg==}
@@ -8448,16 +8457,14 @@ packages:
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
-  starknet@6.23.1:
-    resolution: {integrity: sha512-vQV9luXpmwZZs9RVZaRwm2iD8T0PYx1AzgZeQsCvD89tR0HwUF0paty27ZzuJrdPe0CmAs/ipAYFCE55jbj0RQ==}
-
-  starknet@6.24.1:
-    resolution: {integrity: sha512-g7tiCt73berhcNi41otlN3T3kxZnIvZhMi8WdC21Y6GC6zoQgbI2z1t7JAZF9c4xZiomlanwVnurcpyfEdyMpg==}
+  starknet@7.6.2:
+    resolution: {integrity: sha512-IoXUtzrtG+IPfvnZzIYcbp2lDSCb8VKFyOtgvuJhlfRWUJDxbe27ZAsXJfo9rSFS7kbKny5KdiZgO6RlxcmXvg==}
+    engines: {node: '>=22'}
 
   starknetkit@2.10.4:
     resolution: {integrity: sha512-POdv8GdGzBmwgMxn+FQhGXxcc4kFY6tnCHoB/c3j5vigZO2fLVxi5tJX9nYsITRX7QzoV3yal7W5e2agJ4SFSA==}
     peerDependencies:
-      starknet: ^6.21.1
+      starknet: ^7.6.2
 
   start-server-and-test@2.0.11:
     resolution: {integrity: sha512-TN39gLzPhHAflxyOkE/oMfQGj+pj3JgF6qVicFH/JrXt7xXktidKXwqfRga+ve7lVA8+RgPZVc25VrEPRScaDw==}
@@ -8647,7 +8654,7 @@ packages:
     hasBin: true
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0-next.0
-      typescript: '>=5.0.0'
+      typescript: ^5.7.3
 
   svelte-eslint-parser@0.43.0:
     resolution: {integrity: sha512-GpU52uPKKcVnh8tKN5P4UZpJ/fUDndmq7wfsvoVXsyP+aY0anol7Yqo01fyrlaWGMFfm4av5DyrjlaXdLRJvGA==}
@@ -8776,10 +8783,6 @@ packages:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
 
-  tough-cookie@4.1.4:
-    resolution: {integrity: sha512-Loo5UUvLD9ScZ6jh8beX1T6sO1w2/MpCRpEP7V280GKMVUQ0Jzar2U3UJPsrdbziLEMMhu3Ujnq//rhiFuIeag==}
-    engines: {node: '>=6'}
-
   tough-cookie@5.1.2:
     resolution: {integrity: sha512-FVDYdxtnj0G6Qm/DhNPSb8Ju59ULcup3tuJxkFb5K8Bv2pUXILbf0xZWU8PX8Ov19OXljbUyveOFwRMwkXzO+A==}
     engines: {node: '>=16'}
@@ -8808,7 +8811,7 @@ packages:
     resolution: {integrity: sha512-CUgTZL1irw8u29bzrOD/nH85jqyc74D6SshFgujOIA7osm2Rz7dYH77agkx7H4FBNxDq7Cjf+IjaX/8zwFW+ZQ==}
     engines: {node: '>=18.12'}
     peerDependencies:
-      typescript: '>=4.8.4'
+      typescript: ^5.7.3
 
   ts-dedent@2.2.0:
     resolution: {integrity: sha512-q5W7tVM71e2xjHZTlgfTDoPF/SmqKG5hddq9SzR49CH2hayqRKJtQ4mtRlSxKaJlR/+9rEM+mnBHf7I2/BQcpQ==}
@@ -8828,7 +8831,7 @@ packages:
       babel-jest: ^29.0.0
       esbuild: '*'
       jest: ^29.0.0
-      typescript: '>=4.3 <6'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       '@babel/core':
         optional: true
@@ -8854,7 +8857,7 @@ packages:
       '@swc/core': '>=1.2.50'
       '@swc/wasm': '>=1.2.50'
       '@types/node': '*'
-      typescript: '>=2.7'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       '@swc/core':
         optional: true
@@ -8868,7 +8871,7 @@ packages:
       '@swc/core': '>=1.2.50'
       '@swc/wasm': '>=1.2.50'
       '@types/node': '*'
-      typescript: '>=2.7'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       '@swc/core':
         optional: true
@@ -8902,7 +8905,7 @@ packages:
       '@microsoft/api-extractor': ^7.36.0
       '@swc/core': ^1
       postcss: ^8.4.12
-      typescript: '>=4.5.0'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       '@microsoft/api-extractor':
         optional: true
@@ -9007,17 +9010,7 @@ packages:
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
-      typescript: '>=4.8.4 <5.9.0'
-
-  typescript@4.9.5:
-    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-
-  typescript@5.8.2:
-    resolution: {integrity: sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==}
-    engines: {node: '>=14.17'}
-    hasBin: true
+      typescript: ^5.7.3
 
   typescript@5.8.3:
     resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
@@ -9059,10 +9052,6 @@ packages:
 
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
-    engines: {node: '>= 4.0.0'}
-
-  universalify@0.2.0:
-    resolution: {integrity: sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==}
     engines: {node: '>= 4.0.0'}
 
   universalify@2.0.1:
@@ -9153,9 +9142,6 @@ packages:
 
   url-join@4.0.1:
     resolution: {integrity: sha512-jk1+QP6ZJqyOiuEI9AEWQfju/nB2Pw466kbA0LEZljHwKeMgd9WrAEgEGxjPDD2+TNbbb37rTyhEfrCXfuKXnA==}
-
-  url-parse@1.5.10:
-    resolution: {integrity: sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==}
 
   url@0.11.4:
     resolution: {integrity: sha512-oCwdVC7mTuWiPyjLUz/COz5TLk6wgp0RCsN+wHZ2Ekneac9w8uuV0njcbbie2ME+Vs+d6duwmYuR3HgQXs1fOg==}
@@ -9257,7 +9243,7 @@ packages:
   viem@2.23.2:
     resolution: {integrity: sha512-NVmW/E0c5crMOtbEAqMF0e3NmvQykFXhLOc/CkLIXOlzHSA6KXVz3CYVmaKqBF8/xtjsjHAGjdJN3Ru1kFJLaA==}
     peerDependencies:
-      typescript: '>=5.0.4'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -9265,7 +9251,7 @@ packages:
   viem@2.28.1:
     resolution: {integrity: sha512-7eqGfxAPlMW9u9aE3SMEFPzNYqqU7uFLKUQyd/GwccyW4OAdq7VqJkPIpdULUePN9m3XmfBunA9mswYFp9sUuQ==}
     peerDependencies:
-      typescript: '>=5.0.4'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -9273,29 +9259,29 @@ packages:
   viem@2.9.20:
     resolution: {integrity: sha512-PHb1MrBHMrSZ8Ayuk3Y/6wUTcMbzlACQaM6AJBSv9kRKX3xYSZ/kehi+gvS0swQJeAlTQ4eZM7jsHQJNAOarmg==}
     peerDependencies:
-      typescript: '>=5.0.4'
+      typescript: ^5.7.3
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  vite-node@2.1.9:
-    resolution: {integrity: sha512-AM9aQ/IPrW/6ENLQg3AGY4K1N2TGZdR5e4gu/MmmR2xR3Ll1+dib+nook92g4TV3PXVyeyxdWwtaCAiUL0hMxA==}
+  vite-node@2.1.8:
+    resolution: {integrity: sha512-uPAwSr57kYjAUux+8E2j0q0Fxpn8M9VoyfGiRI8Kfktz9NcYMCenwY5RnZxnF1WTu3TGiYipirIzacLL3VVGFg==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
   vite-plugin-dts@4.5.3:
     resolution: {integrity: sha512-P64VnD00dR+e8S26ESoFELqc17+w7pKkwlBpgXteOljFyT0zDwD8hH4zXp49M/kciy//7ZbVXIwQCekBJjfWzA==}
     peerDependencies:
-      typescript: '*'
+      typescript: ^5.7.3
       vite: '*'
     peerDependenciesMeta:
       vite:
         optional: true
 
-  vite-plugin-node-polyfills@0.22.0:
-    resolution: {integrity: sha512-F+G3LjiGbG8QpbH9bZ//GSBr9i1InSTkaulfUHFa9jkLqVGORFBoqc2A/Yu5Mmh1kNAbiAeKeK+6aaQUf3x0JA==}
+  vite-plugin-node-polyfills@0.23.0:
+    resolution: {integrity: sha512-4n+Ys+2bKHQohPBKigFlndwWQ5fFKwaGY6muNDMTb0fSQLyBzS+jjUNRZG9sKF0S/Go4ApG6LFnUGopjkILg3w==}
     peerDependencies:
-      vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
+      vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
 
   vite-plugin-top-level-await@1.5.0:
     resolution: {integrity: sha512-r/DtuvHrSqUVk23XpG2cl8gjt1aATMG5cjExXL1BUTcSNab6CzkcPua9BPEc9fuTP5UpwClCxUe3+dNGL0yrgQ==}
@@ -9386,15 +9372,15 @@ packages:
       vite:
         optional: true
 
-  vitest@2.1.9:
-    resolution: {integrity: sha512-MSmPM9REYqDGBI8439mA4mWhV5sKmDlBKWIYbA3lRb2PTHACE0mgKwA8yQ2xq9vxDTuk4iPrECBAEW2aoFXY0Q==}
+  vitest@2.1.8:
+    resolution: {integrity: sha512-1vBKTZskHw/aosXqQUlVWWlGUxSJR8YtiyZDJAFeW2kPAeX6S3Sool0mjspO+kXLuxVWlEDDowBAeqeAQefqLQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
       '@edge-runtime/vm': '*'
       '@types/node': ^18.0.0 || >=20.0.0
-      '@vitest/browser': 2.1.9
-      '@vitest/ui': 2.1.9
+      '@vitest/browser': 2.1.8
+      '@vitest/ui': 2.1.8
       happy-dom: '*'
       jsdom: '*'
     peerDependenciesMeta:
@@ -9465,9 +9451,6 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
-
-  whatwg-fetch@3.6.20:
-    resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -9605,8 +9588,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.18.2:
-    resolution: {integrity: sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ==}
+  ws@8.18.3:
+    resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -9950,19 +9933,18 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@cartridge/arcade@0.0.0(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@cartridge/arcade@0.0.0(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
-      '@dojoengine/core': 1.5.5(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@dojoengine/sdk': 1.5.5(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@dojoengine/core': 1.5.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@dojoengine/sdk': 1.5.5(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@dojoengine/torii-client': 1.5.5
       eventemitter3: 5.0.1
-      starknet: 6.23.1(encoding@0.1.13)
+      starknet: 7.6.2
     transitivePeerDependencies:
       - '@tanstack/react-query'
       - '@types/react'
       - '@types/react-dom'
       - bufferutil
-      - encoding
       - get-starknet-core
       - react
       - react-dom
@@ -9970,15 +9952,15 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/controller-wasm@0.1.8': {}
+  '@cartridge/controller-wasm@0.2.0': {}
 
-  '@cartridge/marketplace@0.0.9(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@cartridge/marketplace@0.0.9(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
-      '@dojoengine/core': 1.5.17(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@dojoengine/sdk': 1.5.18(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@dojoengine/core': 1.5.17(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@dojoengine/sdk': 1.5.18(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@dojoengine/torii-client': 1.5.16
       '@dojoengine/torii-wasm': 1.5.16
-      starknet: 6.23.1(encoding@0.1.13)
+      starknet: 7.6.2
     optionalDependencies:
       '@tanstack/react-query': 5.75.0(react@18.3.1)
       react: 18.3.1
@@ -9986,7 +9968,6 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
       - bufferutil
-      - encoding
       - get-starknet-core
       - react-dom
       - typescript
@@ -10003,7 +9984,7 @@ snapshots:
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))':
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@7.6.2)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))':
     dependencies:
       '@cartridge/presets': https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022
       '@radix-ui/react-accordion': 1.2.1(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -10036,10 +10017,10 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       sonner: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      starknet: 6.24.1(encoding@0.1.13)
+      starknet: 7.6.2
       swr: 2.3.3(react@18.3.1)
       tailwind-merge: 2.6.0
-      tailwindcss-animate: 1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))
+      tailwindcss-animate: 1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)))
       vaul: 0.9.9(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       viem: 2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
     transitivePeerDependencies:
@@ -10048,7 +10029,7 @@ snapshots:
       - react-native
       - tailwindcss
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.24.1(encoding@0.1.13))(viem@2.28.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)(zod@3.24.4))':
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/bfcc1bd(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@7.6.2)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))':
     dependencies:
       '@cartridge/presets': https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022
       '@radix-ui/react-accordion': 1.2.1(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -10081,12 +10062,12 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       sonner: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      starknet: 6.24.1(encoding@0.1.13)
+      starknet: 7.6.2
       swr: 2.3.3(react@18.3.1)
       tailwind-merge: 2.6.0
       tailwindcss-animate: 1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)))
       vaul: 0.9.9(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      viem: 2.28.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)(zod@3.24.4)
+      viem: 2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
     transitivePeerDependencies:
       - '@types/react'
       - '@types/react-dom'
@@ -10135,25 +10116,23 @@ snapshots:
 
   '@csstools/css-tokenizer@3.0.3': {}
 
-  '@dojoengine/core@1.5.17(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)':
+  '@dojoengine/core@1.5.17(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
-      starknet: 6.23.1(encoding@0.1.13)
+      starknet: 7.6.2
       zod: 3.24.4
     transitivePeerDependencies:
       - bufferutil
-      - encoding
       - typescript
       - utf-8-validate
 
-  '@dojoengine/core@1.5.5(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)':
+  '@dojoengine/core@1.5.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
-      starknet: 6.23.1(encoding@0.1.13)
+      starknet: 7.6.2
       zod: 3.24.4
     transitivePeerDependencies:
       - bufferutil
-      - encoding
       - typescript
       - utf-8-validate
 
@@ -10169,14 +10148,14 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/sdk@1.5.18(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@dojoengine/sdk@1.5.18(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
-      '@dojoengine/core': 1.5.17(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@dojoengine/core': 1.5.17(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@dojoengine/torii-client': 1.5.16
       '@dojoengine/torii-wasm': 1.5.16
-      '@dojoengine/utils': 1.5.16(bufferutil@4.0.9)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@dojoengine/utils': 1.5.16(bufferutil@4.0.9)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@starknet-react/chains': 3.1.3
-      '@starknet-react/core': 3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@starknet-react/core': 3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@tanstack/react-query': 5.75.0(react@18.3.1)
       '@types/react': 18.3.20
       '@types/react-dom': 18.3.7(@types/react@18.3.20)
@@ -10184,24 +10163,23 @@ snapshots:
       neverthrow: 8.2.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      starknet: 6.23.1(encoding@0.1.13)
+      starknet: 7.6.2
       zustand: 4.5.6(@types/react@18.3.20)(immer@10.1.1)(react@18.3.1)
     transitivePeerDependencies:
       - bufferutil
-      - encoding
       - get-starknet-core
       - typescript
       - utf-8-validate
       - zod
 
-  '@dojoengine/sdk@1.5.5(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@dojoengine/sdk@1.5.5(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
-      '@dojoengine/core': 1.5.5(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@dojoengine/core': 1.5.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@dojoengine/torii-client': 1.5.5
       '@dojoengine/torii-wasm': 1.5.5
-      '@dojoengine/utils': 1.5.5(bufferutil@4.0.9)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@dojoengine/utils': 1.5.5(bufferutil@4.0.9)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@starknet-react/chains': 3.1.3
-      '@starknet-react/core': 3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@starknet-react/core': 3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@tanstack/react-query': 5.75.0(react@18.3.1)
       '@types/react': 18.3.20
       '@types/react-dom': 18.3.7(@types/react@18.3.20)
@@ -10209,11 +10187,10 @@ snapshots:
       neverthrow: 8.2.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      starknet: 6.23.1(encoding@0.1.13)
+      starknet: 7.6.2
       zustand: 4.5.6(@types/react@18.3.20)(immer@10.1.1)(react@18.3.1)
     transitivePeerDependencies:
       - bufferutil
-      - encoding
       - get-starknet-core
       - typescript
       - utf-8-validate
@@ -10231,26 +10208,26 @@ snapshots:
 
   '@dojoengine/torii-wasm@1.5.5': {}
 
-  '@dojoengine/utils@1.5.16(bufferutil@4.0.9)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@dojoengine/utils@1.5.16(bufferutil@4.0.9)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
       '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@latticexyz/utils': 2.2.21
       mathjs: 12.4.3
       micro-starknet: 0.2.3
-      starknet: 6.23.1(encoding@0.1.13)
+      starknet: 7.6.2
     transitivePeerDependencies:
       - bufferutil
       - typescript
       - utf-8-validate
       - zod
 
-  '@dojoengine/utils@1.5.5(bufferutil@4.0.9)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@dojoengine/utils@1.5.5(bufferutil@4.0.9)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
       '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@latticexyz/utils': 2.2.21
       mathjs: 12.4.3
       micro-starknet: 0.2.3
-      starknet: 6.23.1(encoding@0.1.13)
+      starknet: 7.6.2
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -11156,7 +11133,7 @@ snapshots:
       resolve: 1.22.10
       semver: 7.5.4
       source-map: 0.6.1
-      typescript: 5.8.2
+      typescript: 5.8.3
     transitivePeerDependencies:
       - '@types/node'
 
@@ -11174,7 +11151,7 @@ snapshots:
       resolve: 1.22.10
       semver: 7.5.4
       source-map: 0.6.1
-      typescript: 5.8.2
+      typescript: 5.8.3
     transitivePeerDependencies:
       - '@types/node'
     optional: true
@@ -12694,9 +12671,13 @@ snapshots:
 
   '@starknet-io/types-js@0.7.7': {}
 
+  '@starknet-io/types-js@0.8.4': {}
+
   '@starknet-react/chains@3.1.3': {}
 
-  '@starknet-react/core@3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.23.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)':
+  '@starknet-react/chains@4.0.1-beta.3': {}
+
+  '@starknet-react/core@3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@starknet-io/types-js': 0.7.10
       '@starknet-react/chains': 3.1.3
@@ -12705,7 +12686,7 @@ snapshots:
       eventemitter3: 5.0.1
       get-starknet-core: 4.0.0
       react: 18.3.1
-      starknet: 6.23.1(encoding@0.1.13)
+      starknet: 7.6.2
       viem: 2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       zod: 3.24.4
     transitivePeerDependencies:
@@ -12713,16 +12694,16 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@starknet-react/core@3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.24.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)':
+  '@starknet-react/core@4.0.1-beta.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@starknet-io/types-js': 0.7.10
-      '@starknet-react/chains': 3.1.3
+      '@starknet-react/chains': 4.0.1-beta.3
       '@tanstack/react-query': 5.75.0(react@18.3.1)
       abi-wan-kanabi: 2.2.4
       eventemitter3: 5.0.1
       get-starknet-core: 4.0.0
       react: 18.3.1
-      starknet: 6.24.1(encoding@0.1.13)
+      starknet: 7.6.2
       viem: 2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       zod: 3.24.4
     transitivePeerDependencies:
@@ -12846,7 +12827,7 @@ snapshots:
       recast: 0.23.11
       semver: 7.7.1
       util: 0.12.5
-      ws: 8.18.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
       prettier: 3.5.3
     transitivePeerDependencies:
@@ -13722,8 +13703,8 @@ snapshots:
       node-fetch: 2.6.9(encoding@0.1.13)
       path-to-regexp: 6.2.1
       ts-morph: 12.0.0
-      ts-node: 10.9.1(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@4.9.5)
-      typescript: 4.9.5
+      ts-node: 10.9.1(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)
+      typescript: 5.8.3
       undici: 5.28.4
     transitivePeerDependencies:
       - '@swc/core'
@@ -13782,7 +13763,7 @@ snapshots:
     transitivePeerDependencies:
       - '@swc/helpers'
 
-  '@vitest/coverage-v8@2.1.8(vitest@2.1.9(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)))':
+  '@vitest/coverage-v8@2.1.8(vitest@2.1.8(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -13796,7 +13777,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.1.9(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      vitest: 2.1.8(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
     transitivePeerDependencies:
       - supports-color
 
@@ -13807,16 +13788,16 @@ snapshots:
       chai: 5.2.0
       tinyrainbow: 1.2.0
 
-  '@vitest/expect@2.1.9':
+  '@vitest/expect@2.1.8':
     dependencies:
-      '@vitest/spy': 2.1.9
-      '@vitest/utils': 2.1.9
+      '@vitest/spy': 2.1.8
+      '@vitest/utils': 2.1.8
       chai: 5.2.0
       tinyrainbow: 1.2.0
 
-  '@vitest/mocker@2.1.9(vite@5.4.19(@types/node@18.19.87))':
+  '@vitest/mocker@2.1.8(vite@5.4.19(@types/node@18.19.87))':
     dependencies:
-      '@vitest/spy': 2.1.9
+      '@vitest/spy': 2.1.8
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
@@ -13826,18 +13807,22 @@ snapshots:
     dependencies:
       tinyrainbow: 1.2.0
 
+  '@vitest/pretty-format@2.1.8':
+    dependencies:
+      tinyrainbow: 1.2.0
+
   '@vitest/pretty-format@2.1.9':
     dependencies:
       tinyrainbow: 1.2.0
 
-  '@vitest/runner@2.1.9':
+  '@vitest/runner@2.1.8':
     dependencies:
-      '@vitest/utils': 2.1.9
+      '@vitest/utils': 2.1.8
       pathe: 1.1.2
 
-  '@vitest/snapshot@2.1.9':
+  '@vitest/snapshot@2.1.8':
     dependencies:
-      '@vitest/pretty-format': 2.1.9
+      '@vitest/pretty-format': 2.1.8
       magic-string: 0.30.17
       pathe: 1.1.2
 
@@ -13845,7 +13830,7 @@ snapshots:
     dependencies:
       tinyspy: 3.0.2
 
-  '@vitest/spy@2.1.9':
+  '@vitest/spy@2.1.8':
     dependencies:
       tinyspy: 3.0.2
 
@@ -13853,6 +13838,12 @@ snapshots:
     dependencies:
       '@vitest/pretty-format': 2.0.5
       estree-walker: 3.0.3
+      loupe: 3.1.3
+      tinyrainbow: 1.2.0
+
+  '@vitest/utils@2.1.8':
+    dependencies:
+      '@vitest/pretty-format': 2.1.8
       loupe: 3.1.3
       tinyrainbow: 1.2.0
 
@@ -14444,11 +14435,6 @@ snapshots:
   abitype@1.0.0(typescript@5.8.3)(zod@3.24.4):
     optionalDependencies:
       typescript: 5.8.3
-      zod: 3.24.4
-
-  abitype@1.0.8(typescript@4.9.5)(zod@3.24.4):
-    optionalDependencies:
-      typescript: 4.9.5
       zod: 3.24.4
 
   abitype@1.0.8(typescript@5.8.3)(zod@3.22.4):
@@ -16362,11 +16348,6 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.2
 
-  fetch-cookie@3.0.1:
-    dependencies:
-      set-cookie-parser: 2.7.1
-      tough-cookie: 4.1.4
-
   file-entry-cache@8.0.0:
     dependencies:
       flat-cache: 4.0.1
@@ -17049,13 +17030,6 @@ snapshots:
 
   isexe@2.0.0: {}
 
-  isomorphic-fetch@3.0.0(encoding@0.1.13):
-    dependencies:
-      node-fetch: 2.7.0(encoding@0.1.13)
-      whatwg-fetch: 3.6.20
-    transitivePeerDependencies:
-      - encoding
-
   isomorphic-timers-promises@1.0.1: {}
 
   isomorphic-ws@4.0.1(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
@@ -17644,7 +17618,7 @@ snapshots:
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.2.0
-      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -18281,20 +18255,6 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  ox@0.6.9(typescript@4.9.5)(zod@3.24.4):
-    dependencies:
-      '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.9.0
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@4.9.5)(zod@3.24.4)
-      eventemitter3: 5.0.1
-    optionalDependencies:
-      typescript: 4.9.5
-    transitivePeerDependencies:
-      - zod
-
   ox@0.6.9(typescript@5.8.3)(zod@3.22.4):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
@@ -18553,6 +18513,14 @@ snapshots:
       postcss: 8.5.3
       ts-node: 10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@22.15.3)(typescript@5.8.3)
 
+  postcss-load-config@4.0.2(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)):
+    dependencies:
+      lilconfig: 3.1.3
+      yaml: 2.7.1
+    optionalDependencies:
+      postcss: 8.5.3
+      ts-node: 10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)
+
   postcss-load-config@4.0.2(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)):
     dependencies:
       lilconfig: 3.1.3
@@ -18662,10 +18630,6 @@ snapshots:
     dependencies:
       event-stream: 3.3.4
 
-  psl@1.15.0:
-    dependencies:
-      punycode: 2.3.1
-
   public-encrypt@4.0.3:
     dependencies:
       bn.js: 4.12.2
@@ -18711,8 +18675,6 @@ snapshots:
       strict-uri-encode: 2.0.0
 
   querystring-es3@0.2.1: {}
-
-  querystringify@2.2.0: {}
 
   queue-microtask@1.2.3: {}
 
@@ -19010,7 +18972,7 @@ snapshots:
       buffer: 6.0.3
       eventemitter3: 5.0.1
       uuid: 8.3.2
-      ws: 8.18.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
       bufferutil: 4.0.9
       utf-8-validate: 5.0.10
@@ -19294,39 +19256,20 @@ snapshots:
 
   stackback@0.0.2: {}
 
-  starknet@6.23.1(encoding@0.1.13):
+  starknet@7.6.2:
     dependencies:
       '@noble/curves': 1.7.0
       '@noble/hashes': 1.6.0
       '@scure/base': 1.2.1
       '@scure/starknet': 1.1.0
+      '@starknet-io/starknet-types-07': '@starknet-io/types-js@0.7.10'
+      '@starknet-io/starknet-types-08': '@starknet-io/types-js@0.8.4'
       abi-wan-kanabi: 2.2.4
-      fetch-cookie: 3.0.1
-      isomorphic-fetch: 3.0.0(encoding@0.1.13)
       lossless-json: 4.0.2
       pako: 2.1.0
-      starknet-types-07: '@starknet-io/types-js@0.7.10'
       ts-mixer: 6.0.4
-    transitivePeerDependencies:
-      - encoding
 
-  starknet@6.24.1(encoding@0.1.13):
-    dependencies:
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.0
-      '@scure/base': 1.2.1
-      '@scure/starknet': 1.1.0
-      abi-wan-kanabi: 2.2.4
-      fetch-cookie: 3.0.1
-      isomorphic-fetch: 3.0.0(encoding@0.1.13)
-      lossless-json: 4.0.2
-      pako: 2.1.0
-      starknet-types-07: '@starknet-io/types-js@0.7.10'
-      ts-mixer: 6.0.4
-    transitivePeerDependencies:
-      - encoding
-
-  starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.24.1(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4):
+  starknetkit@2.10.4(bufferutil@4.0.9)(starknet@7.6.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4):
     dependencies:
       '@starknet-io/get-starknet': 4.0.7
       '@starknet-io/get-starknet-core': 4.0.7
@@ -19339,7 +19282,7 @@ snapshots:
       eventemitter3: 5.0.1
       events: 3.3.0
       lodash-es: 4.17.21
-      starknet: 6.24.1(encoding@0.1.13)
+      starknet: 7.6.2
       svelte-forms: 2.3.1
       trpc-browser: 1.4.4(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)
     transitivePeerDependencies:
@@ -19633,9 +19576,40 @@ snapshots:
 
   tailwind-merge@2.6.0: {}
 
+  tailwindcss-animate@1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3))):
+    dependencies:
+      tailwindcss: 3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3))
+
   tailwindcss-animate@1.0.7(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3))):
     dependencies:
       tailwindcss: 3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3))
+
+  tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)):
+    dependencies:
+      '@alloc/quick-lru': 5.2.0
+      arg: 5.0.2
+      chokidar: 3.6.0
+      didyoumean: 1.2.2
+      dlv: 1.1.3
+      fast-glob: 3.3.3
+      glob-parent: 6.0.2
+      is-glob: 4.0.3
+      jiti: 1.21.7
+      lilconfig: 3.1.3
+      micromatch: 4.0.8
+      normalize-path: 3.0.0
+      object-hash: 3.0.0
+      picocolors: 1.1.1
+      postcss: 8.5.3
+      postcss-import: 15.1.0(postcss@8.5.3)
+      postcss-js: 4.0.1(postcss@8.5.3)
+      postcss-load-config: 4.0.2(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3))
+      postcss-nested: 6.2.0(postcss@8.5.3)
+      postcss-selector-parser: 6.1.2
+      resolve: 1.22.10
+      sucrase: 3.35.0
+    transitivePeerDependencies:
+      - ts-node
 
   tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3)):
     dependencies:
@@ -19754,13 +19728,6 @@ snapshots:
 
   totalist@3.0.1: {}
 
-  tough-cookie@4.1.4:
-    dependencies:
-      psl: 1.15.0
-      punycode: 2.3.1
-      universalify: 0.2.0
-      url-parse: 1.5.10
-
   tough-cookie@5.1.2:
     dependencies:
       tldts: 6.1.86
@@ -19817,7 +19784,7 @@ snapshots:
       '@ts-morph/common': 0.11.1
       code-block-writer: 10.1.1
 
-  ts-node@10.9.1(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@4.9.5):
+  ts-node@10.9.1(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -19831,11 +19798,32 @@ snapshots:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 4.9.5
+      typescript: 5.8.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     optionalDependencies:
       '@swc/core': 1.11.24(@swc/helpers@0.5.17)
+
+  ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 16.18.11
+      acorn: 8.14.1
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.8.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optionalDependencies:
+      '@swc/core': 1.11.24(@swc/helpers@0.5.17)
+    optional: true
 
   ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@18.19.87)(typescript@5.8.3):
     dependencies:
@@ -20057,10 +20045,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  typescript@4.9.5: {}
-
-  typescript@5.8.2: {}
-
   typescript@5.8.3: {}
 
   ufo@1.6.1: {}
@@ -20095,8 +20079,6 @@ snapshots:
       qs: 6.14.0
 
   universalify@0.1.2: {}
-
-  universalify@0.2.0: {}
 
   universalify@2.0.1: {}
 
@@ -20158,11 +20140,6 @@ snapshots:
       punycode: 2.3.1
 
   url-join@4.0.1: {}
-
-  url-parse@1.5.10:
-    dependencies:
-      querystringify: 2.2.0
-      requires-port: 1.0.0
 
   url@0.11.4:
     dependencies:
@@ -20282,23 +20259,6 @@ snapshots:
       - utf-8-validate
       - zod
 
-  viem@2.28.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)(zod@3.24.4):
-    dependencies:
-      '@noble/curves': 1.8.2
-      '@noble/hashes': 1.7.2
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
-      abitype: 1.0.8(typescript@4.9.5)(zod@3.24.4)
-      isows: 1.0.6(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      ox: 0.6.9(typescript@4.9.5)(zod@3.24.4)
-      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-    optionalDependencies:
-      typescript: 4.9.5
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-      - zod
-
   viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.22.4):
     dependencies:
       '@noble/curves': 1.8.2
@@ -20350,7 +20310,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  vite-node@2.1.9(@types/node@18.19.87):
+  vite-node@2.1.8(@types/node@18.19.87):
     dependencies:
       cac: 6.7.14
       debug: 4.4.0
@@ -20387,7 +20347,7 @@ snapshots:
       - rollup
       - supports-color
 
-  vite-plugin-node-polyfills@0.22.0(rollup@4.40.2)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)):
+  vite-plugin-node-polyfills@0.23.0(rollup@4.40.2)(vite@6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)):
     dependencies:
       '@rollup/plugin-inject': 5.0.5(rollup@4.40.2)
       node-stdlib-browser: 1.3.1
@@ -20466,15 +20426,15 @@ snapshots:
     optionalDependencies:
       vite: 6.3.4(@types/node@22.15.3)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
 
-  vitest@2.1.9(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
+  vitest@2.1.8(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
     dependencies:
-      '@vitest/expect': 2.1.9
-      '@vitest/mocker': 2.1.9(vite@5.4.19(@types/node@18.19.87))
+      '@vitest/expect': 2.1.8
+      '@vitest/mocker': 2.1.8(vite@5.4.19(@types/node@18.19.87))
       '@vitest/pretty-format': 2.1.9
-      '@vitest/runner': 2.1.9
-      '@vitest/snapshot': 2.1.9
-      '@vitest/spy': 2.1.9
-      '@vitest/utils': 2.1.9
+      '@vitest/runner': 2.1.8
+      '@vitest/snapshot': 2.1.8
+      '@vitest/spy': 2.1.8
+      '@vitest/utils': 2.1.8
       chai: 5.2.0
       debug: 4.4.0
       expect-type: 1.2.1
@@ -20486,7 +20446,7 @@ snapshots:
       tinypool: 1.0.2
       tinyrainbow: 1.2.0
       vite: 5.4.19(@types/node@18.19.87)
-      vite-node: 2.1.9(@types/node@18.19.87)
+      vite-node: 2.1.8(@types/node@18.19.87)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@edge-runtime/vm': 3.2.0
@@ -20562,8 +20522,6 @@ snapshots:
   whatwg-encoding@3.1.1:
     dependencies:
       iconv-lite: 0.6.3
-
-  whatwg-fetch@3.6.20: {}
 
   whatwg-mimetype@4.0.0: {}
 
@@ -20702,7 +20660,7 @@ snapshots:
       bufferutil: 4.0.9
       utf-8-validate: 5.0.10
 
-  ws@8.18.2(bufferutil@4.0.9)(utf-8-validate@5.0.10):
+  ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     optionalDependencies:
       bufferutil: 4.0.9
       utf-8-validate: 5.0.10
