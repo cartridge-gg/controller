@@ -14,7 +14,7 @@ import {
   Connection,
   PublicKey,
   Transaction,
-} from "@solana/web3.js";
+} from "@solana/web3";
 import {
   createAssociatedTokenAccountInstruction,
   createTransferInstruction,
