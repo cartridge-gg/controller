@@ -65,6 +65,27 @@ const CreateSessionLayout = ({
   const { controller, theme } = useConnection();
   const upgrade = useUpgrade();
 
+  const hasRequiredPolicy = useMemo(() => {
+    if (!policies) return false;
+
+    if (policies.contracts) {
+      for (const address in policies.contracts) {
+        if (policies.contracts[address].methods.some((m) => m.isRequired)) {
+          return true;
+        }
+      }
+    }
+
+    // Check message policies
+    if (policies.messages) {
+      if (policies.messages.some((m) => Boolean(m.isRequired))) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [policies]);
+
   const expiresAt = useMemo(() => {
     return duration + now();
   }, [duration]);
@@ -176,14 +197,16 @@ const CreateSessionLayout = ({
           {error && <ControllerErrorAlert className="mb-3" error={error} />}
 
           <div className="flex items-center gap-4">
-            <Button
-              variant="secondary"
-              onClick={onSkipSession}
-              disabled={isConnecting}
-              className="px-8"
-            >
-              Skip
-            </Button>
+            {!hasRequiredPolicy && (
+              <Button
+                variant="secondary"
+                onClick={onSkipSession}
+                disabled={isConnecting}
+                className="px-8"
+              >
+                Skip
+              </Button>
+            )}
             <Button
               className="flex-1"
               disabled={isConnecting || (!policies?.verified && !isConsent)}
