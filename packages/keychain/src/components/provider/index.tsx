@@ -20,6 +20,11 @@ import { PostHogProvider } from "./posthog";
 import { TokensProvider } from "./tokens";
 import { UIProvider } from "./ui";
 import { FeatureProvider } from "@/hooks/features";
+import { ArcadeProvider as ProfileArcadeProvider } from "#profile/components/provider/arcade";
+import { MarketplaceProvider as ProfileMarketplaceProvider } from "#profile/components/provider/marketplace";
+import { DataProvider as ProfileDataProvider } from "#profile/components/provider/data";
+import { ThemeProvider as ProfileThemeProvider } from "#profile/components/provider/theme";
+import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -47,30 +52,42 @@ export function Provider({ children }: PropsWithChildren) {
     <BrowserRouter>
       <FeatureProvider>
         <CartridgeAPIProvider url={ENDPOINT}>
-          <QueryClientProvider client={queryClient}>
-            <ConnectionContext.Provider value={connection}>
-              <TurnkeyProvider config={turnkeyConfig}>
-                <Auth0Provider {...auth0Config}>
-                  <WalletsProvider>
-                    <PostHogProvider>
-                      <UpgradeProvider controller={connection.controller}>
-                        <UIProvider>
-                          <StarknetConfig
-                            explorer={cartridge}
-                            chains={[sepolia, mainnet]}
-                            defaultChainId={defaultChainId}
-                            provider={jsonRpcProvider({ rpc })}
-                          >
-                            <TokensProvider>{children}</TokensProvider>
-                          </StarknetConfig>
-                        </UIProvider>
-                      </UpgradeProvider>
-                    </PostHogProvider>
-                  </WalletsProvider>
-                </Auth0Provider>
-              </TurnkeyProvider>
-            </ConnectionContext.Provider>
-          </QueryClientProvider>
+          <IndexerAPIProvider credentials="omit">
+            <QueryClientProvider client={queryClient}>
+              <ConnectionContext.Provider value={connection}>
+                <TurnkeyProvider config={turnkeyConfig}>
+                  <Auth0Provider {...auth0Config}>
+                    <WalletsProvider>
+                      <PostHogProvider>
+                        <UpgradeProvider controller={connection.controller}>
+                          <UIProvider>
+                            <StarknetConfig
+                              explorer={cartridge}
+                              chains={[sepolia, mainnet]}
+                              defaultChainId={defaultChainId}
+                              provider={jsonRpcProvider({ rpc })}
+                            >
+                              <TokensProvider>
+                                <ProfileMarketplaceProvider>
+                                  <ProfileArcadeProvider>
+                                    <ProfileThemeProvider>
+                                      <ProfileDataProvider>
+                                        {children}
+                                      </ProfileDataProvider>
+                                    </ProfileThemeProvider>
+                                  </ProfileArcadeProvider>
+                                </ProfileMarketplaceProvider>
+                              </TokensProvider>
+                            </StarknetConfig>
+                          </UIProvider>
+                        </UpgradeProvider>
+                      </PostHogProvider>
+                    </WalletsProvider>
+                  </Auth0Provider>
+                </TurnkeyProvider>
+              </ConnectionContext.Provider>
+            </QueryClientProvider>
+          </IndexerAPIProvider>
         </CartridgeAPIProvider>
       </FeatureProvider>
     </BrowserRouter>

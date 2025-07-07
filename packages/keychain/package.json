@@ -21,13 +21,37 @@
     "test:storybook:update": "start-server-and-test 'SNAPSHOT=1 pnpm storybook:serve' 6001 'pnpm test-storybook --url http://127.0.0.1:6001 -u'",
     "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6001 'pnpm test-storybook -u'"
   },
+  "imports": {
+    "#profile/hooks/account": {
+      "storybook": "./src/profile/hooks/account.mock.ts",
+      "default": "./src/profile/hooks/account.ts"
+    },
+    "#profile/hooks/collection": {
+      "storybook": "./src/profile/hooks/collection.mock.ts",
+      "default": "./src/profile/hooks/collection.ts"
+    },
+    "#profile/hooks/token": {
+      "storybook": "./src/profile/hooks/token.mock.ts",
+      "default": "./src/profile/hooks/token.ts"
+    },
+    "#profile/*": [
+      "./src/profile/*",
+      "./src/profile/*.ts",
+      "./src/profile/*.tsx",
+      "./src/profile/*/index.ts",
+      "./src/profile/*/index.tsx"
+    ]
+  },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
     "@auth0/auth0-spa-js": "^2.1.3",
+    "@cartridge/arcade": "0.0.0",
     "@cartridge/controller": "workspace:*",
     "@cartridge/controller-wasm": "catalog:",
+    "@cartridge/marketplace": "0.0.9",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",
+    "@dojoengine/torii-wasm": "1.5.16",
     "@noble/hashes": "^1.7.1",
     "@solana/spl-token": "catalog:",
     "@solana/web3.js": "catalog:",
@@ -50,6 +74,8 @@
     "jwt-decode": "^4.0.0",
     "lodash": "catalog:",
     "p-throttle": "^6.2.0",
+    "compare-versions": "^6.1.1",
+    "viem": "catalog:",
     "posthog-js-lite": "3.2.1",
     "qrcode.react": "catalog:",
     "react": "catalog:",

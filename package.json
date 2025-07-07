@@ -21,7 +21,6 @@
     "controller": "pnpm --filter @cartridge/controller",
     "connector": "pnpm --filter @cartridge/connector",
     "book": "pnpm --filter @cartridge/documentation",
-    "profil": "pnpm --filter @cartridge/profile",
     "example:next": "pnpm --filter @cartridge/controller-example-next",
     "example:svelte": "pnpm --filter @cartridge/controller-example-svelte",
     "test": "pnpm keychain test",
