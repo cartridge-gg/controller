@@ -5,6 +5,7 @@ import { useConnection } from "@/hooks/connection";
 import {
   DeployCtx,
   ExecuteCtx,
+  NavigateCtx,
   OpenStarterPackCtx,
   SignMessageCtx,
 } from "@/utils/connection";
@@ -21,11 +22,13 @@ import { usePostHog } from "./provider/posthog";
 import { StarterPack } from "./starterpack";
 import { PurchaseType } from "@/hooks/payments/crypto";
 import { executeCore } from "@/utils/connection/execute";
+import { useNavigate } from "react-router-dom";
 
 export function Home() {
   const { context, controller, policies, origin, isConfigLoading } =
     useConnection();
   const upgrade = useUpgrade();
+  const navigate = useNavigate();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
   >(undefined);
@@ -48,6 +51,15 @@ export function Home() {
       );
     }
   }, [context?.type, posthog]);
+
+  // Handle navigation context
+  useEffect(() => {
+    if (context?.type === "navigate") {
+      const ctx = context as NavigateCtx;
+      navigate(ctx.path);
+      ctx.resolve();
+    }
+  }, [context, navigate]);
 
   if (window.self === window.top || !context || !origin) {
     return <></>;
@@ -172,6 +184,10 @@ export function Home() {
     case "open-starter-pack": {
       const ctx = context as OpenStarterPackCtx;
       return <StarterPack starterpackId={ctx.starterpackId} />;
+    }
+    case "navigate": {
+      // Navigation is handled in useEffect above
+      return <></>;
     }
     default:
       return <>*Waves*</>;
