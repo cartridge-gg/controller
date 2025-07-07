@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { TROPHY, PROGRESS } from "#profile/constants";
+import { TROPHY } from "#profile/constants";
 import { Trophy, Progress, Task } from "#profile/models";
-import { useConnection } from "./context";
+import { useProfileContext } from "./profile";
 import { useAccount } from "./account";
 import { useProgressions } from "./progressions";
 import { useTrophies } from "./trophies";
@@ -45,7 +45,7 @@ export interface Player {
 }
 
 export function useAchievements(accountAddress?: string) {
-  const { project, namespace } = useConnection();
+  const { project, namespace } = useProfileContext();
   const { address } = useAccount();
 
   const [achievements, setAchievements] = useState<Item[]>([]);
@@ -62,17 +62,13 @@ export function useAchievements(accountAddress?: string) {
     parser: Trophy.parse,
   });
 
-  const { progressions, status: progressionsStatus } = useProgressions({
-    namespace: namespace ?? "",
-    name: PROGRESS,
-    project: project ?? "",
-    parser: Progress.parse,
-  });
+  const { progressions, isFetching: progressionsLoading } = useProgressions();
+  const progressionsStatus = progressionsLoading ? "loading" : "success";
 
   const status = useMemo(() => {
-    return trophiesStatus === "loading" && progressionsStatus === "loading"
+    return trophiesStatus === "loading" || progressionsStatus === "loading"
       ? "loading"
-      : trophiesStatus === "error" || progressionsStatus === "error"
+      : trophiesStatus === "error"
         ? "error"
         : "success";
   }, [trophiesStatus, progressionsStatus]);

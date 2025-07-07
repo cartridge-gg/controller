@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
-import { useConnection } from "./context";
+import { useConnection as useKeychainConnection } from "@/hooks/connection";
 import { useMemo, useState } from "react";
-import { BigNumberish } from "starknet";
+import { BigNumberish, RpcProvider } from "starknet";
 import { WalletType } from "@cartridge/ui";
 
 const ARGENT_ACCOUNT_CLASS_HASHES: BigNumberish[] = [
@@ -21,7 +21,10 @@ const CONTROLLER_CLASS_HASHES: BigNumberish[] = [
 ];
 
 export function useWallet({ address }: { address: string }) {
-  const { provider } = useConnection();
+  const keychainConnection = useKeychainConnection();
+  const provider = new RpcProvider({
+    nodeUrl: keychainConnection.rpcUrl || import.meta.env.VITE_RPC_SEPOLIA,
+  });
   const [error, setError] = useState<string>("");
 
   const { data, isFetching } = useQuery({
