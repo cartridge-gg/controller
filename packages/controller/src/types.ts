@@ -12,7 +12,7 @@ import {
   constants,
   InvocationsDetails,
 } from "starknet";
-import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import { KeychainIFrame } from "./iframe";
 import {
   ExternalWallet,
   ExternalWalletResponse,
@@ -85,7 +85,6 @@ export type DeployReply = {
 
 export type IFrames = {
   keychain: KeychainIFrame;
-  profile?: ProfileIFrame;
   version?: number;
 };
 
