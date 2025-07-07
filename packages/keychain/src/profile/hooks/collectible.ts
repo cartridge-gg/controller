@@ -4,7 +4,7 @@ import {
   useCollectibleQuery,
   useCollectiblesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useConnection } from "./context";
+import { useProfileContext } from "./profile";
 
 const TYPE = "ERC-1155";
 const LIMIT = 1000;
@@ -40,7 +40,7 @@ export function useCollectible({
   tokenIds?: string[];
 }): UseCollectibleResponse {
   const { address } = useAccount();
-  const { project } = useConnection();
+  const { project } = useProfileContext();
   const [collectible, setCollectible] = useState<Collectible | undefined>(
     undefined,
   );
@@ -125,7 +125,7 @@ export type CollectibleType = {
 
 export function useCollectibles(): UseCollectiblesResponse {
   const { address } = useAccount();
-  const { project } = useConnection();
+  const { project } = useProfileContext();
   const [offset, setOffset] = useState(0);
   const [collectibles, setCollectibles] = useState<{
     [key: string]: Collectible;

@@ -18,7 +18,9 @@ import { cn } from "@cartridge/ui/utils";
 import { useCallback, useMemo } from "react";
 import placeholder from "/public/placeholder.svg";
 import { CollectionHeader } from "./header";
-import { useConnection, useTheme } from "#profile/hooks/context.js";
+import { useKeychain } from "#profile/hooks/keychain";
+import { useControllerTheme } from "@/hooks/connection";
+import { useProfileContext } from "#profile/hooks/profile";
 import { useCollectible } from "#profile/hooks/collectible.js";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { EditionModel, GameModel } from "@cartridge/arcade";
@@ -26,8 +28,9 @@ import { EditionModel, GameModel } from "@cartridge/arcade";
 export function Collectible() {
   const { games, editions } = useArcade();
   const { address: contractAddress, tokenId } = useParams();
-  const { closable, visitor, project, namespace } = useConnection();
-  const { theme } = useTheme();
+  const { closeModal } = useKeychain();
+  const { closable, visitor, project, namespace } = useProfileContext();
+  const theme = useControllerTheme();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -55,7 +58,7 @@ export function Collectible() {
   return (
     <LayoutContainer>
       <LayoutHeader
-        className="hidden"
+        onClose={closeModal}
         onBack={closable || visitor ? undefined : handleBack}
       />
       {status === "loading" || !collectible || !assets ? (

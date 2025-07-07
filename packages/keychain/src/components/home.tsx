@@ -25,7 +25,7 @@ import { executeCore } from "@/utils/connection/execute";
 import { useNavigate } from "react-router-dom";
 
 export function Home() {
-  const { context, controller, policies, origin, isConfigLoading } =
+  const { context, controller, policies, origin, isConfigLoading, setContext } =
     useConnection();
   const upgrade = useUpgrade();
   const navigate = useNavigate();
@@ -58,8 +58,10 @@ export function Home() {
       const ctx = context as NavigateCtx;
       navigate(ctx.path);
       ctx.resolve();
+      // Clear the context after navigation to allow new navigation requests
+      setContext(undefined);
     }
-  }, [context, navigate]);
+  }, [context, navigate, setContext]);
 
   if (window.self === window.top || !context || !origin) {
     return <></>;

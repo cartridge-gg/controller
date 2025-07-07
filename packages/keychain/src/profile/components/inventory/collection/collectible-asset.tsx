@@ -26,7 +26,8 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { constants } from "starknet";
-import { useConnection, useTheme } from "#profile/hooks/context";
+import { useProfileContext } from "#profile/hooks/profile";
+import { useControllerTheme } from "@/hooks/connection";
 import { useCallback, useMemo, useState } from "react";
 import { useCollectible } from "#profile/hooks/collectible";
 import { CollectionHeader } from "./header";
@@ -41,12 +42,13 @@ import { useUsername } from "#profile/hooks/username.js";
 const OFFSET = 10;
 
 export function CollectibleAsset() {
-  const { chainId, visitor, namespace, project } = useConnection();
+  const { visitor, namespace, project } = useProfileContext();
+  const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [cap, setCap] = useState(OFFSET);
-  const { theme } = useTheme();
+  const theme = useControllerTheme();
   const { editions } = useArcade();
 
   const edition: EditionModel | undefined = useMemo(() => {

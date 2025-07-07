@@ -19,7 +19,8 @@ import {
   Thumbnail,
   InfoIcon,
 } from "@cartridge/ui";
-import { useConnection, useData } from "#profile/hooks/context";
+import { useProfileContext } from "#profile/hooks/profile";
+import { useData } from "#profile/hooks/data";
 import {
   getDate,
   isPublicChain,
@@ -50,7 +51,8 @@ export function Token() {
 
 function Credits() {
   const navigate = useNavigate();
-  const { parent, isVisible } = useConnection();
+  // TODO: Get parent from keychain connection if needed
+  const isVisible = true; // Always visible in keychain
   const { username } = useAccount();
   const credit = useCreditBalance({
     username,
@@ -86,7 +88,14 @@ function Credits() {
       </LayoutContent>
 
       <LayoutFooter className="gap-4">
-        <Button onClick={() => parent.openPurchaseCredits()}>Purchase</Button>
+        <Button
+          onClick={() => {
+            // TODO: Implement purchase credits
+            console.log("Purchase credits clicked");
+          }}
+        >
+          Purchase
+        </Button>
       </LayoutFooter>
     </LayoutContainer>
   );
@@ -99,7 +108,9 @@ function ERC20() {
 
   const { transfers } = useData();
 
-  const { chainId, version, closable, visitor } = useConnection();
+  const { closable, visitor } = useProfileContext();
+  const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
+  const version = "0.5.6"; // Default version for compatibility
   const { token } = useToken({ tokenAddress: address! });
   const [searchParams] = useSearchParams();
 
@@ -168,7 +179,7 @@ function ERC20() {
 
         <ERC20Detail
           token={token}
-          isPublicChain={isPublicChain(chainId)}
+          isPublicChain={isPublicChain(chainId || "")}
           chainId={chainId as constants.StarknetChainId}
         />
 

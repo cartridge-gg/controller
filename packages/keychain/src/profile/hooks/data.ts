@@ -1,68 +1,32 @@
-import { useState, ReactNode, useMemo, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { useAccount } from "#profile/hooks/account";
 import { useAchievements } from "#profile/hooks/achievements";
-import { DataContext } from "#profile/context/data";
 import {
   useActivitiesQuery,
   useTransfersQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useAccount } from "#profile/hooks/account";
-import { useProfileContext } from "#profile/hooks/profile";
+import { CardProps } from "#profile/components/provider/data";
+import { useProfileContext } from "./profile";
+import { getDate } from "@cartridge/ui/utils";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
-import { useArcade } from "#profile/hooks/arcade.js";
-import { EditionModel, GameModel } from "@cartridge/arcade";
-import { getDate } from "@cartridge/ui/utils";
+import { useArcade } from "#profile/hooks/arcade";
 
-export interface CardProps {
-  variant: "token" | "collectible" | "game" | "achievement";
-  key: string;
-  contractAddress: string;
-  transactionHash: string;
-  amount: string;
-  address: string;
-  value: string;
-  name: string;
-  collection: string;
-  image: string;
-  title: string;
-  website: string;
-  certified: boolean;
-  action: "send" | "receive" | "mint";
-  timestamp: number;
-  date: string;
-  points?: number;
-}
-
-export function DataProvider({ children }: { children: ReactNode }) {
+export function useData() {
   const [accountAddress, setAccountAddress] = useState<string | undefined>(
     undefined,
   );
-
   const { address } = useAccount();
   const { project, namespace } = useProfileContext();
-  const isVisible = true; // Always visible in keychain
-
   const { games, editions } = useArcade();
-
-  const edition: EditionModel | undefined = useMemo(() => {
-    return Object.values(editions).find(
-      (edition) => edition.config.project === project,
-    );
-  }, [editions, project, namespace]);
-
-  const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find((game) => game.id === edition?.gameId);
-  }, [games, edition]);
 
   const projects = useMemo(() => {
     const projects = project ? [project] : [];
-    return projects.map((proejct) => {
-      return {
-        project: proejct,
-        address,
-        limit: 0,
-      };
-    });
+    return projects.map((project) => ({
+      project,
+      address,
+      limit: 0,
+    }));
   }, [project, address]);
 
   const trophies = useAchievements(accountAddress);
@@ -105,6 +69,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
         : "success";
   }, [transfersStatus, activitiesStatus]);
 
+  const edition = useMemo(() => {
+    return Object.values(editions).find(
+      (edition) => edition.config.project === project,
+    );
+  }, [editions, project, namespace]);
+
+  const game = useMemo(() => {
+    return Object.values(games).find((game) => game.id === edition?.gameId);
+  }, [games, edition]);
+
+  // ERC20 transfers (tokens without tokenId)
   const erc20s: CardProps[] = useMemo(() => {
     return (
       transfers?.transfers?.items.flatMap((item) =>
@@ -145,6 +120,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     );
   }, [transfers, address]);
 
+  // ERC721 transfers (collectibles with tokenId)
   const erc721s: CardProps[] = useMemo(() => {
     return (
       transfers?.transfers?.items.flatMap((item) => {
@@ -195,6 +171,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     );
   }, [transfers, address]);
 
+  // Game activities
   const actions: CardProps[] = useMemo(() => {
     return (
       transactions?.activities?.items?.flatMap((item) =>
@@ -220,6 +197,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     );
   }, [transactions, game, edition]);
 
+  // Achievements
   const achievements: CardProps[] = useMemo(() => {
     return trophies.achievements
       .filter((item) => item.completed)
@@ -253,27 +231,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     );
   }, [erc20s, erc721s, actions, achievements]);
 
-  useEffect(() => {
-    if (isVisible) {
-      refetchTransactions();
-      refetchTransfers();
-    }
-  }, [isVisible, refetchTransactions, refetchTransfers]);
-
-  return (
-    <DataContext.Provider
-      value={{
-        events,
-        trophies,
-        transfers,
-        transactions,
-        status,
-        setAccountAddress,
-        refetchTransfers,
-        refetchTransactions,
-      }}
-    >
-      {children}
-    </DataContext.Provider>
-  );
+  return {
+    events,
+    trophies,
+    transfers,
+    transactions,
+    status,
+    setAccountAddress: useCallback((address: string | undefined) => {
+      setAccountAddress(address);
+    }, []),
+    refetchTransfers,
+    refetchTransactions,
+  };
 }

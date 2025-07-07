@@ -10,7 +10,8 @@ import {
 import { useAccount, useUsernames } from "#profile/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { useData } from "#profile/hooks/context";
+import { useKeychain } from "#profile/hooks/keychain";
+import { useData } from "#profile/hooks/data";
 import { useArcade } from "#profile/hooks/arcade";
 import { getChecksumAddress } from "starknet";
 import { LayoutBottomNav } from "#profile/components/bottom-nav";
@@ -22,6 +23,7 @@ export function Leaderboard() {
     setAccountAddress,
   } = useData();
   const { followeds } = useArcade();
+  const { closeModal } = useKeychain();
 
   const followings = useMemo(() => {
     return followeds[getChecksumAddress(self)] || [];
@@ -57,7 +59,7 @@ export function Leaderboard() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader variant="hidden" />
+      <LayoutHeader variant="hidden" onClose={closeModal} />
       {status === "loading" ? (
         <LoadingState />
       ) : status === "error" || !data.length ? (

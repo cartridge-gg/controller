@@ -9,7 +9,9 @@ import { useAccount } from "#profile/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
-import { useConnection, useData } from "#profile/hooks/context";
+import { useKeychain } from "#profile/hooks/keychain";
+import { useProfileContext } from "#profile/hooks/profile";
+import { useData } from "#profile/hooks/data";
 import { useArcade } from "#profile/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import { addAddressPadding } from "starknet";
@@ -25,7 +27,8 @@ export function Achievements() {
   const { pins, games, editions } = useArcade();
 
   const { address } = useParams<{ address: string }>();
-  const { project, namespace } = useConnection();
+  const { closeModal } = useKeychain();
+  const { project, namespace } = useProfileContext();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -64,7 +67,7 @@ export function Achievements() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader variant="hidden" />
+      <LayoutHeader variant="hidden" onClose={closeModal} />
       {status === "loading" ? (
         <LoadingState />
       ) : status === "error" || !achievements.length ? (

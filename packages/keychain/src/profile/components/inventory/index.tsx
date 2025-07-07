@@ -15,19 +15,22 @@ import { LayoutBottomNav } from "#profile/components/bottom-nav";
 import { Outlet, useParams } from "react-router-dom";
 import { Collections } from "./collection";
 import { Tokens } from "./token";
+import { useKeychain } from "#profile/hooks/keychain";
 
 export function Inventory() {
   const { project, address: tokenContractAddress } = useParams<{
     project?: string;
     address?: string;
   }>();
+  const { closeModal } = useKeychain();
+
   if (tokenContractAddress) {
     return <Outlet />;
   }
 
   return (
     <LayoutContainer>
-      <LayoutHeader variant="hidden" onBack={undefined} />
+      <LayoutHeader variant="hidden" onClose={closeModal} />
 
       <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
         <Tokens />
