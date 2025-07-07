@@ -36,18 +36,15 @@ export function Profile() {
 
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap gap-1">
-          <Button onClick={() => ctrlConnector.controller.openProfile()}>
+          <Button
+            onClick={() => ctrlConnector.controller.openProfile("inventory")}
+          >
             Inventory
           </Button>
           <Button
             onClick={() => ctrlConnector.controller.openProfile("achievements")}
           >
             Achievements
-          </Button>
-          <Button
-            onClick={() => ctrlConnector.controller.openProfile("trophies")}
-          >
-            Trophies
           </Button>
           <Button
             onClick={() => ctrlConnector.controller.openProfile("leaderboard")}
@@ -60,40 +57,14 @@ export function Profile() {
             Activity
           </Button>
           <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=followers",
-              )
-            }
+            onClick={() => ctrlConnector.controller.openProfileTo("followers")}
           >
             Followers
           </Button>
           <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=following",
-              )
-            }
+            onClick={() => ctrlConnector.controller.openProfileTo("following")}
           >
             Following
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=followers&closable=true",
-              )
-            }
-          >
-            Followers Closable
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=following&closable=true",
-              )
-            }
-          >
-            Following Closable
           </Button>
         </div>
         <div className="flex flex-wrap gap-1">

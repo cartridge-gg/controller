@@ -4,11 +4,7 @@ import {
   ConnectionContextValue,
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
-import {
-  ConnectionCtx,
-  connectToController,
-  OpenSettingsCtx,
-} from "@/utils/connection";
+import { ConnectionCtx, connectToController } from "@/utils/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -18,6 +14,7 @@ import {
   ExternalWalletType,
   ResponseCodes,
   toArray,
+  Token,
   toSessionPolicies,
   WalletAdapter,
   WalletBridge,
@@ -30,17 +27,35 @@ import {
   Policies,
 } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
-import { isIframe, normalizeOrigin } from "@cartridge/ui/utils";
 import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
+import {
+  ETH_CONTRACT_ADDRESS,
+  isIframe,
+  normalizeOrigin,
+  STRK_CONTRACT_ADDRESS,
+  USDC_CONTRACT_ADDRESS,
+  USDT_CONTRACT_ADDRESS,
+} from "@cartridge/ui/utils";
 import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SemVer } from "semver";
-import { RpcProvider, shortString } from "starknet";
+import { getChecksumAddress, RpcProvider, shortString } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
+
+const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
+  "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+);
+
+const TOKEN_ADDRESSES: Record<Token, string> = {
+  eth: ETH_CONTRACT_ADDRESS,
+  strk: STRK_CONTRACT_ADDRESS,
+  lords: LORDS_CONTRACT_ADDRESS,
+  usdc: USDC_CONTRACT_ADDRESS,
+  usdt: USDT_CONTRACT_ADDRESS,
+};
 
 export type ParentMethods = AsyncMethodReturns<{
   close: () => Promise<void>;
-  closeAll: () => Promise<void>;
   reload: () => Promise<void>;
 
   // Wallet bridge methods
@@ -173,12 +188,22 @@ export function useConnectionValue() {
     const rpcUrl = urlParams.get("rpc_url");
     const policies = urlParams.get("policies");
     const version = urlParams.get("v");
+    const project = urlParams.get("ps");
+    const namespace = urlParams.get("ns");
+
+    const erc20Param = urlParams.get("erc20");
+    const tokens = erc20Param
+      ? decodeURIComponent(erc20Param)
+          .split(",")
+          .map((token) => TOKEN_ADDRESSES[token as Token] || null)
+          .filter((address) => address !== null)
+      : [STRK_CONTRACT_ADDRESS];
 
     if (rpcUrl) {
       setRpcUrl(rpcUrl);
     }
 
-    return { theme, preset, policies, version };
+    return { theme, preset, policies, version, project, namespace, tokens };
   }, []);
 
   // Fetch chain ID from RPC provider when rpcUrl changes
@@ -397,9 +422,6 @@ export function useConnectionValue() {
         close: () => {
           throw new Error("Can't call this function when not in an iFrame");
         },
-        closeAll: () => {
-          throw new Error("Can't call this function when not in an iFrame");
-        },
         reload: () => {
           throw new Error("Can't call this function when not in an iFrame");
         },
@@ -418,45 +440,50 @@ export function useConnectionValue() {
   }, [setOrigin, setRpcUrl, setContext, setController, setConfigSignupOptions]);
 
   const logout = useCallback(async () => {
-    if (!parent || !context?.resolve) return;
-
-    try {
-      await window.controller?.disconnect();
-      parent.closeAll();
+    await window.controller?.disconnect();
+    window.location.reload();
+    if (parent) {
+      parent.close();
       parent.reload();
+    }
 
-      context.resolve({
+    if (context) {
+      context.resolve?.({
         code: ResponseCodes.NOT_CONNECTED,
         message: "User logged out",
       });
-    } catch (err) {
-      console.error("Disconnect failed:", err);
     }
   }, [context, parent, setController]);
 
   const openSettings = useCallback(() => {
-    if (!context) return;
-
-    setContext({
-      type: "open-settings",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as OpenSettingsCtx);
-  }, [context]);
+    window.dispatchEvent(
+      new CustomEvent("controller-navigate", {
+        detail: {
+          path: "/settings",
+          options: {
+            resetStack: false,
+          },
+        },
+      }),
+    );
+  }, []);
 
   const closeModal = useCallback(async () => {
-    if (!parent || !context?.resolve) return;
+    if (!parent) {
+      return;
+    }
 
-    context.resolve({
+    context?.resolve?.({
       code: ResponseCodes.CANCELED,
       message: "User aborted",
     });
-    setContext(undefined); // clears context
-    try {
-      await parent.close();
-    } catch (e) {
+
+    setContext(undefined);
+
+    // Don't await parent.close() - let it run in the background
+    parent.close().catch((e) => {
       console.error("Failed to close modal:", e);
-    }
+    });
   }, [context, parent, setContext]);
 
   const openModal = useCallback(async () => {
@@ -543,6 +570,9 @@ export function useConnectionValue() {
     rpcUrl,
     policies,
     theme,
+    project: urlParams.project,
+    namespace: urlParams.namespace,
+    tokens: urlParams.tokens,
     isConfigLoading,
     verified,
     chainId,

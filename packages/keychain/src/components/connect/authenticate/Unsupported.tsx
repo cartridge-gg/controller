@@ -1,13 +1,12 @@
-import { LayoutContainer, LayoutHeader, AlertIcon } from "@cartridge/ui";
+import { AlertIcon, HeaderInner } from "@cartridge/ui";
 
 export function Unsupported({ message }: { message: string }) {
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        Icon={AlertIcon}
-        title="Device is not supported"
-        description={message}
-      />
-    </LayoutContainer>
+    <HeaderInner
+      Icon={AlertIcon}
+      title="Device is not supported"
+      description={message}
+      hideIcon
+    />
   );
 }

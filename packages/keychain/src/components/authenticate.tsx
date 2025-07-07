@@ -46,7 +46,7 @@ export function Authenticate() {
           return window.close();
         }
 
-        navigate(`${import.meta.env.VITE_ADMIN_URL}/profile`);
+        navigate(`${import.meta.env.VITE_ADMIN_URL}`);
       }}
     />
   );
