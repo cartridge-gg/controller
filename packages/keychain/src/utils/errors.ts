@@ -14,9 +14,10 @@ export function parseExecutionError(
     error: string[];
   }[];
 } {
-  let executionError: string = (
-    typeof error.data === "string" ? JSON.parse(error.data) : error.data
-  )?.execution_error;
+  const parsedData =
+    typeof error.data === "string" ? JSON.parse(error.data) : error.data;
+  let executionError = parsedData?.execution_error;
+
   if (!executionError) {
     return {
       raw: JSON.stringify(error.data),
@@ -25,8 +26,50 @@ export function parseExecutionError(
     };
   }
 
+  // Handle object format execution error
+  if (typeof executionError === "object" && executionError.error) {
+    const objectError = executionError;
+    const errorMessage = objectError.error;
+
+    // Parse the tuple error format
+    const tupleMatch = errorMessage.match(/^\((.*)\)$/);
+    if (tupleMatch) {
+      const allErrors = [...tupleMatch[1].matchAll(/'([^']+)'/g)].map(
+        (match) => match[1],
+      );
+      const meaningfulError =
+        allErrors.find(
+          (err) =>
+            err !== "argent/multicall-failed" && err !== "ENTRYPOINT_FAILED",
+        ) || allErrors[0];
+
+      return {
+        raw: JSON.stringify(executionError),
+        summary: "There was an error in the transaction",
+        stack: [
+          {
+            address: objectError.contract_address,
+            class: objectError.class_hash,
+            selector: objectError.selector,
+            error: meaningfulError
+              ? [meaningfulError]
+              : allErrors.length > 0
+                ? allErrors
+                : [errorMessage],
+          },
+        ],
+      };
+    }
+
+    // Convert object format to string format for compatibility
+    executionError = `Transaction execution has failed:\n0: Error in the called contract (contract address: ${objectError.contract_address}, class hash: ${objectError.class_hash}, selector: ${objectError.selector}):\nExecution failed. Failure reason: ${objectError.error}.`;
+  }
+
   let summaryOveride;
-  const executionErrorRaw = executionError;
+  const executionErrorRaw =
+    typeof executionError === "string"
+      ? executionError
+      : JSON.stringify(executionError);
 
   // Remove the "Transaction reverted: Transaction execution has failed:\n" prefix
   executionError = executionError.replace(/^Transaction reverted: /, "");
@@ -53,7 +96,7 @@ export function parseExecutionError(
   }
 
   const rawStackTrace = executionError.split(/\n\d+: /);
-  const stack = rawStackTrace.map((trace) => {
+  const stack = rawStackTrace.map((trace: string) => {
     const extractedInfo: {
       address?: string;
       class?: string;
@@ -89,8 +132,8 @@ export function parseExecutionError(
     const errorLines = trace
       .split("\n")
       .slice(trace.split("\n").length > 1 ? 1 : 0)
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
+      .map((line: string) => line.trim())
+      .filter((line: string) => line.length > 0);
 
     if (errorLines.length > 0) {
       if (errorLines[0].startsWith("Error at pc=")) {
@@ -101,11 +144,23 @@ export function parseExecutionError(
       ) {
         extractedInfo.error = ["Function not found in the contract."];
       } else if (errorLines[0].includes("Failure reason:")) {
-        const failureReason = errorLines[0].match(/'([^']+)'/)?.[1];
-        if (failureReason) {
-          extractedInfo.error = [failureReason];
+        // Check if it's a tuple format with multiple errors
+        const tupleMatch = errorLines[0].match(/Failure reason: \((.*)\)\./);
+        if (tupleMatch) {
+          // Extract all quoted strings from the tuple
+          const allErrors = [...tupleMatch[1].matchAll(/'([^']+)'/g)].map(
+            (match) => match[1],
+          );
+          extractedInfo.error =
+            allErrors.length > 0 ? allErrors : [tupleMatch[1]];
         } else {
-          extractedInfo.error = errorLines;
+          // Single error format
+          const failureReason = errorLines[0].match(/'([^']+)'/)?.[1];
+          if (failureReason) {
+            extractedInfo.error = [failureReason];
+          } else {
+            extractedInfo.error = errorLines;
+          }
         }
       } else {
         extractedInfo.error = errorLines;
@@ -157,6 +212,15 @@ export function parseExecutionError(
         /.*Class with hash.*is not declared.$/.test(lastErrorMessage)
       ) {
         summary = "Class hash is not declared.";
+      } else if (
+        lastError.some((err: string) => err === "argent/multicall-failed")
+      ) {
+        // If multicall failed, look for the actual error
+        const actualError = lastError.find(
+          (err: string) =>
+            err !== "argent/multicall-failed" && err !== "ENTRYPOINT_FAILED",
+        );
+        summary = actualError || "Multicall failed";
       } else {
         summary = lastErrorMessage;
         lastError[lastError.length - 1] = summary;
@@ -659,6 +723,40 @@ export const starknetTransactionExecutionErrorTestCases = [
           error: ["Failed to deserialize param #1"],
           selector:
             "0x28ffe4ff0f226a9107253e17a904099aa4f63a02a5621de0576e5aa71bc5194",
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        execution_error: {
+          class_hash:
+            "0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+          contract_address:
+            "0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b",
+          error:
+            "(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x1, 0x753235365f737562204f766572666c6f77 ('u256_sub Overflow'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'))",
+          selector:
+            "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+        },
+        transaction_index: 0,
+      },
+    },
+    expected: {
+      raw: '{"class_hash":"0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf","contract_address":"0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b","error":"(0x617267656e742f6d756c746963616c6c2d6661696c6564 (\'argent/multicall-failed\'), 0x1, 0x753235365f737562204f766572666c6f77 (\'u256_sub Overflow\'), 0x454e545259504f494e545f4641494c4544 (\'ENTRYPOINT_FAILED\'))","selector":"0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad"}',
+      summary: "u256_sub Overflow",
+      stack: [
+        {
+          address:
+            "0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b",
+          class:
+            "0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+          error: ["u256_sub Overflow"],
+          selector:
+            "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
         },
       ],
     },

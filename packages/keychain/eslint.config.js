@@ -1,2 +1,2 @@
 import config from "@cartridge/eslint";
-export default [...config];
+export default [...config, { ignores: ["public/**"] }];

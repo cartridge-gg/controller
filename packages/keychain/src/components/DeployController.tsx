@@ -8,10 +8,9 @@ import {
   CheckIcon,
   ControllerIcon,
   ExternalIcon,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Spinner,
 } from "@cartridge/ui";
 import { getChainName } from "@cartridge/ui/utils";
@@ -26,7 +25,6 @@ import {
 } from "starknet";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { Fees } from "./Fees";
-import { Funding } from "./funding";
 
 export function DeployController({
   onClose,
@@ -41,8 +39,8 @@ export function DeployController({
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [accountState, setAccountState] = useState<
-    "fund" | "deploy" | "deploying" | "deployed"
-  >("fund");
+    "deploy" | "deploying" | "deployed"
+  >("deploy");
 
   const chainId = controller?.chainId();
   const chainName = chainId ? getChainName(chainId) : "Unknown";
@@ -108,14 +106,12 @@ export function DeployController({
   }, [deployHash, controller]);
 
   useEffect(() => {
-    if (!estimateFee || accountState != "fund" || !feeToken?.balance) return;
+    if (!estimateFee || !feeToken?.balance) return;
 
-    if (feeToken.balance >= estimateFee.overall_fee) {
-      setAccountState("deploy");
-    } else {
-      setAccountState("fund");
+    if (feeToken.balance < estimateFee.overall_fee) {
+      setError(new Error("Insufficient balance. Please fund your account."));
     }
-  }, [feeToken?.balance, estimateFee, accountState]);
+  }, [feeToken?.balance, estimateFee]);
 
   const onDeploy = useCallback(async () => {
     if (!estimateFee) return;
@@ -133,34 +129,25 @@ export function DeployController({
 
   if (isLoading) {
     return (
-      <LayoutContainer>
-        <LayoutHeader
-          variant="expanded"
-          title="Checking account balance..."
-          icon={<Spinner size="xl" />}
-        />
-      </LayoutContainer>
+      <HeaderInner
+        variant="expanded"
+        title="Checking account balance..."
+        icon={<Spinner size="xl" />}
+        hideIcon
+      />
     );
   }
 
   switch (accountState) {
-    case "fund":
-      return (
-        <Funding
-          title={"Fund Controller"}
-          onComplete={() => {
-            setAccountState("deploy");
-          }}
-        />
-      );
     case "deploy":
       return (
-        <LayoutContainer>
-          <LayoutHeader
+        <>
+          <HeaderInner
             variant="expanded"
             icon={<ControllerIcon size="lg" />}
             title="Deploy Controller"
             description="This will deploy your Controller"
+            hideIcon
           />
           <LayoutContent>
             <TransactionSummary
@@ -187,16 +174,17 @@ export function DeployController({
               DEPLOY
             </Button>
           </LayoutFooter>
-        </LayoutContainer>
+        </>
       );
     case "deploying":
       return (
-        <LayoutContainer>
-          <LayoutHeader
+        <>
+          <HeaderInner
             variant="expanded"
             icon={<Spinner size="xl" />}
             title="Deploying Controller"
             description={`Your controller is being deployed on ${chainName}`}
+            hideIcon
           />
           <LayoutContent>
             {deployHash && controller && (
@@ -219,16 +207,17 @@ export function DeployController({
               continue
             </Button>
           </LayoutFooter>
-        </LayoutContainer>
+        </>
       );
     case "deployed":
       return (
-        <LayoutContainer>
-          <LayoutHeader
+        <>
+          <HeaderInner
             variant="expanded"
             Icon={CheckIcon}
             title="Success!"
             description={`Your controller has been deployed on ${chainName}`}
+            hideIcon
           />
           <LayoutContent className="items-center">
             {deployHash && controller && (
@@ -249,7 +238,7 @@ export function DeployController({
             ) : null}
             <Button onClick={onClose}>continue</Button>
           </LayoutFooter>
-        </LayoutContainer>
+        </>
       );
   }
 }

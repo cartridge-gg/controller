@@ -12,7 +12,7 @@ import {
   constants,
   InvocationsDetails,
 } from "starknet";
-import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import { KeychainIFrame } from "./iframe";
 import {
   ExternalWallet,
   ExternalWalletResponse,
@@ -85,7 +85,6 @@ export type DeployReply = {
 
 export type IFrames = {
   keychain: KeychainIFrame;
-  profile?: ProfileIFrame;
   version?: number;
 };
 
@@ -149,6 +148,7 @@ export interface Keychain {
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
   openStarterPack(starterpackId: string): void;
+  navigate(path: string): Promise<void>;
 
   // External wallet methods
   externalDetectWallets(): Promise<ExternalWallet[]>;
@@ -184,9 +184,7 @@ export interface Modal {
 /**
  * Options for configuring the controller
  */
-export type ControllerOptions = ProviderOptions &
-  KeychainOptions &
-  ProfileOptions;
+export type ControllerOptions = ProviderOptions & KeychainOptions;
 
 export type IFrameOptions = {
   /** The ID of the starter pack to use */
@@ -218,11 +216,6 @@ export type KeychainOptions = IFrameOptions & {
   signupOptions?: AuthOptions;
   /** When true, manually provided policies will override preset policies. Default is false. */
   shouldOverridePresetPolicies?: boolean;
-};
-
-export type ProfileOptions = IFrameOptions & {
-  /** The URL of profile. Mainly for internal development purpose */
-  profileUrl?: string;
   /** The project name of Slot instance. */
   slot?: string;
   /** The namespace to use to fetch trophies data from indexer. Will be mandatory once profile page is in production */

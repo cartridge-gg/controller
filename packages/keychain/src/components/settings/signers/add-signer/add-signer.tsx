@@ -17,18 +17,14 @@ import {
 } from "@cartridge/controller-wasm";
 import {
   AddUserIcon,
-  AlertIcon,
   Button,
-  CheckIcon,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   SignerMethod,
   SignerMethodKind,
   SignerPendingCard,
   SignerPendingCardKind,
-  Spinner,
 } from "@cartridge/ui";
 import {
   ControllerQuery,
@@ -36,6 +32,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QueryObserverResult } from "react-query";
+import { useNavigate } from "react-router-dom";
 import { SignerAlert } from "../signer-alert";
 
 type SignerPending = {
@@ -46,18 +43,14 @@ type SignerPending = {
 };
 
 export function AddSigner({
-  onBack,
   controllerQuery,
 }: {
-  onBack: () => void;
   controllerQuery: QueryObserverResult<ControllerQuery>;
 }) {
+  const navigate = useNavigate();
   const [wallets, setWallets] = useState<boolean>(false);
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
     null,
-  );
-  const [headerIcon, setHeaderIcon] = useState<typeof AddUserIcon | "spinner">(
-    AddUserIcon,
   );
 
   const handleClick = useCallback(
@@ -70,7 +63,6 @@ export function AddSigner({
           kind: auth,
           inProgress: true,
         });
-        setHeaderIcon("spinner");
 
         const alreadyOwner = await authFn(auth);
         if (alreadyOwner) {
@@ -79,7 +71,6 @@ export function AddSigner({
             inProgress: false,
             authedAddress: alreadyOwner,
           });
-          setHeaderIcon(CheckIcon);
           return;
         }
 
@@ -87,7 +78,6 @@ export function AddSigner({
           kind: auth,
           inProgress: false,
         });
-        setHeaderIcon(CheckIcon);
       } catch (error) {
         console.error(error);
         const errorMessage =
@@ -99,10 +89,9 @@ export function AddSigner({
           inProgress: false,
           error: errorMessage,
         });
-        setHeaderIcon(AlertIcon);
       }
     },
-    [setSignerPending, setHeaderIcon],
+    [setSignerPending],
   );
 
   useEffect(() => {
@@ -114,20 +103,18 @@ export function AddSigner({
     ) {
       setTimeout(async () => {
         await controllerQuery.refetch();
-        onBack();
+        navigate("/settings");
       }, 2000);
     }
-  }, [signerPending, signerPending?.inProgress]);
+  }, [signerPending, signerPending?.inProgress, controllerQuery, navigate]);
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        Icon={headerIcon === "spinner" ? undefined : headerIcon}
-        icon={headerIcon === "spinner" ? <Spinner size="lg" /> : undefined}
+    <>
+      <HeaderInner
+        icon={<AddUserIcon />}
         variant="compressed"
         title="Add Signer"
-        onBack={onBack}
-        hideSettings
+        hideIcon
       />
       <LayoutContent className="flex flex-col gap-3 w-full h-fit">
         {!signerPending && <SignerAlert />}
@@ -163,7 +150,6 @@ export function AddSigner({
             onClick={() => {
               if (signerPending?.error || signerPending?.authedAddress) {
                 setSignerPending(null);
-                setHeaderIcon(AddUserIcon);
               } else {
                 setWallets(false);
               }
@@ -172,8 +158,13 @@ export function AddSigner({
             Cancel
           </Button>
         )}
+        {!wallets && !signerPending && (
+          <Button variant="secondary" onClick={() => navigate("/settings")}>
+            Back
+          </Button>
+        )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }
 

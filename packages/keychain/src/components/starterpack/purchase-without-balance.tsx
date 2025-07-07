@@ -6,11 +6,10 @@ import {
   GiftIcon,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Spinner,
   useUI,
 } from "@cartridge/ui";
-import { LayoutContainer } from "@cartridge/ui";
+import { HeaderInner } from "@cartridge/ui";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { useEffect, useMemo, useState } from "react";
@@ -116,7 +115,7 @@ export const PurchaseWithoutBalance = () => {
         stripe={stripePromise}
       >
         <StripeCheckout
-          onBack={() => setPurchaseState(PurchaseState.BACK)}
+          // onBack={() => setPurchaseState(PurchaseState.BACK)}
           onComplete={() => setPurchaseState(PurchaseState.PENDING)}
           price={{
             baseCostInCents: priceUsd,
@@ -129,8 +128,8 @@ export const PurchaseWithoutBalance = () => {
   }
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
+    <>
+      <HeaderInner
         icon={
           purchaseState === PurchaseState.PENDING ? (
             <Spinner />
@@ -147,7 +146,7 @@ export const PurchaseWithoutBalance = () => {
           ) : error ? (
             <ErrorAlert
               variant="warning"
-              title="Purchase Alert"
+              title="Purchase Error"
               description={error.message}
             />
           ) : null}
@@ -199,6 +198,6 @@ export const PurchaseWithoutBalance = () => {
           </Button>
         )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 };
