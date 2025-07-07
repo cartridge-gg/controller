@@ -12,6 +12,7 @@ import { probe } from "./probe";
 import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
+import { navigateFactory } from "./navigate";
 import { ConnectionCtx } from "./types";
 
 export function connectToController<ParentMethods extends object>({
@@ -40,6 +41,7 @@ export function connectToController<ParentMethods extends object>({
       probe: normalize(probe({ setController })),
       signMessage: () => signMessageFactory(setContext),
       openSettings: () => openSettingsFactory(setContext),
+      navigate: () => navigateFactory(setContext),
       reset: () => () => {
         setContext(undefined);
       },
