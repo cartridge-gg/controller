@@ -47,6 +47,15 @@ export function ProfileApp() {
             </Route>
           </Route>
           <Route path="activity" element={<Activity />} />
+          <Route path="achievements" element={<Achievements />}>
+            <Route path=":address" element={<Achievements />} />
+          </Route>
+          <Route path="leaderboard" element={<Leaderboard />}>
+            <Route path=":address" element={<Leaderboard />} />
+          </Route>
+          <Route path="trophies" element={<RedirectAchievements />}>
+            <Route path=":address" element={<RedirectAchievements />} />
+          </Route>
 
           <Route path="slot/:project" element={<Slot />}>
             <Route path="inventory" element={<Inventory />}>
