@@ -148,6 +148,7 @@ export interface Keychain {
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
   openStarterPack(starterpackId: string): void;
+  navigate(path: string): Promise<void>;
 
   // External wallet methods
   externalDetectWallets(): Promise<ExternalWallet[]>;

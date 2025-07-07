@@ -238,7 +238,7 @@ export default class ControllerProvider extends BaseProvider {
 
   async openProfile(tab: ProfileContextTypeVariant = "inventory") {
     // Profile functionality is now integrated into keychain
-    // Open profile in keychain directly
+    // Navigate keychain iframe to profile page
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -249,7 +249,9 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     const username = await this.keychain.username();
-    window.open(`/profile/account/${username}/${tab}`, "_blank");
+    // Navigate the keychain to the profile page
+    await this.keychain.navigate(`/profile/account/${username}/${tab}`);
+    this.iframes.keychain.open();
   }
 
   async openProfileTo(to: string) {
@@ -264,7 +266,8 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     const username = await this.keychain.username();
-    window.open(`/profile/account/${username}/${to}`, "_blank");
+    await this.keychain.navigate(`/profile/account/${username}/${to}`);
+    this.iframes.keychain.open();
   }
 
   async openProfileAt(at: string) {
@@ -278,7 +281,8 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    window.open(`/profile${at}`, "_blank");
+    await this.keychain.navigate(`/profile${at}`);
+    this.iframes.keychain.open();
   }
 
   async openSettings() {

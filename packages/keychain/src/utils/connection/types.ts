@@ -17,6 +17,7 @@ export type ConnectionCtx =
   | OpenSettingsCtx
   | OpenPurchaseCreditsCtx
   | OpenStarterPackCtx
+  | NavigateCtx
   | undefined;
 
 export type ConnectCtx = {
@@ -83,5 +84,12 @@ export type OpenStarterPackCtx = {
   type: "open-starter-pack";
   starterpackId: string;
   resolve: (res: ConnectError) => void;
+  reject: (reason?: unknown) => void;
+};
+
+export type NavigateCtx = {
+  type: "navigate";
+  path: string;
+  resolve: () => void;
   reject: (reason?: unknown) => void;
 };
