@@ -12,7 +12,8 @@ import {
   Skeleton,
 } from "@cartridge/ui";
 import { VoyagerUrl, cn } from "@cartridge/ui/utils";
-import { useConnection, useData } from "#profile/hooks/context";
+import { useKeychain } from "#profile/hooks/keychain";
+import { useData } from "#profile/hooks/data";
 import { LayoutBottomNav } from "#profile/components/bottom-nav";
 import { useCallback, useMemo, useState } from "react";
 import { constants } from "starknet";
@@ -41,7 +42,7 @@ interface CardProps {
 
 export function Activity() {
   const [cap, setCap] = useState(OFFSET);
-  const { chainId } = useConnection();
+  const { chainId, closeModal } = useKeychain();
 
   const { events: data, status } = useData();
 
@@ -64,7 +65,7 @@ export function Activity() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader variant="hidden" />
+      <LayoutHeader variant="hidden" onClose={closeModal} />
 
       {status === "loading" ? (
         <LoadingState />

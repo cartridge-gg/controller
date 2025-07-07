@@ -2,7 +2,7 @@ import { defaultTheme, ControllerTheme, loadConfig } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useConnection } from "#profile/hooks/context";
+
 import {
   ColorScheme,
   ThemeContext,
@@ -51,7 +51,7 @@ export function ThemeProvider({
   const [loading, setLoading] = useState<boolean>(false);
   const themeParam = searchParams.get("theme");
   const presetParam = searchParams.get("preset");
-  const { origin } = useConnection();
+  const origin = window.location.origin;
 
   useEffect(() => {
     // Handle theme from URL param

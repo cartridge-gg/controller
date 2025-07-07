@@ -5,18 +5,19 @@ import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { useCollectibles } from "#profile/hooks/collectible.js";
 import { useArcade } from "#profile/hooks/arcade.js";
-import { useConnection, useTheme } from "#profile/hooks/context.js";
+import { useControllerTheme } from "@/hooks/connection";
+import { useProfileContext } from "#profile/hooks/profile";
 import { EditionModel } from "@cartridge/arcade";
-import { useMarketplace } from "#profile/hooks/marketplace.js";
+
 import { getChecksumAddress } from "starknet";
 
 export function Collections() {
   const { collections, status: CollectionsStatus } = useCollections();
   const { collectibles, status: CollectiblesStatus } = useCollectibles();
   const { editions } = useArcade();
-  const { getCollectionOrders } = useMarketplace();
-  const { project, namespace } = useConnection();
-  const { theme } = useTheme();
+  const getCollectionOrders = (_: string) => ({}); // TODO: Implement collection orders
+  const { project, namespace } = useProfileContext();
+  const theme = useControllerTheme();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(

@@ -1,5 +1,6 @@
-import { useConnection } from "#profile/hooks/context";
+import { useProfileContext } from "#profile/hooks/profile";
 import { Token, useToken, useTokens } from "#profile/hooks/token";
+import { useExecute } from "#profile/hooks/execute";
 import {
   LayoutContainer,
   LayoutContent,
@@ -16,19 +17,17 @@ import {
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import {
-  Call,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
-  uint256,
-} from "starknet";
+import { Call, uint256 } from "starknet";
 import { SendRecipient } from "#profile/components/modules/recipient";
 import { SendAmount } from "./amount";
-import { useData } from "#profile/hooks/context";
+import { useData } from "#profile/hooks/data";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
-  const { parent, provider, closable } = useConnection();
+  const { closable } = useProfileContext();
+  // TODO: Get provider from keychain connection if needed
+  const provider = null;
+  const { execute } = useExecute();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
   const { token, status: tokenFetching } = useToken({
@@ -96,15 +95,11 @@ export function SendToken() {
         },
       ];
       try {
-        const res = await parent.openExecute(calls);
-        if (res?.transactionHash) {
-          await provider.waitForTransaction(res.transactionHash, {
-            retryInterval: 1000,
-            successStates: [
-              TransactionExecutionStatus.SUCCEEDED,
-              TransactionFinalityStatus.ACCEPTED_ON_L2,
-            ],
-          });
+        // Use execute helper to trigger transaction
+        const transactionHash = await execute(calls);
+
+        if (transactionHash) {
+          // TODO: Wait for transaction completion if needed
           // Refetch transfers 5 seconds after to leave time to the indexer to take the new tx into account
           setTimeout(() => {
             refetchTransfers();
@@ -122,7 +117,7 @@ export function SendToken() {
     [
       selectedToken,
       provider,
-      parent,
+      execute,
       closable,
       navigate,
       searchParams,

@@ -13,14 +13,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { BigNumberish, getChecksumAddress } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useConnection } from "#profile/hooks/context.js";
+import { useProfileContext } from "#profile/hooks/profile";
+import { useExecute } from "#profile/hooks/execute";
 import { toast } from "sonner";
 
 export function Socials() {
   const { address } = useAccount();
-  const { parent, closable, visitor } = useConnection();
+  const { closable, visitor } = useProfileContext();
+  const { execute } = useExecute();
   const {
-    chainId,
     provider,
     followers: allFollowers,
     followeds: allFolloweds,
@@ -98,11 +99,10 @@ export function Socials() {
           const calls = follow
             ? provider.social.follow({ target })
             : provider.social.unfollow({ target });
-          const res = await parent.openExecute(
+          const transactionHash = await execute(
             Array.isArray(calls) ? calls : [calls],
-            chainId,
           );
-          if (res && res.transactionHash) {
+          if (transactionHash) {
             toast.success(`${follow ? "Followed" : "Unfollowed"} successfully`);
           }
         } catch (error) {
@@ -114,7 +114,7 @@ export function Socials() {
       };
       process();
     },
-    [chainId, provider, parent],
+    [execute, provider],
   );
 
   useEffect(() => {

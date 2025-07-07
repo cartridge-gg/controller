@@ -9,11 +9,11 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
-import { useConnection } from "#profile/hooks/context.js";
+import { useProfileContext } from "#profile/hooks/profile";
 
 export function LayoutBottomNav() {
   const { pathname } = useLocation();
-  const { namespace } = useConnection();
+  const { namespace } = useProfileContext();
 
   const active = useMemo<
     "inventory" | "trophies" | "achievements" | "leaderboard" | "activity"

@@ -1,44 +1,8 @@
 import { PropsWithChildren } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { ArcadeProvider } from "./arcade";
-import { ThemeProvider } from "./theme";
-import { ConnectionProvider } from "./connection";
-import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
-import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { DataProvider } from "./data";
-import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
-import { UIProvider } from "./ui";
-import { MarketplaceProvider } from "./marketplace";
-
-const posthog = new PostHogWrapper(import.meta.env.VITE_POSTHOG_KEY!, {
-  host: import.meta.env.VITE_POSTHOG_HOST,
-  autocapture: true,
-});
 
 export function Provider({ children }: PropsWithChildren) {
-  const queryClient = new QueryClient();
-
-  return (
-    <PostHogContext.Provider value={{ posthog }}>
-      <CartridgeAPIProvider
-        url={`${import.meta.env.VITE_CARTRIDGE_API_URL!}/query`}
-      >
-        <IndexerAPIProvider credentials="omit">
-          <QueryClientProvider client={queryClient}>
-            <MarketplaceProvider>
-              <ConnectionProvider>
-                <ArcadeProvider>
-                  <UIProvider>
-                    <ThemeProvider defaultScheme="system">
-                      <DataProvider>{children}</DataProvider>
-                    </ThemeProvider>
-                  </UIProvider>
-                </ArcadeProvider>
-              </ConnectionProvider>
-            </MarketplaceProvider>
-          </QueryClientProvider>
-        </IndexerAPIProvider>
-      </CartridgeAPIProvider>
-    </PostHogContext.Provider>
-  );
+  // Profile is always rendered within keychain, so only provide minimal providers
+  // since the main keychain already provides the connection infrastructure
+  return <DataProvider>{children}</DataProvider>;
 }

@@ -1,41 +1,25 @@
-import { useEffect, useState } from "react";
-import { useQuery } from "react-query";
-import { useConnection } from "./context";
-import { InterfaceAbi, FunctionAbi } from "starknet";
+import { useMemo } from "react";
+// import { useConnection as useKeychainConnection } from "@/hooks/connection";
+// import { RpcProvider } from "starknet";
 
-export const useEntrypoints = ({ address }: { address: string }) => {
-  const [entrypoints, setEntrypoints] = useState<string[]>([]);
-  const { provider } = useConnection();
+export function useEntrypoints({
+  contractAddress: _,
+}: {
+  contractAddress: string;
+}) {
+  // TODO: Use provider if needed
+  // const keychainConnection = useKeychainConnection();
+  // const provider = new RpcProvider({
+  //   nodeUrl: keychainConnection.rpcUrl || import.meta.env.VITE_RPC_SEPOLIA,
+  // });
 
-  const { data, isFetching } = useQuery({
-    enabled: !!address && address !== "0x0",
-    queryKey: ["contract", address],
-    queryFn: async () => {
-      try {
-        const code = await provider.getClassAt(address);
-        const interfaces = code.abi.filter(
-          (element) => element.type === "interface",
-        );
-        if (interfaces.length > 0) {
-          return interfaces.flatMap((element: InterfaceAbi) =>
-            element.items.map((item: FunctionAbi) => item.name),
-          );
-        }
-        const functions = code.abi.filter(
-          (element) => element.type === "function",
-        );
-        return functions.map((item: FunctionAbi) => item.name);
-      } catch (error) {
-        console.error(error);
-      }
-    },
-  });
+  const interfaces = useMemo(() => {
+    return []; // TODO: Implement if needed
+  }, []);
 
-  useEffect(() => {
-    if (!data) return;
-    if (entrypoints.length === data.length) return;
-    setEntrypoints(data);
-  }, [data, entrypoints, setEntrypoints]);
+  const entrypoints = useMemo(() => {
+    return []; // TODO: Implement if needed
+  }, []);
 
-  return { entrypoints, isFetching };
-};
+  return { interfaces, entrypoints };
+}

@@ -9,8 +9,9 @@ import {
   useBalancesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "./account";
-import { useConnection } from "./context";
-import { getChecksumAddress } from "starknet";
+import { useProfileContext } from "./profile";
+import { useConnection as useKeychainConnection } from "@/hooks/connection";
+import { getChecksumAddress, RpcProvider } from "starknet";
 import { useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
 import { useUsername } from "./username";
@@ -48,7 +49,7 @@ export function useBalance({
   tokenAddress?: string;
 }): UseBalanceResponse {
   const { address } = useAccount();
-  const { project } = useConnection();
+  const { project } = useProfileContext();
   const [token, setToken] = useState<Token | undefined>(undefined);
   const { status } = useBalanceQuery(
     {
@@ -99,7 +100,7 @@ export type UseBalancesResponse = {
 
 export function useBalances(accountAddress?: string): UseBalancesResponse {
   const { address: connectedAddress } = useAccount();
-  const { project } = useConnection();
+  const { project } = useProfileContext();
   const address = useMemo(
     () => accountAddress ?? connectedAddress,
     [accountAddress, connectedAddress],
@@ -163,7 +164,13 @@ export type UseTokensResponse = {
 };
 
 export function useTokens(accountAddress?: string): UseTokensResponse {
-  const { erc20: options, provider, isVisible } = useConnection();
+  // TODO: Get erc20 options from profile context if needed
+  const options: string[] = [];
+  const keychainConnection = useKeychainConnection();
+  const provider = new RpcProvider({
+    nodeUrl: keychainConnection.rpcUrl || import.meta.env.VITE_RPC_SEPOLIA,
+  });
+  const isVisible = true; // Always visible in keychain
   const { address } = useAccount();
 
   // Fetch credits
@@ -245,7 +252,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     const tokenMap: Record<string, Token> = {};
 
     // Process tokens from rpcData
-    rpcData.forEach((token) => {
+    rpcData.forEach((token: any) => {
       const contractAddress = token.meta.address;
       // Normalize the address by converting to BigInt and back to string
       const normalizedAddress = BigInt(contractAddress).toString();

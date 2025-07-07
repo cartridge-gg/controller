@@ -24,17 +24,20 @@ import { useCallback, useMemo } from "react";
 import { useCollection } from "#profile/hooks/collection";
 import placeholder from "/public/placeholder.svg";
 import { CollectionHeader } from "./header";
-import { useConnection, useTheme } from "#profile/hooks/context.js";
+import { useKeychain } from "#profile/hooks/keychain";
+import { useControllerTheme } from "@/hooks/connection";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { EditionModel, GameModel } from "@cartridge/arcade";
-import { useMarketplace } from "#profile/hooks/marketplace.js";
+
+import { useProfileContext } from "#profile/hooks/profile";
 
 export function Collection() {
   const { games, editions } = useArcade();
   const { address: contractAddress, tokenId } = useParams();
-  const { closable, project, namespace } = useConnection();
-  const { theme } = useTheme();
-  const { collectionOrders: orders } = useMarketplace();
+  const { closeModal } = useKeychain();
+  const { closable, project, namespace } = useProfileContext();
+  const theme = useControllerTheme();
+  const orders: { [key: string]: any[] } = {}; // TODO: Get collection orders from marketplace
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -104,7 +107,7 @@ export function Collection() {
   return (
     <LayoutContainer>
       <LayoutHeader
-        className="hidden"
+        onClose={closeModal}
         onBack={closable ? undefined : handleBack}
       />
       {status === "loading" || !collection || !assets ? (

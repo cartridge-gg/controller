@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 import { Token, useTokens } from "#profile/hooks/token";
 import placeholder from "/public/placeholder.svg";
 import { useEffect, useMemo, useState } from "react";
-import { useConnection } from "#profile/hooks/context.js";
+
 import { cn } from "@cartridge/ui/utils";
 
 const DEFAULT_TOKENS_COUNT = 2;
 
 export function Tokens() {
-  const { isVisible } = useConnection();
+  const isVisible = true; // Always visible in keychain
   const { tokens, credits, status } = useTokens();
   const [unfolded, setUnfolded] = useState(false);
 
