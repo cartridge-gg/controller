@@ -173,12 +173,15 @@ export function useConnectionValue() {
     const rpcUrl = urlParams.get("rpc_url");
     const policies = urlParams.get("policies");
     const version = urlParams.get("v");
+    const project = urlParams.get("ps");
+    const namespace = urlParams.get("ns");
+    const tokens = urlParams.get("erc20");
 
     if (rpcUrl) {
       setRpcUrl(rpcUrl);
     }
 
-    return { theme, preset, policies, version };
+    return { theme, preset, policies, version, project, namespace, tokens };
   }, []);
 
   // Fetch chain ID from RPC provider when rpcUrl changes
@@ -545,6 +548,9 @@ export function useConnectionValue() {
     rpcUrl,
     policies,
     theme,
+    project: urlParams.project,
+    namespace: urlParams.namespace,
+    tokens: urlParams.tokens,
     isConfigLoading,
     verified,
     chainId,

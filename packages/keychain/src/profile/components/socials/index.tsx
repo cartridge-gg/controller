@@ -13,15 +13,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { BigNumberish, getChecksumAddress } from "starknet";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useProfileContext } from "#profile/hooks/profile";
 import { useExecute } from "#profile/hooks/execute";
 import { toast } from "sonner";
 import { useController } from "@/hooks/controller";
+import { useConnection } from "@/hooks/connection";
 
 export function Socials() {
   const { controller } = useController();
-  const { closable, visitor } = useProfileContext();
   const { execute } = useExecute();
+  const connection = useConnection();
   const { address } = useAccount();
   const {
     provider,
@@ -47,10 +47,15 @@ export function Socials() {
   }, [navigate]);
 
   const { baseFollowers, baseFolloweds } = useMemo(() => {
-    return {
-      baseFollowers: allFollowers[getChecksumAddress(address)] ?? [],
-      baseFolloweds: allFolloweds[getChecksumAddress(address)] ?? [],
-    };
+    return address != ""
+      ? {
+          baseFollowers: allFollowers[getChecksumAddress(address)] ?? [],
+          baseFolloweds: allFolloweds[getChecksumAddress(address)] ?? [],
+        }
+      : {
+          baseFollowers: [],
+          baseFolloweds: [],
+        };
   }, [allFollowers, allFolloweds, address]);
 
   const addresses = useMemo(() => {
@@ -99,7 +104,7 @@ export function Socials() {
       follow: boolean,
       setLoading: (address: BigNumberish | null) => void,
     ) => {
-      if (!target) return;
+      if (!target || !provider) return;
       const process = async () => {
         setLoading(target);
         try {
@@ -137,7 +142,7 @@ export function Socials() {
     <LayoutContainer>
       <LayoutHeader
         variant="hidden"
-        onBack={closable || visitor ? undefined : onBack}
+        onBack={onBack}
       />
       <LayoutContent className="py-6 gap-y-6 select-none overflow-hidden">
         <FollowerTabs

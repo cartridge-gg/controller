@@ -6,9 +6,9 @@ import {
 import { formatAddress } from "@cartridge/ui/utils";
 import { useUsernames } from "./account";
 import { getChecksumAddress } from "starknet";
-import { useMarketplace } from "./marketplace";
+import { useMarketplace } from "#profile/hooks/marketplace";
 import { erc20Metadata } from "@cartridge/presets";
-import { useProfileContext } from "./profile";
+import { useConnection } from "@/hooks/connection";
 
 const LIMIT = 0;
 
@@ -54,7 +54,7 @@ export function useTraceabilities({
   tokenId,
 }: TraceabilitiesProps): UseTraceabilitiesResponse {
   const { sales: salesData, listings: listingsData } = useMarketplace();
-  const { project } = useProfileContext();
+  const { project } = useConnection();
   const [traceabilities, setTraceabilities] = useState<{
     [key: string]: Traceability;
   }>({});

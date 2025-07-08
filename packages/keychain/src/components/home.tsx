@@ -31,8 +31,6 @@ export function Home() {
   >(undefined);
   const posthog = usePostHog();
 
-  console.log("context", context);
-
   useEffect(() => {
     if (controller && policies) {
       controller.isRequestedSession(policies).then((isRequestedSession) => {
