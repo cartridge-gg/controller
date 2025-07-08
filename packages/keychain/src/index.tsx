@@ -1,3 +1,5 @@
+import "./index.css";
+
 import { registerRootComponent } from "expo";
 // import { StrictMode } from "react";
 // import { SonnerToaster } from "@cartridge/ui";
@@ -6,8 +8,6 @@ import { registerRootComponent } from "expo";
 import { Text } from "react-native";
 import Controller from "@/utils/controller";
 
-import "./index.css";
-
 declare global {
   interface Window {
     controller: ReturnType<typeof Controller.fromStore>;
@@ -15,13 +15,12 @@ declare global {
 }
 
 function KeychainApp() {
-  if (typeof window !== "undefined") {
-    const origin = process.env.EXPO_PUBLIC_ORIGIN || "https://x.cartridge.gg";
-    window.controller = Controller.fromStore(origin);
-  }
+  // if (typeof window !== "undefined") {
+  //   const origin = process.env.EXPO_PUBLIC_ORIGIN || "https://x.cartridge.gg";
+  //   window.controller = Controller.fromStore(origin);
+  // }
 
-  return <Text>Keychain App</Text>;
-
+  return <Text className="text-[yellow]">Keychain App</Text>;
   // return (
   //   <StrictMode>
   //     <Provider>
