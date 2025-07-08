@@ -10,6 +10,7 @@ import {
   PurchaseState,
   PricingDetails,
   PurchaseCreditsProps,
+  Network,
 } from "../components/purchase/types";
 
 export function usePurchase({
@@ -41,6 +42,7 @@ export function usePurchase({
   const [selectedWallet, setSelectedWallet] = useState<ExternalWallet>();
   const [walletAddress, setWalletAddress] = useState<string>();
   const [displayError, setDisplayError] = useState<Error | null>(null);
+  const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null);
 
   const {
     stripePromise,
@@ -114,6 +116,54 @@ export function usePurchase({
 
   const onComplete = useCallback(() => setState(PurchaseState.SUCCESS), []);
 
+  const onPurchase = useCallback(
+    () => setState(PurchaseState.PAYMENT_METHOD_SELECTION),
+    [],
+  );
+
+  const onPaymentMethodBack = useCallback(
+    () => setState(PurchaseState.SELECTION),
+    [],
+  );
+
+  const onControllerSelected = useCallback(() => {
+    // For controller payments, we can implement later
+    // For now, redirect to credit card
+    onCreditCard();
+  }, [onCreditCard]);
+
+  const onWalletButtonSelected = useCallback(() => {
+    setState(PurchaseState.NETWORK_SELECTION);
+  }, []);
+
+  const onNetworkSelected = useCallback((network: Network) => {
+    setSelectedNetwork(network);
+    setState(PurchaseState.WALLET_SELECTION);
+  }, []);
+
+  const onNetworkBack = useCallback(() => {
+    setState(PurchaseState.PAYMENT_METHOD_SELECTION);
+  }, []);
+
+  const onWalletBack = useCallback(() => {
+    setState(PurchaseState.NETWORK_SELECTION);
+  }, []);
+
+  const onWalletSelected = useCallback(
+    (walletType: string) => {
+      // TODO: Create wallet object based on walletType and network
+      // For now, we'll need to implement wallet creation logic
+      console.log(
+        "Selected wallet:",
+        walletType,
+        "for network:",
+        selectedNetwork,
+      );
+      setState(PurchaseState.CRYPTO_CHECKOUT);
+    },
+    [selectedNetwork],
+  );
+
   return {
     state,
     setState,
@@ -123,6 +173,7 @@ export function usePurchase({
     selectedWallet,
     walletAddress,
     displayError,
+    selectedNetwork,
     stripePromise,
     isStripeLoading,
     isLoadingWallets,
@@ -135,5 +186,13 @@ export function usePurchase({
     onExternalConnect,
     onBack,
     onComplete,
+    onPurchase,
+    onPaymentMethodBack,
+    onControllerSelected,
+    onWalletButtonSelected,
+    onNetworkSelected,
+    onNetworkBack,
+    onWalletBack,
+    onWalletSelected,
   };
 }

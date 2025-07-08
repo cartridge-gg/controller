@@ -17,6 +17,9 @@ import CheckoutForm from "./StripeCheckout";
 import { CryptoCheckout } from "./CryptoCheckout";
 import { PurchaseType } from "@/hooks/payments/crypto";
 import { PaymentMethod } from "./PaymentMethod";
+import { PaymentMethodSelection } from "./PaymentMethodSelection";
+import { NetworkSelection } from "./NetworkSelection";
+import { WalletSelection } from "./WalletSelection";
 import { Supply } from "./Supply";
 import { PurchaseContent } from "./PurchaseContent";
 import { usePurchase } from "@/hooks/purchase";
@@ -39,6 +42,7 @@ export function Purchase(props: PurchaseCreditsProps) {
     selectedWallet,
     walletAddress,
     displayError,
+    selectedNetwork,
     stripePromise,
     isStripeLoading,
     isLoadingWallets,
@@ -51,6 +55,14 @@ export function Purchase(props: PurchaseCreditsProps) {
     onExternalConnect,
     onBack: handleBack,
     onComplete,
+    onPurchase,
+    onPaymentMethodBack,
+    onControllerSelected,
+    onWalletButtonSelected,
+    onNetworkSelected,
+    onNetworkBack,
+    onWalletBack,
+    onWalletSelected,
   } = usePurchase(props);
 
   const { onBack, wallets, type, isSlot, starterpackDetails } = props;
@@ -61,8 +73,16 @@ export function Purchase(props: PurchaseCreditsProps) {
         return type === PurchaseType.CREDITS
           ? "Purchase Credits"
           : (starterpackDetails?.name ?? "Purchase Starter Pack");
+      case PurchaseState.PAYMENT_METHOD_SELECTION:
+        return "Choose Payment Method";
+      case PurchaseState.NETWORK_SELECTION:
+        return "Choose Network";
+      case PurchaseState.WALLET_SELECTION:
+        return "Select a Wallet";
       case PurchaseState.STRIPE_CHECKOUT:
         return "Credit Card";
+      case PurchaseState.CRYPTO_CHECKOUT:
+        return "Crypto Checkout";
       case PurchaseState.SUCCESS:
         return "Purchase Complete";
     }
@@ -98,6 +118,39 @@ export function Purchase(props: PurchaseCreditsProps) {
           onComplete={onComplete}
         />
       </Elements>
+    );
+  }
+
+  if (state === PurchaseState.PAYMENT_METHOD_SELECTION) {
+    return (
+      <PaymentMethodSelection
+        onBack={onPaymentMethodBack}
+        onControllerSelected={onControllerSelected}
+        onCreditCardSelected={onCreditCard}
+        onWalletSelected={onWalletButtonSelected}
+        wallets={wallets}
+        isStripeLoading={isStripeLoading}
+        isLoadingWallets={isLoadingWallets}
+      />
+    );
+  }
+
+  if (state === PurchaseState.NETWORK_SELECTION) {
+    return (
+      <NetworkSelection
+        onBack={onNetworkBack}
+        onNetworkSelected={onNetworkSelected}
+      />
+    );
+  }
+
+  if (state === PurchaseState.WALLET_SELECTION) {
+    return (
+      <WalletSelection
+        selectedNetwork={selectedNetwork!}
+        onBack={onWalletBack}
+        onWalletSelected={onWalletSelected}
+      />
     );
   }
 
@@ -189,6 +242,7 @@ export function Purchase(props: PurchaseCreditsProps) {
             onClaim={onClaim}
             onCreditCard={onCreditCard}
             onExternalConnect={onExternalConnect}
+            onPurchase={onPurchase}
           />
         )}
       </LayoutFooter>

@@ -16,6 +16,7 @@ export type PaymentMethodProps = {
   onClaim: () => void;
   onCreditCard: () => void;
   onExternalConnect: (wallet: ExternalWallet) => void;
+  onPurchase: () => void;
 };
 
 export function PaymentMethod({
@@ -29,6 +30,7 @@ export function PaymentMethod({
   onClaim,
   onCreditCard,
   onExternalConnect,
+  onPurchase,
 }: PaymentMethodProps) {
   const {
     isConnecting,
@@ -85,6 +87,20 @@ export function PaymentMethod({
     );
   }
 
+  // For starterpacks, show single "Purchase" button
+  if (starterpackDetails) {
+    return (
+      <Button
+        className="flex-1"
+        onClick={onPurchase}
+        disabled={isStarterpackLoading || isLoadingWallets}
+      >
+        Purchase
+      </Button>
+    );
+  }
+
+  // For credits, show the existing credit card and wallet options
   return (
     <>
       <Button
