@@ -1,3 +1,3 @@
-declare const __PACKAGE_VERSION__: string;
+import packageJson from "../package.json";
 
-export const PACKAGE_VERSION = __PACKAGE_VERSION__;
+export const PACKAGE_VERSION = packageJson.version;

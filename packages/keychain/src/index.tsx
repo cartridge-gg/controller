@@ -1,11 +1,11 @@
 import "./index.css";
+import "./globals";
 
 import { registerRootComponent } from "expo";
-// import { StrictMode } from "react";
-// import { SonnerToaster } from "@cartridge/ui";
-// import { App } from "../src/components/app";
-// import { Provider } from "../src/components/provider";
-import { Text } from "react-native";
+import { StrictMode } from "react";
+import { SonnerToaster } from "@cartridge/ui";
+import { App } from "@/components/app";
+// import { Provider } from "@/components/provider";
 import Controller from "@/utils/controller";
 
 declare global {
@@ -20,15 +20,14 @@ function KeychainApp() {
   //   window.controller = Controller.fromStore(origin);
   // }
 
-  return <Text className="text-[yellow]">Keychain App</Text>;
-  // return (
-  //   <StrictMode>
-  //     <Provider>
-  //       <App />
-  //     </Provider>
-  //     <SonnerToaster position="bottom-right" />
-  //   </StrictMode>
-  // );
+  return (
+    <StrictMode>
+      {/* <Provider> */}
+      <App />
+      <SonnerToaster position="bottom-right" />
+      {/* </Provider> */}
+    </StrictMode>
+  );
 }
 
 registerRootComponent(KeychainApp);

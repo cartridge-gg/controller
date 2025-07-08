@@ -20,10 +20,11 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, "node_modules"),
 ];
 
-// 3. Add crypto polyfill for web platform and path aliases
+// 3. Setup polyfills for web platform and path aliases
 config.resolver.alias = {
   ...config.resolver.alias,
   crypto: require.resolve("crypto-browserify"),
+  buffer: require.resolve("buffer"),
   "@": path.resolve(projectRoot, "src"),
 };
 
