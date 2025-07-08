@@ -31,4 +31,7 @@ config.resolver.resolverMainFields = ["react-native", "browser", "main"];
 config.transformer.enableBabelRCLookup = false;
 config.transformer.enableBabelRuntime = false;
 
+// 6. Add WASM support for Metro
+config.resolver.assetExts = [...config.resolver.assetExts, "wasm"];
+
 module.exports = config;

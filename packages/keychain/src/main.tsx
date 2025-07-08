@@ -15,7 +15,7 @@ declare global {
 }
 
 // Initialize controller before React rendering
-window.controller = Controller.fromStore(import.meta.env.VITE_ORIGIN!);
+window.controller = Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

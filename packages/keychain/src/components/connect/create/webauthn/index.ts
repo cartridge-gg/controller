@@ -54,7 +54,7 @@ export function useWebauthnAuthentication() {
         {
           signer: {
             webauthn: {
-              rpId: import.meta.env.VITE_RP_ID!,
+              rpId: process.env.EXPO_PUBLIC_RP_ID!,
               credentialId,
               publicKey,
             },
@@ -80,7 +80,7 @@ export function useWebauthnAuthentication() {
       const initialOwner: Owner = {
         signer: {
           webauthn: {
-            rpId: import.meta.env.VITE_RP_ID!,
+            rpId: process.env.EXPO_PUBLIC_RP_ID!,
             credentialId: webauthnsSigner.webauthns?.[0]?.credentialId ?? "",
             publicKey: webauthnsSigner.webauthns?.[0]?.publicKey ?? "",
           },

@@ -37,7 +37,7 @@ export const getOrCreateWallet = async (
   const wallets = await authIframeClient.getWallets({
     organizationId: subOrgId,
   });
-  if (wallets.wallets.length > 1 && !import.meta.env.DEV) {
+  if (wallets.wallets.length > 1 && !__DEV__) {
     throw new Error(
       "Multiple wallets found" + JSON.stringify(wallets, null, 2),
     );
@@ -113,7 +113,7 @@ interface DecodedIdToken extends JwtPayload {
 export type SocialProvider = Extract<AuthOption, "discord" | "google">;
 
 export const fetchApi = fetchApiCreator(
-  `${import.meta.env.VITE_CARTRIDGE_API_URL}/oauth2`,
+  `${process.env.EXPO_PUBLIC_CARTRIDGE_API_URL}/oauth2`,
   {
     credentials: "same-origin",
   },
@@ -163,7 +163,7 @@ export const getOrCreateTurnkeySuborg = async (
   } else if (getSuborgsResponse.organizationIds.length === 1) {
     targetSubOrgId = getSuborgsResponse.organizationIds[0];
   } else {
-    if (import.meta.env.DEV) {
+    if (__DEV__) {
       targetSubOrgId = getSuborgsResponse.organizationIds[0];
     } else {
       // We don't want to handle multiple suborgs per user at the moment

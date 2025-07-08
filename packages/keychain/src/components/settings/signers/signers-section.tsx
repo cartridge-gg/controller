@@ -106,7 +106,7 @@ const toJsSigner = (signer: CredentialMetadata): Signer => {
       return {
         webauthn: {
           publicKey: signer.webauthn?.[0]?.publicKey ?? "",
-          rpId: import.meta.env.VITE_RP_ID,
+          rpId: process.env.EXPO_PUBLIC_RP_ID!,
           credentialId: signer.webauthn?.[0]?.id ?? "",
         },
       };

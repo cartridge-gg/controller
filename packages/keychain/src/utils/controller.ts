@@ -62,7 +62,7 @@ export default class Controller {
       address,
       username,
       owner,
-      import.meta.env.VITE_CARTRIDGE_API_URL,
+      process.env.EXPO_PUBLIC_CARTRIDGE_API_URL,
     );
 
     this.provider = new RpcProvider({ nodeUrl: rpcUrl });
@@ -292,7 +292,7 @@ export default class Controller {
   static fromStore(appId: string) {
     const cartridgeWithMeta = CartridgeAccount.fromStorage(
       appId,
-      import.meta.env.VITE_CARTRIDGE_API_URL,
+      process.env.EXPO_PUBLIC_CARTRIDGE_API_URL,
     );
     if (!cartridgeWithMeta) {
       return;
