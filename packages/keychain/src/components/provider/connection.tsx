@@ -7,7 +7,6 @@ import {
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
-  Tokens,
 } from "@cartridge/controller";
 import { ControllerTheme } from "@cartridge/ui";
 import { createContext } from "react";
@@ -23,9 +22,9 @@ export type ConnectionContextValue = {
   controller?: Controller;
   origin: string;
   rpcUrl: string;
-  project?: string;
-  namespace?: string;
-  tokens?: Tokens;
+  project: string | null;
+  namespace: string | null;
+  tokens?: string[];
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
   isConfigLoading: boolean;

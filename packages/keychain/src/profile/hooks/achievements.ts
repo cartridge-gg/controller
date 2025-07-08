@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { TROPHY } from "#profile/constants";
+import { PROGRESS, TROPHY } from "#profile/constants";
 import { Trophy, Progress, Task } from "#profile/models";
 import { useConnection } from "@/hooks/connection";
 import { useAccount } from "#profile/hooks/account";
 import { useTrophies } from "#profile/hooks/trophies";
+import { useProgressions } from "./progressions";
 
 export interface Item {
   id: string;
@@ -61,14 +62,17 @@ export function useAchievements(accountAddress?: string) {
     parser: Trophy.parse,
   });
 
-  // TODO: Fix progressions hook integration
-  const progressions = {};
-  const progressionsStatus = "success";
+  const { progressions, status: progressionsStatus } = useProgressions({
+    namespace: namespace ?? "",
+    name: PROGRESS,
+    project: project ?? "",
+    parser: Progress.parse,
+  });
 
   const status = useMemo(() => {
-    return trophiesStatus === "loading" || progressionsStatus === "loading"
+    return trophiesStatus === "loading" && progressionsStatus === "loading"
       ? "loading"
-      : trophiesStatus === "error"
+      : trophiesStatus === "error" || progressionsStatus === "error"
         ? "error"
         : "success";
   }, [trophiesStatus, progressionsStatus]);

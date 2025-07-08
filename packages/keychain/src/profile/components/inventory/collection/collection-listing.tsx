@@ -31,12 +31,13 @@ import {
   cairo,
   Call,
   CallData,
-  InvokeTransactionReceiptResponse,
-  TransactionStatus,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
 } from "starknet";
 import { useMarketplace } from "#profile/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "#profile/hooks/entrypoints";
+import { useExecute } from "#profile/hooks/execute";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
@@ -54,9 +55,10 @@ const EXPIRATIONS = [
 
 export function CollectionListing() {
   const { chainId, provider } = useMarketplace();
-  const { parent } = useConnection();
+  const { parent, controller } = useConnection();
   const { address: contractAddress, tokenId } = useParams();
   const { tokens } = useTokens();
+  const { execute } = useExecute();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Token | undefined>();
@@ -182,45 +184,42 @@ export function CollectionListing() {
       const amount = BigInt(price * 10 ** selected.metadata.decimals);
 
       // Commented out calls for now
-      // const calls: AllowArray<Call> = [
-      //   {
-      //     contractAddress: contractAddress,
-      //     entrypoint: entrypoint,
-      //     calldata: CallData.compile({
-      //       operator: marketplaceAddress,
-      //       approved: true,
-      //     }),
-      //   },
-      //   ...tokenIds.map((tokenId) => ({
-      //     contractAddress: marketplaceAddress,
-      //     entrypoint: "list",
-      //     calldata: CallData.compile({
-      //       collection: contractAddress,
-      //       tokenId: cairo.uint256(tokenId),
-      //       quantity: 0, // 0 for ERC721
-      //       price: amount.toString(),
-      //       currency: selected.metadata.address,
-      //       expiration: expiration,
-      //       royalties: true,
-      //     }),
-      //   })),
-      // ];
-      // const res = await parent.openExecute(
-      //   Array.isArray(calls) ? calls : [calls],
-      //   chainId,
-      // );
-      // if (res?.transactionHash) {
-      //   await starknet.waitForTransaction(res.transactionHash, {
-      //     retryInterval: 1000,
-      //     successStates: [
-      //       TransactionExecutionStatus.SUCCEEDED,
-      //       TransactionFinalityStatus.ACCEPTED_ON_L2,
-      //     ],
-      //   });
-      // }
-      // if (res) {
-      //   toast.success(`Asset(s) listed successfully`);
-      // }
+      const calls: AllowArray<Call> = [
+        {
+          contractAddress: contractAddress,
+          entrypoint: entrypoint,
+          calldata: CallData.compile({
+            operator: marketplaceAddress,
+            approved: true,
+          }),
+        },
+        ...tokenIds.map((tokenId) => ({
+          contractAddress: marketplaceAddress,
+          entrypoint: "list",
+          calldata: CallData.compile({
+            collection: contractAddress,
+            tokenId: cairo.uint256(tokenId),
+            quantity: 0, // 0 for ERC721
+            price: amount.toString(),
+            currency: selected.metadata.address,
+            expiration: expiration,
+            royalties: true,
+          }),
+        })),
+      ];
+
+      const res = await execute(calls);
+      if (res?.transaction_hash) {
+        await controller?.provider?.waitForTransaction(res.transaction_hash, {
+          retryInterval: 100,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+
+        toast.success(`Asset(s) listed successfully`);
+      }
     } catch (error) {
       console.error(error);
       toast.error(`Failed to list asset(s)`);

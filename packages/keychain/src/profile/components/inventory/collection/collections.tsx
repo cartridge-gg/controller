@@ -4,17 +4,18 @@ import placeholder from "/placeholder.svg?url";
 import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { useCollectibles } from "#profile/hooks/collectible";
-import { useArcade } from "#profile/hooks/arcade.js";
+import { useArcade } from "#profile/hooks/arcade";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { EditionModel } from "@cartridge/arcade";
 
 import { getChecksumAddress } from "starknet";
+import { useMarketplace } from "#profile/hooks/marketplace";
 
 export function Collections() {
   const { collections, status: CollectionsStatus } = useCollections();
   const { collectibles, status: CollectiblesStatus } = useCollectibles();
   const { editions } = useArcade();
-  const getCollectionOrders = (_: string) => ({}); // TODO: Implement collection orders
+  const { getCollectionOrders } = useMarketplace();
   const { project, namespace } = useConnection();
   const theme = useControllerTheme();
 

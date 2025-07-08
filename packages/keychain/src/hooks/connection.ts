@@ -18,6 +18,7 @@ import {
   ExternalWalletType,
   ResponseCodes,
   toArray,
+  Token,
   toSessionPolicies,
   WalletAdapter,
   WalletBridge,
@@ -30,13 +31,32 @@ import {
   Policies,
 } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
-import { isIframe, normalizeOrigin } from "@cartridge/ui/utils";
 import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
+import {
+  ETH_CONTRACT_ADDRESS,
+  isIframe,
+  normalizeOrigin,
+  STRK_CONTRACT_ADDRESS,
+  USDC_CONTRACT_ADDRESS,
+  USDT_CONTRACT_ADDRESS,
+} from "@cartridge/ui/utils";
 import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SemVer } from "semver";
-import { RpcProvider, shortString } from "starknet";
+import { getChecksumAddress, RpcProvider, shortString } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
+
+const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
+  "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+);
+
+const TOKEN_ADDRESSES: Record<Token, string> = {
+  eth: ETH_CONTRACT_ADDRESS,
+  strk: STRK_CONTRACT_ADDRESS,
+  lords: LORDS_CONTRACT_ADDRESS,
+  usdc: USDC_CONTRACT_ADDRESS,
+  usdt: USDT_CONTRACT_ADDRESS,
+};
 
 export type ParentMethods = AsyncMethodReturns<{
   close: () => Promise<void>;
@@ -175,7 +195,14 @@ export function useConnectionValue() {
     const version = urlParams.get("v");
     const project = urlParams.get("ps");
     const namespace = urlParams.get("ns");
-    const tokens = urlParams.get("erc20");
+
+    const erc20Param = urlParams.get("erc20");
+    const tokens = erc20Param
+      ? decodeURIComponent(erc20Param)
+          .split(",")
+          .map((token) => TOKEN_ADDRESSES[token as Token] || null)
+          .filter((address) => address !== null)
+      : [STRK_CONTRACT_ADDRESS];
 
     if (rpcUrl) {
       setRpcUrl(rpcUrl);

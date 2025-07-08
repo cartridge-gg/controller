@@ -42,7 +42,9 @@ export function Collectible() {
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { collectible, assets, status } = useCollectible({ contractAddress: address });
+  const { collectible, assets, status } = useCollectible({
+    contractAddress: address,
+  });
 
   if (address || location.pathname.includes("/send")) {
     return <Outlet />;
@@ -50,10 +52,7 @@ export function Collectible() {
 
   return (
     <LayoutContainer>
-      <NavigationHeader
-        onClose={closeModal}
-        // onBack={closable || visitor ? undefined : handleBack}
-      />
+      <NavigationHeader onClose={closeModal} />
       {status === "loading" || !collectible || !assets ? (
         <LoadingState />
       ) : status === "error" ? (

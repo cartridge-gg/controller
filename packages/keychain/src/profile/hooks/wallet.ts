@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
-import { useConnection as useKeychainConnection } from "@/hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { useMemo, useState } from "react";
-import { BigNumberish, RpcProvider } from "starknet";
+import { BigNumberish } from "starknet";
 import { WalletType } from "@cartridge/ui";
 
 const ARGENT_ACCOUNT_CLASS_HASHES: BigNumberish[] = [
@@ -21,10 +21,8 @@ const CONTROLLER_CLASS_HASHES: BigNumberish[] = [
 ];
 
 export function useWallet({ address }: { address: string }) {
-  const keychainConnection = useKeychainConnection();
-  const provider = new RpcProvider({
-    nodeUrl: keychainConnection.rpcUrl || import.meta.env.VITE_RPC_SEPOLIA,
-  });
+  const { controller } = useConnection();
+  const provider = controller?.provider;
   const [error, setError] = useState<string>("");
 
   const { data, isFetching } = useQuery({
@@ -33,7 +31,7 @@ export function useWallet({ address }: { address: string }) {
     queryFn: async () => {
       try {
         setError("");
-        return await provider.getClassHashAt(BigInt(address));
+        return await provider?.getClassHashAt(BigInt(address));
       } catch (error: unknown) {
         if (
           (error as { message: string }).message.includes("Contract not found")

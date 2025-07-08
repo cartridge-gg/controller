@@ -31,6 +31,7 @@ import { useAccount } from "#profile/hooks/account";
 import { useToken } from "#profile/hooks/token";
 import { useCallback, useMemo } from "react";
 import { compare } from "compare-versions";
+import { useConnection } from "@/hooks/connection";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -103,10 +104,9 @@ function Credits() {
 function ERC20() {
   const { address } = useParams<{ address: string }>();
   const { address: accountAddress } = useAccount();
-
+  const { controller } = useConnection();
   const { transfers } = useData();
 
-  // const { closable, visitor } = useProfileContext();
   const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
   const version = "0.5.6"; // Default version for compatibility
   const { token } = useToken({ tokenAddress: address! });
@@ -214,7 +214,7 @@ function ERC20() {
         </div>
       </LayoutContent>
 
-      {compatibility && (
+      {compatibility && controller && (
         <LayoutFooter>
           <Link to={`send?${searchParams.toString()}`} className="w-full">
             <Button className="w-full space-x-2">

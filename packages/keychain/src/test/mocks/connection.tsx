@@ -25,6 +25,8 @@ export const defaultMockConnection: ConnectionContextValue = {
   rpcUrl: "https://test.rpc.com",
   chainId: "SN_MAIN",
   parent: undefined,
+  project: null,
+  namespace: null,
   verified: false,
   isConfigLoading: false,
   theme: {

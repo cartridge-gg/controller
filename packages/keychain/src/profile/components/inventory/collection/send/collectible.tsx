@@ -27,6 +27,7 @@ import { SendAmount } from "./amount";
 import { SendHeader } from "./header";
 import { useEntrypoints } from "#profile/hooks/entrypoints";
 import { NavigationHeader } from "@/components";
+import { useExecute } from "#profile/hooks/execute";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
@@ -52,6 +53,7 @@ export function SendCollectible() {
   const [recipientLoading, setRecipientLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { execute } = useExecute();
 
   const [to, setTo] = useState("");
 
@@ -120,17 +122,18 @@ export function SendCollectible() {
           calldata: [address, to, tokenId, formattedAmount, ...calldata],
         };
       });
-      // TODO: Implement transaction execution
-      // const res = await controller.execute(calls);
-      // if (res?.transactionHash) {
-      //   await provider.waitForTransaction(res.transactionHash, {
-      //     retryInterval: 1000,
-      //     successStates: [
-      //       TransactionExecutionStatus.SUCCEEDED,
-      //       TransactionFinalityStatus.ACCEPTED_ON_L2,
-      //     ],
-      //   });
-      // }
+
+      const res = await execute(calls);
+      if (res?.transaction_hash) {
+        await controller?.provider?.waitForTransaction(res.transaction_hash, {
+          retryInterval: 100,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+      }
+
       navigate(`../../..?${searchParams.toString()}`);
       setLoading(false);
     },

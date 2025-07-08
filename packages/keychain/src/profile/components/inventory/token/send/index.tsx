@@ -16,16 +16,20 @@ import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Call, uint256 } from "starknet";
+import {
+  Call,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+  uint256,
+} from "starknet";
 import { SendRecipient } from "#profile/components/modules/recipient";
 import { SendAmount } from "./amount";
 import { useData } from "#profile/hooks/data";
+import { useConnection } from "@/hooks/connection";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
-  // const { closable } = useProfileContext();
-  // TODO: Get provider from keychain connection if needed
-  const provider = null;
+  const { controller } = useConnection();
   const { execute } = useExecute();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
@@ -95,29 +99,33 @@ export function SendToken() {
       ];
       try {
         // Use execute helper to trigger transaction
-        const transactionHash = await execute(calls);
+        const res = await execute(calls);
 
-        if (transactionHash) {
+        if (res?.transaction_hash) {
+          await controller?.provider?.waitForTransaction(res.transaction_hash, {
+            retryInterval: 100,
+            successStates: [
+              TransactionExecutionStatus.SUCCEEDED,
+              TransactionFinalityStatus.ACCEPTED_ON_L2,
+            ],
+          });
+
           // TODO: Wait for transaction completion if needed
           // Refetch transfers 5 seconds after to leave time to the indexer to take the new tx into account
           setTimeout(() => {
             refetchTransfers();
           }, 5000);
         }
-        // if (closable) {
-        //   navigate(`..?${searchParams.toString()}`);
-        // } else {
+
         navigate(`../../..?${searchParams.toString()}`);
-        // }
       } finally {
         setLoading(false);
       }
     },
     [
       selectedToken,
-      provider,
+      controller,
       execute,
-      // closable,
       navigate,
       searchParams,
       refetchTransfers,
