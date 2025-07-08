@@ -64,7 +64,7 @@ export function Consent() {
 
     const redirect_uri = encodeURIComponent(callback_uri);
     const url = `${
-      import.meta.env.VITE_CARTRIDGE_API_URL
+      process.env.EXPO_PUBLIC_CARTRIDGE_API_URL
     }/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
 
     window.location.href = url;
@@ -76,7 +76,7 @@ export function Consent() {
   }, [callback_uri]);
 
   useEffect(() => {
-    if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
+    if (!Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!)) {
       navigate(
         `/slot?returnTo=${encodeURIComponent(pathname)}${
           callback_uri

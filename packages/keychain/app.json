@@ -7,6 +7,7 @@
     "bundler": "metro",
     "output": "single"
   },
+  "platforms": ["ios", "android", "web"],
   "cli": {
     "appVersionSource": "remote"
   },
