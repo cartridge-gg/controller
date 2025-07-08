@@ -4,9 +4,12 @@ import { StarterPackDetails } from "@/hooks/starterpack";
 
 export enum PurchaseState {
   SELECTION = 0,
-  STRIPE_CHECKOUT = 1,
-  CRYPTO_CHECKOUT = 2,
-  SUCCESS = 3,
+  PAYMENT_METHOD_SELECTION = 1,
+  NETWORK_SELECTION = 2,
+  WALLET_SELECTION = 3,
+  STRIPE_CHECKOUT = 4,
+  CRYPTO_CHECKOUT = 5,
+  SUCCESS = 6,
 }
 
 export type PurchaseCreditsProps = {
@@ -22,6 +25,13 @@ export type PricingDetails = {
   baseCostInCents: number;
   processingFeeInCents: number;
   totalInCents: number;
+};
+
+export type Network = {
+  id: string;
+  name: string;
+  icon: React.ElementType;
+  color: string;
 };
 
 export type StripeResponse = {
