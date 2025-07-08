@@ -3,7 +3,7 @@ import {
   OwnershipProject,
   useOwnershipsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useProfileContext } from "./profile";
+import { useConnection } from "@/hooks/connection";
 
 const LIMIT = 0;
 
@@ -29,7 +29,7 @@ export function useOwnerships({
   contractAddresses,
   tokenIds,
 }: OwnershipsProps): UseOwnershipsResponse {
-  const { project } = useProfileContext();
+  const { project } = useConnection();
   const [ownerships, setOwnerships] = useState<{ [key: string]: Ownership }>(
     {},
   );
@@ -92,7 +92,7 @@ export function useOwnership({
   contractAddress,
   tokenId,
 }: OwnershipProps): UseOwnershipResponse {
-  const { project } = useProfileContext();
+  const { project } = useConnection();
   const [ownership, setOwnership] = useState<Ownership | undefined>(undefined);
 
   const projects: OwnershipProject[] = useMemo(() => {

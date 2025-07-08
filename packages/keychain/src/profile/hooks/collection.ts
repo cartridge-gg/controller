@@ -1,65 +1,117 @@
-import { useAccount } from "./account";
-import { useState } from "react";
-import { useCollectionsQuery } from "@cartridge/ui/utils/api/cartridge";
-import { useProfileContext } from "./profile";
+import { useAccount } from "#profile/hooks/account";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCollectionQuery,
+  useCollectionsQuery,
+} from "@cartridge/ui/utils/api/cartridge";
+import { Collections, Marketplace } from "@cartridge/marketplace";
+import { Token, ToriiClient } from "@dojoengine/torii-wasm";
+import { useMarketplace } from "#profile/hooks/marketplace";
+import { useConnection } from "@/hooks/connection";
 
 const TYPE = "ERC-721";
 const LIMIT = 1000;
 
-interface Collection {
-  name: string;
+export type Collection = {
   address: string;
-  imageUrl?: string;
-  type: string;
-  totalCount?: number;
-}
-
-export interface Asset {
   name: string;
+  type: string;
+  imageUrl: string;
+  totalCount: number;
+};
+
+export type Asset = {
   tokenId: string;
-  imageUrl?: string;
-  amount: number;
-  attributes: Array<{
-    trait_type?: string;
-    trait?: string;
-    value: string | number;
-  }>;
-}
+  name: string;
+  description?: string;
+  imageUrl: string;
+  attributes: Record<string, unknown>[];
+};
 
 export type UseCollectionResponse = {
-  collection: Collection;
-  assets: Asset[];
+  collection?: Collection;
+  assets?: Asset[];
   status: "success" | "error" | "idle" | "loading";
   refetch: () => void;
 };
 
 export function useCollection({
-  contractAddress: _,
-  tokenIds: __,
+  contractAddress,
+  tokenIds = [],
 }: {
   contractAddress?: string;
   tokenIds?: string[];
-}) {
-  // TODO: Implement collection fetching
-  const collection: Collection = {
-    name: "Collection",
-    address: "0x0",
-    imageUrl: "",
-    type: "ERC-721",
-  };
-  const assets: Asset[] = [];
-  const status = "success";
+}): UseCollectionResponse {
+  const { address } = useAccount({ overridable: true });
+  const { project } = useConnection();
+  const [collection, setCollection] = useState<Collection | undefined>(
+    undefined,
+  );
+  const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
 
-  const refetch = () => {
-    // TODO: Implement refetch
-  };
+  const { status, refetch } = useCollectionQuery(
+    {
+      projects: [project ?? ""],
+      accountAddress: address,
+      contractAddress: contractAddress ?? "",
+    },
+    {
+      queryKey: ["collection"],
+      enabled: !!project && !!address,
+      onSuccess: ({ collection }) => {
+        const name = collection.meta.name;
+        const newCollection: Collection = {
+          address: collection.meta.contractAddress,
+          name: name ? name : "---",
+          type: TYPE,
+          imageUrl: collection.meta.imagePath,
+          totalCount: collection.meta.assetCount,
+        };
 
-  return {
-    collection,
-    assets,
-    status,
-    refetch,
-  };
+        const newAssets: { [key: string]: Asset } = {};
+
+        collection.assets.forEach((a) => {
+          let imageUrl = a.imageUrl;
+          if (!imageUrl.includes("://")) {
+            imageUrl = newCollection.imageUrl.replace(
+              /0x[a-fA-F0-9]+(?=\/image$)/,
+              a.tokenId,
+            );
+          }
+          let attributes = [];
+          try {
+            attributes = JSON.parse(!a.attributes ? "[]" : a.attributes);
+          } catch (error) {
+            console.warn(error, { data: attributes });
+          }
+          let metadata: { image?: string } = {};
+          try {
+            metadata = JSON.parse(!a.metadata ? "{}" : a.metadata);
+          } catch (error) {
+            console.warn(error, { data: a.metadata });
+          }
+          const asset: Asset = {
+            tokenId: a.tokenId,
+            name: a.name,
+            description: a.description ?? "",
+            imageUrl: imageUrl || metadata?.image || "",
+            attributes: attributes,
+          };
+          newAssets[`${newCollection.address}-${a.tokenId}`] = asset;
+        });
+
+        setCollection(newCollection);
+        setAssets(newAssets);
+      },
+    },
+  );
+
+  const filteredAssets = useMemo(() => {
+    if (!tokenIds.length) return Object.values(assets);
+    return Object.values(assets).filter((a) => tokenIds.includes(a.tokenId));
+  }, [assets, tokenIds]);
+
+  return { collection, assets: filteredAssets, status, refetch };
 }
 
 export type UseCollectionsResponse = {
@@ -81,7 +133,7 @@ export type CollectionType = {
 
 export function useCollections(): UseCollectionsResponse {
   const { address } = useAccount();
-  const { project } = useProfileContext();
+  const { project } = useConnection();
   const [offset, setOffset] = useState(0);
   const [collections, setCollections] = useState<{ [key: string]: Collection }>(
     {},
@@ -129,30 +181,109 @@ export function useCollections(): UseCollectionsResponse {
   };
 }
 
-export function useToriiCollections() {
-  // TODO: Implement torii collections fetching
-  const collections = {};
-  const status = "success";
+export type UseToriiCollectionsResponse = {
+  collections: Collections;
+  status: "success" | "error" | "idle" | "loading";
+  refetch: () => void;
+};
+
+export function useToriiCollections(): UseToriiCollectionsResponse {
+  const { provider } = useMarketplace();
+  const { project } = useConnection();
+  const [client, setClient] = useState<ToriiClient | undefined>(undefined);
+  const [status, setStatus] = useState<
+    "success" | "error" | "idle" | "loading"
+  >("idle");
+  const [collections, setCollections] = useState<Collections>({});
+
+  const refetch = useCallback(() => {
+    if (!client || !project) return;
+    setStatus("loading");
+    Marketplace.fetchCollections({ [project]: client })
+      .then((collections) => {
+        setCollections(collections);
+        setStatus("success");
+      })
+      .catch((error) => {
+        setStatus("error");
+        console.error(error);
+      });
+  }, [project, client, setStatus, setCollections]);
+
+  useEffect(() => {
+    if (!project) return;
+    const getClients = async () => {
+      const url = `https://api.cartridge.gg/x/${project}/torii`;
+      const client = await provider.getToriiClient(url);
+      setClient(client);
+    };
+    getClients();
+  }, [provider, project]);
+
+  useEffect(() => {
+    refetch();
+  }, [client, refetch]);
 
   return {
-    collections,
+    collections: collections,
     status,
+    refetch,
   };
 }
 
+export type UseToriiCollectionResponse = {
+  tokens: Token[];
+  status: "success" | "error" | "idle" | "loading";
+  refetch: () => void;
+};
+
 export function useToriiCollection({
-  contractAddress: _,
-  tokenIds: __,
+  contractAddress,
+  tokenIds,
 }: {
   contractAddress: string;
   tokenIds: string[];
-}) {
-  // TODO: Implement torii collection fetching
-  const tokens: any[] = [];
-  const status = "success";
+}): UseToriiCollectionResponse {
+  const { provider } = useMarketplace();
+  const { project } = useConnection();
+  const [client, setClient] = useState<ToriiClient | undefined>(undefined);
+  const [status, setStatus] = useState<
+    "success" | "error" | "idle" | "loading"
+  >("idle");
+  const [tokens, setTokens] = useState<Token[]>([]);
+
+  useEffect(() => {
+    if (!project) return;
+    const getClients = async () => {
+      const url = `https://api.cartridge.gg/x/${project}/torii`;
+      const client = await provider.getToriiClient(url);
+      setClient(client);
+    };
+    getClients();
+  }, [provider, project]);
+
+  const refetch = useCallback(() => {
+    if (!client) return;
+    setStatus("loading");
+    client
+      .getTokens([contractAddress], tokenIds)
+      .then((tokens) => {
+        setTokens(tokens.items || []);
+        setStatus("success");
+      })
+      .catch((error) => {
+        setStatus("error");
+        console.error(error);
+      });
+  }, [client, setStatus, setTokens, contractAddress, tokenIds]);
+
+  useEffect(() => {
+    refetch();
+  }, [client]);
 
   return {
-    tokens,
+    tokens: tokens,
     status,
+    refetch,
   };
 }

@@ -1,4 +1,3 @@
-import { useProfileContext } from "#profile/hooks/profile";
 import { Token, useToken, useTokens } from "#profile/hooks/token";
 import { useExecute } from "#profile/hooks/execute";
 import {
@@ -24,7 +23,7 @@ import { useData } from "#profile/hooks/data";
 
 export function SendToken() {
   const { address: tokenAddress } = useParams<{ address: string }>();
-  const { closable } = useProfileContext();
+  // const { closable } = useProfileContext();
   // TODO: Get provider from keychain connection if needed
   const provider = null;
   const { execute } = useExecute();
@@ -105,11 +104,11 @@ export function SendToken() {
             refetchTransfers();
           }, 5000);
         }
-        if (closable) {
-          navigate(`..?${searchParams.toString()}`);
-        } else {
+        // if (closable) {
+        //   navigate(`..?${searchParams.toString()}`);
+        // } else {
           navigate(`../../..?${searchParams.toString()}`);
-        }
+        // }
       } finally {
         setLoading(false);
       }
@@ -118,7 +117,7 @@ export function SendToken() {
       selectedToken,
       provider,
       execute,
-      closable,
+      // closable,
       navigate,
       searchParams,
       refetchTransfers,

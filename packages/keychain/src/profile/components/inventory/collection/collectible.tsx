@@ -20,16 +20,15 @@ import placeholder from "/public/placeholder.svg";
 import { CollectionHeader } from "./header";
 import { useConnection } from "@/hooks/connection";
 import { useControllerTheme } from "@/hooks/connection";
-import { useProfileContext } from "#profile/hooks/profile";
-import { useCollectible } from "#profile/hooks/collectible.js";
-import { useArcade } from "#profile/hooks/arcade.js";
+import { useCollectible } from "#profile/hooks/collectible";
+import { useArcade } from "#profile/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 
 export function Collectible() {
   const { games, editions } = useArcade();
   const { address: contractAddress, tokenId } = useParams();
   const { closeModal } = useConnection();
-  const { closable, visitor, project, namespace } = useProfileContext();
+  const { project, namespace } = useConnection();
   const theme = useControllerTheme();
 
   const edition: EditionModel | undefined = useMemo(() => {
@@ -59,7 +58,7 @@ export function Collectible() {
     <LayoutContainer>
       <LayoutHeader
         onClose={closeModal}
-        onBack={closable || visitor ? undefined : handleBack}
+        // onBack={closable || visitor ? undefined : handleBack}
       />
       {status === "loading" || !collectible || !assets ? (
         <LoadingState />

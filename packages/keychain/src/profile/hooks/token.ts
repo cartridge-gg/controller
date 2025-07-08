@@ -9,7 +9,7 @@ import {
   useBalancesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "./account";
-import { useProfileContext } from "./profile";
+// import { useProfileContext } from "./profile";
 import { useConnection as useKeychainConnection } from "@/hooks/connection";
 import { getChecksumAddress, RpcProvider } from "starknet";
 import { useMemo, useState } from "react";
@@ -49,7 +49,7 @@ export function useBalance({
   tokenAddress?: string;
 }): UseBalanceResponse {
   const { address } = useAccount();
-  const { project } = useProfileContext();
+  const { project } = useKeychainConnection();
   const [token, setToken] = useState<Token | undefined>(undefined);
   const { status } = useBalanceQuery(
     {
@@ -100,7 +100,7 @@ export type UseBalancesResponse = {
 
 export function useBalances(accountAddress?: string): UseBalancesResponse {
   const { address: connectedAddress } = useAccount();
-  const { project } = useProfileContext();
+  const { project } = useKeychainConnection();
   const address = useMemo(
     () => accountAddress ?? connectedAddress,
     [accountAddress, connectedAddress],

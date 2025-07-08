@@ -281,7 +281,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    await this.keychain.navigate(`${at}`);
+    await this.keychain.navigate(at);
     this.iframes.keychain.open();
   }
 

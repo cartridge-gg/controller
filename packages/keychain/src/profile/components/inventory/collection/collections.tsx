@@ -3,10 +3,9 @@ import { useCollections } from "#profile/hooks/collection";
 import placeholder from "/public/placeholder.svg";
 import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
-import { useCollectibles } from "#profile/hooks/collectible.js";
+import { useCollectibles } from "#profile/hooks/collectible";
 import { useArcade } from "#profile/hooks/arcade.js";
-import { useControllerTheme } from "@/hooks/connection";
-import { useProfileContext } from "#profile/hooks/profile";
+import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { EditionModel } from "@cartridge/arcade";
 
 import { getChecksumAddress } from "starknet";
@@ -16,7 +15,7 @@ export function Collections() {
   const { collectibles, status: CollectiblesStatus } = useCollectibles();
   const { editions } = useArcade();
   const getCollectionOrders = (_: string) => ({}); // TODO: Implement collection orders
-  const { project, namespace } = useProfileContext();
+  const { project, namespace } = useConnection();
   const theme = useControllerTheme();
 
   const edition: EditionModel | undefined = useMemo(() => {

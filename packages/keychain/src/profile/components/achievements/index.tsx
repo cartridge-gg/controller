@@ -10,7 +10,6 @@ import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
 import { useConnection } from "@/hooks/connection";
-import { useProfileContext } from "#profile/hooks/profile";
 import { useData } from "#profile/hooks/data";
 import { useArcade } from "#profile/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
@@ -28,7 +27,7 @@ export function Achievements() {
 
   const { address } = useParams<{ address: string }>();
   const { closeModal } = useConnection();
-  const { project, namespace } = useProfileContext();
+  const { project, namespace } = useConnection();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(

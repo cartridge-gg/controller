@@ -19,7 +19,6 @@ import {
   Thumbnail,
   InfoIcon,
 } from "@cartridge/ui";
-import { useProfileContext } from "#profile/hooks/profile";
 import { useData } from "#profile/hooks/data";
 import {
   getDate,
@@ -108,7 +107,7 @@ function ERC20() {
 
   const { transfers } = useData();
 
-  const { closable, visitor } = useProfileContext();
+  // const { closable, visitor } = useProfileContext();
   const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
   const version = "0.5.6"; // Default version for compatibility
   const { token } = useToken({ tokenAddress: address! });
@@ -171,7 +170,7 @@ function ERC20() {
     <LayoutContainer>
       <LayoutHeader
         className="hidden"
-        onBack={closable || visitor ? undefined : handleBack}
+        // onBack={closable || visitor ? undefined : handleBack}
       />
 
       <LayoutContent className="pb-4 gap-6">
@@ -223,7 +222,7 @@ function ERC20() {
         </div>
       </LayoutContent>
 
-      {compatibility && !visitor && (
+      {compatibility && (
         <LayoutFooter>
           <Link to={`send?${searchParams.toString()}`} className="w-full">
             <Button className="w-full space-x-2">

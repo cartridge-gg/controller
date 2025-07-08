@@ -26,7 +26,7 @@ export function Leaderboard() {
   const { closeModal } = useConnection();
 
   const followings = useMemo(() => {
-    return followeds[getChecksumAddress(self)] || [];
+    return self != "" ? followeds[getChecksumAddress(self)] || [] : [];
   }, [followeds, self]);
 
   const addresses = useMemo(() => {
