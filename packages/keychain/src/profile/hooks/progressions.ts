@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Project,
   useProgressionsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { Progress, RawProgress, getSelectorFromTag } from "#profile/models";
-import { useConnection } from "@/hooks/connection";
 
 interface Response {
   items: { achievements: RawProgress[] }[];
@@ -32,7 +31,7 @@ export function useProgressions({
     [namespace, name, project],
   );
 
-  const { status, refetch } = useProgressionsQuery(
+  const { status } = useProgressionsQuery(
     {
       projects,
     },

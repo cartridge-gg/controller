@@ -1,20 +1,8 @@
-import React from "react";
-import { LayoutHeader } from "@cartridge/ui";
+import { LayoutHeader, HeaderProps } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { useNavigationStack } from "@/hooks/useNavigationStack";
 
-export interface NavigationHeaderProps {
-  // All standard LayoutHeader props - make them more flexible
-  title?: string | React.ReactElement;
-  description?: string | React.ReactElement;
-  icon?: React.ReactElement;
-  variant?: "expanded" | "compressed" | "hidden";
-  hideSettings?: boolean;
-  hideNetwork?: boolean;
-  hideUsername?: boolean;
-  right?: React.ReactElement;
-  className?: string;
-
+export type NavigationHeaderProps = {
   // Navigation props
   onClose?: () => void;
   onBack?: () => void;
@@ -30,10 +18,7 @@ export interface NavigationHeaderProps {
   // Navigation stack options
   stackKey?: string; // Key for navigation stack (default: "default")
   hasBottomNav?: boolean; // If true, always shows close and doesn't add to nav stack
-
-  // Pass through any other props to LayoutHeader
-  [key: string]: any;
-}
+} & HeaderProps;
 
 export function NavigationHeader({
   onClose,

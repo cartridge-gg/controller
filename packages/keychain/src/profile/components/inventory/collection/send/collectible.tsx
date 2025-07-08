@@ -22,7 +22,7 @@ import {
 import { SendRecipient } from "../../../modules/recipient";
 import { useCollectible } from "#profile/hooks/collectible";
 import { Sending } from "./collectible-sending";
-import placeholder from "/public/placeholder.svg";
+import placeholder from "/placeholder.svg?url";
 import { SendAmount } from "./amount";
 import { SendHeader } from "./header";
 import { useEntrypoints } from "#profile/hooks/entrypoints";

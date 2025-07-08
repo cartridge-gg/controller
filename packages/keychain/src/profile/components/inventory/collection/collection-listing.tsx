@@ -22,7 +22,7 @@ import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useCollection } from "#profile/hooks/collection";
-import placeholder from "/public/placeholder.svg";
+import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
 import { useTokens } from "#profile/hooks/token";
 import { useConnection } from "@/hooks/connection";
@@ -31,8 +31,8 @@ import {
   cairo,
   Call,
   CallData,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
+  InvokeTransactionReceiptResponse,
+  TransactionStatus,
 } from "starknet";
 import { useMarketplace } from "#profile/hooks/marketplace";
 import { toast } from "sonner";
@@ -54,7 +54,7 @@ const EXPIRATIONS = [
 
 export function CollectionListing() {
   const { chainId, provider } = useMarketplace();
-  const { parent, controller } = useConnection();
+  const { parent } = useConnection();
   const { address: contractAddress, tokenId } = useParams();
   const { tokens } = useTokens();
   const [submitted, setSubmitted] = useState(false);
@@ -181,29 +181,30 @@ export function CollectionListing() {
       )?.address;
       const amount = BigInt(price * 10 ** selected.metadata.decimals);
 
-      const calls: AllowArray<Call> = [
-        {
-          contractAddress: contractAddress,
-          entrypoint: entrypoint,
-          calldata: CallData.compile({
-            operator: marketplaceAddress,
-            approved: true,
-          }),
-        },
-        ...tokenIds.map((tokenId) => ({
-          contractAddress: marketplaceAddress,
-          entrypoint: "list",
-          calldata: CallData.compile({
-            collection: contractAddress,
-            tokenId: cairo.uint256(tokenId),
-            quantity: 0, // 0 for ERC721
-            price: amount.toString(),
-            currency: selected.metadata.address,
-            expiration: expiration,
-            royalties: true,
-          }),
-        })),
-      ];
+      // Commented out calls for now
+      // const calls: AllowArray<Call> = [
+      //   {
+      //     contractAddress: contractAddress,
+      //     entrypoint: entrypoint,
+      //     calldata: CallData.compile({
+      //       operator: marketplaceAddress,
+      //       approved: true,
+      //     }),
+      //   },
+      //   ...tokenIds.map((tokenId) => ({
+      //     contractAddress: marketplaceAddress,
+      //     entrypoint: "list",
+      //     calldata: CallData.compile({
+      //       collection: contractAddress,
+      //       tokenId: cairo.uint256(tokenId),
+      //       quantity: 0, // 0 for ERC721
+      //       price: amount.toString(),
+      //       currency: selected.metadata.address,
+      //       expiration: expiration,
+      //       royalties: true,
+      //     }),
+      //   })),
+      // ];
       // const res = await parent.openExecute(
       //   Array.isArray(calls) ? calls : [calls],
       //   chainId,

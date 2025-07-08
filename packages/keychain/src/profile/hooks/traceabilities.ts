@@ -159,7 +159,7 @@ export function useTraceabilities({
         currencyImage: currencyImage,
       } as CardProps;
     });
-  }, [salesData, usernames, project, contractAddress, tokenId]);
+  }, [salesData, usernames, contractAddress, tokenId]);
 
   const listings: CardProps[] = useMemo(() => {
     if (!contractAddress || !tokenId) return [];
@@ -191,7 +191,7 @@ export function useTraceabilities({
         currencyImage: currencyImage,
       } as CardProps;
     });
-  }, [salesData, usernames, project, contractAddress, tokenId]);
+  }, [salesData, usernames, project, contractAddress, tokenId, listingsData]);
 
   const transfers: CardProps[][] = useMemo(() => {
     const results = Object.values(traceabilities).map((traceability) => {

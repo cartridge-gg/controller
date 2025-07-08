@@ -10,7 +10,6 @@ import { NavigationHeader } from "@/components";
 import { useAccount, useUsernames } from "#profile/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { useConnection } from "@/hooks/connection";
 import { useData } from "#profile/hooks/data";
 import { useArcade } from "#profile/hooks/arcade";
 import { getChecksumAddress } from "starknet";
@@ -23,7 +22,6 @@ export function Leaderboard() {
     setAccountAddress,
   } = useData();
   const { followeds } = useArcade();
-  const { closeModal } = useConnection();
 
   const followings = useMemo(() => {
     return self != "" ? followeds[getChecksumAddress(self)] || [] : [];

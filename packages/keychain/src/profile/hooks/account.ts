@@ -176,7 +176,6 @@ export function useAccountInfo({ nameOrAddress }: { nameOrAddress: string }) {
 export type UseAccountResponse = {
   username: string;
   address: string;
-  error?: string;
 };
 
 export function useAccount({
@@ -190,16 +189,10 @@ export function useAccount({
   const [searchParams] = useSearchParams();
 
   const username = match?.params.username ?? "";
-  const { data: usernameData, error: usernameError } =
-    useAddressByUsernameQuery({ username }, { enabled: !!username });
-
-  if (usernameError) {
-    return {
-      username: "",
-      address: "",
-      error: "Could not find address from username",
-    };
-  }
+  const { data: usernameData } = useAddressByUsernameQuery(
+    { username },
+    { enabled: !!username },
+  );
 
   const address = useMemo(
     () =>

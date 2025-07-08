@@ -1,7 +1,7 @@
 import { Empty, MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
 import { Link } from "react-router-dom";
 import { Token, useTokens } from "#profile/hooks/token";
-import placeholder from "/public/placeholder.svg";
+import placeholder from "/placeholder.svg?url";
 import { useEffect, useMemo, useState } from "react";
 
 import { cn } from "@cartridge/ui/utils";

@@ -36,13 +36,12 @@ import {
   Call,
   CallData,
   constants,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
+  TransactionStatus,
 } from "starknet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "#profile/hooks/collection";
 import { CollectionHeader } from "./header";
-import placeholder from "/public/placeholder.svg";
+import placeholder from "/placeholder.svg?url";
 import { VoyagerUrl } from "@cartridge/ui/utils";
 import { CardProps, useTraceabilities } from "#profile/hooks/traceabilities";
 import { useArcade } from "#profile/hooks/arcade";
@@ -146,10 +145,6 @@ export function CollectionAsset() {
     return Number(order?.price) / Math.pow(10, token?.metadata.decimals || 0);
   }, [order, token]);
 
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
-
   const handleUnlist = useCallback(async () => {
     if (!contractAddress || !asset || !isListed || !order || !isOwner) return;
     setLoading(true);
@@ -158,17 +153,6 @@ export function CollectionAsset() {
         (c: { tag: string }) => c.tag?.includes("Marketplace"),
       )?.address;
       const orderIds = selfOrders.map((order) => order.id);
-      const calls: AllowArray<Call> = [
-        ...orderIds.map((orderId) => ({
-          contractAddress: marketplaceAddress,
-          entrypoint: "cancel",
-          calldata: CallData.compile({
-            orderId: orderId,
-            collection: contractAddress,
-            tokenId: cairo.uint256(asset.tokenId),
-          }),
-        })),
-      ];
       // const res = await controller?.parent?.openExecute(
       //   Array.isArray(calls) ? calls : [calls],
       //   chainId,
