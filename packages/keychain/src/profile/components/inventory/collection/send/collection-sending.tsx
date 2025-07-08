@@ -7,7 +7,7 @@ import {
 } from "@cartridge/ui";
 import { Asset } from "#profile/hooks/collection";
 
-import placeholder from "/public/placeholder.svg";
+import placeholder from "/placeholder.svg?url";
 
 export function Sending({
   assets,

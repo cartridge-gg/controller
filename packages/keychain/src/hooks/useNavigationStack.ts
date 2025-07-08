@@ -137,7 +137,8 @@ export function useNavigationStack(options: UseNavigationStackOptions = {}) {
   const clearStack = useCallback(() => {
     navigationStacks.set(stackKey, []);
     setStackDepth(0);
-  }, [stackKey]);
+    navigate("/", { replace: true });
+  }, [stackKey, navigate]);
 
   const getStackDepth = useCallback(() => {
     return getCurrentStack().length;

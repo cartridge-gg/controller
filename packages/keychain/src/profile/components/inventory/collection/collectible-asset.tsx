@@ -30,7 +30,7 @@ import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useCallback, useMemo, useState } from "react";
 import { useCollectible } from "#profile/hooks/collectible";
 import { CollectionHeader } from "./header";
-import placeholder from "/public/placeholder.svg";
+import placeholder from "/placeholder.svg?url";
 import { VoyagerUrl } from "@cartridge/ui/utils";
 import { CardProps, useTraceabilities } from "#profile/hooks/traceabilities";
 import { useArcade } from "#profile/hooks/arcade";

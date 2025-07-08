@@ -188,7 +188,7 @@ const controller = new ControllerConnector({
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
   tokens: {
-    erc20: ["lords"],
+    erc20: ["lords", "strk"],
   },
 });
 

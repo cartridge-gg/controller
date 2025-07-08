@@ -52,6 +52,7 @@ import { toast } from "sonner";
 import { useTokens } from "#profile/hooks/token";
 import { useQuery } from "react-query";
 import { useEntrypoints } from "#profile/hooks/entrypoints";
+import { useExecute } from "#profile/hooks/execute.js";
 
 const FEE_ENTRYPOINT = "royalty_info";
 
@@ -65,7 +66,7 @@ export function CollectionPurchase() {
   const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
   const { provider, orders, marketplaceFee, removeOrder, setAmount } =
     useMarketplace();
-
+  const { execute } = useExecute();
   const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
@@ -181,10 +182,6 @@ export function CollectionPurchase() {
     [setRoyalties],
   );
 
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
-
   const handlePurchase = useCallback(async () => {
     if (!token || !tokenOrders || tokenOrders.length === 0) return;
     setLoading(true);
@@ -214,23 +211,23 @@ export function CollectionPurchase() {
           }),
         })),
       ];
-      // const res = await controller?.parent?.openExecute(
-      //   Array.isArray(calls) ? calls : [calls],
-      //   chainId,
-      // );
-      // if (res?.transactionHash) {
-      //   await starknet.waitForTransaction(res.transactionHash, {
-      //     retryInterval: 100,
-      //     successStates: [
-      //       TransactionExecutionStatus.SUCCEEDED,
-      //       TransactionFinalityStatus.ACCEPTED_ON_L2,
-      //     ],
-      //   });
-      // }
-      // if (res) {
-      //   toast.success(`Asset purchased successfully`);
-      //   refetch();
-      // }
+      const res = await execute(calls);
+
+      if (res?.transaction_hash) {
+        await controller?.provider?.waitForTransaction(res.transaction_hash, {
+          retryInterval: 100,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+      }
+
+      if (res) {
+        toast.success(`Asset purchased successfully`);
+        refetch();
+      }
+
       // Removing the order optimistically
       tokenOrders.forEach((order) => {
         removeOrder(order);

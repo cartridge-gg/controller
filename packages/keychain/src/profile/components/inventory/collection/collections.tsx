@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCollections } from "#profile/hooks/collection";
-import placeholder from "/public/placeholder.svg";
+import placeholder from "/placeholder.svg?url";
 import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { useCollectibles } from "#profile/hooks/collectible";

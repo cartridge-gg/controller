@@ -21,7 +21,6 @@ export function Achievements() {
   const { pins, games, editions } = useArcade();
 
   const { address } = useParams<{ address: string }>();
-  const { closeModal } = useConnection();
   const { project, namespace } = useConnection();
 
   const edition: EditionModel | undefined = useMemo(() => {

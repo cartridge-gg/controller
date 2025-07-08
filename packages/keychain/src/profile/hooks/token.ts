@@ -1,4 +1,5 @@
 import {
+  ERC20Balance,
   useCountervalue,
   useCreditBalance,
   useERC20Balance,
@@ -9,7 +10,6 @@ import {
   useBalancesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "./account";
-// import { useProfileContext } from "./profile";
 import { useConnection as useKeychainConnection } from "@/hooks/connection";
 import { getChecksumAddress, RpcProvider } from "starknet";
 import { useMemo, useState } from "react";
@@ -252,7 +252,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     const tokenMap: Record<string, Token> = {};
 
     // Process tokens from rpcData
-    rpcData.forEach((token: any) => {
+    rpcData.forEach((token: ERC20Balance) => {
       const contractAddress = token.meta.address;
       // Normalize the address by converting to BigInt and back to string
       const normalizedAddress = BigInt(contractAddress).toString();

@@ -39,7 +39,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   );
 
   const { address } = useAccount();
-  const { project, namespace } = useConnection();
+  const { project } = useConnection();
   const isVisible = true; // Always visible in keychain
 
   const { games, editions } = useArcade();

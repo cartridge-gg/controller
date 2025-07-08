@@ -2,7 +2,6 @@ import {
   Link,
   Outlet,
   useLocation,
-  useNavigate,
   useParams,
   useSearchParams,
 } from "react-router-dom";
@@ -22,33 +21,32 @@ import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useMemo } from "react";
 import { useCollection } from "#profile/hooks/collection";
-import placeholder from "/public/placeholder.svg";
+import placeholder from "/placeholder.svg?url";
 import { CollectionHeader } from "./header";
 import { useConnection } from "@/hooks/connection";
 import { useControllerTheme } from "@/hooks/connection";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { EditionModel, GameModel } from "@cartridge/arcade";
+import { useMarketplace } from "#profile/hooks/marketplace.js";
 
 export function Collection() {
   const { games, editions } = useArcade();
   const { address: contractAddress, tokenId } = useParams();
-  const { closeModal } = useConnection();
-  const { project, namespace } = useConnection();
+  const { project } = useConnection();
+  const { collectionOrders: orders } = useMarketplace();
   const theme = useControllerTheme();
-  const orders: { [key: string]: any[] } = {}; // TODO: Get collection orders from marketplace
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
     );
-  }, [editions, project, namespace]);
+  }, [editions, project]);
 
   const game: GameModel | undefined = useMemo(() => {
     return Object.values(games).find((game) => game.id === edition?.gameId);
   }, [games, edition]);
 
   const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tokenIds = searchParams.getAll("tokenIds");
   const { collection, assets, status } = useCollection({ contractAddress });
@@ -89,10 +87,6 @@ export function Collection() {
     [tokenIds, searchParams, setSearchParams],
   );
 
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
-
   if (
     tokenId ||
     location.pathname.includes("/send") ||
@@ -104,11 +98,7 @@ export function Collection() {
 
   return (
     <LayoutContainer>
-      <NavigationHeader
-        className="hidden"
-        // onClose={closable ? closeModal : undefined}
-        // onBack={closable ? undefined : handleBack}
-      />
+      <NavigationHeader className="hidden" />
       {status === "loading" || !collection || !assets ? (
         <LoadingState />
       ) : status === "error" ? (

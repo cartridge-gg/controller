@@ -2,7 +2,6 @@ import {
   Link,
   Outlet,
   useLocation,
-  useNavigate,
   useParams,
   useSearchParams,
 } from "react-router-dom";
@@ -15,8 +14,8 @@ import {
 } from "@cartridge/ui";
 import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
-import { useCallback, useMemo } from "react";
-import placeholder from "/public/placeholder.svg";
+import { useMemo } from "react";
+import placeholder from "/placeholder.svg?url";
 import { CollectionHeader } from "./header";
 import { useConnection } from "@/hooks/connection";
 import { useControllerTheme } from "@/hooks/connection";
@@ -26,7 +25,7 @@ import { EditionModel, GameModel } from "@cartridge/arcade";
 
 export function Collectible() {
   const { games, editions } = useArcade();
-  const { address: contractAddress, tokenId } = useParams();
+  const { address } = useParams<{ address: string }>();
   const { closeModal } = useConnection();
   const { project, namespace } = useConnection();
   const theme = useControllerTheme();
@@ -42,15 +41,10 @@ export function Collectible() {
   }, [games, edition]);
 
   const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { collectible, assets, status } = useCollectible({ contractAddress });
+  const { collectible, assets, status } = useCollectible({ contractAddress: address });
 
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
-
-  if (tokenId || location.pathname.includes("/send")) {
+  if (address || location.pathname.includes("/send")) {
     return <Outlet />;
   }
 

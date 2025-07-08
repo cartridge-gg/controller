@@ -29,28 +29,13 @@ type UseArcadeResponse = {
  * @throws {Error} If used outside of a ArcadeProvider context
  */
 export const useArcade = (): UseArcadeResponse => {
-  const { address, error } = useAccount();
+  const { address } = useAccount();
   const context = useContext(ArcadeContext);
 
   if (!context) {
     throw new Error(
       "The `useArcade` hook must be used within a `ArcadeProvider`",
     );
-  }
-
-  if (error) {
-    return {
-      chainId: "",
-      provider: null,
-      pins: {},
-      followers: {},
-      followeds: {},
-      games: {},
-      editions: {},
-      followersCount: 0,
-      followedsCount: 0,
-      error,
-    };
   }
 
   const { chainId, provider, pins, followers, followeds, games, editions } =

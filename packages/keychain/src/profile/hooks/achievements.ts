@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { TROPHY } from "#profile/constants";
 import { Trophy, Progress, Task } from "#profile/models";
 import { useConnection } from "@/hooks/connection";
-import { useAccount } from "./account";
-import { useProgressions } from "#profile/hooks/progressions";
-import { useTrophies } from "./trophies";
+import { useAccount } from "#profile/hooks/account";
+import { useTrophies } from "#profile/hooks/trophies";
 
 export interface Item {
   id: string;

@@ -1,5 +1,6 @@
 import { useAccount } from "#profile/hooks/account";
 import { useConnection } from "@/hooks/connection";
+import { useExecute } from "#profile/hooks/execute";
 import {
   LayoutContainer,
   LayoutContent,
@@ -14,13 +15,14 @@ import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { uint256 } from "starknet";
+import { uint256, Call } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
 import { useCollection } from "#profile/hooks/collection";
 import { Sending } from "./collection-sending";
 import { useEntrypoints } from "#profile/hooks/entrypoints";
-import placeholder from "/public/placeholder.svg";
+import placeholder from "/placeholder.svg?url";
 import { SendHeader } from "./header";
+import { toast } from "sonner";
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
 const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
@@ -37,6 +39,7 @@ export function SendCollection() {
   });
   const { address } = useAccount();
   const { controller } = useConnection();
+  const { execute } = useExecute();
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
   const [recipientError, setRecipientError] = useState<Error | undefined>();
@@ -99,48 +102,41 @@ export function SendCollection() {
       )
         return;
       setLoading(true);
-      // Fill the extra argument in case of safe transfer functions
       const calldata = entrypoint.includes("safe") ? [0] : [];
-      // const calls: Call[] = (tokenIds as string[]).map((id: string) => {
-      //   const tokenId = uint256.bnToUint256(BigInt(id));
-      //   return {
-      //     contractAddress: contractAddress,
-      //     entrypoint,
-      //     calldata: [address, to, tokenId, ...calldata],
-      //   };
-      // });
-      // const res = await parent.openExecute(calls);
-      // if (res?.transactionHash) {
-      //   await provider.waitForTransaction(res.transactionHash, {
-      //     retryInterval: 1000,
-      //     successStates: [
-      //       TransactionExecutionStatus.SUCCEEDED,
-      //       TransactionFinalityStatus.ACCEPTED_ON_L2,
-      //     ],
-      //   });
-      // }
-      // if (res) {
-      //   refetch();
-      // }
-      // if (closable) {
-      //   navigate(`../..?${searchParams.toString()}`);
-      // } else {
-      navigate(`../../..?${searchParams.toString()}`);
-      // }
-      setLoading(false);
+      const calls: Call[] = tokenIds.map((id: string) => {
+        const tokenId = uint256.bnToUint256(BigInt(id));
+        return {
+          contractAddress: contractAddress,
+          entrypoint,
+          calldata: [address, to, tokenId, ...calldata],
+        };
+      });
+      
+      try {
+        const transactionHash = await execute(calls);
+        if (transactionHash) {
+          toast.success("Transaction submitted successfully!");
+          refetch();
+        }
+        navigate(`../../..?${searchParams.toString()}`);
+      } catch (error) {
+        console.error("Transaction failed:", error);
+        toast.error("Failed to send asset(s)");
+      } finally {
+        setLoading(false);
+      }
     },
     [
       controller,
       tokenIds,
       contractAddress,
       address,
-      parent,
       recipientError,
       entrypoint,
-      // closable,
       navigate,
       searchParams,
       refetch,
+      execute,
     ],
   );
 
