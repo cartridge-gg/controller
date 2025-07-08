@@ -1,0 +1,10 @@
+[install]
+# Override packages similar to pnpm overrides
+[install.overrides]
+"@radix-ui/react-accordion" = "1.2.1"
+
+[install.scopes]
+# Configure any scoped registries if needed
+
+[install.cache]
+# Configure cache behavior 

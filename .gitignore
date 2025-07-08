@@ -141,9 +141,9 @@ node_modules/
 *.tsbuildinfo
 
 .turbo
-.pnpm-store
+.bun
 
-**/.pnpm-debug.log*
+**/.bun-debug.log*
 
 **/storybook-static/
 
@@ -186,3 +186,5 @@ lcov.info
 
 account.json
 keystore.json
+
+**/.expo

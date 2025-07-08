@@ -3,8 +3,8 @@
 ### Development
 
 ```
-pnpm i
-pnpm dev
+bun install
+bun dev
 
 # Example page: localhost:3002
 # Keychain: localhost:3001
@@ -17,8 +17,8 @@ pnpm dev
 bin/apidev
 
 # Run test
-pnpm e2e
+bun run e2e
 
 # or Run test with Playwright UI
-pnpm e2e:ui
+bun run e2e:ui
 ```

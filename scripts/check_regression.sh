@@ -81,13 +81,13 @@ if [ $? -ne 0 ]; then echo "ERROR: Failed to create worktree example-next at $CO
 cd "$WORKTREE_EXAMPLE_NEXT_PATH"
 if [ $? -ne 0 ]; then echo "ERROR: Failed to cd into worktree example-next."; exit 1; fi
 
-pnpm install
-if [ $? -ne 0 ]; then echo "ERROR: pnpm install failed in worktree example-next."; exit 1; fi
+bun install
+if [ $? -ne 0 ]; then echo "ERROR: bun install failed in worktree example-next."; exit 1; fi
 
-pnpm build
-if [ $? -ne 0 ]; then echo "ERROR: pnpm build failed in worktree example-next."; exit 1; fi
+bun build
+if [ $? -ne 0 ]; then echo "ERROR: bun build failed in worktree example-next."; exit 1; fi
 
-pnpm --filter "$PACKAGE_EXAMPLE_NEXT" dev &
+bun --filter "$PACKAGE_EXAMPLE_NEXT" dev &
 DEV_EXAMPLE_NEXT_PID=$!
 echo "$PACKAGE_EXAMPLE_NEXT dev server started with PID $DEV_EXAMPLE_NEXT_PID."
 sleep 5
@@ -100,13 +100,13 @@ if [ $? -ne 0 ]; then echo "ERROR: Failed to create worktree keychain at $COMMIT
 cd "$WORKTREE_KEYCHAIN_PATH"
 if [ $? -ne 0 ]; then echo "ERROR: Failed to cd into worktree keychain."; exit 1; fi
 
-pnpm install
-if [ $? -ne 0 ]; then echo "ERROR: pnpm install failed in worktree keychain."; exit 1; fi
+bun install
+if [ $? -ne 0 ]; then echo "ERROR: bun install failed in worktree keychain."; exit 1; fi
 
-pnpm build
-if [ $? -ne 0 ]; then echo "ERROR: pnpm build failed in worktree keychain."; exit 1; fi
+bun build
+if [ $? -ne 0 ]; then echo "ERROR: bun build failed in worktree keychain."; exit 1; fi
 
-pnpm --filter "$PACKAGE_KEYCHAIN" dev &
+bun --filter "$PACKAGE_KEYCHAIN" dev &
 DEV_KEYCHAIN_PID=$!
 echo "$PACKAGE_KEYCHAIN dev server started with PID $DEV_KEYCHAIN_PID."
 sleep 5

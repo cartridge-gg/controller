@@ -75,35 +75,35 @@ jobs:
             - Component composition and reusability
             - Props interface design and validation
             - State management patterns
-            
+
             **Wallet & Blockchain Integration:**
             - StarkNet integration best practices
             - Account abstraction implementation
             - Session token management
             - WebAuthn/Passkeys security patterns
             - Iframe communication security
-            
+
             **UI/UX & Accessibility:**
             - Component API consistency
             - Storybook story completeness
             - TailwindCSS usage patterns
             - Responsive design considerations
             - Accessibility best practices
-            
+
             **Testing & Quality:**
             - Jest unit test coverage and quality
             - Storybook visual regression tests
             - Playwright E2E test completeness
             - Mock usage and test isolation
             - Error boundary implementation
-            
+
             **Monorepo & Build:**
             - Package interdependencies
             - Turbo build configuration
             - Workspace protocol usage
             - Bundle size considerations
             - Performance optimizations
-            
+
             **Security:**
             - Input validation and sanitization
             - XSS prevention
@@ -116,4 +116,9 @@ jobs:
             **Important**: Submit as "COMMENT" type so the review doesn't block the PR.
 
           # Add MCP GitHub tools for inline comments and project-specific testing
-          allowed_tools: "mcp__github__create_pending_pull_request_review,mcp__github__get_pull_request_comments,mcp__github__get_pull_request_reviews,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff,Bash(pnpm install),Bash(pnpm run build),Bash(pnpm run test:*),Bash(pnpm run lint:*),Bash(pnpm run format),Bash(pnpm run dev),Bash(pnpm run storybook),Bash(pnpm run e2e:*),Bash(pnpm --filter *),Bash(pnpm run clean),Bash(corepack enable pnpm)"
+          allowed_tools:
+            "mcp__github__create_pending_pull_request_review,mcp__github__get_pull_request_comments,mcp__github__get_pull_request_reviews,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff,Bash(bun
+            install),Bash(bun run build),Bash(bun run test:*),Bash(bun run
+            lint:*),Bash(bun run format),Bash(bun run dev),Bash(bun run
+            storybook),Bash(bun run e2e:*),Bash(bun --filter *),Bash(bun run
+            clean)"

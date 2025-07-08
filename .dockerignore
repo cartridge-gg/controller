@@ -1,12 +1,12 @@
 # Node.js
 node_modules/
-.pnpm-store/
+.bun/
 .turbo/
 .next/
 dist/
 build/
 *.tsbuildinfo
-.pnpm-debug.log*
+.bun-debug.log*
 
 # Environment
 .env.local

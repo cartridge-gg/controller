@@ -6,6 +6,6 @@ interactions with the users credentials in a secure, self-custodial manner.
 ## Development
 
 ```
-# `pnpm profile` is reserved command. Make sure to type in French.
-pnpm profil dev
+# Run profile dev server
+bun run profile dev
 ```

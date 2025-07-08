@@ -9,9 +9,9 @@
     "dev": "node --experimental-wasm-modules --import tsx src/session.ts"
   },
   "dependencies": {
-    "@cartridge/controller-wasm": "catalog:",
+    "@cartridge/controller-wasm": "0.1.8",
     "@cartridge/controller": "workspace:*",
-    "starknet": "catalog:"
+    "starknet": "^6.21.0"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

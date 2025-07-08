@@ -1,1 +1,1 @@
-pnpm run lint --ui stream
+bun run lint --ui stream

@@ -21,7 +21,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
 # Add cargo to PATH
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-RUN npm i -g pnpm
+RUN curl -fsSL https://bun.sh/install | bash
 
 # Setup display with consistent resolution
 RUN Xvfb :99 -screen 0 1280x1024x24 2>/dev/null & 
@@ -31,8 +31,9 @@ WORKDIR /app
 # Copy package files for installation
 COPY . .
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Add bun to PATH and install dependencies
+ENV PATH="/root/.bun/bin:${PATH}"
+RUN bun install --frozen-lockfile
 
 # Default command that can be overridden
 CMD ["bash"]

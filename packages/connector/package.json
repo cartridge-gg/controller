@@ -45,15 +45,16 @@
     "dts": "resolve"
   },
   "peerDependencies": {
-    "@starknet-react/core": "catalog:"
+    "@starknet-react/core": "^3.7.3"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:*"
+    "@cartridge/controller": "workspace:*",
+    "minimatch": "^10.0.3"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
-    "prettier": "catalog:",
-    "tsup": "catalog:",
-    "typescript": "catalog:"
+    "prettier": "^3.4.2",
+    "tsup": "^8.0.1",
+    "typescript": "^5.7.3"
   }
 }

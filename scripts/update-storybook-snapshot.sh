@@ -25,7 +25,7 @@ docker run \
   --ipc=host \
   -ti \
   ghcr.io/cartridge-gg/controller/storybook-env:sha-f1c10ea \
-  bash -c "pnpm i && pnpm --filter $PACKAGE test-storybook -u --url http://$HOST_IP:$PORT"
+  bash -c "bun install && bun --filter $PACKAGE test-storybook -u --url http://$HOST_IP:$PORT"
 
 status=$?
 

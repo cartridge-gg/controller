@@ -7,6 +7,6 @@
     "react.json"
   ],
   "devDependencies": {
-    "typescript": "catalog:"
+    "typescript": "^5.7.3"
   }
 }

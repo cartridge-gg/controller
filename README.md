@@ -28,22 +28,22 @@ The project consists of several subfolders located in the `packages` directory:
 
 ### Frontend
 
-Install pnpm via corepack:
+Install bun:
 
 ```sh
-corepack enable pnpm
+curl -fsSL https://bun.sh/install | bash
 ```
 
 Install dependencies:
 
 ```sh
-pnpm i
+bun install
 ```
 
 Run Controller with examples:
 
 ```sh
-pnpm dev
+bun dev
 ```
 
 This command builds all workspace dependencies first and start these servers:

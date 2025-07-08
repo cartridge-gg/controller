@@ -1,49 +1,50 @@
 {
   "name": "controller",
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "bun@1.1.38",
   "private": true,
+  "workspaces": [
+    "examples/next",
+    "examples/node",
+    "examples/svelte",
+    "packages/*"
+  ],
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "build:deps": "turbo build:deps",
     "build": "turbo build:deps build",
     "dev": "turbo build:deps dev",
-    "storybook": "pnpm turbo build:deps storybook",
+    "storybook": "bun turbo build:deps storybook",
     "e2e": "turbo build:deps dev e2e",
     "e2e:ui": "turbo build:deps dev e2e:ui",
     "lint": "turbo lint format:check",
     "format": "turbo format lint:fix",
-    "clean": "git clean -fdX && pnpm store prune",
-    "ci": "pnpm clean && pnpm i",
-    "release": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector publish --tag latest --no-git-checks --access public",
-    "release:prerelease": "pnpm build && pnpm -r --filter=@cartridge/controller --filter=@cartridge/connector publish --tag prerelease --no-git-checks --access public",
-    "keychain": "pnpm --filter @cartridge/keychain",
-    "controller": "pnpm --filter @cartridge/controller",
-    "connector": "pnpm --filter @cartridge/connector",
-    "book": "pnpm --filter @cartridge/documentation",
-    "profil": "pnpm --filter @cartridge/profile",
-    "example:next": "pnpm --filter @cartridge/controller-example-next",
-    "example:svelte": "pnpm --filter @cartridge/controller-example-svelte",
-    "test": "pnpm keychain test",
-    "test:ci": "pnpm keychain test:ci",
-    "test:storybook": "pnpm turbo build:deps test:storybook",
-    "test:storybook:update": "pnpm turbo build:deps test:storybook:update",
-    "check:regression": "pnpm ./scripts/check_regression.sh",
+    "clean": "git clean -fdX && bun pm cache rm",
+    "ci": "bun run clean && bun install",
+    "release": "bun run build && bun -r --filter=@cartridge/controller --filter=@cartridge/connector publish --tag latest --no-git-checks --access public",
+    "release:prerelease": "bun run build && bun -r --filter=@cartridge/controller --filter=@cartridge/connector publish --tag prerelease --no-git-checks --access public",
+    "keychain": "bun --filter @cartridge/keychain",
+    "controller": "bun --filter @cartridge/controller",
+    "connector": "bun --filter @cartridge/connector",
+    "book": "bun --filter @cartridge/documentation",
+    "profil": "bun --filter @cartridge/profile",
+    "example:next": "bun --filter @cartridge/controller-example-next",
+    "example:svelte": "bun --filter @cartridge/controller-example-svelte",
+    "test": "bun keychain test",
+    "test:ci": "bun keychain test:ci",
+    "test:storybook": "bun turbo build:deps test:storybook",
+    "test:storybook:update": "bun turbo build:deps test:storybook:update",
+    "check:regression": "bun ./scripts/check_regression.sh",
     "preview": "turbo build:deps preview",
     "prepare": "husky"
   },
   "dependencies": {
     "@cartridge/presets": "github:cartridge-gg/presets#d246ec1",
-    "@cartridge/ui": "github:cartridge-gg/ui#bfcc1bd"
+    "@cartridge/ui": "github:cartridge-gg/ui#bfcc1bd",
+    "ajv": "^8.17.1"
   },
   "devDependencies": {
     "husky": "^9.1.7",
     "turbo": "^2.4.4",
     "vercel": "^37.14.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@radix-ui/react-accordion": "1.2.1"
-    }
   },
   "files": [
     "*.js",
