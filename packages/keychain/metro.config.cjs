@@ -1,5 +1,9 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("path");
+const { withNativeWind } = require("nativewind/metro");
+const {
+  wrapWithReanimatedMetroConfig,
+} = require("react-native-reanimated/metro-config");
 
 // Find the project and workspace directories
 const projectRoot = __dirname;
@@ -34,4 +38,6 @@ config.transformer.enableBabelRuntime = false;
 // 6. Add WASM support for Metro
 config.resolver.assetExts = [...config.resolver.assetExts, "wasm"];
 
-module.exports = config;
+module.exports = wrapWithReanimatedMetroConfig(
+  withNativeWind(config, { input: "src/index.css" }),
+);
