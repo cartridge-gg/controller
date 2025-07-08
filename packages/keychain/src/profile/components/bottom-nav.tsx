@@ -7,13 +7,10 @@ import {
   PulseIcon,
   LeaderboardIcon,
 } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
-import { useProfileContext } from "#profile/hooks/profile";
 
 export function LayoutBottomNav() {
   const { pathname } = useLocation();
-  const { namespace } = useProfileContext();
 
   const active = useMemo<
     "inventory" | "trophies" | "achievements" | "leaderboard" | "activity"
@@ -36,10 +33,7 @@ export function LayoutBottomNav() {
           <ChestIcon variant="solid" size="lg" />
         </Link>
       </BottomTab>
-      <BottomTab
-        status={active === "achievements" ? "active" : undefined}
-        className={cn(!namespace && "hidden")}
-      >
+      <BottomTab status={active === "achievements" ? "active" : undefined}>
         <Link
           to="../achievements"
           className="h-full w-full flex items-center justify-center"
@@ -47,10 +41,7 @@ export function LayoutBottomNav() {
           <TrophyIcon size="lg" variant="solid" />
         </Link>
       </BottomTab>
-      <BottomTab
-        status={active === "leaderboard" ? "active" : undefined}
-        className={cn(!namespace && "hidden")}
-      >
+      <BottomTab status={active === "leaderboard" ? "active" : undefined}>
         <Link
           to="../leaderboard"
           className="h-full w-full flex items-center justify-center"
