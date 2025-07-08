@@ -29,13 +29,11 @@ import { useControllerTheme } from "@/hooks/connection";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 
-import { useProfileContext } from "#profile/hooks/profile";
-
 export function Collection() {
   const { games, editions } = useArcade();
   const { address: contractAddress, tokenId } = useParams();
   const { closeModal } = useConnection();
-  const { closable, project, namespace } = useProfileContext();
+  const { project, namespace } = useConnection();
   const theme = useControllerTheme();
   const orders: { [key: string]: any[] } = {}; // TODO: Get collection orders from marketplace
 
@@ -108,8 +106,8 @@ export function Collection() {
     <LayoutContainer>
       <LayoutHeader
         className="hidden"
-        onClose={closable ? closeModal : undefined}
-        onBack={closable ? undefined : handleBack}
+          // onClose={closable ? closeModal : undefined}
+          // onBack={closable ? undefined : handleBack}
       />
       {status === "loading" || !collection || !assets ? (
         <LoadingState />

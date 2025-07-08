@@ -6,7 +6,7 @@ import {
   useTransfersQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "#profile/hooks/account";
-import { useProfileContext } from "#profile/hooks/profile";
+import { useConnection } from "@/hooks/connection";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { useArcade } from "#profile/hooks/arcade.js";
@@ -39,7 +39,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   );
 
   const { address } = useAccount();
-  const { project, namespace } = useProfileContext();
+  const { project, namespace } = useConnection();
   const isVisible = true; // Always visible in keychain
 
   const { games, editions } = useArcade();

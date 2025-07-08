@@ -6,7 +6,7 @@ import {
   useTransfersQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { CardProps } from "#profile/components/provider/data";
-import { useProfileContext } from "./profile";
+import { useConnection } from "@/hooks/connection";
 import { getDate } from "@cartridge/ui/utils";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
@@ -17,7 +17,7 @@ export function useData() {
     undefined,
   );
   const { address } = useAccount();
-  const { project, namespace } = useProfileContext();
+  const { project, namespace } = useConnection();
   const { games, editions } = useArcade();
 
   const projects = useMemo(() => {

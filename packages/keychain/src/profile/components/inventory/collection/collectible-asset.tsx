@@ -26,24 +26,22 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { constants } from "starknet";
-import { useProfileContext } from "#profile/hooks/profile";
-import { useControllerTheme } from "@/hooks/connection";
+import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useCallback, useMemo, useState } from "react";
 import { useCollectible } from "#profile/hooks/collectible";
 import { CollectionHeader } from "./header";
 import placeholder from "/public/placeholder.svg";
 import { VoyagerUrl } from "@cartridge/ui/utils";
-import { CardProps, useTraceabilities } from "#profile/hooks/traceabilities.js";
-import { useArcade } from "#profile/hooks/arcade.js";
+import { CardProps, useTraceabilities } from "#profile/hooks/traceabilities";
+import { useArcade } from "#profile/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
-import { useOwnership } from "#profile/hooks/ownerships.js";
-import { useUsername } from "#profile/hooks/username.js";
+import { useOwnership } from "#profile/hooks/ownerships";
+import { useUsername } from "#profile/hooks/username";
 
 const OFFSET = 10;
 
 export function CollectibleAsset() {
-  const { visitor, namespace, project } = useProfileContext();
-  const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
+  const { chainId, namespace, project } = useConnection();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -223,7 +221,7 @@ export function CollectibleAsset() {
           <LayoutFooter
             className={cn(
               "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-0",
-              visitor && "hidden",
+              // visitor && "hidden",
             )}
           >
             <Link

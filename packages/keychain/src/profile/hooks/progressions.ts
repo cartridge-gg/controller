@@ -1,31 +1,64 @@
-import { useMemo } from "react";
-import { useQuery } from "react-query";
-import { useAccount } from "./account";
-import { useProfileContext } from "./profile";
-// import { useConnection as useKeychainConnection } from "@/hooks/connection";
-// import { RpcProvider } from "starknet";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Project,
+  useProgressionsQuery,
+} from "@cartridge/ui/utils/api/cartridge";
+import { Progress, RawProgress, getSelectorFromTag } from "#profile/models";
+import { useConnection } from "@/hooks/connection";
 
-export function useProgressions() {
-  const { address } = useAccount();
-  const { project } = useProfileContext();
-  // TODO: Use provider if needed
-  // const keychainConnection = useKeychainConnection();
-  // const provider = new RpcProvider({
-  //   nodeUrl: keychainConnection.rpcUrl || import.meta.env.VITE_RPC_SEPOLIA,
-  // });
+interface Response {
+  items: { achievements: RawProgress[] }[];
+}
 
-  const { data: progressions = [], isFetching } = useQuery({
-    enabled: !!address && !!project,
-    queryKey: ["progressions", address, project],
-    queryFn: async () => {
-      // TODO: Implement progression fetching if needed
-      return [];
+export function useProgressions({
+  namespace,
+  name,
+  project,
+  parser,
+}: {
+  namespace: string;
+  name: string;
+  project: string;
+  parser: (node: RawProgress) => Progress;
+}) {
+  const [progressions, setProgressions] = useState<{ [key: string]: Progress }>(
+    {},
+  );
+  // const { isVisible } = useConnection();
+
+  // Fetch achievement creations from raw events
+  const projects: Project[] = useMemo(
+    () => [{ model: getSelectorFromTag(namespace, name), namespace, project }],
+    [namespace, name, project],
+  );
+
+  const { status, refetch } = useProgressionsQuery(
+    {
+      projects,
     },
-  });
+    {
+      enabled: !!namespace && !!project,
+      queryKey: ["progressions", namespace, name, project],
+      refetchOnWindowFocus: false,
+      onSuccess: ({ playerAchievements }: { playerAchievements: Response }) => {
+        const items = playerAchievements.items;
+        if (items.length === 0) return;
+        const progressions = items[0].achievements
+          .map(parser)
+          .reduce((acc: { [key: string]: Progress }, achievement: Progress) => {
+            acc[achievement.key] = achievement;
+            return acc;
+          }, {});
+        setProgressions(progressions);
+      },
+    },
+  );
 
-  const progression = useMemo(() => {
-    return progressions[0] || null;
-  }, [progressions]);
+  // useEffect(() => {
+  //   if (isVisible) {
+  //     refetch();
+  //   }
+  // }, [isVisible, refetch]);
 
-  return { progression, progressions, isFetching };
+  return { progressions, status };
 }

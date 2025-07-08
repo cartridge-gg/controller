@@ -15,6 +15,9 @@ export class KeychainIFrame extends IFrame<Keychain> {
     url,
     policies,
     version,
+    slot,
+    namespace,
+    tokens,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
@@ -29,6 +32,21 @@ export class KeychainIFrame extends IFrame<Keychain> {
 
     if (version) {
       _url.searchParams.set("v", encodeURIComponent(version));
+    }
+
+    if (slot) {
+      _url.searchParams.set("ps", encodeURIComponent(slot));
+    }
+
+    if (namespace) {
+      _url.searchParams.set("ns", encodeURIComponent(namespace));
+    }
+
+    if (tokens?.erc20) {
+      _url.searchParams.set(
+        "erc20",
+        encodeURIComponent(tokens.erc20.toString()),
+      );
     }
 
     super({
