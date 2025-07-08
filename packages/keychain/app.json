@@ -1,0 +1,52 @@
+{
+  "name": "cartridge-keychain",
+  "slug": "cartridge-keychain",
+  "version": "0.8.0",
+  "web": {
+    "favicon": "./public/favicon-48x48.png",
+    "bundler": "metro",
+    "output": "single"
+  },
+  "cli": {
+    "appVersionSource": "remote"
+  },
+  "experiments": {
+    "tsconfigPaths": true,
+    "baseUrl": "./src"
+  },
+  "plugins": [
+    [
+      "expo-font",
+      {
+        "fonts": [
+          "node_modules/@expo-google-fonts/inter/Inter_400Regular.ttf",
+          "node_modules/@expo-google-fonts/inter/Inter_500Medium.ttf",
+          "node_modules/@expo-google-fonts/inter/Inter_600SemiBold.ttf",
+          "node_modules/@expo-google-fonts/inter/Inter_700Bold.ttf",
+          "node_modules/@expo-google-fonts/ibm-plex-mono/IBMPlexMono_400Regular.ttf",
+          "node_modules/@expo-google-fonts/ibm-plex-mono/IBMPlexMono_500Medium.ttf",
+          "node_modules/@expo-google-fonts/ibm-plex-mono/IBMPlexMono_600SemiBold.ttf",
+          "node_modules/@expo-google-fonts/ibm-plex-mono/IBMPlexMono_700Bold.ttf"
+        ]
+      }
+    ]
+  ],
+  "orientation": "portrait",
+  "icon": "./public/apple-touch-icon.png",
+  "userInterfaceStyle": "light",
+  "splash": {
+    "image": "./public/cover.png",
+    "resizeMode": "contain",
+    "backgroundColor": "#ffffff"
+  },
+  "assetBundlePatterns": ["**/*"],
+  "ios": {
+    "supportsTablet": true
+  },
+  "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./public/apple-touch-icon.png",
+      "backgroundColor": "#ffffff"
+    }
+  }
+}
