@@ -32,10 +32,10 @@ export function Provider({ children }: PropsWithChildren) {
     let nodeUrl;
     switch (connection.controller?.chainId()) {
       case constants.StarknetChainId.SN_MAIN:
-        nodeUrl = import.meta.env.VITE_RPC_MAINNET;
+        nodeUrl = process.env.EXPO_PUBLIC_RPC_MAINNET;
         break;
       case constants.StarknetChainId.SN_SEPOLIA:
-        nodeUrl = import.meta.env.VITE_RPC_SEPOLIA;
+        nodeUrl = process.env.EXPO_PUBLIC_RPC_SEPOLIA;
         break;
       default:
         nodeUrl = connection.rpcUrl;
@@ -100,16 +100,16 @@ const queryClient = new QueryClient({
 });
 
 const turnkeyConfig = {
-  apiBaseUrl: import.meta.env.VITE_TURNKEY_BASE_URL!,
-  defaultOrganizationId: import.meta.env.VITE_TURNKEY_ORGANIZATION_ID!,
+  apiBaseUrl: process.env.EXPO_PUBLIC_TURNKEY_BASE_URL!,
+  defaultOrganizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID!,
   /// This doesn't matter as we never use the WebAuthn
   rpId: "http://localhost",
-  iframeUrl: import.meta.env.VITE_TURNKEY_IFRAME_URL,
+  iframeUrl: process.env.EXPO_PUBLIC_TURNKEY_IFRAME_URL,
 };
 
 const auth0Config: Auth0ProviderOptions = {
-  domain: import.meta.env.VITE_AUTH0_DOMAIN!,
-  clientId: import.meta.env.VITE_AUTH0_CLIENT_ID!,
+  domain: process.env.EXPO_PUBLIC_AUTH0_DOMAIN!,
+  clientId: process.env.EXPO_PUBLIC_AUTH0_CLIENT_ID!,
   authorizationParams: {
     redirect_uri: window.location.origin,
   },

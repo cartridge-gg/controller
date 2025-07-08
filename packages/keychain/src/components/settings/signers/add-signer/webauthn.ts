@@ -8,7 +8,7 @@ export const addWebauthnSigner = async (controller: Controller | undefined) => {
   await controller.addOwner(
     {
       webauthn: {
-        rpId: import.meta.env.VITE_RP_ID,
+        rpId: process.env.EXPO_PUBLIC_RP_ID!,
         credentialId: "",
         publicKey: JSON.stringify({}),
       },

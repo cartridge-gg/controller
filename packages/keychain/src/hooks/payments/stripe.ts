@@ -17,7 +17,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   const [error, setError] = useState<Error | null>(null);
 
   const isLiveMode = useMemo(() => {
-    if (import.meta.env.DEV) {
+    if (__DEV__) {
       // Always use test mode in local dev
       return false;
     }
@@ -28,7 +28,7 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
     }
 
     if (
-      import.meta.env.PROD &&
+      !__DEV__ &&
       controller?.chainId() === constants.StarknetChainId.SN_MAIN
     ) {
       // In prod, only use live mode if on mainnet
@@ -43,8 +43,8 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
     () =>
       loadStripe(
         isLiveMode
-          ? import.meta.env.VITE_STRIPE_API_PUBKEY_LIVE_MODE
-          : import.meta.env.VITE_STRIPE_API_PUBKEY_TEST_MODE,
+          ? process.env.EXPO_PUBLIC_STRIPE_API_PUBKEY_LIVE_MODE
+          : process.env.EXPO_PUBLIC_STRIPE_API_PUBKEY_TEST_MODE,
       ),
     [isLiveMode],
   );

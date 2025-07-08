@@ -39,7 +39,7 @@ export function Fund() {
   } = useTeamsQuery(undefined, { refetchInterval: 1000 });
 
   useEffect(() => {
-    if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
+    if (!Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!)) {
       navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
         replace: true,
       });

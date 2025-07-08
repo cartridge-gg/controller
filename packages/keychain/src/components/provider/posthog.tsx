@@ -4,9 +4,9 @@ import { PostHogContext, PostHogWrapper } from "@cartridge/ui/utils";
 import { PropsWithChildren, useContext, useEffect, useState } from "react";
 
 const posthog = new PostHogWrapper(
-  import.meta.env.VITE_POSTHOG_KEY ?? "api key",
+  process.env.EXPO_PUBLIC_POSTHOG_KEY ?? "api key",
   {
-    host: import.meta.env.VITE_POSTHOG_HOST,
+    host: process.env.EXPO_PUBLIC_POSTHOG_HOST,
     autocapture: true,
   },
 );
