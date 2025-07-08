@@ -247,10 +247,10 @@ export default class ControllerProvider extends BaseProvider {
       console.error("Account is not ready");
       return;
     }
-
     const username = await this.keychain.username();
+
     // Navigate the keychain to the profile page
-    await this.keychain.navigate(`/profile/account/${username}/${tab}`);
+    this.keychain.navigate(`/profile/account/${username}/${tab}`);
     this.iframes.keychain.open();
   }
 

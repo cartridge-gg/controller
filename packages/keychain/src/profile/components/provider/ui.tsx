@@ -5,7 +5,7 @@ import {
   DialogContent,
   UIProvider as Provider,
 } from "@cartridge/ui";
-import { useKeychain } from "#profile/hooks/keychain";
+import { useConnection } from "@/hooks/connection";
 import { useAccount } from "#profile/hooks/account";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { useNavigate } from "react-router-dom";
@@ -61,7 +61,7 @@ function QrCodeDisplay({
 
 export function UIProvider({ children }: PropsWithChildren) {
   const { followersCount, followedsCount } = useArcade();
-  const { chainId, closeModal, openSettings, logout } = useKeychain();
+  const { chainId, closeModal, openSettings, logout } = useConnection();
   const account = useAccount();
   const [showQrCode, setShowQrCode] = useState(false);
 

@@ -9,7 +9,7 @@ import { useAccount } from "#profile/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Trophies } from "./trophies";
-import { useKeychain } from "#profile/hooks/keychain";
+import { useConnection } from "@/hooks/connection";
 import { useProfileContext } from "#profile/hooks/profile";
 import { useData } from "#profile/hooks/data";
 import { useArcade } from "#profile/hooks/arcade";
@@ -27,7 +27,7 @@ export function Achievements() {
   const { pins, games, editions } = useArcade();
 
   const { address } = useParams<{ address: string }>();
-  const { closeModal } = useKeychain();
+  const { closeModal } = useConnection();
   const { project, namespace } = useProfileContext();
 
   const edition: EditionModel | undefined = useMemo(() => {

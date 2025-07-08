@@ -36,7 +36,9 @@ export function Profile() {
 
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap gap-1">
-          <Button onClick={() => ctrlConnector.controller.openProfile()}>
+          <Button
+            onClick={() => ctrlConnector.controller.openProfile("inventory")}
+          >
             Inventory
           </Button>
           <Button

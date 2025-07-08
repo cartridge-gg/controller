@@ -445,13 +445,15 @@ export function useConnectionValue() {
   }, [context]);
 
   const closeModal = useCallback(async () => {
-    if (!parent || !context?.resolve) return;
+    if (!parent) return;
 
-    context.resolve({
+    context?.resolve?.({
       code: ResponseCodes.CANCELED,
       message: "User aborted",
     });
+
     setContext(undefined); // clears context
+
     try {
       await parent.close();
     } catch (e) {

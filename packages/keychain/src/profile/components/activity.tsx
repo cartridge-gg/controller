@@ -12,7 +12,7 @@ import {
   Skeleton,
 } from "@cartridge/ui";
 import { VoyagerUrl, cn } from "@cartridge/ui/utils";
-import { useKeychain } from "#profile/hooks/keychain";
+import { useConnection } from "@/hooks/connection";
 import { useData } from "#profile/hooks/data";
 import { LayoutBottomNav } from "#profile/components/bottom-nav";
 import { useCallback, useMemo, useState } from "react";
@@ -42,7 +42,7 @@ interface CardProps {
 
 export function Activity() {
   const [cap, setCap] = useState(OFFSET);
-  const { chainId, closeModal } = useKeychain();
+  const { chainId, closeModal } = useConnection();
 
   const { events: data, status } = useData();
 

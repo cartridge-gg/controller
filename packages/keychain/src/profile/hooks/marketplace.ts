@@ -22,8 +22,8 @@ export function useMarketplace() {
   const orders = {};
   const marketplaceFee = 0;
   const royaltyFee = 0;
-  const sales: any[] = [];
-  const listings: any[] = [];
+  const sales: { [key: string]: { [key: string]: any[] } } = {};
+  const listings: { [key: string]: { [key: string]: any[] } } = {};
   const collectionOrders = {};
 
   const removeOrder = (_: OrderModel) => {
