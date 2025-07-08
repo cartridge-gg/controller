@@ -41,7 +41,7 @@ export function connectToController<ParentMethods extends object>({
       probe: normalize(probe({ setController })),
       signMessage: () => signMessageFactory(setContext),
       openSettings: () => openSettingsFactory(setContext),
-      navigate: () => navigateFactory(setContext),
+      navigate: () => navigateFactory(),
       reset: () => () => {
         setContext(undefined);
       },

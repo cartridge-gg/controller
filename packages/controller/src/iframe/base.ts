@@ -125,10 +125,7 @@ export class IFrame<CallSender extends {}> implements Modal {
       if (typeof document === "undefined") return;
       const existingController = document.getElementById("controller");
       if (document.body) {
-        if (
-          (id === "controller-keychain" && !existingController) ||
-          id === "controller-profile"
-        ) {
+        if (id === "controller-keychain" && !existingController) {
           document.body.appendChild(container);
           observer.disconnect();
         }
@@ -142,10 +139,7 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     const existingController = document.getElementById("controller");
     if (document.body) {
-      if (
-        (id === "controller-keychain" && !existingController) ||
-        id === "controller-profile"
-      ) {
+      if (id === "controller-keychain" && !existingController) {
         document.body.appendChild(container);
       }
     }
