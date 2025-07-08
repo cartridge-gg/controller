@@ -1,10 +1,9 @@
 import { useAccount } from "#profile/hooks/account";
 import { useConnection } from "@/hooks/connection";
-import {  
+import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Button,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
@@ -27,6 +26,7 @@ import placeholder from "/public/placeholder.svg";
 import { SendAmount } from "./amount";
 import { SendHeader } from "./header";
 import { useEntrypoints } from "#profile/hooks/entrypoints";
+import { NavigationHeader } from "@/components";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
@@ -165,13 +165,9 @@ export function SendCollectible() {
     return assets[0].amount;
   }, [collectible, assets]);
 
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
-
   return (
     <LayoutContainer>
-      <LayoutHeader className="hidden" onBack={handleBack} />
+      <NavigationHeader className="hidden" />
       {status === "loading" || !collectible || !assets ? (
         <LoadingState />
       ) : status === "error" ? (

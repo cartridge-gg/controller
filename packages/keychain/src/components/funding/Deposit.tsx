@@ -28,8 +28,8 @@ import {
   Button,
   CopyAddress,
   Separator,
-  LayoutHeader,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
@@ -152,7 +152,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         title="Deposit"
         description={
           controller ? (

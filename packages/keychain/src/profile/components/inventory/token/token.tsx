@@ -10,7 +10,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Button,
   ActivityTokenCard,
   ERC20Detail,
@@ -19,6 +18,7 @@ import {
   Thumbnail,
   InfoIcon,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useData } from "#profile/hooks/data";
 import {
   getDate,
@@ -60,7 +60,7 @@ function Credits() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         variant="hidden"
         onBack={() => {
           navigate("..");
@@ -101,7 +101,6 @@ function Credits() {
 }
 
 function ERC20() {
-  const navigate = useNavigate();
   const { address } = useParams<{ address: string }>();
   const { address: accountAddress } = useAccount();
 
@@ -117,10 +116,6 @@ function ERC20() {
     if (!version) return false;
     return compare(version, "0.5.6", ">=");
   }, [version]);
-
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
 
   const txs = useMemo(() => {
     if (!transfers || !token?.metadata?.image) {
@@ -168,10 +163,7 @@ function ERC20() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        className="hidden"
-        // onBack={closable || visitor ? undefined : handleBack}
-      />
+      <NavigationHeader className="hidden" />
 
       <LayoutContent className="pb-4 gap-6">
         <ERC20Header token={token} />

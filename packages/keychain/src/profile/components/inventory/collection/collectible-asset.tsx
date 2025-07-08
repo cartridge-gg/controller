@@ -9,7 +9,6 @@ import {
 import {
   LayoutContainer,
   LayoutContent,
-  LayoutHeader,
   Button,
   CollectiblePreview,
   Property,
@@ -24,6 +23,7 @@ import {
   TraceabilityCollectibleCard,
   PaperPlaneIcon,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { constants } from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
@@ -139,7 +139,7 @@ export function CollectibleAsset() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader className="hidden" onBack={handleBack} />
+      <NavigationHeader className="hidden" onBack={handleBack} />
 
       {status === "loading" || !collectible || !asset ? (
         <LoadingState />

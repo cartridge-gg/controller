@@ -10,8 +10,8 @@ import {
   CardTitle,
   CardListContent,
   CardListItem,
-  LayoutHeader,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 // import { OcclusionDetector } from "@/components/OcclusionDetector";
 
@@ -80,7 +80,7 @@ export function SignMessage({
     <>
       {/* <OcclusionDetector /> */}
       <LayoutContainer>
-        <LayoutHeader
+        <NavigationHeader
           title="Signature Request"
           description={`${origin} is asking you to sign a message`}
         />

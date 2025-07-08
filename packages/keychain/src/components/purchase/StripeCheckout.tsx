@@ -14,9 +14,9 @@ import {
   LayoutContent,
   LayoutFooter,
   Button,
-  LayoutHeader,
   CreditCardIcon,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { PricingDetails } from ".";
 import { CostBreakdown } from "./CostBreakdown";
@@ -134,7 +134,7 @@ export const StripeCheckoutContainer = ({
 }) => {
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         title={"Enter Payment Details"}
         icon={<CreditCardIcon variant="solid" size="lg" />}
         onBack={onBack}

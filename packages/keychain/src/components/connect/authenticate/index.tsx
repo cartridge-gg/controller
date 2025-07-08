@@ -4,8 +4,8 @@ import {
   LayoutContent,
   LayoutFooter,
   Button,
-  LayoutHeader,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { Unsupported } from "./Unsupported";
 import { doSignup } from "@/hooks/account";
 import { useIsSupported } from "./useIsSupported";
@@ -69,7 +69,7 @@ export function Authenticate({
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         variant="expanded"
         title={title}
         description={description}

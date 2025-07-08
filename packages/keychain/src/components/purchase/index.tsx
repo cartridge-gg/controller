@@ -119,7 +119,7 @@ export function Purchase(props: PurchaseCreditsProps) {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         title={title}
         onClose={closeModal}
         onBack={

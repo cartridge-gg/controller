@@ -7,7 +7,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   PlusIcon,
   Sheet,
   SheetClose,
@@ -126,7 +125,7 @@ export function Settings() {
   return (
     <Sheet>
       <LayoutContainer>
-        <LayoutHeader
+        <NavigationHeader
           variant="compressed"
           title="Settings"
           Icon={GearIcon}

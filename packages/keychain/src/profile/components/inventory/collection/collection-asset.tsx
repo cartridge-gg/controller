@@ -9,7 +9,6 @@ import {
 import {
   LayoutContainer,
   LayoutContent,
-  LayoutHeader,
   Button,
   CollectiblePreview,
   Property,
@@ -28,6 +27,7 @@ import {
   Spinner,
   Thumbnail,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 
 import { cn } from "@cartridge/ui/utils";
 import {
@@ -254,7 +254,7 @@ export function CollectionAsset() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         className="hidden"
         // onBack={closable ? undefined : handleBack}
       />

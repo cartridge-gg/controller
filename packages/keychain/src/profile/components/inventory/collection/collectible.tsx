@@ -9,11 +9,11 @@ import {
 import {
   LayoutContainer,
   LayoutContent,
-  LayoutHeader,
   CollectibleCard,
   Skeleton,
   Empty,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useMemo } from "react";
 import placeholder from "/public/placeholder.svg";
@@ -56,7 +56,7 @@ export function Collectible() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         onClose={closeModal}
         // onBack={closable || visitor ? undefined : handleBack}
       />

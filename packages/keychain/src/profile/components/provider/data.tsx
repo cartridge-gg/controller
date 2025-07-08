@@ -48,7 +48,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
     );
-  }, [editions, project, namespace]);
+  }, [editions, project]);
 
   const game: GameModel | undefined = useMemo(() => {
     return Object.values(games).find((game) => game.id === edition?.gameId);

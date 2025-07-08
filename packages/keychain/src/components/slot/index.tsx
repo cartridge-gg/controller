@@ -12,12 +12,8 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import {
-  CheckIcon,
-  LayoutContainer,
-  LayoutContent,
-  LayoutHeader,
-} from "@cartridge/ui";
+import { CheckIcon, LayoutContainer, LayoutContent } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 
 export function Slot() {
   const { pathname } = useLocation();
@@ -70,7 +66,7 @@ function Auth() {
 export function Success() {
   return (
     <LayoutContainer className="pb-12">
-      <LayoutHeader
+      <NavigationHeader
         variant="expanded"
         Icon={CheckIcon}
         title="Success!"
