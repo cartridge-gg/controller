@@ -10,8 +10,8 @@ import {
   useBalancesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "./account";
-import { useConnection as useKeychainConnection } from "@/hooks/connection";
-import { getChecksumAddress, RpcProvider } from "starknet";
+import { useConnection } from "@/hooks/connection";
+import { getChecksumAddress } from "starknet";
 import { useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
 import { useUsername } from "./username";
@@ -49,7 +49,7 @@ export function useBalance({
   tokenAddress?: string;
 }): UseBalanceResponse {
   const { address } = useAccount();
-  const { project } = useKeychainConnection();
+  const { project } = useConnection();
   const [token, setToken] = useState<Token | undefined>(undefined);
   const { status } = useBalanceQuery(
     {
@@ -100,7 +100,7 @@ export type UseBalancesResponse = {
 
 export function useBalances(accountAddress?: string): UseBalancesResponse {
   const { address: connectedAddress } = useAccount();
-  const { project } = useKeychainConnection();
+  const { project } = useConnection();
   const address = useMemo(
     () => accountAddress ?? connectedAddress,
     [accountAddress, connectedAddress],
@@ -164,12 +164,8 @@ export type UseTokensResponse = {
 };
 
 export function useTokens(accountAddress?: string): UseTokensResponse {
-  // TODO: Get erc20 options from profile context if needed
-  const options: string[] = [];
-  const keychainConnection = useKeychainConnection();
-  const provider = new RpcProvider({
-    nodeUrl: keychainConnection.rpcUrl || import.meta.env.VITE_RPC_SEPOLIA,
-  });
+  const { tokens: options, controller } = useConnection();
+  const provider = controller?.provider;
   const isVisible = true; // Always visible in keychain
   const { address } = useAccount();
 
@@ -203,7 +199,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   // Get token data from rpc (based on url options without those fetched from torii)
   const contractAddress = useMemo(() => {
     if (toriiStatus !== "success") return [];
-    return options.filter(
+    return options?.filter(
       (token) =>
         !toriiTokens.find(
           (t) => BigInt(t.metadata.address || "0x0") === BigInt(token),
@@ -213,7 +209,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
 
   const { data: rpcData }: UseERC20BalanceResponse = useERC20Balance({
     address: accountAddress ?? address,
-    contractAddress: contractAddress,
+    contractAddress: contractAddress ?? [],
     provider,
     interval: isVisible ? 30000 : undefined,
   });
@@ -296,7 +292,10 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     return newData;
   }, [rpcData, toriiTokens, countervalues]);
 
-  return { tokens: tokens.tokens, credits, status: toriiStatus };
+  // Convert idle status to loading to prevent jitter on initial load
+  const status = toriiStatus === "idle" ? "loading" : toriiStatus;
+
+  return { tokens: tokens.tokens, credits, status };
 }
 
 export type UseTokenResponse = UseBalanceResponse;

@@ -111,10 +111,10 @@ export function SendCollection() {
           calldata: [address, to, tokenId, ...calldata],
         };
       });
-      
+
       try {
-        const transactionHash = await execute(calls);
-        if (transactionHash) {
+        const res = await execute(calls);
+        if (res?.transaction_hash) {
           toast.success("Transaction submitted successfully!");
           refetch();
         }

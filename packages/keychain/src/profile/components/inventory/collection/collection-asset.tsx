@@ -36,7 +36,8 @@ import {
   Call,
   CallData,
   constants,
-  TransactionStatus,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
 } from "starknet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "#profile/hooks/collection";
@@ -53,6 +54,7 @@ import { toast } from "sonner";
 import { useTokens } from "#profile/hooks/token";
 import { useAccount } from "#profile/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
+import { useExecute } from "#profile/hooks/execute";
 
 const OFFSET = 10;
 
@@ -77,7 +79,7 @@ export function CollectionAsset() {
   const { isListed, provider, selfOrders, order, removeOrder, setAmount } =
     useMarketplace();
   const [loading, setLoading] = useState(false);
-
+  const { execute } = useExecute();
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
@@ -153,22 +155,31 @@ export function CollectionAsset() {
         (c: { tag: string }) => c.tag?.includes("Marketplace"),
       )?.address;
       const orderIds = selfOrders.map((order) => order.id);
-      // const res = await controller?.parent?.openExecute(
-      //   Array.isArray(calls) ? calls : [calls],
-      //   chainId,
-      // );
-      // if (res?.transactionHash) {
-      //   await starknet.waitForTransaction(res.transactionHash, {
-      //     retryInterval: 1000,
-      //     successStates: [
-      //       TransactionExecutionStatus.SUCCEEDED,
-      //       TransactionFinalityStatus.ACCEPTED_ON_L2,
-      //     ],
-      //   });
-      // }
-      // if (res) {
-      //   toast.success(`Asset unlisted successfully`);
-      // }
+      const calls: AllowArray<Call> = [
+        ...orderIds.map((orderId) => ({
+          contractAddress: marketplaceAddress,
+          entrypoint: "cancel",
+          calldata: CallData.compile({
+            orderId: orderId,
+            collection: contractAddress,
+            tokenId: cairo.uint256(asset.tokenId),
+          }),
+        })),
+      ];
+
+      const res = await execute(calls);
+      if (res?.transaction_hash) {
+        await controller?.provider?.waitForTransaction(res.transaction_hash, {
+          retryInterval: 100,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+
+        toast.success(`Asset unlisted successfully`);
+      }
+
       // Removing the order optimistically
       removeOrder(order);
     } catch (error) {

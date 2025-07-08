@@ -23,7 +23,6 @@ import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "#profile/components/provider/arcade";
 import { MarketplaceProvider as ProfileMarketplaceProvider } from "#profile/components/provider/marketplace";
 import { DataProvider as ProfileDataProvider } from "#profile/components/provider/data";
-import { ThemeProvider as ProfileThemeProvider } from "#profile/components/provider/theme";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 
 export function Provider({ children }: PropsWithChildren) {
@@ -70,11 +69,9 @@ export function Provider({ children }: PropsWithChildren) {
                               <TokensProvider>
                                 <ProfileMarketplaceProvider>
                                   <ProfileArcadeProvider>
-                                    <ProfileThemeProvider>
-                                      <ProfileDataProvider>
-                                        {children}
-                                      </ProfileDataProvider>
-                                    </ProfileThemeProvider>
+                                    <ProfileDataProvider>
+                                      {children}
+                                    </ProfileDataProvider>
                                   </ProfileArcadeProvider>
                                 </ProfileMarketplaceProvider>
                               </TokensProvider>

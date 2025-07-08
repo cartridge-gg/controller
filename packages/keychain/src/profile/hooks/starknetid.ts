@@ -1,13 +1,10 @@
 import { useQuery } from "react-query";
-import { useConnection as useKeychainConnection } from "@/hooks/connection";
+import { useConnection } from "@/hooks/connection";
 import { useState } from "react";
-import { RpcProvider } from "starknet";
 
 export const useStarkAddress = ({ name }: { name: string }) => {
-  const keychainConnection = useKeychainConnection();
-  const provider = new RpcProvider({
-    nodeUrl: keychainConnection.rpcUrl || import.meta.env.VITE_RPC_SEPOLIA,
-  });
+  const { controller } = useConnection();
+  const provider = controller?.provider;
   const [error, setError] = useState<string | null>(null);
 
   const { data, isFetching } = useQuery({
@@ -15,7 +12,7 @@ export const useStarkAddress = ({ name }: { name: string }) => {
     queryKey: ["starknetid", name],
     queryFn: async () => {
       setError("");
-      const address = await provider.getAddressFromStarkName(name);
+      const address = await provider?.getAddressFromStarkName(name);
       if (!address || address === "0x0") {
         setError("Could not get address from stark name");
         return null;
