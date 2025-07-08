@@ -50,7 +50,7 @@ const createCredentials = async (
     { alg: -257, type: "public-key" },
     { alg: -7, type: "public-key" },
   ];
-  beginRegistration.publicKey.rp.id = import.meta.env.VITE_RP_ID;
+  beginRegistration.publicKey.rp.id = process.env.EXPO_PUBLIC_RP_ID;
   const credentials = (await navigator.credentials.create(
     beginRegistration,
   )) as RawAttestation & {
@@ -209,7 +209,7 @@ export async function doLogin({
         beginLoginData.beginLogin.publicKey.challenge,
       ),
       timeout: 60000,
-      rpId: import.meta.env.VITE_RP_ID,
+      rpId: process.env.EXPO_PUBLIC_RP_ID,
       allowCredentials: [
         {
           type: "public-key",

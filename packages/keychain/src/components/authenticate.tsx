@@ -43,7 +43,7 @@ export function Authenticate() {
           return window.close();
         }
 
-        navigate(`${import.meta.env.VITE_ADMIN_URL}/profile`);
+        navigate(`${process.env.EXPO_PUBLIC_ADMIN_URL}/profile`);
       }}
     />
   );

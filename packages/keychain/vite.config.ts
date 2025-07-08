@@ -29,11 +29,11 @@ export default defineConfig(({ mode }) => ({
   },
   resolve: {
     alias: {
-      "@": "/src",
+      "@": "./src",
       ...(mode === "production"
         ? {
-            "fetch-cookie": "/src/shims/fetch-cookie.ts",
-            pako: "/src/shims/pako.ts",
+            "fetch-cookie": "./src/shims/fetch-cookie.ts",
+            pako: "./src/shims/pako.ts",
           }
         : {}),
     },

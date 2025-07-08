@@ -48,7 +48,8 @@
     "@starknet-react/core": "catalog:"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:*"
+    "@cartridge/controller": "workspace:*",
+    "minimatch": "^10.0.3"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",

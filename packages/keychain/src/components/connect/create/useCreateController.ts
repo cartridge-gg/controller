@@ -100,7 +100,7 @@ export function useCreateController({
             {
               signer: {
                 webauthn: {
-                  rpId: import.meta.env.VITE_RP_ID!,
+                  rpId: process.env.EXPO_PUBLIC_RP_ID!,
                   credentialId,
                   publicKey,
                 },

@@ -8,7 +8,7 @@ export function Fund() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
+    if (!Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!)) {
       navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
         replace: true,
       });

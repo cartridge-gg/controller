@@ -55,7 +55,6 @@ export function useEvents<TEvent extends Trophy | Progress>({
   const [offset, setOffset] = useState(0);
   const [nodes, setNodes] = useState<{ [key: string]: boolean }>({});
   const [events, setEvents] = useState<TEvent[]>([]);
-
   // Fetch achievement creations from raw events
   const { refetch: fetchEvents, isFetching } = useEventsQuery(
     {
