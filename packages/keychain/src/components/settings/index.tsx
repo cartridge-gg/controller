@@ -15,6 +15,7 @@ import {
   SheetFooter,
   SheetTrigger,
   SignOutIcon,
+  ChestIcon,
 } from "@cartridge/ui";
 import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo, useState } from "react";
@@ -81,6 +82,12 @@ export function Settings() {
     }
   }, [logout]);
 
+  const handleOpenProfile = useCallback(() => {
+    if (!controller?.username()) return;
+    // Navigate to profile within the same keychain iframe
+    window.location.href = `/account/${controller.username()}/inventory`;
+  }, [controller]);
+
   if (state === State.RECOVERY) {
     return <Recovery onBack={() => setState(State.SETTINGS)} />;
   }
@@ -100,6 +107,25 @@ export function Settings() {
         />
 
         <LayoutContent className="gap-6">
+          {/* Profile Section */}
+          <section className="space-y-4">
+            <SectionHeader
+              title="Profile"
+              description="View your inventory, achievements, and activity"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full py-3 px-4 text-foreground-100 gap-3 justify-start"
+              onClick={handleOpenProfile}
+            >
+              <ChestIcon size="sm" variant="line" />
+              <span className="normal-case font-normal font-sans text-sm">
+                Open Profile
+              </span>
+            </Button>
+          </section>
+
           {featureFlags.signers && (
             <SignersSection controllerQuery={controllerQuery} />
           )}
