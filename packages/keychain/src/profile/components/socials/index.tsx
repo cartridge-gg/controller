@@ -16,22 +16,29 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProfileContext } from "#profile/hooks/profile";
 import { useExecute } from "#profile/hooks/execute";
 import { toast } from "sonner";
+import { useController } from "@/hooks/controller";
 
 export function Socials() {
-  const { address } = useAccount();
+  const { controller } = useController();
   const { closable, visitor } = useProfileContext();
   const { execute } = useExecute();
+  const { address } = useAccount();
   const {
     provider,
     followers: allFollowers,
     followeds: allFolloweds,
   } = useArcade();
   const [loading, setLoading] = useState<BigNumberish | null>(null);
-
   const navigate = useNavigate();
-
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(searchParams.get("social") ?? "followers");
+
+  // Redirect to base path if no controller is present
+  useEffect(() => {
+    if (!controller) {
+      navigate("/");
+    }
+  }, [controller, navigate]);
 
   const onBack = useCallback(() => {
     const url = new URL(window.location.href);
@@ -120,6 +127,11 @@ export function Socials() {
   useEffect(() => {
     setTab(searchParams.get("social") ?? "followers");
   }, [searchParams]);
+
+  // Don't render anything if no controller (redirect will happen)
+  if (!controller) {
+    return null;
+  }
 
   return (
     <LayoutContainer>

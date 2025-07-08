@@ -110,7 +110,7 @@ export function Settings() {
   const handleOpenProfile = useCallback(() => {
     if (!controller?.username()) return;
     // Navigate to profile within the same keychain iframe
-    window.location.href = `/profile/account/${controller.username()}/inventory`;
+    window.location.href = `/account/${controller.username()}/inventory`;
   }, [controller]);
 
   if (state === State.RECOVERY) {

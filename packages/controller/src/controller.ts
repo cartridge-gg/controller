@@ -250,7 +250,7 @@ export default class ControllerProvider extends BaseProvider {
     const username = await this.keychain.username();
 
     // Navigate the keychain to the profile page
-    this.keychain.navigate(`/profile/account/${username}/${tab}`);
+    this.keychain.navigate(`/account/${username}/${tab}`);
     this.iframes.keychain.open();
   }
 
@@ -266,7 +266,7 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     const username = await this.keychain.username();
-    await this.keychain.navigate(`/profile/account/${username}/${to}`);
+    await this.keychain.navigate(`/account/${username}/${to}`);
     this.iframes.keychain.open();
   }
 
@@ -281,7 +281,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    await this.keychain.navigate(`/profile${at}`);
+    await this.keychain.navigate(`${at}`);
     this.iframes.keychain.open();
   }
 

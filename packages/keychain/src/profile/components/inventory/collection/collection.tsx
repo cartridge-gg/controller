@@ -107,7 +107,8 @@ export function Collection() {
   return (
     <LayoutContainer>
       <LayoutHeader
-        onClose={closeModal}
+        className="hidden"
+        onClose={closable ? closeModal : undefined}
         onBack={closable ? undefined : handleBack}
       />
       {status === "loading" || !collection || !assets ? (
