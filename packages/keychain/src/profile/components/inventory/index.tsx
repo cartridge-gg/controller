@@ -12,21 +12,12 @@ export { SendToken } from "./token/send";
 
 import { LayoutContainer, LayoutContent, LayoutHeader } from "@cartridge/ui";
 import { LayoutBottomNav } from "#profile/components/bottom-nav";
-import { Outlet, useParams } from "react-router-dom";
 import { Collections } from "./collection";
 import { Tokens } from "./token";
-import { useKeychain } from "#profile/hooks/keychain";
+import { useConnection } from "@/hooks/connection";
 
 export function Inventory() {
-  const { project, address: tokenContractAddress } = useParams<{
-    project?: string;
-    address?: string;
-  }>();
-  const { closeModal } = useKeychain();
-
-  if (tokenContractAddress) {
-    return <Outlet />;
-  }
+  const { closeModal } = useConnection();
 
   return (
     <LayoutContainer>
@@ -34,10 +25,10 @@ export function Inventory() {
 
       <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
         <Tokens />
-        {project && <Collections />}
+        <Collections />
       </LayoutContent>
 
-      {project && <LayoutBottomNav />}
+      <LayoutBottomNav />
     </LayoutContainer>
   );
 }

@@ -18,7 +18,7 @@ import { cn } from "@cartridge/ui/utils";
 import { useCallback, useMemo } from "react";
 import placeholder from "/public/placeholder.svg";
 import { CollectionHeader } from "./header";
-import { useKeychain } from "#profile/hooks/keychain";
+import { useConnection } from "@/hooks/connection";
 import { useControllerTheme } from "@/hooks/connection";
 import { useProfileContext } from "#profile/hooks/profile";
 import { useCollectible } from "#profile/hooks/collectible.js";
@@ -28,7 +28,7 @@ import { EditionModel, GameModel } from "@cartridge/arcade";
 export function Collectible() {
   const { games, editions } = useArcade();
   const { address: contractAddress, tokenId } = useParams();
-  const { closeModal } = useKeychain();
+  const { closeModal } = useConnection();
   const { closable, visitor, project, namespace } = useProfileContext();
   const theme = useControllerTheme();
 

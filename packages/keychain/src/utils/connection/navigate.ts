@@ -1,13 +1,12 @@
-import { ConnectionCtx } from "./types";
-
-export function navigateFactory(setContext: (ctx: ConnectionCtx) => void) {
+export function navigateFactory() {
   return (path: string) =>
-    new Promise<void>((resolve, reject) => {
-      setContext({
-        type: "navigate",
-        path,
-        resolve,
-        reject,
-      });
+    new Promise<void>((resolve) => {
+      // Use native browser navigation within the iframe
+      window.history.replaceState({}, "", path);
+
+      // Dispatch a popstate event to trigger React Router to update
+      window.dispatchEvent(new PopStateEvent("popstate"));
+
+      resolve();
     });
 }

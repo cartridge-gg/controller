@@ -24,7 +24,7 @@ import { useCallback, useMemo } from "react";
 import { useCollection } from "#profile/hooks/collection";
 import placeholder from "/public/placeholder.svg";
 import { CollectionHeader } from "./header";
-import { useKeychain } from "#profile/hooks/keychain";
+import { useConnection } from "@/hooks/connection";
 import { useControllerTheme } from "@/hooks/connection";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { EditionModel, GameModel } from "@cartridge/arcade";
@@ -34,7 +34,7 @@ import { useProfileContext } from "#profile/hooks/profile";
 export function Collection() {
   const { games, editions } = useArcade();
   const { address: contractAddress, tokenId } = useParams();
-  const { closeModal } = useKeychain();
+  const { closeModal } = useConnection();
   const { closable, project, namespace } = useProfileContext();
   const theme = useControllerTheme();
   const orders: { [key: string]: any[] } = {}; // TODO: Get collection orders from marketplace
