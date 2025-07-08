@@ -131,8 +131,8 @@ export function Purchase(props: PurchaseCreditsProps) {
     : state === PurchaseState.SELECTION || state === PurchaseState.SUCCESS;
 
   return (
-    <LayoutContainer className="min-h-[600px]">
-      <LayoutHeader
+    <LayoutContainer>
+      <NavigationHeader
         title={title}
         onClose={closeModal}
         onBack={

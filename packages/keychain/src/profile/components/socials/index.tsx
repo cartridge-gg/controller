@@ -5,9 +5,9 @@ import {
   FollowerTabs,
   LayoutContainer,
   LayoutContent,
-  LayoutHeader,
   TabsContent,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useAccount, useUsernames } from "#profile/hooks/account";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "#profile/hooks/arcade.js";
@@ -16,12 +16,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useExecute } from "#profile/hooks/execute";
 import { toast } from "sonner";
 import { useController } from "@/hooks/controller";
-import { useConnection } from "@/hooks/connection";
 
 export function Socials() {
   const { controller } = useController();
   const { execute } = useExecute();
-  const connection = useConnection();
   const { address } = useAccount();
   const {
     provider,
@@ -39,12 +37,6 @@ export function Socials() {
       navigate("/");
     }
   }, [controller, navigate]);
-
-  const onBack = useCallback(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("social");
-    navigate(url.toString().replace(window.location.origin, ""));
-  }, [navigate]);
 
   const { baseFollowers, baseFolloweds } = useMemo(() => {
     return address != ""
@@ -140,10 +132,7 @@ export function Socials() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
-        variant="hidden"
-        onBack={onBack}
-      />
+      <NavigationHeader variant="hidden" />
       <LayoutContent className="py-6 gap-y-6 select-none overflow-hidden">
         <FollowerTabs
           followers={followers.length}

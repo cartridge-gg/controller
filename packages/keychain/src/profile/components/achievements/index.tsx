@@ -1,10 +1,5 @@
-import {
-  LayoutContainer,
-  LayoutContent,
-  LayoutHeader,
-  Empty,
-  Skeleton,
-} from "@cartridge/ui";
+import { LayoutContainer, LayoutContent, Empty, Skeleton } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useAccount } from "#profile/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
@@ -66,7 +61,7 @@ export function Achievements() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader variant="hidden" onClose={closeModal} />
+      <NavigationHeader variant="hidden" hasBottomNav />
       {status === "loading" ? (
         <LoadingState />
       ) : status === "error" || !achievements.length ? (

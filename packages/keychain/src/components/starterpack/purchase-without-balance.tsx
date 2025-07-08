@@ -6,10 +6,10 @@ import {
   GiftIcon,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Spinner,
   useUI,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { LayoutContainer } from "@cartridge/ui";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
@@ -130,7 +130,7 @@ export const PurchaseWithoutBalance = () => {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         icon={
           purchaseState === PurchaseState.PENDING ? (
             <Spinner />

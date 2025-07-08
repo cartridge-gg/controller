@@ -2,7 +2,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Button,
   Skeleton,
   Empty,
@@ -18,6 +17,7 @@ import {
   TagIcon,
   ThumbnailCollectible,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -252,7 +252,7 @@ export function CollectionListing() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         className="hidden"
         onBack={validated ? () => setValidated(false) : handleBack}
       />

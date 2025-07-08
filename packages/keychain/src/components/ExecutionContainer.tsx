@@ -8,8 +8,8 @@ import {
   type HeaderProps,
   LayoutContainer,
   LayoutFooter,
-  LayoutHeader,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import isEqual from "lodash/isEqual";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -175,7 +175,7 @@ export function ExecutionContainer({
     <>
       {/* <OcclusionDetector /> */}
       <LayoutContainer>
-        <LayoutHeader
+        <NavigationHeader
           title={title}
           description={description}
           icon={icon}

@@ -1,4 +1,5 @@
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
+import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { useDeploy } from "@/hooks/deploy";
 import { useFeeToken } from "@/hooks/tokens";
@@ -11,7 +12,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Spinner,
 } from "@cartridge/ui";
 import { getChainName } from "@cartridge/ui/utils";
@@ -134,7 +134,7 @@ export function DeployController({
   if (isLoading) {
     return (
       <LayoutContainer>
-        <LayoutHeader
+        <NavigationHeader
           variant="expanded"
           title="Checking account balance..."
           icon={<Spinner size="xl" />}
@@ -156,7 +156,7 @@ export function DeployController({
     case "deploy":
       return (
         <LayoutContainer>
-          <LayoutHeader
+          <NavigationHeader
             variant="expanded"
             icon={<ControllerIcon size="lg" />}
             title="Deploy Controller"
@@ -192,7 +192,7 @@ export function DeployController({
     case "deploying":
       return (
         <LayoutContainer>
-          <LayoutHeader
+          <NavigationHeader
             variant="expanded"
             icon={<Spinner size="xl" />}
             title="Deploying Controller"
@@ -224,7 +224,7 @@ export function DeployController({
     case "deployed":
       return (
         <LayoutContainer>
-          <LayoutHeader
+          <NavigationHeader
             variant="expanded"
             Icon={CheckIcon}
             title="Success!"

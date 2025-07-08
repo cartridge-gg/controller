@@ -5,8 +5,8 @@ import {
   AlertIcon,
   Button,
   Input,
-  LayoutHeader,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
@@ -44,7 +44,7 @@ export function Delegate({ onBack }: { onBack: () => void }) {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         variant="expanded"
         title="Delegate account"
         onBack={() => onBack()}

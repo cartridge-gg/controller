@@ -1,16 +1,12 @@
-import {
-  LayoutContainer,
-  AlertIcon,
-  ExternalIcon,
-  LayoutHeader,
-} from "@cartridge/ui";
+import { LayoutContainer, AlertIcon, ExternalIcon } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { Link } from "react-router-dom";
 
 export function Failure() {
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         variant="expanded"
         Icon={AlertIcon}
         title="Uh-oh something went wrong"

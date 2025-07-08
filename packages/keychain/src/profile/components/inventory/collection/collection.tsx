@@ -10,7 +10,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Button,
   CheckboxIcon,
   CollectibleCard,
@@ -19,6 +18,7 @@ import {
   PaperPlaneIcon,
   TagIcon,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useMemo } from "react";
 import { useCollection } from "#profile/hooks/collection";
@@ -104,10 +104,10 @@ export function Collection() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         className="hidden"
-          // onClose={closable ? closeModal : undefined}
-          // onBack={closable ? undefined : handleBack}
+        // onClose={closable ? closeModal : undefined}
+        // onBack={closable ? undefined : handleBack}
       />
       {status === "loading" || !collection || !assets ? (
         <LoadingState />

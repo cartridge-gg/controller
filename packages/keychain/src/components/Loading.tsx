@@ -1,10 +1,10 @@
 import {
   LayoutContainer,
-  LayoutHeader,
   LayoutContent,
   LayoutFooter,
   Skeleton,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 
 interface PageLoadingProps {
   headerVariant?: "expanded" | "hidden";
@@ -19,7 +19,7 @@ export function PageLoading({
 }: PageLoadingProps = {}) {
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         variant={headerVariant}
         title={title}
         description={description}

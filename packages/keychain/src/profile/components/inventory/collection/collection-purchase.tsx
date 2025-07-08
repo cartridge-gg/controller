@@ -7,7 +7,6 @@ import {
 import {
   LayoutContainer,
   LayoutContent,
-  LayoutHeader,
   Button,
   LayoutFooter,
   Skeleton,
@@ -29,6 +28,7 @@ import {
   CaratIcon,
   SelectTrigger,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
   addAddressPadding,
@@ -277,7 +277,7 @@ export function CollectionPurchase() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         className="hidden"
         // onBack={closable ? undefined : handleBack}
       />

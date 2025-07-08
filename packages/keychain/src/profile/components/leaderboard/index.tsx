@@ -1,12 +1,12 @@
 import {
   LayoutContainer,
   LayoutContent,
-  LayoutHeader,
   LeaderboardTable,
   LeaderboardRow,
   Empty,
   Skeleton,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useAccount, useUsernames } from "#profile/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
@@ -59,7 +59,7 @@ export function Leaderboard() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader variant="hidden" onClose={closeModal} />
+      <NavigationHeader variant="hidden" hasBottomNav />
       {status === "loading" ? (
         <LoadingState />
       ) : status === "error" || !data.length ? (

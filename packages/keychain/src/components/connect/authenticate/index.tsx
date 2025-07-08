@@ -6,12 +6,16 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
+  Button,
 } from "@cartridge/ui";
-import { useCallback, useState } from "react";
+import { NavigationHeader } from "@/components";
+import { Unsupported } from "./Unsupported";
+import { doSignup } from "@/hooks/account";
+import { useIsSupported } from "./useIsSupported";
 import { FaceIDImage } from "./FaceID";
 import { Unsupported } from "./Unsupported";
 import { useIsSupported } from "./useIsSupported";
+import { useCallback, useState } from "react";
 
 export type AuthAction = "signup" | "login" | "add-signer";
 
@@ -86,7 +90,7 @@ export function Authenticate({
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         variant="expanded"
         title={title}
         description={description}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import {
   LayoutContainer,
@@ -6,7 +7,6 @@ import {
   LayoutFooter,
   Button,
   CoinsIcon,
-  LayoutHeader,
   ControllerIcon,
 } from "@cartridge/ui";
 import { Deposit } from "./Deposit";
@@ -57,9 +57,15 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         className="p-6"
-        title={title || (controller ? `Fund ${controller.username()}` : "")}
+        title={
+          typeof title === "string"
+            ? title
+            : controller
+              ? `Fund ${controller.username()}`
+              : ""
+        }
         icon={<ControllerIcon size="lg" />}
       />
       <LayoutContent className="gap-6 px-6">

@@ -7,10 +7,10 @@ import {
   GiftIcon,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Spinner,
   useUI,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { LayoutContainer } from "@cartridge/ui";
 import { useState, useEffect } from "react";
 import { Receiving } from "./receiving";
@@ -46,7 +46,7 @@ export const PurchaseWithBalance = () => {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         icon={
           purchaseState === PurchaseState.PENDING ? (
             <Spinner />

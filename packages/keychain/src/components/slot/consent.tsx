@@ -1,11 +1,6 @@
 import Controller from "@/utils/controller";
-import {
-  LayoutContainer,
-  LayoutFooter,
-  LayoutHeader,
-  Button,
-  Checkbox,
-} from "@cartridge/ui";
+import { LayoutContainer, LayoutFooter, Button, Checkbox } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -92,7 +87,7 @@ export function Consent() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         onClose={onDeny}
         variant="expanded"
         title="Sign in to Slot"

@@ -4,7 +4,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Button,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
@@ -13,6 +12,7 @@ import {
   Spinner,
   PaperPlaneIcon,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -107,7 +107,7 @@ export function SendToken() {
         // if (closable) {
         //   navigate(`..?${searchParams.toString()}`);
         // } else {
-          navigate(`../../..?${searchParams.toString()}`);
+        navigate(`../../..?${searchParams.toString()}`);
         // }
       } finally {
         setLoading(false);
@@ -134,7 +134,7 @@ export function SendToken() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader className="hidden" onBack={handleBack} />
+      <NavigationHeader className="hidden" onBack={handleBack} />
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-3">
           <Thumbnail

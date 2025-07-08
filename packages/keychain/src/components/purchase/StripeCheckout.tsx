@@ -14,9 +14,9 @@ import {
   LayoutContent,
   LayoutFooter,
   Button,
-  LayoutHeader,
   CreditCardIcon,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { PricingDetails } from ".";
 import { CostBreakdown } from "./CostBreakdown";
@@ -133,8 +133,8 @@ export const StripeCheckoutContainer = ({
   handleSubmit: (e: React.FormEvent) => Promise<void>;
 }) => {
   return (
-    <LayoutContainer className="min-h-[600px]">
-      <LayoutHeader
+    <LayoutContainer>
+      <NavigationHeader
         title={"Enter Payment Details"}
         icon={<CreditCardIcon variant="solid" size="lg" />}
         onBack={onBack}

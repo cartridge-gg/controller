@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import { useUrlTxns } from "@/hooks/transaction";
 import { Transaction, TransactionState } from "@/components/Transaction";
-import {
-  LayoutContainer,
-  LayoutContent,
-  ClockIcon,
-  LayoutHeader,
-} from "@cartridge/ui";
+import { LayoutContainer, LayoutContent, ClockIcon } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 
 export function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
@@ -32,7 +28,7 @@ export function Pending() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         icon={<ClockIcon variant="solid" size="lg" />}
         title={title}
         description={description}

@@ -19,9 +19,9 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   SliderIcon,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish } from "starknet";
 // import { OcclusionDetector } from "../OcclusionDetector";
@@ -112,7 +112,7 @@ const CreateSessionLayout = ({
     <>
       {/* <OcclusionDetector /> */}
       <LayoutContainer>
-        <LayoutHeader
+        <NavigationHeader
           className="px-6 pt-6 pb-0"
           title={!isUpdate ? "Create Session" : "Update Session"}
           description={isUpdate ? "The policies were updated" : undefined}

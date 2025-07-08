@@ -6,8 +6,8 @@ import {
   AlertIcon,
   ExternalIcon,
   Button,
-  LayoutHeader,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { Link } from "react-router-dom";
@@ -49,7 +49,7 @@ export function ErrorPage({ error }: { error: Error }) {
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         variant="expanded"
         title="Uh oh!"
         description="Something went wrong"

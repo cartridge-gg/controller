@@ -4,22 +4,17 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Button,
   CheckboxCheckedIcon,
   CheckboxUncheckedIcon,
   Skeleton,
   Empty,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import {
-  Call,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
-  uint256,
-} from "starknet";
+import { uint256 } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
 import { useCollection } from "#profile/hooks/collection";
 import { Sending } from "./collection-sending";
@@ -167,7 +162,7 @@ export function SendCollection() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader className="hidden" onBack={handleBack} />
+      <NavigationHeader className="hidden" onBack={handleBack} />
       {status === "loading" || !collection || !assets ? (
         <LoadingState />
       ) : status === "error" ? (

@@ -7,10 +7,10 @@ import {
   Empty,
   LayoutContainer,
   LayoutContent,
-  LayoutHeader,
   PlusIcon,
   Skeleton,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { VoyagerUrl, cn } from "@cartridge/ui/utils";
 import { useConnection } from "@/hooks/connection";
 import { useData } from "#profile/hooks/data";
@@ -65,7 +65,7 @@ export function Activity() {
 
   return (
     <LayoutContainer>
-      <LayoutHeader variant="hidden" onClose={closeModal} />
+      <NavigationHeader variant="hidden" onClose={closeModal} hasBottomNav />
 
       {status === "loading" ? (
         <LoadingState />

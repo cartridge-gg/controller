@@ -9,7 +9,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   MetaMaskColorIcon,
   MetaMaskIcon,
   PhantomColorIcon,
@@ -23,6 +22,7 @@ import {
   TokenCard,
   Spinner,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
@@ -135,7 +135,7 @@ export function CryptoCheckout({
 
   return (
     <LayoutContainer>
-      <LayoutHeader
+      <NavigationHeader
         title={getTitle}
         icon={<DepositIcon variant="solid" size="lg" />}
         onBack={() => {
