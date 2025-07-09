@@ -44,7 +44,9 @@ export function NavigationHeader({
   const shouldShowClose = forceShowClose || !shouldShowBack;
 
   // Handle back navigation
-  const handleBack = onBack || (shouldShowBack ? goBack : undefined);
+  const handleBack = shouldShowClose
+    ? undefined
+    : onBack || (shouldShowBack ? goBack : undefined);
 
   // Handle close navigation - use the enhanced handleClose that resets stack
   const handleCloseAction =

@@ -16,8 +16,7 @@ export type ConnectionCtx =
   | SignMessageCtx
   | OpenSettingsCtx
   | OpenPurchaseCreditsCtx
-  | OpenStarterPackCtx
-  | undefined;
+  | OpenStarterPackCtx;
 
 export type ConnectCtx = {
   origin: string;

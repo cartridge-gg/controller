@@ -1,7 +1,6 @@
 import { Token, useToken, useTokens } from "#profile/hooks/token";
 import { useExecute } from "#profile/hooks/execute";
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Button,
@@ -12,7 +11,6 @@ import {
   Spinner,
   PaperPlaneIcon,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -137,8 +135,7 @@ export function SendToken() {
   }
 
   return (
-    <LayoutContainer>
-      <NavigationHeader className="hidden" />
+    <>
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-3">
           <Thumbnail
@@ -208,6 +205,6 @@ export function SendToken() {
           </Button>
         </div>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

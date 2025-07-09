@@ -2,12 +2,10 @@ import {
   Link,
   Outlet,
   useLocation,
-  useNavigate,
   useParams,
   useSearchParams,
 } from "react-router-dom";
 import {
-  LayoutContainer,
   LayoutContent,
   Button,
   CollectiblePreview,
@@ -23,7 +21,6 @@ import {
   TraceabilityCollectibleCard,
   PaperPlaneIcon,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { constants } from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
@@ -44,7 +41,6 @@ export function CollectibleAsset() {
   const { chainId, namespace, project } = useConnection();
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const navigate = useNavigate();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
   const { editions } = useArcade();
@@ -99,10 +95,6 @@ export function CollectibleAsset() {
       }));
   }, [asset]);
 
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
-
   const { events, dates } = useMemo(() => {
     const filteredData = data.slice(0, cap);
     return {
@@ -138,9 +130,7 @@ export function CollectibleAsset() {
   }
 
   return (
-    <LayoutContainer>
-      <NavigationHeader className="hidden" onBack={handleBack} />
-
+    <>
       {status === "loading" || !collectible || !asset ? (
         <LoadingState />
       ) : status === "error" ? (
@@ -236,7 +226,7 @@ export function CollectibleAsset() {
           </LayoutFooter>
         </>
       )}
-    </LayoutContainer>
+    </>
   );
 }
 

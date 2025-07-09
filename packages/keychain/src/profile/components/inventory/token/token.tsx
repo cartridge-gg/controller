@@ -1,6 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Button,
@@ -11,7 +10,7 @@ import {
   Thumbnail,
   InfoIcon,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
+
 import { useData } from "#profile/hooks/data";
 import {
   getDate,
@@ -47,9 +46,7 @@ function Credits() {
   });
 
   return (
-    <LayoutContainer>
-      <NavigationHeader />
-
+    <>
       <LayoutContent className="pb-4 gap-6">
         <div className="flex gap-4 items-center">
           <Thumbnail
@@ -79,7 +76,7 @@ function Credits() {
           Purchase
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }
 
@@ -144,9 +141,7 @@ function ERC20() {
   if (!token) return;
 
   return (
-    <LayoutContainer>
-      <NavigationHeader className="hidden" />
-
+    <>
       <LayoutContent className="pb-4 gap-6">
         <ERC20Header token={token} />
 
@@ -206,6 +201,6 @@ function ERC20() {
           </Link>
         </LayoutFooter>
       )}
-    </LayoutContainer>
+    </>
   );
 }

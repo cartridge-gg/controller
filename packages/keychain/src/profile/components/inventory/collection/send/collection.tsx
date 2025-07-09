@@ -2,7 +2,6 @@ import { useAccount } from "#profile/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import { useExecute } from "#profile/hooks/execute";
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Button,
@@ -11,7 +10,6 @@ import {
   Skeleton,
   Empty,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -152,13 +150,8 @@ export function SendCollection() {
     return assets[0].imageUrl || placeholder;
   }, [collection, assets]);
 
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
-
   return (
-    <LayoutContainer>
-      <NavigationHeader className="hidden" onBack={handleBack} />
+    <>
       {status === "loading" || !collection || !assets ? (
         <LoadingState />
       ) : status === "error" ? (
@@ -211,7 +204,7 @@ export function SendCollection() {
           </LayoutFooter>
         </>
       )}
-    </LayoutContainer>
+    </>
   );
 }
 

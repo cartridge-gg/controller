@@ -1,5 +1,4 @@
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Button,
@@ -17,7 +16,6 @@ import {
   TagIcon,
   ThumbnailCollectible,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -149,10 +147,6 @@ export function CollectionListing() {
     return `~$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   }, [selected, price, listingData]);
 
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
-
   const handleSelection = useCallback(
     (token: Token) => {
       setSelected(token);
@@ -251,11 +245,7 @@ export function CollectionListing() {
   if (!selected || tokens.length === 0) return null;
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
-        className="hidden"
-        onBack={validated ? () => setValidated(false) : handleBack}
-      />
+    <>
       {status === "loading" || !collection || !assets ? (
         <LoadingState />
       ) : status === "error" ? (
@@ -326,7 +316,7 @@ export function CollectionListing() {
           </LayoutFooter>
         </>
       )}
-    </LayoutContainer>
+    </>
   );
 }
 

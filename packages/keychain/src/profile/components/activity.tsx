@@ -12,7 +12,6 @@ import {
 import { VoyagerUrl, cn } from "@cartridge/ui/utils";
 import { useConnection } from "@/hooks/connection";
 import { useData } from "#profile/hooks/data";
-import { RootLayout } from "#profile/components/layout/RootLayout";
 import { useCallback, useMemo, useState } from "react";
 import { constants } from "starknet";
 import { Link } from "react-router-dom";
@@ -66,7 +65,7 @@ export function Activity() {
   ) : status === "error" || !data.length ? (
     <EmptyState />
   ) : (
-    <RootLayout>
+    <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
       {dates.map((current) => {
         return (
           <div key={current} className="flex flex-col gap-y-2 select-none">
@@ -152,7 +151,7 @@ export function Activity() {
         <PlusIcon variant="solid" size="xs" />
         See More
       </Button>
-    </RootLayout>
+    </LayoutContent>
   );
 }
 

@@ -3,11 +3,10 @@ import {
   FollowerSocialList,
   FollowerSocialRow,
   FollowerTabs,
-  LayoutContainer,
   LayoutContent,
   TabsContent,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
+
 import { useAccount, useUsernames } from "#profile/hooks/account";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "#profile/hooks/arcade.js";
@@ -131,8 +130,7 @@ export function Socials() {
   }
 
   return (
-    <LayoutContainer>
-      <NavigationHeader variant="hidden" />
+    <>
       <LayoutContent className="py-6 gap-y-6 select-none overflow-hidden">
         <FollowerTabs
           followers={followers.length}
@@ -197,7 +195,7 @@ export function Socials() {
           </TabsContent>
         </FollowerTabs>
       </LayoutContent>
-    </LayoutContainer>
+    </>
   );
 }
 
