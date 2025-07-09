@@ -1,11 +1,4 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContainer,
   LayoutContent,
@@ -35,11 +28,6 @@ import { useConnection } from "@/hooks/connection";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
-  const location = useLocation();
-
-  if (location.pathname.endsWith("/send")) {
-    return <Outlet />;
-  }
 
   switch (address) {
     case "credit":
@@ -50,7 +38,6 @@ export function Token() {
 }
 
 function Credits() {
-  const navigate = useNavigate();
   // TODO: Get parent from keychain connection if needed
   const isVisible = true; // Always visible in keychain
   const { username } = useAccount();
@@ -61,12 +48,7 @@ function Credits() {
 
   return (
     <LayoutContainer>
-      <NavigationHeader
-        variant="hidden"
-        onBack={() => {
-          navigate("..");
-        }}
-      />
+      <NavigationHeader />
 
       <LayoutContent className="pb-4 gap-6">
         <div className="flex gap-4 items-center">

@@ -59,27 +59,37 @@ export function Tokens() {
   );
 }
 
-function TokenCardContent({ token }: { token: Token }) {
-  return (
-    <Link to={`token/${token.metadata.address}`}>
-      <TokenCard
-        image={token.metadata.image || placeholder}
-        title={token.metadata.name}
-        amount={`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
-        value={
-          token.balance.value
-            ? `$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-            : ""
-        }
-        change={
-          token.balance.change === 0
-            ? undefined
-            : token.balance.change > 0
-              ? `+$${token.balance.change.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-              : `-$${(-token.balance.change).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-        }
-      />
-    </Link>
+function TokenCardContent({
+  token,
+  disabled,
+}: {
+  token: Token;
+  disabled?: boolean;
+}) {
+  const tokenCard = (
+    <TokenCard
+      image={token.metadata.image || placeholder}
+      title={token.metadata.name}
+      amount={`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
+      value={
+        token.balance.value
+          ? `$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+          : ""
+      }
+      change={
+        token.balance.change === 0
+          ? undefined
+          : token.balance.change > 0
+            ? `+$${token.balance.change.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+            : `-$${(-token.balance.change).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+      }
+    />
+  );
+
+  return disabled ? (
+    tokenCard
+  ) : (
+    <Link to={`./token/${token.metadata.address}`}>{tokenCard}</Link>
   );
 }
 
