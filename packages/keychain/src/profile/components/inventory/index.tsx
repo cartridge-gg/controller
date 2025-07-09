@@ -10,23 +10,15 @@ export {
 export { Token } from "./token";
 export { SendToken } from "./token/send";
 
-import { LayoutContainer, LayoutContent } from "@cartridge/ui";
-import { LayoutBottomNav } from "#profile/components/bottom-nav";
 import { Collections } from "./collection";
 import { Tokens } from "./token";
-import { NavigationHeader } from "@/components";
+import { RootLayout } from "#profile/components/layout/RootLayout";
 
 export function Inventory() {
   return (
-    <LayoutContainer>
-      <NavigationHeader variant="hidden" hasBottomNav />
-
-      <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
-        <Tokens />
-        <Collections />
-      </LayoutContent>
-
-      <LayoutBottomNav />
-    </LayoutContainer>
+    <RootLayout>
+      <Tokens />
+      <Collections />
+    </RootLayout>
   );
 }

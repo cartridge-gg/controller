@@ -1,5 +1,4 @@
-import { LayoutContainer, LayoutContent, Empty, Skeleton } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
+import { LayoutContent, Empty, Skeleton } from "@cartridge/ui";
 import { useAccount } from "#profile/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
@@ -9,7 +8,7 @@ import { useData } from "#profile/hooks/data";
 import { useArcade } from "#profile/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import { addAddressPadding } from "starknet";
-import { LayoutBottomNav } from "#profile/components/bottom-nav";
+import { RootLayout } from "#profile/components/layout/RootLayout";
 
 export function Achievements() {
   const { address: self } = useAccount();
@@ -58,29 +57,23 @@ export function Achievements() {
     setAccountAddress(address || self || "");
   }, [address, self, setAccountAddress]);
 
-  return (
-    <LayoutContainer>
-      <NavigationHeader variant="hidden" hasBottomNav />
-      {status === "loading" ? (
-        <LoadingState />
-      ) : status === "error" || !achievements.length ? (
-        <EmptyState />
-      ) : (
-        <LayoutContent className="py-6 gap-y-6 select-none h-full">
-          <Trophies
-            achievements={achievements}
-            pinneds={pinneds}
-            softview={false}
-            enabled={pinneds.length < 3}
-            game={game}
-            edition={edition}
-            pins={pins}
-            earnings={points}
-          />
-        </LayoutContent>
-      )}
-      <LayoutBottomNav />
-    </LayoutContainer>
+  return status === "loading" ? (
+    <LoadingState />
+  ) : status === "error" || !achievements.length ? (
+    <EmptyState />
+  ) : (
+    <RootLayout>
+      <Trophies
+        achievements={achievements}
+        pinneds={pinneds}
+        softview={false}
+        enabled={pinneds.length < 3}
+        game={game}
+        edition={edition}
+        pins={pins}
+        earnings={points}
+      />
+    </RootLayout>
   );
 }
 

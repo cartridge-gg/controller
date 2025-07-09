@@ -17,7 +17,6 @@ export type NavigationHeaderProps = {
 
   // Navigation stack options
   stackKey?: string; // Key for navigation stack (default: "default")
-  hasBottomNav?: boolean; // If true, always shows close and doesn't add to nav stack
 } & HeaderProps;
 
 export function NavigationHeader({
@@ -27,7 +26,6 @@ export function NavigationHeader({
   forceShowBack = false,
   forceShowClose = false,
   stackKey = "default",
-  hasBottomNav = false,
   ...props
 }: NavigationHeaderProps) {
   const { closeModal } = useConnection();
@@ -38,17 +36,12 @@ export function NavigationHeader({
         if (onClose) onClose();
         if (closeModal) closeModal();
       },
-      // Don't add to stack if hasBottomNav is true
-      disabled: hasBottomNav,
     });
 
-  // When hasBottomNav is true, always show close
-  const shouldShowBack = hasBottomNav
-    ? false
-    : forceShowBack || (canNavigateBack && stackDepth > stackThreshold);
-  const shouldShowClose = hasBottomNav
-    ? true
-    : forceShowClose || !shouldShowBack;
+  // Determine which button to show based on navigation state
+  const shouldShowBack =
+    forceShowBack || (canNavigateBack && stackDepth > stackThreshold);
+  const shouldShowClose = forceShowClose || !shouldShowBack;
 
   // Handle back navigation
   const handleBack = onBack || (shouldShowBack ? goBack : undefined);
