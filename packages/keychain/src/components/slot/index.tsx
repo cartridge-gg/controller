@@ -5,13 +5,7 @@ import { CreateController } from "@/components/connect";
 import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useController } from "@/hooks/controller";
 import { useEffect } from "react";
-import {
-  Navigate,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import {
   CheckIcon,
   LayoutContainer,
@@ -19,33 +13,21 @@ import {
   LayoutHeader,
 } from "@cartridge/ui";
 
+// This component is now simplified since we use file-based routing
 export function Slot() {
-  const { pathname } = useLocation();
-  switch (pathname) {
-    case "/slot/auth":
-      return <Navigate to="/slot" replace />;
-    case "/slot/auth/success":
-      return <Success />;
-    case "/slot/auth/failure":
-      return <Navigate to="/failure" replace />;
-    case "/slot/consent":
-    case "/slot/fund":
-      return <Outlet />;
-    default:
-      return <Auth />;
-  }
+  return <Auth />;
 }
 
 function Auth() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const router = useRouter();
+  const searchParams = useLocalSearchParams();
   const { controller } = useController();
   const { data: user, isFetched } = useMeQuery(undefined, { retry: false });
 
   useEffect(() => {
     if (user && controller) {
-      const returnTo = searchParams.get("returnTo");
-      const otherParams = Array.from(searchParams.entries())
+      const returnTo = searchParams.returnTo as string;
+      const otherParams = Object.entries(searchParams)
         .filter(([key]) => key !== "returnTo")
         .reduce(
           (prev, [key, val], i) =>
@@ -56,9 +38,9 @@ function Auth() {
       const target = returnTo
         ? `${returnTo}${otherParams}`
         : `/slot/consent${otherParams}`;
-      navigate(target, { replace: true });
+      router.replace(target);
     }
-  }, [user, controller, navigate, searchParams]);
+  }, [user, controller, router, searchParams]);
 
   if (!isFetched) {
     return <PageLoading />;

@@ -5,7 +5,7 @@ import {
   LayoutHeader,
 } from "@cartridge/ui";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 
 export function Failure() {
   return (
@@ -18,7 +18,7 @@ export function Failure() {
           <>
             If this problem persists, swing by the Cartridge support channel on{" "}
             <Link
-              to={CARTRIDGE_DISCORD_LINK}
+              href={CARTRIDGE_DISCORD_LINK}
               target="_blank"
               className="inline-flex items-center gap-1 hover:underline text-foreground-200 font-semibold"
             >

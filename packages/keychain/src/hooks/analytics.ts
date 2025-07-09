@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { usePathname } from "expo-router";
 
 export interface AnalyticsEvent {
   type:
@@ -17,7 +17,7 @@ export interface AnalyticsEvent {
 }
 
 export const useAnalytics = () => {
-  const { pathname } = useLocation();
+  const pathname = usePathname();
   const event = useCallback(
     ({ type, payload, address }: AnalyticsEvent) => {
       log(type, { address, path: pathname, ...payload });

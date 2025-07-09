@@ -1,21 +1,19 @@
 import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useFeatures } from "@/hooks/features";
 
-type FeatureParams = {
-  name: string;
-  action: "enable" | "disable" | string; // Allow string initially for validation
-};
-
 export function FeatureToggle() {
-  const { name, action } = useParams<FeatureParams>();
+  const { name, action } = useLocalSearchParams<{
+    name: string;
+    action: string;
+  }>();
   const { enableFeature, disableFeature } = useFeatures();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (!name) {
       console.error("Feature name missing in URL.");
-      navigate("/"); // Redirect to home or an error page
+      router.push("/"); // Redirect to home or an error page
       return;
     }
 
@@ -33,11 +31,11 @@ export function FeatureToggle() {
     // Redirect to home page after toggling
     // Consider showing a success message briefly before redirecting
     const timer = setTimeout(() => {
-      navigate("/");
+      router.push("/");
     }, 1000); // Redirect after 1 second
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
-  }, [name, action, enableFeature, disableFeature, navigate]);
+  }, [name, action, enableFeature, disableFeature, router]);
 
   // Display a message while processing/redirecting
   return (

@@ -10,34 +10,62 @@ const projectRoot = __dirname;
 // This can be replaced with `find-yarn-workspace-root`
 const monorepoRoot = path.resolve(projectRoot, "../..");
 
+/** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(projectRoot);
 
 // 1. Watch all files within the monorepo
 config.watchFolders = [monorepoRoot];
+
 // 2. Let Metro know where to resolve packages and in what order
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(monorepoRoot, "node_modules"),
 ];
 
-// 3. Setup polyfills for web platform and path aliases
-config.resolver.alias = {
-  ...config.resolver.alias,
+// 3. Setup polyfills for web platform using extraNodeModules
+config.resolver.extraNodeModules = {
   crypto: require.resolve("crypto-browserify"),
-  "node:crypto": require.resolve("crypto-browserify"),
+  stream: require.resolve("readable-stream"),
   buffer: require.resolve("buffer"),
-  "@": path.resolve(projectRoot, "src"),
 };
 
-// 4. Ensure platform-specific resolution
+// 4. Setup path aliases
+config.resolver.alias = {
+  ...config.resolver.alias,
+  "@": path.resolve(projectRoot, "src"),
+  // Fix for rpc-websockets package export conditions
+  "rpc-websockets": path.resolve(
+    monorepoRoot,
+    "node_modules/.pnpm/rpc-websockets@7.11.2/node_modules/rpc-websockets/dist/index.browser.cjs",
+  ),
+};
+
+// 5. Ensure platform-specific resolution
 config.resolver.platforms = ["native", "web", "ios", "android"];
 
-// 5. Enable web support
+// 6. Enable web support
 config.resolver.resolverMainFields = ["react-native", "browser", "main"];
+
+// 7. Configure package export conditions
+// config.resolver.unstable_conditionNames = [
+//   "browser",
+//   "import",
+//   "require",
+//   "default",
+// ];
+
+// 8. Configure transformer
 config.transformer.enableBabelRCLookup = false;
 config.transformer.enableBabelRuntime = false;
 
-// 6. Add WASM support for Metro
+config.transformer.getTransformOptions = () => ({
+  transform: {
+    experimentalImportSupport: false,
+    inlineRequires: true,
+  },
+});
+
+// 9. Add WASM support for Metro
 config.resolver.assetExts = [...config.resolver.assetExts, "wasm"];
 
 module.exports = wrapWithReanimatedMetroConfig(

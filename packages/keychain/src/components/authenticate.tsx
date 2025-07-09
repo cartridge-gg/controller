@@ -1,33 +1,33 @@
 import { Authenticate as AuthComponent } from "@/components/connect";
 import { constants } from "starknet";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { AuthAction } from "./connect/authenticate";
 
 // auth page used for externally embedded keychain
 export function Authenticate() {
-  const [searchParams] = useSearchParams();
+  const searchParams = useLocalSearchParams();
   const [params, setParams] = useState<{
     name: string;
     action: string;
     network: string | null;
   }>();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (params) {
       return;
     }
-    const name = searchParams.get("name");
-    const action = searchParams.get("action");
-    const network = searchParams.get("network");
+    const name = searchParams.name as string;
+    const action = searchParams.action as string;
+    const network = searchParams.network as string;
     if (name && action) {
       setParams({ name, action, network });
 
       // Remove query params to avoid issues with password managers
-      navigate(".", { replace: true });
+      router.replace(".");
     }
-  }, [params, searchParams, navigate]);
+  }, [params, searchParams, router]);
 
   if (!params) {
     return null;
@@ -43,7 +43,7 @@ export function Authenticate() {
           return window.close();
         }
 
-        navigate(`${process.env.EXPO_PUBLIC_ADMIN_URL}/profile`);
+        router.push(`${process.env.EXPO_PUBLIC_ADMIN_URL}/profile`);
       }}
     />
   );

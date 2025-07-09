@@ -1,19 +1,17 @@
 import { useEffect } from "react";
 import { Funding } from "../funding";
 import Controller from "@/utils/controller";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useRouter, usePathname } from "expo-router";
 
 export function Fund() {
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!)) {
-      navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
-        replace: true,
-      });
+      router.replace(`/slot?returnTo=${encodeURIComponent(pathname)}`);
     }
-  }, [navigate, pathname]);
+  }, [router, pathname]);
 
   return <Funding title="Fund Credits for Slot" isSlot />;
 }

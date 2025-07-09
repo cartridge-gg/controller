@@ -7,7 +7,7 @@ import {
   Checkbox,
 } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useRouter, useLocalSearchParams, usePathname } from "expo-router";
 
 interface ConsentCheckboxProps {
   checked: boolean;
@@ -47,10 +47,10 @@ function ConsentCheckbox({
 }
 
 export function Consent() {
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const [searchParams] = useSearchParams();
-  const callback_uri = searchParams.get("callback_uri")!;
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useLocalSearchParams();
+  const callback_uri = searchParams.callback_uri as string;
 
   const [acceptedEULA, setAcceptedEULA] = useState(false);
   const [acceptedPrivacyPolicy, setAcceptedPrivacyPolicy] = useState(false);
@@ -77,18 +77,15 @@ export function Consent() {
 
   useEffect(() => {
     if (!Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!)) {
-      navigate(
+      router.replace(
         `/slot?returnTo=${encodeURIComponent(pathname)}${
           callback_uri
             ? `&callback_uri=${encodeURIComponent(callback_uri)}`
             : ""
         }`,
-        {
-          replace: true,
-        },
       );
     }
-  }, [navigate, callback_uri, pathname]);
+  }, [router, callback_uri, pathname]);
 
   return (
     <LayoutContainer>
