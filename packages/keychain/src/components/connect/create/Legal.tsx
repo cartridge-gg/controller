@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 
 export function Legal() {
   return (
@@ -6,7 +6,7 @@ export function Legal() {
       <div className="text-xs">
         By continuing you are agreeing to Cartridge&apos;s{" "}
         <Link
-          to="https://cartridge.gg/legal/terms-of-service"
+          href="https://cartridge.gg/legal/terms-of-service"
           target="_blank"
           className="underline focus:text-primary focus:outline-none"
         >
@@ -14,7 +14,7 @@ export function Legal() {
         </Link>{" "}
         and{" "}
         <Link
-          to="https://cartridge.gg/legal/privacy-policy"
+          href="https://cartridge.gg/legal/privacy-policy"
           target="_blank"
           className="underline focus:text-primary focus:outline-none"
         >

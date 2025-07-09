@@ -6,7 +6,7 @@ import {
   cartridge,
   publicProvider,
 } from "@starknet-react/core";
-import { BrowserRouter } from "react-router-dom";
+
 import { ConnectionContext } from "../src/components/provider/connection";
 import { UIProvider } from "../src/components/provider/ui";
 import {
@@ -31,23 +31,21 @@ export function Provider({
       explorer={cartridge}
       provider={publicProvider()}
     >
-      <BrowserRouter>
-        <FeatureProvider>
-          <QueryClientProvider client={queryClient}>
-            <ConnectionContext.Provider value={connection}>
-              <WalletsProvider>
-                <PostHogProvider>
-                  <MockUpgradeProvider controller={connection.controller}>
-                    <UIProvider>
-                      <TokensProvider>{children}</TokensProvider>
-                    </UIProvider>
-                  </MockUpgradeProvider>
-                </PostHogProvider>
-              </WalletsProvider>
-            </ConnectionContext.Provider>
-          </QueryClientProvider>
-        </FeatureProvider>
-      </BrowserRouter>
+      <FeatureProvider>
+        <QueryClientProvider client={queryClient}>
+          <ConnectionContext.Provider value={connection}>
+            <WalletsProvider>
+              <PostHogProvider>
+                <MockUpgradeProvider controller={connection.controller}>
+                  <UIProvider>
+                    <TokensProvider>{children}</TokensProvider>
+                  </UIProvider>
+                </MockUpgradeProvider>
+              </PostHogProvider>
+            </WalletsProvider>
+          </ConnectionContext.Provider>
+        </QueryClientProvider>
+      </FeatureProvider>
     </StarknetConfig>
   );
 }

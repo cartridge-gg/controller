@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { render, RenderResult } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+
 import {
   ConnectionContextValue,
   VerifiableControllerTheme,
@@ -25,13 +25,11 @@ export function renderWithProviders(
   config: ProvidersConfig = {},
 ): RenderResult {
   const wrapped = withConnection(
-    <BrowserRouter>
-      <NavigationProvider>
-        <FeatureProvider>
-          {withStarknet(withPostHog(ui), config.starknet)}
-        </FeatureProvider>
-      </NavigationProvider>
-    </BrowserRouter>,
+    <NavigationProvider>
+      <FeatureProvider>
+        {withStarknet(withPostHog(ui), config.starknet)}
+      </FeatureProvider>
+    </NavigationProvider>,
     config.connection,
   );
 

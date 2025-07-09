@@ -1,7 +1,7 @@
 import { useConnection } from "@/hooks/connection";
 import { LockIcon, VerifiedIcon } from "@cartridge/ui";
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 
 export function SessionConsent({
   isVerified,
@@ -31,7 +31,7 @@ export function SessionConsent({
         <div className="flex items-center gap-2">
           {isVerified && (
             <Link
-              to="https://github.com/cartridge-gg/controller/blob/main/packages/controller/src/presets.ts"
+              href="https://github.com/cartridge-gg/controller/blob/main/packages/controller/src/presets.ts"
               target="_blank"
             >
               <VerifiedIcon size="lg" className="text-foreground" />

@@ -13,7 +13,8 @@
   },
   "experiments": {
     "tsconfigPaths": true,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "reactServerFunctions": true
   },
   "plugins": [
     [
