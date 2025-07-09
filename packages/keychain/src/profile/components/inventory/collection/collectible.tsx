@@ -5,14 +5,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import {
-  LayoutContainer,
-  LayoutContent,
-  CollectibleCard,
-  Skeleton,
-  Empty,
-} from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
+import { LayoutContent, CollectibleCard, Skeleton, Empty } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
 import placeholder from "/placeholder.svg?url";
@@ -26,7 +19,6 @@ import { EditionModel, GameModel } from "@cartridge/arcade";
 export function Collectible() {
   const { games, editions } = useArcade();
   const { address } = useParams<{ address: string }>();
-  const { closeModal } = useConnection();
   const { project, namespace } = useConnection();
   const theme = useControllerTheme();
 
@@ -51,8 +43,7 @@ export function Collectible() {
   }
 
   return (
-    <LayoutContainer>
-      <NavigationHeader onClose={closeModal} />
+    <>
       {status === "loading" || !collectible || !assets ? (
         <LoadingState />
       ) : status === "error" ? (
@@ -97,7 +88,7 @@ export function Collectible() {
           </LayoutContent>
         </>
       )}
-    </LayoutContainer>
+    </>
   );
 }
 

@@ -1,7 +1,6 @@
 import { useAccount } from "#profile/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Button,
@@ -26,7 +25,6 @@ import placeholder from "/placeholder.svg?url";
 import { SendAmount } from "./amount";
 import { SendHeader } from "./header";
 import { useEntrypoints } from "#profile/hooks/entrypoints";
-import { NavigationHeader } from "@/components";
 import { useExecute } from "#profile/hooks/execute";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
@@ -169,8 +167,7 @@ export function SendCollectible() {
   }, [collectible, assets]);
 
   return (
-    <LayoutContainer>
-      <NavigationHeader className="hidden" />
+    <>
       {status === "loading" || !collectible || !assets ? (
         <LoadingState />
       ) : status === "error" ? (
@@ -230,7 +227,7 @@ export function SendCollectible() {
           </LayoutFooter>
         </>
       )}
-    </LayoutContainer>
+    </>
   );
 }
 

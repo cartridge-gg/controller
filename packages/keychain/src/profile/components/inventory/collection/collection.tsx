@@ -6,7 +6,6 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Button,
@@ -17,7 +16,7 @@ import {
   PaperPlaneIcon,
   TagIcon,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
+
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useMemo } from "react";
 import { useCollection } from "#profile/hooks/collection";
@@ -97,8 +96,7 @@ export function Collection() {
   }
 
   return (
-    <LayoutContainer>
-      <NavigationHeader className="hidden" />
+    <>
       {status === "loading" || !collection || !assets ? (
         <LoadingState />
       ) : status === "error" ? (
@@ -202,7 +200,7 @@ export function Collection() {
           </LayoutFooter>
         </>
       )}
-    </LayoutContainer>
+    </>
   );
 }
 

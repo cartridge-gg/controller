@@ -5,7 +5,6 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import {
-  LayoutContainer,
   LayoutContent,
   Button,
   LayoutFooter,
@@ -28,7 +27,6 @@ import {
   CaratIcon,
   SelectTrigger,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
   addAddressPadding,
@@ -273,12 +271,7 @@ export function CollectionPurchase() {
   }, [tokenOrders, setAmount]);
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
-        className="hidden"
-        // onBack={closable ? undefined : handleBack}
-      />
-
+    <>
       {status === "loading" || !collection || tokenOrders.length === 0 ? (
         <LoadingState />
       ) : status === "error" || !token ? (
@@ -385,7 +378,7 @@ export function CollectionPurchase() {
           </LayoutFooter>
         </>
       )}
-    </LayoutContainer>
+    </>
   );
 }
 

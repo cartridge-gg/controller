@@ -7,7 +7,6 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import {
-  LayoutContainer,
   LayoutContent,
   Button,
   CollectiblePreview,
@@ -27,7 +26,6 @@ import {
   Spinner,
   Thumbnail,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 
 import { cn } from "@cartridge/ui/utils";
 import {
@@ -248,12 +246,7 @@ export function CollectionAsset() {
   }
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
-        className="hidden"
-        // onBack={closable ? undefined : handleBack}
-      />
-
+    <>
       {status === "loading" || !collection || !asset ? (
         <LoadingState />
       ) : status === "error" || (isListed && !token) ? (
@@ -411,7 +404,7 @@ export function CollectionAsset() {
           </LayoutFooter>
         </>
       )}
-    </LayoutContainer>
+    </>
   );
 }
 

@@ -13,7 +13,6 @@ import {
 import { TurnkeyProvider } from "@turnkey/sdk-react";
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { BrowserRouter } from "react-router-dom";
 import { constants, num } from "starknet";
 import { ConnectionContext } from "./connection";
 import { PostHogProvider } from "./posthog";
@@ -48,46 +47,44 @@ export function Provider({ children }: PropsWithChildren) {
   }, [connection.controller]);
 
   return (
-    <BrowserRouter>
-      <FeatureProvider>
-        <CartridgeAPIProvider url={ENDPOINT}>
-          <IndexerAPIProvider credentials="omit">
-            <QueryClientProvider client={queryClient}>
-              <ConnectionContext.Provider value={connection}>
-                <TurnkeyProvider config={turnkeyConfig}>
-                  <Auth0Provider {...auth0Config}>
-                    <WalletsProvider>
-                      <PostHogProvider>
-                        <UpgradeProvider controller={connection.controller}>
-                          <UIProvider>
-                            <StarknetConfig
-                              explorer={cartridge}
-                              chains={[sepolia, mainnet]}
-                              defaultChainId={defaultChainId}
-                              provider={jsonRpcProvider({ rpc })}
-                            >
-                              <TokensProvider>
-                                <ProfileMarketplaceProvider>
-                                  <ProfileArcadeProvider>
-                                    <ProfileDataProvider>
-                                      {children}
-                                    </ProfileDataProvider>
-                                  </ProfileArcadeProvider>
-                                </ProfileMarketplaceProvider>
-                              </TokensProvider>
-                            </StarknetConfig>
-                          </UIProvider>
-                        </UpgradeProvider>
-                      </PostHogProvider>
-                    </WalletsProvider>
-                  </Auth0Provider>
-                </TurnkeyProvider>
-              </ConnectionContext.Provider>
-            </QueryClientProvider>
-          </IndexerAPIProvider>
-        </CartridgeAPIProvider>
-      </FeatureProvider>
-    </BrowserRouter>
+    <FeatureProvider>
+      <CartridgeAPIProvider url={ENDPOINT}>
+        <IndexerAPIProvider credentials="omit">
+          <QueryClientProvider client={queryClient}>
+            <ConnectionContext.Provider value={connection}>
+              <TurnkeyProvider config={turnkeyConfig}>
+                <Auth0Provider {...auth0Config}>
+                  <WalletsProvider>
+                    <PostHogProvider>
+                      <UpgradeProvider controller={connection.controller}>
+                        <UIProvider>
+                          <StarknetConfig
+                            explorer={cartridge}
+                            chains={[sepolia, mainnet]}
+                            defaultChainId={defaultChainId}
+                            provider={jsonRpcProvider({ rpc })}
+                          >
+                            <TokensProvider>
+                              <ProfileMarketplaceProvider>
+                                <ProfileArcadeProvider>
+                                  <ProfileDataProvider>
+                                    {children}
+                                  </ProfileDataProvider>
+                                </ProfileArcadeProvider>
+                              </ProfileMarketplaceProvider>
+                            </TokensProvider>
+                          </StarknetConfig>
+                        </UIProvider>
+                      </UpgradeProvider>
+                    </PostHogProvider>
+                  </WalletsProvider>
+                </Auth0Provider>
+              </TurnkeyProvider>
+            </ConnectionContext.Provider>
+          </QueryClientProvider>
+        </IndexerAPIProvider>
+      </CartridgeAPIProvider>
+    </FeatureProvider>
   );
 }
 

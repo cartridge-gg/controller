@@ -8,7 +8,6 @@ import { useData } from "#profile/hooks/data";
 import { useArcade } from "#profile/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import { addAddressPadding } from "starknet";
-import { RootLayout } from "#profile/components/layout/RootLayout";
 
 export function Achievements() {
   const { address: self } = useAccount();
@@ -62,7 +61,7 @@ export function Achievements() {
   ) : status === "error" || !achievements.length ? (
     <EmptyState />
   ) : (
-    <RootLayout>
+    <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
       <Trophies
         achievements={achievements}
         pinneds={pinneds}
@@ -73,7 +72,7 @@ export function Achievements() {
         pins={pins}
         earnings={points}
       />
-    </RootLayout>
+    </LayoutContent>
   );
 }
 

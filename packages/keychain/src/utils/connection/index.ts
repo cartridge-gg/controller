@@ -22,7 +22,7 @@ export function connectToController<ParentMethods extends object>({
   setConfigSignupOptions,
 }: {
   setRpcUrl: (url: string) => void;
-  setContext: (ctx: ConnectionCtx) => void;
+  setContext: (ctx: ConnectionCtx | undefined) => void;
   setController: (controller?: Controller) => void;
   setConfigSignupOptions: (options: AuthOptions | undefined) => void;
 }) {

@@ -11,7 +11,6 @@ import { useParams } from "react-router-dom";
 import { useData } from "#profile/hooks/data";
 import { useArcade } from "#profile/hooks/arcade";
 import { getChecksumAddress } from "starknet";
-import { RootLayout } from "#profile/components/layout/RootLayout";
 
 export function Leaderboard() {
   const { address: self } = useAccount();
@@ -58,7 +57,7 @@ export function Leaderboard() {
   ) : status === "error" || !data.length ? (
     <EmptyState />
   ) : (
-    <RootLayout>
+    <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
       <LeaderboardTable className="h-full">
         {data.map((item, index) => (
           <LeaderboardRow
@@ -71,7 +70,7 @@ export function Leaderboard() {
           />
         ))}
       </LeaderboardTable>
-    </RootLayout>
+    </LayoutContent>
   );
 }
 
