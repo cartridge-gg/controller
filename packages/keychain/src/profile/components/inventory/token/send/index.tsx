@@ -132,17 +132,13 @@ export function SendToken() {
     ],
   );
 
-  const handleBack = useCallback(() => {
-    navigate(`..?${searchParams.toString()}`);
-  }, [navigate, searchParams]);
-
   if (!token) {
     return null;
   }
 
   return (
     <LayoutContainer>
-      <NavigationHeader className="hidden" onBack={handleBack} />
+      <NavigationHeader className="hidden" />
       <LayoutContent className="pb-4 gap-6">
         <div className="flex items-center gap-3">
           <Thumbnail
@@ -203,18 +199,8 @@ export function SendToken() {
         <div className="flex flex-row items-center gap-3">
           <Button
             disabled={disabled}
-            variant="secondary"
-            type="button"
-            className="w-1/3"
-            isLoading={loading}
-            onClick={handleBack}
-          >
-            Cancel
-          </Button>
-          <Button
-            disabled={disabled}
             type="submit"
-            className="w-2/3"
+            className="w-full"
             isLoading={loading}
             onClick={() => onSubmit(to, amount!)}
           >

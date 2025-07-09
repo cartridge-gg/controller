@@ -30,7 +30,6 @@ import {
 } from "#profile/components/inventory";
 import { Achievements } from "#profile/components/achievements";
 import { Activity } from "#profile/components/activity";
-import { Slot as SlotProfile } from "#profile/components/slot";
 import { Leaderboard } from "#profile/components/leaderboard";
 import { CollectionPurchase } from "#profile/components/inventory/collection/collection-purchase";
 import { useMemo } from "react";
@@ -66,55 +65,142 @@ export function App() {
           />
           <Route path="/feature/:name/:action" element={<FeatureToggle />} />
           <Route path="account/:username" element={<Account />}>
-            <Route path="inventory" element={<Inventory />}>
-              <Route path="token/:address" element={<Token />}>
-                <Route path="send" element={<SendToken />} />
-              </Route>
-            </Route>
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="inventory/token/:address" element={<Token />} />
+            <Route
+              path="inventory/token/:address/send"
+              element={<SendToken />}
+            />
+            <Route
+              path="inventory/collection/:address"
+              element={<Collection />}
+            />
+            <Route
+              path="inventory/collection/:address/token/:tokenId"
+              element={<CollectionAsset />}
+            />
+            <Route
+              path="inventory/collection/:address/token/:tokenId/send"
+              element={<SendCollection />}
+            />
+            <Route
+              path="inventory/collection/:address/token/:tokenId/list"
+              element={<CollectionListing />}
+            />
+            <Route
+              path="inventory/collection/:address/token/:tokenId/purchase"
+              element={<CollectionPurchase />}
+            />
+            <Route
+              path="inventory/collection/:address/send"
+              element={<SendCollection />}
+            />
+            <Route
+              path="inventory/collection/:address/list"
+              element={<CollectionListing />}
+            />
+            <Route
+              path="inventory/collection/:address/purchase"
+              element={<CollectionPurchase />}
+            />
+            <Route
+              path="inventory/collectible/:address"
+              element={<Collectible />}
+            />
+            <Route
+              path="inventory/collectible/:address/token/:tokenId"
+              element={<CollectibleAsset />}
+            />
+            <Route
+              path="inventory/collectible/:address/token/:tokenId/send"
+              element={<SendCollectible />}
+            />
             <Route path="activity" element={<Activity />} />
-            <Route path="achievements" element={<Achievements />}>
-              <Route path=":address" element={<Achievements />} />
-            </Route>
-            <Route path="leaderboard" element={<Leaderboard />}>
-              <Route path=":address" element={<Leaderboard />} />
-            </Route>
-            <Route path="trophies" element={<RedirectAchievements />}>
-              <Route path=":address" element={<RedirectAchievements />} />
-            </Route>
+            <Route path="achievements" element={<Achievements />} />
+            <Route path="achievements/:address" element={<Achievements />} />
+            <Route path="leaderboard" element={<Leaderboard />} />
+            <Route path="leaderboard/:address" element={<Leaderboard />} />
+            <Route path="trophies" element={<RedirectAchievements />} />
+            <Route
+              path="trophies/:address"
+              element={<RedirectAchievements />}
+            />
 
-            <Route path="slot/:project" element={<SlotProfile />}>
-              <Route path="inventory" element={<Inventory />}>
-                <Route path="token/:address" element={<Token />}>
-                  <Route path="send" element={<SendToken />} />
-                </Route>
-                <Route path="collection/:address" element={<Collection />}>
-                  <Route path="token/:tokenId" element={<CollectionAsset />}>
-                    <Route path="send" element={<SendCollection />} />
-                    <Route path="list" element={<CollectionListing />} />
-                    <Route path="purchase" element={<CollectionPurchase />} />
-                  </Route>
-                  <Route path="send" element={<SendCollection />} />
-                  <Route path="list" element={<CollectionListing />} />
-                  <Route path="purchase" element={<CollectionPurchase />} />
-                </Route>
-                <Route path="collectible/:address" element={<Collectible />}>
-                  <Route path="token/:tokenId" element={<CollectibleAsset />}>
-                    <Route path="send" element={<SendCollectible />} />
-                    {/* <Route path="list" element={<ListCollectible />} /> */}
-                  </Route>
-                </Route>
-              </Route>
-              <Route path="achievements" element={<Achievements />}>
-                <Route path=":address" element={<Achievements />} />
-              </Route>
-              <Route path="leaderboard" element={<Leaderboard />}>
-                <Route path=":address" element={<Leaderboard />} />
-              </Route>
-              <Route path="trophies" element={<RedirectAchievements />}>
-                <Route path=":address" element={<RedirectAchievements />} />
-              </Route>
-              <Route path="activity" element={<Activity />} />
-            </Route>
+            <Route path="slot/:project/inventory" element={<Inventory />} />
+            <Route
+              path="slot/:project/inventory/token/:address"
+              element={<Token />}
+            />
+            <Route
+              path="slot/:project/inventory/token/:address/send"
+              element={<SendToken />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address"
+              element={<Collection />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/token/:tokenId"
+              element={<CollectionAsset />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/token/:tokenId/send"
+              element={<SendCollection />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/token/:tokenId/list"
+              element={<CollectionListing />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/token/:tokenId/purchase"
+              element={<CollectionPurchase />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/send"
+              element={<SendCollection />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/list"
+              element={<CollectionListing />}
+            />
+            <Route
+              path="slot/:project/inventory/collection/:address/purchase"
+              element={<CollectionPurchase />}
+            />
+            <Route
+              path="slot/:project/inventory/collectible/:address"
+              element={<Collectible />}
+            />
+            <Route
+              path="slot/:project/inventory/collectible/:address/token/:tokenId"
+              element={<CollectibleAsset />}
+            />
+            <Route
+              path="slot/:project/inventory/collectible/:address/token/:tokenId/send"
+              element={<SendCollectible />}
+            />
+            <Route
+              path="slot/:project/achievements"
+              element={<Achievements />}
+            />
+            <Route
+              path="slot/:project/achievements/:address"
+              element={<Achievements />}
+            />
+            <Route path="slot/:project/leaderboard" element={<Leaderboard />} />
+            <Route
+              path="slot/:project/leaderboard/:address"
+              element={<Leaderboard />}
+            />
+            <Route
+              path="slot/:project/trophies"
+              element={<RedirectAchievements />}
+            />
+            <Route
+              path="slot/:project/trophies/:address"
+              element={<RedirectAchievements />}
+            />
+            <Route path="slot/:project/activity" element={<Activity />} />
           </Route>
           <Route path="*" element={<div>Page not found</div>} />
         </Route>
