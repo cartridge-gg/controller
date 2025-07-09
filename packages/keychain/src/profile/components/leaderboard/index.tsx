@@ -1,19 +1,17 @@
 import {
-  LayoutContainer,
   LayoutContent,
   LeaderboardTable,
   LeaderboardRow,
   Empty,
   Skeleton,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { useAccount, useUsernames } from "#profile/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useData } from "#profile/hooks/data";
 import { useArcade } from "#profile/hooks/arcade";
 import { getChecksumAddress } from "starknet";
-import { LayoutBottomNav } from "#profile/components/bottom-nav";
+import { RootLayout } from "#profile/components/layout/RootLayout";
 
 export function Leaderboard() {
   const { address: self } = useAccount();
@@ -55,31 +53,25 @@ export function Leaderboard() {
     setAccountAddress(address || self || "");
   }, [address, self, setAccountAddress]);
 
-  return (
-    <LayoutContainer>
-      <NavigationHeader variant="hidden" hasBottomNav />
-      {status === "loading" ? (
-        <LoadingState />
-      ) : status === "error" || !data.length ? (
-        <EmptyState />
-      ) : (
-        <LayoutContent className="py-6 gap-y-6 select-none h-full">
-          <LeaderboardTable className="h-full">
-            {data.map((item, index) => (
-              <LeaderboardRow
-                key={index}
-                rank={index + 1}
-                name={item.name}
-                points={item.points}
-                highlight={item.highlight}
-                following={item.following}
-              />
-            ))}
-          </LeaderboardTable>
-        </LayoutContent>
-      )}
-      <LayoutBottomNav />
-    </LayoutContainer>
+  return status === "loading" ? (
+    <LoadingState />
+  ) : status === "error" || !data.length ? (
+    <EmptyState />
+  ) : (
+    <RootLayout>
+      <LeaderboardTable className="h-full">
+        {data.map((item, index) => (
+          <LeaderboardRow
+            key={index}
+            rank={index + 1}
+            name={item.name}
+            points={item.points}
+            highlight={item.highlight}
+            following={item.following}
+          />
+        ))}
+      </LeaderboardTable>
+    </RootLayout>
   );
 }
 
