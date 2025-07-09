@@ -12,20 +12,27 @@ import {
 } from "@cartridge/controller-wasm";
 import {
   AccountQuery,
-  Eip191Credentials,
+  CredentialMetadata,
   SignerInput,
   SignerType,
   useAccountQuery,
+  WebauthnCredential,
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo, useState } from "react";
 import { shortString } from "starknet";
-import { LoginMode } from "../types";
+import {
+  credentialToAddress,
+  credentialToAuth,
+  LoginMode,
+  signerToAddress,
+} from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
+import { findAvailableCredential } from "./webauthn/device-detection";
 
 export interface SignupResponse {
   address: string;
@@ -51,6 +58,9 @@ export function useCreateController({
   const [overlay, setOverlay] = useState<React.ReactNode | null>(null);
   const [changeWallet, setChangeWallet] = useState<boolean>(false);
 
+  const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(
+    undefined,
+  );
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
 
@@ -181,9 +191,7 @@ export function useCreateController({
           };
           return;
         case "discord":
-          signupResponse = (await signupWithSocial({
-            username,
-          })) as SignupResponse;
+          signupResponse = (await signupWithSocial(username)) as SignupResponse;
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
@@ -295,32 +303,43 @@ export function useCreateController({
 
       const controller = controllerRet.controller;
 
-      const signer = controller?.signers?.[0];
-
-      if (!signer || !signer.metadata) {
-        // Handle the case where the signer or metadata is missing
-        // This might involve throwing an error or logging a warning
-        console.error(
-          "Signer or signer metadata not found for controller:",
-          controller,
-        );
-        // Depending on expected behavior, you might want to throw an error:
-        // throw new Error("Signer information is missing.");
-        return; // Or handle appropriately
+      if (!controller) {
+        throw new Error("Undefined controller");
       }
 
       let loginResponse: LoginResponse | undefined;
       switch (authenticationMethod) {
         case "webauthn": {
-          const webauthnCredential = (signer.metadata as WebauthnCredentials)
-            .webauthn?.[0];
-          if (!webauthnCredential) {
-            throw new Error("WebAuthn credential not found for signer.");
+          const signers = controller.signers?.filter(
+            (signer) => signer.metadata.__typename === "WebauthnCredentials",
+          );
+          if (!signers || signers.length === 0) {
+            throw new Error("Signer not found for controller");
           }
-
+          let selectedCredential = (signers[0].metadata as WebauthnCredentials)
+            .webauthn?.[0];
+          if (signers.length > 1) {
+            const passkeysCredentials = await findAvailableCredential(
+              signers.map(
+                (signer) =>
+                  (signer.metadata as WebauthnCredentials)
+                    .webauthn?.[0] as WebauthnCredential,
+              ),
+              import.meta.env.VITE_RP_ID!,
+            );
+            selectedCredential =
+              passkeysCredentials ??
+              (signers[0] as WebauthnCredentials).webauthn?.[0];
+            if (!selectedCredential) {
+              throw new Error("No available credentials found");
+            }
+          }
+          if (!selectedCredential) {
+            throw new Error("No available credentials found");
+          }
           await loginWithWebauthn(
             controller,
-            webauthnCredential,
+            selectedCredential,
             loginMode,
             !!isSlot,
           );
@@ -328,37 +347,21 @@ export function useCreateController({
         }
         case "discord": {
           setWaitingForConfirmation(true);
-          const eip191Credential = (signer.metadata as Eip191Credentials)
-            .eip191?.[0];
-          if (!eip191Credential) {
-            throw new Error("EIP191 credential not found for signer.");
-          }
-
-          loginResponse = (await loginWithSocial({
-            address: eip191Credential.ethAddress,
-          })) as LoginResponse | undefined;
+          loginResponse = await loginWithSocial();
           break;
         }
         case "rabby":
         case "metamask": {
           setWaitingForConfirmation(true);
-          const credential = (signer.metadata as Eip191Credentials).eip191?.[0];
-          if (!credential) {
-            throw new Error("EIP191 credential not found for signer.");
-          }
-
-          loginResponse = (await loginWithExternalWallet(
+          loginResponse = await loginWithExternalWallet(
             controller,
-            credential,
-          )) as LoginResponse;
+            authenticationMethod,
+          );
           break;
         }
         case "walletconnect":
           setWaitingForConfirmation(true);
-          loginResponse = (await loginWithWalletConnect(
-            controller,
-            setChangeWallet,
-          )) as LoginResponse | undefined;
+          loginResponse = await loginWithWalletConnect(controller);
           break;
         case "phantom":
         case "argent":
@@ -367,6 +370,27 @@ export function useCreateController({
       }
 
       if (!loginResponse) {
+        throw new Error("Login failed");
+      }
+
+      const connectedAddress = signerToAddress(loginResponse.signer);
+      const possibleSigners = controller.signers?.filter(
+        (signer) =>
+          credentialToAuth(signer.metadata as CredentialMetadata) ===
+          authenticationMethod,
+      );
+      if (!possibleSigners || possibleSigners.length === 0) {
+        throw new Error("No signers found for controller");
+      }
+
+      if (
+        !possibleSigners.find(
+          (signer) =>
+            credentialToAddress(signer.metadata as CredentialMetadata) ===
+            connectedAddress,
+        )
+      ) {
+        setChangeWallet(true);
         return;
       }
 
@@ -399,6 +423,7 @@ export function useCreateController({
       setController,
       changeWallet,
       setChangeWallet,
+      wallets,
     ],
   );
 
@@ -410,6 +435,8 @@ export function useCreateController({
     ) => {
       setError(undefined);
       setIsLoading(true);
+
+      setAuthMethod(authenticationMethod);
 
       try {
         if (exists) {
@@ -436,7 +463,7 @@ export function useCreateController({
       }
       setIsLoading(false);
     },
-    [handleLogin, handleSignup, doPopupFlow],
+    [handleLogin, handleSignup, doPopupFlow, setAuthMethod],
   );
 
   return {
@@ -453,6 +480,7 @@ export function useCreateController({
     changeWallet,
     setChangeWallet,
     signupOptions,
+    authMethod,
   };
 }
 

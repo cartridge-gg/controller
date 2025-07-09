@@ -35,7 +35,10 @@ export class TurnkeyWallet {
       clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
     });
 
-    const turnkeyIframe = document.getElementById("turnkey-iframe-container");
+    const randomId = Math.random().toString(36).substring(2, 15);
+    const turnkeyIframe = document.getElementById(
+      `turnkey-iframe-container-${randomId}`,
+    );
     if (turnkeyIframe) {
       document.body.removeChild(turnkeyIframe);
     }
@@ -78,13 +81,7 @@ export class TurnkeyWallet {
     };
   }
 
-  async connect(
-    signupOrLogin?: { username: string } | { address: string },
-  ): Promise<ExternalWalletResponse> {
-    if (!signupOrLogin) {
-      throw new Error("No signupOrLogin");
-    }
-
+  async connect(signupUsername?: string): Promise<ExternalWalletResponse> {
     try {
       const turnkeyIframeClient = await this.getTurnkeyIframeClient(10_000);
 
@@ -116,13 +113,9 @@ export class TurnkeyWallet {
         throw new Error("No oidcTokenString");
       }
 
-      const subOrganizationId =
-        "username" in signupOrLogin
-          ? await getOrCreateTurnkeySuborg(
-              oidcTokenString,
-              signupOrLogin.username,
-            )
-          : await getTurnkeySuborg(oidcTokenString);
+      const subOrganizationId = signupUsername
+        ? await getOrCreateTurnkeySuborg(oidcTokenString, signupUsername)
+        : await getTurnkeySuborg(oidcTokenString);
 
       if (!subOrganizationId) {
         throw new Error("No subOrganizationId");
@@ -133,22 +126,16 @@ export class TurnkeyWallet {
         turnkeyIframeClient!,
       );
 
-      const turnkeyAddress =
-        "address" in signupOrLogin
-          ? await getWallet(subOrganizationId, turnkeyIframeClient!)
-          : await getOrCreateWallet(
-              subOrganizationId,
-              signupOrLogin.username,
-              turnkeyIframeClient!,
-            );
-      if (
-        "address" in signupOrLogin &&
-        BigInt(signupOrLogin.address) !== BigInt(turnkeyAddress)
-      ) {
-        throw new Error("Account mismatch");
-      }
+      const turnkeyAddress = signupUsername
+        ? await getOrCreateWallet(
+            subOrganizationId,
+            signupUsername,
+            turnkeyIframeClient!,
+          )
+        : await getWallet(subOrganizationId, turnkeyIframeClient!);
 
       const checksummedAddress = getAddress(turnkeyAddress);
+
       this.account = checksummedAddress;
       this.subOrganizationId = subOrganizationId;
 
@@ -211,11 +198,12 @@ export class TurnkeyWallet {
       }
 
       if (!this.subOrganizationId) {
-        const { success, error } = await this.connect({
-          address: this.account,
-        });
+        const { success, error, account } = await this.connect();
         if (!success) {
           throw new Error(error);
+        }
+        if (account !== this.account) {
+          throw new Error("Account mismatch");
         }
       }
 

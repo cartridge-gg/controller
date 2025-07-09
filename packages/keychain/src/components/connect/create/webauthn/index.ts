@@ -110,8 +110,11 @@ export function useWebauthnAuthentication() {
       window.controller = controllerObject;
       setController(controllerObject);
     },
-    [chainId, rpcUrl, origin],
+    [chainId, rpcUrl, origin, setController],
   );
 
-  return { signup, login };
+  return {
+    signup,
+    login,
+  };
 }

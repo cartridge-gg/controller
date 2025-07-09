@@ -33,19 +33,15 @@ export class MetaMaskWallet implements WalletAdapter {
           .then((accounts: any) => {
             if (accounts && accounts.length > 0) {
               this.account = getAddress(accounts[0]);
-              this.connectedAccounts = accounts.map((account: string) =>
-                getAddress(account),
-              );
+              this.connectedAccounts = accounts.map(getAddress);
             }
           });
         this.MMSDK.getProvider()?.on("accountsChanged", (accounts: any) => {
           if (Array.isArray(accounts)) {
             if (accounts.length > 0) {
               this.account = getAddress(accounts?.[0]);
+              this.connectedAccounts = accounts.map(getAddress);
             }
-            this.connectedAccounts = accounts.map((account: string) =>
-              getAddress(account),
-            );
           }
         });
       });
@@ -75,11 +71,7 @@ export class MetaMaskWallet implements WalletAdapter {
     };
   }
 
-  async connect(address?: string): Promise<ExternalWalletResponse<any>> {
-    if (address && this.connectedAccounts.includes(getAddress(address))) {
-      this.account = getAddress(address);
-    }
-
+  async connect(): Promise<ExternalWalletResponse<any>> {
     if (this.account) {
       return { success: true, wallet: this.type, account: this.account };
     }
@@ -95,6 +87,7 @@ export class MetaMaskWallet implements WalletAdapter {
         this.connectedAccounts = accounts.map((account: string) =>
           getAddress(account),
         );
+
         return { success: true, wallet: this.type, account: this.account };
       }
 
@@ -142,7 +135,10 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
-  async signMessage(message: string): Promise<ExternalWalletResponse<any>> {
+  async signMessage(
+    message: string,
+    address?: string,
+  ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("MetaMask is not connected");
@@ -150,7 +146,7 @@ export class MetaMaskWallet implements WalletAdapter {
 
       const result = await this.MMSDK.getProvider()?.request({
         method: "personal_sign",
-        params: [this.account, message],
+        params: [address || this.account, message],
       });
 
       return { success: true, wallet: this.type, result };

@@ -9,6 +9,8 @@ import {
   connectToController,
   OpenSettingsCtx,
 } from "@/utils/connection";
+import { TurnkeyWallet } from "@/wallets/social/turnkey";
+import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
   AuthOptions,
   ExternalWallet,
@@ -29,6 +31,7 @@ import {
 } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
 import { isIframe, normalizeOrigin } from "@cartridge/ui/utils";
+import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SemVer } from "semver";
@@ -196,7 +199,13 @@ export function useConnectionValue() {
   }, [rpcUrl]);
 
   useEffect(() => {
-    if (!controller?.username() || !chainId) return;
+    if (
+      !controller?.username() ||
+      !chainId ||
+      !window ||
+      !window.keychain_wallets
+    )
+      return;
 
     (async () => {
       try {
@@ -208,61 +217,61 @@ export function useConnectionValue() {
 
         if (
           !controllerResponse.controller ||
-          !controllerResponse.controller.signers ||
-          controllerResponse.controller.signers.some(
-            (signer) =>
-              signer.metadata.__typename !== "Eip191Credentials" ||
-              signer.metadata.eip191?.[0]?.provider !== "discord",
-          )
+          !controllerResponse.controller.signers
         ) {
           return;
         }
 
-        // At this point we know that all the signers are Eip191Credentials and that the provider is discord
-        // So we need to check if at least one of the signers here has an attached embedded wallet in the keychain_wallets
-        const hasEmbeddedWallet = controllerResponse.controller?.signers?.some(
-          (signer) => {
-            const ethAddress = (
-              signer.metadata as { eip191?: Array<{ ethAddress: string }> }
-            ).eip191?.[0]?.ethAddress;
-            if (!ethAddress) return false;
-
-            try {
-              return (
-                window.keychain_wallets?.getEmbeddedWallet(ethAddress) !==
-                undefined
-              );
-            } catch (error) {
-              console.error("Invalid eth address:", ethAddress, error);
-              return false;
-            }
-          },
+        const signers = controllerResponse.controller.signers.filter(
+          (signer) =>
+            signer.metadata.__typename === "Eip191Credentials" &&
+            (signer.metadata.eip191?.[0]?.provider === "discord" ||
+              signer.metadata.eip191?.[0]?.provider === "walletconnect"),
         );
 
-        if (hasEmbeddedWallet) {
+        if (signers.length === 0) {
           return;
         }
 
-        const signer = controllerResponse.controller?.signers?.[0];
-        const ethAddress = (
-          signer?.metadata as { eip191?: Array<{ ethAddress: string }> }
-        ).eip191?.[0]?.ethAddress;
-        if (!ethAddress) {
-          throw new Error("No eth address found");
+        for (const signer of signers) {
+          const ethAddress = (
+            signer?.metadata as { eip191?: Array<{ ethAddress: string }> }
+          ).eip191?.[0]?.ethAddress;
+          if (!ethAddress) {
+            throw new Error("No eth address found");
+          }
+          if (
+            window.keychain_wallets!.getEmbeddedWallet(ethAddress) !== undefined
+          ) {
+            continue;
+          }
+          const provider = (signer.metadata as Eip191Credentials).eip191?.[0]
+            ?.provider;
+
+          if (provider === "walletconnect") {
+            const walletConnectWallet = new WalletConnectWallet();
+            if (!walletConnectWallet) {
+              throw new Error("Embedded WalletConnect wallet not found");
+            }
+            window.keychain_wallets!.addEmbeddedWallet(
+              ethAddress,
+              walletConnectWallet as WalletAdapter,
+            );
+          } else if (provider === "discord") {
+            const turnkeyWallet = new TurnkeyWallet();
+            if (!turnkeyWallet) {
+              throw new Error("Embedded Turnkey wallet not found");
+            }
+
+            turnkeyWallet.account = getAddress(ethAddress);
+            turnkeyWallet.subOrganizationId = undefined;
+
+            window.keychain_wallets!.addEmbeddedWallet(
+              ethAddress,
+              turnkeyWallet as WalletAdapter,
+            );
+          }
         }
-
-        const turnkeyWallet = window.keychain_wallets?.turnkeyWallet;
-        if (!turnkeyWallet) {
-          throw new Error("Embedded Turnkey wallet not found");
-        }
-
-        turnkeyWallet.account = getAddress(ethAddress);
-        turnkeyWallet.subOrganizationId = undefined;
-
-        window.keychain_wallets?.addEmbeddedWallet(
-          ethAddress,
-          turnkeyWallet as WalletAdapter,
-        );
       } catch (error) {
         console.error("Failed to add embedded wallet:", error);
       }

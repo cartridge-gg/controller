@@ -60,7 +60,7 @@ const createCredentials = async (
   return credentials;
 };
 
-const onCreateBegin = async (
+export const onCreateBegin = async (
   name: string,
 ): Promise<Credentials | undefined> => {
   const hasPlatformAuthenticator =

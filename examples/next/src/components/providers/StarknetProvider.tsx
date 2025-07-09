@@ -182,7 +182,7 @@ const controller = new ControllerConnector({
   // However, if you want to use custom RPC URLs or a different default chain,
   // you can still specify them:
   chains: controllerConnectorChains,
-  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+  defaultChainId: constants.StarknetChainId.SN_MAIN,
   url: keychainUrl,
   profileUrl: profileUrl,
   slot: "eternum",
@@ -197,8 +197,8 @@ const controller = new ControllerConnector({
 
 const session = new SessionConnector({
   policies,
-  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA!,
-  chainId: constants.StarknetChainId.SN_SEPOLIA,
+  rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
+  chainId: constants.StarknetChainId.SN_MAIN,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   keychainUrl,
 });

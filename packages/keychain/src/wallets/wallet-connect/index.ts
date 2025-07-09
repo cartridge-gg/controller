@@ -19,8 +19,9 @@ const REOWN_PROJECT_ID = "9e74c94c62b9f42303d951e0b8375c14";
 export class WalletConnectWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "walletconnect" as ExternalWalletType;
   readonly platform: ExternalPlatform = "ethereum";
-  private account: string | undefined = undefined;
+  account: string | undefined = undefined;
   private providerPromise: Promise<Provider> | undefined = undefined;
+  private connectionPromise: PromiseWithResolvers<void> | undefined = undefined;
 
   constructor() {
     this.providerPromise = EthereumProvider.init({
@@ -47,9 +48,14 @@ export class WalletConnectWallet implements WalletAdapter {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       provider.on("connect", (_: { chainId: string }) => {
         window.dispatchEvent(new CustomEvent("close-qr-code"));
+        this.connectionPromise?.resolve();
       });
       provider.on("disconnect", () => {
         window.dispatchEvent(new CustomEvent("close-qr-code"));
+        this.connectionPromise?.resolve();
+      });
+      window.addEventListener("qr-code-cancelled", () => {
+        this.connectionPromise?.reject(new Error("User cancelled"));
       });
       return provider;
     });
@@ -82,18 +88,21 @@ export class WalletConnectWallet implements WalletAdapter {
         throw new Error("WalletConnect is not available");
       }
 
+      this.connectionPromise = getPromiseWithResolvers<void>();
+
       const provider = await this.getProvider(10_000);
 
       await provider.disconnect();
-      await provider.connect().catch((error: Error) => {
-        throw new Error("Error connecting to WalletConnect: " + error.message);
-      });
+
+      provider.connect();
+
+      await getPromiseResult(this.connectionPromise.promise, 120_000);
+
       const accounts = await provider.request<string[]>({
         method: "eth_requestAccounts",
       });
 
       if (accounts && accounts.length > 0) {
-        console.log("accounts", accounts);
         const address = getAddress(accounts[0]);
         this.account = address;
         return { success: true, wallet: this.type, account: this.account };
@@ -101,12 +110,13 @@ export class WalletConnectWallet implements WalletAdapter {
 
       throw new Error("No accounts found");
     } catch (error) {
-      console.error(`Error connecting to WalletConnect:`, error);
       return {
         success: false,
         wallet: this.type,
         error: (error as Error).message || "Unknown error",
       };
+    } finally {
+      this.connectionPromise = undefined;
     }
   }
 
@@ -140,8 +150,11 @@ export class WalletConnectWallet implements WalletAdapter {
     message: `0x${string}`,
   ): Promise<ExternalWalletResponse<string>> {
     try {
-      if (!this.isAvailable() || !this.account) {
+      if (!this.isAvailable()) {
         throw new Error("WalletConnect is not connected");
+      }
+      if (!this.account) {
+        await this.connect();
       }
 
       const provider = await this.getProvider(10_000);
@@ -254,20 +267,35 @@ export class WalletConnectWallet implements WalletAdapter {
     if (!this.providerPromise) {
       throw new Error("Provider not initialized");
     }
-    return this.getPromiseResult(this.providerPromise, timeoutMs);
-  }
-
-  private async getPromiseResult<T>(
-    promise: Promise<T>,
-    timeoutMs: number,
-  ): Promise<T> {
-    const timeoutId = setTimeout(() => {
-      throw new Error("Timeout waiting for promise");
-    }, timeoutMs);
-
-    const result = await promise;
-    clearTimeout(timeoutId);
-
-    return result;
+    return getPromiseResult(this.providerPromise, timeoutMs);
   }
 }
+async function getPromiseResult<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+): Promise<T> {
+  const timeoutId = setTimeout(() => {
+    throw new Error("Timeout waiting for promise");
+  }, timeoutMs);
+
+  const result = await promise;
+  clearTimeout(timeoutId);
+
+  return result;
+}
+
+function getPromiseWithResolvers<T>() {
+  let resolve: (value: T | PromiseLike<T>) => void;
+  let reject: (reason?: Error) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve: resolve!, reject: reject! };
+}
+
+type PromiseWithResolvers<T> = {
+  promise: Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason?: Error) => void;
+};

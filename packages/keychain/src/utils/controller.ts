@@ -20,13 +20,17 @@ import {
   JsRegister,
   JsRegisterResponse,
   JsRevokableSession,
+  JsSignerInput,
   Owner,
+  Signer,
 } from "@cartridge/controller-wasm/controller";
 
 import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
 import { FeeSource } from "@cartridge/controller";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { fromJsFeeEstimate, toJsFeeEstimate } from "./fee";
+import { credentialToAuth } from "@/components/connect/types";
+import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -140,6 +144,13 @@ export default class Controller {
     }
 
     await this.cartridge.skipSession(toWasmPolicies(policies));
+  }
+
+  async addOwner(owner: Signer, signerInput: JsSignerInput) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+    await this.cartridge.addOwner(owner, signerInput);
   }
 
   async registerSessionCalldata(
@@ -301,3 +312,9 @@ function toJsFeeSource(
       throw new Error("Invalid fee source");
   }
 }
+
+export const allUseSameAuth = (signers: CredentialMetadata[]) => {
+  return signers.every(
+    (signer) => credentialToAuth(signer) === credentialToAuth(signers[0]),
+  );
+};

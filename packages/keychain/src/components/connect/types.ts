@@ -1,5 +1,7 @@
 import { AuthOption } from "@cartridge/controller";
+import { Signer } from "@cartridge/controller-wasm";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
+import { ec } from "starknet";
 
 export type FormInput = {
   username: string;
@@ -27,11 +29,11 @@ export type LoginProps = AuthBaseProps & {
   onSignup: (username: string) => void;
 };
 
-export function getControllerSignerProvider(
+export function credentialToAuth(
   signer: CredentialMetadata | undefined,
-): AuthOption | undefined {
+): AuthOption {
   if (!signer) {
-    return undefined;
+    throw new Error("No signer provided");
   }
   switch (signer.__typename) {
     case "Eip191Credentials":
@@ -47,7 +49,7 @@ export function getControllerSignerProvider(
   }
 }
 
-export function getControllerSignerAddress(
+export function credentialToAddress(
   signer: CredentialMetadata | undefined,
 ): string | undefined {
   if (!signer) {
@@ -60,7 +62,24 @@ export function getControllerSignerAddress(
       return signer.siws?.[0].publicKey;
     case "StarknetCredentials":
       return signer.starknet?.[0].publicKey;
+    case "WebauthnCredentials":
+      return undefined;
     default:
       throw new Error("Unknown controller signer provider");
+  }
+}
+
+export function signerToAddress(signer: Signer): string {
+  if (!signer) {
+    throw new Error("No signer provided");
+  }
+  if (signer.eip191) {
+    return signer.eip191?.address;
+  } else if (signer.starknet) {
+    return ec.starkCurve.getStarkKey(signer.starknet?.privateKey);
+  } else if (signer.webauthn) {
+    throw new Error("Should not need to convert webauthn signer to address");
+  } else {
+    throw new Error("Unknown signer type");
   }
 }
