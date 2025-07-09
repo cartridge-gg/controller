@@ -24,6 +24,7 @@ config.resolver.nodeModulesPaths = [
 config.resolver.alias = {
   ...config.resolver.alias,
   crypto: require.resolve("crypto-browserify"),
+  "node:crypto": require.resolve("crypto-browserify"),
   buffer: require.resolve("buffer"),
   "@": path.resolve(projectRoot, "src"),
 };
