@@ -154,7 +154,7 @@ const SignerIcon = React.memo(
 const getSignerIdentifyingInfo = async (
   signer: CredentialMetadata,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  controllerUsername: string | undefined,
+  _controllerUsername: string | undefined,
 ) => {
   switch (signer.__typename) {
     case "Eip191Credentials":
