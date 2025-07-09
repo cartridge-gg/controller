@@ -25,7 +25,7 @@ catalogs:
       specifier: ^0.2.3
       version: 0.2.3
     '@expo/cli':
-      specifier: ~0.24.19
+      specifier: ~0.24.20
       version: 0.24.20
     '@expo/metro-runtime':
       specifier: ~5.0.4
@@ -103,7 +103,7 @@ catalogs:
       specifier: ^9.12.0
       version: 9.25.1
     expo:
-      specifier: ~53.0.18
+      specifier: ~53.0.19
       version: 53.0.20
     expo-font:
       specifier: ~13.3.2
@@ -12658,7 +12658,7 @@ snapshots:
       ci-info: 3.9.0
       compression: 1.8.1
       connect: 3.7.0
-      debug: 4.4.0
+      debug: 4.4.1
       env-editor: 0.4.2
       freeport-async: 2.0.0
       getenv: 2.0.0
@@ -12708,7 +12708,7 @@ snapshots:
       '@expo/plist': 0.3.5
       '@expo/sdk-runtime-versions': 1.0.0
       chalk: 4.1.2
-      debug: 4.4.0
+      debug: 4.4.1
       getenv: 2.0.0
       glob: 10.4.5
       resolve-from: 5.0.0
@@ -12751,7 +12751,7 @@ snapshots:
   '@expo/env@1.0.7':
     dependencies:
       chalk: 4.1.2
-      debug: 4.4.0
+      debug: 4.4.1
       dotenv: 16.4.7
       dotenv-expand: 11.0.7
       getenv: 2.0.0
@@ -12763,7 +12763,7 @@ snapshots:
       '@expo/spawn-async': 1.7.2
       arg: 5.0.2
       chalk: 4.1.2
-      debug: 4.4.0
+      debug: 4.4.1
       find-up: 5.0.0
       getenv: 2.0.0
       glob: 10.4.5
@@ -12795,15 +12795,15 @@ snapshots:
   '@expo/metro-config@0.20.17':
     dependencies:
       '@babel/core': 7.27.1
-      '@babel/generator': 7.27.1
-      '@babel/parser': 7.27.2
-      '@babel/types': 7.27.1
+      '@babel/generator': 7.28.0
+      '@babel/parser': 7.28.0
+      '@babel/types': 7.28.2
       '@expo/config': 11.0.13
       '@expo/env': 1.0.7
       '@expo/json-file': 9.1.5
       '@expo/spawn-async': 1.7.2
       chalk: 4.1.2
-      debug: 4.4.0
+      debug: 4.4.1
       dotenv: 16.4.7
       dotenv-expand: 11.0.7
       getenv: 2.0.0
@@ -12848,7 +12848,7 @@ snapshots:
       '@expo/image-utils': 0.7.6
       '@expo/json-file': 9.1.5
       '@react-native/normalize-colors': 0.79.5
-      debug: 4.4.0
+      debug: 4.4.1
       resolve-from: 5.0.0
       semver: 7.7.1
       xml2js: 0.6.0
@@ -18270,7 +18270,7 @@ snapshots:
       babel-plugin-react-native-web: 0.19.13
       babel-plugin-syntax-hermes-parser: 0.25.1
       babel-plugin-transform-flow-enums: 0.0.2(@babel/core@7.27.1)
-      debug: 4.4.0
+      debug: 4.4.1
       react-refresh: 0.14.2
       resolve-from: 5.0.0
     transitivePeerDependencies:
