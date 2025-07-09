@@ -4,7 +4,7 @@ import { CheckIcon, ExternalIcon, Spinner, StarknetIcon } from "@cartridge/ui";
 import { useController } from "@/hooks/controller";
 import { useChainName } from "@/hooks/chain";
 import { StarkscanUrl } from "@cartridge/ui/utils";
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 
 export type TransactionState = "pending" | "success" | "error";
 
@@ -60,7 +60,7 @@ export function Transaction({
           <StarknetIcon size="sm" />
           <div>{chainName}</div>
         </div>
-        <Link to={StarkscanUrl(chainId).transaction(hash)} target="_blank">
+        <Link href={StarkscanUrl(chainId).transaction(hash)} target="_blank">
           <ExternalIcon size="sm" />
         </Link>
       </div>

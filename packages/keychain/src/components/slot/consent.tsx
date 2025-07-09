@@ -1,8 +1,8 @@
 import Controller from "@/utils/controller";
 import { LayoutFooter, Button, Checkbox, HeaderInner } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
+import { useLocalSearchParams, usePathname } from "expo-router";
 
 interface ConsentCheckboxProps {
   checked: boolean;
@@ -43,9 +43,9 @@ function ConsentCheckbox({
 
 export function Consent() {
   const { navigate } = useNavigation();
-  const { pathname } = useLocation();
-  const [searchParams] = useSearchParams();
-  const callback_uri = searchParams.get("callback_uri")!;
+  const pathname = usePathname();
+  const searchParams = useLocalSearchParams();
+  const callback_uri = searchParams.callback_uri as string;
 
   const [acceptedEULA, setAcceptedEULA] = useState(false);
   const [acceptedPrivacyPolicy, setAcceptedPrivacyPolicy] = useState(false);
@@ -58,9 +58,8 @@ export function Consent() {
     if (!allAccepted) return;
 
     const redirect_uri = encodeURIComponent(callback_uri);
-    const url = `${
-      process.env.EXPO_PUBLIC_CARTRIDGE_API_URL
-    }/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
+    const url = `${process.env.EXPO_PUBLIC_CARTRIDGE_API_URL
+      }/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
 
     window.location.href = url;
   }, [callback_uri, allAccepted]);
@@ -68,14 +67,11 @@ export function Consent() {
   useEffect(() => {
     if (!Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!)) {
       navigate(
-        `/slot?returnTo=${encodeURIComponent(pathname)}${
-          callback_uri
-            ? `&callback_uri=${encodeURIComponent(callback_uri)}`
-            : ""
+        `/slot?returnTo=${encodeURIComponent(pathname)}${callback_uri
+          ? `&callback_uri=${encodeURIComponent(callback_uri)}`
+          : ""
         }`,
-        {
-          replace: true,
-        },
+        { replace: true },
       );
     }
   }, [navigate, callback_uri, pathname]);
