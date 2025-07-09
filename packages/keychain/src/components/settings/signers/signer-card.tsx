@@ -41,7 +41,7 @@ export const SignerCard = React.forwardRef<
 
   const [signerIdentifyingInfo, setSignerIdentifyingInfo] = useState<
     string | undefined
-  >(undefined);
+  >("pending");
 
   useEffect(() => {
     getSignerIdentifyingInfo(signer, controller?.username()).then(
@@ -67,12 +67,12 @@ export const SignerCard = React.forwardRef<
                 : "Unknown"}
             </p>
           </div>
-          {signerIdentifyingInfo ? (
+          {signerIdentifyingInfo === "pending" ? (
+            <Skeleton className="w-10 h-4" />
+          ) : (
             <p className="text-sm font-normal text-foreground-300">
               {signerIdentifyingInfo}
             </p>
-          ) : (
-            <Skeleton className="w-10 h-4" />
           )}
         </Card>
         {/* disabled until delete signer functionality is implemented */}
