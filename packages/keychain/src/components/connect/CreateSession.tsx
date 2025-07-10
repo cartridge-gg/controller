@@ -17,12 +17,10 @@ import {
   Checkbox,
   cn,
   HeaderInner,
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   SliderIcon,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { useCallback, useMemo, useState } from "react";
 import { type BigNumberish } from "starknet";
 // import { OcclusionDetector } from "../OcclusionDetector";

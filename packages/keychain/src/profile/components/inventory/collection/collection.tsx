@@ -1,6 +1,5 @@
 import {
   Link,
-  Outlet,
   useLocation,
   useParams,
   useSearchParams,
@@ -18,7 +17,7 @@ import {
 } from "@cartridge/ui";
 
 import { cn } from "@cartridge/ui/utils";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { useCollection } from "#profile/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { CollectionHeader } from "./header";
@@ -30,7 +29,7 @@ import { useMarketplace } from "#profile/hooks/marketplace.js";
 
 export function Collection() {
   const { games, editions } = useArcade();
-  const { address: contractAddress, tokenId } = useParams();
+  const { address: contractAddress } = useParams();
   const { project } = useConnection();
   const { collectionOrders: orders } = useMarketplace();
   const theme = useControllerTheme();
@@ -46,54 +45,63 @@ export function Collection() {
   }, [games, edition]);
 
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tokenIds = searchParams.getAll("tokenIds");
+  const [searchParams] = useSearchParams();
   const { collection, assets, status } = useCollection({ contractAddress });
 
+  // Use local state for selection instead of URL parameters
+  const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
+
+  // Initialize selection from URL parameters if present (for deep linking)
+  useEffect(() => {
+    const urlTokenIds = searchParams.getAll("tokenIds");
+    if (urlTokenIds.length > 0) {
+      setSelectedTokenIds(urlTokenIds);
+    }
+  }, []);
+
   const selection = useMemo(() => {
-    return tokenIds.length > 0;
-  }, [tokenIds]);
+    return selectedTokenIds.length > 0;
+  }, [selectedTokenIds]);
 
   const allUnlisted = useMemo(() => {
-    if (tokenIds.length === 0) return false;
-    return tokenIds.every(
+    if (selectedTokenIds.length === 0) return false;
+    return selectedTokenIds.every(
       (tokenId) =>
         !orders[BigInt(tokenId).toString()] ||
         !orders[BigInt(tokenId).toString()].length,
     );
-  }, [orders, tokenIds]);
+  }, [orders, selectedTokenIds]);
 
   const handleSelectAll = useCallback(() => {
     if (!assets) return;
-    const params = Object.fromEntries(searchParams.entries());
-    setSearchParams({
-      ...params,
-      tokenIds: tokenIds.length ? [] : assets.map((asset) => asset.tokenId),
-    });
-  }, [assets, tokenIds, searchParams, setSearchParams]);
+    setSelectedTokenIds(
+      selectedTokenIds.length ? [] : assets.map((asset) => asset.tokenId),
+    );
+  }, [assets, selectedTokenIds]);
 
   const handleSelect = useCallback(
     (tokenId: string) => {
-      const isSelected = tokenIds.includes(tokenId);
-      const params = Object.fromEntries(searchParams.entries());
-      setSearchParams({
-        ...params,
-        tokenIds: isSelected
-          ? tokenIds.filter((id) => id !== tokenId)
-          : [...tokenIds, tokenId],
-      });
+      const isSelected = selectedTokenIds.includes(tokenId);
+      setSelectedTokenIds(
+        isSelected
+          ? selectedTokenIds.filter((id) => id !== tokenId)
+          : [...selectedTokenIds, tokenId],
+      );
     },
-    [tokenIds, searchParams, setSearchParams],
+    [selectedTokenIds],
   );
 
-  if (
-    tokenId ||
-    location.pathname.includes("/send") ||
-    location.pathname.includes("/list") ||
-    location.pathname.includes("/purchase")
-  ) {
-    return <Outlet />;
-  }
+  // Create search params with selected tokens for navigation
+  const createNavigationParams = useCallback(() => {
+    const params = new URLSearchParams(searchParams);
+    // Clear existing tokenIds
+    params.delete("tokenIds");
+    // Add selected tokenIds
+    selectedTokenIds.forEach((tokenId) => {
+      params.append("tokenIds", tokenId);
+    });
+    return params.toString();
+  }, [searchParams, selectedTokenIds]);
 
   return (
     <>
@@ -123,13 +131,15 @@ export function Collection() {
                 size="sm"
               />
               <div>
-                {selection ? `${tokenIds.length} Selected` : "Select all"}
+                {selection
+                  ? `${selectedTokenIds.length} Selected`
+                  : "Select all"}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 place-items-center">
               {assets.map((asset) => {
-                const isSelected = tokenIds.includes(asset.tokenId);
+                const isSelected = selectedTokenIds.includes(asset.tokenId);
                 const tokenId = BigInt(asset.tokenId).toString();
                 const listingCount = orders[tokenId]?.length || undefined;
                 return (
@@ -176,7 +186,7 @@ export function Collection() {
             <div className="flex gap-3 w-full">
               <Link
                 className="flex items-center justify-center gap-x-4 w-full"
-                to={allUnlisted ? `list?${searchParams.toString()}` : ""}
+                to={allUnlisted ? `list?${createNavigationParams()}` : ""}
               >
                 <Button
                   variant="secondary"
@@ -189,7 +199,7 @@ export function Collection() {
               </Link>
               <Link
                 className="flex items-center justify-center gap-x-4 w-full"
-                to={`send?${searchParams.toString()}`}
+                to={`send?${createNavigationParams()}`}
               >
                 <Button variant="secondary" className="w-full gap-2">
                   <PaperPlaneIcon variant="solid" size="sm" />
