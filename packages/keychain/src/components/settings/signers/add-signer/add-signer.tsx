@@ -9,7 +9,11 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "@cartridge/controller";
-import { JsSignerInput, Signer } from "@cartridge/controller-wasm";
+import {
+  JsControllerError,
+  JsSignerInput,
+  Signer,
+} from "@cartridge/controller-wasm";
 import {
   AddUserIcon,
   Button,
@@ -223,9 +227,9 @@ const WalletAuths = ({
     } catch (error) {
       console.error(error);
       const errorMessage =
-        (error as unknown as { message?: string })?.message ||
-        (error as unknown as string);
-
+        error instanceof Error || error instanceof JsControllerError
+          ? error.message
+          : "Unknown error";
       setSignerPending({
         kind: wallet as SignerMethodKind,
         inProgress: false,
@@ -272,8 +276,9 @@ const RegularAuths = ({
       } catch (error) {
         console.error(error);
         const errorMessage =
-          (error as unknown as { message?: string })?.message ||
-          (error as unknown as string);
+          error instanceof Error || error instanceof JsControllerError
+            ? error.message
+            : "Unknown error";
         setSignerPending({
           kind,
           inProgress: false,
