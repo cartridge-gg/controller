@@ -1,7 +1,6 @@
 import { AuthOption } from "@cartridge/controller";
 import { Signer } from "@cartridge/controller-wasm";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
-import { ec } from "starknet";
 
 export type FormInput = {
   username: string;
@@ -76,7 +75,7 @@ export function signerToAddress(signer: Signer): string {
   if (signer.eip191) {
     return signer.eip191?.address;
   } else if (signer.starknet) {
-    return ec.starkCurve.getStarkKey(signer.starknet?.privateKey);
+    throw new Error("Should not need to convert starknet signer to address");
   } else if (signer.webauthn) {
     throw new Error("Should not need to convert webauthn signer to address");
   } else {
