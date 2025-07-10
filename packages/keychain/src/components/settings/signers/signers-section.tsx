@@ -22,6 +22,8 @@ export const SignersSection = ({
 }) => {
   const { chainId, controller } = useConnection();
 
+  const canAddSigner = false;
+
   const signers = useMemo(
     () =>
       controllerQuery.data?.controller?.signers
@@ -63,20 +65,22 @@ export const SignersSection = ({
           <div>No data</div>
         )}
       </div>
-      <Button
-        type="button"
-        variant="outline"
-        className="text-foreground-300 gap-1 w-fit px-3"
-        disabled={chainId !== constants.StarknetChainId.SN_MAIN}
-        onClick={() => setState(State.ADD_SIGNER)}
-      >
-        <PlusIcon size="sm" variant="line" />
-        <span className="normal-case font-normal font-sans text-sm">
-          {chainId === constants.StarknetChainId.SN_MAIN
-            ? "Add Signer"
-            : "Must be on Mainnet"}
-        </span>
-      </Button>
+      {canAddSigner && (
+        <Button
+          type="button"
+          variant="outline"
+          className="text-foreground-300 gap-1 w-fit px-3"
+          disabled={chainId !== constants.StarknetChainId.SN_MAIN}
+          onClick={() => setState(State.ADD_SIGNER)}
+        >
+          <PlusIcon size="sm" variant="line" />
+          <span className="normal-case font-normal font-sans text-sm">
+            {chainId === constants.StarknetChainId.SN_MAIN
+              ? "Add Signer"
+              : "Must be on Mainnet"}
+          </span>
+        </Button>
+      )}
     </section>
   );
 };
