@@ -2,17 +2,14 @@ import { credentialToAddress } from "@/components/connect/types";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
+import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
   AuthOptions,
   ExternalWalletResponse,
   ExternalWalletType,
   WalletAdapter,
 } from "@cartridge/controller";
-import {
-  JsControllerError,
-  JsSignerInput,
-  Signer,
-} from "@cartridge/controller-wasm";
+import { JsSignerInput, Signer } from "@cartridge/controller-wasm";
 import {
   AddUserIcon,
   Button,
@@ -33,7 +30,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { SignerAlert } from "../signer-alert";
 import { addWebauthnSigner } from "./webauthn";
-import { WalletConnectWallet } from "@/wallets/wallet-connect";
 
 type SignerPending = {
   kind: SignerMethodKind;
@@ -225,10 +221,15 @@ const WalletAuths = ({
         });
       }
     } catch (error) {
+      console.error(error);
+      const errorMessage =
+        (error as unknown as { message?: string })?.message ||
+        (error as unknown as string);
+
       setSignerPending({
         kind: wallet as SignerMethodKind,
         inProgress: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: errorMessage,
       });
     }
   }, []);
@@ -269,15 +270,10 @@ const RegularAuths = ({
           kind,
         });
       } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : error instanceof JsControllerError
-              ? error.message
-              : "Unknown error";
-
         console.error(error);
-
+        const errorMessage =
+          (error as unknown as { message?: string })?.message ||
+          (error as unknown as string);
         setSignerPending({
           kind,
           inProgress: false,
