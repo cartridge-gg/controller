@@ -105,7 +105,7 @@ describe("CreateController", () => {
       error: undefined,
       setError: vi.fn(),
       handleSubmit,
-      authenticationStep: AuthenticationStep.ChooseSignupMethod,
+      authenticationStep: AuthenticationStep.ChooseMethod,
       setAuthenticationStep,
       signupOptions: ["webauthn"],
     });
@@ -188,7 +188,7 @@ describe("CreateController", () => {
       error: undefined,
       setError: vi.fn(),
       handleSubmit,
-      authenticationStep: AuthenticationStep.ChooseSignupMethod,
+      authenticationStep: AuthenticationStep.ChooseMethod,
       setAuthenticationStep,
       setChangeWallet: vi.fn(),
       signupOptions: ["webauthn"],

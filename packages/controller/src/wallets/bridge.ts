@@ -38,9 +38,8 @@ export class WalletBridge {
   getIFrameMethods() {
     return {
       externalDetectWallets: (_origin: string) => () => this.detectWallets(),
-      externalConnectWallet:
-        (_origin: string) => (type: ExternalWalletType, address?: string) =>
-          this.connectWallet(type, address),
+      externalConnectWallet: (_origin: string) => (type: ExternalWalletType) =>
+        this.connectWallet(type),
       externalSignMessage:
         (_origin: string) =>
         (identifier: ExternalWalletType | string, message: string) =>
@@ -102,11 +101,10 @@ export class WalletBridge {
 
   async connectWallet(
     type: ExternalWalletType,
-    address?: string,
   ): Promise<ExternalWalletResponse> {
     try {
       const wallet = this.getWalletAdapterByType(type);
-      const response = await wallet.connect(address);
+      const response = await wallet.connect();
 
       if (response.success && response.account) {
         console.log(
@@ -138,21 +136,10 @@ export class WalletBridge {
       const checkSummedAddress = getAddress(identifier);
 
       wallet = this.walletAdapters.values().find((adapter) => {
-        return (
-          adapter.getConnectedAccounts().includes(checkSummedAddress) ||
-          adapter.type === checkSummedAddress
-        );
+        return adapter.getConnectedAccounts().includes(checkSummedAddress);
       });
     } else {
       wallet = this.walletAdapters.get(identifier);
-    }
-
-    if (!wallet && typeof identifier === "string") {
-      wallet = this.walletAdapters
-        .values()
-        .find((adapter) =>
-          adapter.getConnectedAccounts().includes(getAddress(identifier)),
-        );
     }
 
     if (!wallet) {
@@ -175,7 +162,7 @@ export class WalletBridge {
           `Wallet type ${wallet.type} (identifier: ${identifier}) does not support signing messages`,
         );
       }
-      return await wallet.signMessage(message);
+      return await wallet.signMessage(message, identifier);
     } catch (error) {
       return this.handleError(
         identifier,

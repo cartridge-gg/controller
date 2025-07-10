@@ -1,11 +1,12 @@
 import { useConnection } from "@/hooks/connection";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { useEffect, useRef, useState } from "react";
+import { constants } from "starknet";
 import { fetchController } from "./utils";
 
 export type ValidationState = {
   status: "idle" | "validating" | "valid" | "invalid";
-  signer?: CredentialMetadata;
+  signers?: CredentialMetadata[];
   error?: Error;
   exists?: boolean;
 };
@@ -80,8 +81,16 @@ export function useUsernameValidation(username: string) {
           setValidation({
             status: "valid",
             exists: true,
-            signer: controller.controller?.signers?.[0]
-              .metadata as CredentialMetadata,
+            signers:
+              chainId === constants.StarknetChainId.SN_MAIN
+                ? controller.controller?.signers?.map(
+                    (signer) => signer.metadata as CredentialMetadata,
+                  )
+                : controller.controller?.signers?.[0]?.metadata
+                  ? ([
+                      controller.controller?.signers?.[0]?.metadata,
+                    ] as CredentialMetadata[])
+                  : [],
           });
         }
       })

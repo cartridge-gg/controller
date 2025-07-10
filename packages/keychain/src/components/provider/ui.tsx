@@ -74,7 +74,10 @@ export function UIProvider({ children }: PropsWithChildren) {
           setOverlay(
             <QRCodeOverlay
               uri={openQrCodeEvent?.uri}
-              onCancel={() => setOverlay(null)}
+              onCancel={() => {
+                setOverlay(null);
+                window.dispatchEvent(new CustomEvent("qr-code-cancelled"));
+              }}
             />,
           );
         }

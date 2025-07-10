@@ -3,6 +3,7 @@ import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
+import { allUseSameAuth } from "@/utils/controller";
 import { AuthOption } from "@cartridge/controller";
 import {
   CreateAccount,
@@ -16,7 +17,7 @@ import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
 import { ChangeWallet } from "../buttons/change-wallet";
-import { getControllerSignerProvider, LoginMode } from "../types";
+import { credentialToAuth, LoginMode } from "../types";
 import { ChooseSignupMethodForm } from "./ChooseSignupMethodForm";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
@@ -44,12 +45,13 @@ interface CreateControllerViewProps {
   waitingForConfirmation: boolean;
   changeWallet: boolean;
   setChangeWallet: (value: boolean) => void;
-  signupOptions: AuthOption[];
+  authOptions: AuthOption[];
+  authMethod: AuthOption | undefined;
 }
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
-  "authenticationStep" | "setAuthenticationStep" | "signupOptions"
+  "authenticationStep" | "setAuthenticationStep" | "authOptions"
 >;
 
 function CreateControllerForm({
@@ -67,6 +69,7 @@ function CreateControllerForm({
   waitingForConfirmation,
   changeWallet,
   setChangeWallet,
+  authMethod,
 }: CreateControllerFormProps) {
   return (
     <>
@@ -87,7 +90,7 @@ function CreateControllerForm({
         style={{ scrollbarWidth: "none" }}
         onSubmit={(e) => {
           e.preventDefault();
-          onSubmit(getControllerSignerProvider(validation.signer));
+          onSubmit();
         }}
       >
         <LayoutContent className="gap-6 overflow-y-hidden">
@@ -127,6 +130,7 @@ function CreateControllerForm({
             validation={validation}
             changeWallet={changeWallet}
             setChangeWallet={setChangeWallet}
+            authMethod={authMethod}
           />
 
           <AuthButton
@@ -160,7 +164,8 @@ export function CreateControllerView({
   waitingForConfirmation,
   changeWallet,
   setChangeWallet,
-  signupOptions,
+  authOptions,
+  authMethod,
 }: CreateControllerViewProps) {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -171,7 +176,7 @@ export function CreateControllerView({
   return (
     <LayoutContainer>
       <Sheet
-        open={authenticationStep === AuthenticationStep.ChooseSignupMethod}
+        open={authenticationStep === AuthenticationStep.ChooseMethod}
         onOpenChange={handleOpenChange}
       >
         <CreateControllerForm
@@ -189,11 +194,13 @@ export function CreateControllerView({
           waitingForConfirmation={waitingForConfirmation}
           changeWallet={changeWallet}
           setChangeWallet={setChangeWallet}
+          authMethod={authMethod}
         />
         <ChooseSignupMethodForm
           isLoading={isLoading}
+          validation={validation}
           onSubmit={onSubmit}
-          signupOptions={signupOptions}
+          authOptions={authOptions}
         />
       </Sheet>
     </LayoutContainer>
@@ -227,7 +234,6 @@ export function CreateController({
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
-  const newLoginFeatureEnabled = true;
 
   const [usernameField, setUsernameField] = useState({
     value: "",
@@ -255,6 +261,7 @@ export function CreateController({
     changeWallet,
     setChangeWallet,
     signupOptions,
+    authMethod,
   } = useCreateController({
     isSlot,
     loginMode,
@@ -273,24 +280,34 @@ export function CreateController({
 
       if (validation.status === "valid") {
         const accountExists = !!validation.exists;
+        if (
+          authenticationMode === undefined &&
+          validation.signers &&
+          validation.signers.length > 1 &&
+          !allUseSameAuth(validation.signers)
+        ) {
+          setAuthenticationStep(AuthenticationStep.ChooseMethod);
+          return;
+        }
 
         if (
           authenticationMode === undefined &&
           !accountExists &&
-          newLoginFeatureEnabled &&
           signupOptions.length > 1
         ) {
-          setAuthenticationStep(AuthenticationStep.ChooseSignupMethod);
+          setAuthenticationStep(AuthenticationStep.ChooseMethod);
           return;
         }
-
-        handleSubmit(
-          usernameField.value,
-          accountExists,
+        const authenticationMethod =
           signupOptions.length === 1 && !accountExists
             ? signupOptions[0]
-            : authenticationMode,
-        );
+            : validation.signers &&
+                (validation.signers.length == 1 ||
+                  allUseSameAuth(validation.signers))
+              ? credentialToAuth(validation.signers[0])
+              : authenticationMode;
+
+        handleSubmit(usernameField.value, accountExists, authenticationMethod);
       }
     },
     [
@@ -299,7 +316,6 @@ export function CreateController({
       validation.exists,
       validation.status,
       setAuthenticationStep,
-      newLoginFeatureEnabled,
       signupOptions,
     ],
   );
@@ -350,7 +366,7 @@ export function CreateController({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleFormSubmit(getControllerSignerProvider(validation.signer));
+      handleFormSubmit();
     }
   };
 
@@ -374,7 +390,8 @@ export function CreateController({
         waitingForConfirmation={waitingForConfirmation}
         changeWallet={changeWallet}
         setChangeWallet={setChangeWallet}
-        signupOptions={signupOptions}
+        authOptions={signupOptions}
+        authMethod={authMethod}
       />
       {overlay}
     </>

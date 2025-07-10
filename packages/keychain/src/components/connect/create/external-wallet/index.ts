@@ -5,16 +5,14 @@ import {
   ExternalWalletResponse,
   ExternalWalletType,
 } from "@cartridge/controller";
-import {
-  ControllerQuery,
-  Eip191Credential,
-} from "@cartridge/ui/utils/api/cartridge";
+import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
+import { getAddress } from "ethers";
 import { useCallback } from "react";
 import { SignupResponse } from "../useCreateController";
 
 export const useExternalWalletAuthentication = () => {
-  const { origin, chainId, rpcUrl, setController } = useConnection();
-  const { connectWallet, wallets } = useWallets();
+  const { origin, chainId, rpcUrl } = useConnection();
+  const { connectWallet } = useWallets();
 
   const signup = useCallback(
     async (authenticationMode: AuthOption): Promise<SignupResponse> => {
@@ -35,37 +33,23 @@ export const useExternalWalletAuthentication = () => {
   const login = useCallback(
     async (
       controller: ControllerQuery["controller"],
-      credential: Eip191Credential | undefined,
+      provider: ExternalWalletType,
     ) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
       if (!controller) throw new Error("No controller found");
-      if (!credential) throw new Error("No EIP191 credential provided");
 
-      const address = credential?.ethAddress;
-
-      if (!address) {
-        throw new Error(
-          "Could not extract ethAddress from provided EIP191 credential",
-        );
-      }
-
-      const connectedWallet = await connectWallet(
-        credential.provider as ExternalWalletType,
-        address,
-      );
+      const connectedWallet = await connectWallet(provider);
 
       if (!connectedWallet || !connectedWallet.account)
-        throw new Error("No wallet found for address: " + address);
-
-      if (BigInt(connectedWallet.account) !== BigInt(address)) {
-        return undefined;
-      }
+        throw new Error(
+          "No wallet found for address: " + connectedWallet?.account,
+        );
 
       return {
         signer: walletToSigner(connectedWallet),
       };
     },
-    [chainId, rpcUrl, origin, setController, wallets],
+    [chainId, rpcUrl, origin, connectWallet],
   );
 
   return { signup, login };
@@ -76,6 +60,6 @@ const walletToSigner = (wallet: ExternalWalletResponse) => {
     throw new Error("Unsupported wallet");
   }
   return {
-    eip191: { address: wallet.account!.toLowerCase() },
+    eip191: { address: getAddress(wallet.account!) },
   };
 };

@@ -1,22 +1,39 @@
 import { AuthOption } from "@cartridge/controller";
 import { SheetContent, SheetTitle } from "@cartridge/ui";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
+import { credentialToAuth } from "../types";
+import { useUsernameValidation } from "./useUsernameValidation";
 
 interface ChooseSignupMethodProps {
   isLoading: boolean;
+  validation: ReturnType<typeof useUsernameValidation>;
   onSubmit: (authenticationMode?: AuthOption) => void;
-  signupOptions: AuthOption[];
+  authOptions: AuthOption[];
 }
 
 export function ChooseSignupMethodForm({
   isLoading,
+  validation,
   onSubmit,
-  signupOptions,
+  authOptions,
 }: ChooseSignupMethodProps) {
   const [selectedAuth, setSelectedAuth] = useState<AuthOption | undefined>(
     undefined,
   );
+
+  const options = useMemo(() => {
+    if (validation.signers?.length) {
+      return Array.from(
+        new Set(
+          validation.signers
+            .map((signer) => credentialToAuth(signer))
+            .filter(Boolean),
+        ),
+      ) as AuthOption[];
+    }
+    return authOptions;
+  }, [validation.signers, authOptions]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -59,7 +76,7 @@ export function ChooseSignupMethodForm({
       onInteractOutside={handleInteractOutside}
     >
       <SheetTitle className="hidden"></SheetTitle>
-      {signupOptions.includes("webauthn") && (
+      {options.includes("webauthn") && (
         <div className="border-b border-background-125 pb-4">
           <SignupButton
             authMethod="webauthn"
@@ -72,7 +89,7 @@ export function ChooseSignupMethodForm({
         </div>
       )}
       <div className="flex flex-col gap-3">
-        {signupOptions
+        {options
           .filter((option) => option !== "webauthn")
           .map((option) => (
             <SignupButton

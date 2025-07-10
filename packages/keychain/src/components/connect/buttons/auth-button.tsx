@@ -1,5 +1,6 @@
 import { useWallets } from "@/hooks/wallets";
 import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
+import { allUseSameAuth } from "@/utils/controller";
 import {
   ArgentIcon,
   Button,
@@ -14,10 +15,7 @@ import {
 import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
 import { useUsernameValidation } from "../create/useUsernameValidation";
-import {
-  getControllerSignerAddress,
-  getControllerSignerProvider,
-} from "../types";
+import { credentialToAuth } from "../types";
 
 interface AuthButtonProps extends React.ComponentProps<typeof Button> {
   waitingForConfirmation: boolean;
@@ -78,56 +76,31 @@ export function AuthButton({
   username,
   ...props
 }: AuthButtonProps) {
-  const { wallets } = useWallets();
+  const { isExtensionMissing } = useWallets();
 
   const { isLoading, disabled, ...restProps } = props;
 
-  const option = useMemo(
-    () => OPTIONS[getControllerSignerProvider(validation.signer) ?? ""],
-    [validation.signer],
-  );
-
-  const extensionMissingForSigner = useMemo(() => {
-    if (option?.isExtension) {
-      return !wallets.some(
-        (wallet) =>
-          wallet.type === getControllerSignerProvider(validation.signer),
-      );
+  const option = useMemo(() => {
+    if (!validation.signers || validation.signers.length === 0) {
+      return;
     }
-    return false;
-  }, [option?.isExtension, wallets, validation.signer]);
 
-  const shouldChangeWallet = useMemo(() => {
+    if (allUseSameAuth(validation.signers)) {
+      return OPTIONS[credentialToAuth(validation.signers[0])];
+    } else {
+      return OPTIONS["webauthn"];
+    }
+  }, [validation.signers]);
+
+  const extensionsMissingForAllSigners = useMemo(() => {
     if (!option?.isExtension) {
       return false;
     }
-    if (!validation.signer) {
+    if (!validation.signers) {
       return false;
     }
-    if (validation.signer.__typename === "WebauthnCredentials") {
-      return false;
-    }
-
-    const walletProvider = wallets.find(
-      (wallet) =>
-        wallet.type === getControllerSignerProvider(validation.signer),
-    );
-
-    if (walletProvider?.connectedAccounts?.length === 0) {
-      return false;
-    }
-
-    return !wallets
-      .find(
-        (wallet) =>
-          wallet.type === getControllerSignerProvider(validation.signer),
-      )
-      ?.connectedAccounts?.find(
-        (account) =>
-          BigInt(account) ===
-          BigInt(getControllerSignerAddress(validation.signer) || 0),
-      );
-  }, [validation.signer, wallets]);
+    return validation.signers.every((signer) => isExtensionMissing(signer));
+  }, [isExtensionMissing, validation.signers]);
 
   const icon = useMemo(() => {
     if (isLoading || waitingForConfirmation) {
@@ -149,7 +122,7 @@ export function AuthButton({
     option?.label,
     isLoading,
     waitingForConfirmation,
-    validation.signer,
+    validation.signers,
     validation.exists,
     username,
   ]);
@@ -172,8 +145,7 @@ export function AuthButton({
         isLoading ||
         disabled ||
         waitingForConfirmation ||
-        extensionMissingForSigner ||
-        shouldChangeWallet
+        extensionsMissingForAllSigners
       }
     >
       {icon}
