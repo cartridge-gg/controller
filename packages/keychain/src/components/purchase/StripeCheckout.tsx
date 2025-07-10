@@ -15,21 +15,19 @@ import {
   LayoutFooter,
   Button,
   CreditCardIcon,
+  HeaderInner,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { PricingDetails } from ".";
 import { CostBreakdown } from "./CostBreakdown";
 
 type StripeCheckoutProps = {
   price: PricingDetails;
-  onBack: () => void;
   onComplete: () => void;
 };
 
 export default function StripeCheckout({
   price,
-  onBack,
   onComplete,
 }: StripeCheckoutProps) {
   const stripe = useStripe();
@@ -96,7 +94,6 @@ export default function StripeCheckout({
       error={error}
       isLoading={isLoading}
       isSubmitting={isSubmitting}
-      onBack={onBack}
       handleSubmit={handleSubmit}
     >
       <form id="payment-form">
@@ -119,7 +116,6 @@ export const StripeCheckoutContainer = ({
   isLoading,
   isSubmitting,
   children,
-  onBack,
   handleSubmit,
 }: {
   price: PricingDetails;
@@ -129,15 +125,13 @@ export const StripeCheckoutContainer = ({
   isLoading: boolean;
   isSubmitting: boolean;
   children: React.ReactNode;
-  onBack: () => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
 }) => {
   return (
     <LayoutContainer>
-      <NavigationHeader
+      <HeaderInner
         title={"Enter Payment Details"}
         icon={<CreditCardIcon variant="solid" size="lg" />}
-        onBack={onBack}
       />
       <LayoutContent className="gap-6">{children}</LayoutContent>
       <LayoutFooter>

@@ -44,74 +44,88 @@ export function useCollection({
 }): UseCollectionResponse {
   const { address } = useAccount({ overridable: true });
   const { project } = useConnection();
-  const [collection, setCollection] = useState<Collection | undefined>(
-    undefined,
-  );
-  const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
 
-  const { status, refetch } = useCollectionQuery(
+  const { data, status, refetch } = useCollectionQuery(
     {
       projects: [project ?? ""],
       accountAddress: address,
       contractAddress: contractAddress ?? "",
     },
     {
-      queryKey: ["collection"],
-      enabled: !!project && !!address,
-      onSuccess: ({ collection }) => {
-        const name = collection.meta.name;
-        const newCollection: Collection = {
-          address: collection.meta.contractAddress,
-          name: name ? name : "---",
-          type: TYPE,
-          imageUrl: collection.meta.imagePath,
-          totalCount: collection.meta.assetCount,
-        };
-
-        const newAssets: { [key: string]: Asset } = {};
-
-        collection.assets.forEach((a) => {
-          let imageUrl = a.imageUrl;
-          if (!imageUrl.includes("://")) {
-            imageUrl = newCollection.imageUrl.replace(
-              /0x[a-fA-F0-9]+(?=\/image$)/,
-              a.tokenId,
-            );
-          }
-          let attributes = [];
-          try {
-            attributes = JSON.parse(!a.attributes ? "[]" : a.attributes);
-          } catch (error) {
-            console.warn(error, { data: attributes });
-          }
-          let metadata: { image?: string } = {};
-          try {
-            metadata = JSON.parse(!a.metadata ? "{}" : a.metadata);
-          } catch (error) {
-            console.warn(error, { data: a.metadata });
-          }
-          const asset: Asset = {
-            tokenId: a.tokenId,
-            name: a.name,
-            description: a.description ?? "",
-            imageUrl: imageUrl || metadata?.image || "",
-            attributes: attributes,
-          };
-          newAssets[`${newCollection.address}-${a.tokenId}`] = asset;
-        });
-
-        setCollection(newCollection);
-        setAssets(newAssets);
-      },
+      queryKey: ["collection", contractAddress, address, project],
+      enabled: !!project && !!address && !!contractAddress,
+      staleTime: 60,
+      cacheTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
     },
   );
 
+  // Process the collection data (from cache or fresh query)
+  const { collection, assets } = useMemo(() => {
+    if (!data?.collection) {
+      return { collection: undefined, assets: {} };
+    }
+
+    const name = data.collection.meta.name;
+    const newCollection: Collection = {
+      address: data.collection.meta.contractAddress,
+      name: name ? name : "---",
+      type: TYPE,
+      imageUrl: data.collection.meta.imagePath,
+      totalCount: data.collection.meta.assetCount,
+    };
+
+    const newAssets: { [key: string]: Asset } = {};
+
+    data.collection.assets.forEach((a) => {
+      let imageUrl = a.imageUrl;
+      if (!imageUrl.includes("://")) {
+        imageUrl = newCollection.imageUrl.replace(
+          /0x[a-fA-F0-9]+(?=\/image$)/,
+          a.tokenId,
+        );
+      }
+      let attributes = [];
+      try {
+        attributes = JSON.parse(!a.attributes ? "[]" : a.attributes);
+      } catch (error) {
+        console.warn(error, { data: attributes });
+      }
+      let metadata: { image?: string } = {};
+      try {
+        metadata = JSON.parse(!a.metadata ? "{}" : a.metadata);
+      } catch (error) {
+        console.warn(error, { data: a.metadata });
+      }
+      const asset: Asset = {
+        tokenId: a.tokenId,
+        name: a.name,
+        description: a.description ?? "",
+        imageUrl: imageUrl || metadata?.image || "",
+        attributes: attributes,
+      };
+      newAssets[`${newCollection.address}-${a.tokenId}`] = asset;
+    });
+
+    return { collection: newCollection, assets: newAssets };
+  }, [data, status]);
+
   const filteredAssets = useMemo(() => {
     if (!tokenIds.length) return Object.values(assets);
-    return Object.values(assets).filter((a) => tokenIds.includes(a.tokenId));
-  }, [assets, tokenIds]);
+    const filtered = Object.values(assets).filter((a) =>
+      tokenIds.includes(a.tokenId),
+    );
 
-  return { collection, assets: filteredAssets, status, refetch };
+    return filtered;
+  }, [assets, tokenIds, contractAddress, data, status]);
+
+  return {
+    collection,
+    assets: filteredAssets,
+    status,
+    refetch,
+  };
 }
 
 export type UseCollectionsResponse = {

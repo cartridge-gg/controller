@@ -79,14 +79,17 @@ export function App() {
           <Route
             path="inventory/collection/:address"
             element={<Collection />}
+            key="collection"
           />
           <Route
             path="inventory/collection/:address/token/:tokenId"
             element={<CollectionAsset />}
+            key="collection-asset"
           />
           <Route
             path="inventory/collection/:address/token/:tokenId/send"
             element={<SendCollection />}
+            key="send-collection"
           />
           <Route
             path="inventory/collection/:address/token/:tokenId/list"
@@ -99,6 +102,7 @@ export function App() {
           <Route
             path="inventory/collection/:address/send"
             element={<SendCollection />}
+            key="send-collection-bulk"
           />
           <Route
             path="inventory/collection/:address/list"
@@ -140,14 +144,17 @@ export function App() {
           <Route
             path="slot/:project/inventory/collection/:address"
             element={<Collection />}
+            key="slot-collection"
           />
           <Route
             path="slot/:project/inventory/collection/:address/token/:tokenId"
             element={<CollectionAsset />}
+            key="slot-collection-asset"
           />
           <Route
             path="slot/:project/inventory/collection/:address/token/:tokenId/send"
             element={<SendCollection />}
+            key="slot-send-collection"
           />
           <Route
             path="slot/:project/inventory/collection/:address/token/:tokenId/list"
@@ -160,6 +167,7 @@ export function App() {
           <Route
             path="slot/:project/inventory/collection/:address/send"
             element={<SendCollection />}
+            key="slot-send-collection-bulk"
           />
           <Route
             path="slot/:project/inventory/collection/:address/list"

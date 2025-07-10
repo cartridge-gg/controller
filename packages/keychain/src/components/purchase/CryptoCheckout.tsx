@@ -21,6 +21,7 @@ import {
   TokenSummary,
   TokenCard,
   Spinner,
+  HeaderInner,
 } from "@cartridge/ui";
 import { NavigationHeader } from "@/components";
 import { useCallback, useMemo, useState } from "react";
@@ -134,8 +135,8 @@ export function CryptoCheckout({
   }, [sendPayment, selectedWallet, wholeCredits, onComplete]);
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
+    <>
+      <HeaderInner
         title={getTitle}
         icon={<DepositIcon variant="solid" size="lg" />}
         onBack={() => {
@@ -223,7 +224,7 @@ export function CryptoCheckout({
           </Button>
         )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }
 
