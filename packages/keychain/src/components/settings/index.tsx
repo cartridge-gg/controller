@@ -16,8 +16,12 @@ import {
   SheetTrigger,
   SignOutIcon,
 } from "@cartridge/ui";
-import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
+import {
+  ControllerQuery,
+  useControllerQuery,
+} from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo, useState } from "react";
+import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";
 import { Delegate } from "./Delegate";
@@ -28,12 +32,14 @@ import {
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
 import { SessionsSection } from "./sessions/sessions-section";
+import { AddSigner } from "./signers/add-signer/add-signer";
 import { SignersSection } from "./signers/signers-section";
 
-enum State {
+export enum State {
   SETTINGS,
   RECOVERY,
   DELEGATE,
+  ADD_SIGNER,
 }
 
 // Feature flag configuration
@@ -50,9 +56,8 @@ const registeredAccounts: RegisteredAccount[] = [
   },
 ];
 
-// TODO(tedison): Add signer address
 export function Settings() {
-  const { logout, controller } = useConnection();
+  const { logout, controller, chainId } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);
 
   // Feature flags - can be moved to environment variables or API config later
@@ -65,13 +70,33 @@ export function Settings() {
     [],
   );
 
-  const controllerQuery = useControllerQuery(
+  const controllerQueryRaw = useControllerQuery(
     {
       username: controller?.username() ?? "",
       chainId: constants.NetworkName.SN_MAIN,
     },
-    { refetchOnMount: "always" },
+    {
+      refetchOnMount: "always",
+    },
   );
+
+  const controllerQuery = useMemo(() => {
+    if (chainId === constants.StarknetChainId.SN_MAIN) {
+      return controllerQueryRaw;
+    }
+    return {
+      ...controllerQueryRaw,
+      data: {
+        controller: {
+          ...controllerQueryRaw.data?.controller,
+          signers: controllerQueryRaw.data?.controller?.signers
+            ? [controllerQueryRaw.data?.controller?.signers[0]]
+            : undefined,
+        },
+        ...controllerQueryRaw.data,
+      },
+    } as QueryObserverResult<ControllerQuery>;
+  }, [chainId, controllerQueryRaw.data]);
 
   const handleLogout = useCallback(() => {
     try {
@@ -89,6 +114,15 @@ export function Settings() {
     return <Delegate onBack={() => setState(State.SETTINGS)} />;
   }
 
+  if (state === State.ADD_SIGNER) {
+    return (
+      <AddSigner
+        onBack={() => setState(State.SETTINGS)}
+        controllerQuery={controllerQuery}
+      />
+    );
+  }
+
   return (
     <Sheet>
       <LayoutContainer>
@@ -101,7 +135,10 @@ export function Settings() {
 
         <LayoutContent className="gap-6">
           {featureFlags.signers && (
-            <SignersSection controllerQuery={controllerQuery} />
+            <SignersSection
+              setState={setState}
+              controllerQuery={controllerQuery}
+            />
           )}
 
           {featureFlags.registeredAccounts && (

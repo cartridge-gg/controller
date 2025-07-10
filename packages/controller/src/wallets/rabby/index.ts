@@ -27,7 +27,10 @@ export class RabbyWallet implements WalletAdapter {
         method: "eth_accounts",
       })
       .then((accounts) => {
-        this.connectedAccounts = accounts;
+        this.connectedAccounts = accounts.map(getAddress);
+        if (accounts.length > 0) {
+          this.account = getAddress(accounts?.[0]);
+        }
       });
     this.provider?.provider?.on("accountsChanged", (accounts: string[]) => {
       if (accounts) {
@@ -74,8 +77,8 @@ export class RabbyWallet implements WalletAdapter {
         method: "eth_requestAccounts",
       });
       if (accounts && accounts.length > 0) {
-        this.account = accounts[0];
-        this.connectedAccounts = accounts;
+        this.account = getAddress(accounts[0]);
+        this.connectedAccounts = accounts.map(getAddress);
         return { success: true, wallet: this.type, account: this.account };
       }
 
@@ -125,14 +128,16 @@ export class RabbyWallet implements WalletAdapter {
 
   async signMessage(
     message: `0x${string}`,
+    address?: string,
   ): Promise<ExternalWalletResponse<any>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Rabby is not connected");
       }
+
       const result = await this.provider?.provider.request({
         method: "personal_sign",
-        params: [this.account!, message] as any,
+        params: [address || this.account, message] as any,
       });
 
       return { success: true, wallet: this.type, result };

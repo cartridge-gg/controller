@@ -33,12 +33,12 @@
   },
   "dependencies": {
     "@cartridge/presets": "github:cartridge-gg/presets#d246ec1",
-    "@cartridge/ui": "github:cartridge-gg/ui#824f4ef",
+    "@cartridge/ui": "github:cartridge-gg/ui#c678487",
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "husky": "^9.1.7",
-    "turbo": "^2.4.4",
+    "turbo": "^2.5.4",
     "vercel": "^37.14.0"
   },
   "pnpm": {

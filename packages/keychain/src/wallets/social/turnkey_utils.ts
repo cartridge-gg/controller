@@ -200,7 +200,7 @@ export const authenticateToTurnkey = async (
   }
 };
 
-type GetSuborgsResponse = {
+export type GetSuborgsResponse = {
   organizationIds: string[];
 };
 

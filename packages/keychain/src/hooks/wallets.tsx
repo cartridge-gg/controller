@@ -1,9 +1,11 @@
+import { credentialToAuth } from "@/components/connect/types";
 import {
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
   WalletAdapter,
 } from "@cartridge/controller";
+import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers/address";
 import React, {
   createContext,
@@ -14,9 +16,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { TurnkeyWallet } from "../wallets/social/turnkey";
 import { ParentMethods, useConnection } from "./connection";
-import { WalletConnectWallet } from "@/wallets/wallet-connect";
 
 interface WalletsContextValue {
   wallets: ExternalWallet[];
@@ -26,8 +26,8 @@ interface WalletsContextValue {
   detectWallets: () => Promise<void>;
   connectWallet: (
     type: ExternalWalletType,
-    address?: string,
   ) => Promise<ExternalWalletResponse | null>;
+  isExtensionMissing: (signer: CredentialMetadata) => boolean;
 }
 
 declare global {
@@ -120,7 +120,6 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const connectWallet = useCallback(
     async (
       identifier: ExternalWalletType,
-      address?: string,
     ): Promise<ExternalWalletResponse | null> => {
       if (!parent) {
         setError(new Error("Connection not ready."));
@@ -131,10 +130,7 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       setError(null);
 
       try {
-        const response = await parent.externalConnectWallet(
-          identifier,
-          address,
-        );
+        const response = await parent.externalConnectWallet(identifier);
         if (!response.success) {
           setError(new Error(response.error || "Failed to connect wallet."));
           return response; // Return response even on failure
@@ -154,6 +150,15 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
     [parent],
   );
 
+  const isExtensionMissing = useCallback(
+    (signer: CredentialMetadata) => {
+      return !wallets.some(
+        (wallet) => wallet.type === credentialToAuth(signer),
+      );
+    },
+    [wallets],
+  );
+
   const value = useMemo(
     () => ({
       wallets,
@@ -162,8 +167,17 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       error,
       detectWallets,
       connectWallet,
+      isExtensionMissing,
     }),
-    [wallets, isLoading, isConnecting, error, detectWallets, connectWallet],
+    [
+      wallets,
+      isLoading,
+      isConnecting,
+      error,
+      detectWallets,
+      connectWallet,
+      isExtensionMissing,
+    ],
   );
 
   return (
@@ -187,15 +201,10 @@ export const useWallets = (): WalletsContextValue => {
 export class KeychainWallets {
   private parent: ParentMethods;
   private embeddedWalletsByAddress: Map<string, WalletAdapter> = new Map();
-  turnkeyWallet: TurnkeyWallet;
-  walletConnectWallet: WalletConnectWallet;
 
   // Method to set the parent connection once established
   constructor(parent: ParentMethods) {
     this.parent = parent;
-
-    this.turnkeyWallet = new TurnkeyWallet();
-    this.walletConnectWallet = new WalletConnectWallet();
   }
 
   /**
@@ -250,7 +259,7 @@ export class KeychainWallets {
         // Call the parent window's bridge method via penpal
         // Note: Parent's externalSignMessage now expects identifier string
         const response = await this.parent.externalSignMessage(
-          identifier,
+          identifier.startsWith("0x") ? getAddress(identifier) : identifier,
           message,
         );
 

@@ -13,6 +13,8 @@ import {
   Spinner,
   BranchIcon,
   Badge,
+  TokenSummary,
+  TokenCard,
 } from "@cartridge/ui";
 import { creditsToUSD } from "@/hooks/tokens";
 import { Team } from "./fund";
@@ -59,7 +61,9 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
               </div>
             ) : teams.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-foreground-300">No teams found</p>
+                <p className="text-foreground-300 text-sm">
+                  Please first create a team with slot cli
+                </p>
               </div>
             ) : (
               teams.map((team) => (
@@ -117,28 +121,15 @@ const TeamCard = ({
         onBack={onBack}
       />
       <LayoutContent className="h-screen pb-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex flex-row items-center gap-3">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">$</span>
-              </div>
-              <div className="flex flex-col">
-                <CardTitle className="text-foreground font-medium text-sm">
-                  USD
-                </CardTitle>
-                <p className="text-foreground-300 text-xs">
-                  {team.credits || 0} USD
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-foreground font-bold text-sm">
-                ${creditsToUSD(team.credits || 0).toFixed(2)}
-              </p>
-            </div>
-          </CardHeader>
-        </Card>
+        <TokenSummary>
+          <TokenCard
+            title={"USD"}
+            image={"https://static.cartridge.gg/media/usd_icon.svg"}
+            amount={`${team.credits} USD`}
+            value={`$${creditsToUSD(team.credits).toFixed(2)}`}
+            className={"pointer-events-none"}
+          />
+        </TokenSummary>
 
         <div className="flex flex-col gap-4 h-full mt-2">
           <div className="flex flex-row items-center justify-between">
