@@ -36,7 +36,7 @@ config.resolver.alias = {
   // Fix for rpc-websockets package export conditions
   "rpc-websockets": path.resolve(
     monorepoRoot,
-    "node_modules/.pnpm/rpc-websockets@7.11.2/node_modules/rpc-websockets/dist/index.browser.cjs",
+    "node_modules/.pnpm/rpc-websockets@9.1.1/node_modules/rpc-websockets/dist/index.browser.cjs",
   ),
 };
 
@@ -52,6 +52,7 @@ config.resolver.resolverMainFields = ["react-native", "browser", "main"];
 //   "import",
 //   "require",
 //   "default",
+//   "react-native",
 // ];
 
 // 8. Configure transformer
