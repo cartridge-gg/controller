@@ -14,8 +14,10 @@ import {
 
 export function usePurchase({
   isSlot,
+  teamId,
   starterpackDetails,
   initState = PurchaseState.SELECTION,
+  onComplete,
 }: PurchaseCreditsProps) {
   const { controller, closeModal } = useConnection();
   const {
@@ -79,6 +81,7 @@ export function usePurchase({
       const paymentIntent = await createPaymentIntent(
         wholeCredits,
         controller.username(),
+        teamId,
         starterpackDetails?.id,
       );
       setClientSecret(paymentIntent.clientSecret);
@@ -87,7 +90,13 @@ export function usePurchase({
     } catch (e) {
       setDisplayError(e as Error);
     }
-  }, [wholeCredits, createPaymentIntent, controller, starterpackDetails?.id]);
+  }, [
+    wholeCredits,
+    createPaymentIntent,
+    controller,
+    starterpackDetails?.id,
+    teamId,
+  ]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet) => {
@@ -112,7 +121,10 @@ export function usePurchase({
 
   const onBack = useCallback(() => setState(PurchaseState.SELECTION), []);
 
-  const onComplete = useCallback(() => setState(PurchaseState.SUCCESS), []);
+  const onCompletePurchase = useCallback(() => {
+    setState(PurchaseState.SUCCESS);
+    onComplete?.();
+  }, [onComplete]);
 
   return {
     state,
@@ -134,6 +146,6 @@ export function usePurchase({
     onCreditCard,
     onExternalConnect,
     onBack,
-    onComplete,
+    onCompletePurchase,
   };
 }

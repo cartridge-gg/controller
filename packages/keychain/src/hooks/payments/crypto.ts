@@ -48,6 +48,7 @@ export const useCryptoPayment = () => {
       walletAddress: string,
       wholeCredits: number,
       platform: ExternalPlatform,
+      teamId?: string,
       starterpackId?: string,
       onSubmitted?: (explorer: Explorer) => void,
     ): Promise<string> => {
@@ -68,6 +69,7 @@ export const useCryptoPayment = () => {
           controller.username(),
           wholeCredits,
           platform,
+          teamId,
           starterpackId,
           isMainnet,
         );
@@ -148,6 +150,7 @@ export const useCryptoPayment = () => {
     username: string,
     wholeCredits: number,
     platform: ExternalPlatform,
+    teamId?: string,
     starterpackId?: string,
     isMainnet: boolean = false,
   ) {
@@ -165,6 +168,7 @@ export const useCryptoPayment = () => {
             ? PurchaseType.STARTERPACK
             : PurchaseType.CREDITS,
           starterpackId,
+          teamId,
           isMainnet,
         },
       },

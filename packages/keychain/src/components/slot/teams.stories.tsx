@@ -6,17 +6,10 @@ const mockTeams = [
   {
     id: "cmcv7v80x0004qgmy5pqja21c",
     name: "cartridge",
-    credits: 2000,
+    credits: 200000000,
     deployments: {
-      totalCount: 6,
-      edges: [
-        { node: { project: "dopewars" } },
-        { node: { project: "provable-dw" } },
-        { node: { project: "slot-e2e-infra" } },
-        { node: { project: "trading-game" } },
-        { node: { project: "nft-marketplace" } },
-        { node: { project: "defi-protocol" } },
-      ],
+      totalCount: 1,
+      edges: [{ node: { project: "dopewars" } }],
     },
   },
   {
@@ -31,9 +24,9 @@ const mockTeams = [
   {
     id: "cmcv7v80x0004qgmy5pqja23e",
     name: "my-game-studio",
-    credits: 15000,
+    credits: 1500000000,
     deployments: {
-      totalCount: 12,
+      totalCount: 6,
       edges: [
         { node: { project: "pixel-rpg" } },
         { node: { project: "racing-game" } },
@@ -41,36 +34,12 @@ const mockTeams = [
         { node: { project: "strategy-war" } },
         { node: { project: "adventure-land" } },
         { node: { project: "sports-arena" } },
-        { node: { project: "card-battle" } },
-        { node: { project: "tower-defense" } },
-        { node: { project: "match-three" } },
-        { node: { project: "platformer-jump" } },
-        { node: { project: "shooter-space" } },
-        { node: { project: "simulation-city" } },
       ],
     },
   },
 ];
 
 const singleTeam = [mockTeams[0]];
-
-const highCreditsTeam = [
-  {
-    id: "cmcv7v80x0004qgmy5pqja24f",
-    name: "mega-corp",
-    credits: 1000000,
-    deployments: {
-      totalCount: 5,
-      edges: [
-        { node: { project: "enterprise-app" } },
-        { node: { project: "blockchain-infra" } },
-        { node: { project: "ai-platform" } },
-        { node: { project: "data-analytics" } },
-        { node: { project: "cloud-services" } },
-      ],
-    },
-  },
-];
 
 const meta: Meta<typeof Teams> = {
   title: "Slot/Teams",
@@ -114,22 +83,6 @@ export const Default: Story = {
       description: {
         story:
           "Shows the Teams component with sample team data including credits and deployments.",
-      },
-    },
-  },
-};
-
-export const Loading: Story = {
-  args: {
-    teams: [],
-    isLoading: true,
-    error: false,
-    onFundTeam: () => {},
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: "Shows the loading state while teams data is being fetched.",
       },
     },
   },
@@ -179,22 +132,6 @@ export const MultipleTeams: Story = {
       description: {
         story:
           "Shows multiple team cards with different credit amounts and deployment counts.",
-      },
-    },
-  },
-};
-
-export const HighCreditsTeam: Story = {
-  args: {
-    teams: highCreditsTeam,
-    isLoading: false,
-    error: false,
-    onFundTeam: () => {},
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: "Shows a team with very high credits to test number formatting.",
       },
     },
   },

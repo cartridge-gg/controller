@@ -68,6 +68,7 @@ export function CryptoCheckout({
   walletAddress,
   wholeCredits,
   starterpackDetails,
+  teamId,
   initialState = CheckoutState.REVIEW_PURCHASE,
   onBack,
   onComplete,
@@ -76,6 +77,7 @@ export function CryptoCheckout({
   walletAddress: string;
   wholeCredits: number;
   starterpackDetails?: StarterPackDetails;
+  teamId?: string;
   initialState?: CheckoutState;
   onBack: () => void;
   onComplete: () => void;
@@ -112,6 +114,7 @@ export function CryptoCheckout({
         walletAddress,
         wholeCredits,
         selectedWallet.platform!,
+        teamId,
         starterpackDetails?.id,
         (explorer) => {
           setState(CheckoutState.TRANSACTION_SUBMITTED);

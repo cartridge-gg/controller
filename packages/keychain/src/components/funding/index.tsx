@@ -23,12 +23,10 @@ const enum FundingState {
 export type FundingProps = {
   title?: React.ReactElement | string;
   isSlot?: boolean;
-  teamId?: string;
   onComplete?: (deployHash?: string) => void;
-  onBack?: () => void;
 };
 
-export function Funding({ title, isSlot, onComplete, onBack }: FundingProps) {
+export function Funding({ title, isSlot, onComplete }: FundingProps) {
   const { controller } = useConnection();
   const [state, setState] = useState<FundingState>(FundingState.SHOW_OPTIONS);
   const balances: BalanceType[] = isSlot
@@ -58,12 +56,11 @@ export function Funding({ title, isSlot, onComplete, onBack }: FundingProps) {
   }
 
   return (
-    <LayoutContainer className="min-h-[600px]">
+    <LayoutContainer>
       <LayoutHeader
         className="p-6"
         title={title || (controller ? `Fund ${controller.username()}` : "")}
         icon={<ControllerIcon size="lg" />}
-        onBack={onBack}
       />
       <LayoutContent className="gap-6 px-6">
         <Balance types={balances} />

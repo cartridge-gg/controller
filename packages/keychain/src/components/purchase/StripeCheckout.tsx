@@ -133,7 +133,7 @@ export const StripeCheckoutContainer = ({
   handleSubmit: (e: React.FormEvent) => Promise<void>;
 }) => {
   return (
-    <LayoutContainer>
+    <LayoutContainer className="min-h-[600px]">
       <LayoutHeader
         title={"Enter Payment Details"}
         icon={<CreditCardIcon variant="solid" size="lg" />}

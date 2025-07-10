@@ -1,13 +1,29 @@
 import { useEffect, useState } from "react";
-import { Funding } from "../funding";
 import Controller from "@/utils/controller";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { Purchase } from "../purchase";
+import { PurchaseType } from "@/hooks/payments/crypto";
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CheckIcon,
+  LayoutContainer,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+  TokenCard,
+  TokenSummary,
+} from "@cartridge/ui";
 import { Teams } from "./teams";
+import { formatBalance } from "@/hooks/tokens";
 
 enum FundState {
   SELECT_TEAM,
-  FUND,
+  PURCHASE,
+  SUCCESS,
 }
 
 export interface Team {
@@ -30,6 +46,7 @@ export function Fund() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [state, setState] = useState<FundState>(FundState.SELECT_TEAM);
+  const [teamId, setTeamId] = useState<string>();
 
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
@@ -39,7 +56,11 @@ export function Fund() {
     }
   }, [navigate, pathname]);
 
-  const { data: teamsData, isLoading, error } = useTeamsQuery();
+  const {
+    data: teamsData,
+    isLoading,
+    error,
+  } = useTeamsQuery(undefined, { refetchInterval: 1000 });
 
   const teams: Team[] =
     teamsData?.me?.teams?.edges
@@ -52,20 +73,54 @@ export function Fund() {
         teams={teams}
         isLoading={isLoading}
         error={!!error}
-        onFundTeam={() => {
-          setState(FundState.FUND);
+        onFundTeam={(team) => {
+          setState(FundState.PURCHASE);
+          setTeamId(team.id);
         }}
       />
     );
   }
 
-  if (state === FundState.FUND) {
+  if (state === FundState.PURCHASE) {
     return (
-      <Funding
-        title="Fund Credits for Slot"
+      <Purchase
+        title={`Fund ${teams[0].name}`}
+        type={PurchaseType.CREDITS}
+        isSlot={true}
+        teamId={teamId}
         onBack={() => setState(FundState.SELECT_TEAM)}
-        isSlot
+        onComplete={() => setState(FundState.SUCCESS)}
       />
     );
   }
+
+  const team = teams.find((team) => team.id === teamId);
+
+  return (
+    <LayoutContainer className="min-h-[600px]">
+      <LayoutHeader title="Purchase Complete" Icon={CheckIcon} />
+      <LayoutContent>
+        <Card>
+          <CardHeader>
+            <CardTitle className="normal-case font-semibold text-xs">
+              {`Funded ${team?.name}`}
+            </CardTitle>
+          </CardHeader>
+          <TokenSummary className="rounded-tl-none rounded-tr-none">
+            <TokenCard
+              image={"https://static.cartridge.gg/media/usd_icon.svg"}
+              title={"USD"}
+              amount={`${formatBalance(BigInt(team?.credits || 0), 8, 2)} USD`}
+              value={`$${formatBalance(BigInt(team?.credits || 0), 8, 2)}`}
+            />
+          </TokenSummary>
+        </Card>
+      </LayoutContent>
+      <LayoutFooter>
+        <Button onClick={() => setState(FundState.SELECT_TEAM)}>
+          Fund More Teams
+        </Button>
+      </LayoutFooter>
+    </LayoutContainer>
+  );
 }
