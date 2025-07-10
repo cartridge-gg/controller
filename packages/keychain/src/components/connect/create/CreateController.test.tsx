@@ -1,8 +1,9 @@
-import { renderWithProviders } from "@/test/mocks/providers";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LoginMode } from "../types";
+import { vi } from "vitest";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { CreateController } from "./CreateController";
+import { describe, expect, beforeEach, it } from "vitest";
+import { LoginMode } from "../types";
+import { renderWithProviders } from "@/test/mocks/providers";
 import { AuthenticationStep } from "./utils";
 
 // Create mock functions that we'll use in multiple tests
