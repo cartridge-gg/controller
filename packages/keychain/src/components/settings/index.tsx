@@ -56,7 +56,6 @@ const registeredAccounts: RegisteredAccount[] = [
   },
 ];
 
-// TODO(tedison): Add signer address
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
   const [state, setState] = useState<State>(State.SETTINGS);

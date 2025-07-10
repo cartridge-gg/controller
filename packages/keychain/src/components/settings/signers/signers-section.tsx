@@ -4,7 +4,6 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 
 import { useConnection } from "@/hooks/connection";
-import { useVersion } from "@/hooks/version";
 import { Signer, signerToGuid } from "@cartridge/controller-wasm";
 import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
@@ -22,20 +21,6 @@ export const SignersSection = ({
   setState: (state: State) => void;
 }) => {
   const { chainId, controller } = useConnection();
-  const { ready, isControllerGte } = useVersion();
-
-  const canAddSigner = useMemo(() => {
-    if (!ready) {
-      return false;
-    }
-    if (!isControllerGte("0.8.0")) {
-      console.warn(
-        "Upgrade controller to a newer version than 0.7.14-alpha.3 to use additional signer",
-      );
-      return false;
-    }
-    return true;
-  }, [ready, isControllerGte, chainId]);
 
   const signers = useMemo(
     () =>
@@ -78,22 +63,20 @@ export const SignersSection = ({
           <div>No data</div>
         )}
       </div>
-      {canAddSigner && (
-        <Button
-          type="button"
-          variant="outline"
-          className="text-foreground-300 gap-1 w-fit px-3"
-          disabled={chainId !== constants.StarknetChainId.SN_MAIN}
-          onClick={() => setState(State.ADD_SIGNER)}
-        >
-          <PlusIcon size="sm" variant="line" />
-          <span className="normal-case font-normal font-sans text-sm">
-            {chainId === constants.StarknetChainId.SN_MAIN
-              ? "Add Signer"
-              : "Must be on Mainnet"}
-          </span>
-        </Button>
-      )}
+      <Button
+        type="button"
+        variant="outline"
+        className="text-foreground-300 gap-1 w-fit px-3"
+        disabled={chainId !== constants.StarknetChainId.SN_MAIN}
+        onClick={() => setState(State.ADD_SIGNER)}
+      >
+        <PlusIcon size="sm" variant="line" />
+        <span className="normal-case font-normal font-sans text-sm">
+          {chainId === constants.StarknetChainId.SN_MAIN
+            ? "Add Signer"
+            : "Must be on Mainnet"}
+        </span>
+      </Button>
     </section>
   );
 };
