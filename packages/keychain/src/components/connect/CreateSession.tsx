@@ -16,6 +16,7 @@ import {
   Button,
   Checkbox,
   cn,
+  HeaderInner,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
@@ -111,8 +112,8 @@ const CreateSessionLayout = ({
   return (
     <>
       {/* <OcclusionDetector /> */}
-      <LayoutContainer>
-        <NavigationHeader
+      <>
+        <HeaderInner
           className="px-6 pt-6 pb-0"
           title={!isUpdate ? "Create Session" : "Update Session"}
           description={isUpdate ? "The policies were updated" : undefined}
@@ -196,7 +197,7 @@ const CreateSessionLayout = ({
 
           {!error && <div className="flex flex-col" />}
         </LayoutFooter>
-      </LayoutContainer>
+      </>
     </>
   );
 };
