@@ -25,6 +25,7 @@ config.resolver.nodeModulesPaths = [
 // 3. Setup polyfills for web platform using extraNodeModules
 config.resolver.extraNodeModules = {
   crypto: require.resolve("crypto-browserify"),
+  "node:crypto": require.resolve("crypto-browserify"),
   stream: require.resolve("readable-stream"),
   buffer: require.resolve("buffer"),
 };
@@ -43,30 +44,17 @@ config.resolver.alias = {
 // 5. Ensure platform-specific resolution
 config.resolver.platforms = ["native", "web", "ios", "android"];
 
-// 6. Enable web support
-config.resolver.resolverMainFields = ["react-native", "browser", "main"];
-
-// 7. Configure package export conditions
+// 6. Configure package export conditions
 // config.resolver.unstable_conditionNames = [
 //   "browser",
+//   "react-native",
 //   "import",
 //   "require",
+//   "node",
 //   "default",
-//   "react-native",
 // ];
 
-// 8. Configure transformer
-config.transformer.enableBabelRCLookup = false;
-config.transformer.enableBabelRuntime = false;
-
-config.transformer.getTransformOptions = () => ({
-  transform: {
-    experimentalImportSupport: false,
-    inlineRequires: true,
-  },
-});
-
-// 9. Add WASM support for Metro
+// 7. Add WASM support for Metro
 config.resolver.assetExts = [...config.resolver.assetExts, "wasm"];
 
 module.exports = wrapWithReanimatedMetroConfig(
