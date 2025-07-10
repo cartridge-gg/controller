@@ -7,14 +7,13 @@ import { LayoutBottomNav } from "#profile/components/bottom-nav";
 export function AccountLayout({ children }: { children?: React.ReactNode }) {
   const { closeModal } = useConnection();
   const location = useLocation();
-
   // Check if current page should have bottom navigation
   const hasBottomNav = [
     "inventory",
     "achievements",
     "leaderboard",
     "activity",
-  ].some((page) => location.pathname.includes(`/${page}`));
+  ].some((page) => location.pathname.endsWith(`/${page}`));
 
   return (
     <div style={{ position: "relative" }}>

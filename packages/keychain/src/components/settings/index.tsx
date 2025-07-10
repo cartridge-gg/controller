@@ -127,12 +127,12 @@ export function Settings() {
   return (
     <Sheet>
       <LayoutContainer>
-        <NavigationHeader
+        {/* <NavigationHeader
           variant="compressed"
           title="Settings"
           Icon={GearIcon}
           hideSettings
-        />
+        /> */}
 
         <LayoutContent className="gap-6">
           {featureFlags.signers && (

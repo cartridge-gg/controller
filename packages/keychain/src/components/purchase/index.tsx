@@ -7,7 +7,7 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
+  HeaderInner,
 } from "@cartridge/ui";
 import { isIframe } from "@cartridge/ui/utils";
 import { Elements } from "@stripe/react-stripe-js";
@@ -126,23 +126,22 @@ export function Purchase(props: PurchaseCreditsProps) {
       />
     );
   }
-  const isCloseable = isSlot
-    ? false
-    : state === PurchaseState.SELECTION || state === PurchaseState.SUCCESS;
+  // const isCloseable = isSlot
+  //   ? false
+  //   : state === PurchaseState.SELECTION || state === PurchaseState.SUCCESS;
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
+    <>
+      <HeaderInner
         title={title}
-        onClose={closeModal}
-        onBack={
-          !isCloseable
-            ? () => {
-                onBack?.();
-                setState(PurchaseState.SELECTION);
-              }
-            : undefined
-        }
+        // onBack={
+        //   !isCloseable
+        //     ? () => {
+        //         onBack?.();
+        //         setState(PurchaseState.SELECTION);
+        //       }
+        //     : undefined
+        // }
         right={
           state === PurchaseState.SELECTION &&
           starterpackDetails?.supply !== undefined ? (
@@ -205,6 +204,6 @@ export function Purchase(props: PurchaseCreditsProps) {
           />
         )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }
