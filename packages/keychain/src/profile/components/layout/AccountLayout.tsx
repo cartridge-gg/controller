@@ -9,13 +9,12 @@ export function AccountLayout({ children }: { children?: React.ReactNode }) {
   const location = useLocation();
 
   // Check if current page should have bottom navigation
-  const hasBottomNav =
-    ["inventory", "achievements", "leaderboard", "activity"].some((page) =>
-      location.pathname.includes(`/${page}`),
-    ) &&
-    !location.pathname.includes("/token/") &&
-    !location.pathname.includes("/collection/") &&
-    !location.pathname.includes("/collectible/");
+  const hasBottomNav = [
+    "inventory",
+    "achievements",
+    "leaderboard",
+    "activity",
+  ].some((page) => location.pathname.includes(`/${page}`));
 
   return (
     <div style={{ position: "relative" }}>

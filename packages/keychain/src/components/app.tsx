@@ -56,7 +56,7 @@ export function App() {
 
   return (
     <Routes>
-      <Route element={<Home />}>
+      <Route path="/" element={<Home />}>
         <Route path="/settings" element={<Settings />} />
         <Route path="authenticate" element={<Authenticate />} />
         <Route path="session" element={<Session />} />

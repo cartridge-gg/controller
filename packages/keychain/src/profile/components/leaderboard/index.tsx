@@ -58,7 +58,7 @@ export function Leaderboard() {
     <EmptyState />
   ) : (
     <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
-      <LeaderboardTable className="h-full">
+      <LeaderboardTable className="flex">
         {data.map((item, index) => (
           <LeaderboardRow
             key={index}
