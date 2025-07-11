@@ -68,7 +68,6 @@ export function CryptoCheckout({
   wholeCredits,
   starterpackDetails,
   initialState = CheckoutState.REVIEW_PURCHASE,
-  onBack,
   onComplete,
 }: {
   selectedWallet: ExternalWallet;
@@ -76,7 +75,6 @@ export function CryptoCheckout({
   wholeCredits: number;
   starterpackDetails?: StarterPackDetails;
   initialState?: CheckoutState;
-  onBack: () => void;
   onComplete: () => void;
 }) {
   const [error, setError] = useState<Error>();
@@ -162,7 +160,7 @@ export function CryptoCheckout({
         {error && (
           <ErrorAlert
             variant="error"
-            title="Purchase Alert"
+            title="Purchase Error"
             description={error.message}
           />
         )}

@@ -13,17 +13,6 @@ export function navigateFactory() {
         from: currentPath === "/" ? undefined : currentPath,
       };
 
-      if (import.meta.env.DEV) {
-        console.log(
-          "[navigateFactory] Navigating from:",
-          currentPath,
-          "to:",
-          path,
-          "with state:",
-          navigationState,
-        );
-      }
-
       // Dispatch a custom event with the navigation details
       // This allows React components to handle the navigation with proper state
       window.dispatchEvent(
@@ -37,24 +26,10 @@ export function navigateFactory() {
 
       // If path didn't change, resolve immediately
       if (currentPath === path) {
-        if (import.meta.env.DEV) {
-          console.log(
-            "[navigateFactory] Path unchanged, resolving immediately",
-          );
-        }
         resolve();
         return;
       }
 
-      // Wait for React to render the new route
-      // Using double requestAnimationFrame to ensure rendering is complete
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (import.meta.env.DEV) {
-            console.log("[navigateFactory] Navigation complete");
-          }
-          resolve();
-        });
-      });
+      resolve();
     });
 }

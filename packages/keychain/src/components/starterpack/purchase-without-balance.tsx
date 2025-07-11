@@ -147,7 +147,7 @@ export const PurchaseWithoutBalance = () => {
           ) : error ? (
             <ErrorAlert
               variant="warning"
-              title="Purchase Alert"
+              title="Purchase Error"
               description={error.message}
             />
           ) : null}

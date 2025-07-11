@@ -9,6 +9,7 @@ import {
   PaperPlaneIcon,
   Thumbnail,
   InfoIcon,
+  Skeleton,
 } from "@cartridge/ui";
 
 import { useData } from "#profile/hooks/data";
@@ -45,6 +46,11 @@ function Credits() {
     interval: isVisible ? 30000 : undefined,
   });
 
+  // Show loading state while credits are being fetched
+  if (!credit.balance.value) {
+    return <CreditsLoadingState />;
+  }
+
   return (
     <>
       <LayoutContent className="pb-4 gap-6">
@@ -79,6 +85,33 @@ function Credits() {
     </>
   );
 }
+
+const CreditsLoadingState = () => {
+  return (
+    <>
+      <LayoutContent className="pb-4 gap-6 select-none h-full overflow-hidden">
+        {/* Credits header skeleton */}
+        <div className="flex gap-4 items-center">
+          <Skeleton className="w-16 h-16 rounded-full bg-background-300 animate-pulse" />
+          <Skeleton className="h-6 w-40 rounded bg-background-300 animate-pulse" />
+        </div>
+
+        {/* Credits info skeleton */}
+        <div className="flex gap-1 bg-background-125 border border-background-200 px-3 py-2.5 rounded">
+          <Skeleton className="w-5 h-5 rounded bg-background-300 animate-pulse" />
+          <div className="flex flex-col gap-1 px-1 flex-1">
+            <Skeleton className="h-3 w-full rounded bg-background-300 animate-pulse" />
+            <Skeleton className="h-3 w-3/4 rounded bg-background-300 animate-pulse" />
+          </div>
+        </div>
+      </LayoutContent>
+
+      <LayoutFooter className="gap-4">
+        <Skeleton className="h-11 w-full rounded bg-background-300 animate-pulse" />
+      </LayoutFooter>
+    </>
+  );
+};
 
 function ERC20() {
   const { address } = useParams<{ address: string }>();
@@ -138,7 +171,9 @@ function ERC20() {
     );
   }, []);
 
-  if (!token) return;
+  if (!token) {
+    return null;
+  }
 
   return (
     <>

@@ -94,22 +94,6 @@ export class IFrame<CallSender extends {}> implements Modal {
       iframe: this.iframe,
       methods: {
         close: (_origin: string) => () => this.close(),
-        closeAll: (_origin: string) => () => {
-          // Close all iframes
-          const iframes = document.querySelectorAll(
-            'iframe[id^="controller-"]',
-          );
-          iframes.forEach((iframe) => {
-            const container = iframe.parentElement;
-            if (container) {
-              container.style.visibility = "hidden";
-              container.style.opacity = "0";
-            }
-          });
-          if (document.body) {
-            document.body.style.overflow = "auto";
-          }
-        },
         reload: (_origin: string) => () => window.location.reload(),
         ...methods,
       },

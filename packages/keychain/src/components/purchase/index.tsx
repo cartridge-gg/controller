@@ -4,7 +4,6 @@ import {
   Card,
   CardDescription,
   InfoIcon,
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   HeaderInner,
@@ -32,7 +31,6 @@ export type {
 export function Purchase(props: PurchaseCreditsProps) {
   const {
     state,
-    setState,
     clientSecret,
     pricingDetails,
     wholeCredits,
@@ -53,7 +51,7 @@ export function Purchase(props: PurchaseCreditsProps) {
     onComplete,
   } = usePurchase(props);
 
-  const { onBack, wallets, type, isSlot, starterpackDetails } = props;
+  const { wallets, type, starterpackDetails } = props;
 
   const title = useMemo(() => {
     switch (state) {
@@ -92,11 +90,7 @@ export function Purchase(props: PurchaseCreditsProps) {
         options={{ clientSecret, appearance, loader: "auto" }}
         stripe={stripePromise}
       >
-        <CheckoutForm
-          price={pricingDetails!}
-          onBack={handleBack}
-          onComplete={onComplete}
-        />
+        <CheckoutForm price={pricingDetails!} onComplete={onComplete} />
       </Elements>
     );
   }
@@ -151,7 +145,7 @@ export function Purchase(props: PurchaseCreditsProps) {
         {displayError && (
           <ErrorAlert
             variant="error"
-            title="Purchase Alert"
+            title="Purchase Error"
             description={displayError.message}
           />
         )}

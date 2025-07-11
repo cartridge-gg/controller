@@ -32,10 +32,6 @@ export function NavigationHeader({
     if (onBack) {
       onBack();
     } else if (canGoBack) {
-      if (import.meta.env.DEV) {
-        console.log("[NavigationHeader] Going back");
-      }
-
       goBack();
     }
   }, [onBack, canGoBack, goBack]);
@@ -45,15 +41,10 @@ export function NavigationHeader({
     if (onClose) {
       onClose();
     } else if (closeModal) {
-      // Reset to root when closing to clear navigation state
-      navigateToRoot();
-
-      if (import.meta.env.DEV) {
-        console.log("[NavigationHeader] Closing and resetting navigation");
-      }
-
       closeModal();
     }
+
+    navigateToRoot();
   }, [onClose, closeModal, navigateToRoot]);
 
   return (

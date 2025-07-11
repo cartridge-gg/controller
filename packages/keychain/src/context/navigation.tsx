@@ -11,7 +11,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 // Type for navigation entry
 interface NavigationEntry {
   path: string;
-  state?: any;
+  state?: unknown;
   timestamp: number;
 }
 
@@ -21,7 +21,7 @@ interface NavigationContextType {
   navigationDepth: number;
   navigate: (
     to: string | number,
-    options?: { replace?: boolean; state?: any },
+    options?: { replace?: boolean; state?: unknown },
   ) => void;
   navigateToRoot: () => void;
   goBack: () => void;
@@ -65,11 +65,8 @@ export function NavigationProvider({
     setNavigationStack([rootEntry]);
     setCurrentIndex(0);
     lastTrackedPath.current = "/";
-    navigate("/", { replace: true });
 
-    if (import.meta.env.DEV) {
-      console.log("[NavigationContext] Reset to root");
-    }
+    navigate("/", { replace: true });
   }, [navigate]);
 
   // Initialize with current location
@@ -85,10 +82,6 @@ export function NavigationProvider({
       setCurrentIndex(0);
       lastTrackedPath.current = currentPath;
       isInitialized.current = true;
-
-      if (import.meta.env.DEV) {
-        console.log("[NavigationContext] Initialized with:", currentPath);
-      }
     }
   }, [getFullPath, location.state]);
 
@@ -135,15 +128,6 @@ export function NavigationProvider({
       const newIndex = newStack.length - 1;
       setCurrentIndex(newIndex);
 
-      if (import.meta.env.DEV) {
-        console.log("[NavigationContext] Location changed:", {
-          to: currentPath,
-          from: previousPath,
-          navigationDepth: newIndex,
-          stackSize: newStack.length,
-        });
-      }
-
       return newStack;
     });
 
@@ -153,29 +137,31 @@ export function NavigationProvider({
   // Handle controller navigation events
   useEffect(() => {
     const handleControllerNavigate = (event: Event) => {
-      const navEvent = event as CustomEvent<{ path: string; state?: any }>;
-      const { path, state } = navEvent.detail;
+      const navEvent = event as CustomEvent<{
+        path: string;
+        state?: unknown;
+        options?: { resetStack?: boolean };
+      }>;
+      const { path, state, options } = navEvent.detail;
+      const resetStack = options?.resetStack ?? true;
 
-      if (import.meta.env.DEV) {
-        console.log(
-          "[NavigationContext] Controller outside navigation to:",
+      if (resetStack) {
+        // For controller navigation, we typically want to start fresh
+        const entry: NavigationEntry = {
           path,
-        );
+          state,
+          timestamp: Date.now(),
+        };
+
+        setNavigationStack([entry]);
+        setCurrentIndex(0);
+        lastTrackedPath.current = path;
+        isInternalNavigation.current = true; // Prevent double tracking
+
+        navigate(path, { replace: true, state });
+      } else {
+        navigate(path, { state });
       }
-
-      // For controller navigation, we typically want to start fresh
-      const entry: NavigationEntry = {
-        path,
-        state,
-        timestamp: Date.now(),
-      };
-
-      setNavigationStack([entry]);
-      setCurrentIndex(0);
-      lastTrackedPath.current = path;
-      isInternalNavigation.current = true; // Prevent double tracking
-
-      navigate(path, { replace: true, state });
     };
 
     window.addEventListener("controller-navigate", handleControllerNavigate);
@@ -190,7 +176,7 @@ export function NavigationProvider({
 
   // Navigate with tracking
   const navigateWithTracking = useCallback(
-    (to: string | number, options?: { replace?: boolean; state?: any }) => {
+    (to: string | number, options?: { replace?: boolean; state?: unknown }) => {
       if (typeof to === "number") {
         // Handle relative navigation
         const newIndex = currentIndex + to;
@@ -237,12 +223,14 @@ export function NavigationProvider({
 
   // Expose method to reset navigation (useful for external calls)
   useEffect(() => {
-    (window as any).__resetNavigation = () => {
-      navigateToRoot();
-    };
+    (window as Window & { __resetNavigation?: () => void }).__resetNavigation =
+      () => {
+        navigateToRoot();
+      };
 
     return () => {
-      delete (window as any).__resetNavigation;
+      delete (window as Window & { __resetNavigation?: () => void })
+        .__resetNavigation;
     };
   }, [navigateToRoot]);
 
