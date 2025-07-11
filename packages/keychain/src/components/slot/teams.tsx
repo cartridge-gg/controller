@@ -62,17 +62,12 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
             />
           ) : (
             sortedTeams.map((team) => (
-              <TokenSummary
-                key={team.id}
-                onClick={() => setSelectedTeam(team)}
-                className="cursor-pointer"
-              >
+              <TokenSummary key={team.id} onClick={() => setSelectedTeam(team)}>
                 <TokenCard
                   title={team.name}
                   image={<UsersIcon variant="solid" size="lg" />}
                   amount={`${team.deployments?.totalCount} Deployments`}
                   value={`$${formatBalance(BigInt(team.credits), 8, 2)}`}
-                  className={"pointer-events-none"}
                 />
               </TokenSummary>
             ))
@@ -110,14 +105,13 @@ export const TeamCard = ({
             className={"pointer-events-none"}
           />
         </TokenSummary>
-
         <div className="flex flex-col gap-4 mt-2">
           <div className="flex flex-row items-center justify-between">
             <h3 className="text-foreground-400 text-xs font-medium">
               Deployments
             </h3>
             {team.deployments?.totalCount > 0 && (
-              <Badge className="px-2 rounded-full text-foreground-400 text-xs">
+              <Badge className="px-2 rounded-full text-foreground-300 text-xs">
                 {team.deployments?.totalCount || 0} total
               </Badge>
             )}
