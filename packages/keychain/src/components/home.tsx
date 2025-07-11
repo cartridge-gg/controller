@@ -2,24 +2,15 @@ import { Signature } from "starknet";
 import { useEffect, useState } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import {
-  DeployCtx,
-  ExecuteCtx,
-  OpenStarterPackCtx,
-  SignMessageCtx,
-} from "@/utils/connection";
+import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Upgrade } from "./connect";
 import { LoginMode } from "./connect/types";
 import { DeployController } from "./DeployController";
-import { Purchase } from "./purchase";
-import { Settings } from "./settings";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
-import { StarterPack } from "./starterpack";
-import { PurchaseType } from "@/hooks/payments/crypto";
 import { executeCore } from "@/utils/connection/execute";
 import { AccountLayout } from "#profile/components/layout/AccountLayout.js";
 import { Outlet } from "react-router-dom";
@@ -50,6 +41,22 @@ export function Home() {
       );
     }
   }, [context?.type, posthog]);
+
+  // Handle navigation for routed contexts
+  // useEffect(() => {
+  //   if (!context) return;
+
+  //   switch (context.type) {
+  //     case "open-settings":
+  //       navigate("/settings");
+  //       break;
+  //     case "open-purchase-credits":
+  //       navigate("/purchase");
+  //       break;
+  //     // Note: open-starter-pack is now handled directly by the controller
+  //     // via the controller-navigate event
+  //   }
+  // }, [context, navigate]);
 
   if (window.self === window.top || !origin) {
     return <></>;
@@ -170,16 +177,6 @@ export function Home() {
                 }
               />
             );
-          }
-          case "open-settings": {
-            return <Settings />;
-          }
-          case "open-purchase-credits": {
-            return <Purchase type={PurchaseType.CREDITS} />;
-          }
-          case "open-starter-pack": {
-            const ctx = context as OpenStarterPackCtx;
-            return <StarterPack starterpackId={ctx.starterpackId} />;
           }
           default:
             return <Outlet />;

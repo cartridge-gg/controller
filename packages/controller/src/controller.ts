@@ -249,8 +249,8 @@ export default class ControllerProvider extends BaseProvider {
     }
     const username = await this.keychain.username();
 
-    // Navigate the keychain to the profile page
-    this.keychain.navigate(`/account/${username}/${tab}`);
+    // Navigate first, then open to avoid flash
+    await this.keychain.navigate(`/account/${username}/${tab}`);
     this.iframes.keychain.open();
   }
 
@@ -285,18 +285,13 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.open();
   }
 
-  async openSettings() {
+  openSettings() {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
-      return null;
+      return;
     }
     this.iframes.keychain.open();
-    const res = await this.keychain.openSettings();
-    this.iframes.keychain.close();
-    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
-      return false;
-    }
-    return true;
+    this.keychain.openSettings();
   }
 
   revoke(origin: string, _policy: Policy[]) {
@@ -344,8 +339,11 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return;
     }
-    this.iframes.keychain.open();
-    this.keychain.openStarterPack(starterpackId);
+
+    // Navigate first, then open the iframe
+    this.keychain.navigate(`/starter-pack/${starterpackId}`).then(() => {
+      this.iframes.keychain.open();
+    });
   }
 
   async openExecute(calls: any, chainId?: string) {

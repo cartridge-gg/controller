@@ -47,11 +47,6 @@ export function Profile() {
             Achievements
           </Button>
           <Button
-            onClick={() => ctrlConnector.controller.openProfile("trophies")}
-          >
-            Trophies
-          </Button>
-          <Button
             onClick={() => ctrlConnector.controller.openProfile("leaderboard")}
           >
             Leaderboard
@@ -62,20 +57,12 @@ export function Profile() {
             Activity
           </Button>
           <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=followers",
-              )
-            }
+            onClick={() => ctrlConnector.controller.openProfileTo("followers")}
           >
             Followers
           </Button>
           <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=following",
-              )
-            }
+            onClick={() => ctrlConnector.controller.openProfileTo("following")}
           >
             Following
           </Button>

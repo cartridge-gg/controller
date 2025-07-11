@@ -7,8 +7,8 @@ import {
 } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { useAccount } from "#profile/hooks/account";
-import { useArcade } from "#profile/hooks/arcade.js";
-import { useNavigate } from "react-router-dom";
+import { useArcade } from "#profile/hooks/arcade";
+import { useTrackedNavigation } from "@/hooks/navigation";
 import { QRCodeSVG } from "qrcode.react";
 
 function QrCodeDisplay({
@@ -65,7 +65,7 @@ export function UIProvider({ children }: PropsWithChildren) {
   const account = useAccount();
   const [showQrCode, setShowQrCode] = useState(false);
 
-  const navigate = useNavigate();
+  const { navigate } = useTrackedNavigation();
 
   const onFollowersClick = useCallback(() => {
     const url = new URL(window.location.href);

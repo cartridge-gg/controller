@@ -1,0 +1,274 @@
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+
+// Type for navigation entry
+interface NavigationEntry {
+  path: string;
+  state?: any;
+  timestamp: number;
+}
+
+interface NavigationContextType {
+  canGoBack: boolean;
+  canGoForward: boolean;
+  navigationDepth: number;
+  navigate: (
+    to: string | number,
+    options?: { replace?: boolean; state?: any },
+  ) => void;
+  navigateToRoot: () => void;
+  goBack: () => void;
+  goForward: () => void;
+  currentPath: string;
+  history: NavigationEntry[];
+}
+
+const NavigationContext = createContext<NavigationContextType | undefined>(
+  undefined,
+);
+
+export function NavigationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Navigation stack and current position
+  const [navigationStack, setNavigationStack] = useState<NavigationEntry[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const isInternalNavigation = useRef(false);
+  const lastTrackedPath = useRef<string>("");
+  const isInitialized = useRef(false);
+
+  // Get full path including search params
+  const getFullPath = useCallback(() => {
+    return location.pathname + location.search;
+  }, [location.pathname, location.search]);
+
+  // Navigate to root and clear navigation state
+  const navigateToRoot = useCallback(() => {
+    const rootEntry: NavigationEntry = {
+      path: "/",
+      state: {},
+      timestamp: Date.now(),
+    };
+
+    setNavigationStack([rootEntry]);
+    setCurrentIndex(0);
+    lastTrackedPath.current = "/";
+    navigate("/", { replace: true });
+
+    if (import.meta.env.DEV) {
+      console.log("[NavigationContext] Reset to root");
+    }
+  }, [navigate]);
+
+  // Initialize with current location
+  useEffect(() => {
+    if (!isInitialized.current) {
+      const currentPath = getFullPath();
+      const initialEntry: NavigationEntry = {
+        path: currentPath,
+        state: location.state,
+        timestamp: Date.now(),
+      };
+      setNavigationStack([initialEntry]);
+      setCurrentIndex(0);
+      lastTrackedPath.current = currentPath;
+      isInitialized.current = true;
+
+      if (import.meta.env.DEV) {
+        console.log("[NavigationContext] Initialized with:", currentPath);
+      }
+    }
+  }, [getFullPath, location.state]);
+
+  // Track location changes - fixed to avoid infinite loop
+  useEffect(() => {
+    // Skip if not initialized
+    if (!isInitialized.current) return;
+
+    const currentPath = getFullPath();
+
+    // Skip if this is an internal navigation (back/forward)
+    if (isInternalNavigation.current) {
+      isInternalNavigation.current = false;
+      lastTrackedPath.current = currentPath;
+      return;
+    }
+
+    // Skip if the path hasn't actually changed
+    if (currentPath === lastTrackedPath.current) return;
+
+    const previousPath = lastTrackedPath.current;
+
+    const newEntry: NavigationEntry = {
+      path: currentPath,
+      state: location.state,
+      timestamp: Date.now(),
+    };
+
+    // Update both stack and index together to ensure consistency
+    setNavigationStack((prev) => {
+      // Find where we currently are in the stack
+      let currentPosition = prev.length - 1;
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (prev[i].path === previousPath) {
+          currentPosition = i;
+          break;
+        }
+      }
+
+      // Truncate any forward history and add new entry
+      const newStack = [...prev.slice(0, currentPosition + 1), newEntry];
+
+      // Update the index to point to the new entry
+      const newIndex = newStack.length - 1;
+      setCurrentIndex(newIndex);
+
+      if (import.meta.env.DEV) {
+        console.log("[NavigationContext] Location changed:", {
+          to: currentPath,
+          from: previousPath,
+          navigationDepth: newIndex,
+          stackSize: newStack.length,
+        });
+      }
+
+      return newStack;
+    });
+
+    lastTrackedPath.current = currentPath;
+  }, [getFullPath, location.state]);
+
+  // Handle controller navigation events
+  useEffect(() => {
+    const handleControllerNavigate = (event: Event) => {
+      const navEvent = event as CustomEvent<{ path: string; state?: any }>;
+      const { path, state } = navEvent.detail;
+
+      if (import.meta.env.DEV) {
+        console.log(
+          "[NavigationContext] Controller outside navigation to:",
+          path,
+        );
+      }
+
+      // For controller navigation, we typically want to start fresh
+      const entry: NavigationEntry = {
+        path,
+        state,
+        timestamp: Date.now(),
+      };
+
+      setNavigationStack([entry]);
+      setCurrentIndex(0);
+      lastTrackedPath.current = path;
+      isInternalNavigation.current = true; // Prevent double tracking
+
+      navigate(path, { replace: true, state });
+    };
+
+    window.addEventListener("controller-navigate", handleControllerNavigate);
+
+    return () => {
+      window.removeEventListener(
+        "controller-navigate",
+        handleControllerNavigate,
+      );
+    };
+  }, [navigate]);
+
+  // Navigate with tracking
+  const navigateWithTracking = useCallback(
+    (to: string | number, options?: { replace?: boolean; state?: any }) => {
+      if (typeof to === "number") {
+        // Handle relative navigation
+        const newIndex = currentIndex + to;
+
+        if (newIndex >= 0 && newIndex < navigationStack.length) {
+          isInternalNavigation.current = true;
+          setCurrentIndex(newIndex);
+          const entry = navigationStack[newIndex];
+          lastTrackedPath.current = entry.path;
+          navigate(entry.path, { state: entry.state });
+        }
+      } else {
+        // For replace navigation, update current entry
+        if (options?.replace) {
+          setNavigationStack((prev) => {
+            const newStack = [...prev];
+            if (newStack[currentIndex]) {
+              newStack[currentIndex] = {
+                path: to,
+                state: options.state,
+                timestamp: Date.now(),
+              };
+            }
+            return newStack;
+          });
+          lastTrackedPath.current = to;
+        }
+
+        navigate(to, options);
+      }
+    },
+    [navigate, currentIndex, navigationStack],
+  );
+
+  // Go back helper
+  const goBack = useCallback(() => {
+    navigateWithTracking(-1);
+  }, [navigateWithTracking]);
+
+  // Go forward helper
+  const goForward = useCallback(() => {
+    navigateWithTracking(1);
+  }, [navigateWithTracking]);
+
+  // Expose method to reset navigation (useful for external calls)
+  useEffect(() => {
+    (window as any).__resetNavigation = () => {
+      navigateToRoot();
+    };
+
+    return () => {
+      delete (window as any).__resetNavigation;
+    };
+  }, [navigateToRoot]);
+
+  const value: NavigationContextType = {
+    canGoBack: currentIndex > 0,
+    canGoForward: currentIndex < navigationStack.length - 1,
+    navigationDepth: currentIndex,
+    navigate: navigateWithTracking,
+    navigateToRoot,
+    goBack,
+    goForward,
+    currentPath: navigationStack[currentIndex]?.path || getFullPath(),
+    history: navigationStack,
+  };
+
+  return (
+    <NavigationContext.Provider value={value}>
+      {children}
+    </NavigationContext.Provider>
+  );
+}
+
+export function useNavigation() {
+  const context = useContext(NavigationContext);
+  if (!context) {
+    throw new Error("useNavigation must be used within a NavigationProvider");
+  }
+  return context;
+}

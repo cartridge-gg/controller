@@ -31,33 +31,30 @@ import { Achievements } from "#profile/components/achievements";
 import { Activity } from "#profile/components/activity";
 import { Leaderboard } from "#profile/components/leaderboard";
 import { CollectionPurchase } from "#profile/components/inventory/collection/collection-purchase";
-import { useMemo } from "react";
-import { Socials } from "#profile/components/socials/index.js";
+import { Socials } from "#profile/components/socials/index";
 import { useConnection } from "@/hooks/connection";
 import { CreateController } from "./connect";
 import { LoginMode } from "./connect/types";
 import { Settings } from "./settings";
+import { Purchase } from "./purchase";
+import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function App() {
   const { controller } = useConnection();
-  const [searchParams] = useSearchParams();
-  const social = useMemo(() => {
-    return searchParams.get("social");
-  }, [searchParams]);
 
   // No controller, send to login
   if (!controller) {
     return <CreateController loginMode={LoginMode.Controller} />;
   }
 
-  if (social) {
-    return <Socials />;
-  }
-
   return (
     <Routes>
       <Route path="/" element={<Home />}>
         <Route path="/settings" element={<Settings />} />
+        <Route
+          path="/purchase"
+          element={<Purchase type={PurchaseType.CREDITS} />}
+        />
         <Route path="authenticate" element={<Authenticate />} />
         <Route path="session" element={<Session />} />
         <Route path="slot" element={<Slot />}>
@@ -74,6 +71,8 @@ export function App() {
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />
+          <Route path="following" element={<Socials />} />
+          <Route path="followers" element={<Socials />} />
           <Route path="inventory/token/:address" element={<Token />} />
           <Route path="inventory/token/:address/send" element={<SendToken />} />
           <Route

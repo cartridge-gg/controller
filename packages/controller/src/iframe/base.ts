@@ -193,4 +193,8 @@ export class IFrame<CallSender extends {}> implements Modal {
     this.iframe.style.width = "432px";
     this.iframe.style.borderRadius = "8px";
   }
+
+  isOpen() {
+    return this.iframe?.style.display !== "none";
+  }
 }
