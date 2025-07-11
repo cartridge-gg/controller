@@ -46,7 +46,7 @@ export function Fund() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [state, setState] = useState<FundState>(FundState.SELECT_TEAM);
-  const [teamId, setTeamId] = useState<string>();
+  const [team, setTeam] = useState<Team>();
 
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
@@ -75,7 +75,7 @@ export function Fund() {
         error={!!error}
         onFundTeam={(team) => {
           setState(FundState.PURCHASE);
-          setTeamId(team.id);
+          setTeam(team);
         }}
       />
     );
@@ -84,17 +84,15 @@ export function Fund() {
   if (state === FundState.PURCHASE) {
     return (
       <Purchase
-        title={`Fund ${teams[0].name}`}
+        title={`Fund ${team?.name}`}
         type={PurchaseType.CREDITS}
         isSlot={true}
-        teamId={teamId}
+        teamId={team?.id}
         onBack={() => setState(FundState.SELECT_TEAM)}
         onComplete={() => setState(FundState.SUCCESS)}
       />
     );
   }
-
-  const team = teams.find((team) => team.id === teamId);
 
   return (
     <LayoutContainer className="min-h-[600px]">

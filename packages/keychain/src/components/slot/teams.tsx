@@ -43,7 +43,11 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
 
   return (
     <LayoutContainer className="min-h-[600px]">
-      <LayoutHeader title="Select Team to Fund" icon={<SlotIcon size="lg" />} />
+      <LayoutHeader
+        title="Select Team to Fund"
+        icon={<SlotIcon size="lg" />}
+        hideSettings
+      />
       <LayoutContent className="h-full h-screen">
         <div className="flex flex-col gap-4 h-full w-full">
           {isLoading ? (
@@ -94,6 +98,7 @@ export const TeamCard = ({
         title={team.name || "Unknown Team"}
         icon={<UsersIcon variant="solid" size="lg" />}
         onBack={onBack}
+        hideSettings
       />
       <LayoutContent className="pb-3">
         <TokenSummary>
