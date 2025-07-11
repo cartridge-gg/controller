@@ -14,8 +14,23 @@ import {
   Empty,
 } from "@cartridge/ui";
 import { formatBalance } from "@/hooks/tokens";
-import { Team } from "./fund";
 import { useState } from "react";
+
+export interface Team {
+  id: string;
+  name: string;
+  credits: number;
+  deployments: {
+    totalCount: number;
+    edges?:
+      | ({
+          node?: {
+            project: string;
+          } | null;
+        } | null)[]
+      | null;
+  };
+}
 
 interface TeamsProps {
   teams: Team[];
