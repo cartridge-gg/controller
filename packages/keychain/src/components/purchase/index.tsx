@@ -4,7 +4,6 @@ import {
   Card,
   CardDescription,
   InfoIcon,
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   HeaderInner,
@@ -32,7 +31,6 @@ export type {
 export function Purchase(props: PurchaseCreditsProps) {
   const {
     state,
-    setState,
     clientSecret,
     pricingDetails,
     wholeCredits,
@@ -50,14 +48,11 @@ export function Purchase(props: PurchaseCreditsProps) {
     onCreditCard,
     onExternalConnect,
     onCompletePurchase,
-    onBack: handleBack,
   } = usePurchase(props);
 
   const {
-    onBack,
     wallets,
     type,
-    isSlot,
     starterpackDetails,
     teamId,
     title: propsTitle,
@@ -104,11 +99,7 @@ export function Purchase(props: PurchaseCreditsProps) {
         options={{ clientSecret, appearance, loader: "auto" }}
         stripe={stripePromise}
       >
-        <CheckoutForm
-          price={pricingDetails!}
-          onBack={handleBack}
-          onComplete={onCompletePurchase}
-        />
+        <CheckoutForm price={pricingDetails!} onComplete={onCompletePurchase} />
       </Elements>
     );
   }
@@ -121,7 +112,6 @@ export function Purchase(props: PurchaseCreditsProps) {
         wholeCredits={wholeCredits}
         starterpackDetails={starterpackDetails}
         teamId={teamId}
-        onBack={handleBack}
         onComplete={onCompletePurchase}
       />
     );
@@ -164,7 +154,7 @@ export function Purchase(props: PurchaseCreditsProps) {
         {displayError && (
           <ErrorAlert
             variant="error"
-            title="Purchase Alert"
+            title="Purchase Error"
             description={displayError.message}
           />
         )}

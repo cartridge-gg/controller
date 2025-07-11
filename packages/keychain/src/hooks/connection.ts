@@ -4,11 +4,7 @@ import {
   ConnectionContextValue,
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
-import {
-  ConnectionCtx,
-  connectToController,
-  OpenSettingsCtx,
-} from "@/utils/connection";
+import { ConnectionCtx, connectToController } from "@/utils/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -60,7 +56,6 @@ const TOKEN_ADDRESSES: Record<Token, string> = {
 
 export type ParentMethods = AsyncMethodReturns<{
   close: () => Promise<void>;
-  closeAll: () => Promise<void>;
   reload: () => Promise<void>;
 
   // Wallet bridge methods
@@ -427,9 +422,6 @@ export function useConnectionValue() {
         close: () => {
           throw new Error("Can't call this function when not in an iFrame");
         },
-        closeAll: () => {
-          throw new Error("Can't call this function when not in an iFrame");
-        },
         reload: () => {
           throw new Error("Can't call this function when not in an iFrame");
         },
@@ -452,7 +444,7 @@ export function useConnectionValue() {
 
     try {
       await window.controller?.disconnect();
-      parent.closeAll();
+      parent.close();
       parent.reload();
 
       context.resolve({
@@ -465,30 +457,34 @@ export function useConnectionValue() {
   }, [context, parent, setController]);
 
   const openSettings = useCallback(() => {
-    if (!context) return;
+    window.dispatchEvent(
+      new CustomEvent("controller-navigate", {
+        detail: {
+          path: "/settings",
+          options: {
+            resetStack: false,
+          },
+        },
+      }),
+    );
+  }, []);
 
-    setContext({
-      type: "open-settings",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as OpenSettingsCtx);
-  }, [context]);
-
-  const closeModal = useCallback(async () => {
-    if (!parent) return;
+  const closeModal = useCallback(() => {
+    if (!parent) {
+      return;
+    }
 
     context?.resolve?.({
       code: ResponseCodes.CANCELED,
       message: "User aborted",
     });
 
-    setContext(undefined); // clears context
+    setContext(undefined);
 
-    try {
-      await parent.close();
-    } catch (e) {
+    // Don't await parent.close() - let it run in the background
+    parent.close().catch((e) => {
       console.error("Failed to close modal:", e);
-    }
+    });
   }, [context, parent, setContext]);
 
   const openModal = useCallback(async () => {

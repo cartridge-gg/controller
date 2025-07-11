@@ -1,10 +1,4 @@
-import {
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useSearchParams,
-} from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Home } from "./home";
 import { Authenticate } from "./authenticate";
 import { Session } from "./session";

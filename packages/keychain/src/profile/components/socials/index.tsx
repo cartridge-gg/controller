@@ -11,10 +11,11 @@ import { useAccount, useUsernames } from "#profile/hooks/account";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { BigNumberish, getChecksumAddress } from "starknet";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useExecute } from "#profile/hooks/execute";
 import { toast } from "sonner";
 import { useController } from "@/hooks/controller";
+import { useNavigation } from "@/context/navigation";
 
 export function Socials() {
   const { controller } = useController();
@@ -26,7 +27,7 @@ export function Socials() {
     followeds: allFolloweds,
   } = useArcade();
   const [loading, setLoading] = useState<BigNumberish | null>(null);
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const location = useLocation();
 
   // Extract the last segment of the path
@@ -41,7 +42,7 @@ export function Socials() {
   // Redirect to base path if no controller is present
   useEffect(() => {
     if (!controller) {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   }, [controller, navigate]);
 
@@ -158,7 +159,7 @@ export function Socials() {
       pathSegments.push(value);
     }
 
-    navigate(`/${pathSegments.join("/")}`);
+    navigate(`/${pathSegments.join("/")}`, { replace: true });
   };
 
   return (

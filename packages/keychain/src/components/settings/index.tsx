@@ -4,7 +4,7 @@ import {
   ControllerIcon,
   CopyAddress,
   GearIcon,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
   PlusIcon,
@@ -126,72 +126,64 @@ export function Settings() {
 
   return (
     <Sheet>
-      <LayoutContainer>
-        {/* <NavigationHeader
-          variant="compressed"
-          title="Settings"
-          Icon={GearIcon}
-          hideSettings
-        /> */}
+      <HeaderInner variant="compressed" title="Settings" Icon={GearIcon} />
+      <LayoutContent className="gap-6">
+        {featureFlags.signers && (
+          <SignersSection
+            setState={setState}
+            controllerQuery={controllerQuery}
+          />
+        )}
 
-        <LayoutContent className="gap-6">
-          {featureFlags.signers && (
-            <SignersSection
-              setState={setState}
-              controllerQuery={controllerQuery}
+        {featureFlags.registeredAccounts && (
+          <section className="space-y-4">
+            <SectionHeader
+              title="Registered Account"
+              description="Information associated with registered accounts can be made available to games and applications."
             />
-          )}
-
-          {featureFlags.registeredAccounts && (
-            <section className="space-y-4">
-              <SectionHeader
-                title="Registered Account"
-                description="Information associated with registered accounts can be made available to games and applications."
-              />
-              <div className="space-y-3">
-                {registeredAccounts.map((i, index) => (
-                  <RegisteredAccountCard
-                    key={index}
-                    accountName={i.accountName}
-                    accountAddress={i.accountAddress}
-                  />
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="py-2.5 px-3 text-foreground-300 gap-1"
-              >
-                <PlusIcon size="sm" variant="line" />
-                <span className="normal-case font-normal font-sans text-sm">
-                  Add Account
-                </span>
-              </Button>
-            </section>
-          )}
-
-          {featureFlags.currency && (
-            <section className="space-y-4">
-              <SectionHeader
-                title="Currency"
-                description="Set your default currency for denomination"
-              />
-              <CurrencySelect />
-            </section>
-          )}
-
-          <SessionsSection controllerQuery={controllerQuery} />
-        </LayoutContent>
-
-        <LayoutFooter>
-          <SheetTrigger asChild>
-            <Button type="button" variant="secondary" className="gap-2">
-              <SignOutIcon />
-              <span>Log out</span>
+            <div className="space-y-3">
+              {registeredAccounts.map((i, index) => (
+                <RegisteredAccountCard
+                  key={index}
+                  accountName={i.accountName}
+                  accountAddress={i.accountAddress}
+                />
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="py-2.5 px-3 text-foreground-300 gap-1"
+            >
+              <PlusIcon size="sm" variant="line" />
+              <span className="normal-case font-normal font-sans text-sm">
+                Add Account
+              </span>
             </Button>
-          </SheetTrigger>
-        </LayoutFooter>
-      </LayoutContainer>
+          </section>
+        )}
+
+        {featureFlags.currency && (
+          <section className="space-y-4">
+            <SectionHeader
+              title="Currency"
+              description="Set your default currency for denomination"
+            />
+            <CurrencySelect />
+          </section>
+        )}
+
+        <SessionsSection controllerQuery={controllerQuery} />
+      </LayoutContent>
+
+      <LayoutFooter>
+        <SheetTrigger asChild>
+          <Button type="button" variant="secondary" className="gap-2">
+            <SignOutIcon />
+            <span>Log out</span>
+          </Button>
+        </SheetTrigger>
+      </LayoutFooter>
 
       {/* LOGOUT SHEET CONTENTS */}
       <SheetContent

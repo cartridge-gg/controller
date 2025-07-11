@@ -256,7 +256,7 @@ export function CollectionPurchase() {
   const status = useMemo(() => {
     if (collectionStatus === "error" || assetsStatus === "error")
       return "error";
-    if (collectionStatus === "loading" && assetsStatus === "loading")
+    if (collectionStatus === "loading" || assetsStatus === "loading")
       return "loading";
     return "success";
   }, [collectionStatus, assetsStatus]);
@@ -272,9 +272,9 @@ export function CollectionPurchase() {
 
   return (
     <>
-      {status === "loading" || !collection || tokenOrders.length === 0 ? (
+      {status === "loading" || !collection ? (
         <LoadingState />
-      ) : status === "error" || !token ? (
+      ) : status === "error" || !token || tokenOrders.length === 0 ? (
         <EmptyState />
       ) : (
         <>
@@ -615,7 +615,7 @@ const EmptyState = () => {
   return (
     <LayoutContent className="select-none h-full">
       <Empty
-        title="No information found for this asset."
+        title="No orders found for purchase."
         icon="inventory"
         className="h-full"
       />
