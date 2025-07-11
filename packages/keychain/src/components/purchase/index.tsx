@@ -49,13 +49,25 @@ export function Purchase(props: PurchaseCreditsProps) {
     onClaim,
     onCreditCard,
     onExternalConnect,
+    onCompletePurchase,
     onBack: handleBack,
-    onComplete,
   } = usePurchase(props);
 
-  const { onBack, wallets, type, isSlot, starterpackDetails } = props;
+  const {
+    onBack,
+    wallets,
+    type,
+    isSlot,
+    starterpackDetails,
+    teamId,
+    title: propsTitle,
+  } = props;
 
   const title = useMemo(() => {
+    if (propsTitle) {
+      return propsTitle;
+    }
+
     switch (state) {
       case PurchaseState.SELECTION:
         return type === PurchaseType.CREDITS
@@ -95,7 +107,7 @@ export function Purchase(props: PurchaseCreditsProps) {
         <CheckoutForm
           price={pricingDetails!}
           onBack={handleBack}
-          onComplete={onComplete}
+          onComplete={onCompletePurchase}
         />
       </Elements>
     );
@@ -108,8 +120,9 @@ export function Purchase(props: PurchaseCreditsProps) {
         selectedWallet={selectedWallet!}
         wholeCredits={wholeCredits}
         starterpackDetails={starterpackDetails}
+        teamId={teamId}
         onBack={handleBack}
-        onComplete={onComplete}
+        onComplete={onCompletePurchase}
       />
     );
   }
@@ -118,7 +131,7 @@ export function Purchase(props: PurchaseCreditsProps) {
     : state === PurchaseState.SELECTION || state === PurchaseState.SUCCESS;
 
   return (
-    <LayoutContainer>
+    <LayoutContainer className="min-h-[600px]">
       <LayoutHeader
         title={title}
         onClose={closeModal}

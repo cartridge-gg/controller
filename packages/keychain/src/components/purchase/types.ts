@@ -10,12 +10,15 @@ export enum PurchaseState {
 }
 
 export type PurchaseCreditsProps = {
+  title?: string;
+  teamId?: string;
   isSlot?: boolean;
   wallets?: ExternalWallet[];
   type: PurchaseType;
   starterpackDetails?: StarterPackDetails;
   initState?: PurchaseState;
   onBack?: () => void;
+  onComplete?: () => void;
 };
 
 export type PricingDetails = {
