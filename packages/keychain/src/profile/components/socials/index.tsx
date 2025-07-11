@@ -11,7 +11,7 @@ import { useAccount, useUsernames } from "#profile/hooks/account";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "#profile/hooks/arcade.js";
 import { BigNumberish, getChecksumAddress } from "starknet";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useExecute } from "#profile/hooks/execute";
 import { toast } from "sonner";
 import { useController } from "@/hooks/controller";
@@ -27,8 +27,16 @@ export function Socials() {
   } = useArcade();
   const [loading, setLoading] = useState<BigNumberish | null>(null);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [tab, setTab] = useState(searchParams.get("social") ?? "followers");
+  const location = useLocation();
+
+  // Extract the last segment of the path
+  const pathSegments = location.pathname.split("/").filter(Boolean);
+  const lastSegment = pathSegments[pathSegments.length - 1];
+  const tabFromPath = ["followers", "following"].includes(lastSegment)
+    ? lastSegment
+    : "followers";
+
+  const [tab, setTab] = useState(tabFromPath);
 
   // Redirect to base path if no controller is present
   useEffect(() => {
@@ -121,13 +129,37 @@ export function Socials() {
   );
 
   useEffect(() => {
-    setTab(searchParams.get("social") ?? "followers");
-  }, [searchParams]);
+    // Update tab state when path changes
+    const pathSegments = location.pathname.split("/").filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    const newTab = ["followers", "following"].includes(lastSegment)
+      ? lastSegment
+      : "followers";
+    setTab(newTab);
+  }, [location.pathname]);
 
   // Don't render anything if no controller (redirect will happen)
   if (!controller) {
     return null;
   }
+
+  const handleTabChange = (value: string) => {
+    // Navigate to the new path when tab changes
+    const currentPath = location.pathname;
+    const pathSegments = currentPath.split("/").filter(Boolean);
+
+    // Replace the last segment with the new tab value
+    if (
+      ["followers", "following"].includes(pathSegments[pathSegments.length - 1])
+    ) {
+      pathSegments[pathSegments.length - 1] = value;
+    } else {
+      // If the last segment isn't a valid tab, append the tab value
+      pathSegments.push(value);
+    }
+
+    navigate(`/${pathSegments.join("/")}`);
+  };
 
   return (
     <>
@@ -136,7 +168,7 @@ export function Socials() {
           followers={followers.length}
           following={followeds.length}
           value={tab}
-          onValueChange={(value) => setTab(value)}
+          onValueChange={handleTabChange}
           className="h-full overflow-hidden"
         >
           <TabsContent

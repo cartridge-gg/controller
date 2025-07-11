@@ -10,7 +10,6 @@ import {
   StripePaymentElementOptions,
 } from "@stripe/stripe-js";
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Button,
@@ -128,11 +127,7 @@ export const StripeCheckoutContainer = ({
   handleSubmit: (e: React.FormEvent) => Promise<void>;
 }) => {
   return (
-    <LayoutContainer>
-      <HeaderInner
-        title={"Enter Payment Details"}
-        icon={<CreditCardIcon variant="solid" size="lg" />}
-      />
+    <>
       <LayoutContent className="gap-6">{children}</LayoutContent>
       <LayoutFooter>
         {error && (
@@ -151,6 +146,6 @@ export const StripeCheckoutContainer = ({
           Purchase
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 };

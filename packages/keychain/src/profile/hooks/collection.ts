@@ -153,7 +153,7 @@ export function useCollections(): UseCollectionsResponse {
     {},
   );
 
-  const { status, refetch } = useCollectionsQuery(
+  const { data, status, refetch } = useCollectionsQuery(
     {
       accountAddress: address,
       projects: [project ?? ""],
@@ -163,28 +163,38 @@ export function useCollections(): UseCollectionsResponse {
     {
       queryKey: ["collections", offset],
       enabled: !!project && !!address,
-      onSuccess: ({ collections }) => {
-        const newCollections: { [key: string]: Collection } = {};
-        collections?.edges.forEach((e) => {
-          const contractAddress = e.node.meta.contractAddress;
-          const imagePath = e.node.meta.imagePath;
-          const name = e.node.meta.name;
-          const count = e.node.meta.assetCount;
-          newCollections[`${contractAddress}`] = {
-            address: contractAddress,
-            imageUrl: imagePath,
-            name: name ? name : "---",
-            totalCount: count,
-            type: TYPE,
-          };
-        });
-        if (collections?.edges.length === LIMIT) {
-          setOffset(offset + LIMIT);
-        }
-        setCollections((prev) => ({ ...prev, ...newCollections }));
-      },
     },
   );
+
+  const processedCollections = useMemo(() => {
+    if (!data?.collections) return {};
+
+    const newCollections: { [key: string]: Collection } = {};
+    data.collections.edges.forEach((e) => {
+      const contractAddress = e.node.meta.contractAddress;
+      const imagePath = e.node.meta.imagePath;
+      const name = e.node.meta.name;
+      const count = e.node.meta.assetCount;
+      newCollections[`${contractAddress}`] = {
+        address: contractAddress,
+        imageUrl: imagePath,
+        name: name ? name : "---",
+        totalCount: count,
+        type: TYPE,
+      };
+    });
+    return newCollections;
+  }, [data]);
+
+  useEffect(() => {
+    if (data?.collections) {
+      if (data.collections.edges.length === LIMIT) {
+        setOffset(offset + LIMIT);
+      }
+
+      setCollections((prev) => ({ ...prev, ...processedCollections }));
+    }
+  }, [data, offset, processedCollections]);
 
   return {
     collections: Object.values(collections).sort((a, b) =>

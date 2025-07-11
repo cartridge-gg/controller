@@ -6,7 +6,6 @@ import {
   CardDescription,
   DepositIcon,
   EthereumIcon,
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   MetaMaskColorIcon,
@@ -23,7 +22,6 @@ import {
   Spinner,
   HeaderInner,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
@@ -139,11 +137,11 @@ export function CryptoCheckout({
       <HeaderInner
         title={getTitle}
         icon={<DepositIcon variant="solid" size="lg" />}
-        onBack={() => {
-          if (state === CheckoutState.REVIEW_PURCHASE) {
-            onBack();
-          }
-        }}
+        // onBack={() => {
+        //   if (state === CheckoutState.REVIEW_PURCHASE) {
+        //     onBack();
+        //   }
+        // }}
       />
       <LayoutContent className="gap-6">
         {starterpackDetails ? (
@@ -238,7 +236,6 @@ export const walletIcon = (wallet?: ExternalWallet, useColor = false) => {
     : WALLET_CONFIG[wallet.type as keyof typeof WALLET_CONFIG].icon;
   return <Icon />;
 };
-
 const ReviewToken = ({
   title,
   name,
