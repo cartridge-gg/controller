@@ -1,10 +1,6 @@
 import {
   LayoutContainer,
   LayoutHeader,
-  Card,
-  CardHeader,
-  CardTitle,
-  Thumbnail,
   UsersIcon,
   SlotIcon,
   Button,
@@ -46,9 +42,9 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
   );
 
   return (
-    <LayoutContainer className="pb-12 min-h-[600px]">
+    <LayoutContainer className="min-h-[600px]">
       <LayoutHeader title="Select Team to Fund" icon={<SlotIcon size="lg" />} />
-      <LayoutContent className="h-full">
+      <LayoutContent className="h-full h-screen">
         <div className="flex flex-col gap-4 h-full w-full">
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
@@ -59,41 +55,26 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
               <p className="text-red-500">Error loading teams</p>
             </div>
           ) : sortedTeams.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-foreground-300 text-sm">
-                Please first create a team with slot cli
-              </p>
-            </div>
+            <Empty
+              icon="discover"
+              title="Please create a team with Slot cli"
+              className="h-full"
+            />
           ) : (
             sortedTeams.map((team) => (
-              <Card
+              <TokenSummary
                 key={team.id}
                 onClick={() => setSelectedTeam(team)}
                 className="cursor-pointer"
               >
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div className="flex flex-row items-center gap-3">
-                    <Thumbnail
-                      size="lg"
-                      icon={<UsersIcon variant="solid" size="lg" />}
-                      variant="light"
-                    />
-                    <div className="flex flex-col">
-                      <CardTitle className="text-foreground font-medium text-sm">
-                        {team.name || "Unknown Team"}
-                      </CardTitle>
-                      <p className="text-foreground-300 text-xs">
-                        {team.deployments?.totalCount || 0} Deployments
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-foreground font-bold text-sm">
-                      ${formatBalance(BigInt(team.credits), 8, 2)}
-                    </p>
-                  </div>
-                </CardHeader>
-              </Card>
+                <TokenCard
+                  title={team.name}
+                  image={<UsersIcon variant="solid" size="lg" />}
+                  amount={`${team.deployments?.totalCount} Deployments`}
+                  value={`$${formatBalance(BigInt(team.credits), 8, 2)}`}
+                  className={"pointer-events-none"}
+                />
+              </TokenSummary>
             ))
           )}
         </div>
