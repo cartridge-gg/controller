@@ -63,8 +63,8 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
         icon={<SlotIcon size="lg" />}
         hideSettings
       />
-      <LayoutContent className="h-full h-screen">
-        <div className="flex flex-col gap-4 h-full w-full">
+      <LayoutContent className="pb-3 flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col gap-4 pb-3">
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
               <Spinner size="lg" />
@@ -77,7 +77,7 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
             <Empty
               icon="discover"
               title="Please create a team with Slot cli"
-              className="h-full"
+              className="h-full md:h-[420px]"
             />
           ) : (
             sortedTeams.map((team) => (
