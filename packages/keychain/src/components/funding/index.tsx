@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Button,
   CoinsIcon,
   ControllerIcon,
+  HeaderInner,
 } from "@cartridge/ui";
 import { Deposit } from "./Deposit";
 import { Purchase } from "../purchase";
@@ -56,8 +55,8 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
   }
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
+    <>
+      <HeaderInner
         className="p-6"
         title={
           typeof title === "string"
@@ -86,6 +85,6 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
           </Button>
         )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

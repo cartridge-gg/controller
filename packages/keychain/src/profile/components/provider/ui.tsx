@@ -8,8 +8,8 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { useAccount } from "#profile/hooks/account";
 import { useArcade } from "#profile/hooks/arcade";
-import { useTrackedNavigation } from "@/hooks/navigation";
 import { QRCodeSVG } from "qrcode.react";
+import { useNavigation } from "@/context/navigation";
 
 function QrCodeDisplay({
   showQrCode,
@@ -64,8 +64,7 @@ export function UIProvider({ children }: PropsWithChildren) {
   const { chainId, closeModal, openSettings, logout } = useConnection();
   const account = useAccount();
   const [showQrCode, setShowQrCode] = useState(false);
-
-  const { navigate } = useTrackedNavigation();
+  const { navigate } = useNavigation();
 
   const onFollowersClick = useCallback(() => {
     const url = new URL(window.location.href);

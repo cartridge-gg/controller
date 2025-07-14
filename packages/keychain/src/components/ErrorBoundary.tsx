@@ -1,13 +1,12 @@
 import React, { PropsWithChildren } from "react";
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   AlertIcon,
   ExternalIcon,
   Button,
+  HeaderInner,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/const";
 import { Link } from "react-router-dom";
@@ -48,8 +47,8 @@ export function ErrorPage({ error }: { error: Error }) {
   }, [error, posthog]);
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
+    <>
+      <HeaderInner
         variant="expanded"
         title="Uh oh!"
         description="Something went wrong"
@@ -79,6 +78,6 @@ export function ErrorPage({ error }: { error: Error }) {
           close
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

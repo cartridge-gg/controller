@@ -1,5 +1,4 @@
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
-import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { useDeploy } from "@/hooks/deploy";
 import { useFeeToken } from "@/hooks/tokens";
@@ -9,7 +8,7 @@ import {
   CheckIcon,
   ControllerIcon,
   ExternalIcon,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
   Spinner,
@@ -133,13 +132,11 @@ export function DeployController({
 
   if (isLoading) {
     return (
-      <LayoutContainer>
-        <NavigationHeader
-          variant="expanded"
-          title="Checking account balance..."
-          icon={<Spinner size="xl" />}
-        />
-      </LayoutContainer>
+      <HeaderInner
+        variant="expanded"
+        title="Checking account balance..."
+        icon={<Spinner size="xl" />}
+      />
     );
   }
 
@@ -155,8 +152,8 @@ export function DeployController({
       );
     case "deploy":
       return (
-        <LayoutContainer>
-          <NavigationHeader
+        <>
+          <HeaderInner
             variant="expanded"
             icon={<ControllerIcon size="lg" />}
             title="Deploy Controller"
@@ -187,12 +184,12 @@ export function DeployController({
               DEPLOY
             </Button>
           </LayoutFooter>
-        </LayoutContainer>
+        </>
       );
     case "deploying":
       return (
-        <LayoutContainer>
-          <NavigationHeader
+        <>
+          <HeaderInner
             variant="expanded"
             icon={<Spinner size="xl" />}
             title="Deploying Controller"
@@ -219,12 +216,12 @@ export function DeployController({
               continue
             </Button>
           </LayoutFooter>
-        </LayoutContainer>
+        </>
       );
     case "deployed":
       return (
-        <LayoutContainer>
-          <NavigationHeader
+        <>
+          <HeaderInner
             variant="expanded"
             Icon={CheckIcon}
             title="Success!"
@@ -249,7 +246,7 @@ export function DeployController({
             ) : null}
             <Button onClick={onClose}>continue</Button>
           </LayoutFooter>
-        </LayoutContainer>
+        </>
       );
   }
 }

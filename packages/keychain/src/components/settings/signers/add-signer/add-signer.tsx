@@ -19,11 +19,9 @@ import {
   AddUserIcon,
   AlertIcon,
   Button,
-  CheckIcon,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   SignerMethod,
   SignerMethodKind,
   SignerPendingCard,
@@ -36,6 +34,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QueryObserverResult } from "react-query";
+import { useNavigate } from "react-router-dom";
 import { SignerAlert } from "../signer-alert";
 
 type SignerPending = {
@@ -46,12 +45,11 @@ type SignerPending = {
 };
 
 export function AddSigner({
-  onBack,
   controllerQuery,
 }: {
-  onBack: () => void;
   controllerQuery: QueryObserverResult<ControllerQuery>;
 }) {
+  const navigate = useNavigate();
   const [wallets, setWallets] = useState<boolean>(false);
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
     null,
@@ -114,20 +112,17 @@ export function AddSigner({
     ) {
       setTimeout(async () => {
         await controllerQuery.refetch();
-        onBack();
+        navigate("/settings");
       }, 2000);
     }
-  }, [signerPending, signerPending?.inProgress]);
+  }, [signerPending, signerPending?.inProgress, controllerQuery, navigate]);
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        Icon={headerIcon === "spinner" ? undefined : headerIcon}
-        icon={headerIcon === "spinner" ? <Spinner size="lg" /> : undefined}
+    <>
+      <HeaderInner
+        icon={<AddUserIcon />}
         variant="compressed"
         title="Add Signer"
-        onBack={onBack}
-        hideSettings
       />
       <LayoutContent className="flex flex-col gap-3 w-full h-fit">
         {!signerPending && <SignerAlert />}
@@ -172,8 +167,13 @@ export function AddSigner({
             Cancel
           </Button>
         )}
+        {!wallets && !signerPending && (
+          <Button variant="secondary" onClick={() => navigate("/settings")}>
+            Back
+          </Button>
+        )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }
 

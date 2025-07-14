@@ -9,8 +9,7 @@ import {
   Spinner,
   useUI,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
-import { LayoutContainer } from "@cartridge/ui";
+import { HeaderInner } from "@cartridge/ui";
 import { Elements } from "@stripe/react-stripe-js";
 import { Appearance, loadStripe } from "@stripe/stripe-js";
 import { useEffect, useMemo, useState } from "react";
@@ -116,7 +115,7 @@ export const PurchaseWithoutBalance = () => {
         stripe={stripePromise}
       >
         <StripeCheckout
-          onBack={() => setPurchaseState(PurchaseState.BACK)}
+          // onBack={() => setPurchaseState(PurchaseState.BACK)}
           onComplete={() => setPurchaseState(PurchaseState.PENDING)}
           price={{
             baseCostInCents: priceUsd,
@@ -129,8 +128,8 @@ export const PurchaseWithoutBalance = () => {
   }
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
+    <>
+      <HeaderInner
         icon={
           purchaseState === PurchaseState.PENDING ? (
             <Spinner />
@@ -199,6 +198,6 @@ export const PurchaseWithoutBalance = () => {
           </Button>
         )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 };

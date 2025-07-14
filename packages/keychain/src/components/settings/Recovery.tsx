@@ -1,18 +1,17 @@
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   AlertIcon,
   Button,
   Input,
+  HeaderInner,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
 
-export function Recovery({ onBack }: { onBack: () => void }) {
+export function Recovery() {
   const { controller, context, setContext } = useConnection();
   const [externalOwnerAddress, setExternalOwnerAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
@@ -43,22 +42,18 @@ export function Recovery({ onBack }: { onBack: () => void }) {
   }, [controller, externalOwnerAddress, context, setContext]);
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
-        variant="expanded"
-        title="Recovery Account(s)"
-        onBack={onBack}
-        hideSettings
-      />
+    <>
+      <HeaderInner variant="compressed" title="Add Recovery Account" />
       <LayoutContent>
         {/* TODO: Get rid of this div once Content is updated with TW */}
         <div className="flex flex-col gap-4">
-          <div className="text-sm text-foreground-400 text-center">
-            Your controller can be owned by an existing Starknet wallet
+          <div className="text-sm text-foreground-400">
+            Recovery accounts are Starknet wallets that can be used to recover
+            your Controller if you lose access to your signers.
           </div>
           <div className="flex flex-col gap-2">
             <Input
-              placeholder="0x..."
+              placeholder="Wallet Address"
               value={externalOwnerAddress}
               onChange={(e) => setExternalOwnerAddress(e.target.value)}
             />
@@ -77,6 +72,6 @@ export function Recovery({ onBack }: { onBack: () => void }) {
           Add Recovery Account
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

@@ -12,8 +12,7 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { CheckIcon, LayoutContainer, LayoutContent } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
+import { CheckIcon, HeaderInner, LayoutContent } from "@cartridge/ui";
 
 export function Slot() {
   const { pathname } = useLocation();
@@ -65,13 +64,8 @@ function Auth() {
 
 export function Success() {
   return (
-    <LayoutContainer className="pb-12">
-      <NavigationHeader
-        variant="expanded"
-        Icon={CheckIcon}
-        title="Success!"
-        hideNetwork
-      />
+    <>
+      <HeaderInner variant="expanded" Icon={CheckIcon} title="Success!" />
       <LayoutContent className="gap-4">
         <div className="flex w-full px-4 py-5 bg-background-200 border border-background-300 rounded">
           <p className="w-full text-sm">
@@ -93,6 +87,6 @@ export function Success() {
           </p>
         </div>
       </LayoutContent>
-    </LayoutContainer>
+    </>
   );
 }

@@ -11,8 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { LoginMode } from "@/components/connect/types";
 import { PageLoading } from "@/components/Loading";
 import { useSearchParams } from "react-router-dom";
-import { CheckIcon, LayoutContainer } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
+import { CheckIcon, HeaderInner } from "@cartridge/ui";
 import { Failure } from "./failure";
 
 type SessionResponse = {
@@ -165,15 +164,12 @@ export function Session() {
 
   if (isSuccess) {
     return (
-      <LayoutContainer className="pb-12">
-        <NavigationHeader
-          variant="expanded"
-          Icon={CheckIcon}
-          title="Session Registered!"
-          description="Return to the application to continue"
-          hideNetwork
-        />
-      </LayoutContainer>
+      <HeaderInner
+        variant="expanded"
+        Icon={CheckIcon}
+        title="Session Registered!"
+        description="Return to the application to continue"
+      />
     );
   }
 

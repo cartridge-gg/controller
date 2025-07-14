@@ -18,7 +18,6 @@ import {
   wallet,
 } from "starknet";
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   ArgentIcon,
@@ -28,8 +27,8 @@ import {
   Button,
   CopyAddress,
   Separator,
+  HeaderInner,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "../ErrorAlert";
 import { AmountSelection } from "./AmountSelection";
@@ -39,7 +38,6 @@ import { convertUSDToTokenAmount, useFeeToken } from "@/hooks/tokens";
 
 type DepositProps = {
   onComplete?: (deployHash?: string) => void;
-  onBack: () => void;
 };
 
 export function Deposit(innerProps: DepositProps) {
@@ -50,7 +48,7 @@ export function Deposit(innerProps: DepositProps) {
   );
 }
 
-function DepositInner({ onComplete, onBack }: DepositProps) {
+function DepositInner({ onComplete }: DepositProps) {
   const { connectAsync, connectors, isPending: isConnecting } = useConnect();
   const { controller } = useConnection();
   const { account: extAccount } = useAccount();
@@ -151,8 +149,8 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
   }, [controller]);
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
+    <>
+      <HeaderInner
         title="Deposit"
         description={
           controller ? (
@@ -160,7 +158,6 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
           ) : undefined
         }
         icon={<DepositIcon variant="solid" size="lg" />}
-        onBack={onBack}
       />
 
       <LayoutContent className="gap-6">
@@ -233,7 +230,7 @@ function DepositInner({ onComplete, onBack }: DepositProps) {
           }
         })()}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }
 

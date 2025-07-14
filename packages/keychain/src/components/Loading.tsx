@@ -1,10 +1,9 @@
 import {
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
   Skeleton,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 
 interface PageLoadingProps {
   headerVariant?: "expanded" | "hidden";
@@ -18,14 +17,11 @@ export function PageLoading({
   description,
 }: PageLoadingProps = {}) {
   return (
-    <LayoutContainer>
-      <NavigationHeader
+    <>
+      <HeaderInner
         variant={headerVariant}
         title={title}
         description={description}
-        hideNetwork
-        hideUsername
-        hideSettings
       />
 
       <LayoutContent className="gap-6 overflow-y-hidden">
@@ -50,6 +46,6 @@ export function PageLoading({
         {/* Button skeleton */}
         <Skeleton className="h-11 w-full rounded" />
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

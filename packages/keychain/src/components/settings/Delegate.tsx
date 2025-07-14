@@ -1,19 +1,20 @@
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   AlertIcon,
   Button,
   Input,
+  HeaderInner,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
+import { useNavigate } from "react-router-dom";
 
-export function Delegate({ onBack }: { onBack: () => void }) {
+export function Delegate() {
   const { controller, context, setContext } = useConnection();
+  const navigate = useNavigate();
   const [delegateAddress, setDelegateAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -43,13 +44,8 @@ export function Delegate({ onBack }: { onBack: () => void }) {
   }, [controller, delegateAddress, context, setContext]);
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
-        variant="expanded"
-        title="Delegate account"
-        onBack={() => onBack()}
-        hideSettings
-      />
+    <>
+      <HeaderInner variant="expanded" title="Delegate account" />
       <LayoutContent className="gap-6">
         <div className="flex flex-col gap-4">
           <div className="text-sm text-foreground-400 text-center">
@@ -73,6 +69,9 @@ export function Delegate({ onBack }: { onBack: () => void }) {
         </div>
       </LayoutContent>
       <LayoutFooter>
+        <Button variant="secondary" onClick={() => navigate("/settings")}>
+          Back
+        </Button>
         <Button onClick={onSetDelegate} disabled={!isValid}>
           Set delegate account
         </Button>
@@ -80,6 +79,6 @@ export function Delegate({ onBack }: { onBack: () => void }) {
           Setup later
         </Button> */}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

@@ -32,6 +32,9 @@ import { LoginMode } from "./connect/types";
 import { Settings } from "./settings";
 import { Purchase } from "./purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
+import { Recovery } from "./settings/Recovery";
+import { Delegate } from "./settings/Delegate";
+import { AddSignerRoute } from "./settings/AddSignerRoute";
 
 export function App() {
   const { controller } = useConnection();
@@ -45,6 +48,9 @@ export function App() {
     <Routes>
       <Route path="/" element={<Home />}>
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/recovery" element={<Recovery />} />
+        <Route path="/settings/delegate" element={<Delegate />} />
+        <Route path="/settings/add-signer" element={<AddSignerRoute />} />
         <Route
           path="/purchase"
           element={<Purchase type={PurchaseType.CREDITS} />}

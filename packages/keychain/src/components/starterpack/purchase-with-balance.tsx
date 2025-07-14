@@ -5,13 +5,12 @@ import {
   ControllerIcon,
   ExternalIcon,
   GiftIcon,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
   Spinner,
   useUI,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
-import { LayoutContainer } from "@cartridge/ui";
 import { useState, useEffect } from "react";
 import { Receiving } from "./receiving";
 import { useStarterPack } from "@/hooks/starterpack";
@@ -45,8 +44,8 @@ export const PurchaseWithBalance = () => {
   };
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
+    <>
+      <HeaderInner
         icon={
           purchaseState === PurchaseState.PENDING ? (
             <Spinner />
@@ -122,6 +121,6 @@ export const PurchaseWithBalance = () => {
           </>
         )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 };

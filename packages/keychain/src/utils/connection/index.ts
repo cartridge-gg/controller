@@ -40,7 +40,7 @@ export function connectToController<ParentMethods extends object>({
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),
       signMessage: () => signMessageFactory(setContext),
-      openSettings: () => openSettingsFactory(setContext),
+      openSettings: () => openSettingsFactory(),
       navigate: () => navigateFactory(),
       reset: () => () => {
         setContext(undefined);

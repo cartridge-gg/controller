@@ -2,13 +2,11 @@ import { addWebauthnSigner } from "@/components/settings/signers/add-signer/weba
 import { doSignup } from "@/hooks/account";
 import Controller from "@/utils/controller";
 import {
-  Button,
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Button,
+  HeaderInner,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import { Unsupported } from "./Unsupported";
 import { doSignup } from "@/hooks/account";
 import { useIsSupported } from "./useIsSupported";
@@ -89,12 +87,8 @@ export function Authenticate({
       : "continue";
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
-        variant="expanded"
-        title={title}
-        description={description}
-      />
+    <>
+      <HeaderInner variant="expanded" title={title} description={description} />
       <LayoutContent className="items-center pb-10">
         <FaceIDImage />
       </LayoutContent>
@@ -104,6 +98,6 @@ export function Authenticate({
           {cta}
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

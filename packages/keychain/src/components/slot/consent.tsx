@@ -1,6 +1,5 @@
 import Controller from "@/utils/controller";
-import { LayoutContainer, LayoutFooter, Button, Checkbox } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
+import { LayoutFooter, Button, Checkbox, HeaderInner } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -86,9 +85,9 @@ export function Consent() {
   }, [navigate, callback_uri, pathname]);
 
   return (
-    <LayoutContainer>
-      <NavigationHeader
-        onClose={onDeny}
+    <>
+      <HeaderInner
+        // onClose={onDeny}
         variant="expanded"
         title="Sign in to Slot"
         description={
@@ -156,6 +155,6 @@ export function Consent() {
           Continue
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

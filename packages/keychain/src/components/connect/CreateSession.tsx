@@ -68,36 +68,27 @@ const CreateSessionLayout = ({
     return duration + now();
   }, [duration]);
 
-  const onCreateSession = useCallback(async () => {
-    if (!controller || !policies) return;
-    try {
-      setError(undefined);
-      setIsConnecting(true);
+  const onCreateSession = useCallback(
+    async (shouldAuthorizePolicies?: boolean) => {
+      if (!controller || !policies) return;
+      try {
+        setError(undefined);
+        setIsConnecting(true);
 
-      const processedPolicies = processPolicies(policies);
+        const processedPolicies = processPolicies(
+          policies,
+          !shouldAuthorizePolicies,
+        );
 
-      await controller.createSession(expiresAt, processedPolicies, maxFee);
-      onConnect();
-    } catch (e) {
-      setError(e as unknown as Error);
-      setIsConnecting(false);
-    }
-  }, [controller, policies, maxFee, expiresAt, onConnect]);
-
-  const onSkipSession = useCallback(async () => {
-    if (!controller || !policies) return;
-    try {
-      setError(undefined);
-      setIsConnecting(true);
-
-      const processedPolicies = processPolicies(policies, true);
-      await controller.createSession(duration, processedPolicies, maxFee);
-      onConnect();
-    } catch (e) {
-      setError(e as unknown as Error);
-      setIsConnecting(false);
-    }
-  }, [controller, duration, policies, maxFee, onConnect]);
+        await controller.createSession(expiresAt, processedPolicies, maxFee);
+        onConnect();
+      } catch (e) {
+        setError(e as unknown as Error);
+        setIsConnecting(false);
+      }
+    },
+    [controller, policies, maxFee, expiresAt, onConnect],
+  );
 
   if (!upgrade.isSynced) {
     return <></>;
@@ -177,7 +168,7 @@ const CreateSessionLayout = ({
           <div className="flex items-center gap-4">
             <Button
               variant="secondary"
-              onClick={onSkipSession}
+              onClick={() => onCreateSession(false)}
               disabled={isConnecting}
               className="px-8"
             >
@@ -187,7 +178,7 @@ const CreateSessionLayout = ({
               className="flex-1"
               disabled={isConnecting || (!policies?.verified && !isConsent)}
               isLoading={isConnecting}
-              onClick={onCreateSession}
+              onClick={() => onCreateSession(true)}
             >
               {isUpdate ? "update" : "create"} session
             </Button>
