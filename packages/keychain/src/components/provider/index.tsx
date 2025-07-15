@@ -23,6 +23,7 @@ import { ArcadeProvider as ProfileArcadeProvider } from "#profile/components/pro
 import { MarketplaceProvider as ProfileMarketplaceProvider } from "#profile/components/provider/marketplace";
 import { DataProvider as ProfileDataProvider } from "#profile/components/provider/data";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
+import { ErrorBoundary } from "../ErrorBoundary";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -56,26 +57,28 @@ export function Provider({ children }: PropsWithChildren) {
                 <Auth0Provider {...auth0Config}>
                   <WalletsProvider>
                     <PostHogProvider>
-                      <UpgradeProvider controller={connection.controller}>
-                        <UIProvider>
-                          <StarknetConfig
-                            explorer={cartridge}
-                            chains={[sepolia, mainnet]}
-                            defaultChainId={defaultChainId}
-                            provider={jsonRpcProvider({ rpc })}
-                          >
-                            <TokensProvider>
-                              <ProfileMarketplaceProvider>
-                                <ProfileArcadeProvider>
-                                  <ProfileDataProvider>
-                                    {children}
-                                  </ProfileDataProvider>
-                                </ProfileArcadeProvider>
-                              </ProfileMarketplaceProvider>
-                            </TokensProvider>
-                          </StarknetConfig>
-                        </UIProvider>
-                      </UpgradeProvider>
+                      <ErrorBoundary>
+                        <UpgradeProvider controller={connection.controller}>
+                          <UIProvider>
+                            <StarknetConfig
+                              explorer={cartridge}
+                              chains={[sepolia, mainnet]}
+                              defaultChainId={defaultChainId}
+                              provider={jsonRpcProvider({ rpc })}
+                            >
+                              <TokensProvider>
+                                <ProfileMarketplaceProvider>
+                                  <ProfileArcadeProvider>
+                                    <ProfileDataProvider>
+                                      {children}
+                                    </ProfileDataProvider>
+                                  </ProfileArcadeProvider>
+                                </ProfileMarketplaceProvider>
+                              </TokensProvider>
+                            </StarknetConfig>
+                          </UIProvider>
+                        </UpgradeProvider>
+                      </ErrorBoundary>
                     </PostHogProvider>
                   </WalletsProvider>
                 </Auth0Provider>

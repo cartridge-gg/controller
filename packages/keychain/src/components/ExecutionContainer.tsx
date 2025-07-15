@@ -15,7 +15,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Call, EstimateFee } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
-import { Funding } from "./funding";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -40,7 +39,6 @@ export function ExecutionContainer({
   executionError,
   onSubmit,
   onDeploy,
-  onFund,
   onError,
   buttonText = "SUBMIT",
   right,
@@ -144,11 +142,9 @@ export function ExecutionContainer({
           ctrlError.data.includes("exceeds balance"))))
   ) {
     return (
-      <Funding
-        onComplete={() => {
-          resetState();
-          onFund?.();
-        }}
+      <ErrorAlert
+        title="Insufficient Balance"
+        description="Your account doesn't have enough funds to complete this transaction. Please fund your account."
       />
     );
   }

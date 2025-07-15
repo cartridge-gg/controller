@@ -1,4 +1,9 @@
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   LayoutContent,
   LayoutFooter,
@@ -45,9 +50,10 @@ function Credits() {
     username,
     interval: isVisible ? 30000 : undefined,
   });
+  const navigate = useNavigate();
 
   // Show loading state while credits are being fetched
-  if (!credit.balance.value) {
+  if (credit.balance.value === undefined) {
     return <CreditsLoadingState />;
   }
 
@@ -75,8 +81,7 @@ function Credits() {
       <LayoutFooter className="gap-4">
         <Button
           onClick={() => {
-            // TODO: Implement purchase credits
-            console.log("Purchase credits clicked");
+            navigate("/funding/credits");
           }}
         >
           Purchase

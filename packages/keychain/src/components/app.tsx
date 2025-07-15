@@ -1,4 +1,10 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { Home } from "./home";
 import { Authenticate } from "./authenticate";
 import { Session } from "./session";
@@ -35,12 +41,16 @@ import { PurchaseType } from "@/hooks/payments/crypto";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
+import { Funding } from "./funding";
+import { Deposit } from "./funding/Deposit";
 
 export function App() {
   const { controller } = useConnection();
+  const navigate = useNavigate();
 
   // No controller, send to login
   if (!controller) {
+    console.log("No controller, sending to login");
     return <CreateController loginMode={LoginMode.Controller} />;
   }
 
@@ -54,6 +64,36 @@ export function App() {
         <Route
           path="/purchase"
           element={<Purchase type={PurchaseType.CREDITS} />}
+        />
+        <Route path="/funding" element={<Funding />} />
+        <Route
+          path="/funding/deposit"
+          element={
+            <Deposit
+              onComplete={() => {
+                const searchParams = new URLSearchParams(
+                  window.location.search,
+                );
+                const returnTo = searchParams.get("returnTo");
+                navigate(returnTo || "/funding");
+              }}
+            />
+          }
+        />
+        <Route
+          path="/funding/credits"
+          element={
+            <Purchase
+              type={PurchaseType.CREDITS}
+              onBack={() => {
+                const searchParams = new URLSearchParams(
+                  window.location.search,
+                );
+                const returnTo = searchParams.get("returnTo");
+                navigate(returnTo || "/funding");
+              }}
+            />
+          }
         />
         <Route path="authenticate" element={<Authenticate />} />
         <Route path="session" element={<Session />} />

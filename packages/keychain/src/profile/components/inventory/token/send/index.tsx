@@ -13,7 +13,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   Call,
   TransactionExecutionStatus,
@@ -38,8 +38,6 @@ export function SendToken() {
   const userSelectedToken = useRef(false);
 
   const { refetchTransfers } = useData();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState<number | undefined>();
@@ -114,20 +112,11 @@ export function SendToken() {
             refetchTransfers();
           }, 5000);
         }
-
-        navigate(`../../..?${searchParams.toString()}`);
       } finally {
         setLoading(false);
       }
     },
-    [
-      selectedToken,
-      controller,
-      execute,
-      navigate,
-      searchParams,
-      refetchTransfers,
-    ],
+    [selectedToken, controller, execute, refetchTransfers],
   );
 
   if (!token) {
