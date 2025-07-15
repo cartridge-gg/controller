@@ -136,6 +136,7 @@ export function DeployController({
         variant="expanded"
         title="Checking account balance..."
         icon={<Spinner size="xl" />}
+        hideIcon
       />
     );
   }
@@ -158,6 +159,7 @@ export function DeployController({
             icon={<ControllerIcon size="lg" />}
             title="Deploy Controller"
             description="This will deploy your Controller"
+            hideIcon
           />
           <LayoutContent>
             <TransactionSummary
@@ -194,6 +196,7 @@ export function DeployController({
             icon={<Spinner size="xl" />}
             title="Deploying Controller"
             description={`Your controller is being deployed on ${chainName}`}
+            hideIcon
           />
           <LayoutContent>
             {deployHash && controller && (
@@ -226,6 +229,7 @@ export function DeployController({
             Icon={CheckIcon}
             title="Success!"
             description={`Your controller has been deployed on ${chainName}`}
+            hideIcon
           />
           <LayoutContent className="items-center">
             {deployHash && controller && (

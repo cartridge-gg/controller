@@ -66,6 +66,7 @@ export function Funding({ title, isSlot, onComplete }: FundingProps) {
               : ""
         }
         icon={<ControllerIcon size="lg" />}
+        hideIcon
       />
       <LayoutContent className="gap-6 px-6">
         <Balance types={balances} />

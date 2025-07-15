@@ -158,6 +158,7 @@ function DepositInner({ onComplete }: DepositProps) {
           ) : undefined
         }
         icon={<DepositIcon variant="solid" size="lg" />}
+        hideIcon
       />
 
       <LayoutContent className="gap-6">

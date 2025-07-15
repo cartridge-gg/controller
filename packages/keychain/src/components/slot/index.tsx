@@ -65,7 +65,12 @@ function Auth() {
 export function Success() {
   return (
     <>
-      <HeaderInner variant="expanded" Icon={CheckIcon} title="Success!" />
+      <HeaderInner
+        variant="expanded"
+        Icon={CheckIcon}
+        title="Success!"
+        hideIcon
+      />
       <LayoutContent className="gap-4">
         <div className="flex w-full px-4 py-5 bg-background-200 border border-background-300 rounded">
           <p className="w-full text-sm">

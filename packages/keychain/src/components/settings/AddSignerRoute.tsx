@@ -1,5 +1,8 @@
 import { useConnection } from "@/hooks/connection";
-import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
+import {
+  ControllerQuery,
+  useControllerQuery,
+} from "@cartridge/ui/utils/api/cartridge";
 import { useMemo } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
@@ -33,7 +36,7 @@ export function AddSignerRoute() {
         },
         ...controllerQueryRaw.data,
       },
-    } as QueryObserverResult<any>;
+    } as QueryObserverResult<ControllerQuery>;
   }, [chainId, controllerQueryRaw.data]);
 
   return <AddSigner controllerQuery={controllerQuery} />;

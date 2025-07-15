@@ -52,6 +52,7 @@ export function NavigationHeader({
       {...props}
       onBack={shouldShowBack ? handleBack : undefined}
       onClose={shouldShowClose ? handleCloseAction : undefined}
+      hideSettings
     />
   );
 }

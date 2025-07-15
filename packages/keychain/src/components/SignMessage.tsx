@@ -81,6 +81,7 @@ export function SignMessage({
       <HeaderInner
         title="Signature Request"
         description={`${origin} is asking you to sign a message`}
+        hideIcon
       />
       <LayoutContent>
         {messageData && (

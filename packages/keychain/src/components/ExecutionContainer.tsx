@@ -175,6 +175,7 @@ export function ExecutionContainer({
         description={description}
         icon={icon}
         right={right}
+        hideIcon
       />
       {children}
       <LayoutFooter>

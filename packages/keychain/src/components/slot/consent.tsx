@@ -64,11 +64,6 @@ export function Consent() {
     window.location.href = url;
   }, [callback_uri, allAccepted]);
 
-  const onDeny = useCallback(async () => {
-    const url = decodeURIComponent(callback_uri);
-    window.location.href = url;
-  }, [callback_uri]);
-
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
       navigate(
@@ -87,7 +82,6 @@ export function Consent() {
   return (
     <>
       <HeaderInner
-        // onClose={onDeny}
         variant="expanded"
         title="Sign in to Slot"
         description={
@@ -96,6 +90,7 @@ export function Consent() {
             manage your Cartridge Infrastructure
           </>
         }
+        hideIcon
       />
 
       <div className="flex flex-col gap-4 p-6 pb-2">

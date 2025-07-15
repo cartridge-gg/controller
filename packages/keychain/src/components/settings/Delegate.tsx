@@ -45,7 +45,7 @@ export function Delegate() {
 
   return (
     <>
-      <HeaderInner variant="expanded" title="Delegate account" />
+      <HeaderInner variant="compressed" title="Delegate account" hideIcon />
       <LayoutContent className="gap-6">
         <div className="flex flex-col gap-4">
           <div className="text-sm text-foreground-400 text-center">

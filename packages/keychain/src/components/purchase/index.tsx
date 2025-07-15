@@ -138,6 +138,7 @@ export function Purchase(props: PurchaseCreditsProps) {
             <Supply amount={starterpackDetails!.supply} />
           ) : undefined
         }
+        hideIcon
       />
       <LayoutContent>
         <PurchaseContent

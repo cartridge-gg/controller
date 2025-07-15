@@ -123,6 +123,7 @@ export function AddSigner({
         icon={<AddUserIcon />}
         variant="compressed"
         title="Add Signer"
+        hideIcon
       />
       <LayoutContent className="flex flex-col gap-3 w-full h-fit">
         {!signerPending && <SignerAlert />}

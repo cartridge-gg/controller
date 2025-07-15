@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { useUrlTxns } from "@/hooks/transaction";
 import { Transaction, TransactionState } from "@/components/Transaction";
-import {
-  LayoutContainer,
-  LayoutContent,
-  ClockIcon,
-  HeaderInner,
-} from "@cartridge/ui";
+import { LayoutContent, ClockIcon, HeaderInner } from "@cartridge/ui";
 
 export function Pending() {
   const [txnResults, setTxnResults] = useState<TransactionState[]>([]);
@@ -36,6 +31,7 @@ export function Pending() {
         icon={<ClockIcon variant="solid" size="lg" />}
         title={title}
         description={description}
+        hideIcon
       />
       <LayoutContent>
         {chainId &&

@@ -59,6 +59,7 @@ export const PurchaseWithBalance = () => {
             ? "Success!"
             : "Purchase Starter Pack"
         }
+        hideIcon
       />
       <LayoutContent>
         {purchaseState === PurchaseState.REVIEW ? (

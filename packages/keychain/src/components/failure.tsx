@@ -8,6 +8,7 @@ export function Failure() {
       variant="expanded"
       Icon={AlertIcon}
       title="Uh-oh something went wrong"
+      hideIcon
       description={
         <>
           If this problem persists, swing by the Cartridge support channel on{" "}

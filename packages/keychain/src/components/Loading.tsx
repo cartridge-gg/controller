@@ -22,6 +22,7 @@ export function PageLoading({
         variant={headerVariant}
         title={title}
         description={description}
+        hideIcon
       />
 
       <LayoutContent className="gap-6 overflow-y-hidden">

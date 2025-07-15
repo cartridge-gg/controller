@@ -43,7 +43,7 @@ export function Recovery() {
 
   return (
     <>
-      <HeaderInner variant="compressed" title="Add Recovery Account" />
+      <HeaderInner variant="compressed" title="Add Recovery Account" hideIcon />
       <LayoutContent>
         {/* TODO: Get rid of this div once Content is updated with TW */}
         <div className="flex flex-col gap-4">

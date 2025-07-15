@@ -169,6 +169,7 @@ export function Session() {
         Icon={CheckIcon}
         title="Session Registered!"
         description="Return to the application to continue"
+        hideIcon
       />
     );
   }

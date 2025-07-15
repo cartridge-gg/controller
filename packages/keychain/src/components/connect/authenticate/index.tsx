@@ -88,7 +88,12 @@ export function Authenticate({
 
   return (
     <>
-      <HeaderInner variant="expanded" title={title} description={description} />
+      <HeaderInner
+        variant="expanded"
+        title={title}
+        description={description}
+        hideIcon
+      />
       <LayoutContent className="items-center pb-10">
         <FaceIDImage />
       </LayoutContent>
