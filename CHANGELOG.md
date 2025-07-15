@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.8.1] - 2025-07-15
+
+### ✨ New Features
+- **@cartridge/keychain**: Added multi-signer support allowing users to add additional signers to their accounts for enhanced security and flexibility (#1813, #1821)
+- **@cartridge/keychain**: Implemented team-based slot funding flow enabling teams to fund slots collaboratively (#1815)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Refactored purchase flow for better maintainability and user experience (#1808)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed slot team selection screen display issues (#1826)
+- **@cartridge/keychain**: Improved error messaging clarity in signer addition process (#1818)
+- **@cartridge/keychain**: Removed unnecessary version constraint for adding signers (#1817)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates to the UI component library for improved design consistency and functionality (#1827, #1825, #1823, #1822, #1820, #1819, #1816, #1814, #1811, #1805, #1803)
+
 ## [0.8.0] - 2025-06-24
 
 ### ✨ New Features
