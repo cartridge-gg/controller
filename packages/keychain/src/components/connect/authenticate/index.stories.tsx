@@ -16,6 +16,7 @@ export const Default: Story = {
     name: "account-1",
     network: constants.NetworkName.SN_MAIN,
     action: "login",
+    appId: "app-1",
     onSuccess: () => {
       console.log("Success!");
     },
