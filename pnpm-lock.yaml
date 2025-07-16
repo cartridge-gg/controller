@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@cartridge/controller-wasm':
-      specifier: ^0.2.2
-      version: 0.2.2
+      specifier: ^0.2.3
+      version: 0.2.3
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -269,7 +269,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.2.2
+        version: 0.2.3
       starknet:
         specifier: ^7.6.2
         version: 7.6.2
@@ -377,7 +377,7 @@ importers:
     dependencies:
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.2.2
+        version: 0.2.3
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -505,7 +505,7 @@ importers:
         version: link:../controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.2.2
+        version: 0.2.3
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -1091,8 +1091,8 @@ packages:
   '@cartridge/arcade@0.0.0':
     resolution: {integrity: sha512-Kab7xBDgP3IphVrkGGyh7Qq9OAa6mnPwiecR31OO0JC6dfRtLCMuELOIlJD75+UhLW0NE7/Z30xF7tx6zhUXWw==}
 
-  '@cartridge/controller-wasm@0.2.2':
-    resolution: {integrity: sha512-cmrrN3+BzQvIESyLcvwdu77KIvu4X25sXxPAEzSLdFMETFSX6HI/s0eiatKVhCfYXRKwTCC6ViLvWGLwMLwOhg==}
+  '@cartridge/controller-wasm@0.2.3':
+    resolution: {integrity: sha512-2yxPMcgwdxtwy6g8VtJU6CNOAYJaSc0G5JXxcHsVeYc0rrDExk0IR1srjxhzLglYlF3jutirt9yV3mKV1NquVQ==}
 
   '@cartridge/marketplace@0.0.9':
     resolution: {integrity: sha512-kKS+jhTKWo6U1v+3OxFWyQr4VHLIiXlgKvDkNvvgnbgJAnReg6NP9yaP/Gq3VoP/1i9elyzpo3HqCVU4Z33bhg==}
@@ -9952,7 +9952,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/controller-wasm@0.2.2': {}
+  '@cartridge/controller-wasm@0.2.3': {}
 
   '@cartridge/marketplace@0.0.9(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
