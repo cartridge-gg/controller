@@ -43,12 +43,9 @@ export function Home() {
     }
   }, [context?.type, posthog]);
 
-  // Allow direct access for /slot routes
-  const isSlotRoute = location.pathname.startsWith("/slot");
-  if (
-    (window.self === window.top && !isSlotRoute) ||
-    (!origin && !isSlotRoute)
-  ) {
+  // Allow direct access for / routes
+  const isBasePath = location.pathname.startsWith("/");
+  if ((window.self === window.top && !isBasePath) || (!origin && !isBasePath)) {
     return <></>;
   }
 

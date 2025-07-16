@@ -45,19 +45,7 @@ function Auth() {
     enabled: true,
   });
 
-  console.log("[Slot Auth] Debug info:", {
-    user,
-    controller: !!controller,
-    isFetched,
-    searchParams: Object.fromEntries(searchParams.entries()),
-  });
-
   useEffect(() => {
-    console.log("[Slot Auth] useEffect triggered:", {
-      hasUser: !!user,
-      hasController: !!controller,
-    });
-
     if (user && controller) {
       const returnTo = searchParams.get("returnTo");
       const otherParams = Array.from(searchParams.entries())
@@ -72,24 +60,20 @@ function Auth() {
         ? `${returnTo}${otherParams}`
         : `/slot/consent${otherParams}`;
 
-      console.log("[Slot Auth] Navigating to:", target);
       navigate(target, { replace: true });
     }
   }, [user, controller, navigate, searchParams]);
 
   useEffect(() => {
     if (controller && isFetched && !user) {
-      console.log("[Slot Auth] Controller set but no user, refetching...");
       refetch();
     }
   }, [controller, user, isFetched, refetch]);
 
   if (!isFetched) {
-    console.log("[Slot Auth] Still fetching user data...");
     return <PageLoading />;
   }
 
-  console.log("[Slot Auth] Showing CreateController (no user or controller)");
   return <CreateController isSlot={true} />;
 }
 
