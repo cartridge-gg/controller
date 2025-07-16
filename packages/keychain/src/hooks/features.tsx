@@ -10,7 +10,7 @@ import React, {
 
 const LOCAL_STORAGE_KEY = "@cartridge/features";
 
-export type Feature = "new-login";
+export type Feature = "addSigner";
 
 // --- Helper Functions ---
 
@@ -49,6 +49,21 @@ export const FeatureProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [features, setFeatures] = useState<Record<string, boolean>>(() =>
     loadFeaturesFromStorage(),
   );
+
+  useEffect(() => {
+    window.addEventListener(
+      "storage",
+      function (event) {
+        if (event.storageArea === localStorage) {
+          setFeatures(loadFeaturesFromStorage());
+        }
+      },
+      false,
+    );
+    return () => {
+      window.removeEventListener("storage", () => {});
+    };
+  }, [setFeatures]);
 
   // Persist changes to local storage
   useEffect(() => {

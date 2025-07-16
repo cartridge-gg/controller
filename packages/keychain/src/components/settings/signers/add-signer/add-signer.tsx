@@ -16,7 +16,9 @@ import {
 } from "@cartridge/controller-wasm";
 import {
   AddUserIcon,
+  AlertIcon,
   Button,
+  CheckIcon,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
@@ -25,6 +27,7 @@ import {
   SignerMethodKind,
   SignerPendingCard,
   SignerPendingCardKind,
+  Spinner,
 } from "@cartridge/ui";
 import {
   ControllerQuery,
@@ -53,12 +56,61 @@ export function AddSigner({
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
     null,
   );
+  const [headerIcon, setHeaderIcon] = useState<typeof AddUserIcon | "spinner">(
+    AddUserIcon,
+  );
+
+  const handleClick = useCallback(
+    async (
+      auth: SignerMethodKind,
+      authFn: (auth: SignerMethodKind) => Promise<string | undefined>,
+    ) => {
+      try {
+        setSignerPending({
+          kind: auth,
+          inProgress: true,
+        });
+        setHeaderIcon("spinner");
+
+        const alreadyOwner = await authFn(auth);
+        if (alreadyOwner) {
+          setSignerPending({
+            kind: auth,
+            inProgress: false,
+            authedAddress: alreadyOwner,
+          });
+          setHeaderIcon(CheckIcon);
+          return;
+        }
+
+        setSignerPending({
+          kind: auth,
+          inProgress: false,
+        });
+        setHeaderIcon(CheckIcon);
+      } catch (error) {
+        console.error(error);
+        const errorMessage =
+          error instanceof Error || error instanceof JsControllerError
+            ? error.message
+            : "Unknown error";
+        setSignerPending({
+          kind: auth,
+          inProgress: false,
+          error: errorMessage,
+        });
+        setHeaderIcon(AlertIcon);
+      }
+    },
+    [setSignerPending, setHeaderIcon],
+  );
 
   useEffect(() => {
     if (
       signerPending &&
       signerPending.inProgress === false &&
-      !signerPending.error
+      !signerPending.error &&
+      !signerPending.authedAddress
     ) {
       setTimeout(async () => {
         await controllerQuery.refetch();
@@ -70,14 +122,15 @@ export function AddSigner({
   return (
     <LayoutContainer>
       <LayoutHeader
-        icon={<AddUserIcon />}
+        Icon={headerIcon === "spinner" ? undefined : headerIcon}
+        icon={headerIcon === "spinner" ? <Spinner size="lg" /> : undefined}
         variant="compressed"
         title="Add Signer"
         onBack={onBack}
         hideSettings
       />
       <LayoutContent className="flex flex-col gap-3 w-full h-fit">
-        <SignerAlert />
+        {!signerPending && <SignerAlert />}
         {signerPending ? (
           <SignerPendingCard
             kind={signerPending.kind as SignerPendingCardKind}
@@ -87,18 +140,18 @@ export function AddSigner({
           />
         ) : wallets ? (
           <WalletAuths
-            setSignerPending={setSignerPending}
             currentSigners={controllerQuery.data?.controller?.signers?.map(
               (signer) => signer.metadata as CredentialMetadata,
             )}
+            handleClick={handleClick}
           />
         ) : (
           <RegularAuths
             setWallets={setWallets}
-            setSignerPending={setSignerPending}
             currentSigners={controllerQuery.data?.controller?.signers?.map(
               (signer) => signer.metadata as CredentialMetadata,
             )}
+            handleClick={handleClick}
           />
         )}
       </LayoutContent>
@@ -108,8 +161,9 @@ export function AddSigner({
           <Button
             variant="secondary"
             onClick={() => {
-              if (signerPending?.error) {
+              if (signerPending?.error || signerPending?.authedAddress) {
                 setSignerPending(null);
+                setHeaderIcon(AddUserIcon);
               } else {
                 setWallets(false);
               }
@@ -124,11 +178,14 @@ export function AddSigner({
 }
 
 const WalletAuths = ({
-  setSignerPending,
   currentSigners,
+  handleClick,
 }: {
-  setSignerPending: (signerPending: SignerPending | null) => void;
   currentSigners: CredentialMetadata[] | undefined;
+  handleClick: (
+    auth: SignerMethodKind,
+    authFn: (auth: SignerMethodKind) => Promise<string | undefined>,
+  ) => void;
 }) => {
   const { wallets, connectWallet } = useWallets();
   const { controller } = useController();
@@ -145,13 +202,8 @@ const WalletAuths = ({
     [wallets],
   );
 
-  const handleClick = useCallback(async (wallet: SignerMethodKind) => {
-    try {
-      setSignerPending({
-        kind: wallet as SignerMethodKind,
-        inProgress: true,
-      });
-
+  const handleClickInner = useCallback(
+    async (wallet: SignerMethodKind) => {
       let response: ExternalWalletResponse<unknown> | null = null;
       let signer: Signer | null = null;
       let signerInput: JsSignerInput | null = null;
@@ -204,39 +256,17 @@ const WalletAuths = ({
           throw new Error("Wallet not supported");
       }
 
-      if (response?.success && response.account) {
-        if (
-          currentSigners?.find(
-            (signer) => credentialToAddress(signer) === response.account,
-          )
-        ) {
-          setSignerPending({
-            kind: wallet as SignerMethodKind,
-            inProgress: false,
-            authedAddress: response.account,
-          });
-          return;
-        }
-
-        await controller?.addOwner(signer!, signerInput!);
-        setSignerPending({
-          kind: wallet as SignerMethodKind,
-          inProgress: false,
-        });
+      if (
+        currentSigners?.find(
+          (signer) => credentialToAddress(signer) === response.account,
+        )
+      ) {
+        return response.account;
       }
-    } catch (error) {
-      console.error(error);
-      const errorMessage =
-        error instanceof Error || error instanceof JsControllerError
-          ? error.message
-          : "Unknown error";
-      setSignerPending({
-        kind: wallet as SignerMethodKind,
-        inProgress: false,
-        error: errorMessage,
-      });
-    }
-  }, []);
+      await controller?.addOwner(signer!, signerInput!);
+    },
+    [currentSigners, controller],
+  );
 
   return (
     <>
@@ -244,7 +274,9 @@ const WalletAuths = ({
         <SignerMethod
           key={wallet as string}
           kind={wallet as SignerMethodKind}
-          onClick={() => handleClick(wallet as SignerMethodKind)}
+          onClick={() =>
+            handleClick(wallet as SignerMethodKind, handleClickInner)
+          }
         />
       ))}
     </>
@@ -253,41 +285,17 @@ const WalletAuths = ({
 
 const RegularAuths = ({
   setWallets,
-  setSignerPending,
   currentSigners,
+  handleClick,
 }: {
   setWallets: (wallets: boolean) => void;
-  setSignerPending: (signerPending: SignerPending | null) => void;
   currentSigners: CredentialMetadata[] | undefined;
+  handleClick: (
+    auth: SignerMethodKind,
+    authFn: (auth: SignerMethodKind) => Promise<string | undefined>,
+  ) => void;
 }) => {
   const { controller } = useController();
-  const handleClick = useCallback(
-    async (kind: SignerMethodKind, addFn: () => Promise<void>) => {
-      try {
-        setSignerPending({
-          kind,
-          inProgress: true,
-        });
-        await addFn();
-        setSignerPending({
-          inProgress: false,
-          kind,
-        });
-      } catch (error) {
-        console.error(error);
-        const errorMessage =
-          error instanceof Error || error instanceof JsControllerError
-            ? error.message
-            : "Unknown error";
-        setSignerPending({
-          kind,
-          inProgress: false,
-          error: errorMessage,
-        });
-      }
-    },
-    [setSignerPending],
-  );
 
   return (
     <>
@@ -296,6 +304,7 @@ const RegularAuths = ({
         onClick={async () => {
           await handleClick("passkey", async () => {
             await addWebauthnSigner(controller);
+            return undefined;
           });
         }}
       />
@@ -328,12 +337,7 @@ const RegularAuths = ({
                 (signer) => credentialToAddress(signer) === response.account,
               )
             ) {
-              setSignerPending({
-                kind: "discord",
-                inProgress: false,
-                authedAddress: response.account,
-              });
-              return;
+              return response.account;
             }
             await controller?.addOwner(
               { eip191: { address: response.account } },

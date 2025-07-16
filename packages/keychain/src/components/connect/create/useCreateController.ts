@@ -16,7 +16,6 @@ import {
   SignerInput,
   SignerType,
   useAccountQuery,
-  WebauthnCredential,
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo, useState } from "react";
@@ -32,7 +31,6 @@ import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
-import { findAvailableCredential } from "./webauthn/device-detection";
 
 export interface SignupResponse {
   address: string;
@@ -310,36 +308,24 @@ export function useCreateController({
       let loginResponse: LoginResponse | undefined;
       switch (authenticationMethod) {
         case "webauthn": {
-          const signers = controller.signers?.filter(
+          const webauthnSigners = controller.signers?.filter(
             (signer) => signer.metadata.__typename === "WebauthnCredentials",
           );
-          if (!signers || signers.length === 0) {
+          if (!webauthnSigners || webauthnSigners.length === 0) {
             throw new Error("Signer not found for controller");
-          }
-          let selectedCredential = (signers[0].metadata as WebauthnCredentials)
-            .webauthn?.[0];
-          if (signers.length > 1) {
-            const passkeysCredentials = await findAvailableCredential(
-              signers.map(
-                (signer) =>
-                  (signer.metadata as WebauthnCredentials)
-                    .webauthn?.[0] as WebauthnCredential,
-              ),
-              import.meta.env.VITE_RP_ID!,
-            );
-            selectedCredential =
-              passkeysCredentials ??
-              (signers[0] as WebauthnCredentials).webauthn?.[0];
-            if (!selectedCredential) {
-              throw new Error("No available credentials found");
-            }
-          }
-          if (!selectedCredential) {
-            throw new Error("No available credentials found");
           }
           await loginWithWebauthn(
             controller,
-            selectedCredential,
+            {
+              webauthns: webauthnSigners.map((signer) => {
+                const webauthn = signer.metadata as WebauthnCredentials;
+                return {
+                  rpId: import.meta.env.VITE_RP_ID!,
+                  credentialId: webauthn.webauthn?.[0]?.id ?? "",
+                  publicKey: webauthn.webauthn?.[0]?.publicKey ?? "",
+                };
+              }),
+            },
             loginMode,
             !!isSlot,
           );
