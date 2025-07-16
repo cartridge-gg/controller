@@ -92,7 +92,8 @@ export default defineConfig(({ mode }) => ({
       "react-native-css-interop",
     ], // Pre-bundle common dependencies
     esbuildOptions: {
-      jsx: "transform",
+      mainFields: ["module", "main"],
+      jsx: "automatic",
       loader: {
         ".js": "jsx",
         ".mjs": "jsx",

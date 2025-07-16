@@ -6,7 +6,7 @@ import nativewind from "nativewind/preset";
 const config: Config = {
   content: [
     "./src/**/*.{html,ts,tsx}",
-    "./node_modules/@cartridge/ui/dist/**/*.{js,jsx}",
+    "./node_modules/@cartridge/ui-ts/dist/**/*.{js,jsx}",
   ],
   presets: [nativewind, cartridgeTWPreset],
   theme: {

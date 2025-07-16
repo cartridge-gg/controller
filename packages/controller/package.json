@@ -5,7 +5,6 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
-  "main": "dist/index.js",
   "scripts": {
     "build:deps": "pnpm build",
     "dev": "vite build --watch",
