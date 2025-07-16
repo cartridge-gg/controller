@@ -26,6 +26,20 @@
         ".svelte-kit/**"
       ]
     },
+    "build:compat": {
+      "dependsOn": [
+        "^build:deps",
+        "^build:compat"
+      ],
+      "outputs": [
+        ".next/**",
+        "dist/**",
+        "**/pkg-controller/**",
+        "**/pkg-session/**",
+        "build/**",
+        ".svelte-kit/**"
+      ]
+    },
     "dev": {
       "persistent": true,
       "dependsOn": [

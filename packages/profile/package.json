@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:compat": "tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier --write ./src index.html",
     "format:check": "prettier --check ./src index.html",
