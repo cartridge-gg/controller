@@ -22,19 +22,19 @@
     "test:storybook": "start-server-and-test 'pnpm storybook:serve' 6001 'pnpm test-storybook -u'"
   },
   "imports": {
-    "#profile/hooks/account": {
+    "@/hooks/account": {
       "storybook": "./src/profile/hooks/account.mock.ts",
       "default": "./src/profile/hooks/account.ts"
     },
-    "#profile/hooks/collection": {
+    "@/hooks/collection": {
       "storybook": "./src/profile/hooks/collection.mock.ts",
       "default": "./src/profile/hooks/collection.ts"
     },
-    "#profile/hooks/token": {
+    "@/hooks/token": {
       "storybook": "./src/profile/hooks/token.mock.ts",
       "default": "./src/profile/hooks/token.ts"
     },
-    "#profile/*": [
+    "@/*": [
       "./src/profile/*",
       "./src/profile/*.ts",
       "./src/profile/*.tsx",

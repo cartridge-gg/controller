@@ -19,9 +19,9 @@ import { PostHogProvider } from "./posthog";
 import { TokensProvider } from "./tokens";
 import { UIProvider } from "./ui";
 import { FeatureProvider } from "@/hooks/features";
-import { ArcadeProvider as ProfileArcadeProvider } from "#profile/components/provider/arcade";
-import { MarketplaceProvider as ProfileMarketplaceProvider } from "#profile/components/provider/marketplace";
-import { DataProvider as ProfileDataProvider } from "#profile/components/provider/data";
+import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
+import { MarketplaceProvider as ProfileMarketplaceProvider } from "@/components/provider/marketplace";
+import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { ErrorBoundary } from "../ErrorBoundary";
 
