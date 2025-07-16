@@ -17,7 +17,6 @@ import {
 } from "@cartridge/controller-wasm";
 import {
   AddUserIcon,
-  AlertIcon,
   Button,
   HeaderInner,
   LayoutContent,
@@ -26,7 +25,6 @@ import {
   SignerMethodKind,
   SignerPendingCard,
   SignerPendingCardKind,
-  Spinner,
 } from "@cartridge/ui";
 import {
   ControllerQuery,
@@ -54,9 +52,6 @@ export function AddSigner({
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
     null,
   );
-  const [headerIcon, setHeaderIcon] = useState<typeof AddUserIcon | "spinner">(
-    AddUserIcon,
-  );
 
   const handleClick = useCallback(
     async (
@@ -68,7 +63,6 @@ export function AddSigner({
           kind: auth,
           inProgress: true,
         });
-        setHeaderIcon("spinner");
 
         const alreadyOwner = await authFn(auth);
         if (alreadyOwner) {
@@ -77,7 +71,6 @@ export function AddSigner({
             inProgress: false,
             authedAddress: alreadyOwner,
           });
-          setHeaderIcon(CheckIcon);
           return;
         }
 
@@ -85,7 +78,6 @@ export function AddSigner({
           kind: auth,
           inProgress: false,
         });
-        setHeaderIcon(CheckIcon);
       } catch (error) {
         console.error(error);
         const errorMessage =
@@ -97,10 +89,9 @@ export function AddSigner({
           inProgress: false,
           error: errorMessage,
         });
-        setHeaderIcon(AlertIcon);
       }
     },
-    [setSignerPending, setHeaderIcon],
+    [setSignerPending],
   );
 
   useEffect(() => {
@@ -159,7 +150,6 @@ export function AddSigner({
             onClick={() => {
               if (signerPending?.error || signerPending?.authedAddress) {
                 setSignerPending(null);
-                setHeaderIcon(AddUserIcon);
               } else {
                 setWallets(false);
               }

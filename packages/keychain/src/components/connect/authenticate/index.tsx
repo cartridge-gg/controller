@@ -8,10 +8,7 @@ import {
   HeaderInner,
 } from "@cartridge/ui";
 import { Unsupported } from "./Unsupported";
-import { doSignup } from "@/hooks/account";
-import { useIsSupported } from "./useIsSupported";
 import { FaceIDImage } from "./FaceID";
-import { Unsupported } from "./Unsupported";
 import { useIsSupported } from "./useIsSupported";
 import { useCallback, useState } from "react";
 

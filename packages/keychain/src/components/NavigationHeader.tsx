@@ -23,9 +23,12 @@ export function NavigationHeader({
   const { closeModal } = useConnection();
   const { canGoBack, goBack, navigateToRoot } = useNavigation();
 
+  // Check if we're in an iframe
+  const isInIframe = window.self !== window.top;
+
   // Determine which button to show based on navigation state
   const shouldShowBack = forceShowBack || (canGoBack && !forceShowClose);
-  const shouldShowClose = forceShowClose || !shouldShowBack;
+  const shouldShowClose = isInIframe && (forceShowClose || !shouldShowBack);
 
   // Handle back navigation
   const handleBack = useCallback(() => {

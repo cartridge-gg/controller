@@ -440,19 +440,18 @@ export function useConnectionValue() {
   }, [setOrigin, setRpcUrl, setContext, setController, setConfigSignupOptions]);
 
   const logout = useCallback(async () => {
-    if (!parent || !context?.resolve) return;
-
-    try {
-      await window.controller?.disconnect();
+    await window.controller?.disconnect();
+    window.location.reload();
+    if (parent) {
       parent.close();
       parent.reload();
+    }
 
-      context.resolve({
+    if (context) {
+      context.resolve?.({
         code: ResponseCodes.NOT_CONNECTED,
         message: "User logged out",
       });
-    } catch (err) {
-      console.error("Disconnect failed:", err);
     }
   }, [context, parent, setController]);
 
