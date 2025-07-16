@@ -12,7 +12,6 @@ import {
   Spinner,
   WalletConnectIcon,
 } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
 import { useUsernameValidation } from "../create/useUsernameValidation";
 import { credentialToAuth } from "../types";
@@ -130,16 +129,17 @@ export function AuthButton({
   return (
     <Button
       {...restProps}
-      className={cn(
-        "transition-all duration-300 ease-in-out px-3 py-2.5",
-        restProps.className,
-        !waitingForConfirmation && ["w-full h-[40px] gap-2", option?.bgColor],
-        waitingForConfirmation && [
-          "justify-start pointer-events-none rounded-[4px] text-sm normal-case font-normal font-sans border border-background-200 gap-1",
-          "bg-background-125",
-          "text-foreground-300",
-        ],
-      )}
+      className="bg-[red]"
+      // className={cn(
+      //   "transition-all duration-300 ease-in-out px-3 py-2.5",
+      //   restProps.className,
+      //   !waitingForConfirmation && ["w-full h-[40px] gap-2", option?.bgColor],
+      //   waitingForConfirmation && [
+      //     "justify-start pointer-events-none rounded-[4px] text-sm normal-case font-normal font-sans border border-background-200 gap-1",
+      //     "bg-background-125",
+      //     "text-foreground-300",
+      //   ],
+      // )}
       isLoading={false}
       disabled={
         isLoading ||
@@ -147,6 +147,9 @@ export function AuthButton({
         waitingForConfirmation ||
         extensionsMissingForAllSigners
       }
+      onPress={() => {
+        console.log("pressed");
+      }}
     >
       {icon}
       {text}
