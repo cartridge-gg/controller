@@ -45,7 +45,8 @@
     "overrides": {
       "@radix-ui/react-accordion": "1.2.1",
       "typescript": "catalog:",
-      "starknet": "catalog:"
+      "starknet": "catalog:",
+      "@cartridge/ui": "file:../ui"
     }
   },
   "files": [
