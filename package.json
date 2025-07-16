@@ -6,6 +6,7 @@
     "preinstall": "npx only-allow pnpm",
     "build:deps": "turbo build:deps",
     "build": "turbo build:deps build",
+    "build:compat": "turbo build:deps build:compat",
     "dev": "turbo build:deps dev",
     "storybook": "pnpm turbo build:deps storybook",
     "e2e": "turbo build:deps dev e2e",
