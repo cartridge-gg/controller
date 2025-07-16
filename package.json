@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@cartridge/presets": "github:cartridge-gg/presets#d246ec1",
-    "@cartridge/ui": "github:cartridge-gg/ui#6481e98",
+    "@cartridge/ui": "catalog:",
     "tailwindcss": "catalog:"
   },
   "devDependencies": {

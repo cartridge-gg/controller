@@ -12,6 +12,7 @@ import { constants } from "starknet";
 import { State } from "..";
 import { SectionHeader } from "../section-header";
 import { SignerCard } from "./signer-card";
+import { useFeature } from "@/hooks/features";
 
 export const SignersSection = ({
   controllerQuery,
@@ -21,8 +22,9 @@ export const SignersSection = ({
   setState: (state: State) => void;
 }) => {
   const { chainId, controller } = useConnection();
+  const isFeatureEnabled = useFeature("addSigner");
 
-  const canAddSigner = false;
+  const canAddSigner = isFeatureEnabled;
 
   const signers = useMemo(
     () =>
@@ -44,7 +46,7 @@ export const SignersSection = ({
     <section className="space-y-4">
       <SectionHeader
         title="Signer(s)"
-        description="Information associated with registered accounts can be made available to games and applications."
+        description="Add authorized signers to your Controller. Each signer provides a secure alternative authentication method."
       />
       <div className="space-y-3">
         {controllerQuery.isLoading ? (
@@ -69,9 +71,11 @@ export const SignersSection = ({
         <Button
           type="button"
           variant="outline"
-          className="text-foreground-300 gap-1 w-fit px-3"
+          className="bg-background-100 text-foreground-300 gap-1 w-fit px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200 hover:border-background-200"
           disabled={chainId !== constants.StarknetChainId.SN_MAIN}
-          onClick={() => setState(State.ADD_SIGNER)}
+          onClick={() => {
+            setState(State.ADD_SIGNER);
+          }}
         >
           <PlusIcon size="sm" variant="line" />
           <span className="normal-case font-normal font-sans text-sm">

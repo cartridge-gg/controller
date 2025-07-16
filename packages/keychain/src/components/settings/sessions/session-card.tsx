@@ -34,6 +34,15 @@ export const SessionCard = React.forwardRef<
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const isExpired = expiresAt < now();
+    const urlWithoutProtocol = new URL(sessionName).hostname;
+    const truncatedSessionName =
+      urlWithoutProtocol.length > 26
+        ? urlWithoutProtocol.slice(0, 13) +
+          "..." +
+          urlWithoutProtocol.slice(-13)
+        : urlWithoutProtocol;
+
     return (
       <Sheet open={open} onOpenChange={setOpen}>
         <div
@@ -43,11 +52,13 @@ export const SessionCard = React.forwardRef<
         >
           <Card className="py-2.5 px-3 gap-1.5 flex flex-1 flex-row items-center bg-background-200">
             <DeviceIcon os={sessionOs} />
-            <h1 className="flex-1 text-sm font-normal">{sessionName}</h1>
+            <h1 className="flex-1 text-sm font-normal">
+              {truncatedSessionName}
+            </h1>
             <div className="flex flex-row items-center gap-1 text-foreground-300">
-              <ClockIcon variant="line" size="xs" />
+              {!isExpired && <ClockIcon variant="line" size="xs" />}
               <h1 className="text-xs font-normal">
-                {formatDuration(expiresAt)}
+                {isExpired ? "Expired" : formatDuration(expiresAt)}
               </h1>
             </div>
           </Card>
@@ -79,7 +90,7 @@ export const SessionCard = React.forwardRef<
             <div className="flex flex-col items-start gap-1">
               <div className="flex flex-col items-start gap-0.5">
                 <h3 className="text-lg font-semibold text-foreground-100">
-                  {sessionName}
+                  {truncatedSessionName}
                 </h3>
                 <div className="flex items-center text-xs font-normal text-foreground-300 gap-1">
                   <ClockIcon variant="line" size="xs" />

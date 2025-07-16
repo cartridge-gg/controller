@@ -78,19 +78,22 @@ export function useUsernameValidation(username: string) {
     fetchController(chainId, username, abortController.signal)
       .then((controller) => {
         if (!abortController.signal.aborted) {
+          const signers =
+            chainId === constants.StarknetChainId.SN_MAIN
+              ? controller.controller?.signers?.map(
+                  (signer) => signer.metadata as CredentialMetadata,
+                )
+              : ([
+                  controller.controller?.signers?.sort(
+                    (a, b) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime(),
+                  )?.[0]?.metadata,
+                ] as CredentialMetadata[]);
           setValidation({
             status: "valid",
             exists: true,
-            signers:
-              chainId === constants.StarknetChainId.SN_MAIN
-                ? controller.controller?.signers?.map(
-                    (signer) => signer.metadata as CredentialMetadata,
-                  )
-                : controller.controller?.signers?.[0]?.metadata
-                  ? ([
-                      controller.controller?.signers?.[0]?.metadata,
-                    ] as CredentialMetadata[])
-                  : [],
+            signers,
           });
         }
       })

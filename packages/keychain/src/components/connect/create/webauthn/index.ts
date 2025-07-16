@@ -1,10 +1,8 @@
 import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { doLogin, doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
-import {
-  ControllerQuery,
-  WebauthnCredential,
-} from "@cartridge/ui/utils/api/cartridge";
+import { Owner, Signer } from "@cartridge/controller-wasm";
+import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
 import { shortString } from "starknet";
 import { LoginMode } from "../../types";
@@ -73,12 +71,21 @@ export function useWebauthnAuthentication() {
   const login = useCallback(
     async (
       controller: ControllerQuery["controller"],
-      credential: WebauthnCredential,
+      webauthnsSigner: Signer,
       loginMode: LoginMode,
       isSlot: boolean,
     ) => {
       if (!controller) throw new Error("No controller found");
 
+      const initialOwner: Owner = {
+        signer: {
+          webauthn: {
+            rpId: import.meta.env.VITE_RP_ID!,
+            credentialId: webauthnsSigner.webauthns?.[0]?.credentialId ?? "",
+            publicKey: webauthnsSigner.webauthns?.[0]?.publicKey ?? "",
+          },
+        },
+      };
       const controllerObject = await createController(
         origin!,
         chainId!,
@@ -86,25 +93,21 @@ export function useWebauthnAuthentication() {
         controller.accountID,
         controller.constructorCalldata[0],
         controller.address,
-        {
-          signer: {
-            webauthn: {
-              rpId: import.meta.env.VITE_RP_ID!,
-              credentialId: credential.id,
-              publicKey: credential.publicKey,
-            },
-          },
-        },
+        initialOwner,
       );
 
       if (loginMode === LoginMode.Webauthn) {
         await doLogin({
           name: controller.accountID,
-          credentialId: credential.id,
+          credentialId: initialOwner.signer?.webauthn?.credentialId ?? "",
           finalize: !!isSlot,
         });
       } else {
-        await controllerObject.login(now() + DEFAULT_SESSION_DURATION, true);
+        await controllerObject.login(
+          now() + DEFAULT_SESSION_DURATION,
+          true,
+          webauthnsSigner,
+        );
       }
 
       window.controller = controllerObject;

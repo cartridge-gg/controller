@@ -25,12 +25,12 @@ import {
   Signer,
 } from "@cartridge/controller-wasm/controller";
 
+import { credentialToAuth } from "@/components/connect/types";
 import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
 import { FeeSource } from "@cartridge/controller";
+import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { fromJsFeeEstimate, toJsFeeEstimate } from "./fee";
-import { credentialToAuth } from "@/components/connect/types";
-import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -107,12 +107,20 @@ export default class Controller {
     delete window.controller;
   }
 
-  async login(expiresAt: bigint, isControllerRegistered?: boolean) {
+  async login(
+    expiresAt: bigint,
+    isControllerRegistered?: boolean,
+    signer?: Signer,
+  ) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
 
-    return await this.cartridge.login(expiresAt, isControllerRegistered);
+    return await this.cartridge.login(
+      expiresAt,
+      isControllerRegistered,
+      signer,
+    );
   }
 
   async register(registerInput: JsRegister): Promise<JsRegisterResponse> {

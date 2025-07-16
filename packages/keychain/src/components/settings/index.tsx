@@ -117,7 +117,9 @@ export function Settings() {
   if (state === State.ADD_SIGNER) {
     return (
       <AddSigner
-        onBack={() => setState(State.SETTINGS)}
+        onBack={() => {
+          setState(State.SETTINGS);
+        }}
         controllerQuery={controllerQuery}
       />
     );
