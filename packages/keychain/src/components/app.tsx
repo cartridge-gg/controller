@@ -50,7 +50,6 @@ export function App() {
 
   // No controller, send to login
   if (!controller) {
-    console.log("No controller, sending to login");
     return <CreateController loginMode={LoginMode.Controller} />;
   }
 

@@ -469,7 +469,7 @@ export function useConnectionValue() {
     );
   }, []);
 
-  const closeModal = useCallback(() => {
+  const closeModal = useCallback(async () => {
     if (!parent) {
       return;
     }

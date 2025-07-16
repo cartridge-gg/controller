@@ -13,12 +13,13 @@ import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { executeCore } from "@/utils/connection/execute";
 import { AccountLayout } from "#profile/components/layout/AccountLayout.js";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 export function Home() {
   const { context, controller, policies, origin, isConfigLoading } =
     useConnection();
   const upgrade = useUpgrade();
+  const location = useLocation();
   const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
     boolean | undefined
   >(undefined);
@@ -42,23 +43,12 @@ export function Home() {
     }
   }, [context?.type, posthog]);
 
-  // Handle navigation for routed contexts
-  // useEffect(() => {
-  //   if (!context) return;
-
-  //   switch (context.type) {
-  //     case "open-settings":
-  //       navigate("/settings");
-  //       break;
-  //     case "open-purchase-credits":
-  //       navigate("/purchase");
-  //       break;
-  //     // Note: open-starter-pack is now handled directly by the controller
-  //     // via the controller-navigate event
-  //   }
-  // }, [context, navigate]);
-
-  if (window.self === window.top || !origin) {
+  // Allow direct access for /slot routes
+  const isSlotRoute = location.pathname.startsWith("/slot");
+  if (
+    (window.self === window.top && !isSlotRoute) ||
+    (!origin && !isSlotRoute)
+  ) {
     return <></>;
   }
 
