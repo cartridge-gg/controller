@@ -1,6 +1,7 @@
 import { credentialToAddress } from "@/components/connect/types";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
+import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -36,7 +37,6 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { SignerAlert } from "../signer-alert";
-import { addWebauthnSigner } from "./webauthn";
 
 type SignerPending = {
   kind: SignerMethodKind;
@@ -303,8 +303,34 @@ const RegularAuths = ({
         kind="passkey"
         onClick={async () => {
           await handleClick("passkey", async () => {
-            await addWebauthnSigner(controller);
-            return undefined;
+            if (!controller?.username()) {
+              throw new Error("No username");
+            }
+
+            const isSafari = /^((?!chrome|android).)*safari/i.test(
+              navigator.userAgent,
+            );
+            if (isSafari) {
+              const searchParams = new URLSearchParams(window.location.search);
+              searchParams.set(
+                "name",
+                encodeURIComponent(controller?.username() ?? ""),
+              );
+              searchParams.set(
+                "appId",
+                encodeURIComponent(controller?.appId() ?? ""),
+              );
+              searchParams.set("action", "add-signer");
+
+              PopupCenter(
+                `/authenticate?${searchParams.toString()}`,
+                "Cartridge Add Signer",
+                480,
+                640,
+              );
+
+              return undefined;
+            }
           });
         }}
       />

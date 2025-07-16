@@ -1,7 +1,7 @@
 import { Authenticate as AuthComponent } from "@/components/connect";
-import { constants } from "starknet";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { constants } from "starknet";
 import { AuthAction } from "./connect/authenticate";
 
 // auth page used for externally embedded keychain
@@ -11,6 +11,7 @@ export function Authenticate() {
     name: string;
     action: string;
     network: string | null;
+    appId: string | null;
   }>();
   const navigate = useNavigate();
 
@@ -21,8 +22,9 @@ export function Authenticate() {
     const name = searchParams.get("name");
     const action = searchParams.get("action");
     const network = searchParams.get("network");
+    const appId = searchParams.get("appId");
     if (name && action) {
-      setParams({ name, action, network });
+      setParams({ name, action, network, appId });
 
       // Remove query params to avoid issues with password managers
       navigate(".", { replace: true });
@@ -38,6 +40,7 @@ export function Authenticate() {
       name={decodeURIComponent(params.name)}
       action={decodeURIComponent(params.action) as AuthAction}
       network={params.network ?? constants.NetworkName.SN_MAIN}
+      appId={decodeURIComponent(params.appId ?? "")}
       onSuccess={() => {
         if (window.opener) {
           return window.close();
