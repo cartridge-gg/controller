@@ -1,4 +1,4 @@
-import { DEFAULT_SESSION_DURATION, now } from "@/const";
+import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { doLogin, doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
 import { Owner, Signer } from "@cartridge/controller-wasm";

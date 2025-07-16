@@ -80,24 +80,6 @@ export function Profile() {
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileTo(
-                `inventory/token/${STRK_CONTRACT_ADDRESS}?preset=cartridge&closable=true`,
-              )
-            }
-          >
-            Open to Token STRK Closable
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                `inventory/token/${STRK_CONTRACT_ADDRESS}?preset=cartridge&visitor=true`,
-              )
-            }
-          >
-            Open to Token STRK Visitor
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
                 `inventory/token/${STRK_CONTRACT_ADDRESS}/send?preset=cartridge`,
               )
             }
@@ -129,20 +111,11 @@ export function Profile() {
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileAt(
-                `account/${username}/slot/dragarkbal/inventory/collection/0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420?ps=dragarkbal&closable=true`,
+                `account/${username}/slot/dragarkbal/inventory/collection/0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420?ps=dragarkbal`,
               )
             }
           >
-            Open at Dragark Collection Closable
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileAt(
-                `account/bal7hazar/slot/dragarkbal/inventory/collection/0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420?ps=dragarkbal&visitor=true`,
-              )
-            }
-          >
-            Open at Dragark Collection Visitor
+            Open at Dragark Collection
           </Button>
           <Button
             onClick={() =>

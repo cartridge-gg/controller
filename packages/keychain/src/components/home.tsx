@@ -12,7 +12,7 @@ import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { executeCore } from "@/utils/connection/execute";
-import { AccountLayout } from "#profile/components/layout/AccountLayout.js";
+import { Layout } from "@/components/layout";
 import { Outlet, useLocation } from "react-router-dom";
 
 export function Home() {
@@ -68,7 +68,7 @@ export function Home() {
   }
 
   return (
-    <AccountLayout>
+    <Layout>
       {(() => {
         switch (context?.type) {
           case "connect": {
@@ -169,6 +169,6 @@ export function Home() {
             return <Outlet />;
         }
       })()}
-    </AccountLayout>
+    </Layout>
   );
 }

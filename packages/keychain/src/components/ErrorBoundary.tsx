@@ -9,7 +9,7 @@ import {
   LayoutContainer,
 } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
-import { CARTRIDGE_DISCORD_LINK } from "@/const";
+import { CARTRIDGE_DISCORD_LINK } from "@/constants";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { usePostHog } from "./provider/posthog";

@@ -10,11 +10,12 @@ import { Authenticate } from "./authenticate";
 import { Session } from "./session";
 import { Failure } from "./failure";
 import { Pending } from "./pending";
-import { Consent, Slot, Success } from "./slot";
+import { Slot } from "./slot";
+import { Consent, Success } from "./slot/index";
 import { Fund } from "./slot/fund";
 import { StarterPackWrapper } from "./starterpack";
 import { FeatureToggle } from "./feature-toggle";
-import { Account } from "#profile/components/account";
+import { Account } from "@/components/account";
 import {
   Inventory,
   Collection,
@@ -26,12 +27,12 @@ import {
   SendCollectible,
   SendToken,
   Token,
-} from "#profile/components/inventory";
-import { Achievements } from "#profile/components/achievements";
-import { Activity } from "#profile/components/activity";
-import { Leaderboard } from "#profile/components/leaderboard";
-import { CollectionPurchase } from "#profile/components/inventory/collection/collection-purchase";
-import { Socials } from "#profile/components/socials/index";
+} from "@/components/inventory";
+import { Achievements } from "@/components/achievements";
+import { Activity } from "@/components/activity";
+import { Leaderboard } from "@/components/leaderboard";
+import { CollectionPurchase } from "@/components/inventory/collection/collection-purchase";
+import { Socials } from "@/components/socials/index";
 import { useConnection } from "@/hooks/connection";
 import { CreateController } from "./connect";
 import { LoginMode } from "./connect/types";

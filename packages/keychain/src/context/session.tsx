@@ -1,5 +1,5 @@
 import { isPolicyRequired } from "@/components/connect/create/utils";
-import { DEFAULT_SESSION_DURATION } from "@/const";
+import { DEFAULT_SESSION_DURATION } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import {
   type ContractType,
