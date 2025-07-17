@@ -326,7 +326,7 @@ const RegularAuths = ({
               await addWebauthnSigner(controller);
             } catch (e) {
               if (
-                e instanceof Error &&
+                (e instanceof Error || e instanceof JsControllerError) &&
                 (e.message.includes(
                   "Invalid 'sameOriginWithAncestors' value",
                 ) ||
