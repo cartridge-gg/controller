@@ -10,10 +10,9 @@ import {
   CardHeader,
   CardTitle,
   CheckIcon,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   TokenCard,
   TokenSummary,
 } from "@cartridge/ui";
@@ -32,19 +31,25 @@ export function Fund() {
   const [state, setState] = useState<FundState>(FundState.SELECT_TEAM);
   const [selectedTeam, setSelectedTeam] = useState<Team | undefined>();
 
+  const {
+    data: teamsData,
+    isLoading,
+    error,
+  } = useTeamsQuery(undefined, { refetchInterval: 1000 });
+
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
       navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
         replace: true,
       });
     }
-  }, [navigate, pathname]);
 
-  const {
-    data: teamsData,
-    isLoading,
-    error,
-  } = useTeamsQuery(undefined, { refetchInterval: 1000 });
+    if (error) {
+      navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
+        replace: true,
+      });
+    }
+  }, [navigate, pathname, error]);
 
   const teams: Team[] =
     teamsData?.me?.teams?.edges
@@ -90,9 +95,13 @@ export function Fund() {
   }
 
   return (
-    <LayoutContainer className="min-h-[600px]">
-      <LayoutHeader title="Purchase Complete" Icon={CheckIcon} />
-      <LayoutContent>
+    <>
+      <HeaderInner
+        icon={<CheckIcon />}
+        variant="compressed"
+        title="Purchase Complete"
+      />
+      <LayoutContent className="pb-3">
         <Card>
           <CardHeader>
             <CardTitle className="normal-case font-semibold text-xs">
@@ -119,6 +128,6 @@ export function Fund() {
           Fund More Teams
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }
