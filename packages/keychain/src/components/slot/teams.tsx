@@ -1,6 +1,4 @@
 import {
-  LayoutContainer,
-  LayoutHeader,
   UsersIcon,
   SlotIcon,
   Button,
@@ -12,6 +10,7 @@ import {
   TokenSummary,
   TokenCard,
   Empty,
+  HeaderInner,
 } from "@cartridge/ui";
 import { formatBalance } from "@/hooks/tokens";
 import { useState } from "react";
@@ -43,13 +42,7 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
   if (selectedTeam) {
-    return (
-      <TeamCard
-        team={selectedTeam}
-        onFundTeam={onFundTeam}
-        onBack={() => setSelectedTeam(null)}
-      />
-    );
+    return <TeamCard team={selectedTeam} onFundTeam={onFundTeam} />;
   }
 
   const sortedTeams = [...teams].sort(
@@ -57,12 +50,8 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
   );
 
   return (
-    <LayoutContainer className="min-h-[600px]">
-      <LayoutHeader
-        title="Select Team to Fund"
-        icon={<SlotIcon size="lg" />}
-        hideSettings
-      />
+    <>
+      <HeaderInner title="Select Team to Fund" icon={<SlotIcon size="lg" />} />
       <LayoutContent className="pb-3 flex flex-1 flex-col">
         <div className="flex flex-1 flex-col gap-4 pb-3">
           {isLoading ? (
@@ -93,27 +82,24 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
           )}
         </div>
       </LayoutContent>
-    </LayoutContainer>
+    </>
   );
 }
 
 export const TeamCard = ({
   team,
   onFundTeam,
-  onBack,
 }: {
   team: Team;
   onFundTeam: (team: Team) => void;
-  onBack: () => void;
 }) => {
   const usdBalance = formatBalance(BigInt(team.credits), 8, 2);
   return (
-    <LayoutContainer className="min-h-[600px]">
-      <LayoutHeader
-        title={team.name || "Unknown Team"}
+    <>
+      <HeaderInner
         icon={<UsersIcon variant="solid" size="lg" />}
-        onBack={onBack}
-        hideSettings
+        variant="compressed"
+        title={team.name}
       />
       <LayoutContent className="pb-3">
         <TokenSummary>
@@ -162,6 +148,6 @@ export const TeamCard = ({
           FUND TEAM
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 };
