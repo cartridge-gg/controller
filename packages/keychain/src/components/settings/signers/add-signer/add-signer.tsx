@@ -1,6 +1,8 @@
 import { credentialToAddress } from "@/components/connect/types";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
+import Controller from "@/utils/controller";
+import { awaitWithTimeout, getPromiseWithResolvers } from "@/utils/promises";
 import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
@@ -11,6 +13,7 @@ import {
   WalletAdapter,
 } from "@cartridge/controller";
 import {
+  CreatePasskeyOwnerResult,
   JsControllerError,
   JsSignerInput,
   Signer,
@@ -309,7 +312,7 @@ const RegularAuths = ({
               navigator.userAgent,
             );
             if (isSafari) {
-              doPopupFlow(controller.username(), controller.appId());
+              doPopupFlow(controller);
               return undefined;
             }
 
@@ -323,7 +326,7 @@ const RegularAuths = ({
                 ) ||
                   e.message.includes("document which is same-origin"))
               ) {
-                doPopupFlow(controller.username(), controller.appId());
+                doPopupFlow(controller);
                 return undefined;
               }
 
@@ -391,16 +394,62 @@ const RegularAuths = ({
   );
 };
 
-const doPopupFlow = (username: string, appId: string) => {
+const doPopupFlow = async (controller: Controller) => {
+  const username = controller.username();
+  const appId = controller.appId();
+
+  if (!username || !appId) {
+    throw new Error("Invalid controller");
+  }
+
   const searchParams = new URLSearchParams(window.location.search);
   searchParams.set("name", encodeURIComponent(username));
   searchParams.set("appId", encodeURIComponent(appId));
   searchParams.set("action", "add-signer");
 
-  PopupCenter(
+  const popupWindow = PopupCenter(
     `/authenticate?${searchParams.toString()}`,
     "Cartridge Add Signer",
     480,
     640,
   );
+  if (!popupWindow) {
+    throw new Error("Failed to open popup");
+  }
+
+  const { promise, resolve, reject } =
+    getPromiseWithResolvers<CreatePasskeyOwnerResult>();
+  popupWindow.onclose = () => {
+    reject(new Error("Popup closed"));
+  };
+  const handleMessage = (event: MessageEvent) => {
+    if (
+      event.origin === import.meta.env.VITE_ORIGIN &&
+      event.data.target === "create-passkey-owner"
+    ) {
+      resolve(event.data.payload);
+    }
+  };
+  window.addEventListener("message", handleMessage);
+  const { call, signerInput, signerGuid } = await awaitWithTimeout(
+    promise,
+    120_000,
+  );
+  window.removeEventListener("message", handleMessage);
+
+  const txn = await controller.executeFromOutsideV3(
+    [{ ...call, entrypoint: "add_owner" }],
+    undefined,
+  );
+
+  const ret = await controller.provider.waitForTransaction(
+    txn.transaction_hash,
+  );
+
+  if (!ret.isSuccess) {
+    throw new Error(ret.value.toString());
+  }
+
+  await controller.addPasskeyOwnerWithCartridge(signerInput, signerGuid);
+  return ret;
 };

@@ -1,4 +1,3 @@
-import { addWebauthnSigner } from "@/components/settings/signers/add-signer/webauthn";
 import { doSignup } from "@/hooks/account";
 import Controller from "@/utils/controller";
 import {
@@ -44,8 +43,18 @@ export function Authenticate({
           if (appId.length === 0) {
             throw new Error("App ID is required");
           }
+          if (!window.opener) {
+            throw new Error("Window opener not found");
+          }
+
           const controller = Controller.fromStore(appId);
-          await addWebauthnSigner(controller);
+          const ret = await controller?.createPasskeyOwner(
+            import.meta.env.VITE_RP_ID,
+          );
+          window.opener.postMessage(
+            { target: "create-passkey-owner", payload: ret },
+            import.meta.env.VITE_ORIGIN,
+          );
           break;
         }
         default:
