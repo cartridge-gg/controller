@@ -304,38 +304,40 @@ const RegularAuths = ({
         kind="passkey"
         onClick={async () => {
           await handleClick("passkey", async () => {
-            if (!controller?.username()) {
-              throw new Error("No username");
+            if (
+              !controller ||
+              !controller?.username() ||
+              !controller?.appId()
+            ) {
+              throw new Error(
+                `Invalid data: username: ${controller?.username()} appId: ${controller?.appId()}`,
+              );
             }
 
-            console.log("navigator.userAgent", navigator.userAgent);
             const isSafari = /^((?!chrome|android).)*safari/i.test(
               navigator.userAgent,
             );
-            console.log("isSafari", isSafari);
             if (isSafari) {
-              const searchParams = new URLSearchParams(window.location.search);
-              searchParams.set(
-                "name",
-                encodeURIComponent(controller?.username() ?? ""),
-              );
-              searchParams.set(
-                "appId",
-                encodeURIComponent(controller?.appId() ?? ""),
-              );
-              searchParams.set("action", "add-signer");
-
-              PopupCenter(
-                `/authenticate?${searchParams.toString()}`,
-                "Cartridge Add Signer",
-                480,
-                640,
-              );
-
+              doPopupFlow(controller.username(), controller.appId());
               return undefined;
             }
 
-            await addWebauthnSigner(controller);
+            try {
+              await addWebauthnSigner(controller);
+            } catch (e) {
+              if (
+                e instanceof Error &&
+                (e.message.includes(
+                  "Invalid 'sameOriginWithAncestors' value",
+                ) ||
+                  e.message.includes("document which is same-origin"))
+              ) {
+                doPopupFlow(controller.username(), controller.appId());
+                return undefined;
+              }
+
+              throw e;
+            }
             return undefined;
           });
         }}
@@ -395,5 +397,19 @@ const RegularAuths = ({
         }}
       />
     </>
+  );
+};
+
+const doPopupFlow = (username: string, appId: string) => {
+  const searchParams = new URLSearchParams(window.location.search);
+  searchParams.set("name", encodeURIComponent(username));
+  searchParams.set("appId", encodeURIComponent(appId));
+  searchParams.set("action", "add-signer");
+
+  PopupCenter(
+    `/authenticate?${searchParams.toString()}`,
+    "Cartridge Add Signer",
+    480,
+    640,
   );
 };
