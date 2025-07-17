@@ -154,6 +154,26 @@ export default class Controller {
     await this.cartridge.skipSession(toWasmPolicies(policies));
   }
 
+  async createPasskeyOwner(rpId: string) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+    return await this.cartridge.createPasskeyOwner(rpId);
+  }
+
+  async addPasskeyOwnerWithCartridge(
+    signerInput: JsSignerInput,
+    signerGuid: string,
+  ) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+    return await this.cartridge.addPasskeyOwnerWithCartridge(
+      signerInput,
+      signerGuid,
+    );
+  }
+
   async addOwner(owner: Signer, signerInput: JsSignerInput) {
     if (!this.cartridge) {
       throw new Error("Account not found");

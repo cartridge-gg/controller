@@ -1,4 +1,9 @@
 import {
+  awaitWithTimeout,
+  getPromiseWithResolvers,
+  PromiseWithResolvers,
+} from "@/utils/promises";
+import {
   ExternalPlatform,
   ExternalWallet,
   ExternalWalletResponse,
@@ -96,7 +101,7 @@ export class WalletConnectWallet implements WalletAdapter {
 
       provider.connect();
 
-      await getPromiseResult(this.connectionPromise.promise, 120_000);
+      await awaitWithTimeout(this.connectionPromise.promise, 120_000);
 
       const accounts = await provider.request<string[]>({
         method: "eth_requestAccounts",
@@ -267,35 +272,6 @@ export class WalletConnectWallet implements WalletAdapter {
     if (!this.providerPromise) {
       throw new Error("Provider not initialized");
     }
-    return getPromiseResult(this.providerPromise, timeoutMs);
+    return awaitWithTimeout(this.providerPromise, timeoutMs);
   }
 }
-async function getPromiseResult<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-): Promise<T> {
-  const timeoutId = setTimeout(() => {
-    throw new Error("Timeout waiting for promise");
-  }, timeoutMs);
-
-  const result = await promise;
-  clearTimeout(timeoutId);
-
-  return result;
-}
-
-function getPromiseWithResolvers<T>() {
-  let resolve: (value: T | PromiseLike<T>) => void;
-  let reject: (reason?: Error) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve: resolve!, reject: reject! };
-}
-
-type PromiseWithResolvers<T> = {
-  promise: Promise<T>;
-  resolve: (value: T | PromiseLike<T>) => void;
-  reject: (reason?: Error) => void;
-};
