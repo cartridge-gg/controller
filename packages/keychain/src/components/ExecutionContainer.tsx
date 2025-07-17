@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Call, EstimateFee } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
+import { useNavigation } from "@/context/navigation";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -22,7 +23,6 @@ interface ExecutionContainerProps {
   executionError?: ControllerError;
   onSubmit: (maxFee?: EstimateFee) => Promise<void>;
   onDeploy?: () => void;
-  onFund?: () => void;
   onClose?: () => void;
   onError?: (error: ControllerError) => void;
   buttonText?: string;
@@ -52,9 +52,8 @@ export function ExecutionContainer({
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isEstimating, setIsEstimating] = useState(true);
-  const [ctaState, setCTAState] = useState<"fund" | "deploy" | "execute">(
-    "execute",
-  );
+  const [ctaState, setCTAState] = useState<"deploy" | "execute">("execute");
+  const { navigate } = useNavigation();
 
   // Prevent unnecessary estimate fee calls.
   const prevTransactionsRef = useRef<{
@@ -133,23 +132,6 @@ export function ExecutionContainer({
   };
 
   if (
-    ctaState === "fund" &&
-    (ctrlError?.code === ErrorCode.InsufficientBalance ||
-      (ctrlError?.code === ErrorCode.StarknetValidationFailure &&
-        ctrlError?.data &&
-        typeof ctrlError.data === "string" &&
-        (ctrlError.data.includes("exceed balance") ||
-          ctrlError.data.includes("exceeds balance"))))
-  ) {
-    return (
-      <ErrorAlert
-        title="Insufficient Balance"
-        description="Your account doesn't have enough funds to complete this transaction. Please fund your account."
-      />
-    );
-  }
-
-  if (
     ctaState === "deploy" &&
     ctrlError?.code === ErrorCode.CartridgeControllerNotDeployed
   ) {
@@ -194,7 +176,15 @@ export function ExecutionContainer({
                   ) : (
                     <Fees isLoading={isEstimating} maxFee={maxFee} />
                   )}
-                  <Button onClick={() => setCTAState("fund")}>ADD FUNDS</Button>
+                  <Button
+                    onClick={() => {
+                      navigate(
+                        `/funding?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+                      );
+                    }}
+                  >
+                    ADD FUNDS
+                  </Button>
                 </>
               );
             case ErrorCode.StarknetValidationFailure:
@@ -208,7 +198,13 @@ export function ExecutionContainer({
                 return (
                   <>
                     <ControllerErrorAlert error={ctrlError} />
-                    <Button onClick={() => setCTAState("fund")}>
+                    <Button
+                      onClick={() => {
+                        navigate(
+                          `/funding?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+                        );
+                      }}
+                    >
                       ADD FUNDS
                     </Button>
                   </>

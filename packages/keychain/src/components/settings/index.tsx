@@ -22,7 +22,6 @@ import {
 import { useCallback, useMemo } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
-import { useNavigate } from "react-router-dom";
 import CurrencySelect from "./currency-select";
 import {
   RegisteredAccount,
@@ -31,6 +30,7 @@ import {
 import { SectionHeader } from "./section-header";
 import { SessionsSection } from "./sessions/sessions-section";
 import { SignersSection } from "./signers/signers-section";
+import { useNavigation } from "@/context/navigation";
 
 // Feature flag configuration
 interface FeatureFlags {
@@ -50,7 +50,7 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
 
   // Feature flags - can be moved to environment variables or API config later
   const featureFlags = useMemo<FeatureFlags>(

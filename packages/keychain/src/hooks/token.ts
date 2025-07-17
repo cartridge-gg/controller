@@ -168,7 +168,6 @@ export type UseTokensResponse = {
 export function useTokens(accountAddress?: string): UseTokensResponse {
   const { tokens: options, controller } = useConnection();
   const provider = controller?.provider;
-  const isVisible = true; // Always visible in keychain
   const account = useAccount();
   const address = account?.address || "";
 
@@ -176,7 +175,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   const { username } = useUsername({ address });
   const creditBalance = useCreditBalance({
     username,
-    interval: isVisible ? 30000 : undefined,
+    interval: 30000,
   });
   const credits: Token = useMemo(() => {
     return {
@@ -214,7 +213,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     address: accountAddress ?? address,
     contractAddress: contractAddress ?? [],
     provider,
-    interval: isVisible ? 30000 : undefined,
+    interval: 30000,
   });
 
   // Get tokens list from rpc that are not in torii
@@ -241,7 +240,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     {
       tokens: tokenData,
     },
-    { enabled: isVisible },
+    { enabled: true },
   );
 
   // Merge data

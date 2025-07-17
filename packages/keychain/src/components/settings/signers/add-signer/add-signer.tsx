@@ -32,8 +32,8 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QueryObserverResult } from "react-query";
-import { useNavigate } from "react-router-dom";
 import { SignerAlert } from "../signer-alert";
+import { useNavigation } from "@/context/navigation";
 
 type SignerPending = {
   kind: SignerMethodKind;
@@ -47,7 +47,7 @@ export function AddSigner({
 }: {
   controllerQuery: QueryObserverResult<ControllerQuery>;
 }) {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [wallets, setWallets] = useState<boolean>(false);
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
     null,

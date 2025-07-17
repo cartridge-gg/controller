@@ -2,14 +2,13 @@ import { Empty, MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
 import { Link } from "react-router-dom";
 import { Token, useTokens } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { cn } from "@cartridge/ui/utils";
 
 const DEFAULT_TOKENS_COUNT = 2;
 
 export function Tokens() {
-  const isVisible = true; // Always visible in keychain
   const { tokens, credits, status } = useTokens();
   const [unfolded, setUnfolded] = useState(false);
 
@@ -18,10 +17,6 @@ export function Tokens() {
       .filter((token) => token.balance.amount > 0)
       .sort((a, b) => b.balance.value - a.balance.value);
   }, [tokens]);
-
-  useEffect(() => {
-    setUnfolded(false);
-  }, [isVisible]);
 
   return status === "loading" ? (
     <LoadingState />
@@ -59,37 +54,27 @@ export function Tokens() {
   );
 }
 
-function TokenCardContent({
-  token,
-  disabled,
-}: {
-  token: Token;
-  disabled?: boolean;
-}) {
-  const tokenCard = (
-    <TokenCard
-      image={token.metadata.image || placeholder}
-      title={token.metadata.name}
-      amount={`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
-      value={
-        token.balance.value
-          ? `$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-          : ""
-      }
-      change={
-        token.balance.change === 0
-          ? undefined
-          : token.balance.change > 0
-            ? `+$${token.balance.change.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-            : `-$${(-token.balance.change).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-      }
-    />
-  );
-
-  return disabled ? (
-    tokenCard
-  ) : (
-    <Link to={`./token/${token.metadata.address}`}>{tokenCard}</Link>
+function TokenCardContent({ token }: { token: Token }) {
+  return (
+    <Link to={`./token/${token.metadata.address}`}>
+      <TokenCard
+        image={token.metadata.image || placeholder}
+        title={token.metadata.name}
+        amount={`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
+        value={
+          token.balance.value
+            ? `$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+            : ""
+        }
+        change={
+          token.balance.change === 0
+            ? undefined
+            : token.balance.change > 0
+              ? `+$${token.balance.change.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+              : `-$${(-token.balance.change).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+        }
+      />
+    </Link>
   );
 }
 

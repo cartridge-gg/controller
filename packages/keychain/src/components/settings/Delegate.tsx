@@ -10,11 +10,9 @@ import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
-import { useNavigate } from "react-router-dom";
 
 export function Delegate() {
   const { controller, context, setContext } = useConnection();
-  const navigate = useNavigate();
   const [delegateAddress, setDelegateAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -69,9 +67,6 @@ export function Delegate() {
         </div>
       </LayoutContent>
       <LayoutFooter>
-        <Button variant="secondary" onClick={() => navigate("/settings")}>
-          Back
-        </Button>
         <Button onClick={onSetDelegate} disabled={!isValid}>
           Set delegate account
         </Button>

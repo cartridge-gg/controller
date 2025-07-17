@@ -60,18 +60,6 @@ export function SendCollection() {
     tokenIds,
   });
 
-  // Debug logging for collection data
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.log(`[SendCollection] Collection data`, {
-        collection,
-        assets,
-        status,
-        refetch,
-      });
-    }
-  }, [collection, assets, status, refetch]);
-
   const entrypoint: string | null = useMemo(() => {
     if (entrypoints.includes(SAFE_TRANSFER_FROM_SNAKE_CASE)) {
       return SAFE_TRANSFER_FROM_SNAKE_CASE;
@@ -131,12 +119,7 @@ export function SendCollection() {
         }
 
         const navigationPath = `../../..?${searchParams.toString()}`;
-        if (import.meta.env.DEV) {
-          console.log(`[SendCollection] Navigating after submit`, {
-            navigationPath,
-            currentPath: window.location.pathname,
-          });
-        }
+
         navigate(navigationPath);
       } catch (error) {
         console.error("Transaction failed:", error);
@@ -161,12 +144,6 @@ export function SendCollection() {
 
   const handleCancel = useCallback(() => {
     const navigationPath = `../..?${searchParams.toString()}`;
-    if (import.meta.env.DEV) {
-      console.log(`[SendCollection] Cancel navigation`, {
-        navigationPath,
-        currentPath: window.location.pathname,
-      });
-    }
     navigate(navigationPath);
   }, [navigate, searchParams]);
 
@@ -181,16 +158,6 @@ export function SendCollection() {
     if (assets.length > 1) return collection.imageUrl || placeholder;
     return assets[0].imageUrl || placeholder;
   }, [collection, assets]);
-
-  if (import.meta.env.DEV) {
-    console.log(`[SendCollection] Render`, {
-      status,
-      hasCollection: !!collection,
-      hasAssets: !!assets,
-      loading,
-      pathname: window.location.pathname,
-    });
-  }
 
   return (
     <>
