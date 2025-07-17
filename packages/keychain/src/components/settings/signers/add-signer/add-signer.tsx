@@ -37,6 +37,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { SignerAlert } from "../signer-alert";
+import { addWebauthnSigner } from "./webauthn";
 
 type SignerPending = {
   kind: SignerMethodKind;
@@ -307,9 +308,11 @@ const RegularAuths = ({
               throw new Error("No username");
             }
 
+            console.log("navigator.userAgent", navigator.userAgent);
             const isSafari = /^((?!chrome|android).)*safari/i.test(
               navigator.userAgent,
             );
+            console.log("isSafari", isSafari);
             if (isSafari) {
               const searchParams = new URLSearchParams(window.location.search);
               searchParams.set(
@@ -331,6 +334,9 @@ const RegularAuths = ({
 
               return undefined;
             }
+
+            await addWebauthnSigner(controller);
+            return undefined;
           });
         }}
       />
