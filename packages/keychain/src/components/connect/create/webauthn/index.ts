@@ -15,10 +15,12 @@ export function useWebauthnAuthentication() {
     async (username: string, doPopupFlow: (username: string) => void) => {
       if (!chainId) throw new Error("No chainId found");
 
+      console.log("userAgent", navigator.userAgent);
       // Signup flow
       const isSafari = /^((?!chrome|android).)*safari/i.test(
         navigator.userAgent,
       );
+      console.log("isSafari", isSafari);
 
       if (isSafari) {
         doPopupFlow(username);
