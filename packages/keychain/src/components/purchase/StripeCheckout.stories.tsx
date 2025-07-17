@@ -22,7 +22,6 @@ export const Default: Story = {
     isLoading: false,
     isSubmitting: false,
     children: null,
-    onBack: () => {},
     handleSubmit: async () => {},
   },
 };
@@ -40,7 +39,6 @@ export const WithError: Story = {
     isLoading: false,
     isSubmitting: false,
     children: null,
-    onBack: () => {},
     handleSubmit: async () => {},
   },
 };

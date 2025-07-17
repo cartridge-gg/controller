@@ -26,8 +26,8 @@ export const SessionsSection = ({
   return (
     <section className="space-y-4">
       <SectionHeader
-        title="Session Key(s)"
-        description="Sessions grant permission to your Controller to perform certain game actions on your behalf"
+        title="Session Keys"
+        description="Session keys grant permission to your Controller to perform certain game actions on your behalf"
         showStatus={false}
         extraContent={
           activeSessions.length > 0 && (

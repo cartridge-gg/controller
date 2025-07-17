@@ -6,10 +6,8 @@ import {
   CardDescription,
   DepositIcon,
   EthereumIcon,
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   MetaMaskColorIcon,
   MetaMaskIcon,
   PhantomColorIcon,
@@ -22,6 +20,7 @@ import {
   TokenSummary,
   TokenCard,
   Spinner,
+  HeaderInner,
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
@@ -70,7 +69,6 @@ export function CryptoCheckout({
   starterpackDetails,
   teamId,
   initialState = CheckoutState.REVIEW_PURCHASE,
-  onBack,
   onComplete,
 }: {
   selectedWallet: ExternalWallet;
@@ -79,7 +77,6 @@ export function CryptoCheckout({
   starterpackDetails?: StarterPackDetails;
   teamId?: string;
   initialState?: CheckoutState;
-  onBack: () => void;
   onComplete: () => void;
 }) {
   const [error, setError] = useState<Error>();
@@ -134,15 +131,16 @@ export function CryptoCheckout({
   }, [sendPayment, selectedWallet, wholeCredits, onComplete]);
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
+    <>
+      <HeaderInner
         title={getTitle}
         icon={<DepositIcon variant="solid" size="lg" />}
-        onBack={() => {
-          if (state === CheckoutState.REVIEW_PURCHASE) {
-            onBack();
-          }
-        }}
+        hideIcon
+        // onBack={() => {
+        //   if (state === CheckoutState.REVIEW_PURCHASE) {
+        //     onBack();
+        //   }
+        // }}
       />
       <LayoutContent className="gap-6">
         {starterpackDetails ? (
@@ -166,7 +164,7 @@ export function CryptoCheckout({
         {error && (
           <ErrorAlert
             variant="error"
-            title="Purchase Alert"
+            title="Purchase Error"
             description={error.message}
           />
         )}
@@ -223,7 +221,7 @@ export function CryptoCheckout({
           </Button>
         )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }
 
@@ -237,7 +235,6 @@ export const walletIcon = (wallet?: ExternalWallet, useColor = false) => {
     : WALLET_CONFIG[wallet.type as keyof typeof WALLET_CONFIG].icon;
   return <Icon />;
 };
-
 const ReviewToken = ({
   title,
   name,

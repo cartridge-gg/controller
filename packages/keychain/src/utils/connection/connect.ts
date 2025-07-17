@@ -8,7 +8,7 @@ export function connect({
   setConfigSignupOptions,
 }: {
   setRpcUrl: (url: string) => void;
-  setContext: (context: ConnectionCtx) => void;
+  setContext: (context: ConnectionCtx | undefined) => void;
   setConfigSignupOptions: (options: AuthOptions | undefined) => void;
 }) {
   return (origin: string) => {

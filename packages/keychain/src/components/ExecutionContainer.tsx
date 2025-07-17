@@ -5,10 +5,9 @@ import { parseControllerError } from "@/utils/connection/execute";
 import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
   Button,
+  HeaderInner,
   type HeaderProps,
-  LayoutContainer,
   LayoutFooter,
-  LayoutHeader,
 } from "@cartridge/ui";
 import isEqual from "lodash/isEqual";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -16,8 +15,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Call, EstimateFee } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
-import { Funding } from "./funding";
-// import { OcclusionDetector } from "@/components/OcclusionDetector";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -42,9 +39,7 @@ export function ExecutionContainer({
   executionError,
   onSubmit,
   onDeploy,
-  onFund,
   onError,
-  onClose,
   buttonText = "SUBMIT",
   right,
   children,
@@ -147,11 +142,9 @@ export function ExecutionContainer({
           ctrlError.data.includes("exceeds balance"))))
   ) {
     return (
-      <Funding
-        onComplete={() => {
-          resetState();
-          onFund?.();
-        }}
+      <ErrorAlert
+        title="Insufficient Balance"
+        description="Your account doesn't have enough funds to complete this transaction. Please fund your account."
       />
     );
   }
@@ -173,116 +166,111 @@ export function ExecutionContainer({
 
   return (
     <>
-      {/* <OcclusionDetector /> */}
-      <LayoutContainer>
-        <LayoutHeader
-          title={title}
-          description={description}
-          icon={icon}
-          onClose={onClose}
-          right={right}
-        />
-        {children}
-        <LayoutFooter>
-          {(() => {
-            switch (ctrlError?.code) {
-              case ErrorCode.CartridgeControllerNotDeployed:
+      <HeaderInner
+        title={title}
+        description={description}
+        icon={icon}
+        right={right}
+        hideIcon
+      />
+      {children}
+      <LayoutFooter>
+        {(() => {
+          switch (ctrlError?.code) {
+            case ErrorCode.CartridgeControllerNotDeployed:
+              return (
+                <>
+                  <ControllerErrorAlert error={ctrlError} />
+                  <Button onClick={() => setCTAState("deploy")}>
+                    DEPLOY ACCOUNT
+                  </Button>
+                </>
+              );
+            case ErrorCode.InsufficientBalance:
+              return (
+                <>
+                  {ctrlError ? (
+                    <ControllerErrorAlert error={ctrlError} />
+                  ) : (
+                    <Fees isLoading={isEstimating} maxFee={maxFee} />
+                  )}
+                  <Button onClick={() => setCTAState("fund")}>ADD FUNDS</Button>
+                </>
+              );
+            case ErrorCode.StarknetValidationFailure:
+              // Check if it's an insufficient balance error
+              if (
+                ctrlError?.data &&
+                typeof ctrlError.data === "string" &&
+                (ctrlError.data.includes("exceed balance") ||
+                  ctrlError.data.includes("exceeds balance"))
+              ) {
                 return (
                   <>
                     <ControllerErrorAlert error={ctrlError} />
-                    <Button onClick={() => setCTAState("deploy")}>
-                      DEPLOY ACCOUNT
-                    </Button>
-                  </>
-                );
-              case ErrorCode.InsufficientBalance:
-                return (
-                  <>
-                    {ctrlError ? (
-                      <ControllerErrorAlert error={ctrlError} />
-                    ) : (
-                      <Fees isLoading={isEstimating} maxFee={maxFee} />
-                    )}
                     <Button onClick={() => setCTAState("fund")}>
                       ADD FUNDS
                     </Button>
                   </>
                 );
-              case ErrorCode.StarknetValidationFailure:
-                // Check if it's an insufficient balance error
-                if (
-                  ctrlError?.data &&
-                  typeof ctrlError.data === "string" &&
-                  (ctrlError.data.includes("exceed balance") ||
-                    ctrlError.data.includes("exceeds balance"))
-                ) {
-                  return (
-                    <>
-                      <ControllerErrorAlert error={ctrlError} />
-                      <Button onClick={() => setCTAState("fund")}>
-                        ADD FUNDS
-                      </Button>
-                    </>
-                  );
-                }
-                // Fall through to default case for other validation failures
-                break;
-              case ErrorCode.SessionAlreadyRegistered:
+              }
+              // Fall through to default case for other validation failures
+              break;
+            case ErrorCode.SessionAlreadyRegistered:
+              return (
+                <>
+                  <ErrorAlert
+                    variant="info"
+                    title="Session Already Registered"
+                  />
+                  <Button
+                    onClick={() => onSubmit()}
+                    isLoading={false}
+                    data-testid="continue-button"
+                  >
+                    CONTINUE
+                  </Button>
+                </>
+              );
+            default:
+              // Workaround until we can get same fee token address on provable katana
+              if (buttonText.toLowerCase() === "upgrade") {
                 return (
-                  <>
-                    <ErrorAlert
-                      variant="info"
-                      title="Session Already Registered"
-                    />
-                    <Button
-                      onClick={() => onSubmit()}
-                      isLoading={false}
-                      data-testid="continue-button"
-                    >
-                      CONTINUE
-                    </Button>
-                  </>
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    disabled={
+                      !transactions ||
+                      !!(maxFee === null && transactions?.length)
+                    }
+                  >
+                    {buttonText}
+                  </Button>
                 );
-              default:
-                // Workaround until we can get same fee token address on provable katana
-                if (buttonText.toLowerCase() === "upgrade") {
-                  return (
-                    <Button
-                      onClick={handleSubmit}
-                      isLoading={isLoading}
-                      disabled={
-                        !transactions ||
-                        !!(maxFee === null && transactions?.length)
-                      }
-                    >
-                      {buttonText}
-                    </Button>
-                  );
-                }
+              }
 
-                return (
-                  <>
-                    {ctrlError && <ControllerErrorAlert error={ctrlError} />}
-                    {!ctrlError && (
-                      <Fees isLoading={isEstimating} maxFee={maxFee} />
-                    )}
-                    <Button
-                      onClick={handleSubmit}
-                      isLoading={isLoading}
-                      disabled={
-                        !!ctrlError ||
-                        !transactions ||
-                        !!(maxFee === null && transactions?.length)
-                      }
-                    >
-                      {buttonText}
-                    </Button>
-                  </>
-                );
-            }
-          })()}
-        </LayoutFooter>
-      </LayoutContainer>
+              return (
+                <>
+                  {ctrlError && <ControllerErrorAlert error={ctrlError} />}
+                  {!ctrlError && (
+                    <Fees isLoading={isEstimating} maxFee={maxFee} />
+                  )}
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    disabled={
+                      !!ctrlError ||
+                      !transactions ||
+                      !!(maxFee === null && transactions?.length)
+                    }
+                  >
+                    {buttonText}
+                  </Button>
+                </>
+              );
+          }
+        })()}
+      </LayoutFooter>
     </>
   );
 }

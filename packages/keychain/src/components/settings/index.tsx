@@ -4,10 +4,9 @@ import {
   ControllerIcon,
   CopyAddress,
   GearIcon,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   PlusIcon,
   Sheet,
   SheetClose,
@@ -20,33 +19,26 @@ import {
   ControllerQuery,
   useControllerQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
+import { useNavigate } from "react-router-dom";
 import CurrencySelect from "./currency-select";
-import { Delegate } from "./Delegate";
-import { Recovery } from "./Recovery";
 import {
   RegisteredAccount,
   RegisteredAccountCard,
 } from "./registered-account-card";
 import { SectionHeader } from "./section-header";
 import { SessionsSection } from "./sessions/sessions-section";
-import { AddSigner } from "./signers/add-signer/add-signer";
 import { SignersSection } from "./signers/signers-section";
-
-export enum State {
-  SETTINGS,
-  RECOVERY,
-  DELEGATE,
-  ADD_SIGNER,
-}
 
 // Feature flag configuration
 interface FeatureFlags {
   signers: boolean;
   registeredAccounts: boolean;
   currency: boolean;
+  recovery: boolean;
+  delegate: boolean;
 }
 
 const registeredAccounts: RegisteredAccount[] = [
@@ -58,7 +50,7 @@ const registeredAccounts: RegisteredAccount[] = [
 
 export function Settings() {
   const { logout, controller, chainId } = useConnection();
-  const [state, setState] = useState<State>(State.SETTINGS);
+  const navigate = useNavigate();
 
   // Feature flags - can be moved to environment variables or API config later
   const featureFlags = useMemo<FeatureFlags>(
@@ -66,6 +58,8 @@ export function Settings() {
       signers: true,
       registeredAccounts: false,
       currency: false,
+      recovery: true,
+      delegate: true,
     }),
     [],
   );
@@ -106,93 +100,108 @@ export function Settings() {
     }
   }, [logout]);
 
-  if (state === State.RECOVERY) {
-    return <Recovery onBack={() => setState(State.SETTINGS)} />;
-  }
-
-  if (state === State.DELEGATE) {
-    return <Delegate onBack={() => setState(State.SETTINGS)} />;
-  }
-
-  if (state === State.ADD_SIGNER) {
-    return (
-      <AddSigner
-        onBack={() => {
-          setState(State.SETTINGS);
-        }}
-        controllerQuery={controllerQuery}
-      />
-    );
-  }
-
   return (
     <Sheet>
-      <LayoutContainer>
-        <LayoutHeader
-          variant="compressed"
-          title="Settings"
-          Icon={GearIcon}
-          hideSettings
-        />
+      <HeaderInner
+        variant="compressed"
+        title="Settings"
+        Icon={GearIcon}
+        hideIcon
+      />
+      <LayoutContent className="gap-6">
+        {featureFlags.signers && (
+          <SignersSection controllerQuery={controllerQuery} />
+        )}
 
-        <LayoutContent className="gap-6">
-          {featureFlags.signers && (
-            <SignersSection
-              setState={setState}
-              controllerQuery={controllerQuery}
+        {featureFlags.recovery && (
+          <section className="space-y-4">
+            <SectionHeader
+              title="Recovery Accounts"
+              description="Recovery accounts are Starknet wallets that can be used to recover your Controller if you lose access to your signers."
             />
-          )}
-
-          {featureFlags.registeredAccounts && (
-            <section className="space-y-4">
-              <SectionHeader
-                title="Registered Account"
-                description="Information associated with registered accounts can be made available to games and applications."
-              />
-              <div className="space-y-3">
-                {registeredAccounts.map((i, index) => (
-                  <RegisteredAccountCard
-                    key={index}
-                    accountName={i.accountName}
-                    accountAddress={i.accountAddress}
-                  />
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="py-2.5 px-3 text-foreground-300 gap-1"
-              >
-                <PlusIcon size="sm" variant="line" />
-                <span className="normal-case font-normal font-sans text-sm">
-                  Add Account
-                </span>
-              </Button>
-            </section>
-          )}
-
-          {featureFlags.currency && (
-            <section className="space-y-4">
-              <SectionHeader
-                title="Currency"
-                description="Set your default currency for denomination"
-              />
-              <CurrencySelect />
-            </section>
-          )}
-
-          <SessionsSection controllerQuery={controllerQuery} />
-        </LayoutContent>
-
-        <LayoutFooter>
-          <SheetTrigger asChild>
-            <Button type="button" variant="secondary" className="gap-2">
-              <SignOutIcon />
-              <span>Log out</span>
+            <Button
+              type="button"
+              variant="outline"
+              className="py-2.5 px-3 text-foreground-300 gap-1"
+              onClick={() => navigate("/settings/recovery")}
+            >
+              <PlusIcon size="sm" variant="line" />
+              <span className="normal-case font-normal font-sans text-sm">
+                Add Recovery Account
+              </span>
             </Button>
-          </SheetTrigger>
-        </LayoutFooter>
-      </LayoutContainer>
+          </section>
+        )}
+
+        {/* {featureFlags.delegate && (
+          <section className="space-y-4">
+            <SectionHeader
+              title="Delegate"
+              description="Set up delegate account for your controller"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="py-2.5 px-3 text-foreground-300 gap-1"
+              onClick={() => navigate("/settings/delegate")}
+            >
+              <PlusIcon size="sm" variant="line" />
+              <span className="normal-case font-normal font-sans text-sm">
+                Set Delegate Account
+              </span>
+            </Button>
+          </section>
+        )} */}
+
+        {featureFlags.registeredAccounts && (
+          <section className="space-y-4">
+            <SectionHeader
+              title="Registered Account"
+              description="Information associated with registered accounts can be made available to games and applications."
+            />
+            <div className="space-y-3">
+              {registeredAccounts.map((i, index) => (
+                <RegisteredAccountCard
+                  key={index}
+                  accountName={i.accountName}
+                  accountAddress={i.accountAddress}
+                />
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="py-2.5 px-3 text-foreground-300 gap-1"
+            >
+              <PlusIcon size="sm" variant="line" />
+              <span className="normal-case font-normal font-sans text-sm">
+                Add Account
+              </span>
+            </Button>
+          </section>
+        )}
+
+        {featureFlags.currency && (
+          <section className="space-y-4">
+            <SectionHeader
+              title="Currency"
+              description="Set your default currency for denomination"
+            />
+            <CurrencySelect />
+          </section>
+        )}
+
+        <SessionsSection controllerQuery={controllerQuery} />
+      </LayoutContent>
+
+      <LayoutFooter>
+        <SheetTrigger asChild>
+          <Button type="button" variant="secondary" className="gap-2">
+            <SignOutIcon />
+            <span>Log out</span>
+          </Button>
+        </SheetTrigger>
+      </LayoutFooter>
 
       {/* LOGOUT SHEET CONTENTS */}
       <SheetContent

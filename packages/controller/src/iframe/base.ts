@@ -94,22 +94,6 @@ export class IFrame<CallSender extends {}> implements Modal {
       iframe: this.iframe,
       methods: {
         close: (_origin: string) => () => this.close(),
-        closeAll: (_origin: string) => () => {
-          // Close all iframes
-          const iframes = document.querySelectorAll(
-            'iframe[id^="controller-"]',
-          );
-          iframes.forEach((iframe) => {
-            const container = iframe.parentElement;
-            if (container) {
-              container.style.visibility = "hidden";
-              container.style.opacity = "0";
-            }
-          });
-          if (document.body) {
-            document.body.style.overflow = "auto";
-          }
-        },
         reload: (_origin: string) => () => window.location.reload(),
         ...methods,
       },
@@ -125,10 +109,7 @@ export class IFrame<CallSender extends {}> implements Modal {
       if (typeof document === "undefined") return;
       const existingController = document.getElementById("controller");
       if (document.body) {
-        if (
-          (id === "controller-keychain" && !existingController) ||
-          id === "controller-profile"
-        ) {
+        if (id === "controller-keychain" && !existingController) {
           document.body.appendChild(container);
           observer.disconnect();
         }
@@ -142,10 +123,7 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     const existingController = document.getElementById("controller");
     if (document.body) {
-      if (
-        (id === "controller-keychain" && !existingController) ||
-        id === "controller-profile"
-      ) {
+      if (id === "controller-keychain" && !existingController) {
         document.body.appendChild(container);
       }
     }
@@ -198,5 +176,9 @@ export class IFrame<CallSender extends {}> implements Modal {
     this.iframe.style.height = "600px";
     this.iframe.style.width = "432px";
     this.iframe.style.borderRadius = "8px";
+  }
+
+  isOpen() {
+    return this.iframe?.style.display !== "none";
   }
 }

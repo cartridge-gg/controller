@@ -12,6 +12,7 @@ import { probe } from "./probe";
 import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
+import { navigateFactory } from "./navigate";
 import { ConnectionCtx } from "./types";
 
 export function connectToController<ParentMethods extends object>({
@@ -21,7 +22,7 @@ export function connectToController<ParentMethods extends object>({
   setConfigSignupOptions,
 }: {
   setRpcUrl: (url: string) => void;
-  setContext: (ctx: ConnectionCtx) => void;
+  setContext: (ctx: ConnectionCtx | undefined) => void;
   setController: (controller?: Controller) => void;
   setConfigSignupOptions: (options: AuthOptions | undefined) => void;
 }) {
@@ -39,7 +40,8 @@ export function connectToController<ParentMethods extends object>({
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),
       signMessage: () => signMessageFactory(setContext),
-      openSettings: () => openSettingsFactory(setContext),
+      openSettings: () => openSettingsFactory(),
+      navigate: () => navigateFactory(),
       reset: () => () => {
         setContext(undefined);
       },
@@ -62,14 +64,6 @@ export function connectToController<ParentMethods extends object>({
       openPurchaseCredits: () => () => {
         setContext({
           type: "open-purchase-credits",
-          resolve: () => Promise.resolve(),
-          reject: () => Promise.reject(),
-        });
-      },
-      openStarterPack: () => (staterpackid: string) => {
-        setContext({
-          type: "open-starter-pack",
-          starterpackId: staterpackid,
           resolve: () => Promise.resolve(),
           reject: () => Promise.reject(),
         });

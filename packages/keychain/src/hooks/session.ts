@@ -15,7 +15,7 @@ import {
   typedData,
 } from "starknet";
 
-import { DEFAULT_SESSION_DURATION } from "@/const";
+import { DEFAULT_SESSION_DURATION } from "@/constants";
 import type { Policy } from "@cartridge/controller-wasm";
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";

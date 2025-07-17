@@ -134,7 +134,6 @@ const provider = jsonRpcProvider({
 });
 
 let keychainUrl = process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL;
-let profileUrl = process.env.NEXT_PUBLIC_PROFILE_FRAME_URL;
 
 if (
   process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" &&
@@ -145,7 +144,6 @@ if (
     "-",
   );
   keychainUrl = `https://keychain-git-${branchName}.preview.cartridge.gg/`;
-  profileUrl = `https://profile-git-${branchName}.preview.cartridge.gg/`;
 }
 
 const starknetConfigChains = [mainnet, sepolia].filter(Boolean) as Chain[];
@@ -184,14 +182,14 @@ const controller = new ControllerConnector({
   chains: controllerConnectorChains,
   defaultChainId: constants.StarknetChainId.SN_MAIN,
   url: keychainUrl,
-  profileUrl: profileUrl,
-  slot: "eternum",
-  preset: "eternum",
+  slot: "pistols-mainnet",
+  namespace: "pistols",
+  preset: "pistols",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
   tokens: {
-    erc20: ["lords"],
+    erc20: ["lords", "strk"],
   },
 });
 

@@ -1,11 +1,5 @@
 import Controller from "@/utils/controller";
-import {
-  LayoutContainer,
-  LayoutFooter,
-  LayoutHeader,
-  Button,
-  Checkbox,
-} from "@cartridge/ui";
+import { LayoutFooter, Button, Checkbox, HeaderInner } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -70,11 +64,6 @@ export function Consent() {
     window.location.href = url;
   }, [callback_uri, allAccepted]);
 
-  const onDeny = useCallback(async () => {
-    const url = decodeURIComponent(callback_uri);
-    window.location.href = url;
-  }, [callback_uri]);
-
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
       navigate(
@@ -91,9 +80,8 @@ export function Consent() {
   }, [navigate, callback_uri, pathname]);
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        onClose={onDeny}
+    <>
+      <HeaderInner
         variant="expanded"
         title="Sign in to Slot"
         description={
@@ -102,6 +90,7 @@ export function Consent() {
             manage your Cartridge Infrastructure
           </>
         }
+        hideIcon
       />
 
       <div className="flex flex-col gap-4 p-6 pb-2">
@@ -161,6 +150,6 @@ export function Consent() {
           Continue
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

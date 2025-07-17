@@ -13,13 +13,17 @@ import {
 import { TurnkeyProvider } from "@turnkey/sdk-react";
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { BrowserRouter } from "react-router-dom";
 import { constants, num } from "starknet";
 import { ConnectionContext } from "./connection";
 import { PostHogProvider } from "./posthog";
 import { TokensProvider } from "./tokens";
 import { UIProvider } from "./ui";
 import { FeatureProvider } from "@/hooks/features";
+import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
+import { MarketplaceProvider as ProfileMarketplaceProvider } from "@/components/provider/marketplace";
+import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
+import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
+import { ErrorBoundary } from "../ErrorBoundary";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -44,36 +48,46 @@ export function Provider({ children }: PropsWithChildren) {
   }, [connection.controller]);
 
   return (
-    <BrowserRouter>
-      <FeatureProvider>
-        <CartridgeAPIProvider url={ENDPOINT}>
+    <FeatureProvider>
+      <CartridgeAPIProvider url={ENDPOINT}>
+        <IndexerAPIProvider credentials="omit">
           <QueryClientProvider client={queryClient}>
             <ConnectionContext.Provider value={connection}>
               <TurnkeyProvider config={turnkeyConfig}>
                 <Auth0Provider {...auth0Config}>
                   <WalletsProvider>
                     <PostHogProvider>
-                      <UpgradeProvider controller={connection.controller}>
-                        <UIProvider>
-                          <StarknetConfig
-                            explorer={cartridge}
-                            chains={[sepolia, mainnet]}
-                            defaultChainId={defaultChainId}
-                            provider={jsonRpcProvider({ rpc })}
-                          >
-                            <TokensProvider>{children}</TokensProvider>
-                          </StarknetConfig>
-                        </UIProvider>
-                      </UpgradeProvider>
+                      <ErrorBoundary>
+                        <UpgradeProvider controller={connection.controller}>
+                          <UIProvider>
+                            <StarknetConfig
+                              explorer={cartridge}
+                              chains={[sepolia, mainnet]}
+                              defaultChainId={defaultChainId}
+                              provider={jsonRpcProvider({ rpc })}
+                            >
+                              <TokensProvider>
+                                <ProfileMarketplaceProvider>
+                                  <ProfileArcadeProvider>
+                                    <ProfileDataProvider>
+                                      {children}
+                                    </ProfileDataProvider>
+                                  </ProfileArcadeProvider>
+                                </ProfileMarketplaceProvider>
+                              </TokensProvider>
+                            </StarknetConfig>
+                          </UIProvider>
+                        </UpgradeProvider>
+                      </ErrorBoundary>
                     </PostHogProvider>
                   </WalletsProvider>
                 </Auth0Provider>
               </TurnkeyProvider>
             </ConnectionContext.Provider>
           </QueryClientProvider>
-        </CartridgeAPIProvider>
-      </FeatureProvider>
-    </BrowserRouter>
+        </IndexerAPIProvider>
+      </CartridgeAPIProvider>
+    </FeatureProvider>
   );
 }
 

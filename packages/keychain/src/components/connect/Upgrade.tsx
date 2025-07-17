@@ -4,7 +4,7 @@ import { useConnection } from "@/hooks/connection";
 import { useUpgrade } from "../provider/upgrade";
 
 export const Upgrade = () => {
-  const { controller, logout } = useConnection();
+  const { controller } = useConnection();
   const upgrade = useUpgrade();
 
   return (
@@ -16,7 +16,6 @@ export const Upgrade = () => {
       buttonText="Upgrade"
       onSubmit={upgrade.onUpgrade}
       executionError={upgrade.error}
-      onClose={logout}
     >
       <LayoutContent>
         <div className="text-sm text-foreground-400 pb-2">

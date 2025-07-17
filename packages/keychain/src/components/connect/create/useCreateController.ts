@@ -1,5 +1,5 @@
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
-import { DEFAULT_SESSION_DURATION, now } from "@/const";
+import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";

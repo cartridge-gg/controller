@@ -4,10 +4,9 @@ import {
   Card,
   CardDescription,
   InfoIcon,
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
+  HeaderInner,
 } from "@cartridge/ui";
 import { isIframe } from "@cartridge/ui/utils";
 import { Elements } from "@stripe/react-stripe-js";
@@ -32,7 +31,6 @@ export type {
 export function Purchase(props: PurchaseCreditsProps) {
   const {
     state,
-    setState,
     clientSecret,
     pricingDetails,
     wholeCredits,
@@ -50,14 +48,11 @@ export function Purchase(props: PurchaseCreditsProps) {
     onCreditCard,
     onExternalConnect,
     onCompletePurchase,
-    onBack: handleBack,
   } = usePurchase(props);
 
   const {
-    onBack,
     wallets,
     type,
-    isSlot,
     starterpackDetails,
     teamId,
     title: propsTitle,
@@ -104,11 +99,7 @@ export function Purchase(props: PurchaseCreditsProps) {
         options={{ clientSecret, appearance, loader: "auto" }}
         stripe={stripePromise}
       >
-        <CheckoutForm
-          price={pricingDetails!}
-          onBack={handleBack}
-          onComplete={onCompletePurchase}
-        />
+        <CheckoutForm price={pricingDetails!} onComplete={onCompletePurchase} />
       </Elements>
     );
   }
@@ -121,34 +112,33 @@ export function Purchase(props: PurchaseCreditsProps) {
         wholeCredits={wholeCredits}
         starterpackDetails={starterpackDetails}
         teamId={teamId}
-        onBack={handleBack}
         onComplete={onCompletePurchase}
       />
     );
   }
-  const isCloseable = isSlot
-    ? false
-    : state === PurchaseState.SELECTION || state === PurchaseState.SUCCESS;
+  // const isCloseable = isSlot
+  //   ? false
+  //   : state === PurchaseState.SELECTION || state === PurchaseState.SUCCESS;
 
   return (
-    <LayoutContainer className="min-h-[600px]">
-      <LayoutHeader
+    <>
+      <HeaderInner
         title={title}
-        onClose={closeModal}
-        onBack={
-          !isCloseable
-            ? () => {
-                onBack?.();
-                setState(PurchaseState.SELECTION);
-              }
-            : undefined
-        }
+        // onBack={
+        //   !isCloseable
+        //     ? () => {
+        //         onBack?.();
+        //         setState(PurchaseState.SELECTION);
+        //       }
+        //     : undefined
+        // }
         right={
           state === PurchaseState.SELECTION &&
           starterpackDetails?.supply !== undefined ? (
             <Supply amount={starterpackDetails!.supply} />
           ) : undefined
         }
+        hideIcon
       />
       <LayoutContent>
         <PurchaseContent
@@ -165,7 +155,7 @@ export function Purchase(props: PurchaseCreditsProps) {
         {displayError && (
           <ErrorAlert
             variant="error"
-            title="Purchase Alert"
+            title="Purchase Error"
             description={displayError.message}
           />
         )}
@@ -205,6 +195,6 @@ export function Purchase(props: PurchaseCreditsProps) {
           />
         )}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

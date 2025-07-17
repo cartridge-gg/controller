@@ -78,7 +78,7 @@ export async function executeCore(
 export function execute({
   setContext,
 }: {
-  setContext: (context: ConnectionCtx) => void;
+  setContext: (context: ConnectionCtx | undefined) => void;
 }) {
   return async (
     transactions: AllowArray<Call>,

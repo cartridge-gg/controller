@@ -2,7 +2,7 @@ import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { SessionConsent } from "@/components/connect";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { now } from "@/const";
+import { now } from "@/constants";
 import { CreateSessionProvider } from "@/context/session";
 import { useConnection } from "@/hooks/connection";
 import {

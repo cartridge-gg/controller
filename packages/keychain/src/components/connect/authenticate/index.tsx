@@ -2,16 +2,15 @@ import { addWebauthnSigner } from "@/components/settings/signers/add-signer/weba
 import { doSignup } from "@/hooks/account";
 import Controller from "@/utils/controller";
 import {
-  Button,
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
+  Button,
+  HeaderInner,
 } from "@cartridge/ui";
-import { useCallback, useState } from "react";
-import { FaceIDImage } from "./FaceID";
 import { Unsupported } from "./Unsupported";
+import { FaceIDImage } from "./FaceID";
 import { useIsSupported } from "./useIsSupported";
+import { useCallback, useState } from "react";
 
 export type AuthAction = "signup" | "login" | "add-signer";
 
@@ -85,11 +84,12 @@ export function Authenticate({
       : "continue";
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
+    <>
+      <HeaderInner
         variant="expanded"
         title={title}
         description={description}
+        hideIcon
       />
       <LayoutContent className="items-center pb-10">
         <FaceIDImage />
@@ -100,6 +100,6 @@ export function Authenticate({
           {cta}
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

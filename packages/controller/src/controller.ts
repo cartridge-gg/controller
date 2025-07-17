@@ -10,7 +10,7 @@ import { constants, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { NotReadyToConnect } from "./errors";
-import { KeychainIFrame, ProfileIFrame } from "./iframe";
+import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
 import {
   Chain,
@@ -20,7 +20,6 @@ import {
   IFrames,
   Keychain,
   ProbeReply,
-  Profile,
   ProfileContextTypeVariant,
   ResponseCodes,
 } from "./types";
@@ -28,7 +27,6 @@ import { parseChainId } from "./utils";
 
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
-  private profile?: AsyncMethodReturns<Profile>;
   private options: ControllerOptions;
   private iframes: IFrames;
   private selectedChain: ChainId;
@@ -135,26 +133,6 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    if (!this.iframes.profile) {
-      const username = await this.keychain.username();
-
-      this.iframes.profile = new ProfileIFrame({
-        ...this.options,
-        onConnect: (profile) => {
-          this.profile = profile;
-        },
-        methods: {
-          openSettings: () => this.openSettings.bind(this),
-          openPurchaseCredits: () => this.openPurchaseCredits.bind(this),
-          openExecute: () => this.openExecute.bind(this),
-          logout: () => this.logout.bind(this),
-        },
-        rpcUrl: this.rpcUrl(),
-        username,
-        version: this.version,
-      });
-    }
-
     return this.account;
   }
 
@@ -228,7 +206,6 @@ export default class ControllerProvider extends BaseProvider {
       }
 
       await this.keychain.switchChain(this.rpcUrl());
-      await this.profile?.switchChain(this.rpcUrl());
     } catch (e) {
       console.error(e);
       return false;
@@ -260,22 +237,27 @@ export default class ControllerProvider extends BaseProvider {
   }
 
   async openProfile(tab: ProfileContextTypeVariant = "inventory") {
-    if (!this.profile || !this.iframes.profile?.url) {
-      console.error("Profile is not ready");
+    // Profile functionality is now integrated into keychain
+    // Navigate keychain iframe to profile page
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
       return;
     }
     if (!this.account) {
       console.error("Account is not ready");
       return;
     }
+    const username = await this.keychain.username();
 
-    this.profile.navigate(`${this.iframes.profile.url?.pathname}/${tab}`);
-    this.iframes.profile.open();
+    // Navigate first, then open to avoid flash
+    await this.keychain.navigate(`/account/${username}/${tab}`);
+    this.iframes.keychain.open();
   }
 
   async openProfileTo(to: string) {
-    if (!this.profile || !this.iframes.profile?.url) {
-      console.error("Profile is not ready");
+    // Profile functionality is now integrated into keychain
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
       return;
     }
     if (!this.account) {
@@ -283,13 +265,15 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    this.profile.navigate(`${this.iframes.profile.url?.pathname}/${to}`);
-    this.iframes.profile.open();
+    const username = await this.keychain.username();
+    await this.keychain.navigate(`/account/${username}/${to}`);
+    this.iframes.keychain.open();
   }
 
   async openProfileAt(at: string) {
-    if (!this.profile || !this.iframes.profile?.url) {
-      console.error("Profile is not ready");
+    // Profile functionality is now integrated into keychain
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
       return;
     }
     if (!this.account) {
@@ -297,28 +281,17 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    this.profile.navigate(at);
-    this.iframes.profile.open();
+    await this.keychain.navigate(at);
+    this.iframes.keychain.open();
   }
 
-  async openSettings() {
+  openSettings() {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
-      return null;
-    }
-    if (this.iframes.profile?.sendBackward) {
-      this.iframes.profile?.sendBackward();
-    } else {
-      this.iframes.profile?.close();
+      return;
     }
     this.iframes.keychain.open();
-    const res = await this.keychain.openSettings();
-    this.iframes.keychain.close();
-    this.iframes.profile?.sendForward?.();
-    if (res && (res as ConnectError).code === ResponseCodes.NOT_CONNECTED) {
-      return false;
-    }
-    return true;
+    this.keychain.openSettings();
   }
 
   revoke(origin: string, _policy: Policy[]) {
@@ -357,11 +330,6 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return;
     }
-    if (!this.iframes.profile) {
-      console.error("Profile is not ready");
-      return;
-    }
-    this.iframes.profile.close();
     this.iframes.keychain.open();
     this.keychain.openPurchaseCredits();
   }
@@ -371,13 +339,11 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return;
     }
-    if (!this.iframes.profile) {
-      console.error("Profile is not ready");
-      return;
-    }
-    this.iframes.profile.close();
-    this.iframes.keychain.open();
-    this.keychain.openStarterPack(starterpackId);
+
+    // Navigate first, then open the iframe
+    this.keychain.navigate(`/starter-pack/${starterpackId}`).then(() => {
+      this.iframes.keychain.open();
+    });
   }
 
   async openExecute(calls: any, chainId?: string) {
@@ -385,25 +351,17 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return;
     }
-    if (!this.iframes.profile) {
-      console.error("Profile is not ready");
-      return;
-    }
     // Switch to the chain if provided
     let currentChainId = this.selectedChain;
     if (chainId) {
       this.switchStarknetChain(chainId);
     }
-    // Switch iframes
-    this.iframes.profile?.sendBackward();
+    // Open keychain
     this.iframes.keychain.open();
-    this.iframes.profile?.close();
     // Invoke execute
     const res = await this.keychain.execute(calls, undefined, undefined, true);
-    // Switch back iframes
-    this.iframes.profile?.open();
+    // Close keychain
     this.iframes.keychain.close();
-    this.iframes.profile?.sendForward();
     // Switch back to the original chain
     if (chainId) {
       this.switchStarknetChain(currentChainId);
