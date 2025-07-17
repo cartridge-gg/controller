@@ -1,4 +1,5 @@
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
+import reactNativeWeb from "vite-plugin-react-native-web";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
@@ -15,7 +16,15 @@ export default defineConfig(({ mode }) => ({
     }),
     wasm(),
     topLevelAwait(),
-    react(),
+    reactNativeWeb(),
+    react({
+      jsxRuntime: "automatic",
+      jsxImportSource: "nativewind",
+      babel: {
+        plugins: ["react-native-reanimated/plugin"],
+        presets: ["nativewind/babel"],
+      },
+    }),
     // Add visualizer in build mode
     mode === "production" &&
       visualizer({
@@ -75,7 +84,21 @@ export default defineConfig(({ mode }) => ({
     timeout: 120000, // 2 minutes
   },
   optimizeDeps: {
-    include: ["react", "react-dom"], // Pre-bundle common dependencies
+    include: [
+      "react",
+      "react-dom",
+      "react-native-reanimated",
+      "nativewind",
+      "react-native-css-interop",
+    ], // Pre-bundle common dependencies
+    esbuildOptions: {
+      mainFields: ["module", "main"],
+      jsx: "automatic",
+      loader: {
+        ".js": "jsx",
+        ".mjs": "jsx",
+      },
+    },
   },
   // Add this to ensure polyfills are properly included
   define: {
