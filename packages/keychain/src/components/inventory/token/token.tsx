@@ -44,12 +44,11 @@ export function Token() {
 
 function Credits() {
   // TODO: Get parent from keychain connection if needed
-  const isVisible = true; // Always visible in keychain
   const account = useAccount();
   const username = account?.username || "";
   const credit = useCreditBalance({
     username,
-    interval: isVisible ? 30000 : undefined,
+    interval: 30000,
   });
   const navigate = useNavigate();
 

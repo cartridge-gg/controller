@@ -2,11 +2,11 @@ import { useCallback, useContext, useMemo, useState } from "react";
 import { MarketplaceContext } from "@/context/marketplace";
 import { useParams } from "react-router-dom";
 import { cairo, getChecksumAddress } from "starknet";
-import { useAccountProfile } from "@/hooks/account";
 import { OrderModel, StatusType } from "@cartridge/marketplace";
 import { useQuery } from "react-query";
 import { useConnection } from "@/hooks/connection";
 import { useEntrypoints } from "./entrypoints";
+import { useAccount } from "./account";
 
 const FEE_ENTRYPOINT = "royalty_info";
 
@@ -29,7 +29,8 @@ export const useMarketplace = () => {
     );
   }
 
-  const { address } = useAccountProfile({ overridable: true });
+  const account = useAccount();
+  const address = account?.address || "";
   const { address: contractAddress, tokenId } = useParams();
   const { controller } = useConnection();
   const {

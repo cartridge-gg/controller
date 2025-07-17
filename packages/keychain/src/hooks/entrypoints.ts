@@ -12,6 +12,7 @@ export const useEntrypoints = ({ address }: { address: string }) => {
     queryKey: ["contract", address],
     queryFn: async () => {
       try {
+        // TODO: Remove dependency on getClassAt since it is super slow
         const code = await controller?.provider?.getClassAt(address);
         if (!code) return;
         const interfaces = code.abi.filter(

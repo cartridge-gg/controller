@@ -2,14 +2,13 @@ import { Empty, MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
 import { Link } from "react-router-dom";
 import { Token, useTokens } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { cn } from "@cartridge/ui/utils";
 
 const DEFAULT_TOKENS_COUNT = 2;
 
 export function Tokens() {
-  const isVisible = true; // Always visible in keychain
   const { tokens, credits, status } = useTokens();
   const [unfolded, setUnfolded] = useState(false);
 
@@ -18,10 +17,6 @@ export function Tokens() {
       .filter((token) => token.balance.amount > 0)
       .sort((a, b) => b.balance.value - a.balance.value);
   }, [tokens]);
-
-  useEffect(() => {
-    setUnfolded(false);
-  }, [isVisible]);
 
   return status === "loading" ? (
     <LoadingState />

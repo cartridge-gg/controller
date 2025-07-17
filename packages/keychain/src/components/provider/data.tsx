@@ -1,4 +1,4 @@
-import { useState, ReactNode, useMemo, useEffect } from "react";
+import { useState, ReactNode, useMemo } from "react";
 import { useAchievements } from "@/hooks/achievements";
 import { DataContext } from "@/context/data";
 import {
@@ -41,7 +41,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const account = useAccount();
   const address = account?.address || "";
   const { project } = useConnection();
-  const isVisible = true; // Always visible in keychain
 
   const { games, editions } = useArcade();
 
@@ -253,13 +252,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       (a, b) => b.timestamp - a.timestamp,
     );
   }, [erc20s, erc721s, actions, achievements]);
-
-  useEffect(() => {
-    if (isVisible) {
-      refetchTransactions();
-      refetchTransfers();
-    }
-  }, [isVisible, refetchTransactions, refetchTransfers]);
 
   return (
     <DataContext.Provider
