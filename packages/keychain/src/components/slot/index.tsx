@@ -15,7 +15,6 @@ import {
 import { CheckIcon, HeaderInner, LayoutContent } from "@cartridge/ui";
 
 export function Slot() {
-  console.log("Slot");
   const { pathname } = useLocation();
   switch (pathname) {
     case "/slot/auth":
