@@ -106,7 +106,6 @@ export function SendToken() {
             ],
           });
 
-          // TODO: Wait for transaction completion if needed
           // Refetch transfers 5 seconds after to leave time to the indexer to take the new tx into account
           setTimeout(() => {
             refetchTransfers();

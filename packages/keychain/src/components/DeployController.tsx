@@ -25,6 +25,7 @@ import {
 } from "starknet";
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { Fees } from "./Fees";
+import { Funding } from "./funding";
 
 export function DeployController({
   onClose,
@@ -39,8 +40,8 @@ export function DeployController({
   const [deployHash, setDeployHash] = useState<string>();
   const [error, setError] = useState<Error>();
   const [accountState, setAccountState] = useState<
-    "deploy" | "deploying" | "deployed"
-  >("deploy");
+    "fund" | "deploy" | "deploying" | "deployed"
+  >("fund");
 
   const chainId = controller?.chainId();
   const chainName = chainId ? getChainName(chainId) : "Unknown";
@@ -106,12 +107,14 @@ export function DeployController({
   }, [deployHash, controller]);
 
   useEffect(() => {
-    if (!estimateFee || !feeToken?.balance) return;
+    if (!estimateFee || accountState != "fund" || !feeToken?.balance) return;
 
-    if (feeToken.balance < estimateFee.overall_fee) {
-      setError(new Error("Insufficient balance. Please fund your account."));
+    if (feeToken.balance >= estimateFee.overall_fee) {
+      setAccountState("deploy");
+    } else {
+      setAccountState("fund");
     }
-  }, [feeToken?.balance, estimateFee]);
+  }, [feeToken?.balance, estimateFee, accountState]);
 
   const onDeploy = useCallback(async () => {
     if (!estimateFee) return;
@@ -139,6 +142,8 @@ export function DeployController({
   }
 
   switch (accountState) {
+    case "fund":
+      return <Funding title={"Fund Controller"} />;
     case "deploy":
       return (
         <>

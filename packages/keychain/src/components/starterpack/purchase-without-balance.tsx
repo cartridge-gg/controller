@@ -115,6 +115,7 @@ export const PurchaseWithoutBalance = () => {
         stripe={stripePromise}
       >
         <StripeCheckout
+          // TODO: Migrate to browser routes
           // onBack={() => setPurchaseState(PurchaseState.BACK)}
           onComplete={() => setPurchaseState(PurchaseState.PENDING)}
           price={{

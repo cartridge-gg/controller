@@ -23,7 +23,6 @@ export function useProgressions({
   const [progressions, setProgressions] = useState<{ [key: string]: Progress }>(
     {},
   );
-  // const { isVisible } = useConnection();
 
   // Fetch achievement creations from raw events
   const projects: Project[] = useMemo(
@@ -52,12 +51,6 @@ export function useProgressions({
       },
     },
   );
-
-  // useEffect(() => {
-  //   if (isVisible) {
-  //     refetch();
-  //   }
-  // }, [isVisible, refetch]);
 
   return { progressions, status };
 }

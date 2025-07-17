@@ -136,11 +136,6 @@ export function CryptoCheckout({
         title={getTitle}
         icon={<DepositIcon variant="solid" size="lg" />}
         hideIcon
-        // onBack={() => {
-        //   if (state === CheckoutState.REVIEW_PURCHASE) {
-        //     onBack();
-        //   }
-        // }}
       />
       <LayoutContent className="gap-6">
         {starterpackDetails ? (

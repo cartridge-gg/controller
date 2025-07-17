@@ -44,7 +44,7 @@ export function Home() {
   }, [context?.type, posthog]);
 
   // Allow direct access for / routes
-  const isBasePath = location.pathname.startsWith("/");
+  const isBasePath = location.pathname == "/";
   if ((window.self === window.top && !isBasePath) || (!origin && !isBasePath)) {
     return <></>;
   }

@@ -28,8 +28,8 @@ import { constants, getChecksumAddress } from "starknet";
 import { useAccount } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
 import { useCallback, useMemo } from "react";
-import { compare } from "compare-versions";
 import { useConnection } from "@/hooks/connection";
+import { useVersion } from "@/hooks/version";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -44,12 +44,11 @@ export function Token() {
 
 function Credits() {
   // TODO: Get parent from keychain connection if needed
-  const isVisible = true; // Always visible in keychain
   const account = useAccount();
   const username = account?.username || "";
   const credit = useCreditBalance({
     username,
-    interval: isVisible ? 30000 : undefined,
+    interval: 30000,
   });
   const navigate = useNavigate();
 
@@ -125,16 +124,15 @@ function ERC20() {
   const accountAddress = account?.address || "";
   const { controller } = useConnection();
   const { transfers } = useData();
+  const { isControllerGte } = useVersion();
 
   const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
-  const version = "0.5.6"; // Default version for compatibility
   const { token } = useToken({ tokenAddress: address! });
   const [searchParams] = useSearchParams();
 
   const compatibility = useMemo(() => {
-    if (!version) return false;
-    return compare(version, "0.5.6", ">=");
-  }, [version]);
+    return isControllerGte("0.5.6");
+  }, [isControllerGte]);
 
   const txs = useMemo(() => {
     if (!transfers || !token?.metadata?.image) {
