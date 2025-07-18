@@ -31,8 +31,9 @@ export function ChooseSignupMethodForm({
             .filter(Boolean),
         ),
       ) as AuthOption[];
+    } else {
+      return authOptions;
     }
-    return authOptions;
   }, [validation.signers, authOptions]);
 
   useEffect(() => {

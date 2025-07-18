@@ -5,6 +5,7 @@ import {
   ArgentIcon,
   Button,
   DiscordIcon,
+  GoogleColorIcon,
   IconProps,
   MetaMaskIcon,
   PhantomIcon,
@@ -67,6 +68,11 @@ const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
     Icon: WalletConnectIcon,
     bgColor: "bg-wallet-theme-600",
     label: AUTH_METHODS_LABELS.walletconnect,
+  },
+  google: {
+    Icon: GoogleColorIcon,
+    bgColor: "bg-foreground-100",
+    label: AUTH_METHODS_LABELS.google,
   },
 };
 
