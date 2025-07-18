@@ -8,4 +8,5 @@ export const AUTH_METHODS_LABELS: Record<AuthOption, string> = {
   metamask: "MetaMask",
   discord: "Discord",
   walletconnect: "Wallet Connect",
+  google: "Google",
 };

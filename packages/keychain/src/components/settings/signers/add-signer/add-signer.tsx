@@ -309,19 +309,15 @@ const RegularAuths = ({
           });
         }}
       />
-      {/* <SignerMethod
-        kind="google"
-        onClick={() => {}}
-      /> */}
       <SignerMethod
-        kind="discord"
+        kind="google"
         onClick={async () => {
-          await handleClick("discord", async () => {
+          await handleClick("google", async () => {
             if (!controller?.username()) {
               throw new Error("No username");
             }
 
-            const turnkeyWallet = new TurnkeyWallet();
+            const turnkeyWallet = new TurnkeyWallet("google");
             const response = await turnkeyWallet.connect(controller.username());
             if (!response || !response.success || !response.account) {
               throw new Error(response?.error || "Wallet auth: unknown error");
@@ -331,7 +327,48 @@ const RegularAuths = ({
             }
             window.keychain_wallets?.addEmbeddedWallet(
               response.account,
-              turnkeyWallet as WalletAdapter,
+              turnkeyWallet as unknown as WalletAdapter,
+            );
+            if (
+              currentSigners?.find(
+                (signer) => credentialToAddress(signer) === response.account,
+              )
+            ) {
+              return response.account;
+            }
+
+            await controller?.addOwner(
+              { eip191: { address: response.account } },
+              {
+                type: "eip191",
+                credential: JSON.stringify({
+                  provider: "google",
+                  eth_address: response.account,
+                }),
+              },
+            );
+          });
+        }}
+      />
+      <SignerMethod
+        kind="discord"
+        onClick={async () => {
+          await handleClick("discord", async () => {
+            if (!controller?.username()) {
+              throw new Error("No username");
+            }
+
+            const turnkeyWallet = new TurnkeyWallet("discord");
+            const response = await turnkeyWallet.connect(controller.username());
+            if (!response || !response.success || !response.account) {
+              throw new Error(response?.error || "Wallet auth: unknown error");
+            }
+            if (response.error?.includes("Account mismatch")) {
+              throw new Error("Account mismatch");
+            }
+            window.keychain_wallets?.addEmbeddedWallet(
+              response.account,
+              turnkeyWallet as unknown as WalletAdapter,
             );
             if (
               currentSigners?.find(

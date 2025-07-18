@@ -166,6 +166,7 @@ export function useCreateController({
         )
         .map((wallet) => wallet.type),
       "discord" as AuthOption,
+      "google" as AuthOption,
       "walletconnect" as AuthOption,
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
@@ -189,11 +190,27 @@ export function useCreateController({
           };
           return;
         case "discord":
-          signupResponse = (await signupWithSocial(username)) as SignupResponse;
+          signupResponse = (await signupWithSocial(
+            "discord",
+            username,
+          )) as SignupResponse;
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
               provider: "discord",
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        case "google":
+          signupResponse = (await signupWithSocial(
+            "google",
+            username,
+          )) as SignupResponse;
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: "google",
               eth_address: signupResponse.address,
             }),
           };
@@ -333,7 +350,12 @@ export function useCreateController({
         }
         case "discord": {
           setWaitingForConfirmation(true);
-          loginResponse = await loginWithSocial();
+          loginResponse = await loginWithSocial("discord");
+          break;
+        }
+        case "google": {
+          setWaitingForConfirmation(true);
+          loginResponse = await loginWithSocial("google");
           break;
         }
         case "rabby":
