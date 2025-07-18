@@ -1,7 +1,8 @@
 import Controller from "@/utils/controller";
 import { LayoutFooter, Button, Checkbox, HeaderInner } from "@cartridge/ui";
 import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { useNavigation } from "@/context/navigation";
 
 interface ConsentCheckboxProps {
   checked: boolean;
@@ -41,7 +42,7 @@ function ConsentCheckbox({
 }
 
 export function Consent() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const callback_uri = searchParams.get("callback_uri")!;

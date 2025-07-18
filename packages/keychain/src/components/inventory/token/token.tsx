@@ -1,9 +1,4 @@
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   LayoutFooter,
@@ -30,6 +25,7 @@ import { useToken } from "@/hooks/token";
 import { useCallback, useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
+import { useNavigation } from "@/context/navigation";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -44,13 +40,13 @@ export function Token() {
 
 function Credits() {
   // TODO: Get parent from keychain connection if needed
+  const { navigate } = useNavigation();
   const account = useAccount();
   const username = account?.username || "";
   const credit = useCreditBalance({
     username,
     interval: 30000,
   });
-  const navigate = useNavigate();
 
   // Show loading state while credits are being fetched
   if (credit.balance.value === undefined) {

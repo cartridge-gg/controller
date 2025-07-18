@@ -11,7 +11,8 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigation } from "@/context/navigation";
 import {
   Call,
   TransactionExecutionStatus,
@@ -51,7 +52,7 @@ export function SendCollectible() {
   const [loading, setLoading] = useState(false);
   const [recipientLoading, setRecipientLoading] = useState(false);
 
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const { execute } = useExecute();
 
   const [to, setTo] = useState("");

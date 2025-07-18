@@ -2,7 +2,6 @@ import {
   Link,
   Outlet,
   useLocation,
-  useNavigate,
   useParams,
   useSearchParams,
 } from "react-router-dom";
@@ -53,6 +52,7 @@ import { useTokens } from "@/hooks/token";
 import { useAccount } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useExecute } from "@/hooks/execute";
+import { useNavigation } from "@/context/navigation";
 
 const OFFSET = 10;
 
@@ -62,7 +62,7 @@ export function CollectionAsset() {
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
   const { editions } = useArcade();

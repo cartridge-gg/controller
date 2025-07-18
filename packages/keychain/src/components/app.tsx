@@ -1,10 +1,4 @@
-import {
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Home } from "./home";
 import { Authenticate } from "./authenticate";
 import { Session } from "./session";
@@ -44,10 +38,11 @@ import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
+import { useNavigation } from "@/context/navigation";
 
 export function App() {
   const { controller } = useConnection();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
 
   // No controller, send to login
   if (!controller) {

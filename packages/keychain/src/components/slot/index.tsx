@@ -9,10 +9,10 @@ import {
   Navigate,
   Outlet,
   useLocation,
-  useNavigate,
   useSearchParams,
 } from "react-router-dom";
 import { CheckIcon, HeaderInner, LayoutContent } from "@cartridge/ui";
+import { useNavigation } from "@/context/navigation";
 
 export function Slot() {
   const { pathname } = useLocation();
@@ -32,7 +32,7 @@ export function Slot() {
 }
 
 function Auth() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [searchParams] = useSearchParams();
   const { controller } = useController();
   const {

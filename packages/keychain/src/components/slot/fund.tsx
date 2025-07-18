@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Controller from "@/utils/controller";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/ui/utils/api/cartridge";
 import { Purchase } from "../purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
@@ -18,6 +18,7 @@ import {
 } from "@cartridge/ui";
 import { Team, Teams } from "./teams";
 import { formatBalance } from "@/hooks/tokens";
+import { useNavigation } from "@/context/navigation";
 
 enum FundState {
   SELECT_TEAM,
@@ -26,7 +27,7 @@ enum FundState {
 }
 
 export function Fund() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const { pathname } = useLocation();
   const [state, setState] = useState<FundState>(FundState.SELECT_TEAM);
   const [selectedTeam, setSelectedTeam] = useState<Team | undefined>();

@@ -9,7 +9,7 @@ import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
-import { useNavigate } from "react-router-dom";
+import { useNavigation } from "@/context/navigation";
 import { SectionHeader } from "../section-header";
 import { SignerCard } from "./signer-card";
 import { useFeature } from "@/hooks/features";
@@ -21,7 +21,7 @@ export const SignersSection = ({
 }) => {
   const { chainId, controller } = useConnection();
   const isFeatureEnabled = useFeature("addSigner");
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
 
   const canAddSigner = isFeatureEnabled;
 

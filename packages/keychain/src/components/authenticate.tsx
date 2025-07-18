@@ -6,6 +6,7 @@ import { AuthAction } from "./connect/authenticate";
 
 // auth page used for externally embedded keychain
 export function Authenticate() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [params, setParams] = useState<{
     name: string;
@@ -13,7 +14,6 @@ export function Authenticate() {
     network: string | null;
     appId: string | null;
   }>();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (params) {
