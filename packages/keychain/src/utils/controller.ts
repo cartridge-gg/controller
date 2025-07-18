@@ -154,31 +154,22 @@ export default class Controller {
     await this.cartridge.skipSession(toWasmPolicies(policies));
   }
 
-  async createPasskeyOwner(rpId: string) {
+  async createPasskeySigner(rpId: string) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
-    return await this.cartridge.createPasskeyOwner(rpId);
+    return await this.cartridge.createPasskeySigner(rpId);
   }
 
-  async addPasskeyOwnerWithCartridge(
-    signerInput: JsSignerInput,
-    signerGuid: string,
+  async addOwner(
+    owner: Signer | null,
+    signerInput: JsSignerInput | null,
+    rp_id: string | null,
   ) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
-    return await this.cartridge.addPasskeyOwnerWithCartridge(
-      signerInput,
-      signerGuid,
-    );
-  }
-
-  async addOwner(owner: Signer, signerInput: JsSignerInput) {
-    if (!this.cartridge) {
-      throw new Error("Account not found");
-    }
-    await this.cartridge.addOwner(owner, signerInput);
+    await this.cartridge.addOwner(owner, signerInput, rp_id);
   }
 
   async registerSessionCalldata(

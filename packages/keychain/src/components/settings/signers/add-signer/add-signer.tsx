@@ -1,9 +1,7 @@
 import { credentialToAddress } from "@/components/connect/types";
+import { useNavigation } from "@/context/navigation";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
-import Controller from "@/utils/controller";
-import { awaitWithTimeout, getPromiseWithResolvers } from "@/utils/promises";
-import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -13,7 +11,6 @@ import {
   WalletAdapter,
 } from "@cartridge/controller";
 import {
-  CreatePasskeyOwnerResult,
   JsControllerError,
   JsSignerInput,
   Signer,
@@ -36,8 +33,6 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { SignerAlert } from "../signer-alert";
-import { addWebauthnSigner } from "./webauthn";
-import { useNavigation } from "@/context/navigation";
 
 type SignerPending = {
   kind: SignerMethodKind;
@@ -258,7 +253,7 @@ const WalletAuths = ({
       ) {
         return response.account;
       }
-      await controller?.addOwner(signer!, signerInput!);
+      await controller?.addOwner(signer!, signerInput!, null);
     },
     [currentSigners, controller],
   );
@@ -308,30 +303,8 @@ const RegularAuths = ({
               );
             }
 
-            const isSafari = /^((?!chrome|android).)*safari/i.test(
-              navigator.userAgent,
-            );
-            if (isSafari) {
-              doPopupFlow(controller);
-              return undefined;
-            }
+            await controller.addOwner(null, null, import.meta.env.VITE_RP_ID);
 
-            try {
-              await addWebauthnSigner(controller);
-            } catch (e) {
-              if (
-                (e instanceof Error || e instanceof JsControllerError) &&
-                (e.message.includes(
-                  "Invalid 'sameOriginWithAncestors' value",
-                ) ||
-                  e.message.includes("document which is same-origin"))
-              ) {
-                doPopupFlow(controller);
-                return undefined;
-              }
-
-              throw e;
-            }
             return undefined;
           });
         }}
@@ -376,6 +349,7 @@ const RegularAuths = ({
                   eth_address: response.account,
                 }),
               },
+              null,
             );
           });
         }}
@@ -392,64 +366,4 @@ const RegularAuths = ({
       />
     </>
   );
-};
-
-const doPopupFlow = async (controller: Controller) => {
-  const username = controller.username();
-  const appId = controller.appId();
-
-  if (!username || !appId) {
-    throw new Error("Invalid controller");
-  }
-
-  const searchParams = new URLSearchParams(window.location.search);
-  searchParams.set("name", encodeURIComponent(username));
-  searchParams.set("appId", encodeURIComponent(appId));
-  searchParams.set("action", "add-signer");
-
-  const popupWindow = PopupCenter(
-    `/authenticate?${searchParams.toString()}`,
-    "Cartridge Add Signer",
-    480,
-    640,
-  );
-  if (!popupWindow) {
-    throw new Error("Failed to open popup");
-  }
-
-  const { promise, resolve, reject } =
-    getPromiseWithResolvers<CreatePasskeyOwnerResult>();
-  popupWindow.onclose = () => {
-    reject(new Error("Popup closed"));
-  };
-  const handleMessage = (event: MessageEvent) => {
-    if (
-      event.origin === import.meta.env.VITE_ORIGIN &&
-      event.data.target === "create-passkey-owner"
-    ) {
-      resolve(event.data.payload);
-    }
-  };
-  window.addEventListener("message", handleMessage);
-  const { call, signerInput, signerGuid } = await awaitWithTimeout(
-    promise,
-    120_000,
-  );
-  window.removeEventListener("message", handleMessage);
-
-  const txn = await controller.executeFromOutsideV3(
-    [{ ...call, entrypoint: "add_owner" }],
-    undefined,
-  );
-
-  const ret = await controller.provider.waitForTransaction(
-    txn.transaction_hash,
-  );
-
-  if (!ret.isSuccess) {
-    throw new Error(ret.value.toString());
-  }
-
-  await controller.addPasskeyOwnerWithCartridge(signerInput, signerGuid);
-  return ret;
 };

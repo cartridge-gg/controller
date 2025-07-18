@@ -48,11 +48,11 @@ export function Authenticate({
           }
 
           const controller = Controller.fromStore(appId);
-          const ret = await controller?.createPasskeyOwner(
+          const ret = await controller?.createPasskeySigner(
             import.meta.env.VITE_RP_ID,
           );
           window.opener.postMessage(
-            { target: "create-passkey-owner", payload: ret },
+            { target: "passkey-creation-popup", payload: ret },
             import.meta.env.VITE_ORIGIN,
           );
           break;
