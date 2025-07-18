@@ -18,7 +18,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useCollection } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
@@ -36,6 +36,7 @@ import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useExecute } from "@/hooks/execute";
+import { useNavigation } from "@/context/navigation";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
@@ -66,7 +67,7 @@ export function CollectionListing() {
   const [userSelected, setUserSelected] = useState<boolean>(false);
   const [validated, setValidated] = useState<boolean>(false);
 
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
 
   const [searchParams] = useSearchParams();
   const paramsTokenIds = searchParams.getAll("tokenIds");

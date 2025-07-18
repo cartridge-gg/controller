@@ -1,9 +1,4 @@
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Button,
@@ -51,6 +46,7 @@ import { useTokens } from "@/hooks/token";
 import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useExecute } from "@/hooks/execute";
+import { useNavigation } from "@/context/navigation";
 
 const FEE_ENTRYPOINT = "royalty_info";
 
@@ -65,7 +61,7 @@ export function CollectionPurchase() {
   const { provider, orders, marketplaceFee, removeOrder, setAmount } =
     useMarketplace();
   const { execute } = useExecute();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
 
   const [searchParams] = useSearchParams();
   const paramsOrders = searchParams.get("orders")?.split(",").map(Number) || [];
