@@ -29,7 +29,7 @@ export const Transfer = () => {
           },
           {
             contractAddress: STRK_CONTRACT_ADDRESS,
-            entrypoint: "transfer",
+            entrypoint: "increaseAllowance",
             calldata: [account?.address, amount, "0x0"],
           },
         ])
