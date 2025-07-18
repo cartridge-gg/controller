@@ -3,6 +3,7 @@ import {
   ArgentColorIcon,
   Button,
   DiscordColorIcon,
+  GoogleColorIcon,
   IconProps,
   MetaMaskColorIcon,
   PasskeyIcon,
@@ -58,6 +59,11 @@ const OPTIONS: Partial<
     variant: "secondary",
     Icon: DiscordColorIcon,
     label: AUTH_METHODS_LABELS.discord,
+  },
+  google: {
+    variant: "secondary",
+    Icon: GoogleColorIcon,
+    label: AUTH_METHODS_LABELS.google,
   },
   walletconnect: {
     variant: "secondary",
