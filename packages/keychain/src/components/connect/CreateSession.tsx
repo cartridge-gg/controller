@@ -32,10 +32,12 @@ const requiredPolicies: Array<ContractType> = ["VRF"];
 export function CreateSession({
   policies,
   onConnect,
+  onSkip,
   isUpdate,
 }: {
   policies: ParsedSessionPolicies;
-  onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
+  onConnect: () => void;
+  onSkip: () => void;
   isUpdate?: boolean;
 }) {
   return (
@@ -43,7 +45,11 @@ export function CreateSession({
       initialPolicies={policies}
       requiredPolicies={requiredPolicies}
     >
-      <CreateSessionLayout isUpdate={isUpdate} onConnect={onConnect} />
+      <CreateSessionLayout
+        isUpdate={isUpdate}
+        onConnect={onConnect}
+        onSkip={onSkip}
+      />
     </CreateSessionProvider>
   );
 }
@@ -51,9 +57,11 @@ export function CreateSession({
 const CreateSessionLayout = ({
   isUpdate,
   onConnect,
+  onSkip,
 }: {
   isUpdate?: boolean;
-  onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
+  onConnect: () => void;
+  onSkip: () => void;
 }) => {
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -84,21 +92,6 @@ const CreateSessionLayout = ({
       setIsConnecting(false);
     }
   }, [controller, policies, maxFee, expiresAt, onConnect]);
-
-  const onSkipSession = useCallback(async () => {
-    if (!controller || !policies) return;
-    try {
-      setError(undefined);
-      setIsConnecting(true);
-
-      const processedPolicies = processPolicies(policies, true);
-      await controller.createSession(duration, processedPolicies, maxFee);
-      onConnect();
-    } catch (e) {
-      setError(e as unknown as Error);
-      setIsConnecting(false);
-    }
-  }, [controller, duration, policies, maxFee, onConnect]);
 
   if (!upgrade.isSynced) {
     return <></>;
@@ -178,7 +171,7 @@ const CreateSessionLayout = ({
           <div className="flex items-center gap-4">
             <Button
               variant="secondary"
-              onClick={onSkipSession}
+              onClick={onSkip}
               disabled={isConnecting}
               className="px-8"
             >
