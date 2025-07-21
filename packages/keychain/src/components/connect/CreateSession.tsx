@@ -32,10 +32,12 @@ const requiredPolicies: Array<ContractType> = ["VRF"];
 export function CreateSession({
   policies,
   onConnect,
+  onSkip,
   isUpdate,
 }: {
   policies: ParsedSessionPolicies;
-  onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
+  onConnect: () => void;
+  onSkip?: () => void;
   isUpdate?: boolean;
 }) {
   return (
@@ -43,7 +45,11 @@ export function CreateSession({
       initialPolicies={policies}
       requiredPolicies={requiredPolicies}
     >
-      <CreateSessionLayout isUpdate={isUpdate} onConnect={onConnect} />
+      <CreateSessionLayout
+        isUpdate={isUpdate}
+        onConnect={onConnect}
+        onSkip={onSkip}
+      />
     </CreateSessionProvider>
   );
 }
@@ -51,9 +57,11 @@ export function CreateSession({
 const CreateSessionLayout = ({
   isUpdate,
   onConnect,
+  onSkip,
 }: {
   isUpdate?: boolean;
-  onConnect: (transaction_hash?: string, expiresAt?: bigint) => void;
+  onConnect: () => void;
+  onSkip?: () => void;
 }) => {
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -69,36 +77,30 @@ const CreateSessionLayout = ({
     return duration + now();
   }, [duration]);
 
-  const onCreateSession = useCallback(async () => {
-    if (!controller || !policies) return;
-    try {
-      setError(undefined);
-      setIsConnecting(true);
+  const createSession = useCallback(
+    async ({
+      toggleOff,
+      successCallback,
+    }: {
+      toggleOff: boolean;
+      successCallback?: () => void;
+    }) => {
+      if (!controller || !policies) return;
+      try {
+        setError(undefined);
+        setIsConnecting(true);
 
-      const processedPolicies = processPolicies(policies);
-
-      await controller.createSession(expiresAt, processedPolicies, maxFee);
-      onConnect();
-    } catch (e) {
-      setError(e as unknown as Error);
-      setIsConnecting(false);
-    }
-  }, [controller, policies, maxFee, expiresAt, onConnect]);
-
-  const onSkipSession = useCallback(async () => {
-    if (!controller || !policies) return;
-    try {
-      setError(undefined);
-      setIsConnecting(true);
-
-      const processedPolicies = processPolicies(policies, true);
-      await controller.createSession(duration, processedPolicies, maxFee);
-      onConnect();
-    } catch (e) {
-      setError(e as unknown as Error);
-      setIsConnecting(false);
-    }
-  }, [controller, duration, policies, maxFee, onConnect]);
+        const processedPolicies = processPolicies(policies, toggleOff);
+        await controller.createSession(expiresAt, processedPolicies, maxFee);
+        successCallback?.();
+      } catch (e) {
+        setError(e as unknown as Error);
+      } finally {
+        setIsConnecting(false);
+      }
+    },
+    [controller, policies, maxFee, expiresAt],
+  );
 
   if (!upgrade.isSynced) {
     return <></>;
@@ -178,7 +180,12 @@ const CreateSessionLayout = ({
           <div className="flex items-center gap-4">
             <Button
               variant="secondary"
-              onClick={onSkipSession}
+              onClick={async () => {
+                await createSession({
+                  toggleOff: true,
+                  successCallback: onSkip,
+                });
+              }}
               disabled={isConnecting}
               className="px-8"
             >
@@ -188,7 +195,12 @@ const CreateSessionLayout = ({
               className="flex-1"
               disabled={isConnecting || (!policies?.verified && !isConsent)}
               isLoading={isConnecting}
-              onClick={onCreateSession}
+              onClick={async () => {
+                await createSession({
+                  toggleOff: false,
+                  successCallback: onConnect,
+                });
+              }}
             >
               {isUpdate ? "update" : "create"} session
             </Button>

@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { ConfirmTransaction } from "./ConfirmTransaction";
 import { ETH_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
-import { VerifiableControllerTheme } from "@/components/provider/connection";
 
 const meta = {
   component: ConfirmTransaction,
@@ -14,6 +13,7 @@ const meta = {
         }),
         hasSession: () => true,
         session: () => true,
+        isRequestedSession: () => Promise.resolve(true),
       },
       context: {
         origin: "http://localhost:6001",
@@ -48,28 +48,21 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    onComplete: (transaction_hash: string) => {
+      console.log("Transaction completed:", transaction_hash);
+    },
+  },
+};
 
 export const WithTheme: Story = {
   parameters: {
     preset: "eternum",
   },
   args: {
-    theme: {
-      name: "Eternum",
-    } as VerifiableControllerTheme,
-    usernameField: {
-      value: "",
-      error: undefined,
+    onComplete: (transaction_hash: string) => {
+      console.log("Transaction completed:", transaction_hash);
     },
-    validation: {
-      status: "valid",
-      exists: false,
-    },
-    isLoading: false,
-    onUsernameChange: () => {},
-    onUsernameFocus: () => {},
-    onUsernameClear: () => {},
-    onSubmit: () => {},
   },
 };
