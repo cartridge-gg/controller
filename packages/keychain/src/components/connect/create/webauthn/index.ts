@@ -1,10 +1,11 @@
 import { DEFAULT_SESSION_DURATION, now } from "@/const";
 import { doLogin, doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
+import Controller from "@/utils/controller";
 import { Owner, Signer } from "@cartridge/controller-wasm";
 import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
-import { shortString } from "starknet";
+import { BlockTag, RpcError, shortString } from "starknet";
 import { LoginMode } from "../../types";
 import { createController } from "../useCreateController";
 
@@ -61,6 +62,8 @@ export function useWebauthnAuthentication() {
           },
         },
       );
+
+      await waitUntilAccountIsDeployed(controller);
 
       window.controller = controller;
       setController(controller);
@@ -121,3 +124,42 @@ export function useWebauthnAuthentication() {
     login,
   };
 }
+
+const waitUntilAccountIsDeployed = async (controller: Controller) => {
+  const ownerGuid = controller.ownerGuid();
+  const call = {
+    contractAddress: controller.address(),
+    entrypoint: "is_owner",
+    calldata: [ownerGuid],
+  };
+  const delay = 1_000;
+  const timeout = 20_000;
+
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    try {
+      const isOwner = await controller.provider.callContract(
+        call,
+        BlockTag.LATEST,
+      );
+
+      if (isOwner) {
+        return true;
+      }
+    } catch (error) {
+      if (
+        !(
+          error instanceof RpcError &&
+          error.isType("CONTRACT_ERROR") &&
+          error.message.includes("is not deployed")
+        )
+      ) {
+        throw error;
+      }
+    } finally {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw new Error("Timeout waiting for account to be deployed");
+};
