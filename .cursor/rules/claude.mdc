@@ -1,0 +1,6 @@
+---
+description: Include CLAUDE.md file
+globs: 
+  - "CLAUDE.md"
+alwaysApply: false
+---

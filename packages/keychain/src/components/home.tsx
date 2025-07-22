@@ -1,5 +1,5 @@
 import { Signature } from "starknet";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
@@ -11,29 +11,16 @@ import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
-import { executeCore } from "@/utils/connection/execute";
 import { Layout } from "@/components/layout";
 import { Outlet, useLocation } from "react-router-dom";
 
 export function Home() {
   const { context, controller, policies, origin, isConfigLoading } =
     useConnection();
-  const upgrade = useUpgrade();
   const location = useLocation();
-  const [hasSessionForPolicies, setHasSessionForPolicies] = useState<
-    boolean | undefined
-  >(undefined);
-  const posthog = usePostHog();
 
-  useEffect(() => {
-    if (controller && policies) {
-      controller.isRequestedSession(policies).then((isRequestedSession) => {
-        setHasSessionForPolicies(isRequestedSession);
-      });
-    } else if (controller && !policies) {
-      setHasSessionForPolicies(true);
-    }
-  }, [controller, policies]);
+  const upgrade = useUpgrade();
+  const posthog = usePostHog();
 
   useEffect(() => {
     if (context?.type) {
@@ -54,11 +41,7 @@ export function Home() {
     return <CreateController loginMode={LoginMode.Controller} />;
   }
 
-  if (
-    !upgrade.isSynced ||
-    hasSessionForPolicies === undefined ||
-    isConfigLoading
-  ) {
+  if (!upgrade.isSynced || isConfigLoading) {
     // This is likely never observable in a real application but just in case.
     return <PageLoading />;
   }
@@ -94,7 +77,13 @@ export function Home() {
                 onConnect={() => {
                   context.resolve({
                     code: ResponseCodes.SUCCESS,
-                    address: controller!.address(),
+                    address: controller.address(),
+                  });
+                }}
+                onSkip={() => {
+                  context.resolve({
+                    code: ResponseCodes.SUCCESS,
+                    address: controller.address(),
                   });
                 }}
               />
@@ -119,37 +108,16 @@ export function Home() {
 
           case "execute": {
             const ctx = context as ExecuteCtx;
-            if (!hasSessionForPolicies) {
-              return (
-                <CreateSession
-                  isUpdate
-                  policies={policies!}
-                  onConnect={async () => {
-                    const authorized =
-                      await controller!.hasAuthorizedPoliciesForCalls(
-                        ctx.transactions,
-                      );
-
-                    // If calls are authorized, resolve immediately
-                    if (authorized) {
-                      const transaction_hash = await executeCore(
-                        ctx.transactions,
-                      );
-
-                      return ctx.resolve?.({
-                        code: ResponseCodes.SUCCESS,
-                        transaction_hash,
-                      });
-                    }
-
-                    // If not authorized, fall through to confirm transaction
-                    setHasSessionForPolicies(true);
-                  }}
-                />
-              );
-            }
-
-            return <ConfirmTransaction />;
+            return (
+              <ConfirmTransaction
+                onComplete={(transaction_hash) =>
+                  ctx.resolve?.({
+                    code: ResponseCodes.SUCCESS,
+                    transaction_hash,
+                  })
+                }
+              />
+            );
           }
 
           case "deploy": {
