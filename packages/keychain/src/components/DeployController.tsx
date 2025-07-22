@@ -8,10 +8,9 @@ import {
   CheckIcon,
   ControllerIcon,
   ExternalIcon,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Spinner,
 } from "@cartridge/ui";
 import { getChainName } from "@cartridge/ui/utils";
@@ -133,34 +132,27 @@ export function DeployController({
 
   if (isLoading) {
     return (
-      <LayoutContainer>
-        <LayoutHeader
-          variant="expanded"
-          title="Checking account balance..."
-          icon={<Spinner size="xl" />}
-        />
-      </LayoutContainer>
+      <HeaderInner
+        variant="expanded"
+        title="Checking account balance..."
+        icon={<Spinner size="xl" />}
+        hideIcon
+      />
     );
   }
 
   switch (accountState) {
     case "fund":
-      return (
-        <Funding
-          title={"Fund Controller"}
-          onComplete={() => {
-            setAccountState("deploy");
-          }}
-        />
-      );
+      return <Funding title={"Fund Controller"} />;
     case "deploy":
       return (
-        <LayoutContainer>
-          <LayoutHeader
+        <>
+          <HeaderInner
             variant="expanded"
             icon={<ControllerIcon size="lg" />}
             title="Deploy Controller"
             description="This will deploy your Controller"
+            hideIcon
           />
           <LayoutContent>
             <TransactionSummary
@@ -187,16 +179,17 @@ export function DeployController({
               DEPLOY
             </Button>
           </LayoutFooter>
-        </LayoutContainer>
+        </>
       );
     case "deploying":
       return (
-        <LayoutContainer>
-          <LayoutHeader
+        <>
+          <HeaderInner
             variant="expanded"
             icon={<Spinner size="xl" />}
             title="Deploying Controller"
             description={`Your controller is being deployed on ${chainName}`}
+            hideIcon
           />
           <LayoutContent>
             {deployHash && controller && (
@@ -219,16 +212,17 @@ export function DeployController({
               continue
             </Button>
           </LayoutFooter>
-        </LayoutContainer>
+        </>
       );
     case "deployed":
       return (
-        <LayoutContainer>
-          <LayoutHeader
+        <>
+          <HeaderInner
             variant="expanded"
             Icon={CheckIcon}
             title="Success!"
             description={`Your controller has been deployed on ${chainName}`}
+            hideIcon
           />
           <LayoutContent className="items-center">
             {deployHash && controller && (
@@ -249,7 +243,7 @@ export function DeployController({
             ) : null}
             <Button onClick={onClose}>continue</Button>
           </LayoutFooter>
-        </LayoutContainer>
+        </>
       );
   }
 }

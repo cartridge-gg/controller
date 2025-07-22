@@ -73,10 +73,6 @@ const meta: Meta<typeof TeamCard> = {
       description: "Callback when fund team button is clicked",
       action: "fundTeam",
     },
-    onBack: {
-      description: "Callback when back button is clicked",
-      action: "back",
-    },
   },
 };
 

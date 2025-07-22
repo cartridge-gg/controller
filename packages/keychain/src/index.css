@@ -12,4 +12,8 @@
   body {
     @apply bg-background text-foreground ring-foreground;
   }
+
+  * {
+    @apply focus:outline-none focus:ring-0;
+  }
 }

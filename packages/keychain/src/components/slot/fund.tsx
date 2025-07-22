@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Controller from "@/utils/controller";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/ui/utils/api/cartridge";
 import { Purchase } from "../purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
@@ -10,15 +10,15 @@ import {
   CardHeader,
   CardTitle,
   CheckIcon,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   TokenCard,
   TokenSummary,
 } from "@cartridge/ui";
 import { Team, Teams } from "./teams";
 import { formatBalance } from "@/hooks/tokens";
+import { useNavigation } from "@/context/navigation";
 
 enum FundState {
   SELECT_TEAM,
@@ -27,10 +27,16 @@ enum FundState {
 }
 
 export function Fund() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const { pathname } = useLocation();
   const [state, setState] = useState<FundState>(FundState.SELECT_TEAM);
   const [selectedTeam, setSelectedTeam] = useState<Team | undefined>();
+
+  const {
+    data: teamsData,
+    isLoading,
+    error,
+  } = useTeamsQuery(undefined, { refetchInterval: 1000 });
 
   useEffect(() => {
     if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
@@ -38,13 +44,13 @@ export function Fund() {
         replace: true,
       });
     }
-  }, [navigate, pathname]);
 
-  const {
-    data: teamsData,
-    isLoading,
-    error,
-  } = useTeamsQuery(undefined, { refetchInterval: 1000 });
+    if (error) {
+      navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
+        replace: true,
+      });
+    }
+  }, [navigate, pathname, error]);
 
   const teams: Team[] =
     teamsData?.me?.teams?.edges
@@ -90,9 +96,13 @@ export function Fund() {
   }
 
   return (
-    <LayoutContainer className="min-h-[600px]">
-      <LayoutHeader title="Purchase Complete" Icon={CheckIcon} />
-      <LayoutContent>
+    <>
+      <HeaderInner
+        icon={<CheckIcon />}
+        variant="compressed"
+        title="Purchase Complete"
+      />
+      <LayoutContent className="pb-3">
         <Card>
           <CardHeader>
             <CardTitle className="normal-case font-semibold text-xs">
@@ -119,6 +129,6 @@ export function Fund() {
           Fund More Teams
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

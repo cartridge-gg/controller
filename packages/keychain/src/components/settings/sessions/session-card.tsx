@@ -1,4 +1,4 @@
-import { now } from "@/const";
+import { now } from "@/constants";
 import {
   Button,
   Card,

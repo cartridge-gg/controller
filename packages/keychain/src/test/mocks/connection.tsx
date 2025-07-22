@@ -7,6 +7,8 @@ import {
 import { render, RenderResult } from "@testing-library/react";
 import { constants } from "starknet";
 import { SemVer } from "semver";
+import { BrowserRouter } from "react-router-dom";
+import { NavigationProvider } from "@/context/navigation";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const defaultMockController: any = {
@@ -25,6 +27,8 @@ export const defaultMockConnection: ConnectionContextValue = {
   rpcUrl: "https://test.rpc.com",
   chainId: "SN_MAIN",
   parent: undefined,
+  project: null,
+  namespace: null,
   verified: false,
   isConfigLoading: false,
   theme: {
@@ -107,5 +111,11 @@ export function renderWithConnection(
   ui: ReactNode,
   connectionOverrides?: Partial<ConnectionContextValue>,
 ): RenderResult {
-  return render(withConnection(ui, connectionOverrides));
+  return render(
+    <BrowserRouter>
+      <NavigationProvider>
+        {withConnection(ui, connectionOverrides)}
+      </NavigationProvider>
+    </BrowserRouter>,
+  );
 }

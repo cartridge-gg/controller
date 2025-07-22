@@ -9,15 +9,10 @@ import {
   Navigate,
   Outlet,
   useLocation,
-  useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import {
-  CheckIcon,
-  LayoutContainer,
-  LayoutContent,
-  LayoutHeader,
-} from "@cartridge/ui";
+import { CheckIcon, HeaderInner, LayoutContent } from "@cartridge/ui";
+import { useNavigation } from "@/context/navigation";
 
 export function Slot() {
   const { pathname } = useLocation();
@@ -37,10 +32,17 @@ export function Slot() {
 }
 
 function Auth() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [searchParams] = useSearchParams();
   const { controller } = useController();
-  const { data: user, isFetched } = useMeQuery(undefined, { retry: false });
+  const {
+    data: user,
+    isFetched,
+    refetch,
+  } = useMeQuery(undefined, {
+    retry: false,
+    enabled: true,
+  });
 
   useEffect(() => {
     if (user && controller) {
@@ -56,9 +58,16 @@ function Auth() {
       const target = returnTo
         ? `${returnTo}${otherParams}`
         : `/slot/consent${otherParams}`;
+
       navigate(target, { replace: true });
     }
   }, [user, controller, navigate, searchParams]);
+
+  useEffect(() => {
+    if (controller && isFetched && !user) {
+      refetch();
+    }
+  }, [controller, user, isFetched, refetch]);
 
   if (!isFetched) {
     return <PageLoading />;
@@ -69,12 +78,12 @@ function Auth() {
 
 export function Success() {
   return (
-    <LayoutContainer className="pb-12">
-      <LayoutHeader
+    <>
+      <HeaderInner
         variant="expanded"
         Icon={CheckIcon}
         title="Success!"
-        hideNetwork
+        hideIcon
       />
       <LayoutContent className="gap-4">
         <div className="flex w-full px-4 py-5 bg-background-200 border border-background-300 rounded">
@@ -97,6 +106,6 @@ export function Success() {
           </p>
         </div>
       </LayoutContent>
-    </LayoutContainer>
+    </>
   );
 }

@@ -9,6 +9,7 @@ import { withConnection } from "./connection";
 import { withPostHog } from "./posthog";
 import { withStarknet } from "./starknet";
 import { FeatureProvider } from "@/hooks/features";
+import { NavigationProvider } from "@/context/navigation";
 
 type ProvidersConfig = {
   connection?: Partial<ConnectionContextValue>;
@@ -25,9 +26,11 @@ export function renderWithProviders(
 ): RenderResult {
   const wrapped = withConnection(
     <BrowserRouter>
-      <FeatureProvider>
-        {withStarknet(withPostHog(ui), config.starknet)}
-      </FeatureProvider>
+      <NavigationProvider>
+        <FeatureProvider>
+          {withStarknet(withPostHog(ui), config.starknet)}
+        </FeatureProvider>
+      </NavigationProvider>
     </BrowserRouter>,
     config.connection,
   );

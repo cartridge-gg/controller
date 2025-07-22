@@ -10,9 +10,9 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   Sheet,
 } from "@cartridge/ui";
+import { NavigationHeader } from "@/components";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
@@ -73,7 +73,7 @@ function CreateControllerForm({
 }: CreateControllerFormProps) {
   return (
     <>
-      <LayoutHeader
+      <NavigationHeader
         variant="expanded"
         title={
           theme.name.toLowerCase() === "cartridge"

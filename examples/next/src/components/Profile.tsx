@@ -36,18 +36,15 @@ export function Profile() {
 
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap gap-1">
-          <Button onClick={() => ctrlConnector.controller.openProfile()}>
+          <Button
+            onClick={() => ctrlConnector.controller.openProfile("inventory")}
+          >
             Inventory
           </Button>
           <Button
             onClick={() => ctrlConnector.controller.openProfile("achievements")}
           >
             Achievements
-          </Button>
-          <Button
-            onClick={() => ctrlConnector.controller.openProfile("trophies")}
-          >
-            Trophies
           </Button>
           <Button
             onClick={() => ctrlConnector.controller.openProfile("leaderboard")}
@@ -60,40 +57,14 @@ export function Profile() {
             Activity
           </Button>
           <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=followers",
-              )
-            }
+            onClick={() => ctrlConnector.controller.openProfileTo("followers")}
           >
             Followers
           </Button>
           <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=following",
-              )
-            }
+            onClick={() => ctrlConnector.controller.openProfileTo("following")}
           >
             Following
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=followers&closable=true",
-              )
-            }
-          >
-            Followers Closable
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                "inventory?social=following&closable=true",
-              )
-            }
-          >
-            Following Closable
           </Button>
         </div>
         <div className="flex flex-wrap gap-1">
@@ -105,24 +76,6 @@ export function Profile() {
             }
           >
             Open to Token STRK
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                `inventory/token/${STRK_CONTRACT_ADDRESS}?preset=cartridge&closable=true`,
-              )
-            }
-          >
-            Open to Token STRK Closable
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileTo(
-                `inventory/token/${STRK_CONTRACT_ADDRESS}?preset=cartridge&visitor=true`,
-              )
-            }
-          >
-            Open to Token STRK Visitor
           </Button>
           <Button
             onClick={() =>
@@ -158,20 +111,11 @@ export function Profile() {
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileAt(
-                `account/${username}/slot/dragarkbal/inventory/collection/0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420?ps=dragarkbal&closable=true`,
+                `account/${username}/slot/dragarkbal/inventory/collection/0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420?ps=dragarkbal`,
               )
             }
           >
-            Open at Dragark Collection Closable
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileAt(
-                `account/bal7hazar/slot/dragarkbal/inventory/collection/0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420?ps=dragarkbal&visitor=true`,
-              )
-            }
-          >
-            Open at Dragark Collection Visitor
+            Open at Dragark Collection
           </Button>
           <Button
             onClick={() =>

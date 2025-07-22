@@ -304,7 +304,7 @@ export function ControllerErrorAlert({
         description = <StackTraceDisplay stackTrace={parsedError.stack} />;
       } catch {
         title = "Execution error";
-        description = error.data;
+        description = JSON.stringify(error.data);
       }
       break;
     case ErrorCode.StarknetValidationFailure: {

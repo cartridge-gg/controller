@@ -9,20 +9,19 @@ import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
-import { State } from "..";
+import { useNavigation } from "@/context/navigation";
 import { SectionHeader } from "../section-header";
 import { SignerCard } from "./signer-card";
 import { useFeature } from "@/hooks/features";
 
 export const SignersSection = ({
   controllerQuery,
-  setState,
 }: {
   controllerQuery: QueryObserverResult<ControllerQuery>;
-  setState: (state: State) => void;
 }) => {
   const { chainId, controller } = useConnection();
   const isFeatureEnabled = useFeature("addSigner");
+  const { navigate } = useNavigation();
 
   const canAddSigner = isFeatureEnabled;
 
@@ -73,9 +72,7 @@ export const SignersSection = ({
           variant="outline"
           className="bg-background-100 text-foreground-300 gap-1 w-fit px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200 hover:border-background-200"
           disabled={chainId !== constants.StarknetChainId.SN_MAIN}
-          onClick={() => {
-            setState(State.ADD_SIGNER);
-          }}
+          onClick={() => navigate("/settings/add-signer")}
         >
           <PlusIcon size="sm" variant="line" />
           <span className="normal-case font-normal font-sans text-sm">

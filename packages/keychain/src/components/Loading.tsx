@@ -1,6 +1,5 @@
 import {
-  LayoutContainer,
-  LayoutHeader,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
   Skeleton,
@@ -18,14 +17,12 @@ export function PageLoading({
   description,
 }: PageLoadingProps = {}) {
   return (
-    <LayoutContainer>
-      <LayoutHeader
+    <>
+      <HeaderInner
         variant={headerVariant}
         title={title}
         description={description}
-        hideNetwork
-        hideUsername
-        hideSettings
+        hideIcon
       />
 
       <LayoutContent className="gap-6 overflow-y-hidden">
@@ -50,6 +47,6 @@ export function PageLoading({
         {/* Button skeleton */}
         <Skeleton className="h-11 w-full rounded" />
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

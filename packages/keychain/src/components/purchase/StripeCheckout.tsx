@@ -9,27 +9,18 @@ import {
   StripeElements,
   StripePaymentElementOptions,
 } from "@stripe/stripe-js";
-import {
-  LayoutContainer,
-  LayoutContent,
-  LayoutFooter,
-  Button,
-  LayoutHeader,
-  CreditCardIcon,
-} from "@cartridge/ui";
+import { LayoutContent, LayoutFooter, Button } from "@cartridge/ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { PricingDetails } from ".";
 import { CostBreakdown } from "./CostBreakdown";
 
 type StripeCheckoutProps = {
   price: PricingDetails;
-  onBack: () => void;
   onComplete: () => void;
 };
 
 export default function StripeCheckout({
   price,
-  onBack,
   onComplete,
 }: StripeCheckoutProps) {
   const stripe = useStripe();
@@ -96,7 +87,6 @@ export default function StripeCheckout({
       error={error}
       isLoading={isLoading}
       isSubmitting={isSubmitting}
-      onBack={onBack}
       handleSubmit={handleSubmit}
     >
       <form id="payment-form">
@@ -119,7 +109,6 @@ export const StripeCheckoutContainer = ({
   isLoading,
   isSubmitting,
   children,
-  onBack,
   handleSubmit,
 }: {
   price: PricingDetails;
@@ -129,16 +118,10 @@ export const StripeCheckoutContainer = ({
   isLoading: boolean;
   isSubmitting: boolean;
   children: React.ReactNode;
-  onBack: () => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
 }) => {
   return (
-    <LayoutContainer className="min-h-[600px]">
-      <LayoutHeader
-        title={"Enter Payment Details"}
-        icon={<CreditCardIcon variant="solid" size="lg" />}
-        onBack={onBack}
-      />
+    <>
       <LayoutContent className="gap-6">{children}</LayoutContent>
       <LayoutFooter>
         {error && (
@@ -157,6 +140,6 @@ export const StripeCheckoutContainer = ({
           Purchase
         </Button>
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 };

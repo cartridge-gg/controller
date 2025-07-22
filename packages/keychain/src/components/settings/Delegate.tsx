@@ -1,18 +1,17 @@
 import {
-  LayoutContainer,
   LayoutContent,
   LayoutFooter,
   AlertIcon,
   Button,
   Input,
-  LayoutHeader,
+  HeaderInner,
 } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
 import { ExecuteCtx } from "@/utils/connection";
 
-export function Delegate({ onBack }: { onBack: () => void }) {
+export function Delegate() {
   const { controller, context, setContext } = useConnection();
   const [delegateAddress, setDelegateAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
@@ -43,13 +42,8 @@ export function Delegate({ onBack }: { onBack: () => void }) {
   }, [controller, delegateAddress, context, setContext]);
 
   return (
-    <LayoutContainer>
-      <LayoutHeader
-        variant="expanded"
-        title="Delegate account"
-        onBack={() => onBack()}
-        hideSettings
-      />
+    <>
+      <HeaderInner variant="compressed" title="Delegate account" hideIcon />
       <LayoutContent className="gap-6">
         <div className="flex flex-col gap-4">
           <div className="text-sm text-foreground-400 text-center">
@@ -80,6 +74,6 @@ export function Delegate({ onBack }: { onBack: () => void }) {
           Setup later
         </Button> */}
       </LayoutFooter>
-    </LayoutContainer>
+    </>
   );
 }

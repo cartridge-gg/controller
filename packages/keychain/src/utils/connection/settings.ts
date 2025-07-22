@@ -1,14 +1,22 @@
-import { ConnectionCtx, OpenSettingsCtx } from "./types";
+import { ResponseCodes } from "@cartridge/controller";
 
-export function openSettingsFactory(setContext: (ctx: ConnectionCtx) => void) {
-  return (account: string) =>
-    new Promise((resolve, reject) => {
-      setContext({
-        type: "open-settings",
-        origin,
-        account,
-        resolve,
-        reject,
-      } as OpenSettingsCtx);
+export function openSettingsFactory() {
+  return () =>
+    new Promise((resolve) => {
+      window.dispatchEvent(
+        new CustomEvent("controller-navigate", {
+          detail: {
+            path: "/settings",
+            options: {
+              resetStack: true,
+            },
+          },
+        }),
+      );
+
+      resolve({
+        code: ResponseCodes.SUCCESS,
+        message: "Settings opened",
+      });
     });
 }

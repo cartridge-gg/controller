@@ -4,11 +4,7 @@ import { Deposit } from "./Deposit";
 
 const meta = {
   component: Deposit,
-  args: {
-    onBack: () => {
-      console.log("onBack");
-    },
-  },
+  args: {},
 } satisfies Meta<typeof Deposit>;
 
 export default meta;

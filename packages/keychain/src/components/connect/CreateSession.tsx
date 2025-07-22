@@ -3,7 +3,7 @@ import { SessionConsent } from "@/components/connect";
 import { Upgrade } from "./Upgrade";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
-import { now } from "@/const";
+import { now } from "@/constants";
 import { CreateSessionProvider } from "@/context/session";
 import { useConnection } from "@/hooks/connection";
 import {
@@ -16,10 +16,9 @@ import {
   Button,
   Checkbox,
   cn,
-  LayoutContainer,
+  HeaderInner,
   LayoutContent,
   LayoutFooter,
-  LayoutHeader,
   SliderIcon,
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState } from "react";
@@ -113,8 +112,8 @@ const CreateSessionLayout = ({
   return (
     <>
       {/* <OcclusionDetector /> */}
-      <LayoutContainer>
-        <LayoutHeader
+      <>
+        <HeaderInner
           className="px-6 pt-6 pb-0"
           title={!isUpdate ? "Create Session" : "Update Session"}
           description={isUpdate ? "The policies were updated" : undefined}
@@ -208,7 +207,7 @@ const CreateSessionLayout = ({
 
           {!error && <div className="flex flex-col" />}
         </LayoutFooter>
-      </LayoutContainer>
+      </>
     </>
   );
 };
