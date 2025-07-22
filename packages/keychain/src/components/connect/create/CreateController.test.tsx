@@ -19,6 +19,33 @@ vi.mock("@/hooks/posthog", () => ({
   }),
 }));
 vi.mock("@/hooks/connection", () => ({
+  useConnection: () => ({
+    theme: mockUseControllerTheme(),
+    controller: null,
+    policies: null,
+    context: null,
+    origin: "test-origin",
+    rpcUrl: "test-rpc",
+    chainId: "SN_MAIN",
+    project: null,
+    namespace: null,
+    tokens: [],
+    verified: true,
+    isConfigLoading: false,
+    controllerVersion: null,
+    setController: vi.fn(),
+    setContext: vi.fn(),
+    closeModal: vi.fn(),
+    openModal: vi.fn(),
+    logout: vi.fn(),
+    openSettings: vi.fn(),
+    externalDetectWallets: vi.fn(),
+    externalConnectWallet: vi.fn(),
+    externalSignMessage: vi.fn(),
+    externalSignTypedData: vi.fn(),
+    externalSendTransaction: vi.fn(),
+    externalGetBalance: vi.fn(),
+  }),
   useControllerTheme: () => mockUseControllerTheme(),
 }));
 

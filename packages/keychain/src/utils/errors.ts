@@ -747,7 +747,7 @@ export const starknetTransactionExecutionErrorTestCases = [
     },
     expected: {
       raw: '{"class_hash":"0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf","contract_address":"0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b","error":"(0x617267656e742f6d756c746963616c6c2d6661696c6564 (\'argent/multicall-failed\'), 0x1, 0x753235365f737562204f766572666c6f77 (\'u256_sub Overflow\'), 0x454e545259504f494e545f4641494c4544 (\'ENTRYPOINT_FAILED\'))","selector":"0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad"}',
-      summary: "u256_sub Overflow",
+      summary: "There was an error in the transaction",
       stack: [
         {
           address:
