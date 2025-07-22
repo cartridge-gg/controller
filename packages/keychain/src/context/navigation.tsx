@@ -91,6 +91,7 @@ export function NavigationProvider({
     if (!isInitialized.current) return;
 
     const currentPath = getFullPath();
+    const currentPathname = location.pathname;
 
     // Skip if this is an internal navigation (back/forward)
     if (isInternalNavigation.current) {
@@ -99,10 +100,13 @@ export function NavigationProvider({
       return;
     }
 
-    // Skip if the path hasn't actually changed
-    if (currentPath === lastTrackedPath.current) return;
-
-    const previousPath = lastTrackedPath.current;
+    // Skip if the pathname hasn't actually changed (ignore search params for stack entries)
+    const previousPathname = lastTrackedPath.current.split("?")[0];
+    if (currentPathname === previousPathname) {
+      // Update the lastTrackedPath to include new search params but don't add to stack
+      lastTrackedPath.current = currentPath;
+      return;
+    }
 
     const newEntry: NavigationEntry = {
       path: currentPath,
@@ -112,10 +116,11 @@ export function NavigationProvider({
 
     // Update both stack and index together to ensure consistency
     setNavigationStack((prev) => {
-      // Find where we currently are in the stack
+      // Find where we currently are in the stack (compare only pathname)
       let currentPosition = prev.length - 1;
       for (let i = prev.length - 1; i >= 0; i--) {
-        if (prev[i].path === previousPath) {
+        const stackPathname = prev[i].path.split("?")[0];
+        if (stackPathname === previousPathname) {
           currentPosition = i;
           break;
         }
@@ -132,7 +137,7 @@ export function NavigationProvider({
     });
 
     lastTrackedPath.current = currentPath;
-  }, [getFullPath, location.state]);
+  }, [getFullPath, location.state, location.pathname]);
 
   // Handle controller navigation events
   useEffect(() => {

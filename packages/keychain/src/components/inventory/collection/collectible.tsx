@@ -49,44 +49,42 @@ export function Collectible() {
       ) : status === "error" ? (
         <EmptyState />
       ) : (
-        <>
-          <LayoutContent className={cn("p-6 flex flex-col gap-y-4")}>
-            <CollectionHeader
-              image={edition?.properties.icon || theme?.icon}
-              title={collectible.name}
-              subtitle={game?.name || theme?.name || "---"}
-              certified
-            />
+        <LayoutContent className={cn("p-6 flex flex-col gap-y-4")}>
+          <CollectionHeader
+            image={edition?.properties.icon || theme?.icon}
+            title={collectible.name}
+            subtitle={game?.name || theme?.name || "---"}
+            certified
+          />
 
-            <div className="grid grid-cols-2 gap-4 place-items-center">
-              {assets.map((asset) => {
-                return (
-                  <Link
-                    className="w-full select-none"
-                    draggable={false}
-                    to={`token/${asset.tokenId}?${searchParams.toString()}`}
-                    state={location.state}
-                    key={asset.tokenId}
-                  >
-                    <CollectibleCard
-                      title={
-                        asset.name.includes(
-                          `${parseInt(BigInt(asset.tokenId).toString())}`,
-                        )
-                          ? asset.name
-                          : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
-                      }
-                      selectable={false}
-                      image={asset.imageUrl || placeholder}
-                      totalCount={asset.amount}
-                      className="rounded overflow-hidden"
-                    />
-                  </Link>
-                );
-              })}
-            </div>
-          </LayoutContent>
-        </>
+          <div className="grid grid-cols-2 gap-4 place-items-center">
+            {assets.map((asset) => {
+              return (
+                <Link
+                  className="w-full select-none"
+                  draggable={false}
+                  to={`token/${asset.tokenId}?${searchParams.toString()}`}
+                  state={location.state}
+                  key={asset.tokenId}
+                >
+                  <CollectibleCard
+                    title={
+                      asset.name.includes(
+                        `${parseInt(BigInt(asset.tokenId).toString())}`,
+                      )
+                        ? asset.name
+                        : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
+                    }
+                    selectable={false}
+                    image={asset.imageUrl || placeholder}
+                    totalCount={asset.amount}
+                    className="rounded overflow-hidden"
+                  />
+                </Link>
+              );
+            })}
+          </div>
+        </LayoutContent>
       )}
     </>
   );
