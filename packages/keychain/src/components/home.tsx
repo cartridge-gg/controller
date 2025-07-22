@@ -30,10 +30,19 @@ export function Home() {
     }
   }, [context?.type, posthog]);
 
-  // Allow direct access for / routes
-  const isBasePath = location.pathname == "/";
-  if ((window.self === window.top && !isBasePath) || (!origin && !isBasePath)) {
-    return <></>;
+  // Allow direct access for /, /slot, /success, and /failure routes
+  const isBasePath = location.pathname === "/";
+  const isSlotPath = location.pathname.startsWith("/slot");
+  const isSuccessPath = location.pathname === "/success";
+  const isFailurePath = location.pathname === "/failure";
+  const isAllowedPath =
+    isBasePath || isSlotPath || isSuccessPath || isFailurePath;
+
+  if (
+    (window.self === window.top && !isAllowedPath) ||
+    (!origin && !isAllowedPath)
+  ) {
+    return <>Access Denied</>;
   }
 
   // No controller, send to login
