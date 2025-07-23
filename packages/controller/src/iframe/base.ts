@@ -64,12 +64,11 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.left = "0";
     container.style.zIndex = "10000";
     container.style.backgroundColor = "rgba(0,0,0,0.6)";
-    container.style.display = "flex";
+    container.style.display = "none"; // Use display: none to completely hide from password managers
     container.style.alignItems = "center";
     container.style.justifyContent = "center";
-    container.style.visibility = "hidden";
-    container.style.opacity = "0";
     container.style.transition = "opacity 0.2s ease";
+    container.style.opacity = "0";
     container.style.pointerEvents = "auto";
     container.appendChild(iframe);
 
@@ -136,8 +135,13 @@ export class IFrame<CallSender extends {}> implements Modal {
       return;
     document.body.style.overflow = "hidden";
 
-    this.container.style.visibility = "visible";
-    this.container.style.opacity = "1";
+    this.container.style.display = "flex";
+    // Use requestAnimationFrame to ensure display change is processed before opacity change
+    requestAnimationFrame(() => {
+      if (this.container) {
+        this.container.style.opacity = "1";
+      }
+    });
   }
 
   close() {
@@ -147,8 +151,15 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     document.body.style.overflow = "auto";
 
-    this.container.style.visibility = "hidden";
+    // Start fade-out transition
     this.container.style.opacity = "0";
+    
+    // Set display: none after transition completes (200ms)
+    setTimeout(() => {
+      if (this.container) {
+        this.container.style.display = "none";
+      }
+    }, 200);
   }
 
   sendBackward() {
@@ -179,6 +190,6 @@ export class IFrame<CallSender extends {}> implements Modal {
   }
 
   isOpen() {
-    return this.iframe?.style.display !== "none";
+    return this.container?.style.display !== "none";
   }
 }
