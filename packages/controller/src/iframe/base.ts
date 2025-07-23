@@ -15,6 +15,7 @@ export class IFrame<CallSender extends {}> implements Modal {
   private container?: HTMLDivElement;
   private onClose?: () => void;
   private child?: AsyncMethodReturns<CallSender>;
+  private closeTimeout?: NodeJS.Timeout;
 
   constructor({
     id,
@@ -133,6 +134,13 @@ export class IFrame<CallSender extends {}> implements Modal {
   open() {
     if (!this.container || typeof document === "undefined" || !document.body)
       return;
+    
+    // Clear any pending close timeout to prevent race condition
+    if (this.closeTimeout) {
+      clearTimeout(this.closeTimeout);
+      this.closeTimeout = undefined;
+    }
+    
     document.body.style.overflow = "hidden";
 
     this.container.style.display = "flex";
@@ -155,10 +163,11 @@ export class IFrame<CallSender extends {}> implements Modal {
     this.container.style.opacity = "0";
     
     // Set display: none after transition completes (200ms)
-    setTimeout(() => {
+    this.closeTimeout = setTimeout(() => {
       if (this.container) {
         this.container.style.display = "none";
       }
+      this.closeTimeout = undefined;
     }, 200);
   }
 
