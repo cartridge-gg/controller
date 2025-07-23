@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.9.2] - 2025-07-23
+
+### ✨ New Features
+- **@cartridge/keychain**: Added popup flow for addOwner functionality, providing a streamlined user experience for adding account signers (#1835)
+- **@cartridge/keychain**: Merged profile functionality into keychain, consolidating user profile management, inventory, achievements, and activity tracking into a unified interface (#1837)
+
+### 🚀 Improvements  
+- **Development**: Added compatibility Next.js example build to improve development and testing workflows (#1836)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed password manager detection for hidden input fields to prevent interference with browser password managers (#1848)
+- **@cartridge/keychain**: Fixed slot routes to ensure proper navigation and routing within the slot funding flow (#1847)
+- **@cartridge/controller**: Fixed incorrect update session request handling to improve session management reliability (#1843)
+- **@cartridge/keychain**: Fixed Bitwarden integration flow to ensure compatibility with the Bitwarden password manager (#1840)
+- **@cartridge/keychain**: Enhanced logging and fixed various issues for better debugging and error tracking (#1839)
+- **@cartridge/keychain**: Fixed multiple issues related to owners and session management for improved account functionality (#1834)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates to the UI component library for improved design consistency and functionality (#1845, #1833, #1832, #1831)
+
 ## [0.9.0] - 2025-07-15
 
 ### ✨ New Features
