@@ -8,7 +8,6 @@ import {
 
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LoginMode } from "@/components/connect/types";
 import { PageLoading } from "@/components/Loading";
 import { useSearchParams } from "react-router-dom";
 import { CheckIcon, HeaderInner } from "@cartridge/ui";
@@ -155,7 +154,7 @@ export function Session() {
   }, [controller, policies, queries.public_key, onCallback]);
 
   if (!controller) {
-    return <CreateController loginMode={LoginMode.Controller} />;
+    return <CreateController />;
   }
 
   if (isLoading) {
