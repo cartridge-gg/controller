@@ -89,8 +89,12 @@ export default class ControllerProvider extends BaseProvider {
       iframes.forEach((iframe) => {
         const container = iframe.parentElement;
         if (container) {
-          container.style.visibility = "hidden";
+          // Start fade-out transition
           container.style.opacity = "0";
+          // Set display: none after transition completes
+          setTimeout(() => {
+            container.style.display = "none";
+          }, 200);
         }
       });
 
