@@ -119,21 +119,35 @@ export function parseGraphQLError(error: unknown): {
         details: {},
       };
     }
-  } else if (error?.errors || error?.data) {
-    // Direct GraphQL response object
-    graphqlResponse = error;
   } else if (
-    error?.message &&
-    typeof error.message === "string" &&
-    error.message.includes("GraphQL")
+    typeof error === "object" &&
+    error !== null &&
+    ("errors" in error || "data" in error)
+  ) {
+    // Direct GraphQL response object
+    graphqlResponse = error as GraphQLResponse;
+  } else if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string" &&
+    (error as { message: string }).message.includes("GraphQL")
   ) {
     // Error object with GraphQL information in the message
-    return parseGraphQLError(error.message);
+    return parseGraphQLError((error as { message: string }).message);
   } else {
     // Generic error object
+    const errorMessage =
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof (error as { message: unknown }).message === "string"
+        ? (error as { message: string }).message
+        : "Unknown GraphQL error";
+
     return {
       raw: JSON.stringify(error),
-      summary: error?.message || "Unknown GraphQL error",
+      summary: errorMessage,
       details: {},
     };
   }

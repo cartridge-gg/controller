@@ -134,13 +134,13 @@ export class IFrame<CallSender extends {}> implements Modal {
   open() {
     if (!this.container || typeof document === "undefined" || !document.body)
       return;
-    
+
     // Clear any pending close timeout to prevent race condition
     if (this.closeTimeout) {
       clearTimeout(this.closeTimeout);
       this.closeTimeout = undefined;
     }
-    
+
     document.body.style.overflow = "hidden";
 
     this.container.style.display = "flex";
@@ -161,7 +161,7 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     // Start fade-out transition
     this.container.style.opacity = "0";
-    
+
     // Set display: none after transition completes (200ms)
     this.closeTimeout = setTimeout(() => {
       if (this.container) {
