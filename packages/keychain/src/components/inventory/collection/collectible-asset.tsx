@@ -1,10 +1,4 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, Slot, usePathname, useLocalSearchParams } from "expo-router";
 import {
   LayoutContent,
   Button,
@@ -39,8 +33,7 @@ const OFFSET = 10;
 
 export function CollectibleAsset() {
   const { chainId, namespace, project } = useConnection();
-  const [searchParams] = useSearchParams();
-  const location = useLocation();
+  const pathname = usePathname();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
   const { editions } = useArcade();
@@ -51,25 +44,27 @@ export function CollectibleAsset() {
     );
   }, [editions, project, namespace]);
 
-  const { address: contractAddress, tokenId } = useParams();
+  const { address: contractAddress, tokenId } = useLocalSearchParams();
+  const contractAddressStr = contractAddress as string;
+  const tokenIdStr = tokenId as string;
   const {
     collectible,
     assets,
     status: collectibleStatus,
   } = useCollectible({
-    contractAddress: contractAddress,
-    tokenIds: tokenId ? [tokenId] : [],
+    contractAddress: contractAddressStr,
+    tokenIds: tokenIdStr ? [tokenIdStr] : [],
   });
 
   const { ownership, status: ownershipStatus } = useOwnership({
-    contractAddress: contractAddress ?? "",
-    tokenId: tokenId ?? "",
+    contractAddress: contractAddressStr ?? "",
+    tokenId: tokenIdStr ?? "",
   });
 
   const { traceabilities: data, status: traceabilitiesStatus } =
     useTraceabilities({
-      contractAddress: contractAddress ?? "",
-      tokenId: tokenId ?? "",
+      contractAddress: contractAddressStr ?? "",
+      tokenId: tokenIdStr ?? "",
     });
 
   const { username } = useUsername({
@@ -125,8 +120,8 @@ export function CollectibleAsset() {
     return "success";
   }, [collectibleStatus, traceabilitiesStatus, ownershipStatus]);
 
-  if (location.pathname.includes("/send")) {
-    return <Outlet />;
+  if (pathname.includes("/send")) {
+    return <Slot />;
   }
 
   return (
@@ -176,7 +171,7 @@ export function CollectibleAsset() {
                   {events.map((props: CardProps, index: number) => (
                     <Link
                       key={`${index}-${props.key}`}
-                      to={to(props.transactionHash)}
+                      href={to(props.transactionHash)}
                       target="_blank"
                     >
                       <TraceabilityCollectibleCard
@@ -215,7 +210,7 @@ export function CollectibleAsset() {
           >
             <Link
               className="flex items-center justify-center gap-x-4 w-full"
-              to={`send?${searchParams.toString()}`}
+              href="send"
             >
               <Button className="h-10 w-full gap-2">
                 <PaperPlaneIcon variant="solid" size="sm" />

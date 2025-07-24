@@ -1,6 +1,6 @@
 import { useCallback, useContext, useMemo, useState } from "react";
 import { MarketplaceContext } from "@/context/marketplace";
-import { useParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { cairo, getChecksumAddress } from "starknet";
 import { OrderModel, StatusType } from "@cartridge/marketplace";
 import { useQuery } from "react-query";
@@ -31,7 +31,9 @@ export const useMarketplace = () => {
 
   const account = useAccount();
   const address = account?.address || "";
-  const { address: contractAddress, tokenId } = useParams();
+  const { address: contractAddress, tokenId } = useLocalSearchParams();
+  const contractAddressStr = contractAddress as string;
+  const tokenIdStr = tokenId as string;
   const { controller } = useConnection();
   const {
     chainId,
@@ -69,18 +71,18 @@ export const useMarketplace = () => {
   );
 
   const collectionOrders: { [token: string]: OrderModel[] } = useMemo(() => {
-    return getCollectionOrders(contractAddress || "0x0");
-  }, [getCollectionOrders, contractAddress]);
+    return getCollectionOrders(contractAddressStr || "0x0");
+  }, [getCollectionOrders, contractAddressStr]);
 
   const tokenOrders = useMemo(() => {
-    const collection = getChecksumAddress(contractAddress || "0x0");
+    const collection = getChecksumAddress(contractAddressStr || "0x0");
     const collectionOrders = orders[collection];
     if (!collectionOrders) return [];
-    const token = BigInt(tokenId || "0x0").toString();
+    const token = BigInt(tokenIdStr || "0x0").toString();
     return Object.values(collectionOrders[token] || {}).filter(
       (order) => order.status.value === StatusType.Placed,
     );
-  }, [orders, tokenId]);
+  }, [orders, tokenIdStr]);
 
   const selfOrders = useMemo(() => {
     if (!address) return [];
@@ -90,17 +92,17 @@ export const useMarketplace = () => {
   }, [address, tokenOrders]);
 
   const order: OrderModel | undefined = useMemo(() => {
-    if (!contractAddress || !tokenId) return;
-    const collection = getChecksumAddress(contractAddress);
+    if (!contractAddressStr || !tokenIdStr) return;
+    const collection = getChecksumAddress(contractAddressStr);
     const collectionOrders = orders[collection];
     if (!collectionOrders) return;
-    const token = BigInt(tokenId).toString();
+    const token = BigInt(tokenIdStr).toString();
     const tokenOrders = Object.values(collectionOrders[token] || {}).filter(
       (order) => order.status.value === StatusType.Placed,
     );
     if (tokenOrders.length === 0) return;
     return tokenOrders[0];
-  }, [orders, contractAddress, tokenId]);
+  }, [orders, contractAddressStr, tokenIdStr]);
 
   const isListed = useMemo(() => {
     if (!address) return false;
@@ -109,19 +111,19 @@ export const useMarketplace = () => {
     );
   }, [address, tokenOrders]);
 
-  const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
+  const { entrypoints } = useEntrypoints({ address: contractAddressStr || "" });
 
   const { data: royalties, isFetching: isLoading } = useQuery({
-    enabled: !!contractAddress && !!book && !!tokenId && !!amount,
-    queryKey: ["fee", contractAddress, tokenId, amount],
+    enabled: !!contractAddressStr && !!book && !!tokenIdStr && !!amount,
+    queryKey: ["fee", contractAddressStr, tokenIdStr, amount],
     queryFn: async () => {
       if (!entrypoints || !entrypoints.includes(FEE_ENTRYPOINT)) return;
       try {
         return await controller?.provider?.callContract({
-          contractAddress: contractAddress ?? "",
+          contractAddress: contractAddressStr ?? "",
           entrypoint: FEE_ENTRYPOINT,
           calldata: [
-            cairo.uint256(tokenId ?? "0x0"),
+            cairo.uint256(tokenIdStr ?? "0x0"),
             cairo.uint256(amount || 0),
           ],
         });

@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useLocalSearchParams } from "expo-router";
 import {
   LayoutContent,
   LayoutFooter,
@@ -28,9 +28,10 @@ import { useVersion } from "@/hooks/version";
 import { useNavigation } from "@/context/navigation";
 
 export function Token() {
-  const { address } = useParams<{ address: string }>();
+  const { address } = useLocalSearchParams<{ address: string }>();
+  const addressStr = address as string;
 
-  switch (address) {
+  switch (addressStr) {
     case "credit":
       return <Credits />;
     default:
@@ -115,7 +116,8 @@ const CreditsLoadingState = () => {
 };
 
 function ERC20() {
-  const { address } = useParams<{ address: string }>();
+  const { address } = useLocalSearchParams<{ address: string }>();
+  const addressStr = address as string;
   const account = useAccount();
   const accountAddress = account?.address || "";
   const { controller } = useConnection();
@@ -123,8 +125,7 @@ function ERC20() {
   const { isControllerGte } = useVersion();
 
   const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
-  const { token } = useToken({ tokenAddress: address! });
-  const [searchParams] = useSearchParams();
+  const { token } = useToken({ tokenAddress: addressStr! });
 
   const compatibility = useMemo(() => {
     return isControllerGte("0.5.6");
@@ -209,7 +210,7 @@ function ERC20() {
               {transactions.map((item) => (
                 <Link
                   key={item.key}
-                  to={to(item.transactionHash)}
+                  href={to(item.transactionHash)}
                   target="_blank"
                 >
                   <ActivityTokenCard
@@ -229,7 +230,7 @@ function ERC20() {
 
       {compatibility && controller && (
         <LayoutFooter>
-          <Link to={`send?${searchParams.toString()}`} className="w-full">
+          <Link href="send" className="w-full">
             <Button className="w-full space-x-2">
               <PaperPlaneIcon variant="solid" />
               Send

@@ -14,7 +14,7 @@ import { client, ENDPOINT } from "@/utils/graphql";
 import base64url from "base64url";
 import { useConnection } from "./connection";
 import { useEffect, useMemo, useState } from "react";
-import { useMatch, useSearchParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
 import { constants, getChecksumAddress } from "starknet";
@@ -421,10 +421,8 @@ export function useAccountProfile({
 } = {}): UseAccountResponse {
   // To be used in top level provider (Above Route component)
   // Ref: https://stackoverflow.com/a/75462921
-  const match = useMatch("/account/:username/*");
-  const [searchParams] = useSearchParams();
-
-  const username = match?.params.username ?? "";
+  const searchParams = useLocalSearchParams();
+  const username = (searchParams.username as string) ?? "";
   const { data: usernameData } = useAddressByUsernameQuery(
     { username },
     { enabled: !!username },
@@ -438,7 +436,7 @@ export function useAccountProfile({
     [usernameData],
   );
 
-  const addressParam = searchParams.get("address");
+  const addressParam = searchParams.address as string;
   const { data: addressData } = useAccountNameQuery(
     { address: addressParam || "" },
     {

@@ -1,19 +1,19 @@
 import { LayoutContainer } from "@cartridge/ui";
 import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
-import { Outlet, useLocation } from "react-router-dom";
+import { Slot, usePathname } from "expo-router";
 import { LayoutBottomNav } from "@/components/bottom-nav";
 
 export function Layout({ children }: { children?: React.ReactNode }) {
   const { closeModal } = useConnection();
-  const location = useLocation();
+  const pathname = usePathname();
   // Check if current page should have bottom navigation
   const hasBottomNav = [
     "inventory",
     "achievements",
     "leaderboard",
     "activity",
-  ].some((page) => location.pathname.endsWith(`/${page}`));
+  ].some((page) => pathname.endsWith(`/${page}`));
 
   return (
     <div style={{ position: "relative" }}>
@@ -24,7 +24,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
           onClose={hasBottomNav ? closeModal : undefined}
         />
 
-        {children || <Outlet />}
+        {children || <Slot />}
 
         {hasBottomNav && <LayoutBottomNav />}
       </LayoutContainer>

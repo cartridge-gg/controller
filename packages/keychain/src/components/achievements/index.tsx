@@ -1,7 +1,7 @@
 import { LayoutContent, Empty, Skeleton } from "@cartridge/ui";
 import { useAccount } from "@/hooks/account";
 import { useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { Trophies } from "./trophies";
 import { useConnection } from "@/hooks/connection";
 import { useData } from "@/hooks/data";
@@ -19,7 +19,8 @@ export function Achievements() {
 
   const { pins, games, editions } = useArcade();
 
-  const { address } = useParams<{ address: string }>();
+  const { address } = useLocalSearchParams<{ address: string }>();
+  const addressStr = address as string;
   const { project, namespace } = useConnection();
 
   const edition: EditionModel | undefined = useMemo(() => {
@@ -34,7 +35,7 @@ export function Achievements() {
 
   const pinneds = useMemo(() => {
     const ids = (
-      pins[addAddressPadding(address || self || "0x0")] || []
+      pins[addAddressPadding(addressStr || self || "0x0")] || []
     ).filter((id) => achievements.find((item) => item.id === id)?.completed);
     const pinneds = achievements
       .filter(
@@ -44,18 +45,18 @@ export function Achievements() {
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     return pinneds;
-  }, [achievements, pins, address, self]);
+  }, [achievements, pins, addressStr, self]);
 
   const points = useMemo(() => {
     return (
-      players.find((player) => player.address === (address || self))
+      players.find((player) => player.address === (addressStr || self))
         ?.earnings || 0
     );
-  }, [address, self, players]);
+  }, [addressStr, self, players]);
 
   useEffect(() => {
-    setAccountAddress(address || self || "");
-  }, [address, self, setAccountAddress]);
+    setAccountAddress(addressStr || self || "");
+  }, [addressStr, self, setAccountAddress]);
 
   return status === "loading" ? (
     <LoadingState />

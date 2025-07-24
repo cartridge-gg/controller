@@ -54,7 +54,7 @@ export default class Controller {
     username: string;
     owner: Owner;
   }) {
-    const accountWithMeta = CartridgeAccount.new(
+    const accountWithMeta = window.CartridgeAccount.new(
       appId,
       classHash,
       rpcUrl,

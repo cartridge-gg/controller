@@ -1,9 +1,4 @@
-import {
-  Link,
-  useLocation,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link } from "expo-router";
 import {
   LayoutContent,
   LayoutFooter,

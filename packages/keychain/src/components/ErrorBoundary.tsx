@@ -86,7 +86,7 @@ export function ErrorPage({ error }: { error: Error }) {
             close
           </Button>
         </LayoutFooter>
-      </LayoutContainer >
-    </div >
+      </LayoutContainer>
+    </div>
   );
 }
