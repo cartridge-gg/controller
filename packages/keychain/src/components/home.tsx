@@ -5,7 +5,6 @@ import { useConnection } from "@/hooks/connection";
 import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { CreateController, CreateSession, Upgrade } from "./connect";
-import { LoginMode } from "./connect/types";
 import { DeployController } from "./DeployController";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
@@ -47,7 +46,7 @@ export function Home() {
 
   // No controller, send to login
   if (!controller) {
-    return <CreateController loginMode={LoginMode.Controller} />;
+    return <CreateController />;
   }
 
   if (!upgrade.isSynced || isConfigLoading) {

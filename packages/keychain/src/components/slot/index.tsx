@@ -1,9 +1,7 @@
 export { Consent } from "./consent";
 
 import { PageLoading } from "@/components/Loading";
-import { CreateController } from "@/components/connect";
 import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
-import { useController } from "@/hooks/controller";
 import { useEffect } from "react";
 import {
   Navigate,
@@ -13,6 +11,7 @@ import {
 } from "react-router-dom";
 import { CheckIcon, HeaderInner, LayoutContent } from "@cartridge/ui";
 import { useNavigation } from "@/context/navigation";
+import { useConnection } from "@/hooks/connection";
 
 export function Slot() {
   const { pathname } = useLocation();
@@ -34,12 +33,8 @@ export function Slot() {
 function Auth() {
   const { navigate } = useNavigation();
   const [searchParams] = useSearchParams();
-  const { controller } = useController();
-  const {
-    data: user,
-    isFetched,
-    refetch,
-  } = useMeQuery(undefined, {
+  const { logout, controller } = useConnection();
+  const { data: user, isFetched } = useMeQuery(undefined, {
     retry: false,
     enabled: true,
   });
@@ -61,19 +56,16 @@ function Auth() {
 
       navigate(target, { replace: true });
     }
-  }, [user, controller, navigate, searchParams]);
+  }, [user, isFetched, controller, navigate, searchParams, logout]);
 
+  // Logout to send user back to login
   useEffect(() => {
     if (controller && isFetched && !user) {
-      refetch();
+      logout();
     }
-  }, [controller, user, isFetched, refetch]);
+  }, [controller, user, isFetched, logout]);
 
-  if (!isFetched) {
-    return <PageLoading />;
-  }
-
-  return <CreateController isSlot={true} />;
+  return <PageLoading />;
 }
 
 export function Success() {

@@ -29,7 +29,6 @@ import { CollectionPurchase } from "@/components/inventory/collection/collection
 import { Socials } from "@/components/socials/index";
 import { useConnection } from "@/hooks/connection";
 import { CreateController } from "./connect";
-import { LoginMode } from "./connect/types";
 import { Settings } from "./settings";
 import { Purchase } from "./purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
@@ -43,10 +42,11 @@ import { useNavigation } from "@/context/navigation";
 export function App() {
   const { controller } = useConnection();
   const { navigate } = useNavigation();
+  const { pathname } = useLocation();
 
   // No controller, send to login
   if (!controller) {
-    return <CreateController loginMode={LoginMode.Controller} />;
+    return <CreateController isSlot={pathname.startsWith("/slot")} />;
   }
 
   return (

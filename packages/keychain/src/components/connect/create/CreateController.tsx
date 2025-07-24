@@ -227,10 +227,8 @@ function getNativeBrowserUrl() {
 
 export function CreateController({
   isSlot,
-  loginMode = LoginMode.Webauthn,
 }: {
   isSlot?: boolean;
-  loginMode?: LoginMode;
   error?: Error;
 }) {
   const posthog = usePostHog();
@@ -268,7 +266,7 @@ export function CreateController({
     authMethod,
   } = useCreateController({
     isSlot,
-    loginMode,
+    loginMode: isSlot ? LoginMode.Webauthn : LoginMode.Controller,
   });
 
   const handleFormSubmit = useCallback(
