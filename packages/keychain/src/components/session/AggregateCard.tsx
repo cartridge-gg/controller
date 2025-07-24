@@ -15,7 +15,7 @@ import {
 } from "@cartridge/ui";
 import { formatAddress, cn } from "@cartridge/ui/utils";
 import { useExplorer } from "@starknet-react/core";
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 import { constants } from "starknet";
 import { AccordionCard } from "./AccordionCard";
 import { MessageContent } from "./MessageCard";
@@ -69,7 +69,7 @@ export function AggregateCard({
           <div className="flex items-center justify-between bg-background-200 text-xs">
             <div className="py-2 font-medium">{name}</div>
             <Link
-              to={
+              href={
                 controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
                 controller?.chainId() === constants.StarknetChainId.SN_SEPOLIA
                   ? explorer.contract(address)

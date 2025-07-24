@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 import { useCollections } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { CollectibleCard, Skeleton } from "@cartridge/ui";
@@ -51,8 +51,7 @@ export function Collections() {
         return (
           <Link
             className="w-full group select-none"
-            draggable={false}
-            to={`./collection/${collection.address}`}
+            href={`./collection/${collection.address}`}
             key={collection.address}
           >
             <CollectibleCard
@@ -76,8 +75,7 @@ export function Collections() {
         return (
           <Link
             className="w-full group select-none"
-            draggable={false}
-            to={`./collectible/${collectible.address}`}
+            href={`./collectible/${collectible.address}`}
             key={collectible.address}
           >
             <CollectibleCard

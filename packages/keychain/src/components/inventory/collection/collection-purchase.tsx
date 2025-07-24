@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useLocalSearchParams } from "expo-router";
 import {
   LayoutContent,
   Button,
@@ -46,25 +46,28 @@ import { useTokens } from "@/hooks/token";
 import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useExecute } from "@/hooks/execute";
-import { useNavigation } from "@/context/navigation";
+import { useNavigation } from "@/context/useNavigation";
 
 const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectionPurchase() {
   const { closeModal } = useUI();
-  const { address: contractAddress, tokenId, project } = useParams();
+  const { address: contractAddress, tokenId, project } = useLocalSearchParams();
+  const contractAddressStr = contractAddress as string;
+
   const { chainId, parent, controller } = useConnection();
   const { tokens } = useTokens();
   const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
-  const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
+  const { entrypoints } = useEntrypoints({ address: contractAddressStr || "" });
   const { provider, orders, marketplaceFee, removeOrder, setAmount } =
     useMarketplace();
   const { execute } = useExecute();
   const { navigate } = useNavigation();
 
-  const [searchParams] = useSearchParams();
-  const paramsOrders = searchParams.get("orders")?.split(",").map(Number) || [];
+  const searchParams = useLocalSearchParams();
+  const paramsOrders =
+    (searchParams.orders as string)?.split(",").map(Number) || [];
   const tokenOrders = useMemo(() => {
     const allOrders = Object.values(orders).flatMap((orders) =>
       Object.values(orders).flatMap((orders) => Object.values(orders)),

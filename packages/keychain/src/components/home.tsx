@@ -12,12 +12,12 @@ import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
-import { Outlet, useLocation } from "react-router-dom";
+import { Slot, usePathname } from "expo-router";
 
 export function Home() {
   const { context, controller, policies, origin, isConfigLoading } =
     useConnection();
-  const location = useLocation();
+  const pathname = usePathname();
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
@@ -31,10 +31,10 @@ export function Home() {
   }, [context?.type, posthog]);
 
   // Allow direct access for /, /slot, /success, and /failure routes
-  const isBasePath = location.pathname === "/";
-  const isSlotPath = location.pathname.startsWith("/slot");
-  const isSuccessPath = location.pathname === "/success";
-  const isFailurePath = location.pathname === "/failure";
+  const isBasePath = pathname === "/";
+  const isSlotPath = pathname.startsWith("/slot");
+  const isSuccessPath = pathname === "/success";
+  const isFailurePath = pathname === "/failure";
   const isAllowedPath =
     isBasePath || isSlotPath || isSuccessPath || isFailurePath;
 
@@ -143,7 +143,7 @@ export function Home() {
             );
           }
           default:
-            return <Outlet />;
+            return <Slot />;
         }
       })()}
     </Layout>

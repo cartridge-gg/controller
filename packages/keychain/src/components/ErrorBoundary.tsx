@@ -10,7 +10,7 @@ import {
 } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { CARTRIDGE_DISCORD_LINK } from "@/constants";
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 import { useEffect } from "react";
 import { usePostHog } from "./provider/posthog";
 import { NavigationHeader } from "./NavigationHeader";
@@ -71,7 +71,7 @@ export function ErrorPage({ error }: { error: Error }) {
             <p className="text-sm font-semibold">Get help</p>
 
             <Link
-              to={CARTRIDGE_DISCORD_LINK}
+              href={CARTRIDGE_DISCORD_LINK}
               target="_blank"
               className="flex items-center text-sm gap-2 hover:underline"
             >

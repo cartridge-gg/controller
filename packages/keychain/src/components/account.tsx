@@ -1,19 +1,19 @@
-import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
+import { Redirect, Slot, usePathname, useLocalSearchParams } from "expo-router";
 
 export function Account() {
-  const location = useLocation();
-  const { username, project } = useParams<{
+  const pathname = usePathname();
+  const { username, project } = useLocalSearchParams<{
     username: string;
     project: string;
   }>();
 
   if (
     [`/account/${username}`, `/account/${username}/slot/${project}`].includes(
-      location.pathname,
+      pathname,
     )
   ) {
-    return <Navigate to="inventory" replace />;
+    return <Redirect href="inventory" />;
   }
 
-  return <Outlet />;
+  return <Slot />;
 }

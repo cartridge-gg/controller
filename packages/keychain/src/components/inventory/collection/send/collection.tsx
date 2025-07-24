@@ -12,7 +12,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { useNavigation } from "@/context/navigation";
 import { uint256, Call } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
@@ -28,10 +28,13 @@ const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
 const TRANSFER_FROM_SNAKE_CASE = "transfer_from";
 
 export function SendCollection() {
-  const { address: contractAddress, tokenId } = useParams();
+  const { address: contractAddress, tokenId } = useLocalSearchParams<{
+    address: string;
+    tokenId: string;
+  }>();
 
-  const [searchParams] = useSearchParams();
-  const paramsTokenIds = searchParams.getAll("tokenIds");
+  const searchParams = useLocalSearchParams();
+  const paramsTokenIds = searchParams.tokenIds;
 
   const { entrypoints } = useEntrypoints({
     address: contractAddress || "0x0",

@@ -2,7 +2,6 @@ import React, {
   createContext,
   PropsWithChildren,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -34,14 +33,14 @@ const saveFeaturesToStorage = (features: Record<string, boolean>): void => {
 
 // --- Context & Provider ---
 
-interface FeaturesContextValue {
+export interface FeaturesContextValue {
   features: Record<string, boolean>;
   enableFeature: (name: string) => void;
   disableFeature: (name: string) => void;
   isFeatureEnabled: (name: string) => boolean;
 }
 
-const FeaturesContext = createContext<FeaturesContextValue | undefined>(
+export const FeaturesContext = createContext<FeaturesContextValue | undefined>(
   undefined,
 );
 
@@ -108,17 +107,4 @@ export const FeatureProvider: React.FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-// --- Hooks ---
-
-export function useFeatures(): FeaturesContextValue {
-  const context = useContext(FeaturesContext);
-  if (context === undefined) {
-    throw new Error("useFeatures must be used within a FeatureProvider");
-  }
-  return context;
-}
-
-export function useFeature(name: Feature): boolean {
-  const { isFeatureEnabled } = useFeatures();
-  return isFeatureEnabled(name);
-}
+// Hooks moved to separate file to fix react-refresh/only-export-components

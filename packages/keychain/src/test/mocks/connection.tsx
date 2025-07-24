@@ -4,11 +4,8 @@ import {
   ConnectionContext,
   ConnectionContextValue,
 } from "@/components/provider/connection";
-import { render, RenderResult } from "@testing-library/react";
 import { constants } from "starknet";
 import { SemVer } from "semver";
-import { BrowserRouter } from "react-router-dom";
-import { NavigationProvider } from "@/context/navigation";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const defaultMockController: any = {
@@ -80,42 +77,4 @@ export function MockConnectionProvider({
 }
 
 // Helper for mocking the useConnection hook
-export function mockUseConnection(overrides?: Partial<ConnectionContextValue>) {
-  const mockConnection = createMockConnection({
-    ...overrides,
-    controller: overrides?.controller
-      ? { ...defaultMockController, ...overrides.controller }
-      : defaultMockController,
-  });
-
-  vi.mock("@/hooks/connection", () => ({
-    useConnection: () => mockConnection,
-  }));
-
-  return mockConnection;
-}
-
-export function withConnection(
-  children: ReactNode,
-  connectionOverrides?: Partial<ConnectionContextValue>,
-) {
-  const connection = createMockConnection(connectionOverrides);
-  return (
-    <ConnectionContext.Provider value={connection}>
-      {children}
-    </ConnectionContext.Provider>
-  );
-}
-
-export function renderWithConnection(
-  ui: ReactNode,
-  connectionOverrides?: Partial<ConnectionContextValue>,
-): RenderResult {
-  return render(
-    <BrowserRouter>
-      <NavigationProvider>
-        {withConnection(ui, connectionOverrides)}
-      </NavigationProvider>
-    </BrowserRouter>,
-  );
-}
+// Functions moved to separate file to fix react-refresh/only-export-components

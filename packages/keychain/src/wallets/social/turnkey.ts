@@ -31,8 +31,8 @@ export class TurnkeyWallet {
 
   constructor() {
     this.auth0ClientPromise = createAuth0Client({
-      domain: import.meta.env.VITE_AUTH0_DOMAIN,
-      clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
+      domain: process.env.EXPO_PUBLIC_AUTH0_DOMAIN,
+      clientId: process.env.EXPO_PUBLIC_AUTH0_CLIENT_ID,
     });
 
     const randomId = Math.random().toString(36).substring(2, 15);
@@ -43,8 +43,8 @@ export class TurnkeyWallet {
       document.body.removeChild(turnkeyIframe);
     }
     const turnkeySdk = new Turnkey({
-      apiBaseUrl: import.meta.env.VITE_TURNKEY_BASE_URL,
-      defaultOrganizationId: import.meta.env.VITE_TURNKEY_ORGANIZATION_ID,
+      apiBaseUrl: process.env.EXPO_PUBLIC_TURNKEY_BASE_URL,
+      defaultOrganizationId: process.env.EXPO_PUBLIC_TURNKEY_ORGANIZATION_ID,
     });
     const iframeContainer = document.createElement("div");
     iframeContainer.style.display = "none";
@@ -54,7 +54,7 @@ export class TurnkeyWallet {
     this.turnkeyIframePromise = turnkeySdk
       .iframeClient({
         iframeContainer: iframeContainer,
-        iframeUrl: import.meta.env.VITE_TURNKEY_IFRAME_URL,
+        iframeUrl: process.env.EXPO_PUBLIC_TURNKEY_IFRAME_URL,
       })
       .then(async (turnkeyIframeClient: TurnkeyIframeClient) => {
         await turnkeyIframeClient.initEmbeddedKey();
@@ -95,7 +95,7 @@ export class TurnkeyWallet {
         {
           authorizationParams: {
             connection: SOCIAL_PROVIDER_NAME,
-            redirect_uri: import.meta.env.VITE_ORIGIN,
+            redirect_uri: process.env.EXPO_PUBLIC_ORIGIN,
             nonce,
             display: "touch",
             tknonce: nonce,

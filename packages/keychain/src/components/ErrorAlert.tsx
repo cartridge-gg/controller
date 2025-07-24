@@ -22,7 +22,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 
 export function ErrorAlert({
   title,
@@ -378,7 +378,7 @@ function StackTraceDisplay({
                     </div>
                     {key === "address" || key === "class" ? (
                       <Link
-                        to={getExplorerUrl(key, value as string)}
+                        href={getExplorerUrl(key, value as string)}
                         target="_blank"
                         className="break-all text-left hover:underline"
                       >

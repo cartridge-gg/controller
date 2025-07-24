@@ -1,19 +1,8 @@
 import {
-  ArgentColorIcon,
-  ArgentIcon,
   Button,
   Card,
   CardDescription,
   DepositIcon,
-  EthereumIcon,
-  LayoutContent,
-  LayoutFooter,
-  MetaMaskColorIcon,
-  MetaMaskIcon,
-  PhantomColorIcon,
-  PhantomIcon,
-  StarknetIcon,
-  SolanaIcon,
   ExternalIcon,
   CardTitle,
   CardHeader,
@@ -21,6 +10,8 @@ import {
   TokenCard,
   Spinner,
   HeaderInner,
+  LayoutContent,
+  LayoutFooter,
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
@@ -30,37 +21,11 @@ import { CostBreakdown } from "./CostBreakdown";
 import { StarterPackDetails } from "@/hooks/starterpack";
 import { Receiving } from "../starterpack/receiving";
 import { creditsToUSD } from "@/hooks/tokens";
-export const WALLET_CONFIG = {
-  argent: {
-    icon: ArgentIcon,
-    colorIcon: ArgentColorIcon,
-    network: "Starknet",
-    networkIcon: StarknetIcon,
-    bgColor: "#FF875B",
-  },
-  metamask: {
-    icon: MetaMaskIcon,
-    colorIcon: MetaMaskColorIcon,
-    network: "Ethereum",
-    networkIcon: EthereumIcon,
-    bgColor: "#E88A39",
-  },
-  phantom: {
-    icon: PhantomIcon,
-    colorIcon: PhantomColorIcon,
-    network: "Solana",
-    networkIcon: SolanaIcon,
-    bgColor: "#AB9FF2",
-  },
-} as const;
-
-export enum CheckoutState {
-  REVIEW_PURCHASE = 0,
-  REQUESTING_PAYMENT = 1,
-  TRANSACTION_SUBMITTED = 2,
-}
-
-const CARTRIDGE_FEE = 0.025;
+import {
+  WALLET_CONFIG,
+  CheckoutState,
+  CARTRIDGE_FEE,
+} from "./cryptoCheckoutConfig";
 
 export function CryptoCheckout({
   selectedWallet,

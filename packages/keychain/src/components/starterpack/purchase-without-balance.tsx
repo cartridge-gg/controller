@@ -42,7 +42,7 @@ export const PurchaseWithoutBalance = () => {
   const { priceUsd, items: starterPackItems } = useStarterPack("");
 
   const stripePromise = useMemo(
-    () => loadStripe(import.meta.env.VITE_STRIPE_API_PUBKEY),
+    () => loadStripe(process.env.EXPO_PUBLIC_STRIPE_API_PUBKEY),
     [],
   );
 
@@ -67,7 +67,7 @@ export const PurchaseWithoutBalance = () => {
   const { isLoading } = useQuery({
     queryKey: ["payment"],
     queryFn: async () => {
-      const res = await fetch(import.meta.env.VITE_STRIPE_PAYMENT!, {
+      const res = await fetch(process.env.EXPO_PUBLIC_STRIPE_PAYMENT!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

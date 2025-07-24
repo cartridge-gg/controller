@@ -14,7 +14,7 @@ import { client, ENDPOINT } from "@/utils/graphql";
 import base64url from "base64url";
 import { useConnection } from "./connection";
 import { useEffect, useMemo, useState } from "react";
-import { useMatch, useSearchParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
 import { constants, getChecksumAddress } from "starknet";
@@ -56,7 +56,7 @@ const createCredentials = async (
     { alg: -257, type: "public-key" },
     { alg: -7, type: "public-key" },
   ];
-  beginRegistration.publicKey.rp.id = import.meta.env.VITE_RP_ID;
+  beginRegistration.publicKey.rp.id = process.env.EXPO_PUBLIC_RP_ID;
   const credentials = (await navigator.credentials.create(
     beginRegistration,
   )) as RawAttestation & {
@@ -215,7 +215,7 @@ export async function doLogin({
         beginLoginData.beginLogin.publicKey.challenge,
       ),
       timeout: 60000,
-      rpId: import.meta.env.VITE_RP_ID,
+      rpId: process.env.EXPO_PUBLIC_RP_ID,
       allowCredentials: [
         {
           type: "public-key",
@@ -421,10 +421,8 @@ export function useAccountProfile({
 } = {}): UseAccountResponse {
   // To be used in top level provider (Above Route component)
   // Ref: https://stackoverflow.com/a/75462921
-  const match = useMatch("/account/:username/*");
-  const [searchParams] = useSearchParams();
-
-  const username = match?.params.username ?? "";
+  const searchParams = useLocalSearchParams();
+  const username = (searchParams.username as string) ?? "";
   const { data: usernameData } = useAddressByUsernameQuery(
     { username },
     { enabled: !!username },
@@ -432,13 +430,13 @@ export function useAccountProfile({
 
   const address = useMemo(
     () =>
-      (import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS as string) ??
+      (process.env.EXPO_PUBLIC_MOCKED_ACCOUNT_ADDRESS as string) ??
       usernameData?.account?.controllers.edges?.[0]?.node?.address ??
       "",
     [usernameData],
   );
 
-  const addressParam = searchParams.get("address");
+  const addressParam = searchParams.address as string;
   const { data: addressData } = useAccountNameQuery(
     { address: addressParam || "" },
     {

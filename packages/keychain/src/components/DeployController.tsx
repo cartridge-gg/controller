@@ -15,7 +15,7 @@ import {
 } from "@cartridge/ui";
 import { getChainName } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 import {
   constants,
   EstimateFee,
@@ -266,7 +266,7 @@ function ExplorerLink({
 
   return (
     <Link
-      to={`https://${
+      href={`https://${
         chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
       }starkscan.co/tx/${txHash}`}
       target="_blank"

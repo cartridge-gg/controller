@@ -1,5 +1,5 @@
 import { Empty, MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 import { Token, useTokens } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
 import { useMemo, useState } from "react";
@@ -56,7 +56,7 @@ export function Tokens() {
 
 function TokenCardContent({ token }: { token: Token }) {
   return (
-    <Link to={`./token/${token.metadata.address}`}>
+    <Link href={`./token/${token.metadata.address}`}>
       <TokenCard
         image={token.metadata.image || placeholder}
         title={token.metadata.name}

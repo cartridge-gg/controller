@@ -4,7 +4,6 @@ import { SonnerToaster } from "@cartridge/ui";
 import { App } from "@/components/app";
 import { Provider } from "@/components/provider";
 import { NavigationProvider } from "@/context/navigation";
-import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import Controller from "./utils/controller";
 
@@ -15,17 +14,15 @@ declare global {
 }
 
 // Initialize controller before React rendering
-window.controller = Controller.fromStore(import.meta.env.VITE_ORIGIN!);
+window.controller = Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
-      <NavigationProvider>
-        <Provider>
-          <App />
-        </Provider>
-      </NavigationProvider>
-      <SonnerToaster position="bottom-right" />
-    </BrowserRouter>
+    <NavigationProvider>
+      <Provider>
+        <App />
+      </Provider>
+    </NavigationProvider>
+    <SonnerToaster position="bottom-right" />
   </StrictMode>,
 );
