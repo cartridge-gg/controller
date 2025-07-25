@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/keychain",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -51,8 +51,8 @@
     "@cartridge/marketplace": "0.0.9",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",
-    "@dojoengine/torii-wasm": "1.5.16",
-    "@noble/hashes": "^1.7.1",
+    "@dojoengine/torii-wasm": "catalog:",
+    "@noble/hashes": "catalog:",
     "@solana/spl-token": "catalog:",
     "@solana/web3.js": "catalog:",
     "@starknet-io/types-js": "catalog:",

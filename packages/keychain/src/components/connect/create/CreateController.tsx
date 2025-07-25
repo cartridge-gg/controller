@@ -6,10 +6,13 @@ import { useDebounce } from "@/hooks/debounce";
 import { allUseSameAuth } from "@/utils/controller";
 import { AuthOption } from "@cartridge/controller";
 import {
+  CartridgeLogo,
+  ControllerIcon,
   CreateAccount,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
+  Separator,
   Sheet,
 } from "@cartridge/ui";
 import { NavigationHeader } from "@/components";
@@ -107,7 +110,7 @@ function CreateControllerForm({
           <Legal />
         </LayoutContent>
 
-        <LayoutFooter showCatridgeLogo>
+        <LayoutFooter>
           {isInAppBrowser && (
             <ErrorAlert
               title="Browser not supported"
@@ -142,6 +145,7 @@ function CreateControllerForm({
             waitingForConfirmation={waitingForConfirmation}
             username={usernameField.value}
           />
+          <CartridgeFooter />
         </LayoutFooter>
       </form>
     </>
@@ -223,10 +227,8 @@ function getNativeBrowserUrl() {
 
 export function CreateController({
   isSlot,
-  loginMode = LoginMode.Webauthn,
 }: {
   isSlot?: boolean;
-  loginMode?: LoginMode;
   error?: Error;
 }) {
   const posthog = usePostHog();
@@ -264,7 +266,7 @@ export function CreateController({
     authMethod,
   } = useCreateController({
     isSlot,
-    loginMode,
+    loginMode: isSlot ? LoginMode.Webauthn : LoginMode.Controller,
   });
 
   const handleFormSubmit = useCallback(
@@ -395,5 +397,23 @@ export function CreateController({
       />
       {overlay}
     </>
+  );
+}
+
+export function CartridgeFooter() {
+  return (
+    <div className="flex flex-col">
+      <Separator orientation="horizontal" className="bg-spacer" />
+      <a
+        href="https://cartridge.gg"
+        target="_blank"
+        className="h-10 flex items-center justify-center gap-1 text-foreground-400 hover:text-primary transition-colors focus:outline-none focus:text-primary"
+        tabIndex={-1}
+      >
+        <ControllerIcon />
+        <div className="text-xs font-medium">by</div>
+        <CartridgeLogo />
+      </a>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import { IdToken } from "@auth0/auth0-react";
+import { AuthOption } from "@cartridge/controller";
 import { fetchApiCreator } from "@cartridge/ui/utils";
 import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
 import { jwtDecode, JwtPayload } from "jwt-decode";
@@ -109,7 +110,7 @@ interface DecodedIdToken extends JwtPayload {
   tknonce?: string;
 }
 
-export const SOCIAL_PROVIDER_NAME = "discord";
+export type SocialProvider = Extract<AuthOption, "discord" | "google">;
 
 export const fetchApi = fetchApiCreator(
   `${import.meta.env.VITE_CARTRIDGE_API_URL}/oauth2`,
@@ -139,6 +140,7 @@ export const getTurnkeySuborg = async (
 export const getOrCreateTurnkeySuborg = async (
   oidcToken: string,
   username: string,
+  socialProvider: SocialProvider,
 ) => {
   const getSuborgsResponse = await fetchApi<GetSuborgsResponse>("suborgs", {
     filterType: "OIDC_TOKEN",
@@ -154,7 +156,7 @@ export const getOrCreateTurnkeySuborg = async (
       "create-suborg",
       {
         rootUserUsername: username,
-        oauthProviders: [{ providerName: SOCIAL_PROVIDER_NAME, oidcToken }],
+        oauthProviders: [{ providerName: socialProvider, oidcToken }],
       },
     );
     targetSubOrgId = createSuborgResponse.subOrganizationId;

@@ -1,6 +1,7 @@
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
+import { useFeature } from "@/hooks/features";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
@@ -79,6 +80,8 @@ export function useCreateController({
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication();
   const { wallets } = useWallets();
+
+  const isGoogleEnabled = useFeature("google");
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -166,11 +169,12 @@ export function useCreateController({
         )
         .map((wallet) => wallet.type),
       "discord" as AuthOption,
+      ...(isGoogleEnabled ? ["google" as AuthOption] : []),
       "walletconnect" as AuthOption,
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
-  }, [wallets, configSignupOptions]);
+  }, [wallets, configSignupOptions, isGoogleEnabled]);
 
   const handleSignup = useCallback(
     async (username: string, authenticationMode: AuthOption) => {
@@ -189,11 +193,27 @@ export function useCreateController({
           };
           return;
         case "discord":
-          signupResponse = (await signupWithSocial(username)) as SignupResponse;
+          signupResponse = (await signupWithSocial(
+            "discord",
+            username,
+          )) as SignupResponse;
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
               provider: "discord",
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        case "google":
+          signupResponse = (await signupWithSocial(
+            "google",
+            username,
+          )) as SignupResponse;
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: "google",
               eth_address: signupResponse.address,
             }),
           };
@@ -333,7 +353,12 @@ export function useCreateController({
         }
         case "discord": {
           setWaitingForConfirmation(true);
-          loginResponse = await loginWithSocial();
+          loginResponse = await loginWithSocial("discord");
+          break;
+        }
+        case "google": {
+          setWaitingForConfirmation(true);
+          loginResponse = await loginWithSocial("google");
           break;
         }
         case "rabby":

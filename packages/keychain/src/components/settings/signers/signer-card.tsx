@@ -1,11 +1,12 @@
 import { useController } from "@/hooks/controller";
 import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
-import { fetchApi } from "@/wallets/social/turnkey_utils";
+import { fetchApi, SocialProvider } from "@/wallets/social/turnkey_utils";
 import { AuthOption } from "@cartridge/controller";
 import {
   Button,
   Card,
   DiscordIcon,
+  GoogleIcon,
   MetaMaskIcon,
   PhantomIcon,
   RabbyIcon,
@@ -143,6 +144,8 @@ const SignerIcon = React.memo(
         return <MetaMaskIcon size="sm" />;
       case "discord":
         return <DiscordIcon size="sm" />;
+      case "google":
+        return <GoogleIcon size="sm" />;
       case "walletconnect":
         return <WalletConnectIcon size="sm" />;
       default:
@@ -158,11 +161,15 @@ const getSignerIdentifyingInfo = async (
 ) => {
   switch (signer.__typename) {
     case "Eip191Credentials":
-      if (signer.eip191?.[0]?.provider === "discord") {
-        return undefined;
-        // return await getDiscordUsername(controllerUsername);
-      } else {
-        return formatAddress(credentialToAddress(signer)!, { size: "xs" });
+      switch (signer.eip191?.[0]?.provider) {
+        case "discord":
+          // return await getOauthProvider(controllerUsername, "discord");
+          return undefined;
+        case "google":
+          // return await getOauthProvider(controllerUsername, "google");
+          return undefined;
+        default:
+          return formatAddress(credentialToAddress(signer)!, { size: "xs" });
       }
     case "WebauthnCredentials":
       return undefined;
@@ -173,8 +180,9 @@ const getSignerIdentifyingInfo = async (
   }
 };
 
-export const getDiscordUsername = async (
+export const getOauthProvider = async (
   controllerUsername: string | undefined,
+  socialProvider: SocialProvider,
 ) => {
   try {
     const getOauthProvidersResponse = await fetchApi<GetOauthProvidersResponse>(
@@ -184,7 +192,7 @@ export const getDiscordUsername = async (
       },
     );
     return getOauthProvidersResponse.find(
-      (provider) => provider.providerName === "discord",
+      (provider) => provider.providerName === socialProvider,
     )?.subject;
   } catch (error) {
     if (error instanceof Error && error.message.includes("status: 500")) {

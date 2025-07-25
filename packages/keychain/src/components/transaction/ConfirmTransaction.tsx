@@ -38,7 +38,7 @@ export function ConfirmTransaction({
     onComplete(transaction_hash);
   };
 
-  if (!hasSession && !skipSession) {
+  if (policies && !hasSession && !skipSession) {
     return (
       <CreateSession
         isUpdate
