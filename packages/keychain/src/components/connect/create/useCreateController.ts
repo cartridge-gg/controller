@@ -174,7 +174,7 @@ export function useCreateController({
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
-  }, [wallets, configSignupOptions]);
+  }, [wallets, configSignupOptions, isGoogleEnabled]);
 
   const handleSignup = useCallback(
     async (username: string, authenticationMode: AuthOption) => {
