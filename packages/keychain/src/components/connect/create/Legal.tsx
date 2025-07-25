@@ -1,10 +1,8 @@
-import { LockIcon } from "@cartridge/ui";
 import { Link } from "react-router-dom";
 
 export function Legal() {
   return (
-    <div className="flex items-center gap-1 text-foreground-400">
-      <LockIcon />
+    <div className="flex items-center gap-1 text-foreground-400 px-1">
       <div className="text-xs">
         By continuing you are agreeing to Cartridge&apos;s{" "}
         <Link
