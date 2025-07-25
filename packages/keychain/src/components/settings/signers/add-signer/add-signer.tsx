@@ -1,7 +1,7 @@
 import { credentialToAddress } from "@/components/connect/types";
+import { useNavigation } from "@/context/navigation";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
-import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -33,8 +33,6 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { SignerAlert } from "../signer-alert";
-import { addWebauthnSigner } from "./webauthn";
-import { useNavigation } from "@/context/navigation";
 
 type SignerPending = {
   kind: SignerMethodKind;
@@ -255,7 +253,7 @@ const WalletAuths = ({
       ) {
         return response.account;
       }
-      await controller?.addOwner(signer!, signerInput!);
+      await controller?.addOwner(signer!, signerInput!, null);
     },
     [currentSigners, controller],
   );
@@ -305,30 +303,8 @@ const RegularAuths = ({
               );
             }
 
-            const isSafari = /^((?!chrome|android).)*safari/i.test(
-              navigator.userAgent,
-            );
-            if (isSafari) {
-              doPopupFlow(controller.username(), controller.appId());
-              return undefined;
-            }
+            await controller.addOwner(null, null, import.meta.env.VITE_RP_ID);
 
-            try {
-              await addWebauthnSigner(controller);
-            } catch (e) {
-              if (
-                e instanceof Error &&
-                (e.message.includes(
-                  "Invalid 'sameOriginWithAncestors' value",
-                ) ||
-                  e.message.includes("document which is same-origin"))
-              ) {
-                doPopupFlow(controller.username(), controller.appId());
-                return undefined;
-              }
-
-              throw e;
-            }
             return undefined;
           });
         }}
@@ -373,6 +349,7 @@ const RegularAuths = ({
                   eth_address: response.account,
                 }),
               },
+              null,
             );
           });
         }}
@@ -388,19 +365,5 @@ const RegularAuths = ({
         }}
       />
     </>
-  );
-};
-
-const doPopupFlow = (username: string, appId: string) => {
-  const searchParams = new URLSearchParams(window.location.search);
-  searchParams.set("name", encodeURIComponent(username));
-  searchParams.set("appId", encodeURIComponent(appId));
-  searchParams.set("action", "add-signer");
-
-  PopupCenter(
-    `/authenticate?${searchParams.toString()}`,
-    "Cartridge Add Signer",
-    480,
-    640,
   );
 };
