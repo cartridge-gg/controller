@@ -5,6 +5,7 @@ import { useConnection } from "@/hooks/connection";
 import { useAccount } from "@/hooks/account";
 import { useTrophies } from "@/hooks/trophies";
 import { useProgressions } from "./progressions";
+import { addAddressPadding } from "starknet";
 
 export interface Item {
   id: string;
@@ -160,8 +161,9 @@ export function useAchievements(accountAddress?: string) {
     const achievements: Item[] = Object.values(trophies).map(
       (trophy: Trophy) => {
         const achievement =
-          (currentAddress ? data[currentAddress]?.[trophy.id] : undefined) ||
-          {};
+          (currentAddress
+            ? data[addAddressPadding(currentAddress)]?.[trophy.id]
+            : undefined) || {};
         const completion =
           Object.values(achievement).length > 0 &&
           Object.values(achievement).every((task) => task.completion);
