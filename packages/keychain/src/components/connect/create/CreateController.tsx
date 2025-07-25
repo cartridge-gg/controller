@@ -12,7 +12,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  Separator,
   Sheet,
 } from "@cartridge/ui";
 import { NavigationHeader } from "@/components";
@@ -119,7 +118,7 @@ function CreateControllerForm({
           <Legal />
         </LayoutContent>
 
-        <LayoutFooter>
+        <LayoutFooter className="pb-2">
           {isInAppBrowser && (
             <ErrorAlert
               title={`Using Controller in ${appName ?? "Unknown App"} is not supported`}
@@ -385,7 +384,6 @@ export function CreateController({
 export function CartridgeFooter() {
   return (
     <div className="flex flex-col">
-      <Separator orientation="horizontal" className="bg-spacer" />
       <a
         href="https://cartridge.gg"
         target="_blank"
