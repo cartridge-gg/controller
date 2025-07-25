@@ -26,7 +26,7 @@ export function Leaderboard() {
   }, [followeds, self]);
 
   const addresses = useMemo(() => {
-    return players.map((player) => player.address);
+    return players.map((player) => `0x${BigInt(player.address).toString(16)}`);
   }, [players]);
 
   const { usernames } = useUsernames({ addresses });
