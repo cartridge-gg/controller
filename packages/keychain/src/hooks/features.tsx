@@ -10,7 +10,7 @@ import React, {
 
 const LOCAL_STORAGE_KEY = "@cartridge/features";
 
-export type Feature = "addSigner";
+export type Feature = "addSigner" | "google";
 
 // --- Helper Functions ---
 

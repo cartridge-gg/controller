@@ -40,7 +40,7 @@ export function PageLoading({
         </div>
       </LayoutContent>
 
-      <LayoutFooter showCatridgeLogo>
+      <LayoutFooter>
         {/* Error alert skeleton (optional) */}
         <Skeleton className="h-16 w-full rounded" />
 

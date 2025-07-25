@@ -1,5 +1,303 @@
 import { ControllerError } from "@cartridge/controller";
 
+interface GraphQLError {
+  message: string;
+  locations?: Array<{ line: number; column: number }>;
+  path?: Array<string | number>;
+  extensions?: Record<string, unknown>;
+}
+
+interface GraphQLResponse {
+  errors?: GraphQLError[];
+  data?: unknown;
+}
+
+export function parseGraphQLError(error: unknown): {
+  raw: string;
+  summary: string;
+  details: {
+    operation?: string;
+    network?: string;
+    rpcError?: string;
+    path?: Array<string | number>;
+  };
+} {
+  let graphqlResponse: GraphQLResponse;
+
+  // Handle different error formats
+  if (typeof error === "string") {
+    // Handle string errors that might contain GraphQL error information
+    try {
+      if (error.includes("GraphQLErrors")) {
+        // Parse the GraphQLErrors format: GraphQLErrors([Error { ... }])
+        const match = error.match(/GraphQLErrors\(\[(.*)\]\)$/);
+        if (match) {
+          const errorString = match[1];
+
+          // Extract message
+          const messageMatch = errorString.match(/message: "([^"]+)"/);
+          const message = messageMatch?.[1] || "Unknown GraphQL error";
+
+          // Extract path if present
+          const pathMatch = errorString.match(/path: Some\(\[([^\]]+)\]\)/);
+          let path: Array<string | number> | undefined;
+          if (pathMatch) {
+            try {
+              // Parse path elements like Key("createSession"), 0, Key("id")
+              const pathString = pathMatch[1];
+              const pathElements: Array<string | number> = [];
+
+              // Split by comma but be careful of commas inside quotes
+              let current = "";
+              let inQuotes = false;
+              let depth = 0;
+
+              for (let i = 0; i < pathString.length; i++) {
+                const char = pathString[i];
+                if (char === '"') {
+                  inQuotes = !inQuotes;
+                  current += char;
+                } else if (char === "(" && !inQuotes) {
+                  depth++;
+                  current += char;
+                } else if (char === ")" && !inQuotes) {
+                  depth--;
+                  current += char;
+                } else if (char === "," && !inQuotes && depth === 0) {
+                  // Process the current element
+                  const element = current.trim();
+                  const keyMatch = element.match(/Key\("([^"]+)"\)/);
+                  if (keyMatch) {
+                    pathElements.push(keyMatch[1]);
+                  } else {
+                    const numMatch = element.match(/^(\d+)$/);
+                    if (numMatch) {
+                      pathElements.push(parseInt(numMatch[1]));
+                    } else {
+                      pathElements.push(element);
+                    }
+                  }
+                  current = "";
+                } else {
+                  current += char;
+                }
+              }
+
+              // Handle the last element
+              if (current.trim()) {
+                const element = current.trim();
+                const keyMatch = element.match(/Key\("([^"]+)"\)/);
+                if (keyMatch) {
+                  pathElements.push(keyMatch[1]);
+                } else {
+                  const numMatch = element.match(/^(\d+)$/);
+                  if (numMatch) {
+                    pathElements.push(parseInt(numMatch[1]));
+                  } else {
+                    pathElements.push(element);
+                  }
+                }
+              }
+
+              path = pathElements;
+            } catch {
+              // Ignore path parsing errors
+            }
+          }
+
+          return parseGraphQLErrorMessage(message, path, error);
+        }
+      }
+
+      // Try to parse as JSON
+      graphqlResponse = JSON.parse(error);
+    } catch {
+      // If parsing fails, treat as a generic error message
+      return {
+        raw: error,
+        summary: "GraphQL request failed",
+        details: {},
+      };
+    }
+  } else if (
+    typeof error === "object" &&
+    error !== null &&
+    ("errors" in error || "data" in error)
+  ) {
+    // Direct GraphQL response object
+    graphqlResponse = error as GraphQLResponse;
+  } else if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string" &&
+    (error as { message: string }).message.includes("GraphQL")
+  ) {
+    // Error object with GraphQL information in the message
+    return parseGraphQLError((error as { message: string }).message);
+  } else {
+    // Generic error object
+    const errorMessage =
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof (error as { message: unknown }).message === "string"
+        ? (error as { message: string }).message
+        : "Unknown GraphQL error";
+
+    return {
+      raw: JSON.stringify(error),
+      summary: errorMessage,
+      details: {},
+    };
+  }
+
+  // Process GraphQL response
+  if (graphqlResponse?.errors && graphqlResponse.errors.length > 0) {
+    const firstError = graphqlResponse.errors[0];
+    return parseGraphQLErrorMessage(
+      firstError.message,
+      firstError.path,
+      JSON.stringify(graphqlResponse),
+    );
+  }
+
+  return {
+    raw: JSON.stringify(graphqlResponse || error),
+    summary: "GraphQL request completed with no data",
+    details: {},
+  };
+}
+
+function parseGraphQLErrorMessage(
+  message: string,
+  path?: Array<string | number>,
+  raw?: string,
+): {
+  raw: string;
+  summary: string;
+  details: {
+    operation?: string;
+    network?: string;
+    rpcError?: string;
+    path?: Array<string | number>;
+  };
+} {
+  const details: {
+    operation?: string;
+    network?: string;
+    rpcError?: string;
+    path?: Array<string | number>;
+  } = {};
+
+  if (path) {
+    details.path = path;
+    if (path.length > 0 && typeof path[0] === "string") {
+      details.operation = path[0];
+    }
+  }
+
+  // Parse RPC errors from the message
+  const rpcMatch = message.match(/rpc error: code = (\w+) desc = (.+)/);
+  if (rpcMatch) {
+    const [, code, description] = rpcMatch;
+    details.rpcError = `${code}: ${description}`;
+
+    // Extract network from description if present
+    const networkMatch = description.match(/network (\w+)/);
+    if (networkMatch) {
+      details.network = networkMatch[1];
+    }
+
+    // Generate user-friendly summary based on error type
+    if (code === "NotFound") {
+      if (description.includes("controller not found")) {
+        return {
+          raw: raw || message,
+          summary: "Controller not found for user",
+          details,
+        };
+      } else if (description.includes("user")) {
+        return {
+          raw: raw || message,
+          summary: "User not found",
+          details,
+        };
+      } else {
+        return {
+          raw: raw || message,
+          summary: "Resource not found",
+          details,
+        };
+      }
+    } else if (code === "InvalidArgument") {
+      return {
+        raw: raw || message,
+        summary: "Invalid request parameters",
+        details,
+      };
+    } else if (code === "PermissionDenied") {
+      return {
+        raw: raw || message,
+        summary: "Access denied",
+        details,
+      };
+    } else if (code === "Unauthenticated") {
+      return {
+        raw: raw || message,
+        summary: "Authentication required",
+        details,
+      };
+    } else if (code === "Unavailable") {
+      return {
+        raw: raw || message,
+        summary: "Service temporarily unavailable",
+        details,
+      };
+    } else {
+      return {
+        raw: raw || message,
+        summary: `Service error: ${code}`,
+        details,
+      };
+    }
+  }
+
+  // Handle other common GraphQL error patterns
+  if (message.includes("timeout") || message.includes("deadline")) {
+    return {
+      raw: raw || message,
+      summary: "Request timeout",
+      details,
+    };
+  } else if (message.includes("network") || message.includes("connection")) {
+    return {
+      raw: raw || message,
+      summary: "Network connection error",
+      details,
+    };
+  } else if (message.includes("validation")) {
+    return {
+      raw: raw || message,
+      summary: "Request validation failed",
+      details,
+    };
+  } else if (message.includes("rate limit")) {
+    return {
+      raw: raw || message,
+      summary: "Rate limit exceeded",
+      details,
+    };
+  }
+
+  // Default case
+  return {
+    raw: raw || message,
+    summary: message.length > 100 ? message.substring(0, 100) + "..." : message,
+    details,
+  };
+}
+
 export function parseExecutionError(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any,
@@ -791,6 +1089,81 @@ export const starknetTransactionValidationErrorTestCases = [
         l1gasMaxPrice: 18106067943992n,
         balance: 122941657491449276n,
       },
+    },
+  },
+];
+
+export const graphqlErrorTestCases = [
+  {
+    input:
+      'GraphQL API error: GraphQLErrors([Error { message: "rpc error: code = NotFound desc = controller not found for user test on network SN_MAIN", locations: None, path: Some([Key("createSession")]), extensions: None }])',
+    expected: {
+      raw: 'GraphQL API error: GraphQLErrors([Error { message: "rpc error: code = NotFound desc = controller not found for user test on network SN_MAIN", locations: None, path: Some([Key("createSession")]), extensions: None }])',
+      summary: "Controller not found for user",
+      details: {
+        operation: "createSession",
+        network: "SN_MAIN",
+        rpcError:
+          "NotFound: controller not found for user test on network SN_MAIN",
+        path: ["createSession"],
+      },
+    },
+  },
+  {
+    input: {
+      errors: [
+        {
+          message:
+            "rpc error: code = InvalidArgument desc = invalid session token",
+          path: ["authenticate"],
+          extensions: { code: "INVALID_TOKEN" },
+        },
+      ],
+    },
+    expected: {
+      raw: '{"errors":[{"message":"rpc error: code = InvalidArgument desc = invalid session token","path":["authenticate"],"extensions":{"code":"INVALID_TOKEN"}}]}',
+      summary: "Invalid request parameters",
+      details: {
+        operation: "authenticate",
+        rpcError: "InvalidArgument: invalid session token",
+        path: ["authenticate"],
+      },
+    },
+  },
+  {
+    input: {
+      errors: [
+        {
+          message: "Network connection timeout",
+          path: ["query"],
+        },
+      ],
+    },
+    expected: {
+      raw: '{"errors":[{"message":"Network connection timeout","path":["query"]}]}',
+      summary: "Request timeout",
+      details: {
+        operation: "query",
+        path: ["query"],
+      },
+    },
+  },
+  {
+    input: "Generic error message without GraphQL formatting",
+    expected: {
+      raw: "Generic error message without GraphQL formatting",
+      summary: "GraphQL request failed",
+      details: {},
+    },
+  },
+  {
+    input: {
+      message: "Something went wrong with GraphQL",
+    },
+    expected: {
+      raw: "Something went wrong with GraphQL",
+      summary: "GraphQL request failed",
+      details: {},
     },
   },
 ];
