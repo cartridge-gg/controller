@@ -11,12 +11,10 @@ import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 export function Home() {
-  const { context, controller, policies, origin, isConfigLoading } =
-    useConnection();
-  const location = useLocation();
+  const { context, controller, policies, isConfigLoading } = useConnection();
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
@@ -28,21 +26,6 @@ export function Home() {
       );
     }
   }, [context?.type, posthog]);
-
-  // Allow direct access for /, /slot, /success, and /failure routes
-  const isBasePath = location.pathname === "/";
-  const isSlotPath = location.pathname.startsWith("/slot");
-  const isSuccessPath = location.pathname === "/success";
-  const isFailurePath = location.pathname === "/failure";
-  const isAllowedPath =
-    isBasePath || isSlotPath || isSuccessPath || isFailurePath;
-
-  if (
-    (window.self === window.top && !isAllowedPath) ||
-    (!origin && !isAllowedPath)
-  ) {
-    return <>Access Denied</>;
-  }
 
   // No controller, send to login
   if (!controller) {
