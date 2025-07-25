@@ -41,7 +41,6 @@ interface CreateControllerViewProps {
   onUsernameClear: () => void;
   onSubmit: (authenticationMode?: AuthOption) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
-  isInAppBrowser?: boolean;
   isSlot?: boolean;
   authenticationStep: AuthenticationStep;
   setAuthenticationStep: (value: AuthenticationStep) => void;
@@ -63,7 +62,6 @@ function CreateControllerForm({
   validation,
   isLoading,
   error,
-  isInAppBrowser,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -74,6 +72,17 @@ function CreateControllerForm({
   setChangeWallet,
   authMethod,
 }: CreateControllerFormProps) {
+  const [{ isInApp, appKey, appName, ua }] = useState(() => InAppSpy());
+
+  // appKey is undefined for unknown applications which we're
+  // assuming are dojo applications which implement AASA and
+  // support using passkeys in the inapp browser.
+  // https://docs.cartridge.gg/controller/presets#apple-app-site-association
+  const isInAppBrowser = isInApp && !!appKey;
+
+  useEffect(() => {
+    console.log("in app", isInApp, appKey, appName, ua);
+  }, [isInApp, appKey, appName, ua]);
   return (
     <>
       <NavigationHeader
@@ -113,10 +122,10 @@ function CreateControllerForm({
         <LayoutFooter>
           {isInAppBrowser && (
             <ErrorAlert
-              title="Browser not supported"
+              title={`Using Controller in ${appName ?? "Unknown App"} is not supported`}
               description="Please open this page in your device's native browser (Safari/Chrome) to continue."
-              variant="error"
-              isExpanded={false}
+              variant="info"
+              isExpanded
             />
           )}
 
@@ -145,19 +154,20 @@ function CreateControllerForm({
             waitingForConfirmation={waitingForConfirmation}
             username={usernameField.value}
           />
+
           <CartridgeFooter />
         </LayoutFooter>
       </form>
     </>
   );
 }
+
 export function CreateControllerView({
   theme,
   usernameField,
   validation,
   isLoading,
   error,
-  isInAppBrowser,
   onUsernameChange,
   onUsernameFocus,
   onUsernameClear,
@@ -189,7 +199,6 @@ export function CreateControllerView({
           validation={validation}
           isLoading={isLoading}
           error={error}
-          isInAppBrowser={isInAppBrowser}
           onUsernameChange={onUsernameChange}
           onUsernameFocus={onUsernameFocus}
           onUsernameClear={onUsernameClear}
@@ -209,20 +218,6 @@ export function CreateControllerView({
       </Sheet>
     </LayoutContainer>
   );
-}
-
-function getNativeBrowserUrl() {
-  // iOS: Open in Safari
-  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-    return `x-safari-${window.location.href}`;
-  }
-  // Android: Open in Chrome
-  if (/Android/.test(navigator.userAgent)) {
-    let currentUrl = window.location.href;
-    currentUrl = currentUrl.replace(/^https?:\/\//, "");
-    return `intent://${currentUrl}#Intent;scheme=https;package=com.android.chrome;end`;
-  }
-  return null;
 }
 
 export function CreateController({
@@ -328,18 +323,6 @@ export function CreateController({
     }
   }, [debouncedValidation.status, handleFormSubmit]);
 
-  const [{ isInApp }] = useState(() => InAppSpy());
-
-  useEffect(() => {
-    if (isInApp) {
-      const nativeBrowserUrl = getNativeBrowserUrl();
-      if (nativeBrowserUrl) {
-        // Try to open in native browser
-        window.location.href = nativeBrowserUrl;
-      }
-    }
-  }, [isInApp]);
-
   const handleUsernameChange = (value: string) => {
     if (!hasLoggedChange.current) {
       posthog?.capture("Change Username");
@@ -380,7 +363,6 @@ export function CreateController({
         validation={debouncedValidation}
         isLoading={isLoading}
         error={error}
-        isInAppBrowser={isInApp}
         isSlot={isSlot}
         onUsernameChange={handleUsernameChange}
         onUsernameFocus={handleUsernameFocus}
