@@ -346,6 +346,7 @@ const RegularAuths = ({
                   eth_address: response.account,
                 }),
               },
+              null,
             );
           });
         }}
