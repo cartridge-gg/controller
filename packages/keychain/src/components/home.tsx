@@ -11,10 +11,11 @@ import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
+  const location = useLocation();
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
@@ -98,6 +99,10 @@ export function Home() {
           }
 
           case "execute": {
+            if (location.pathname.startsWith("/purchase")) {
+              return <Outlet />;
+            }
+
             const ctx = context as ExecuteCtx;
             return (
               <ConfirmTransaction

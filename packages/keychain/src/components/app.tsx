@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { Home } from "./home";
 import { Authenticate } from "./authenticate";
 import { Session } from "./session";
@@ -30,18 +30,14 @@ import { Socials } from "@/components/socials/index";
 import { useConnection } from "@/hooks/connection";
 import { CreateController } from "./connect";
 import { Settings } from "./settings";
-import { Purchase } from "./purchase";
-import { PurchaseType } from "@/hooks/payments/crypto";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
-import { Funding } from "./funding";
-import { Deposit } from "./funding/Deposit";
-import { useNavigation } from "@/context/navigation";
+import { PurchaseCredits } from "./purchasenew/credits";
+import { PurchaseStarterpack } from "./purchasenew/starterpack";
 
 export function App() {
   const { controller } = useConnection();
-  const { navigate } = useNavigation();
   const { pathname } = useLocation();
 
   // No controller, send to login
@@ -56,7 +52,23 @@ export function App() {
         <Route path="/settings/recovery" element={<Recovery />} />
         <Route path="/settings/delegate" element={<Delegate />} />
         <Route path="/settings/add-signer" element={<AddSignerRoute />} />
-        <Route
+        <Route path="/purchase" element={<Outlet />}>
+          <Route path="credits" element={<PurchaseCredits />} />
+          <Route path="starterpack/:starterpackId" element={<PurchaseStarterpack />} />
+          <Route path="method" element={<></>}>
+            <Route path="controller" element={<></>} />
+            <Route path="crypto" element={<></>} />
+            <Route path="card" element={<></>} />
+          </Route>
+          <Route path="network" element={<></>} />
+          <Route path="wallet" element={<></>} />
+          <Route path="review" element={<></>} />
+          <Route path="pending" element={<></>} />
+          <Route path="completed" element={<></>} />
+          <Route path="failed" element={<></>} />
+        </Route>
+
+        {/* <Route
           path="/purchase"
           element={<Purchase type={PurchaseType.CREDITS} />}
         />
@@ -80,7 +92,7 @@ export function App() {
           element={
             <Purchase
               type={PurchaseType.CREDITS}
-              onBack={() => {
+              onComplete={() => {
                 const searchParams = new URLSearchParams(
                   window.location.search,
                 );
@@ -89,7 +101,7 @@ export function App() {
               }}
             />
           }
-        />
+        /> */}
         <Route path="authenticate" element={<Authenticate />} />
         <Route path="session" element={<Session />} />
         <Route path="slot" element={<Slot />}>

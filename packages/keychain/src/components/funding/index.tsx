@@ -25,9 +25,6 @@ export function Funding({ title, isSlot }: FundingProps) {
   const balances: BalanceType[] = isSlot
     ? [BalanceType.CREDITS]
     : [BalanceType.CREDITS, BalanceType.FEE_TOKEN];
-  const showCredits =
-    (typeof document !== "undefined" && document.cookie.includes("credits=")) ||
-    isSlot;
 
   const handleNavigate = (path: string) => {
     // Preserve returnTo parameter when navigating
@@ -55,11 +52,9 @@ export function Funding({ title, isSlot }: FundingProps) {
         <Balance types={balances} />
       </LayoutContent>
       <LayoutFooter>
-        {showCredits && (
-          <Button onClick={() => handleNavigate("/funding/credits")}>
-            <CoinsIcon variant="line" size="sm" /> Purchase Credits
-          </Button>
-        )}
+        <Button onClick={() => handleNavigate("/funding/credits")}>
+          <CoinsIcon variant="line" size="sm" /> Purchase Credits
+        </Button>
         {!isSlot && (
           <Button
             onClick={() => handleNavigate("/funding/deposit")}
