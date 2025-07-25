@@ -16,9 +16,13 @@ import {
   getOrCreateWallet,
   getTurnkeySuborg,
   getWallet,
+  SocialProvider,
 } from "./turnkey_utils";
 
-const SOCIAL_PROVIDER_NAME = "discord";
+export const Auth0SocialProviderName: Record<SocialProvider, string> = {
+  discord: "discord",
+  google: "google-oauth2",
+};
 
 export class TurnkeyWallet {
   readonly type: ExternalWalletType = "turnkey" as ExternalWalletType;
@@ -29,7 +33,7 @@ export class TurnkeyWallet {
   private turnkeyIframePromise: Promise<TurnkeyIframeClient> | undefined =
     undefined;
 
-  constructor() {
+  constructor(private socialProvider: SocialProvider) {
     this.auth0ClientPromise = createAuth0Client({
       domain: import.meta.env.VITE_AUTH0_DOMAIN,
       clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
@@ -94,7 +98,7 @@ export class TurnkeyWallet {
       await auth0Client.loginWithPopup(
         {
           authorizationParams: {
-            connection: SOCIAL_PROVIDER_NAME,
+            connection: Auth0SocialProviderName[this.socialProvider],
             redirect_uri: import.meta.env.VITE_ORIGIN,
             nonce,
             display: "touch",
@@ -114,7 +118,11 @@ export class TurnkeyWallet {
       }
 
       const subOrganizationId = signupUsername
-        ? await getOrCreateTurnkeySuborg(oidcTokenString, signupUsername)
+        ? await getOrCreateTurnkeySuborg(
+            oidcTokenString,
+            signupUsername,
+            this.socialProvider,
+          )
         : await getTurnkeySuborg(oidcTokenString);
 
       if (!subOrganizationId) {
@@ -145,6 +153,7 @@ export class TurnkeyWallet {
         account: checksummedAddress,
       };
     } catch (error) {
+      console.error(`Error connecting to Turnkey:`, error);
       return {
         success: false,
         wallet: this.type,

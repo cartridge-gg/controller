@@ -54,6 +54,11 @@ const OPTIONS: Partial<
     label: AUTH_METHODS_LABELS.walletconnect,
     isExtension: false,
   },
+  google: {
+    color: "text-wallet-theme-700",
+    label: AUTH_METHODS_LABELS.google,
+    isExtension: false,
+  },
 };
 
 export function ChangeWallet({

@@ -251,7 +251,8 @@ export function useConnectionValue() {
           (signer) =>
             signer.metadata.__typename === "Eip191Credentials" &&
             (signer.metadata.eip191?.[0]?.provider === "discord" ||
-              signer.metadata.eip191?.[0]?.provider === "walletconnect"),
+              signer.metadata.eip191?.[0]?.provider === "walletconnect" ||
+              signer.metadata.eip191?.[0]?.provider === "google"),
         );
 
         if (signers.length === 0) {
@@ -282,8 +283,8 @@ export function useConnectionValue() {
               ethAddress,
               walletConnectWallet as WalletAdapter,
             );
-          } else if (provider === "discord") {
-            const turnkeyWallet = new TurnkeyWallet();
+          } else if (provider === "discord" || provider === "google") {
+            const turnkeyWallet = new TurnkeyWallet(provider);
             if (!turnkeyWallet) {
               throw new Error("Embedded Turnkey wallet not found");
             }
@@ -293,7 +294,7 @@ export function useConnectionValue() {
 
             window.keychain_wallets!.addEmbeddedWallet(
               ethAddress,
-              turnkeyWallet as WalletAdapter,
+              turnkeyWallet as unknown as WalletAdapter,
             );
           }
         }

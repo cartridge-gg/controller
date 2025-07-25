@@ -31,6 +31,7 @@ export type Session = {
 };
 
 export type AuthOption =
+  | "google"
   | "webauthn"
   | "discord"
   | "walletconnect"
