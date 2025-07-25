@@ -5,6 +5,7 @@ import {
   LayoutFooter,
   Button,
   HeaderInner,
+  LayoutContainer,
 } from "@cartridge/ui";
 import { Unsupported } from "./Unsupported";
 import { FaceIDImage } from "./FaceID";
@@ -93,7 +94,7 @@ export function Authenticate({
       : "continue";
 
   return (
-    <>
+    <LayoutContainer>
       <HeaderInner
         variant="expanded"
         title={title}
@@ -109,6 +110,6 @@ export function Authenticate({
           {cta}
         </Button>
       </LayoutFooter>
-    </>
+    </LayoutContainer>
   );
 }

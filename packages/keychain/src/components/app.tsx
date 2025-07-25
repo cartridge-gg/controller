@@ -1,6 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Home } from "./home";
-import { Authenticate } from "./authenticate";
 import { Session } from "./session";
 import { Failure } from "./failure";
 import { Pending } from "./pending";
@@ -27,8 +26,6 @@ import { Activity } from "@/components/activity";
 import { Leaderboard } from "@/components/leaderboard";
 import { CollectionPurchase } from "@/components/inventory/collection/collection-purchase";
 import { Socials } from "@/components/socials/index";
-import { useConnection } from "@/hooks/connection";
-import { CreateController } from "./connect";
 import { Settings } from "./settings";
 import { Purchase } from "./purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
@@ -40,14 +37,7 @@ import { Deposit } from "./funding/Deposit";
 import { useNavigation } from "@/context/navigation";
 
 export function App() {
-  const { controller } = useConnection();
   const { navigate } = useNavigation();
-  const { pathname } = useLocation();
-
-  // No controller, send to login
-  if (!controller) {
-    return <CreateController isSlot={pathname.startsWith("/slot")} />;
-  }
 
   return (
     <Routes>
@@ -90,7 +80,6 @@ export function App() {
             />
           }
         />
-        <Route path="authenticate" element={<Authenticate />} />
         <Route path="session" element={<Session />} />
         <Route path="slot" element={<Slot />}>
           <Route path="consent" element={<Consent />} />
