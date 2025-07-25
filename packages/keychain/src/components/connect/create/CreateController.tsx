@@ -6,6 +6,7 @@ import { useDebounce } from "@/hooks/debounce";
 import { allUseSameAuth } from "@/utils/controller";
 import { AuthOption } from "@cartridge/controller";
 import {
+  Button,
   CartridgeLogo,
   ControllerIcon,
   CreateAccount,
@@ -74,6 +75,14 @@ function CreateControllerForm({
   setChangeWallet,
   authMethod,
 }: CreateControllerFormProps) {
+  const handleOpenInNativeBrowser = () => {
+    const nativeBrowserUrl = getNativeBrowserUrl();
+    if (nativeBrowserUrl) {
+      const link = document.createElement("a");
+      link.href = nativeBrowserUrl;
+      link.click();
+    }
+  };
   return (
     <>
       <NavigationHeader
@@ -136,15 +145,24 @@ function CreateControllerForm({
             authMethod={authMethod}
           />
 
-          <AuthButton
-            type="submit"
-            isLoading={isLoading}
-            disabled={validation.status !== "valid"}
-            data-testid="submit-button"
-            validation={validation}
-            waitingForConfirmation={waitingForConfirmation}
-            username={usernameField.value}
-          />
+          {isInAppBrowser ? (
+            <Button
+              className="w-full h-[40px] gap-2"
+              onClick={handleOpenInNativeBrowser}
+            >
+              Open in Native Browser
+            </Button>
+          ) : (
+            <AuthButton
+              type="submit"
+              isLoading={isLoading}
+              disabled={validation.status !== "valid"}
+              data-testid="submit-button"
+              validation={validation}
+              waitingForConfirmation={waitingForConfirmation}
+              username={usernameField.value}
+            />
+          )}
           <CartridgeFooter />
         </LayoutFooter>
       </form>
@@ -328,17 +346,17 @@ export function CreateController({
     }
   }, [debouncedValidation.status, handleFormSubmit]);
 
-  const [{ isInApp }] = useState(() => InAppSpy());
+  const [{ isInApp, appKey, appName, ua }] = useState(() => InAppSpy());
+
+  // appKey is undefined for unknown applications which we're
+  // assuming are dojo applications which implement AASA and
+  // support using passkeys in the inapp browser.
+  // https://docs.cartridge.gg/controller/presets#apple-app-site-association
+  const isInAppBrowser = isInApp && !!appKey;
 
   useEffect(() => {
-    if (isInApp) {
-      const nativeBrowserUrl = getNativeBrowserUrl();
-      if (nativeBrowserUrl) {
-        // Try to open in native browser
-        window.location.href = nativeBrowserUrl;
-      }
-    }
-  }, [isInApp]);
+    console.log("in app", isInApp, appKey, appName, ua);
+  }, [isInApp, appKey, appName, ua]);
 
   const handleUsernameChange = (value: string) => {
     if (!hasLoggedChange.current) {
@@ -380,7 +398,7 @@ export function CreateController({
         validation={debouncedValidation}
         isLoading={isLoading}
         error={error}
-        isInAppBrowser={isInApp}
+        isInAppBrowser={isInAppBrowser}
         isSlot={isSlot}
         onUsernameChange={handleUsernameChange}
         onUsernameFocus={handleUsernameFocus}

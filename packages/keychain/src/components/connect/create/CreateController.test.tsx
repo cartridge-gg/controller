@@ -53,10 +53,10 @@ vi.mock("@/hooks/wallets", () => ({
   useWallets: () => mockUseWallets(),
 }));
 
+// Mock InAppSpy with configurable return values
+const mockInAppSpy = vi.fn();
 vi.mock("inapp-spy", () => ({
-  default: () => ({
-    isInApp: false,
-  }),
+  default: () => mockInAppSpy(),
 }));
 vi.mock("./useUsernameValidation", () => ({
   useUsernameValidation: () => mockUseUsernameValidation(),
@@ -91,6 +91,13 @@ describe("CreateController", () => {
       verified: true,
       icon: "icon-url",
       cover: "cover-url",
+    });
+    // Set default InAppSpy mock (not in app)
+    mockInAppSpy.mockReturnValue({
+      isInApp: false,
+      appKey: undefined,
+      appName: undefined,
+      ua: "test-user-agent",
     });
   });
   const renderComponent = () => {
@@ -225,6 +232,67 @@ describe("CreateController", () => {
 
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledWith("validuser", false, "webauthn");
+    });
+  });
+
+  describe("In-app browser handling", () => {
+    it("shows normal auth button when not in app browser", () => {
+      // Default mock already sets isInApp: false
+      renderComponent();
+
+      const input = screen.getByPlaceholderText("Username");
+      fireEvent.change(input, { target: { value: "testuser" } });
+
+      expect(screen.getByText("sign up")).toBeInTheDocument();
+      expect(
+        screen.queryByText("Open in Native Browser"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Browser not supported"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows normal auth button when in app but appKey is undefined (dojo apps)", () => {
+      mockInAppSpy.mockReturnValue({
+        isInApp: true,
+        appKey: undefined,
+        appName: "Dojo App",
+        ua: "test-user-agent",
+      });
+
+      renderComponent();
+
+      const input = screen.getByPlaceholderText("Username");
+      fireEvent.change(input, { target: { value: "testuser" } });
+
+      expect(screen.getByText("sign up")).toBeInTheDocument();
+      expect(
+        screen.queryByText("Open in Native Browser"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Browser not supported"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows error and native browser button when in unsupported in-app browser", () => {
+      mockInAppSpy.mockReturnValue({
+        isInApp: true,
+        appKey: "some-app-key",
+        appName: "Unknown App",
+        ua: "test-user-agent",
+      });
+
+      renderComponent();
+
+      const input = screen.getByPlaceholderText("Username");
+      fireEvent.change(input, { target: { value: "testuser" } });
+
+      // Should show error message
+      expect(screen.getByText("Browser not supported")).toBeInTheDocument();
+
+      // Should show native browser button instead of auth button
+      expect(screen.getByText("Open in Native Browser")).toBeInTheDocument();
+      expect(screen.queryByText("sign up")).not.toBeInTheDocument();
     });
   });
 });
