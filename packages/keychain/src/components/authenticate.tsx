@@ -7,7 +7,7 @@ import { AuthAction } from "./connect/authenticate";
 // auth page used for externally embedded keychain
 export function Authenticate() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [params, setParams] = useState<{
     name: string;
     action: string;
@@ -27,7 +27,7 @@ export function Authenticate() {
       setParams({ name, action, network, appId });
 
       // Remove query params to avoid issues with password managers
-      navigate(".", { replace: true });
+      setSearchParams({}, { replace: true });
     }
   }, [params, searchParams, navigate]);
 
