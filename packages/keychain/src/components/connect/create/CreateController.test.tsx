@@ -244,12 +244,7 @@ describe("CreateController", () => {
       fireEvent.change(input, { target: { value: "testuser" } });
 
       expect(screen.getByText("sign up")).toBeInTheDocument();
-      expect(
-        screen.queryByText("Open in Native Browser"),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByText("Browser not supported"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText(/not supported/)).not.toBeInTheDocument();
     });
 
     it("shows normal auth button when in app but appKey is undefined (dojo apps)", () => {
@@ -266,15 +261,10 @@ describe("CreateController", () => {
       fireEvent.change(input, { target: { value: "testuser" } });
 
       expect(screen.getByText("sign up")).toBeInTheDocument();
-      expect(
-        screen.queryByText("Open in Native Browser"),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByText("Browser not supported"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText(/not supported/)).not.toBeInTheDocument();
     });
 
-    it("shows error and native browser button when in unsupported in-app browser", () => {
+    it("shows error message when in unsupported in-app browser", () => {
       mockInAppSpy.mockReturnValue({
         isInApp: true,
         appKey: "some-app-key",
@@ -287,12 +277,18 @@ describe("CreateController", () => {
       const input = screen.getByPlaceholderText("Username");
       fireEvent.change(input, { target: { value: "testuser" } });
 
-      // Should show error message
-      expect(screen.getByText("Browser not supported")).toBeInTheDocument();
+      // Should show error message with app name
+      expect(
+        screen.getByText("Using Controller in Unknown App is not supported"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Please open this page in your device's native browser (Safari/Chrome) to continue.",
+        ),
+      ).toBeInTheDocument();
 
-      // Should show native browser button instead of auth button
-      expect(screen.getByText("Open in Native Browser")).toBeInTheDocument();
-      expect(screen.queryByText("sign up")).not.toBeInTheDocument();
+      // Should still show auth button (but it may be disabled or handle redirect)
+      expect(screen.getByText("sign up")).toBeInTheDocument();
     });
   });
 });
