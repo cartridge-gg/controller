@@ -79,9 +79,6 @@ function CreateControllerForm({
   // https://docs.cartridge.gg/controller/presets#apple-app-site-association
   const isInAppBrowser = isInApp && !!appKey;
 
-  useEffect(() => {
-    console.log("in app", isInApp, appKey, appName, ua);
-  }, [isInApp, appKey, appName, ua]);
   return (
     <>
       <NavigationHeader
