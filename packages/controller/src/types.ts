@@ -31,6 +31,7 @@ export type KeychainSession = {
 };
 
 export type AuthOption =
+  | "sms"
   | "google"
   | "webauthn"
   | "discord"

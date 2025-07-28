@@ -87,6 +87,9 @@ catalogs:
     jest-image-snapshot:
       specifier: ^6.4.0
       version: 6.4.0
+    lodash:
+      specifier: ^4.17.21
+      version: 4.17.21
     playwright:
       specifier: ^1.49.1
       version: 1.52.0
@@ -591,6 +594,12 @@ importers:
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
+      libphonenumber-js:
+        specifier: ^1.12.10
+        version: 1.12.17
+      lodash:
+        specifier: 'catalog:'
+        version: 4.17.21
       micro-sol-signer:
         specifier: ^0.5.0
         version: 0.5.0
@@ -6830,8 +6839,8 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  libphonenumber-js@1.12.7:
-    resolution: {integrity: sha512-0nYZSNj/QEikyhcM5RZFXGlCB/mr4PVamnT1C2sKBnDDTYndrvbybYjvg+PMqAndQHlLbwQ3socolnL3WWTUFA==}
+  libphonenumber-js@1.12.17:
+    resolution: {integrity: sha512-bsxi8FoceAYR/bjHcLYc2ShJ/aVAzo5jaxAYiMHF0BD+NTp47405CGuPNKYpw+lHadN9k/ClFGc9X5vaZswIrA==}
 
   lilconfig@2.1.0:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
@@ -13093,7 +13102,7 @@ snapshots:
       '@turnkey/sdk-server': 3.1.0(@babel/core@7.27.1)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@turnkey/wallet-stamper': 1.0.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@types/react': 18.3.20
-      libphonenumber-js: 1.12.7
+      libphonenumber-js: 1.12.17
       next: 15.3.1(@babel/core@7.27.1)(@playwright/test@1.52.0)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-apple-login: 1.1.6(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -17553,7 +17562,7 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  libphonenumber-js@1.12.7: {}
+  libphonenumber-js@1.12.17: {}
 
   lilconfig@2.1.0: {}
 

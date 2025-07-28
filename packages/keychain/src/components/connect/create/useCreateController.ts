@@ -26,6 +26,7 @@ import {
 } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { usePasswordAuthentication } from "./password";
+import { useSmsAuthentication } from "./sms";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
@@ -73,6 +74,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
   const { supportedWalletsForAuth } = useWallets();
+  const { signup: signupWithSms, login: loginWithSms } = useSmsAuthentication();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -163,6 +165,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       ...supportedWalletsForAuth,
       "discord" as AuthOption,
       "google" as AuthOption,
+      "sms" as AuthOption,
       "walletconnect" as AuthOption,
       "password" as AuthOption,
     ].filter(
@@ -259,6 +262,16 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
           break;
         case "walletconnect":
           signupResponse = await signupWithWalletConnect();
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: authenticationMode,
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        case "sms":
+          signupResponse = await signupWithSms(username);
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
@@ -442,6 +455,11 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
           if (!loginResponse) {
             return;
           }
+          break;
+        }
+        case "sms": {
+          setWaitingForConfirmation(true);
+          loginResponse = await loginWithSms(username);
           break;
         }
         case "rabby":
