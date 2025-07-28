@@ -1,7 +1,6 @@
 import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
-import { useFeature } from "@/hooks/features";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
@@ -80,8 +79,6 @@ export function useCreateController({
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication();
   const { wallets } = useWallets();
-
-  const isGoogleEnabled = useFeature("google");
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -169,12 +166,12 @@ export function useCreateController({
         )
         .map((wallet) => wallet.type),
       "discord" as AuthOption,
-      ...(isGoogleEnabled ? ["google" as AuthOption] : []),
+      "google" as AuthOption,
       "walletconnect" as AuthOption,
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
-  }, [wallets, configSignupOptions, isGoogleEnabled]);
+  }, [wallets, configSignupOptions]);
 
   const handleSignup = useCallback(
     async (username: string, authenticationMode: AuthOption) => {
