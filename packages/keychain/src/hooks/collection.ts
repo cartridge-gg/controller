@@ -162,7 +162,7 @@ export function useCollections(): UseCollectionsResponse {
       offset: offset,
     },
     {
-      queryKey: ["collections", offset],
+      queryKey: ["collections", project, address, offset],
       enabled: !!project && !!address,
     },
   );

@@ -1,10 +1,4 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Button,
@@ -20,9 +14,20 @@ import {
   PlusIcon,
   TraceabilityCollectibleCard,
   PaperPlaneIcon,
+  CollectibleItems,
+  CollectibleItem,
+  TagIcon,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { constants } from "starknet";
+import {
+  AllowArray,
+  cairo,
+  Call,
+  CallData,
+  constants,
+  TransactionExecutionStatus,
+  TransactionFinalityStatus,
+} from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useCallback, useMemo, useState } from "react";
 import { useCollectible } from "@/hooks/collectible";
@@ -33,17 +38,26 @@ import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
 import { useOwnership } from "@/hooks/ownerships";
-import { useUsername } from "@/hooks/username";
+import { useMarketplace } from "@/hooks/marketplace";
+import { OrderModel } from "@cartridge/marketplace";
+import { useExecute } from "@/hooks/execute";
+import { toast } from "sonner";
+import { useAccount, useUsername } from "@/hooks/account";
+import { erc20Metadata } from "@cartridge/presets";
 
 const OFFSET = 10;
 
 export function CollectibleAsset() {
-  const { chainId, namespace, project } = useConnection();
+  const account = useAccount();
+  const address = account?.address || "";
+  const { chainId, namespace, project, controller } = useConnection();
   const [searchParams] = useSearchParams();
-  const location = useLocation();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
   const { editions } = useArcade();
+  const { selfOrders, tokenOrders, provider, removeOrder } = useMarketplace();
+  const [loading, setLoading] = useState(false);
+  const { execute } = useExecute();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -66,15 +80,16 @@ export function CollectibleAsset() {
     tokenId: tokenId ?? "",
   });
 
+  const isOwner = useMemo(() => {
+    if (!address || !ownership?.accountAddress) return false;
+    return BigInt(ownership.accountAddress) === BigInt(address);
+  }, [ownership, address]);
+
   const { traceabilities: data, status: traceabilitiesStatus } =
     useTraceabilities({
       contractAddress: contractAddress ?? "",
       tokenId: tokenId ?? "",
     });
-
-  const { username } = useUsername({
-    address: ownership?.accountAddress ?? "",
-  });
 
   const asset = useMemo(() => {
     return assets?.[0];
@@ -109,6 +124,60 @@ export function CollectibleAsset() {
     );
   }, []);
 
+  const handleUnlist = useCallback(async () => {
+    if (!contractAddress || !asset || !selfOrders) return;
+    setLoading(true);
+    try {
+      const marketplaceAddress: string = provider.manifest.contracts.find(
+        (c: { tag: string }) => c.tag?.includes("Marketplace"),
+      )?.address;
+      const orderIds = selfOrders.map((order) => order.id);
+      const calls: AllowArray<Call> = [
+        ...orderIds.map((orderId) => ({
+          contractAddress: marketplaceAddress,
+          entrypoint: "cancel",
+          calldata: CallData.compile({
+            orderId: orderId,
+            collection: contractAddress,
+            tokenId: cairo.uint256(asset.tokenId),
+          }),
+        })),
+      ];
+
+      const res = await execute(calls);
+      if (res?.transaction_hash) {
+        await controller?.provider?.waitForTransaction(res.transaction_hash, {
+          retryInterval: 100,
+          successStates: [
+            TransactionExecutionStatus.SUCCEEDED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        });
+
+        toast.success(`Asset unlisted successfully`);
+      }
+
+      // Removing the order optimistically
+      selfOrders.forEach((order) => {
+        removeOrder(order);
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error(`Failed to unlist asset(s)`);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    contractAddress,
+    asset,
+    chainId,
+    provider,
+    controller,
+    removeOrder,
+    selfOrders,
+    execute,
+  ]);
+
   const status = useMemo(() => {
     if (
       collectibleStatus === "error" ||
@@ -124,10 +193,6 @@ export function CollectibleAsset() {
       return "loading";
     return "success";
   }, [collectibleStatus, traceabilitiesStatus, ownershipStatus]);
-
-  if (location.pathname.includes("/send")) {
-    return <Outlet />;
-  }
 
   return (
     <>
@@ -153,7 +218,10 @@ export function CollectibleAsset() {
                 size="lg"
                 className="w-full self-center"
               />
-              <CollectibleTabs order={["details", "activity"]} className="pb-6">
+              <CollectibleTabs
+                order={["details", "items", "activity"]}
+                className="pb-6"
+              >
                 <TabsContent
                   className="m-0 p-0 flex flex-col gap-y-4"
                   value="details"
@@ -166,8 +234,21 @@ export function CollectibleAsset() {
                     address={collectible.address}
                     tokenId={asset.tokenId}
                     standard={collectible.type}
-                    owner={username}
+                    // owner={username}  // Owner hidden for 1155 since there are several
                   />
+                </TabsContent>
+                <TabsContent
+                  className="m-0 p-0 flex flex-col gap-y-4"
+                  value="items"
+                >
+                  {properties.length > 0 && (
+                    <CollectibleProperties properties={properties} />
+                  )}
+                  <CollectibleItems>
+                    {selfOrders.map((order) => (
+                      <Item key={order.id} order={order} self={address} />
+                    ))}
+                  </CollectibleItems>
                 </TabsContent>
                 <TabsContent
                   className="m-0 p-0 flex flex-col gap-px"
@@ -213,21 +294,105 @@ export function CollectibleAsset() {
               "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-0",
             )}
           >
-            <Link
-              className="flex items-center justify-center gap-x-4 w-full"
-              to={`send?${searchParams.toString()}`}
-            >
-              <Button className="h-10 w-full gap-2">
-                <PaperPlaneIcon variant="solid" size="sm" />
-                <span className="font-semibold text-base/5">Send</span>
+            <div className="flex gap-3 w-full">
+              <Button
+                variant="secondary"
+                isLoading={loading}
+                onClick={handleUnlist}
+                className={cn(
+                  "w-full gap-2 text-destructive-100",
+                  (selfOrders.length === 0 || !isOwner) && "hidden",
+                )}
+              >
+                <TagIcon variant="solid" size="sm" />
+                Unlist
               </Button>
-            </Link>
+              <Link
+                className={cn(
+                  "flex items-center justify-center gap-x-4 w-full",
+                  (selfOrders.length > 0 || !isOwner) && "hidden",
+                )}
+                to={`list?${searchParams.toString()}`}
+              >
+                <Button variant="secondary" className={cn("w-full gap-2")}>
+                  <TagIcon variant="solid" size="sm" />
+                  List
+                </Button>
+              </Link>
+              <Link
+                className={cn(
+                  "flex items-center justify-center gap-x-4 w-full",
+                  (tokenOrders.length === selfOrders.length || isOwner) &&
+                    "hidden",
+                )}
+                to={`purchase?${searchParams.toString()}`}
+              >
+                <Button
+                  isLoading={loading}
+                  variant="primary"
+                  className="w-full gap-2"
+                >
+                  Purchase
+                </Button>
+              </Link>
+              <Link
+                className={cn(
+                  "flex items-center justify-center gap-x-4 w-full",
+                  !isOwner && "hidden",
+                )}
+                to={`send?${searchParams.toString()}`}
+              >
+                <Button variant="secondary" className="w-full gap-2">
+                  <PaperPlaneIcon variant="solid" size="sm" />
+                  Send
+                </Button>
+              </Link>
+            </div>
           </LayoutFooter>
         </>
       )}
     </>
   );
 }
+
+const Item = ({ order, self }: { order: OrderModel; self: string }) => {
+  const { username } = useUsername({ address: order.owner });
+
+  const isOwner = useMemo(() => {
+    if (!self || !order.owner) return false;
+    return BigInt(order.owner) === BigInt(self);
+  }, [self, order]);
+
+  const token = useMemo(
+    () =>
+      erc20Metadata.find(
+        (token) => BigInt(token.l2_token_address) === BigInt(order.currency),
+      ),
+    [order.currency],
+  );
+  const price = useMemo(() => {
+    if (!token) return "0";
+    return Math.floor(Number(order.price) / 10 ** token.decimals);
+  }, [order.price, token]);
+  const expiration = useMemo(() => {
+    const date = new Date(Number(order.expiration) * 1000);
+    const now = new Date();
+    const diff = date.getTime() - now.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    return `${days}d`;
+  }, [order.expiration]);
+
+  return (
+    <CollectibleItem
+      owner={username}
+      quantity={order.quantity}
+      price={price.toString()}
+      expiration={expiration}
+      action={isOwner ? "unlist" : "purchase"}
+      onActionClick={() => {}}
+    />
+  );
+};
 
 const LoadingState = () => {
   return (

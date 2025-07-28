@@ -71,8 +71,12 @@ export function Collections() {
           collectible.address || "0x0",
         );
         const collectionOrders = getCollectionOrders(collectionAddress);
-        const listingCount =
-          Object.entries(collectionOrders).length || undefined;
+        const listingCount = Object.values(collectionOrders).reduce(
+          (acc, orders) => {
+            return acc + orders.length;
+          },
+          0,
+        );
         return (
           <Link
             className="w-full group select-none"

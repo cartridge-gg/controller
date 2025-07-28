@@ -1,10 +1,4 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Button,
@@ -61,7 +55,6 @@ export function CollectionAsset() {
   const account = useAccount();
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
   const { navigate } = useNavigation();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
@@ -229,14 +222,6 @@ export function CollectionAsset() {
       orders: order.id.toString(),
     });
   }, [order, searchParams, setAmount, setSearchParams]);
-
-  if (
-    location.pathname.includes("/send") ||
-    location.pathname.includes("/list") ||
-    location.pathname.includes("/purchase")
-  ) {
-    return <Outlet />;
-  }
 
   return (
     <>
