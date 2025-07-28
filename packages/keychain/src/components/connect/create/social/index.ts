@@ -1,6 +1,5 @@
-import { TurnkeyWallet } from "@/wallets/social/turnkey";
+import { OAuthWallet } from "@/wallets/social/turnkey";
 import { SocialProvider } from "@/wallets/social/turnkey_utils";
-import { WalletAdapter } from "@cartridge/controller";
 import { useCallback } from "react";
 
 export const useSocialAuthentication = (
@@ -8,8 +7,8 @@ export const useSocialAuthentication = (
 ) => {
   const signup = useCallback(
     async (socialProvider: SocialProvider, signupUsername?: string) => {
-      const turnkeyWallet = new TurnkeyWallet(socialProvider);
-      const { account, error } = await turnkeyWallet.connect(signupUsername);
+      const oauthWallet = new OAuthWallet(socialProvider);
+      const { account, error } = await oauthWallet.connect(signupUsername);
       if (error?.includes("Account mismatch")) {
         setChangeWallet?.(true);
         return;
@@ -17,13 +16,17 @@ export const useSocialAuthentication = (
       if (!account) {
         throw new Error("No account found");
       }
+      if (!window.keychain_wallets) {
+        throw new Error("No keychain_wallets found");
+      }
 
-      window.keychain_wallets?.addEmbeddedWallet(
-        account,
-        turnkeyWallet as unknown as WalletAdapter,
-      );
+      window.keychain_wallets.addEmbeddedWallet(account, oauthWallet);
 
-      return { address: account, signer: { eip191: { address: account } } };
+      return {
+        address: account,
+        signer: { eip191: { address: account } },
+        type: socialProvider,
+      };
     },
     [setChangeWallet],
   );

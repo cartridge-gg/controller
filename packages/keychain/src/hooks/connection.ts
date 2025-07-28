@@ -5,7 +5,7 @@ import {
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
 import { ConnectionCtx, connectToController } from "@/utils/connection";
-import { TurnkeyWallet } from "@/wallets/social/turnkey";
+import { OAuthWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
   AuthOptions,
@@ -27,7 +27,6 @@ import {
   Policies,
 } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
-import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import {
   ETH_CONTRACT_ADDRESS,
   isIframe,
@@ -36,6 +35,7 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
+import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SemVer } from "semver";
@@ -160,7 +160,7 @@ export function useConnectionValue() {
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>(window.location.origin);
   const [rpcUrl, setRpcUrl] = useState<string>(
-    import.meta.env.VITE_RPC_SEPOLIA,
+    window.controller?.rpcUrl() || import.meta.env.VITE_RPC_SEPOLIA,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [verified, setVerified] = useState<boolean>(false);
@@ -224,6 +224,12 @@ export function useConnectionValue() {
   }, [rpcUrl]);
 
   useEffect(() => {
+    if (controller) {
+      setRpcUrl(controller.rpcUrl());
+    }
+  }, [controller]);
+
+  useEffect(() => {
     if (
       !controller?.username() ||
       !chainId ||
@@ -284,18 +290,15 @@ export function useConnectionValue() {
               walletConnectWallet as WalletAdapter,
             );
           } else if (provider === "discord" || provider === "google") {
-            const turnkeyWallet = new TurnkeyWallet(provider);
-            if (!turnkeyWallet) {
+            const oauthWallet = new OAuthWallet(provider);
+            if (!oauthWallet) {
               throw new Error("Embedded Turnkey wallet not found");
             }
 
-            turnkeyWallet.account = getAddress(ethAddress);
-            turnkeyWallet.subOrganizationId = undefined;
+            oauthWallet.account = getAddress(ethAddress);
+            oauthWallet.subOrganizationId = undefined;
 
-            window.keychain_wallets!.addEmbeddedWallet(
-              ethAddress,
-              turnkeyWallet as unknown as WalletAdapter,
-            );
+            window.keychain_wallets!.addEmbeddedWallet(ethAddress, oauthWallet);
           }
         }
       } catch (error) {
