@@ -3,16 +3,16 @@ import {
   CredentialMetadata,
 } from "@cartridge/ui/utils/api/cartridge";
 
+import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
+import { useFeature } from "@/hooks/features";
 import { Signer, signerToGuid } from "@cartridge/controller-wasm";
 import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
-import { useNavigation } from "@/context/navigation";
 import { SectionHeader } from "../section-header";
 import { SignerCard } from "./signer-card";
-import { useFeature } from "@/hooks/features";
 
 export const SignersSection = ({
   controllerQuery,

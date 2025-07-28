@@ -6,6 +6,7 @@ import {
   GoogleColorIcon,
   IconProps,
   MetaMaskColorIcon,
+  MobileIcon,
   PasskeyIcon,
   PhantomColorIcon,
   RabbyColorIcon,
@@ -23,7 +24,8 @@ const OPTIONS: Partial<
     string,
     {
       variant: "primary" | "secondary";
-      Icon: React.ComponentType<IconProps>;
+      Icon?: React.ComponentType<IconProps>;
+      icon?: React.ReactNode;
       label: string;
       className?: string;
     }
@@ -70,6 +72,11 @@ const OPTIONS: Partial<
     Icon: WalletConnectColorIcon,
     label: AUTH_METHODS_LABELS.walletconnect,
   },
+  sms: {
+    variant: "secondary",
+    icon: <MobileIcon size="sm" variant="solid" />,
+    label: AUTH_METHODS_LABELS.sms,
+  },
 };
 
 export function SignupButton({ authMethod, ...props }: SignupButtonProps) {
@@ -82,7 +89,7 @@ export function SignupButton({ authMethod, ...props }: SignupButtonProps) {
     return null;
   }
 
-  const { Icon, label, ...restOptionProps } = option;
+  const { Icon, icon, label, ...restOptionProps } = option;
 
   return (
     <Button
@@ -92,7 +99,7 @@ export function SignupButton({ authMethod, ...props }: SignupButtonProps) {
       isLoading={false}
       disabled={isLoading || disabled}
     >
-      {isLoading ? <Spinner size="sm" /> : <Icon size="sm" />}
+      {isLoading ? <Spinner size="sm" /> : Icon ? <Icon size="sm" /> : icon}
       {label}
     </Button>
   );

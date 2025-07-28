@@ -1,29 +1,30 @@
+import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
+import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
+import { MarketplaceProvider as ProfileMarketplaceProvider } from "@/components/provider/marketplace";
 import { UpgradeProvider } from "@/components/provider/upgrade";
 import { useConnectionValue } from "@/hooks/connection";
+import { FeatureProvider } from "@/hooks/features";
 import { WalletsProvider } from "@/hooks/wallets";
 import { ENDPOINT } from "@/utils/graphql";
 import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
+import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
+  cartridge,
   jsonRpcProvider,
   StarknetConfig,
-  cartridge,
 } from "@starknet-react/core";
 import { TurnkeyProvider } from "@turnkey/sdk-react";
 import { PropsWithChildren, useCallback, useMemo } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { constants, num } from "starknet";
+import { ErrorBoundary } from "../ErrorBoundary";
 import { ConnectionContext } from "./connection";
+import { KeychainWalletsProvider } from "./keychain-wallets";
 import { PostHogProvider } from "./posthog";
 import { TokensProvider } from "./tokens";
 import { UIProvider } from "./ui";
-import { FeatureProvider } from "@/hooks/features";
-import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
-import { MarketplaceProvider as ProfileMarketplaceProvider } from "@/components/provider/marketplace";
-import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
-import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
-import { ErrorBoundary } from "../ErrorBoundary";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
@@ -66,15 +67,17 @@ export function Provider({ children }: PropsWithChildren) {
                               defaultChainId={defaultChainId}
                               provider={jsonRpcProvider({ rpc })}
                             >
-                              <TokensProvider>
-                                <ProfileMarketplaceProvider>
-                                  <ProfileArcadeProvider>
-                                    <ProfileDataProvider>
-                                      {children}
-                                    </ProfileDataProvider>
-                                  </ProfileArcadeProvider>
-                                </ProfileMarketplaceProvider>
-                              </TokensProvider>
+                              <KeychainWalletsProvider>
+                                <TokensProvider>
+                                  <ProfileMarketplaceProvider>
+                                    <ProfileArcadeProvider>
+                                      <ProfileDataProvider>
+                                        {children}
+                                      </ProfileDataProvider>
+                                    </ProfileArcadeProvider>
+                                  </ProfileMarketplaceProvider>
+                                </TokensProvider>
+                              </KeychainWalletsProvider>
                             </StarknetConfig>
                           </UIProvider>
                         </UpgradeProvider>

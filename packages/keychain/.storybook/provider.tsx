@@ -1,23 +1,23 @@
-import React, { PropsWithChildren } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { mainnet } from "@starknet-react/chains";
 import {
   StarknetConfig,
   cartridge,
   publicProvider,
 } from "@starknet-react/core";
+import React, { PropsWithChildren } from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter } from "react-router-dom";
 import { ConnectionContext } from "../src/components/provider/connection";
+import { PostHogProvider } from "../src/components/provider/posthog";
+import { TokensProvider } from "../src/components/provider/tokens";
 import { UIProvider } from "../src/components/provider/ui";
+import { FeatureProvider } from "../src/hooks/features";
+import { WalletsProvider } from "../src/hooks/wallets";
 import {
   MockUpgradeProvider,
   StoryParameters,
   useMockedConnection,
 } from "./mock";
-import { TokensProvider } from "../src/components/provider/tokens";
-import { PostHogProvider } from "../src/components/provider/posthog";
-import { WalletsProvider } from "../src/hooks/wallets";
-import { FeatureProvider } from "../src/hooks/features";
 
 export function Provider({
   children,

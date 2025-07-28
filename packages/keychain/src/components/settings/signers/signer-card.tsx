@@ -8,6 +8,7 @@ import {
   DiscordIcon,
   GoogleIcon,
   MetaMaskIcon,
+  MobileIcon,
   PhantomIcon,
   RabbyIcon,
   Sheet,
@@ -148,6 +149,8 @@ const SignerIcon = React.memo(
         return <GoogleIcon size="sm" />;
       case "walletconnect":
         return <WalletConnectIcon size="sm" />;
+      case "sms":
+        return <MobileIcon size="sm" variant="solid" />;
       default:
         return <TouchIcon size="sm" />;
     }
@@ -167,6 +170,8 @@ const getSignerIdentifyingInfo = async (
           return undefined;
         case "google":
           // return await getOauthProvider(controllerUsername, "google");
+          return undefined;
+        case "sms":
           return undefined;
         default:
           return formatAddress(credentialToAddress(signer)!, { size: "xs" });

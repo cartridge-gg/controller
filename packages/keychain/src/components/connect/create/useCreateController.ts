@@ -27,6 +27,7 @@ import {
   signerToAddress,
 } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
+import { useSmsAuthentication } from "./sms";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
@@ -78,6 +79,7 @@ export function useCreateController({
     useExternalWalletAuthentication();
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication();
+  const { signup: signupWithSms, login: loginWithSms } = useSmsAuthentication();
   const { wallets } = useWallets();
 
   const handleAccountQuerySuccess = useCallback(
@@ -167,6 +169,7 @@ export function useCreateController({
         .map((wallet) => wallet.type),
       "discord" as AuthOption,
       "google" as AuthOption,
+      "sms" as AuthOption,
       "walletconnect" as AuthOption,
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
@@ -217,6 +220,16 @@ export function useCreateController({
           break;
         case "walletconnect":
           signupResponse = await signupWithWalletConnect();
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: authenticationMode,
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        case "sms":
+          signupResponse = await signupWithSms(username);
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
@@ -356,6 +369,11 @@ export function useCreateController({
         case "google": {
           setWaitingForConfirmation(true);
           loginResponse = await loginWithSocial("google");
+          break;
+        }
+        case "sms": {
+          setWaitingForConfirmation(true);
+          loginResponse = await loginWithSms(username);
           break;
         }
         case "rabby":
