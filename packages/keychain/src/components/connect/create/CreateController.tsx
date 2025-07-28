@@ -71,7 +71,7 @@ function CreateControllerForm({
   setChangeWallet,
   authMethod,
 }: CreateControllerFormProps) {
-  const [{ isInApp, appKey, appName, ua }] = useState(() => InAppSpy());
+  const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
 
   // appKey is undefined for unknown applications which we're
   // assuming are dojo applications which implement AASA and
@@ -79,9 +79,6 @@ function CreateControllerForm({
   // https://docs.cartridge.gg/controller/presets#apple-app-site-association
   const isInAppBrowser = isInApp && !!appKey;
 
-  useEffect(() => {
-    console.log("in app", isInApp, appKey, appName, ua);
-  }, [isInApp, appKey, appName, ua]);
   return (
     <>
       <NavigationHeader
