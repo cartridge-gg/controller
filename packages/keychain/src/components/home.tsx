@@ -12,10 +12,12 @@ import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
 import { Outlet, useLocation } from "react-router-dom";
+import { Authenticate } from "./authenticate";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
   const location = useLocation();
+  const { pathname } = useLocation();
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
@@ -28,9 +30,14 @@ export function Home() {
     }
   }, [context?.type, posthog]);
 
+  // Popup flow authentication
+  if (pathname.startsWith("/authenticate")) {
+    return <Authenticate />;
+  }
+
   // No controller, send to login
   if (!controller) {
-    return <CreateController />;
+    return <CreateController isSlot={pathname.startsWith("/slot")} />;
   }
 
   if (!upgrade.isSynced || isConfigLoading) {

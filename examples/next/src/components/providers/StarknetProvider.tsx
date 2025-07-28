@@ -170,17 +170,14 @@ if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
 
 const controller = new ControllerConnector({
   policies,
-  // With the defaults, you can omit chains and defaultChainId if you want to use:
+  // With the defaults, you can omit chains if you want to use:
   // - chains: [
   //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia" },
   //     { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet" },
   //   ]
-  // - defaultChainId: constants.StarknetChainId.SN_MAIN
   //
-  // However, if you want to use custom RPC URLs or a different default chain,
-  // you can still specify them:
+  // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  defaultChainId: constants.StarknetChainId.SN_MAIN,
   url: keychainUrl,
   //slot: "pistols-mainnet",
   //namespace: "pistols",
@@ -205,6 +202,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
+      defaultChainId={mainnet.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}

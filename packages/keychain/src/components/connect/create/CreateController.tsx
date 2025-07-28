@@ -12,7 +12,6 @@ import {
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
-  Separator,
   Sheet,
 } from "@cartridge/ui";
 import { NavigationHeader } from "@/components";
@@ -72,7 +71,7 @@ function CreateControllerForm({
   setChangeWallet,
   authMethod,
 }: CreateControllerFormProps) {
-  const [{ isInApp, appKey, appName, ua }] = useState(() => InAppSpy());
+  const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
 
   // appKey is undefined for unknown applications which we're
   // assuming are dojo applications which implement AASA and
@@ -80,9 +79,6 @@ function CreateControllerForm({
   // https://docs.cartridge.gg/controller/presets#apple-app-site-association
   const isInAppBrowser = isInApp && !!appKey;
 
-  useEffect(() => {
-    console.log("in app", isInApp, appKey, appName, ua);
-  }, [isInApp, appKey, appName, ua]);
   return (
     <>
       <NavigationHeader
@@ -119,7 +115,7 @@ function CreateControllerForm({
           <Legal />
         </LayoutContent>
 
-        <LayoutFooter>
+        <LayoutFooter className="pb-2">
           {isInAppBrowser && (
             <ErrorAlert
               title={`Using Controller in ${appName ?? "Unknown App"} is not supported`}
@@ -385,7 +381,6 @@ export function CreateController({
 export function CartridgeFooter() {
   return (
     <div className="flex flex-col">
-      <Separator orientation="horizontal" className="bg-spacer" />
       <a
         href="https://cartridge.gg"
         target="_blank"
