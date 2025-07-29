@@ -34,6 +34,7 @@ import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
+import { Execute } from "./Execute";
 import { useNavigation } from "@/context/navigation";
 
 export function App() {
@@ -65,6 +66,7 @@ export function App() {
             />
           }
         />
+        <Route path="/execute" element={<Execute />} />
         <Route
           path="/funding/credits"
           element={

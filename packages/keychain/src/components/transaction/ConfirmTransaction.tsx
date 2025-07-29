@@ -1,23 +1,31 @@
-import { toArray } from "@cartridge/controller";
 import { LayoutContent } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
-import { ExecuteCtx } from "@/utils/connection";
-import { EstimateFee } from "starknet";
+import { ControllerError } from "@/utils/connection";
+import { Call, EstimateFee } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { CreateSession } from "../connect";
 import { executeCore } from "@/utils/connection/execute";
 import { useEffect, useState } from "react";
 
+interface ConfirmTransactionProps {
+  onComplete: (transaction_hash: string) => void;
+  onError?: (error: ControllerError) => void;
+  onClose?: () => void;
+  transactions: Call[];
+  executionError?: ControllerError;
+}
+
 export function ConfirmTransaction({
   onComplete,
-}: {
-  onComplete: (transaction_hash: string) => void;
-}) {
-  const { controller, context, origin, policies } = useConnection();
-  const ctx = context as ExecuteCtx;
+  onError,
+  onClose,
+  transactions,
+  executionError,
+}: ConfirmTransactionProps) {
+  const { controller, origin, policies } = useConnection();
   const account = controller;
-  const transactions = toArray(ctx.transactions);
+
   const [hasSession, setHasSession] = useState(false);
   const [skipSession, setSkipSession] = useState(false);
 
@@ -44,7 +52,7 @@ export function ConfirmTransaction({
         isUpdate
         policies={policies!}
         onConnect={async () => {
-          const transaction_hash = await executeCore(ctx.transactions);
+          const transaction_hash = await executeCore(transactions);
           onComplete(transaction_hash);
         }}
         onSkip={() => setSkipSession(true)}
@@ -56,10 +64,11 @@ export function ConfirmTransaction({
     <ExecutionContainer
       title={`Review Transaction${transactions.length > 1 ? "s" : ""}`}
       description={origin}
-      executionError={ctx.error}
+      executionError={executionError}
       transactions={transactions}
-      feeEstimate={ctx.feeEstimate}
       onSubmit={onSubmit}
+      onError={onError}
+      onClose={onClose}
     >
       <LayoutContent>
         <TransactionSummary calls={transactions} />
