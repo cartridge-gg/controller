@@ -18,7 +18,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { useCollection } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
@@ -36,7 +36,7 @@ import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useExecute } from "@/hooks/execute";
-import { useNavigation } from "@/context/navigation";
+import { useNavigation } from "@/context/useNavigation";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
@@ -55,7 +55,8 @@ const EXPIRATIONS = [
 export function CollectionListing() {
   const { chainId, provider } = useMarketplace();
   const { parent, controller } = useConnection();
-  const { address: contractAddress, tokenId } = useParams();
+  const { address: contractAddress, tokenId } = useLocalSearchParams();
+
   const { tokens } = useTokens();
   const { execute } = useExecute();
   const [submitted, setSubmitted] = useState(false);
@@ -69,8 +70,8 @@ export function CollectionListing() {
 
   const { navigate } = useNavigation();
 
-  const [searchParams] = useSearchParams();
-  const paramsTokenIds = searchParams.getAll("tokenIds");
+  const searchParams = useLocalSearchParams();
+  const paramsTokenIds = (searchParams.tokenIds as string)?.split(",") || [];
   const tokenIds = useMemo(() => {
     if (!tokenId) return [...paramsTokenIds];
     return [tokenId, ...paramsTokenIds];

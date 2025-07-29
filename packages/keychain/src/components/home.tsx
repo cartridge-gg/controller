@@ -11,12 +11,12 @@ import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
-import { Outlet, useLocation } from "react-router-dom";
-import { Authenticate } from "./authenticate";
+import { Slot, usePathname } from "expo-router";
 
 export function Home() {
-  const { context, controller, policies, isConfigLoading } = useConnection();
-  const { pathname } = useLocation();
+  const { context, controller, policies, origin, isConfigLoading } =
+    useConnection();
+  const pathname = usePathname();
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
@@ -29,9 +29,19 @@ export function Home() {
     }
   }, [context?.type, posthog]);
 
-  // Popup flow authentication
-  if (pathname.startsWith("/authenticate")) {
-    return <Authenticate />;
+  // Allow direct access for /, /slot, /success, and /failure routes
+  const isBasePath = pathname === "/";
+  const isSlotPath = pathname.startsWith("/slot");
+  const isSuccessPath = pathname === "/success";
+  const isFailurePath = pathname === "/failure";
+  const isAllowedPath =
+    isBasePath || isSlotPath || isSuccessPath || isFailurePath;
+
+  if (
+    (window.self === window.top && !isAllowedPath) ||
+    (!origin && !isAllowedPath)
+  ) {
+    return <>Access Denied</>;
   }
 
   // No controller, send to login
@@ -132,7 +142,7 @@ export function Home() {
             );
           }
           default:
-            return <Outlet />;
+            return <Slot />;
         }
       })()}
     </Layout>

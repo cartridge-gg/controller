@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Controller from "@/utils/controller";
-import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/ui/utils/api/cartridge";
 import { Purchase } from "../purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
@@ -19,6 +18,7 @@ import {
 import { Team, Teams } from "./teams";
 import { formatBalance } from "@/hooks/tokens";
 import { useNavigation } from "@/context/navigation";
+import { usePathname } from "expo-router";
 
 enum FundState {
   SELECT_TEAM,
@@ -28,7 +28,7 @@ enum FundState {
 
 export function Fund() {
   const { navigate } = useNavigation();
-  const { pathname } = useLocation();
+  const pathname = usePathname();
   const [state, setState] = useState<FundState>(FundState.SELECT_TEAM);
   const [selectedTeam, setSelectedTeam] = useState<Team | undefined>();
 
@@ -39,7 +39,7 @@ export function Fund() {
   } = useTeamsQuery(undefined, { refetchInterval: 1000 });
 
   useEffect(() => {
-    if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
+    if (!Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!)) {
       navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
         replace: true,
       });

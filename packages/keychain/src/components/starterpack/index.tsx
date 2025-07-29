@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import {
   MintAllowance,
   StarterItemData,
@@ -30,7 +30,7 @@ export function StarterPack({ starterpackId }: { starterpackId: string }) {
 }
 
 export function StarterPackWrapper() {
-  const { starterpackId } = useParams();
+  const { starterpackId } = useLocalSearchParams<{ starterpackId: string }>();
 
   if (!starterpackId) {
     return <div>No starterpack ID</div>;

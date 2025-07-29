@@ -9,7 +9,7 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageLoading } from "@/components/Loading";
-import { useSearchParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { CheckIcon, HeaderInner } from "@cartridge/ui";
 import { Failure } from "./failure";
 
@@ -33,13 +33,13 @@ type SessionQueryParams = {
     This page is for registering session
 */
 export function Session() {
-  const [searchParams] = useSearchParams();
+  const searchParams = useLocalSearchParams();
   const queries: SessionQueryParams = useMemo(
     () => ({
-      public_key: searchParams.get("public_key")!,
-      callback_uri: searchParams.get("callback_uri"),
-      redirect_uri: searchParams.get("redirect_uri"),
-      redirect_query_name: searchParams.get("redirect_query_name"),
+      public_key: searchParams.public_key as string,
+      callback_uri: searchParams.callback_uri as string | null,
+      redirect_uri: searchParams.redirect_uri as string | null,
+      redirect_query_name: searchParams.redirect_query_name as string | null,
     }),
     [searchParams],
   );

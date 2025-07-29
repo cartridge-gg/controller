@@ -3,36 +3,19 @@ export { Consent } from "./consent";
 import { PageLoading } from "@/components/Loading";
 import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useEffect } from "react";
-import {
-  Navigate,
-  Outlet,
-  useLocation,
-  useSearchParams,
-} from "react-router-dom";
 import { CheckIcon, HeaderInner, LayoutContent } from "@cartridge/ui";
 import { useNavigation } from "@/context/navigation";
+import { useLocalSearchParams } from "expo-router";
 import { useConnection } from "@/hooks/connection";
 
+// This component is now simplified since we use file-based routing
 export function Slot() {
-  const { pathname } = useLocation();
-  switch (pathname) {
-    case "/slot/auth":
-      return <Navigate to="/slot" replace />;
-    case "/slot/auth/success":
-      return <Success />;
-    case "/slot/auth/failure":
-      return <Navigate to="/failure" replace />;
-    case "/slot/consent":
-    case "/slot/fund":
-      return <Outlet />;
-    default:
-      return <Auth />;
-  }
+  return <Auth />;
 }
 
 function Auth() {
   const { navigate } = useNavigation();
-  const [searchParams] = useSearchParams();
+  const searchParams = useLocalSearchParams();
   const { logout, controller } = useConnection();
   const { data: user, isFetched } = useMeQuery(undefined, {
     retry: false,
@@ -41,8 +24,8 @@ function Auth() {
 
   useEffect(() => {
     if (user && controller) {
-      const returnTo = searchParams.get("returnTo");
-      const otherParams = Array.from(searchParams.entries())
+      const returnTo = searchParams.returnTo as string;
+      const otherParams = Object.entries(searchParams)
         .filter(([key]) => key !== "returnTo")
         .reduce(
           (prev, [key, val], i) =>

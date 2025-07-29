@@ -1,12 +1,12 @@
 import React, {
   createContext,
-  useContext,
   useCallback,
   useState,
   useEffect,
   useRef,
+  useContext,
 } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useRouter, usePathname, useLocalSearchParams } from "expo-router";
 
 // Type for navigation entry
 interface NavigationEntry {
@@ -30,17 +30,18 @@ interface NavigationContextType {
   history: NavigationEntry[];
 }
 
-const NavigationContext = createContext<NavigationContextType | undefined>(
-  undefined,
-);
+export const NavigationContext = createContext<
+  NavigationContextType | undefined
+>(undefined);
 
 export function NavigationProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useLocalSearchParams();
 
   // Navigation stack and current position
   const [navigationStack, setNavigationStack] = useState<NavigationEntry[]>([]);
@@ -51,8 +52,13 @@ export function NavigationProvider({
 
   // Get full path including search params
   const getFullPath = useCallback(() => {
-    return location.pathname + location.search;
-  }, [location.pathname, location.search]);
+    const searchString =
+      Object.keys(searchParams).length > 0
+        ? "?" +
+          new URLSearchParams(searchParams as Record<string, string>).toString()
+        : "";
+    return pathname + searchString;
+  }, [pathname, searchParams]);
 
   // Navigate to root and clear navigation state
   const navigateToRoot = useCallback(() => {
@@ -66,8 +72,8 @@ export function NavigationProvider({
     setCurrentIndex(0);
     lastTrackedPath.current = "/";
 
-    navigate("/", { replace: true });
-  }, [navigate]);
+    router.replace("/");
+  }, [router]);
 
   // Initialize with current location
   useEffect(() => {
@@ -75,7 +81,7 @@ export function NavigationProvider({
       const currentPath = getFullPath();
       const initialEntry: NavigationEntry = {
         path: currentPath,
-        state: location.state,
+        state: {}, // expo-router doesn't have location.state like react-router
         timestamp: Date.now(),
       };
       setNavigationStack([initialEntry]);
@@ -83,7 +89,7 @@ export function NavigationProvider({
       lastTrackedPath.current = currentPath;
       isInitialized.current = true;
     }
-  }, [getFullPath, location.state]);
+  }, [getFullPath]);
 
   // Track location changes - fixed to avoid infinite loop
   useEffect(() => {
@@ -91,7 +97,6 @@ export function NavigationProvider({
     if (!isInitialized.current) return;
 
     const currentPath = getFullPath();
-    const currentPathname = location.pathname;
 
     // Skip if this is an internal navigation (back/forward)
     if (isInternalNavigation.current) {
@@ -102,7 +107,7 @@ export function NavigationProvider({
 
     // Skip if the pathname hasn't actually changed (ignore search params for stack entries)
     const previousPathname = lastTrackedPath.current.split("?")[0];
-    if (currentPathname === previousPathname) {
+    if (pathname === previousPathname) {
       // Update the lastTrackedPath to include new search params but don't add to stack
       lastTrackedPath.current = currentPath;
       return;
@@ -110,7 +115,7 @@ export function NavigationProvider({
 
     const newEntry: NavigationEntry = {
       path: currentPath,
-      state: location.state,
+      state: {}, // expo-router doesn't have location.state like react-router
       timestamp: Date.now(),
     };
 
@@ -137,7 +142,7 @@ export function NavigationProvider({
     });
 
     lastTrackedPath.current = currentPath;
-  }, [getFullPath, location.state, location.pathname]);
+  }, [getFullPath, pathname]);
 
   // Handle controller navigation events
   useEffect(() => {
@@ -163,9 +168,9 @@ export function NavigationProvider({
         lastTrackedPath.current = path;
         isInternalNavigation.current = true; // Prevent double tracking
 
-        navigate(path, { replace: true, state });
+        router.replace(path);
       } else {
-        navigate(path, { state });
+        router.push(path);
       }
     };
 
@@ -177,7 +182,7 @@ export function NavigationProvider({
         handleControllerNavigate,
       );
     };
-  }, [navigate]);
+  }, [router]);
 
   // Navigate with tracking
   const navigateWithTracking = useCallback(
@@ -191,7 +196,7 @@ export function NavigationProvider({
           setCurrentIndex(newIndex);
           const entry = navigationStack[newIndex];
           lastTrackedPath.current = entry.path;
-          navigate(entry.path, { state: entry.state });
+          router.push(entry.path);
         }
       } else {
         // For replace navigation, update current entry
@@ -210,10 +215,14 @@ export function NavigationProvider({
           lastTrackedPath.current = to;
         }
 
-        navigate(to, options);
+        if (options?.replace) {
+          router.replace(to);
+        } else {
+          router.push(to);
+        }
       }
     },
-    [navigate, currentIndex, navigationStack],
+    [router, currentIndex, navigationStack],
   );
 
   // Go back helper

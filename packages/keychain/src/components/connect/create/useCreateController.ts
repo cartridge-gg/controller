@@ -108,7 +108,7 @@ export function useCreateController({
             {
               signer: {
                 webauthn: {
-                  rpId: import.meta.env.VITE_RP_ID!,
+                  rpId: process.env.EXPO_PUBLIC_RP_ID!,
                   credentialId,
                   publicKey,
                 },
@@ -337,7 +337,7 @@ export function useCreateController({
               webauthns: webauthnSigners.map((signer) => {
                 const webauthn = signer.metadata as WebauthnCredentials;
                 return {
-                  rpId: import.meta.env.VITE_RP_ID!,
+                  rpId: process.env.EXPO_PUBLIC_RP_ID!,
                   credentialId: webauthn.webauthn?.[0]?.id ?? "",
                   publicKey: webauthn.webauthn?.[0]?.publicKey ?? "",
                 };

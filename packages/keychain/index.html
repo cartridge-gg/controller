@@ -36,6 +36,13 @@
       content="{CartridgeTheme.semanticTokens.colors.brand}"
     />
     <script src="/noflash.js"></script>
+    <script type="module">
+      import init, { CartridgeAccount } from "./pkg-controller/account_wasm.js";
+      window.CartridgeAccount = CartridgeAccount;
+      init().then(() => {
+        console.log("Controller WASM loaded");
+      });
+    </script>
   </head>
   <body class="h-dvh bg-background text-foreground overflow-y-auto">
     <div id="root"></div>

@@ -13,7 +13,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import {
   Call,
   TransactionExecutionStatus,
@@ -26,13 +26,14 @@ import { useData } from "@/hooks/data";
 import { useConnection } from "@/hooks/connection";
 
 export function SendToken() {
-  const { address: tokenAddress } = useParams<{ address: string }>();
+  const { address: tokenAddress } = useLocalSearchParams<{ address: string }>();
+  const tokenAddressStr = tokenAddress as string;
   const { controller } = useConnection();
   const { execute } = useExecute();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
   const { token, status: tokenFetching } = useToken({
-    tokenAddress: tokenAddress!,
+    tokenAddress: tokenAddressStr!,
   });
   const { tokens } = useTokens();
   const userSelectedToken = useRef(false);

@@ -11,7 +11,7 @@ import { useAccount, useUsernames } from "@/hooks/account";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { BigNumberish, getChecksumAddress } from "starknet";
-import { useLocation } from "react-router-dom";
+import { usePathname } from "expo-router";
 import { useExecute } from "@/hooks/execute";
 import { toast } from "sonner";
 import { useController } from "@/hooks/controller";
@@ -29,10 +29,10 @@ export function Socials() {
   } = useArcade();
   const [loading, setLoading] = useState<BigNumberish | null>(null);
   const { navigate } = useNavigation();
-  const location = useLocation();
+  const pathname = usePathname();
 
   // Extract the last segment of the path
-  const pathSegments = location.pathname.split("/").filter(Boolean);
+  const pathSegments = pathname.split("/").filter(Boolean);
   const lastSegment = pathSegments[pathSegments.length - 1];
   const tabFromPath = ["followers", "following"].includes(lastSegment)
     ? lastSegment

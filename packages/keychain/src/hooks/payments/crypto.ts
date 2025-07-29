@@ -34,7 +34,7 @@ export const useCryptoPayment = () => {
 
   const isMainnet = useMemo(() => {
     if (
-      import.meta.env.PROD &&
+      !__DEV__ &&
       controller?.chainId() === constants.StarknetChainId.SN_MAIN
     ) {
       return true;
@@ -185,9 +185,10 @@ export const useCryptoPayment = () => {
     isMainnet: boolean = false,
   ) {
     const rpcUrl = isMainnet
-      ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL ||
+      ? process.env.EXPO_PUBLIC_SOLANA_MAINNET_RPC_URL ||
         clusterApiUrl("mainnet-beta")
-      : import.meta.env.VITE_SOLANA_DEVNET_RPC_URL || clusterApiUrl("devnet");
+      : process.env.EXPO_PUBLIC_SOLANA_DEVNET_RPC_URL ||
+        clusterApiUrl("devnet");
     const connection = new Connection(rpcUrl);
     const senderPublicKey = new PublicKey(walletAddress);
     const recipientPublicKey = new PublicKey(depositAddress);
