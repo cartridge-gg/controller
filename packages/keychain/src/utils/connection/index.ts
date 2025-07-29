@@ -1,4 +1,5 @@
 export * from "./types";
+export { createManualExecuteUrl } from "./execute";
 
 import Controller from "@/utils/controller";
 import { AuthOptions } from "@cartridge/controller";
@@ -20,11 +21,16 @@ export function connectToController<ParentMethods extends object>({
   setContext,
   setController,
   setConfigSignupOptions,
+  navigate,
 }: {
   setRpcUrl: (url: string) => void;
   setContext: (ctx: ConnectionCtx | undefined) => void;
   setController: (controller?: Controller) => void;
   setConfigSignupOptions: (options: AuthOptions | undefined) => void;
+  navigate: (
+    to: string | number,
+    options?: { replace?: boolean; state?: unknown },
+  ) => void;
 }) {
   return connectToParent<ParentMethods>({
     methods: {
@@ -36,7 +42,7 @@ export function connectToController<ParentMethods extends object>({
         }),
       ),
       deploy: () => deployFactory(setContext),
-      execute: () => execute({ setContext }),
+      execute: () => execute({ navigate }),
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),
       signMessage: () => signMessageFactory(setContext),

@@ -19,7 +19,6 @@ import { useNavigation } from "@/context/navigation";
 
 interface ExecutionContainerProps {
   transactions: Call[];
-  feeEstimate?: EstimateFee;
   executionError?: ControllerError;
   onSubmit: (maxFee?: EstimateFee) => Promise<void>;
   onDeploy?: () => void;
@@ -35,7 +34,6 @@ export function ExecutionContainer({
   description,
   icon,
   transactions,
-  feeEstimate,
   executionError,
   onSubmit,
   onDeploy,
@@ -46,7 +44,7 @@ export function ExecutionContainer({
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
   const { controller } = useConnection();
-  const [maxFee, setMaxFee] = useState<EstimateFee | undefined>(feeEstimate);
+  const [maxFee, setMaxFee] = useState<EstimateFee | undefined>();
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
   );
@@ -89,23 +87,20 @@ export function ExecutionContainer({
       return;
     }
 
-    // Only estimate if transactions or details have changed
-    if (
-      isEqual(prevTransactionsRef.current.transactions, transactions) &&
-      isEqual(prevTransactionsRef.current.feeEstimate, feeEstimate)
-    ) {
+    // Only estimate if transactions have changed
+    if (isEqual(prevTransactionsRef.current.transactions, transactions)) {
       return;
     }
 
     // Update ref with current values
-    prevTransactionsRef.current = { transactions, feeEstimate };
+    prevTransactionsRef.current = { transactions, feeEstimate: maxFee };
 
     const estimateFeesAsync = async () => {
       await estimateFees(transactions);
     };
 
     estimateFeesAsync();
-  }, [transactions, estimateFees]);
+  }, [transactions, estimateFees, maxFee]);
 
   useEffect(() => {
     setCtrlError(executionError);

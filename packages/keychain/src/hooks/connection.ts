@@ -5,6 +5,7 @@ import {
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
 import { ConnectionCtx, connectToController } from "@/utils/connection";
+import Controller from "@/utils/controller";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -41,6 +42,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SemVer } from "semver";
 import { getChecksumAddress, RpcProvider, shortString } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
+import { useNavigation } from "@/context/navigation";
 
 const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
@@ -156,6 +158,7 @@ function getConfigChainPolicies(
 }
 
 export function useConnectionValue() {
+  const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>(window.location.origin);
@@ -203,25 +206,53 @@ export function useConnectionValue() {
       setRpcUrl(rpcUrl);
     }
 
-    return { theme, preset, policies, version, project, namespace, tokens };
+    return {
+      theme,
+      preset,
+      policies,
+      version,
+      project,
+      namespace,
+      tokens,
+    };
   }, []);
 
-  // Fetch chain ID from RPC provider when rpcUrl changes
+  // Fetch chain ID from RPC provider and switch controller if needed
   useEffect(() => {
-    const fetchChainId = async () => {
+    if (!rpcUrl) return;
+
+    const fetchChainIdAndSwitchController = async () => {
       try {
         const provider = new RpcProvider({ nodeUrl: rpcUrl });
-        const id = await provider.getChainId();
-        setChainId(id);
+        const newChainId = await provider.getChainId();
+        setChainId(newChainId);
+
+        // If we have an existing controller and the rpcUrl/chainId differs, create a new controller
+        if (
+          controller &&
+          (controller.rpcUrl() !== rpcUrl ||
+            controller.chainId() !== newChainId)
+        ) {
+          const nextController = new Controller({
+            appId: controller.appId(),
+            classHash: controller.classHash(),
+            chainId: newChainId,
+            rpcUrl: rpcUrl,
+            address: controller.address(),
+            username: controller.username(),
+            owner: controller.owner(),
+          });
+
+          setController(nextController);
+          window.controller = nextController;
+        }
       } catch (e) {
         console.error("Failed to fetch chain ID:", e);
       }
     };
 
-    if (rpcUrl) {
-      fetchChainId();
-    }
-  }, [rpcUrl]);
+    fetchChainIdAndSwitchController();
+  }, [rpcUrl, controller, setController]);
 
   useEffect(() => {
     if (
@@ -400,6 +431,7 @@ export function useConnectionValue() {
         setContext,
         setController,
         setConfigSignupOptions,
+        navigate,
       });
 
       connection.promise
