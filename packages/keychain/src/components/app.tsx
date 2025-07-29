@@ -31,7 +31,7 @@ import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
 import { PurchaseCredits } from "./purchasenew/credits";
-import { PurchaseStarterpack } from "./purchasenew/starterpack";
+import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 
 export function App() {
   return (
@@ -43,7 +43,10 @@ export function App() {
         <Route path="/settings/add-signer" element={<AddSignerRoute />} />
         <Route path="/purchase" element={<Outlet />}>
           <Route path="credits" element={<PurchaseCredits />} />
-          <Route path="starterpack/:starterpackId" element={<PurchaseStarterpack />} />
+          <Route
+            path="starterpack/:starterpackId"
+            element={<PurchaseStarterpack />}
+          />
           <Route path="method" element={<></>}>
             <Route path="controller" element={<></>} />
             <Route path="crypto" element={<></>} />
@@ -101,7 +104,7 @@ export function App() {
         <Route path="pending" element={<Pending />} />
         <Route
           path="starter-pack/:starterpackId"
-          element={<StarterPackWrapper />}
+          element={<PurchaseStarterpack />}
         />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
