@@ -1,4 +1,4 @@
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, usePathname, useLocalSearchParams } from "expo-router";
 import {
   LayoutBottomTabs,
   ChestIcon,
@@ -10,8 +10,8 @@ import {
 import { useMemo } from "react";
 
 export function LayoutBottomNav() {
-  const { pathname } = useLocation();
-  const { username, project } = useParams<{
+  const pathname = usePathname();
+  const { username, project } = useLocalSearchParams<{
     username: string;
     project?: string;
   }>();
@@ -39,7 +39,7 @@ export function LayoutBottomNav() {
     <LayoutBottomTabs>
       <BottomTab status={active === "inventory" ? "active" : undefined}>
         <Link
-          to={`${basePath}/inventory`}
+          href={`${basePath}/inventory`}
           className="h-full w-full flex items-center justify-center"
         >
           <ChestIcon variant="solid" size="lg" />
@@ -47,7 +47,7 @@ export function LayoutBottomNav() {
       </BottomTab>
       <BottomTab status={active === "achievements" ? "active" : undefined}>
         <Link
-          to={`${basePath}/achievements`}
+          href={`${basePath}/achievements`}
           className="h-full w-full flex items-center justify-center"
         >
           <TrophyIcon size="lg" variant="solid" />
@@ -55,7 +55,7 @@ export function LayoutBottomNav() {
       </BottomTab>
       <BottomTab status={active === "leaderboard" ? "active" : undefined}>
         <Link
-          to={`${basePath}/leaderboard`}
+          href={`${basePath}/leaderboard`}
           className="h-full w-full flex items-center justify-center"
         >
           <LeaderboardIcon size="lg" variant="solid" />
@@ -63,7 +63,7 @@ export function LayoutBottomNav() {
       </BottomTab>
       <BottomTab status={active === "activity" ? "active" : undefined}>
         <Link
-          to={`${basePath}/activity`}
+          href={`${basePath}/activity`}
           className="h-full w-full flex items-center justify-center"
         >
           <PulseIcon size="lg" variant="solid" />

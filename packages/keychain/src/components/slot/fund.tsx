@@ -40,7 +40,9 @@ export function Fund() {
 
   useEffect(() => {
     if (!Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!)) {
-      navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, { replace: true });
+      navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
+        replace: true,
+      });
     }
 
     if (error) {

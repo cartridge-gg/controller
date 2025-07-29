@@ -58,8 +58,9 @@ export function Consent() {
     if (!allAccepted) return;
 
     const redirect_uri = encodeURIComponent(callback_uri);
-    const url = `${process.env.EXPO_PUBLIC_CARTRIDGE_API_URL
-      }/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
+    const url = `${
+      process.env.EXPO_PUBLIC_CARTRIDGE_API_URL
+    }/oauth2/auth?client_id=cartridge&redirect_uri=${redirect_uri}`;
 
     window.location.href = url;
   }, [callback_uri, allAccepted]);
@@ -67,9 +68,10 @@ export function Consent() {
   useEffect(() => {
     if (!Controller.fromStore(process.env.EXPO_PUBLIC_ORIGIN!)) {
       navigate(
-        `/slot?returnTo=${encodeURIComponent(pathname)}${callback_uri
-          ? `&callback_uri=${encodeURIComponent(callback_uri)}`
-          : ""
+        `/slot?returnTo=${encodeURIComponent(pathname)}${
+          callback_uri
+            ? `&callback_uri=${encodeURIComponent(callback_uri)}`
+            : ""
         }`,
         { replace: true },
       );

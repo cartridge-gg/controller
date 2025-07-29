@@ -14,7 +14,7 @@ import { useConnection } from "@/hooks/connection";
 import { useData } from "@/hooks/data";
 import { useCallback, useMemo, useState } from "react";
 import { constants } from "starknet";
-import { Link } from "react-router-dom";
+import { Link } from "expo-router";
 
 const OFFSET = 100;
 
@@ -79,7 +79,7 @@ export function Activity() {
                       return (
                         <Link
                           key={`${index}-${props.key}`}
-                          to={to(props.transactionHash)}
+                          href={to(props.transactionHash)}
                           target="_blank"
                         >
                           <ActivityTokenCard
@@ -95,7 +95,7 @@ export function Activity() {
                       return (
                         <Link
                           key={`${index}-${props.key}`}
-                          to={to(props.transactionHash)}
+                          href={to(props.transactionHash)}
                           target="_blank"
                         >
                           <ActivityCollectibleCard
@@ -111,7 +111,7 @@ export function Activity() {
                       return (
                         <Link
                           key={`${index}-${props.key}`}
-                          to={to(props.transactionHash)}
+                          href={to(props.transactionHash)}
                           target="_blank"
                         >
                           <ActivityGameCard

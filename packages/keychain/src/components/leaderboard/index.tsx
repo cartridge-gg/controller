@@ -7,7 +7,7 @@ import {
 } from "@cartridge/ui";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { useData } from "@/hooks/data";
 import { useArcade } from "@/hooks/arcade";
 import { getChecksumAddress } from "starknet";
@@ -31,7 +31,8 @@ export function Leaderboard() {
 
   const { usernames } = useUsernames({ addresses });
 
-  const { address } = useParams<{ address: string }>();
+  const { address } = useLocalSearchParams<{ address: string }>();
+  const addressStr = address as string;
 
   const data = useMemo(() => {
     return players.map((player) => {
@@ -43,15 +44,15 @@ export function Leaderboard() {
               BigInt(user.address || "0x0") === BigInt(player.address),
           )?.username || player.address.slice(0, 9),
         points: player.earnings,
-        highlight: player.address === (address || self),
+        highlight: player.address === (addressStr || self),
         following: followings.includes(player.address),
       };
     });
-  }, [players, address, self, usernames, followings]);
+  }, [players, addressStr, self, usernames, followings]);
 
   useEffect(() => {
-    setAccountAddress(address || self || "");
-  }, [address, self, setAccountAddress]);
+    setAccountAddress(addressStr || self || "");
+  }, [addressStr, self, setAccountAddress]);
 
   return status === "loading" ? (
     <LoadingState />

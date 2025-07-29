@@ -1,10 +1,4 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, Slot, usePathname, useLocalSearchParams } from "expo-router";
 import { LayoutContent, CollectibleCard, Skeleton, Empty } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
@@ -18,7 +12,8 @@ import { EditionModel, GameModel } from "@cartridge/arcade";
 
 export function Collectible() {
   const { games, editions } = useArcade();
-  const { address } = useParams<{ address: string }>();
+  const { address } = useLocalSearchParams<{ address: string }>();
+  const addressStr = address as string;
   const { project, namespace } = useConnection();
   const theme = useControllerTheme();
 
@@ -32,14 +27,13 @@ export function Collectible() {
     return Object.values(games).find((game) => game.id === edition?.gameId);
   }, [games, edition]);
 
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
+  const pathname = usePathname();
   const { collectible, assets, status } = useCollectible({
-    contractAddress: address,
+    contractAddress: addressStr,
   });
 
-  if (address || location.pathname.includes("/send")) {
-    return <Outlet />;
+  if (addressStr || pathname.includes("/send")) {
+    return <Slot />;
   }
 
   return (
@@ -62,9 +56,7 @@ export function Collectible() {
               return (
                 <Link
                   className="w-full select-none"
-                  draggable={false}
-                  to={`token/${asset.tokenId}?${searchParams.toString()}`}
-                  state={location.state}
+                  href={`token/${asset.tokenId}`}
                   key={asset.tokenId}
                 >
                   <CollectibleCard

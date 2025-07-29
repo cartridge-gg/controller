@@ -1,10 +1,10 @@
 import React, {
   createContext,
-  useContext,
   useCallback,
   useState,
   useEffect,
   useRef,
+  useContext,
 } from "react";
 import { useRouter, usePathname, useLocalSearchParams } from "expo-router";
 
@@ -30,9 +30,9 @@ interface NavigationContextType {
   history: NavigationEntry[];
 }
 
-const NavigationContext = createContext<NavigationContextType | undefined>(
-  undefined,
-);
+export const NavigationContext = createContext<
+  NavigationContextType | undefined
+>(undefined);
 
 export function NavigationProvider({
   children,
@@ -52,9 +52,11 @@ export function NavigationProvider({
 
   // Get full path including search params
   const getFullPath = useCallback(() => {
-    const searchString = Object.keys(searchParams).length > 0
-      ? '?' + new URLSearchParams(searchParams as Record<string, string>).toString()
-      : '';
+    const searchString =
+      Object.keys(searchParams).length > 0
+        ? "?" +
+          new URLSearchParams(searchParams as Record<string, string>).toString()
+        : "";
     return pathname + searchString;
   }, [pathname, searchParams]);
 

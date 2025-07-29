@@ -11,7 +11,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { useNavigation } from "@/context/navigation";
 import {
   Call,
@@ -32,10 +32,17 @@ const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
 
 export function SendCollectible() {
-  const { address: contractAddress, tokenId } = useParams();
+  const {
+    address: contractAddress,
+    tokenId,
+    tokenIds: tokenIdsParam,
+  } = useLocalSearchParams<{
+    address: string;
+    tokenId: string;
+    tokenIds: string;
+  }>();
 
-  const [searchParams] = useSearchParams();
-  const paramsTokenIds = searchParams.getAll("tokenIds");
+  const paramsTokenIds = tokenIdsParam.split(",") || [];
 
   const { entrypoints } = useEntrypoints({
     address: contractAddress || "0x0",

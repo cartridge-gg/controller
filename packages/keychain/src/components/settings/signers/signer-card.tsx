@@ -1,6 +1,5 @@
 import { useController } from "@/hooks/controller";
 import { AUTH_METHODS_LABELS } from "@/utils/connection/constants";
-import { fetchApi, SocialProvider } from "@/wallets/social/turnkey_utils";
 import { AuthOption } from "@cartridge/controller";
 import {
   Button,
@@ -180,35 +179,4 @@ const getSignerIdentifyingInfo = async (
   }
 };
 
-export const getOauthProvider = async (
-  controllerUsername: string | undefined,
-  socialProvider: SocialProvider,
-) => {
-  try {
-    const getOauthProvidersResponse = await fetchApi<GetOauthProvidersResponse>(
-      "get-oauth-providers",
-      {
-        controllerUsername: controllerUsername,
-      },
-    );
-    return getOauthProvidersResponse.find(
-      (provider) => provider.providerName === socialProvider,
-    )?.subject;
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("status: 500")) {
-      return undefined;
-    }
-    console.error(error);
-    return undefined;
-  }
-};
-
-type GetOauthProvidersResponse = {
-  audience: string;
-  createdAt: { nanos: string; seconds: string };
-  issuer: string;
-  providerId: string;
-  providerName: string;
-  subject: string;
-  updatedAt: { nanos: string; seconds: string };
-}[];
+// Function moved to separate file to fix react-refresh/only-export-components

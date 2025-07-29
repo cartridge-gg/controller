@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useLocalSearchParams } from "expo-router";
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 import {
@@ -19,8 +19,8 @@ export type FundingProps = {
 export function Funding({ title, isSlot }: FundingProps) {
   const { controller } = useConnection();
   const { navigate } = useNavigation();
-  const [searchParams] = useSearchParams();
-  const returnTo = searchParams.get("returnTo");
+  const searchParams = useLocalSearchParams();
+  const returnTo = searchParams.returnTo as string;
 
   const balances: BalanceType[] = isSlot
     ? [BalanceType.CREDITS]
