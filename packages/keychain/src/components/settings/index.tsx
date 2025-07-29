@@ -49,6 +49,9 @@ const registeredAccounts: RegisteredAccount[] = [
 ];
 
 export function Settings() {
+  console.log("[Settings] Component rendering");
+  console.log("[Settings] Current pathname:", window.location.pathname);
+
   const { logout, controller, chainId } = useConnection();
   const { navigate } = useNavigation();
 

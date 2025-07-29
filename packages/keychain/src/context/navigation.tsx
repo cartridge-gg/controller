@@ -73,6 +73,7 @@ export function NavigationProvider({
   useEffect(() => {
     if (!isInitialized.current) {
       const currentPath = getFullPath();
+      console.log("[NavigationProvider] Initializing with path:", currentPath);
       const initialEntry: NavigationEntry = {
         path: currentPath,
         state: location.state,
@@ -141,6 +142,8 @@ export function NavigationProvider({
 
   // Handle controller navigation events
   useEffect(() => {
+    console.log("[NavigationProvider] Setting up controller-navigate listener");
+
     const handleControllerNavigate = (event: Event) => {
       const navEvent = event as CustomEvent<{
         path: string;
@@ -150,6 +153,13 @@ export function NavigationProvider({
       const { path, state, options } = navEvent.detail;
       const resetStack = options?.resetStack ?? true;
 
+      console.log("[NavigationProvider] Received controller-navigate event:", {
+        path,
+        resetStack,
+        currentPath: window.location.pathname,
+        navigateFn: typeof navigate,
+      });
+
       if (resetStack) {
         // For controller navigation, we typically want to start fresh
         const entry: NavigationEntry = {
@@ -158,20 +168,27 @@ export function NavigationProvider({
           timestamp: Date.now(),
         };
 
+        console.log(
+          "[NavigationProvider] Resetting stack and navigating to:",
+          path,
+        );
         setNavigationStack([entry]);
         setCurrentIndex(0);
         lastTrackedPath.current = path;
         isInternalNavigation.current = true; // Prevent double tracking
 
         navigate(path, { replace: true, state });
+        console.log("[NavigationProvider] Navigation called");
       } else {
         navigate(path, { state });
       }
     };
 
     window.addEventListener("controller-navigate", handleControllerNavigate);
+    console.log("[NavigationProvider] Listener attached");
 
     return () => {
+      console.log("[NavigationProvider] Removing controller-navigate listener");
       window.removeEventListener(
         "controller-navigate",
         handleControllerNavigate,
@@ -228,6 +245,7 @@ export function NavigationProvider({
 
   // Expose method to reset navigation (useful for external calls)
   useEffect(() => {
+    console.log("[NavigationProvider] Exposing __resetNavigation method");
     (window as Window & { __resetNavigation?: () => void }).__resetNavigation =
       () => {
         navigateToRoot();

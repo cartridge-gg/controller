@@ -26,6 +26,8 @@ export function connectToController<ParentMethods extends object>({
   setController: (controller?: Controller) => void;
   setConfigSignupOptions: (options: AuthOptions | undefined) => void;
 }) {
+  console.log("[connectToController] Setting up parent connection");
+
   return connectToParent<ParentMethods>({
     methods: {
       connect: normalize(
@@ -40,7 +42,10 @@ export function connectToController<ParentMethods extends object>({
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),
       signMessage: () => signMessageFactory(setContext),
-      openSettings: () => openSettingsFactory(),
+      openSettings: () => {
+        console.log("[connectToController] openSettings method called");
+        return openSettingsFactory();
+      },
       navigate: () => navigateFactory(),
       reset: () => () => {
         setContext(undefined);

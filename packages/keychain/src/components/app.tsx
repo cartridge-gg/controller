@@ -38,6 +38,10 @@ import { useNavigation } from "@/context/navigation";
 
 export function App() {
   const { navigate } = useNavigation();
+  const location = useLocation();
+
+  console.log("[App] Rendering with location:", location.pathname);
+  console.log("[App] Routes mounted:", true);
 
   return (
     <Routes>

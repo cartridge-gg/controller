@@ -18,6 +18,9 @@ export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
   const { pathname } = useLocation();
 
+  console.log("[Home] Rendering with pathname:", pathname);
+  console.log("[Home] Controller exists:", !!controller);
+
   const upgrade = useUpgrade();
   const posthog = usePostHog();
 

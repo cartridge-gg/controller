@@ -14,8 +14,16 @@ declare global {
   }
 }
 
+console.log("[Main] Starting app initialization");
+console.log("[Main] Initial pathname:", window.location.pathname);
+console.log("[Main] Initial href:", window.location.href);
+
 // Initialize controller before React rendering
 window.controller = Controller.fromStore(import.meta.env.VITE_ORIGIN!);
+console.log("[Main] Controller initialized");
+
+const root = document.getElementById("root");
+console.log("[Main] Root element found:", !!root);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -29,3 +37,5 @@ createRoot(document.getElementById("root")!).render(
     </BrowserRouter>
   </StrictMode>,
 );
+
+console.log("[Main] React app mounted");
