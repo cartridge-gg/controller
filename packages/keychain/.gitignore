@@ -26,3 +26,4 @@ stats.html
 .vercel
 
 storybook-static/
+.expo/
