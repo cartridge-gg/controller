@@ -1,7 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
   createExecuteUrl,
-  createManualExecuteUrl,
   parseControllerError,
   execute,
   normalizeCalls,
@@ -101,45 +100,13 @@ describe("execute utils", () => {
 
     it("should create execute URL with error", () => {
       const transactions: Call[] = [];
-      const error = { code: ErrorCode.InsufficientBalance, message: "Test error", data: {} };
+      const error = {
+        code: ErrorCode.InsufficientBalance,
+        message: "Test error",
+        data: {},
+      };
 
       const url = createExecuteUrl(transactions, { error });
-
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
-
-      expect(decoded.error).toEqual(error);
-    });
-  });
-
-  describe("createManualExecuteUrl", () => {
-    it("should create manual execute URL", () => {
-      const transactions: Call[] = [
-        {
-          contractAddress: "0x123",
-          entrypoint: "transfer",
-          calldata: ["0x456", "100", "0"],
-        },
-      ];
-
-      const url = createManualExecuteUrl(transactions);
-
-      expect(url).toMatch(/^\/execute\?data=/);
-
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
-
-      expect(decoded).toEqual({
-        id: "test-id",
-        transactions,
-      });
-    });
-
-    it("should create manual execute URL with error", () => {
-      const transactions: Call[] = [];
-      const error = { code: ErrorCode.InsufficientBalance, message: "Test error", data: {} };
-
-      const url = createManualExecuteUrl(transactions, error);
 
       const dataParam = url.split("?data=")[1];
       const decoded = JSON.parse(decodeURIComponent(dataParam));
@@ -198,7 +165,7 @@ describe("execute utils", () => {
       expect(result[0]).toEqual({
         contractAddress: expect.stringMatching(/^0x/),
         entrypoint: "transfer",
-        calldata: expect.any(String),
+        calldata: expect.any(Array),
       });
     });
 

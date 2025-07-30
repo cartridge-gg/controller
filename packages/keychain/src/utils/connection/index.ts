@@ -1,5 +1,4 @@
 export * from "./types";
-export { createManualExecuteUrl } from "./execute";
 
 import Controller from "@/utils/controller";
 import { AuthOptions } from "@cartridge/controller";
