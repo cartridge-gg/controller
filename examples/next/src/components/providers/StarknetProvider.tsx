@@ -182,9 +182,15 @@ const controller = new ControllerConnector({
   chains: controllerConnectorChains,
   defaultChainId: constants.StarknetChainId.SN_MAIN,
   url: keychainUrl,
-  slot: "pistols-mainnet",
-  namespace: "pistols",
-  preset: "pistols",
+  // slot: "arcade-dopewars",
+  // namespace: "dopewars",
+  // preset: "dope-wars",
+  // slot: "pistols-mainnet",
+  // namespace: "pistols",
+  // preset: "pistols",
+  slot: "arcade-briq",
+  namespace: "MARKETPLACE",
+  preset: "dope-wars",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,

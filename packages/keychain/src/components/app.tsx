@@ -222,6 +222,14 @@ export function App() {
             path="slot/:project/inventory/collectible/:address/token/:tokenId/send"
             element={<SendCollectible />}
           />
+          <Route
+            path="slot/:project/inventory/collectible/:address/token/:tokenId/list"
+            element={<CollectibleListing />}
+          />
+          <Route
+            path="slot/:project/inventory/collectible/:address/token/:tokenId/purchase"
+            element={<CollectiblePurchase />}
+          />
           <Route path="slot/:project/achievements" element={<Achievements />} />
           <Route
             path="slot/:project/achievements/:address"

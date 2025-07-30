@@ -129,9 +129,9 @@ export function CollectibleListing() {
       return undefined;
     const value = selected.balance.value;
     const max = selected.balance.amount;
-    const total = (value * price) / max;
+    const total = (value * (split ? price : quantity * price)) / max;
     return `~$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-  }, [selected, price]);
+  }, [selected, price, split, quantity]);
 
   const listingData = useMemo(() => {
     if (!asset || !collectible || !selected || !price)
@@ -148,7 +148,7 @@ export function CollectibleListing() {
     const currency = {
       name: selected.metadata.symbol,
       image: selected.metadata.image || "",
-      price: price,
+      price: split ? price : quantity * price,
       value: conversion || "",
     };
     return { assets: tokens, currency };
@@ -199,7 +199,9 @@ export function CollectibleListing() {
       const marketplaceAddress: string = provider.manifest.contracts.find(
         (c: { tag: string }) => c.tag?.includes("Marketplace"),
       )?.address;
-      const amount = BigInt(price * 10 ** selected.metadata.decimals);
+      const amount = BigInt(
+        (split ? 1 : quantity) * price * 10 ** selected.metadata.decimals,
+      );
 
       // Commented out calls for now
       const calls: AllowArray<Call> = [

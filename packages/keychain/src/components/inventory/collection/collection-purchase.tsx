@@ -143,7 +143,7 @@ export function CollectionPurchase() {
     return tokenOrders
       .map((order) => {
         const asset = assets.find(
-          (asset) => BigInt(asset.token_id) === BigInt(order.tokenId),
+          (asset) => BigInt(asset.token_id ?? "0x0") === BigInt(order.tokenId),
         );
         if (!asset) return;
         const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
@@ -396,7 +396,7 @@ const Order = ({
   price: number;
   token: Token;
   entrypoints: string[];
-  tokenId: string;
+  tokenId?: string;
   addRoyalties: (orderId: number, royaltyFee: number) => void;
 }) => {
   const { controller } = useConnection();

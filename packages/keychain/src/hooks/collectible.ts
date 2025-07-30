@@ -113,7 +113,7 @@ export function useCollectible({
   const filteredAssets = useMemo(() => {
     if (!tokenIds.length) return Object.values(assets);
     const filtered = Object.values(assets).filter((a) =>
-      tokenIds.includes(a.tokenId),
+      tokenIds.map((t) => BigInt(t)).includes(BigInt(a.tokenId)),
     );
 
     return filtered;

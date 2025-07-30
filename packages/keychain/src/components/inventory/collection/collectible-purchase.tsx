@@ -35,11 +35,7 @@ import {
 } from "starknet";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  useCollection,
-  useToriiCollection,
-  useToriiCollections,
-} from "@/hooks/collection";
+import { useToriiCollection, useToriiCollections } from "@/hooks/collection";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useTokens } from "@/hooks/token";
@@ -47,13 +43,19 @@ import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useExecute } from "@/hooks/execute";
 import { useNavigation } from "@/context/navigation";
+import { useCollectible } from "@/hooks/collectible";
+import {
+  CLIENT_FEE_NUMERATOR,
+  CLIENT_FEE_DENOMINATOR,
+  CLIENT_FEE_RECEIVER,
+} from "@/constants";
 
 const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectiblePurchase() {
   const { closeModal } = useUI();
-  const { address: contractAddress, tokenId, project } = useParams();
-  const { chainId, parent, controller } = useConnection();
+  const { address: contractAddress, tokenId } = useParams();
+  const { chainId, parent, controller, project } = useConnection();
   const { tokens } = useTokens();
   const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
@@ -78,7 +80,7 @@ export function CollectiblePurchase() {
     );
   }, [tokenOrders]);
 
-  const { refetch } = useCollection({
+  const { refetch } = useCollectible({
     contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
   });
@@ -120,6 +122,9 @@ export function CollectiblePurchase() {
     );
     const formattedMarketplaceFee =
       marketplaceFee / Math.pow(10, token?.metadata.decimals || 0);
+    const formattedClientFee =
+      (price * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR)) /
+      Math.pow(10, token?.metadata.decimals || 0);
     const formattedRoyaltyFee =
       royaltyFee / Math.pow(10, token?.metadata.decimals || 0);
     const total = formattedMarketplaceFee + formattedRoyaltyFee;
@@ -128,6 +133,11 @@ export function CollectiblePurchase() {
         label: "Marketplace Fee",
         amount: `${formattedMarketplaceFee.toFixed(2)} ${token?.metadata.symbol}`,
         percentage: `${(price ? (marketplaceFee / price) * 100 : 0).toFixed(2)}%`,
+      },
+      {
+        label: "Client Fee",
+        amount: `${formattedClientFee.toFixed(2)} ${token?.metadata.symbol}`,
+        percentage: `${((CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR) * 100).toFixed(2)}%`,
       },
       {
         label: "Creator Royalties",
@@ -143,7 +153,7 @@ export function CollectiblePurchase() {
     return tokenOrders
       .map((order) => {
         const asset = assets.find(
-          (asset) => BigInt(asset.token_id) === BigInt(order.tokenId),
+          (asset) => BigInt(asset.token_id ?? "0x0") === BigInt(order.tokenId),
         );
         if (!asset) return;
         const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
@@ -152,21 +162,25 @@ export function CollectiblePurchase() {
           image: image,
           name: asset.name,
           collection: collection.name,
-          collectionAddress: collection.contract_address,
+          collectionAddress: contractAddress,
           price: order.price,
           tokenId: asset.token_id,
         };
       })
       .filter((value) => value !== undefined);
-  }, [assets, collection, tokenOrders]);
+  }, [assets, collection, tokenOrders, contractAddress]);
 
   const { totalPrice, floatPrice } = useMemo(() => {
     const total = tokenOrders.reduce(
       (acc, order) => acc + Number(order?.price),
       0,
     );
-    const formatted = total / Math.pow(10, token?.metadata.decimals || 0);
-    return { totalPrice: total, floatPrice: formatted };
+    const fees = Math.floor(
+      total * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR),
+    );
+    const formatted =
+      (total + fees) / Math.pow(10, token?.metadata.decimals || 0);
+    return { totalPrice: total + fees, floatPrice: formatted, fees };
   }, [tokenOrders]);
 
   const addRoyalties = useCallback(
@@ -200,8 +214,10 @@ export function CollectiblePurchase() {
             collection: order.collection,
             tokenId: cairo.uint256(order.tokenId),
             assetId: cairo.uint256(order.tokenId),
-            quantity: 0, // 0 for ERC721
+            quantity: order.quantity,
             royalties: true,
+            clientFee: CLIENT_FEE_NUMERATOR,
+            clientFeeReceiver: CLIENT_FEE_RECEIVER,
           }),
         })),
       ];
@@ -309,7 +325,7 @@ export function CollectiblePurchase() {
                   image={args.image}
                   name={args.name}
                   collection={args.collection}
-                  collectionAddress={args.collectionAddress}
+                  collectionAddress={contractAddress || ""}
                   price={args.price}
                   token={token}
                   entrypoints={entrypoints}
@@ -396,7 +412,7 @@ const Order = ({
   price: number;
   token: Token;
   entrypoints: string[];
-  tokenId: string;
+  tokenId?: string;
   addRoyalties: (orderId: number, royaltyFee: number) => void;
 }) => {
   const { controller } = useConnection();
