@@ -7,6 +7,7 @@ import {
   normalizeCalls,
 } from "./execute";
 import { ResponseCodes } from "@cartridge/controller";
+import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import { storeCallbacks, cleanupCallbacks } from "./callbacks";
 import { Call } from "starknet";
 
@@ -100,7 +101,7 @@ describe("execute utils", () => {
 
     it("should create execute URL with error", () => {
       const transactions: Call[] = [];
-      const error = { code: "TEST_ERROR", message: "Test error", data: {} };
+      const error = { code: ErrorCode.InsufficientBalance, message: "Test error", data: {} };
 
       const url = createExecuteUrl(transactions, { error });
 
@@ -136,7 +137,7 @@ describe("execute utils", () => {
 
     it("should create manual execute URL with error", () => {
       const transactions: Call[] = [];
-      const error = { code: "TEST_ERROR", message: "Test error", data: {} };
+      const error = { code: ErrorCode.InsufficientBalance, message: "Test error", data: {} };
 
       const url = createManualExecuteUrl(transactions, error);
 
@@ -150,7 +151,7 @@ describe("execute utils", () => {
   describe("parseControllerError", () => {
     it("should parse controller error with valid JSON data", () => {
       const controllerError = {
-        code: "TEST_ERROR",
+        code: ErrorCode.InsufficientBalance,
         message: "Test error",
         data: '{"execution_error": "Invalid transaction"}',
       };
@@ -158,7 +159,7 @@ describe("execute utils", () => {
       const result = parseControllerError(controllerError);
 
       expect(result).toEqual({
-        code: "TEST_ERROR",
+        code: ErrorCode.InsufficientBalance,
         message: "Test error",
         data: { execution_error: "Invalid transaction" },
       });
@@ -166,7 +167,7 @@ describe("execute utils", () => {
 
     it("should handle controller error with invalid JSON data", () => {
       const controllerError = {
-        code: "TEST_ERROR",
+        code: ErrorCode.InsufficientBalance,
         message: "Test error",
         data: "invalid json",
       };
@@ -174,7 +175,7 @@ describe("execute utils", () => {
       const result = parseControllerError(controllerError);
 
       expect(result).toEqual({
-        code: "TEST_ERROR",
+        code: ErrorCode.InsufficientBalance,
         message: "Test error",
         data: { execution_error: "invalid json" },
       });

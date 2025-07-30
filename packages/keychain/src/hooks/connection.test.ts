@@ -138,7 +138,7 @@ describe("useConnectionValue - rpcUrl handling", () => {
         pathname: "/",
         origin: "https://test.com",
       },
-      controller: mockController,
+      controller: mockController as any,
     } as any;
   });
 
@@ -166,7 +166,7 @@ describe("useConnectionValue - rpcUrl handling", () => {
     mockGetChainId.mockResolvedValue(newChainId);
 
     global.window.location.search = "?rpc_url=https://mainnet-rpc.example.com";
-    global.window.controller = mockController;
+    global.window.controller = mockController as any;
 
     const { result } = renderHook(() => useConnectionValue());
 
@@ -208,7 +208,7 @@ describe("useConnectionValue - rpcUrl handling", () => {
       ...mockController,
       chainId: () => existingChainId,
       rpcUrl: () => "https://same-chain-rpc.example.com",
-    };
+    } as any;
 
     const originalController = global.window.controller;
 
