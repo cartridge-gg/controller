@@ -13,7 +13,9 @@ import {
 import { MintAllowance } from "@cartridge/ui/utils/api/cartridge";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { CostBreakdown } from "../review/cost";
+import { useNavigation } from "@/context";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -47,6 +49,7 @@ export function StarterPackInner({
   mintAllowance?: MintAllowance;
   starterpackItems?: StarterItemData[];
 }) {
+  const { navigate } = useNavigation();
   return (
     <>
       <HeaderInner
@@ -82,7 +85,15 @@ export function StarterPackInner({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        <Button>Purchase</Button>
+        <CostBreakdown
+          rails="stripe"
+          costDetails={{
+            baseCostInCents: 1000,
+            processingFeeInCents: 100,
+            totalInCents: 1100,
+          }}
+        />
+        <Button onClick={() => navigate("/purchase/method")}>Purchase</Button>
       </LayoutFooter>
     </>
   );

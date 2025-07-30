@@ -6,7 +6,6 @@ import { Pending } from "./pending";
 import { Slot } from "./slot";
 import { Consent, Success } from "./slot/index";
 import { Fund } from "./slot/fund";
-import { StarterPackWrapper } from "./starterpack";
 import { FeatureToggle } from "./feature-toggle";
 import { Account } from "@/components/account";
 import {
@@ -32,6 +31,8 @@ import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
 import { PurchaseCredits } from "./purchasenew/credits";
 import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
+import { PaymentMethod } from "./purchasenew/method";
+import { PurchaseProvider } from "@/context";
 
 export function App() {
   return (
@@ -41,13 +42,28 @@ export function App() {
         <Route path="/settings/recovery" element={<Recovery />} />
         <Route path="/settings/delegate" element={<Delegate />} />
         <Route path="/settings/add-signer" element={<AddSignerRoute />} />
-        <Route path="/purchase" element={<Outlet />}>
+        <Route path="session" element={<Session />} />
+        <Route path="slot" element={<Slot />}>
+          <Route path="consent" element={<Consent />} />
+          <Route path="fund" element={<Fund />} />
+        </Route>
+        <Route path="success" element={<Success />} />
+        <Route path="failure" element={<Failure />} />
+        <Route path="pending" element={<Pending />} />
+        <Route
+          path="/purchase"
+          element={
+            <PurchaseProvider>
+              <Outlet />
+            </PurchaseProvider>
+          }
+        >
           <Route path="credits" element={<PurchaseCredits />} />
           <Route
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}
           />
-          <Route path="method" element={<></>}>
+          <Route path="method" element={<PaymentMethod />}>
             <Route path="controller" element={<></>} />
             <Route path="crypto" element={<></>} />
             <Route path="card" element={<></>} />
@@ -59,53 +75,6 @@ export function App() {
           <Route path="completed" element={<></>} />
           <Route path="failed" element={<></>} />
         </Route>
-
-        {/* <Route
-          path="/purchase"
-          element={<Purchase type={PurchaseType.CREDITS} />}
-        />
-        <Route path="/funding" element={<Funding />} />
-        <Route
-          path="/funding/deposit"
-          element={
-            <Deposit
-              onComplete={() => {
-                const searchParams = new URLSearchParams(
-                  window.location.search,
-                );
-                const returnTo = searchParams.get("returnTo");
-                navigate(returnTo || "/funding");
-              }}
-            />
-          }
-        />
-        <Route
-          path="/funding/credits"
-          element={
-            <Purchase
-              type={PurchaseType.CREDITS}
-              onComplete={() => {
-                const searchParams = new URLSearchParams(
-                  window.location.search,
-                );
-                const returnTo = searchParams.get("returnTo");
-                navigate(returnTo || "/funding");
-              }}
-            />
-          }
-        />*/}
-        <Route path="session" element={<Session />} />
-        <Route path="slot" element={<Slot />}>
-          <Route path="consent" element={<Consent />} />
-          <Route path="fund" element={<Fund />} />
-        </Route>
-        <Route path="success" element={<Success />} />
-        <Route path="failure" element={<Failure />} />
-        <Route path="pending" element={<Pending />} />
-        <Route
-          path="starter-pack/:starterpackId"
-          element={<PurchaseStarterpack />}
-        />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />

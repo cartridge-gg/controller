@@ -1,3 +1,4 @@
+import { useNavigation, usePurchaseContext } from "@/context";
 import {
   Button,
   ControllerColorIcon,
@@ -11,6 +12,8 @@ import {
 } from "@cartridge/ui";
 
 export function PaymentMethod() {
+  const { goBack } = useNavigation();
+  const { onCreditCard } = usePurchaseContext();
   return (
     <>
       <HeaderInner
@@ -22,11 +25,16 @@ export function PaymentMethod() {
         <PaymentCard
           text="Credit Card"
           icon={<CreditCardIcon variant="solid" />}
+          onClick={async () => {
+            await onCreditCard();
+          }}
         />
         <PaymentCard text="Wallet" icon={<WalletIcon variant="solid" />} />
       </LayoutContent>
       <LayoutFooter>
-        <Button variant="secondary">Back</Button>
+        <Button variant="secondary" onClick={goBack}>
+          Back
+        </Button>
       </LayoutFooter>
     </>
   );
