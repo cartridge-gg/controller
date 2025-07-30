@@ -179,15 +179,9 @@ const controller = new ControllerConnector({
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
   url: keychainUrl,
-  // slot: "arcade-dopewars",
-  // namespace: "dopewars",
-  // preset: "dope-wars",
-  // slot: "pistols-mainnet",
-  // namespace: "pistols",
-  // preset: "pistols",
-  slot: "arcade-briq",
-  namespace: "MARKETPLACE",
-  preset: "dope-wars",
+  slot: "pistols-mainnet",
+  namespace: "pistols",
+  preset: "pistols",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
