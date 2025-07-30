@@ -124,14 +124,6 @@ export function Purchase(props: PurchaseCreditsProps) {
     <>
       <HeaderInner
         title={title}
-        // onBack={
-        //   !isCloseable
-        //     ? () => {
-        //         onBack?.();
-        //         setState(PurchaseState.SELECTION);
-        //       }
-        //     : undefined
-        // }
         right={
           state === PurchaseState.SELECTION &&
           starterpackDetails?.supply !== undefined ? (

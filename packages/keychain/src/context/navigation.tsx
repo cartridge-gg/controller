@@ -105,6 +105,26 @@ export function NavigationProvider({
     if (currentPathname === previousPathname) {
       // Update the lastTrackedPath to include new search params but don't add to stack
       lastTrackedPath.current = currentPath;
+
+      // However, if this navigation was to the same pathname but with different query params,
+      // we should update the current navigation entry to preserve the new query params
+      setNavigationStack((prev) => {
+        if (
+          prev.length > 0 &&
+          currentIndex >= 0 &&
+          currentIndex < prev.length
+        ) {
+          const newStack = [...prev];
+          newStack[currentIndex] = {
+            ...newStack[currentIndex],
+            path: currentPath,
+            timestamp: Date.now(),
+          };
+          return newStack;
+        }
+        return prev;
+      });
+
       return;
     }
 
@@ -214,26 +234,37 @@ export function NavigationProvider({
           return;
         }
 
+        // Preserve returnTo parameter if it exists in current URL
+        let finalPath = to;
+        const currentSearchParams = new URLSearchParams(location.search);
+        const returnTo = currentSearchParams.get("returnTo");
+
+        if (returnTo && !to.includes("returnTo=")) {
+          const url = new URL(to, "http://dummy.com");
+          url.searchParams.set("returnTo", returnTo);
+          finalPath = url.pathname + url.search;
+        }
+
         // For replace navigation, update current entry
         if (options?.replace) {
           setNavigationStack((prev) => {
             const newStack = [...prev];
             if (newStack[currentIndex]) {
               newStack[currentIndex] = {
-                path: to,
+                path: finalPath,
                 state: options.state,
                 timestamp: Date.now(),
               };
             }
             return newStack;
           });
-          lastTrackedPath.current = to;
+          lastTrackedPath.current = finalPath;
         }
 
-        navigate(to, options);
+        navigate(finalPath, options);
       }
     },
-    [navigate, currentIndex, navigationStack],
+    [navigate, currentIndex, navigationStack, location.search],
   );
 
   // Go back helper

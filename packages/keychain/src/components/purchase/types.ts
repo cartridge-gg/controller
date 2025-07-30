@@ -17,7 +17,6 @@ export type PurchaseCreditsProps = {
   type: PurchaseType;
   starterpackDetails?: StarterPackDetails;
   initState?: PurchaseState;
-  onBack?: () => void;
   onComplete?: () => void;
 };
 
