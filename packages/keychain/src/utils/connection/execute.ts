@@ -57,13 +57,6 @@ export function createExecuteUrl(
   return `/execute?data=${paramString}`;
 }
 
-export function createManualExecuteUrl(
-  transactions: Call[],
-  error?: ControllerError,
-): string {
-  return createExecuteUrl(transactions, { error });
-}
-
 export function parseControllerError(
   controllerError: ControllerError,
 ): ControllerError {

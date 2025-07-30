@@ -40,7 +40,13 @@ vi.mock("./transaction/ConfirmTransaction", () => ({
     onClose,
     transactions,
     executionError,
-  }: any) => (
+  }: {
+    onComplete: (hash: string) => void;
+    onError: (error: { message: string }) => void;
+    onClose: () => void;
+    transactions: unknown;
+    executionError?: { message: string };
+  }) => (
     <div data-testid="confirm-transaction">
       <div data-testid="transactions">{JSON.stringify(transactions)}</div>
       <div data-testid="execution-error">

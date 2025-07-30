@@ -5,7 +5,6 @@ import {
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
 import { ConnectionCtx, connectToController } from "@/utils/connection";
-import Controller from "@/utils/controller";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -217,42 +216,22 @@ export function useConnectionValue() {
     };
   }, []);
 
-  // Fetch chain ID from RPC provider and switch controller if needed
+  // Fetch chain ID from RPC provider when rpcUrl changes
   useEffect(() => {
-    if (!rpcUrl) return;
-
-    const fetchChainIdAndSwitchController = async () => {
+    const fetchChainId = async () => {
       try {
         const provider = new RpcProvider({ nodeUrl: rpcUrl });
-        const newChainId = await provider.getChainId();
-        setChainId(newChainId);
-
-        // If we have an existing controller and the rpcUrl/chainId differs, create a new controller
-        if (
-          controller &&
-          (controller.rpcUrl() !== rpcUrl ||
-            controller.chainId() !== newChainId)
-        ) {
-          const nextController = new Controller({
-            appId: controller.appId(),
-            classHash: controller.classHash(),
-            chainId: newChainId,
-            rpcUrl: rpcUrl,
-            address: controller.address(),
-            username: controller.username(),
-            owner: controller.owner(),
-          });
-
-          setController(nextController);
-          window.controller = nextController;
-        }
+        const id = await provider.getChainId();
+        setChainId(id);
       } catch (e) {
         console.error("Failed to fetch chain ID:", e);
       }
     };
 
-    fetchChainIdAndSwitchController();
-  }, [rpcUrl, controller, setController]);
+    if (rpcUrl) {
+      fetchChainId();
+    }
+  }, [rpcUrl]);
 
   useEffect(() => {
     if (

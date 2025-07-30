@@ -1,11 +1,16 @@
 // Global store for all connection callbacks
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const globalCallbacks = new Map<string, any>();
+interface Callbacks {
+  resolve?: (result: unknown) => void;
+  reject?: (error: unknown) => void;
+  onCancel?: () => void;
+  [key: string]: unknown;
+}
+
+const globalCallbacks = new Map<string, Callbacks>();
 
 let callbackIdCounter = 0;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function storeCallbacks(id: string, callbacks: any) {
+export function storeCallbacks(id: string, callbacks: Callbacks) {
   globalCallbacks.set(id, callbacks);
 }
 
