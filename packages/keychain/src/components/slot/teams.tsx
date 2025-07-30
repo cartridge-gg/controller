@@ -72,7 +72,7 @@ export function Teams({ teams, isLoading, error, onFundTeam }: TeamsProps) {
             sortedTeams.map((team) => (
               <TokenSummary key={team.id} onClick={() => setSelectedTeam(team)}>
                 <TokenCard
-                  title={team.name}
+                  title={<span className="lowercase">{team.name}</span>}
                   image={<UsersIcon variant="solid" size="lg" />}
                   amount={`${team.deployments?.totalCount} Deployments`}
                   value={`$${formatBalance(BigInt(team.credits), 8, 2)}`}
