@@ -487,13 +487,19 @@ export function parseExecutionError(
         summary = "Contract not deployed.";
         lastError[lastError.length - 1] = summary;
       } else if (
-        lastErrorMessage.includes("ERC20: transfer amount exceeds balance")
+        lastErrorMessage.includes("ERC20: transfer amount exceeds balance") ||
+        lastErrorMessage.includes("transfer amount exceeds balance")
       ) {
-        summary = "ERC20: transfer amount exceeds balance.";
+        summary = "Insufficient token balance";
+      } else if (
+        lastErrorMessage.includes("SafeUint256: subtraction overflow") ||
+        lastErrorMessage.includes("subtraction overflow")
+      ) {
+        summary = "Insufficient balance for operation";
       } else if (
         lastErrorMessage.includes("ERC20: amount is not a valid Uint256")
       ) {
-        summary = "Invalid token amount.";
+        summary = "Invalid token amount";
       } else if (lastErrorMessage.includes("ASSERT_EQ instruction failed")) {
         summary = "Assertion failed in contract.";
       } else if (
@@ -612,6 +618,55 @@ export function parseValidationError(error: ControllerError): {
     details: error.message || "Unknown validation error",
   };
 }
+
+// Test case for the specific JSON-RPC error from wasm bundle
+export const jsonRpcExecutionErrorTestCase = {
+  input: {
+    code: 41,
+    message: "Transaction execution error",
+    data: {
+      execution_error:
+        "Transaction reverted: Transaction execution has failed:\n0: Error in the called contract (contract address: 0x0089fd6e04b5026c017785989d025252b9c52cd00bdf287aac1070c079ea3007, class hash: 0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nError at pc=0:17104:\nCairo traceback (most recent call last):\nUnknown location (pc=0:351)\nUnknown location (pc=0:6112)\nUnknown location (pc=0:17122)\n\n1: Error in the called contract (contract address: 0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d, class hash: 0x00a2475bc66197c751d854ea8c39c6ad9781eb284103bcd856b58e6b500078ac, selector: 0x0083afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e):\nError message: SafeUint256: subtraction overflow\nError at pc=0:347:\nCairo traceback (most recent call last):\nUnknown location (pc=0:1349)\nUnknown location (pc=0:1328)\nUnknown location (pc=0:721)\nError message: ERC20: transfer amount exceeds balance\nUnknown location (pc=0:902)\n\nAn ASSERT_EQ instruction failed: 0 != 1.\n",
+    },
+  },
+  expected: {
+    summary: "Insufficient token balance",
+    stack: [
+      {
+        address:
+          "0x0089fd6e04b5026c017785989d025252b9c52cd00bdf287aac1070c079ea3007",
+        class:
+          "0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+        selector:
+          "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+        error: [
+          "Cairo traceback (most recent call last):",
+          "Unknown location (pc=0:351)",
+          "Unknown location (pc=0:6112)",
+          "Unknown location (pc=0:17122)",
+        ],
+      },
+      {
+        address:
+          "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+        class:
+          "0x00a2475bc66197c751d854ea8c39c6ad9781eb284103bcd856b58e6b500078ac",
+        selector:
+          "0x0083afd3f4caedc6eebf44246fe54e38c95e3179a5ec9ea81740eca5b482d12e",
+        error: [
+          "Error message: SafeUint256: subtraction overflow",
+          "Cairo traceback (most recent call last):",
+          "Unknown location (pc=0:1349)",
+          "Unknown location (pc=0:1328)",
+          "Unknown location (pc=0:721)",
+          "Error message: ERC20: transfer amount exceeds balance",
+          "Unknown location (pc=0:902)",
+          "An ASSERT_EQ instruction failed: 0 != 1.",
+        ],
+      },
+    ],
+  },
+};
 
 export const starknetTransactionExecutionErrorTestCases = [
   {

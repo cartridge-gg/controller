@@ -61,7 +61,13 @@ export function App() {
                   window.location.search,
                 );
                 const returnTo = searchParams.get("returnTo");
-                navigate(returnTo || "/funding");
+                if (returnTo) {
+                  // returnTo is already decoded by URLSearchParams.get()
+                  // Use replace navigation for execute URLs to ensure proper navigation stack handling
+                  navigate(returnTo, { replace: true });
+                } else {
+                  navigate("/funding");
+                }
               }}
             />
           }
@@ -77,7 +83,13 @@ export function App() {
                   window.location.search,
                 );
                 const returnTo = searchParams.get("returnTo");
-                navigate(returnTo || "/funding");
+                if (returnTo) {
+                  // returnTo is already decoded by URLSearchParams.get()
+                  // Use replace navigation for execute URLs to ensure proper navigation stack handling
+                  navigate(returnTo, { replace: true });
+                } else {
+                  navigate("/funding");
+                }
               }}
             />
           }
