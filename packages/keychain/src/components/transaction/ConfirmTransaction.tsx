@@ -28,6 +28,7 @@ export function ConfirmTransaction({
 
   const [hasSession, setHasSession] = useState(false);
   const [skipSession, setSkipSession] = useState(false);
+  const [error, setError] = useState<ControllerError | undefined>(undefined);
 
   useEffect(() => {
     if (controller && policies) {
@@ -42,8 +43,13 @@ export function ConfirmTransaction({
       return;
     }
 
-    const { transaction_hash } = await account.execute(transactions, maxFee);
-    onComplete(transaction_hash);
+    try {
+      const { transaction_hash } = await account.execute(transactions, maxFee);
+      onComplete(transaction_hash);
+    } catch (e) {
+      console.error(e);
+      setError(e as ControllerError);
+    }
   };
 
   if (policies && !hasSession && !skipSession) {
@@ -52,8 +58,8 @@ export function ConfirmTransaction({
         isUpdate
         policies={policies!}
         onConnect={async () => {
-          const transaction_hash = await executeCore(transactions);
-          onComplete(transaction_hash);
+          const res = await executeCore(transactions);
+          onComplete(res.transaction_hash);
         }}
         onSkip={() => setSkipSession(true)}
       />
@@ -64,7 +70,7 @@ export function ConfirmTransaction({
     <ExecutionContainer
       title={`Review Transaction${transactions.length > 1 ? "s" : ""}`}
       description={origin}
-      executionError={executionError}
+      executionError={error || executionError}
       transactions={transactions}
       onSubmit={onSubmit}
       onError={onError}

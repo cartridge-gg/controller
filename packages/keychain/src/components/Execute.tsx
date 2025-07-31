@@ -1,11 +1,12 @@
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
 import { useConnection } from "@/hooks/connection";
 import { ExecuteParams } from "@/utils/connection/execute";
 import { ConnectError, ResponseCodes } from "@cartridge/controller";
 import { InvokeFunctionResponse } from "starknet";
+import { useNavigation } from "@/context/navigation";
 
 function parseExecuteParams(paramString: string): {
   params: ExecuteParams;
@@ -31,7 +32,7 @@ function parseExecuteParams(paramString: string): {
 
 export function Execute() {
   const { closeModal } = useConnection();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [searchParams] = useSearchParams();
   const [params, setParams] =
     useState<ReturnType<typeof parseExecuteParams>>(null);
@@ -68,7 +69,11 @@ export function Execute() {
       transactions={params.params.transactions}
       executionError={params.params.error}
       onComplete={(transaction_hash) => {
-        if (params.resolve) {
+        // Check if there's a returnTo URL parameter and navigate there
+        const returnTo = searchParams.get("returnTo");
+        if (returnTo) {
+          navigate(returnTo, { reset: true });
+        } else if (params.resolve) {
           params.resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,

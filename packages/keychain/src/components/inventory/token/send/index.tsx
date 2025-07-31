@@ -1,5 +1,4 @@
 import { Token, useToken, useTokens } from "@/hooks/token";
-import { useExecute } from "@/hooks/execute";
 import {
   LayoutContent,
   LayoutFooter,
@@ -13,22 +12,23 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
-import {
-  Call,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
-  uint256,
-} from "starknet";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigation } from "@/context/navigation";
+import { Call, uint256 } from "starknet";
 import { SendRecipient } from "@/components/modules/recipient";
 import { SendAmount } from "./amount";
 import { useData } from "@/hooks/data";
 import { useConnection } from "@/hooks/connection";
+import { createExecuteUrl } from "@/utils/connection/execute";
 
 export function SendToken() {
-  const { address: tokenAddress } = useParams<{ address: string }>();
+  const { address: tokenAddress, username } = useParams<{
+    address: string;
+    username: string;
+  }>();
+  const [searchParams] = useSearchParams();
   const { controller } = useConnection();
-  const { execute } = useExecute();
+  const { navigate } = useNavigation();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
   const { token, status: tokenFetching } = useToken({
@@ -93,29 +93,16 @@ export function SendToken() {
           calldata: [to, formattedAmount],
         },
       ];
-      try {
-        // Use execute helper to trigger transaction
-        const res = await execute(calls);
+      // Create execute URL with returnTo parameter pointing back to token page
+      const executeUrl = createExecuteUrl(calls);
 
-        if (res?.transaction_hash) {
-          await controller?.provider?.waitForTransaction(res.transaction_hash, {
-            retryInterval: 100,
-            successStates: [
-              TransactionExecutionStatus.SUCCEEDED,
-              TransactionFinalityStatus.ACCEPTED_ON_L2,
-            ],
-          });
-
-          // Refetch transfers 5 seconds after to leave time to the indexer to take the new tx into account
-          setTimeout(() => {
-            refetchTransfers();
-          }, 5000);
-        }
-      } finally {
-        setLoading(false);
-      }
+      // Navigate to execute screen with returnTo parameter to come back to token page
+      const inventoryPath = `/account/${username}/inventory?${searchParams.toString()}`;
+      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(inventoryPath)}`;
+      navigate(executeUrlWithReturn);
+      setLoading(false);
     },
-    [selectedToken, controller, execute, refetchTransfers],
+    [selectedToken, controller, refetchTransfers, navigate],
   );
 
   if (!token) {

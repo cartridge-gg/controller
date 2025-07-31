@@ -87,9 +87,9 @@ export function Fund() {
         type={PurchaseType.CREDITS}
         isSlot={true}
         teamId={selectedTeam?.id}
-        onBack={() => {
-          setState(FundState.SELECT_TEAM);
-        }}
+        // onBack={() => {
+        //   setState(FundState.SELECT_TEAM);
+        // }}
         onComplete={() => setState(FundState.SUCCESS)}
       />
     );

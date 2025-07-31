@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Button,
@@ -30,8 +30,6 @@ import {
   Call,
   CallData,
   getChecksumAddress,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
 } from "starknet";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -45,14 +43,14 @@ import { toast } from "sonner";
 import { useTokens } from "@/hooks/token";
 import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
-import { useExecute } from "@/hooks/execute";
 import { useNavigation } from "@/context/navigation";
+import { createExecuteUrl } from "@/utils/connection/execute";
 
 const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectionPurchase() {
   const { closeModal } = useUI();
-  const { address: contractAddress, tokenId, project } = useParams();
+  const { address: contractAddress, tokenId, project, username } = useParams();
   const { chainId, parent, controller } = useConnection();
   const { tokens } = useTokens();
   const [loading, setLoading] = useState(false);
@@ -60,7 +58,6 @@ export function CollectionPurchase() {
   const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
   const { provider, orders, marketplaceFee, removeOrder, setAmount } =
     useMarketplace();
-  const { execute } = useExecute();
   const { navigate } = useNavigation();
 
   const [searchParams] = useSearchParams();
@@ -205,28 +202,13 @@ export function CollectionPurchase() {
           }),
         })),
       ];
-      const res = await execute(calls);
+      // Create execute URL with returnTo parameter pointing back to current page
+      const executeUrl = createExecuteUrl(calls);
 
-      if (res?.transaction_hash) {
-        await controller?.provider?.waitForTransaction(res.transaction_hash, {
-          retryInterval: 100,
-          successStates: [
-            TransactionExecutionStatus.SUCCEEDED,
-            TransactionFinalityStatus.ACCEPTED_ON_L2,
-          ],
-        });
-      }
-
-      if (res) {
-        toast.success(`Asset purchased successfully`);
-        refetch();
-      }
-
-      // Removing the order optimistically
-      tokenOrders.forEach((order) => {
-        removeOrder(order);
-      });
-      closeModal?.();
+      // Navigate to execute screen with returnTo parameter to come back to inventory
+      const inventoryPath = `/account/${username}/inventory?${searchParams.toString()}`;
+      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(inventoryPath)}`;
+      navigate(executeUrlWithReturn);
     } catch (error) {
       console.error(error);
       toast.error(`Failed to purchase asset(s)`);
@@ -351,17 +333,9 @@ export function CollectionPurchase() {
             </div>
             <div className="flex gap-3 w-full">
               <div className="w-full flex items-center gap-3">
-                <Link
-                  className="w-1/3"
-                  to={`../../..?${searchParams.toString()}`}
-                >
-                  <Button variant="secondary" type="button" className="w-full">
-                    Cancel
-                  </Button>
-                </Link>
                 <Button
                   type="submit"
-                  className="w-2/3"
+                  className="w-full"
                   isLoading={loading}
                   onClick={handlePurchase}
                 >
