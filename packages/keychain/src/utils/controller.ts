@@ -14,13 +14,14 @@ import {
   AuthorizedSession,
   CartridgeAccount,
   CartridgeAccountMeta,
+  JsAddSignerInput,
   JsCall,
   JsFeeSource,
   JsFelt,
   JsRegister,
   JsRegisterResponse,
+  JsRemoveSignerInput,
   JsRevokableSession,
-  JsSignerInput,
   Owner,
   Signer,
 } from "@cartridge/controller-wasm/controller";
@@ -163,13 +164,20 @@ export default class Controller {
 
   async addOwner(
     owner: Signer | null,
-    signerInput: JsSignerInput | null,
+    signerInput: JsAddSignerInput | null,
     rp_id: string | null,
   ) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
     await this.cartridge.addOwner(owner, signerInput, rp_id);
+  }
+
+  async removeSigner(signerGuid: JsRemoveSignerInput) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+    await this.cartridge.removeOwner(signerGuid);
   }
 
   async registerSessionCalldata(
