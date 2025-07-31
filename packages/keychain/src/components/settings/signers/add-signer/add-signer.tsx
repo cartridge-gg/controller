@@ -11,7 +11,7 @@ import {
   WalletAdapter,
 } from "@cartridge/controller";
 import {
-	JsAddSignerInput,
+  JsAddSignerInput,
   JsControllerError,
   Signer,
 } from "@cartridge/controller-wasm";
