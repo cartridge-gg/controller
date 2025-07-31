@@ -14,8 +14,8 @@ import {
   SheetClose,
   SheetContent,
   SheetFooter,
-  SheetTrigger,
   Skeleton,
+  SpinnerIcon,
   StarknetIcon,
   TouchIcon,
   TrashIcon,
@@ -43,9 +43,10 @@ export const SignerCard = React.forwardRef<
     { className, signer, onDelete, current, isOriginalSigner, ...props },
     ref,
   ) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const signerType = credentialToAuth(signer);
     const { controller } = useController();
-
     const [signerIdentifyingInfo, setSignerIdentifyingInfo] = useState<
       string | undefined
     >("pending");
@@ -59,7 +60,7 @@ export const SignerCard = React.forwardRef<
     }, [signer, controller]);
 
     return (
-      <Sheet>
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <div
           ref={ref}
           className={cn("flex items-center gap-3", className)}
@@ -83,11 +84,14 @@ export const SignerCard = React.forwardRef<
             )}
           </Card>
           {onDelete && (
-            <SheetTrigger asChild>
-              <Button variant="icon" size="icon" type="button">
-                <TrashIcon size="default" className="text-foreground-300" />
-              </Button>
-            </SheetTrigger>
+            <Button
+              variant="icon"
+              size="icon"
+              type="button"
+              onClick={() => setIsOpen(true)}
+            >
+              <TrashIcon size="default" className="text-foreground-300" />
+            </Button>
           )}
         </div>
 
@@ -104,7 +108,11 @@ export const SignerCard = React.forwardRef<
               size="icon"
               className="flex items-center justify-center text-foreground-100"
             >
-              <SignerIcon signerType={signerType} />
+              {isLoading ? (
+                <SpinnerIcon className="animate-spin" size="lg" />
+              ) : (
+                <SignerIcon signerType={signerType} />
+              )}
             </Button>
             <div className="flex flex-col items-start gap-1">
               <h3 className="text-lg font-semibold text-foreground-100">
@@ -114,12 +122,25 @@ export const SignerCard = React.forwardRef<
           </div>
           <SheetFooter className="flex flex-row items-center gap-4">
             <SheetClose asChild className="flex-1">
-              <Button variant="secondary">Cancel</Button>
+              <Button variant="secondary" disabled={isLoading}>
+                Cancel
+              </Button>
             </SheetClose>
             <Button
               variant="secondary"
-              onClick={onDelete}
+              onClick={async () => {
+                setIsLoading(true);
+                try {
+                  await onDelete?.();
+                  setIsOpen(false);
+                } catch (error) {
+                  console.error(error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
               className="flex-1 text-destructive-100"
+              disabled={isLoading}
             >
               <TrashIcon size="default" />
               <span>DELETE</span>

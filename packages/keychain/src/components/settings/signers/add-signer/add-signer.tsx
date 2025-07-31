@@ -17,7 +17,9 @@ import {
 } from "@cartridge/controller-wasm";
 import {
   AddUserIcon,
+  AlertIcon,
   Button,
+  CheckIcon,
   HeaderInner,
   LayoutContent,
   LayoutFooter,
@@ -25,6 +27,7 @@ import {
   SignerMethodKind,
   SignerPendingCard,
   SignerPendingCardKind,
+  SpinnerIcon,
 } from "@cartridge/ui";
 import {
   ControllerQuery,
@@ -51,6 +54,9 @@ export function AddSigner({
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
     null,
   );
+  const [headerIcon, setHeaderIcon] = useState<React.ReactElement>(
+    <AddUserIcon size="lg" />,
+  );
 
   const handleClick = useCallback(
     async (
@@ -63,7 +69,10 @@ export function AddSigner({
           inProgress: true,
         });
 
+        setHeaderIcon(<SpinnerIcon className="animate-spin" size="lg"/>);
         const alreadyOwner = await authFn(auth);
+        setHeaderIcon(<CheckIcon size="lg" />);
+
         if (alreadyOwner) {
           setSignerPending({
             kind: auth,
@@ -83,6 +92,7 @@ export function AddSigner({
           error instanceof Error || error instanceof JsControllerError
             ? error.message
             : "Unknown error";
+        setHeaderIcon(<AlertIcon size="lg" />);
         setSignerPending({
           kind: auth,
           inProgress: false,
@@ -110,10 +120,9 @@ export function AddSigner({
   return (
     <>
       <HeaderInner
-        icon={<AddUserIcon />}
+        icon={headerIcon}
         variant="compressed"
-        title="Add Signer"
-        hideIcon
+        title={`Add ${signerPending?.kind ? `${signerPending.kind.charAt(0).toUpperCase() + signerPending.kind.slice(1)} ` : ""} Signer`}
       />
       <LayoutContent className="flex flex-col gap-3 w-full h-fit">
         {!signerPending && <SignerAlert />}
@@ -147,6 +156,7 @@ export function AddSigner({
           <Button
             variant="secondary"
             onClick={() => {
+              setHeaderIcon(<AddUserIcon size="lg" />);
               if (signerPending?.error || signerPending?.authedAddress) {
                 setSignerPending(null);
               } else {

@@ -5,7 +5,6 @@ import {
 
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
-import { useFeature } from "@/hooks/features";
 import {
   JsRemoveSignerInput,
   Signer,
@@ -17,6 +16,7 @@ import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
 import { SectionHeader } from "../section-header";
 import { SignerCard } from "./signer-card";
+import { useFeature } from "@/hooks/features";
 
 export const SignersSection = ({
   controllerQuery,
@@ -48,11 +48,17 @@ export const SignersSection = ({
         };
       },
     );
+    if (!oldestSigner) {
+      throw new Error("No signers found");
+    }
 
-    if (oldestSigner) signers[oldestSigner.index].isOriginal = true;
+    signers[oldestSigner.index].isOriginal = true;
+    if (chainId !== constants.StarknetChainId.SN_MAIN) {
+      return [signers[oldestSigner.index]];
+    }
 
     return signers.sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent));
-  }, [controllerQuery.data, controller]);
+  }, [controllerQuery.data, controller, chainId]);
 
   return (
     <section className="space-y-4">
