@@ -1,4 +1,4 @@
-import { LayoutContainer } from "@cartridge/ui";
+import { GearIcon, LayoutContainer } from "@cartridge/ui";
 import { NavigationHeader } from "@/components";
 import { useConnection } from "@/hooks/connection";
 import { Outlet, useLocation } from "react-router-dom";
@@ -21,6 +21,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
         <NavigationHeader
           variant="hidden"
           forceShowClose={hasBottomNav}
+          icon={<GearIcon />}
           onClose={hasBottomNav ? closeModal : undefined}
         />
 
