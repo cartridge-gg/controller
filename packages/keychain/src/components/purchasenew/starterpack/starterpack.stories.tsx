@@ -1,9 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { StarterPackInner } from "./starterpack";
 import { StarterItemType } from "@/hooks/starterpack";
+import { NavigationProvider } from "@/context";
 
 const meta = {
   component: StarterPackInner,
+  decorators: [
+    (Story) => (
+      <NavigationProvider>
+        <Story />
+      </NavigationProvider>
+    ),
+  ],
 } satisfies Meta<typeof StarterPackInner>;
 
 export default meta;

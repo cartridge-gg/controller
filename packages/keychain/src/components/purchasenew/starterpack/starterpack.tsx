@@ -16,33 +16,48 @@ import { Supply } from "./supply";
 import { useParams } from "react-router-dom";
 import { CostBreakdown } from "../review/cost";
 import { useNavigation, usePurchaseContext } from "@/context";
+import { useEffect } from "react";
+import { PurchaseItem, PurchaseItemType } from "@/context/purchase";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
   const { name, items, supply, mintAllowance, isLoading } =
     useStarterPack(starterpackId);
-
-  const { setStarterpackId } = usePurchaseContext();
+  const { setStarterpackId, setPurchaseItems } = usePurchaseContext();
 
   if (!starterpackId) {
     throw new Error("Starterpack ID is required");
   }
 
-  setStarterpackId(starterpackId);
+  useEffect(() => {
+    if (!isLoading && starterpackId) {
+      setStarterpackId(starterpackId);
+      const purchaseItems = items.map((item) => {
+        return {
+          title: item.title,
+          icon: item.image,
+          value: item.value,
+          type:
+            item.type === StarterItemType.NFT
+              ? PurchaseItemType.NFT
+              : PurchaseItemType.CREDIT,
+        } as PurchaseItem;
+      });
+      setPurchaseItems(purchaseItems);
+    }
+  }, [starterpackId, isLoading]);
 
   if (isLoading) {
     return <LoadingState />;
   }
 
   return (
-    <>
-      <StarterPackInner
-        name={name}
-        supply={supply}
-        mintAllowance={mintAllowance}
-        starterpackItems={items}
-      />
-    </>
+    <StarterPackInner
+      name={name}
+      supply={supply}
+      mintAllowance={mintAllowance}
+      starterpackItems={items}
+    />
   );
 }
 

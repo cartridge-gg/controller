@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ReviewPurchase } from "./review";
-import { PurchaseItemType } from "../types";
 import { EthereumIcon, SolanaIcon, StarknetIcon } from "@cartridge/ui";
+import { PurchaseItemType } from "@/context/purchase";
 
 const meta = {
   component: ReviewPurchase,

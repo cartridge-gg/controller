@@ -33,6 +33,8 @@ import { PurchaseCredits } from "./purchasenew/credits";
 import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { PaymentMethod } from "./purchasenew/method";
 import { StripeCheckout } from "./purchasenew/checkout/stripe";
+import { PurchaseSuccess } from "./purchasenew/success";
+import { PurchasePending } from "./purchasenew/pending";
 
 export function App() {
   return (
@@ -65,8 +67,8 @@ export function App() {
           <Route path="network" element={<></>} />
           <Route path="wallet" element={<></>} />
           <Route path="review" element={<></>} />
-          <Route path="pending" element={<></>} />
-          <Route path="completed" element={<></>} />
+          <Route path="pending" element={<PurchasePending />} />
+          <Route path="success" element={<PurchaseSuccess />} />
           <Route path="failed" element={<></>} />
         </Route>
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />

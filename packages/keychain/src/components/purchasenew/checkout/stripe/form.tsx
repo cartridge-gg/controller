@@ -10,7 +10,13 @@ import {
   StripeElements,
   StripePaymentElementOptions,
 } from "@stripe/stripe-js";
-import { Button, CreditCardIcon, HeaderInner, LayoutContent, LayoutFooter } from "@cartridge/ui";
+import {
+  Button,
+  CreditCardIcon,
+  HeaderInner,
+  LayoutContent,
+  LayoutFooter,
+} from "@cartridge/ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { CostBreakdown } from "../../review/cost";
 

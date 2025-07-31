@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ChooseNetwork } from "./network";
-import { networkWalletData } from "./data";
+import { networkWalletData } from "./wallet/data";
 
 const meta = {
   component: ChooseNetwork,

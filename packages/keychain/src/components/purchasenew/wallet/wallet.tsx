@@ -6,7 +6,7 @@ import {
   PaymentCard,
   WalletIcon,
 } from "@cartridge/ui";
-import { NetworkWalletData } from "./types";
+import { NetworkWalletData } from "../types";
 
 interface SelectWalletProps {
   data: NetworkWalletData;

@@ -10,7 +10,7 @@ import {
   SolflareColorIcon,
   StarknetColorIcon,
 } from "@cartridge/ui";
-import { NetworkWalletData } from "./types";
+import { NetworkWalletData } from "../types";
 
 export const networkWalletData: NetworkWalletData = {
   networks: [

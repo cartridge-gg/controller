@@ -26,11 +26,28 @@ export interface Network {
   icon: React.ReactElement;
 }
 
+export enum PurchaseItemType {
+  CREDIT = "CREDIT",
+  ERC20 = "ERC20",
+  NFT = "NFT",
+}
+
+export type PurchaseItem = {
+  title: string;
+  subtitle?: string;
+  icon: string | React.ReactNode;
+  value?: number;
+  type: PurchaseItemType;
+};
+
+export type PaymentMethod = "stripe" | "crypto";
+
 export interface PurchaseContextType {
   // Purchase details
   usdAmount: number;
   starterpackId?: string;
   teamId?: string;
+  purchaseItems: PurchaseItem[];
 
   // Payment state
   selectedNetwork?: Network;
@@ -52,9 +69,10 @@ export interface PurchaseContextType {
 
   // Actions
   setUsdAmount: (amount: number) => void;
-  setStarterpackId: (id: string) => void;
   setSelectedNetwork: (network?: Network) => void;
   setSelectedWallet: (wallet?: ExternalWallet) => void;
+  setPurchaseItems: (items: PurchaseItem[]) => void;
+  setStarterpackId: (id: string) => void;
 
   // Payment actions
   onCreditCard: () => Promise<void>;
@@ -94,6 +112,7 @@ export const PurchaseProvider = ({
   // State
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
   const [starterpackId, setStarterpackId] = useState<string | undefined>();
+  const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
 
   const [selectedNetwork, setSelectedNetwork] = useState<Network | undefined>();
   const [selectedWallet, setSelectedWallet] = useState<
@@ -159,6 +178,7 @@ export const PurchaseProvider = ({
     // Purchase details
     usdAmount,
     starterpackId,
+    purchaseItems,
 
     // Payment state
     selectedNetwork,
@@ -183,6 +203,7 @@ export const PurchaseProvider = ({
     setStarterpackId,
     setSelectedNetwork,
     setSelectedWallet,
+    setPurchaseItems,
 
     // Actions
     onCreditCard,

@@ -1,10 +1,11 @@
 import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import CheckoutForm from "./form";
-import { usePurchaseContext } from "@/context";
+import { useNavigation, usePurchaseContext } from "@/context";
 
 export function StripeCheckout() {
   const { stripePromise, clientSecret, costDetails } = usePurchaseContext();
+  const { navigate } = useNavigation();
 
   const appearance = {
     theme: "flat",
@@ -29,7 +30,10 @@ export function StripeCheckout() {
       options={{ clientSecret, appearance, loader: "auto" }}
       stripe={stripePromise}
     >
-      <CheckoutForm cost={costDetails!} onComplete={() => {}} />
+      <CheckoutForm
+        cost={costDetails!}
+        onComplete={() => navigate("/purchase/success", { resetStack: true })}
+      />
     </Elements>
   );
 }
