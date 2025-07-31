@@ -69,7 +69,7 @@ export function AddSigner({
           inProgress: true,
         });
 
-        setHeaderIcon(<SpinnerIcon className="animate-spin" size="lg"/>);
+        setHeaderIcon(<SpinnerIcon className="animate-spin" size="lg" />);
         const alreadyOwner = await authFn(auth);
         setHeaderIcon(<CheckIcon size="lg" />);
 
