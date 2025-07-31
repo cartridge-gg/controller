@@ -68,7 +68,11 @@ export function Execute() {
       transactions={params.params.transactions}
       executionError={params.params.error}
       onComplete={(transaction_hash) => {
-        if (params.resolve) {
+        // Check if there's a returnTo URL parameter and navigate there
+        const returnTo = searchParams.get("returnTo");
+        if (returnTo) {
+          navigate(returnTo, { replace: true });
+        } else if (params.resolve) {
           params.resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,

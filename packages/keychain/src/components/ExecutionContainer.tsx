@@ -111,6 +111,7 @@ export function ExecutionContainer({
     try {
       await onSubmit(maxFee);
     } catch (e) {
+      console.error(e);
       const error = parseControllerError(e as unknown as ControllerError);
       onError?.(error);
       setCtrlError(error);

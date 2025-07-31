@@ -1,6 +1,4 @@
 import { useAccount } from "@/hooks/account";
-import { useConnection } from "@/hooks/connection";
-import { useExecute } from "@/hooks/execute";
 import {
   LayoutContent,
   LayoutFooter,
@@ -21,14 +19,15 @@ import { Sending } from "./collection-sending";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import placeholder from "/placeholder.svg?url";
 import { SendHeader } from "./header";
-import { toast } from "sonner";
+import { createExecuteUrl } from "@/utils/connection/execute";
+
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
 const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
 const TRANSFER_FROM_SNAKE_CASE = "transfer_from";
 
 export function SendCollection() {
-  const { address: contractAddress, tokenId } = useParams();
+  const { address: contractAddress, tokenId, username } = useParams();
 
   const [searchParams] = useSearchParams();
   const paramsTokenIds = searchParams.getAll("tokenIds");
@@ -38,8 +37,6 @@ export function SendCollection() {
   });
   const account = useAccount();
   const address = account?.address || "";
-  const { controller } = useConnection();
-  const { execute } = useExecute();
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
   const [recipientError, setRecipientError] = useState<Error | undefined>();
@@ -112,25 +109,16 @@ export function SendCollection() {
         };
       });
 
-      try {
-        const res = await execute(calls);
-        if (res?.transaction_hash) {
-          toast.success("Transaction submitted successfully!");
-          refetch();
-        }
+      // Create execute URL with returnTo parameter pointing back to inventory
+      const executeUrl = createExecuteUrl(calls);
 
-        const navigationPath = `../../..?${searchParams.toString()}`;
-
-        navigate(navigationPath);
-      } catch (error) {
-        console.error("Transaction failed:", error);
-        toast.error("Failed to send asset(s)");
-      } finally {
-        setLoading(false);
-      }
+      // Navigate to execute screen with returnTo parameter to come back to inventory
+      const inventoryPath = `/account/${username}/inventory?${searchParams.toString()}`;
+      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(inventoryPath)}`;
+      navigate(executeUrlWithReturn);
+      setLoading(false);
     },
     [
-      controller,
       tokenIds,
       contractAddress,
       address,
@@ -139,14 +127,8 @@ export function SendCollection() {
       navigate,
       searchParams,
       refetch,
-      execute,
     ],
   );
-
-  const handleCancel = useCallback(() => {
-    const navigationPath = `../..?${searchParams.toString()}`;
-    navigate(navigationPath);
-  }, [navigate, searchParams]);
 
   const title = useMemo(() => {
     if (!collection || !assets || assets.length === 0) return "";
@@ -193,22 +175,13 @@ export function SendCollection() {
             />
             <div className="w-full flex items-center gap-3">
               <Button
-                variant="secondary"
-                type="button"
-                className="w-1/3"
-                isLoading={loading}
-                onClick={handleCancel}
-              >
-                Cancel
-              </Button>
-              <Button
                 disabled={disabled}
                 type="submit"
-                className="w-2/3"
+                className="w-full"
                 isLoading={loading}
                 onClick={() => onSubmit(to)}
               >
-                Review
+                Send
               </Button>
             </div>
           </LayoutFooter>

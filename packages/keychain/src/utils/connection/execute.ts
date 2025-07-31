@@ -41,7 +41,7 @@ export function createExecuteUrl(
   // Store callbacks if provided
   if (options.resolve || options.reject || options.onCancel) {
     storeCallbacks(id, {
-      resolve: options.resolve,
+      resolve: options.resolve as ((result: unknown) => void) | undefined,
       reject: options.reject,
       onCancel: options.onCancel,
     });
@@ -79,7 +79,7 @@ export function parseControllerError(
 export async function executeCore(
   transactions: AllowArray<Call>,
   feeSource?: FeeSource,
-): Promise<string> {
+): Promise<InvokeFunctionResponse> {
   const controller: Controller | undefined = window.controller;
 
   if (!controller) {
@@ -90,11 +90,8 @@ export async function executeCore(
 
   // Try paymaster flow
   try {
-    const { transaction_hash } = await controller.executeFromOutsideV3(
-      calls,
-      feeSource,
-    );
-    return transaction_hash;
+    const res = await controller.executeFromOutsideV3(calls, feeSource);
+    return res;
   } catch (e) {
     const error = e as ControllerError;
     if (error.code !== ErrorCode.PaymasterNotSupported) {
@@ -104,12 +101,12 @@ export async function executeCore(
 
   // User pays flow
   const estimate = await controller.estimateInvokeFee(calls);
-  const { transaction_hash } = await controller.execute(
+  const res = await controller.execute(
     transactions as Call[],
     estimate,
     feeSource,
   );
-  return transaction_hash;
+  return res;
 }
 
 export function execute({
@@ -170,7 +167,7 @@ export function execute({
 
         // Use the consolidated execution logic
         try {
-          const transaction_hash = await executeCore(calls, feeSource);
+          const { transaction_hash } = await executeCore(calls, feeSource);
           return resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,
