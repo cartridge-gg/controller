@@ -48,11 +48,7 @@ import { erc20Metadata } from "@cartridge/presets";
 
 const OFFSET = 10;
 
-export function CollectibleAsset({
-  purchaseView = true,
-}: {
-  purchaseView?: boolean;
-}) {
+export function CollectibleAsset() {
   const account = useAccount();
   const address = account?.address || "";
   const { chainId, namespace, project, controller } = useConnection();
@@ -64,11 +60,15 @@ export function CollectibleAsset({
   const [loading, setLoading] = useState(false);
   const { execute } = useExecute();
 
+  const purchaseView = useMemo(
+    () => searchParams.get("purchaseView") === "true",
+    [searchParams],
+  );
+
   const orders = useMemo(() => {
     if (!purchaseView) return selfOrders;
-    // return tokenOrders.filter((order) => BigInt(order.owner) !== BigInt(address));
     return tokenOrders.filter(
-      (order) => BigInt(order.owner) === BigInt(address),
+      (order) => BigInt(order.owner) !== BigInt(address),
     );
   }, [purchaseView, selfOrders, tokenOrders, address]);
 
@@ -283,7 +283,7 @@ export function CollectibleAsset({
                         order={order}
                         self={address}
                         handleUnlist={handleUnlist}
-                        purchaseView={purchaseView}
+                        purchaseView={!!purchaseView}
                       />
                     ))}
                     {remaining > 0 && !purchaseView && (
