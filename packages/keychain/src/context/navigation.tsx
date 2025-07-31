@@ -21,7 +21,7 @@ interface NavigationContextType {
   navigationDepth: number;
   navigate: (
     to: string | number,
-    options?: { replace?: boolean; state?: unknown; resetStack?: boolean },
+    options?: { replace?: boolean; state?: unknown; reset?: boolean },
   ) => void;
   navigateToRoot: () => void;
   goBack: () => void;
@@ -183,7 +183,7 @@ export function NavigationProvider({
   const navigateWithTracking = useCallback(
     (
       to: string | number,
-      options?: { replace?: boolean; state?: unknown; resetStack?: boolean },
+      options?: { replace?: boolean; state?: unknown; reset?: boolean },
     ) => {
       if (typeof to === "number") {
         // Handle relative navigation
@@ -197,8 +197,8 @@ export function NavigationProvider({
           navigate(entry.path, { state: entry.state });
         }
       } else {
-        // Handle resetStack option - reset navigation stack to just this path
-        if (options?.resetStack) {
+        // Handle reset option - reset navigation stack to just this path
+        if (options?.reset) {
           const entry: NavigationEntry = {
             path: to,
             state: options.state,
