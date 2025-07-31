@@ -32,7 +32,7 @@ import { AddSignerRoute } from "./settings/AddSignerRoute";
 import { PurchaseCredits } from "./purchasenew/credits";
 import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { PaymentMethod } from "./purchasenew/method";
-import { PurchaseProvider } from "@/context";
+import { StripeCheckout } from "./purchasenew/checkout/stripe";
 
 export function App() {
   return (
@@ -50,14 +50,7 @@ export function App() {
         <Route path="success" element={<Success />} />
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />
-        <Route
-          path="/purchase"
-          element={
-            <PurchaseProvider>
-              <Outlet />
-            </PurchaseProvider>
-          }
-        >
+        <Route path="/purchase" element={<Outlet />}>
           <Route path="credits" element={<PurchaseCredits />} />
           <Route
             path="starterpack/:starterpackId"
@@ -68,6 +61,7 @@ export function App() {
             <Route path="crypto" element={<></>} />
             <Route path="card" element={<></>} />
           </Route>
+          <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="network" element={<></>} />
           <Route path="wallet" element={<></>} />
           <Route path="review" element={<></>} />

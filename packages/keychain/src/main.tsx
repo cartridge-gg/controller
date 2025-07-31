@@ -7,6 +7,7 @@ import { NavigationProvider } from "@/context/navigation";
 import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import Controller from "./utils/controller";
+import { PurchaseProvider } from "./context";
 
 declare global {
   interface Window {
@@ -22,7 +23,9 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <NavigationProvider>
         <Provider>
-          <App />
+          <PurchaseProvider>
+            <App />
+          </PurchaseProvider>
         </Provider>
       </NavigationProvider>
       <SonnerToaster position="bottom-right" />

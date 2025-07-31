@@ -1,7 +1,6 @@
 import { useNavigation, usePurchaseContext } from "@/context";
 import {
   Button,
-  ControllerColorIcon,
   CreditCardIcon,
   DepositIcon,
   HeaderInner,
@@ -10,29 +9,45 @@ import {
   PaymentCard,
   WalletIcon,
 } from "@cartridge/ui";
+import { useState } from "react";
+import { ErrorAlert } from "../ErrorAlert";
 
 export function PaymentMethod() {
-  const { goBack } = useNavigation();
-  const { onCreditCard } = usePurchaseContext();
+  const { goBack, navigate } = useNavigation();
+  const { onCreditCard, displayError } = usePurchaseContext();
+  const [isLoading, setIsLoading] = useState(false);
   return (
     <>
       <HeaderInner
         title="Choose Payment Method"
         icon={<DepositIcon variant="solid" size="lg" />}
       />
-      <LayoutContent>
-        <PaymentCard text="Controller" icon={<ControllerColorIcon />} />
+      <LayoutContent className={isLoading ? "pointer-events-none" : ""}>
+        {/* <PaymentCard text="Controller" icon={<ControllerColorIcon />} /> */}
         <PaymentCard
           text="Credit Card"
           icon={<CreditCardIcon variant="solid" />}
           onClick={async () => {
+            setIsLoading(true);
             await onCreditCard();
+            navigate("/purchase/checkout/stripe");
           }}
         />
         <PaymentCard text="Wallet" icon={<WalletIcon variant="solid" />} />
       </LayoutContent>
       <LayoutFooter>
-        <Button variant="secondary" onClick={goBack}>
+        {displayError && (
+          <ErrorAlert
+            variant="error"
+            title="Purchase Error"
+            description={displayError.message}
+          />
+        )}
+        <Button
+          variant="secondary"
+          onClick={goBack}
+          disabled={isLoading || !!displayError}
+        >
           Back
         </Button>
       </LayoutFooter>

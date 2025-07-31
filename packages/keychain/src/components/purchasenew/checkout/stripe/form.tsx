@@ -10,7 +10,7 @@ import {
   StripeElements,
   StripePaymentElementOptions,
 } from "@stripe/stripe-js";
-import { Button, LayoutContent, LayoutFooter } from "@cartridge/ui";
+import { Button, CreditCardIcon, HeaderInner, LayoutContent, LayoutFooter } from "@cartridge/ui";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { CostBreakdown } from "../../review/cost";
 
@@ -119,6 +119,10 @@ export const StripeCheckoutContainer = ({
 }) => {
   return (
     <>
+      <HeaderInner
+        title="Enter Payment Details"
+        icon={<CreditCardIcon variant="solid" size="lg" />}
+      />
       <LayoutContent className="gap-6">{children}</LayoutContent>
       <LayoutFooter>
         {error && (

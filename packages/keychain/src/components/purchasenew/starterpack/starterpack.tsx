@@ -13,14 +13,22 @@ import {
 import { MintAllowance } from "@cartridge/ui/utils/api/cartridge";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { CostBreakdown } from "../review/cost";
-import { useNavigation } from "@/context";
+import { useNavigation, usePurchaseContext } from "@/context";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
   const { name, items, supply, mintAllowance, isLoading } =
     useStarterPack(starterpackId);
+
+  const { setStarterpackId } = usePurchaseContext();
+
+  if (!starterpackId) {
+    throw new Error("Starterpack ID is required");
+  }
+
+  setStarterpackId(starterpackId);
 
   if (isLoading) {
     return <LoadingState />;

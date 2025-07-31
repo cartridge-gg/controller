@@ -12,23 +12,12 @@ import { useWallets } from "@/hooks/wallets";
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
-
-// Types
-export type PurchaseType = "credits" | "starterpack";
-export type PaymentMethodType = "controller" | "stripe" | "crypto";
+import { Stripe } from "@stripe/stripe-js";
 
 export interface CostDetails {
   baseCostInCents: number;
   processingFeeInCents: number;
   totalInCents: number;
-}
-
-export interface StarterPackDetails {
-  id: string;
-  name: string;
-  priceUsd: number;
-  starterPackItems: any[];
-  mintAllowance?: any;
 }
 
 export interface Network {
@@ -39,14 +28,11 @@ export interface Network {
 
 export interface PurchaseContextType {
   // Purchase details
-  purchaseType: PurchaseType;
-  amount: number;
-  wholeCredits: number;
+  usdAmount: number;
   starterpackId?: string;
   teamId?: string;
 
   // Payment state
-  paymentMethod?: PaymentMethodType;
   selectedNetwork?: Network;
   selectedWallet?: ExternalWallet;
   walletAddress?: string;
@@ -54,7 +40,7 @@ export interface PurchaseContextType {
   // Stripe state
   clientSecret?: string;
   costDetails?: CostDetails;
-  stripePromise: any;
+  stripePromise: Promise<Stripe | null>;
 
   // Loading states
   isStripeLoading: boolean;
@@ -65,28 +51,15 @@ export interface PurchaseContextType {
   displayError?: Error;
 
   // Actions
-  setPurchaseType: (type: PurchaseType) => void;
-  setAmount: (amount: number) => void;
-  setWholeCredits: (credits: number) => void;
+  setUsdAmount: (amount: number) => void;
   setStarterpackId: (id: string) => void;
-  setTeamId: (teamId?: string) => void;
-  setPaymentMethod: (method?: PaymentMethodType) => void;
   setSelectedNetwork: (network?: Network) => void;
   setSelectedWallet: (wallet?: ExternalWallet) => void;
-  setWalletAddress: (address?: string) => void;
-  setClientSecret: (secret?: string) => void;
-  setCostDetails: (cost?: CostDetails) => void;
-  setDisplayError: (error?: Error) => void;
 
   // Payment actions
-  onAmountChanged: (usdAmount: number) => void;
   onCreditCard: () => Promise<void>;
   onExternalConnect: (wallet: ExternalWallet) => Promise<void>;
   onCompletePurchase: () => void;
-
-  // Utility
-  clearState: () => void;
-  closeModal: () => void;
 }
 
 const PurchaseContext = createContext<PurchaseContextType | undefined>(
@@ -104,7 +77,7 @@ export const PurchaseProvider = ({
   isSlot = false,
   onComplete,
 }: PurchaseProviderProps) => {
-  const { controller, closeModal } = useConnection();
+  const { controller } = useConnection();
   const {
     isLoading: isLoadingWallets,
     error: walletError,
@@ -119,17 +92,9 @@ export const PurchaseProvider = ({
   } = useStripePayment({ isSlot });
 
   // State
-  const [purchaseType, setPurchaseType] = useState<PurchaseType>("credits");
-  const [amount, setAmount] = useState<number>(USD_AMOUNTS[0]);
-  const [wholeCredits, setWholeCredits] = useState<number>(
-    usdToCredits(USD_AMOUNTS[0]),
-  );
+  const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
   const [starterpackId, setStarterpackId] = useState<string | undefined>();
-  const [teamId, setTeamId] = useState<string | undefined>();
 
-  const [paymentMethod, setPaymentMethod] = useState<
-    PaymentMethodType | undefined
-  >();
   const [selectedNetwork, setSelectedNetwork] = useState<Network | undefined>();
   const [selectedWallet, setSelectedWallet] = useState<
     ExternalWallet | undefined
@@ -147,36 +112,22 @@ export const PurchaseProvider = ({
     setDisplayError(walletError || stripeError || undefined);
   }, [walletError, stripeError]);
 
-  // Actions
-  const onAmountChanged = useCallback((usdAmount: number) => {
-    setDisplayError(undefined);
-    setAmount(usdAmount);
-    setWholeCredits(usdToCredits(usdAmount));
-  }, []);
-
   const onCreditCard = useCallback(async () => {
     if (!controller) return;
 
     try {
       const paymentIntent = await createPaymentIntent(
-        wholeCredits,
+        usdToCredits(usdAmount),
         controller.username(),
-        teamId,
+        undefined,
         starterpackId,
       );
       setClientSecret(paymentIntent.clientSecret);
       setCostDetails(paymentIntent.pricing);
-      setPaymentMethod("stripe");
     } catch (e) {
       setDisplayError(e as Error);
     }
-  }, [
-    wholeCredits,
-    createPaymentIntent,
-    controller,
-    starterpackId,
-    teamId,
-  ]);
+  }, [usdAmount, createPaymentIntent, controller, starterpackId]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet) => {
@@ -193,7 +144,6 @@ export const PurchaseProvider = ({
           return;
         }
         setWalletAddress(res.account);
-        setPaymentMethod("crypto");
       }
     },
     [connectWallet],
@@ -205,31 +155,12 @@ export const PurchaseProvider = ({
     }
   }, [onComplete]);
 
-  const clearState = useCallback(() => {
-    setPurchaseType("credits");
-    setAmount(USD_AMOUNTS[0]);
-    setWholeCredits(usdToCredits(USD_AMOUNTS[0]));
-    setStarterpackId(undefined);
-    setTeamId(undefined);
-    setPaymentMethod(undefined);
-    setSelectedNetwork(undefined);
-    setSelectedWallet(undefined);
-    setWalletAddress(undefined);
-    setClientSecret(undefined);
-    setCostDetails(undefined);
-    setDisplayError(undefined);
-  }, []);
-
   const contextValue: PurchaseContextType = {
     // Purchase details
-    purchaseType,
-    amount,
-    wholeCredits,
+    usdAmount,
     starterpackId,
-    teamId,
 
     // Payment state
-    paymentMethod,
     selectedNetwork,
     selectedWallet,
     walletAddress,
@@ -248,28 +179,15 @@ export const PurchaseProvider = ({
     displayError,
 
     // Setters
-    setPurchaseType,
-    setAmount,
-    setWholeCredits,
+    setUsdAmount,
     setStarterpackId,
-    setTeamId,
-    setPaymentMethod,
     setSelectedNetwork,
     setSelectedWallet,
-    setWalletAddress,
-    setClientSecret,
-    setCostDetails,
-    setDisplayError,
 
     // Actions
-    onAmountChanged,
     onCreditCard,
     onExternalConnect,
     onCompletePurchase,
-
-    // Utility
-    clearState,
-    closeModal: closeModal || (() => {}),
   };
 
   return (
