@@ -32,7 +32,7 @@ export function StripeCheckout() {
     >
       <CheckoutForm
         cost={costDetails!}
-        onComplete={() => navigate("/purchase/success", { resetStack: true })}
+        onComplete={() => navigate("/purchase/success", { reset: true })}
       />
     </Elements>
   );
