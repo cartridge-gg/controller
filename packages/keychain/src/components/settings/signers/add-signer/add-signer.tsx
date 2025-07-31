@@ -11,8 +11,8 @@ import {
   WalletAdapter,
 } from "@cartridge/controller";
 import {
+	JsAddSignerInput,
   JsControllerError,
-  JsSignerInput,
   Signer,
 } from "@cartridge/controller-wasm";
 import {
@@ -196,7 +196,7 @@ const WalletAuths = ({
     async (wallet: SignerMethodKind) => {
       let response: ExternalWalletResponse<unknown> | null = null;
       let signer: Signer | null = null;
-      let signerInput: JsSignerInput | null = null;
+      let signerInput: JsAddSignerInput | null = null;
       switch (wallet) {
         case "metamask":
         case "rabby": {

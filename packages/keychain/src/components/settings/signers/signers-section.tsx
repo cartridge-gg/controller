@@ -3,16 +3,20 @@ import {
   CredentialMetadata,
 } from "@cartridge/ui/utils/api/cartridge";
 
+import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
-import { Signer, signerToGuid } from "@cartridge/controller-wasm";
+import { useFeature } from "@/hooks/features";
+import {
+  JsRemoveSignerInput,
+  Signer,
+  signerToGuid,
+} from "@cartridge/controller-wasm";
 import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
-import { useNavigation } from "@/context/navigation";
 import { SectionHeader } from "../section-header";
 import { SignerCard } from "./signer-card";
-import { useFeature } from "@/hooks/features";
 
 export const SignersSection = ({
   controllerQuery,
@@ -20,26 +24,35 @@ export const SignersSection = ({
   controllerQuery: QueryObserverResult<ControllerQuery>;
 }) => {
   const { chainId, controller } = useConnection();
-  const isFeatureEnabled = useFeature("addSigner");
+  const canAddSigner = useFeature("addSigner");
   const { navigate } = useNavigation();
 
-  const canAddSigner = isFeatureEnabled;
+  const signers = useMemo(() => {
+    if (!controllerQuery.data?.controller?.signers) return undefined;
+    let oldestSigner: { index: number; createdAt: string } | undefined;
 
-  const signers = useMemo(
-    () =>
-      controllerQuery.data?.controller?.signers
-        ?.map((signer) => {
-          return {
-            ...signer,
-            isCurrent:
-              signerToGuid(
-                toJsSigner(signer.metadata as CredentialMetadata),
-              ) === controller?.ownerGuid(),
-          };
-        })
-        .sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent)),
-    [controllerQuery.data, controller],
-  );
+    const signers = controllerQuery.data?.controller?.signers?.map(
+      (signer, index) => {
+        if (
+          !oldestSigner ||
+          new Date(signer.createdAt) < new Date(oldestSigner.createdAt)
+        ) {
+          oldestSigner = { index, createdAt: signer.createdAt };
+        }
+        return {
+          ...signer,
+          isOriginal: false,
+          isCurrent:
+            signerToGuid(toJsSigner(signer.metadata as CredentialMetadata)) ===
+            controller?.ownerGuid(),
+        };
+      },
+    );
+
+    if (oldestSigner) signers[oldestSigner.index].isOriginal = true;
+
+    return signers.sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent));
+  }, [controllerQuery.data, controller]);
 
   return (
     <section className="space-y-4">
@@ -59,6 +72,55 @@ export const SignersSection = ({
                 key={`${index}`}
                 current={signer.isCurrent}
                 signer={signer.metadata as CredentialMetadata}
+                isOriginalSigner={signer.isOriginal}
+                onDelete={
+                  signer.isCurrent
+                    ? undefined
+                    : async () => {
+                        let jsSigner: JsRemoveSignerInput | undefined;
+                        switch (signer.metadata.__typename) {
+                          case "Eip191Credentials":
+                            jsSigner = {
+                              type: "eip191",
+                              credential: JSON.stringify(
+                                signer.metadata.eip191?.[0],
+                              ),
+                            };
+                            break;
+                          case "WebauthnCredentials":
+                            jsSigner = {
+                              type: "webauthn",
+                              credential: JSON.stringify({
+                                ...signer.metadata.webauthn?.[0],
+                                rpId: import.meta.env.VITE_RP_ID,
+                              }),
+                            };
+                            break;
+                          case "SIWSCredentials":
+                            jsSigner = {
+                              type: "siws",
+                              credential: JSON.stringify(
+                                signer.metadata.siws?.[0],
+                              ),
+                            };
+                            break;
+                          case "StarknetCredentials": {
+                            jsSigner = {
+                              type: "starknet",
+                              credential: JSON.stringify(
+                                signer.metadata.starknet?.[0],
+                              ),
+                            };
+                            break;
+                          }
+                          default:
+                            throw new Error("Unimplemented");
+                        }
+                        await controller?.removeSigner(jsSigner);
+                        await controllerQuery.refetch();
+                        return;
+                      }
+                }
               />
             );
           })
