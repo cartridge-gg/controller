@@ -41,7 +41,6 @@ export function CryptoCheckoutInner() {
         <Receiving title="Receiving" items={purchaseItems} />
       </LayoutContent>
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
         <CostBreakdown
           rails={"crypto"}
           paymentUnit="usdc"
@@ -52,6 +51,7 @@ export function CryptoCheckoutInner() {
             totalInCents: usdAmount * 100 * (1 + CARTRIDGE_FEE),
           }}
         />
+        {error && <ErrorAlert title="Error" description={error.message} />}
         <Button onClick={handlePurchase} isLoading={isLoading}>
           Purchase
         </Button>
