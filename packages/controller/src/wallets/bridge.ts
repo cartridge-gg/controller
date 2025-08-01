@@ -131,27 +131,27 @@ export class WalletBridge {
     identifier: ExternalWalletType | string,
   ): WalletAdapter {
     let wallet: WalletAdapter | undefined;
-    
+    let checkSummedAddress: string;
+
     try {
-      const checkSummedAddress = getAddress(identifier);
-      wallet = this.walletAdapters.values().find((adapter) => {
-        return adapter.getConnectedAccounts().includes(checkSummedAddress);
-      });
-      if (!wallet) {
-        throw new Error(
-          `No wallet found with connected address ${identifier}`,
-        );
-      }
+      checkSummedAddress = getAddress(identifier);
     } catch {
       // getAddress failed, so this must be a wallet type
       wallet = this.walletAdapters.get(identifier as ExternalWalletType);
       if (!wallet) {
-        throw new Error(
-          `Wallet ${identifier} is not connected or supported`,
-        );
+        throw new Error(`Wallet ${identifier} is not connected or supported`);
       }
+      return wallet;
     }
-    
+
+    wallet = this.walletAdapters.values().find((adapter) => {
+      return adapter.getConnectedAccounts().includes(checkSummedAddress);
+    });
+
+    if (!wallet) {
+      throw new Error(`No wallet found with connected address ${identifier}`);
+    }
+
     return wallet;
   }
 
