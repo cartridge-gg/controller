@@ -56,8 +56,7 @@ export function CollectiblePurchase() {
   const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
   const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
-  const { provider, orders, marketplaceFee, setAmount } =
-    useMarketplace();
+  const { provider, orders, marketplaceFee, setAmount } = useMarketplace();
   const { navigate } = useNavigation();
 
   const [searchParams] = useSearchParams();

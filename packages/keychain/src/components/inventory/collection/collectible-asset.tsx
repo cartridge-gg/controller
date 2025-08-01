@@ -21,13 +21,7 @@ import {
   Thumbnail,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import {
-  AllowArray,
-  cairo,
-  Call,
-  CallData,
-  constants,
-} from "starknet";
+import { AllowArray, cairo, Call, CallData, constants } from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollectible } from "@/hooks/collectible";
@@ -176,7 +170,7 @@ export function CollectibleAsset() {
         ];
         // Create execute URL with returnTo parameter pointing back to current page
         const executeUrl = createExecuteUrl(calls);
-  
+
         // Navigate to execute screen with returnTo parameter to come back to current page
         const currentPath = window.location.pathname + window.location.search;
         const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;

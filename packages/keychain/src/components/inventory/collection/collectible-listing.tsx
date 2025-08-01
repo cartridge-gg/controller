@@ -26,12 +26,7 @@ import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
 import { useTokens } from "@/hooks/token";
 import { useConnection } from "@/hooks/connection";
-import {
-  AllowArray,
-  cairo,
-  Call,
-  CallData,
-} from "starknet";
+import { AllowArray, cairo, Call, CallData } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
@@ -230,7 +225,10 @@ export function CollectibleListing() {
       const executeUrl = createExecuteUrl(calls);
 
       // Navigate to execute screen with returnTo parameter to come back to the parent page
-      const currentPath = `${window.location.pathname + window.location.search}`.split("/").slice(0, -1).join("/");
+      const currentPath = `${window.location.pathname + window.location.search}`
+        .split("/")
+        .slice(0, -1)
+        .join("/");
       const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
       navigate(executeUrlWithReturn);
     } catch (error) {

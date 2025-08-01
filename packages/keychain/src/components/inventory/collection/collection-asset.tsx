@@ -52,8 +52,7 @@ export function CollectionAsset() {
   const theme = useControllerTheme();
   const { editions } = useArcade();
   const { tokens } = useTokens();
-  const { isListed, provider, selfOrders, order, setAmount } =
-    useMarketplace();
+  const { isListed, provider, selfOrders, order, setAmount } = useMarketplace();
   const [loading, setLoading] = useState(false);
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
