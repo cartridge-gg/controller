@@ -100,7 +100,6 @@ export function SendToken() {
       const inventoryPath = `/account/${username}/inventory?${searchParams.toString()}`;
       const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(inventoryPath)}`;
       navigate(executeUrlWithReturn);
-      navigate(executeUrlWithReturn);
       setLoading(false);
     },
     [
