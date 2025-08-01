@@ -51,7 +51,6 @@ export function ExecutionContainer({
   const [isLoading, setIsLoading] = useState(false);
   const [isEstimating, setIsEstimating] = useState(true);
   const [ctaState, setCTAState] = useState<"deploy" | "execute">("execute");
-  const { navigate } = useNavigation();
 
   // Prevent unnecessary estimate fee calls.
   const prevTransactionsRef = useRef<{
@@ -172,15 +171,7 @@ export function ExecutionContainer({
                   ) : (
                     <Fees isLoading={isEstimating} maxFee={maxFee} />
                   )}
-                  <Button
-                    onClick={() => {
-                      navigate(
-                        `/funding?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
-                      );
-                    }}
-                  >
-                    ADD FUNDS
-                  </Button>
+                  <FundingButton />
                 </>
               );
             case ErrorCode.StarknetValidationFailure:
@@ -194,15 +185,7 @@ export function ExecutionContainer({
                 return (
                   <>
                     <ControllerErrorAlert error={ctrlError} />
-                    <Button
-                      onClick={() => {
-                        navigate(
-                          `/funding?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
-                        );
-                      }}
-                    >
-                      ADD FUNDS
-                    </Button>
+                    <FundingButton />
                   </>
                 );
               }
@@ -251,6 +234,7 @@ export function ExecutionContainer({
                     onClick={handleSubmit}
                     isLoading={isLoading}
                     disabled={
+                      isEstimating ||
                       !!ctrlError ||
                       !transactions ||
                       !!(maxFee === null && transactions?.length)
@@ -266,3 +250,18 @@ export function ExecutionContainer({
     </>
   );
 }
+
+const FundingButton = () => {
+  const { navigate } = useNavigation();
+  return (
+    <Button
+      onClick={() => {
+        navigate(
+          `/purchase?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+        );
+      }}
+    >
+      ADD FUNDS
+    </Button>
+  );
+};
