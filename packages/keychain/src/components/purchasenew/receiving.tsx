@@ -22,7 +22,10 @@ export function Receiving({ title, items, isLoading }: ReceivingProps) {
 
       <CardListContent>
         {items.map((item) => (
-          <CardListItem className="flex flex-row items-center p-3">
+          <CardListItem
+            key={item.title}
+            className="flex flex-row items-center p-3"
+          >
             <div className="flex flex-row items-center gap-3">
               <Thumbnail
                 size="lg"

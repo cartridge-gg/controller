@@ -1,4 +1,4 @@
-import { usePurchaseContext } from "@/context";
+import { useNavigation, usePurchaseContext } from "@/context";
 import {
   Button,
   GiftIcon,
@@ -8,28 +8,25 @@ import {
 } from "@cartridge/ui";
 import { Receiving } from "../../receiving";
 import { CostBreakdown } from "../../review/cost";
-import { useCryptoPayment } from "@/hooks/payments/crypto";
 import { useCallback } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
 const CARTRIDGE_FEE = 0.025;
 
 export function CryptoCheckout() {
-  return <CryptoCheckoutInner />;
-}
-
-export function CryptoCheckoutInner() {
-  const { purchaseItems, usdAmount, selectedWallet, walletAddress, starterpackId } = usePurchaseContext();
-  const { sendPayment, waitForPayment, error, isLoading } = useCryptoPayment();
-
-  const handlePurchase = useCallback(async () => {
-    if (!walletAddress || !selectedWallet) {
-      return;
-    }
-
-    const paymentId = await sendPayment(walletAddress, 0, selectedWallet.platform!, undefined, starterpackId);
-    await waitForPayment(paymentId);
-  }, [sendPayment, selectedWallet, walletAddress, starterpackId]);
+  const {
+    purchaseItems,
+    usdAmount,
+    isCryptoLoading,
+    displayError,
+    selectedWallet,
+    onCrypto,
+  } = usePurchaseContext();
+  const { navigate } = useNavigation();
+  const onPurchase = useCallback(async () => {
+    await onCrypto();
+    navigate("/purchase/pending", { reset: true });
+  }, [onCrypto, navigate]);
 
   return (
     <>
@@ -51,8 +48,10 @@ export function CryptoCheckoutInner() {
             totalInCents: usdAmount * 100 * (1 + CARTRIDGE_FEE),
           }}
         />
-        {error && <ErrorAlert title="Error" description={error.message} />}
-        <Button onClick={handlePurchase} isLoading={isLoading}>
+        {displayError && (
+          <ErrorAlert title="Error" description={displayError.message} />
+        )}
+        <Button onClick={onPurchase} isLoading={isCryptoLoading}>
           Purchase
         </Button>
       </LayoutFooter>

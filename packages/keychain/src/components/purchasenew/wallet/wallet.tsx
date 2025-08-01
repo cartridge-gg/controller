@@ -15,7 +15,8 @@ import { ExternalWallet } from "@cartridge/controller";
 export function SelectWallet() {
   const { goBack, navigate } = useNavigation();
   const { platformId } = useParams();
-  const { onExternalConnect, wallets, isWalletConnecting } = usePurchaseContext();
+  const { onExternalConnect, wallets, isWalletConnecting } =
+    usePurchaseContext();
   const [isLoading, setIsLoading] = useState(true);
   const [availableWallets, setAvailableWallets] = useState<ExternalWallet[]>(
     [],
@@ -102,13 +103,19 @@ export function SelectWallet() {
                 await onExternalConnect(wallet);
                 navigate(`/purchase/checkout/crypto`);
               }}
-              className={isWalletConnecting ? "opacity-50 pointer-events-none" : ""}
+              className={
+                isWalletConnecting ? "opacity-50 pointer-events-none" : ""
+              }
             />
           );
         })}
       </LayoutContent>
       <LayoutFooter>
-        <Button variant="secondary" onClick={goBack} disabled={isWalletConnecting}>
+        <Button
+          variant="secondary"
+          onClick={goBack}
+          disabled={isWalletConnecting}
+        >
           Back
         </Button>
       </LayoutFooter>

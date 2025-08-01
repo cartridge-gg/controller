@@ -13,6 +13,7 @@ import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
+import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
 
 export interface CostDetails {
   baseCostInCents: number;
@@ -50,9 +51,12 @@ export interface PurchaseContextType {
   purchaseItems: PurchaseItem[];
 
   // Payment state
+  paymentMethod?: PaymentMethod;
   selectedWallet?: ExternalWallet;
   walletAddress?: string;
   wallets?: ExternalWallet[];
+  paymentId?: string;
+  explorer?: Explorer;
 
   // Stripe state
   clientSecret?: string;
@@ -62,6 +66,7 @@ export interface PurchaseContextType {
   // Loading states
   isStripeLoading: boolean;
   isWalletConnecting: boolean;
+  isCryptoLoading: boolean;
 
   // Error state
   displayError?: Error;
@@ -73,6 +78,7 @@ export interface PurchaseContextType {
 
   // Payment actions
   onCreditCard: () => Promise<void>;
+  onCrypto: () => Promise<void>;
   onExternalConnect: (wallet: ExternalWallet) => Promise<void>;
 }
 
@@ -104,10 +110,21 @@ export const PurchaseProvider = ({
     createPaymentIntent,
   } = useStripePayment({ isSlot });
 
+  const {
+    error: cryptoError,
+    isLoading: isCryptoLoading,
+    sendPayment,
+  } = useCryptoPayment();
+
   // State
+  const [paymentMethod, setPaymentMethod] = useState<
+    PaymentMethod | undefined
+  >();
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
   const [starterpackId, setStarterpackId] = useState<string | undefined>();
   const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
+  const [paymentId, setPaymentId] = useState<string | undefined>();
+  const [explorer, setExplorer] = useState<Explorer | undefined>();
 
   const [walletAddress, setWalletAddress] = useState<string>();
   const [selectedWallet, setSelectedWallet] = useState<
@@ -120,13 +137,14 @@ export const PurchaseProvider = ({
   const [displayError, setDisplayError] = useState<Error | undefined>();
 
   useEffect(() => {
-    setDisplayError(stripeError || walletError || undefined);
+    setDisplayError(stripeError || walletError || cryptoError || undefined);
   }, [stripeError]);
 
   const onCreditCard = useCallback(async () => {
     if (!controller) return;
 
     try {
+      setPaymentMethod("stripe");
       const paymentIntent = await createPaymentIntent(
         usdToCredits(usdAmount),
         controller.username(),
@@ -139,6 +157,23 @@ export const PurchaseProvider = ({
       setDisplayError(e as Error);
     }
   }, [usdAmount, controller, starterpackId, createPaymentIntent]);
+
+  const onCrypto = useCallback(async () => {
+    if (!controller || !selectedWallet || !walletAddress) return;
+
+    setPaymentMethod("crypto");
+    const paymentId = await sendPayment(
+      walletAddress,
+      0,
+      selectedWallet.platform!,
+      undefined,
+      starterpackId,
+      (explorer) => {
+        setExplorer(explorer);
+      },
+    );
+    setPaymentId(paymentId);
+  }, [controller, selectedWallet, walletAddress, starterpackId, sendPayment]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet) => {
@@ -166,9 +201,12 @@ export const PurchaseProvider = ({
     purchaseItems,
 
     // Payment state
+    paymentMethod,
     selectedWallet,
     walletAddress,
     wallets,
+    paymentId,
+    explorer,
 
     // Stripe state
     clientSecret,
@@ -178,6 +216,7 @@ export const PurchaseProvider = ({
     // Loading states
     isStripeLoading,
     isWalletConnecting,
+    isCryptoLoading,
 
     // Error state
     displayError,
@@ -189,6 +228,7 @@ export const PurchaseProvider = ({
 
     // Actions
     onCreditCard,
+    onCrypto,
     onExternalConnect,
   };
 

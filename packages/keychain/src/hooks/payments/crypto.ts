@@ -8,7 +8,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
-import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
+import { ExternalPlatform } from "@cartridge/controller";
 import {
   clusterApiUrl,
   Connection,
