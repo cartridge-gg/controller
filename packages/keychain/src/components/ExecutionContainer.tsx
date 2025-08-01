@@ -80,6 +80,7 @@ export function ExecutionContainer({
         const error = parseControllerError(e as unknown as ControllerError);
         onError?.(error);
         setCtrlError(error);
+        setIsEstimating(false);
       }
     },
     [controller, onError, setCtrlError, executionError],
