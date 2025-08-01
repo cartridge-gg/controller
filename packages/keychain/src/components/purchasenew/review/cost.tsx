@@ -28,7 +28,6 @@ export function CostBreakdown({
   paymentUnit?: PaymentUnit;
   openFeesTooltip?: boolean;
 }) {
-  console.log("network", network);
   const formatCurrency = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
   };

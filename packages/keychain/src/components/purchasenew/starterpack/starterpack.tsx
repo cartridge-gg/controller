@@ -14,16 +14,16 @@ import { MintAllowance } from "@cartridge/ui/utils/api/cartridge";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
 import { useParams } from "react-router-dom";
-import { CostBreakdown } from "../review/cost";
 import { useNavigation, usePurchaseContext } from "@/context";
 import { useEffect } from "react";
 import { PurchaseItem, PurchaseItemType } from "@/context/purchase";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
-  const { name, items, supply, mintAllowance, isLoading } =
+  const { name, items, supply, mintAllowance, priceUsd, isLoading } =
     useStarterPack(starterpackId);
-  const { setStarterpackId, setPurchaseItems } = usePurchaseContext();
+  const { setStarterpackId, setPurchaseItems, setUsdAmount } =
+    usePurchaseContext();
 
   if (!starterpackId) {
     throw new Error("Starterpack ID is required");
@@ -32,6 +32,7 @@ export function PurchaseStarterpack() {
   useEffect(() => {
     if (!isLoading && starterpackId) {
       setStarterpackId(starterpackId);
+      setUsdAmount(priceUsd);
       const purchaseItems = items.map((item) => {
         return {
           title: item.title,
@@ -108,14 +109,6 @@ export function StarterPackInner({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        <CostBreakdown
-          rails="stripe"
-          costDetails={{
-            baseCostInCents: 1000,
-            processingFeeInCents: 100,
-            totalInCents: 1100,
-          }}
-        />
         <Button onClick={() => navigate("/purchase/method")}>Purchase</Button>
       </LayoutFooter>
     </>

@@ -8,11 +8,11 @@ import {
 } from "react";
 import { ExternalWallet } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { useWallets } from "@/hooks/wallets";
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
+import { useWallets } from "@/hooks/wallets";
 
 export interface CostDetails {
   baseCostInCents: number;
@@ -50,9 +50,9 @@ export interface PurchaseContextType {
   purchaseItems: PurchaseItem[];
 
   // Payment state
-  selectedNetwork?: Network;
   selectedWallet?: ExternalWallet;
   walletAddress?: string;
+  wallets?: ExternalWallet[];
 
   // Stripe state
   clientSecret?: string;
@@ -61,23 +61,19 @@ export interface PurchaseContextType {
 
   // Loading states
   isStripeLoading: boolean;
-  isLoadingWallets: boolean;
-  isClaiming: boolean;
+  isWalletConnecting: boolean;
 
   // Error state
   displayError?: Error;
 
   // Actions
   setUsdAmount: (amount: number) => void;
-  setSelectedNetwork: (network?: Network) => void;
-  setSelectedWallet: (wallet?: ExternalWallet) => void;
   setPurchaseItems: (items: PurchaseItem[]) => void;
   setStarterpackId: (id: string) => void;
 
   // Payment actions
   onCreditCard: () => Promise<void>;
   onExternalConnect: (wallet: ExternalWallet) => Promise<void>;
-  onCompletePurchase: () => void;
 }
 
 const PurchaseContext = createContext<PurchaseContextType | undefined>(
@@ -87,18 +83,17 @@ const PurchaseContext = createContext<PurchaseContextType | undefined>(
 export interface PurchaseProviderProps {
   children: ReactNode;
   isSlot?: boolean;
-  onComplete?: () => void;
 }
 
 export const PurchaseProvider = ({
   children,
   isSlot = false,
-  onComplete,
 }: PurchaseProviderProps) => {
   const { controller } = useConnection();
   const {
-    isLoading: isLoadingWallets,
+    wallets,
     error: walletError,
+    isConnecting: isWalletConnecting,
     connectWallet,
   } = useWallets();
 
@@ -114,22 +109,19 @@ export const PurchaseProvider = ({
   const [starterpackId, setStarterpackId] = useState<string | undefined>();
   const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
 
-  const [selectedNetwork, setSelectedNetwork] = useState<Network | undefined>();
+  const [walletAddress, setWalletAddress] = useState<string>();
   const [selectedWallet, setSelectedWallet] = useState<
     ExternalWallet | undefined
   >();
-  const [walletAddress, setWalletAddress] = useState<string | undefined>();
 
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
 
   const [displayError, setDisplayError] = useState<Error | undefined>();
-  const [isClaiming] = useState(false); // TODO: Connect to actual claiming state
 
-  // Update error when wallet or stripe errors change
   useEffect(() => {
-    setDisplayError(walletError || stripeError || undefined);
-  }, [walletError, stripeError]);
+    setDisplayError(stripeError || walletError || undefined);
+  }, [stripeError]);
 
   const onCreditCard = useCallback(async () => {
     if (!controller) return;
@@ -146,11 +138,10 @@ export const PurchaseProvider = ({
     } catch (e) {
       setDisplayError(e as Error);
     }
-  }, [usdAmount, createPaymentIntent, controller, starterpackId]);
+  }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet) => {
-      setDisplayError(undefined);
       setSelectedWallet(wallet);
       const res = await connectWallet(wallet.type);
       if (res?.success) {
@@ -168,12 +159,6 @@ export const PurchaseProvider = ({
     [connectWallet],
   );
 
-  const onCompletePurchase = useCallback(() => {
-    if (onComplete) {
-      onComplete();
-    }
-  }, [onComplete]);
-
   const contextValue: PurchaseContextType = {
     // Purchase details
     usdAmount,
@@ -181,9 +166,9 @@ export const PurchaseProvider = ({
     purchaseItems,
 
     // Payment state
-    selectedNetwork,
     selectedWallet,
     walletAddress,
+    wallets,
 
     // Stripe state
     clientSecret,
@@ -192,8 +177,7 @@ export const PurchaseProvider = ({
 
     // Loading states
     isStripeLoading,
-    isLoadingWallets,
-    isClaiming,
+    isWalletConnecting,
 
     // Error state
     displayError,
@@ -201,14 +185,11 @@ export const PurchaseProvider = ({
     // Setters
     setUsdAmount,
     setStarterpackId,
-    setSelectedNetwork,
-    setSelectedWallet,
     setPurchaseItems,
 
     // Actions
     onCreditCard,
     onExternalConnect,
-    onCompletePurchase,
   };
 
   return (

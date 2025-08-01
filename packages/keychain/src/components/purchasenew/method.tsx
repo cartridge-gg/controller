@@ -33,7 +33,13 @@ export function PaymentMethod() {
             navigate("/purchase/checkout/stripe");
           }}
         />
-        <PaymentCard text="Wallet" icon={<WalletIcon variant="solid" />} />
+        <PaymentCard
+          text="Wallet"
+          icon={<WalletIcon variant="solid" />}
+          onClick={() => {
+            navigate("/purchase/network");
+          }}
+        />
       </LayoutContent>
       <LayoutFooter>
         {displayError && (

@@ -1,16 +1,21 @@
 import { PurchaseItem } from "@/context/purchase";
+import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 
 export interface Wallet {
-  id: string;
   name: string;
+  type: ExternalWalletType;
   icon: React.ReactNode;
+  color?: string;
+  enabled?: boolean;
 }
 
 export interface Network {
-  id: string;
   name: string;
+  platform: ExternalPlatform;
   icon: React.ReactNode;
-  wallets: Wallet[];
+  subIcon?: React.ReactNode;
+  enabled?: boolean;
+  wallets: Map<string, Wallet>;
 }
 
 export interface NetworkWalletData {
