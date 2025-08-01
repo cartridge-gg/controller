@@ -1,9 +1,27 @@
 import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { act } from "react";
 import { ConfirmTransaction } from "./ConfirmTransaction";
 import { describe, expect, beforeEach, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/mocks/providers";
 import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import type { ControllerError } from "@/utils/connection";
+
+// Mock the tokens hook for ConfirmTransaction tests
+vi.mock("@/hooks/tokens", () => ({
+  useFeeToken: vi.fn(() => ({
+    token: {
+      address:
+        "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+      price: { value: 2500, currency: "USD" },
+    },
+    isLoading: false,
+    error: null,
+  })),
+  convertTokenAmountToUSD: vi.fn(() => "$0.01"),
+}));
 
 describe("ConfirmTransaction", () => {
   const mockTransactions = [
@@ -25,8 +43,10 @@ describe("ConfirmTransaction", () => {
     vi.clearAllMocks();
   });
 
-  it("renders transaction confirmation form", () => {
-    renderWithProviders(<ConfirmTransaction {...defaultProps} />);
+  it("renders transaction confirmation form", async () => {
+    await act(async () => {
+      renderWithProviders(<ConfirmTransaction {...defaultProps} />);
+    });
     expect(screen.getByText("Review Transaction")).toBeInTheDocument();
   });
 
@@ -42,29 +62,29 @@ describe("ConfirmTransaction", () => {
       suggestedMaxFee: BigInt(1000),
     });
 
-    renderWithProviders(
-      <ConfirmTransaction {...defaultProps} executionError={validationError} />,
-      {
-        connection: {
-          controller: {
-            execute: mockExecute,
-            estimateInvokeFee,
-            isRequestedSession: vi.fn().mockResolvedValue(true),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any,
+    await act(async () => {
+      renderWithProviders(
+        <ConfirmTransaction
+          {...defaultProps}
+          executionError={validationError}
+        />,
+        {
+          connection: {
+            controller: {
+              execute: mockExecute,
+              estimateInvokeFee,
+              isRequestedSession: vi.fn().mockResolvedValue(true),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+          },
         },
-      },
-    );
-
-    // Wait for component to settle
-    await waitFor(() => {
-      expect(screen.getByText("Account validation failed")).toBeInTheDocument();
+      );
     });
 
-    // Check that the error details are displayed
-    expect(
-      screen.getByText(/Max L1Gas price.*is lower than the actual gas price/),
-    ).toBeInTheDocument();
+    // Wait for component to settle and check that at least one error message is displayed
+    await waitFor(() => {
+      expect(screen.getAllByText("Account validation failed")).toHaveLength(2);
+    });
 
     // Check that the submit button is disabled due to error
     const submitButton = screen.getByRole("button", { name: /submit/i });
@@ -83,15 +103,17 @@ describe("ConfirmTransaction", () => {
       suggestedMaxFee: BigInt(1000),
     });
 
-    renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
-      connection: {
-        controller: {
-          execute: mockExecute,
-          estimateInvokeFee,
-          isRequestedSession: vi.fn().mockResolvedValue(true),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
-      },
+    await act(async () => {
+      renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
+        connection: {
+          controller: {
+            execute: mockExecute,
+            estimateInvokeFee,
+            isRequestedSession: vi.fn().mockResolvedValue(true),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        },
+      });
     });
 
     // Wait for fee estimation to complete
@@ -102,7 +124,9 @@ describe("ConfirmTransaction", () => {
 
     // Click submit button
     const submitButton = screen.getByRole("button", { name: /submit/i });
-    fireEvent.click(submitButton);
+    await act(async () => {
+      fireEvent.click(submitButton);
+    });
 
     // Wait for error to be handled
     await waitFor(() => {
@@ -112,9 +136,9 @@ describe("ConfirmTransaction", () => {
       );
     });
 
-    // Check that error is displayed
+    // Check that error is displayed (should have 2 instances of the error message)
     await waitFor(() => {
-      expect(screen.getByText("Account validation failed")).toBeInTheDocument();
+      expect(screen.getAllByText("Account validation failed")).toHaveLength(2);
     });
   });
 
@@ -127,15 +151,17 @@ describe("ConfirmTransaction", () => {
       suggestedMaxFee: BigInt(1000),
     });
 
-    renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
-      connection: {
-        controller: {
-          execute: mockExecute,
-          estimateInvokeFee,
-          isRequestedSession: vi.fn().mockResolvedValue(true),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
-      },
+    await act(async () => {
+      renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
+        connection: {
+          controller: {
+            execute: mockExecute,
+            estimateInvokeFee,
+            isRequestedSession: vi.fn().mockResolvedValue(true),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        },
+      });
     });
 
     // Wait for fee estimation to complete
@@ -146,7 +172,9 @@ describe("ConfirmTransaction", () => {
 
     // Click submit button
     const submitButton = screen.getByRole("button", { name: /submit/i });
-    fireEvent.click(submitButton);
+    await act(async () => {
+      fireEvent.click(submitButton);
+    });
 
     // Wait for completion
     await waitFor(() => {

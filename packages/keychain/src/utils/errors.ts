@@ -499,7 +499,7 @@ export function parseExecutionError(
       } else if (
         lastErrorMessage.includes("ERC20: amount is not a valid Uint256")
       ) {
-        summary = "Invalid token amount";
+        summary = "Invalid token amount.";
       } else if (lastErrorMessage.includes("ASSERT_EQ instruction failed")) {
         summary = "Assertion failed in contract.";
       } else if (

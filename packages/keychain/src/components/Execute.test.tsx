@@ -24,6 +24,23 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+// Mock the tokens hook for Execute tests (since it uses ConfirmTransaction -> ExecutionContainer -> Fees)
+vi.mock("@/hooks/tokens", () => ({
+  useFeeToken: vi.fn(() => ({
+    token: {
+      address:
+        "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+      name: "Ether",
+      symbol: "ETH",
+      decimals: 18,
+      price: { value: 2500, currency: "USD" },
+    },
+    isLoading: false,
+    error: null,
+  })),
+  convertTokenAmountToUSD: vi.fn(() => "$0.01"),
+}));
+
 // Mock the connection hook
 const mockCloseModal = vi.fn();
 vi.mock("@/hooks/connection", () => ({
