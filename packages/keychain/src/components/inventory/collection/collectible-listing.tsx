@@ -31,13 +31,11 @@ import {
   cairo,
   Call,
   CallData,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
 } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
-import { useExecute } from "@/hooks/execute";
+import { createExecuteUrl } from "@/utils/connection/execute";
 import { useNavigation } from "@/context/navigation";
 import { useCollectible } from "@/hooks/collectible";
 
@@ -57,10 +55,9 @@ const EXPIRATIONS = [
 
 export function CollectibleListing() {
   const { chainId, provider } = useMarketplace();
-  const { parent, controller } = useConnection();
+  const { parent } = useConnection();
   const { address: contractAddress, tokenId } = useParams();
   const { tokens } = useTokens();
-  const { execute } = useExecute();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Token | undefined>();
@@ -229,29 +226,19 @@ export function CollectibleListing() {
           }));
         }),
       ];
+      // Create execute URL with returnTo parameter pointing back to current page
+      const executeUrl = createExecuteUrl(calls);
 
-      const res = await execute(calls);
-      if (res?.transaction_hash) {
-        await controller?.provider?.waitForTransaction(res.transaction_hash, {
-          retryInterval: 100,
-          successStates: [
-            TransactionExecutionStatus.SUCCEEDED,
-            TransactionFinalityStatus.ACCEPTED_ON_L2,
-          ],
-        });
-
-        toast.success(`Asset(s) listed successfully`);
-      }
+      // Navigate to execute screen with returnTo parameter to come back to the parent page
+      const currentPath = `${window.location.pathname + window.location.search}`.split("/").slice(0, -1).join("/");
+      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
+      navigate(executeUrlWithReturn);
     } catch (error) {
       console.error(error);
       toast.error(`Failed to list asset(s)`);
     } finally {
       setLoading(false);
     }
-    // Remove tokenIds from search params
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.delete("tokenIds");
-    navigate(`..?${newSearchParams.toString()}`);
   }, [
     tokenIds,
     contractAddress,

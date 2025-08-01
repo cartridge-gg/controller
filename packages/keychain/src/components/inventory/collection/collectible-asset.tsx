@@ -27,8 +27,6 @@ import {
   Call,
   CallData,
   constants,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
 } from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -41,10 +39,11 @@ import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { OrderModel } from "@cartridge/marketplace";
-import { useExecute } from "@/hooks/execute";
+import { createExecuteUrl } from "@/utils/connection/execute";
 import { toast } from "sonner";
 import { useAccount, useUsername } from "@/hooks/account";
 import { erc20Metadata } from "@cartridge/presets";
+import { useNavigation } from "@/context";
 
 const OFFSET = 10;
 
@@ -56,9 +55,9 @@ export function CollectibleAsset() {
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
   const { editions } = useArcade();
-  const { selfOrders, tokenOrders, provider, removeOrder } = useMarketplace();
+  const { selfOrders, tokenOrders, provider } = useMarketplace();
   const [loading, setLoading] = useState(false);
-  const { execute } = useExecute();
+  const { navigate } = useNavigation();
 
   const purchaseView = useMemo(
     () => searchParams.get("purchaseView") === "true",
@@ -175,24 +174,13 @@ export function CollectibleAsset() {
             }),
           })),
         ];
-
-        const res = await execute(calls);
-        if (res?.transaction_hash) {
-          await controller?.provider?.waitForTransaction(res.transaction_hash, {
-            retryInterval: 100,
-            successStates: [
-              TransactionExecutionStatus.SUCCEEDED,
-              TransactionFinalityStatus.ACCEPTED_ON_L2,
-            ],
-          });
-
-          toast.success(`Asset unlisted successfully`);
-        }
-
-        // Removing the order optimistically
-        selfOrders.forEach((order) => {
-          removeOrder(order);
-        });
+        // Create execute URL with returnTo parameter pointing back to current page
+        const executeUrl = createExecuteUrl(calls);
+  
+        // Navigate to execute screen with returnTo parameter to come back to current page
+        const currentPath = window.location.pathname + window.location.search;
+        const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
+        navigate(executeUrlWithReturn);
       } catch (error) {
         console.error(error);
         toast.error(`Failed to unlist asset(s)`);
@@ -206,9 +194,9 @@ export function CollectibleAsset() {
       chainId,
       provider,
       controller,
-      removeOrder,
       selfOrders,
-      execute,
+      navigate,
+      searchParams,
     ],
   );
 

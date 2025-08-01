@@ -56,7 +56,7 @@ export function CollectionPurchase() {
   const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
   const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
-  const { provider, orders, marketplaceFee, removeOrder, setAmount } =
+  const { provider, orders, marketplaceFee, setAmount } =
     useMarketplace();
   const { navigate } = useNavigation();
 
@@ -224,7 +224,6 @@ export function CollectionPurchase() {
     parent,
     provider,
     controller,
-    removeOrder,
     navigate,
     searchParams,
     refetch,

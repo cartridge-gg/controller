@@ -17,7 +17,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
   InfoIcon,
-  useUI,
   SelectValue,
   CaratIcon,
   SelectTrigger,
@@ -30,8 +29,6 @@ import {
   Call,
   CallData,
   getChecksumAddress,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
 } from "starknet";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -41,9 +38,9 @@ import { toast } from "sonner";
 import { useTokens } from "@/hooks/token";
 import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
-import { useExecute } from "@/hooks/execute";
 import { useNavigation } from "@/context/navigation";
 import { useCollectible } from "@/hooks/collectible";
+import { createExecuteUrl } from "@/utils/connection/execute";
 import {
   CLIENT_FEE_NUMERATOR,
   CLIENT_FEE_DENOMINATOR,
@@ -53,16 +50,14 @@ import {
 const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectiblePurchase() {
-  const { closeModal } = useUI();
   const { address: contractAddress, tokenId } = useParams();
   const { chainId, parent, controller, project } = useConnection();
   const { tokens } = useTokens();
   const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
   const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
-  const { provider, orders, marketplaceFee, removeOrder, setAmount } =
+  const { provider, orders, marketplaceFee, setAmount } =
     useMarketplace();
-  const { execute } = useExecute();
   const { navigate } = useNavigation();
 
   const [searchParams] = useSearchParams();
@@ -221,28 +216,13 @@ export function CollectiblePurchase() {
           }),
         })),
       ];
-      const res = await execute(calls);
+      // Create execute URL with returnTo parameter pointing back to current page
+      const executeUrl = createExecuteUrl(calls);
 
-      if (res?.transaction_hash) {
-        await controller?.provider?.waitForTransaction(res.transaction_hash, {
-          retryInterval: 100,
-          successStates: [
-            TransactionExecutionStatus.SUCCEEDED,
-            TransactionFinalityStatus.ACCEPTED_ON_L2,
-          ],
-        });
-      }
-
-      if (res) {
-        toast.success(`Asset purchased successfully`);
-        refetch();
-      }
-
-      // Removing the order optimistically
-      tokenOrders.forEach((order) => {
-        removeOrder(order);
-      });
-      closeModal?.();
+      // Navigate to execute screen with returnTo parameter to come back to current page
+      const currentPath = window.location.pathname + window.location.search;
+      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
+      navigate(executeUrlWithReturn);
     } catch (error) {
       console.error(error);
       toast.error(`Failed to purchase asset(s)`);
@@ -250,7 +230,6 @@ export function CollectiblePurchase() {
       setLoading(false);
     }
   }, [
-    closeModal,
     token,
     tokenOrders,
     chainId,
@@ -258,7 +237,6 @@ export function CollectiblePurchase() {
     parent,
     provider,
     controller,
-    removeOrder,
     navigate,
     searchParams,
     refetch,
