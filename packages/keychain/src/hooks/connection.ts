@@ -27,7 +27,6 @@ import {
   Policies,
 } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
-import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import {
   ETH_CONTRACT_ADDRESS,
   isIframe,
@@ -36,6 +35,7 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
+import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SemVer } from "semver";
@@ -180,6 +180,12 @@ export function useConnectionValue() {
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
+
+  useEffect(() => {
+    if (window.controller) {
+      setRpcUrl(window.controller.rpcUrl());
+    }
+  }, [window.controller]);
 
   const urlParams = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);

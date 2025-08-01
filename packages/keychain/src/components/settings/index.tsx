@@ -1,3 +1,4 @@
+import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 import {
   Button,
@@ -30,7 +31,6 @@ import {
 import { SectionHeader } from "./section-header";
 import { SessionsSection } from "./sessions/sessions-section";
 import { SignersSection } from "./signers/signers-section";
-import { useNavigation } from "@/context/navigation";
 
 // Feature flag configuration
 interface FeatureFlags {
@@ -102,12 +102,7 @@ export function Settings() {
 
   return (
     <Sheet>
-      <HeaderInner
-        variant="compressed"
-        title="Settings"
-        Icon={GearIcon}
-        hideIcon
-      />
+      <HeaderInner variant="compressed" title="Settings" Icon={GearIcon} />
       <LayoutContent className="gap-6">
         {featureFlags.signers && (
           <SignersSection controllerQuery={controllerQuery} />
