@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Button,
@@ -17,7 +17,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
   InfoIcon,
-  useUI,
   SelectValue,
   CaratIcon,
   SelectTrigger,
@@ -33,25 +32,26 @@ import {
 } from "starknet";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  useCollection,
-  useToriiCollection,
-  useToriiCollections,
-} from "@/hooks/collection";
+import { useToriiCollection, useToriiCollections } from "@/hooks/collection";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useTokens } from "@/hooks/token";
 import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
+import { useCollectible } from "@/hooks/collectible";
 import { createExecuteUrl } from "@/utils/connection/execute";
+import {
+  CLIENT_FEE_NUMERATOR,
+  CLIENT_FEE_DENOMINATOR,
+  CLIENT_FEE_RECEIVER,
+} from "@/constants";
 
 const FEE_ENTRYPOINT = "royalty_info";
 
-export function CollectionPurchase() {
-  const { closeModal } = useUI();
-  const { address: contractAddress, tokenId, project } = useParams();
-  const { chainId, parent, controller } = useConnection();
+export function CollectiblePurchase() {
+  const { address: contractAddress, tokenId } = useParams();
+  const { chainId, parent, controller, project } = useConnection();
   const { tokens } = useTokens();
   const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
@@ -74,7 +74,7 @@ export function CollectionPurchase() {
     );
   }, [tokenOrders]);
 
-  const { refetch } = useCollection({
+  const { refetch } = useCollectible({
     contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
   });
@@ -116,6 +116,9 @@ export function CollectionPurchase() {
     );
     const formattedMarketplaceFee =
       marketplaceFee / Math.pow(10, token?.metadata.decimals || 0);
+    const formattedClientFee =
+      (price * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR)) /
+      Math.pow(10, token?.metadata.decimals || 0);
     const formattedRoyaltyFee =
       royaltyFee / Math.pow(10, token?.metadata.decimals || 0);
     const total = formattedMarketplaceFee + formattedRoyaltyFee;
@@ -124,6 +127,11 @@ export function CollectionPurchase() {
         label: "Marketplace Fee",
         amount: `${formattedMarketplaceFee.toFixed(2)} ${token?.metadata.symbol}`,
         percentage: `${(price ? (marketplaceFee / price) * 100 : 0).toFixed(2)}%`,
+      },
+      {
+        label: "Client Fee",
+        amount: `${formattedClientFee.toFixed(2)} ${token?.metadata.symbol}`,
+        percentage: `${((CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR) * 100).toFixed(2)}%`,
       },
       {
         label: "Creator Royalties",
@@ -148,21 +156,25 @@ export function CollectionPurchase() {
           image: image,
           name: asset.name,
           collection: collection.name,
-          collectionAddress: collection.contract_address,
+          collectionAddress: contractAddress,
           price: order.price,
           tokenId: asset.token_id,
         };
       })
       .filter((value) => value !== undefined);
-  }, [assets, collection, tokenOrders]);
+  }, [assets, collection, tokenOrders, contractAddress]);
 
   const { totalPrice, floatPrice } = useMemo(() => {
     const total = tokenOrders.reduce(
       (acc, order) => acc + Number(order?.price),
       0,
     );
-    const formatted = total / Math.pow(10, token?.metadata.decimals || 0);
-    return { totalPrice: total, floatPrice: formatted };
+    const fees = Math.floor(
+      total * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR),
+    );
+    const formatted =
+      (total + fees) / Math.pow(10, token?.metadata.decimals || 0);
+    return { totalPrice: total + fees, floatPrice: formatted, fees };
   }, [tokenOrders]);
 
   const addRoyalties = useCallback(
@@ -196,8 +208,10 @@ export function CollectionPurchase() {
             collection: order.collection,
             tokenId: cairo.uint256(order.tokenId),
             assetId: cairo.uint256(order.tokenId),
-            quantity: 0, // 0 for ERC721
+            quantity: order.quantity,
             royalties: true,
+            clientFee: CLIENT_FEE_NUMERATOR,
+            clientFeeReceiver: CLIENT_FEE_RECEIVER,
           }),
         })),
       ];
@@ -215,7 +229,6 @@ export function CollectionPurchase() {
       setLoading(false);
     }
   }, [
-    closeModal,
     token,
     tokenOrders,
     chainId,
@@ -289,7 +302,7 @@ export function CollectionPurchase() {
                   image={args.image}
                   name={args.name}
                   collection={args.collection}
-                  collectionAddress={args.collectionAddress}
+                  collectionAddress={contractAddress || ""}
                   price={args.price}
                   token={token}
                   entrypoints={entrypoints}
@@ -331,9 +344,17 @@ export function CollectionPurchase() {
             </div>
             <div className="flex gap-3 w-full">
               <div className="w-full flex items-center gap-3">
+                <Link
+                  className="w-1/3"
+                  to={`../../..?${searchParams.toString()}`}
+                >
+                  <Button variant="secondary" type="button" className="w-full">
+                    Cancel
+                  </Button>
+                </Link>
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-2/3"
                   isLoading={loading}
                   onClick={handlePurchase}
                 >
