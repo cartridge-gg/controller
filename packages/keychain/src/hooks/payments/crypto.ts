@@ -1,8 +1,8 @@
 import { useState, useCallback, useMemo } from "react";
 import {
-  CreateCryptoPaymentDocument,
-  CreateCryptoPaymentMutation,
-  Network,
+  CreateLayerswapPaymentDocument,
+  CreateLayerswapPaymentMutation,
+  LayerswapNetwork,
   CryptoPaymentQuery,
   CryptoPaymentDocument,
 } from "@cartridge/ui/utils/api/cartridge";
@@ -146,6 +146,17 @@ export const useCryptoPayment = () => {
     );
   }, []);
 
+  function mapPlatformToLayerswapNetwork(
+    platform: ExternalPlatform,
+  ): LayerswapNetwork {
+    switch (platform) {
+      case "solana":
+        return LayerswapNetwork.Solana;
+      default:
+        throw new Error(`Unsupported platform for layerswap: ${platform}`);
+    }
+  }
+
   async function createCryptoPayment(
     username: string,
     wholeCredits: number,
@@ -154,8 +165,8 @@ export const useCryptoPayment = () => {
     starterpackId?: string,
     isMainnet: boolean = false,
   ) {
-    const result = await client.request<CreateCryptoPaymentMutation>(
-      CreateCryptoPaymentDocument,
+    const result = await client.request<CreateLayerswapPaymentMutation>(
+      CreateLayerswapPaymentDocument,
       {
         input: {
           username,
@@ -163,7 +174,7 @@ export const useCryptoPayment = () => {
             amount: wholeCredits,
             decimals: 0,
           },
-          network: platform.toUpperCase() as Network,
+          sourceNetwork: mapPlatformToLayerswapNetwork(platform),
           purchaseType: starterpackId
             ? PurchaseType.STARTERPACK
             : PurchaseType.CREDITS,
@@ -174,7 +185,13 @@ export const useCryptoPayment = () => {
       },
     );
 
-    return result.createCryptoPayment;
+    return {
+      id: result.createLayerswapPayment.cryptoPaymentId,
+      depositAddress: result.createLayerswapPayment.sourceDepositAddress,
+      tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
+      tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
+      swapId: result.createLayerswapPayment.swapId,
+    };
   }
 
   async function requestPhantomPayment(
