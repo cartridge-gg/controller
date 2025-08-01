@@ -12,7 +12,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
 import { Call, uint256 } from "starknet";
 import { SendRecipient } from "@/components/modules/recipient";
@@ -22,7 +22,11 @@ import { useConnection } from "@/hooks/connection";
 import { createExecuteUrl } from "@/utils/connection/execute";
 
 export function SendToken() {
-  const { address: tokenAddress } = useParams<{ address: string }>();
+  const { address: tokenAddress, username } = useParams<{
+    address: string;
+    username: string;
+  }>();
+  const [searchParams] = useSearchParams();
   const { controller } = useConnection();
   const { navigate } = useNavigation();
   const [validated, setValidated] = useState(false);
@@ -93,12 +97,20 @@ export function SendToken() {
       const executeUrl = createExecuteUrl(calls);
 
       // Navigate to execute screen with returnTo parameter to come back to token page
-      const currentPath = window.location.pathname + window.location.search;
-      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
+      const inventoryPath = `/account/${username}/inventory?${searchParams.toString()}`;
+      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(inventoryPath)}`;
+      navigate(executeUrlWithReturn);
       navigate(executeUrlWithReturn);
       setLoading(false);
     },
-    [selectedToken, controller, refetchTransfers, navigate],
+    [
+      selectedToken,
+      controller,
+      refetchTransfers,
+      navigate,
+      username,
+      searchParams,
+    ],
   );
 
   if (!token) {
