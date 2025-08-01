@@ -26,6 +26,25 @@ export function SignMessage({
   const { controller, origin } = useConnection();
   const [messageData, setMessageData] = useState<TypedData>();
 
+  const formatValue = (value: unknown): string => {
+    if (typeof value === "boolean") {
+      return value.toString();
+    }
+
+    if (typeof value === "string") {
+      if (value === "0x1" || value === "1") {
+        return "true";
+      }
+      if (value === "0x0" || value === "0") {
+        return "false";
+      }
+
+      return value;
+    }
+
+    return String(value);
+  };
+
   useEffect(() => {
     if (!typedData) return;
     const primaryTypeData = typedData.types[typedData.primaryType];
@@ -106,13 +125,13 @@ export function SignMessage({
                               {key}:
                             </div>
                             <div className="break-words break-all">
-                              {value as string}
+                              {formatValue(value)}
                             </div>
                           </CardListItem>
                         ))}
                       </CardListContent>
                     ) : (
-                      <CardListItem>{v as string}</CardListItem>
+                      <CardListItem>{formatValue(v)}</CardListItem>
                     );
                   })()}
                 </CardListContent>
