@@ -13,12 +13,7 @@ import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
-import {
-  Call,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
-  uint256,
-} from "starknet";
+import { Call, uint256 } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
 import { useCollectible } from "@/hooks/collectible";
 import { Sending } from "./collectible-sending";
@@ -26,13 +21,13 @@ import placeholder from "/placeholder.svg?url";
 import { SendAmount } from "./amount";
 import { SendHeader } from "./header";
 import { useEntrypoints } from "@/hooks/entrypoints";
-import { useExecute } from "@/hooks/execute";
+import { createExecuteUrl } from "@/utils/connection/execute";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
 
 export function SendCollectible() {
-  const { address: contractAddress, tokenId } = useParams();
+  const { address: contractAddress, tokenId, username } = useParams();
 
   const [searchParams] = useSearchParams();
   const paramsTokenIds = searchParams.getAll("tokenIds");
@@ -53,7 +48,6 @@ export function SendCollectible() {
   const [recipientLoading, setRecipientLoading] = useState(false);
 
   const { navigate } = useNavigation();
-  const { execute } = useExecute();
 
   const [to, setTo] = useState("");
 
@@ -123,18 +117,13 @@ export function SendCollectible() {
         };
       });
 
-      const res = await execute(calls);
-      if (res?.transaction_hash) {
-        await controller?.provider?.waitForTransaction(res.transaction_hash, {
-          retryInterval: 100,
-          successStates: [
-            TransactionExecutionStatus.SUCCEEDED,
-            TransactionFinalityStatus.ACCEPTED_ON_L2,
-          ],
-        });
-      }
+      // Create execute URL with returnTo parameter pointing back to inventory
+      const executeUrl = createExecuteUrl(calls);
 
-      navigate(`../../..?${searchParams.toString()}`);
+      // Navigate to execute screen with returnTo parameter to come back to inventory
+      const inventoryPath = `/account/${username}/inventory?${searchParams.toString()}`;
+      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(inventoryPath)}`;
+      navigate(executeUrlWithReturn);
       setLoading(false);
     },
     [
@@ -208,22 +197,13 @@ export function SendCollectible() {
             />
             <div className="w-full flex items-center gap-3">
               <Button
-                variant="secondary"
-                type="button"
-                className="w-1/3"
-                isLoading={loading}
-                onClick={() => navigate(`../../..?${searchParams.toString()}`)}
-              >
-                Cancel
-              </Button>
-              <Button
                 disabled={disabled}
                 type="submit"
-                className="w-2/3"
+                className="w-full"
                 isLoading={loading}
                 onClick={() => onSubmit(to)}
               >
-                Review
+                Send
               </Button>
             </div>
           </LayoutFooter>

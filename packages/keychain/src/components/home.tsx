@@ -2,8 +2,7 @@ import { Signature } from "starknet";
 import { useEffect } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { DeployCtx, ExecuteCtx, SignMessageCtx } from "@/utils/connection";
-import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
+import { DeployCtx, SignMessageCtx } from "@/utils/connection";
 import { CreateController, CreateSession, Upgrade } from "./connect";
 import { DeployController } from "./DeployController";
 import { SignMessage } from "./SignMessage";
@@ -16,7 +15,6 @@ import { Authenticate } from "./authenticate";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
-  const location = useLocation();
   const { pathname } = useLocation();
 
   const upgrade = useUpgrade();
@@ -99,24 +97,6 @@ export function Home() {
                   ctx.resolve({
                     code: ResponseCodes.CANCELED,
                     message: "Canceled",
-                  })
-                }
-              />
-            );
-          }
-
-          case "execute": {
-            if (location.pathname.startsWith("/purchase")) {
-              return <Outlet />;
-            }
-
-            const ctx = context as ExecuteCtx;
-            return (
-              <ConfirmTransaction
-                onComplete={(transaction_hash) =>
-                  ctx.resolve?.({
-                    code: ResponseCodes.SUCCESS,
-                    transaction_hash,
                   })
                 }
               />

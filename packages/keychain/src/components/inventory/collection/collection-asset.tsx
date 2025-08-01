@@ -27,15 +27,7 @@ import {
 } from "@cartridge/ui";
 
 import { cn } from "@cartridge/ui/utils";
-import {
-  AllowArray,
-  cairo,
-  Call,
-  CallData,
-  constants,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
-} from "starknet";
+import { AllowArray, cairo, Call, CallData, constants } from "starknet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "@/hooks/collection";
 import { CollectionHeader } from "./header";
@@ -51,8 +43,8 @@ import { toast } from "sonner";
 import { useTokens } from "@/hooks/token";
 import { useAccount } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
-import { useExecute } from "@/hooks/execute";
 import { useNavigation } from "@/context/navigation";
+import { createExecuteUrl } from "@/utils/connection/execute";
 
 const OFFSET = 10;
 
@@ -70,7 +62,6 @@ export function CollectionAsset() {
   const { isListed, provider, selfOrders, order, removeOrder, setAmount } =
     useMarketplace();
   const [loading, setLoading] = useState(false);
-  const { execute } = useExecute();
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
@@ -158,21 +149,13 @@ export function CollectionAsset() {
         })),
       ];
 
-      const res = await execute(calls);
-      if (res?.transaction_hash) {
-        await controller?.provider?.waitForTransaction(res.transaction_hash, {
-          retryInterval: 100,
-          successStates: [
-            TransactionExecutionStatus.SUCCEEDED,
-            TransactionFinalityStatus.ACCEPTED_ON_L2,
-          ],
-        });
+      // Create execute URL with returnTo parameter pointing back to inventory
+      const executeUrl = createExecuteUrl(calls);
 
-        toast.success(`Asset unlisted successfully`);
-      }
-
-      // Removing the order optimistically
-      removeOrder(order);
+      // Navigate to execute screen with returnTo parameter to come back to inventory
+      const currentPath = window.location.pathname + window.location.search;
+      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
+      navigate(executeUrlWithReturn);
     } catch (error) {
       console.error(error);
       toast.error(`Failed to unlist asset(s)`);

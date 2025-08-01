@@ -21,7 +21,7 @@ interface NavigationContextType {
   navigationDepth: number;
   navigate: (
     to: string | number,
-    options?: { replace?: boolean; state?: unknown; reset?: boolean },
+    options?: { replace?: boolean; state?: unknown },
   ) => void;
   navigateToRoot: () => void;
   goBack: () => void;
@@ -105,6 +105,26 @@ export function NavigationProvider({
     if (currentPathname === previousPathname) {
       // Update the lastTrackedPath to include new search params but don't add to stack
       lastTrackedPath.current = currentPath;
+
+      // However, if this navigation was to the same pathname but with different query params,
+      // we should update the current navigation entry to preserve the new query params
+      setNavigationStack((prev) => {
+        if (
+          prev.length > 0 &&
+          currentIndex >= 0 &&
+          currentIndex < prev.length
+        ) {
+          const newStack = [...prev];
+          newStack[currentIndex] = {
+            ...newStack[currentIndex],
+            path: currentPath,
+            timestamp: Date.now(),
+          };
+          return newStack;
+        }
+        return prev;
+      });
+
       return;
     }
 
@@ -181,10 +201,7 @@ export function NavigationProvider({
 
   // Navigate with tracking
   const navigateWithTracking = useCallback(
-    (
-      to: string | number,
-      options?: { replace?: boolean; state?: unknown; reset?: boolean },
-    ) => {
+    (to: string | number, options?: { replace?: boolean; state?: unknown }) => {
       if (typeof to === "number") {
         // Handle relative navigation
         const newIndex = currentIndex + to;
@@ -197,21 +214,15 @@ export function NavigationProvider({
           navigate(entry.path, { state: entry.state });
         }
       } else {
-        // Handle reset option - reset navigation stack to just this path
-        if (options?.reset) {
-          const entry: NavigationEntry = {
-            path: to,
-            state: options.state,
-            timestamp: Date.now(),
-          };
+        // Preserve returnTo parameter if it exists in current URL
+        let finalPath = to;
+        const currentSearchParams = new URLSearchParams(location.search);
+        const returnTo = currentSearchParams.get("returnTo");
 
-          setNavigationStack([entry]);
-          setCurrentIndex(0);
-          lastTrackedPath.current = to;
-          isInternalNavigation.current = true; // Prevent double tracking
-
-          navigate(to, { replace: true, state: options.state });
-          return;
+        if (returnTo && !to.includes("returnTo=")) {
+          const url = new URL(to, "http://dummy.com");
+          url.searchParams.set("returnTo", returnTo);
+          finalPath = url.pathname + url.search;
         }
 
         // For replace navigation, update current entry
@@ -220,20 +231,20 @@ export function NavigationProvider({
             const newStack = [...prev];
             if (newStack[currentIndex]) {
               newStack[currentIndex] = {
-                path: to,
+                path: finalPath,
                 state: options.state,
                 timestamp: Date.now(),
               };
             }
             return newStack;
           });
-          lastTrackedPath.current = to;
+          lastTrackedPath.current = finalPath;
         }
 
-        navigate(to, options);
+        navigate(finalPath, options);
       }
     },
-    [navigate, currentIndex, navigationStack],
+    [navigate, currentIndex, navigationStack, location.search],
   );
 
   // Go back helper

@@ -41,6 +41,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SemVer } from "semver";
 import { getChecksumAddress, RpcProvider, shortString } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
+import { useNavigation } from "@/context/navigation";
 
 const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
@@ -156,6 +157,7 @@ function getConfigChainPolicies(
 }
 
 export function useConnectionValue() {
+  const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>(window.location.origin);
@@ -203,7 +205,15 @@ export function useConnectionValue() {
       setRpcUrl(rpcUrl);
     }
 
-    return { theme, preset, policies, version, project, namespace, tokens };
+    return {
+      theme,
+      preset,
+      policies,
+      version,
+      project,
+      namespace,
+      tokens,
+    };
   }, []);
 
   // Fetch chain ID from RPC provider when rpcUrl changes
@@ -400,6 +410,7 @@ export function useConnectionValue() {
         setContext,
         setController,
         setConfigSignupOptions,
+        navigate,
       });
 
       connection.promise
