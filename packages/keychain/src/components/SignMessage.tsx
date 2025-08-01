@@ -26,6 +26,27 @@ export function SignMessage({
   const { controller, origin } = useConnection();
   const [messageData, setMessageData] = useState<TypedData>();
 
+  const formatValue = (value: unknown, fieldType?: string): string => {
+    if (typeof value === "boolean") {
+      return value.toString();
+    }
+
+    if (typeof value === "string") {
+      if (fieldType === "bool" || fieldType === "boolean") {
+        if (value === "0x1" || value === "1") {
+          return "true";
+        }
+        if (value === "0x0" || value === "0") {
+          return "false";
+        }
+      }
+
+      return value;
+    }
+
+    return String(value);
+  };
+
   useEffect(() => {
     if (!typedData) return;
     const primaryTypeData = typedData.types[typedData.primaryType];
@@ -100,19 +121,29 @@ export function SignMessage({
                       ];
                     return typeof v === "object" ? (
                       <CardListContent>
-                        {Object.entries(v).map(([key, value]) => (
-                          <CardListItem className="flex flex-row justify-start gap-2 ">
-                            <div className="capitalize text-foreground-400">
-                              {key}:
-                            </div>
-                            <div className="break-words break-all">
-                              {value as string}
-                            </div>
-                          </CardListItem>
-                        ))}
+                        {Object.entries(v).map(([key, value]) => {
+                          const nestedTypes = messageData.types[typ.type];
+                          const fieldType = nestedTypes?.find(
+                            (field) => field.name === key,
+                          )?.type;
+
+                          return (
+                            <CardListItem
+                              key={key}
+                              className="flex flex-row justify-start gap-2 "
+                            >
+                              <div className="capitalize text-foreground-400">
+                                {key}:
+                              </div>
+                              <div className="break-words break-all">
+                                {formatValue(value, fieldType)}
+                              </div>
+                            </CardListItem>
+                          );
+                        })}
                       </CardListContent>
                     ) : (
-                      <CardListItem>{v as string}</CardListItem>
+                      <CardListItem>{formatValue(v, typ.type)}</CardListItem>
                     );
                   })()}
                 </CardListContent>

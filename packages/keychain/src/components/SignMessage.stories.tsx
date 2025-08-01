@@ -199,3 +199,41 @@ export const VariousPrimitiveTypes: Story = {
     onCancel: () => console.log("Cancel VariousPrimitiveTypes"),
   },
 };
+
+export const BooleanExamples: Story = {
+  args: {
+    typedData: {
+      types: {
+        StarknetDomain: [
+          { name: "name", type: "shortstring" },
+          { name: "version", type: "shortstring" },
+          { name: "chainId", type: "shortstring" },
+          { name: "revision", type: "shortstring" },
+        ],
+        BooleanTest: [
+          { name: "nativeTrue", type: "bool" },
+          { name: "nativeFalse", type: "bool" },
+          { name: "intTrue", type: "bool" },
+          { name: "hexFalse", type: "bool" },
+          { name: "description", type: "felt" },
+        ],
+      },
+      primaryType: "BooleanTest",
+      domain: {
+        name: "Boolean Test",
+        version: "1",
+        revision: "1",
+        chainId: "SN_SEPOLIA",
+      },
+      message: {
+        nativeTrue: true,
+        nativeFalse: false,
+        intTrue: "1", // Should display as "true"
+        hexFalse: "0x0", // Should display as "false"
+        description: "Testing different boolean representations",
+      },
+    },
+    onSign: () => console.log("Sign BooleanExamples"),
+    onCancel: () => console.log("Cancel BooleanExamples"),
+  },
+};
