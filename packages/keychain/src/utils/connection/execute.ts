@@ -13,12 +13,49 @@ import {
   InvokeFunctionResponse,
   addAddressPadding,
 } from "starknet";
-import { ConnectionCtx, ControllerError, ExecuteCtx } from "./types";
+import { ControllerError } from "./types";
 import { ErrorCode, JsCall } from "@cartridge/controller-wasm/controller";
 import { mutex } from "./sync";
 import Controller from "../controller";
+import { storeCallbacks, generateCallbackId } from "./callbacks";
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
+
+export interface ExecuteParams {
+  id: string;
+  transactions: Call[];
+  error?: ControllerError;
+}
+
+export function createExecuteUrl(
+  transactions: Call[],
+  options: {
+    error?: ControllerError;
+    resolve?: (res: InvokeFunctionResponse | ConnectError) => void;
+    reject?: (reason?: unknown) => void;
+    onCancel?: () => void;
+  } = {},
+): string {
+  const id = generateCallbackId();
+
+  // Store callbacks if provided
+  if (options.resolve || options.reject || options.onCancel) {
+    storeCallbacks(id, {
+      resolve: options.resolve as ((result: unknown) => void) | undefined,
+      reject: options.reject,
+      onCancel: options.onCancel,
+    });
+  }
+
+  const executeParams: ExecuteParams = {
+    id,
+    transactions,
+    error: options.error,
+  };
+
+  const paramString = encodeURIComponent(JSON.stringify(executeParams));
+  return `/execute?data=${paramString}`;
+}
 
 export function parseControllerError(
   controllerError: ControllerError,
@@ -42,7 +79,7 @@ export function parseControllerError(
 export async function executeCore(
   transactions: AllowArray<Call>,
   feeSource?: FeeSource,
-): Promise<string> {
+): Promise<InvokeFunctionResponse> {
   const controller: Controller | undefined = window.controller;
 
   if (!controller) {
@@ -53,11 +90,8 @@ export async function executeCore(
 
   // Try paymaster flow
   try {
-    const { transaction_hash } = await controller.executeFromOutsideV3(
-      calls,
-      feeSource,
-    );
-    return transaction_hash;
+    const res = await controller.executeFromOutsideV3(calls, feeSource);
+    return res;
   } catch (e) {
     const error = e as ControllerError;
     if (error.code !== ErrorCode.PaymasterNotSupported) {
@@ -67,18 +101,21 @@ export async function executeCore(
 
   // User pays flow
   const estimate = await controller.estimateInvokeFee(calls);
-  const { transaction_hash } = await controller.execute(
+  const res = await controller.execute(
     transactions as Call[],
     estimate,
     feeSource,
   );
-  return transaction_hash;
+  return res;
 }
 
 export function execute({
-  setContext,
+  navigate,
 }: {
-  setContext: (context: ConnectionCtx | undefined) => void;
+  navigate: (
+    to: string | number,
+    options?: { replace?: boolean; state?: unknown },
+  ) => void;
 }) {
   return async (
     transactions: AllowArray<Call>,
@@ -92,13 +129,13 @@ export function execute({
 
     if (sync) {
       return await new Promise((resolve, reject) => {
-        setContext({
-          type: "execute",
-          transactions,
+        const url = createExecuteUrl(toArray(transactions), {
           error,
           resolve,
           reject,
-        } as ExecuteCtx);
+        });
+
+        navigate(url, { replace: true });
       });
     }
 
@@ -109,7 +146,6 @@ export function execute({
         const controller: Controller | undefined = window.controller;
 
         if (!controller) {
-          setContext(undefined);
           return reject({
             message: "Controller context not available",
           });
@@ -117,12 +153,11 @@ export function execute({
 
         // Check if calls are authorized by stored policies
         if (!(await controller.hasAuthorizedPoliciesForCalls(calls))) {
-          setContext({
-            type: "execute",
-            transactions,
+          const url = createExecuteUrl(toArray(transactions), {
             resolve,
             reject,
-          } as ExecuteCtx);
+          });
+          navigate(url, { replace: true });
 
           return resolve({
             code: ResponseCodes.USER_INTERACTION_REQUIRED,
@@ -132,25 +167,26 @@ export function execute({
 
         // Use the consolidated execution logic
         try {
-          const transaction_hash = await executeCore(calls, feeSource);
-          setContext(undefined);
+          const { transaction_hash } = await executeCore(calls, feeSource);
           return resolve({
             code: ResponseCodes.SUCCESS,
             transaction_hash,
           });
         } catch (e) {
           const error = e as ControllerError;
-          setContext({
-            type: "execute",
-            transactions,
-            error: parseControllerError(error),
+          const parsedError = parseControllerError(error);
+
+          const url = createExecuteUrl(toArray(transactions), {
+            error: parsedError,
             resolve,
             reject,
-          } as ExecuteCtx);
+          });
+          navigate(url, { replace: true });
+
           return resolve({
             code: ResponseCodes.ERROR,
             message: error.message,
-            error: parseControllerError(error),
+            error: parsedError,
           });
         }
       },

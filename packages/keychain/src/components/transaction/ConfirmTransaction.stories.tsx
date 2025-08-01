@@ -50,6 +50,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
+    transactions: [
+      {
+        contractAddress:
+          "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        entrypoint: "transfer",
+        calldata: ["0x1234567890abcdef", "1000000000000000000", "0"],
+      },
+    ],
     onComplete: (transaction_hash: string) => {
       console.log("Transaction completed:", transaction_hash);
     },
@@ -61,6 +69,14 @@ export const WithTheme: Story = {
     preset: "eternum",
   },
   args: {
+    transactions: [
+      {
+        contractAddress:
+          "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        entrypoint: "transfer",
+        calldata: ["0x1234567890abcdef", "1000000000000000000", "0"],
+      },
+    ],
     onComplete: (transaction_hash: string) => {
       console.log("Transaction completed:", transaction_hash);
     },

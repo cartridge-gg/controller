@@ -12,14 +12,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { BigNumberish, getChecksumAddress } from "starknet";
 import { useLocation } from "react-router-dom";
-import { useExecute } from "@/hooks/execute";
-import { toast } from "sonner";
 import { useController } from "@/hooks/controller";
 import { useNavigation } from "@/context/navigation";
+import { createExecuteUrl } from "@/utils/connection/execute";
 
 export function Socials() {
   const { controller } = useController();
-  const { execute } = useExecute();
   const account = useAccount();
   const address = account?.address || "";
   const {
@@ -114,22 +112,25 @@ export function Socials() {
           const calls = follow
             ? provider.social.follow({ target })
             : provider.social.unfollow({ target });
-          const transactionHash = await execute(
+
+          // Create execute URL with returnTo parameter pointing back to socials
+          const executeUrl = createExecuteUrl(
             Array.isArray(calls) ? calls : [calls],
           );
-          if (transactionHash) {
-            toast.success(`${follow ? "Followed" : "Unfollowed"} successfully`);
-          }
+
+          // Navigate to execute screen with returnTo parameter to come back to socials
+          const currentPath = window.location.pathname + window.location.search;
+          const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
+          navigate(executeUrlWithReturn);
         } catch (error) {
           console.error(error);
-          toast.error(`Failed to ${follow ? "follow" : "unfollow"}`);
         } finally {
           setLoading(null);
         }
       };
       process();
     },
-    [execute, provider],
+    [provider, navigate],
   );
 
   useEffect(() => {

@@ -86,6 +86,7 @@ export function TokensProvider({
   const [tokens, setTokens] = useState<Record<string, ERC20>>({});
   const [addresses, setAdresses] = useState<string[]>([]);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [isPricesLoaded, setIsPricesLoaded] = useState(false);
 
   useEffect(() => {
     if (!controller) {
@@ -198,10 +199,11 @@ export function TokensProvider({
             };
           }
         });
+        setIsPricesLoaded(true);
         return newTokens;
       });
     }
-  }, [priceData?.priceByAddresses, addresses]);
+  }, [priceData?.priceByAddresses, addresses, isPricesLoaded]);
 
   const registerPair = useCallback(
     async (address: string) => {
@@ -244,7 +246,9 @@ export function TokensProvider({
     () => ({
       tokens,
       feeToken: tokens[getChecksumAddress(feeToken)],
-      isLoading: !initialLoadComplete && (isLoadingBalances || isPriceLoading),
+      isLoading:
+        !initialLoadComplete &&
+        (isLoadingBalances || isPriceLoading || isPricesLoaded),
       error: (balanceError || priceError) as Error | undefined,
       registerPair,
     }),
