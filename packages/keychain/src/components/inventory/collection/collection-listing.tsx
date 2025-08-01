@@ -35,8 +35,8 @@ import {
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
-import { useExecute } from "@/hooks/execute";
 import { useNavigation } from "@/context/navigation";
+import { executeCore } from "@/utils/connection/execute";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
@@ -57,7 +57,6 @@ export function CollectionListing() {
   const { parent, controller } = useConnection();
   const { address: contractAddress, tokenId } = useParams();
   const { tokens } = useTokens();
-  const { execute } = useExecute();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Token | undefined>();
@@ -203,7 +202,7 @@ export function CollectionListing() {
         })),
       ];
 
-      const res = await execute(calls);
+      const res = await executeCore(calls);
       if (res?.transaction_hash) {
         await controller?.provider?.waitForTransaction(res.transaction_hash, {
           retryInterval: 100,
@@ -296,17 +295,9 @@ export function CollectionListing() {
               </div>
               <div className="w-full flex items-center gap-3">
                 <Button
-                  variant="secondary"
-                  type="button"
-                  className="w-1/3"
-                  onClick={() => navigate(`../..?${searchParams.toString()}`)}
-                >
-                  Cancel
-                </Button>
-                <Button
                   disabled={disabled}
                   type="submit"
-                  className="w-2/3"
+                  className="w-full"
                   isLoading={loading}
                   onClick={validated ? handleList : () => setValidated(true)}
                 >

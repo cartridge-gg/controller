@@ -1,11 +1,9 @@
-import { useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 import {
   LayoutContent,
   LayoutFooter,
   Button,
-  CoinsIcon,
   ControllerIcon,
   HeaderInner,
 } from "@cartridge/ui";
@@ -19,8 +17,6 @@ export type FundingProps = {
 export function Funding({ title, isSlot }: FundingProps) {
   const { controller } = useConnection();
   const { navigate } = useNavigation();
-  const [searchParams] = useSearchParams();
-  const returnTo = searchParams.get("returnTo");
 
   const balances: BalanceType[] = isSlot
     ? [BalanceType.CREDITS]
@@ -28,14 +24,6 @@ export function Funding({ title, isSlot }: FundingProps) {
   const showCredits =
     (typeof document !== "undefined" && document.cookie.includes("credits=")) ||
     isSlot;
-
-  const handleNavigate = (path: string) => {
-    // Preserve returnTo parameter when navigating
-    const url = returnTo
-      ? `${path}?returnTo=${encodeURIComponent(returnTo)}`
-      : path;
-    navigate(url);
-  };
 
   return (
     <>
@@ -56,13 +44,13 @@ export function Funding({ title, isSlot }: FundingProps) {
       </LayoutContent>
       <LayoutFooter>
         {showCredits && (
-          <Button onClick={() => handleNavigate("/funding/credits")}>
-            <CoinsIcon variant="line" size="sm" /> Purchase Credits
+          <Button onClick={() => navigate("/funding/credits")}>
+            Purchase Credits
           </Button>
         )}
         {!isSlot && (
           <Button
-            onClick={() => handleNavigate("/funding/deposit")}
+            onClick={() => navigate("/funding/deposit")}
             variant="secondary"
           >
             Deposit

@@ -34,6 +34,7 @@ import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
+import { Execute } from "./Execute";
 import { useNavigation } from "@/context/navigation";
 
 export function App() {
@@ -60,23 +61,36 @@ export function App() {
                   window.location.search,
                 );
                 const returnTo = searchParams.get("returnTo");
-                navigate(returnTo || "/funding");
+                if (returnTo) {
+                  // returnTo is already decoded by URLSearchParams.get()
+                  // Use replace navigation for execute URLs to ensure proper navigation stack handling
+                  navigate(returnTo, { replace: true });
+                } else {
+                  navigate("/funding");
+                }
               }}
             />
           }
         />
+        <Route path="/execute" element={<Execute />} />
         <Route
           path="/funding/credits"
           element={
             <Purchase
               type={PurchaseType.CREDITS}
-              onBack={() => {
-                const searchParams = new URLSearchParams(
-                  window.location.search,
-                );
-                const returnTo = searchParams.get("returnTo");
-                navigate(returnTo || "/funding");
-              }}
+              // onBack={() => {
+              //   const searchParams = new URLSearchParams(
+              //     window.location.search,
+              //   );
+              //   const returnTo = searchParams.get("returnTo");
+              //   if (returnTo) {
+              //     // returnTo is already decoded by URLSearchParams.get()
+              //     // Use replace navigation for execute URLs to ensure proper navigation stack handling
+              //     navigate(returnTo, { replace: true });
+              //   } else {
+              //     navigate("/funding");
+              //   }
+              // }}
             />
           }
         />

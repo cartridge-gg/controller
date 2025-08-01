@@ -156,14 +156,6 @@ export function CryptoCheckout({
       </LayoutContent>
 
       <LayoutFooter>
-        {error && (
-          <ErrorAlert
-            variant="error"
-            title="Purchase Error"
-            description={error.message}
-          />
-        )}
-
         {(state === CheckoutState.REVIEW_PURCHASE ||
           state === CheckoutState.REQUESTING_PAYMENT) && (
           <CostBreakdown
@@ -176,6 +168,13 @@ export function CryptoCheckout({
               baseCostInCents: costUSDC * 100,
               totalInCents: costUSDC * 100 * (1 + CARTRIDGE_FEE),
             }}
+          />
+        )}
+        {error && (
+          <ErrorAlert
+            variant="error"
+            title="Purchase Error"
+            description={error.message}
           />
         )}
         {state === CheckoutState.TRANSACTION_SUBMITTED && (
