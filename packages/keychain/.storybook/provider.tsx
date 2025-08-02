@@ -18,6 +18,7 @@ import { TokensProvider } from "../src/components/provider/tokens";
 import { PostHogProvider } from "../src/components/provider/posthog";
 import { WalletsProvider } from "../src/hooks/wallets";
 import { FeatureProvider } from "../src/hooks/features";
+import { NavigationProvider } from "../src/context/navigation";
 
 export function Provider({
   children,
@@ -32,21 +33,23 @@ export function Provider({
       provider={publicProvider()}
     >
       <BrowserRouter>
-        <FeatureProvider>
-          <QueryClientProvider client={queryClient}>
-            <ConnectionContext.Provider value={connection}>
-              <WalletsProvider>
-                <PostHogProvider>
-                  <MockUpgradeProvider controller={connection.controller}>
-                    <UIProvider>
-                      <TokensProvider>{children}</TokensProvider>
-                    </UIProvider>
-                  </MockUpgradeProvider>
-                </PostHogProvider>
-              </WalletsProvider>
-            </ConnectionContext.Provider>
-          </QueryClientProvider>
-        </FeatureProvider>
+        <NavigationProvider>
+          <FeatureProvider>
+            <QueryClientProvider client={queryClient}>
+              <ConnectionContext.Provider value={connection}>
+                <WalletsProvider>
+                  <PostHogProvider>
+                    <MockUpgradeProvider controller={connection.controller}>
+                      <UIProvider>
+                        <TokensProvider>{children}</TokensProvider>
+                      </UIProvider>
+                    </MockUpgradeProvider>
+                  </PostHogProvider>
+                </WalletsProvider>
+              </ConnectionContext.Provider>
+            </QueryClientProvider>
+          </FeatureProvider>
+        </NavigationProvider>
       </BrowserRouter>
     </StarknetConfig>
   );

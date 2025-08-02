@@ -1,8 +1,34 @@
 import "@testing-library/jest-dom";
-import { afterEach } from "vitest";
+import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 
-// Add any global test setup here
+// Add unknown global test setup here
+
+// Suppress ReactDOMTestUtils.act deprecation warnings from testing library internals
+const originalWarn = console.warn;
+const originalError = console.error;
+
+console.warn = (...args: unknown[]) => {
+  if (
+    typeof args[0] === "string" &&
+    (args[0].includes("ReactDOMTestUtils.act is deprecated") ||
+      args[0].includes("`ReactDOMTestUtils.act` is deprecated"))
+  ) {
+    return; // Suppress this specific warning
+  }
+  originalWarn.apply(console, args);
+};
+
+console.error = (...args: unknown[]) => {
+  if (
+    typeof args[0] === "string" &&
+    (args[0].includes("ReactDOMTestUtils.act is deprecated") ||
+      args[0].includes("`ReactDOMTestUtils.act` is deprecated"))
+  ) {
+    return; // Suppress this specific warning
+  }
+  originalError.apply(console, args);
+};
 
 // Mock matchMedia
 Object.defineProperty(window, "matchMedia", {

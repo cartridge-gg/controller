@@ -70,16 +70,20 @@ export function ExecutionContainer({
 
       try {
         const maxFee = await controller.estimateInvokeFee(transactions);
-        setCtrlError(undefined);
+        // Only clear error if it was from fee estimation, not from props
+        if (!executionError) {
+          setCtrlError(undefined);
+        }
         setMaxFee(maxFee);
         setIsEstimating(false);
       } catch (e) {
         const error = parseControllerError(e as unknown as ControllerError);
         onError?.(error);
         setCtrlError(error);
+        setIsEstimating(false);
       }
     },
-    [controller, onError, setCtrlError],
+    [controller, onError, setCtrlError, executionError],
   );
 
   useEffect(() => {
@@ -206,8 +210,13 @@ export function ExecutionContainer({
                   </>
                 );
               }
-              // Fall through to default case for other validation failures
-              break;
+              // Other validation failures (e.g., gas price issues) - show retry button
+              return (
+                <>
+                  <ControllerErrorAlert error={ctrlError} />
+                  <Button disabled>{buttonText}</Button>
+                </>
+              );
             case ErrorCode.SessionAlreadyRegistered:
               return (
                 <>
