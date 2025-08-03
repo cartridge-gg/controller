@@ -138,7 +138,7 @@ export const PurchaseProvider = ({
 
   useEffect(() => {
     setDisplayError(stripeError || walletError || cryptoError || undefined);
-  }, [stripeError]);
+  }, [stripeError, walletError, cryptoError]);
 
   const onCreditCard = useCallback(async () => {
     if (!controller) return;

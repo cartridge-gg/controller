@@ -136,7 +136,6 @@ export function Purchase(props: PurchaseCreditsProps) {
         <PurchaseContent
           state={state}
           type={type}
-          starterpackDetails={starterpackDetails}
           isStripeLoading={isStripeLoading}
           isLoadingWallets={isLoadingWallets}
           onAmountChanged={onAmountChanged}
