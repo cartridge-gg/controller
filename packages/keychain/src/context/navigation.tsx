@@ -21,7 +21,7 @@ interface NavigationContextType {
   navigationDepth: number;
   navigate: (
     to: string | number,
-    options?: { replace?: boolean; state?: unknown },
+    options?: { replace?: boolean; state?: unknown; reset?: boolean },
   ) => void;
   navigateToRoot: () => void;
   goBack: () => void;
@@ -201,7 +201,10 @@ export function NavigationProvider({
 
   // Navigate with tracking
   const navigateWithTracking = useCallback(
-    (to: string | number, options?: { replace?: boolean; state?: unknown }) => {
+    (
+      to: string | number,
+      options?: { replace?: boolean; state?: unknown; reset?: boolean },
+    ) => {
       if (typeof to === "number") {
         // Handle relative navigation
         const newIndex = currentIndex + to;
@@ -214,6 +217,23 @@ export function NavigationProvider({
           navigate(entry.path, { state: entry.state });
         }
       } else {
+        // Handle reset option - reset navigation stack to just this path
+        if (options?.reset) {
+          const entry: NavigationEntry = {
+            path: to,
+            state: options.state,
+            timestamp: Date.now(),
+          };
+
+          setNavigationStack([entry]);
+          setCurrentIndex(0);
+          lastTrackedPath.current = to;
+          isInternalNavigation.current = true; // Prevent double tracking
+
+          navigate(to, { replace: true, state: options.state });
+          return;
+        }
+
         // Preserve returnTo parameter if it exists in current URL
         let finalPath = to;
         const currentSearchParams = new URLSearchParams(location.search);
