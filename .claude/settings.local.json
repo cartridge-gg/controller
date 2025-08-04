@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Bash(./bin/migrate-to-submodules:*)",
+      "Bash(./bin/multi-repo-task:*)",
+      "Bash(mv:*)",
+      "Bash(./bin/spawn-task:*)",
+      "Bash(rm:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(docker build:*)",
+      "Bash(timeout 600 docker build .)",
+      "Bash(true)",
+      "Bash(./test_protoc.sh:*)",
+      "Bash(cat:*)",
+      "Bash(timeout 300 docker build . --no-cache)",
+      "Bash(timeout 300 docker build . --no-cache --progress=plain)",
+      "Bash(tmux:*)",
+      "Bash(brew install:*)",
+      "Bash(git submodule:*)",
+      "Bash(git worktree:*)"
+    ],
+    "deny": []
+  }
+}
