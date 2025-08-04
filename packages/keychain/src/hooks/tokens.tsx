@@ -83,6 +83,7 @@ export function convertTokenAmountToUSD(
   amount: bigint,
   decimals: number,
   price: { amount: string; decimals: number },
+  exactPrecision = false, // Added parameter for fee display
 ) {
   // Convert price to BigInt
   const priceAmount = BigInt(price.amount);
@@ -97,6 +98,11 @@ export function convertTokenAmountToUSD(
   // Handle zero amount
   if (valueInUsd === 0) {
     return "$0";
+  }
+
+  // For transaction fees, show exact precision
+  if (exactPrecision) {
+    return "$" + valueInUsd.toString();
   }
 
   // For small numbers (< 0.01), show 3 decimal places

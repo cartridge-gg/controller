@@ -27,7 +27,7 @@ export const TotalCost = React.forwardRef<HTMLDivElement, TotalCostProps>(
               Total
             </span>
             <div className="text-foreground-100 text-sm font-medium">
-              ${(price + (processingFee ?? 0)).toFixed(2)}
+              ${price + (processingFee ?? 0)}
             </div>
           </div>
         </CardContent>
@@ -45,7 +45,7 @@ const ProcessingFee = React.memo(
         <div className="flex items-center justify-between w-full">
           <span className="text-foreground-400 text-xs font-normal">Cost</span>
           <div className="text-foreground-400 text-xs font-normal">
-            ${price.toFixed(2)}
+            ${price}
           </div>
         </div>
         <div className="flex items-center justify-between w-full">
@@ -56,7 +56,7 @@ const ProcessingFee = React.memo(
             <InfoIcon size="xs" className="text-foreground-400" />
           </div>
           <div className="text-foreground-400 text-xs font-normal">
-            {`$${processingFee.toFixed(2)}`}
+            {`$${processingFee}`}
           </div>
         </div>
         <div className="w-full">
