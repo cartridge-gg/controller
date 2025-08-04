@@ -29,7 +29,6 @@ import { Settings } from "./settings";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
-import { PurchaseCredits } from "./purchasenew/credits";
 import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
 import { PaymentMethod } from "./purchasenew/method";
 import { StripeCheckout } from "./purchasenew/checkout/stripe";
@@ -40,8 +39,15 @@ import { SelectWallet } from "./purchasenew/wallet/wallet";
 import { CryptoCheckout } from "./purchasenew/checkout/crypto";
 import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
+import { Execute } from "./Execute";
+import { Funding } from "./funding";
+import { Deposit } from "./funding/Deposit";
+import { useNavigation } from "@/context";
+import { Purchase } from "./purchase";
+import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function App() {
+  const { navigate } = useNavigation();
   return (
     <Routes>
       <Route path="/" element={<Home />}>
@@ -58,7 +64,10 @@ export function App() {
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />
         <Route path="/purchase" element={<Outlet />}>
-          <Route path="credits" element={<PurchaseCredits />} />
+          <Route
+            path="credits"
+            element={<Purchase type={PurchaseType.CREDITS} />}
+          />
           <Route
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}
@@ -73,6 +82,49 @@ export function App() {
           <Route path="success" element={<PurchaseSuccess />} />
           <Route path="failed" element={<></>} />
         </Route>
+        <Route path="/funding" element={<Funding />} />
+        <Route
+          path="/funding/deposit"
+          element={
+            <Deposit
+              onComplete={() => {
+                const searchParams = new URLSearchParams(
+                  window.location.search,
+                );
+                const returnTo = searchParams.get("returnTo");
+                if (returnTo) {
+                  // returnTo is already decoded by URLSearchParams.get()
+                  // Use replace navigation for execute URLs to ensure proper navigation stack handling
+                  navigate(returnTo, { replace: true });
+                } else {
+                  navigate("/funding");
+                }
+              }}
+            />
+          }
+        />
+        <Route
+          path="/funding/credits"
+          element={
+            <Purchase
+              type={PurchaseType.CREDITS}
+              // onBack={() => {
+              //   const searchParams = new URLSearchParams(
+              //     window.location.search,
+              //   );
+              //   const returnTo = searchParams.get("returnTo");
+              //   if (returnTo) {
+              //     // returnTo is already decoded by URLSearchParams.get()
+              //     // Use replace navigation for execute URLs to ensure proper navigation stack handling
+              //     navigate(returnTo, { replace: true });
+              //   } else {
+              //     navigate("/funding");
+              //   }
+              // }}
+            />
+          }
+        />
+        <Route path="/execute" element={<Execute />} />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />

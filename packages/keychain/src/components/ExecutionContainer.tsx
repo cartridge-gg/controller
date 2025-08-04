@@ -266,7 +266,7 @@ const FundingButton = () => {
     <Button
       onClick={() => {
         navigate(
-          `/purchase?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+          `/purchase/credits?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`,
         );
       }}
     >
