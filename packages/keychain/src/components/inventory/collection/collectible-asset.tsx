@@ -216,7 +216,11 @@ export function CollectibleAsset() {
               title={title}
               subtitle={collectible.name}
               count={Number(asset.amount)}
-              listingCount={Number(asset.amount) - remaining}
+              listingCount={
+                Number(asset.amount) - remaining > 0
+                  ? Number(asset.amount) - remaining
+                  : undefined
+              }
             />
             <div
               className="flex flex-col gap-6 overflow-scroll relative"
@@ -290,7 +294,7 @@ export function CollectibleAsset() {
                       target="_blank"
                     >
                       <TraceabilityCollectibleCard
-                        username={props.username}
+                        username={props.username || ""}
                         timestamp={props.timestamp}
                         category={props.category}
                         collectibleImage={

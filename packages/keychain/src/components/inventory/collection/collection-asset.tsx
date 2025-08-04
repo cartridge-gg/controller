@@ -273,7 +273,7 @@ export function CollectionAsset() {
                       target="_blank"
                     >
                       <TraceabilityCollectibleCard
-                        username={props.username}
+                        username={props.username || ""}
                         timestamp={props.timestamp}
                         category={props.category}
                         amount={props.amount}

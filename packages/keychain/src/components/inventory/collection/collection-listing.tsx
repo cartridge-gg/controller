@@ -23,20 +23,12 @@ import { useCollection } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
 import { useTokens } from "@/hooks/token";
-import { useConnection } from "@/hooks/connection";
-import {
-  AllowArray,
-  cairo,
-  Call,
-  CallData,
-  TransactionExecutionStatus,
-  TransactionFinalityStatus,
-} from "starknet";
+import { createExecuteUrl } from "@/utils/connection/execute";
+import { AllowArray, cairo, Call, CallData } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
-import { executeCore } from "@/utils/connection/execute";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
@@ -54,7 +46,6 @@ const EXPIRATIONS = [
 
 export function CollectionListing() {
   const { chainId, provider } = useMarketplace();
-  const { parent, controller } = useConnection();
   const { address: contractAddress, tokenId } = useParams();
   const { tokens } = useTokens();
   const [submitted, setSubmitted] = useState(false);
@@ -201,29 +192,22 @@ export function CollectionListing() {
           }),
         })),
       ];
+      // Create execute URL with returnTo parameter pointing back to current page
+      const executeUrl = createExecuteUrl(calls);
 
-      const res = await executeCore(calls);
-      if (res?.transaction_hash) {
-        await controller?.provider?.waitForTransaction(res.transaction_hash, {
-          retryInterval: 100,
-          successStates: [
-            TransactionExecutionStatus.SUCCEEDED,
-            TransactionFinalityStatus.ACCEPTED_ON_L2,
-          ],
-        });
-
-        toast.success(`Asset(s) listed successfully`);
-      }
+      // Navigate to execute screen with returnTo parameter to come back to the parent page
+      const currentPath = `${window.location.pathname + window.location.search}`
+        .split("/")
+        .slice(0, -1)
+        .join("/");
+      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
+      navigate(executeUrlWithReturn);
     } catch (error) {
       console.error(error);
       toast.error(`Failed to list asset(s)`);
     } finally {
       setLoading(false);
     }
-    // Remove tokenIds from search params
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.delete("tokenIds");
-    navigate(`..?${newSearchParams.toString()}`);
   }, [
     tokenIds,
     contractAddress,
@@ -233,7 +217,6 @@ export function CollectionListing() {
     navigate,
     searchParams,
     chainId,
-    parent,
     entrypoint,
   ]);
 
