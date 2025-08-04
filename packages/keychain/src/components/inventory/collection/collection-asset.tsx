@@ -1,10 +1,4 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Button,
@@ -53,14 +47,12 @@ export function CollectionAsset() {
   const account = useAccount();
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
   const { navigate } = useNavigation();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
   const { editions } = useArcade();
   const { tokens } = useTokens();
-  const { isListed, provider, selfOrders, order, removeOrder, setAmount } =
-    useMarketplace();
+  const { isListed, provider, selfOrders, order, setAmount } = useMarketplace();
   const [loading, setLoading] = useState(false);
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -172,7 +164,6 @@ export function CollectionAsset() {
     controller,
     order,
     isOwner,
-    removeOrder,
     navigate,
     searchParams,
   ]);
@@ -212,14 +203,6 @@ export function CollectionAsset() {
       orders: order.id.toString(),
     });
   }, [order, searchParams, setAmount, setSearchParams]);
-
-  if (
-    location.pathname.includes("/send") ||
-    location.pathname.includes("/list") ||
-    location.pathname.includes("/purchase")
-  ) {
-    return <Outlet />;
-  }
 
   return (
     <>
@@ -290,7 +273,7 @@ export function CollectionAsset() {
                       target="_blank"
                     >
                       <TraceabilityCollectibleCard
-                        username={props.username}
+                        username={props.username || ""}
                         timestamp={props.timestamp}
                         category={props.category}
                         amount={props.amount}

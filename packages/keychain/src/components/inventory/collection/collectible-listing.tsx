@@ -15,20 +15,24 @@ import {
   ToggleGroupItem,
   TagIcon,
   ThumbnailCollectible,
+  Checkbox,
+  PlusIcon,
+  MinusIcon,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { useCollection } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
 import { useTokens } from "@/hooks/token";
-import { createExecuteUrl } from "@/utils/connection/execute";
+import { useConnection } from "@/hooks/connection";
 import { AllowArray, cairo, Call, CallData } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
+import { createExecuteUrl } from "@/utils/connection/execute";
 import { useNavigation } from "@/context/navigation";
+import { useCollectible } from "@/hooks/collectible";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
@@ -44,8 +48,9 @@ const EXPIRATIONS = [
   { duration: NEVER, label: "Never" },
 ];
 
-export function CollectionListing() {
+export function CollectibleListing() {
   const { chainId, provider } = useMarketplace();
+  const { parent } = useConnection();
   const { address: contractAddress, tokenId } = useParams();
   const { tokens } = useTokens();
   const [submitted, setSubmitted] = useState(false);
@@ -56,6 +61,8 @@ export function CollectionListing() {
   const [priceError, setPriceError] = useState<Error | undefined>();
   const [userSelected, setUserSelected] = useState<boolean>(false);
   const [validated, setValidated] = useState<boolean>(false);
+  const [split, setSplit] = useState<boolean>(false);
+  const [quantity, setQuantity] = useState<number>(1);
 
   const { navigate } = useNavigation();
 
@@ -66,10 +73,15 @@ export function CollectionListing() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collection, assets, status } = useCollection({
+  const { collectible, assets, status } = useCollectible({
     contractAddress: contractAddress,
     tokenIds,
   });
+
+  const asset = useMemo(() => {
+    if (!collectible || !assets || assets.length === 0) return undefined;
+    return assets[0];
+  }, [collectible, assets]);
 
   const { entrypoints } = useEntrypoints({
     address: contractAddress || "0x0",
@@ -79,17 +91,20 @@ export function CollectionListing() {
     return !!priceError;
   }, [priceError]);
 
+  const balance = useMemo(() => {
+    if (!asset) return 0;
+    return asset.amount || 0;
+  }, [asset]);
+
   const title = useMemo(() => {
-    if (!collection || !assets || assets.length === 0) return "";
-    if (assets.length > 1) return `${assets.length} ${collection.name}(s)`;
-    return assets[0].name;
-  }, [collection, assets]);
+    if (!collectible || !asset) return "";
+    return asset.name;
+  }, [collectible, asset]);
 
   const image = useMemo(() => {
-    if (!collection || !assets) return placeholder;
-    if (assets.length > 1) return collection.imageUrl || placeholder;
-    return assets[0].imageUrl || placeholder;
-  }, [collection, assets]);
+    if (!collectible || !asset) return placeholder;
+    return asset.imageUrl || placeholder;
+  }, [collectible, asset]);
 
   const entrypoint: string | null = useMemo(() => {
     if (entrypoints.includes(SET_APPROVAL_FOR_ALL_SNAKE_CASE)) {
@@ -106,29 +121,39 @@ export function CollectionListing() {
       return undefined;
     const value = selected.balance.value;
     const max = selected.balance.amount;
-    const total = (value * price) / max;
+    const total = (value * (split ? price : quantity * price)) / max;
     return `~$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-  }, [selected, price]);
+  }, [selected, price, split, quantity]);
 
   const listingData = useMemo(() => {
-    if (!assets || !collection || !selected || !price)
+    if (!asset || !collectible || !selected || !price)
       return {
         assets: [],
         currency: { name: "", image: "", price: 0, value: "" },
       };
-    const tokens = assets.map((asset) => ({
-      name: asset.name,
-      image: asset.imageUrl || collection.imageUrl || placeholder,
-      collection: collection.name,
+    const tokens = Array.from({ length: split ? quantity : 1 }, () => ({
+      name:
+        !split && quantity > 1 ? `${quantity} ${asset.name}(ડ)` : asset.name,
+      image: asset.imageUrl || collectible.imageUrl || placeholder,
+      collection: collectible.name,
     }));
     const currency = {
       name: selected.metadata.symbol,
       image: selected.metadata.image || "",
-      price: price,
+      price: split ? price : quantity * price,
       value: conversion || "",
     };
     return { assets: tokens, currency };
-  }, [assets, collection, selected, price, conversion, placeholder]);
+  }, [
+    asset,
+    collectible,
+    selected,
+    price,
+    conversion,
+    placeholder,
+    quantity,
+    split,
+  ]);
 
   const totalEarnings = useMemo(() => {
     if (!selected || !selected.balance.value || !price) return undefined;
@@ -166,7 +191,9 @@ export function CollectionListing() {
       const marketplaceAddress: string = provider.manifest.contracts.find(
         (c: { tag: string }) => c.tag?.includes("Marketplace"),
       )?.address;
-      const amount = BigInt(price * 10 ** selected.metadata.decimals);
+      const amount = BigInt(
+        (split ? 1 : quantity) * price * 10 ** selected.metadata.decimals,
+      );
 
       // Commented out calls for now
       const calls: AllowArray<Call> = [
@@ -178,19 +205,21 @@ export function CollectionListing() {
             approved: true,
           }),
         },
-        ...tokenIds.map((tokenId) => ({
-          contractAddress: marketplaceAddress,
-          entrypoint: "list",
-          calldata: CallData.compile({
-            collection: contractAddress,
-            tokenId: cairo.uint256(tokenId),
-            quantity: 0, // 0 for ERC721
-            price: amount.toString(),
-            currency: selected.metadata.address,
-            expiration: expiration,
-            royalties: true,
-          }),
-        })),
+        ...tokenIds.flatMap((tokenId) => {
+          return Array.from({ length: split ? quantity : 1 }, () => ({
+            contractAddress: marketplaceAddress,
+            entrypoint: "list",
+            calldata: CallData.compile({
+              collection: contractAddress,
+              tokenId: cairo.uint256(tokenId),
+              quantity: split ? 1 : quantity,
+              price: amount.toString(),
+              currency: selected.metadata.address,
+              expiration: expiration,
+              royalties: true,
+            }),
+          }));
+        }),
       ];
       // Create execute URL with returnTo parameter pointing back to current page
       const executeUrl = createExecuteUrl(calls);
@@ -217,6 +246,7 @@ export function CollectionListing() {
     navigate,
     searchParams,
     chainId,
+    parent,
     entrypoint,
   ]);
 
@@ -229,7 +259,7 @@ export function CollectionListing() {
 
   return (
     <>
-      {status === "loading" || !collection || !assets ? (
+      {status === "loading" || !collectible || !assets ? (
         <LoadingState />
       ) : status === "error" ? (
         <EmptyState />
@@ -240,8 +270,13 @@ export function CollectionListing() {
           ) : (
             <LayoutContent className="p-6 flex flex-col gap-4">
               <ListHeader image={image} title={title} />
+              <Quantity
+                quantity={quantity}
+                setQuantity={setQuantity}
+                maximum={balance}
+              />
               <Price
-                multiple={assets.length > 1}
+                multiple
                 submitted={submitted}
                 price={price}
                 conversion={conversion}
@@ -251,6 +286,11 @@ export function CollectionListing() {
                 setSelected={handleSelection}
                 error={priceError}
                 setError={setPriceError}
+              />
+              <SplitListing
+                disabled={quantity <= 1}
+                checked={split}
+                onClick={() => setSplit(!split)}
               />
               <Expiration duration={duration} setDuration={setDuration} />
             </LayoutContent>
@@ -278,9 +318,17 @@ export function CollectionListing() {
               </div>
               <div className="w-full flex items-center gap-3">
                 <Button
+                  variant="secondary"
+                  type="button"
+                  className="w-1/3"
+                  onClick={() => navigate(`../..?${searchParams.toString()}`)}
+                >
+                  Cancel
+                </Button>
+                <Button
                   disabled={disabled}
                   type="submit"
-                  className="w-full"
+                  className="w-2/3"
                   isLoading={loading}
                   onClick={validated ? handleList : () => setValidated(true)}
                 >
@@ -371,6 +419,79 @@ const ListingConfirmation = ({
         </div>
       </LayoutContent>
     </>
+  );
+};
+
+const Quantity = ({
+  maximum,
+  quantity,
+  setQuantity,
+}: {
+  maximum: number;
+  quantity: number;
+  setQuantity: (quantity: number) => void;
+}) => {
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setQuantity(
+        value === "" ? 0 : Number(value) > maximum ? maximum : Number(value),
+      );
+    },
+    [setQuantity, maximum],
+  );
+
+  const handlePlus = useCallback(() => {
+    setQuantity(quantity + 1);
+  }, [setQuantity, quantity]);
+
+  const handleMinus = useCallback(() => {
+    setQuantity(quantity - 1);
+  }, [setQuantity, quantity]);
+
+  const handleMax = useCallback(() => {
+    setQuantity(maximum);
+  }, [setQuantity, maximum]);
+
+  return (
+    <div className="flex flex-col gap-px select-none">
+      <div className="flex items-center justify-between font-semibold text-xs tracking-wider text-foreground-400">
+        <p className="py-3">Quantity</p>
+        <p
+          className="py-3 flex items-center gap-2 cursor-pointer"
+          onClick={handleMax}
+        >
+          Own:
+          <span className="font-medium text-foreground-100">{maximum}</span>
+        </p>
+      </div>
+      <div className="flex justify-between items-start gap-3">
+        <Input
+          size="lg"
+          type="number"
+          className="grow h-10 pr-20"
+          placeholder={(0).toLocaleString()}
+          value={quantity.toLocaleString()}
+          onChange={handleChange}
+        />
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={handleMinus}
+          disabled={quantity < 1}
+        >
+          <MinusIcon size="xs" />
+        </Button>
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={handlePlus}
+          disabled={quantity >= maximum}
+        >
+          <PlusIcon size="xs" variant="solid" />
+        </Button>
+      </div>
+    </div>
   );
 };
 
@@ -486,6 +607,43 @@ const Price = ({
           </SelectContent>
         </Select>
       </div>
+    </div>
+  );
+};
+
+const SplitListing = ({
+  disabled,
+  checked,
+  onClick,
+}: {
+  disabled: boolean;
+  checked: boolean;
+  onClick: () => void;
+}) => {
+  const enabled = useMemo(() => {
+    return checked && !disabled;
+  }, [checked, disabled]);
+
+  return (
+    <div
+      className="h-8 w-fit flex gap-1 items-center cursor-pointer select-none"
+      onClick={onClick}
+    >
+      <div className="flex items-center justify-center h-full aspect-square">
+        <Checkbox
+          checked={enabled}
+          disabled={disabled}
+          size="sm"
+          variant="line"
+          className={cn("text-foreground-300", enabled && "text-primary-100")}
+        />
+      </div>
+      <p
+        data-disabled={disabled}
+        className="data-[disabled=true]:text-foreground-400 text-sm text-foreground-100"
+      >
+        Split into individual listings
+      </p>
     </div>
   );
 };

@@ -5,12 +5,19 @@ import {
   useCollectionsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { Collections, Marketplace } from "@cartridge/marketplace";
-import { Token, ToriiClient } from "@dojoengine/torii-wasm";
+import { Pagination, Token, ToriiClient } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useConnection } from "@/hooks/connection";
+import { addAddressPadding } from "starknet";
 
 const TYPE = "ERC-721";
-const LIMIT = 1000;
+const LIMIT = 5000;
+const DEFAULT_PAGINATION: Pagination = {
+  limit: LIMIT,
+  cursor: undefined,
+  order_by: [],
+  direction: "Forward",
+};
 
 export type Collection = {
   address: string;
@@ -162,7 +169,7 @@ export function useCollections(): UseCollectionsResponse {
       offset: offset,
     },
     {
-      queryKey: ["collections", offset],
+      queryKey: ["collections", project, address, offset],
       enabled: !!project && !!address,
     },
   );
@@ -279,19 +286,25 @@ export function useToriiCollection({
 
   useEffect(() => {
     if (!project) return;
-    const getClients = async () => {
+    const getClient = async () => {
       const url = `https://api.cartridge.gg/x/${project}/torii`;
       const client = await provider.getToriiClient(url);
       setClient(client);
     };
-    getClients();
+    getClient();
   }, [provider, project]);
 
   const refetch = useCallback(() => {
-    if (!client) return;
+    if (!client || !contractAddress || !tokenIds.length) return;
     setStatus("loading");
     client
-      .getTokens([contractAddress], tokenIds)
+      .getTokens({
+        contract_addresses: [contractAddress],
+        token_ids: tokenIds.map((id) =>
+          addAddressPadding(id).replace("0x", ""),
+        ),
+        pagination: DEFAULT_PAGINATION,
+      })
       .then((tokens) => {
         setTokens(tokens.items || []);
         setStatus("success");

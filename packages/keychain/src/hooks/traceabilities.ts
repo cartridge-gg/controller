@@ -1,8 +1,5 @@
-import { useMemo, useState } from "react";
-import {
-  TraceabilityProject,
-  useTraceabilitiesQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+import { useMemo } from "react";
+import { useTraceabilitiesQuery } from "@cartridge/ui/utils/api/cartridge";
 import { formatAddress } from "@cartridge/ui/utils";
 import { useUsernames } from "./account";
 import { getChecksumAddress } from "starknet";
@@ -55,72 +52,67 @@ export function useTraceabilities({
 }: TraceabilitiesProps): UseTraceabilitiesResponse {
   const { sales: salesData, listings: listingsData } = useMarketplace();
   const { project } = useConnection();
-  const [traceabilities, setTraceabilities] = useState<{
-    [key: string]: Traceability;
-  }>({});
 
-  const projects: TraceabilityProject[] = useMemo(() => {
-    if (!contractAddress || !tokenId) return [];
-    return [
-      {
-        project: project ?? "",
-        date: "",
-        contractAddress: contractAddress,
-        tokenId: tokenId,
-        limit: LIMIT,
-      },
-    ];
-  }, [project, tokenId, contractAddress]);
-
-  const { status } = useTraceabilitiesQuery(
+  const { data, status } = useTraceabilitiesQuery(
     {
-      projects,
+      projects: [
+        {
+          project: project ?? "",
+          date: "",
+          contractAddress: contractAddress,
+          tokenId: tokenId,
+          limit: LIMIT,
+        },
+      ],
     },
     {
-      queryKey: ["traceabilities", projects],
-      enabled: projects.length > 0,
-      onSuccess: ({ traceabilities }) => {
-        const newTraceabilities: { [key: string]: Traceability } = {};
-        traceabilities?.items.forEach((item) => {
-          item.transfers.forEach(
-            ({
-              amount,
-              contractAddress,
-              decimals,
-              eventId,
-              executedAt,
-              fromAddress,
-              toAddress,
-              metadata,
-              name,
-              symbol,
-              tokenId,
-              transactionHash,
-            }) => {
-              const key = `${transactionHash}-${eventId}`;
-              const traceability: Traceability = {
-                project: item.meta.project,
-                amount: Number(amount),
-                contractAddress,
-                decimals: Number(decimals),
-                eventId,
-                executedAt,
-                fromAddress,
-                toAddress,
-                metadata,
-                name,
-                symbol,
-                tokenId,
-                transactionHash,
-              };
-              newTraceabilities[key] = traceability;
-            },
-          );
-        });
-        setTraceabilities(newTraceabilities);
-      },
+      queryKey: ["traceabilities", project, contractAddress, tokenId],
+      enabled: !!project && !!contractAddress && !!tokenId,
     },
   );
+
+  const traceabilities = useMemo(() => {
+    if (!data) return [];
+    const { traceabilities } = data;
+    const newTraceabilities: { [key: string]: Traceability } = {};
+    traceabilities?.items.forEach((item) => {
+      item.transfers.forEach(
+        ({
+          amount,
+          contractAddress,
+          decimals,
+          eventId,
+          executedAt,
+          fromAddress,
+          toAddress,
+          metadata,
+          name,
+          symbol,
+          tokenId,
+          transactionHash,
+        }) => {
+          const key = `${transactionHash}-${eventId}`;
+          const traceability: Traceability = {
+            project: item.meta.project,
+            amount: Number(amount),
+            contractAddress,
+            decimals: Number(decimals),
+            eventId,
+            executedAt,
+            fromAddress,
+            toAddress,
+            metadata,
+            name,
+            symbol,
+            tokenId,
+            transactionHash,
+          };
+          newTraceabilities[key] = traceability;
+        },
+      );
+    });
+    return newTraceabilities;
+  }, [data]);
 
   const addresses = useMemo(() => {
     return Object.values(traceabilities).flatMap((traceability) => [
