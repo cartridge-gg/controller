@@ -46,7 +46,15 @@ export function PurchaseStarterpack() {
       });
       setPurchaseItems(purchaseItems);
     }
-  }, [starterpackId, isLoading]);
+  }, [
+    starterpackId,
+    isLoading,
+    items,
+    priceUsd,
+    setStarterpackId,
+    setUsdAmount,
+    setPurchaseItems,
+  ]);
 
   if (isLoading) {
     return <LoadingState />;

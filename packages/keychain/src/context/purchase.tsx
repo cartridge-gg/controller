@@ -159,13 +159,13 @@ export const PurchaseProvider = ({
   }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
   const onCrypto = useCallback(async () => {
-    if (!controller || !selectedWallet || !walletAddress) return;
+    if (!controller || !selectedWallet?.platform || !walletAddress) return;
 
     setPaymentMethod("crypto");
     const paymentId = await sendPayment(
       walletAddress,
       usdToCredits(usdAmount),
-      selectedWallet.platform!,
+      selectedWallet.platform,
       undefined,
       starterpackId,
       (explorer) => {
