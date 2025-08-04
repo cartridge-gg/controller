@@ -207,7 +207,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
           (t) => BigInt(t.metadata.address || "0x0") === BigInt(token),
         ),
     );
-  }, [options, toriiTokens]);
+  }, [options, toriiTokens, toriiStatus]);
 
   const { data: rpcData }: UseERC20BalanceResponse = useERC20Balance({
     address: accountAddress ?? address,

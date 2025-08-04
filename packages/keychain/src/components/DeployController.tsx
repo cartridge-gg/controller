@@ -14,7 +14,7 @@ import {
   Spinner,
 } from "@cartridge/ui";
 import { getChainName } from "@cartridge/ui/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   constants,
@@ -49,35 +49,39 @@ export function DeployController({
   // What is this cancer
   // Update: this is still cancer
   const feeEstimate: FeeEstimate | undefined = ctrlError?.data?.fee_estimate;
-  const estimateFee: EstimateFee | undefined = feeEstimate
-    ? {
-        l2_gas_consumed: BigInt(feeEstimate.l2_gas_consumed ?? 0),
-        l2_gas_price: BigInt(feeEstimate.l2_gas_price ?? 0),
-        overall_fee: BigInt(feeEstimate.overall_fee),
-        unit: feeEstimate.unit,
-        suggestedMaxFee: BigInt(feeEstimate.overall_fee),
-        l1_data_gas_consumed: BigInt(feeEstimate.l1_data_gas_consumed ?? 0),
-        l1_data_gas_price: BigInt(feeEstimate.l1_data_gas_price ?? 0),
-        l1_gas_consumed: BigInt(feeEstimate.l1_gas_consumed ?? 0),
-        l1_gas_price: BigInt(feeEstimate.l1_gas_price ?? 0),
-        resourceBounds: {
-          l1_gas: {
-            max_amount:
-              typeof feeEstimate.overall_fee === "string"
-                ? feeEstimate.overall_fee
-                : feeEstimate.overall_fee.toString(),
-            max_price_per_unit: feeEstimate.l1_gas_price?.toString() ?? "",
-          },
-          l2_gas: {
-            max_amount:
-              typeof feeEstimate.overall_fee === "string"
-                ? feeEstimate.overall_fee
-                : feeEstimate.overall_fee.toString(),
-            max_price_per_unit: feeEstimate.l2_gas_price?.toString() ?? "",
-          },
-        },
-      }
-    : undefined;
+  const estimateFee: EstimateFee | undefined = useMemo(
+    () =>
+      feeEstimate
+        ? {
+            l2_gas_consumed: BigInt(feeEstimate.l2_gas_consumed ?? 0),
+            l2_gas_price: BigInt(feeEstimate.l2_gas_price ?? 0),
+            overall_fee: BigInt(feeEstimate.overall_fee),
+            unit: feeEstimate.unit,
+            suggestedMaxFee: BigInt(feeEstimate.overall_fee),
+            l1_data_gas_consumed: BigInt(feeEstimate.l1_data_gas_consumed ?? 0),
+            l1_data_gas_price: BigInt(feeEstimate.l1_data_gas_price ?? 0),
+            l1_gas_consumed: BigInt(feeEstimate.l1_gas_consumed ?? 0),
+            l1_gas_price: BigInt(feeEstimate.l1_gas_price ?? 0),
+            resourceBounds: {
+              l1_gas: {
+                max_amount:
+                  typeof feeEstimate.overall_fee === "string"
+                    ? feeEstimate.overall_fee
+                    : feeEstimate.overall_fee.toString(),
+                max_price_per_unit: feeEstimate.l1_gas_price?.toString() ?? "",
+              },
+              l2_gas: {
+                max_amount:
+                  typeof feeEstimate.overall_fee === "string"
+                    ? feeEstimate.overall_fee
+                    : feeEstimate.overall_fee.toString(),
+                max_price_per_unit: feeEstimate.l2_gas_price?.toString() ?? "",
+              },
+            },
+          }
+        : undefined,
+    [feeEstimate],
+  );
 
   useEffect(() => {
     if (

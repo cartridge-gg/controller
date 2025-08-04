@@ -43,7 +43,7 @@ import { createExecuteUrl } from "@/utils/connection/execute";
 const OFFSET = 10;
 
 export function CollectionAsset() {
-  const { chainId, namespace, project, parent, controller } = useConnection();
+  const { chainId, project } = useConnection();
   const account = useAccount();
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
@@ -58,7 +58,7 @@ export function CollectionAsset() {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
     );
-  }, [editions, project, namespace]);
+  }, [editions, project]);
 
   const { address: contractAddress, tokenId } = useParams();
   const {
@@ -163,14 +163,11 @@ export function CollectionAsset() {
     contractAddress,
     asset,
     isListed,
-    chainId,
-    parent,
     provider,
-    controller,
     order,
     isOwner,
     navigate,
-    searchParams,
+    selfOrders,
   ]);
 
   const events = useMemo(() => {

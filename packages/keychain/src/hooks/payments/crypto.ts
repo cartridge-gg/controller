@@ -40,6 +40,72 @@ export const useCryptoPayment = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
+  const requestPhantomPayment = useCallback(
+    async (
+      walletAddress: string,
+      depositAddress: string,
+      tokenAmount: number,
+      tokenAddress: string,
+      isMainnet: boolean = false,
+    ) => {
+      const rpcUrl = isMainnet
+        ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL ||
+          clusterApiUrl("mainnet-beta")
+        : import.meta.env.VITE_SOLANA_DEVNET_RPC_URL || clusterApiUrl("devnet");
+      const connection = new Connection(rpcUrl);
+      const senderPublicKey = new PublicKey(walletAddress);
+      const recipientPublicKey = new PublicKey(depositAddress);
+      const tokenMint = new PublicKey(tokenAddress);
+
+      const senderTokenAccount = await getAssociatedTokenAddress(
+        tokenMint,
+        senderPublicKey,
+      );
+
+      const recipientTokenAccount = await getAssociatedTokenAddress(
+        tokenMint,
+        recipientPublicKey,
+      );
+
+      const createAtaIx = createAssociatedTokenAccountInstruction(
+        senderPublicKey,
+        recipientTokenAccount,
+        recipientPublicKey,
+        tokenMint,
+      );
+
+      const transferInstruction = createTransferInstruction(
+        senderTokenAccount,
+        recipientTokenAccount,
+        new PublicKey(walletAddress),
+        tokenAmount,
+      );
+
+      const txn = new Transaction().add(createAtaIx, transferInstruction);
+      txn.feePayer = senderPublicKey;
+      const { blockhash } = await connection.getLatestBlockhash();
+      txn.recentBlockhash = blockhash;
+
+      const serializedTxn = txn.serialize({ requireAllSignatures: false });
+      const res = await externalSendTransaction(
+        "phantom",
+        new Uint8Array(serializedTxn),
+      );
+      if (!res.success) {
+        throw new Error(res.error);
+      }
+
+      const { signature } = res.result as { signature: string };
+
+      return {
+        signature,
+        confirmTransaction: async () => {
+          await pollForFinalization(connection, signature);
+        },
+      };
+    },
+    [externalSendTransaction],
+  );
   const sendPayment = useCallback(
     async (
       walletAddress: string,
@@ -121,7 +187,7 @@ export const useCryptoPayment = () => {
         setIsLoading(false);
       }
     },
-    [controller, externalSendTransaction, isMainnet],
+    [controller, isMainnet, requestPhantomPayment],
   );
 
   const quotePaymentFees = useCallback(
@@ -232,69 +298,6 @@ export const useCryptoPayment = () => {
     };
   }
 
-  async function requestPhantomPayment(
-    walletAddress: string,
-    depositAddress: string,
-    tokenAmount: number,
-    tokenAddress: string,
-    isMainnet: boolean = false,
-  ) {
-    const rpcUrl = isMainnet
-      ? import.meta.env.VITE_SOLANA_MAINNET_RPC_URL ||
-        clusterApiUrl("mainnet-beta")
-      : import.meta.env.VITE_SOLANA_DEVNET_RPC_URL || clusterApiUrl("devnet");
-    const connection = new Connection(rpcUrl);
-    const senderPublicKey = new PublicKey(walletAddress);
-    const recipientPublicKey = new PublicKey(depositAddress);
-    const tokenMint = new PublicKey(tokenAddress);
-
-    const senderTokenAccount = await getAssociatedTokenAddress(
-      tokenMint,
-      senderPublicKey,
-    );
-
-    const recipientTokenAccount = await getAssociatedTokenAddress(
-      tokenMint,
-      recipientPublicKey,
-    );
-
-    const createAtaIx = createAssociatedTokenAccountInstruction(
-      senderPublicKey,
-      recipientTokenAccount,
-      recipientPublicKey,
-      tokenMint,
-    );
-
-    const transferInstruction = createTransferInstruction(
-      senderTokenAccount,
-      recipientTokenAccount,
-      new PublicKey(walletAddress),
-      tokenAmount,
-    );
-
-    const txn = new Transaction().add(createAtaIx, transferInstruction);
-    txn.feePayer = senderPublicKey;
-    const { blockhash } = await connection.getLatestBlockhash();
-    txn.recentBlockhash = blockhash;
-
-    const serializedTxn = txn.serialize({ requireAllSignatures: false });
-    const res = await externalSendTransaction(
-      "phantom",
-      new Uint8Array(serializedTxn),
-    );
-    if (!res.success) {
-      throw new Error(res.error);
-    }
-
-    const { signature } = res.result as { signature: string };
-
-    return {
-      signature,
-      confirmTransaction: async () => {
-        await pollForFinalization(connection, signature);
-      },
-    };
-  }
 
   async function requestEvmPayment(
     walletAddress: string,
