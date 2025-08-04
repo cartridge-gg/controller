@@ -1,8 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  OwnershipProject,
-  useOwnershipsQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+import { useOwnershipsQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useConnection } from "@/hooks/connection";
 
 const LIMIT = 0;
@@ -34,25 +31,20 @@ export function useOwnerships({
     {},
   );
 
-  const projects: OwnershipProject[] = useMemo(() => {
-    if (!contractAddresses || !tokenIds) return [];
-    return [
-      {
-        project: project ?? "",
-        contractAddresses: contractAddresses,
-        tokenIds: tokenIds,
-        limit: LIMIT,
-      },
-    ];
-  }, [project, tokenIds, contractAddresses]);
-
   const { status } = useOwnershipsQuery(
     {
-      projects,
+      projects: [
+        {
+          project: project ?? "",
+          contractAddresses: contractAddresses,
+          tokenIds: tokenIds,
+          limit: LIMIT,
+        },
+      ],
     },
     {
-      queryKey: ["ownerships", projects],
-      enabled: projects.length > 0,
+      queryKey: ["ownerships", project, contractAddresses, tokenIds],
+      enabled: !!project && !!contractAddresses && !!tokenIds,
       onSuccess: ({ ownerships }) => {
         const newOwnerships: { [key: string]: Ownership } = {};
         ownerships?.items.forEach((item) => {
@@ -93,48 +85,45 @@ export function useOwnership({
   tokenId,
 }: OwnershipProps): UseOwnershipResponse {
   const { project } = useConnection();
-  const [ownership, setOwnership] = useState<Ownership | undefined>(undefined);
 
-  const projects: OwnershipProject[] = useMemo(() => {
-    if (!contractAddress || !tokenId) return [];
-    return [
-      {
-        project: project ?? "",
-        contractAddresses: [contractAddress],
-        tokenIds: [tokenId],
-        limit: LIMIT,
-      },
-    ];
-  }, [project, tokenId, contractAddress]);
-
-  const { status } = useOwnershipsQuery(
+  const { data, status } = useOwnershipsQuery(
     {
-      projects,
+      projects: [
+        {
+          project: project ?? "",
+          contractAddresses: [contractAddress],
+          tokenIds: [tokenId],
+          limit: LIMIT,
+        },
+      ],
     },
     {
-      queryKey: ["ownership", projects],
-      enabled: projects.length > 0,
-      onSuccess: ({ ownerships }) => {
-        const newOwnerships: { [key: string]: Ownership } = {};
-        ownerships?.items.forEach((item) => {
-          item.ownerships.forEach(
-            ({ accountAddress, contractAddress, tokenId, balance }) => {
-              const key = `${contractAddress}-${tokenId}`;
-              const ownership: Ownership = {
-                project: item.meta.project,
-                accountAddress,
-                contractAddress,
-                tokenId,
-                balance: Number(balance),
-              };
-              newOwnerships[key] = ownership;
-            },
-          );
-        });
-        setOwnership(newOwnerships[`${contractAddress}-${tokenId}`]);
-      },
+      queryKey: ["ownership", project, contractAddress, tokenId],
+      enabled: !!project && !!contractAddress && !!tokenId,
     },
   );
+
+  const ownership = useMemo(() => {
+    if (!data || !contractAddress || !tokenId) return undefined;
+    const { ownerships } = data;
+    const newOwnerships: { [key: string]: Ownership } = {};
+    ownerships.items.forEach((item) => {
+      item.ownerships.forEach(
+        ({ accountAddress, contractAddress, tokenId, balance }) => {
+          const key = `${contractAddress}-${tokenId}`;
+          const ownership: Ownership = {
+            project: item.meta.project,
+            accountAddress,
+            contractAddress,
+            tokenId,
+            balance: Number(balance),
+          };
+          newOwnerships[key] = ownership;
+        },
+      );
+    });
+    return newOwnerships[`${contractAddress}-${tokenId}`];
+  }, [data, contractAddress, tokenId]);
 
   return { ownership, status };
 }

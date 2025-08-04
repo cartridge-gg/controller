@@ -129,11 +129,29 @@ export function Profile() {
           <Button
             onClick={() =>
               ctrlConnector.controller.openProfileAt(
+                `account/${username}/slot/arcade-briq/inventory/collectible/0x48089694913599fb5e23e3e9ee01287c5ea9a54d7d48b08cbbf0091995d502e/token/1?address=0x06B0fDa70d073743a3b0f6b02cbc1Ab5C1c85f2a36d7c3c17ca5DBF8ea0883A0&tokenIds=1`,
+              )
+            }
+          >
+            Open at BRIQ Token 1
+          </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
                 `account/${username}/slot/pistols-mainnet/inventory/collection/0x7aaa9866750a0db82a54ba8674c38620fa2f967d2fbb31133def48e0527c87f/purchase?&orders=${ORDERS.join(",")}`,
               )
             }
           >
             Open at Pistols Collection Purchase Orders
+          </Button>
+          <Button
+            onClick={() =>
+              ctrlConnector.controller.openProfileAt(
+                `account/${username}/slot/arcade-briq/inventory/collectible/0x48089694913599fb5e23e3e9ee01287c5ea9a54d7d48b08cbbf0091995d502e/purchase?&orders=${ORDERS.join(",")}`,
+              )
+            }
+          >
+            Open at BRIQ Collection Purchase Orders
           </Button>
         </div>
       </div>

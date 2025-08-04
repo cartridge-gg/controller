@@ -38,6 +38,8 @@ import { PurchasePending } from "./purchasenew/pending";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { SelectWallet } from "./purchasenew/wallet/wallet";
 import { CryptoCheckout } from "./purchasenew/checkout/crypto";
+import { CollectibleListing } from "./inventory/collection/collectible-listing";
+import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
 
 export function App() {
   return (
@@ -126,6 +128,18 @@ export function App() {
             path="inventory/collectible/:address/token/:tokenId/send"
             element={<SendCollectible />}
           />
+          <Route
+            path="inventory/collectible/:address/token/:tokenId/list"
+            element={<CollectibleListing />}
+          />
+          <Route
+            path="inventory/collectible/:address/token/:tokenId/purchase"
+            element={<CollectiblePurchase />}
+          />
+          <Route
+            path="inventory/collectible/:address/purchase"
+            element={<CollectionPurchase />}
+          />
           <Route path="activity" element={<Activity />} />
           <Route path="achievements" element={<Achievements />} />
           <Route path="achievements/:address" element={<Achievements />} />
@@ -190,6 +204,18 @@ export function App() {
           <Route
             path="slot/:project/inventory/collectible/:address/token/:tokenId/send"
             element={<SendCollectible />}
+          />
+          <Route
+            path="slot/:project/inventory/collectible/:address/token/:tokenId/list"
+            element={<CollectibleListing />}
+          />
+          <Route
+            path="slot/:project/inventory/collectible/:address/token/:tokenId/purchase"
+            element={<CollectiblePurchase />}
+          />
+          <Route
+            path="slot/:project/inventory/collectible/:address/purchase"
+            element={<CollectiblePurchase />}
           />
           <Route path="slot/:project/achievements" element={<Achievements />} />
           <Route

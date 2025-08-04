@@ -1,6 +1,5 @@
 import {
   Link,
-  Outlet,
   useLocation,
   useParams,
   useSearchParams,
@@ -15,12 +14,14 @@ import { useControllerTheme } from "@/hooks/connection";
 import { useCollectible } from "@/hooks/collectible";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
+import { useMarketplace } from "@/hooks/marketplace";
 
 export function Collectible() {
   const { games, editions } = useArcade();
   const { address } = useParams<{ address: string }>();
   const { project, namespace } = useConnection();
   const theme = useControllerTheme();
+  const { getCollectionOrders } = useMarketplace();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -38,9 +39,9 @@ export function Collectible() {
     contractAddress: address,
   });
 
-  if (address || location.pathname.includes("/send")) {
-    return <Outlet />;
-  }
+  const orders = useMemo(() => {
+    return getCollectionOrders(address || "");
+  }, [address]);
 
   return (
     <>
@@ -78,6 +79,10 @@ export function Collectible() {
                     selectable={false}
                     image={asset.imageUrl || placeholder}
                     totalCount={asset.amount}
+                    listingCount={
+                      orders[parseInt(BigInt(asset.tokenId).toString())]
+                        ?.length || 0
+                    }
                     className="rounded overflow-hidden"
                   />
                 </Link>
