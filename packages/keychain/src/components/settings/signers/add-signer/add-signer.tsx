@@ -2,7 +2,8 @@ import { credentialToAddress } from "@/components/connect/types";
 import { useNavigation } from "@/context/navigation";
 import { useController } from "@/hooks/controller";
 import { useWallets } from "@/hooks/wallets";
-import { TurnkeyWallet } from "@/wallets/social/turnkey";
+import { SmsWallet } from "@/wallets/social/sms-wallet";
+import { OAuthWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
   AuthOptions,
@@ -19,12 +20,15 @@ import {
   AddUserIcon,
   Button,
   HeaderInner,
+  LayoutContainer,
   LayoutContent,
   LayoutFooter,
+  MobileIcon,
   SignerMethod,
   SignerMethodKind,
   SignerPendingCard,
   SignerPendingCardKind,
+  SpinnerIcon,
 } from "@cartridge/ui";
 import {
   ControllerQuery,
@@ -51,6 +55,9 @@ export function AddSigner({
   const [signerPending, setSignerPending] = useState<SignerPending | null>(
     null,
   );
+  const [HeaderIcon, setHeaderIcon] = useState<
+    typeof MobileIcon | typeof SpinnerIcon
+  >(AddUserIcon);
 
   const handleClick = useCallback(
     async (
@@ -62,6 +69,7 @@ export function AddSigner({
           kind: auth,
           inProgress: true,
         });
+        setHeaderIcon(SpinnerIcon);
 
         const alreadyOwner = await authFn(auth);
         if (alreadyOwner) {
@@ -108,62 +116,59 @@ export function AddSigner({
   }, [signerPending, signerPending?.inProgress, controllerQuery, navigate]);
 
   return (
-    <>
+    <LayoutContainer>
       <HeaderInner
-        icon={<AddUserIcon />}
+        icon={<HeaderIcon size="lg" variant="solid" />}
         variant="compressed"
-        title="Add Signer"
-        hideIcon
+        title={`Add ${signerPending ? signerPending.kind : ""} Signer`}
       />
-      <LayoutContent className="flex flex-col gap-3 w-full h-fit">
-        {!signerPending && <SignerAlert />}
-        {signerPending ? (
-          <SignerPendingCard
-            kind={signerPending.kind as SignerPendingCardKind}
-            inProgress={signerPending.inProgress}
-            error={signerPending.error}
-            authedAddress={signerPending.authedAddress}
-          />
-        ) : wallets ? (
-          <WalletAuths
-            currentSigners={controllerQuery.data?.controller?.signers?.map(
-              (signer) => signer.metadata as CredentialMetadata,
-            )}
-            handleClick={handleClick}
-          />
-        ) : (
-          <RegularAuths
-            setWallets={setWallets}
-            currentSigners={controllerQuery.data?.controller?.signers?.map(
-              (signer) => signer.metadata as CredentialMetadata,
-            )}
-            handleClick={handleClick}
-          />
-        )}
-      </LayoutContent>
+      <>
+        <LayoutContent className="flex flex-col gap-3 w-full h-fit">
+          {!signerPending && <SignerAlert />}
+          {signerPending ? (
+            <SignerPendingCard
+              kind={signerPending.kind as SignerPendingCardKind}
+              inProgress={signerPending.inProgress}
+              error={signerPending.error}
+              authedAddress={signerPending.authedAddress}
+            />
+          ) : wallets ? (
+            <WalletAuths
+              currentSigners={controllerQuery.data?.controller?.signers?.map(
+                (signer) => signer.metadata as CredentialMetadata,
+              )}
+              handleClick={handleClick}
+            />
+          ) : (
+            <RegularAuths
+              setWallets={setWallets}
+              currentSigners={controllerQuery.data?.controller?.signers?.map(
+                (signer) => signer.metadata as CredentialMetadata,
+              )}
+              handleClick={handleClick}
+            />
+          )}
+        </LayoutContent>
 
-      <LayoutFooter>
-        {(wallets || signerPending?.error) && (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              if (signerPending?.error || signerPending?.authedAddress) {
-                setSignerPending(null);
-              } else {
-                setWallets(false);
-              }
-            }}
-          >
-            Cancel
-          </Button>
-        )}
-        {!wallets && !signerPending && (
-          <Button variant="secondary" onClick={() => navigate("/settings")}>
-            Back
-          </Button>
-        )}
-      </LayoutFooter>
-    </>
+        <LayoutFooter>
+          {(wallets || signerPending?.error) && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (signerPending?.error || signerPending?.authedAddress) {
+                  setSignerPending(null);
+                  setHeaderIcon(AddUserIcon);
+                } else {
+                  setWallets(false);
+                }
+              }}
+            >
+              Cancel
+            </Button>
+          )}
+        </LayoutFooter>
+      </>
+    </LayoutContainer>
   );
 }
 
@@ -317,7 +322,7 @@ const RegularAuths = ({
               throw new Error("No username");
             }
 
-            const turnkeyWallet = new TurnkeyWallet("google");
+            const turnkeyWallet = new OAuthWallet("google");
             const response = await turnkeyWallet.connect(controller.username());
             if (!response || !response.success || !response.account) {
               throw new Error(response?.error || "Wallet auth: unknown error");
@@ -359,7 +364,7 @@ const RegularAuths = ({
               throw new Error("No username");
             }
 
-            const turnkeyWallet = new TurnkeyWallet("discord");
+            const turnkeyWallet = new OAuthWallet("discord");
             const response = await turnkeyWallet.connect(controller.username());
             if (!response || !response.success || !response.account) {
               throw new Error(response?.error || "Wallet auth: unknown error");
@@ -392,10 +397,47 @@ const RegularAuths = ({
           });
         }}
       />
-      {/* <SignerMethod
-        kind="SMS"
-        onClick={() => {}}
-      /> */}
+      <SignerMethod
+        kind="sms"
+        onClick={async () => {
+          if (!controller?.username()) {
+            throw new Error("No username");
+          }
+          const smsWallet = new SmsWallet();
+          const response = await smsWallet.connect(
+            controller.username()!,
+            "add-signer",
+          );
+          if (!response || !response.success || !response.account) {
+            throw new Error(response?.error || "Wallet auth: unknown error");
+          }
+          if (response.error?.includes("Account mismatch")) {
+            throw new Error("Account mismatch");
+          }
+          window.keychain_wallets?.addEmbeddedWallet(
+            response.account,
+            smsWallet as unknown as WalletAdapter,
+          );
+          if (
+            currentSigners?.find(
+              (signer) => credentialToAddress(signer) === response.account,
+            )
+          ) {
+            return response.account;
+          }
+          await controller?.addOwner(
+            { eip191: { address: response.account } },
+            {
+              type: "eip191",
+              credential: JSON.stringify({
+                provider: "sms",
+                eth_address: response.account,
+              }),
+            },
+            null,
+          );
+        }}
+      />
       <SignerMethod
         kind="wallet"
         onClick={() => {

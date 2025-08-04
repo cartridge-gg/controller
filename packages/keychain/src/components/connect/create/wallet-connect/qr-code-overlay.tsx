@@ -65,8 +65,8 @@ export const QRCodeOverlay = ({
           <button
             id="copy-link"
             className="relative w-full h-[44px] flex p-3 items-center justify-between rounded-b-[12px]
-			bg-background-200 text-foreground-400 hover:text-foreground-300
-			transition-colors duration-200 ease-in-out overflow-hidden"
+            bg-background-200 text-foreground-400 hover:text-foreground-300
+            transition-colors duration-200 ease-in-out overflow-hidden"
             onClick={() => {
               navigator.clipboard.writeText(uri);
               setCopyLinkClicked(true);
@@ -98,8 +98,8 @@ export const QRCodeOverlay = ({
       </div>
       <button
         className="w-fit h-fit py-[10px] px-6 gap-2 rounded-[20px] text-foreground-100
-		bg-translucent-light-200 hover:bg-translucent-light-200
-		transition-colors duration-200 ease-in-out"
+        bg-translucent-light-200 hover:bg-translucent-light-200
+        transition-colors duration-200 ease-in-out"
         onClick={onCancel}
       >
         Cancel
