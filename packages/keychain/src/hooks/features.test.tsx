@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import React, { PropsWithChildren, act } from "react";
-import { vi } from "vitest"; // Import vi
+import { vi, beforeEach } from "vitest";
 import { FeatureProvider, useFeatures, useFeature, Feature } from "./features"; // Adjust path as needed
 
 const LOCAL_STORAGE_KEY = "@cartridge/features";
