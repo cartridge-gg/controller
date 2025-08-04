@@ -128,7 +128,16 @@ export function CryptoCheckout({
     } finally {
       setState(CheckoutState.REVIEW_PURCHASE);
     }
-  }, [sendPayment, selectedWallet, wholeCredits, onComplete]);
+  }, [
+    sendPayment,
+    selectedWallet,
+    wholeCredits,
+    onComplete,
+    walletAddress,
+    teamId,
+    starterpackDetails?.id,
+    waitForPayment,
+  ]);
 
   return (
     <>

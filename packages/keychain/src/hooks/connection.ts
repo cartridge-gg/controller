@@ -312,7 +312,7 @@ export function useConnectionValue() {
         console.error("Failed to add embedded wallet:", error);
       }
     })();
-  }, [controller?.username, chainId]);
+  }, [controller?.username, chainId, controller]);
 
   // Handle controller initialization
   useEffect(() => {
@@ -449,7 +449,14 @@ export function useConnectionValue() {
         externalGetBalance: iframeMethods.externalGetBalance(currentOrigin),
       });
     }
-  }, [setOrigin, setRpcUrl, setContext, setController, setConfigSignupOptions]);
+  }, [
+    setOrigin,
+    setRpcUrl,
+    setContext,
+    setController,
+    setConfigSignupOptions,
+    navigate,
+  ]);
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
@@ -465,7 +472,7 @@ export function useConnectionValue() {
         message: "User logged out",
       });
     }
-  }, [context, parent, setController]);
+  }, [context, parent]);
 
   const openSettings = useCallback(() => {
     window.dispatchEvent(

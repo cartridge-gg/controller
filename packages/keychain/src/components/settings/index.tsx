@@ -90,7 +90,7 @@ export function Settings() {
         ...controllerQueryRaw.data,
       },
     } as QueryObserverResult<ControllerQuery>;
-  }, [chainId, controllerQueryRaw.data]);
+  }, [chainId, controllerQueryRaw]);
 
   const handleLogout = useCallback(() => {
     try {

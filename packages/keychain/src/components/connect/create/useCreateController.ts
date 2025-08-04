@@ -62,14 +62,8 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
 
-  const {
-    origin,
-    policies,
-    rpcUrl,
-    chainId,
-    setController,
-    configSignupOptions,
-  } = useConnection();
+  const { origin, rpcUrl, chainId, setController, configSignupOptions } =
+    useConnection();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -292,10 +286,6 @@ export function useCreateController({
       chainId,
       rpcUrl,
       origin,
-      loginMode,
-      policies,
-      isSlot,
-      createController,
       setController,
       doPopupFlow,
       signupWithExternalWallet,
@@ -427,11 +417,11 @@ export function useCreateController({
       loginWithExternalWallet,
       loginMode,
       chainId,
+      origin,
+      rpcUrl,
       setWaitingForConfirmation,
       setController,
-      changeWallet,
       setChangeWallet,
-      wallets,
     ],
   );
 

@@ -1,5 +1,4 @@
 import { useAccount } from "@/hooks/account";
-import { useConnection } from "@/hooks/connection";
 import {
   LayoutContent,
   LayoutFooter,
@@ -37,7 +36,6 @@ export function SendCollectible() {
   });
   const account = useAccount();
   const address = account?.address || "";
-  const { controller } = useConnection();
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
   const [recipientError, setRecipientError] = useState<Error | undefined>();
@@ -127,7 +125,6 @@ export function SendCollectible() {
       setLoading(false);
     },
     [
-      controller,
       tokenIds,
       contractAddress,
       address,
@@ -137,6 +134,7 @@ export function SendCollectible() {
       searchParams,
       amount,
       amountError,
+      username,
     ],
   );
 
