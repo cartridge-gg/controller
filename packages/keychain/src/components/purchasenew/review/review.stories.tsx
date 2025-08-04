@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ReviewPurchase } from "./review";
-import { EthereumIcon, SolanaIcon, StarknetIcon } from "@cartridge/ui";
 import { PurchaseItemType } from "@/context/purchase";
 
 const meta = {
@@ -32,12 +31,7 @@ export const Starterpack: Story = {
       processingFeeInCents: 100,
       totalInCents: 1100,
     },
-    network: {
-      name: "Ethereum",
-      platform: "ethereum",
-      icon: <StarknetIcon />,
-      wallets: new Map(),
-    },
+    platform: "starknet",
     isLoading: false,
   },
 };
@@ -57,12 +51,7 @@ export const CreditsOnly: Story = {
       processingFeeInCents: 100,
       totalInCents: 1100,
     },
-    network: {
-      name: "Ethereum",
-      platform: "ethereum",
-      icon: <EthereumIcon />,
-      wallets: new Map(),
-    },
+    platform: "ethereum",
     isLoading: false,
   },
 };
@@ -94,12 +83,7 @@ export const MultipleItems: Story = {
       processingFeeInCents: 100,
       totalInCents: 1100,
     },
-    network: {
-      name: "Solana",
-      platform: "solana",
-      icon: <SolanaIcon />,
-      wallets: new Map(),
-    },
+    platform: "solana",
     isLoading: false,
   },
 };
@@ -125,12 +109,7 @@ export const Loading: Story = {
       processingFeeInCents: 100,
       totalInCents: 1100,
     },
-    network: {
-      name: "Solana",
-      platform: "solana",
-      icon: <SolanaIcon />,
-      wallets: new Map(),
-    },
+    platform: "solana",
     isLoading: true,
   },
 };

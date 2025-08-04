@@ -5,15 +5,16 @@ import {
   LayoutContent,
   LayoutFooter,
 } from "@cartridge/ui";
-import { CostDetails, Network } from "../types";
+import { CostDetails } from "../types";
 import { CostBreakdown } from "./cost";
 import { Receiving } from "../receiving";
 import { PurchaseItem } from "@/context/purchase";
+import { ExternalPlatform } from "@cartridge/controller";
 
 type ReviewPurchaseProps = {
   items: PurchaseItem[];
   costDetails: CostDetails;
-  network?: Network;
+  platform?: ExternalPlatform;
   isLoading?: boolean;
   onConfirm?: () => void;
 };
@@ -21,7 +22,7 @@ type ReviewPurchaseProps = {
 export function ReviewPurchase({
   items,
   costDetails,
-  network,
+  platform,
   isLoading,
   onConfirm,
 }: ReviewPurchaseProps) {
@@ -36,8 +37,8 @@ export function ReviewPurchase({
       </LayoutContent>
       <LayoutFooter>
         <CostBreakdown
-          rails="stripe"
-          network={network}
+          rails={platform ? "crypto" : "stripe"}
+          platform={platform}
           costDetails={costDetails}
         />
         <Button onClick={onConfirm} isLoading={isLoading}>

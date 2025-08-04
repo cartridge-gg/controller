@@ -334,7 +334,7 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return;
     }
-    this.keychain.navigate("/purchase/credits/").then(() => {
+    this.keychain.navigate("/purchase/credits").then(() => {
       this.iframes.keychain.open();
     });
   }

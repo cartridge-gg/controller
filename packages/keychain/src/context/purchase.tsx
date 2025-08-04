@@ -164,7 +164,7 @@ export const PurchaseProvider = ({
     setPaymentMethod("crypto");
     const paymentId = await sendPayment(
       walletAddress,
-      0,
+      usdToCredits(usdAmount),
       selectedWallet.platform!,
       undefined,
       starterpackId,

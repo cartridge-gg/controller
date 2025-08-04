@@ -6,8 +6,12 @@ import {
   Separator,
   Thumbnail,
 } from "@cartridge/ui";
-import { CostDetails, Network } from "../types";
-import { ExternalWalletType } from "@cartridge/controller";
+import { CostDetails } from "../types";
+import {
+  ExternalPlatform,
+  ExternalWalletType,
+  humanizeString,
+} from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
 
 type PaymentRails = "stripe" | "crypto";
@@ -17,18 +21,17 @@ export function CostBreakdown({
   rails,
   costDetails,
   walletType,
-  network,
+  platform,
   paymentUnit,
   openFeesTooltip = false,
 }: {
   rails: PaymentRails;
   costDetails: CostDetails;
   walletType?: ExternalWalletType;
-  network?: Network;
+  platform?: ExternalPlatform;
   paymentUnit?: PaymentUnit;
   openFeesTooltip?: boolean;
 }) {
-  console.log({ network });
   const formatCurrency = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
   };
@@ -40,10 +43,10 @@ export function CostBreakdown({
   return (
     <Card className="gap-3">
       <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
-        {rails === "crypto" && (
+        {rails === "crypto" && platform && (
           <>
             <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
-              Purchase funds on
+              Purchase funds on {humanizeString(platform)}
             </div>
             <Separator className="bg-background-200" />
           </>

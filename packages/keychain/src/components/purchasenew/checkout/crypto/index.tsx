@@ -41,6 +41,7 @@ export function CryptoCheckout() {
         <CostBreakdown
           rails={"crypto"}
           paymentUnit="usdc"
+          platform={selectedWallet?.platform}
           walletType={selectedWallet?.type}
           costDetails={{
             baseCostInCents: usdAmount * 100,

@@ -54,7 +54,7 @@ export function PurchasePendingInner({
         navigate("/purchase/success", { reset: true });
       });
     }
-  }, [paymentId, waitForPayment]);
+  }, [paymentId, waitForPayment, navigate]);
 
   return (
     <>
