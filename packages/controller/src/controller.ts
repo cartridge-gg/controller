@@ -334,8 +334,9 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return;
     }
-    this.iframes.keychain.open();
-    this.keychain.openPurchaseCredits();
+    this.keychain.navigate("/purchase/credits").then(() => {
+      this.iframes.keychain.open();
+    });
   }
 
   openStarterPack(starterpackId: string) {
@@ -345,9 +346,11 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     // Navigate first, then open the iframe
-    this.keychain.navigate(`/starter-pack/${starterpackId}`).then(() => {
-      this.iframes.keychain.open();
-    });
+    this.keychain
+      .navigate(`/purchase/starterpack/${starterpackId}`)
+      .then(() => {
+        this.iframes.keychain.open();
+      });
   }
 
   async openExecute(calls: any, chainId?: string) {

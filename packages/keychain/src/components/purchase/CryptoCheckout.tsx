@@ -28,7 +28,6 @@ import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useCryptoPayment } from "@/hooks/payments/crypto";
 import { CostBreakdown } from "./CostBreakdown";
 import { StarterPackDetails } from "@/hooks/starterpack";
-import { Receiving } from "../starterpack/receiving";
 import { creditsToUSD } from "@/hooks/tokens";
 export const WALLET_CONFIG = {
   argent: {
@@ -138,21 +137,13 @@ export function CryptoCheckout({
         hideIcon
       />
       <LayoutContent className="gap-6">
-        {starterpackDetails ? (
-          <Receiving
-            title={"Receiving"}
-            items={starterpackDetails.starterPackItems}
-            isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
-          />
-        ) : (
-          <ReviewToken
-            title={"Receiving"}
-            name={"Credits"}
-            icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
-            amount={wholeCredits.toLocaleString() + " Credits"}
-            isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
-          />
-        )}
+        <ReviewToken
+          title={"Receiving"}
+          name={"Credits"}
+          icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
+          amount={wholeCredits.toLocaleString() + " Credits"}
+          isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
+        />
       </LayoutContent>
 
       <LayoutFooter>

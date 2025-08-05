@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { Home } from "./home";
 import { Session } from "./session";
 import { Failure } from "./failure";
@@ -6,7 +6,6 @@ import { Pending } from "./pending";
 import { Slot } from "./slot";
 import { Consent, Success } from "./slot/index";
 import { Fund } from "./slot/fund";
-import { StarterPackWrapper } from "./starterpack";
 import { FeatureToggle } from "./feature-toggle";
 import { Account } from "@/components/account";
 import {
@@ -27,21 +26,28 @@ import { Leaderboard } from "@/components/leaderboard";
 import { CollectionPurchase } from "@/components/inventory/collection/collection-purchase";
 import { Socials } from "@/components/socials/index";
 import { Settings } from "./settings";
-import { Purchase } from "./purchase";
-import { PurchaseType } from "@/hooks/payments/crypto";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
 import { AddSignerRoute } from "./settings/AddSignerRoute";
-import { Funding } from "./funding";
-import { Deposit } from "./funding/Deposit";
-import { Execute } from "./Execute";
-import { useNavigation } from "@/context/navigation";
+import { PurchaseStarterpack } from "./purchasenew/starterpack/starterpack";
+import { PaymentMethod } from "./purchasenew/method";
+import { StripeCheckout } from "./purchasenew/checkout/stripe";
+import { PurchaseSuccess } from "./purchasenew/success";
+import { PurchasePending } from "./purchasenew/pending";
+import { ChooseNetwork } from "./purchasenew/wallet/network";
+import { SelectWallet } from "./purchasenew/wallet/wallet";
+import { CryptoCheckout } from "./purchasenew/checkout/crypto";
 import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
+import { Execute } from "./Execute";
+import { Funding } from "./funding";
+import { Deposit } from "./funding/Deposit";
+import { useNavigation } from "@/context";
+import { Purchase } from "./purchase";
+import { PurchaseType } from "@/hooks/payments/crypto";
 
 export function App() {
   const { navigate } = useNavigation();
-
   return (
     <Routes>
       <Route path="/" element={<Home />}>
@@ -49,10 +55,33 @@ export function App() {
         <Route path="/settings/recovery" element={<Recovery />} />
         <Route path="/settings/delegate" element={<Delegate />} />
         <Route path="/settings/add-signer" element={<AddSignerRoute />} />
-        <Route
-          path="/purchase"
-          element={<Purchase type={PurchaseType.CREDITS} />}
-        />
+        <Route path="session" element={<Session />} />
+        <Route path="slot" element={<Slot />}>
+          <Route path="consent" element={<Consent />} />
+          <Route path="fund" element={<Fund />} />
+        </Route>
+        <Route path="success" element={<Success />} />
+        <Route path="failure" element={<Failure />} />
+        <Route path="pending" element={<Pending />} />
+        <Route path="/purchase" element={<Outlet />}>
+          <Route
+            path="credits"
+            element={<Purchase type={PurchaseType.CREDITS} />}
+          />
+          <Route
+            path="starterpack/:starterpackId"
+            element={<PurchaseStarterpack />}
+          />
+          <Route path="method" element={<PaymentMethod />} />
+          <Route path="checkout/stripe" element={<StripeCheckout />} />
+          <Route path="checkout/crypto" element={<CryptoCheckout />} />
+          <Route path="network" element={<ChooseNetwork />} />
+          <Route path="wallet/:platformId" element={<SelectWallet />} />
+          <Route path="review" element={<></>} />
+          <Route path="pending" element={<PurchasePending />} />
+          <Route path="success" element={<PurchaseSuccess />} />
+          <Route path="failed" element={<></>} />
+        </Route>
         <Route path="/funding" element={<Funding />} />
         <Route
           path="/funding/deposit"
@@ -74,7 +103,6 @@ export function App() {
             />
           }
         />
-        <Route path="/execute" element={<Execute />} />
         <Route
           path="/funding/credits"
           element={
@@ -96,18 +124,7 @@ export function App() {
             />
           }
         />
-        <Route path="session" element={<Session />} />
-        <Route path="slot" element={<Slot />}>
-          <Route path="consent" element={<Consent />} />
-          <Route path="fund" element={<Fund />} />
-        </Route>
-        <Route path="success" element={<Success />} />
-        <Route path="failure" element={<Failure />} />
-        <Route path="pending" element={<Pending />} />
-        <Route
-          path="starter-pack/:starterpackId"
-          element={<StarterPackWrapper />}
-        />
+        <Route path="/execute" element={<Execute />} />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />

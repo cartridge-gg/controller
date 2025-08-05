@@ -1,4 +1,3 @@
-import { StarterItemData, StarterItemType } from "@/hooks/starterpack";
 import {
   Card,
   CardHeader,
@@ -8,12 +7,8 @@ import {
   Spinner,
   Thumbnail,
 } from "@cartridge/ui";
-
-type ReceivingProps = {
-  title?: string;
-  items: StarterItemData[];
-  isLoading?: boolean;
-};
+import { ReceivingProps } from "./types";
+import { PurchaseItemType } from "@/context/purchase";
 
 export function Receiving({ title, items, isLoading }: ReceivingProps) {
   return (
@@ -27,23 +22,26 @@ export function Receiving({ title, items, isLoading }: ReceivingProps) {
 
       <CardListContent>
         {items.map((item) => (
-          <CardListItem className="flex flex-row items-center p-3">
+          <CardListItem
+            key={item.title}
+            className="flex flex-row items-center p-3"
+          >
             <div className="flex flex-row items-center gap-3">
               <Thumbnail
                 size="lg"
-                icon={item.image}
+                icon={item.icon}
                 variant="light"
-                rounded={item.type === StarterItemType.CREDIT}
+                rounded={item.type === PurchaseItemType.CREDIT}
               />
               <div className="flex flex-col gap-0.5">
                 <p className="text-foreground-100 font-medium text-sm">
-                  {item.type === StarterItemType.CREDIT
+                  {item.type === PurchaseItemType.CREDIT
                     ? "Credits"
                     : item.title}
                 </p>
                 <p className="text-foreground-300 font-normal text-xs">
-                  {item.type === StarterItemType.NFT
-                    ? item.collectionName || item.description
+                  {item.type === PurchaseItemType.NFT
+                    ? item.subtitle
                     : `${item.value?.toLocaleString()} Credits`}
                 </p>
               </div>
