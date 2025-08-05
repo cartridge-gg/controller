@@ -30,7 +30,10 @@ export function Home() {
   useEffect(() => {
     if (context?.type === "deploy" && pathname !== "/deploy") {
       navigate("/deploy", { replace: true });
-    } else if (context?.type === "sign-message" && pathname !== "/sign-message") {
+    } else if (
+      context?.type === "sign-message" &&
+      pathname !== "/sign-message"
+    ) {
       navigate("/sign-message", { replace: true });
     }
   }, [context?.type, pathname, navigate]);
