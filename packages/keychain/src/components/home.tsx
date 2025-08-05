@@ -26,18 +26,6 @@ export function Home() {
     }
   }, [context?.type, posthog]);
 
-  // Navigate to routes for deploy and sign-message context types
-  useEffect(() => {
-    if (context?.type === "deploy" && pathname !== "/deploy") {
-      navigate("/deploy", { replace: true });
-    } else if (
-      context?.type === "sign-message" &&
-      pathname !== "/sign-message"
-    ) {
-      navigate("/sign-message", { replace: true });
-    }
-  }, [context?.type, pathname, navigate]);
-
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {
     return <Authenticate />;

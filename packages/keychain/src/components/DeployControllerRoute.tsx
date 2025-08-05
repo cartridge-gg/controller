@@ -1,34 +1,76 @@
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
 import { useConnection } from "@/hooks/connection";
-import { useNavigation } from "@/context/navigation";
-import { DeployCtx } from "@/utils/connection/types";
-import { ResponseCodes } from "@cartridge/controller";
 import { DeployController } from "./DeployController";
-import { useEffect } from "react";
+import { ResponseCodes, ConnectError } from "@cartridge/controller";
+import { DeployParams } from "@/utils/connection/deploy";
+
+function parseDeployParams(paramString: string): {
+  params: DeployParams;
+  resolve?: (res: void | ConnectError) => void;
+  reject?: (reason?: unknown) => void;
+} | null {
+  try {
+    const params: DeployParams = JSON.parse(decodeURIComponent(paramString));
+
+    // Only get callbacks if there's an actual ID
+    const callbacks = params.id ? getCallbacks(params.id) : {};
+
+    return {
+      params,
+      ...callbacks,
+    };
+  } catch (error) {
+    console.error("Failed to parse deploy params:", error);
+    return null;
+  }
+}
 
 export function DeployControllerRoute() {
-  const { context } = useConnection();
-  const { navigate } = useNavigation();
+  const { closeModal } = useConnection();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [params, setParams] =
+    useState<ReturnType<typeof parseDeployParams>>(null);
 
   useEffect(() => {
-    // If no deploy context is available, navigate back to home
-    if (!context || context.type !== "deploy") {
-      navigate("/", { replace: true });
+    const dataParam = searchParams.get("data");
+    if (dataParam) {
+      const parsed = parseDeployParams(dataParam);
+      if (parsed) {
+        setParams(parsed);
+        return;
+      }
     }
-  }, [context, navigate]);
 
-  if (!context || context.type !== "deploy") {
+    // No valid data, redirect to home
+    navigate("/", { replace: true });
+  }, [searchParams, navigate]);
+
+  // Cleanup callbacks when component unmounts
+  useEffect(() => {
+    return () => {
+      if (params?.params.id) {
+        cleanupCallbacks(params.params.id);
+      }
+    };
+  }, [params?.params.id]);
+
+  if (!params) {
     return null;
   }
 
-  const deployContext = context as DeployCtx;
-
   const handleClose = () => {
-    deployContext.resolve({
-      code: ResponseCodes.CANCELED,
-      message: "Canceled",
-    });
-    navigate("/", { replace: true });
+    if (params.resolve) {
+      params.resolve({
+        code: ResponseCodes.CANCELED,
+        message: "Canceled",
+      });
+      closeModal?.();
+    }
   };
 
   return <DeployController onClose={handleClose} />;
 }
+
