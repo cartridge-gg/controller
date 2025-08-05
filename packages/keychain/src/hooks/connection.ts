@@ -42,6 +42,7 @@ import { SemVer } from "semver";
 import { getChecksumAddress, RpcProvider, shortString } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { useNavigation } from "@/context/navigation";
+import { useSearchParams } from "react-router-dom";
 
 const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
@@ -187,8 +188,10 @@ export function useConnectionValue() {
     }
   }, [window.controller]);
 
+  const [searchParams] = useSearchParams();
+
   const urlParams = useMemo(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(searchParams);
     const theme = urlParams.get("theme");
     const preset = window.location.pathname.startsWith("/slot")
       ? "slot"
@@ -220,7 +223,7 @@ export function useConnectionValue() {
       namespace,
       tokens,
     };
-  }, []);
+  }, [searchParams]);
 
   // Fetch chain ID from RPC provider when rpcUrl changes
   useEffect(() => {
