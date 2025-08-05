@@ -6,7 +6,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-  PaymentCard,
+  PurchaseCard,
   WalletIcon,
 } from "@cartridge/ui";
 import { useState } from "react";
@@ -23,8 +23,8 @@ export function PaymentMethod() {
         icon={<DepositIcon variant="solid" size="lg" />}
       />
       <LayoutContent className={isLoading ? "pointer-events-none" : ""}>
-        {/* <PaymentCard text="Controller" icon={<ControllerColorIcon />} /> */}
-        <PaymentCard
+        {/* <PurchaseCard text="Controller" icon={<ControllerColorIcon />} /> */}
+        <PurchaseCard
           text="Credit Card"
           icon={<CreditCardIcon variant="solid" />}
           onClick={async () => {
@@ -33,7 +33,7 @@ export function PaymentMethod() {
             navigate("/purchase/checkout/stripe");
           }}
         />
-        <PaymentCard
+        <PurchaseCard
           text="Wallet"
           icon={<WalletIcon variant="solid" />}
           onClick={() => {

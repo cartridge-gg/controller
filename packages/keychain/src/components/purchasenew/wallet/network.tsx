@@ -4,7 +4,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-  PaymentCard,
+  PurchaseCard,
 } from "@cartridge/ui";
 import { networkWalletData } from "./data";
 import { useNavigation } from "@/context";
@@ -19,7 +19,7 @@ export function ChooseNetwork() {
       />
       <LayoutContent>
         {networkWalletData.networks.map((network) => (
-          <PaymentCard
+          <PurchaseCard
             key={network.platform}
             text={network.name + (network.enabled ? "" : " (Coming Soon)")}
             icon={network.icon}

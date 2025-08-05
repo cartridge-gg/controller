@@ -3,7 +3,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-  PaymentCard,
+  PurchaseCard,
   WalletIcon,
 } from "@cartridge/ui";
 import { networkWalletData } from "./data";
@@ -93,7 +93,7 @@ export function SelectWallet() {
           const walletConfig = selectedNetwork.wallets.get(wallet.type);
 
           return (
-            <PaymentCard
+            <PurchaseCard
               key={wallet.type}
               text={walletConfig?.name || wallet.type}
               icon={walletConfig?.icon}
