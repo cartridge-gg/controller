@@ -154,7 +154,7 @@ export function useStarterPack(starterpackId?: string) {
       })
       .catch(setError)
       .finally(() => setIsLoading(false));
-  }, [starterpackId, controller]);
+  }, [starterpackId, controller, checkSupply]);
 
   const claim = useCallback(async () => {
     if (!controller || !starterpackId) {

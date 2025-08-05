@@ -73,7 +73,7 @@ export function Purchase(props: PurchaseCreditsProps) {
       case PurchaseState.SUCCESS:
         return "Purchase Complete";
     }
-  }, [state, starterpackDetails, type]);
+  }, [state, starterpackDetails, type, propsTitle]);
 
   const appearance = {
     theme: "flat",

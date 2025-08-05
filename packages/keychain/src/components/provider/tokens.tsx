@@ -258,6 +258,7 @@ export function TokensProvider({
       initialLoadComplete,
       isLoadingBalances,
       isPriceLoading,
+      isPricesLoaded,
       balanceError,
       priceError,
       registerPair,

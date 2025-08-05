@@ -37,7 +37,7 @@ export function AddSignerRoute() {
         ...controllerQueryRaw.data,
       },
     } as QueryObserverResult<ControllerQuery>;
-  }, [chainId, controllerQueryRaw.data]);
+  }, [chainId, controllerQueryRaw]);
 
   return <AddSigner controllerQuery={controllerQuery} />;
 }

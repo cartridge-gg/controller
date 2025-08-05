@@ -5,19 +5,13 @@ import {
   useCollectionsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { Collections, Marketplace } from "@cartridge/marketplace";
-import { Pagination, Token, ToriiClient } from "@dojoengine/torii-wasm";
+import { Token, ToriiClient } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useConnection } from "@/hooks/connection";
 import { addAddressPadding } from "starknet";
 
 const TYPE = "ERC-721";
 const LIMIT = 5000;
-const DEFAULT_PAGINATION: Pagination = {
-  limit: LIMIT,
-  cursor: undefined,
-  order_by: [],
-  direction: "Forward",
-};
 
 export type Collection = {
   address: string;
@@ -116,7 +110,7 @@ export function useCollection({
     });
 
     return { collection: newCollection, assets: newAssets };
-  }, [data, status]);
+  }, [data]);
 
   const filteredAssets = useMemo(() => {
     if (!tokenIds.length) return Object.values(assets);
@@ -125,7 +119,7 @@ export function useCollection({
     );
 
     return filtered;
-  }, [assets, tokenIds, contractAddress, data, status]);
+  }, [assets, tokenIds]);
 
   return {
     collection,
@@ -303,7 +297,12 @@ export function useToriiCollection({
         token_ids: tokenIds.map((id) =>
           addAddressPadding(id).replace("0x", ""),
         ),
-        pagination: DEFAULT_PAGINATION,
+        pagination: {
+          limit: LIMIT,
+          cursor: undefined,
+          direction: "Forward",
+          order_by: [],
+        },
       })
       .then((tokens) => {
         setTokens(tokens.items || []);
@@ -317,7 +316,7 @@ export function useToriiCollection({
 
   useEffect(() => {
     refetch();
-  }, [client]);
+  }, [client, refetch]);
 
   return {
     tokens: tokens,

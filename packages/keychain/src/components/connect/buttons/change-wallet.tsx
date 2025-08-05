@@ -71,7 +71,7 @@ export function ChangeWallet({
 
   useEffect(() => {
     setChangeWallet(false);
-  }, [validation.status]);
+  }, [validation.status, setChangeWallet]);
 
   const option = useMemo(() => {
     if (authMethod) {
@@ -97,7 +97,7 @@ export function ChangeWallet({
       return validation.signers.every((signer) => isExtensionMissing(signer));
     }
     return false;
-  }, [option, wallets, authMethod, validation.signers]);
+  }, [option, wallets, authMethod, validation.signers, isExtensionMissing]);
 
   const shouldChangeWallet = (() => {
     if (!option) {

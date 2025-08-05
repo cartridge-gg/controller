@@ -49,9 +49,8 @@ import { createExecuteUrl } from "@/utils/connection/execute";
 const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectionPurchase() {
-  const { closeModal } = useUI();
+  useUI();
   const { address: contractAddress, tokenId, project } = useParams();
-  const { chainId, parent, controller } = useConnection();
   const { tokens } = useTokens();
   const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
@@ -60,13 +59,14 @@ export function CollectionPurchase() {
   const { navigate } = useNavigation();
 
   const [searchParams] = useSearchParams();
-  const paramsOrders = searchParams.get("orders")?.split(",").map(Number) || [];
   const tokenOrders = useMemo(() => {
+    const paramsOrders =
+      searchParams.get("orders")?.split(",").map(Number) || [];
     const allOrders = Object.values(orders).flatMap((orders) =>
       Object.values(orders).flatMap((orders) => Object.values(orders)),
     );
     return allOrders.filter((order) => paramsOrders.includes(order.id));
-  }, [orders, paramsOrders]);
+  }, [orders, searchParams]);
 
   const tokenIds = useMemo(() => {
     return tokenOrders.map((order) =>
@@ -74,7 +74,7 @@ export function CollectionPurchase() {
     );
   }, [tokenOrders]);
 
-  const { refetch } = useCollection({
+  useCollection({
     contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
   });
@@ -132,7 +132,7 @@ export function CollectionPurchase() {
       },
     ];
     return { total, fees };
-  }, [marketplaceFee, royalties, token]);
+  }, [marketplaceFee, royalties, token, tokenOrders]);
 
   const props = useMemo(() => {
     if (!assets || !collection || !tokenOrders) return [];
@@ -154,7 +154,7 @@ export function CollectionPurchase() {
         };
       })
       .filter((value) => value !== undefined);
-  }, [assets, collection, tokenOrders]);
+  }, [assets, collection, tokenOrders, contractAddress, project]);
 
   const { totalPrice, floatPrice } = useMemo(() => {
     const total = tokenOrders.reduce(
@@ -163,7 +163,7 @@ export function CollectionPurchase() {
     );
     const formatted = total / Math.pow(10, token?.metadata.decimals || 0);
     return { totalPrice: total, floatPrice: formatted };
-  }, [tokenOrders]);
+  }, [tokenOrders, token?.metadata.decimals]);
 
   const addRoyalties = useCallback(
     (orderId: number, royaltyFee: number) => {
@@ -214,19 +214,7 @@ export function CollectionPurchase() {
     } finally {
       setLoading(false);
     }
-  }, [
-    closeModal,
-    token,
-    tokenOrders,
-    chainId,
-    totalPrice,
-    parent,
-    provider,
-    controller,
-    navigate,
-    searchParams,
-    refetch,
-  ]);
+  }, [token, tokenOrders, totalPrice, provider, navigate]);
 
   const status = useMemo(() => {
     if (collectionStatus === "error" || assetsStatus === "error")
@@ -405,7 +393,7 @@ const Order = ({
   useEffect(() => {
     if (!royalties) return;
     addRoyalties(orderId, royaltyFee);
-  }, [addRoyalties, orderId, royaltyFee]);
+  }, [addRoyalties, orderId, royaltyFee, royalties]);
 
   const { countervalues } = useCountervalue(
     {

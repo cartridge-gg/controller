@@ -29,7 +29,7 @@ export function Authenticate() {
       // Remove query params to avoid issues with password managers
       setSearchParams({}, { replace: true });
     }
-  }, [params, searchParams, navigate]);
+  }, [params, searchParams, navigate, setSearchParams]);
 
   if (!params) {
     return null;

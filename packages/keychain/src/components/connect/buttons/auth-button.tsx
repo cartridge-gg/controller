@@ -106,7 +106,7 @@ export function AuthButton({
       return false;
     }
     return validation.signers.every((signer) => isExtensionMissing(signer));
-  }, [isExtensionMissing, validation.signers]);
+  }, [isExtensionMissing, validation.signers, option?.isExtension]);
 
   const icon = useMemo(() => {
     if (isLoading || waitingForConfirmation) {
@@ -128,7 +128,6 @@ export function AuthButton({
     option?.label,
     isLoading,
     waitingForConfirmation,
-    validation.signers,
     validation.exists,
     username,
   ]);

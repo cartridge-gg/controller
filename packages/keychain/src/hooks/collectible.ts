@@ -108,7 +108,7 @@ export function useCollectible({
     });
 
     return { collectible: newCollectible, assets: newAssets };
-  }, [data, status]);
+  }, [data]);
 
   const filteredAssets = useMemo(() => {
     if (!tokenIds.length) return Object.values(assets);
@@ -117,7 +117,7 @@ export function useCollectible({
     );
 
     return filtered;
-  }, [assets, tokenIds, contractAddress, data, status]);
+  }, [assets, tokenIds]);
 
   return {
     collectible,

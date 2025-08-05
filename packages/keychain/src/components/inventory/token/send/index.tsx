@@ -17,8 +17,6 @@ import { useNavigation } from "@/context/navigation";
 import { Call, uint256 } from "starknet";
 import { SendRecipient } from "@/components/modules/recipient";
 import { SendAmount } from "./amount";
-import { useData } from "@/hooks/data";
-import { useConnection } from "@/hooks/connection";
 import { createExecuteUrl } from "@/utils/connection/execute";
 
 export function SendToken() {
@@ -27,7 +25,6 @@ export function SendToken() {
     username: string;
   }>();
   const [searchParams] = useSearchParams();
-  const { controller } = useConnection();
   const { navigate } = useNavigation();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
@@ -36,8 +33,6 @@ export function SendToken() {
   });
   const { tokens } = useTokens();
   const userSelectedToken = useRef(false);
-
-  const { refetchTransfers } = useData();
 
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState<number | undefined>();
@@ -102,14 +97,7 @@ export function SendToken() {
       navigate(executeUrlWithReturn);
       setLoading(false);
     },
-    [
-      selectedToken,
-      controller,
-      refetchTransfers,
-      navigate,
-      username,
-      searchParams,
-    ],
+    [selectedToken, navigate, username, searchParams],
   );
 
   if (!token) {

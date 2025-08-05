@@ -49,8 +49,8 @@ const EXPIRATIONS = [
 ];
 
 export function CollectibleListing() {
-  const { chainId, provider } = useMarketplace();
-  const { parent } = useConnection();
+  const { provider } = useMarketplace();
+  useConnection();
   const { address: contractAddress, tokenId } = useParams();
   const { tokens } = useTokens();
   const [submitted, setSubmitted] = useState(false);
@@ -144,16 +144,7 @@ export function CollectibleListing() {
       value: conversion || "",
     };
     return { assets: tokens, currency };
-  }, [
-    asset,
-    collectible,
-    selected,
-    price,
-    conversion,
-    placeholder,
-    quantity,
-    split,
-  ]);
+  }, [asset, collectible, selected, price, conversion, quantity, split]);
 
   const totalEarnings = useMemo(() => {
     if (!selected || !selected.balance.value || !price) return undefined;
@@ -244,10 +235,10 @@ export function CollectibleListing() {
     selected,
     duration,
     navigate,
-    searchParams,
-    chainId,
-    parent,
     entrypoint,
+    provider.manifest.contracts,
+    quantity,
+    split,
   ]);
 
   useEffect(() => {

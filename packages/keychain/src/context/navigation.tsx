@@ -157,7 +157,7 @@ export function NavigationProvider({
     });
 
     lastTrackedPath.current = currentPath;
-  }, [getFullPath, location.state, location.pathname]);
+  }, [getFullPath, location.state, location.pathname, currentIndex]);
 
   // Handle controller navigation events
   useEffect(() => {

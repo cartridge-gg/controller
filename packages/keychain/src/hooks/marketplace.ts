@@ -80,7 +80,7 @@ export const useMarketplace = () => {
     return Object.values(collectionOrders[token] || {}).filter(
       (order) => order.status.value === StatusType.Placed,
     );
-  }, [orders, tokenId]);
+  }, [orders, tokenId, contractAddress]);
 
   const selfOrders = useMemo(() => {
     if (!address) return [];

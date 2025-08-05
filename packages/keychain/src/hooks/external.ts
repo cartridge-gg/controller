@@ -43,7 +43,7 @@ export function useExternalOwners() {
 
     init();
   }, [
-    controller?.address,
+    controller,
     provider,
     externalOwnerRegisteredSelector,
     externalOwnerRemovedSelector,

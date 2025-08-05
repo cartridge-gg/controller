@@ -20,13 +20,13 @@ export function Achievements() {
   const { pins, games, editions } = useArcade();
 
   const { address } = useParams<{ address: string }>();
-  const { project, namespace } = useConnection();
+  const { project } = useConnection();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
     );
-  }, [editions, project, namespace]);
+  }, [editions, project]);
 
   const game: GameModel | undefined = useMemo(() => {
     return Object.values(games).find((game) => game.id === edition?.gameId);

@@ -44,7 +44,7 @@ const OFFSET = 10;
 export function CollectibleAsset() {
   const account = useAccount();
   const address = account?.address || "";
-  const { chainId, namespace, project, controller } = useConnection();
+  const { project, chainId } = useConnection();
   const [searchParams] = useSearchParams();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
@@ -76,7 +76,7 @@ export function CollectibleAsset() {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
     );
-  }, [editions, project, namespace]);
+  }, [editions, project]);
 
   const { address: contractAddress, tokenId } = useParams();
   const {
@@ -182,16 +182,7 @@ export function CollectibleAsset() {
         setLoading(false);
       }
     },
-    [
-      contractAddress,
-      asset,
-      chainId,
-      provider,
-      controller,
-      selfOrders,
-      navigate,
-      searchParams,
-    ],
+    [contractAddress, asset, provider, selfOrders, navigate],
   );
 
   const status = useMemo(() => {
