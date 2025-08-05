@@ -244,7 +244,6 @@ export const useCryptoPayment = () => {
     return result.createCryptoPayment;
   }
 
-
   return {
     sendPayment,
     waitForPayment,
