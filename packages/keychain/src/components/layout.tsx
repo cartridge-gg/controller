@@ -17,7 +17,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
 
   return (
     <div style={{ position: "relative" }}>
-      <LayoutContainer>
+      <LayoutContainer modal={true} onModalClick={closeModal}>
         <NavigationHeader
           variant="hidden"
           forceShowClose={hasBottomNav}

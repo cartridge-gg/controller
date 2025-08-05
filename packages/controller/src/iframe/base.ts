@@ -14,7 +14,6 @@ export class IFrame<CallSender extends {}> implements Modal {
   private iframe?: HTMLIFrameElement;
   private container?: HTMLDivElement;
   private onClose?: () => void;
-  private child?: AsyncMethodReturns<CallSender>;
   private closeTimeout?: NodeJS.Timeout;
 
   constructor({
@@ -45,6 +44,9 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.src = url.toString();
     iframe.id = id;
     iframe.style.border = "none";
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.pointerEvents = "auto"; // Enable interactions within iframe
     iframe.sandbox.add("allow-forms");
     iframe.sandbox.add("allow-popups");
     iframe.sandbox.add("allow-popups-to-escape-sandbox");
@@ -64,28 +66,14 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.top = "0";
     container.style.left = "0";
     container.style.zIndex = "10000";
-    container.style.backgroundColor = "rgba(0,0,0,0.6)";
     container.style.display = "none"; // Use display: none to completely hide from password managers
-    container.style.alignItems = "center";
-    container.style.justifyContent = "center";
     container.style.transition = "opacity 0.2s ease";
     container.style.opacity = "0";
-    container.style.pointerEvents = "auto";
+    container.style.pointerEvents = "none"; // Allow clicks to pass through by default
     container.appendChild(iframe);
 
-    // Add click event listener to close iframe when clicking outside
-    container.addEventListener("click", (e) => {
-      if (e.target === container) {
-        // Attempting to reset(clear context) for keychain iframe (identified by ID)
-        if (id === "controller-keychain" && this.child) {
-          // Type assertion for keychain child only
-          (this.child as any)
-            .reset?.()
-            .catch((e: any) => console.error("Error resetting context:", e));
-        }
-        this.close();
-      }
-    });
+    // Click-outside-to-close is now handled internally by the keychain app
+    // The iframe container no longer provides backdrop functionality
 
     this.iframe = iframe;
     this.container = container;
@@ -98,7 +86,6 @@ export class IFrame<CallSender extends {}> implements Modal {
         ...methods,
       },
     }).promise.then((child) => {
-      this.child = child;
       onConnect(child);
     });
 
@@ -143,7 +130,8 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     document.body.style.overflow = "hidden";
 
-    this.container.style.display = "flex";
+    this.container.style.display = "block";
+    this.container.style.pointerEvents = "auto"; // Enable interactions when open
     // Use requestAnimationFrame to ensure display change is processed before opacity change
     requestAnimationFrame(() => {
       if (this.container) {
@@ -161,6 +149,7 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     // Start fade-out transition
     this.container.style.opacity = "0";
+    this.container.style.pointerEvents = "none"; // Disable interactions when closing
 
     // Set display: none after transition completes (200ms)
     this.closeTimeout = setTimeout(() => {
@@ -185,17 +174,8 @@ export class IFrame<CallSender extends {}> implements Modal {
     if (!this.iframe || typeof window === "undefined") return;
 
     this.iframe.style.userSelect = "none";
-
-    if (window.innerWidth < 768) {
-      this.iframe.style.height = "100%";
-      this.iframe.style.width = "100%";
-      this.iframe.style.borderRadius = "0";
-      return;
-    }
-
-    this.iframe.style.height = "600px";
-    this.iframe.style.width = "432px";
-    this.iframe.style.borderRadius = "8px";
+    // Iframe now always fills the container (100% width/height set in constructor)
+    // Modal sizing and positioning is handled internally by the keychain app
   }
 
   isOpen() {
