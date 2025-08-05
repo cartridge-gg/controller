@@ -15,6 +15,7 @@ import {
   SheetContent,
   SheetFooter,
   Skeleton,
+  SpinnerIcon,
   StarknetIcon,
   TouchIcon,
   TrashIcon,
@@ -29,99 +30,127 @@ export interface Signer {
 }
 
 export interface SignerCardProps extends Signer {
-  onDelete?: () => void;
+  onDelete?: () => Promise<void>;
   current?: boolean;
+  isOriginalSigner?: boolean;
 }
 
 export const SignerCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SignerCardProps
->(({ className, signer, onDelete, current, ...props }, ref) => {
-  const signerType = credentialToAuth(signer);
-  const { controller } = useController();
+>(
+  (
+    { className, signer, onDelete, current, isOriginalSigner, ...props },
+    ref,
+  ) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const signerType = credentialToAuth(signer);
+    const { controller } = useController();
+    const [signerIdentifyingInfo, setSignerIdentifyingInfo] = useState<
+      string | undefined
+    >("pending");
 
-  const [signerIdentifyingInfo, setSignerIdentifyingInfo] = useState<
-    string | undefined
-  >("pending");
+    useEffect(() => {
+      getSignerIdentifyingInfo(signer, controller?.username()).then(
+        (username) => {
+          setSignerIdentifyingInfo(username);
+        },
+      );
+    }, [signer, controller]);
 
-  useEffect(() => {
-    getSignerIdentifyingInfo(signer, controller?.username()).then(
-      (username) => {
-        setSignerIdentifyingInfo(username);
-      },
-    );
-  }, [signer, controller]);
-
-  return (
-    <Sheet>
-      <div
-        ref={ref}
-        className={cn("flex items-center gap-3", className)}
-        {...props}
-      >
-        <Card className="py-2.5 px-3 flex flex-1 flex-row justify-between items-center bg-background-200">
-          <div className="flex flex-row items-center gap-1.5">
-            <SignerIcon signerType={signerType} />
-            <p className="flex-1 text-sm font-normal">
-              {signerType
-                ? `${AUTH_METHODS_LABELS[signerType]} ${current ? "(current)" : ""}`
-                : "Unknown"}
-            </p>
-          </div>
-          {signerIdentifyingInfo === "pending" ? (
-            <Skeleton className="w-10 h-4" />
-          ) : (
-            <p className="text-sm font-normal text-foreground-300">
-              {signerIdentifyingInfo}
-            </p>
+    return (
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <div
+          ref={ref}
+          className={cn("flex items-center gap-3", className)}
+          {...props}
+        >
+          <Card className="py-2.5 px-3 flex flex-1 flex-row justify-between items-center bg-background-200">
+            <div className="flex flex-row items-center gap-1.5">
+              <SignerIcon signerType={signerType} />
+              <p className="flex-1 text-sm font-normal">
+                {signerType
+                  ? `${AUTH_METHODS_LABELS[signerType]} ${current ? "(current)" : ""} ${isOriginalSigner ? "(original)" : ""}`
+                  : "Unknown"}
+              </p>
+            </div>
+            {signerIdentifyingInfo === "pending" ? (
+              <Skeleton className="w-10 h-4" />
+            ) : (
+              <p className="text-sm font-normal text-foreground-300">
+                {signerIdentifyingInfo}
+              </p>
+            )}
+          </Card>
+          {onDelete && (
+            <Button
+              variant="icon"
+              size="icon"
+              type="button"
+              onClick={() => setIsOpen(true)}
+            >
+              <TrashIcon size="default" className="text-foreground-300" />
+            </Button>
           )}
-        </Card>
-        {/* disabled until delete signer functionality is implemented */}
-        {/* <SheetTrigger asChild> */}
-        {/*   <Button variant="icon" size="icon" type="button"> */}
-        {/*     <TrashIcon size="default" className="text-foreground-300" /> */}
-        {/*   </Button> */}
-        {/* </SheetTrigger> */}
-      </div>
-
-      {/* DELETE SIGNER SHEET CONTENTS */}
-      <SheetContent
-        side="bottom"
-        className="border-background-100 p-6 gap-6 rounded-t-xl"
-        showClose={false}
-      >
-        <div className="flex flex-row items-center gap-3 mb-6">
-          <Button
-            type="button"
-            variant="icon"
-            size="icon"
-            className="flex items-center justify-center text-foreground-100"
-          >
-            <SignerIcon signerType={signerType} />
-          </Button>
-          <div className="flex flex-col items-start gap-1">
-            <h3 className="text-lg font-semibold text-foreground-100">
-              {signerType ? AUTH_METHODS_LABELS[signerType] : "Unknown"}
-            </h3>
-          </div>
         </div>
-        <SheetFooter className="flex flex-row items-center gap-4">
-          <SheetClose asChild className="flex-1">
-            <Button variant="secondary">Cancel</Button>
-          </SheetClose>
-          <Button
-            variant="secondary"
-            onClick={onDelete}
-            className="flex-1 text-destructive-100"
-          >
-            <TrashIcon size="default" />
-            <span>DELETE</span>
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-});
+
+        {/* DELETE SIGNER SHEET CONTENTS */}
+        <SheetContent
+          side="bottom"
+          className="border-background-100 p-6 gap-6 rounded-t-xl"
+          showClose={false}
+        >
+          <div className="flex flex-row items-center gap-3 mb-6">
+            <Button
+              type="button"
+              variant="icon"
+              size="icon"
+              className="flex items-center justify-center text-foreground-100"
+            >
+              {isLoading ? (
+                <SpinnerIcon className="animate-spin" size="lg" />
+              ) : (
+                <SignerIcon signerType={signerType} />
+              )}
+            </Button>
+            <div className="flex flex-col items-start gap-1">
+              <h3 className="text-lg font-semibold text-foreground-100">
+                {signerType ? AUTH_METHODS_LABELS[signerType] : "Unknown"}
+              </h3>
+            </div>
+          </div>
+          <SheetFooter className="flex flex-row items-center gap-4">
+            <SheetClose asChild className="flex-1">
+              <Button variant="secondary" disabled={isLoading}>
+                Cancel
+              </Button>
+            </SheetClose>
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                setIsLoading(true);
+                try {
+                  await onDelete?.();
+                  setIsOpen(false);
+                } catch (error) {
+                  console.error(error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+              className="flex-1 text-destructive-100"
+              disabled={isLoading}
+            >
+              <TrashIcon size="default" />
+              <span>DELETE</span>
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    );
+  },
+);
 
 SignerCard.displayName = "SignerCard";
 
