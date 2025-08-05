@@ -298,7 +298,6 @@ export const useCryptoPayment = () => {
     };
   }
 
-
   async function requestEvmPayment(
     walletAddress: string,
     walletType: ExternalWalletType,
