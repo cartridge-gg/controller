@@ -292,11 +292,18 @@ export function useToriiCollection({
     if (!client || !contractAddress || !tokenIds.length) return;
     setStatus("loading");
     client
-      .getTokens(
-        [contractAddress],
-        tokenIds.map((id) => addAddressPadding(id).replace("0x", "")),
-        LIMIT,
-      )
+      .getTokens({
+        contract_addresses: [contractAddress],
+        token_ids: tokenIds.map((id) =>
+          addAddressPadding(id).replace("0x", ""),
+        ),
+        pagination: {
+          limit: LIMIT,
+          cursor: undefined,
+          direction: "Forward",
+          order_by: [],
+        },
+      })
       .then((tokens) => {
         setTokens(tokens.items || []);
         setStatus("success");
