@@ -361,15 +361,12 @@ export function useCreateController({
         case "rabby":
         case "metamask": {
           setWaitingForConfirmation(true);
-          loginResponse = await loginWithExternalWallet(
-            controller,
-            authenticationMethod,
-          );
+          loginResponse = await loginWithExternalWallet(authenticationMethod);
           break;
         }
         case "walletconnect":
           setWaitingForConfirmation(true);
-          loginResponse = await loginWithWalletConnect(controller);
+          loginResponse = await loginWithWalletConnect();
           break;
         case "phantom":
         case "argent":
