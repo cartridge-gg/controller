@@ -3,6 +3,7 @@ import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
+import { processControllerQuery } from "@/utils/signers";
 import { PopupCenter } from "@/utils/url";
 import { AuthOption } from "@cartridge/controller";
 import {
@@ -316,7 +317,10 @@ export function useCreateController({
         throw new Error("Undefined controller");
       }
 
-      const controller = controllerRet.controller;
+      const controller = processControllerQuery(
+        controllerRet,
+        chainId,
+      ).controller;
 
       if (!controller) {
         throw new Error("Undefined controller");

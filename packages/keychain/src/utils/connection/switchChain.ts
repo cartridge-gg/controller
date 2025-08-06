@@ -27,7 +27,7 @@ export function switchChain({
       rpcUrl: rpcUrl,
       address: controller.address(),
       username: controller.username(),
-      owner: controller.owner(),
+      owner: await controller.owner(),
     });
 
     setRpcUrl(rpcUrl);
