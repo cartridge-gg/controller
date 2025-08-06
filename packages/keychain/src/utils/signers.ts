@@ -1,0 +1,81 @@
+import { Signer, signerToGuid } from "@cartridge/controller-wasm";
+import {
+  ControllerQuery,
+  CredentialMetadata,
+} from "@cartridge/ui/utils/api/cartridge";
+import { constants } from "starknet";
+import Controller from "./controller";
+
+export const toJsSigner = (signer: CredentialMetadata): Signer => {
+  switch (signer.__typename) {
+    case "Eip191Credentials":
+      return {
+        eip191: {
+          address: signer.eip191?.[0]?.ethAddress ?? "",
+        },
+      };
+    case "WebauthnCredentials":
+      return {
+        webauthn: {
+          publicKey: signer.webauthn?.[0]?.publicKey ?? "",
+          rpId: import.meta.env.VITE_RP_ID,
+          credentialId: signer.webauthn?.[0]?.id ?? "",
+        },
+      };
+    default:
+      throw new Error("Unimplemented");
+  }
+};
+
+export const isCurrentSigner = async (
+  signer: CredentialMetadata,
+  controller: Controller,
+) => {
+  const signerGuid = signerToGuid(toJsSigner(signer));
+  const controllerGuid = await controller.ownerGuid();
+  return signerGuid === controllerGuid;
+};
+
+export const sortSignersByCreationDate = <T extends { createdAt: string }>(
+  signers: T[],
+): T[] => {
+  console.log(signers);
+  return [...signers].sort((a, b) => {
+    if (a.createdAt === b.createdAt) {
+      throw new Error("Signers have the same creation timestamp");
+    }
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  });
+};
+
+export const processControllerQuery = (
+  data: ControllerQuery,
+  chainId: string,
+): ControllerQuery => {
+  if (!data?.controller) {
+    return data;
+  }
+
+  const validSigners = data?.controller?.signers?.filter(
+    (signer) => !signer.isRevoked,
+  );
+
+  if (chainId === constants.StarknetChainId.SN_MAIN) {
+    return {
+      ...data,
+      controller: {
+        ...data.controller,
+        signers: validSigners,
+      },
+    };
+  }
+
+  const signers = sortSignersByCreationDate(validSigners ?? []);
+  return {
+    ...data,
+    controller: {
+      ...data.controller,
+      signers: signers ? [signers[0]] : undefined,
+    },
+  };
+};
