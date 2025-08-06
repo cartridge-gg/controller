@@ -76,13 +76,13 @@ export function useUsernameValidation(username: string) {
     }
 
     fetchController(chainId, username, abortController.signal)
-      .then((controller) => processControllerQuery(controller, chainId))
       .then((controller) => {
         if (!abortController.signal.aborted) {
+          const processedQuery = processControllerQuery(controller, chainId);
           setValidation({
             status: "valid",
             exists: true,
-            signers: controller.controller?.signers?.map(
+            signers: processedQuery.controller?.signers?.map(
               (signer) => signer.metadata as CredentialMetadata,
             ),
           });
