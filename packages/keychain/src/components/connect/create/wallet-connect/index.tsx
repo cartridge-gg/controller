@@ -1,6 +1,5 @@
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import { ExternalWalletResponse, WalletAdapter } from "@cartridge/controller";
-import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
 import { SignupResponse } from "../useCreateController";
 
@@ -27,9 +26,7 @@ export const useWalletConnectAuthentication = () => {
   }, []);
 
   const login = useCallback(
-    async (controller: ControllerQuery["controller"]) => {
-      if (!controller) throw new Error("No controller found");
-
+    async () => {
       const walletConnectWallet = new WalletConnectWallet();
       const { success, account, error } =
         (await walletConnectWallet.connect()) as ExternalWalletResponse;
