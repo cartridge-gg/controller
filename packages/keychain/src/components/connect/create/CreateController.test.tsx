@@ -12,6 +12,16 @@ const mockUseUsernameValidation = vi.fn();
 const mockUseControllerTheme = vi.fn();
 const mockUseWallets = vi.fn().mockReturnValue({ wallets: [] });
 
+// Mock the ResizeObserver
+const ResizeObserverMock = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Stub the global ResizeObserver
+vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+
 // Mock the hooks
 vi.mock("@/hooks/posthog", () => ({
   usePostHog: () => ({

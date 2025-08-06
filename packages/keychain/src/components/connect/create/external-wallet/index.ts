@@ -5,7 +5,6 @@ import {
   ExternalWalletResponse,
   ExternalWalletType,
 } from "@cartridge/controller";
-import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import { useCallback } from "react";
 import { SignupResponse } from "../useCreateController";
@@ -31,12 +30,8 @@ export const useExternalWalletAuthentication = () => {
   );
 
   const login = useCallback(
-    async (
-      controller: ControllerQuery["controller"],
-      provider: ExternalWalletType,
-    ) => {
+    async (provider: ExternalWalletType) => {
       if (!origin || !chainId || !rpcUrl) throw new Error("No connection");
-      if (!controller) throw new Error("No controller found");
 
       const connectedWallet = await connectWallet(provider);
 
