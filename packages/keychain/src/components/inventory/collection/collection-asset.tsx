@@ -52,7 +52,7 @@ export function CollectionAsset() {
   const theme = useControllerTheme();
   const { editions } = useArcade();
   const { tokens } = useTokens();
-  const { isListed, provider, selfOrders, order, setAmount } = useMarketplace();
+  const { provider, selfOrders, order, setAmount } = useMarketplace();
   const [loading, setLoading] = useState(false);
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -89,6 +89,11 @@ export function CollectionAsset() {
     if (!address || !ownership?.accountAddress) return false;
     return BigInt(ownership.accountAddress) === BigInt(address);
   }, [ownership, address]);
+
+  const isListed = useMemo(() => {
+    if (!order) return false;
+    return BigInt(order.tokenId) === BigInt(tokenId ?? "");
+  }, [order, tokenId]);
 
   const asset = useMemo(() => {
     return assets?.[0];
