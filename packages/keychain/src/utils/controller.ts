@@ -88,11 +88,11 @@ export default class Controller {
   }
 
   owner() {
-    return this.cartridgeMeta.owner();
+    return this.cartridge.owner();
   }
 
   ownerGuid() {
-    return this.cartridgeMeta.ownerGuid();
+    return this.cartridge.ownerGuid();
   }
 
   rpcUrl() {
