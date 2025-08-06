@@ -25,27 +25,24 @@ export const useWalletConnectAuthentication = () => {
     };
   }, []);
 
-  const login = useCallback(
-    async () => {
-      const walletConnectWallet = new WalletConnectWallet();
-      const { success, account, error } =
-        (await walletConnectWallet.connect()) as ExternalWalletResponse;
+  const login = useCallback(async () => {
+    const walletConnectWallet = new WalletConnectWallet();
+    const { success, account, error } =
+      (await walletConnectWallet.connect()) as ExternalWalletResponse;
 
-      if (!success)
-        throw new Error("Failed to connect to WalletConnect: " + error);
-      if (!account) throw new Error("No account found");
+    if (!success)
+      throw new Error("Failed to connect to WalletConnect: " + error);
+    if (!account) throw new Error("No account found");
 
-      window.keychain_wallets?.addEmbeddedWallet(
-        account,
-        walletConnectWallet as WalletAdapter,
-      );
+    window.keychain_wallets?.addEmbeddedWallet(
+      account,
+      walletConnectWallet as WalletAdapter,
+    );
 
-      return {
-        signer: { eip191: { address: account } },
-      };
-    },
-    [],
-  );
+    return {
+      signer: { eip191: { address: account } },
+    };
+  }, []);
 
   return { signup, login };
 };
