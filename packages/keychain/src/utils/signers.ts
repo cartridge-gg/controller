@@ -27,12 +27,12 @@ export const toJsSigner = (signer: CredentialMetadata): Signer => {
   }
 };
 
-export const isCurrentSigner = async (
+export const isCurrentSigner = (
   signer: CredentialMetadata,
   controller: Controller,
 ) => {
   const signerGuid = signerToGuid(toJsSigner(signer));
-  const controllerGuid = await controller.ownerGuid();
+  const controllerGuid = controller.ownerGuid();
   return signerGuid === controllerGuid;
 };
 
