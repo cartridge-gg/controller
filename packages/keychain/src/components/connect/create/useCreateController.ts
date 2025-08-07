@@ -6,11 +6,7 @@ import Controller from "@/utils/controller";
 import { processControllerQuery } from "@/utils/signers";
 import { PopupCenter } from "@/utils/url";
 import { AuthOption } from "@cartridge/controller";
-import {
-  computeAccountAddress,
-  Owner,
-  Signer,
-} from "@cartridge/controller-wasm";
+import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
 import {
   AccountQuery,
   CredentialMetadata,
@@ -99,14 +95,14 @@ export function useCreateController({
           chainId &&
           origin
         ) {
-          const controller = await createController(
-            origin,
+          const controller = await Controller.create({
+            appId: origin,
             chainId,
             rpcUrl,
             username,
-            controllerNode.constructorCalldata[0],
-            controllerNode.address,
-            {
+            classHash: controllerNode.constructorCalldata[0],
+            address: controllerNode.address,
+            owner: {
               signer: {
                 webauthn: {
                   rpId: import.meta.env.VITE_RP_ID!,
@@ -115,7 +111,7 @@ export function useCreateController({
                 },
               },
             },
-          );
+          });
 
           window.controller = controller;
           setController(controller);
@@ -185,10 +181,6 @@ export function useCreateController({
       switch (authenticationMode) {
         case "webauthn":
           await signupWithWebauthn(username, doPopupFlow);
-          signer = {
-            type: SignerType.Webauthn,
-            credential: JSON.stringify({}),
-          };
           return;
         case "discord":
           signupResponse = (await signupWithSocial(
@@ -254,32 +246,30 @@ export function useCreateController({
       const salt = shortString.encodeShortString(username);
       const address = computeAccountAddress(classHash, owner, salt);
 
-      const controller = new Controller({
+      const { controller, session } = await Controller.login({
         appId: origin,
         classHash,
-        chainId,
         rpcUrl,
+        chainId,
         address,
         username,
         owner,
+        cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
+        session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
+        isControllerRegistered: false,
       });
-
-      const result = await controller.login(
-        now() + DEFAULT_SESSION_DURATION,
-        false,
-      );
 
       const registerRet = await controller.register({
         username,
         chainId: shortString.decodeShortString(chainId),
         owner: signer,
         session: {
-          expiresAt: result.session.expiresAt,
-          guardianKeyGuid: result.session.guardianKeyGuid,
-          metadataHash: result.session.metadataHash,
-          sessionKeyGuid: result.session.sessionKeyGuid,
-          allowedPoliciesRoot: result.allowedPoliciesRoot,
-          authorization: result.authorization ?? [],
+          expiresAt: session.expiresAt,
+          guardianKeyGuid: session.guardianKeyGuid,
+          metadataHash: session.metadataHash,
+          sessionKeyGuid: session.sessionKeyGuid,
+          allowedPoliciesRoot: session.allowedPoliciesRoot,
+          authorization: session.authorization ?? [],
           appId: origin,
         },
       });
@@ -296,7 +286,6 @@ export function useCreateController({
       loginMode,
       policies,
       isSlot,
-      createController,
       setController,
       doPopupFlow,
       signupWithExternalWallet,
@@ -338,14 +327,16 @@ export function useCreateController({
           await loginWithWebauthn(
             controller,
             {
-              webauthns: webauthnSigners.map((signer) => {
-                const webauthn = signer.metadata as WebauthnCredentials;
-                return {
-                  rpId: import.meta.env.VITE_RP_ID!,
-                  credentialId: webauthn.webauthn?.[0]?.id ?? "",
-                  publicKey: webauthn.webauthn?.[0]?.publicKey ?? "",
-                };
-              }),
+              signer: {
+                webauthns: webauthnSigners.map((signer) => {
+                  const webauthn = signer.metadata as WebauthnCredentials;
+                  return {
+                    rpId: import.meta.env.VITE_RP_ID!,
+                    credentialId: webauthn.webauthn?.[0]?.id ?? "",
+                    publicKey: webauthn.webauthn?.[0]?.publicKey ?? "",
+                  };
+                }),
+              },
             },
             loginMode,
             !!isSlot,
@@ -406,22 +397,23 @@ export function useCreateController({
         return;
       }
 
-      const controllerObject = await createController(
-        origin,
+      const controllerObject = await Controller.login({
+        appId: origin,
         chainId,
         rpcUrl,
-        username,
-        controller.constructorCalldata[0],
-        controller.address,
-        {
+        username: controller.accountID,
+        classHash: controller.constructorCalldata[0],
+        address: controller.address,
+        owner: {
           signer: loginResponse?.signer,
         },
-      );
+        cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
+        session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
+        isControllerRegistered: true,
+      });
 
-      await controllerObject.login(now() + DEFAULT_SESSION_DURATION, true);
-
-      window.controller = controllerObject;
-      setController(controllerObject);
+      window.controller = controllerObject.controller;
+      setController(controllerObject.controller);
     },
     [
       isSlot,
@@ -494,24 +486,4 @@ export function useCreateController({
     signupOptions,
     authMethod,
   };
-}
-
-export async function createController(
-  origin: string,
-  chainId: string,
-  rpcUrl: string,
-  username: string,
-  classHash: string,
-  address: string,
-  owner: Owner,
-) {
-  return new Controller({
-    appId: origin,
-    classHash,
-    chainId,
-    rpcUrl,
-    address,
-    username,
-    owner,
-  });
 }
