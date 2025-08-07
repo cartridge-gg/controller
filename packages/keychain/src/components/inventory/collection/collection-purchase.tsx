@@ -50,8 +50,8 @@ const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectionPurchase() {
   const { closeModal } = useUI();
-  const { address: contractAddress, tokenId, project } = useParams();
-  const { chainId, parent, controller } = useConnection();
+  const { address: contractAddress, tokenId } = useParams();
+  const { chainId, parent, controller, project } = useConnection();
   const { tokens } = useTokens();
   const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
