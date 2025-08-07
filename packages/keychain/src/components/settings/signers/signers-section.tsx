@@ -8,7 +8,6 @@ import { useConnection } from "@/hooks/connection";
 import { isCurrentSigner, sortSignersByCreationDate } from "@/utils/signers";
 import { JsRemoveSignerInput } from "@cartridge/controller-wasm";
 import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
-import { useEffect, useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
 import { SectionHeader } from "../section-header";
@@ -20,36 +19,13 @@ export const SignersSection = ({
 }: {
   controllerQuery: QueryObserverResult<ControllerQuery>;
 }) => {
-  const [signers, setSigners] = useState<
-    Array<
-      NonNullable<
-        NonNullable<ControllerQuery["controller"]>["signers"]
-      >[number] & {
-        isCurrent?: boolean;
-      }
-    >
-  >([]);
   const { chainId, controller } = useConnection();
   const canAddSigner = useFeature("addSigner");
   const { navigate } = useNavigation();
 
-  useEffect(() => {
-    if (!controller) return;
-    const sortedSigners = sortSignersByCreationDate(
-      controllerQuery?.data?.controller?.signers ?? [],
-    );
-    Promise.all(
-      sortedSigners.map(async (signer) => {
-        const isCurrent = await isCurrentSigner(
-          signer.metadata as CredentialMetadata,
-          controller,
-        );
-        return { ...signer, isCurrent };
-      }),
-    ).then((signers) => {
-      setSigners(signers);
-    });
-  }, [controller, controllerQuery.data?.controller?.signers]);
+  const sortedSigners = sortSignersByCreationDate(
+    controllerQuery?.data?.controller?.signers ?? [],
+  );
 
   return (
     <section className="space-y-4">
@@ -63,17 +39,21 @@ export const SignersSection = ({
         ) : controllerQuery.isError ? (
           <div>Error</div>
         ) : controller && controllerQuery.isSuccess ? (
-          signers.map((signer, index) => {
+          sortedSigners.map((signer, index) => {
             // index === 0 is the original signer because data is pre-sorted by createdAt ascending
             const isOriginalSigner = index === 0;
+            const isCurrent = isCurrentSigner(
+              signer.metadata as CredentialMetadata,
+              controller,
+            );
             return (
               <SignerCard
                 key={`${index}`}
-                current={signer.isCurrent}
+                current={isCurrent}
                 signer={signer.metadata as CredentialMetadata}
                 isOriginalSigner={isOriginalSigner}
                 onDelete={
-                  signer.isCurrent || isOriginalSigner
+                  isCurrent || isOriginalSigner
                     ? undefined
                     : async () => {
                         let jsSigner: JsRemoveSignerInput | undefined;
