@@ -5,13 +5,9 @@ import {
 
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
-import {
-  JsRemoveSignerInput,
-  Signer,
-  signerToGuid,
-} from "@cartridge/controller-wasm";
+import { isCurrentSigner, sortSignersByCreationDate } from "@/utils/signers";
+import { JsRemoveSignerInput } from "@cartridge/controller-wasm";
 import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
-import { useMemo } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
 import { SectionHeader } from "../section-header";
@@ -27,38 +23,9 @@ export const SignersSection = ({
   const canAddSigner = useFeature("addSigner");
   const { navigate } = useNavigation();
 
-  const signers = useMemo(() => {
-    if (!controllerQuery.data?.controller?.signers) return undefined;
-    let oldestSigner: { index: number; createdAt: string } | undefined;
-
-    const signers = controllerQuery.data?.controller?.signers?.map(
-      (signer, index) => {
-        if (
-          !oldestSigner ||
-          new Date(signer.createdAt) < new Date(oldestSigner.createdAt)
-        ) {
-          oldestSigner = { index, createdAt: signer.createdAt };
-        }
-        return {
-          ...signer,
-          isOriginal: false,
-          isCurrent:
-            signerToGuid(toJsSigner(signer.metadata as CredentialMetadata)) ===
-            controller?.ownerGuid(),
-        };
-      },
-    );
-    if (!oldestSigner) {
-      throw new Error("No signers found");
-    }
-
-    signers[oldestSigner.index].isOriginal = true;
-    if (chainId !== constants.StarknetChainId.SN_MAIN) {
-      return [signers[oldestSigner.index]];
-    }
-
-    return signers.sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent));
-  }, [controllerQuery.data, controller, chainId]);
+  const sortedSigners = sortSignersByCreationDate(
+    controllerQuery?.data?.controller?.signers ?? [],
+  );
 
   return (
     <section className="space-y-4">
@@ -71,16 +38,22 @@ export const SignersSection = ({
           <LoadingState />
         ) : controllerQuery.isError ? (
           <div>Error</div>
-        ) : controllerQuery.isSuccess && controllerQuery.data ? (
-          signers?.map((signer, index) => {
+        ) : controller && controllerQuery.isSuccess ? (
+          sortedSigners.map((signer, index) => {
+            // index === 0 is the original signer because data is pre-sorted by createdAt ascending
+            const isOriginalSigner = index === 0;
+            const isCurrent = isCurrentSigner(
+              signer.metadata as CredentialMetadata,
+              controller,
+            );
             return (
               <SignerCard
                 key={`${index}`}
-                current={signer.isCurrent}
+                current={isCurrent}
                 signer={signer.metadata as CredentialMetadata}
-                isOriginalSigner={signer.isOriginal}
+                isOriginalSigner={isOriginalSigner}
                 onDelete={
-                  signer.isCurrent
+                  isCurrent || isOriginalSigner
                     ? undefined
                     : async () => {
                         let jsSigner: JsRemoveSignerInput | undefined;
@@ -160,25 +133,4 @@ const LoadingState = () => {
       <Skeleton className="h-10 w-full rounded" />
     </div>
   );
-};
-
-const toJsSigner = (signer: CredentialMetadata): Signer => {
-  switch (signer.__typename) {
-    case "Eip191Credentials":
-      return {
-        eip191: {
-          address: signer.eip191?.[0]?.ethAddress ?? "",
-        },
-      };
-    case "WebauthnCredentials":
-      return {
-        webauthn: {
-          publicKey: signer.webauthn?.[0]?.publicKey ?? "",
-          rpId: import.meta.env.VITE_RP_ID,
-          credentialId: signer.webauthn?.[0]?.id ?? "",
-        },
-      };
-    default:
-      throw new Error("Unimplemented");
-  }
 };
