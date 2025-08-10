@@ -200,7 +200,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
 
   // Get token data from rpc (based on url options without those fetched from torii)
   const contractAddress = useMemo(() => {
-    if (toriiStatus !== "success") return [];
+    if (toriiStatus === "loading") return [];
     return options?.filter(
       (token) =>
         !toriiTokens.find(
@@ -295,9 +295,8 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   }, [rpcData, toriiTokens, countervalues]);
 
   // Convert idle status to loading to prevent jitter on initial load
-  const status = toriiStatus === "idle" ? "loading" : toriiStatus;
 
-  return { tokens: tokens.tokens, credits, status };
+  return { tokens: tokens.tokens, credits, status: toriiStatus };
 }
 
 export type UseTokenResponse = UseBalanceResponse;
