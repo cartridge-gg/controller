@@ -27,7 +27,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollectible } from "@/hooks/collectible";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { VoyagerUrl } from "@cartridge/ui/utils";
+import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
@@ -45,6 +45,7 @@ export function CollectibleAsset() {
   const account = useAccount();
   const address = account?.address || "";
   const { chainId, namespace, project, controller } = useConnection();
+  const explorer = useExplorer();
   const [searchParams] = useSearchParams();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
@@ -139,11 +140,12 @@ export function CollectibleAsset() {
     return { orderAmount: amount, orderImage: token.logo_url };
   }, [mainOrder]);
 
-  const to = useCallback((transactionHash: string) => {
-    return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
-      transactionHash,
-    );
-  }, []);
+  const to = useCallback(
+    (transactionHash: string) => {
+      return explorer.transaction(transactionHash);
+    },
+    [explorer],
+  );
 
   const handleUnlist = useCallback(
     async (orderId?: number) => {

@@ -16,6 +16,7 @@ import {
 import { getChainName } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useExplorer } from "@starknet-react/core";
 import {
   constants,
   EstimateFee,
@@ -255,6 +256,8 @@ function ExplorerLink({
   txHash: string;
   chainId: string;
 }) {
+  const explorer = useExplorer();
+
   if (
     ![
       constants.StarknetChainId.SN_SEPOLIA,
@@ -266,13 +269,11 @@ function ExplorerLink({
 
   return (
     <Link
-      to={`https://${
-        chainId === constants.StarknetChainId.SN_SEPOLIA ? "sepolia." : ""
-      }starkscan.co/tx/${txHash}`}
+      to={explorer.transaction(txHash)}
       target="_blank"
       className="flex items-center gap-1 text-sm text-foreground-400 underline"
     >
-      View on Starkscan
+      View Transaction
       <ExternalIcon size="sm" />
     </Link>
   );

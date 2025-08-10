@@ -13,12 +13,8 @@ import {
 } from "@cartridge/ui";
 
 import { useData } from "@/hooks/data";
-import {
-  getDate,
-  isPublicChain,
-  useCreditBalance,
-  VoyagerUrl,
-} from "@cartridge/ui/utils";
+import { getDate, isPublicChain, useCreditBalance } from "@cartridge/ui/utils";
+import { useExplorer } from "@starknet-react/core";
 import { constants, getChecksumAddress } from "starknet";
 import { useAccount } from "@/hooks/account";
 import { useToken } from "@/hooks/token";
@@ -119,6 +115,7 @@ function ERC20() {
   const account = useAccount();
   const accountAddress = account?.address || "";
   const { controller } = useConnection();
+  const explorer = useExplorer();
   const { transfers } = useData();
   const { isControllerGte } = useVersion();
 
@@ -166,11 +163,12 @@ function ERC20() {
     });
   }, [transfers, accountAddress, token?.metadata?.image]);
 
-  const to = useCallback((transactionHash: string) => {
-    return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
-      transactionHash,
-    );
-  }, []);
+  const to = useCallback(
+    (transactionHash: string) => {
+      return explorer.transaction(transactionHash);
+    },
+    [explorer],
+  );
 
   if (!token) {
     return null;

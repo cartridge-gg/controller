@@ -9,11 +9,10 @@ import {
   PlusIcon,
   Skeleton,
 } from "@cartridge/ui";
-import { VoyagerUrl, cn } from "@cartridge/ui/utils";
-import { useConnection } from "@/hooks/connection";
+import { cn } from "@cartridge/ui/utils";
+import { useExplorer } from "@starknet-react/core";
 import { useData } from "@/hooks/data";
 import { useCallback, useMemo, useState } from "react";
-import { constants } from "starknet";
 import { Link } from "react-router-dom";
 
 const OFFSET = 100;
@@ -39,17 +38,15 @@ interface CardProps {
 
 export function Activity() {
   const [cap, setCap] = useState(OFFSET);
-  const { chainId } = useConnection();
+  const explorer = useExplorer();
 
   const { events: data, status } = useData();
 
   const to = useCallback(
     (transactionHash: string) => {
-      return VoyagerUrl(chainId as constants.StarknetChainId).transaction(
-        transactionHash,
-      );
+      return explorer.transaction(transactionHash);
     },
-    [chainId],
+    [explorer],
   );
 
   const { events, dates } = useMemo(() => {
