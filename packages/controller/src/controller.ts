@@ -254,7 +254,13 @@ export default class ControllerProvider extends BaseProvider {
     const username = await this.keychain.username();
 
     // Navigate first, then open to avoid flash
-    await this.keychain.navigate(`/account/${username}/${tab}`);
+    const options = [];
+    if (this.options.slot) {
+      options.push(`ps=${this.options.slot}`);
+    }
+    await this.keychain.navigate(
+      `/account/${username}/${tab}?${options.join("&")}`,
+    );
     this.iframes.keychain.open();
   }
 
@@ -270,7 +276,13 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     const username = await this.keychain.username();
-    await this.keychain.navigate(`/account/${username}/${to}`);
+    const options = [];
+    if (this.options.slot) {
+      options.push(`ps=${this.options.slot}`);
+    }
+    await this.keychain.navigate(
+      `/account/${username}/${to}?${options.join("&")}`,
+    );
     this.iframes.keychain.open();
   }
 
