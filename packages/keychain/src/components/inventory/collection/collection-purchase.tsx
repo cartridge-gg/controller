@@ -45,6 +45,7 @@ import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
 import { createExecuteUrl } from "@/utils/connection/execute";
+import { CLIENT_FEE_NUMERATOR, CLIENT_FEE_RECEIVER } from "@/constants";
 
 const FEE_ENTRYPOINT = "royalty_info";
 
@@ -198,6 +199,8 @@ export function CollectionPurchase() {
             assetId: cairo.uint256(order.tokenId),
             quantity: 0, // 0 for ERC721
             royalties: true,
+            clientFee: CLIENT_FEE_NUMERATOR,
+            clientFeeReceiver: CLIENT_FEE_RECEIVER,
           }),
         })),
       ];
