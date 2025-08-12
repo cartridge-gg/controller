@@ -170,6 +170,10 @@ export interface Keychain {
     type: ExternalWalletType,
     tokenAddress?: string,
   ): Promise<ExternalWalletResponse>;
+  externalSwitchChain(
+    type: ExternalWalletType,
+    chainId: string,
+  ): Promise<boolean>;
 }
 
 export interface Profile {

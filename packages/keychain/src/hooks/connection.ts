@@ -84,6 +84,10 @@ export type ParentMethods = AsyncMethodReturns<{
     identifier: string,
     tokenAddress?: string,
   ) => Promise<ExternalWalletResponse>;
+  externalSwitchChain: (
+    identifier: string,
+    chainId: string,
+  ) => Promise<boolean>;
 }>;
 
 /**
@@ -456,6 +460,7 @@ export function useConnectionValue() {
         externalSendTransaction:
           iframeMethods.externalSendTransaction(currentOrigin),
         externalGetBalance: iframeMethods.externalGetBalance(currentOrigin),
+        externalSwitchChain: iframeMethods.externalSwitchChain(currentOrigin),
       });
     }
   }, [setOrigin, setRpcUrl, setContext, setController, setConfigSignupOptions]);

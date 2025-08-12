@@ -28,6 +28,10 @@ interface WalletsContextValue {
     type: ExternalWalletType,
   ) => Promise<ExternalWalletResponse | null>;
   isExtensionMissing: (signer: CredentialMetadata) => boolean;
+  switchChain: (
+    identifier: ExternalWalletType,
+    chainId: string,
+  ) => Promise<boolean>;
 }
 
 declare global {
@@ -150,6 +154,26 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
     [parent],
   );
 
+  const switchChain = useCallback(
+    async (identifier: ExternalWalletType, chainId: string) => {
+      if (!parent) {
+        setError(new Error("Connection not ready."));
+        return false;
+      }
+
+      try {
+        return await parent.externalSwitchChain(identifier, chainId);
+      } catch (err) {
+        console.error(`Failed to switch chain for wallet ${identifier}:`, err);
+        setError(
+          err instanceof Error ? err : new Error("Failed to switch chain"),
+        );
+        return false;
+      }
+    },
+    [parent],
+  );
+
   const isExtensionMissing = useCallback(
     (signer: CredentialMetadata) => {
       return !wallets.some(
@@ -168,6 +192,7 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       detectWallets,
       connectWallet,
       isExtensionMissing,
+      switchChain,
     }),
     [
       wallets,
@@ -177,6 +202,7 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
       detectWallets,
       connectWallet,
       isExtensionMissing,
+      switchChain,
     ],
   );
 
