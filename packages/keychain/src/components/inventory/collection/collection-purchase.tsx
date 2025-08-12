@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Button,
@@ -60,6 +60,7 @@ export function CollectionPurchase() {
   const { provider, orders, marketplaceFee, setAmount } = useMarketplace();
   const { navigate } = useNavigation();
 
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const paramsOrders = searchParams.get("orders")?.split(",").map(Number) || [];
   const tokenOrders = useMemo(() => {
@@ -208,7 +209,7 @@ export function CollectionPurchase() {
       const executeUrl = createExecuteUrl(calls);
 
       // Navigate to execute screen with returnTo parameter to come back to current page
-      const currentPath = window.location.pathname + window.location.search;
+      const currentPath = `${location.pathname}${location.search}`;
       const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
       navigate(executeUrlWithReturn);
     } catch (error) {
@@ -228,6 +229,7 @@ export function CollectionPurchase() {
     controller,
     navigate,
     searchParams,
+    location,
     refetch,
   ]);
 

@@ -18,7 +18,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import { useCollection } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
@@ -59,6 +59,7 @@ export function CollectionListing() {
 
   const { navigate } = useNavigation();
 
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const paramsTokenIds = searchParams.getAll("tokenIds");
   const tokenIds = useMemo(() => {
@@ -196,10 +197,7 @@ export function CollectionListing() {
       const executeUrl = createExecuteUrl(calls);
 
       // Navigate to execute screen with returnTo parameter to come back to the parent page
-      const currentPath = `${window.location.pathname + window.location.search}`
-        .split("/")
-        .slice(0, -1)
-        .join("/");
+      const currentPath = `${location.pathname.split("/").slice(0, -1).join("/")}${location.search}`;
       const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
       navigate(executeUrlWithReturn);
     } catch (error) {
@@ -215,6 +213,7 @@ export function CollectionListing() {
     selected,
     duration,
     navigate,
+    location,
     searchParams,
     chainId,
     entrypoint,
