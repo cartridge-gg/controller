@@ -8,7 +8,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
-import { ExternalPlatform } from "@cartridge/controller";
+import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 import {
   clusterApiUrl,
   Connection,
@@ -20,6 +20,8 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
+import { ethers } from "ethers";
+import erc20abi from "./erc20abi.json" assert { type: "json" };
 
 export enum PurchaseType {
   CREDITS = "CREDITS",
@@ -34,8 +36,9 @@ export const useCryptoPayment = () => {
   const sendPayment = useCallback(
     async (
       walletAddress: string,
-      wholeCredits: number,
+      walletType: ExternalWalletType,
       platform: ExternalPlatform,
+      wholeCredits: number,
       teamId?: string,
       starterpackId?: string,
       onSubmitted?: (explorer: Explorer) => void,
@@ -48,8 +51,6 @@ export const useCryptoPayment = () => {
         setIsLoading(true);
         setError(null);
 
-        console.log("platform", platform);
-
         const {
           id: paymentId,
           depositAddress,
@@ -57,8 +58,8 @@ export const useCryptoPayment = () => {
           tokenAddress,
         } = await createCryptoPayment(
           controller.username(),
-          wholeCredits,
           platform,
+          wholeCredits,
           teamId,
           starterpackId,
           isMainnet,
@@ -81,14 +82,21 @@ export const useCryptoPayment = () => {
             await confirmTransaction();
             break;
           }
-          case "ethereum": {
-            throw new Error("Ethereum not supported yet");
-          }
-          case "starknet": {
-            throw new Error("Starknet not supported yet");
+          case "arbitrum": {
+            const hash = await requestEvmPayment(
+              walletAddress,
+              walletType,
+              depositAddress,
+              parseInt(tokenAmount),
+              tokenAddress,
+            );
+            onSubmitted?.(
+              getExplorer(platform, hash as string, isMainnet) as Explorer,
+            );
+            break;
           }
           default: {
-            throw new Error(`Unsupported platform: ${platform}`);
+            throw new Error(`Unsupported payment platform: ${platform}`);
           }
         }
 
@@ -141,8 +149,8 @@ export const useCryptoPayment = () => {
 
   async function createCryptoPayment(
     username: string,
-    wholeCredits: number,
     platform: ExternalPlatform,
+    wholeCredits: number,
     teamId?: string,
     starterpackId?: string,
     isMainnet: boolean = false,
@@ -238,6 +246,28 @@ export const useCryptoPayment = () => {
         await pollForFinalization(connection, signature);
       },
     };
+  }
+
+  async function requestEvmPayment(
+    walletAddress: string,
+    walletType: ExternalWalletType,
+    depositAddress: string,
+    tokenAmount: number,
+    tokenAddress: string,
+  ) {
+    const iface = new ethers.Interface(erc20abi);
+    const data = iface.encodeFunctionData("transfer", [
+      depositAddress,
+      tokenAmount,
+    ]);
+
+    const res = await externalSendTransaction(walletType, {
+      from: walletAddress,
+      to: tokenAddress,
+      data,
+      value: "0x0", // ERC-20 transfer sends no ETH
+    });
+    return res.result;
   }
 
   return {

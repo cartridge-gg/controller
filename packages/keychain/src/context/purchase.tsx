@@ -6,7 +6,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { ExternalWallet } from "@cartridge/controller";
+import { ExternalWallet, ExternalWalletType } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -124,6 +124,7 @@ export const PurchaseProvider = ({
   const [explorer, setExplorer] = useState<Explorer | undefined>();
 
   const [walletAddress, setWalletAddress] = useState<string>();
+  const [walletType, setWalletType] = useState<ExternalWalletType>();
   const [selectedWallet, setSelectedWallet] = useState<
     ExternalWallet | undefined
   >();
@@ -160,13 +161,20 @@ export const PurchaseProvider = ({
   }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
   const onCrypto = useCallback(async () => {
-    if (!controller || !selectedWallet?.platform || !walletAddress) return;
+    if (
+      !controller ||
+      !selectedWallet?.platform ||
+      !walletAddress ||
+      !walletType
+    )
+      return;
 
     setPaymentMethod("crypto");
     const paymentId = await sendPayment(
       walletAddress,
-      usdToCredits(usdAmount),
+      walletType,
       selectedWallet.platform,
+      usdToCredits(usdAmount),
       undefined,
       starterpackId,
       (explorer) => {
@@ -174,7 +182,14 @@ export const PurchaseProvider = ({
       },
     );
     setPaymentId(paymentId);
-  }, [controller, selectedWallet, walletAddress, starterpackId, sendPayment]);
+  }, [
+    controller,
+    selectedWallet,
+    walletAddress,
+    walletType,
+    starterpackId,
+    sendPayment,
+  ]);
 
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet, chainId?: string | number) => {
@@ -201,6 +216,7 @@ export const PurchaseProvider = ({
           return;
         }
         setWalletAddress(res.account);
+        setWalletType(wallet.type);
       }
     },
     [connectWallet],
