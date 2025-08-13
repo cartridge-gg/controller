@@ -178,12 +178,31 @@ export class RabbyWallet implements WalletAdapter {
     }
   }
 
-  async sendTransaction(_txn: any): Promise<ExternalWalletResponse<any>> {
-    return {
-      success: false,
-      wallet: this.type,
-      error: "Not implemented",
-    };
+  async sendTransaction(txn: any): Promise<ExternalWalletResponse<any>> {
+    try {
+      if (!this.isAvailable() || !this.account) {
+        throw new Error("Rabby is not connected");
+      }
+
+      const provider = this.provider?.provider;
+      if (!provider) {
+        throw new Error("Rabby is not connected");
+      }
+
+      const result = await provider.request({
+        method: "eth_sendTransaction",
+        params: [txn],
+      });
+
+      return { success: true, wallet: this.type, result };
+    } catch (error) {
+      console.error(`Error sending transaction with Rabby:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
   }
 
   async switchChain(chainId: string): Promise<boolean> {
