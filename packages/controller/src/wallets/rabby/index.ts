@@ -111,7 +111,7 @@ export class RabbyWallet implements WalletAdapter {
       }
 
       const result = await ethereum.request({
-        method: "eth_sendTransaction",
+        method: "eth_signTransaction",
         params: [transaction],
       });
 
