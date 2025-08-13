@@ -1,8 +1,8 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import {
-  CreateCryptoPaymentDocument,
-  CreateCryptoPaymentMutation,
-  Network,
+  CreateLayerswapPaymentDocument,
+  CreateLayerswapPaymentMutation,
+  LayerswapNetwork,
   CryptoPaymentQuery,
   CryptoPaymentDocument,
 } from "@cartridge/ui/utils/api/cartridge";
@@ -20,7 +20,6 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
-import { constants } from "starknet";
 
 export enum PurchaseType {
   CREDITS = "CREDITS",
@@ -28,20 +27,9 @@ export enum PurchaseType {
 }
 
 export const useCryptoPayment = () => {
-  const { controller, externalSendTransaction } = useConnection();
+  const { controller, isMainnet, externalSendTransaction } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-
-  const isMainnet = useMemo(() => {
-    if (
-      import.meta.env.PROD &&
-      controller?.chainId() === constants.StarknetChainId.SN_MAIN
-    ) {
-      return true;
-    }
-
-    return false;
-  }, [controller]);
 
   const sendPayment = useCallback(
     async (
@@ -59,6 +47,8 @@ export const useCryptoPayment = () => {
       try {
         setIsLoading(true);
         setError(null);
+
+        console.log("platform", platform);
 
         const {
           id: paymentId,
@@ -96,6 +86,9 @@ export const useCryptoPayment = () => {
           }
           case "starknet": {
             throw new Error("Starknet not supported yet");
+          }
+          default: {
+            throw new Error(`Unsupported platform: ${platform}`);
           }
         }
 
@@ -154,8 +147,8 @@ export const useCryptoPayment = () => {
     starterpackId?: string,
     isMainnet: boolean = false,
   ) {
-    const result = await client.request<CreateCryptoPaymentMutation>(
-      CreateCryptoPaymentDocument,
+    const result = await client.request<CreateLayerswapPaymentMutation>(
+      CreateLayerswapPaymentDocument,
       {
         input: {
           username,
@@ -163,7 +156,7 @@ export const useCryptoPayment = () => {
             amount: wholeCredits,
             decimals: 0,
           },
-          network: platform.toUpperCase() as Network,
+          sourceNetwork: mapPlatformToLayerswapNetwork(platform),
           purchaseType: starterpackId
             ? PurchaseType.STARTERPACK
             : PurchaseType.CREDITS,
@@ -174,7 +167,13 @@ export const useCryptoPayment = () => {
       },
     );
 
-    return result.createCryptoPayment;
+    return {
+      id: result.createLayerswapPayment.cryptoPaymentId,
+      depositAddress: result.createLayerswapPayment.sourceDepositAddress,
+      tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
+      tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
+      swapId: result.createLayerswapPayment.swapId,
+    };
   }
 
   async function requestPhantomPayment(
@@ -309,7 +308,34 @@ const getExplorer = (
           ? `https://voyager.online/tx/${txHash}`
           : `https://goerli.voyager.online/tx/${txHash}`,
       };
+    case "arbitrum":
+      return {
+        name: "Arbitrum Explorer",
+        url: isMainnet
+          ? `https://arbiscan.io/tx/${txHash}`
+          : `https://sepolia.arbiscan.io/tx/${txHash}`,
+      };
     default:
       throw new Error(`Unsupported platform: ${platform}`);
   }
 };
+
+function mapPlatformToLayerswapNetwork(
+  platform: ExternalPlatform,
+): LayerswapNetwork {
+  switch (platform) {
+    case "solana":
+      return LayerswapNetwork.Solana;
+    case "ethereum":
+      return LayerswapNetwork.Ethereum;
+    case "base":
+      return LayerswapNetwork.Base;
+    case "arbitrum":
+      return LayerswapNetwork.Arbitrum;
+    case "optimism":
+      return LayerswapNetwork.Optimism;
+    // Starknet supported natively
+    default:
+      throw new Error(`Unsupported platform: ${platform}`);
+  }
+}

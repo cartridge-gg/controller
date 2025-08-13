@@ -8,7 +8,7 @@ import {
 } from "@cartridge/ui";
 import { Receiving } from "../../receiving";
 import { CostBreakdown } from "../../review/cost";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
 const CARTRIDGE_FEE = 0.025;
@@ -21,12 +21,18 @@ export function CryptoCheckout() {
     displayError,
     selectedWallet,
     onCrypto,
+    clearError,
   } = usePurchaseContext();
   const { navigate } = useNavigation();
   const onPurchase = useCallback(async () => {
     await onCrypto();
     navigate("/purchase/pending", { reset: true });
   }, [onCrypto, navigate]);
+
+  useEffect(() => {
+    clearError();
+    return () => clearError();
+  }, [clearError]);
 
   return (
     <>

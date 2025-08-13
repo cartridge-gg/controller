@@ -12,12 +12,23 @@ import {
   StarknetIcon,
 } from "@cartridge/ui";
 import { NetworkWalletData } from "../types";
+import { constants } from "starknet";
 
 export const networkWalletData: NetworkWalletData = {
   networks: [
     {
       name: "Starknet",
       platform: "starknet",
+      chains: [
+        {
+          chainId: constants.StarknetChainId.SN_MAIN,
+          isMainnet: true,
+        },
+        {
+          chainId: constants.StarknetChainId.SN_SEPOLIA,
+          isMainnet: false,
+        },
+      ],
       icon: React.createElement(StarknetColorIcon),
       subIcon: React.createElement(StarknetIcon),
       wallets: new Map([
@@ -43,7 +54,17 @@ export const networkWalletData: NetworkWalletData = {
     },
     {
       name: "Base",
-      platform: "ethereum",
+      platform: "base",
+      chains: [
+        {
+          chainId: "0x2105",
+          isMainnet: true,
+        },
+        {
+          chainId: "0x14A34",
+          isMainnet: false,
+        },
+      ],
       icon: React.createElement(BaseColorIcon),
       subIcon: React.createElement(EthereumIcon),
       wallets: new Map([
@@ -89,6 +110,35 @@ export const networkWalletData: NetworkWalletData = {
         //   color: "#AB9FF2",
         //   enabled: true,
         // }],
+      ]),
+    },
+    {
+      name: "Arbitrum",
+      platform: "arbitrum",
+      icon: null,
+      subIcon: null,
+      enabled: true,
+      chains: [
+        {
+          chainId: "0xA4B1",
+          isMainnet: true,
+        },
+        {
+          chainId: "0x66EEE",
+          isMainnet: false,
+        },
+      ],
+      wallets: new Map([
+        [
+          "metamask",
+          {
+            name: "MetaMask",
+            type: "metamask",
+            icon: React.createElement(MetaMaskColorIcon),
+            color: "#E88A39",
+            enabled: true,
+          },
+        ],
       ]),
     },
   ],

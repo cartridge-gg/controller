@@ -12,6 +12,10 @@ export interface Wallet {
 export interface Network {
   name: string;
   platform: ExternalPlatform;
+  chains?: {
+    chainId: string;
+    isMainnet: boolean;
+  }[];
   icon: React.ReactNode;
   subIcon?: React.ReactNode;
   enabled?: boolean;

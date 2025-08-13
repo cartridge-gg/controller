@@ -65,11 +65,11 @@ export interface PurchaseContextType {
 
   // Loading states
   isStripeLoading: boolean;
-  isWalletConnecting: boolean;
   isCryptoLoading: boolean;
 
   // Error state
   displayError?: Error;
+  clearError: () => void;
 
   // Actions
   setUsdAmount: (amount: number) => void;
@@ -79,7 +79,10 @@ export interface PurchaseContextType {
   // Payment actions
   onCreditCard: () => Promise<void>;
   onCrypto: () => Promise<void>;
-  onExternalConnect: (wallet: ExternalWallet) => Promise<void>;
+  onExternalConnect: (
+    wallet: ExternalWallet,
+    chainId?: string,
+  ) => Promise<void>;
 }
 
 const PurchaseContext = createContext<PurchaseContextType | undefined>(
@@ -96,12 +99,7 @@ export const PurchaseProvider = ({
   isSlot = false,
 }: PurchaseProviderProps) => {
   const { controller } = useConnection();
-  const {
-    wallets,
-    error: walletError,
-    isConnecting: isWalletConnecting,
-    connectWallet,
-  } = useWallets();
+  const { error: walletError, connectWallet, switchChain } = useWallets();
 
   const {
     stripePromise,
@@ -116,7 +114,6 @@ export const PurchaseProvider = ({
     sendPayment,
   } = useCryptoPayment();
 
-  // State
   const [paymentMethod, setPaymentMethod] = useState<
     PaymentMethod | undefined
   >();
@@ -139,6 +136,10 @@ export const PurchaseProvider = ({
   useEffect(() => {
     setDisplayError(stripeError || walletError || cryptoError || undefined);
   }, [stripeError, walletError, cryptoError]);
+
+  const clearError = useCallback(() => {
+    setDisplayError(undefined);
+  }, []);
 
   const onCreditCard = useCallback(async () => {
     if (!controller) return;
@@ -176,8 +177,19 @@ export const PurchaseProvider = ({
   }, [controller, selectedWallet, walletAddress, starterpackId, sendPayment]);
 
   const onExternalConnect = useCallback(
-    async (wallet: ExternalWallet) => {
+    async (wallet: ExternalWallet, chainId?: string | number) => {
       setSelectedWallet(wallet);
+
+      if (chainId) {
+        const res = await switchChain(wallet.type, chainId.toString());
+        if (!res) {
+          setDisplayError(
+            new Error(`Failed to switch chain for ${wallet.name}`),
+          );
+          return;
+        }
+      }
+
       const res = await connectWallet(wallet.type);
       if (res?.success) {
         if (!res.account) {
@@ -204,7 +216,6 @@ export const PurchaseProvider = ({
     paymentMethod,
     selectedWallet,
     walletAddress,
-    wallets,
     paymentId,
     explorer,
 
@@ -215,11 +226,11 @@ export const PurchaseProvider = ({
 
     // Loading states
     isStripeLoading,
-    isWalletConnecting,
     isCryptoLoading,
 
     // Error state
     displayError,
+    clearError,
 
     // Setters
     setUsdAmount,

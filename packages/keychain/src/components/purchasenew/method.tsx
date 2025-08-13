@@ -16,6 +16,7 @@ export function PaymentMethod() {
   const { goBack, navigate } = useNavigation();
   const { onCreditCard, displayError } = usePurchaseContext();
   const [isLoading, setIsLoading] = useState(false);
+
   return (
     <>
       <HeaderInner
