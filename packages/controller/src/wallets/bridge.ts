@@ -56,6 +56,10 @@ export class WalletBridge {
         (_origin: string) =>
         (identifier: ExternalWalletType | string, tokenAddress?: string) =>
           this.getBalance(identifier, tokenAddress),
+      externalSwitchChain:
+        (_origin: string) =>
+        (identifier: ExternalWalletType | string, chainId: string) =>
+          this.switchChain(identifier, chainId),
     };
   }
 
@@ -234,6 +238,19 @@ export class WalletBridge {
         "getting balance from",
         wallet?.type,
       );
+    }
+  }
+
+  async switchChain(
+    identifier: ExternalWalletType | string,
+    chainId: string,
+  ): Promise<boolean> {
+    try {
+      const wallet = this.getConnectedWalletAdapter(identifier);
+      return await wallet.switchChain(chainId);
+    } catch (error) {
+      console.error(`Error switching chain for ${identifier} wallet:`, error);
+      return false;
     }
   }
 }

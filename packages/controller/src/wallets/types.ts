@@ -1,5 +1,11 @@
 export type ExternalWalletType = "argent" | "metamask" | "phantom" | "rabby";
-export type ExternalPlatform = "starknet" | "ethereum" | "solana";
+export type ExternalPlatform =
+  | "starknet"
+  | "ethereum"
+  | "solana"
+  | "base"
+  | "arbitrum"
+  | "optimism";
 
 export interface ExternalWallet {
   type: ExternalWalletType;
@@ -35,4 +41,5 @@ export interface WalletAdapter {
   signTypedData?(data: any): Promise<ExternalWalletResponse<any>>;
   sendTransaction(tx: any): Promise<ExternalWalletResponse<any>>;
   getBalance(tokenAddress?: string): Promise<ExternalWalletResponse<any>>;
+  switchChain(chainId: string): Promise<boolean>;
 }
