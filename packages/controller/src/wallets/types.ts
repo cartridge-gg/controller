@@ -27,7 +27,7 @@ export interface ExternalWalletResponse<T = unknown> {
 
 export interface WalletAdapter {
   type: ExternalWalletType;
-  platform: ExternalPlatform;
+  platform: ExternalPlatform | undefined;
 
   // Methods
   isAvailable(): boolean;

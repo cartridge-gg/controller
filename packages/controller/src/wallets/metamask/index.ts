@@ -8,10 +8,12 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "../types";
+import { chainIdToPlatform } from "../platform";
 
 export class MetaMaskWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "metamask";
-  readonly platform: ExternalPlatform = "ethereum";
+  platform: ExternalPlatform | undefined;
+
   private MMSDK: MetaMaskSDK;
   private store = createStore();
   private account: string | undefined = undefined;
@@ -44,6 +46,12 @@ export class MetaMaskWallet implements WalletAdapter {
             }
           }
         });
+        this.MMSDK.getProvider()?.on("chainChanged", (chainId: any) => {
+          this.platform = chainIdToPlatform(chainId);
+        });
+
+        const chainId = this.MMSDK.getProvider()?.chainId;
+        this.platform = chainId ? chainIdToPlatform(chainId) : undefined;
       });
     }
   }
@@ -201,16 +209,18 @@ export class MetaMaskWallet implements WalletAdapter {
         throw new Error("MetaMask is not available");
       }
 
-      const ethereum = this.MMSDK.getProvider();
-      if (!ethereum) {
+      const provider = this.MMSDK.getProvider();
+      if (!provider) {
         throw new Error("MetaMask is not connected");
       }
 
       try {
-        await ethereum.request({
+        await provider.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId }],
         });
+
+        this.platform = chainIdToPlatform(chainId);
         return true;
       } catch (error) {
         if ((error as any).code === 4902) {
