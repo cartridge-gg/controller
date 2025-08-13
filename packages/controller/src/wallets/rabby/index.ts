@@ -7,7 +7,7 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "../types";
-import { chainIdToPlatform } from "..";
+import { chainIdToPlatform } from "../platform";
 
 const RABBY_RDNS = "io.rabby";
 

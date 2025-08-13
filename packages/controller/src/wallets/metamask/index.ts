@@ -8,7 +8,7 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "../types";
-import { chainIdToPlatform } from "..";
+import { chainIdToPlatform } from "../platform";
 
 export class MetaMaskWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "metamask";
