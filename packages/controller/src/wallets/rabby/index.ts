@@ -7,12 +7,14 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "../types";
+import { chainIdToPlatform } from "..";
 
 const RABBY_RDNS = "io.rabby";
 
 export class RabbyWallet implements WalletAdapter {
   readonly type: ExternalWalletType = "rabby";
-  readonly platform: ExternalPlatform = "ethereum";
+  platform: ExternalPlatform | undefined;
+
   private account: string | undefined = undefined;
   private store = createStore();
   private provider: EIP6963ProviderDetail | undefined;
@@ -32,6 +34,15 @@ export class RabbyWallet implements WalletAdapter {
           this.account = getAddress(accounts?.[0]);
         }
       });
+
+    this.provider?.provider
+      .request({
+        method: "eth_chainId",
+      })
+      .then((chainId) => {
+        this.platform = chainIdToPlatform(chainId);
+      });
+
     this.provider?.provider?.on("accountsChanged", (accounts: string[]) => {
       if (accounts) {
         // rabby doesn't allow multiple accounts to be connected at the same time
@@ -202,6 +213,8 @@ export class RabbyWallet implements WalletAdapter {
           method: "wallet_switchEthereumChain",
           params: [{ chainId }],
         });
+
+        this.platform = chainIdToPlatform(chainId);
         return true;
       } catch (error) {
         if ((error as any).code === 4902) {
