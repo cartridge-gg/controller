@@ -1,4 +1,9 @@
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import {
   LayoutContent,
   Button,
@@ -45,6 +50,7 @@ export function CollectibleAsset() {
   const account = useAccount();
   const address = account?.address || "";
   const { chainId, namespace, project, controller } = useConnection();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
@@ -172,7 +178,7 @@ export function CollectibleAsset() {
         const executeUrl = createExecuteUrl(calls);
 
         // Navigate to execute screen with returnTo parameter to come back to current page
-        const currentPath = window.location.pathname + window.location.search;
+        const currentPath = `${location.pathname}${location.search}`;
         const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
         navigate(executeUrlWithReturn);
       } catch (error) {
@@ -191,6 +197,7 @@ export function CollectibleAsset() {
       selfOrders,
       navigate,
       searchParams,
+      location,
     ],
   );
 

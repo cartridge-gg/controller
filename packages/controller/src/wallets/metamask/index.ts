@@ -47,7 +47,7 @@ export class MetaMaskWallet implements WalletAdapter {
           }
         });
         this.MMSDK.getProvider()?.on("chainChanged", (chainId: any) => {
-          this.platform = chainId ? chainIdToPlatform(chainId) : undefined;
+          this.platform = chainIdToPlatform(chainId);
         });
 
         const chainId = this.MMSDK.getProvider()?.chainId;
@@ -195,12 +195,31 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
-  async sendTransaction(_txn: any): Promise<ExternalWalletResponse<any>> {
-    return {
-      success: false,
-      wallet: this.type,
-      error: "Not implemented",
-    };
+  async sendTransaction(txn: any): Promise<ExternalWalletResponse<any>> {
+    try {
+      if (!this.isAvailable() || !this.account) {
+        throw new Error("MetaMask is not connected");
+      }
+
+      const provider = this.MMSDK.getProvider();
+      if (!provider) {
+        throw new Error("MetaMask is not connected");
+      }
+
+      const result = await provider.request({
+        method: "eth_sendTransaction",
+        params: [txn],
+      });
+
+      return { success: true, wallet: this.type, result };
+    } catch (error) {
+      console.error(`Error sending transaction with MetaMask:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
   }
 
   async switchChain(chainId: string): Promise<boolean> {

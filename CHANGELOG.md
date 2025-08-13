@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.9.3] - 2025-08-13
+
+### ✨ New Features
+- **@cartridge/keychain**: Added multichain purchase flow for starterpack, enabling seamless cross-chain purchasing with improved wallet and network selection (#1868)
+- **@cartridge/controller**: Enabled switch chain functionality for external wallets, allowing users to change networks when using external wallet connections (#1899)
+- **@cartridge/keychain**: Added ERC1155 listing and purchase support for enhanced NFT marketplace functionality (#1873)
+- **@cartridge/keychain**: Added remove signer functionality, allowing users to remove additional signers from their accounts (#1874)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Separated controller and sessions queries for improved performance and better data management (#1892)
+- **@cartridge/keychain**: Enhanced validation error display to provide clearer feedback to users during transactions and form submissions (#1877)
+- **Development**: Added Claude Code configuration for improved development workflow and AI-assisted coding (#1885)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed multi-purchase ERC721 functionality by replacing window.location pattern with useLocation hook and added proper search params handling (#1897)
+- **@cartridge/keychain**: Fixed tokens loading forever issue that prevented proper token balance and information display (#1896)
+- **@cartridge/keychain**: Fixed ERC721 listing detection to ensure proper marketplace functionality (#1893)
+- **@cartridge/keychain**: Fixed purchase page loading issues for better user experience during transactions (#1894)
+- **@cartridge/keychain**: Fixed navigation reset functionality to ensure proper routing after transactions (#1880)
+- **@cartridge/keychain**: Fixed sign message handling for boolean values to prevent signing errors (#1879)
+- **@cartridge/keychain**: Fixed external wallet transaction failures by improving error handling and transaction processing (#1878)
+- **@cartridge/keychain**: Fixed parameter updates for better transaction handling (#1888)
+- **CI/CD**: Removed non-working end-to-end CI tests to improve build reliability (#1895)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates to the UI component library for improved design consistency and functionality (#1886, #1882, #1881)
+
 ## [0.9.2] - 2025-07-23
 
 ### ✨ New Features
