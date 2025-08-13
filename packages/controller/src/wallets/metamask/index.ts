@@ -46,6 +46,10 @@ export class MetaMaskWallet implements WalletAdapter {
             }
           }
         });
+        this.MMSDK.getProvider()?.on("chainChanged", (chainId: any) => {
+          this.platform = chainId ? chainIdToPlatform(chainId) : undefined;
+        });
+
         const chainId = this.MMSDK.getProvider()?.chainId;
         this.platform = chainId ? chainIdToPlatform(chainId) : undefined;
       });

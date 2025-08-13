@@ -43,6 +43,10 @@ export class RabbyWallet implements WalletAdapter {
         this.platform = chainIdToPlatform(chainId);
       });
 
+    this.provider?.provider?.on("chainChanged", (chainId: string) => {
+      this.platform = chainIdToPlatform(chainId);
+    });
+
     this.provider?.provider?.on("accountsChanged", (accounts: string[]) => {
       if (accounts) {
         // rabby doesn't allow multiple accounts to be connected at the same time
