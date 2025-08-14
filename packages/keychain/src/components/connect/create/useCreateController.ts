@@ -31,6 +31,7 @@ import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
+import { usePasswordAuthentication } from "./password";
 
 export interface SignupResponse {
   address: string;
@@ -78,6 +79,7 @@ export function useCreateController({
     useExternalWalletAuthentication();
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication();
+  const passwordAuth = usePasswordAuthentication();
   const { wallets } = useWallets();
 
   const handleAccountQuerySuccess = useCallback(
@@ -168,6 +170,7 @@ export function useCreateController({
       "discord" as AuthOption,
       "google" as AuthOption,
       "walletconnect" as AuthOption,
+      "password" as AuthOption,
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
@@ -238,6 +241,30 @@ export function useCreateController({
             }),
           };
           break;
+        case "password": {
+          signupResponse = await passwordAuth.signup();
+          // Cast to get the extended password response with encryption data
+          const passwordSignup = signupResponse as {
+            signer: Signer;
+            address: string;
+            type: string;
+            encryptedPrivateKey: string;
+            publicKey: string;
+          };
+          // Use Starknet signer type with Password-specific credentials
+          signer = {
+            type: SignerType.Starknet,
+            credential: JSON.stringify({
+              Password: [
+                {
+                  publicKey: passwordSignup.publicKey,
+                  encryptedPrivateKey: passwordSignup.encryptedPrivateKey,
+                },
+              ],
+            }),
+          };
+          break;
+        }
         default:
           break;
       }
@@ -368,6 +395,38 @@ export function useCreateController({
           setWaitingForConfirmation(true);
           loginResponse = await loginWithWalletConnect();
           break;
+        case "password": {
+          // Find the password signer from the controller's signers
+          const passwordSigners = controller.signers?.filter(
+            (signer) =>
+              (signer.metadata as { __typename?: string }).__typename ===
+              "PasswordCredentials",
+          );
+          if (!passwordSigners || passwordSigners.length === 0) {
+            throw new Error("Password signer not found for controller");
+          }
+
+          // Extract the encrypted private key from metadata
+          const passwordMetadata = passwordSigners[0].metadata as {
+            __typename: string;
+            Password?: Array<{
+              encryptedPrivateKey: string;
+              publicKey: string;
+            }>;
+          };
+          const encryptedPrivateKey =
+            passwordMetadata.Password?.[0]?.encryptedPrivateKey;
+
+          if (!encryptedPrivateKey) {
+            throw new Error("Encrypted private key not found");
+          }
+
+          // Store the encrypted signer temporarily for the login function to use
+          sessionStorage.setItem("temp_encrypted_signer", encryptedPrivateKey);
+
+          loginResponse = await passwordAuth.login();
+          break;
+        }
         case "phantom":
         case "argent":
         default:
