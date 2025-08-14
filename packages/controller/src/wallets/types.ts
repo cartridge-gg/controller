@@ -42,4 +42,8 @@ export interface WalletAdapter {
   sendTransaction(tx: any): Promise<ExternalWalletResponse<any>>;
   getBalance(tokenAddress?: string): Promise<ExternalWalletResponse<any>>;
   switchChain(chainId: string): Promise<boolean>;
+  waitForTransaction(
+    txHash: string,
+    timeoutMs?: number,
+  ): Promise<ExternalWalletResponse<any>>;
 }
