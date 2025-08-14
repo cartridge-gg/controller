@@ -10,4 +10,5 @@ export const AUTH_METHODS_LABELS: Record<AuthOption, string> = {
   walletconnect: "Wallet Connect",
   google: "Google",
   base: "Base Wallet",
+  password: "Password",
 };
