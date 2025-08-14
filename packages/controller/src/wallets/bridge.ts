@@ -60,6 +60,14 @@ export class WalletBridge {
         (_origin: string) =>
         (identifier: ExternalWalletType | string, chainId: string) =>
           this.switchChain(identifier, chainId),
+      externalWaitForTransaction:
+        (_origin: string) =>
+        (
+          identifier: ExternalWalletType | string,
+          txHash: string,
+          timeoutMs?: number,
+        ) =>
+          this.waitForTransaction(identifier, txHash, timeoutMs),
     };
   }
 
@@ -251,6 +259,25 @@ export class WalletBridge {
     } catch (error) {
       console.error(`Error switching chain for ${identifier} wallet:`, error);
       return false;
+    }
+  }
+
+  async waitForTransaction(
+    identifier: ExternalWalletType | string,
+    txHash: string,
+    timeoutMs?: number,
+  ): Promise<ExternalWalletResponse> {
+    let wallet: WalletAdapter | undefined;
+    try {
+      wallet = this.getConnectedWalletAdapter(identifier);
+      return await wallet.waitForTransaction(txHash, timeoutMs);
+    } catch (error) {
+      return this.handleError(
+        identifier,
+        error,
+        "waiting for transaction with",
+        wallet?.type,
+      );
     }
   }
 }

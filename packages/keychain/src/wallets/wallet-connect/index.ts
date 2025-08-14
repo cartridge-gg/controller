@@ -209,6 +209,15 @@ export class WalletConnectWallet implements WalletAdapter {
     throw new Error("Not implemented");
   }
 
+  async waitForTransaction(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _txHash: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _timeoutMs?: number,
+  ): Promise<ExternalWalletResponse<string>> {
+    throw new Error("Not implemented");
+  }
+
   async switchChain(chainId: string): Promise<boolean> {
     try {
       if (!this.isAvailable()) {

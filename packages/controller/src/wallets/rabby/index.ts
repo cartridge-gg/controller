@@ -286,4 +286,50 @@ export class RabbyWallet implements WalletAdapter {
       };
     }
   }
+
+  async waitForTransaction(
+    txHash: string,
+    timeoutMs: number = 60000,
+  ): Promise<ExternalWalletResponse<any>> {
+    try {
+      if (!this.isAvailable()) {
+        throw new Error("Rabby is not connected");
+      }
+
+      const provider = this.provider?.provider;
+      if (!provider) {
+        throw new Error("Rabby is not connected");
+      }
+
+      const startTime = Date.now();
+      const pollInterval = 1000; // 1 second
+
+      while (Date.now() - startTime < timeoutMs) {
+        const receipt = await provider.request({
+          method: "eth_getTransactionReceipt",
+          params: [txHash as `0x${string}`],
+        });
+
+        if (receipt) {
+          return {
+            success: true,
+            wallet: this.type,
+            result: receipt,
+          };
+        }
+
+        // Wait before polling again
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
+      }
+
+      throw new Error("Transaction confirmation timed out");
+    } catch (error) {
+      console.error(`Error waiting for transaction with Rabby:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
+  }
 }
