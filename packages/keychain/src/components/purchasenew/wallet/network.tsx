@@ -28,11 +28,6 @@ export function ChooseNetwork() {
           />
         ))}
       </LayoutContent>
-      <LayoutFooter>
-        <Button variant="secondary" onClick={goBack}>
-          Back
-        </Button>
-      </LayoutFooter>
     </>
   );
 }

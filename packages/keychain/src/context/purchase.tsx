@@ -206,7 +206,6 @@ export const PurchaseProvider = ({
     async (wallet: ExternalWallet, chainId?: string | number) => {
       setSelectedWallet(wallet);
       if (chainId) {
-        console.log({wallet, chainId})
         const res = await switchChain(wallet.type, chainId.toString());
         if (!res) {
           const error = new Error(

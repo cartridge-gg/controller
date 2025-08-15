@@ -58,7 +58,6 @@ export function SelectWallet() {
     return () => clearError();
   }, [clearError]);
 
-
   if (isLoading) {
     return <></>;
   }
@@ -125,18 +124,11 @@ export function SelectWallet() {
           );
         })}
       </LayoutContent>
-     
+
       <LayoutFooter>
         {displayError && (
           <ErrorAlert title="Error" description={displayError.message} />
         )}
-        <Button
-          variant="secondary"
-          onClick={goBack}
-          disabled={isWalletConnecting}
-        >
-          Back
-        </Button>
       </LayoutFooter>
     </>
   );

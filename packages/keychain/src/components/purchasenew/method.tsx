@@ -50,13 +50,6 @@ export function PaymentMethod() {
             description={displayError.message}
           />
         )}
-        <Button
-          variant="secondary"
-          onClick={goBack}
-          disabled={isLoading || !!displayError}
-        >
-          Back
-        </Button>
       </LayoutFooter>
     </>
   );

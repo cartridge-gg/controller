@@ -2,6 +2,7 @@ import React from "react";
 import {
   ArgentColorIcon,
   BaseColorIcon,
+  EthereumColorIcon,
   EthereumIcon,
   MetaMaskColorIcon,
   PhantomColorIcon,
@@ -11,8 +12,39 @@ import {
   StarknetColorIcon,
   StarknetIcon,
 } from "@cartridge/ui";
-import { NetworkWalletData } from "../types";
+import { NetworkWalletData, Wallet } from "../types";
 import { constants } from "starknet";
+
+const evmWallets = new Map<string, Wallet>([
+  [
+    "metamask",
+    {
+      name: "MetaMask",
+      type: "metamask",
+      icon: React.createElement(MetaMaskColorIcon),
+      color: "#E88A39",
+      enabled: true,
+    },
+  ],
+  [
+    "rabby",
+    {
+      type: "rabby",
+      name: "Rabby",
+      icon: React.createElement(RabbyColorIcon),
+      enabled: true,
+    },
+  ],
+  [
+    "base",
+    {
+      type: "base",
+      name: "Coinbase Wallet",
+      icon: null,
+      enabled: true,
+    },
+  ],
+]);
 
 export const networkWalletData: NetworkWalletData = {
   networks: [
@@ -41,76 +73,25 @@ export const networkWalletData: NetworkWalletData = {
             color: "#FF875B",
           },
         ],
-        // [
-        //   "braavos",
-        //   {
-        //     name: "Braavos",
-        //     type: "braavos", // need to update external wallet type
-        //     icon: React.createElement(BraavosColorIcon),
-        //     color: "#FF875B",
-        //   },
-        // ],
       ]),
     },
     {
-      name: "Base",
-      platform: "base",
+      name: "Ethereum",
+      platform: "ethereum",
+      icon: React.createElement(EthereumColorIcon),
+      subIcon: React.createElement(EthereumIcon),
+      enabled: true,
       chains: [
         {
-          chainId: "0x2105",
+          chainId: "0x1",
           isMainnet: true,
         },
         {
-          chainId: "0x14A34",
+          chainId: "0xaa36a7",
           isMainnet: false,
         },
       ],
-      icon: React.createElement(BaseColorIcon),
-      subIcon: React.createElement(EthereumIcon),
-      wallets: new Map([
-        [
-          "rabby",
-          {
-            type: "rabby",
-            name: "Rabby",
-            icon: React.createElement(RabbyColorIcon),
-          },
-        ],
-        [
-          "metamask",
-          {
-            name: "MetaMask",
-            type: "metamask",
-            icon: React.createElement(MetaMaskColorIcon),
-            color: "#E88A39",
-          },
-        ],
-      ]),
-    },
-    {
-      name: "Solana",
-      platform: "solana",
-      icon: React.createElement(SolanaColorIcon),
-      subIcon: React.createElement(SolanaIcon),
-      enabled: true,
-      wallets: new Map([
-        [
-          "phantom",
-          {
-            name: "Phantom",
-            type: "phantom",
-            icon: React.createElement(PhantomColorIcon),
-            color: "#AB9FF2",
-            enabled: true,
-          },
-        ],
-        // ["solflare", {
-        //   name: "Solflare",
-        //   icon: React.createElement(SolflareColorIcon),
-        //   color: "#AB9FF2",
-        //   enabled: true,
-        // }],
-      ]),
+      wallets: evmWallets,
     },
     {
       name: "Arbitrum",
@@ -128,23 +109,40 @@ export const networkWalletData: NetworkWalletData = {
           isMainnet: false,
         },
       ],
+      wallets: evmWallets,
+    },
+    {
+      name: "Base",
+      platform: "base",
+      enabled: true,
+      chains: [
+        {
+          chainId: "0x2105",
+          isMainnet: true,
+        },
+        {
+          chainId: "0x14A34",
+          isMainnet: false,
+        },
+      ],
+      icon: React.createElement(BaseColorIcon),
+      subIcon: React.createElement(EthereumIcon),
+      wallets: evmWallets,
+    },
+    {
+      name: "Solana",
+      platform: "solana",
+      icon: React.createElement(SolanaColorIcon),
+      subIcon: React.createElement(SolanaIcon),
+      enabled: true,
       wallets: new Map([
         [
-          "metamask",
+          "phantom",
           {
-            name: "MetaMask",
-            type: "metamask",
-            icon: React.createElement(MetaMaskColorIcon),
-            color: "#E88A39",
-            enabled: true,
-          },
-        ],
-        [
-          "rabby",
-          {
-            type: "rabby",
-            name: "Rabby",
-            icon: React.createElement(RabbyColorIcon),
+            name: "Phantom",
+            type: "phantom",
+            icon: React.createElement(PhantomColorIcon),
+            color: "#AB9FF2",
             enabled: true,
           },
         ],
