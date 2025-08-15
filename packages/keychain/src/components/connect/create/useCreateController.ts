@@ -177,7 +177,11 @@ export function useCreateController({
   }, [wallets, configSignupOptions]);
 
   const handleSignup = useCallback(
-    async (username: string, authenticationMode: AuthOption) => {
+    async (
+      username: string,
+      authenticationMode: AuthOption,
+      password?: string,
+    ) => {
       if (!origin || !chainId || !rpcUrl) {
         throw new Error("Origin, chainId, or rpcUrl not found");
       }
@@ -242,7 +246,10 @@ export function useCreateController({
           };
           break;
         case "password": {
-          signupResponse = await passwordAuth.signup();
+          if (!password) {
+            throw new Error("Password required for password authentication");
+          }
+          signupResponse = await passwordAuth.signup(password);
           // Cast to get the extended password response with encryption data
           const passwordSignup = signupResponse as {
             signer: Signer;
@@ -251,16 +258,14 @@ export function useCreateController({
             encryptedPrivateKey: string;
             publicKey: string;
           };
-          // Use Starknet signer type with Password-specific credentials
+          // Use "password" as the type string with Password-specific credentials
+          // Send encrypted_private_key as base64 string directly
           signer = {
-            type: SignerType.Starknet,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            type: "password" as any,
             credential: JSON.stringify({
-              Password: [
-                {
-                  publicKey: passwordSignup.publicKey,
-                  encryptedPrivateKey: passwordSignup.encryptedPrivateKey,
-                },
-              ],
+              public_key: passwordSignup.publicKey,
+              encrypted_private_key: passwordSignup.encryptedPrivateKey,
             }),
           };
           break;
@@ -333,7 +338,11 @@ export function useCreateController({
   );
 
   const handleLogin = useCallback(
-    async (username: string, authenticationMethod: AuthOption) => {
+    async (
+      username: string,
+      authenticationMethod: AuthOption,
+      password?: string,
+    ) => {
       if (!chainId) {
         throw new Error("No chainId");
       }
@@ -396,6 +405,10 @@ export function useCreateController({
           loginResponse = await loginWithWalletConnect();
           break;
         case "password": {
+          if (!password) {
+            throw new Error("Password required for password authentication");
+          }
+
           // Find the password signer from the controller's signers
           const passwordSigners = controller.signers?.filter(
             (signer) =>
@@ -409,22 +422,23 @@ export function useCreateController({
           // Extract the encrypted private key from metadata
           const passwordMetadata = passwordSigners[0].metadata as {
             __typename: string;
-            Password?: Array<{
+            password?: Array<{
               encryptedPrivateKey: string;
               publicKey: string;
             }>;
           };
           const encryptedPrivateKey =
-            passwordMetadata.Password?.[0]?.encryptedPrivateKey;
+            passwordMetadata.password?.[0]?.encryptedPrivateKey;
 
           if (!encryptedPrivateKey) {
             throw new Error("Encrypted private key not found");
           }
 
-          // Store the encrypted signer temporarily for the login function to use
-          sessionStorage.setItem("temp_encrypted_signer", encryptedPrivateKey);
-
-          loginResponse = await passwordAuth.login();
+          // Encrypted private key is already in base64 format from backend
+          loginResponse = await passwordAuth.login(
+            password,
+            encryptedPrivateKey,
+          );
           break;
         }
         case "phantom":
@@ -496,6 +510,7 @@ export function useCreateController({
       username: string,
       exists: boolean,
       authenticationMethod?: AuthOption,
+      password?: string,
     ) => {
       setError(undefined);
       setIsLoading(true);
@@ -504,9 +519,17 @@ export function useCreateController({
 
       try {
         if (exists) {
-          await handleLogin(username, authenticationMethod ?? "webauthn");
+          await handleLogin(
+            username,
+            authenticationMethod ?? "webauthn",
+            password,
+          );
         } else {
-          await handleSignup(username, authenticationMethod ?? "webauthn");
+          await handleSignup(
+            username,
+            authenticationMethod ?? "webauthn",
+            password,
+          );
         }
       } catch (e: unknown) {
         if (

@@ -1,14 +1,15 @@
 import { AuthOption } from "@cartridge/controller";
-import { Button, Input, SheetContent, SheetTitle } from "@cartridge/ui";
+import { SheetContent, SheetTitle } from "@cartridge/ui";
 import { useEffect, useMemo, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 import { credentialToAuth } from "../types";
 import { useUsernameValidation } from "./useUsernameValidation";
+import { PasswordForm } from "./password/PasswordForm";
 
 interface ChooseSignupMethodProps {
   isLoading: boolean;
   validation: ReturnType<typeof useUsernameValidation>;
-  onSubmit: (authenticationMode?: AuthOption) => void;
+  onSubmit: (authenticationMode?: AuthOption, password?: string) => void;
   authOptions: AuthOption[];
 }
 
@@ -22,9 +23,6 @@ export function ChooseSignupMethodForm({
     undefined,
   );
   const [showPasswordInput, setShowPasswordInput] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const options = useMemo(() => {
     if (validation.signers?.length) {
@@ -40,11 +38,26 @@ export function ChooseSignupMethodForm({
     }
   }, [validation.signers, authOptions]);
 
+  // Automatically show password form for login if password is the only option
+  useEffect(() => {
+    if (
+      validation.exists &&
+      options.length === 1 &&
+      options[0] === "password"
+    ) {
+      setShowPasswordInput(true);
+      setSelectedAuth("password");
+    }
+  }, [validation.exists, options]);
+
   useEffect(() => {
     if (!isLoading) {
-      setSelectedAuth(undefined);
+      // Don't reset if we're showing password input
+      if (!showPasswordInput) {
+        setSelectedAuth(undefined);
+      }
     }
-  }, [isLoading]);
+  }, [isLoading, showPasswordInput]);
 
   const handleInteractOutside = (
     event: CustomEvent<{ originalEvent: Event }>,
@@ -56,9 +69,7 @@ export function ChooseSignupMethodForm({
   };
 
   const handleSelectedOption = (
-    e:
-      | React.KeyboardEvent<HTMLButtonElement>
-      | React.MouseEvent<HTMLButtonElement>,
+    e: React.MouseEvent | React.KeyboardEvent,
     option: AuthOption,
   ) => {
     if (
@@ -72,47 +83,19 @@ export function ChooseSignupMethodForm({
     if (option === "password") {
       setShowPasswordInput(true);
       setSelectedAuth(option);
-      setPassword("");
-      setConfirmPassword("");
-      setPasswordError(null);
     } else {
       setSelectedAuth(option);
       onSubmit(option);
     }
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!password) {
-      setPasswordError("Password is required");
-      return;
-    }
-
-    if (password.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-      return;
-    }
-
-    const isSignup = !validation.exists;
-    if (isSignup && password !== confirmPassword) {
-      setPasswordError("Passwords do not match");
-      return;
-    }
-
-    // Store password in sessionStorage temporarily for the auth flow
-    sessionStorage.setItem("temp_password", password);
-    sessionStorage.setItem("temp_password_mode", isSignup ? "signup" : "login");
-
-    onSubmit("password");
+  const handlePasswordSubmit = (password: string) => {
+    onSubmit("password", password);
   };
 
   const handlePasswordCancel = () => {
     setShowPasswordInput(false);
     setSelectedAuth(undefined);
-    setPassword("");
-    setConfirmPassword("");
-    setPasswordError(null);
   };
 
   return (
@@ -123,77 +106,18 @@ export function ChooseSignupMethodForm({
       portal={false}
       onInteractOutside={handleInteractOutside}
     >
-      <SheetTitle className="hidden"></SheetTitle>
       {showPasswordInput ? (
-        <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <h3 className="text-lg font-semibold">
-              {validation.exists ? "Login" : "Create Account"} with Password
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              ⚠️ Testing only - Password cannot be recovered if lost
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password (min. 8 characters)"
-              autoComplete={
-                validation.exists ? "current-password" : "new-password"
-              }
-              disabled={isLoading}
-            />
-          </div>
-
-          {!validation.exists && (
-            <div className="flex flex-col gap-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirm Password
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your password"
-                autoComplete="new-password"
-                disabled={isLoading}
-              />
-            </div>
-          )}
-
-          {passwordError && (
-            <p className="text-sm text-destructive">{passwordError}</p>
-          )}
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handlePasswordCancel}
-              disabled={isLoading}
-              className="flex-1"
-            >
-              Back
-            </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading
-                ? "Processing..."
-                : validation.exists
-                  ? "Login"
-                  : "Create Account"}
-            </Button>
-          </div>
-        </form>
+        <PasswordForm
+          isLogin={!!validation.exists}
+          isLoading={isLoading}
+          onSubmit={handlePasswordSubmit}
+          onCancel={handlePasswordCancel}
+        />
       ) : (
         <>
+          <SheetTitle className="text-lg text-start font-semibold">
+            {validation.exists ? "Login" : "Choose your method"}
+          </SheetTitle>
           {options.includes("webauthn") && (
             <div className="border-b border-background-125 pb-4">
               <SignupButton
