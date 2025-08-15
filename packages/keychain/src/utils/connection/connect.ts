@@ -23,7 +23,9 @@ export function connect({
         throw new Error("If defined, signup options cannot be empty");
       }
 
-      setConfigSignupOptions(signupOptions);
+      if (signupOptions) {
+        setConfigSignupOptions(signupOptions);
+      }
 
       return new Promise((resolve, reject) => {
         setContext({

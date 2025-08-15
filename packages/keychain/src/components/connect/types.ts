@@ -1,7 +1,6 @@
 import { AuthOption } from "@cartridge/controller";
 import { Signer } from "@cartridge/controller-wasm";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
-import { ec, encode } from "starknet";
 
 export type FormInput = {
   username: string;
@@ -35,14 +34,10 @@ export function credentialToAuth(
   if (!signer) {
     throw new Error("No signer provided");
   }
-  // Cast to handle PasswordCredentials which may not be in the generated types yet
-  const signerAny = signer as CredentialMetadata & {
-    __typename?: string;
-    eip191?: Array<{ provider: string }>;
-  };
-  switch (signerAny.__typename as string) {
+
+  switch (signer.__typename) {
     case "Eip191Credentials":
-      return signerAny.eip191?.[0].provider as AuthOption;
+      return signer.eip191?.[0].provider as AuthOption;
     case "WebauthnCredentials":
       return "webauthn";
     case "SIWSCredentials":
@@ -62,28 +57,21 @@ export function credentialToAddress(
   if (!signer) {
     return undefined;
   }
-  // Cast to handle PasswordCredentials which may not be in the generated types yet
-  const signerAny = signer as CredentialMetadata & {
-    __typename?: string;
-    eip191?: Array<{ ethAddress: string }>;
-    siws?: Array<{ publicKey: string }>;
-    starknet?: Array<{ publicKey: string }>;
-    Password?: Array<{ publicKey: string }>;
-  };
-  switch (signerAny.__typename as string) {
+
+  switch (signer.__typename) {
     case "Eip191Credentials":
-      return signerAny.eip191?.[0].ethAddress;
+      return signer.eip191?.[0].ethAddress;
     case "SIWSCredentials":
-      return signerAny.siws?.[0].publicKey;
+      return signer.siws?.[0].publicKey;
     case "StarknetCredentials":
-      return signerAny.starknet?.[0].publicKey;
+      return signer.starknet?.[0].publicKey;
     case "WebauthnCredentials":
       return undefined;
     case "PasswordCredentials":
-      // Access the Password field
-      return signerAny.Password?.[0]?.publicKey;
+      // Access the password field (lowercase)
+      return signer.password?.[0]?.publicKey;
     default:
-      throw new Error("Unknown controller signer provider");
+      throw new Error("Unknown controller signer type");
   }
 }
 
@@ -94,11 +82,7 @@ export function signerToAddress(signer: Signer): string {
   if (signer.eip191) {
     return signer.eip191?.address;
   } else if (signer.starknet) {
-    // For password auth, we need to return the public key since it serves as the address
-    // The password flow uses StarkNet signers
-    // We'll get the public key from the privateKey
-    const keyPair = ec.starkCurve.getStarkKey(signer.starknet.privateKey);
-    return encode.addHexPrefix(keyPair);
+    throw new Error("Should not need to convert starknet signer to address");
   } else if (signer.webauthn) {
     throw new Error("Should not need to convert webauthn signer to address");
   } else {

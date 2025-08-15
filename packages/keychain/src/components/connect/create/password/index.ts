@@ -13,80 +13,63 @@ export interface PasswordSignupResponse extends SignupResponse {
 }
 
 export function usePasswordAuthentication() {
-  const signup = useCallback(async (): Promise<PasswordSignupResponse> => {
-    // Get password from sessionStorage (set by ChooseSignupMethodForm)
-    const password = sessionStorage.getItem("temp_password");
-    const mode = sessionStorage.getItem("temp_password_mode");
+  const signup = useCallback(
+    async (password: string): Promise<PasswordSignupResponse> => {
+      if (!password) {
+        throw new Error("Password not provided");
+      }
 
-    // Clear temporary storage
-    sessionStorage.removeItem("temp_password");
-    sessionStorage.removeItem("temp_password_mode");
+      // Generate a new keypair for this account
+      const { privateKey, publicKey } = generateStarknetKeypair();
 
-    if (!password) {
-      throw new Error("Password not provided");
-    }
+      // Encrypt the private key with the password
+      const encryptedPrivateKey = await encryptPrivateKey(privateKey, password);
 
-    if (mode !== "signup") {
-      throw new Error("Invalid password mode for signup");
-    }
+      // Create a signer with the actual private key
+      const signer: Signer = {
+        starknet: {
+          privateKey,
+        },
+      };
 
-    // Generate a new keypair for this account
-    const { privateKey, publicKey } = generateStarknetKeypair();
+      return {
+        signer,
+        address: publicKey, // The public key serves as the address
+        type: "password",
+        encryptedPrivateKey,
+        publicKey,
+      };
+    },
+    [],
+  );
 
-    // Encrypt the private key with the password
-    const encryptedPrivateKey = await encryptPrivateKey(privateKey, password);
+  const login = useCallback(
+    async (
+      password: string,
+      encryptedPrivateKey: string,
+    ): Promise<LoginResponse> => {
+      if (!password) {
+        throw new Error("Password not provided");
+      }
 
-    // Create a signer with the actual private key
-    const signer: Signer = {
-      starknet: {
-        privateKey,
-      },
-    };
+      if (!encryptedPrivateKey) {
+        throw new Error("Encrypted private key not provided");
+      }
 
-    return {
-      signer,
-      address: publicKey, // The public key serves as the address
-      type: "password",
-      encryptedPrivateKey,
-      publicKey,
-    };
-  }, []);
+      // Decrypt the private key using the password
+      const privateKey = await decryptPrivateKey(encryptedPrivateKey, password);
 
-  const login = useCallback(async (): Promise<LoginResponse> => {
-    // Get password and encrypted signer from sessionStorage
-    const password = sessionStorage.getItem("temp_password");
-    const mode = sessionStorage.getItem("temp_password_mode");
-    const encryptedSigner = sessionStorage.getItem("temp_encrypted_signer");
+      // Create a signer with the decrypted private key
+      const signer: Signer = {
+        starknet: {
+          privateKey,
+        },
+      };
 
-    // Clear temporary storage
-    sessionStorage.removeItem("temp_password");
-    sessionStorage.removeItem("temp_password_mode");
-    sessionStorage.removeItem("temp_encrypted_signer");
-
-    if (!password) {
-      throw new Error("Password not provided");
-    }
-
-    if (mode !== "login") {
-      throw new Error("Invalid password mode for login");
-    }
-
-    if (!encryptedSigner) {
-      throw new Error("Encrypted signer not provided");
-    }
-
-    // Decrypt the private key using the password
-    const privateKey = await decryptPrivateKey(encryptedSigner, password);
-
-    // Create a signer with the decrypted private key
-    const signer: Signer = {
-      starknet: {
-        privateKey,
-      },
-    };
-
-    return { signer };
-  }, []);
+      return { signer };
+    },
+    [],
+  );
 
   return {
     signup,
