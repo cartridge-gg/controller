@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ArgentColorIcon,
+  ArbitrumColorIcon,
   BaseColorIcon,
   EthereumColorIcon,
   EthereumIcon,
@@ -11,6 +12,10 @@ import {
   SolanaIcon,
   StarknetColorIcon,
   StarknetIcon,
+  ArbitrumIcon,
+  CoinbaseWalletColorIcon,
+  OptimismColorIcon,
+  OptimismIcon,
 } from "@cartridge/ui";
 import { NetworkWalletData, Wallet } from "../types";
 import { constants } from "starknet";
@@ -40,11 +45,22 @@ const evmWallets = new Map<string, Wallet>([
     {
       type: "base",
       name: "Coinbase Wallet",
-      icon: null,
+      icon: React.createElement(CoinbaseWalletColorIcon),
       enabled: true,
     },
   ],
 ]);
+
+const evmChains = [
+  {
+    chainId: "0xA4B1",
+    isMainnet: true,
+  },
+  {
+    chainId: "0x66EEE",
+    isMainnet: false,
+  },
+];
 
 export const networkWalletData: NetworkWalletData = {
   networks: [
@@ -94,22 +110,23 @@ export const networkWalletData: NetworkWalletData = {
       wallets: evmWallets,
     },
     {
-      name: "Arbitrum",
-      platform: "arbitrum",
-      icon: null,
-      subIcon: null,
+      name: "Solana",
+      platform: "solana",
+      icon: React.createElement(SolanaColorIcon),
+      subIcon: React.createElement(SolanaIcon),
       enabled: true,
-      chains: [
-        {
-          chainId: "0xA4B1",
-          isMainnet: true,
-        },
-        {
-          chainId: "0x66EEE",
-          isMainnet: false,
-        },
-      ],
-      wallets: evmWallets,
+      wallets: new Map([
+        [
+          "phantom",
+          {
+            name: "Phantom",
+            type: "phantom",
+            icon: React.createElement(PhantomColorIcon),
+            color: "#AB9FF2",
+            enabled: true,
+          },
+        ],
+      ]),
     },
     {
       name: "Base",
@@ -130,23 +147,40 @@ export const networkWalletData: NetworkWalletData = {
       wallets: evmWallets,
     },
     {
-      name: "Solana",
-      platform: "solana",
-      icon: React.createElement(SolanaColorIcon),
-      subIcon: React.createElement(SolanaIcon),
+      name: "Arbitrum",
+      platform: "arbitrum",
+      icon: React.createElement(ArbitrumColorIcon),
+      subIcon: React.createElement(ArbitrumIcon),
       enabled: true,
-      wallets: new Map([
-        [
-          "phantom",
-          {
-            name: "Phantom",
-            type: "phantom",
-            icon: React.createElement(PhantomColorIcon),
-            color: "#AB9FF2",
-            enabled: true,
-          },
-        ],
-      ]),
+      chains: [
+        {
+          chainId: "0xA4B1",
+          isMainnet: true,
+        },
+        {
+          chainId: "0x66EEE",
+          isMainnet: false,
+        },
+      ],
+      wallets: evmWallets,
+    },
+    {
+      name: "Optimism",
+      platform: "optimism",
+      icon: React.createElement(OptimismColorIcon),
+      subIcon: React.createElement(OptimismIcon),
+      enabled: true,
+      chains: [
+        {
+          chainId: "0xA",
+          isMainnet: true,
+        },
+        {
+          chainId: "0xAA37DC",
+          isMainnet: false,
+        },
+      ],
+      wallets: evmWallets,
     },
   ],
 };
