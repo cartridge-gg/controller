@@ -261,7 +261,7 @@ export function CreateController({
   });
 
   const handleFormSubmit = useCallback(
-    (authenticationMode?: AuthOption) => {
+    (authenticationMode?: AuthOption, password?: string) => {
       if (!usernameField.value) {
         return;
       }
@@ -300,7 +300,19 @@ export function CreateController({
               ? credentialToAuth(validation.signers[0])
               : authenticationMode;
 
-        handleSubmit(usernameField.value, accountExists, authenticationMethod);
+        // If password auth is detected and no password provided, show the auth method selection
+        // which will trigger the password form
+        if (authenticationMethod === "password" && !password) {
+          setAuthenticationStep(AuthenticationStep.ChooseMethod);
+          return;
+        }
+
+        handleSubmit(
+          usernameField.value,
+          accountExists,
+          authenticationMethod,
+          password,
+        );
       }
     },
     [

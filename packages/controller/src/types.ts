@@ -35,6 +35,7 @@ export type AuthOption =
   | "webauthn"
   | "discord"
   | "walletconnect"
+  | "password"
   | ExternalWalletType;
 
 export type AuthOptions = Omit<AuthOption, "phantom" | "argent">[];

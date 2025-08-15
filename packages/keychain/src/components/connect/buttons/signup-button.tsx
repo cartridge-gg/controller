@@ -11,6 +11,7 @@ import {
   RabbyColorIcon,
   Spinner,
   WalletConnectColorIcon,
+  LockIcon,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 
@@ -69,6 +70,11 @@ const OPTIONS: Partial<
     variant: "secondary",
     Icon: WalletConnectColorIcon,
     label: AUTH_METHODS_LABELS.walletconnect,
+  },
+  password: {
+    variant: "secondary",
+    Icon: LockIcon,
+    label: AUTH_METHODS_LABELS.password,
   },
 };
 
