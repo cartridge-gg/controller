@@ -1,4 +1,9 @@
-export type ExternalWalletType = "argent" | "metamask" | "phantom" | "rabby";
+export type ExternalWalletType =
+  | "argent"
+  | "metamask"
+  | "phantom"
+  | "rabby"
+  | "base";
 export type ExternalPlatform =
   | "starknet"
   | "ethereum"
