@@ -9,4 +9,5 @@ export const AUTH_METHODS_LABELS: Record<AuthOption, string> = {
   discord: "Discord",
   walletconnect: "Wallet Connect",
   google: "Google",
+  base: "Base Wallet",
 };

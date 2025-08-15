@@ -1,5 +1,6 @@
 import { getAddress } from "ethers";
 import { ArgentWallet } from "./argent";
+import { BaseWallet } from "./base";
 import { MetaMaskWallet } from "./metamask";
 import { PhantomWallet } from "./phantom";
 import { RabbyWallet } from "./rabby";
@@ -31,6 +32,9 @@ export class WalletBridge {
 
     const rabby = new RabbyWallet();
     rabby.isAvailable() && this.walletAdapters.set("rabby", rabby);
+
+    const base = new BaseWallet();
+    base.isAvailable() && this.walletAdapters.set("base", base);
 
     window.wallet_bridge = this;
   }
