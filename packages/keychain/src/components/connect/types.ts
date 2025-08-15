@@ -68,7 +68,7 @@ export function credentialToAddress(
     eip191?: Array<{ ethAddress: string }>;
     siws?: Array<{ publicKey: string }>;
     starknet?: Array<{ publicKey: string }>;
-    Password?: Array<{ publicKey: string }>;
+    password?: Array<{ publicKey: string }>;
   };
   switch (signerAny.__typename as string) {
     case "Eip191Credentials":
@@ -80,10 +80,10 @@ export function credentialToAddress(
     case "WebauthnCredentials":
       return undefined;
     case "PasswordCredentials":
-      // Access the Password field
-      return signerAny.Password?.[0]?.publicKey;
+      // Access the password field (lowercase)
+      return signerAny.password?.[0]?.publicKey;
     default:
-      throw new Error("Unknown controller signer provider");
+      throw new Error("Unknown controller signer type");
   }
 }
 
