@@ -139,6 +139,15 @@ export const networkWalletData: NetworkWalletData = {
             enabled: true,
           },
         ],
+        [
+          "rabby",
+          {
+            type: "rabby",
+            name: "Rabby",
+            icon: React.createElement(RabbyColorIcon),
+            enabled: true,
+          },
+        ],
       ]),
     },
   ],

@@ -13,12 +13,13 @@ import { useEffect, useState } from "react";
 import { ExternalWallet } from "@cartridge/controller";
 import { useWallets } from "@/hooks/wallets";
 import { useConnection } from "@/hooks/connection";
+import { ErrorAlert } from "@/components/ErrorAlert";
 
 export function SelectWallet() {
   const { goBack, navigate } = useNavigation();
   const { platformId } = useParams();
   const { isMainnet } = useConnection();
-  const { onExternalConnect } = usePurchaseContext();
+  const { onExternalConnect, clearError, displayError } = usePurchaseContext();
   const { wallets, isLoading: isWalletConnecting } = useWallets();
   const [chainId, setChainId] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
@@ -52,6 +53,11 @@ export function SelectWallet() {
     setAvailableWallets(matchingWallets);
     setIsLoading(false);
   }, [wallets, isMainnet, selectedNetwork]);
+
+  useEffect(() => {
+    return () => clearError();
+  }, [clearError]);
+
 
   if (isLoading) {
     return <></>;
@@ -119,7 +125,11 @@ export function SelectWallet() {
           );
         })}
       </LayoutContent>
+     
       <LayoutFooter>
+        {displayError && (
+          <ErrorAlert title="Error" description={displayError.message} />
+        )}
         <Button
           variant="secondary"
           onClick={goBack}

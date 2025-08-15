@@ -28,6 +28,11 @@ export enum PurchaseType {
   STARTERPACK = "STARTERPACK",
 }
 
+export interface SendPaymentResult {
+  paymentId: string;
+  transactionHash?: string;
+}
+
 export const useCryptoPayment = () => {
   const { controller, isMainnet, externalSendTransaction } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -42,7 +47,7 @@ export const useCryptoPayment = () => {
       teamId?: string,
       starterpackId?: string,
       onSubmitted?: (explorer: Explorer) => void,
-    ): Promise<string> => {
+    ): Promise<SendPaymentResult> => {
       if (!controller) {
         throw new Error("Controller not connected");
       }
@@ -65,7 +70,24 @@ export const useCryptoPayment = () => {
           isMainnet,
         );
 
+        let transactionHash: string | undefined;
+
         switch (platform) {
+          case "ethereum":
+          case "arbitrum":
+          case "optimism":
+          case "base": {
+            const hash = await requestEvmPayment(
+              walletAddress,
+              walletType,
+              depositAddress,
+              parseInt(tokenAmount),
+              tokenAddress,
+            );
+            onSubmitted?.(getExplorer(platform, hash, isMainnet) as Explorer);
+            transactionHash = hash;
+            break;
+          }
           case "solana": {
             const { signature, confirmTransaction } =
               await requestPhantomPayment(
@@ -82,25 +104,12 @@ export const useCryptoPayment = () => {
             await confirmTransaction();
             break;
           }
-          case "arbitrum": {
-            const hash = await requestEvmPayment(
-              walletAddress,
-              walletType,
-              depositAddress,
-              parseInt(tokenAmount),
-              tokenAddress,
-            );
-            onSubmitted?.(
-              getExplorer(platform, hash as string, isMainnet) as Explorer,
-            );
-            break;
-          }
           default: {
             throw new Error(`Unsupported payment platform: ${platform}`);
           }
         }
 
-        return paymentId;
+        return { paymentId, transactionHash };
       } catch (err) {
         setError(err as Error);
         throw err;
@@ -131,7 +140,7 @@ export const useCryptoPayment = () => {
 
       switch (payment.status) {
         case "CONFIRMED":
-          return payment;
+          return true;
         case "FAILED":
           throw new Error(`Payment failed, ref id: ${paymentId}`);
         case "EXPIRED":
@@ -254,20 +263,29 @@ export const useCryptoPayment = () => {
     depositAddress: string,
     tokenAmount: number,
     tokenAddress: string,
-  ) {
+  ): Promise<string> {
     const iface = new ethers.Interface(erc20abi);
     const data = iface.encodeFunctionData("transfer", [
       depositAddress,
       tokenAmount,
     ]);
 
-    const res = await externalSendTransaction(walletType, {
+    const {
+      success,
+      result: hash,
+      error,
+    } = await externalSendTransaction(walletType, {
       from: walletAddress,
       to: tokenAddress,
       data,
       value: "0x0", // ERC-20 transfer sends no ETH
     });
-    return res.result;
+
+    if (!success) {
+      throw new Error(error);
+    }
+
+    return hash as string;
   }
 
   return {

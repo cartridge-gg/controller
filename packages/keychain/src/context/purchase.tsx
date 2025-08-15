@@ -55,6 +55,7 @@ export interface PurchaseContextType {
   selectedWallet?: ExternalWallet;
   walletAddress?: string;
   wallets?: ExternalWallet[];
+  transactionHash?: string;
   paymentId?: string;
   explorer?: Explorer;
 
@@ -83,6 +84,7 @@ export interface PurchaseContextType {
     wallet: ExternalWallet,
     chainId?: string,
   ) => Promise<void>;
+  waitForPayment: (paymentId: string) => Promise<boolean>;
 }
 
 const PurchaseContext = createContext<PurchaseContextType | undefined>(
@@ -112,6 +114,7 @@ export const PurchaseProvider = ({
     error: cryptoError,
     isLoading: isCryptoLoading,
     sendPayment,
+    waitForPayment,
   } = useCryptoPayment();
 
   const [paymentMethod, setPaymentMethod] = useState<
@@ -122,6 +125,7 @@ export const PurchaseProvider = ({
   const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
   const [paymentId, setPaymentId] = useState<string | undefined>();
   const [explorer, setExplorer] = useState<Explorer | undefined>();
+  const [transactionHash, setTransactionHash] = useState<string | undefined>();
 
   const [walletAddress, setWalletAddress] = useState<string>();
   const [walletType, setWalletType] = useState<ExternalWalletType>();
@@ -157,6 +161,7 @@ export const PurchaseProvider = ({
       setCostDetails(paymentIntent.pricing);
     } catch (e) {
       setDisplayError(e as Error);
+      throw e;
     }
   }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
@@ -169,19 +174,25 @@ export const PurchaseProvider = ({
     )
       return;
 
-    setPaymentMethod("crypto");
-    const paymentId = await sendPayment(
-      walletAddress,
-      walletType,
-      selectedWallet.platform,
-      usdToCredits(usdAmount),
-      undefined,
-      starterpackId,
-      (explorer) => {
-        setExplorer(explorer);
-      },
-    );
-    setPaymentId(paymentId);
+    try {
+      setPaymentMethod("crypto");
+      const { paymentId, transactionHash } = await sendPayment(
+        walletAddress,
+        walletType,
+        selectedWallet.platform,
+        usdToCredits(usdAmount),
+        undefined,
+        starterpackId,
+        (explorer) => {
+          setExplorer(explorer);
+        },
+      );
+      setPaymentId(paymentId);
+      setTransactionHash(transactionHash);
+    } catch (e) {
+      setDisplayError(e as Error);
+      throw e;
+    }
   }, [
     controller,
     selectedWallet,
@@ -194,26 +205,26 @@ export const PurchaseProvider = ({
   const onExternalConnect = useCallback(
     async (wallet: ExternalWallet, chainId?: string | number) => {
       setSelectedWallet(wallet);
-
       if (chainId) {
+        console.log({wallet, chainId})
         const res = await switchChain(wallet.type, chainId.toString());
         if (!res) {
-          setDisplayError(
-            new Error(`Failed to switch chain for ${wallet.name}`),
+          const error = new Error(
+            `${wallet.name} failed to switch chain (${chainId})`,
           );
-          return;
+          setDisplayError(error);
+          throw error;
         }
       }
 
       const res = await connectWallet(wallet.type);
       if (res?.success) {
         if (!res.account) {
-          setDisplayError(
-            new Error(
-              `Connected to ${wallet.name} but no wallet address found`,
-            ),
+          const error = new Error(
+            `Connected to ${wallet.name} but no wallet address found`,
           );
-          return;
+          setDisplayError(error);
+          throw error;
         }
         setWalletAddress(res.account);
         setWalletType(wallet.type);
@@ -232,6 +243,7 @@ export const PurchaseProvider = ({
     paymentMethod,
     selectedWallet,
     walletAddress,
+    transactionHash,
     paymentId,
     explorer,
 
@@ -257,6 +269,7 @@ export const PurchaseProvider = ({
     onCreditCard,
     onCrypto,
     onExternalConnect,
+    waitForPayment,
   };
 
   return (
