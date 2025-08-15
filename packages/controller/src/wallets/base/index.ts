@@ -123,7 +123,7 @@ export class BaseWallet implements WalletAdapter {
 
       const result = await this.provider?.provider.request({
         method: "personal_sign",
-        params: [address || this.account, message] as any,
+        params: [message, address || this.account] as any,
       });
 
       return { success: true, wallet: this.type, result };
