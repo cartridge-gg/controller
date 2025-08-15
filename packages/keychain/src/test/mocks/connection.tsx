@@ -47,6 +47,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   externalSignTypedData: vi.fn(),
   externalSendTransaction: vi.fn(),
   externalGetBalance: vi.fn(),
+  externalWaitForTransaction: vi.fn(),
   controllerVersion: new SemVer("1.0.0"),
 };
 
