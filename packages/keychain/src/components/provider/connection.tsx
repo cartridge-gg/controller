@@ -61,6 +61,11 @@ export type ConnectionContextValue = {
     identifier: string,
     tokenAddress?: string,
   ) => Promise<ExternalWalletResponse>;
+  externalWaitForTransaction: (
+    identifier: string,
+    txHash: string,
+    timeoutMs?: number,
+  ) => Promise<ExternalWalletResponse>;
 };
 
 export type VerifiableControllerTheme = ControllerTheme & {

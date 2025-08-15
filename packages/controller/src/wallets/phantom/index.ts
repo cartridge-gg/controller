@@ -177,4 +177,15 @@ export class PhantomWallet implements WalletAdapter {
       };
     }
   }
+
+  async waitForTransaction(
+    _txHash: string,
+    _timeoutMs?: number,
+  ): Promise<ExternalWalletResponse<any>> {
+    return {
+      success: false,
+      wallet: this.type,
+      error: "waitForTransaction not supported for Phantom wallet",
+    };
+  }
 }

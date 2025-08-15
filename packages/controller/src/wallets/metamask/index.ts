@@ -288,4 +288,50 @@ export class MetaMaskWallet implements WalletAdapter {
       };
     }
   }
+
+  async waitForTransaction(
+    txHash: string,
+    timeoutMs: number = 60000,
+  ): Promise<ExternalWalletResponse<any>> {
+    try {
+      if (!this.isAvailable()) {
+        throw new Error("MetaMask is not connected");
+      }
+
+      const provider = this.MMSDK.getProvider();
+      if (!provider) {
+        throw new Error("MetaMask is not connected");
+      }
+
+      const startTime = Date.now();
+      const pollInterval = 1000; // 1 second
+
+      while (Date.now() - startTime < timeoutMs) {
+        const receipt = await provider.request({
+          method: "eth_getTransactionReceipt",
+          params: [txHash],
+        });
+
+        if (receipt) {
+          return {
+            success: true,
+            wallet: this.type,
+            result: receipt,
+          };
+        }
+
+        // Wait before polling again
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
+      }
+
+      throw new Error("Transaction confirmation timed out");
+    } catch (error) {
+      console.error(`Error waiting for transaction with MetaMask:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
+  }
 }

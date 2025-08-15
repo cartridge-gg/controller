@@ -88,6 +88,11 @@ export type ParentMethods = AsyncMethodReturns<{
     identifier: string,
     chainId: string,
   ) => Promise<boolean>;
+  externalWaitForTransaction: (
+    identifier: string,
+    txHash: string,
+    timeoutMs?: number,
+  ) => Promise<ExternalWalletResponse>;
 }>;
 
 /**
@@ -461,6 +466,8 @@ export function useConnectionValue() {
           iframeMethods.externalSendTransaction(currentOrigin),
         externalGetBalance: iframeMethods.externalGetBalance(currentOrigin),
         externalSwitchChain: iframeMethods.externalSwitchChain(currentOrigin),
+        externalWaitForTransaction:
+          iframeMethods.externalWaitForTransaction(currentOrigin),
       });
     }
   }, [setOrigin, setRpcUrl, setContext, setController, setConfigSignupOptions]);
@@ -588,6 +595,16 @@ export function useConnectionValue() {
     [parent],
   );
 
+  const externalWaitForTransaction = useCallback(
+    (identifier: string, txHash: string, timeoutMs?: number) => {
+      if (!parent) {
+        return Promise.reject(new Error("Parent connection not ready."));
+      }
+      return parent.externalWaitForTransaction(identifier, txHash, timeoutMs);
+    },
+    [parent],
+  );
+
   return {
     parent,
     context,
@@ -616,6 +633,7 @@ export function useConnectionValue() {
     externalSignTypedData,
     externalSendTransaction,
     externalGetBalance,
+    externalWaitForTransaction,
   };
 }
 
