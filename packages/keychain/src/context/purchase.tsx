@@ -6,7 +6,11 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { ExternalWallet, ExternalWalletType } from "@cartridge/controller";
+import {
+  ExternalPlatform,
+  ExternalWallet,
+  ExternalWalletType,
+} from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -53,6 +57,7 @@ export interface PurchaseContextType {
   // Payment state
   paymentMethod?: PaymentMethod;
   selectedWallet?: ExternalWallet;
+  selectedPlatform?: ExternalPlatform;
   walletAddress?: string;
   wallets?: ExternalWallet[];
   transactionHash?: string;
@@ -82,6 +87,7 @@ export interface PurchaseContextType {
   onCrypto: () => Promise<void>;
   onExternalConnect: (
     wallet: ExternalWallet,
+    platform: ExternalPlatform,
     chainId?: string,
   ) => Promise<void>;
   waitForPayment: (paymentId: string) => Promise<boolean>;
@@ -132,6 +138,9 @@ export const PurchaseProvider = ({
   const [selectedWallet, setSelectedWallet] = useState<
     ExternalWallet | undefined
   >();
+  const [selectedPlatform, setSelectedPlatform] = useState<
+    ExternalPlatform | undefined
+  >();
 
   const [clientSecret, setClientSecret] = useState<string | undefined>();
   const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
@@ -166,12 +175,7 @@ export const PurchaseProvider = ({
   }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
   const onCrypto = useCallback(async () => {
-    if (
-      !controller ||
-      !selectedWallet?.platform ||
-      !walletAddress ||
-      !walletType
-    )
+    if (!controller || !selectedPlatform || !walletAddress || !walletType)
       return;
 
     try {
@@ -179,7 +183,7 @@ export const PurchaseProvider = ({
       const { paymentId, transactionHash } = await sendPayment(
         walletAddress,
         walletType,
-        selectedWallet.platform,
+        selectedPlatform,
         usdToCredits(usdAmount),
         undefined,
         starterpackId,
@@ -195,7 +199,7 @@ export const PurchaseProvider = ({
     }
   }, [
     controller,
-    selectedWallet,
+    selectedPlatform,
     walletAddress,
     walletType,
     starterpackId,
@@ -203,8 +207,13 @@ export const PurchaseProvider = ({
   ]);
 
   const onExternalConnect = useCallback(
-    async (wallet: ExternalWallet, chainId?: string | number) => {
+    async (
+      wallet: ExternalWallet,
+      platform: ExternalPlatform,
+      chainId?: string | number,
+    ) => {
       setSelectedWallet(wallet);
+      setSelectedPlatform(platform);
       if (chainId) {
         const res = await switchChain(wallet.type, chainId.toString());
         if (!res) {
@@ -241,6 +250,7 @@ export const PurchaseProvider = ({
     // Payment state
     paymentMethod,
     selectedWallet,
+    selectedPlatform,
     walletAddress,
     transactionHash,
     paymentId,

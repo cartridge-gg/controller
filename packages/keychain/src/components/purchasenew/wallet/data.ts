@@ -51,17 +51,6 @@ const evmWallets = new Map<string, Wallet>([
   ],
 ]);
 
-const evmChains = [
-  {
-    chainId: "0xA4B1",
-    isMainnet: true,
-  },
-  {
-    chainId: "0x66EEE",
-    isMainnet: false,
-  },
-];
-
 export const networkWalletData: NetworkWalletData = {
   networks: [
     {

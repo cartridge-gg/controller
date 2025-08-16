@@ -240,17 +240,6 @@ export function useConnectionValue() {
     };
   }, [searchParams]);
 
-  // const isMainnet = useMemo(() => {
-  //   if (
-  //     import.meta.env.PROD &&
-  //     controller?.chainId() === constants.StarknetChainId.SN_MAIN
-  //   ) {
-  //     return true;
-  //   }
-
-  //   return false;
-  // }, [controller]);
-
   // Fetch chain ID from RPC provider when rpcUrl changes
   useEffect(() => {
     const fetchChainId = async () => {

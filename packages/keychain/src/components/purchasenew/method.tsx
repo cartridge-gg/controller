@@ -1,6 +1,5 @@
 import { useNavigation, usePurchaseContext } from "@/context";
 import {
-  Button,
   CreditCardIcon,
   DepositIcon,
   HeaderInner,
@@ -13,7 +12,7 @@ import { useState } from "react";
 import { ErrorAlert } from "../ErrorAlert";
 
 export function PaymentMethod() {
-  const { goBack, navigate } = useNavigation();
+  const { navigate } = useNavigation();
   const { onCreditCard, displayError } = usePurchaseContext();
   const [isLoading, setIsLoading] = useState(false);
 

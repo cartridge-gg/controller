@@ -20,6 +20,7 @@ export function CryptoCheckout() {
     isCryptoLoading,
     displayError,
     selectedWallet,
+    selectedPlatform,
     onCrypto,
     clearError,
   } = usePurchaseContext();
@@ -47,7 +48,7 @@ export function CryptoCheckout() {
         <CostBreakdown
           rails={"crypto"}
           paymentUnit="usdc"
-          platform={selectedWallet?.platform}
+          platform={selectedPlatform}
           walletType={selectedWallet?.type}
           costDetails={{
             baseCostInCents: usdAmount * 100,

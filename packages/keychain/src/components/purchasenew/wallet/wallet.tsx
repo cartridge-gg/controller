@@ -114,7 +114,11 @@ export function SelectWallet() {
               network={selectedNetwork.name}
               networkIcon={selectedNetwork.subIcon}
               onClick={async () => {
-                await onExternalConnect(wallet, chainId);
+                await onExternalConnect(
+                  wallet,
+                  selectedNetwork.platform,
+                  chainId,
+                );
                 navigate(`/purchase/checkout/crypto`);
               }}
               className={
