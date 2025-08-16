@@ -6,7 +6,11 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { ExternalWallet } from "@cartridge/controller";
+import {
+  ExternalPlatform,
+  ExternalWallet,
+  ExternalWalletType,
+} from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -53,8 +57,10 @@ export interface PurchaseContextType {
   // Payment state
   paymentMethod?: PaymentMethod;
   selectedWallet?: ExternalWallet;
+  selectedPlatform?: ExternalPlatform;
   walletAddress?: string;
   wallets?: ExternalWallet[];
+  transactionHash?: string;
   paymentId?: string;
   explorer?: Explorer;
 
@@ -65,11 +71,11 @@ export interface PurchaseContextType {
 
   // Loading states
   isStripeLoading: boolean;
-  isWalletConnecting: boolean;
   isCryptoLoading: boolean;
 
   // Error state
   displayError?: Error;
+  clearError: () => void;
 
   // Actions
   setUsdAmount: (amount: number) => void;
@@ -79,7 +85,12 @@ export interface PurchaseContextType {
   // Payment actions
   onCreditCard: () => Promise<void>;
   onCrypto: () => Promise<void>;
-  onExternalConnect: (wallet: ExternalWallet) => Promise<void>;
+  onExternalConnect: (
+    wallet: ExternalWallet,
+    platform: ExternalPlatform,
+    chainId?: string,
+  ) => Promise<void>;
+  waitForPayment: (paymentId: string) => Promise<boolean>;
 }
 
 const PurchaseContext = createContext<PurchaseContextType | undefined>(
@@ -96,12 +107,7 @@ export const PurchaseProvider = ({
   isSlot = false,
 }: PurchaseProviderProps) => {
   const { controller } = useConnection();
-  const {
-    wallets,
-    error: walletError,
-    isConnecting: isWalletConnecting,
-    connectWallet,
-  } = useWallets();
+  const { error: walletError, connectWallet, switchChain } = useWallets();
 
   const {
     stripePromise,
@@ -114,9 +120,9 @@ export const PurchaseProvider = ({
     error: cryptoError,
     isLoading: isCryptoLoading,
     sendPayment,
+    waitForPayment,
   } = useCryptoPayment();
 
-  // State
   const [paymentMethod, setPaymentMethod] = useState<
     PaymentMethod | undefined
   >();
@@ -125,10 +131,15 @@ export const PurchaseProvider = ({
   const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
   const [paymentId, setPaymentId] = useState<string | undefined>();
   const [explorer, setExplorer] = useState<Explorer | undefined>();
+  const [transactionHash, setTransactionHash] = useState<string | undefined>();
 
   const [walletAddress, setWalletAddress] = useState<string>();
+  const [walletType, setWalletType] = useState<ExternalWalletType>();
   const [selectedWallet, setSelectedWallet] = useState<
     ExternalWallet | undefined
+  >();
+  const [selectedPlatform, setSelectedPlatform] = useState<
+    ExternalPlatform | undefined
   >();
 
   const [clientSecret, setClientSecret] = useState<string | undefined>();
@@ -139,6 +150,10 @@ export const PurchaseProvider = ({
   useEffect(() => {
     setDisplayError(stripeError || walletError || cryptoError || undefined);
   }, [stripeError, walletError, cryptoError]);
+
+  const clearError = useCallback(() => {
+    setDisplayError(undefined);
+  }, []);
 
   const onCreditCard = useCallback(async () => {
     if (!controller) return;
@@ -155,40 +170,72 @@ export const PurchaseProvider = ({
       setCostDetails(paymentIntent.pricing);
     } catch (e) {
       setDisplayError(e as Error);
+      throw e;
     }
   }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
   const onCrypto = useCallback(async () => {
-    if (!controller || !selectedWallet?.platform || !walletAddress) return;
+    if (!controller || !selectedPlatform || !walletAddress || !walletType)
+      return;
 
-    setPaymentMethod("crypto");
-    const paymentId = await sendPayment(
-      walletAddress,
-      usdToCredits(usdAmount),
-      selectedWallet.platform,
-      undefined,
-      starterpackId,
-      (explorer) => {
-        setExplorer(explorer);
-      },
-    );
-    setPaymentId(paymentId);
-  }, [controller, selectedWallet, walletAddress, starterpackId, sendPayment]);
+    try {
+      setPaymentMethod("crypto");
+      const { paymentId, transactionHash } = await sendPayment(
+        walletAddress,
+        walletType,
+        selectedPlatform,
+        usdToCredits(usdAmount),
+        undefined,
+        starterpackId,
+        (explorer) => {
+          setExplorer(explorer);
+        },
+      );
+      setPaymentId(paymentId);
+      setTransactionHash(transactionHash);
+    } catch (e) {
+      setDisplayError(e as Error);
+      throw e;
+    }
+  }, [
+    controller,
+    selectedPlatform,
+    walletAddress,
+    walletType,
+    starterpackId,
+    sendPayment,
+  ]);
 
   const onExternalConnect = useCallback(
-    async (wallet: ExternalWallet) => {
+    async (
+      wallet: ExternalWallet,
+      platform: ExternalPlatform,
+      chainId?: string | number,
+    ) => {
       setSelectedWallet(wallet);
+      setSelectedPlatform(platform);
+      if (chainId) {
+        const res = await switchChain(wallet.type, chainId.toString());
+        if (!res) {
+          const error = new Error(
+            `${wallet.name} failed to switch chain (${chainId})`,
+          );
+          setDisplayError(error);
+          throw error;
+        }
+      }
+
       const res = await connectWallet(wallet.type);
       if (res?.success) {
         if (!res.account) {
-          setDisplayError(
-            new Error(
-              `Connected to ${wallet.name} but no wallet address found`,
-            ),
+          const error = new Error(
+            `Connected to ${wallet.name} but no wallet address found`,
           );
-          return;
+          setDisplayError(error);
+          throw error;
         }
         setWalletAddress(res.account);
+        setWalletType(wallet.type);
       }
     },
     [connectWallet],
@@ -203,8 +250,9 @@ export const PurchaseProvider = ({
     // Payment state
     paymentMethod,
     selectedWallet,
+    selectedPlatform,
     walletAddress,
-    wallets,
+    transactionHash,
     paymentId,
     explorer,
 
@@ -215,11 +263,11 @@ export const PurchaseProvider = ({
 
     // Loading states
     isStripeLoading,
-    isWalletConnecting,
     isCryptoLoading,
 
     // Error state
     displayError,
+    clearError,
 
     // Setters
     setUsdAmount,
@@ -230,6 +278,7 @@ export const PurchaseProvider = ({
     onCreditCard,
     onCrypto,
     onExternalConnect,
+    waitForPayment,
   };
 
   return (

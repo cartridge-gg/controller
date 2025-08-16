@@ -2,10 +2,17 @@ import { Elements } from "@stripe/react-stripe-js";
 import { type Appearance } from "@stripe/stripe-js";
 import CheckoutForm from "./form";
 import { useNavigation, usePurchaseContext } from "@/context";
+import { useEffect } from "react";
 
 export function StripeCheckout() {
-  const { stripePromise, clientSecret, costDetails } = usePurchaseContext();
+  const { stripePromise, clientSecret, costDetails, clearError } =
+    usePurchaseContext();
   const { navigate } = useNavigation();
+
+  useEffect(() => {
+    clearError();
+    return () => clearError();
+  }, [clearError]);
 
   const appearance = {
     theme: "flat",

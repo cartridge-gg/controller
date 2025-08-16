@@ -28,6 +28,7 @@ export type ConnectionContextValue = {
   policies?: ParsedSessionPolicies;
   theme: VerifiableControllerTheme;
   isConfigLoading: boolean;
+  isMainnet: boolean;
   configSignupOptions?: AuthOptions;
   verified: boolean;
   chainId?: string;

@@ -1,14 +1,14 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import {
-  CreateCryptoPaymentDocument,
-  CreateCryptoPaymentMutation,
-  Network,
+  CreateLayerswapPaymentDocument,
+  CreateLayerswapPaymentMutation,
+  LayerswapNetwork,
   CryptoPaymentQuery,
   CryptoPaymentDocument,
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
-import { ExternalPlatform } from "@cartridge/controller";
+import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 import {
   clusterApiUrl,
   Connection,
@@ -20,38 +20,34 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
-import { constants } from "starknet";
+import { ethers } from "ethers";
+import erc20abi from "./erc20abi.json" assert { type: "json" };
 
 export enum PurchaseType {
   CREDITS = "CREDITS",
   STARTERPACK = "STARTERPACK",
 }
 
+export interface SendPaymentResult {
+  paymentId: string;
+  transactionHash?: string;
+}
+
 export const useCryptoPayment = () => {
-  const { controller, externalSendTransaction } = useConnection();
+  const { controller, isMainnet, externalSendTransaction } = useConnection();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-
-  const isMainnet = useMemo(() => {
-    if (
-      import.meta.env.PROD &&
-      controller?.chainId() === constants.StarknetChainId.SN_MAIN
-    ) {
-      return true;
-    }
-
-    return false;
-  }, [controller]);
 
   const sendPayment = useCallback(
     async (
       walletAddress: string,
-      wholeCredits: number,
+      walletType: ExternalWalletType,
       platform: ExternalPlatform,
+      wholeCredits: number,
       teamId?: string,
       starterpackId?: string,
       onSubmitted?: (explorer: Explorer) => void,
-    ): Promise<string> => {
+    ): Promise<SendPaymentResult> => {
       if (!controller) {
         throw new Error("Controller not connected");
       }
@@ -67,14 +63,31 @@ export const useCryptoPayment = () => {
           tokenAddress,
         } = await createCryptoPayment(
           controller.username(),
-          wholeCredits,
           platform,
+          wholeCredits,
           teamId,
           starterpackId,
           isMainnet,
         );
 
+        let transactionHash: string | undefined;
+
         switch (platform) {
+          case "ethereum":
+          case "arbitrum":
+          case "optimism":
+          case "base": {
+            const hash = await requestEvmPayment(
+              walletAddress,
+              walletType,
+              depositAddress,
+              parseInt(tokenAmount),
+              tokenAddress,
+            );
+            onSubmitted?.(getExplorer(platform, hash, isMainnet) as Explorer);
+            transactionHash = hash;
+            break;
+          }
           case "solana": {
             const { signature, confirmTransaction } =
               await requestPhantomPayment(
@@ -91,15 +104,12 @@ export const useCryptoPayment = () => {
             await confirmTransaction();
             break;
           }
-          case "ethereum": {
-            throw new Error("Ethereum not supported yet");
-          }
-          case "starknet": {
-            throw new Error("Starknet not supported yet");
+          default: {
+            throw new Error(`Unsupported payment platform: ${platform}`);
           }
         }
 
-        return paymentId;
+        return { paymentId, transactionHash };
       } catch (err) {
         setError(err as Error);
         throw err;
@@ -130,7 +140,7 @@ export const useCryptoPayment = () => {
 
       switch (payment.status) {
         case "CONFIRMED":
-          return payment;
+          return true;
         case "FAILED":
           throw new Error(`Payment failed, ref id: ${paymentId}`);
         case "EXPIRED":
@@ -148,14 +158,14 @@ export const useCryptoPayment = () => {
 
   async function createCryptoPayment(
     username: string,
-    wholeCredits: number,
     platform: ExternalPlatform,
+    wholeCredits: number,
     teamId?: string,
     starterpackId?: string,
     isMainnet: boolean = false,
   ) {
-    const result = await client.request<CreateCryptoPaymentMutation>(
-      CreateCryptoPaymentDocument,
+    const result = await client.request<CreateLayerswapPaymentMutation>(
+      CreateLayerswapPaymentDocument,
       {
         input: {
           username,
@@ -163,7 +173,7 @@ export const useCryptoPayment = () => {
             amount: wholeCredits,
             decimals: 0,
           },
-          network: platform.toUpperCase() as Network,
+          sourceNetwork: mapPlatformToLayerswapNetwork(platform),
           purchaseType: starterpackId
             ? PurchaseType.STARTERPACK
             : PurchaseType.CREDITS,
@@ -174,7 +184,13 @@ export const useCryptoPayment = () => {
       },
     );
 
-    return result.createCryptoPayment;
+    return {
+      id: result.createLayerswapPayment.cryptoPaymentId,
+      depositAddress: result.createLayerswapPayment.sourceDepositAddress,
+      tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
+      tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
+      swapId: result.createLayerswapPayment.swapId,
+    };
   }
 
   async function requestPhantomPayment(
@@ -239,6 +255,37 @@ export const useCryptoPayment = () => {
         await pollForFinalization(connection, signature);
       },
     };
+  }
+
+  async function requestEvmPayment(
+    walletAddress: string,
+    walletType: ExternalWalletType,
+    depositAddress: string,
+    tokenAmount: number,
+    tokenAddress: string,
+  ): Promise<string> {
+    const iface = new ethers.Interface(erc20abi);
+    const data = iface.encodeFunctionData("transfer", [
+      depositAddress,
+      tokenAmount,
+    ]);
+
+    const {
+      success,
+      result: hash,
+      error,
+    } = await externalSendTransaction(walletType, {
+      from: walletAddress,
+      to: tokenAddress,
+      data,
+      value: "0x0", // ERC-20 transfer sends no ETH
+    });
+
+    if (!success) {
+      throw new Error(error);
+    }
+
+    return hash as string;
   }
 
   return {
@@ -309,7 +356,34 @@ const getExplorer = (
           ? `https://voyager.online/tx/${txHash}`
           : `https://goerli.voyager.online/tx/${txHash}`,
       };
+    case "arbitrum":
+      return {
+        name: "Arbitrum Explorer",
+        url: isMainnet
+          ? `https://arbiscan.io/tx/${txHash}`
+          : `https://sepolia.arbiscan.io/tx/${txHash}`,
+      };
     default:
       throw new Error(`Unsupported platform: ${platform}`);
   }
 };
+
+function mapPlatformToLayerswapNetwork(
+  platform: ExternalPlatform,
+): LayerswapNetwork {
+  switch (platform) {
+    case "solana":
+      return LayerswapNetwork.Solana;
+    case "ethereum":
+      return LayerswapNetwork.Ethereum;
+    case "base":
+      return LayerswapNetwork.Base;
+    case "arbitrum":
+      return LayerswapNetwork.Arbitrum;
+    case "optimism":
+      return LayerswapNetwork.Optimism;
+    // Starknet supported natively
+    default:
+      throw new Error(`Unsupported platform: ${platform}`);
+  }
+}
