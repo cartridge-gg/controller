@@ -5,6 +5,8 @@ import {
   LayerswapNetwork,
   CryptoPaymentQuery,
   CryptoPaymentDocument,
+  LayerswapQuoteQuery,
+  LayerswapQuoteDocument,
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
@@ -46,6 +48,7 @@ export const useCryptoPayment = () => {
       wholeCredits: number,
       teamId?: string,
       starterpackId?: string,
+      layerswapFees?: string,
       onSubmitted?: (explorer: Explorer) => void,
     ): Promise<SendPaymentResult> => {
       if (!controller) {
@@ -67,6 +70,7 @@ export const useCryptoPayment = () => {
           wholeCredits,
           teamId,
           starterpackId,
+          layerswapFees,
           isMainnet,
         );
 
@@ -120,8 +124,41 @@ export const useCryptoPayment = () => {
     [controller, externalSendTransaction, isMainnet],
   );
 
+  const quotePaymentFees = useCallback(
+    async (
+      username: string,
+      platform: ExternalPlatform,
+      wholeCredits: number,
+      teamId?: string,
+      starterpackId?: string,
+    ) => {
+      const result = await client.request<LayerswapQuoteQuery>(
+        LayerswapQuoteDocument,
+        {
+          input: {
+            username,
+            credits: {
+              amount: wholeCredits,
+              decimals: 0,
+            },
+            sourceNetwork: mapPlatformToLayerswapNetwork(platform),
+            purchaseType: starterpackId
+              ? PurchaseType.STARTERPACK
+              : PurchaseType.CREDITS,
+            starterpackId,
+            teamId,
+            isMainnet,
+          },
+        },
+      );
+
+      return result.layerswapQuote;
+    },
+    [isMainnet],
+  );
+
   const waitForPayment = useCallback(async (paymentId: string) => {
-    const MAX_WAIT_TIME = 60 * 1000; // 1 minute
+    const MAX_WAIT_TIME = 10 * 60 * 1000; // 10 minutes
     const POLL_INTERVAL = 3000; // 3 seconds
     const startTime = Date.now();
 
@@ -152,7 +189,7 @@ export const useCryptoPayment = () => {
     }
 
     throw new Error(
-      `Payment confirmation timed out after 1 minute, ref id: ${paymentId}`,
+      `Payment confirmation timed out after 10 minutes, ref id: ${paymentId}`,
     );
   }, []);
 
@@ -162,6 +199,7 @@ export const useCryptoPayment = () => {
     wholeCredits: number,
     teamId?: string,
     starterpackId?: string,
+    layerswapFees?: string,
     isMainnet: boolean = false,
   ) {
     const result = await client.request<CreateLayerswapPaymentMutation>(
@@ -178,6 +216,7 @@ export const useCryptoPayment = () => {
             ? PurchaseType.STARTERPACK
             : PurchaseType.CREDITS,
           starterpackId,
+          layerswapFees,
           teamId,
           isMainnet,
         },
@@ -290,6 +329,7 @@ export const useCryptoPayment = () => {
 
   return {
     sendPayment,
+    quotePaymentFees,
     waitForPayment,
     isLoading,
     error,

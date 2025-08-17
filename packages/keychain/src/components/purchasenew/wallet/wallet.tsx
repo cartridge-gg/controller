@@ -19,10 +19,11 @@ export function SelectWallet() {
   const { goBack, navigate } = useNavigation();
   const { platformId } = useParams();
   const { isMainnet } = useConnection();
-  const { onExternalConnect, clearError, displayError } = usePurchaseContext();
-  const { wallets, isLoading: isWalletConnecting } = useWallets();
+  const { onExternalConnect, clearError } = usePurchaseContext();
+  const { wallets, isConnecting: isWalletConnecting } = useWallets();
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [chainId, setChainId] = useState<string>();
-  const [isLoading, setIsLoading] = useState(true);
   const [availableWallets, setAvailableWallets] = useState<ExternalWallet[]>(
     [],
   );
@@ -33,7 +34,6 @@ export function SelectWallet() {
   useEffect(() => {
     if (!selectedNetwork || !wallets) {
       setAvailableWallets([]);
-      setIsLoading(false);
       return;
     }
 
@@ -51,16 +51,11 @@ export function SelectWallet() {
 
     setChainId(chainId);
     setAvailableWallets(matchingWallets);
-    setIsLoading(false);
   }, [wallets, isMainnet, selectedNetwork]);
 
   useEffect(() => {
     return () => clearError();
   }, [clearError]);
-
-  if (isLoading) {
-    return <></>;
-  }
 
   if (!selectedNetwork) {
     return (
@@ -114,15 +109,24 @@ export function SelectWallet() {
               network={selectedNetwork.name}
               networkIcon={selectedNetwork.subIcon}
               onClick={async () => {
-                await onExternalConnect(
-                  wallet,
-                  selectedNetwork.platform,
-                  chainId,
-                );
+                setIsLoading(true);
+                try {
+                  await onExternalConnect(
+                    wallet,
+                    selectedNetwork.platform,
+                    chainId,
+                  );
+                } catch (e) {
+                  setError(e as Error);
+                } finally {
+                  setIsLoading(false);
+                }
                 navigate(`/purchase/checkout/crypto`);
               }}
               className={
-                isWalletConnecting ? "opacity-50 pointer-events-none" : ""
+                isWalletConnecting || isLoading
+                  ? "opacity-50 pointer-events-none"
+                  : ""
               }
             />
           );
@@ -130,9 +134,7 @@ export function SelectWallet() {
       </LayoutContent>
 
       <LayoutFooter>
-        {displayError && (
-          <ErrorAlert title="Error" description={displayError.message} />
-        )}
+        {error && <ErrorAlert title="Error" description={error.message} />}
       </LayoutFooter>
     </>
   );

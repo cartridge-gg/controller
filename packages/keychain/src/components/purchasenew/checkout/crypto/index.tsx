@@ -11,16 +11,14 @@ import { CostBreakdown } from "../../review/cost";
 import { useCallback, useEffect } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
-const CARTRIDGE_FEE = 0.025;
-
 export function CryptoCheckout() {
   const {
     purchaseItems,
-    usdAmount,
     isCryptoLoading,
     displayError,
     selectedWallet,
     selectedPlatform,
+    costDetails,
     onCrypto,
     clearError,
   } = usePurchaseContext();
@@ -50,11 +48,7 @@ export function CryptoCheckout() {
           paymentUnit="usdc"
           platform={selectedPlatform}
           walletType={selectedWallet?.type}
-          costDetails={{
-            baseCostInCents: usdAmount * 100,
-            processingFeeInCents: usdAmount * 100 * CARTRIDGE_FEE,
-            totalInCents: usdAmount * 100 * (1 + CARTRIDGE_FEE),
-          }}
+          costDetails={costDetails}
         />
         {displayError && (
           <ErrorAlert title="Error" description={displayError.message} />

@@ -19,6 +19,8 @@ import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
 
+const CARTRIDGE_FEE = 0.025;
+
 export interface CostDetails {
   baseCostInCents: number;
   processingFeeInCents: number;
@@ -120,6 +122,7 @@ export const PurchaseProvider = ({
     error: cryptoError,
     isLoading: isCryptoLoading,
     sendPayment,
+    quotePaymentFees,
     waitForPayment,
   } = useCryptoPayment();
 
@@ -127,6 +130,7 @@ export const PurchaseProvider = ({
     PaymentMethod | undefined
   >();
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
+  const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
   const [starterpackId, setStarterpackId] = useState<string | undefined>();
   const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
   const [paymentId, setPaymentId] = useState<string | undefined>();
@@ -175,7 +179,13 @@ export const PurchaseProvider = ({
   }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
   const onCrypto = useCallback(async () => {
-    if (!controller || !selectedPlatform || !walletAddress || !walletType)
+    if (
+      !controller ||
+      !selectedPlatform ||
+      !walletAddress ||
+      !walletType ||
+      !layerswapFees
+    )
       return;
 
     try {
@@ -187,6 +197,7 @@ export const PurchaseProvider = ({
         usdToCredits(usdAmount),
         undefined,
         starterpackId,
+        layerswapFees,
         (explorer) => {
           setExplorer(explorer);
         },
@@ -203,6 +214,7 @@ export const PurchaseProvider = ({
     walletAddress,
     walletType,
     starterpackId,
+    layerswapFees,
     sendPayment,
   ]);
 
@@ -212,6 +224,8 @@ export const PurchaseProvider = ({
       platform: ExternalPlatform,
       chainId?: string | number,
     ) => {
+      if (!controller) return;
+
       setSelectedWallet(wallet);
       setSelectedPlatform(platform);
       if (chainId) {
@@ -237,8 +251,29 @@ export const PurchaseProvider = ({
         setWalletAddress(res.account);
         setWalletType(wallet.type);
       }
+
+      const quote = await quotePaymentFees(
+        controller.username(),
+        platform,
+        usdToCredits(usdAmount),
+        undefined,
+        starterpackId,
+      );
+
+      const amountInCents = usdAmount * 100;
+      const cartridgeFees = amountInCents * CARTRIDGE_FEE;
+      const layerswapFeesInCents = Number(quote.totalFees) / 1e4;
+      const totalFeesInCents = cartridgeFees + layerswapFeesInCents;
+      const totalInCents = amountInCents + totalFeesInCents;
+
+      setLayerswapFees(quote.totalFees);
+      setCostDetails({
+        baseCostInCents: amountInCents,
+        processingFeeInCents: cartridgeFees + layerswapFeesInCents,
+        totalInCents,
+      });
     },
-    [connectWallet],
+    [controller, usdAmount, starterpackId, quotePaymentFees],
   );
 
   const contextValue: PurchaseContextType = {
