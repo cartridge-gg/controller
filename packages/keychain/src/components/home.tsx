@@ -1,5 +1,5 @@
 import { Signature } from "starknet";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, SignMessageCtx } from "@/utils/connection";
@@ -10,10 +10,39 @@ import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { Authenticate } from "./authenticate";
+import { Button } from "@cartridge/ui";
 
 export function Home() {
+  const [searchParams] = useSearchParams();
+
+  if (searchParams.get("callback_url")) {
+    return <MockedHome />;
+  }
+
+  return <HomeInner />;
+}
+
+function MockedHome() {
+  const [searchParams] = useSearchParams();
+
+  const onClick = useCallback(() => {
+    const callbackUrl = decodeURIComponent(searchParams.get("callback_url")!);
+    if (!callbackUrl) {
+      throw new Error("callback_url is required");
+    }
+    window.location.href = `${callbackUrl}?token=asdfasdf`;
+  }, [searchParams]);
+
+  return (
+    <div className="flex flex-col items-center justify-center h-screen">
+      <Button onClick={onClick}>Log in</Button>
+    </div>
+  );
+}
+
+export function HomeInner() {
   const { context, controller, policies, isConfigLoading } = useConnection();
   const { pathname } = useLocation();
 
