@@ -344,12 +344,13 @@ export function useConnectionValue() {
     if (!isIframe()) {
       if (controller) {
         setController(controller);
-        setIsMainnet(
-          import.meta.env.PROD &&
-            controller?.chainId() === constants.StarknetChainId.SN_MAIN,
-        );
       }
     }
+
+    setIsMainnet(
+      import.meta.env.PROD &&
+        controller?.chainId() === constants.StarknetChainId.SN_MAIN,
+    );
   }, [controller]);
 
   // Check if preset is verified for the current origin, supporting wildcards
