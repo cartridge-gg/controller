@@ -181,4 +181,66 @@ describe("ConfirmTransaction", () => {
       expect(defaultProps.onComplete).toHaveBeenCalledWith(mockTransactionHash);
     });
   });
+
+  it("calls onError when transaction fails after session update", async () => {
+    const executionError: ControllerError = {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Transaction reverted: Transaction execution has failed",
+      },
+    };
+
+    // Mock executeCore to reject with the error
+    vi.mock("@/utils/connection/execute", () => ({
+      executeCore: vi.fn().mockRejectedValue(executionError),
+    }));
+
+    const { executeCore } = await import("@/utils/connection/execute");
+    (executeCore as ReturnType<typeof vi.fn>).mockRejectedValue(
+      executionError,
+    );
+
+    // Mock that we need a session update
+    const mockExecute = vi.fn();
+    const estimateInvokeFee = vi.fn().mockResolvedValue({
+      suggestedMaxFee: BigInt(1000),
+    });
+
+    await act(async () => {
+      renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
+        connection: {
+          controller: {
+            execute: mockExecute,
+            estimateInvokeFee,
+            isRequestedSession: vi.fn().mockResolvedValue(false), // No session exists
+            hasPolicies: vi.fn().mockResolvedValue({
+              policies: [{ target: "0x123", method: "transfer" }],
+            }),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        },
+      });
+    });
+
+    // Should show CreateSession component for session update
+    await waitFor(() => {
+      expect(screen.getByText(/session/i)).toBeInTheDocument();
+    });
+
+    // Simulate clicking connect on session update
+    const connectButton = screen.getByRole("button", {
+      name: /connect|confirm|approve/i,
+    });
+    await act(async () => {
+      fireEvent.click(connectButton);
+    });
+
+    // Wait for onError to be called with the execution error
+    await waitFor(() => {
+      expect(defaultProps.onError).toHaveBeenCalledWith(executionError);
+    });
+  });
 });

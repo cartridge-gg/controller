@@ -58,8 +58,16 @@ export function ConfirmTransaction({
         isUpdate
         policies={policies!}
         onConnect={async () => {
-          const res = await executeCore(transactions);
-          onComplete(res.transaction_hash);
+          try {
+            const res = await executeCore(transactions);
+            onComplete(res.transaction_hash);
+          } catch (e) {
+            console.error(
+              "Transaction execution failed after session update:",
+              e,
+            );
+            onError?.(e as ControllerError);
+          }
         }}
         onSkip={() => setSkipSession(true)}
       />
