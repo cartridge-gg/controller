@@ -55,6 +55,7 @@ export interface PurchaseContextType {
   starterpackId?: string;
   teamId?: string;
   purchaseItems: PurchaseItem[];
+  layerswapFees?: string;
 
   // Payment state
   paymentMethod?: PaymentMethod;
@@ -281,6 +282,7 @@ export const PurchaseProvider = ({
     usdAmount,
     starterpackId,
     purchaseItems,
+    layerswapFees,
 
     // Payment state
     paymentMethod,
