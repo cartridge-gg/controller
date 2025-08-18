@@ -26,7 +26,7 @@ export function CostBreakdown({
   openFeesTooltip = false,
 }: {
   rails: PaymentRails;
-  costDetails: CostDetails;
+  costDetails?: CostDetails;
   walletType?: ExternalWalletType;
   platform?: ExternalPlatform;
   paymentUnit?: PaymentUnit;
@@ -38,6 +38,10 @@ export function CostBreakdown({
 
   if (rails === "crypto" && !walletType) {
     return;
+  }
+
+  if (!costDetails) {
+    return <></>;
   }
 
   return (

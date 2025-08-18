@@ -106,19 +106,21 @@ export function CryptoCheckout({
     setError(undefined);
     try {
       setState(CheckoutState.REQUESTING_PAYMENT);
-      const paymentId = await sendPayment(
+      const res = await sendPayment(
         walletAddress,
-        wholeCredits,
+        selectedWallet.type,
         selectedWallet.platform!,
+        wholeCredits,
         teamId,
         starterpackDetails?.id,
+        undefined,
         (explorer) => {
           setState(CheckoutState.TRANSACTION_SUBMITTED);
           setExplorer(explorer);
         },
       );
 
-      await waitForPayment(paymentId);
+      await waitForPayment(res.paymentId);
 
       onComplete();
     } catch (error) {

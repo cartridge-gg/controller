@@ -1,70 +1,98 @@
 import React from "react";
 import {
-  ArgentColorIcon,
+  ArbitrumColorIcon,
   BaseColorIcon,
+  EthereumColorIcon,
   EthereumIcon,
   MetaMaskColorIcon,
   PhantomColorIcon,
   RabbyColorIcon,
   SolanaColorIcon,
   SolanaIcon,
-  StarknetColorIcon,
-  StarknetIcon,
+  ArbitrumIcon,
+  CoinbaseWalletColorIcon,
+  OptimismColorIcon,
+  OptimismIcon,
 } from "@cartridge/ui";
-import { NetworkWalletData } from "../types";
+import { NetworkWalletData, Wallet } from "../types";
+
+const evmWallets = new Map<string, Wallet>([
+  [
+    "metamask",
+    {
+      name: "MetaMask",
+      type: "metamask",
+      icon: React.createElement(MetaMaskColorIcon),
+      color: "#E88A39",
+      enabled: true,
+    },
+  ],
+  [
+    "rabby",
+    {
+      type: "rabby",
+      name: "Rabby",
+      icon: React.createElement(RabbyColorIcon),
+      enabled: true,
+    },
+  ],
+  [
+    "base",
+    {
+      type: "base",
+      name: "Coinbase Wallet",
+      icon: React.createElement(CoinbaseWalletColorIcon),
+      enabled: true,
+    },
+  ],
+]);
 
 export const networkWalletData: NetworkWalletData = {
   networks: [
+    // {
+    //   name: "Starknet",
+    //   platform: "starknet",
+    //   chains: [
+    //     {
+    //       chainId: constants.StarknetChainId.SN_MAIN,
+    //       isMainnet: true,
+    //     },
+    //     {
+    //       chainId: constants.StarknetChainId.SN_SEPOLIA,
+    //       isMainnet: false,
+    //     },
+    //   ],
+    //   icon: React.createElement(StarknetColorIcon),
+    //   subIcon: React.createElement(StarknetIcon),
+    //   wallets: new Map([
+    //     [
+    //       "argent",
+    //       {
+    //         name: "Argent",
+    //         type: "argent",
+    //         icon: React.createElement(ArgentColorIcon),
+    //         color: "#FF875B",
+    //       },
+    //     ],
+    //   ]),
+    // },
     {
-      name: "Starknet",
-      platform: "starknet",
-      icon: React.createElement(StarknetColorIcon),
-      subIcon: React.createElement(StarknetIcon),
-      wallets: new Map([
-        [
-          "argent",
-          {
-            name: "Argent",
-            type: "argent",
-            icon: React.createElement(ArgentColorIcon),
-            color: "#FF875B",
-          },
-        ],
-        // [
-        //   "braavos",
-        //   {
-        //     name: "Braavos",
-        //     type: "braavos", // need to update external wallet type
-        //     icon: React.createElement(BraavosColorIcon),
-        //     color: "#FF875B",
-        //   },
-        // ],
-      ]),
-    },
-    {
-      name: "Base",
+      name: "Ethereum",
       platform: "ethereum",
-      icon: React.createElement(BaseColorIcon),
+      icon: React.createElement(EthereumColorIcon),
       subIcon: React.createElement(EthereumIcon),
-      wallets: new Map([
-        [
-          "rabby",
-          {
-            type: "rabby",
-            name: "Rabby",
-            icon: React.createElement(RabbyColorIcon),
-          },
-        ],
-        [
-          "metamask",
-          {
-            name: "MetaMask",
-            type: "metamask",
-            icon: React.createElement(MetaMaskColorIcon),
-            color: "#E88A39",
-          },
-        ],
-      ]),
+      enabled: true,
+      chains: [
+        {
+          chainId: "0x1",
+          isMainnet: true,
+        },
+        {
+          chainId: "0xaa36a7",
+          isMainnet: false,
+        },
+      ],
+      wallets: evmWallets,
     },
     {
       name: "Solana",
@@ -83,13 +111,61 @@ export const networkWalletData: NetworkWalletData = {
             enabled: true,
           },
         ],
-        // ["solflare", {
-        //   name: "Solflare",
-        //   icon: React.createElement(SolflareColorIcon),
-        //   color: "#AB9FF2",
-        //   enabled: true,
-        // }],
       ]),
+    },
+    {
+      name: "Base",
+      platform: "base",
+      enabled: true,
+      chains: [
+        {
+          chainId: "0x2105",
+          isMainnet: true,
+        },
+        {
+          chainId: "0x14A34",
+          isMainnet: false,
+        },
+      ],
+      icon: React.createElement(BaseColorIcon),
+      subIcon: React.createElement(EthereumIcon),
+      wallets: evmWallets,
+    },
+    {
+      name: "Arbitrum",
+      platform: "arbitrum",
+      icon: React.createElement(ArbitrumColorIcon),
+      subIcon: React.createElement(ArbitrumIcon),
+      enabled: true,
+      chains: [
+        {
+          chainId: "0xA4B1",
+          isMainnet: true,
+        },
+        {
+          chainId: "0x66EEE",
+          isMainnet: false,
+        },
+      ],
+      wallets: evmWallets,
+    },
+    {
+      name: "Optimism",
+      platform: "optimism",
+      icon: React.createElement(OptimismColorIcon),
+      subIcon: React.createElement(OptimismIcon),
+      enabled: true,
+      chains: [
+        {
+          chainId: "0xA",
+          isMainnet: true,
+        },
+        {
+          chainId: "0xAA37DC",
+          isMainnet: false,
+        },
+      ],
+      wallets: evmWallets,
     },
   ],
 };

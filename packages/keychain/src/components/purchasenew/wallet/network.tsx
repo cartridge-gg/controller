@@ -1,16 +1,14 @@
 import {
-  Button,
   GlobeIcon,
   HeaderInner,
   LayoutContent,
-  LayoutFooter,
   PurchaseCard,
 } from "@cartridge/ui";
 import { networkWalletData } from "./data";
 import { useNavigation } from "@/context";
 
 export function ChooseNetwork() {
-  const { goBack, navigate } = useNavigation();
+  const { navigate } = useNavigation();
   return (
     <>
       <HeaderInner
@@ -28,11 +26,6 @@ export function ChooseNetwork() {
           />
         ))}
       </LayoutContent>
-      <LayoutFooter>
-        <Button variant="secondary" onClick={goBack}>
-          Back
-        </Button>
-      </LayoutFooter>
     </>
   );
 }

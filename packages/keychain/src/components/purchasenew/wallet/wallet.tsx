@@ -11,13 +11,19 @@ import { useNavigation, usePurchaseContext } from "@/context";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ExternalWallet } from "@cartridge/controller";
+import { useWallets } from "@/hooks/wallets";
+import { useConnection } from "@/hooks/connection";
+import { ErrorAlert } from "@/components/ErrorAlert";
 
 export function SelectWallet() {
   const { goBack, navigate } = useNavigation();
   const { platformId } = useParams();
-  const { onExternalConnect, wallets, isWalletConnecting } =
-    usePurchaseContext();
-  const [isLoading, setIsLoading] = useState(true);
+  const { isMainnet } = useConnection();
+  const { onExternalConnect, clearError } = usePurchaseContext();
+  const { wallets, isConnecting: isWalletConnecting } = useWallets();
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [chainId, setChainId] = useState<string>();
   const [availableWallets, setAvailableWallets] = useState<ExternalWallet[]>(
     [],
   );
@@ -28,7 +34,6 @@ export function SelectWallet() {
   useEffect(() => {
     if (!selectedNetwork || !wallets) {
       setAvailableWallets([]);
-      setIsLoading(false);
       return;
     }
 
@@ -40,13 +45,17 @@ export function SelectWallet() {
       configuredWalletTypes.has(detectedWallet.type),
     );
 
-    setAvailableWallets(matchingWallets);
-    setIsLoading(false);
-  }, [wallets, selectedNetwork]);
+    const chainId = selectedNetwork.chains?.find(
+      (chain) => chain.isMainnet === isMainnet,
+    )?.chainId;
 
-  if (isLoading) {
-    return <></>;
-  }
+    setChainId(chainId);
+    setAvailableWallets(matchingWallets);
+  }, [wallets, isMainnet, selectedNetwork]);
+
+  useEffect(() => {
+    return () => clearError();
+  }, [clearError]);
 
   if (!selectedNetwork) {
     return (
@@ -69,9 +78,6 @@ export function SelectWallet() {
           title={`Select a ${selectedNetwork.name} Wallet`}
           icon={<WalletIcon variant="solid" size="lg" />}
         />
-        <LayoutContent>
-          <div>No wallets found</div>
-        </LayoutContent>
         <LayoutFooter>
           <Button variant="secondary" onClick={goBack}>
             Back
@@ -100,24 +106,32 @@ export function SelectWallet() {
               network={selectedNetwork.name}
               networkIcon={selectedNetwork.subIcon}
               onClick={async () => {
-                await onExternalConnect(wallet);
-                navigate(`/purchase/checkout/crypto`);
+                setIsLoading(true);
+                try {
+                  await onExternalConnect(
+                    wallet,
+                    selectedNetwork.platform,
+                    chainId,
+                  );
+                  navigate(`/purchase/checkout/crypto`);
+                } catch (e) {
+                  setError(e as Error);
+                } finally {
+                  setIsLoading(false);
+                }
               }}
               className={
-                isWalletConnecting ? "opacity-50 pointer-events-none" : ""
+                isWalletConnecting || isLoading
+                  ? "opacity-50 pointer-events-none"
+                  : ""
               }
             />
           );
         })}
       </LayoutContent>
+
       <LayoutFooter>
-        <Button
-          variant="secondary"
-          onClick={goBack}
-          disabled={isWalletConnecting}
-        >
-          Back
-        </Button>
+        {error && <ErrorAlert title="Error" description={error.message} />}
       </LayoutFooter>
     </>
   );

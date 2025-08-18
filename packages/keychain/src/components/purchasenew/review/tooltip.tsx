@@ -1,3 +1,4 @@
+import { usePurchaseContext } from "@/context";
 import {
   Separator,
   Tooltip,
@@ -15,6 +16,7 @@ export const FeesTooltip = ({
   defaultOpen?: boolean;
   isStripe: boolean;
 }) => {
+  const { layerswapFees } = usePurchaseContext();
   return (
     <TooltipProvider>
       <Tooltip defaultOpen={defaultOpen}>
@@ -34,6 +36,12 @@ export const FeesTooltip = ({
           <div className="flex flex-row justify-between text-foreground-300">
             Cartridge Processing Fee: <div>{isStripe ? "5%" : "2.5%"}</div>
           </div>
+          {layerswapFees && (
+            <div className="flex flex-row justify-between text-foreground-300">
+              Layerswap Bridging Fee:{" "}
+              <div>${(Number(layerswapFees) / 1e6).toFixed(2)}</div>
+            </div>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

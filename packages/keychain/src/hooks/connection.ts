@@ -39,7 +39,12 @@ import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SemVer } from "semver";
-import { getChecksumAddress, RpcProvider, shortString } from "starknet";
+import {
+  constants,
+  getChecksumAddress,
+  RpcProvider,
+  shortString,
+} from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
 import { useNavigation } from "@/context/navigation";
 import { useSearchParams } from "react-router-dom";
@@ -177,6 +182,7 @@ export function useConnectionValue() {
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [verified, setVerified] = useState<boolean>(false);
   const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
+  const [isMainnet, setIsMainnet] = useState<boolean>(false);
   const [configData, setConfigData] = useState<Record<string, unknown> | null>(
     null,
   );
@@ -338,6 +344,10 @@ export function useConnectionValue() {
     if (!isIframe()) {
       if (controller) {
         setController(controller);
+        setIsMainnet(
+          import.meta.env.PROD &&
+            controller?.chainId() === constants.StarknetChainId.SN_MAIN,
+        );
       }
     }
   }, [controller]);
@@ -617,6 +627,7 @@ export function useConnectionValue() {
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     isConfigLoading,
+    isMainnet,
     verified,
     chainId,
     configSignupOptions,
