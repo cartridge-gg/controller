@@ -78,9 +78,6 @@ export function SelectWallet() {
           title={`Select a ${selectedNetwork.name} Wallet`}
           icon={<WalletIcon variant="solid" size="lg" />}
         />
-        <LayoutContent>
-          <div>No wallets found</div>
-        </LayoutContent>
         <LayoutFooter>
           <Button variant="secondary" onClick={goBack}>
             Back
@@ -116,12 +113,12 @@ export function SelectWallet() {
                     selectedNetwork.platform,
                     chainId,
                   );
+                  navigate(`/purchase/checkout/crypto`);
                 } catch (e) {
                   setError(e as Error);
                 } finally {
                   setIsLoading(false);
                 }
-                navigate(`/purchase/checkout/crypto`);
               }}
               className={
                 isWalletConnecting || isLoading
