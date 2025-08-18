@@ -338,7 +338,9 @@ export function parseExecutionError(
       const meaningfulError =
         allErrors.find(
           (err) =>
-            err !== "argent/multicall-failed" && err !== "ENTRYPOINT_FAILED",
+            err !== "argent/multicall-failed" &&
+            err !== "ENTRYPOINT_FAILED" &&
+            !err.startsWith("0x"), // Exclude hex values that might leak through
         ) || allErrors[0];
 
       return {
@@ -443,14 +445,31 @@ export function parseExecutionError(
         extractedInfo.error = ["Function not found in the contract."];
       } else if (errorLines[0].includes("Failure reason:")) {
         // Check if it's a tuple format with multiple errors
-        const tupleMatch = errorLines[0].match(/Failure reason: \((.*)\)\./);
+        // Handle both inline and multiline formats
+        const fullError = errorLines.join("\n");
+        const tupleMatch = fullError.match(
+          /Failure reason:\s*\n?\s*\((.*)\)\./s,
+        );
         if (tupleMatch) {
           // Extract all quoted strings from the tuple
           const allErrors = [...tupleMatch[1].matchAll(/'([^']+)'/g)].map(
             (match) => match[1],
           );
-          extractedInfo.error =
-            allErrors.length > 0 ? allErrors : [tupleMatch[1]];
+
+          // Find the most meaningful error, excluding common framework errors
+          const meaningfulError = allErrors.find(
+            (err) =>
+              err !== "argent/multicall-failed" &&
+              err !== "ENTRYPOINT_FAILED" &&
+              !err.startsWith("0x"), // Exclude hex values that might leak through
+          );
+
+          // Use the meaningful error if found, otherwise fall back to all errors
+          extractedInfo.error = meaningfulError
+            ? [meaningfulError]
+            : allErrors.length > 0
+              ? allErrors
+              : [tupleMatch[1]];
         } else {
           // Single error format
           const failureReason = errorLines[0].match(/'([^']+)'/)?.[1];
@@ -669,6 +688,32 @@ export const jsonRpcExecutionErrorTestCase = {
 };
 
 export const starknetTransactionExecutionErrorTestCases = [
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Transaction reverted: Transaction execution has failed:\n0: Error in the called contract (contract address: 0x057156ef71dcfb930a272923dcbdc54392b6676497fdc143042ee1d4a7a861c1, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x2, 0x736561736f6e206973207374696c6c206f70656e6564 ('season is still opened'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      },
+    },
+    expected: {
+      raw: "Transaction reverted: Transaction execution has failed:\n0: Error in the called contract (contract address: 0x057156ef71dcfb930a272923dcbdc54392b6676497fdc143042ee1d4a7a861c1, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x2, 0x736561736f6e206973207374696c6c206f70656e6564 ('season is still opened'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      summary: "season is still opened",
+      stack: [
+        {
+          address:
+            "0x057156ef71dcfb930a272923dcbdc54392b6676497fdc143042ee1d4a7a861c1",
+          class:
+            "0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6",
+          selector:
+            "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          error: ["season is still opened"],
+        },
+      ],
+    },
+  },
   {
     input: {
       message: "Unexpected Error",
