@@ -451,25 +451,28 @@ export function useCreateController({
         throw new Error("Login failed");
       }
 
-      const connectedAddress = signerToAddress(loginResponse.signer);
-      const possibleSigners = controller.signers?.filter(
-        (signer) =>
-          credentialToAuth(signer.metadata as CredentialMetadata) ===
-          authenticationMethod,
-      );
-      if (!possibleSigners || possibleSigners.length === 0) {
-        throw new Error("No signers found for controller");
-      }
-
-      if (
-        !possibleSigners.find(
+      // Verify correct EVM wallet account is selected
+      if (authenticationMethod !== "password") {
+        const connectedAddress = signerToAddress(loginResponse.signer);
+        const possibleSigners = controller.signers?.filter(
           (signer) =>
-            credentialToAddress(signer.metadata as CredentialMetadata) ===
-            connectedAddress,
-        )
-      ) {
-        setChangeWallet(true);
-        return;
+            credentialToAuth(signer.metadata as CredentialMetadata) ===
+            authenticationMethod,
+        );
+        if (!possibleSigners || possibleSigners.length === 0) {
+          throw new Error("No signers found for controller");
+        }
+
+        if (
+          !possibleSigners.find(
+            (signer) =>
+              credentialToAddress(signer.metadata as CredentialMetadata) ===
+              connectedAddress,
+          )
+        ) {
+          setChangeWallet(true);
+          return;
+        }
       }
 
       const controllerObject = await createController(
