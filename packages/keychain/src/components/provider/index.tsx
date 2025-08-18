@@ -2,7 +2,7 @@ import { UpgradeProvider } from "@/components/provider/upgrade";
 import { useConnectionValue } from "@/hooks/connection";
 import { WalletsProvider } from "@/hooks/wallets";
 import { ENDPOINT } from "@/utils/graphql";
-import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
+// import { Auth0Provider, Auth0ProviderOptions, } from "@auth0/auth0-react";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
@@ -54,34 +54,34 @@ export function Provider({ children }: PropsWithChildren) {
           <QueryClientProvider client={queryClient}>
             <ConnectionContext.Provider value={connection}>
               <TurnkeyProvider config={turnkeyConfig}>
-                <Auth0Provider {...auth0Config}>
-                  <WalletsProvider>
-                    <PostHogProvider>
-                      <ErrorBoundary>
-                        <UpgradeProvider controller={connection.controller}>
-                          <UIProvider>
-                            <StarknetConfig
-                              explorer={cartridge}
-                              chains={[sepolia, mainnet]}
-                              defaultChainId={defaultChainId}
-                              provider={jsonRpcProvider({ rpc })}
-                            >
-                              <TokensProvider>
-                                <ProfileMarketplaceProvider>
-                                  <ProfileArcadeProvider>
-                                    <ProfileDataProvider>
-                                      {children}
-                                    </ProfileDataProvider>
-                                  </ProfileArcadeProvider>
-                                </ProfileMarketplaceProvider>
-                              </TokensProvider>
-                            </StarknetConfig>
-                          </UIProvider>
-                        </UpgradeProvider>
-                      </ErrorBoundary>
-                    </PostHogProvider>
-                  </WalletsProvider>
-                </Auth0Provider>
+                {/* <Auth0Provider {...auth0Config}> */}
+                <WalletsProvider>
+                  <PostHogProvider>
+                    <ErrorBoundary>
+                      <UpgradeProvider controller={connection.controller}>
+                        <UIProvider>
+                          <StarknetConfig
+                            explorer={cartridge}
+                            chains={[sepolia, mainnet]}
+                            defaultChainId={defaultChainId}
+                            provider={jsonRpcProvider({ rpc })}
+                          >
+                            <TokensProvider>
+                              <ProfileMarketplaceProvider>
+                                <ProfileArcadeProvider>
+                                  <ProfileDataProvider>
+                                    {children}
+                                  </ProfileDataProvider>
+                                </ProfileArcadeProvider>
+                              </ProfileMarketplaceProvider>
+                            </TokensProvider>
+                          </StarknetConfig>
+                        </UIProvider>
+                      </UpgradeProvider>
+                    </ErrorBoundary>
+                  </PostHogProvider>
+                </WalletsProvider>
+                {/* </Auth0Provider> */}
               </TurnkeyProvider>
             </ConnectionContext.Provider>
           </QueryClientProvider>
@@ -107,10 +107,10 @@ const turnkeyConfig = {
   iframeUrl: import.meta.env.VITE_TURNKEY_IFRAME_URL,
 };
 
-const auth0Config: Auth0ProviderOptions = {
-  domain: import.meta.env.VITE_AUTH0_DOMAIN!,
-  clientId: import.meta.env.VITE_AUTH0_CLIENT_ID!,
-  authorizationParams: {
-    redirect_uri: window.location.origin,
-  },
-};
+// const auth0Config: Auth0ProviderOptions = {
+//   domain: import.meta.env.VITE_AUTH0_DOMAIN!,
+//   clientId: import.meta.env.VITE_AUTH0_CLIENT_ID!,
+//   authorizationParams: {
+//     redirect_uri: window.location.origin,
+//   },
+// };
