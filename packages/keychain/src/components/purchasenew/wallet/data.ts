@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  ArgentColorIcon,
   ArbitrumColorIcon,
   BaseColorIcon,
   EthereumColorIcon,
@@ -10,15 +9,12 @@ import {
   RabbyColorIcon,
   SolanaColorIcon,
   SolanaIcon,
-  StarknetColorIcon,
-  StarknetIcon,
   ArbitrumIcon,
   CoinbaseWalletColorIcon,
   OptimismColorIcon,
   OptimismIcon,
 } from "@cartridge/ui";
 import { NetworkWalletData, Wallet } from "../types";
-import { constants } from "starknet";
 
 const evmWallets = new Map<string, Wallet>([
   [
@@ -53,33 +49,33 @@ const evmWallets = new Map<string, Wallet>([
 
 export const networkWalletData: NetworkWalletData = {
   networks: [
-    {
-      name: "Starknet",
-      platform: "starknet",
-      chains: [
-        {
-          chainId: constants.StarknetChainId.SN_MAIN,
-          isMainnet: true,
-        },
-        {
-          chainId: constants.StarknetChainId.SN_SEPOLIA,
-          isMainnet: false,
-        },
-      ],
-      icon: React.createElement(StarknetColorIcon),
-      subIcon: React.createElement(StarknetIcon),
-      wallets: new Map([
-        [
-          "argent",
-          {
-            name: "Argent",
-            type: "argent",
-            icon: React.createElement(ArgentColorIcon),
-            color: "#FF875B",
-          },
-        ],
-      ]),
-    },
+    // {
+    //   name: "Starknet",
+    //   platform: "starknet",
+    //   chains: [
+    //     {
+    //       chainId: constants.StarknetChainId.SN_MAIN,
+    //       isMainnet: true,
+    //     },
+    //     {
+    //       chainId: constants.StarknetChainId.SN_SEPOLIA,
+    //       isMainnet: false,
+    //     },
+    //   ],
+    //   icon: React.createElement(StarknetColorIcon),
+    //   subIcon: React.createElement(StarknetIcon),
+    //   wallets: new Map([
+    //     [
+    //       "argent",
+    //       {
+    //         name: "Argent",
+    //         type: "argent",
+    //         icon: React.createElement(ArgentColorIcon),
+    //         color: "#FF875B",
+    //       },
+    //     ],
+    //   ]),
+    // },
     {
       name: "Ethereum",
       platform: "ethereum",
