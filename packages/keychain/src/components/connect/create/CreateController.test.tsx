@@ -151,6 +151,7 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.ChooseMethod,
       setAuthenticationStep,
+      setChangeWallet: vi.fn(),
       signupOptions: ["webauthn"],
     });
     const passkeyButton = await screen.findByText("Passkey");
