@@ -57,7 +57,7 @@ export function PurchasePendingInner({
   wallet?: ExternalWallet;
 }) {
   const { navigate } = useNavigation();
-  const { waitForPayment } = usePurchaseContext();
+  const { waitForPayment, selectedPlatform } = usePurchaseContext();
   const { externalWaitForTransaction } = useConnection();
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [depositCompleted, setDepositCompleted] = useState(false);
@@ -105,7 +105,7 @@ export function PurchasePendingInner({
               }`}
             >
               <ConfirmingTransaction
-                title={`Confirming on ${humanizeString(wallet?.platform || "")}`}
+                title={`Confirming on ${humanizeString(selectedPlatform!)}`}
                 externalLink={explorer?.url}
                 isLoading={!depositCompleted}
               />
@@ -118,7 +118,7 @@ export function PurchasePendingInner({
               }`}
             >
               <ConfirmingTransaction
-                title="Bridging to Starknet on Layerswap"
+                title="Bridging to Starknet"
                 externalLink={`https://layerswap.io/explorer/${transactionHash}`}
                 isLoading={!paymentCompleted}
               />
