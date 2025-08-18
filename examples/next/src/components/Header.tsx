@@ -88,16 +88,6 @@ const Header = () => {
 
       {status === "connected" && (
         <>
-          <Button
-            className="flex items-center gap-2 min-w-[120px]"
-            onClick={() =>
-              controllerConnector.controller.openStarterPack(
-                "eternum-starterpack",
-              )
-            }
-          >
-            Get Starter Pack
-          </Button>
           <div className="relative" ref={networkRef}>
             <Button
               onClick={() => {

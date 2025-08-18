@@ -11,6 +11,7 @@ import { ManualTransferEth } from "components/ManualTransferEth";
 import { Profile } from "components/Profile";
 import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
+import { Starterpack } from "components/Starterpack";
 
 const Home: FC = () => {
   return (
@@ -25,6 +26,7 @@ const Home: FC = () => {
       <Profile />
       <Transfer />
       <ManualTransferEth />
+      <Starterpack />
       <DelegateAccount />
       <InvalidTxn />
       <SignMessage />
