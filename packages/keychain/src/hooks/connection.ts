@@ -186,7 +186,7 @@ export function useConnectionValue() {
   });
   const [configSignupOptions, setConfigSignupOptions] = useState<
     AuthOptions | undefined
-  >();
+  >(["google", "webauthn", "discord", "walletconnect", "metamask", "rabby"]);
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();

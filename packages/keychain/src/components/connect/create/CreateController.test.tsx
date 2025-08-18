@@ -157,7 +157,12 @@ describe("CreateController", () => {
     fireEvent.click(passkeyButton);
 
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith("validuser", false, "webauthn");
+      expect(handleSubmit).toHaveBeenCalledWith(
+        "validuser",
+        false,
+        "webauthn",
+        undefined,
+      );
     });
   });
 
@@ -241,7 +246,12 @@ describe("CreateController", () => {
     fireEvent.click(passkeyButton);
 
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith("validuser", false, "webauthn");
+      expect(handleSubmit).toHaveBeenCalledWith(
+        "validuser",
+        false,
+        "webauthn",
+        undefined,
+      );
     });
   });
 

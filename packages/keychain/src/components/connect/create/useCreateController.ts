@@ -31,6 +31,7 @@ import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
+import { usePasswordAuthentication } from "./password";
 
 export interface SignupResponse {
   address: string;
@@ -78,6 +79,7 @@ export function useCreateController({
     useExternalWalletAuthentication();
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication();
+  const passwordAuth = usePasswordAuthentication();
   const { wallets } = useWallets();
 
   const handleAccountQuerySuccess = useCallback(
@@ -168,13 +170,18 @@ export function useCreateController({
       "discord" as AuthOption,
       "google" as AuthOption,
       "walletconnect" as AuthOption,
+      "password" as AuthOption,
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
   }, [wallets, configSignupOptions]);
 
   const handleSignup = useCallback(
-    async (username: string, authenticationMode: AuthOption) => {
+    async (
+      username: string,
+      authenticationMode: AuthOption,
+      password?: string,
+    ) => {
       if (!origin || !chainId || !rpcUrl) {
         throw new Error("Origin, chainId, or rpcUrl not found");
       }
@@ -238,6 +245,31 @@ export function useCreateController({
             }),
           };
           break;
+        case "password": {
+          if (!password) {
+            throw new Error("Password required for password authentication");
+          }
+          signupResponse = await passwordAuth.signup(password);
+          // Cast to get the extended password response with encryption data
+          const passwordSignup = signupResponse as {
+            signer: Signer;
+            address: string;
+            type: string;
+            encryptedPrivateKey: string;
+            publicKey: string;
+          };
+          // Use "password" as the type string with Password-specific credentials
+          // Send encrypted_private_key as base64 string directly
+          signer = {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            type: "password" as any,
+            credential: JSON.stringify({
+              public_key: passwordSignup.publicKey,
+              encrypted_private_key: passwordSignup.encryptedPrivateKey,
+            }),
+          };
+          break;
+        }
         default:
           break;
       }
@@ -306,7 +338,11 @@ export function useCreateController({
   );
 
   const handleLogin = useCallback(
-    async (username: string, authenticationMethod: AuthOption) => {
+    async (
+      username: string,
+      authenticationMethod: AuthOption,
+      password?: string,
+    ) => {
       if (!chainId) {
         throw new Error("No chainId");
       }
@@ -368,6 +404,43 @@ export function useCreateController({
           setWaitingForConfirmation(true);
           loginResponse = await loginWithWalletConnect();
           break;
+        case "password": {
+          if (!password) {
+            throw new Error("Password required for password authentication");
+          }
+
+          // Find the password signer from the controller's signers
+          const passwordSigners = controller.signers?.filter(
+            (signer) =>
+              (signer.metadata as { __typename?: string }).__typename ===
+              "PasswordCredentials",
+          );
+          if (!passwordSigners || passwordSigners.length === 0) {
+            throw new Error("Password signer not found for controller");
+          }
+
+          // Extract the encrypted private key from metadata
+          const passwordMetadata = passwordSigners[0].metadata as {
+            __typename: string;
+            password?: Array<{
+              encryptedPrivateKey: string;
+              publicKey: string;
+            }>;
+          };
+          const encryptedPrivateKey =
+            passwordMetadata.password?.[0]?.encryptedPrivateKey;
+
+          if (!encryptedPrivateKey) {
+            throw new Error("Encrypted private key not found");
+          }
+
+          // Encrypted private key is already in base64 format from backend
+          loginResponse = await passwordAuth.login(
+            password,
+            encryptedPrivateKey,
+          );
+          break;
+        }
         case "phantom":
         case "argent":
         default:
@@ -437,6 +510,7 @@ export function useCreateController({
       username: string,
       exists: boolean,
       authenticationMethod?: AuthOption,
+      password?: string,
     ) => {
       setError(undefined);
       setIsLoading(true);
@@ -445,9 +519,17 @@ export function useCreateController({
 
       try {
         if (exists) {
-          await handleLogin(username, authenticationMethod ?? "webauthn");
+          await handleLogin(
+            username,
+            authenticationMethod ?? "webauthn",
+            password,
+          );
         } else {
-          await handleSignup(username, authenticationMethod ?? "webauthn");
+          await handleSignup(
+            username,
+            authenticationMethod ?? "webauthn",
+            password,
+          );
         }
       } catch (e: unknown) {
         if (
