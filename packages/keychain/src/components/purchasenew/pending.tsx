@@ -61,6 +61,7 @@ export function PurchasePendingInner({
   const { externalWaitForTransaction } = useConnection();
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [depositCompleted, setDepositCompleted] = useState(false);
+  const [showBridging, setShowBridging] = useState(false);
 
   useEffect(() => {
     if (wallet && transactionHash) {
@@ -77,6 +78,13 @@ export function PurchasePendingInner({
   }, [paymentId, waitForPayment, navigate]);
 
   useEffect(() => {
+    if (depositCompleted) {
+      // Add a small delay before showing the bridging status
+      setTimeout(() => setShowBridging(true), 300);
+    }
+  }, [depositCompleted]);
+
+  useEffect(() => {
     if (paymentCompleted && depositCompleted) {
       setTimeout(() => navigate("/purchase/success", { reset: true }), 1000);
     }
@@ -90,19 +98,32 @@ export function PurchasePendingInner({
       </LayoutContent>
       <LayoutFooter>
         {paymentMethod === "crypto" && (
-          <>
-            <ConfirmingTransaction
-              title={`Confirming on ${humanizeString(wallet?.platform || "")}`}
-              externalLink={explorer?.url}
-              isLoading={!depositCompleted}
-            />
-            <ConfirmingTransaction
-              title="Bridging to Starknet on Layerswap"
-              // Layerswap does not support testnet, only works mainnet
-              externalLink={`https://layerswap.io/explorer/${transactionHash}`}
-              isLoading={!paymentCompleted}
-            />
-          </>
+          <div className="relative space-y-2">
+            <div
+              className={`transition-transform duration-500 ease-in-out ${
+                depositCompleted ? "-translate-y-1" : "translate-y-0"
+              }`}
+            >
+              <ConfirmingTransaction
+                title={`Confirming on ${humanizeString(wallet?.platform || "")}`}
+                externalLink={explorer?.url}
+                isLoading={!depositCompleted}
+              />
+            </div>
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                showBridging
+                  ? "opacity-100 max-h-20"
+                  : "opacity-0 max-h-0 overflow-hidden"
+              }`}
+            >
+              <ConfirmingTransaction
+                title="Bridging to Starknet on Layerswap"
+                externalLink={`https://layerswap.io/explorer/${transactionHash}`}
+                isLoading={!paymentCompleted}
+              />
+            </div>
+          </div>
         )}
       </LayoutFooter>
     </>
@@ -119,7 +140,7 @@ export function ConfirmingTransaction({
   isLoading?: boolean;
 }) {
   return (
-    <Card className="bg-background-100 border border-background-200 p-2">
+    <Card className="bg-background-100 border border-background-200 p-2 transition-all duration-300">
       <CardDescription className="flex flex-row items-start gap-3 items-center">
         <div className="flex justify-between w-full">
           <div className="text-foreground-200 font-normal text-xs flex items-center gap-1">
