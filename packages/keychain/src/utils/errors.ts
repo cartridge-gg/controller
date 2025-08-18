@@ -1,5 +1,62 @@
 import { ControllerError } from "@cartridge/controller";
 
+function prettifyErrorMessage(message: string): string {
+  // Common error message transformations
+  const errorMap: Record<string, string> = {
+    "argent/multicall-failed": "Transaction failed",
+    "argent/invalid-timestamp": "Invalid transaction timestamp",
+    "session/already-registered": "Session already registered",
+    ENTRYPOINT_FAILED: "Contract execution failed",
+    "u256_sub Overflow": "Insufficient balance",
+    "SafeUint256: subtraction overflow": "Insufficient balance",
+    "ERC20: transfer amount exceeds balance": "Insufficient token balance",
+    "ERC20: amount is not a valid Uint256": "Invalid token amount",
+    "Not authorized to act": "Unauthorized",
+    "Bag is full": "Storage limit reached",
+    "season is still opened": "Cannot perform action while season is active",
+    "Failed to deserialize param": "Invalid parameter format",
+  };
+
+  // Check for exact matches first
+  if (errorMap[message]) {
+    return errorMap[message];
+  }
+
+  // Check for partial matches
+  for (const [key, value] of Object.entries(errorMap)) {
+    if (message.includes(key)) {
+      return value;
+    }
+  }
+
+  // Clean up hex-encoded messages
+  if (message.startsWith("0x") && message.length > 10) {
+    // Try to decode hex to ASCII if it looks like a hex string
+    try {
+      const decoded = Buffer.from(message.slice(2), "hex").toString("utf8");
+      if (/^[\x20-\x7E]+$/.test(decoded)) {
+        return prettifyErrorMessage(decoded);
+      }
+    } catch {
+      // If decoding fails, truncate long hex values
+      return "Transaction failed";
+    }
+  }
+
+  // Remove technical prefixes
+  message = message
+    .replace(/^Error message: /, "")
+    .replace(/^Failure reason: /, "")
+    .replace(/^Execution failed\. /, "");
+
+  // Capitalize first letter if not already
+  if (message.length > 0 && message[0] === message[0].toLowerCase()) {
+    message = message.charAt(0).toUpperCase() + message.slice(1);
+  }
+
+  return message;
+}
+
 interface GraphQLError {
   message: string;
   locations?: Array<{ line: number; column: number }>;
@@ -105,7 +162,11 @@ export function parseGraphQLError(error: unknown): {
             }
           }
 
-          return parseGraphQLErrorMessage(message, path, error);
+          const result = parseGraphQLErrorMessage(message, path, error);
+          return {
+            ...result,
+            summary: prettifyErrorMessage(result.summary),
+          };
         }
       }
 
@@ -155,11 +216,15 @@ export function parseGraphQLError(error: unknown): {
   // Process GraphQL response
   if (graphqlResponse?.errors && graphqlResponse.errors.length > 0) {
     const firstError = graphqlResponse.errors[0];
-    return parseGraphQLErrorMessage(
+    const result = parseGraphQLErrorMessage(
       firstError.message,
       firstError.path,
       JSON.stringify(graphqlResponse),
     );
+    return {
+      ...result,
+      summary: prettifyErrorMessage(result.summary),
+    };
   }
 
   return {
@@ -210,90 +275,55 @@ function parseGraphQLErrorMessage(
     }
 
     // Generate user-friendly summary based on error type
+    let summary: string;
     if (code === "NotFound") {
       if (description.includes("controller not found")) {
-        return {
-          raw: raw || message,
-          summary: "Controller not found for user",
-          details,
-        };
+        summary = "Wallet not found for this account";
       } else if (description.includes("user")) {
-        return {
-          raw: raw || message,
-          summary: "User not found",
-          details,
-        };
+        summary = "Account not found";
       } else {
-        return {
-          raw: raw || message,
-          summary: "Resource not found",
-          details,
-        };
+        summary = "The requested resource was not found";
       }
     } else if (code === "InvalidArgument") {
-      return {
-        raw: raw || message,
-        summary: "Invalid request parameters",
-        details,
-      };
+      summary = "Invalid request. Please check your input.";
     } else if (code === "PermissionDenied") {
-      return {
-        raw: raw || message,
-        summary: "Access denied",
-        details,
-      };
+      summary = "You don't have permission to perform this action";
     } else if (code === "Unauthenticated") {
-      return {
-        raw: raw || message,
-        summary: "Authentication required",
-        details,
-      };
+      summary = "Please sign in to continue";
     } else if (code === "Unavailable") {
-      return {
-        raw: raw || message,
-        summary: "Service temporarily unavailable",
-        details,
-      };
+      summary = "Service is temporarily unavailable. Please try again later.";
     } else {
-      return {
-        raw: raw || message,
-        summary: `Service error: ${code}`,
-        details,
-      };
+      summary = `An error occurred (${code})`;
     }
+
+    return {
+      raw: raw || message,
+      summary: prettifyErrorMessage(summary),
+      details,
+    };
   }
 
   // Handle other common GraphQL error patterns
+  let summary: string;
   if (message.includes("timeout") || message.includes("deadline")) {
-    return {
-      raw: raw || message,
-      summary: "Request timeout",
-      details,
-    };
+    summary = "Request timed out. Please try again.";
   } else if (message.includes("network") || message.includes("connection")) {
-    return {
-      raw: raw || message,
-      summary: "Network connection error",
-      details,
-    };
+    summary = "Connection error. Please check your internet connection.";
   } else if (message.includes("validation")) {
-    return {
-      raw: raw || message,
-      summary: "Request validation failed",
-      details,
-    };
+    summary = "Invalid request. Please check your input.";
   } else if (message.includes("rate limit")) {
-    return {
-      raw: raw || message,
-      summary: "Rate limit exceeded",
-      details,
-    };
+    summary = "Too many requests. Please wait and try again.";
+  } else {
+    // Default case - prettify the message
+    summary = prettifyErrorMessage(message);
+    if (summary.length > 100) {
+      summary = summary.substring(0, 97) + "...";
+    }
   }
 
-  // Default case
   return {
     raw: raw || message,
-    summary: message.length > 100 ? message.substring(0, 100) + "..." : message,
+    summary,
     details,
   };
 }
@@ -345,17 +375,19 @@ export function parseExecutionError(
 
       return {
         raw: JSON.stringify(executionError),
-        summary: "There was an error in the transaction",
+        summary: meaningfulError
+          ? prettifyErrorMessage(meaningfulError)
+          : "Transaction failed",
         stack: [
           {
             address: objectError.contract_address,
             class: objectError.class_hash,
             selector: objectError.selector,
             error: meaningfulError
-              ? [meaningfulError]
+              ? [prettifyErrorMessage(meaningfulError)]
               : allErrors.length > 0
-                ? allErrors
-                : [errorMessage],
+                ? allErrors.map((err) => prettifyErrorMessage(err))
+                : [prettifyErrorMessage(errorMessage)],
           },
         ],
       };
@@ -466,17 +498,19 @@ export function parseExecutionError(
 
           // Use the meaningful error if found, otherwise fall back to all errors
           extractedInfo.error = meaningfulError
-            ? [meaningfulError]
+            ? [prettifyErrorMessage(meaningfulError)]
             : allErrors.length > 0
-              ? allErrors
-              : [tupleMatch[1]];
+              ? allErrors.map((err) => prettifyErrorMessage(err))
+              : [prettifyErrorMessage(tupleMatch[1])];
         } else {
           // Single error format
           const failureReason = errorLines[0].match(/'([^']+)'/)?.[1];
           if (failureReason) {
-            extractedInfo.error = [failureReason];
+            extractedInfo.error = [prettifyErrorMessage(failureReason)];
           } else {
-            extractedInfo.error = errorLines;
+            extractedInfo.error = errorLines.map((err) =>
+              prettifyErrorMessage(err),
+            );
           }
         }
       } else {
@@ -526,11 +560,13 @@ export function parseExecutionError(
       ) {
         summary = "Function not found in the contract.";
       } else if (lastErrorMessage === "argent/invalid-timestamp") {
-        summary = "Invalid paymaster transaction timestamp";
-        lastError[lastError.length - 1] = summary;
+        summary = "Transaction timestamp is invalid";
+        lastError[lastError.length - 1] =
+          prettifyErrorMessage(lastErrorMessage);
       } else if (lastErrorMessage === "session/already-registered") {
-        summary = "Session already registered";
-        lastError[lastError.length - 1] = summary;
+        summary = "This session is already registered";
+        lastError[lastError.length - 1] =
+          prettifyErrorMessage(lastErrorMessage);
       } else if (
         /.*Class with hash.*is not declared.$/.test(lastErrorMessage)
       ) {
@@ -543,9 +579,11 @@ export function parseExecutionError(
           (err: string) =>
             err !== "argent/multicall-failed" && err !== "ENTRYPOINT_FAILED",
         );
-        summary = actualError || "Multicall failed";
+        summary = actualError
+          ? prettifyErrorMessage(actualError)
+          : "Transaction failed";
       } else {
-        summary = lastErrorMessage;
+        summary = prettifyErrorMessage(lastErrorMessage);
         lastError[lastError.length - 1] = summary;
       }
     }
@@ -553,7 +591,9 @@ export function parseExecutionError(
 
   return {
     raw: executionErrorRaw,
-    summary: summaryOveride ? summaryOveride : summary,
+    summary: summaryOveride
+      ? prettifyErrorMessage(summaryOveride)
+      : prettifyErrorMessage(summary),
     stack: processedStack,
   };
 }
@@ -585,7 +625,7 @@ export function parseValidationError(error: ControllerError): {
       const additionalFunds = maxFee - balance;
       return {
         raw: error.data,
-        summary: "Insufficient balance for transaction fee",
+        summary: "Insufficient balance to pay for transaction fees",
         details: {
           maxFee,
           balance,
@@ -604,7 +644,7 @@ export function parseValidationError(error: ControllerError): {
       const balance = BigInt(l1GasBoundsMatch[3]);
       return {
         raw: error.data,
-        summary: "Insufficient balance for transaction fee",
+        summary: "Insufficient balance to pay for transaction fees",
         details: {
           l1gasMaxAmount,
           l1gasMaxPrice,
@@ -622,7 +662,7 @@ export function parseValidationError(error: ControllerError): {
       const actualGasPrice = BigInt(maxGasPriceMatch[2]);
       return {
         raw: error.data,
-        summary: "Estimated gas price too low",
+        summary: "Gas price estimate is too low. Please try again.",
         details: {
           maxGasPrice,
           actualGasPrice,
@@ -633,8 +673,8 @@ export function parseValidationError(error: ControllerError): {
 
   return {
     raw: error.data || JSON.stringify(error),
-    summary: "Account validation failed",
-    details: error.message || "Unknown validation error",
+    summary: prettifyErrorMessage("Account validation failed"),
+    details: prettifyErrorMessage(error.message || "Unknown validation error"),
   };
 }
 
@@ -700,7 +740,7 @@ export const starknetTransactionExecutionErrorTestCases = [
     },
     expected: {
       raw: "Transaction reverted: Transaction execution has failed:\n0: Error in the called contract (contract address: 0x057156ef71dcfb930a272923dcbdc54392b6676497fdc143042ee1d4a7a861c1, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x2, 0x736561736f6e206973207374696c6c206f70656e6564 ('season is still opened'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
-      summary: "season is still opened",
+      summary: "Cannot perform action while season is active",
       stack: [
         {
           address:
@@ -709,7 +749,7 @@ export const starknetTransactionExecutionErrorTestCases = [
             "0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6",
           selector:
             "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
-          error: ["season is still opened"],
+          error: ["Cannot perform action while season is active"],
         },
       ],
     },
@@ -1041,7 +1081,7 @@ export const starknetTransactionExecutionErrorTestCases = [
             "0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4",
           class:
             "0x026b25c3a9bf7582cc8a9e6fff378cb649fc5cba404f93633ed41d59053dcd31",
-          error: ["Not authorized to act"],
+          error: ["Unauthorized"],
           selector:
             "0x02d1af4265f4530c75b41282ed3b71617d3d435e96fe13b08848482173692f4f",
         },
@@ -1093,7 +1133,7 @@ export const starknetTransactionExecutionErrorTestCases = [
             "0x018108b32cea514a78ef1b0e4a0753e855cdf620bc0565202c02456f618c4dc4",
           class:
             "0x026b25c3a9bf7582cc8a9e6fff378cb649fc5cba404f93633ed41d59053dcd31",
-          error: ["Bag is full"],
+          error: ["Storage limit reached"],
           selector:
             "0x00f2f7c15cbe06c8d94597cd91fd7f3369eae842359235712def5584f8d270cd",
         },
@@ -1118,7 +1158,7 @@ export const starknetTransactionExecutionErrorTestCases = [
             "0x5bc6a67cfd7edef68c10eb2100091a01ea7e5b9f01443e1d3cf7c23a084d7da",
           class:
             "0x24a9edbfa7082accfceabf6a92d7160086f346d622f28741bf1c651c412c9ab",
-          error: ["Failed to deserialize param #1"],
+          error: ["Invalid parameter format"],
           selector:
             "0x28ffe4ff0f226a9107253e17a904099aa4f63a02a5621de0576e5aa71bc5194",
         },
@@ -1145,14 +1185,14 @@ export const starknetTransactionExecutionErrorTestCases = [
     },
     expected: {
       raw: '{"class_hash":"0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf","contract_address":"0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b","error":"(0x617267656e742f6d756c746963616c6c2d6661696c6564 (\'argent/multicall-failed\'), 0x1, 0x753235365f737562204f766572666c6f77 (\'u256_sub Overflow\'), 0x454e545259504f494e545f4641494c4544 (\'ENTRYPOINT_FAILED\'))","selector":"0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad"}',
-      summary: "There was an error in the transaction",
+      summary: "Insufficient balance",
       stack: [
         {
           address:
             "0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b",
           class:
             "0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
-          error: ["u256_sub Overflow"],
+          error: ["Insufficient balance"],
           selector:
             "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
         },
@@ -1169,7 +1209,7 @@ export const starknetTransactionValidationErrorTestCases = [
     },
     expected: {
       raw: "Max L1 gas price (69174664530264) is lower than the actual gas price: 71824602546140.",
-      summary: "Estimated gas price too low",
+      summary: "Gas price estimate is too low. Please try again.",
       details: {
         maxGasPrice: 69174664530264n,
         actualGasPrice: 71824602546140n,
@@ -1183,7 +1223,7 @@ export const starknetTransactionValidationErrorTestCases = [
     },
     expected: {
       raw: "L1 gas bounds (max amount: 7206, max price: 18106067943992) exceed balance (122941657491449276).",
-      summary: "Insufficient balance for transaction fee",
+      summary: "Insufficient balance to pay for transaction fees",
       details: {
         l1gasMaxAmount: 7206n,
         l1gasMaxPrice: 18106067943992n,
@@ -1199,7 +1239,7 @@ export const graphqlErrorTestCases = [
       'GraphQL API error: GraphQLErrors([Error { message: "rpc error: code = NotFound desc = controller not found for user test on network SN_MAIN", locations: None, path: Some([Key("createSession")]), extensions: None }])',
     expected: {
       raw: 'GraphQL API error: GraphQLErrors([Error { message: "rpc error: code = NotFound desc = controller not found for user test on network SN_MAIN", locations: None, path: Some([Key("createSession")]), extensions: None }])',
-      summary: "Controller not found for user",
+      summary: "Wallet not found for this account",
       details: {
         operation: "createSession",
         network: "SN_MAIN",
@@ -1222,7 +1262,7 @@ export const graphqlErrorTestCases = [
     },
     expected: {
       raw: '{"errors":[{"message":"rpc error: code = InvalidArgument desc = invalid session token","path":["authenticate"],"extensions":{"code":"INVALID_TOKEN"}}]}',
-      summary: "Invalid request parameters",
+      summary: "Invalid request. Please check your input.",
       details: {
         operation: "authenticate",
         rpcError: "InvalidArgument: invalid session token",
@@ -1241,7 +1281,7 @@ export const graphqlErrorTestCases = [
     },
     expected: {
       raw: '{"errors":[{"message":"Network connection timeout","path":["query"]}]}',
-      summary: "Request timeout",
+      summary: "Request timed out. Please try again.",
       details: {
         operation: "query",
         path: ["query"],
