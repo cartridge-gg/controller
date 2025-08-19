@@ -9,6 +9,7 @@ import { constants, num } from "starknet";
 export const Starterpack = () => {
   const { account, connector } = useAccount();
   const [purchaseSpId, setPurchaseSpId] = useState<string | null>(null);
+  const [claimSpId, setClaimSpId] = useState<string | null>(null);
   const { chain } = useNetwork();
 
   const controllerConnector = connector as unknown as ControllerConnector;
@@ -20,12 +21,14 @@ export const Starterpack = () => {
 
     if (num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       setPurchaseSpId("sick-starterpack-mainnet");
+      setClaimSpId("claim-starterpack-mainnet");
     } else {
       setPurchaseSpId("sick-starterpack-sepolia");
+      setClaimSpId("claim-starterpack-sepolia");
     }
   }, [chain, account]);
 
-  if (!account || !purchaseSpId) {
+  if (!account || !purchaseSpId || !claimSpId) {
     return null;
   }
 
@@ -45,11 +48,8 @@ export const Starterpack = () => {
         <div className="flex items-center gap-2">
           <Button
             onClick={() => {
-              controllerConnector.controller.openStarterPack(
-                "claim-starter-pack",
-              );
+              controllerConnector.controller.openStarterPack(claimSpId);
             }}
-            disabled={true} // TODO: merkle proof claim flow
           >
             Claim Starterpack
           </Button>

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { StarterPackInner } from "./starterpack";
 import { StarterItemType } from "@/hooks/starterpack";
 import { NavigationProvider } from "@/context";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 const meta = {
   component: StarterPackInner,
@@ -22,6 +23,7 @@ export const Default: Story = {
   args: {
     name: "Starterpack",
     supply: 10,
+    acquisitionType: StarterpackAcquisitionType.Paid,
     starterpackItems: [
       {
         title: "Starter NFT",

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ClaimFreeStarterpackDocument,
   ClaimFreeStarterpackMutation,
+  StarterpackAcquisitionType,
   StarterPackDocument,
   StarterpackInput,
   StarterPackQuery,
@@ -33,6 +34,7 @@ export interface StarterPackDetails {
   priceUsd: number;
   supply?: number;
   mintAllowance?: MintAllowance;
+  acquisitionType: StarterpackAcquisitionType;
   starterPackItems: StarterItemData[];
 }
 
@@ -51,6 +53,8 @@ export function useStarterPack(starterpackId?: string) {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [priceUsd, setPriceUsd] = useState<number>(0);
+  const [acquisitionType, setAcquisitionType] =
+    useState<StarterpackAcquisitionType>(StarterpackAcquisitionType.Paid);
   const [mintAllowance, setMintAllowance] = useState<MintAllowance | undefined>(
     undefined,
   );
@@ -98,6 +102,7 @@ export function useStarterPack(starterpackId?: string) {
         const price = details.price.amount;
         const factor = 10 ** details.price.decimals;
         const priceUSD = creditsToUSD(Number(price) / factor);
+        setAcquisitionType(details.acquisitionType);
         setPriceUsd(priceUSD);
         setName(details.starterpack!.name);
         setDescription(details.starterpack!.description ?? "");
@@ -195,6 +200,7 @@ export function useStarterPack(starterpackId?: string) {
     priceUsd,
     supply,
     mintAllowance,
+    acquisitionType,
     isLoading,
     isClaiming,
     error,

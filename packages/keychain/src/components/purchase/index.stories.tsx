@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Purchase, PurchaseState } from ".";
 import { WalletsProvider } from "@/hooks/wallets";
 import { PurchaseType } from "@/hooks/payments/crypto";
-import { StarterItemType } from "@/hooks/starterpack";
+import { AcquisitionType, StarterItemType } from "@/hooks/starterpack";
 
 const meta = {
   component: Purchase,
@@ -47,6 +47,7 @@ export const FreeStarterpack: Story = {
       id: "1",
       name: "Booster Pack",
       priceUsd: 0,
+      acquisitionType: AcquisitionType.PAID,
       mintAllowance: {
         count: 0,
         limit: 1,
@@ -88,6 +89,7 @@ export const FreeStarterpackLimitReached: Story = {
       id: "1",
       name: "Booster Pack",
       priceUsd: 0,
+      acquisitionType: AcquisitionType.PAID,
       mintAllowance: {
         count: 1,
         limit: 1,
@@ -129,6 +131,7 @@ export const PurchaseStarterpack: Story = {
       id: "1",
       name: "Starter Pack Name",
       priceUsd: 100,
+      acquisitionType: AcquisitionType.PAID,
       starterPackItems: [
         {
           title: "Village",
@@ -175,6 +178,7 @@ export const PurchaseStarterpackWithSupply: Story = {
       name: "Starter Pack Name",
       priceUsd: 100,
       supply: 87,
+      acquisitionType: AcquisitionType.PAID,
       starterPackItems: [
         {
           title: "Village",
@@ -221,6 +225,7 @@ export const PurchaseStarterpackSoldOut: Story = {
       name: "Starter Pack Name",
       priceUsd: 100,
       supply: 0,
+      acquisitionType: AcquisitionType.PAID,
       starterPackItems: [
         {
           title: "Village",
@@ -277,6 +282,7 @@ export const SuccessStarterpack: Story = {
       id: "1",
       name: "Starter Pack Name",
       priceUsd: 100,
+      acquisitionType: AcquisitionType.PAID,
       starterPackItems: [
         {
           title: "Village",
