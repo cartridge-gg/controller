@@ -405,6 +405,13 @@ const getExplorer = (
           ? `https://arbiscan.io/tx/${txHash}`
           : `https://sepolia.arbiscan.io/tx/${txHash}`,
       };
+    case "base":
+      return {
+        name: "Base Explorer",
+        url: isMainnet
+          ? `https://basescan.org/tx/${txHash}`
+          : `https://sepolia.basescan.org/tx/${txHash}`,
+      };
     default:
       throw new Error(`Unsupported platform: ${platform}`);
   }
