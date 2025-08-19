@@ -53,7 +53,7 @@ export function SendCollection() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collection, assets, status, refetch } = useCollection({
+  const { collection, assets, status } = useCollection({
     contractAddress: contractAddress,
     tokenIds,
   });
@@ -126,7 +126,7 @@ export function SendCollection() {
       entrypoint,
       navigate,
       searchParams,
-      refetch,
+      username,
     ],
   );
 

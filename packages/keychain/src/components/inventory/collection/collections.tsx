@@ -16,7 +16,7 @@ export function Collections() {
   const { collectibles, status: CollectiblesStatus } = useCollectibles();
   const { editions } = useArcade();
   const { getCollectionOrders } = useMarketplace();
-  const { project, namespace } = useConnection();
+  const { project } = useConnection();
   const theme = useControllerTheme();
   const [searchParams] = useSearchParams();
 
@@ -24,7 +24,7 @@ export function Collections() {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
     );
-  }, [editions, project, namespace]);
+  }, [editions, project]);
 
   const status = useMemo(() => {
     if (CollectionsStatus === "loading" && CollectiblesStatus === "loading") {

@@ -265,7 +265,7 @@ const WalletAuths = ({
       }
       await controller?.addOwner(signer!, signerInput!, null);
     },
-    [currentSigners, controller],
+    [currentSigners, controller, connectWallet],
   );
 
   return (

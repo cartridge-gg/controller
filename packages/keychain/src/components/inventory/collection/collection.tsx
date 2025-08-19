@@ -57,7 +57,7 @@ export function Collection() {
     if (urlTokenIds.length > 0) {
       setSelectedTokenIds(urlTokenIds);
     }
-  }, []);
+  }, [searchParams]);
 
   const selection = useMemo(() => {
     return selectedTokenIds.length > 0;

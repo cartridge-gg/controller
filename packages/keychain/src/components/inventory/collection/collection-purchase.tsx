@@ -52,7 +52,7 @@ const FEE_ENTRYPOINT = "royalty_info";
 export function CollectionPurchase() {
   const { closeModal } = useUI();
   const { address: contractAddress, tokenId } = useParams();
-  const { chainId, parent, controller, project } = useConnection();
+  const { project } = useConnection();
   const { tokens } = useTokens();
   const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
@@ -62,13 +62,14 @@ export function CollectionPurchase() {
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const paramsOrders = searchParams.get("orders")?.split(",").map(Number) || [];
   const tokenOrders = useMemo(() => {
+    const paramsOrders =
+      searchParams.get("orders")?.split(",").map(Number) || [];
     const allOrders = Object.values(orders).flatMap((orders) =>
       Object.values(orders).flatMap((orders) => Object.values(orders)),
     );
     return allOrders.filter((order) => paramsOrders.includes(order.id));
-  }, [orders, paramsOrders]);
+  }, [orders, searchParams]);
 
   const tokenIds = useMemo(() => {
     return tokenOrders.map((order) =>
@@ -76,7 +77,7 @@ export function CollectionPurchase() {
     );
   }, [tokenOrders]);
 
-  const { refetch } = useCollection({
+  useCollection({
     contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
   });
@@ -134,7 +135,7 @@ export function CollectionPurchase() {
       },
     ];
     return { total, fees };
-  }, [marketplaceFee, royalties, token]);
+  }, [marketplaceFee, royalties, token, tokenOrders]);
 
   const props = useMemo(() => {
     if (!assets || !collection || !tokenOrders) return [];
@@ -156,7 +157,7 @@ export function CollectionPurchase() {
         };
       })
       .filter((value) => value !== undefined);
-  }, [assets, collection, tokenOrders]);
+  }, [assets, collection, tokenOrders, contractAddress, project]);
 
   const { totalPrice, floatPrice } = useMemo(() => {
     const total = tokenOrders.reduce(
@@ -165,7 +166,7 @@ export function CollectionPurchase() {
     );
     const formatted = total / Math.pow(10, token?.metadata.decimals || 0);
     return { totalPrice: total, floatPrice: formatted };
-  }, [tokenOrders]);
+  }, [tokenOrders, token?.metadata.decimals]);
 
   const addRoyalties = useCallback(
     (orderId: number, royaltyFee: number) => {
@@ -222,15 +223,10 @@ export function CollectionPurchase() {
     closeModal,
     token,
     tokenOrders,
-    chainId,
     totalPrice,
-    parent,
     provider,
-    controller,
     navigate,
-    searchParams,
     location,
-    refetch,
   ]);
 
   const status = useMemo(() => {
@@ -410,7 +406,7 @@ const Order = ({
   useEffect(() => {
     if (!royalties) return;
     addRoyalties(orderId, royaltyFee);
-  }, [addRoyalties, orderId, royaltyFee]);
+  }, [addRoyalties, orderId, royaltyFee, royalties]);
 
   const { countervalues } = useCountervalue(
     {

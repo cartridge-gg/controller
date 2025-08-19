@@ -320,6 +320,7 @@ export function CreateController({
       usernameField.value,
       validation.exists,
       validation.status,
+      validation.signers,
       setAuthenticationStep,
       signupOptions,
     ],

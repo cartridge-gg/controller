@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Controller from "@/utils/controller";
 import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/ui/utils/api/cartridge";
@@ -52,10 +52,13 @@ export function Fund() {
     }
   }, [navigate, pathname, error]);
 
-  const teams: Team[] =
-    teamsData?.me?.teams?.edges
-      ?.filter((edge) => edge?.node != null)
-      .map((edge) => edge!.node!) || [];
+  const teams: Team[] = useMemo(
+    () =>
+      teamsData?.me?.teams?.edges
+        ?.filter((edge) => edge?.node != null)
+        .map((edge) => edge!.node!) || [],
+    [teamsData?.me?.teams?.edges],
+  );
 
   useEffect(() => {
     if (selectedTeam && teams.length > 0) {
