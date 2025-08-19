@@ -30,7 +30,7 @@ describe("parseValidationError", () => {
 
     expect(result).toEqual({
       raw: "Max fee (308264936364000) exceeds balance (7443707172597).",
-      summary: "Insufficient balance for transaction fee",
+      summary: "Insufficient balance to pay for transaction fees",
       details: {
         maxFee: BigInt("308264936364000"),
         balance: BigInt("7443707172597"),
@@ -50,7 +50,7 @@ describe("parseValidationError", () => {
 
     expect(result).toEqual({
       raw: "Max L1 gas price (69174664530264) is lower than the actual gas price: 71824602546140.",
-      summary: "Estimated gas price too low",
+      summary: "Gas price estimate is too low. Please try again.",
       details: {
         maxGasPrice: BigInt("69174664530264"),
         actualGasPrice: BigInt("71824602546140"),
@@ -75,7 +75,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: error,
-      summary: "Controller not found for user",
+      summary: "Wallet not found for this account",
       details: {
         operation: "createSession",
         network: "SN_MAIN",
@@ -103,7 +103,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: JSON.stringify(error),
-      summary: "Invalid request parameters",
+      summary: "Invalid request. Please check your input.",
       details: {
         operation: "authenticate",
         rpcError: "InvalidArgument: invalid session token",
@@ -126,7 +126,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: JSON.stringify(error),
-      summary: "Request timeout",
+      summary: "Request timed out. Please try again.",
       details: {
         operation: "query",
         path: ["query"],
@@ -148,7 +148,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: JSON.stringify(error),
-      summary: "Network connection error",
+      summary: "Connection error. Please check your internet connection.",
       details: {
         operation: "mutation",
         path: ["mutation"],
@@ -164,7 +164,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: error,
-      summary: "Access denied",
+      summary: "You don't have permission to perform this action",
       details: {
         operation: "executeTransaction",
         rpcError: "PermissionDenied: access denied for operation",
@@ -188,7 +188,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: JSON.stringify(error),
-      summary: "Authentication required",
+      summary: "Please sign in to continue",
       details: {
         operation: "secureOperation",
         rpcError: "Unauthenticated: authentication required",
@@ -212,7 +212,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: JSON.stringify(error),
-      summary: "Service temporarily unavailable",
+      summary: "Service is temporarily unavailable. Please try again later.",
       details: {
         operation: "healthCheck",
         rpcError: "Unavailable: service temporarily down",
@@ -257,7 +257,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: JSON.stringify(error),
-      summary: "Request validation failed",
+      summary: "Invalid request. Please check your input.",
       details: {
         operation: "createUser",
         path: ["createUser"],
@@ -299,7 +299,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: error,
-      summary: "Resource not found",
+      summary: "The requested resource was not found",
       details: {
         operation: "items",
         rpcError: "NotFound: item not found",
@@ -348,7 +348,7 @@ describe("parseGraphQLError", () => {
 
     const result = parseGraphQLError(error);
 
-    expect(result.summary).toBe(longMessage.substring(0, 100) + "...");
+    expect(result.summary).toBe(longMessage.substring(0, 97) + "...");
     expect(result.details.operation).toBe("longOperation");
   });
 
