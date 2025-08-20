@@ -6,7 +6,6 @@ export interface Wallet {
   type: ExternalWalletType;
   icon: React.ReactNode;
   color?: string;
-  enabled?: boolean;
 }
 
 export interface Network {
@@ -18,7 +17,6 @@ export interface Network {
   }[];
   icon: React.ReactNode;
   subIcon?: React.ReactNode;
-  enabled?: boolean;
   wallets: Map<string, Wallet>;
 }
 

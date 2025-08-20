@@ -138,10 +138,10 @@ export function StarterPackInner({
   const onProceed = () => {
     switch (acquisitionType) {
       case StarterpackAcquisitionType.Paid:
-        navigate("/purchase/method");
+        navigate("/purchase/method/ethereum;solana;base;arbitrum;optimism");
         break;
       case StarterpackAcquisitionType.Claimed:
-        navigate("/purchase/network");
+        navigate("/purchase/network/ethereum;starknet");
         break;
       default:
         throw new Error(`Invalid acquisition type: ${acquisitionType}`);

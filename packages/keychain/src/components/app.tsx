@@ -44,6 +44,7 @@ import { Deposit } from "./funding/Deposit";
 import { useNavigation } from "@/context";
 import { Purchase } from "./purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
+import { ChooseNetwork } from "./purchasenew/wallet/network";
 
 export function App() {
   const { navigate } = useNavigation();
@@ -71,7 +72,8 @@ export function App() {
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}
           />
-          <Route path="method" element={<PaymentMethod />} />
+          <Route path="method/:platforms?" element={<PaymentMethod />} />
+          <Route path="network/:platforms?" element={<ChooseNetwork />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/crypto" element={<CryptoCheckout />} />
           <Route path="wallet/:platformId" element={<SelectWallet />} />

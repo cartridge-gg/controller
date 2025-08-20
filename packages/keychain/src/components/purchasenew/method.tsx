@@ -10,8 +10,10 @@ import {
 import { useState } from "react";
 import { ErrorAlert } from "../ErrorAlert";
 import { networkWalletData } from "./wallet/data";
+import { useParams } from "react-router-dom";
 
 export function PaymentMethod() {
+  const { platforms } = useParams();
   const { navigate } = useNavigation();
   const { onCreditCard, displayError } = usePurchaseContext();
   const [isLoading, setIsLoading] = useState(false);
@@ -33,15 +35,20 @@ export function PaymentMethod() {
           }}
         />
 
-        {networkWalletData.networks.map((network) => (
-          <PurchaseCard
-            key={network.platform}
-            text={network.name + (network.enabled ? "" : " (Coming Soon)")}
-            icon={network.icon}
-            onClick={() => navigate(`/purchase/wallet/${network.platform}`)}
-            className={!network.enabled ? "opacity-50 pointer-events-none" : ""}
-          />
-        ))}
+        {networkWalletData.networks.map((network) => {
+          if (platforms && !platforms.includes(network.platform)) {
+            return null;
+          }
+
+          return (
+            <PurchaseCard
+              key={network.platform}
+              text={network.name}
+              icon={network.icon}
+              onClick={() => navigate(`/purchase/wallet/${network.platform}`)}
+            />
+          );
+        })}
       </LayoutContent>
       <LayoutFooter>
         {displayError && (
