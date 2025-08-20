@@ -32,7 +32,7 @@ export function PaymentMethod() {
             navigate("/purchase/checkout/stripe");
           }}
         />
-        
+
         {networkWalletData.networks.map((network) => (
           <PurchaseCard
             key={network.platform}
