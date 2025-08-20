@@ -481,14 +481,7 @@ export function useConnectionValue() {
           iframeMethods.externalWaitForTransaction(currentOrigin),
       });
     }
-  }, [
-    setOrigin,
-    setRpcUrl,
-    setContext,
-    setController,
-    setConfigSignupOptions,
-    navigate,
-  ]);
+  }, []); // Empty dependency array since we only want to run this once
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
