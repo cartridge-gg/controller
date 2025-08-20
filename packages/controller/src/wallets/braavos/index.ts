@@ -100,13 +100,20 @@ export class BraavosWallet implements WalletAdapter {
     };
   }
 
-  async switchChain(_chainId: string): Promise<boolean> {
-    console.warn(
-      "Chain switching for Braavos may require custom implementation",
-    );
-    return false;
-  }
+  async switchChain(chainId: string): Promise<boolean> {
+    if (!this.wallet) {
+      throw new Error("No wallet found");
+    }
 
+    const result = await this.wallet.request({
+      type: "wallet_switchStarknetChain",
+      params: {
+        chainId,
+      },
+    });
+
+    return result;
+  }
   async getBalance(
     _tokenAddress?: string,
   ): Promise<ExternalWalletResponse<any>> {
