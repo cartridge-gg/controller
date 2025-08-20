@@ -1,5 +1,6 @@
 export type ExternalWalletType =
   | "argent"
+  | "braavos"
   | "metamask"
   | "phantom"
   | "rabby"

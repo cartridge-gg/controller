@@ -1,4 +1,5 @@
 export * from "./argent";
+export * from "./braavos";
 export * from "./bridge";
 export * from "./metamask";
 export * from "./phantom";
