@@ -2,6 +2,7 @@ import { AuthOption } from "@cartridge/controller";
 
 export const AUTH_METHODS_LABELS: Record<AuthOption, string> = {
   argent: "Argent",
+  braavos: "Braavos",
   webauthn: "Passkey",
   phantom: "Phantom",
   rabby: "Rabby",
