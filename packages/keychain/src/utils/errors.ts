@@ -552,7 +552,7 @@ export function parseExecutionError(
       } else {
         // Try to find a meaningful error message instead of raw hex or technical errors
         const meaningfulError = lastError.find(
-          (err) =>
+          (err: string) =>
             !err.match(/^0x[0-9a-fA-F]+$/) &&
             err !== "ENTRYPOINT_FAILED" &&
             err !== "0x0" &&
