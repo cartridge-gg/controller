@@ -1,5 +1,5 @@
-import { Signature, constants } from "starknet";
-import { useCallback, useEffect } from "react";
+import { Signature } from "starknet";
+import { useEffect } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, SignMessageCtx } from "@/utils/connection";
@@ -10,43 +10,10 @@ import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
-import { Outlet, useLocation, useSearchParams } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Authenticate } from "./authenticate";
-import { Button } from "@cartridge/ui";
 
 export function Home() {
-  const [searchParams] = useSearchParams();
-
-  if (searchParams.get("callback_uri")) {
-    return <MockedHome />;
-  }
-
-  return <HomeInner />;
-}
-
-function MockedHome() {
-  const [searchParams] = useSearchParams();
-
-  const onClick = useCallback(() => {
-    const callbackUrl = decodeURIComponent(searchParams.get("callback_uri")!);
-    if (!callbackUrl) {
-      throw new Error("callback_uri is required");
-    }
-    const url = new URL(callbackUrl);
-    url.searchParams.set("address", "0x0000000000000000000000000000000000000000000000000000000000000000");
-    url.searchParams.set("chain_id", constants.StarknetChainId.SN_MAIN);
-    url.searchParams.set("rpc_url", encodeURIComponent("https://api.cartridge.gg/x/starknet/mainnet"));
-    window.location.href = url.toString();
-  }, [searchParams]);
-
-  return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <Button onClick={onClick}>Log in</Button>
-    </div>
-  );
-}
-
-export function HomeInner() {
   const { context, controller, policies, isConfigLoading } = useConnection();
   const { pathname } = useLocation();
 
@@ -61,7 +28,10 @@ export function HomeInner() {
     }
   }, [context?.type, posthog]);
 
-  // Popup flow authentication
+  if (pathname.startsWith("/mocked")) {
+    return <Outlet />;
+  }
+
   if (pathname.startsWith("/authenticate")) {
     return <Authenticate />;
   }

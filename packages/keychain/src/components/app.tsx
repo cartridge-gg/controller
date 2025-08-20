@@ -45,11 +45,53 @@ import { useNavigation } from "@/context";
 import { Purchase } from "./purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
 
+import { Mocked } from "./mocked";
+import { constants } from "starknet";
+
 export function App() {
   const { navigate } = useNavigation();
   return (
     <Routes>
       <Route path="/" element={<Home />}>
+        <Route
+          path="mocked"
+          element={
+            <Mocked
+              title="Log in"
+              setSearchParams={(p) => {
+                p.set(
+                  "address",
+                  "0x0000000000000000000000000000000000000000000000000000000000000000",
+                );
+                p.set("chain_id", constants.StarknetChainId.SN_MAIN);
+                p.set(
+                  "rpc_url",
+                  encodeURIComponent(
+                    "https://api.cartridge.gg/x/starknet/mainnet",
+                  ),
+                );
+              }}
+            />
+          }
+        />
+        <Route
+          path="mocked/sign-message"
+          element={
+            <Mocked
+              title="Sign message"
+              setSearchParams={(p) => {
+                const sig = [
+                  "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "0x0000000000000000000000000000000000000000000000000000000000000000",
+                  "0x0000000000000000000000000000000000000000000000000000000000000000",
+                ];
+                for (const s of sig) {
+                  p.append("signature", s);
+                }
+              }}
+            />
+          }
+        />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/recovery" element={<Recovery />} />
         <Route path="/settings/delegate" element={<Delegate />} />
