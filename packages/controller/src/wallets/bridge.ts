@@ -10,6 +10,7 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "./types";
+import { BraavosWallet } from "./braavos";
 
 export class WalletBridge {
   private readonly walletAdapters: Map<ExternalWalletType, WalletAdapter>;
@@ -29,6 +30,9 @@ export class WalletBridge {
 
     const argent = new ArgentWallet();
     argent.isAvailable() && this.walletAdapters.set("argent", argent);
+
+    const braavos = new BraavosWallet();
+    braavos.isAvailable() && this.walletAdapters.set("braavos", braavos);
 
     const rabby = new RabbyWallet();
     rabby.isAvailable() && this.walletAdapters.set("rabby", rabby);
@@ -291,6 +295,7 @@ declare global {
     ethereum?: any;
     solana?: any;
     starknet_argentX?: any;
+    starknet_braavos?: any;
     wallet_bridge?: WalletBridge;
   }
 }
