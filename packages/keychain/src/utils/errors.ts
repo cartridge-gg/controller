@@ -340,7 +340,8 @@ export function parseExecutionError(
           (err) =>
             err !== "argent/multicall-failed" &&
             err !== "ENTRYPOINT_FAILED" &&
-            !err.startsWith("0x"), // Exclude hex values that might leak through
+            err !== "0x0" && // Exclude separator
+            !err.match(/^0x[0-9a-fA-F]+$/), // Exclude hex values that might leak through
         ) || allErrors[0];
 
       return {
@@ -461,7 +462,8 @@ export function parseExecutionError(
             (err) =>
               err !== "argent/multicall-failed" &&
               err !== "ENTRYPOINT_FAILED" &&
-              !err.startsWith("0x"), // Exclude hex values that might leak through
+              err !== "0x0" && // Exclude separator like 0x0
+              !err.match(/^0x[0-9a-fA-F]+$/), // Exclude hex values that might leak through
           );
 
           // Use the meaningful error if found, otherwise fall back to all errors
@@ -541,12 +543,30 @@ export function parseExecutionError(
         // If multicall failed, look for the actual error
         const actualError = lastError.find(
           (err: string) =>
-            err !== "argent/multicall-failed" && err !== "ENTRYPOINT_FAILED",
+            err !== "argent/multicall-failed" &&
+            err !== "ENTRYPOINT_FAILED" &&
+            err !== "0x0" && // Exclude separator
+            !err.match(/^0x[0-9a-fA-F]+$/), // Exclude hex values
         );
         summary = actualError || "Multicall failed";
       } else {
-        summary = lastErrorMessage;
-        lastError[lastError.length - 1] = summary;
+        // Try to find a meaningful error message instead of raw hex or technical errors
+        const meaningfulError = lastError.find(
+          (err: string) =>
+            !err.match(/^0x[0-9a-fA-F]+$/) &&
+            err !== "ENTRYPOINT_FAILED" &&
+            err !== "0x0" &&
+            !err.startsWith("Cairo traceback") &&
+            !err.startsWith("Unknown location"),
+        );
+
+        // Use the meaningful error if found, otherwise use generic "Execution error"
+        summary = meaningfulError || "Execution error";
+
+        // Only update last error if we found something meaningful
+        if (meaningfulError && meaningfulError !== "Execution error") {
+          lastError[lastError.length - 1] = summary;
+        }
       }
     }
   }
@@ -1155,6 +1175,32 @@ export const starknetTransactionExecutionErrorTestCases = [
           error: ["u256_sub Overflow"],
           selector:
             "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        execution_error:
+          "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x03f301af12fb7d7ed8266639594b1867c33b511824d2a1d6bc7fa25ea8eb477c, class hash: 0x0360783345096514626504edc9fb252328d1a240e4e948bef8d0c08dff45927f, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x0, 'Already joined in!', 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+        transaction_index: 0,
+      },
+    },
+    expected: {
+      raw: "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x03f301af12fb7d7ed8266639594b1867c33b511824d2a1d6bc7fa25ea8eb477c, class hash: 0x0360783345096514626504edc9fb252328d1a240e4e948bef8d0c08dff45927f, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x0, 'Already joined in!', 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      summary: "Already joined in!",
+      stack: [
+        {
+          address:
+            "0x03f301af12fb7d7ed8266639594b1867c33b511824d2a1d6bc7fa25ea8eb477c",
+          class:
+            "0x0360783345096514626504edc9fb252328d1a240e4e948bef8d0c08dff45927f",
+          selector:
+            "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          error: ["Already joined in!"],
         },
       ],
     },
