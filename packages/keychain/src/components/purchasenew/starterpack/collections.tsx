@@ -32,7 +32,7 @@ export const Collections = React.forwardRef<
         <div className="text-xs font-semibold text-foreground-400">
           Supported Collections
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(80px,80px))] justify-start gap-2 overflow-x-auto">
           {collections.map((collection) => (
             <Collection key={collection.name} {...collection} />
           ))}

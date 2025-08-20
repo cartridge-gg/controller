@@ -25,30 +25,30 @@ import { CollectionItem, Collections } from "./collections";
 import { ExternalPlatform } from "@cartridge/controller";
 
 // Placeholder collections
-const collections: CollectionItem[] = [
+export const dummyCollections: CollectionItem[] = [
   {
     name: "Realms",
-    image: "https://placehold.co/400x400",
+    image: "https://placehold.co/80x80",
     platforms: ["starknet", "ethereum"] as ExternalPlatform[],
   },
   {
     name: "Dopewars",
-    image: "https://placehold.co/400x400",
+    image: "https://placehold.co/80x80",
     platforms: ["optimism"] as ExternalPlatform[],
   },
   {
     name: "Loot",
-    image: "https://placehold.co/400x400",
+    image: "https://placehold.co/80x80",
     platforms: ["ethereum"] as ExternalPlatform[],
   },
   {
     name: "Blob Arena",
-    image: "https://placehold.co/400x400",
+    image: "https://placehold.co/80x80",
     platforms: ["starknet"] as ExternalPlatform[],
   },
   {
     name: "Something",
-    image: "https://placehold.co/400x400",
+    image: "https://placehold.co/80x80",
     platforms: ["arbitrum"] as ExternalPlatform[],
   },
 ];
@@ -110,6 +110,7 @@ export function PurchaseStarterpack() {
       mintAllowance={mintAllowance}
       acquisitionType={acquisitionType}
       starterpackItems={items}
+      collections={dummyCollections}
       error={error}
     />
   );
@@ -121,6 +122,7 @@ export function StarterPackInner({
   mintAllowance,
   acquisitionType,
   starterpackItems = [],
+  collections = [],
   error,
 }: {
   name: string;
@@ -128,6 +130,7 @@ export function StarterPackInner({
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
   starterpackItems?: StarterItemData[];
+  collections?: CollectionItem[];
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();
