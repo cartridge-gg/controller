@@ -6,10 +6,10 @@ import {
   LayoutContent,
   LayoutFooter,
   PurchaseCard,
-  WalletIcon,
 } from "@cartridge/ui";
 import { useState } from "react";
 import { ErrorAlert } from "../ErrorAlert";
+import { networkWalletData } from "./wallet/data";
 
 export function PaymentMethod() {
   const { navigate } = useNavigation();
@@ -23,7 +23,6 @@ export function PaymentMethod() {
         icon={<DepositIcon variant="solid" size="lg" />}
       />
       <LayoutContent className={isLoading ? "pointer-events-none" : ""}>
-        {/* <PurchaseCard text="Controller" icon={<ControllerColorIcon />} /> */}
         <PurchaseCard
           text="Credit Card"
           icon={<CreditCardIcon variant="solid" />}
@@ -33,13 +32,16 @@ export function PaymentMethod() {
             navigate("/purchase/checkout/stripe");
           }}
         />
-        <PurchaseCard
-          text="Wallet"
-          icon={<WalletIcon variant="solid" />}
-          onClick={() => {
-            navigate("/purchase/network");
-          }}
-        />
+
+        {networkWalletData.networks.map((network) => (
+          <PurchaseCard
+            key={network.platform}
+            text={network.name + (network.enabled ? "" : " (Coming Soon)")}
+            icon={network.icon}
+            onClick={() => navigate(`/purchase/wallet/${network.platform}`)}
+            className={!network.enabled ? "opacity-50 pointer-events-none" : ""}
+          />
+        ))}
       </LayoutContent>
       <LayoutFooter>
         {displayError && (

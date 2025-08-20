@@ -34,7 +34,6 @@ import { PaymentMethod } from "./purchasenew/method";
 import { StripeCheckout } from "./purchasenew/checkout/stripe";
 import { PurchaseSuccess } from "./purchasenew/success";
 import { PurchasePending } from "./purchasenew/pending";
-import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { SelectWallet } from "./purchasenew/wallet/wallet";
 import { CryptoCheckout } from "./purchasenew/checkout/crypto";
 import { CollectibleListing } from "./inventory/collection/collectible-listing";
@@ -75,7 +74,6 @@ export function App() {
           <Route path="method" element={<PaymentMethod />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/crypto" element={<CryptoCheckout />} />
-          <Route path="network" element={<ChooseNetwork />} />
           <Route path="wallet/:platformId" element={<SelectWallet />} />
           <Route path="review" element={<></>} />
           <Route path="pending" element={<PurchasePending />} />
