@@ -1,4 +1,4 @@
-import { Signature } from "starknet";
+import { Signature, constants } from "starknet";
 import { useCallback, useEffect } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
@@ -17,7 +17,7 @@ import { Button } from "@cartridge/ui";
 export function Home() {
   const [searchParams] = useSearchParams();
 
-  if (searchParams.get("callback_url")) {
+  if (searchParams.get("callback_uri")) {
     return <MockedHome />;
   }
 
@@ -28,11 +28,15 @@ function MockedHome() {
   const [searchParams] = useSearchParams();
 
   const onClick = useCallback(() => {
-    const callbackUrl = decodeURIComponent(searchParams.get("callback_url")!);
+    const callbackUrl = decodeURIComponent(searchParams.get("callback_uri")!);
     if (!callbackUrl) {
-      throw new Error("callback_url is required");
+      throw new Error("callback_uri is required");
     }
-    window.location.href = `${callbackUrl}?token=asdfasdf`;
+    const url = new URL(callbackUrl);
+    url.searchParams.set("address", "0x0000000000000000000000000000000000000000000000000000000000000000");
+    url.searchParams.set("chain_id", constants.StarknetChainId.SN_MAIN);
+    url.searchParams.set("rpc_url", encodeURIComponent("https://api.cartridge.gg/x/starknet/mainnet"));
+    window.location.href = url.toString();
   }, [searchParams]);
 
   return (
