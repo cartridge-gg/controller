@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { CheckoutState, CryptoCheckout } from "./CryptoCheckout";
-import { AcquisitionType, StarterItemType } from "@/hooks/starterpack";
+import { StarterItemType } from "@/hooks/starterpack";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 const meta = {
   component: CryptoCheckout,
@@ -23,7 +24,7 @@ export const PurchaseStarterpack: Story = {
       id: "1",
       name: "Starter Pack Name",
       priceUsd: 5,
-      acquisitionType: AcquisitionType.PAID,
+      acquisitionType: StarterpackAcquisitionType.Paid,
       starterPackItems: [
         {
           title: "Village",
@@ -61,7 +62,7 @@ export const StarterpackTxnSubmitted: Story = {
       id: "1",
       name: "Starter Pack Name",
       priceUsd: 5,
-      acquisitionType: AcquisitionType.PAID,
+      acquisitionType: StarterpackAcquisitionType.Paid,
       starterPackItems: [
         {
           title: "Village",
