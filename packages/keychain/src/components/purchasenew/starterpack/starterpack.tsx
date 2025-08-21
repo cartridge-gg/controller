@@ -28,27 +28,27 @@ import { ExternalPlatform } from "@cartridge/controller";
 export const dummyCollections: CollectionItem[] = [
   {
     name: "Realms",
-    image: "https://placehold.co/80x80",
+    image: "https://placehold.co/80x80/161a17/ffffff",
     platforms: ["starknet", "ethereum"] as ExternalPlatform[],
   },
   {
     name: "Dopewars",
-    image: "https://placehold.co/80x80",
+    image: "https://placehold.co/80x80/161a17/ffffff",
     platforms: ["optimism"] as ExternalPlatform[],
   },
   {
     name: "Loot",
-    image: "https://placehold.co/80x80",
+    image: "https://placehold.co/80x80/161a17/ffffff",
     platforms: ["ethereum"] as ExternalPlatform[],
   },
   {
     name: "Blob Arena",
-    image: "https://placehold.co/80x80",
+    image: "https://placehold.co/80x80/161a17/ffffff",
     platforms: ["starknet"] as ExternalPlatform[],
   },
   {
     name: "Something",
-    image: "https://placehold.co/80x80",
+    image: "https://placehold.co/80x80/161a17/ffffff",
     platforms: ["arbitrum"] as ExternalPlatform[],
   },
 ];

@@ -16,6 +16,7 @@ import {
   StarknetColorIcon,
   StarknetIcon,
   ArgentColorIcon,
+  BraavosColorIcon,
 } from "@cartridge/ui";
 import { NetworkWalletData, Wallet } from "../types";
 import { constants } from "starknet";
@@ -73,6 +74,14 @@ export const networkWalletData: NetworkWalletData = {
             type: "argent",
             icon: React.createElement(ArgentColorIcon),
             color: "#FF875B",
+          },
+        ],
+        [
+          "braavos",
+          {
+            name: "Braavos",
+            type: "braavos",
+            icon: React.createElement(BraavosColorIcon),
           },
         ],
       ]),

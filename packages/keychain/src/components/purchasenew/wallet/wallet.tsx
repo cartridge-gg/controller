@@ -37,6 +37,8 @@ export function SelectWallet() {
       return;
     }
 
+    console.log({ wallets });
+
     // Filter detected wallets to only include those configured for this network
     const configuredWalletTypes = new Set(
       Array.from(selectedNetwork.wallets.keys()),

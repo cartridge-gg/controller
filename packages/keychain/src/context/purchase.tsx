@@ -56,6 +56,7 @@ export interface PurchaseContextType {
   teamId?: string;
   purchaseItems: PurchaseItem[];
   layerswapFees?: string;
+  isFetchingFees: boolean;
 
   // Payment state
   paymentMethod?: PaymentMethod;
@@ -94,6 +95,7 @@ export interface PurchaseContextType {
     chainId?: string,
   ) => Promise<void>;
   waitForPayment: (paymentId: string) => Promise<boolean>;
+  fetchFees: () => Promise<void>;
 }
 
 const PurchaseContext = createContext<PurchaseContextType | undefined>(
@@ -151,6 +153,8 @@ export const PurchaseProvider = ({
   const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
 
   const [displayError, setDisplayError] = useState<Error | undefined>();
+
+  const [isFetchingFees, setIsFetchingFees] = useState(false);
 
   useEffect(() => {
     setDisplayError(stripeError || walletError || cryptoError || undefined);
@@ -227,35 +231,45 @@ export const PurchaseProvider = ({
     ) => {
       if (!controller) return;
 
-      setSelectedWallet(wallet);
-      setSelectedPlatform(platform);
-      if (chainId) {
-        const res = await switchChain(wallet.type, chainId.toString());
-        if (!res) {
+      try {
+        setSelectedWallet(wallet);
+        setSelectedPlatform(platform);
+        const res = await connectWallet(wallet.type);
+        if (!res?.success) {
           const error = new Error(
-            `${wallet.name} failed to switch chain (${chainId})`,
+            `Failed to connect to ${wallet.name} - ${res?.error || "Unknown error"}`,
           );
-          setDisplayError(error);
           throw error;
         }
-      }
 
-      const res = await connectWallet(wallet.type);
-      if (res?.success) {
-        if (!res.account) {
-          const error = new Error(
-            `Connected to ${wallet.name} but no wallet address found`,
-          );
-          setDisplayError(error);
-          throw error;
-        }
         setWalletAddress(res.account);
         setWalletType(wallet.type);
+
+        if (chainId) {
+          const res = await switchChain(wallet.type, chainId.toString());
+          if (!res) {
+            const error = new Error(
+              `${wallet.name} failed to switch chain (${chainId})`,
+            );
+            throw error;
+          }
+        }
+      } catch (e) {
+        setDisplayError(e as Error);
+        throw e;
       }
+    },
+    [controller, usdAmount, starterpackId],
+  );
+
+  const fetchFees = useCallback(async () => {
+    if (!controller || !selectedPlatform) return;
+    try {
+      setIsFetchingFees(true);
 
       const quote = await quotePaymentFees(
         controller.username(),
-        platform,
+        selectedPlatform,
         usdToCredits(usdAmount),
         undefined,
         starterpackId,
@@ -273,9 +287,19 @@ export const PurchaseProvider = ({
         processingFeeInCents: cartridgeFees + layerswapFeesInCents,
         totalInCents,
       });
-    },
-    [controller, usdAmount, starterpackId, quotePaymentFees],
-  );
+    } catch (e) {
+      setDisplayError(e as Error);
+      throw e;
+    } finally {
+      setIsFetchingFees(false);
+    }
+  }, [
+    controller,
+    usdAmount,
+    starterpackId,
+    selectedPlatform,
+    quotePaymentFees,
+  ]);
 
   const contextValue: PurchaseContextType = {
     // Purchase details
@@ -283,6 +307,7 @@ export const PurchaseProvider = ({
     starterpackId,
     purchaseItems,
     layerswapFees,
+    isFetchingFees,
 
     // Payment state
     paymentMethod,
@@ -316,6 +341,7 @@ export const PurchaseProvider = ({
     onCrypto,
     onExternalConnect,
     waitForPayment,
+    fetchFees,
   };
 
   return (
