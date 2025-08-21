@@ -45,6 +45,7 @@ import { useNavigation } from "@/context";
 import { Purchase } from "./purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
+import { Claim } from "./purchasenew/claim/claim";
 
 export function App() {
   const { navigate } = useNavigation();
@@ -72,11 +73,12 @@ export function App() {
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}
           />
+          <Route path="claim" element={<Claim />} />
           <Route path="method/:platforms?" element={<PaymentMethod />} />
           <Route path="network/:platforms?" element={<ChooseNetwork />} />
+          <Route path="wallet/:platforms?" element={<SelectWallet />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/crypto" element={<CryptoCheckout />} />
-          <Route path="wallet/:platformId" element={<SelectWallet />} />
           <Route path="review" element={<></>} />
           <Route path="pending" element={<PurchasePending />} />
           <Route path="success" element={<PurchaseSuccess />} />

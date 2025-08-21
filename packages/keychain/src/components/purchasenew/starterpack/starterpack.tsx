@@ -65,8 +65,12 @@ export function PurchaseStarterpack() {
     isLoading,
     error,
   } = useStarterPack(starterpackId);
-  const { setStarterpackId, setPurchaseItems, setUsdAmount } =
-    usePurchaseContext();
+  const {
+    setStarterpackId,
+    setPurchaseItems,
+    setUsdAmount,
+    setAcquisitionType,
+  } = usePurchaseContext();
 
   if (!starterpackId) {
     throw new Error("Starterpack ID is required");
@@ -75,6 +79,7 @@ export function PurchaseStarterpack() {
   useEffect(() => {
     if (!isLoading && starterpackId) {
       setStarterpackId(starterpackId);
+      setAcquisitionType(acquisitionType);
       setUsdAmount(priceUsd);
       const purchaseItems = items.map((item) => {
         return {
@@ -91,6 +96,7 @@ export function PurchaseStarterpack() {
     }
   }, [
     starterpackId,
+    acquisitionType,
     isLoading,
     items,
     priceUsd,
@@ -141,7 +147,7 @@ export function StarterPackInner({
         navigate("/purchase/method/ethereum;solana;base;arbitrum;optimism");
         break;
       case StarterpackAcquisitionType.Claimed:
-        navigate("/purchase/network/ethereum;starknet");
+        navigate("/purchase/wallet/starknet;ethereum;");
         break;
       default:
         throw new Error(`Invalid acquisition type: ${acquisitionType}`);

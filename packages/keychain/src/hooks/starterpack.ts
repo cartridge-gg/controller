@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ClaimFreeStarterpackDocument,
   ClaimFreeStarterpackMutation,
+  MerkleDrop,
   StarterpackAcquisitionType,
   StarterPackDocument,
   StarterpackInput,
@@ -55,6 +56,9 @@ export function useStarterPack(starterpackId?: string) {
   const [priceUsd, setPriceUsd] = useState<number>(0);
   const [acquisitionType, setAcquisitionType] =
     useState<StarterpackAcquisitionType>(StarterpackAcquisitionType.Paid);
+  const [merkleDrop, setMerkleDrop] = useState<MerkleDrop | undefined>(
+    undefined,
+  );
   const [mintAllowance, setMintAllowance] = useState<MintAllowance | undefined>(
     undefined,
   );

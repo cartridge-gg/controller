@@ -9,57 +9,77 @@ import {
 import { networkWalletData } from "./data";
 import { useNavigation, usePurchaseContext } from "@/context";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { ExternalWallet } from "@cartridge/controller";
 import { useWallets } from "@/hooks/wallets";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 export function SelectWallet() {
-  const { goBack, navigate } = useNavigation();
-  const { platformId } = useParams();
+  const { navigate } = useNavigation();
+  const { platforms } = useParams();
   const { isMainnet } = useConnection();
-  const { onExternalConnect, clearError } = usePurchaseContext();
+  const { acquisitionType, onExternalConnect, clearError } =
+    usePurchaseContext();
   const { wallets, isConnecting: isWalletConnecting } = useWallets();
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [chainId, setChainId] = useState<string>();
-  const [availableWallets, setAvailableWallets] = useState<ExternalWallet[]>(
-    [],
-  );
-  const selectedNetwork = networkWalletData.networks.find(
-    (n) => n.platform === platformId,
+  const [chainIds, setChainIds] = useState<Map<string, string>>(new Map());
+  const [availableWallets, setAvailableWallets] = useState<
+    Map<string, ExternalWallet[]>
+  >(new Map());
+
+  const selectedNetworks = useMemo(
+    () =>
+      platforms
+        ?.split(";")
+        .map((platform) =>
+          networkWalletData.networks.find((n) => n.platform === platform),
+        )
+        .filter(Boolean) || [],
+    [platforms],
   );
 
   useEffect(() => {
-    if (!selectedNetwork || !wallets) {
-      setAvailableWallets([]);
+    if (!selectedNetworks.length || !wallets) {
+      setAvailableWallets(new Map());
       return;
     }
 
-    console.log({ wallets });
+    const newAvailableWallets = new Map<string, ExternalWallet[]>();
+    const newChainIds = new Map<string, string>();
 
-    // Filter detected wallets to only include those configured for this network
-    const configuredWalletTypes = new Set(
-      Array.from(selectedNetwork.wallets.keys()),
-    );
-    const matchingWallets = wallets.filter((detectedWallet) =>
-      configuredWalletTypes.has(detectedWallet.type),
-    );
+    selectedNetworks.forEach((network) => {
+      if (!network) return;
 
-    const chainId = selectedNetwork.chains?.find(
-      (chain) => chain.isMainnet === isMainnet,
-    )?.chainId;
+      const configuredWalletTypes = new Set(Array.from(network.wallets.keys()));
+      const matchingWallets = wallets.filter((detectedWallet) =>
+        configuredWalletTypes.has(detectedWallet.type),
+      );
 
-    setChainId(chainId);
-    setAvailableWallets(matchingWallets);
-  }, [wallets, isMainnet, selectedNetwork]);
+      const chainId = network.chains?.find(
+        (chain) => chain.isMainnet === isMainnet,
+      )?.chainId;
+
+      if (chainId) {
+        newChainIds.set(network.platform, chainId);
+      }
+
+      if (matchingWallets.length > 0) {
+        newAvailableWallets.set(network.platform, matchingWallets);
+      }
+    });
+
+    setChainIds(newChainIds);
+    setAvailableWallets(newAvailableWallets);
+  }, [wallets, isMainnet, selectedNetworks]);
 
   useEffect(() => {
     return () => clearError();
   }, [clearError]);
 
-  if (!selectedNetwork) {
+  if (!selectedNetworks.length) {
     return (
       <>
         <HeaderInner
@@ -67,24 +87,8 @@ export function SelectWallet() {
           icon={<WalletIcon variant="solid" size="lg" />}
         />
         <LayoutContent>
-          <div>Network not found</div>
+          <div>No networks found</div>
         </LayoutContent>
-      </>
-    );
-  }
-
-  if (availableWallets.length === 0) {
-    return (
-      <>
-        <HeaderInner
-          title={`Select a ${selectedNetwork.name} Wallet`}
-          icon={<WalletIcon variant="solid" size="lg" />}
-        />
-        <LayoutFooter>
-          <Button variant="secondary" onClick={goBack}>
-            Back
-          </Button>
-        </LayoutFooter>
       </>
     );
   }
@@ -92,43 +96,53 @@ export function SelectWallet() {
   return (
     <>
       <HeaderInner
-        title={`Select a ${selectedNetwork.name} Wallet`}
+        title="Select a Wallet"
         icon={<WalletIcon variant="solid" size="lg" />}
       />
       <LayoutContent>
-        {availableWallets.map((wallet) => {
-          // Get the configuration for this wallet type
-          const walletConfig = selectedNetwork.wallets.get(wallet.type);
+        {selectedNetworks.map((network) => {
+          if (!network || !availableWallets.has(network.platform)) return null;
 
-          return (
-            <PurchaseCard
-              key={wallet.type}
-              text={walletConfig?.name || wallet.type}
-              icon={walletConfig?.icon}
-              network={selectedNetwork.name}
-              networkIcon={selectedNetwork.subIcon}
-              onClick={async () => {
-                setIsLoading(true);
-                try {
-                  await onExternalConnect(
-                    wallet,
-                    selectedNetwork.platform,
-                    chainId,
-                  );
-                  navigate(`/purchase/checkout/crypto`);
-                } catch (e) {
-                  setError(e as Error);
-                } finally {
-                  setIsLoading(false);
+          return availableWallets.get(network.platform)?.map((wallet) => {
+            const walletConfig = network.wallets.get(wallet.type);
+
+            return (
+              <PurchaseCard
+                key={`${network.platform}-${wallet.type}`}
+                text={walletConfig?.name || wallet.type}
+                icon={walletConfig?.icon}
+                network={network.name}
+                networkIcon={network.subIcon}
+                onClick={async () => {
+                  setIsLoading(true);
+                  try {
+                    await onExternalConnect(
+                      wallet,
+                      network.platform,
+                      chainIds.get(network.platform),
+                    );
+
+                    if (
+                      acquisitionType === StarterpackAcquisitionType.Claimed
+                    ) {
+                      navigate(`/purchase/claim`);
+                    } else {
+                      navigate(`/purchase/checkout/crypto`);
+                    }
+                  } catch (e) {
+                    setError(e as Error);
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                className={
+                  isWalletConnecting || isLoading
+                    ? "opacity-50 pointer-events-none"
+                    : ""
                 }
-              }}
-              className={
-                isWalletConnecting || isLoading
-                  ? "opacity-50 pointer-events-none"
-                  : ""
-              }
-            />
-          );
+              />
+            );
+          });
         })}
       </LayoutContent>
 

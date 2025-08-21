@@ -70,7 +70,7 @@ export const networkWalletData: NetworkWalletData = {
         [
           "argent",
           {
-            name: "Argent",
+            name: "Ready",
             type: "argent",
             icon: React.createElement(ArgentColorIcon),
             color: "#FF875B",

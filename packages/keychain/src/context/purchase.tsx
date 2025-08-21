@@ -18,6 +18,7 @@ import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -53,6 +54,7 @@ export interface PurchaseContextType {
   // Purchase details
   usdAmount: number;
   starterpackId?: string;
+  acquisitionType?: StarterpackAcquisitionType;
   teamId?: string;
   purchaseItems: PurchaseItem[];
   layerswapFees?: string;
@@ -85,6 +87,7 @@ export interface PurchaseContextType {
   setUsdAmount: (amount: number) => void;
   setPurchaseItems: (items: PurchaseItem[]) => void;
   setStarterpackId: (id: string) => void;
+  setAcquisitionType: (type: StarterpackAcquisitionType) => void;
 
   // Payment actions
   onCreditCard: () => Promise<void>;
@@ -135,6 +138,8 @@ export const PurchaseProvider = ({
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
   const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
   const [starterpackId, setStarterpackId] = useState<string | undefined>();
+  const [acquisitionType, setAcquisitionType] =
+    useState<StarterpackAcquisitionType>();
   const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
   const [paymentId, setPaymentId] = useState<string | undefined>();
   const [explorer, setExplorer] = useState<Explorer | undefined>();
@@ -305,6 +310,7 @@ export const PurchaseProvider = ({
     // Purchase details
     usdAmount,
     starterpackId,
+    acquisitionType,
     purchaseItems,
     layerswapFees,
     isFetchingFees,
@@ -334,6 +340,7 @@ export const PurchaseProvider = ({
     // Setters
     setUsdAmount,
     setStarterpackId,
+    setAcquisitionType,
     setPurchaseItems,
 
     // Actions
