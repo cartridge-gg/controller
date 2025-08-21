@@ -1,4 +1,4 @@
-import { TypedData } from "@starknet-io/types-js";
+import { Call, TypedData } from "@starknet-io/types-js";
 import { connect, StarknetWindowObject } from "starknetkit";
 import { InjectedConnector } from "starknetkit/injected";
 import {
@@ -92,12 +92,32 @@ export class ArgentWallet implements WalletAdapter {
     }
   }
 
-  async sendTransaction(_txn: any): Promise<ExternalWalletResponse<any>> {
-    return {
-      success: false,
-      wallet: this.type,
-      error: "Not implemented",
-    };
+  async sendTransaction(calls: Call[]): Promise<ExternalWalletResponse> {
+    if (!this.wallet) {
+      throw new Error("No wallet found");
+    }
+
+    try {
+      const result = await this.wallet.request({
+        type: "wallet_addInvokeTransaction",
+        params: {
+          calls,
+        },
+      });
+
+      return {
+        success: true,
+        wallet: this.type,
+        result,
+      };
+    } catch (error) {
+      console.error(`Error sending transaction with Argent:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
   }
 
   async switchChain(chainId: string): Promise<boolean> {
