@@ -18,7 +18,7 @@ import {
   useAccountQuery,
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { shortString } from "starknet";
 import {
   credentialToAddress,
@@ -122,6 +122,12 @@ export function useCreateController({
     },
     [chainId, origin, rpcUrl, setController],
   );
+
+  useEffect(() => {
+    if (error) {
+      setAuthenticationStep(AuthenticationStep.FillForm);
+    }
+  }, [error]);
 
   useAccountQuery(
     { username: pendingUsername || "" },

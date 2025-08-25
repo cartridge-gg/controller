@@ -15,7 +15,7 @@ export const useSocialAuthentication = (
         return;
       }
       if (!account) {
-        throw new Error("No account found");
+        throw new Error(error || "Unknown error trying to connect to Turnkey");
       }
 
       window.keychain_wallets?.addEmbeddedWallet(

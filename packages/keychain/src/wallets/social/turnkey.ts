@@ -95,8 +95,21 @@ export class TurnkeyWallet {
 
       const auth0Client = await this.getAuth0Client(10_000);
       const popup = await openPopup("");
-      await auth0Client.loginWithPopup(
-        {
+      if (popup) {
+        await auth0Client.loginWithPopup(
+          {
+            authorizationParams: {
+              connection: Auth0SocialProviderName[this.socialProvider],
+              redirect_uri: import.meta.env.VITE_ORIGIN,
+              nonce,
+              display: "touch",
+              tknonce: nonce,
+            },
+          },
+          { popup },
+        );
+      } else {
+        await auth0Client.loginWithRedirect({
           authorizationParams: {
             connection: Auth0SocialProviderName[this.socialProvider],
             redirect_uri: import.meta.env.VITE_ORIGIN,
@@ -104,9 +117,8 @@ export class TurnkeyWallet {
             display: "touch",
             tknonce: nonce,
           },
-        },
-        { popup },
-      );
+        });
+      }
 
       const iFramePublicKey = await getIframePublicKey(turnkeyIframeClient!);
 
@@ -388,9 +400,6 @@ const openPopup = (url: string) => {
     "auth0:authorize:popup",
     `resizable,scrollbars=no,status=1`,
   );
-  if (!popup || popup.closed) {
-    throw new Error("Failed to open authentication popup - may be blocked");
-  }
   return popup;
 };
 
