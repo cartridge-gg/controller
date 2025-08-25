@@ -168,7 +168,7 @@ export function Settings() {
           </section>
         )}
 
-        <SessionsSection controllerQuery={controllerQuery} />
+        <SessionsSection />
       </LayoutContent>
 
       <LayoutFooter>
