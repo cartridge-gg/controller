@@ -128,11 +128,11 @@ export default class Controller {
     await this.cartridge.addOwner(owner, signerInput, rp_id);
   }
 
-  async removeSigner(signerGuid: JsRemoveSignerInput) {
+  async removeSigner(signerInput: JsRemoveSignerInput) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
-    await this.cartridge.removeOwner(signerGuid);
+    await this.cartridge.removeOwner(signerInput);
   }
 
   async registerSessionCalldata(
