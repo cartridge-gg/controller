@@ -4,6 +4,7 @@ import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
+import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { AuthOption } from "@cartridge/controller";
 import {
   computeAccountAddress,
@@ -12,6 +13,7 @@ import {
 } from "@cartridge/controller-wasm";
 import {
   AccountQuery,
+  ControllerQuery,
   CredentialMetadata,
   SignerInput,
   SignerType,
@@ -27,11 +29,11 @@ import {
   signerToAddress,
 } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
+import { usePasswordAuthentication } from "./password";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
-import { usePasswordAuthentication } from "./password";
 
 export interface SignupResponse {
   address: string;
@@ -176,6 +178,58 @@ export function useCreateController({
     );
   }, [wallets, configSignupOptions]);
 
+  const finishSignup = useCallback(
+    async (
+      username: string,
+      chainId: string,
+      signupResponse: SignupResponse,
+      signer: SignerInput,
+    ) => {
+      const classHash = STABLE_CONTROLLER.hash;
+      const owner = {
+        signer: signupResponse.signer,
+      };
+      const salt = shortString.encodeShortString(username);
+      const address = computeAccountAddress(classHash, owner, salt);
+
+      const controller = new Controller({
+        appId: origin,
+        classHash,
+        chainId,
+        rpcUrl,
+        address,
+        username,
+        owner,
+      });
+
+      const result = await controller.login(
+        now() + DEFAULT_SESSION_DURATION,
+        false,
+      );
+
+      const registerRet = await controller.register({
+        username,
+        chainId: shortString.decodeShortString(chainId),
+        owner: signer,
+        session: {
+          expiresAt: result.session.expiresAt,
+          guardianKeyGuid: result.session.guardianKeyGuid,
+          metadataHash: result.session.metadataHash,
+          sessionKeyGuid: result.session.sessionKeyGuid,
+          allowedPoliciesRoot: result.allowedPoliciesRoot,
+          authorization: result.authorization ?? [],
+          appId: origin,
+        },
+      });
+
+      if (registerRet.register.username) {
+        window.controller = controller;
+        setController(controller);
+      }
+    },
+    [setController, rpcUrl, origin],
+  );
+
   const handleSignup = useCallback(
     async (
       username: string,
@@ -196,28 +250,16 @@ export function useCreateController({
             credential: JSON.stringify({}),
           };
           return;
+        case "google":
         case "discord":
           signupResponse = (await signupWithSocial(
-            "discord",
+            authenticationMode,
             username,
           )) as SignupResponse;
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
-              provider: "discord",
-              eth_address: signupResponse.address,
-            }),
-          };
-          break;
-        case "google":
-          signupResponse = (await signupWithSocial(
-            "google",
-            username,
-          )) as SignupResponse;
-          signer = {
-            type: SignerType.Eip191,
-            credential: JSON.stringify({
-              provider: "google",
+              provider: authenticationMode,
               eth_address: signupResponse.address,
             }),
           };
@@ -278,47 +320,7 @@ export function useCreateController({
         throw new Error("Signup failed");
       }
 
-      const classHash = STABLE_CONTROLLER.hash;
-      const owner = {
-        signer: signupResponse.signer,
-      };
-      const salt = shortString.encodeShortString(username);
-      const address = computeAccountAddress(classHash, owner, salt);
-
-      const controller = new Controller({
-        appId: origin,
-        classHash,
-        chainId,
-        rpcUrl,
-        address,
-        username,
-        owner,
-      });
-
-      const result = await controller.login(
-        now() + DEFAULT_SESSION_DURATION,
-        false,
-      );
-
-      const registerRet = await controller.register({
-        username,
-        chainId: shortString.decodeShortString(chainId),
-        owner: signer,
-        session: {
-          expiresAt: result.session.expiresAt,
-          guardianKeyGuid: result.session.guardianKeyGuid,
-          metadataHash: result.session.metadataHash,
-          sessionKeyGuid: result.session.sessionKeyGuid,
-          allowedPoliciesRoot: result.allowedPoliciesRoot,
-          authorization: result.authorization ?? [],
-          appId: origin,
-        },
-      });
-
-      if (registerRet.register.username) {
-        window.controller = controller;
-        setController(controller);
-      }
+      await finishSignup(username, chainId, signupResponse, signer);
     },
     [
       chainId,
@@ -330,7 +332,61 @@ export function useCreateController({
       signupWithSocial,
       signupWithWebauthn,
       signupWithWalletConnect,
+      passwordAuth,
+      finishSignup,
     ],
+  );
+
+  const finishLogin = useCallback(
+    async (
+      controller: NonNullable<ControllerQuery["controller"]>,
+      username: string,
+      chainId: string,
+      loginResponse: LoginResponse,
+      authenticationMethod: AuthOption,
+    ) => {
+      // Verify correct EVM wallet account is selected
+      if (authenticationMethod !== "password") {
+        const connectedAddress = signerToAddress(loginResponse.signer);
+        const possibleSigners = controller.signers?.filter(
+          (signer) =>
+            credentialToAuth(signer.metadata as CredentialMetadata) ===
+            authenticationMethod,
+        );
+        if (!possibleSigners || possibleSigners.length === 0) {
+          throw new Error("No signers found for controller");
+        }
+
+        if (
+          !possibleSigners.find(
+            (signer) =>
+              credentialToAddress(signer.metadata as CredentialMetadata) ===
+              connectedAddress,
+          )
+        ) {
+          setChangeWallet(true);
+          return;
+        }
+      }
+
+      const controllerObject = await createController(
+        origin,
+        chainId,
+        rpcUrl,
+        username,
+        controller.constructorCalldata[0],
+        controller.address,
+        {
+          signer: loginResponse?.signer,
+        },
+      );
+
+      await controllerObject.login(now() + DEFAULT_SESSION_DURATION, true);
+
+      window.controller = controllerObject;
+      setController(controllerObject);
+    },
+    [origin, chainId, rpcUrl, setController],
   );
 
   const handleLogin = useCallback(
@@ -380,14 +436,10 @@ export function useCreateController({
           );
           return;
         }
+        case "google":
         case "discord": {
           setWaitingForConfirmation(true);
-          loginResponse = await loginWithSocial("discord");
-          break;
-        }
-        case "google": {
-          setWaitingForConfirmation(true);
-          loginResponse = await loginWithSocial("google");
+          loginResponse = await loginWithSocial(authenticationMethod, username);
           break;
         }
         case "rabby":
@@ -447,46 +499,13 @@ export function useCreateController({
         throw new Error("Login failed");
       }
 
-      // Verify correct EVM wallet account is selected
-      if (authenticationMethod !== "password") {
-        const connectedAddress = signerToAddress(loginResponse.signer);
-        const possibleSigners = controller.signers?.filter(
-          (signer) =>
-            credentialToAuth(signer.metadata as CredentialMetadata) ===
-            authenticationMethod,
-        );
-        if (!possibleSigners || possibleSigners.length === 0) {
-          throw new Error("No signers found for controller");
-        }
-
-        if (
-          !possibleSigners.find(
-            (signer) =>
-              credentialToAddress(signer.metadata as CredentialMetadata) ===
-              connectedAddress,
-          )
-        ) {
-          setChangeWallet(true);
-          return;
-        }
-      }
-
-      const controllerObject = await createController(
-        origin,
-        chainId,
-        rpcUrl,
+      await finishLogin(
+        controller,
         username,
-        controller.constructorCalldata[0],
-        controller.address,
-        {
-          signer: loginResponse?.signer,
-        },
+        chainId,
+        loginResponse,
+        authenticationMethod,
       );
-
-      await controllerObject.login(now() + DEFAULT_SESSION_DURATION, true);
-
-      window.controller = controllerObject;
-      setController(controllerObject);
     },
     [
       isSlot,
@@ -503,6 +522,78 @@ export function useCreateController({
       setChangeWallet,
     ],
   );
+
+  useEffect(() => {
+    if (!chainId) {
+      return;
+    }
+
+    if (
+      window.location.search.includes("code") &&
+      window.location.search.includes("state")
+    ) {
+      (async () => {
+        const turnkeyWallet = new TurnkeyWallet("", chainId, undefined);
+        const { account, username, isSignup, socialProvider } =
+          await turnkeyWallet.handleRedirect(window.location.href);
+        if (error) {
+          throw error;
+        }
+        if (!username || !isSignup || !socialProvider || !account) {
+          return;
+        }
+
+        if (isSignup) {
+          finishSignup(
+            username,
+            chainId,
+            {
+              address: account,
+              signer: {
+                eip191: {
+                  address: account,
+                },
+              },
+              type: socialProvider as AuthOption,
+            },
+            {
+              type: SignerType.Eip191,
+              credential: JSON.stringify({
+                provider: socialProvider,
+                eth_address: account,
+              }),
+            },
+          );
+        } else {
+          const controller = await fetchController(chainId, username);
+          if (!controller || !controller.controller) {
+            throw new Error("Controller not found");
+          }
+
+          finishLogin(
+            controller.controller,
+            username,
+            chainId,
+            {
+              signer: {
+                eip191: {
+                  address: account,
+                },
+              },
+            },
+            socialProvider as AuthOption,
+          );
+        }
+      })();
+    }
+  }, [
+    window.location.search,
+    finishLogin,
+    chainId,
+    finishSignup,
+    origin,
+    rpcUrl,
+  ]);
 
   const handleSubmit = useCallback(
     async (

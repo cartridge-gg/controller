@@ -325,7 +325,11 @@ export function useConnectionValue() {
               walletConnectWallet as WalletAdapter,
             );
           } else if (provider === "discord" || provider === "google") {
-            const turnkeyWallet = new TurnkeyWallet(provider);
+            const turnkeyWallet = new TurnkeyWallet(
+              controller.username(),
+              chainId,
+              provider,
+            );
             if (!turnkeyWallet) {
               throw new Error("Embedded Turnkey wallet not found");
             }

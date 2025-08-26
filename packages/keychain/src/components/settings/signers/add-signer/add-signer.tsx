@@ -327,8 +327,12 @@ const RegularAuths = ({
               throw new Error("No username");
             }
 
-            const turnkeyWallet = new TurnkeyWallet("google");
-            const response = await turnkeyWallet.connect(controller.username());
+            const turnkeyWallet = new TurnkeyWallet(
+              controller.username(),
+              controller.chainId(),
+              "google",
+            );
+            const response = await turnkeyWallet.connect(false);
             if (!response || !response.success || !response.account) {
               throw new Error(response?.error || "Wallet auth: unknown error");
             }
@@ -369,8 +373,12 @@ const RegularAuths = ({
               throw new Error("No username");
             }
 
-            const turnkeyWallet = new TurnkeyWallet("discord");
-            const response = await turnkeyWallet.connect(controller.username());
+            const turnkeyWallet = new TurnkeyWallet(
+              controller.username(),
+              controller.chainId(),
+              "discord",
+            );
+            const response = await turnkeyWallet.connect(false);
             if (!response || !response.success || !response.account) {
               throw new Error(response?.error || "Wallet auth: unknown error");
             }

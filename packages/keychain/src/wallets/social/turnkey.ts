@@ -33,10 +33,16 @@ export class TurnkeyWallet {
   private turnkeyIframePromise: Promise<TurnkeyIframeClient> | undefined =
     undefined;
 
-  constructor(private socialProvider: SocialProvider) {
+  constructor(
+    private username: string,
+    private chainId: string,
+    private socialProvider: SocialProvider | undefined,
+  ) {
     this.auth0ClientPromise = createAuth0Client({
       domain: import.meta.env.VITE_AUTH0_DOMAIN,
       clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
+      cacheLocation: "localstorage",
+      useCookiesForTransactions: true,
     });
 
     const randomId = Math.random().toString(36).substring(2, 15);
@@ -85,12 +91,13 @@ export class TurnkeyWallet {
     };
   }
 
-  async connect(signupUsername?: string): Promise<ExternalWalletResponse> {
+  async connect(isSignup: boolean): Promise<ExternalWalletResponse> {
     try {
-      const turnkeyIframeClient = await this.getTurnkeyIframeClient(10_000);
+      if (!this.socialProvider) {
+        throw new Error("Social provider not set");
+      }
 
       const iframePublicKey = await this.pollIframePublicKey(10_000);
-
       const nonce = getNonce(iframePublicKey);
 
       const auth0Client = await this.getAuth0Client(10_000);
@@ -108,62 +115,29 @@ export class TurnkeyWallet {
           },
           { popup },
         );
+        return await this.finishConnect({
+          signupUsername: this.username,
+          nonce,
+          socialProvider: this.socialProvider,
+        });
       } else {
         await auth0Client.loginWithRedirect({
           authorizationParams: {
             connection: Auth0SocialProviderName[this.socialProvider],
             redirect_uri: import.meta.env.VITE_ORIGIN,
             nonce,
-            display: "touch",
             tknonce: nonce,
           },
+          appState: {
+            nonce,
+            username: this.username,
+            socialProvider: this.socialProvider,
+            isSignup,
+            chainId: this.chainId,
+          },
         });
+        return { success: false, wallet: this.type };
       }
-
-      const iFramePublicKey = await getIframePublicKey(turnkeyIframeClient!);
-
-      const iFrameNonce = getNonce(iFramePublicKey);
-      const tokenClaims = await auth0Client.getIdTokenClaims();
-      const oidcTokenString = await getAuth0OidcToken(tokenClaims, iFrameNonce);
-      if (!oidcTokenString) {
-        throw new Error("No oidcTokenString");
-      }
-
-      const subOrganizationId = signupUsername
-        ? await getOrCreateTurnkeySuborg(
-            oidcTokenString,
-            signupUsername,
-            this.socialProvider,
-          )
-        : await getTurnkeySuborg(oidcTokenString);
-
-      if (!subOrganizationId) {
-        throw new Error("No subOrganizationId");
-      }
-      await authenticateToTurnkey(
-        subOrganizationId,
-        oidcTokenString,
-        turnkeyIframeClient!,
-      );
-
-      const turnkeyAddress = signupUsername
-        ? await getOrCreateWallet(
-            subOrganizationId,
-            signupUsername,
-            turnkeyIframeClient!,
-          )
-        : await getWallet(subOrganizationId, turnkeyIframeClient!);
-
-      const checksummedAddress = getAddress(turnkeyAddress);
-
-      this.account = checksummedAddress;
-      this.subOrganizationId = subOrganizationId;
-
-      return {
-        success: true,
-        wallet: this.type,
-        account: checksummedAddress,
-      };
     } catch (error) {
       console.error(`Error connecting to Turnkey:`, error);
       return {
@@ -172,6 +146,86 @@ export class TurnkeyWallet {
         error: (error as Error).message || "Unknown error",
       };
     }
+  }
+
+  async handleRedirect(url: string): Promise<
+    ExternalWalletResponse & {
+      username?: string;
+      isSignup?: boolean;
+      socialProvider?: string;
+    }
+  > {
+    const auth0Client = await this.getAuth0Client(10_000);
+    const { appState } = await auth0Client.handleRedirectCallback(url);
+    if (!appState || appState.error) {
+      return { success: false, wallet: this.type, error: appState.error };
+    }
+    return {
+      ...this.finishConnect({
+        signupUsername: appState.signupUsername,
+        nonce: appState.nonce,
+        socialProvider: appState.socialProvider,
+      }),
+      username: appState.signupUsername,
+      isSignup: appState.isSignup,
+      socialProvider: appState.socialProvider,
+      chainId: appState.chainId,
+    };
+  }
+
+  async finishConnect({
+    signupUsername,
+    nonce,
+    socialProvider,
+  }: {
+    signupUsername?: string;
+    nonce: string;
+    socialProvider: SocialProvider;
+  }): Promise<ExternalWalletResponse> {
+    const turnkeyIframeClient = await this.getTurnkeyIframeClient(10_000);
+    const auth0Client = await this.getAuth0Client(10_000);
+
+    const tokenClaims = await auth0Client.getIdTokenClaims();
+    const oidcTokenString = await getAuth0OidcToken(tokenClaims, nonce);
+    if (!oidcTokenString) {
+      throw new Error("No oidcTokenString");
+    }
+
+    const subOrganizationId = signupUsername
+      ? await getOrCreateTurnkeySuborg(
+          oidcTokenString,
+          signupUsername,
+          socialProvider,
+        )
+      : await getTurnkeySuborg(oidcTokenString);
+
+    if (!subOrganizationId) {
+      throw new Error("No subOrganizationId");
+    }
+    await authenticateToTurnkey(
+      subOrganizationId,
+      oidcTokenString,
+      turnkeyIframeClient!,
+    );
+
+    const turnkeyAddress = signupUsername
+      ? await getOrCreateWallet(
+          subOrganizationId,
+          signupUsername,
+          turnkeyIframeClient!,
+        )
+      : await getWallet(subOrganizationId, turnkeyIframeClient!);
+
+    const checksummedAddress = getAddress(turnkeyAddress);
+
+    this.account = checksummedAddress;
+    this.subOrganizationId = subOrganizationId;
+
+    return {
+      success: true,
+      wallet: this.type,
+      account: checksummedAddress,
+    };
   }
 
   getConnectedAccounts(): string[] {
@@ -219,7 +273,7 @@ export class TurnkeyWallet {
       }
 
       if (!this.subOrganizationId) {
-        const { success, error, account } = await this.connect();
+        const { success, error, account } = await this.connect(false);
         if (!success) {
           throw new Error(error);
         }
