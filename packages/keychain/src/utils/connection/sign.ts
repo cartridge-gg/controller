@@ -4,11 +4,17 @@ import {
   ResponseCodes,
 } from "@cartridge/controller";
 import { Signature, TypedData } from "starknet";
-import { ConnectionCtx, SignMessageCtx } from "./types";
 import { mutex } from "./sync";
 import { parseControllerError } from "./execute";
+import { generateCallbackId, storeCallbacks } from "./callbacks";
 
-export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
+export interface SignMessageParams {
+  id?: string;
+  typedData: TypedData;
+  account: string;
+}
+
+export function signMessageFactory(navigate: (path: string) => void) {
   return async (
     typedData: TypedData,
     account: string,
@@ -18,14 +24,17 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
 
     if (!async) {
       return new Promise((resolve, reject) => {
-        setContext({
-          type: "sign-message",
-          origin,
-          typedData,
-          account,
-          resolve,
-          reject,
-        } as SignMessageCtx);
+        const id = generateCallbackId();
+        const params: SignMessageParams = { id, typedData, account };
+
+        // Store callbacks for retrieval by the route component
+        storeCallbacks(id, { resolve, reject });
+
+        // Navigate to sign-message route with data in URL params
+        const searchParams = new URLSearchParams({
+          data: encodeURIComponent(JSON.stringify(params)),
+        });
+        navigate(`/sign-message?${searchParams.toString()}`);
       });
     }
 
@@ -38,16 +47,19 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
         }
 
         // If a session call and there is no session available
-        // fallback to manual apporval flow
+        // fallback to manual approval flow
         if (!(await controller.hasAuthorizedPoliciesForMessage(typedData))) {
-          setContext({
-            type: "sign-message",
-            origin,
-            typedData,
-            account,
-            resolve,
-            reject,
-          } as SignMessageCtx);
+          const id = generateCallbackId();
+          const params: SignMessageParams = { id, typedData, account };
+
+          // Store callbacks for retrieval by the route component
+          storeCallbacks(id, { resolve, reject });
+
+          // Navigate to sign-message route with data in URL params
+          const searchParams = new URLSearchParams({
+            data: encodeURIComponent(JSON.stringify(params)),
+          });
+          navigate(`/sign-message?${searchParams.toString()}`);
 
           return resolve({
             code: ResponseCodes.USER_INTERACTION_REQUIRED,
