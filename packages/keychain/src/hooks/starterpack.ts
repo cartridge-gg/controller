@@ -102,10 +102,10 @@ export function useStarterPack(starterpackId?: string) {
         const price = details.price.amount;
         const factor = 10 ** details.price.decimals;
         const priceUSD = creditsToUSD(Number(price) / factor);
-        setAcquisitionType(details.acquisitionType);
         setPriceUsd(priceUSD);
         setName(details.starterpack!.name);
         setDescription(details.starterpack!.description ?? "");
+        setAcquisitionType(details.starterpack!.acquisitionType);
 
         if (details.mintAllowance) {
           setMintAllowance(details.mintAllowance);
