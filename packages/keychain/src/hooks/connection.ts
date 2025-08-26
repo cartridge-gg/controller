@@ -196,6 +196,13 @@ export function useConnectionValue() {
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
+  const [onModalClose, setOnModalCloseInternal] = useState<
+    (() => void) | undefined
+  >();
+
+  const setOnModalClose = useCallback((fn: (() => void) | undefined) => {
+    setOnModalCloseInternal(() => fn);
+  }, []);
 
   useEffect(() => {
     if (window.controller) {
@@ -623,6 +630,8 @@ export function useConnectionValue() {
     origin,
     rpcUrl,
     policies,
+    onModalClose,
+    setOnModalClose,
     theme,
     project: urlParams.project,
     namespace: urlParams.namespace,

@@ -22,7 +22,6 @@ interface ExecutionContainerProps {
   executionError?: ControllerError;
   onSubmit: (maxFee?: EstimateFee) => Promise<void>;
   onDeploy?: () => void;
-  onClose?: () => void;
   onError?: (error: ControllerError) => void;
   buttonText?: string;
   children: React.ReactNode;

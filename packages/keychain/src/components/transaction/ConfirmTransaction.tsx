@@ -11,7 +11,6 @@ import { useEffect, useState } from "react";
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
   onError?: (error: ControllerError) => void;
-  onClose?: () => void;
   transactions: Call[];
   executionError?: ControllerError;
 }
@@ -19,7 +18,6 @@ interface ConfirmTransactionProps {
 export function ConfirmTransaction({
   onComplete,
   onError,
-  onClose,
   transactions,
   executionError,
 }: ConfirmTransactionProps) {
@@ -82,7 +80,6 @@ export function ConfirmTransaction({
       transactions={transactions}
       onSubmit={onSubmit}
       onError={onError}
-      onClose={onClose}
     >
       <LayoutContent>
         <TransactionSummary calls={transactions} />

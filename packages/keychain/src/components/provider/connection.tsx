@@ -36,6 +36,8 @@ export type ConnectionContextValue = {
   controllerVersion: SemVer | undefined;
   setContext: (ctx: ConnectionCtx | undefined) => void;
   closeModal?: () => Promise<void>;
+  onModalClose?: () => void;
+  setOnModalClose?: (onModalClose: () => void) => void;
   openModal: () => Promise<void>;
   logout: () => Promise<void>;
   openSettings: () => void;
