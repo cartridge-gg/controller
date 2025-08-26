@@ -201,7 +201,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/ui':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/d873235(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.5(@swc/helpers@0.5.17))(@swc/wasm@1.13.5)(@types/node@18.19.123)(typescript@5.9.2)))(viem@2.35.1(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/d873235(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.5(@swc/helpers@0.5.17))(@swc/wasm@1.13.5)(@types/node@18.19.123)(typescript@5.9.2)))(viem@2.35.1(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))
       '@starknet-react/chains':
         specifier: 'catalog:'
         version: 5.0.1
@@ -229,10 +229,10 @@ importers:
     devDependencies:
       '@cartridge/connector-published':
         specifier: npm:@cartridge/connector@0.9.0
-        version: '@cartridge/connector@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@8.5.0)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(eb09d7731b1472582c20b644577b28a1))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)'
+        version: '@cartridge/connector@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@8.5.0)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)'
       '@cartridge/controller-published':
         specifier: npm:@cartridge/controller@0.9.0
-        version: '@cartridge/controller@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(eb09d7731b1472582c20b644577b28a1))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)'
+        version: '@cartridge/controller@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)'
       '@cartridge/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
@@ -424,7 +424,7 @@ importers:
         version: 8.5.0
       starknetkit:
         specifier: ^2.6.1
-        version: 2.12.2(eb09d7731b1472582c20b644577b28a1)
+        version: 2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4)
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:*
@@ -525,7 +525,7 @@ importers:
         version: 6.2.4
       '@cartridge/ui':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/d873235(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.5(@swc/helpers@0.5.17))(@swc/wasm@1.13.5)(@types/node@18.19.123)(typescript@5.9.2)))(viem@2.35.1(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/d873235(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.5(@swc/helpers@0.5.17))(@swc/wasm@1.13.5)(@types/node@18.19.123)(typescript@5.9.2)))(viem@2.35.1(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))
       '@dojoengine/torii-wasm':
         specifier: ^1.6.0
         version: 1.6.4
@@ -621,7 +621,7 @@ importers:
         version: 18.3.1(react@18.3.1)
       react-query:
         specifier: 'catalog:'
-        version: 3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
+        version: 3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
       react-router-dom:
         specifier: 'catalog:'
         version: 6.30.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -701,6 +701,9 @@ importers:
       autoprefixer:
         specifier: 'catalog:'
         version: 10.4.21(postcss@8.5.6)
+      cross-fetch:
+        specifier: ^4.1.0
+        version: 4.1.0
       eslint:
         specifier: 'catalog:'
         version: 9.34.0(jiti@1.21.7)
@@ -740,6 +743,9 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.9.2
+      unenv:
+        specifier: 1.0.0
+        version: 1.0.0
       vite:
         specifier: 'catalog:'
         version: 6.3.5(@types/node@18.19.123)(jiti@1.21.7)(terser@5.43.1)(tsx@4.20.5)(yaml@2.8.1)
@@ -8059,6 +8065,11 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
+  mime@3.0.0:
+    resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
+    engines: {node: '>=10.0.0'}
+    hasBin: true
+
   mimic-fn@2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
     engines: {node: '>=6'}
@@ -10184,6 +10195,9 @@ packages:
     resolution: {integrity: sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==}
     engines: {node: '>=14.0'}
 
+  unenv@1.0.0:
+    resolution: {integrity: sha512-vlyi2Rzj4CNlA1JsEXufX+ItkGr3Z5DfLzKniYEneMlBVtuxS+57f1LwTPj2eiBPSPaGHMUVzEnjSCGE7l8JQg==}
+
   unicode-canonical-property-names-ecmascript@2.0.1:
     resolution: {integrity: sha512-dA8WbNeb2a6oQzAQ55YlT5vQAWGV9WXOsi3SskE3bcCdM0P4SDd+24zS/OCacdRq5BkdsRj9q3Pg6YyQoxIGqg==}
     engines: {node: '>=4'}
@@ -10967,7 +10981,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.30
 
-  '@argent/x-ui@1.109.1(48176ecc0de0ffc9b807e881ba4c7db3)':
+  '@argent/x-ui@1.109.1(c87f37aee3e72d5e11d442b290c5ebd1)':
     dependencies:
       '@chakra-ui/react': 2.10.9(@emotion/react@11.14.0(@types/react@18.3.24)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.24)(react@18.3.1))(@types/react@18.3.24)(react@18.3.1))(@types/react@18.3.24)(framer-motion@11.18.2(@emotion/is-prop-valid@1.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emotion/react': 11.14.0(@types/react@18.3.24)(react@18.3.1)
@@ -10995,9 +11009,9 @@ snapshots:
       react: 18.3.1
       react-copy-to-clipboard: 5.1.0(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
-      react-i18next: 15.4.1(i18next@24.2.3(typescript@5.9.2))(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
+      react-i18next: 15.4.1(i18next@24.2.3(typescript@5.9.2))(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
       react-router-dom: 6.30.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react-spring-bottom-sheet: 3.5.0-alpha.0(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react-konva@18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react-zdog@1.2.2)(react@18.3.1)(three@0.179.1)(zdog@1.1.3)
+      react-spring-bottom-sheet: 3.5.0-alpha.0(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react-konva@18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react-zdog@1.2.2)(react@18.3.1)(three@0.179.1)(zdog@1.1.3)
       react-virtuoso: 4.14.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       starknet: 8.5.0
       swr: 2.3.6(react@18.3.1)
@@ -11577,9 +11591,9 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/connector@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@8.5.0)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(eb09d7731b1472582c20b644577b28a1))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
+  '@cartridge/connector@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@8.5.0)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
-      '@cartridge/controller': 0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(eb09d7731b1472582c20b644577b28a1))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@cartridge/controller': 0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
       '@starknet-react/core': 5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@8.5.0)(typescript@5.9.2)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -11618,11 +11632,11 @@ snapshots:
 
   '@cartridge/controller-wasm@0.2.7': {}
 
-  '@cartridge/controller@0.7.13(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(eb09d7731b1472582c20b644577b28a1))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
+  '@cartridge/controller@0.7.13(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
       '@cartridge/account-wasm': 0.7.13
       '@cartridge/penpal': 6.2.4
-      '@cartridge/utils': 0.7.13(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@cartridge/utils': 0.7.13(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
       '@metamask/sdk': 0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@solana/web3.js': 1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@starknet-io/types-js': 0.8.4
@@ -11634,7 +11648,7 @@ snapshots:
       mipd: 0.0.7(typescript@5.9.2)
       open: 10.2.0
       starknet: 8.5.0
-      starknetkit: 2.12.2(eb09d7731b1472582c20b644577b28a1)
+      starknetkit: 2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -11665,7 +11679,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/controller@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(eb09d7731b1472582c20b644577b28a1))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
+  '@cartridge/controller@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
       '@cartridge/controller-wasm': 0.2.1
       '@cartridge/penpal': 6.2.4
@@ -11680,7 +11694,7 @@ snapshots:
       mipd: 0.0.7(typescript@5.9.2)
       open: 10.2.0
       starknet: 8.5.0
-      starknetkit: 2.12.2(eb09d7731b1472582c20b644577b28a1)
+      starknetkit: 2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -11741,7 +11755,7 @@ snapshots:
     dependencies:
       '@starknet-io/types-js': 0.8.4
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/d873235(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.5(@swc/helpers@0.5.17))(@swc/wasm@1.13.5)(@types/node@18.19.123)(typescript@5.9.2)))(viem@2.35.1(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))':
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/d873235(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.0)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.5(@swc/helpers@0.5.17))(@swc/wasm@1.13.5)(@types/node@18.19.123)(typescript@5.9.2)))(viem@2.35.1(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))':
     dependencies:
       '@cartridge/presets': https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022
       '@radix-ui/react-accordion': 1.2.1(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -11772,7 +11786,7 @@ snapshots:
       posthog-js-lite: 3.2.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
+      react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
       sonner: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       starknet: 8.5.0
       swr: 2.3.6(react@18.3.1)
@@ -11817,7 +11831,7 @@ snapshots:
       posthog-js-lite: 3.2.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
+      react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
       sonner: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       starknet: 8.5.0
       swr: 2.3.6(react@18.3.1)
@@ -11831,11 +11845,11 @@ snapshots:
       - react-native
       - tailwindcss
 
-  '@cartridge/utils@0.7.13(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
+  '@cartridge/utils@0.7.13(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
       posthog-js-lite: 3.2.1
       react: 18.3.1
-      react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
+      react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
       starknet: 8.5.0
       swr: 2.3.6(react@18.3.1)
       viem: 2.35.1(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -13937,10 +13951,10 @@ snapshots:
       nullthrows: 1.1.1
       yargs: 17.7.2
 
-  '@react-native/community-cli-plugin@0.81.0(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+  '@react-native/community-cli-plugin@0.81.0(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
       '@react-native/dev-middleware': 0.81.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@react-native/metro-config': 0.81.0(@babel/core@7.28.3)
+      '@react-native/metro-config': 0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       debug: 4.4.1
       invariant: 2.2.4
       metro: 0.83.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -13985,7 +13999,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@react-native/metro-config@0.81.0(@babel/core@7.28.3)':
+  '@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
       '@react-native/js-polyfills': 0.81.0
       '@react-native/metro-babel-transformer': 0.81.0(@babel/core@7.28.3)
@@ -13993,16 +14007,18 @@ snapshots:
       metro-runtime: 0.83.1
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.81.0': {}
 
-  '@react-native/virtualized-lists@0.81.0(@types/react@18.3.24)(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)':
+  '@react-native/virtualized-lists@0.81.0(@types/react@18.3.24)(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)':
     dependencies:
       invariant: 2.2.4
       nullthrows: 1.1.1
       react: 18.3.1
-      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
+      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
     optionalDependencies:
       '@types/react': 18.3.24
 
@@ -14034,14 +14050,14 @@ snapshots:
       react: 18.3.1
       react-konva: 18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@react-spring/native@9.7.5(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)':
+  '@react-spring/native@9.7.5(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)':
     dependencies:
       '@react-spring/animated': 9.7.5(react@18.3.1)
       '@react-spring/core': 9.7.5(react@18.3.1)
       '@react-spring/shared': 9.7.5(react@18.3.1)
       '@react-spring/types': 9.7.5
       react: 18.3.1
-      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
+      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
 
   '@react-spring/rafz@9.7.5': {}
 
@@ -14051,13 +14067,13 @@ snapshots:
       '@react-spring/types': 9.7.5
       react: 18.3.1
 
-  '@react-spring/three@9.7.5(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(react@18.3.1)(three@0.179.1)':
+  '@react-spring/three@9.7.5(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(react@18.3.1)(three@0.179.1)':
     dependencies:
       '@react-spring/animated': 9.7.5(react@18.3.1)
       '@react-spring/core': 9.7.5(react@18.3.1)
       '@react-spring/shared': 9.7.5(react@18.3.1)
       '@react-spring/types': 9.7.5
-      '@react-three/fiber': 9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1)
+      '@react-three/fiber': 9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1)
       react: 18.3.1
       three: 0.179.1
 
@@ -14083,7 +14099,7 @@ snapshots:
       react-zdog: 1.2.2
       zdog: 1.1.3
 
-  '@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1)':
+  '@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1)':
     dependencies:
       '@babel/runtime': 7.28.3
       '@types/react-reconciler': 0.32.0(@types/react@18.3.24)
@@ -14101,7 +14117,7 @@ snapshots:
       zustand: 5.0.8(@types/react@18.3.24)(immer@10.1.1)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
     optionalDependencies:
       react-dom: 18.3.1(react@18.3.1)
-      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
+      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - '@types/react'
       - immer
@@ -20591,6 +20607,8 @@ snapshots:
 
   mime@1.6.0: {}
 
+  mime@3.0.0: {}
+
   mimic-fn@2.1.0: {}
 
   min-indent@1.0.1: {}
@@ -21544,7 +21562,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.24
 
-  react-i18next@15.4.1(i18next@24.2.3(typescript@5.9.2))(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1):
+  react-i18next@15.4.1(i18next@24.2.3(typescript@5.9.2))(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.28.3
       html-parse-stringify: 3.0.1
@@ -21552,7 +21570,7 @@ snapshots:
       react: 18.3.1
     optionalDependencies:
       react-dom: 18.3.1(react@18.3.1)
-      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
+      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
 
   react-international-phone@4.6.0(react@18.3.1):
     dependencies:
@@ -21578,16 +21596,16 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10):
+  react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10):
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
       '@react-native/assets-registry': 0.81.0
       '@react-native/codegen': 0.81.0(@babel/core@7.28.3)
-      '@react-native/community-cli-plugin': 0.81.0(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@react-native/community-cli-plugin': 0.81.0(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@react-native/gradle-plugin': 0.81.0
       '@react-native/js-polyfills': 0.81.0
       '@react-native/normalize-colors': 0.81.0
-      '@react-native/virtualized-lists': 0.81.0(@types/react@18.3.24)(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
+      '@react-native/virtualized-lists': 0.81.0(@types/react@18.3.24)(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
       abort-controller: 3.0.0
       anser: 1.4.10
       ansi-regex: 5.0.1
@@ -21625,7 +21643,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  react-query@3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1):
+  react-query@3.39.3(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.28.3
       broadcast-channel: 3.7.0
@@ -21633,7 +21651,7 @@ snapshots:
       react: 18.3.1
     optionalDependencies:
       react-dom: 18.3.1(react@18.3.1)
-      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
+      react-native: 0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10)
 
   react-reconciler@0.29.2(react@18.3.1):
     dependencies:
@@ -21679,7 +21697,7 @@ snapshots:
       '@remix-run/router': 1.23.0
       react: 18.3.1
 
-  react-spring-bottom-sheet@3.5.0-alpha.0(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react-konva@18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react-zdog@1.2.2)(react@18.3.1)(three@0.179.1)(zdog@1.1.3):
+  react-spring-bottom-sheet@3.5.0-alpha.0(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react-konva@18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react-zdog@1.2.2)(react@18.3.1)(three@0.179.1)(zdog@1.1.3):
     dependencies:
       '@juggle/resize-observer': 3.4.0
       '@reach/portal': 0.13.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -21687,7 +21705,7 @@ snapshots:
       body-scroll-lock: 3.1.5
       focus-trap: 6.9.4
       react: 18.3.1
-      react-spring: 9.7.5(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react-konva@18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react-zdog@1.2.2)(react@18.3.1)(three@0.179.1)(zdog@1.1.3)
+      react-spring: 9.7.5(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react-konva@18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react-zdog@1.2.2)(react@18.3.1)(three@0.179.1)(zdog@1.1.3)
       react-use-gesture: 8.0.1(react@18.3.1)
       xstate: 4.38.3
     transitivePeerDependencies:
@@ -21702,12 +21720,12 @@ snapshots:
       - three
       - zdog
 
-  react-spring@9.7.5(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react-konva@18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react-zdog@1.2.2)(react@18.3.1)(three@0.179.1)(zdog@1.1.3):
+  react-spring@9.7.5(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react-konva@18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react-zdog@1.2.2)(react@18.3.1)(three@0.179.1)(zdog@1.1.3):
     dependencies:
       '@react-spring/core': 9.7.5(react@18.3.1)
       '@react-spring/konva': 9.7.5(konva@9.3.22)(react-konva@18.2.12(@types/react@18.3.24)(konva@9.3.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
-      '@react-spring/native': 9.7.5(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
-      '@react-spring/three': 9.7.5(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(react@18.3.1)(three@0.179.1)
+      '@react-spring/native': 9.7.5(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
+      '@react-spring/three': 9.7.5(@react-three/fiber@9.3.0(@types/react@18.3.24)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(three@0.179.1))(react@18.3.1)(three@0.179.1)
       '@react-spring/web': 9.7.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-spring/zdog': 9.7.5(react-dom@18.3.1(react@18.3.1))(react-zdog@1.2.2)(react@18.3.1)(zdog@1.1.3)
       react: 18.3.1
@@ -22309,10 +22327,10 @@ snapshots:
       pako: 2.1.0
       ts-mixer: 6.0.4
 
-  starknetkit@2.12.2(eb09d7731b1472582c20b644577b28a1):
+  starknetkit@2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4):
     dependencies:
-      '@argent/x-ui': 1.109.1(48176ecc0de0ffc9b807e881ba4c7db3)
-      '@cartridge/controller': 0.7.13(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(eb09d7731b1472582c20b644577b28a1))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@argent/x-ui': 1.109.1(c87f37aee3e72d5e11d442b290c5ebd1)
+      '@cartridge/controller': 0.7.13(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(open@10.2.0)(react-dom@18.3.1(react@18.3.1))(react-native@0.81.0(@babel/core@7.28.3)(@react-native/metro-config@0.81.0(@babel/core@7.28.3)(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.24)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(starknet@8.5.0)(starknetkit@2.12.2(163cc11a759cafb8f6bbc6dd08c5ebd4))(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
       '@starknet-io/get-starknet': 4.0.7
       '@starknet-io/get-starknet-core': 4.0.7
       '@starknet-io/types-js': 0.8.4
@@ -23183,6 +23201,13 @@ snapshots:
   undici@5.28.4:
     dependencies:
       '@fastify/busboy': 2.1.1
+
+  unenv@1.0.0:
+    dependencies:
+      defu: 6.1.4
+      mime: 3.0.0
+      node-fetch-native: 1.6.7
+      pathe: 1.1.2
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
 

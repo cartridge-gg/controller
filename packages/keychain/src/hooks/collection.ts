@@ -5,6 +5,7 @@ import {
   useCollectionsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { Collections, Marketplace } from "@cartridge/marketplace";
+// @ts-expect-error - torii-wasm package build issue
 import { Token, ToriiClient } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useConnection } from "@/hooks/connection";
@@ -230,7 +231,7 @@ export function useToriiCollections(): UseToriiCollectionsResponse {
         setCollections(collections);
         setStatus("success");
       })
-      .catch((error) => {
+      .catch((error: any) => {
         setStatus("error");
         console.error(error);
       });
@@ -304,11 +305,11 @@ export function useToriiCollection({
           order_by: [],
         },
       })
-      .then((tokens) => {
+      .then((tokens: any) => {
         setTokens(tokens.items || []);
         setStatus("success");
       })
-      .catch((error) => {
+      .catch((error: any) => {
         setStatus("error");
         console.error(error);
       });

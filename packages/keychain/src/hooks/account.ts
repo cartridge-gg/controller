@@ -49,7 +49,7 @@ const createCredentials = async (
   beginRegistration.publicKey.user.id = Buffer.from(name);
   beginRegistration.publicKey.challenge = base64url.toBuffer(
     beginRegistration.publicKey.challenge as unknown as string,
-  );
+  ) as unknown as ArrayBuffer;
 
   // https://chromium.googlesource.com/chromium/src/+/main/content/browser/webauth/pub_key_cred_params.md
   beginRegistration.publicKey.pubKeyCredParams = [
@@ -213,13 +213,13 @@ export async function doLogin({
     publicKey: {
       challenge: base64url.toBuffer(
         beginLoginData.beginLogin.publicKey.challenge,
-      ),
+      ) as unknown as ArrayBuffer,
       timeout: 60000,
       rpId: import.meta.env.VITE_RP_ID,
       allowCredentials: [
         {
           type: "public-key",
-          id: base64url.toBuffer(credentialId),
+          id: base64url.toBuffer(credentialId) as unknown as ArrayBuffer,
         },
       ],
       userVerification: "required",

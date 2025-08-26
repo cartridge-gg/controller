@@ -5,8 +5,34 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
 
+const unenvPlugin = () => ({
+  name: "vite-plugin-unenv-shim",
+  resolveId(id) {
+    if (id === "unenv/npm/cross-fetch") {
+      return "cross-fetch";
+    }
+    if (id === "unenv/node/buffer") {
+      return { id: "buffer", external: false };
+    }
+    if (id === "unenv/node/process") {
+      return { id: "process", external: false };
+    }
+    if (id === "unenv/polyfill/globalthis") {
+      return { id: "\0unenv-globalthis", external: false };
+    }
+    return null;
+  },
+  load(id) {
+    if (id === "\0unenv-globalthis") {
+      return "export default globalThis;";
+    }
+    return null;
+  },
+});
+
 export default defineConfig(({ mode }) => ({
   plugins: [
+    unenvPlugin(),
     nodePolyfills({
       include: ["buffer"],
       globals: {
@@ -30,6 +56,10 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": "/src",
+      "unenv/node/process": "/src/shims/unenv-process.ts",
+      "unenv/polyfill/globalthis": "/src/shims/unenv-globalthis.ts",
+      "unenv/npm/cross-fetch": "cross-fetch",
+      "unenv/node/buffer": "/src/shims/unenv-buffer.ts",
       ...(mode === "production"
         ? {
             "fetch-cookie": "/src/shims/fetch-cookie.ts",
