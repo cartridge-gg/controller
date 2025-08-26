@@ -281,7 +281,9 @@ export default class Controller {
     return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
-  async selfDeploy(maxFee?: EstimateFeeResponseOverhead): Promise<DeployedAccountTransaction> {
+  async selfDeploy(
+    maxFee?: EstimateFeeResponseOverhead,
+  ): Promise<DeployedAccountTransaction> {
     return await this.cartridge.deploySelf(toJsFeeEstimate(maxFee));
   }
 

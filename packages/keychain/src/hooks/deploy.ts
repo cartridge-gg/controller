@@ -5,7 +5,9 @@ import { EstimateFeeResponseOverhead } from "starknet";
 type TransactionHash = string;
 
 interface DeployInterface {
-  deploySelf: (maxFee: EstimateFeeResponseOverhead) => Promise<TransactionHash | undefined>;
+  deploySelf: (
+    maxFee: EstimateFeeResponseOverhead,
+  ) => Promise<TransactionHash | undefined>;
   isDeploying: boolean;
 }
 

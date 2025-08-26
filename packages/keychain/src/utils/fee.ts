@@ -1,7 +1,9 @@
 import { JsFeeEstimate } from "@cartridge/controller-wasm/controller";
 import { EstimateFeeResponseOverhead } from "starknet";
 
-export function toJsFeeEstimate(fee?: EstimateFeeResponseOverhead): JsFeeEstimate | undefined {
+export function toJsFeeEstimate(
+  fee?: EstimateFeeResponseOverhead,
+): JsFeeEstimate | undefined {
   // If the overall_fee is 0n then it is a free txn
   if (!fee || fee.overall_fee == 0n) return undefined;
 
@@ -21,7 +23,9 @@ export function toJsFeeEstimate(fee?: EstimateFeeResponseOverhead): JsFeeEstimat
   };
 }
 
-export function fromJsFeeEstimate(fee: JsFeeEstimate): EstimateFeeResponseOverhead {
+export function fromJsFeeEstimate(
+  fee: JsFeeEstimate,
+): EstimateFeeResponseOverhead {
   return {
     overall_fee: BigInt(fee.overall_fee),
     unit: fee.unit,

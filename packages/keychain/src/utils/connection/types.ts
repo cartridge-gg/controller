@@ -6,7 +6,12 @@ import {
   ExecuteReply,
 } from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
-import { Call, EstimateFeeResponseOverhead, Signature, TypedData } from "starknet";
+import {
+  Call,
+  EstimateFeeResponseOverhead,
+  Signature,
+  TypedData,
+} from "starknet";
 
 export type ConnectionCtx =
   | ConnectCtx
