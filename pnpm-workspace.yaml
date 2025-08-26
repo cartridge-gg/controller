@@ -6,7 +6,7 @@ packages:
 catalog:
   "@cartridge/controller-wasm": "^0.2.7"
   "@cartridge/penpal": "^6.2.4"
-  "@cartridge/ui": "github:cartridge-gg/ui#95ca1d0"
+  "@cartridge/ui": "github:cartridge-gg/ui#9bb4907"
   "@eslint/js": "^9.18.0"
   "@noble/curves": "^1.9.0"
   "@noble/hashes": "^1.8.0"
