@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
 import { useConnection } from "./connection";
-import { EstimateFee } from "starknet";
+import { EstimateFeeResponseOverhead } from "starknet";
 
 type TransactionHash = string;
 
 interface DeployInterface {
-  deploySelf: (maxFee: EstimateFee) => Promise<TransactionHash | undefined>;
+  deploySelf: (maxFee: EstimateFeeResponseOverhead) => Promise<TransactionHash | undefined>;
   isDeploying: boolean;
 }
 
@@ -14,7 +14,7 @@ export const useDeploy = (): DeployInterface => {
   const [isDeploying, setIsDeploying] = useState(false);
 
   const deploySelf = useCallback(
-    async (maxFee: EstimateFee) => {
+    async (maxFee: EstimateFeeResponseOverhead) => {
       if (!controller) return;
 
       try {

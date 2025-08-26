@@ -14,7 +14,7 @@ import { Button, LayoutContent, SliderIcon } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type Call,
-  type EstimateFee,
+  type EstimateFeeResponseOverhead,
   TransactionExecutionStatus,
   TransactionFinalityStatus,
 } from "starknet";
@@ -78,7 +78,7 @@ const RegisterSessionLayout = ({
   }, [controller, expiresAt, policies, publicKey]);
 
   const onRegisterSession = useCallback(
-    async (maxFee?: EstimateFee) => {
+    async (maxFee?: EstimateFeeResponseOverhead) => {
       if (maxFee == undefined || !publicKey || !controller) {
         return;
       }

@@ -2,7 +2,7 @@ import {
   BigNumberish,
   Call,
   CallData,
-  EstimateFee,
+  EstimateFeeResponseOverhead,
   InvokeFunctionResponse,
   Provider,
   RpcProvider,
@@ -196,7 +196,7 @@ export default class Controller {
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
     publicKey: string,
-    maxFee?: EstimateFee,
+    maxFee?: EstimateFeeResponseOverhead,
   ): Promise<InvokeFunctionResponse> {
     if (!this.cartridge) {
       throw new Error("Account not found");
@@ -236,7 +236,7 @@ export default class Controller {
 
   async execute(
     calls: Call[],
-    maxFee?: EstimateFee,
+    maxFee?: EstimateFeeResponseOverhead,
     feeSource?: FeeSource,
   ): Promise<InvokeFunctionResponse> {
     return await this.cartridge.execute(
@@ -272,7 +272,7 @@ export default class Controller {
     return await this.cartridge.hasRequestedSession(toWasmPolicies(policies));
   }
 
-  async estimateInvokeFee(calls: Call[]): Promise<EstimateFee> {
+  async estimateInvokeFee(calls: Call[]): Promise<EstimateFeeResponseOverhead> {
     const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
     return fromJsFeeEstimate(res);
   }
@@ -281,7 +281,7 @@ export default class Controller {
     return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
-  async selfDeploy(maxFee?: EstimateFee): Promise<DeployedAccountTransaction> {
+  async selfDeploy(maxFee?: EstimateFeeResponseOverhead): Promise<DeployedAccountTransaction> {
     return await this.cartridge.deploySelf(toJsFeeEstimate(maxFee));
   }
 

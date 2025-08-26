@@ -12,7 +12,7 @@ import {
 import isEqual from "lodash/isEqual";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { Call, EstimateFee } from "starknet";
+import type { Call, EstimateFeeResponseOverhead } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { useNavigation } from "@/context/navigation";
@@ -20,7 +20,7 @@ import { useNavigation } from "@/context/navigation";
 interface ExecutionContainerProps {
   transactions: Call[];
   executionError?: ControllerError;
-  onSubmit: (maxFee?: EstimateFee) => Promise<void>;
+  onSubmit: (maxFee?: EstimateFeeResponseOverhead) => Promise<void>;
   onDeploy?: () => void;
   onError?: (error: ControllerError) => void;
   buttonText?: string;
@@ -43,7 +43,7 @@ export function ExecutionContainer({
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
   const { controller } = useConnection();
-  const [maxFee, setMaxFee] = useState<EstimateFee | undefined>();
+  const [maxFee, setMaxFee] = useState<EstimateFeeResponseOverhead | undefined>();
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
   );
@@ -54,7 +54,7 @@ export function ExecutionContainer({
   // Prevent unnecessary estimate fee calls.
   const prevTransactionsRef = useRef<{
     transactions: Call[] | undefined;
-    feeEstimate: EstimateFee | undefined;
+    feeEstimate: EstimateFeeResponseOverhead | undefined;
   }>({
     transactions: undefined,
     feeEstimate: undefined,

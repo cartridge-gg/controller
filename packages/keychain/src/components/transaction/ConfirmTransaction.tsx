@@ -2,7 +2,7 @@ import { LayoutContent } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
 import { TransactionSummary } from "@/components/transaction/TransactionSummary";
 import { ControllerError } from "@/utils/connection";
-import { Call, EstimateFee } from "starknet";
+import { Call, EstimateFeeResponseOverhead } from "starknet";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { CreateSession } from "../connect";
 import { executeCore } from "@/utils/connection/execute";
@@ -36,7 +36,7 @@ export function ConfirmTransaction({
     }
   }, [controller, policies]);
 
-  const onSubmit = async (maxFee?: EstimateFee) => {
+  const onSubmit = async (maxFee?: EstimateFeeResponseOverhead) => {
     if (maxFee === undefined || !account) {
       return;
     }

@@ -31,7 +31,7 @@ class ControllerAccount extends WalletAccount {
     options: KeychainOptions,
     modal: Modal,
   ) {
-    super({ nodeUrl: rpcUrl }, provider, address);
+    super({ nodeUrl: rpcUrl, provider, address } as any);
 
     this.keychain = keychain;
     this.options = options;

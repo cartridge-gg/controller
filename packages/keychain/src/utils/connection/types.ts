@@ -6,7 +6,7 @@ import {
   ExecuteReply,
 } from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
-import { Call, EstimateFee, Signature, TypedData } from "starknet";
+import { Call, EstimateFeeResponseOverhead, Signature, TypedData } from "starknet";
 
 export type ConnectionCtx =
   | ConnectCtx
@@ -43,7 +43,7 @@ export type ControllerError = {
 export type ExecuteCtx = {
   type: "execute";
   transactions: Call[];
-  feeEstimate?: EstimateFee;
+  feeEstimate?: EstimateFeeResponseOverhead;
   error?: ControllerError;
   resolve?: (res: ExecuteReply | ConnectError) => void;
   reject?: (reason?: unknown) => void;

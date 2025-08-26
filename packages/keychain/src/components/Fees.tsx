@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Spinner } from "@cartridge/ui";
-import { EstimateFee } from "starknet";
+import { EstimateFeeResponseOverhead } from "starknet";
 
 import { convertTokenAmountToUSD, useFeeToken } from "@/hooks/tokens";
 import { ErrorAlert } from "./ErrorAlert";
@@ -11,7 +11,7 @@ export function Fees({
   maxFee,
 }: {
   isLoading: boolean;
-  maxFee?: EstimateFee;
+  maxFee?: EstimateFeeResponseOverhead;
 }) {
   const { isLoading: isPriceLoading, token, error } = useFeeToken();
   const [formattedFee, setFormattedFee] = useState<string>();
