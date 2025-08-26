@@ -196,6 +196,13 @@ export function useConnectionValue() {
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
+  const [onModalClose, setOnModalCloseInternal] = useState<
+    (() => void) | undefined
+  >();
+
+  const setOnModalClose = useCallback((fn: (() => void) | undefined) => {
+    setOnModalCloseInternal(() => fn);
+  }, []);
 
   useEffect(() => {
     if (window.controller) {
@@ -318,7 +325,11 @@ export function useConnectionValue() {
               walletConnectWallet as WalletAdapter,
             );
           } else if (provider === "discord" || provider === "google") {
-            const turnkeyWallet = new TurnkeyWallet(provider);
+            const turnkeyWallet = new TurnkeyWallet(
+              controller.username(),
+              chainId,
+              provider,
+            );
             if (!turnkeyWallet) {
               throw new Error("Embedded Turnkey wallet not found");
             }
@@ -623,6 +634,8 @@ export function useConnectionValue() {
     origin,
     rpcUrl,
     policies,
+    onModalClose,
+    setOnModalClose,
     theme,
     project: urlParams.project,
     namespace: urlParams.namespace,

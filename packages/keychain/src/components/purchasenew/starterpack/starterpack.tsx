@@ -1,4 +1,5 @@
 import {
+  MerkleDrop,
   StarterItemData,
   StarterItemType,
   useStarterPack,
@@ -21,37 +22,7 @@ import { useNavigation, usePurchaseContext } from "@/context";
 import { useEffect } from "react";
 import { PurchaseItem, PurchaseItemType } from "@/context/purchase";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { CollectionItem, Collections } from "./collections";
-import { ExternalPlatform } from "@cartridge/controller";
-
-// Placeholder collections
-export const dummyCollections: CollectionItem[] = [
-  {
-    name: "Realms",
-    image: "https://placehold.co/80x80/161a17/ffffff",
-    platforms: ["starknet", "ethereum"] as ExternalPlatform[],
-  },
-  {
-    name: "Dopewars",
-    image: "https://placehold.co/80x80/161a17/ffffff",
-    platforms: ["optimism"] as ExternalPlatform[],
-  },
-  {
-    name: "Loot",
-    image: "https://placehold.co/80x80/161a17/ffffff",
-    platforms: ["ethereum"] as ExternalPlatform[],
-  },
-  {
-    name: "Blob Arena",
-    image: "https://placehold.co/80x80/161a17/ffffff",
-    platforms: ["starknet"] as ExternalPlatform[],
-  },
-  {
-    name: "Something",
-    image: "https://placehold.co/80x80/161a17/ffffff",
-    platforms: ["arbitrum"] as ExternalPlatform[],
-  },
-];
+import { MerkleDrops } from "./merkledrop";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -60,6 +31,7 @@ export function PurchaseStarterpack() {
     items,
     supply,
     mintAllowance,
+    merkleDrops,
     priceUsd,
     acquisitionType,
     isLoading,
@@ -114,9 +86,9 @@ export function PurchaseStarterpack() {
       name={name}
       supply={supply}
       mintAllowance={mintAllowance}
+      merkleDrops={merkleDrops}
       acquisitionType={acquisitionType}
       starterpackItems={items}
-      collections={dummyCollections}
       error={error}
     />
   );
@@ -127,16 +99,16 @@ export function StarterPackInner({
   supply,
   mintAllowance,
   acquisitionType,
+  merkleDrops = [],
   starterpackItems = [],
-  collections = [],
   error,
 }: {
   name: string;
   supply?: number;
   mintAllowance?: MintAllowance;
+  merkleDrops?: MerkleDrop[];
   acquisitionType: StarterpackAcquisitionType;
   starterpackItems?: StarterItemData[];
-  collections?: CollectionItem[];
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();
@@ -188,7 +160,7 @@ export function StarterPackInner({
             </div>
           </div>
           {acquisitionType === StarterpackAcquisitionType.Claimed && (
-            <Collections collections={collections} />
+            <MerkleDrops merkleDrops={merkleDrops} />
           )}
         </div>
       </LayoutContent>

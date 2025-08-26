@@ -73,7 +73,7 @@ export function App() {
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}
           />
-          <Route path="claim" element={<Claim />} />
+          <Route path="claim/:key/:address" element={<Claim />} />
           <Route path="method/:platforms?" element={<PaymentMethod />} />
           <Route path="network/:platforms?" element={<ChooseNetwork />} />
           <Route path="wallet/:platforms?" element={<SelectWallet />} />

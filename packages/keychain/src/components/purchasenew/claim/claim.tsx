@@ -13,15 +13,18 @@ import { useCallback } from "react";
 import { useConnection } from "@/hooks/connection";
 import { Call } from "@starknet-io/types-js";
 import { Badge } from "../starterpack/badge";
+import { useParams } from "react-router-dom";
+import { useMerkleClaim } from "@/hooks/merkle-claim";
 
 export function Claim() {
+  const { key, address } = useParams();
   const { goBack } = useNavigation();
   const { externalSendTransaction } = useConnection();
   const { purchaseItems, selectedWallet } = usePurchaseContext();
-  const zeroClaims = true;
+  const { claims, error: claimError } = useMerkleClaim({ key: key!, address: address! });
 
   const onConfirm = useCallback(async () => {
-    if (zeroClaims) {
+    if (claims.length === 0) {
       goBack();
       return;
     }
@@ -37,7 +40,7 @@ export function Claim() {
     // };
     // const txn = await externalSendTransaction(selectedWallet.type, [call]);
     // console.log({ txn });
-  }, []);
+  }, [claims]);
 
   return (
     <>
@@ -46,7 +49,7 @@ export function Claim() {
         icon={<GiftIcon variant="solid" />}
       />
       <LayoutContent>
-        {zeroClaims ? (
+        {claims.length === 0 ? (
           <Empty
             icon="inventory"
             title="Nothing to Claim from this Wallet"
@@ -57,7 +60,7 @@ export function Claim() {
         )}
       </LayoutContent>
       <LayoutFooter>
-        {!zeroClaims && (
+        {claims.length > 0 && (
           <CardContent className="relative flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
             <div className="absolute -top-1 right-4">
               <Badge price={0} />
@@ -68,7 +71,7 @@ export function Claim() {
           </CardContent>
         )}
         <Button onClick={onConfirm}>
-          {zeroClaims ? "Check Another Wallet" : "Claim"}
+          {claims.length === 0 ? "Check Another Wallet" : "Claim"}
         </Button>
       </LayoutFooter>
     </>
