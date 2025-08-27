@@ -252,10 +252,10 @@ export function useCreateController({
           return;
         case "google":
         case "discord":
-          signupResponse = (await signupWithSocial(
-            authenticationMode,
-            username,
-          )) as SignupResponse;
+          signupResponse = await signupWithSocial(authenticationMode, username);
+          if (!signupResponse) {
+            return;
+          }
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
@@ -440,6 +440,9 @@ export function useCreateController({
         case "discord": {
           setWaitingForConfirmation(true);
           loginResponse = await loginWithSocial(authenticationMethod, username);
+          if (!loginResponse) {
+            return;
+          }
           break;
         }
         case "rabby":

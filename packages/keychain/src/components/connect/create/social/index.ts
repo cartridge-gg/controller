@@ -46,7 +46,11 @@ export const useSocialAuthentication = (
         turnkeyWallet as unknown as WalletAdapter,
       );
 
-      return { address: account, signer: { eip191: { address: account } } };
+      return {
+        address: account,
+        signer: { eip191: { address: account } },
+        type: socialProvider,
+      };
     },
     [setChangeWallet, chainId],
   );
