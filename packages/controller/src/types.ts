@@ -86,7 +86,7 @@ export type DeployReply = {
 };
 
 export type IFrames = {
-  keychain: KeychainIFrame;
+  keychain?: KeychainIFrame;
   version?: number;
 };
 
@@ -228,6 +228,8 @@ export type KeychainOptions = IFrameOptions & {
   namespace?: string;
   /** The tokens to be listed on Inventory modal */
   tokens?: Tokens;
+  /** When true, defer iframe mounting until connect() is called. Reduces initial load and resource fetching. */
+  lazyload?: boolean;
 };
 
 export type ProfileContextTypeVariant =

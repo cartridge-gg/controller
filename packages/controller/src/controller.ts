@@ -53,19 +53,11 @@ export default class ControllerProvider extends BaseProvider {
 
     this.selectedChain = defaultChainId;
     this.chains = new Map<ChainId, Chain>();
+    this.options = { ...options, chains, defaultChainId };
 
     this.iframes = {
-      keychain: new KeychainIFrame({
-        ...options,
-        onClose: this.keychain?.reset,
-        onConnect: (keychain) => {
-          this.keychain = keychain;
-        },
-        version: version,
-      }),
+      keychain: options.lazyload ? undefined : this.createKeychainIframe(),
     };
-
-    this.options = { ...options, chains, defaultChainId };
 
     this.initializeChains(chains);
 
@@ -113,6 +105,11 @@ export default class ControllerProvider extends BaseProvider {
 
   async probe(): Promise<WalletAccount | undefined> {
     try {
+      // Ensure iframe is created if using lazy loading
+      if (!this.iframes.keychain) {
+        this.iframes.keychain = this.createKeychainIframe();
+      }
+
       await this.waitForKeychain();
 
       if (!this.keychain) {
@@ -143,6 +140,13 @@ export default class ControllerProvider extends BaseProvider {
   async connect(): Promise<WalletAccount | undefined> {
     if (this.account) {
       return this.account;
+    }
+
+    // Ensure iframe is created if using lazy loading
+    if (!this.iframes.keychain) {
+      this.iframes.keychain = this.createKeychainIframe();
+      // Wait for the keychain to be ready
+      await this.waitForKeychain();
     }
 
     if (!this.keychain || !this.iframes.keychain) {
@@ -347,7 +351,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
     this.keychain.navigate("/purchase/credits").then(() => {
-      this.iframes.keychain.open();
+      this.iframes.keychain?.open();
     });
   }
 
@@ -361,7 +365,7 @@ export default class ControllerProvider extends BaseProvider {
     this.keychain
       .navigate(`/purchase/starterpack/${starterpackId}`)
       .then(() => {
-        this.iframes.keychain.open();
+        this.iframes.keychain?.open();
       });
   }
 
@@ -438,6 +442,17 @@ export default class ControllerProvider extends BaseProvider {
           `Available chains: ${Array.from(this.chains.keys()).join(", ")}`,
       );
     }
+  }
+
+  private createKeychainIframe(): KeychainIFrame {
+    return new KeychainIFrame({
+      ...this.options,
+      onClose: this.keychain?.reset,
+      onConnect: (keychain) => {
+        this.keychain = keychain;
+      },
+      version: version,
+    });
   }
 
   private waitForKeychain({
