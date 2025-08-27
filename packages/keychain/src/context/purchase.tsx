@@ -19,6 +19,7 @@ import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -53,8 +54,8 @@ export type PaymentMethod = "stripe" | "crypto";
 export interface PurchaseContextType {
   // Purchase details
   usdAmount: number;
-  starterpackId?: string;
-  acquisitionType?: StarterpackAcquisitionType;
+  starterpackDetails?: StarterPackDetails;
+
   teamId?: string;
   purchaseItems: PurchaseItem[];
   layerswapFees?: string;
@@ -78,6 +79,7 @@ export interface PurchaseContextType {
   // Loading states
   isStripeLoading: boolean;
   isCryptoLoading: boolean;
+  isStarterpackLoading: boolean;
 
   // Error state
   displayError?: Error;
@@ -87,7 +89,6 @@ export interface PurchaseContextType {
   setUsdAmount: (amount: number) => void;
   setPurchaseItems: (items: PurchaseItem[]) => void;
   setStarterpackId: (id: string) => void;
-  setAcquisitionType: (type: StarterpackAcquisitionType) => void;
 
   // Payment actions
   onCreditCard: () => Promise<void>;
@@ -116,6 +117,31 @@ export const PurchaseProvider = ({
 }: PurchaseProviderProps) => {
   const { controller } = useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
+  const [starterpackId, setStarterpackId] = useState<string | undefined>();
+  const [starterpackDetails, setStarterpackDetails] = useState<
+    StarterPackDetails | undefined
+  >();
+  const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
+  const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
+  const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
+  const [paymentId, setPaymentId] = useState<string | undefined>();
+  const [explorer, setExplorer] = useState<Explorer | undefined>();
+  const [transactionHash, setTransactionHash] = useState<string | undefined>();
+  const [walletAddress, setWalletAddress] = useState<string>();
+  const [walletType, setWalletType] = useState<ExternalWalletType>();
+  const [clientSecret, setClientSecret] = useState<string | undefined>();
+  const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
+  const [displayError, setDisplayError] = useState<Error | undefined>();
+  const [isFetchingFees, setIsFetchingFees] = useState(false);
+  const [selectedWallet, setSelectedWallet] = useState<
+    ExternalWallet | undefined
+  >();
+  const [selectedPlatform, setSelectedPlatform] = useState<
+    ExternalPlatform | undefined
+  >();
+  const [paymentMethod, setPaymentMethod] = useState<
+    PaymentMethod | undefined
+  >();
 
   const {
     stripePromise,
@@ -132,38 +158,59 @@ export const PurchaseProvider = ({
     waitForPayment,
   } = useCryptoPayment();
 
-  const [paymentMethod, setPaymentMethod] = useState<
-    PaymentMethod | undefined
-  >();
-  const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
-  const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
-  const [starterpackId, setStarterpackId] = useState<string | undefined>();
-  const [acquisitionType, setAcquisitionType] =
-    useState<StarterpackAcquisitionType>();
-  const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
-  const [paymentId, setPaymentId] = useState<string | undefined>();
-  const [explorer, setExplorer] = useState<Explorer | undefined>();
-  const [transactionHash, setTransactionHash] = useState<string | undefined>();
-
-  const [walletAddress, setWalletAddress] = useState<string>();
-  const [walletType, setWalletType] = useState<ExternalWalletType>();
-  const [selectedWallet, setSelectedWallet] = useState<
-    ExternalWallet | undefined
-  >();
-  const [selectedPlatform, setSelectedPlatform] = useState<
-    ExternalPlatform | undefined
-  >();
-
-  const [clientSecret, setClientSecret] = useState<string | undefined>();
-  const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
-
-  const [displayError, setDisplayError] = useState<Error | undefined>();
-
-  const [isFetchingFees, setIsFetchingFees] = useState(false);
+  const {
+    name,
+    items,
+    supply,
+    mintAllowance,
+    merkleDrops,
+    priceUsd,
+    acquisitionType,
+    isLoading: isStarterpackLoading,
+    error: starterpackError,
+  } = useStarterPack(starterpackId);
 
   useEffect(() => {
-    setDisplayError(stripeError || walletError || cryptoError || undefined);
-  }, [stripeError, walletError, cryptoError]);
+    if (
+      !starterpackId ||
+      items.length === 0 ||
+      !priceUsd ||
+      isStarterpackLoading
+    )
+      return;
+
+    const purchaseItems: PurchaseItem[] = items.map((item) => ({
+      title: item.title,
+      subtitle: item.description,
+      icon: item.image,
+      value: priceUsd,
+      type: PurchaseItemType.NFT,
+    }));
+
+    setPurchaseItems(purchaseItems);
+    setUsdAmount(priceUsd);
+
+    setStarterpackDetails({
+      id: starterpackId,
+      name,
+      starterPackItems: items,
+      supply,
+      mintAllowance,
+      merkleDrops,
+      priceUsd,
+      acquisitionType,
+    });
+  }, [items, priceUsd, starterpackId, isStarterpackLoading]);
+
+  useEffect(() => {
+    setDisplayError(
+      stripeError ||
+        walletError ||
+        cryptoError ||
+        starterpackError ||
+        undefined,
+    );
+  }, [stripeError, walletError, cryptoError, starterpackError]);
 
   const clearError = useCallback(() => {
     setDisplayError(undefined);
@@ -309,8 +356,7 @@ export const PurchaseProvider = ({
   const contextValue: PurchaseContextType = {
     // Purchase details
     usdAmount,
-    starterpackId,
-    acquisitionType,
+    starterpackDetails,
     purchaseItems,
     layerswapFees,
     isFetchingFees,
@@ -332,6 +378,7 @@ export const PurchaseProvider = ({
     // Loading states
     isStripeLoading,
     isCryptoLoading,
+    isStarterpackLoading,
 
     // Error state
     displayError,
@@ -339,9 +386,8 @@ export const PurchaseProvider = ({
 
     // Setters
     setUsdAmount,
-    setStarterpackId,
-    setAcquisitionType,
     setPurchaseItems,
+    setStarterpackId,
 
     // Actions
     onCreditCard,

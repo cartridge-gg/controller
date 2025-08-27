@@ -20,7 +20,7 @@ export function SelectWallet() {
   const { navigate } = useNavigation();
   const { platforms } = useParams();
   const { isMainnet } = useConnection();
-  const { acquisitionType, onExternalConnect, clearError } =
+  const { starterpackDetails, onExternalConnect, clearError } =
     usePurchaseContext();
   const { wallets, isConnecting: isWalletConnecting } = useWallets();
   const [error, setError] = useState<Error | null>(null);
@@ -123,7 +123,8 @@ export function SelectWallet() {
                     );
 
                     if (
-                      acquisitionType === StarterpackAcquisitionType.Claimed
+                      starterpackDetails?.acquisitionType ===
+                      StarterpackAcquisitionType.Claimed
                     ) {
                       navigate(`/purchase/claim`);
                     } else {

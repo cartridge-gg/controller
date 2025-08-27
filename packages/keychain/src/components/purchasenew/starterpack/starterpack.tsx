@@ -2,7 +2,6 @@ import {
   MerkleDrop,
   StarterItemData,
   StarterItemType,
-  useStarterPack,
 } from "@/hooks/starterpack";
 import {
   Button,
@@ -20,76 +19,42 @@ import { Supply } from "./supply";
 import { useParams } from "react-router-dom";
 import { useNavigation, usePurchaseContext } from "@/context";
 import { useEffect } from "react";
-import { PurchaseItem, PurchaseItemType } from "@/context/purchase";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { MerkleDrops } from "./merkledrop";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
+
   const {
-    name,
-    items,
-    supply,
-    mintAllowance,
-    merkleDrops,
-    priceUsd,
-    acquisitionType,
-    isLoading,
-    error,
-  } = useStarterPack(starterpackId);
-  const {
+    isStarterpackLoading,
+    starterpackDetails: sp,
+    displayError,
     setStarterpackId,
-    setPurchaseItems,
-    setUsdAmount,
-    setAcquisitionType,
   } = usePurchaseContext();
 
-  if (!starterpackId) {
-    throw new Error("Starterpack ID is required");
+  if (!sp) {
+    throw new Error("Starterpack not found");
   }
 
   useEffect(() => {
-    if (!isLoading && starterpackId) {
+    if (!isStarterpackLoading && starterpackId) {
       setStarterpackId(starterpackId);
-      setAcquisitionType(acquisitionType);
-      setUsdAmount(priceUsd);
-      const purchaseItems = items.map((item) => {
-        return {
-          title: item.title,
-          icon: item.image,
-          value: item.value,
-          type:
-            item.type === StarterItemType.NFT
-              ? PurchaseItemType.NFT
-              : PurchaseItemType.CREDIT,
-        } as PurchaseItem;
-      });
-      setPurchaseItems(purchaseItems);
     }
-  }, [
-    starterpackId,
-    acquisitionType,
-    isLoading,
-    items,
-    priceUsd,
-    setStarterpackId,
-    setUsdAmount,
-    setPurchaseItems,
-  ]);
+  }, [starterpackId]);
 
-  if (isLoading) {
+  if (isStarterpackLoading) {
     return <LoadingState />;
   }
 
   return (
     <StarterPackInner
-      name={name}
-      supply={supply}
-      mintAllowance={mintAllowance}
-      merkleDrops={merkleDrops}
-      acquisitionType={acquisitionType}
-      starterpackItems={items}
-      error={error}
+      name={sp.name}
+      supply={sp.supply}
+      mintAllowance={sp.mintAllowance}
+      merkleDrops={sp.merkleDrops}
+      acquisitionType={sp.acquisitionType}
+      starterpackItems={sp.starterPackItems}
+      error={displayError}
     />
   );
 }

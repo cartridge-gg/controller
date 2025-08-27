@@ -37,6 +37,7 @@ export interface StarterPackDetails {
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
   starterPackItems: StarterItemData[];
+  merkleDrops: MerkleDrop[];
 }
 
 export interface MintAllowance {

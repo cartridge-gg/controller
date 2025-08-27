@@ -21,7 +21,10 @@ export function Claim() {
   const { goBack } = useNavigation();
   const { externalSendTransaction } = useConnection();
   const { purchaseItems, selectedWallet } = usePurchaseContext();
-  const { claims, error: claimError } = useMerkleClaim({ key: key!, address: address! });
+  const { claims, error: claimError } = useMerkleClaim({
+    key: key!,
+    address: address!,
+  });
 
   const onConfirm = useCallback(async () => {
     if (claims.length === 0) {
