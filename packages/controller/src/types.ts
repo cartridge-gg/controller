@@ -57,7 +57,7 @@ export type ConnectError = {
 export type ControllerError = {
   code: Number;
   message: string;
-  data?: any;
+  data?: unknown;
 };
 
 export type ConnectReply = {
@@ -131,7 +131,7 @@ export interface Keychain {
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
-    feeSource?: any,
+    feeSource?: FeeSource,
     error?: ControllerError,
   ): Promise<ExecuteReply | ConnectError>;
   signMessage(
@@ -165,7 +165,7 @@ export interface Keychain {
   externalSignTypedData(
     type: ExternalWalletType,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any,
+    data: TypedData,
   ): Promise<ExternalWalletResponse>;
   externalGetBalance(
     type: ExternalWalletType,

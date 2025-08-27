@@ -32,13 +32,13 @@ export class MetaMaskWallet implements WalletAdapter {
           ?.request({
             method: "eth_accounts",
           })
-          .then((accounts: any) => {
-            if (accounts && accounts.length > 0) {
+          .then((accounts) => {
+            if (Array.isArray(accounts) && accounts.length > 0) {
               this.account = getAddress(accounts[0]);
               this.connectedAccounts = accounts.map(getAddress);
             }
           });
-        this.MMSDK.getProvider()?.on("accountsChanged", (accounts: any) => {
+        this.MMSDK.getProvider()?.on("accountsChanged", (accounts: unknown) => {
           if (Array.isArray(accounts)) {
             if (accounts.length > 0) {
               this.account = getAddress(accounts?.[0]);
@@ -46,8 +46,8 @@ export class MetaMaskWallet implements WalletAdapter {
             }
           }
         });
-        this.MMSDK.getProvider()?.on("chainChanged", (chainId: any) => {
-          this.platform = chainIdToPlatform(chainId);
+        this.MMSDK.getProvider()?.on("chainChanged", (chainId: unknown) => {
+          this.platform = chainIdToPlatform(chainId as string);
         });
 
         const chainId = this.MMSDK.getProvider()?.chainId;
@@ -115,8 +115,8 @@ export class MetaMaskWallet implements WalletAdapter {
   }
 
   async signTransaction(
-    transaction: any,
-  ): Promise<ExternalWalletResponse<any>> {
+    transaction: unknown,
+  ): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("MetaMask is not connected");
@@ -132,7 +132,7 @@ export class MetaMaskWallet implements WalletAdapter {
         params: [transaction],
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error signing transaction with MetaMask:`, error);
       return {
@@ -157,7 +157,7 @@ export class MetaMaskWallet implements WalletAdapter {
         params: [address || this.account, message],
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error signing message with MetaMask:`, error);
       return {
@@ -168,7 +168,7 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
-  async signTypedData(data: any): Promise<ExternalWalletResponse<any>> {
+  async signTypedData(data: unknown): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("MetaMask is not connected");
@@ -181,10 +181,10 @@ export class MetaMaskWallet implements WalletAdapter {
 
       const result = await ethereum.request({
         method: "eth_signTypedData_v4",
-        params: [this.account, JSON.stringify(data)],
+        params: [this.account, JSON.stringify(data)] as any,
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error signing typed data with MetaMask:`, error);
       return {
@@ -195,7 +195,7 @@ export class MetaMaskWallet implements WalletAdapter {
     }
   }
 
-  async sendTransaction(txn: any): Promise<ExternalWalletResponse<any>> {
+  async sendTransaction(txn: unknown): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("MetaMask is not connected");
@@ -208,10 +208,10 @@ export class MetaMaskWallet implements WalletAdapter {
 
       const result = await provider.request({
         method: "eth_sendTransaction",
-        params: [txn],
+        params: [txn] as any,
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error sending transaction with MetaMask:`, error);
       return {

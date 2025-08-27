@@ -33,9 +33,9 @@ function validatePropertyName(prop: string): void {
   }
 }
 
-function safeObjectAccess<T>(obj: any, prop: string): T {
+function safeObjectAccess<T>(obj: unknown, prop: string): T {
   validatePropertyName(prop);
-  return obj[prop];
+  return (obj as Record<string, T>)[prop];
 }
 
 export function normalizeCalls(calls: Call | Call[]) {
@@ -57,10 +57,9 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
               safeObjectAccess<string>(p, "target"),
             );
             const entrypoint = safeObjectAccess<string>(p, "method");
-            const contracts = safeObjectAccess<Record<string, any>>(
-              prev,
-              "contracts",
-            );
+            const contracts = safeObjectAccess<
+              Record<string, { methods: unknown[] }>
+            >(prev, "contracts");
             const item = {
               name: humanizeString(entrypoint),
               entrypoint: entrypoint,
@@ -78,7 +77,7 @@ export function toSessionPolicies(policies: Policies): SessionPolicies {
               };
             }
           } else {
-            const messages = safeObjectAccess<any[]>(prev, "messages");
+            const messages = safeObjectAccess<unknown[]>(prev, "messages");
             messages.push(p);
           }
 

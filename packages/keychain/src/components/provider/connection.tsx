@@ -48,8 +48,7 @@ export type ConnectionContextValue = {
   ) => Promise<ExternalWalletResponse>;
   externalSignTypedData: (
     identifier: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any,
+    data: unknown,
   ) => Promise<ExternalWalletResponse>;
   externalSignMessage: (
     identifier: string,
@@ -57,8 +56,7 @@ export type ConnectionContextValue = {
   ) => Promise<ExternalWalletResponse>;
   externalSendTransaction: (
     identifier: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    txn: any,
+    txn: unknown,
   ) => Promise<ExternalWalletResponse>;
   externalGetBalance: (
     identifier: string,

@@ -6,7 +6,7 @@ import {
   AddStarknetChainParameters,
   ChainId,
 } from "@starknet-io/types-js";
-import { constants, shortString, WalletAccount } from "starknet";
+import { Call, constants, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
 import { NotReadyToConnect } from "./errors";
@@ -369,7 +369,7 @@ export default class ControllerProvider extends BaseProvider {
       });
   }
 
-  async openExecute(calls: any, chainId?: string) {
+  async openExecute(calls: Call | Call[], chainId?: string) {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;

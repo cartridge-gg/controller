@@ -92,7 +92,9 @@ export class BraavosWallet implements WalletAdapter {
     }
   }
 
-  async sendTransaction(calls: Call[]): Promise<ExternalWalletResponse> {
+  async sendTransaction(
+    calls: unknown,
+  ): Promise<ExternalWalletResponse<string>> {
     if (!this.wallet) {
       throw new Error("No wallet found");
     }
@@ -101,14 +103,14 @@ export class BraavosWallet implements WalletAdapter {
       const result = await this.wallet.request({
         type: "wallet_addInvokeTransaction",
         params: {
-          calls,
+          calls: calls as Call[],
         },
       });
 
       return {
         success: true,
         wallet: this.type,
-        result,
+        result: (result as any).transaction_hash || String(result),
       };
     } catch (error) {
       console.error(`Error sending transaction with Braavos:`, error);

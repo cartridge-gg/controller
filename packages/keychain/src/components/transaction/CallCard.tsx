@@ -22,14 +22,12 @@ interface CallCardProps {
 }
 
 // Utility function to detect if a value is a hex address
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isHexAddress(value: any): boolean {
+function isHexAddress(value: unknown): boolean {
   return typeof value === "string" && /^0x[a-fA-F0-9]{40,64}$/.test(value);
 }
 
 // Utility function to detect if a value is likely a number
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isNumeric(value: any): boolean {
+function isNumeric(value: unknown): boolean {
   if (typeof value === "number") return true;
   if (typeof value !== "string") return false;
   return !isNaN(Number(value)) && !isHexAddress(value);
@@ -62,8 +60,7 @@ function CopyableValue({
 }
 
 // Utility function to format different types of data
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatValue(value: any): React.ReactNode {
+function formatValue(value: unknown): React.ReactNode {
   if (value === null || value === undefined) {
     return <span className="text-foreground-200">null</span>;
   }
@@ -198,8 +195,7 @@ function formatValue(value: any): React.ReactNode {
 }
 
 // Component to render calldata items
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function CalldataItem({ data, index }: { data: any; index: number }) {
+function CalldataItem({ data, index }: { data: unknown; index: number }) {
   return (
     <div className="text-xs bg-background-300 p-2 rounded-md break-all">
       <div className="flex items-start">
@@ -211,8 +207,13 @@ function CalldataItem({ data, index }: { data: any; index: number }) {
 }
 
 // Component to render calldata as key-value pairs
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function CalldataKeyValue({ keyName, value }: { keyName: string; value: any }) {
+function CalldataKeyValue({
+  keyName,
+  value,
+}: {
+  keyName: string;
+  value: unknown;
+}) {
   return (
     <div className="text-xs bg-background-300 p-2 rounded-md break-all">
       <div className="flex flex-col">

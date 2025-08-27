@@ -231,7 +231,7 @@ export function useToriiCollections(): UseToriiCollectionsResponse {
         setCollections(collections);
         setStatus("success");
       })
-      .catch((error: any) => {
+      .catch((error: unknown) => {
         setStatus("error");
         console.error(error);
       });
@@ -305,11 +305,11 @@ export function useToriiCollection({
           order_by: [],
         },
       })
-      .then((tokens: any) => {
+      .then((tokens: { items?: unknown[] }) => {
         setTokens(tokens.items || []);
         setStatus("success");
       })
-      .catch((error: any) => {
+      .catch((error: unknown) => {
         setStatus("error");
         console.error(error);
       });

@@ -126,7 +126,7 @@ export class BaseWallet implements WalletAdapter {
         params: [message, address || this.account] as any,
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error signing message with Base Wallet:`, error);
       return {
@@ -137,7 +137,7 @@ export class BaseWallet implements WalletAdapter {
     }
   }
 
-  async signTypedData(data: any): Promise<ExternalWalletResponse<any>> {
+  async signTypedData(data: unknown): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Base Wallet is not connected");
@@ -153,7 +153,7 @@ export class BaseWallet implements WalletAdapter {
         params: [this.account, JSON.stringify(data)] as any,
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error signing typed data with Base Wallet:`, error);
       return {
@@ -164,7 +164,7 @@ export class BaseWallet implements WalletAdapter {
     }
   }
 
-  async sendTransaction(txn: any): Promise<ExternalWalletResponse<any>> {
+  async sendTransaction(txn: unknown): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Base Wallet is not connected");
@@ -177,10 +177,10 @@ export class BaseWallet implements WalletAdapter {
 
       const result = await provider.request({
         method: "eth_sendTransaction",
-        params: [txn],
+        params: [txn] as any,
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error sending transaction with Base Wallet:`, error);
       return {

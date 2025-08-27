@@ -39,17 +39,17 @@ export interface WalletAdapter {
   isAvailable(): boolean;
   getInfo(): ExternalWallet;
   getConnectedAccounts(): string[];
-  connect(): Promise<ExternalWalletResponse<any>>;
+  connect(): Promise<ExternalWalletResponse<string[]>>;
   signMessage?(
     message: string,
     address?: string,
-  ): Promise<ExternalWalletResponse<any>>;
-  signTypedData?(data: any): Promise<ExternalWalletResponse<any>>;
-  sendTransaction(tx: any): Promise<ExternalWalletResponse<any>>;
-  getBalance(tokenAddress?: string): Promise<ExternalWalletResponse<any>>;
+  ): Promise<ExternalWalletResponse<string>>;
+  signTypedData?(data: unknown): Promise<ExternalWalletResponse<string>>;
+  sendTransaction(tx: unknown): Promise<ExternalWalletResponse<string>>;
+  getBalance(tokenAddress?: string): Promise<ExternalWalletResponse<string>>;
   switchChain(chainId: string): Promise<boolean>;
   waitForTransaction(
     txHash: string,
     timeoutMs?: number,
-  ): Promise<ExternalWalletResponse<any>>;
+  ): Promise<ExternalWalletResponse<unknown>>;
 }

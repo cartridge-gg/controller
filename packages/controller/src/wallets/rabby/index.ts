@@ -113,8 +113,8 @@ export class RabbyWallet implements WalletAdapter {
   }
 
   async signTransaction(
-    transaction: any,
-  ): Promise<ExternalWalletResponse<any>> {
+    transaction: unknown,
+  ): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Rabby is not connected");
@@ -130,7 +130,7 @@ export class RabbyWallet implements WalletAdapter {
         params: [transaction],
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error signing transaction with Rabby:`, error);
       return {
@@ -155,7 +155,7 @@ export class RabbyWallet implements WalletAdapter {
         params: [address || this.account, message] as any,
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error signing message with Rabby:`, error);
       return {
@@ -166,7 +166,7 @@ export class RabbyWallet implements WalletAdapter {
     }
   }
 
-  async signTypedData(data: any): Promise<ExternalWalletResponse<any>> {
+  async signTypedData(data: unknown): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Rabby is not connected");
@@ -182,7 +182,7 @@ export class RabbyWallet implements WalletAdapter {
         params: [this.account, JSON.stringify(data)] as any,
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error signing typed data with Rabby:`, error);
       return {
@@ -193,7 +193,7 @@ export class RabbyWallet implements WalletAdapter {
     }
   }
 
-  async sendTransaction(txn: any): Promise<ExternalWalletResponse<any>> {
+  async sendTransaction(txn: unknown): Promise<ExternalWalletResponse<string>> {
     try {
       if (!this.isAvailable() || !this.account) {
         throw new Error("Rabby is not connected");
@@ -206,10 +206,10 @@ export class RabbyWallet implements WalletAdapter {
 
       const result = await provider.request({
         method: "eth_sendTransaction",
-        params: [txn],
+        params: [txn] as any,
       });
 
-      return { success: true, wallet: this.type, result };
+      return { success: true, wallet: this.type, result: String(result) };
     } catch (error) {
       console.error(`Error sending transaction with Rabby:`, error);
       return {

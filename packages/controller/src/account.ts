@@ -85,6 +85,7 @@ class ControllerAccount extends WalletAccount {
         undefined,
         undefined,
         true,
+        undefined,
         (sessionExecute as ConnectError).error,
       );
 

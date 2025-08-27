@@ -54,11 +54,11 @@ export class WalletBridge {
           this.signMessage(identifier, message),
       externalSignTypedData:
         (_origin: string) =>
-        (identifier: ExternalWalletType | string, data: any) =>
+        (identifier: ExternalWalletType | string, data: unknown) =>
           this.signTypedData(identifier, data),
       externalSendTransaction:
         (_origin: string) =>
-        (identifier: ExternalWalletType | string, txn: any) =>
+        (identifier: ExternalWalletType | string, txn: unknown) =>
           this.sendTransaction(identifier, txn),
       externalGetBalance:
         (_origin: string) =>
@@ -200,7 +200,7 @@ export class WalletBridge {
 
   async signTypedData(
     identifier: ExternalWalletType | string,
-    data: any,
+    data: unknown,
   ): Promise<ExternalWalletResponse> {
     let wallet: WalletAdapter | undefined;
     try {
@@ -223,7 +223,7 @@ export class WalletBridge {
 
   async sendTransaction(
     identifier: ExternalWalletType | string,
-    txn: any,
+    txn: unknown,
   ): Promise<ExternalWalletResponse> {
     let wallet: WalletAdapter | undefined;
     try {
@@ -292,10 +292,10 @@ export class WalletBridge {
 
 declare global {
   interface Window {
-    ethereum?: any;
-    solana?: any;
-    starknet_argentX?: any;
-    starknet_braavos?: any;
+    ethereum?: { version?: string; chainId?: string };
+    solana?: unknown;
+    starknet_argentX?: { version?: string; chainId?: string };
+    starknet_braavos?: { version?: string; chainId?: string };
     wallet_bridge?: WalletBridge;
   }
 }

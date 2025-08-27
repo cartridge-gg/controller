@@ -73,8 +73,7 @@ export type ParentMethods = AsyncMethodReturns<{
   ) => Promise<ExternalWalletResponse>;
   externalSignTypedData: (
     identifier: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any,
+    data: unknown,
   ) => Promise<ExternalWalletResponse>;
   externalSignMessage: (
     identifier: string,
@@ -82,8 +81,7 @@ export type ParentMethods = AsyncMethodReturns<{
   ) => Promise<ExternalWalletResponse>;
   externalSendTransaction: (
     identifier: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    txn: any,
+    txn: unknown,
   ) => Promise<ExternalWalletResponse>;
   externalGetBalance: (
     identifier: string,
@@ -586,8 +584,7 @@ export function useConnectionValue() {
   );
 
   const externalSignTypedData = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (identifier: string, data: any) => {
+    (identifier: string, data: unknown) => {
       if (!parent) {
         return Promise.reject(new Error("Parent connection not ready."));
       }
@@ -597,8 +594,7 @@ export function useConnectionValue() {
   );
 
   const externalSendTransaction = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (identifier: string, txn: any) => {
+    (identifier: string, txn: unknown) => {
       if (!parent) {
         return Promise.reject(new Error("Parent connection not ready."));
       }
