@@ -1,4 +1,4 @@
-import { useNavigation, usePurchaseContext } from "@/context";
+import { useNavigation } from "@/context";
 import {
   Button,
   CardContent,
@@ -9,22 +9,31 @@ import {
   LayoutFooter,
 } from "@cartridge/ui";
 import { Receiving } from "../receiving";
-import { useCallback } from "react";
-import { useConnection } from "@/hooks/connection";
+import { useCallback, useMemo } from "react";
 import { Call } from "@starknet-io/types-js";
 import { Badge } from "../starterpack/badge";
 import { useParams } from "react-router-dom";
 import { useMerkleClaim } from "@/hooks/merkle-claim";
+import { LoadingState } from "../loading";
+import { PurchaseType } from "@/hooks/payments/crypto";
+import { PurchaseItem, PurchaseItemType } from "@/context/purchase";
 
 export function Claim() {
   const { key, address } = useParams();
   const { goBack } = useNavigation();
-  const { externalSendTransaction } = useConnection();
-  const { purchaseItems, selectedWallet } = usePurchaseContext();
-  const { claims, error: claimError } = useMerkleClaim({
+  const { claims, error: claimError, isLoading } = useMerkleClaim({
     key: key!,
     address: address!,
   });
+
+
+  const items = useMemo(()=> {
+    return claims.map((claim) => ({
+      title: claim.data[0],
+      type: PurchaseItemType.NFT,
+      icon: <GiftIcon variant="solid" />,
+    }));
+  }, [claims])
 
   const onConfirm = useCallback(async () => {
     if (claims.length === 0) {
@@ -45,6 +54,10 @@ export function Claim() {
     // console.log({ txn });
   }, [claims]);
 
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
   return (
     <>
       <HeaderInner
@@ -59,7 +72,7 @@ export function Claim() {
             className="h-full md:h-[420px]"
           />
         ) : (
-          <Receiving title="Receiving" items={purchaseItems} />
+          <Receiving title="Receiving" items={items} showTotal />
         )}
       </LayoutContent>
       <LayoutFooter>
@@ -80,3 +93,4 @@ export function Claim() {
     </>
   );
 }
+

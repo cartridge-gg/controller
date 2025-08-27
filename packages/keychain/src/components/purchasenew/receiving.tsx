@@ -10,14 +10,17 @@ import {
 import { ReceivingProps } from "./types";
 import { PurchaseItemType } from "@/context/purchase";
 
-export function Receiving({ title, items, isLoading }: ReceivingProps) {
+export function Receiving({ title, items, showTotal, isLoading }: ReceivingProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between h-10">
         <CardTitle className="normal-case font-semibold text-xs">
           {title ?? "Balance"}
         </CardTitle>
         {isLoading && <Spinner size="sm" />}
+        {showTotal && !isLoading && (
+          <div className="bg-background-300 text-foreground-300 rounded-full px-2 py-0.5 text-xs">{items.length} total</div>
+        )}
       </CardHeader>
 
       <CardListContent>

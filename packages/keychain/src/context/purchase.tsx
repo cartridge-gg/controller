@@ -97,7 +97,7 @@ export interface PurchaseContextType {
     wallet: ExternalWallet,
     platform: ExternalPlatform,
     chainId?: string,
-  ) => Promise<void>;
+  ) => Promise<string | undefined>;
   waitForPayment: (paymentId: string) => Promise<boolean>;
   fetchFees: () => Promise<void>;
 }
@@ -171,13 +171,10 @@ export const PurchaseProvider = ({
   } = useStarterPack(starterpackId);
 
   useEffect(() => {
-    if (
-      !starterpackId ||
-      items.length === 0 ||
-      !priceUsd ||
-      isStarterpackLoading
-    )
+    if (!starterpackId)
       return;
+
+    console.log("starterpackId", starterpackId);
 
     const purchaseItems: PurchaseItem[] = items.map((item) => ({
       title: item.title,
@@ -200,7 +197,7 @@ export const PurchaseProvider = ({
       priceUsd,
       acquisitionType,
     });
-  }, [items, priceUsd, starterpackId, isStarterpackLoading]);
+  }, [starterpackId, items, priceUsd, name, supply, mintAllowance, merkleDrops, acquisitionType]);
 
   useEffect(() => {
     setDisplayError(
@@ -280,7 +277,7 @@ export const PurchaseProvider = ({
       wallet: ExternalWallet,
       platform: ExternalPlatform,
       chainId?: string | number,
-    ) => {
+    ): Promise<string | undefined> => {
       if (!controller) return;
 
       try {
@@ -306,6 +303,8 @@ export const PurchaseProvider = ({
             throw error;
           }
         }
+
+        return res.account;
       } catch (e) {
         setDisplayError(e as Error);
         throw e;

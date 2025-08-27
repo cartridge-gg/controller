@@ -8,7 +8,6 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-  Skeleton,
 } from "@cartridge/ui";
 import {
   MintAllowance,
@@ -21,20 +20,17 @@ import { useNavigation, usePurchaseContext } from "@/context";
 import { useEffect } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { MerkleDrops } from "./merkledrop";
+import { LoadingState } from "../loading";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
 
   const {
     isStarterpackLoading,
-    starterpackDetails: sp,
+    starterpackDetails: details,
     displayError,
     setStarterpackId,
   } = usePurchaseContext();
-
-  if (!sp) {
-    throw new Error("Starterpack not found");
-  }
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
@@ -42,18 +38,18 @@ export function PurchaseStarterpack() {
     }
   }, [starterpackId]);
 
-  if (isStarterpackLoading) {
+  if (isStarterpackLoading || !details) {
     return <LoadingState />;
   }
 
   return (
     <StarterPackInner
-      name={sp.name}
-      supply={sp.supply}
-      mintAllowance={sp.mintAllowance}
-      merkleDrops={sp.merkleDrops}
-      acquisitionType={sp.acquisitionType}
-      starterpackItems={sp.starterPackItems}
+      name={details.name}
+      supply={details.supply}
+      mintAllowance={details.mintAllowance}
+      merkleDrops={details.merkleDrops}
+      acquisitionType={details.acquisitionType}
+      starterpackItems={details.starterPackItems}
       error={displayError}
     />
   );
@@ -140,14 +136,3 @@ export function StarterPackInner({
     </>
   );
 }
-
-const LoadingState = () => {
-  return (
-    <LayoutContent>
-      <Skeleton className="min-h-10 w-full rounded" />
-      <Skeleton className="min-h-10 w-full rounded" />
-      <Skeleton className="min-h-[180px] w-full rounded" />
-      <Skeleton className="min-h-[180px] w-full rounded" />
-    </LayoutContent>
-  );
-};

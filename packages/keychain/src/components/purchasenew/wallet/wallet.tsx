@@ -14,7 +14,7 @@ import { ExternalWallet } from "@cartridge/controller";
 import { useWallets } from "@/hooks/wallets";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { MerkleDropNetwork, StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 export function SelectWallet() {
   const { navigate } = useNavigation();
@@ -116,7 +116,7 @@ export function SelectWallet() {
                 onClick={async () => {
                   setIsLoading(true);
                   try {
-                    await onExternalConnect(
+                    const address = await onExternalConnect(
                       wallet,
                       network.platform,
                       chainIds.get(network.platform),
@@ -126,7 +126,10 @@ export function SelectWallet() {
                       starterpackDetails?.acquisitionType ===
                       StarterpackAcquisitionType.Claimed
                     ) {
-                      navigate(`/purchase/claim`);
+                      const key = starterpackDetails?.merkleDrops?.find(
+                        (drop) => drop.network === network.platform.toUpperCase() as MerkleDropNetwork,
+                      )?.key;
+                      navigate(`/purchase/claim/${key}/${address}`);
                     } else {
                       navigate(`/purchase/checkout/crypto`);
                     }

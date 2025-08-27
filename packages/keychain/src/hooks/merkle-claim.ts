@@ -20,11 +20,14 @@ export const useMerkleClaim = ({
 }) => {
   const [error, setError] = useState<Error | null>(null);
   const [claims, setClaims] = useState<MerkleClaim[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setIsLoading(true);
     client
       .request<MerkleClaimsForAddressQuery>(MerkleClaimsForAddressDocument, {
-        input: { address, key },
+        key,
+        address,
       })
       .then((result) => {
         const claims: MerkleClaim[] = result.merkleClaimsForAddress.map(
@@ -38,6 +41,9 @@ export const useMerkleClaim = ({
       })
       .catch((error) => {
         setError(error as Error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, [key, address]);
 
@@ -45,6 +51,7 @@ export const useMerkleClaim = ({
 
   return {
     claims,
+    isLoading,
     error,
     onSendClaim,
   };
