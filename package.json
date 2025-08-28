@@ -46,7 +46,6 @@
     "overrides": {
       "@radix-ui/react-accordion": "1.2.1",
       "typescript": "catalog:",
-      "starknet": "catalog:",
       "@noble/curves": "catalog:",
       "@noble/hashes": "catalog:",
       "@dojoengine/core": "catalog:",

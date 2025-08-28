@@ -46,7 +46,7 @@
     "dts": "resolve"
   },
   "peerDependencies": {
-    "@starknet-react/core": "catalog:"
+    "@starknet-react/core": "^5.0.1"
   },
   "dependencies": {
     "@cartridge/controller": "workspace:*"
