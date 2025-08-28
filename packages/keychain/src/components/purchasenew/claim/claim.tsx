@@ -9,21 +9,28 @@ import {
   LayoutFooter,
 } from "@cartridge/ui";
 import { Receiving } from "../receiving";
-import { useCallback, useMemo } from "react";
-import { Call } from "@starknet-io/types-js";
+import { useCallback, useMemo, useState } from "react";
 import { Badge } from "../starterpack/badge";
 import { useParams } from "react-router-dom";
 import { useMerkleClaim } from "@/hooks/merkle-claim";
 import { LoadingState } from "../loading";
 import { PurchaseType } from "@/hooks/payments/crypto";
-import { PurchaseItem, PurchaseItemType } from "@/context/purchase";
+import { PurchaseItem, PurchaseItemType, usePurchaseContext } from "@/context/purchase";
+import { useConnection } from "@/hooks/connection";
+import { CallData, Call, num, cairo, hash, shortString } from "starknet";
+import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
+import { hashMessage, parseSignature } from "viem";
+import { ErrorAlert } from "@/components/ErrorAlert";
 
 export function Claim() {
-  const { key, address } = useParams();
+  const { key, address: externalAddress } = useParams();
   const { goBack } = useNavigation();
-  const { claims, error: claimError, isLoading } = useMerkleClaim({
+  const { controller, externalSignMessage } = useConnection();
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const { claims, isLoading } = useMerkleClaim({
     key: key!,
-    address: address!,
+    address: externalAddress!,
   });
 
 
@@ -36,23 +43,70 @@ export function Claim() {
   }, [claims])
 
   const onConfirm = useCallback(async () => {
-    if (claims.length === 0) {
-      goBack();
+    if (!controller) {
       return;
     }
 
-    // const call: Call = {
-    //   contract_address: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
-    //   entry_point: "transfer",
-    //   calldata: [
-    //     "0x00dBD8a366Db7Af2aBC9AA5B72C9E357d0Ff83dfba2FE5B63CC7FfB5Cd0Df2Cd",
-    //     "0x0",
-    //     "0x1",
-    //   ],
-    // };
-    // const txn = await externalSendTransaction(selectedWallet.type, [call]);
-    // console.log({ txn });
-  }, [claims]);
+    try {
+      setIsClaiming(true);
+      setError(null);
+      const claim = claims[0];
+      let receipient = ["0x0", num.toHex(controller.address())];
+      let ethSignature: string[] = ["0x1"];
+      let leafData: string[] = [];
+  
+      if (claim.network === MerkleDropNetwork.Ethereum) {
+        const msg = `Claim on starknet with: ${num.toHex(controller.address())}`;
+        const messageHash = hashMessage(msg);
+
+        const {result, error} = await externalSignMessage(externalAddress!, messageHash);
+        if (error) {
+          throw new Error(error);
+        }
+
+        const { r, s, v } = parseSignature(result as `0x${string}`);
+        ethSignature = CallData.compile([
+          num.toHex(v!),
+          cairo.uint256(r),
+          cairo.uint256(s),
+        ]);
+        ethSignature.unshift("0x0"); 
+
+        leafData = CallData.compile({
+          address: externalAddress!,
+          claim_contract_address: claim.contract,
+          selector: hash.getSelectorFromName(claim.entrypoint),
+          data: claim.data,
+        });
+      }
+
+      const calldata = CallData.compile({
+        merkle_tree_key: {
+          chain_id: shortString.encodeShortString(claim.network), // ETHEREUM
+          claim_contract_address: claim.contract,
+          selector: hash.getSelectorFromName(claim.entrypoint)
+
+        },
+        proof: claim.merkleProof,
+        leaf_data: leafData,
+        recipient: {...receipient},
+        eth_signature: {...ethSignature},
+      })
+
+      const call: Call = {
+        contractAddress: "0xb12abd89a802f600ae266d62ebc5bf3a7b196c61a1abcbbdac49f57ece489e",
+        entrypoint: "verify_and_forward",
+        calldata,
+      };      
+
+      const result = await controller.executeFromOutsideV3([call]);
+      console.log({result});
+    } catch (error) {
+      setError(error as Error);
+    } finally {
+      setIsClaiming(false);
+    }
+  }, [claims, externalAddress]);
 
   if (isLoading) {
     return <LoadingState />;
@@ -76,6 +130,7 @@ export function Claim() {
         )}
       </LayoutContent>
       <LayoutFooter>
+        {error && <ErrorAlert title="Error" description={error.message} />}
         {claims.length > 0 && (
           <CardContent className="relative flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
             <div className="absolute -top-1 right-4">
@@ -86,9 +141,11 @@ export function Claim() {
             </div>
           </CardContent>
         )}
-        <Button onClick={onConfirm}>
-          {claims.length === 0 ? "Check Another Wallet" : "Claim"}
-        </Button>
+        {claims.length === 0 ? (
+          <Button onClick={() => goBack()}>Check Another Wallet</Button>
+        ) : (
+          <Button onClick={onConfirm} isLoading={isClaiming}>Claim</Button>
+        )}
       </LayoutFooter>
     </>
   );

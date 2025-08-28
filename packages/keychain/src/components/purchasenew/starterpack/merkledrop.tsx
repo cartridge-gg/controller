@@ -30,6 +30,7 @@ export const MerkleDrops = React.forwardRef<
         <div className="grid grid-cols-[repeat(auto-fit,minmax(80px,80px))] justify-start gap-2 overflow-x-auto">
           {merkleDrops.map((merkleDrop) => (
             <MerkleItem
+              key={`${merkleDrop.network}`}
               image="https://placehold.co/80x80/161a17/ffffff"
               network={merkleDrop.network}
             />

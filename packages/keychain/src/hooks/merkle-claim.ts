@@ -3,12 +3,17 @@ import { client } from "@/utils/graphql";
 import {
   MerkleClaimsForAddressDocument,
   MerkleClaimsForAddressQuery,
+  MerkleDropNetwork,
 } from "@cartridge/ui/utils/api/cartridge";
 
 export interface MerkleClaim {
+  network: MerkleDropNetwork;
   data: string[];
   claimed: boolean;
   merkleProof: string[];
+  merkleRoot: string;
+  contract: string;
+  entrypoint: string;
 }
 
 export const useMerkleClaim = ({
@@ -32,9 +37,13 @@ export const useMerkleClaim = ({
       .then((result) => {
         const claims: MerkleClaim[] = result.merkleClaimsForAddress.map(
           (claim) => ({
+            network: claim.merkleDrop.network,
             data: claim.data,
             claimed: claim.claimed,
             merkleProof: claim.merkleProof ?? [],
+            merkleRoot: claim.merkleDrop.merkleRoot,
+            contract: claim.merkleDrop.contract,
+            entrypoint: claim.merkleDrop.entrypoint,
           }),
         );
         setClaims(claims);
