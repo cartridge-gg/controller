@@ -19,7 +19,7 @@ import { PurchaseItem, PurchaseItemType, usePurchaseContext } from "@/context/pu
 import { useConnection } from "@/hooks/connection";
 import { CallData, Call, num, cairo, hash, shortString } from "starknet";
 import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
-import { hashMessage, parseSignature } from "viem";
+import { parseSignature } from "viem";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
 export function Claim() {
@@ -51,15 +51,13 @@ export function Claim() {
       setIsClaiming(true);
       setError(null);
       const claim = claims[0];
-      let receipient = ["0x0", num.toHex(controller.address())];
+      let receipient = ["0x0", controller.address()];
       let ethSignature: string[] = ["0x1"];
       let leafData: string[] = [];
   
       if (claim.network === MerkleDropNetwork.Ethereum) {
         const msg = `Claim on starknet with: ${num.toHex(controller.address())}`;
-        const messageHash = hashMessage(msg);
-
-        const {result, error} = await externalSignMessage(externalAddress!, messageHash);
+        const {result, error} = await externalSignMessage(externalAddress!, msg);
         if (error) {
           throw new Error(error);
         }
