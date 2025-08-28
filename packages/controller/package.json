@@ -36,14 +36,14 @@
     "@metamask/sdk": "^0.32.1",
     "@solana/web3.js": "catalog:",
     "open": "^10.1.0",
-    "starknet": "catalog:",
-    "starknetkit": "^2.6.1"
+    "starknet": "^8.5.2",
+    "starknetkit": "^3.0.3"
   },
   "dependencies": {
     "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
     "ethers": "^6.13.5",
-    "@starknet-io/types-js": "catalog:",
+    "@starknet-io/types-js": "0.9.1",
     "@telegram-apps/sdk": "^2.4.0",
     "@turnkey/sdk-browser": "^4.0.0",
     "cbor-x": "^1.5.0",
