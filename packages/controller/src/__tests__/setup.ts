@@ -1,14 +1,10 @@
 // Jest setup file to handle cleanup of timers and open handles
 
-// Mock starknetkit to prevent it from creating timers
-jest.mock("starknetkit", () => ({
-  connect: jest.fn(),
-  StarknetWindowObject: {},
-}));
-
-jest.mock("starknetkit/injected", () => ({
-  InjectedConnector: jest.fn(),
-}));
+// Mock window.starknet objects for wallet tests
+if (typeof window !== "undefined") {
+  (window as any).starknet_argentX = undefined;
+  (window as any).starknet_braavos = undefined;
+}
 
 // Clean up any remaining timers after each test
 afterEach(() => {

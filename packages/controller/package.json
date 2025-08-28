@@ -36,8 +36,7 @@
     "@metamask/sdk": "^0.32.1",
     "@solana/web3.js": "catalog:",
     "open": "^10.1.0",
-    "starknet": "^8.5.2",
-    "starknetkit": "^3.0.3"
+    "starknet": "^8.5.2"
   },
   "dependencies": {
     "@cartridge/controller-wasm": "catalog:",

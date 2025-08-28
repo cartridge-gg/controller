@@ -422,9 +422,6 @@ importers:
       starknet:
         specifier: ^7.6.2
         version: 7.6.2
-      starknetkit:
-        specifier: ^3.0.3
-        version: 3.0.3(79ed08960aa30cf183d6b9bb837e8388)
     devDependencies:
       '@cartridge/tsconfig':
         specifier: workspace:*
