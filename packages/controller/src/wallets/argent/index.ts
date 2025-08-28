@@ -1,6 +1,4 @@
-import { Call, TypedData } from "@starknet-io/types-js";
-import { connect, StarknetWindowObject } from "starknetkit";
-import { InjectedConnector } from "starknetkit/injected";
+import { Call, TypedData, StarknetWindowObject } from "@starknet-io/types-js";
 import {
   ExternalPlatform,
   ExternalWallet,
@@ -45,16 +43,24 @@ export class ArgentWallet implements WalletAdapter {
         throw new Error("Argent is not available");
       }
 
-      const { wallet, connectorData } = await connect({
-        connectors: [new InjectedConnector({ options: { id: "argentX" } })],
-      });
-
+      const wallet = window.starknet_argentX as StarknetWindowObject;
       if (!wallet) {
         throw new Error("No wallet found");
       }
 
+      // Request accounts from the wallet
+      const accounts = await wallet.request({
+        type: "wallet_requestAccounts",
+        params: { silent_mode: false },
+      });
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No accounts found");
+      }
+
       this.wallet = wallet;
-      this.account = connectorData?.account;
+      this.account = accounts[0];
+      this.connectedAccounts = accounts;
       return { success: true, wallet: this.type, account: this.account };
     } catch (error) {
       console.error(`Error connecting to Argent:`, error);

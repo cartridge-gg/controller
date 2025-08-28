@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.10.0-alpha.0] - 2025-08-28
+
+### ✨ New Features
+- **@cartridge/controller**: Added lazy load option to defer iframe mounting, improving initial page load performance and providing better control over when the controller iframe is loaded (#1934)
+- **@cartridge/keychain**: Added fallback redirect option for social login when popup windows don't work, ensuring better compatibility across different browsers and environments (#1929)
+- **@cartridge/controller**: Implemented StarkNet wallet switch chain and send transaction functionality, enabling seamless network switching and transaction execution with external wallets (#1927)
+- **@cartridge/keychain**: Enabled Braavos wallet integration, expanding wallet compatibility for users (#1925)
+- **@cartridge/keychain**: Combined payment method and network selection screens for a more streamlined user experience during transactions (#1920)
+- **@cartridge/keychain**: Added claim starterpack UI, providing an intuitive interface for users to claim their starter packages (#1922)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Enhanced multicall error parsing to extract more meaningful error messages, improving debugging and user experience during transaction failures (#1923)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed social native login/signup issues to ensure proper authentication flow in native applications (#1937)
+- **@cartridge/keychain**: Fixed starterpack hook functionality to ensure proper starterpack claiming and management (#1936)
+- **@cartridge/keychain**: Fixed social login issues in native apps, improving authentication reliability (#1932)
+- **@cartridge/controller**: Fixed issue where user cancellation of manual transactions was not properly propagated, ensuring proper event handling (#1931)
+- **@cartridge/controller**: Fixed connection destroyed on navigate issue, preventing connection loss during page navigation (#1926)
+- **@cartridge/keychain**: Fixed missing Base network block explorer integration (#1919)
+- **@cartridge/controller**: Fixed handling of transaction execution errors after session updates, improving error recovery and user feedback (#1916)
+
+### 📦 Dependencies
+- **starknet.js**: Updated to version 8.5.2 for improved StarkNet integration and bug fixes (#1940)
+- **@cartridge/ui**: Multiple updates to the UI component library for improved design consistency and functionality (#1938, #1933, #1930, #1921)
+
 ## [0.9.3] - 2025-08-13
 
 ### ✨ New Features
