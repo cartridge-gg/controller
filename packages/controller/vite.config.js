@@ -13,7 +13,6 @@ const externalDeps = [
   "@metamask/sdk", 
   "open",
   "starknet",
-  "starknetkit", 
 ];
 
 export default defineConfig(({ mode }) => ({
