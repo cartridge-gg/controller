@@ -1,9 +1,9 @@
 import { JsFeeEstimate } from "@cartridge/controller-wasm/controller";
-import { EstimateFee } from "starknet";
+import { FeeEstimate } from "starknet";
 
-export function toJsFeeEstimate(fee?: EstimateFee): JsFeeEstimate | undefined {
-  // If the overall_fee is 0n then it is a free txn
-  if (!fee || fee.overall_fee == 0n) return undefined;
+export function toJsFeeEstimate(fee?: FeeEstimate): JsFeeEstimate | undefined {
+  // If the overall_fee is 0 then it is a free txn
+  if (!fee || Number(fee.overall_fee) === 0) return undefined;
 
   return {
     l1_gas_consumed: Number(fee.l1_gas_consumed),
@@ -17,26 +17,15 @@ export function toJsFeeEstimate(fee?: EstimateFee): JsFeeEstimate | undefined {
   };
 }
 
-export function fromJsFeeEstimate(fee: JsFeeEstimate): EstimateFee {
+export function fromJsFeeEstimate(fee: JsFeeEstimate): FeeEstimate {
   return {
-    l2_gas_consumed: BigInt(fee.l2_gas_consumed),
-    l2_gas_price: BigInt(fee.l2_gas_price),
-    overall_fee: BigInt(fee.overall_fee),
+    l2_gas_consumed: fee.l2_gas_consumed.toString(),
+    l2_gas_price: fee.l2_gas_price.toString(),
+    overall_fee: fee.overall_fee.toString(),
     unit: fee.unit,
-    l1_gas_consumed: BigInt(fee.l1_gas_consumed),
-    l1_gas_price: BigInt(fee.l1_gas_price),
-    l1_data_gas_consumed: BigInt(fee.l1_data_gas_consumed),
-    l1_data_gas_price: BigInt(fee.l1_data_gas_price),
-    suggestedMaxFee: BigInt(fee.overall_fee),
-    resourceBounds: {
-      l1_gas: {
-        max_amount: "0x0",
-        max_price_per_unit: "0x0",
-      },
-      l2_gas: {
-        max_amount: "0x0",
-        max_price_per_unit: "0x0",
-      },
-    },
+    l1_gas_consumed: fee.l1_gas_consumed.toString(),
+    l1_gas_price: fee.l1_gas_price.toString(),
+    l1_data_gas_consumed: fee.l1_data_gas_consumed.toString(),
+    l1_data_gas_price: fee.l1_data_gas_price.toString(),
   };
 }
