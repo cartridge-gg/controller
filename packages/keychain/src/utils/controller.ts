@@ -2,7 +2,7 @@ import {
   BigNumberish,
   Call,
   CallData,
-  EstimateFee,
+  FeeEstimate,
   InvokeFunctionResponse,
   Provider,
   RpcProvider,
@@ -31,7 +31,7 @@ import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
 import { FeeSource } from "@cartridge/controller";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
-import { fromJsFeeEstimate, toJsFeeEstimate } from "./fee";
+import { toJsFeeEstimate } from "./fee";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -196,7 +196,7 @@ export default class Controller {
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
     publicKey: string,
-    maxFee?: EstimateFee,
+    maxFee?: FeeEstimate,
   ): Promise<InvokeFunctionResponse> {
     if (!this.cartridge) {
       throw new Error("Account not found");
@@ -236,7 +236,7 @@ export default class Controller {
 
   async execute(
     calls: Call[],
-    maxFee?: EstimateFee,
+    maxFee?: FeeEstimate,
     feeSource?: FeeSource,
   ): Promise<InvokeFunctionResponse> {
     return await this.cartridge.execute(
@@ -272,16 +272,19 @@ export default class Controller {
     return await this.cartridge.hasRequestedSession(toWasmPolicies(policies));
   }
 
-  async estimateInvokeFee(calls: Call[]): Promise<EstimateFee> {
-    const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
-    return fromJsFeeEstimate(res);
+  async estimateInvokeFee(calls: Call[]): Promise<FeeEstimate> {
+    const res = (await this.cartridge.estimateInvokeFee(
+      toJsCalls(calls),
+    )) as FeeEstimate;
+    res.unit = "FRI";
+    return res;
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
     return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
-  async selfDeploy(maxFee?: EstimateFee): Promise<DeployedAccountTransaction> {
+  async selfDeploy(maxFee?: FeeEstimate): Promise<DeployedAccountTransaction> {
     return await this.cartridge.deploySelf(toJsFeeEstimate(maxFee));
   }
 
