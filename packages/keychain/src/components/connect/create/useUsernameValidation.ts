@@ -1,5 +1,4 @@
 import { useConnection } from "@/hooks/connection";
-import { processControllerQuery } from "@/utils/signers";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { useEffect, useRef, useState } from "react";
 import { fetchController } from "./utils";
@@ -76,13 +75,12 @@ export function useUsernameValidation(username: string) {
     }
 
     fetchController(chainId, username, abortController.signal)
-      .then((controller) => {
+      .then((controllerQuery) => {
         if (!abortController.signal.aborted) {
-          const processedQuery = processControllerQuery(controller, chainId);
           setValidation({
             status: "valid",
             exists: true,
-            signers: processedQuery.controller?.signers?.map(
+            signers: controllerQuery.controller?.signers?.map(
               (signer) => signer.metadata as CredentialMetadata,
             ),
           });

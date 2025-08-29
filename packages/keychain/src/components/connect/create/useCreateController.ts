@@ -3,7 +3,6 @@ import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
-import { processControllerQuery } from "@/utils/signers";
 import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { AuthOption } from "@cartridge/controller";
@@ -421,16 +420,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
         throw new Error("No chainId");
       }
 
-      const controllerRet = await fetchController(chainId, username);
-      if (!controllerRet) {
-        throw new Error("Undefined controller");
-      }
-
-      const controller = processControllerQuery(
-        controllerRet,
-        chainId,
-      ).controller;
-
+      const controller = (await fetchController(chainId, username))?.controller;
       if (!controller) {
         throw new Error("Undefined controller");
       }
@@ -592,13 +582,14 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
             },
           );
         } else {
-          const controller = await fetchController(chainId, username);
-          if (!controller || !controller.controller) {
+          const controller = (await fetchController(chainId, username))
+            ?.controller;
+          if (!controller) {
             throw new Error("Controller not found");
           }
 
           finishLogin(
-            controller.controller,
+            controller,
             chainId,
             {
               signer: {
