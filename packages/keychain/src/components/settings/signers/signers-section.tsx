@@ -5,14 +5,14 @@ import {
 
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
-import { isCurrentSigner, sortSignersByCreationDate } from "@/utils/signers";
+import { useFeature } from "@/hooks/features";
+import { isCurrentSigner } from "@/utils/signers";
 import { JsRemoveSignerInput } from "@cartridge/controller-wasm";
 import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
 import { SectionHeader } from "../section-header";
 import { SignerCard } from "./signer-card";
-import { useFeature } from "@/hooks/features";
 
 export const SignersSection = ({
   controllerQuery,
@@ -23,9 +23,7 @@ export const SignersSection = ({
   const canAddSigner = useFeature("addSigner");
   const { navigate } = useNavigation();
 
-  const sortedSigners = sortSignersByCreationDate(
-    controllerQuery?.data?.controller?.signers ?? [],
-  );
+  const signers = controllerQuery.data?.controller?.signers;
 
   return (
     <section className="space-y-4">
@@ -38,10 +36,9 @@ export const SignersSection = ({
           <LoadingState />
         ) : controllerQuery.isError ? (
           <div>Error</div>
-        ) : controller && controllerQuery.isSuccess ? (
-          sortedSigners.map((signer, index) => {
-            // index === 0 is the original signer because data is pre-sorted by createdAt ascending
-            const isOriginalSigner = index === 0;
+        ) : controller && controllerQuery.isSuccess && signers ? (
+          signers.map((signer, index) => {
+            const isOriginalSigner = signer.isOriginal;
             const isCurrent = isCurrentSigner(
               signer.metadata as CredentialMetadata,
               controller,
@@ -56,6 +53,9 @@ export const SignersSection = ({
                   isCurrent || isOriginalSigner
                     ? undefined
                     : async () => {
+                        if (isOriginalSigner) {
+                          throw new Error("Cannot delete original signer");
+                        }
                         let jsSigner: JsRemoveSignerInput | undefined;
                         switch (signer.metadata.__typename) {
                           case "Eip191Credentials":

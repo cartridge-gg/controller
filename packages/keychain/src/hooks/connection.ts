@@ -6,7 +6,6 @@ import {
 } from "@/components/provider/connection";
 import { useNavigation } from "@/context/navigation";
 import { ConnectionCtx, connectToController } from "@/utils/connection";
-import { processControllerQuery } from "@/utils/signers";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -276,16 +275,11 @@ export function useConnectionValue() {
 
     (async () => {
       try {
-        const controllerResponse = await fetchController(
+        const controllerQuery = await fetchController(
           chainId,
           controller.username(),
           new AbortController().signal,
         );
-        const controllerQuery = processControllerQuery(
-          controllerResponse,
-          chainId,
-        );
-
         if (
           !controllerQuery.controller ||
           !controllerQuery.controller.signers
