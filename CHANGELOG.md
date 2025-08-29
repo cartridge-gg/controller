@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.10.0-alpha.1] - 2025-08-29
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed WalletAccount constructor to properly work with starknet.js v8.5.2, ensuring compatibility with the latest StarkNet library version (#1943)
+
 ## [0.10.0-alpha.0] - 2025-08-28
 
 ### ✨ New Features
