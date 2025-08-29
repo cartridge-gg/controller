@@ -1,5 +1,6 @@
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
+import { processControllerQuery } from "@/utils/signers";
 import {
   Button,
   ControllerIcon,
@@ -16,12 +17,8 @@ import {
   SheetTrigger,
   SignOutIcon,
 } from "@cartridge/ui";
-import {
-  ControllerQuery,
-  useControllerQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo } from "react";
-import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";
 import {
@@ -64,33 +61,18 @@ export function Settings() {
     [],
   );
 
-  const controllerQueryRaw = useControllerQuery(
+  const controllerQuery = useControllerQuery(
     {
       username: controller?.username() ?? "",
       chainId: constants.NetworkName.SN_MAIN,
     },
     {
       refetchOnMount: "always",
+      select: (data) => processControllerQuery(data, chainId ?? ""),
+      enabled: !!chainId,
+      queryKey: ["controller", controller?.username(), chainId],
     },
   );
-
-  const controllerQuery = useMemo(() => {
-    if (chainId === constants.StarknetChainId.SN_MAIN) {
-      return controllerQueryRaw;
-    }
-    return {
-      ...controllerQueryRaw,
-      data: {
-        controller: {
-          ...controllerQueryRaw.data?.controller,
-          signers: controllerQueryRaw.data?.controller?.signers
-            ? [controllerQueryRaw.data?.controller?.signers[0]]
-            : undefined,
-        },
-        ...controllerQueryRaw.data,
-      },
-    } as QueryObserverResult<ControllerQuery>;
-  }, [chainId, controllerQueryRaw]);
 
   const handleLogout = useCallback(() => {
     try {

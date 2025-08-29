@@ -116,7 +116,7 @@ export function Session() {
       onCallback({
         username: controller.username(),
         address: controller.address(),
-        ownerGuid: controller.ownerGuid(),
+        ownerGuid: await controller.ownerGuid(),
         transactionHash: transaction_hash,
         expiresAt: String(expiresAt),
       });
@@ -136,12 +136,12 @@ export function Session() {
     // registered then return the exising session
     controller
       .isRegisteredSessionAuthorized(policies, queries.public_key)
-      .then((session) => {
+      .then(async (session) => {
         if (session) {
           onCallback({
             username: controller.username(),
             address: controller.address(),
-            ownerGuid: controller.ownerGuid(),
+            ownerGuid: await controller.ownerGuid(),
             alreadyRegistered: true,
             expiresAt: String(session.session.expiresAt),
           });

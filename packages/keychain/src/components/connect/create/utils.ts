@@ -1,5 +1,6 @@
 import type { ContractType } from "@/hooks/session";
 import { fetchData } from "@/utils/graphql";
+import { processControllerQuery } from "@/utils/signers";
 import {
   AccountDocument,
   ControllerDocument,
@@ -10,16 +11,17 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { constants } from "starknet";
 
-export function fetchController(
+export async function fetchController(
   _chainId: string,
   username: string,
   signal?: AbortSignal,
 ) {
-  return fetchData<ControllerQuery, ControllerQueryVariables>(
+  const controllerQuery = await fetchData<ControllerQuery, ControllerQueryVariables>(
     ControllerDocument,
     { chainId: constants.NetworkName.SN_MAIN, username },
     signal,
   );
+  return processControllerQuery(controllerQuery, _chainId);
 }
 
 export function fetchAccount(username: string, signal?: AbortSignal) {
