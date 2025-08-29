@@ -21,14 +21,14 @@ export function CryptoCheckout() {
     costDetails,
     isFetchingFees,
     fetchFees,
-    onCrypto,
+    onCryptoPurchase,
     clearError,
   } = usePurchaseContext();
   const { navigate } = useNavigation();
   const onPurchase = useCallback(async () => {
-    await onCrypto();
+    await onCryptoPurchase();
     navigate("/purchase/pending", { reset: true });
-  }, [onCrypto, navigate]);
+  }, [onCryptoPurchase, navigate]);
 
   useEffect(() => {
     clearError();
