@@ -9,7 +9,7 @@ import { useNavigation } from "@/context";
 import { useParams } from "react-router-dom";
 
 export function ChooseNetwork() {
-  const { filter } = useParams();
+  const { platforms } = useParams();
   const { navigate } = useNavigation();
   return (
     <>
@@ -19,19 +19,16 @@ export function ChooseNetwork() {
       />
       <LayoutContent>
         {networkWalletData.networks.map((network) => {
-          if (filter && network.platform !== filter) {
+          if (platforms && !platforms.includes(network.platform)) {
             return null;
           }
 
           return (
             <PurchaseCard
               key={network.platform}
-              text={network.name + (network.enabled ? "" : " (Coming Soon)")}
+              text={network.name}
               icon={network.icon}
               onClick={() => navigate(`/purchase/wallet/${network.platform}`)}
-              className={
-                !network.enabled ? "opacity-50 pointer-events-none" : ""
-              }
             />
           );
         })}

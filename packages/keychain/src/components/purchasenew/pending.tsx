@@ -11,27 +11,39 @@ import {
 import { Receiving } from "./receiving";
 import {
   PaymentMethod,
-  PurchaseItem,
+  Item,
   usePurchaseContext,
 } from "@/context/purchase";
 import { Explorer } from "@/hooks/payments/crypto";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 export function PurchasePending() {
   const {
     purchaseItems,
+    claimItems,
     explorer,
     paymentMethod,
     selectedWallet,
     paymentId,
     transactionHash,
+    starterpackDetails,
   } = usePurchaseContext();
+
+  const items = useMemo(() => {
+    if (starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Claimed) {
+      return claimItems;
+    }
+
+    return purchaseItems;
+  }, [starterpackDetails, claimItems, purchaseItems]);
+
   return (
     <PurchasePendingInner
-      items={purchaseItems}
+      items={items}
       paymentId={paymentId}
       transactionHash={transactionHash}
       paymentMethod={paymentMethod}
@@ -49,7 +61,7 @@ export function PurchasePendingInner({
   explorer,
   wallet,
 }: {
-  items: PurchaseItem[];
+  items: Item[];
   paymentMethod?: PaymentMethod;
   transactionHash?: string;
   paymentId?: string;

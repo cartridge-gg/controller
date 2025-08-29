@@ -19,19 +19,22 @@ export function CryptoCheckout() {
     selectedWallet,
     selectedPlatform,
     costDetails,
-    onCrypto,
+    isFetchingFees,
+    fetchFees,
+    onCryptoPurchase,
     clearError,
   } = usePurchaseContext();
   const { navigate } = useNavigation();
   const onPurchase = useCallback(async () => {
-    await onCrypto();
+    await onCryptoPurchase();
     navigate("/purchase/pending", { reset: true });
-  }, [onCrypto, navigate]);
+  }, [onCryptoPurchase, navigate]);
 
   useEffect(() => {
     clearError();
+    fetchFees();
     return () => clearError();
-  }, [clearError]);
+  }, [clearError, fetchFees]);
 
   return (
     <>
@@ -43,17 +46,23 @@ export function CryptoCheckout() {
         <Receiving title="Receiving" items={purchaseItems} />
       </LayoutContent>
       <LayoutFooter>
-        <CostBreakdown
-          rails={"crypto"}
-          paymentUnit="usdc"
-          platform={selectedPlatform}
-          walletType={selectedWallet?.type}
-          costDetails={costDetails}
-        />
+        {!isFetchingFees && (
+          <CostBreakdown
+            rails={"crypto"}
+            paymentUnit="usdc"
+            platform={selectedPlatform}
+            walletType={selectedWallet?.type}
+            costDetails={costDetails}
+          />
+        )}
         {displayError && (
           <ErrorAlert title="Error" description={displayError.message} />
         )}
-        <Button onClick={onPurchase} isLoading={isCryptoLoading}>
+        <Button
+          onClick={onPurchase}
+          isLoading={isCryptoLoading || isFetchingFees}
+          disabled={!!displayError}
+        >
           Purchase
         </Button>
       </LayoutFooter>

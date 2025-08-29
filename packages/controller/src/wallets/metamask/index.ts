@@ -152,6 +152,9 @@ export class MetaMaskWallet implements WalletAdapter {
         throw new Error("MetaMask is not connected");
       }
 
+      console.log({message, address});
+      console.log(this.account)
+
       const result = await this.MMSDK.getProvider()?.request({
         method: "personal_sign",
         params: [address || this.account, message],

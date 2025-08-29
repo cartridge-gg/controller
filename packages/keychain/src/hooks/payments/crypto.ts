@@ -431,7 +431,6 @@ function mapPlatformToLayerswapNetwork(
       return LayerswapNetwork.Arbitrum;
     case "optimism":
       return LayerswapNetwork.Optimism;
-    // Starknet supported natively
     default:
       throw new Error(`Unsupported platform: ${platform}`);
   }
