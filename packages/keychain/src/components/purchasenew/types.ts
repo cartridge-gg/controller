@@ -1,4 +1,4 @@
-import { PurchaseItem } from "@/context/purchase";
+import { Item } from "@/context/purchase";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 
 export interface Wallet {
@@ -32,6 +32,7 @@ export type CostDetails = {
 
 export type ReceivingProps = {
   title?: string;
-  items: PurchaseItem[];
+  items: Item[];
   isLoading?: boolean;
+  showTotal?: boolean;
 };

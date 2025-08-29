@@ -369,7 +369,7 @@ export interface Explorer {
   url: string;
 }
 
-const getExplorer = (
+export const getExplorer = (
   platform: ExternalPlatform,
   txHash: string,
   isMainnet?: boolean,

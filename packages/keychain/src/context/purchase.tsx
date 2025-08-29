@@ -18,8 +18,8 @@ import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
-import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
+import { Call } from "starknet";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -35,18 +35,18 @@ export interface Network {
   icon: React.ReactElement;
 }
 
-export enum PurchaseItemType {
+export enum ItemType {
   CREDIT = "CREDIT",
   ERC20 = "ERC20",
   NFT = "NFT",
 }
 
-export type PurchaseItem = {
+export type Item = {
   title: string;
   subtitle?: string;
   icon: string | React.ReactNode;
   value?: number;
-  type: PurchaseItemType;
+  type: ItemType;
 };
 
 export type PaymentMethod = "stripe" | "crypto";
@@ -57,7 +57,8 @@ export interface PurchaseContextType {
   starterpackDetails?: StarterPackDetails;
 
   teamId?: string;
-  purchaseItems: PurchaseItem[];
+  purchaseItems: Item[];
+  claimItems: Item[];
   layerswapFees?: string;
   isFetchingFees: boolean;
 
@@ -87,17 +88,19 @@ export interface PurchaseContextType {
 
   // Actions
   setUsdAmount: (amount: number) => void;
-  setPurchaseItems: (items: PurchaseItem[]) => void;
+  setPurchaseItems: (items: Item[]) => void;
+  setClaimItems: (items: Item[]) => void;
   setStarterpackId: (id: string) => void;
 
   // Payment actions
-  onCreditCard: () => Promise<void>;
-  onCrypto: () => Promise<void>;
+  onCreditCardPurchase: () => Promise<void>;
+  onCryptoPurchase: () => Promise<void>;
   onExternalConnect: (
     wallet: ExternalWallet,
     platform: ExternalPlatform,
     chainId?: string,
   ) => Promise<string | undefined>;
+  onClaim: (call: Call) => Promise<void>;
   waitForPayment: (paymentId: string) => Promise<boolean>;
   fetchFees: () => Promise<void>;
 }
@@ -123,7 +126,8 @@ export const PurchaseProvider = ({
   >();
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
   const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
-  const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
+  const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
+  const [claimItems, setClaimItems] = useState<Item[]>([]);
   const [paymentId, setPaymentId] = useState<string | undefined>();
   const [explorer, setExplorer] = useState<Explorer | undefined>();
   const [transactionHash, setTransactionHash] = useState<string | undefined>();
@@ -174,14 +178,12 @@ export const PurchaseProvider = ({
     if (!starterpackId)
       return;
 
-    console.log("starterpackId", starterpackId);
-
-    const purchaseItems: PurchaseItem[] = items.map((item) => ({
+    const purchaseItems: Item[] = items.map((item) => ({
       title: item.title,
       subtitle: item.description,
       icon: item.image,
       value: priceUsd,
-      type: PurchaseItemType.NFT,
+      type: ItemType.NFT,
     }));
 
     setPurchaseItems(purchaseItems);
@@ -202,10 +204,10 @@ export const PurchaseProvider = ({
   useEffect(() => {
     setDisplayError(
       stripeError ||
-        walletError ||
-        cryptoError ||
-        starterpackError ||
-        undefined,
+      walletError ||
+      cryptoError ||
+      starterpackError ||
+      undefined,
     );
   }, [stripeError, walletError, cryptoError, starterpackError]);
 
@@ -213,7 +215,7 @@ export const PurchaseProvider = ({
     setDisplayError(undefined);
   }, []);
 
-  const onCreditCard = useCallback(async () => {
+  const onCreditCardPurchase = useCallback(async () => {
     if (!controller) return;
 
     try {
@@ -232,7 +234,7 @@ export const PurchaseProvider = ({
     }
   }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
-  const onCrypto = useCallback(async () => {
+  const onCryptoPurchase = useCallback(async () => {
     if (
       !controller ||
       !selectedPlatform ||
@@ -313,6 +315,18 @@ export const PurchaseProvider = ({
     [controller, usdAmount, starterpackId],
   );
 
+  const onClaim = useCallback(async (call: Call) => {
+    if (!controller) return;
+
+    try {
+      const { transaction_hash } = await controller.executeFromOutsideV3([call]);
+      setTransactionHash(transaction_hash);
+    } catch (e) {
+      setDisplayError(e as Error);
+      throw e;
+    }
+  }, [controller]);
+
   const fetchFees = useCallback(async () => {
     if (!controller || !selectedPlatform) return;
     try {
@@ -357,6 +371,7 @@ export const PurchaseProvider = ({
     usdAmount,
     starterpackDetails,
     purchaseItems,
+    claimItems,
     layerswapFees,
     isFetchingFees,
 
@@ -386,12 +401,14 @@ export const PurchaseProvider = ({
     // Setters
     setUsdAmount,
     setPurchaseItems,
+    setClaimItems,
     setStarterpackId,
 
     // Actions
-    onCreditCard,
-    onCrypto,
+    onCreditCardPurchase,
+    onCryptoPurchase,
     onExternalConnect,
+    onClaim,
     waitForPayment,
     fetchFees,
   };

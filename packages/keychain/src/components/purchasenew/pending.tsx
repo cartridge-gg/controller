@@ -11,7 +11,7 @@ import {
 import { Receiving } from "./receiving";
 import {
   PaymentMethod,
-  PurchaseItem,
+  Item,
   usePurchaseContext,
 } from "@/context/purchase";
 import { Explorer } from "@/hooks/payments/crypto";
@@ -19,8 +19,11 @@ import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
+import { useParams } from "react-router-dom";
 
 export function PurchasePending() {
+  const { isClaiming } = useParams();
+
   const {
     purchaseItems,
     explorer,
@@ -29,6 +32,7 @@ export function PurchasePending() {
     paymentId,
     transactionHash,
   } = usePurchaseContext();
+
   return (
     <PurchasePendingInner
       items={purchaseItems}
@@ -49,7 +53,7 @@ export function PurchasePendingInner({
   explorer,
   wallet,
 }: {
-  items: PurchaseItem[];
+  items: Item[];
   paymentMethod?: PaymentMethod;
   transactionHash?: string;
   paymentId?: string;
@@ -69,6 +73,7 @@ export function PurchasePendingInner({
         setDepositCompleted(true),
       );
     }
+
   }, [wallet, transactionHash, externalWaitForTransaction, navigate]);
 
   useEffect(() => {
@@ -100,9 +105,8 @@ export function PurchasePendingInner({
         {paymentMethod === "crypto" && (
           <div className="relative space-y-2">
             <div
-              className={`transition-transform duration-500 ease-in-out ${
-                depositCompleted ? "-translate-y-1" : "translate-y-0"
-              }`}
+              className={`transition-transform duration-500 ease-in-out ${depositCompleted ? "-translate-y-1" : "translate-y-0"
+                }`}
             >
               <ConfirmingTransaction
                 title={`Confirming on ${humanizeString(selectedPlatform!)}`}
@@ -111,11 +115,10 @@ export function PurchasePendingInner({
               />
             </div>
             <div
-              className={`transition-all duration-500 ease-in-out ${
-                showBridging
-                  ? "opacity-100 max-h-20"
-                  : "opacity-0 max-h-0 overflow-hidden"
-              }`}
+              className={`transition-all duration-500 ease-in-out ${showBridging
+                ? "opacity-100 max-h-20"
+                : "opacity-0 max-h-0 overflow-hidden"
+                }`}
             >
               <ConfirmingTransaction
                 title="Bridging to Starknet"
@@ -128,6 +131,10 @@ export function PurchasePendingInner({
       </LayoutFooter>
     </>
   );
+}
+
+export function ClaimPendingInner() {
+  return <></>
 }
 
 export function ConfirmingTransaction({

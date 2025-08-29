@@ -8,7 +8,7 @@ import {
   Thumbnail,
 } from "@cartridge/ui";
 import { ReceivingProps } from "./types";
-import { PurchaseItemType } from "@/context/purchase";
+import { ItemType } from "@/context/purchase";
 
 export function Receiving({ title, items, showTotal, isLoading }: ReceivingProps) {
   return (
@@ -34,16 +34,16 @@ export function Receiving({ title, items, showTotal, isLoading }: ReceivingProps
                 size="lg"
                 icon={item.icon}
                 variant="light"
-                rounded={item.type === PurchaseItemType.CREDIT}
+                rounded={item.type === ItemType.CREDIT}
               />
               <div className="flex flex-col gap-0.5">
                 <p className="text-foreground-100 font-medium text-sm">
-                  {item.type === PurchaseItemType.CREDIT
+                  {item.type === ItemType.CREDIT
                     ? "Credits"
                     : item.title}
                 </p>
                 <p className="text-foreground-300 font-normal text-xs">
-                  {item.type === PurchaseItemType.NFT
+                  {item.type === ItemType.NFT
                     ? item.subtitle
                     : `${item.value?.toLocaleString()} Credits`}
                 </p>

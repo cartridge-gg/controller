@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { PurchaseSuccessInner } from "./success";
 import { CreditIcon } from "@cartridge/ui";
-import { PurchaseItemType } from "@/context/purchase";
+import { ItemType } from "@/context/purchase";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 const meta = {
   component: PurchaseSuccessInner,
@@ -13,12 +14,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Credits: Story = {
   args: {
+    acquisitionType: StarterpackAcquisitionType.Paid,
     items: [
       {
         title: "Credits",
         icon: <CreditIcon />,
         value: 1000,
-        type: PurchaseItemType.CREDIT,
+        type: ItemType.CREDIT,
       },
     ],
   },
@@ -26,11 +28,12 @@ export const Credits: Story = {
 
 export const NFT: Story = {
   args: {
+    acquisitionType: StarterpackAcquisitionType.Paid,
     items: [
       {
         title: "Village pass",
         icon: "https://r2.quddus.my/Frame%203231.png",
-        type: PurchaseItemType.NFT,
+        type: ItemType.NFT,
       },
     ],
   },

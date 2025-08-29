@@ -80,7 +80,7 @@ export function App() {
           <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/crypto" element={<CryptoCheckout />} />
           <Route path="review" element={<></>} />
-          <Route path="pending" element={<PurchasePending />} />
+          <Route path="pending/:isClaiming" element={<PurchasePending />} />
           <Route path="success" element={<PurchaseSuccess />} />
           <Route path="failed" element={<></>} />
         </Route>
@@ -110,19 +110,19 @@ export function App() {
           element={
             <Purchase
               type={PurchaseType.CREDITS}
-              // onBack={() => {
-              //   const searchParams = new URLSearchParams(
-              //     window.location.search,
-              //   );
-              //   const returnTo = searchParams.get("returnTo");
-              //   if (returnTo) {
-              //     // returnTo is already decoded by URLSearchParams.get()
-              //     // Use replace navigation for execute URLs to ensure proper navigation stack handling
-              //     navigate(returnTo, { replace: true });
-              //   } else {
-              //     navigate("/funding");
-              //   }
-              // }}
+            // onBack={() => {
+            //   const searchParams = new URLSearchParams(
+            //     window.location.search,
+            //   );
+            //   const returnTo = searchParams.get("returnTo");
+            //   if (returnTo) {
+            //     // returnTo is already decoded by URLSearchParams.get()
+            //     // Use replace navigation for execute URLs to ensure proper navigation stack handling
+            //     navigate(returnTo, { replace: true });
+            //   } else {
+            //     navigate("/funding");
+            //   }
+            // }}
             />
           }
         />
