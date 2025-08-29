@@ -9,13 +9,12 @@ import {
   LayoutFooter,
 } from "@cartridge/ui";
 import { Receiving } from "../receiving";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "../starterpack/badge";
 import { useParams } from "react-router-dom";
 import { useMerkleClaim } from "@/hooks/merkle-claim";
 import { LoadingState } from "../loading";
-import { PurchaseType } from "@/hooks/payments/crypto";
-import { PurchaseItem, PurchaseItemType, usePurchaseContext } from "@/context/purchase";
+import { PurchaseItemType } from "@/context/purchase";
 import { useConnection } from "@/hooks/connection";
 import { CallData, Call, num, cairo, hash, shortString } from "starknet";
 import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
@@ -35,15 +34,67 @@ export function Claim() {
 
 
   const items = useMemo(()=> {
-    return claims.map((claim) => ({
-      title: claim.data[0],
+    if (claims.length === 0) {
+      return [];
+    }
+
+    return claims[0].data.map((data) => ({
+      title: data,
       type: PurchaseItemType.NFT,
       icon: <GiftIcon variant="solid" />,
     }));
   }, [claims])
 
+  const merkleTreeKey = useMemo(() => {
+    if (claims.length === 0) {
+      return null;
+    }
+
+    return {
+      chain_id: shortString.encodeShortString(claims[0].network),
+      claim_contract_address: claims[0].contract,
+      selector: hash.getSelectorFromName(claims[0].entrypoint)
+    }
+  }, [claims])
+
+  const leafData = useMemo(() => {
+    if (claims.length === 0) {
+      return null;
+    }
+
+    return {
+      address: externalAddress!,
+      claim_contract_address: claims[0].contract,
+      selector: hash.getSelectorFromName(claims[0].entrypoint),
+      data: claims[0].data,
+    }
+  }, [claims, externalAddress])
+
+  useEffect(()=> {
+    if (!merkleTreeKey || !leafData || !controller) {
+      return;
+    }
+
+    const call: Call = {
+      contractAddress: "0x1bee43fc5b696088e7eef7b78d7b2b42e0b88e1e58c93c6d304e35603b582cf",
+      entrypoint: "is_consumed",
+      calldata: CallData.compile({
+        merkle_tree_key: merkleTreeKey,
+        leaf_data: leafData,
+      }),
+    };      
+
+    controller.provider.callContract(call).then((result) => {
+      console.log({result})
+    }).catch((error) => {
+      console.error(error)
+      setError(error as Error)
+    })
+
+  }, [merkleTreeKey, leafData, controller])
+
   const onConfirm = useCallback(async () => {
-    if (!controller) {
+    if (!controller || !merkleTreeKey || !leafData) {
       return;
     }
 
@@ -53,7 +104,7 @@ export function Claim() {
       const claim = claims[0];
       let receipient = ["0x0", controller.address()];
       let ethSignature: string[] = ["0x1"];
-      let leafData: string[] = [];
+      let ld: string[] = [];
   
       if (claim.network === MerkleDropNetwork.Ethereum) {
         const msg = `Claim on starknet with: ${num.toHex(controller.address())}`;
@@ -70,41 +121,42 @@ export function Claim() {
         ]);
         ethSignature.unshift("0x0"); 
 
-        leafData = CallData.compile({
-          address: externalAddress!,
-          claim_contract_address: claim.contract,
-          selector: hash.getSelectorFromName(claim.entrypoint),
-          data: claim.data,
-        });
+        ld = CallData.compile(leafData);
       }
 
       const calldata = CallData.compile({
         merkle_tree_key: {
-          chain_id: shortString.encodeShortString(claim.network), // ETHEREUM
+          chain_id: shortString.encodeShortString(claim.network),
           claim_contract_address: claim.contract,
           selector: hash.getSelectorFromName(claim.entrypoint)
-
         },
         proof: claim.merkleProof,
-        leaf_data: leafData,
+        leaf_data: ld,
         recipient: {...receipient},
         eth_signature: {...ethSignature},
       })
 
+      const isConsumedCallData = CallData.compile({
+        merkle_tree_key: merkleTreeKey,
+        leaf_data: ld,
+      })
+
       const call: Call = {
-        contractAddress: "0xb12abd89a802f600ae266d62ebc5bf3a7b196c61a1abcbbdac49f57ece489e",
-        entrypoint: "verify_and_forward",
-        calldata,
+        contractAddress: "0x1bee43fc5b696088e7eef7b78d7b2b42e0b88e1e58c93c6d304e35603b582cf",
+        entrypoint: "is_consumed",
+        calldata: isConsumedCallData,
       };      
 
-      const result = await controller.executeFromOutsideV3([call]);
-      console.log({result});
+      const result = await controller.provider.callContract(call)
+      console.log({result})
+
+
     } catch (error) {
       setError(error as Error);
     } finally {
       setIsClaiming(false);
     }
-  }, [claims, externalAddress]);
+  }, [claims, externalAddress, merkleTreeKey, leafData, controller, externalSignMessage]);
 
   if (isLoading) {
     return <LoadingState />;
