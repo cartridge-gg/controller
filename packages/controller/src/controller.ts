@@ -41,8 +41,8 @@ export default class ControllerProvider extends BaseProvider {
 
     // Default Cartridge chains that are always available
     const cartridgeChains: Chain[] = [
-      { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia" },
-      { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet" },
+      { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9" },
+      { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9" },
     ];
 
     // Merge user chains with default chains
@@ -425,7 +425,7 @@ export default class ControllerProvider extends BaseProvider {
         if ((isMainnet || isSepolia) && !(isCartridgeRpc || isLocalhost)) {
           throw new Error(
             `Only Cartridge RPC providers are allowed for ${isMainnet ? "mainnet" : "sepolia"}. ` +
-              `Please use: https://api.cartridge.gg/x/starknet/${isMainnet ? "mainnet" : "sepolia"}`,
+              `Please use: https://api.cartridge.gg/x/starknet/${isMainnet ? "mainnet" : "sepolia"}/rpc/v0_9`,
           );
         }
 

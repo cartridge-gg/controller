@@ -16,16 +16,3 @@ export function toJsFeeEstimate(fee?: FeeEstimate): JsFeeEstimate | undefined {
     l1_data_gas_price: Number(fee.l1_data_gas_price),
   };
 }
-
-export function fromJsFeeEstimate(fee: JsFeeEstimate): FeeEstimate {
-  return {
-    l2_gas_consumed: fee.l2_gas_consumed.toString(),
-    l2_gas_price: fee.l2_gas_price.toString(),
-    overall_fee: fee.overall_fee.toString(),
-    unit: fee.unit,
-    l1_gas_consumed: fee.l1_gas_consumed.toString(),
-    l1_gas_price: fee.l1_gas_price.toString(),
-    l1_data_gas_consumed: fee.l1_data_gas_consumed.toString(),
-    l1_data_gas_price: fee.l1_data_gas_price.toString(),
-  };
-}

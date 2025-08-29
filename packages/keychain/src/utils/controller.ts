@@ -31,7 +31,7 @@ import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
 import { FeeSource } from "@cartridge/controller";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
-import { fromJsFeeEstimate, toJsFeeEstimate } from "./fee";
+import { toJsFeeEstimate } from "./fee";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
@@ -274,7 +274,7 @@ export default class Controller {
 
   async estimateInvokeFee(calls: Call[]): Promise<FeeEstimate> {
     const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
-    return fromJsFeeEstimate(res);
+    return res;
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {

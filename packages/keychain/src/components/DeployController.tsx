@@ -14,7 +14,7 @@ import {
   Spinner,
 } from "@cartridge/ui";
 import { getChainName } from "@cartridge/ui/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   constants,
@@ -44,14 +44,7 @@ export function DeployController({
 
   const chainId = controller?.chainId();
   const chainName = chainId ? getChainName(chainId) : "Unknown";
-
-  // What is this cancer
-  // Update: this is still cancer
   const feeEstimate: FeeEstimate | undefined = ctrlError?.data?.fee_estimate;
-  const estimateFee: FeeEstimate | undefined = useMemo(
-    () => feeEstimate,
-    [feeEstimate],
-  );
 
   useEffect(() => {
     if (
@@ -81,20 +74,20 @@ export function DeployController({
   }, [deployHash, controller]);
 
   useEffect(() => {
-    if (!estimateFee || accountState != "fund" || !feeToken?.balance) return;
+    if (!feeEstimate || accountState != "fund" || !feeToken?.balance) return;
 
-    if (feeToken.balance >= BigInt(estimateFee.overall_fee)) {
+    if (feeToken.balance >= BigInt(feeEstimate.overall_fee)) {
       setAccountState("deploy");
     } else {
       setAccountState("fund");
     }
-  }, [feeToken?.balance, estimateFee, accountState]);
+  }, [feeToken?.balance, feeEstimate, accountState]);
 
   const onDeploy = useCallback(async () => {
-    if (!estimateFee) return;
+    if (!feeEstimate) return;
 
     try {
-      const hash = await deploySelf(estimateFee);
+      const hash = await deploySelf(feeEstimate);
       setDeployHash(hash);
     } catch (e) {
       if (e instanceof Error && e.message.includes("DuplicateTx")) {
@@ -102,7 +95,7 @@ export function DeployController({
       }
       setError(e as Error);
     }
-  }, [deploySelf, estimateFee]);
+  }, [deploySelf, feeEstimate]);
 
   if (isLoading) {
     return (
@@ -147,7 +140,7 @@ export function DeployController({
                 description={error.message}
               />
             ) : (
-              <Fees isLoading={false} maxFee={estimateFee} />
+              <Fees isLoading={false} maxFee={feeEstimate} />
             )}
             <Button onClick={onDeploy} isLoading={isDeploying}>
               DEPLOY
