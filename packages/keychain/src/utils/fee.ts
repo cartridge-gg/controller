@@ -11,7 +11,6 @@ export function toJsFeeEstimate(fee?: FeeEstimate): JsFeeEstimate | undefined {
     l2_gas_consumed: Number(fee.l2_gas_consumed),
     l2_gas_price: Number(fee.l2_gas_price),
     overall_fee: Number(fee.overall_fee),
-    unit: fee.unit,
     l1_data_gas_consumed: Number(fee.l1_data_gas_consumed),
     l1_data_gas_price: Number(fee.l1_data_gas_price),
   };

@@ -273,7 +273,10 @@ export default class Controller {
   }
 
   async estimateInvokeFee(calls: Call[]): Promise<FeeEstimate> {
-    const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
+    const res = (await this.cartridge.estimateInvokeFee(
+      toJsCalls(calls),
+    )) as FeeEstimate;
+    res.unit = "FRI";
     return res;
   }
 
