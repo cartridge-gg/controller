@@ -21,17 +21,47 @@ export abstract class EthereumWalletBase implements WalletAdapter {
   protected connectedAccounts: string[] = [];
 
   constructor() {
-    this.provider = this.store
-      .getProviders()
-      .find((provider) => provider.info.rdns === this.rdns);
+    this.initializeIfAvailable();
+  }
 
-    if (this.provider) {
+  private getProvider(): EIP6963ProviderDetail | undefined {
+    if (!this.provider) {
+      this.provider = this.store
+        .getProviders()
+        .find((provider) => provider.info.rdns === this.rdns);
+    }
+    return this.provider;
+  }
+
+  private getEthereumProvider(): any {
+    const provider = this.getProvider();
+    if (provider) {
+      return provider.provider;
+    }
+    
+    // Fallback for MetaMask when not announced via EIP-6963
+    if (this.rdns === "io.metamask" && typeof window !== "undefined" && (window as any).ethereum?.isMetaMask) {
+      return (window as any).ethereum;
+    }
+    
+    return null;
+  }
+
+  private initializeIfAvailable(): void {
+    const provider = this.getProvider();
+    if (provider && !this.initialized) {
+      this.initialized = true;
       this.initializeProvider();
     }
   }
 
+  private initialized = false;
+
   private initializeProvider(): void {
-    this.provider?.provider
+    const provider = this.getProvider();
+    if (!provider) return;
+
+    provider.provider
       .request({
         method: "eth_accounts",
       })
@@ -40,21 +70,23 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         if (accounts.length > 0) {
           this.account = getAddress(accounts[0]);
         }
-      });
+      })
+      .catch(console.error);
 
-    this.provider?.provider
+    provider.provider
       .request({
         method: "eth_chainId",
       })
       .then((chainId) => {
         this.platform = chainIdToPlatform(chainId);
-      });
+      })
+      .catch(console.error);
 
-    this.provider?.provider?.on("chainChanged", (chainId: string) => {
+    provider.provider?.on("chainChanged", (chainId: string) => {
       this.platform = chainIdToPlatform(chainId);
     });
 
-    this.provider?.provider?.on("accountsChanged", (accounts: string[]) => {
+    provider.provider?.on("accountsChanged", (accounts: string[]) => {
       if (accounts) {
         this.connectedAccounts = accounts.map((account) => getAddress(account));
         this.account =
@@ -64,7 +96,21 @@ export abstract class EthereumWalletBase implements WalletAdapter {
   }
 
   isAvailable(): boolean {
-    return typeof window !== "undefined" && !!this.provider;
+    // Check dynamically each time, as the provider might be announced after instantiation
+    const provider = this.getProvider();
+    
+    // Also check for MetaMask via window.ethereum as a fallback for MetaMask specifically
+    if (!provider && this.rdns === "io.metamask" && typeof window !== "undefined") {
+      // MetaMask might be available via window.ethereum even if not announced via EIP-6963 yet
+      return !!(window as any).ethereum?.isMetaMask;
+    }
+    
+    // Initialize if we just found the provider
+    if (provider && !this.initialized) {
+      this.initializeIfAvailable();
+    }
+    
+    return typeof window !== "undefined" && !!provider;
   }
 
   getInfo(): ExternalWallet {
@@ -99,13 +145,43 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         throw new Error(`${this.displayName} is not available`);
       }
 
-      const accounts = await this.provider?.provider.request({
+      let ethereum: any;
+      const provider = this.getProvider();
+      
+      if (provider) {
+        ethereum = provider.provider;
+      } else if (this.rdns === "io.metamask" && (window as any).ethereum?.isMetaMask) {
+        // Fallback for MetaMask when not announced via EIP-6963
+        ethereum = (window as any).ethereum;
+      }
+
+      if (!ethereum) {
+        throw new Error(`${this.displayName} provider not found`);
+      }
+
+      const accounts = await ethereum.request({
         method: "eth_requestAccounts",
       });
 
       if (accounts && accounts.length > 0) {
         this.account = getAddress(accounts[0]);
         this.connectedAccounts = accounts.map(getAddress);
+        
+        // If we used the fallback, store the ethereum provider for future use
+        if (!provider && this.rdns === "io.metamask") {
+          // Create a mock EIP6963ProviderDetail for consistency
+          this.provider = {
+            info: {
+              uuid: 'metamask-fallback',
+              name: 'MetaMask',
+              icon: 'data:image/svg+xml;base64,',
+              rdns: 'io.metamask'
+            },
+            provider: ethereum
+          } as EIP6963ProviderDetail;
+          this.initializeIfAvailable();
+        }
+        
         return { success: true, wallet: this.type, account: this.account };
       }
 
@@ -128,7 +204,7 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         throw new Error(`${this.displayName} is not connected`);
       }
 
-      const ethereum = this.provider?.provider;
+      const ethereum = this.getEthereumProvider();
       if (!ethereum) {
         throw new Error(`${this.displayName} is not connected`);
       }
@@ -161,7 +237,11 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         throw new Error(`${this.displayName} is not connected`);
       }
 
-      const result = await this.provider?.provider.request({
+      const ethereum = this.getEthereumProvider();
+      if (!ethereum) {
+        throw new Error(`${this.displayName} provider not found`);
+      }
+      const result = await ethereum.request({
         method: "personal_sign",
         params: [message, address || this.account] as any,
       });
@@ -183,12 +263,12 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         throw new Error(`${this.displayName} is not connected`);
       }
 
-      const provider = this.provider?.provider;
-      if (!provider) {
+      const ethereum = this.getEthereumProvider();
+      if (!ethereum) {
         throw new Error(`${this.displayName} is not connected`);
       }
 
-      const result = await provider.request({
+      const result = await ethereum.request({
         method: "eth_signTypedData_v4",
         params: [this.account, JSON.stringify(data)] as any,
       });
@@ -213,12 +293,12 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         throw new Error(`${this.displayName} is not connected`);
       }
 
-      const provider = this.provider?.provider;
-      if (!provider) {
+      const ethereum = this.getEthereumProvider();
+      if (!ethereum) {
         throw new Error(`${this.displayName} is not connected`);
       }
 
-      const result = await provider.request({
+      const result = await ethereum.request({
         method: "eth_sendTransaction",
         params: [txn],
       });
@@ -243,13 +323,13 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         throw new Error(`${this.displayName} is not available`);
       }
 
-      const provider = this.provider?.provider;
-      if (!provider) {
+      const ethereum = this.getEthereumProvider();
+      if (!ethereum) {
         throw new Error(`${this.displayName} is not connected`);
       }
 
       try {
-        await provider.request({
+        await ethereum.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId }],
         });
@@ -283,12 +363,12 @@ export abstract class EthereumWalletBase implements WalletAdapter {
           error: "Not implemented for ERC20",
         };
       } else {
-        const provider = this.provider?.provider;
-        if (!provider) {
+        const ethereum = this.getEthereumProvider();
+        if (!ethereum) {
           throw new Error(`${this.displayName} is not connected`);
         }
 
-        const balance = await provider.request({
+        const balance = await ethereum.request({
           method: "eth_getBalance",
           params: [this.account, "latest"] as any,
         });
@@ -313,8 +393,8 @@ export abstract class EthereumWalletBase implements WalletAdapter {
         throw new Error(`${this.displayName} is not connected`);
       }
 
-      const provider = this.provider?.provider;
-      if (!provider) {
+      const ethereum = this.getEthereumProvider();
+      if (!ethereum) {
         throw new Error(`${this.displayName} is not connected`);
       }
 
@@ -322,7 +402,7 @@ export abstract class EthereumWalletBase implements WalletAdapter {
       const pollInterval = 1000; // 1 second
 
       while (Date.now() - startTime < timeoutMs) {
-        const receipt = await provider.request({
+        const receipt = await ethereum.request({
           method: "eth_getTransactionReceipt",
           params: [txHash as `0x${string}`],
         });
