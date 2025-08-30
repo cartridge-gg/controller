@@ -1,4 +1,8 @@
-import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+import {
+  PublicKey,
+  Transaction,
+  VersionedTransaction,
+} from "../../utils/solana";
 import {
   ExternalPlatform,
   ExternalWallet,

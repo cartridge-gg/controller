@@ -16,12 +16,10 @@ import {
   Connection,
   PublicKey,
   Transaction,
-} from "@solana/web3.js";
-import {
   createAssociatedTokenAccountInstruction,
   createTransferInstruction,
   getAssociatedTokenAddress,
-} from "@solana/spl-token";
+} from "../../utils/solana";
 import { ethers } from "ethers";
 import erc20abi from "./erc20abi.json" assert { type: "json" };
 
@@ -81,11 +79,16 @@ export const useCryptoPayment = () => {
         tokenAmount,
       );
 
-      const txn = new Transaction().add(createAtaIx, transferInstruction);
-      txn.feePayer = senderPublicKey;
+      // Build transaction using micro-sol-signer
       const { blockhash } = await connection.getLatestBlockhash();
+
+      // Create a new transaction and add instructions
+      const txn = new Transaction();
+      txn.add(createAtaIx, transferInstruction);
+      txn.feePayer = senderPublicKey;
       txn.recentBlockhash = blockhash;
 
+      // Serialize for sending
       const serializedTxn = txn.serialize({ requireAllSignatures: false });
       const res = await externalSendTransaction(
         "phantom",
