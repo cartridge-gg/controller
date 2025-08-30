@@ -10,7 +10,6 @@ import { visualizer } from "rollup-plugin-visualizer";
 // List peer dependencies, prevents bundling into library
 const externalDeps = [
   "@solana/web3.js",
-  "@metamask/sdk", 
   "open",
   "starknet",
 ];
