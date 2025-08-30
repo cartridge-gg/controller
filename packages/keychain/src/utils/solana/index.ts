@@ -153,11 +153,11 @@ export class Transaction {
     const txHex = sol.createTxComplex(
       this.feePayer.toString(),
       this.instructions,
-      this.recentBlockhash
+      this.recentBlockhash,
     );
 
     // Convert hex string to Uint8Array
-    return new Uint8Array(Buffer.from(txHex, 'hex'));
+    return new Uint8Array(Buffer.from(txHex, "hex"));
   }
 }
 
@@ -176,8 +176,8 @@ export async function getAssociatedTokenAddress(
 
   // For SPL Token ATAs, the address is deterministic
   // This is a simplified calculation - in production use proper PDA derivation
-  const seedsBuffer = Buffer.concat(seeds.map(s => Buffer.from(s)));
-  const hash = await crypto.subtle.digest('SHA-256', seedsBuffer);
+  const seedsBuffer = Buffer.concat(seeds.map((s) => Buffer.from(s)));
+  const hash = await crypto.subtle.digest("SHA-256", seedsBuffer);
   const address = bs58.encode(new Uint8Array(hash).slice(0, 32));
 
   return new PublicKey(address);

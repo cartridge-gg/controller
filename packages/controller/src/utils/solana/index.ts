@@ -101,10 +101,10 @@ export class Transaction {
     const txHex = sol.createTxComplex(
       this.feePayer.toString(),
       this._instructions,
-      this.recentBlockhash
+      this.recentBlockhash,
     );
 
-    return Buffer.from(txHex, 'hex');
+    return Buffer.from(txHex, "hex");
   }
 
   serializeMessage(): Buffer {
@@ -116,11 +116,11 @@ export class Transaction {
     const txHex = sol.createTxComplex(
       this.feePayer.toString(),
       this._instructions,
-      this.recentBlockhash
+      this.recentBlockhash,
     );
 
     // Return the message part of the transaction
-    return Buffer.from(txHex, 'hex');
+    return Buffer.from(txHex, "hex");
   }
 }
 

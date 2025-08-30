@@ -15,10 +15,10 @@ export function getAssociatedTokenAddress(mint: string, owner: string): string {
     bs58.decode(TOKEN_PROGRAM_ID),
     bs58.decode(mint),
   ];
-  
+
   // For SPL Token ATAs, this is deterministic but simplified
   // In production, use proper PDA derivation
-  const combined = Buffer.concat(seeds.map(s => Buffer.from(s)));
+  const combined = Buffer.concat(seeds.map((s) => Buffer.from(s)));
   const hash = Buffer.from(combined).slice(0, 32);
   return bs58.encode(hash);
 }
@@ -38,7 +38,11 @@ export function createAssociatedTokenAccountInstruction(
       { address: associatedToken, sign: false, write: true },
       { address: owner, sign: false, write: false },
       { address: mint, sign: false, write: false },
-      { address: "11111111111111111111111111111111", sign: false, write: false }, // System program
+      {
+        address: "11111111111111111111111111111111",
+        sign: false,
+        write: false,
+      }, // System program
       { address: TOKEN_PROGRAM_ID, sign: false, write: false },
     ],
     data: new Uint8Array(0), // No data for create instruction
