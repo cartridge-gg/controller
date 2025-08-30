@@ -60,15 +60,14 @@ export class Transaction {
   }> = [];
   public feePayer?: PublicKey;
   public recentBlockhash?: string;
+  private _instructions: sol.Instruction[];
 
   constructor() {
     // We'll build instructions array and serialize using micro-sol-signer
     this._instructions = [];
   }
 
-  private _instructions: any[];
-
-  add(...instructions: any[]): Transaction {
+  add(...instructions: sol.Instruction[]): Transaction {
     this._instructions.push(...instructions);
     return this;
   }
@@ -94,14 +93,34 @@ export class Transaction {
       return Buffer.from(sol.Transaction.encode(this._transaction));
     }
 
-    // Otherwise build from instructions
-    // This would need proper implementation using micro-sol-signer's API
-    throw new Error("Transaction serialization not fully implemented");
+    // Build from instructions
+    if (!this.feePayer || !this.recentBlockhash) {
+      throw new Error("Transaction requires feePayer and recentBlockhash");
+    }
+
+    const txHex = sol.createTxComplex(
+      this.feePayer.toString(),
+      this._instructions,
+      this.recentBlockhash
+    );
+
+    return Buffer.from(txHex, 'hex');
   }
 
   serializeMessage(): Buffer {
     // Serialize just the message part
-    throw new Error("Message serialization not fully implemented");
+    if (!this.feePayer || !this.recentBlockhash) {
+      throw new Error("Transaction requires feePayer and recentBlockhash");
+    }
+
+    const txHex = sol.createTxComplex(
+      this.feePayer.toString(),
+      this._instructions,
+      this.recentBlockhash
+    );
+
+    // Return the message part of the transaction
+    return Buffer.from(txHex, 'hex');
   }
 }
 
