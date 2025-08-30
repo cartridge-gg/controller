@@ -33,7 +33,6 @@
     }
   },
   "peerDependencies": {
-    "@metamask/sdk": "^0.32.1",
     "@solana/web3.js": "catalog:"
   },
   "dependencies": {
