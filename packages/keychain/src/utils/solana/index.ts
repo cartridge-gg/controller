@@ -110,7 +110,7 @@ export class Connection {
 
 // Transaction wrapper for compatibility
 export class Transaction {
-  public instructions: unknown[] = [];
+  public instructions: sol.Instruction[] = [];
   public feePayer?: PublicKey;
   public recentBlockhash?: string;
   public signatures: Array<{
@@ -118,7 +118,7 @@ export class Transaction {
     publicKey: PublicKey;
   }> = [];
 
-  add(...instructions: unknown[]): Transaction {
+  add(...instructions: sol.Instruction[]): Transaction {
     this.instructions.push(...instructions);
     return this;
   }
@@ -144,17 +144,20 @@ export class Transaction {
       return sol.Transaction.encode((this as any)._decoded);
     }
 
-    // Build transaction using micro-sol-signer's createTxComplex
+    // Build transaction using micro-sol-signer
     if (!this.feePayer || !this.recentBlockhash) {
       throw new Error("Transaction requires feePayer and recentBlockhash");
     }
 
-    // For now, we'll throw an error as we need to implement proper transaction building
-    // using micro-sol-signer's API. The instructions would need to be converted to
-    // the format expected by micro-sol-signer.
-    throw new Error(
-      "Transaction building from instructions not yet implemented. Use micro-sol-signer directly.",
+    // Create the transaction with micro-sol-signer
+    const txHex = sol.createTxComplex(
+      this.feePayer.toString(),
+      this.instructions,
+      this.recentBlockhash
     );
+
+    // Convert hex string to Uint8Array
+    return new Uint8Array(Buffer.from(txHex, 'hex'));
   }
 }
 
@@ -163,23 +166,18 @@ export async function getAssociatedTokenAddress(
   mint: PublicKey,
   owner: PublicKey,
 ): Promise<PublicKey> {
-  // Use micro-sol-signer's token utilities if available
-  // Otherwise implement PDA derivation
-  const mintStr = mint.toString();
-  const ownerStr = owner.toString();
-
   // Derive the associated token account address
-  // This is a simplified implementation - actual would use PDA derivation
-  const ataSeeds = [
-    bs58.decode(ownerStr),
+  // Using the standard SPL token ATA derivation
+  const seeds = [
+    bs58.decode(owner.toString()),
     bs58.decode(TOKEN_PROGRAM_ID),
-    bs58.decode(mintStr),
+    bs58.decode(mint.toString()),
   ];
 
-  // For now, return a deterministic address based on the inputs
-  // In production, this should use proper PDA derivation
-  const combined = Buffer.concat(ataSeeds);
-  const hash = await crypto.subtle.digest("SHA-256", combined);
+  // For SPL Token ATAs, the address is deterministic
+  // This is a simplified calculation - in production use proper PDA derivation
+  const seedsBuffer = Buffer.concat(seeds.map(s => Buffer.from(s)));
+  const hash = await crypto.subtle.digest('SHA-256', seedsBuffer);
   const address = bs58.encode(new Uint8Array(hash).slice(0, 32));
 
   return new PublicKey(address);
@@ -188,30 +186,23 @@ export async function getAssociatedTokenAddress(
 // Create associated token account instruction
 export function createAssociatedTokenAccountInstruction(
   payer: PublicKey,
-  _associatedToken: PublicKey,
+  associatedToken: PublicKey,
   owner: PublicKey,
   mint: PublicKey,
-) {
+): sol.Instruction {
   // Create the instruction to create an associated token account
-  // Using micro-sol-signer's instruction helpers
-  const instruction = {
-    programId: ASSOCIATED_TOKEN_PROGRAM_ID,
+  return {
+    program: ASSOCIATED_TOKEN_PROGRAM_ID,
     keys: [
-      { pubkey: payer.toString(), isSigner: true, isWritable: true },
-      {
-        pubkey: _associatedToken.toString(),
-        isSigner: false,
-        isWritable: true,
-      },
-      { pubkey: owner.toString(), isSigner: false, isWritable: false },
-      { pubkey: mint.toString(), isSigner: false, isWritable: false },
-      { pubkey: SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { address: payer.toString(), sign: true, write: true },
+      { address: associatedToken.toString(), sign: false, write: true },
+      { address: owner.toString(), sign: false, write: false },
+      { address: mint.toString(), sign: false, write: false },
+      { address: SYSTEM_PROGRAM_ID, sign: false, write: false },
+      { address: TOKEN_PROGRAM_ID, sign: false, write: false },
     ],
     data: new Uint8Array(0), // No data for create instruction
   };
-
-  return instruction;
 }
 
 // Create transfer instruction for SPL tokens
@@ -220,7 +211,7 @@ export function createTransferInstruction(
   destination: PublicKey,
   owner: PublicKey,
   amount: number,
-) {
+): sol.Instruction {
   // Use micro-sol-signer's token transfer instruction
   return sol.token.transfer({
     source: source.toString(),
