@@ -21,7 +21,8 @@ import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
 import { parseSignature } from "viem";
 import { ErrorAlert } from "@/components/ErrorAlert";
 
-const FORWARDER_CONTRACT = "0x1bee43fc5b696088e7eef7b78d7b2b42e0b88e1e58c93c6d304e35603b582cf"
+const FORWARDER_CONTRACT =
+  "0x1bee43fc5b696088e7eef7b78d7b2b42e0b88e1e58c93c6d304e35603b582cf";
 
 export function Claim() {
   const { key, address: externalAddress } = useParams();
@@ -44,21 +45,23 @@ export function Claim() {
     return {
       chain_id: shortString.encodeShortString(claims[0].network),
       claim_contract_address: claims[0].contract,
-      selector: hash.getSelectorFromName(claims[0].entrypoint)
-    }
-  }, [claims])
+      selector: hash.getSelectorFromName(claims[0].entrypoint),
+    };
+  }, [claims]);
 
   useEffect(() => {
     if (claims.length === 0) {
       return;
     }
 
-    setClaimItems(claims[0].data.map((data) => ({
-      title: data,
-      type: ItemType.NFT,
-      icon: <GiftIcon variant="solid" />,
-    })))
-  }, [claims, setClaimItems])
+    setClaimItems(
+      claims[0].data.map((data) => ({
+        title: data,
+        type: ItemType.NFT,
+        icon: <GiftIcon variant="solid" />,
+      })),
+    );
+  }, [claims, setClaimItems]);
 
   const leafDataCompiled = useMemo(() => {
     if (claims.length === 0) {
@@ -70,10 +73,10 @@ export function Claim() {
       claim_contract_address: claims[0].contract,
       selector: hash.getSelectorFromName(claims[0].entrypoint),
       data: claims[0].data,
-    })
-  }, [claims, externalAddress])
+    });
+  }, [claims, externalAddress]);
 
-  useEffect(()=> {
+  useEffect(() => {
     if (!merkleTreeKey || !leafDataCompiled || !controller) {
       return;
     }
@@ -85,19 +88,22 @@ export function Claim() {
         merkle_tree_key: merkleTreeKey,
         leaf_data: leafDataCompiled,
       }),
-    };      
+    };
 
     setIsLoading(true);
-    controller.provider.callContract(call).then((result) => {
-      setIsClaimed(result[0] === "0x1")
-    }).catch((error) => {
-      console.error(error)
-      setError(error as Error)
-    }).finally(() => {
-      setIsLoading(false);
-    });
-
-  }, [merkleTreeKey, leafDataCompiled, controller])
+    controller.provider
+      .callContract(call)
+      .then((result) => {
+        setIsClaimed(result[0] === "0x1");
+      })
+      .catch((error) => {
+        console.error(error);
+        setError(error as Error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [merkleTreeKey, leafDataCompiled, controller]);
 
   const onConfirm = useCallback(async () => {
     if (!controller || !merkleTreeKey || !leafDataCompiled) {
@@ -108,12 +114,15 @@ export function Claim() {
       setIsLoading(true);
       setError(null);
       const claim = claims[0];
-      let receipient = ["0x0", controller.address()];
+      const receipient = ["0x0", controller.address()];
       let ethSignature: string[] = ["0x1"];
-  
+
       if (claim.network === MerkleDropNetwork.Ethereum) {
         const msg = `Claim on starknet with: ${num.toHex(controller.address())}`;
-        const {result, error} = await externalSignMessage(externalAddress!, msg);
+        const { result, error } = await externalSignMessage(
+          externalAddress!,
+          msg,
+        );
         if (error) {
           throw new Error(error);
         }
@@ -124,27 +133,26 @@ export function Claim() {
           cairo.uint256(r),
           cairo.uint256(s),
         ]);
-        ethSignature.unshift("0x0"); 
-
+        ethSignature.unshift("0x0");
       }
 
       const calldata = CallData.compile({
         merkle_tree_key: {
           chain_id: shortString.encodeShortString(claim.network),
           claim_contract_address: claim.contract,
-          selector: hash.getSelectorFromName(claim.entrypoint)
+          selector: hash.getSelectorFromName(claim.entrypoint),
         },
         proof: claim.merkleProof,
         leaf_data: leafDataCompiled,
-        recipient: {...receipient},
-        eth_signature: {...ethSignature},
-      })
+        recipient: { ...receipient },
+        eth_signature: { ...ethSignature },
+      });
 
       const call: Call = {
         contractAddress: FORWARDER_CONTRACT,
         entrypoint: "verify_and_forward",
         calldata,
-      };      
+      };
 
       await onClaim(call);
       navigate("/purchase/pending", { reset: true });
@@ -153,12 +161,18 @@ export function Claim() {
     } finally {
       setIsLoading(false);
     }
-  }, [claims, externalAddress, merkleTreeKey, leafDataCompiled, controller, externalSignMessage]);
+  }, [
+    claims,
+    externalAddress,
+    merkleTreeKey,
+    leafDataCompiled,
+    controller,
+    externalSignMessage,
+  ]);
 
   if (isLoadingClaims) {
     return <LoadingState />;
   }
-
 
   return (
     <>
@@ -192,7 +206,11 @@ export function Claim() {
         {claims.length === 0 ? (
           <Button onClick={() => goBack()}>Check Another Wallet</Button>
         ) : (
-          <Button onClick={onConfirm} isLoading={isLoading} disabled={isClaimed}>
+          <Button
+            onClick={onConfirm}
+            isLoading={isLoading}
+            disabled={isClaimed}
+          >
             {isClaimed ? "Already Claimed" : "Claim"}
           </Button>
         )}

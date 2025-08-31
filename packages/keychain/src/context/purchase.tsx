@@ -175,8 +175,7 @@ export const PurchaseProvider = ({
   } = useStarterPack(starterpackId);
 
   useEffect(() => {
-    if (!starterpackId)
-      return;
+    if (!starterpackId) return;
 
     const purchaseItems: Item[] = items.map((item) => ({
       title: item.title,
@@ -199,15 +198,24 @@ export const PurchaseProvider = ({
       priceUsd,
       acquisitionType,
     });
-  }, [starterpackId, items, priceUsd, name, supply, mintAllowance, merkleDrops, acquisitionType]);
+  }, [
+    starterpackId,
+    items,
+    priceUsd,
+    name,
+    supply,
+    mintAllowance,
+    merkleDrops,
+    acquisitionType,
+  ]);
 
   useEffect(() => {
     setDisplayError(
       stripeError ||
-      walletError ||
-      cryptoError ||
-      starterpackError ||
-      undefined,
+        walletError ||
+        cryptoError ||
+        starterpackError ||
+        undefined,
     );
   }, [stripeError, walletError, cryptoError, starterpackError]);
 
@@ -315,17 +323,22 @@ export const PurchaseProvider = ({
     [controller, usdAmount, starterpackId],
   );
 
-  const onClaim = useCallback(async (call: Call) => {
-    if (!controller) return;
+  const onClaim = useCallback(
+    async (call: Call) => {
+      if (!controller) return;
 
-    try {
-      const { transaction_hash } = await controller.executeFromOutsideV3([call]);
-      setTransactionHash(transaction_hash);
-    } catch (e) {
-      setDisplayError(e as Error);
-      throw e;
-    }
-  }, [controller]);
+      try {
+        const { transaction_hash } = await controller.executeFromOutsideV3([
+          call,
+        ]);
+        setTransactionHash(transaction_hash);
+      } catch (e) {
+        setDisplayError(e as Error);
+        throw e;
+      }
+    },
+    [controller],
+  );
 
   const fetchFees = useCallback(async () => {
     if (!controller || !selectedPlatform) return;

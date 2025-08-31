@@ -1,5 +1,4 @@
 import {
-  Button,
   HeaderInner,
   LayoutContent,
   LayoutFooter,
@@ -14,7 +13,10 @@ import { ExternalWallet } from "@cartridge/controller";
 import { useWallets } from "@/hooks/wallets";
 import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { MerkleDropNetwork, StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import {
+  MerkleDropNetwork,
+  StarterpackAcquisitionType,
+} from "@cartridge/ui/utils/api/cartridge";
 
 export function SelectWallet() {
   const { navigate } = useNavigation();
@@ -127,7 +129,9 @@ export function SelectWallet() {
                       StarterpackAcquisitionType.Claimed
                     ) {
                       const key = starterpackDetails?.merkleDrops?.find(
-                        (drop) => drop.network === network.platform.toUpperCase() as MerkleDropNetwork,
+                        (drop) =>
+                          drop.network ===
+                          (network.platform.toUpperCase() as MerkleDropNetwork),
                       )?.key;
                       navigate(`/purchase/claim/${key}/${address}`);
                     } else {

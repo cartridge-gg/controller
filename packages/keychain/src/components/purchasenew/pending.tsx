@@ -9,29 +9,36 @@ import {
   Spinner,
 } from "@cartridge/ui";
 import { Receiving } from "./receiving";
-import {
-  PaymentMethod,
-  Item,
-  usePurchaseContext,
-} from "@/context/purchase";
-import { Explorer } from "@/hooks/payments/crypto";
+import { PaymentMethod, Item, usePurchaseContext } from "@/context/purchase";
+import { Explorer, getExplorer } from "@/hooks/payments/crypto";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { useParams } from "react-router-dom";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
-export function PurchasePending() {
-  const { isClaiming } = useParams();
-
+export function Pending() {
   const {
+    starterpackDetails,
     purchaseItems,
+    claimItems,
     explorer,
     paymentMethod,
     selectedWallet,
     paymentId,
     transactionHash,
   } = usePurchaseContext();
+
+  if (
+    starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Claimed
+  ) {
+    return (
+      <ClaimPendingInner
+        items={claimItems}
+        transactionHash={transactionHash!}
+      />
+    );
+  }
 
   return (
     <PurchasePendingInner
@@ -73,7 +80,6 @@ export function PurchasePendingInner({
         setDepositCompleted(true),
       );
     }
-
   }, [wallet, transactionHash, externalWaitForTransaction, navigate]);
 
   useEffect(() => {
@@ -105,8 +111,9 @@ export function PurchasePendingInner({
         {paymentMethod === "crypto" && (
           <div className="relative space-y-2">
             <div
-              className={`transition-transform duration-500 ease-in-out ${depositCompleted ? "-translate-y-1" : "translate-y-0"
-                }`}
+              className={`transition-transform duration-500 ease-in-out ${
+                depositCompleted ? "-translate-y-1" : "translate-y-0"
+              }`}
             >
               <ConfirmingTransaction
                 title={`Confirming on ${humanizeString(selectedPlatform!)}`}
@@ -115,10 +122,11 @@ export function PurchasePendingInner({
               />
             </div>
             <div
-              className={`transition-all duration-500 ease-in-out ${showBridging
-                ? "opacity-100 max-h-20"
-                : "opacity-0 max-h-0 overflow-hidden"
-                }`}
+              className={`transition-all duration-500 ease-in-out ${
+                showBridging
+                  ? "opacity-100 max-h-20"
+                  : "opacity-0 max-h-0 overflow-hidden"
+              }`}
             >
               <ConfirmingTransaction
                 title="Bridging to Starknet"
@@ -133,8 +141,40 @@ export function PurchasePendingInner({
   );
 }
 
-export function ClaimPendingInner() {
-  return <></>
+export function ClaimPendingInner({
+  items,
+  transactionHash,
+}: {
+  items: Item[];
+  transactionHash: string;
+}) {
+  const { isMainnet, controller } = useConnection();
+  const { navigate } = useNavigation();
+  const [isClaiming, setIsClaiming] = useState(true);
+
+  useEffect(() => {
+    controller?.provider
+      .waitForTransaction(transactionHash, { retryInterval: 1000 })
+      .then(() => {
+        setIsClaiming(false);
+        navigate("/purchase/success", { reset: true });
+      });
+  }, [controller, transactionHash, navigate]);
+  return (
+    <>
+      <HeaderInner title="Pending Confirmation" icon={<Spinner />} />
+      <LayoutContent>
+        <Receiving title="Receiving" items={items} isLoading={true} />
+      </LayoutContent>
+      <LayoutFooter>
+        <ConfirmingTransaction
+          title="Claiming"
+          externalLink={getExplorer("starknet", transactionHash, isMainnet).url}
+          isLoading={isClaiming}
+        />
+      </LayoutFooter>
+    </>
+  );
 }
 
 export function ConfirmingTransaction({

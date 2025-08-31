@@ -187,7 +187,7 @@ export const useCryptoPayment = () => {
         setIsLoading(false);
       }
     },
-    [controller, isMainnet, requestPhantomPayment],
+    [controller, isMainnet, requestPhantomPayment, requestEvmPayment],
   );
 
   const quotePaymentFees = useCallback(
