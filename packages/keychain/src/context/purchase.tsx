@@ -19,7 +19,6 @@ import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
 import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
-import { Call } from "starknet";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -91,6 +90,7 @@ export interface PurchaseContextType {
   setPurchaseItems: (items: Item[]) => void;
   setClaimItems: (items: Item[]) => void;
   setStarterpackId: (id: string) => void;
+  setTransactionHash: (hash: string) => void;
 
   // Payment actions
   onCreditCardPurchase: () => Promise<void>;
@@ -100,7 +100,6 @@ export interface PurchaseContextType {
     platform: ExternalPlatform,
     chainId?: string,
   ) => Promise<string | undefined>;
-  onClaim: (call: Call) => Promise<void>;
   waitForPayment: (paymentId: string) => Promise<boolean>;
   fetchFees: () => Promise<void>;
 }
@@ -273,6 +272,7 @@ export const PurchaseProvider = ({
       throw e;
     }
   }, [
+    usdAmount,
     controller,
     selectedPlatform,
     walletAddress,
@@ -320,24 +320,7 @@ export const PurchaseProvider = ({
         throw e;
       }
     },
-    [controller, usdAmount, starterpackId],
-  );
-
-  const onClaim = useCallback(
-    async (call: Call) => {
-      if (!controller) return;
-
-      try {
-        const { transaction_hash } = await controller.executeFromOutsideV3([
-          call,
-        ]);
-        setTransactionHash(transaction_hash);
-      } catch (e) {
-        setDisplayError(e as Error);
-        throw e;
-      }
-    },
-    [controller],
+    [controller, connectWallet, switchChain],
   );
 
   const fetchFees = useCallback(async () => {
@@ -416,12 +399,12 @@ export const PurchaseProvider = ({
     setPurchaseItems,
     setClaimItems,
     setStarterpackId,
+    setTransactionHash,
 
     // Actions
     onCreditCardPurchase,
     onCryptoPurchase,
     onExternalConnect,
-    onClaim,
     waitForPayment,
     fetchFees,
   };

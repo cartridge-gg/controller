@@ -36,7 +36,7 @@ export function PurchaseStarterpack() {
     if (!isStarterpackLoading && starterpackId) {
       setStarterpackId(starterpackId);
     }
-  }, [starterpackId]);
+  }, [starterpackId, isStarterpackLoading, setStarterpackId]);
 
   if (isStarterpackLoading || !details) {
     return <LoadingState />;
