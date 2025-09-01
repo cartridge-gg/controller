@@ -19,7 +19,6 @@ const meta = {
         },
       ],
     },
-    isOriginalSigner: true,
   },
 } satisfies Meta<typeof SignerCard>;
 

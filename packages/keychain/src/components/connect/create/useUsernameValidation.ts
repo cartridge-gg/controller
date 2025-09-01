@@ -1,7 +1,7 @@
 import { useConnection } from "@/hooks/connection";
-import { processControllerQuery } from "@/utils/signers";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { useEffect, useRef, useState } from "react";
+import { constants } from "starknet";
 import { fetchController } from "./utils";
 
 export type ValidationState = {
@@ -78,13 +78,22 @@ export function useUsernameValidation(username: string) {
     fetchController(chainId, username, abortController.signal)
       .then((controller) => {
         if (!abortController.signal.aborted) {
-          const processedQuery = processControllerQuery(controller, chainId);
+          const signers =
+            chainId === constants.StarknetChainId.SN_MAIN
+              ? controller.controller?.signers?.map(
+                  (signer) => signer.metadata as CredentialMetadata,
+                )
+              : ([
+                  controller.controller?.signers?.sort(
+                    (a, b) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime(),
+                  )?.[0]?.metadata,
+                ] as CredentialMetadata[]);
           setValidation({
             status: "valid",
             exists: true,
-            signers: processedQuery.controller?.signers?.map(
-              (signer) => signer.metadata as CredentialMetadata,
-            ),
+            signers,
           });
         }
       })

@@ -3,11 +3,14 @@ import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
-import { processControllerQuery } from "@/utils/signers";
 import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { AuthOption } from "@cartridge/controller";
-import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
+import {
+  computeAccountAddress,
+  Owner,
+  Signer,
+} from "@cartridge/controller-wasm";
 import {
   AccountQuery,
   ControllerQuery,
@@ -93,14 +96,14 @@ export function useCreateController({
           chainId &&
           origin
         ) {
-          const controller = await Controller.create({
-            appId: origin,
+          const controller = await createController(
+            origin,
             chainId,
             rpcUrl,
             username,
-            classHash: controllerNode.constructorCalldata[0],
-            address: controllerNode.address,
-            owner: {
+            controllerNode.constructorCalldata[0],
+            controllerNode.address,
+            {
               signer: {
                 webauthn: {
                   rpId: import.meta.env.VITE_RP_ID!,
@@ -109,7 +112,7 @@ export function useCreateController({
                 },
               },
             },
-          });
+          );
 
           window.controller = controller;
           setController(controller);
@@ -189,30 +192,32 @@ export function useCreateController({
       const salt = shortString.encodeShortString(username);
       const address = computeAccountAddress(classHash, owner, salt);
 
-      const { controller, session } = await Controller.login({
+      const controller = new Controller({
         appId: origin,
         classHash,
-        rpcUrl,
         chainId,
+        rpcUrl,
         address,
         username,
         owner,
-        cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
-        session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
-        isControllerRegistered: false,
       });
+
+      const result = await controller.login(
+        now() + DEFAULT_SESSION_DURATION,
+        false,
+      );
 
       const registerRet = await controller.register({
         username,
         chainId: shortString.decodeShortString(chainId),
         owner: signer,
         session: {
-          expiresAt: session.expiresAt,
-          guardianKeyGuid: session.guardianKeyGuid,
-          metadataHash: session.metadataHash,
-          sessionKeyGuid: session.sessionKeyGuid,
-          allowedPoliciesRoot: session.allowedPoliciesRoot,
-          authorization: session.authorization ?? [],
+          expiresAt: result.session.expiresAt,
+          guardianKeyGuid: result.session.guardianKeyGuid,
+          metadataHash: result.session.metadataHash,
+          sessionKeyGuid: result.session.sessionKeyGuid,
+          allowedPoliciesRoot: result.allowedPoliciesRoot,
+          authorization: result.authorization ?? [],
           appId: origin,
         },
       });
@@ -240,6 +245,10 @@ export function useCreateController({
       switch (authenticationMode) {
         case "webauthn":
           await signupWithWebauthn(username, doPopupFlow);
+          signer = {
+            type: SignerType.Webauthn,
+            credential: JSON.stringify({}),
+          };
           return;
         case "google":
         case "discord":
@@ -311,45 +320,7 @@ export function useCreateController({
         throw new Error("Signup failed");
       }
 
-      const classHash = STABLE_CONTROLLER.hash;
-      const owner = {
-        signer: signupResponse.signer,
-      };
-      const salt = shortString.encodeShortString(username);
-      const address = computeAccountAddress(classHash, owner, salt);
-
-      const { controller, session } = await Controller.login({
-        appId: origin,
-        classHash,
-        rpcUrl,
-        chainId,
-        address,
-        username,
-        owner,
-        cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
-        session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
-        isControllerRegistered: false,
-      });
-
-      const registerRet = await controller.register({
-        username,
-        chainId: shortString.decodeShortString(chainId),
-        owner: signer,
-        session: {
-          expiresAt: session.expiresAt,
-          guardianKeyGuid: session.guardianKeyGuid,
-          metadataHash: session.metadataHash,
-          sessionKeyGuid: session.sessionKeyGuid,
-          allowedPoliciesRoot: session.allowedPoliciesRoot,
-          authorization: session.authorization ?? [],
-          appId: origin,
-        },
-      });
-
-      if (registerRet.register.username) {
-        window.controller = controller;
-        setController(controller);
-      }
+      await finishSignup(username, chainId, signupResponse, signer);
     },
     [
       chainId,
@@ -369,6 +340,7 @@ export function useCreateController({
   const finishLogin = useCallback(
     async (
       controller: NonNullable<ControllerQuery["controller"]>,
+      username: string,
       chainId: string,
       loginResponse: LoginResponse,
       authenticationMethod: AuthOption,
@@ -397,23 +369,22 @@ export function useCreateController({
         }
       }
 
-      const loginRet = await Controller.login({
-        appId: origin,
+      const controllerObject = await createController(
+        origin,
         chainId,
         rpcUrl,
-        username: controller.accountID,
-        classHash: controller.constructorCalldata[0],
-        address: controller.address,
-        owner: {
+        username,
+        controller.constructorCalldata[0],
+        controller.address,
+        {
           signer: loginResponse?.signer,
         },
-        cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
-        session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
-        isControllerRegistered: true,
-      });
+      );
 
-      window.controller = loginRet.controller;
-      setController(loginRet.controller);
+      await controllerObject.login(now() + DEFAULT_SESSION_DURATION, true);
+
+      window.controller = controllerObject;
+      setController(controllerObject);
     },
     [origin, chainId, rpcUrl, setController],
   );
@@ -433,10 +404,7 @@ export function useCreateController({
         throw new Error("Undefined controller");
       }
 
-      const controller = processControllerQuery(
-        controllerRet,
-        chainId,
-      ).controller;
+      const controller = controllerRet.controller;
 
       if (!controller) {
         throw new Error("Undefined controller");
@@ -454,16 +422,14 @@ export function useCreateController({
           await loginWithWebauthn(
             controller,
             {
-              signer: {
-                webauthns: webauthnSigners.map((signer) => {
-                  const webauthn = signer.metadata as WebauthnCredentials;
-                  return {
-                    rpId: import.meta.env.VITE_RP_ID!,
-                    credentialId: webauthn.webauthn?.[0]?.id ?? "",
-                    publicKey: webauthn.webauthn?.[0]?.publicKey ?? "",
-                  };
-                }),
-              },
+              webauthns: webauthnSigners.map((signer) => {
+                const webauthn = signer.metadata as WebauthnCredentials;
+                return {
+                  rpId: import.meta.env.VITE_RP_ID!,
+                  credentialId: webauthn.webauthn?.[0]?.id ?? "",
+                  publicKey: webauthn.webauthn?.[0]?.publicKey ?? "",
+                };
+              }),
             },
             loginMode,
             !!isSlot,
@@ -538,6 +504,7 @@ export function useCreateController({
 
       await finishLogin(
         controller,
+        username,
         chainId,
         loginResponse,
         authenticationMethod,
@@ -608,6 +575,7 @@ export function useCreateController({
 
           finishLogin(
             controller.controller,
+            username,
             chainId,
             {
               signer: {
@@ -694,4 +662,24 @@ export function useCreateController({
     signupOptions,
     authMethod,
   };
+}
+
+export async function createController(
+  origin: string,
+  chainId: string,
+  rpcUrl: string,
+  username: string,
+  classHash: string,
+  address: string,
+  owner: Owner,
+) {
+  return new Controller({
+    appId: origin,
+    classHash,
+    chainId,
+    rpcUrl,
+    address,
+    username,
+    owner,
+  });
 }
