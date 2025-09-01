@@ -16,7 +16,10 @@ export async function fetchController(
   username: string,
   signal?: AbortSignal,
 ) {
-  const controllerQuery = await fetchData<ControllerQuery, ControllerQueryVariables>(
+  const controllerQuery = await fetchData<
+    ControllerQuery,
+    ControllerQueryVariables
+  >(
     ControllerDocument,
     { chainId: constants.NetworkName.SN_MAIN, username },
     signal,
