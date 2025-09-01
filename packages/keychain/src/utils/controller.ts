@@ -14,7 +14,7 @@ import {
   AuthorizedSession,
   CartridgeAccount,
   CartridgeAccountMeta,
-  ControllerBuilderFactory,
+  ControllerFactory,
   JsAddSignerInput,
   JsCall,
   JsFeeSource,
@@ -314,7 +314,7 @@ export default class Controller {
     session_expires_at_s: number;
     isControllerRegistered: boolean;
   }) {
-    const loginResult = await ControllerBuilderFactory.login(
+    const loginResult = await ControllerFactory.login(
       appId,
       username,
       classHash,
