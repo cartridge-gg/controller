@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     '@cartridge/controller-wasm':
-      specifier: ^0.3.1
-      version: 0.3.1
+      specifier: ^0.3.0
+      version: 0.3.0
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -276,7 +276,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.1
+        version: 0.3.0
       starknet:
         specifier: 'catalog:'
         version: 8.5.2
@@ -384,7 +384,7 @@ importers:
     dependencies:
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.1
+        version: 0.3.0
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -512,7 +512,7 @@ importers:
         version: link:../controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.1
+        version: 0.3.0
       '@cartridge/marketplace':
         specifier: 0.0.14
         version: 0.0.14(@tanstack/react-query@5.75.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
@@ -845,6 +845,11 @@ packages:
     resolution: {integrity: sha512-FCvFTm0sWV8Fxhpp2McP5/W53GPllQ9QeQ7SiqGWjMf/LVG07lFa5+pgK05IRhVwtvafT22KF+ZSnM9I545CvQ==}
     engines: {node: '>=6.9.0'}
 
+  '@babel/parser@7.27.1':
+    resolution: {integrity: sha512-I0dZ3ZpCrJ1c04OqlNsQcKiZlsrXf/kkE4FXzID9rIOYICsAbA8mMDzhW/luRNAHdCNt7os/u8wenklZDlUVUQ==}
+    engines: {node: '>=6.0.0'}
+    hasBin: true
+
   '@babel/parser@7.27.2':
     resolution: {integrity: sha512-QYLs8299NA7WM/bZAdp+CviYYkVoYXlDW2rzliy3chxd1PQjej7JORuMJDJXJUb9g0TT+B99EwaVLKmX+sPXWw==}
     engines: {node: '>=6.0.0'}
@@ -974,8 +979,8 @@ packages:
   '@cartridge/controller-wasm@0.2.1':
     resolution: {integrity: sha512-uB0ffQEHAlu7+2E4Y/EoWUgbIYNrjMXks2FYHS8lg9ngaFwETvrUFI5Y+Pp71VQTthEnuwVcNKBqluO5TSPAug==}
 
-  '@cartridge/controller-wasm@0.3.1':
-    resolution: {integrity: sha512-mcTJQmZHLHlWiKUY3i6GpwtJ5xmYz0xEsTTMfgn2cPn/7bccQOQh+hYcNPFgCSJa/Ld/EtFc5nYbRnw8nU53GA==}
+  '@cartridge/controller-wasm@0.3.0':
+    resolution: {integrity: sha512-1Uc5K0hV0wySq+QMxBrIcstXdTSSm2Rn2zx11XuSJ0IPrw+57Ctarw4vsXXAs8icS+kal2s3lXwDZTgDoo3NQQ==}
 
   '@cartridge/controller@0.9.0':
     resolution: {integrity: sha512-bIikpiIR+N16MaEyxjab/AN3uDvOj+pdixWbJLSVqGpItpUq58AiQ0GFwPKXnpAwKVT66aqNrVBINSuMWemRhQ==}
@@ -9629,6 +9634,10 @@ snapshots:
       '@babel/template': 7.27.2
       '@babel/types': 7.27.1
 
+  '@babel/parser@7.27.1':
+    dependencies:
+      '@babel/types': 7.27.1
+
   '@babel/parser@7.27.2':
     dependencies:
       '@babel/types': 7.27.1
@@ -9822,7 +9831,7 @@ snapshots:
 
   '@cartridge/controller-wasm@0.2.1': {}
 
-  '@cartridge/controller-wasm@0.3.1': {}
+  '@cartridge/controller-wasm@0.3.0': {}
 
   '@cartridge/controller@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(open@10.1.2)(react@18.3.1)(starknet@8.5.2)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@8.5.2)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
@@ -17658,7 +17667,7 @@ snapshots:
 
   magicast@0.3.5:
     dependencies:
-      '@babel/parser': 7.27.2
+      '@babel/parser': 7.27.1
       '@babel/types': 7.27.1
       source-map-js: 1.2.1
 

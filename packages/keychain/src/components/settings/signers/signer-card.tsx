@@ -32,7 +32,7 @@ export interface Signer {
 export interface SignerCardProps extends Signer {
   onDelete?: () => Promise<void>;
   current?: boolean;
-  isOriginalSigner: boolean;
+  isOriginalSigner?: boolean;
 }
 
 export const SignerCard = React.forwardRef<
@@ -83,7 +83,7 @@ export const SignerCard = React.forwardRef<
               </p>
             )}
           </Card>
-          {!isOriginalSigner && !current && onDelete && (
+          {onDelete && (
             <Button
               variant="icon"
               size="icon"
