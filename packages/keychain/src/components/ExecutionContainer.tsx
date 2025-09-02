@@ -9,7 +9,7 @@ import {
   type HeaderProps,
   LayoutFooter,
 } from "@cartridge/ui";
-import isEqual from "lodash/isEqual";
+import { isEqual } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { Call, FeeEstimate } from "starknet";
