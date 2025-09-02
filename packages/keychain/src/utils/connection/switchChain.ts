@@ -23,8 +23,8 @@ export function switchChain({
     const nextController = Controller.create({
       appId: controller.appId(),
       classHash: controller.classHash(),
-      chainId: chainId,
-      rpcUrl: rpcUrl,
+      chainId,
+      rpcUrl,
       address: controller.address(),
       username: controller.username(),
       owner: controller.owner(),

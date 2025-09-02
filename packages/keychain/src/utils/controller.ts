@@ -255,6 +255,42 @@ export default class Controller {
     return await this.cartridge.revokeSessions(sessions);
   }
 
+  static async apiLogin({
+    appId,
+    classHash,
+    chainId,
+    rpcUrl,
+    address,
+    username,
+    owner,
+  }: {
+    appId: string;
+    classHash: string;
+    chainId: string;
+    rpcUrl: string;
+    address: string;
+    username: string;
+    owner: Owner;
+  }) {
+    const accountWithMeta = await ControllerFactory.apiLogin(
+      appId,
+      username,
+      classHash,
+      rpcUrl,
+      chainId,
+      address,
+      owner,
+      import.meta.env.VITE_CARTRIDGE_API_URL,
+    );
+
+    const controller = Object.create(Controller.prototype) as Controller;
+    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
+    controller.cartridgeMeta = accountWithMeta.meta();
+    controller.cartridge = accountWithMeta.intoAccount();
+
+    return controller;
+  }
+
   static create({
     appId,
     classHash,
@@ -341,7 +377,7 @@ export default class Controller {
   }
 
   static fromStore(appId: string) {
-    const cartridgeWithMeta = CartridgeAccount.fromStorage(
+    const cartridgeWithMeta = ControllerFactory.fromStorage(
       appId,
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );

@@ -22,7 +22,6 @@ import { shortString } from "starknet";
 import {
   credentialToAddress,
   credentialToAuth,
-  LoginMode,
   signerToAddress,
 } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
@@ -42,13 +41,7 @@ export interface LoginResponse {
   signer: Signer;
 }
 
-export function useCreateController({
-  isSlot,
-  loginMode = LoginMode.Webauthn,
-}: {
-  isSlot?: boolean;
-  loginMode?: LoginMode;
-}) {
+export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
@@ -465,7 +458,6 @@ export function useCreateController({
                 }),
               },
             },
-            loginMode,
             !!isSlot,
           );
           return;
@@ -549,7 +541,6 @@ export function useCreateController({
       loginWithSocial,
       loginWithWalletConnect,
       loginWithExternalWallet,
-      loginMode,
       chainId,
       origin,
       rpcUrl,

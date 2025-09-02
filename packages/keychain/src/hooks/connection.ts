@@ -356,13 +356,6 @@ export function useConnectionValue() {
 
   // Handle controller initialization
   useEffect(() => {
-    // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
-    if (!isIframe()) {
-      if (controller) {
-        setController(controller);
-      }
-    }
-
     setIsMainnet(
       import.meta.env.PROD &&
         controller?.chainId() === constants.StarknetChainId.SN_MAIN,

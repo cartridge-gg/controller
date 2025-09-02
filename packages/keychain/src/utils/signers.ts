@@ -39,7 +39,6 @@ export const isCurrentSigner = (
 export const sortSignersByCreationDate = <T extends { createdAt: string }>(
   signers: T[],
 ): T[] => {
-  console.log(signers);
   return [...signers].sort((a, b) => {
     if (a.createdAt === b.createdAt) {
       throw new Error("Signers have the same creation timestamp");
