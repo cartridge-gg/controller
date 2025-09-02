@@ -2,11 +2,11 @@ import { useState, useCallback } from "react";
 import {
   CreateLayerswapPaymentDocument,
   CreateLayerswapPaymentMutation,
-  LayerswapNetwork,
   CryptoPaymentQuery,
   CryptoPaymentDocument,
   LayerswapQuoteQuery,
   LayerswapQuoteDocument,
+  LayerswapSourceNetwork,
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
@@ -210,7 +210,7 @@ export const useCryptoPayment = () => {
               amount: wholeCredits,
               decimals: 0,
             },
-            sourceNetwork: mapPlatformToLayerswapNetwork(platform),
+            sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
             purchaseType: starterpackId
               ? PurchaseType.STARTERPACK
               : PurchaseType.CREDITS,
@@ -280,7 +280,7 @@ export const useCryptoPayment = () => {
             amount: wholeCredits,
             decimals: 0,
           },
-          sourceNetwork: mapPlatformToLayerswapNetwork(platform),
+          sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
           purchaseType: starterpackId
             ? PurchaseType.STARTERPACK
             : PurchaseType.CREDITS,
@@ -422,18 +422,39 @@ const getExplorer = (
 
 function mapPlatformToLayerswapNetwork(
   platform: ExternalPlatform,
-): LayerswapNetwork {
+  isMainnet: boolean,
+): LayerswapSourceNetwork {
   switch (platform) {
     case "solana":
-      return LayerswapNetwork.Solana;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.SolanaMainnet;
+      } else {
+        return LayerswapSourceNetwork.SolanaDevnet;
+      }
     case "ethereum":
-      return LayerswapNetwork.Ethereum;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.EthereumMainnet;
+      } else {
+        return LayerswapSourceNetwork.EthereumSepolia;
+      }
     case "base":
-      return LayerswapNetwork.Base;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.BaseMainnet;
+      } else {
+        return LayerswapSourceNetwork.BaseSepolia;
+      }
     case "arbitrum":
-      return LayerswapNetwork.Arbitrum;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.ArbitrumMainnet;
+      } else {
+        return LayerswapSourceNetwork.ArbitrumSepolia;
+      }
     case "optimism":
-      return LayerswapNetwork.Optimism;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.OptimismMainnet;
+      } else {
+        return LayerswapSourceNetwork.OptimismSepolia;
+      }
     // Starknet supported natively
     default:
       throw new Error(`Unsupported platform: ${platform}`);
