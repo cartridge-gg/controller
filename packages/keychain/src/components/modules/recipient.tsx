@@ -2,7 +2,7 @@ import { useAccountInfo } from "@/hooks/account";
 import { Recipient, WalletType } from "@cartridge/ui";
 import { formatAddress } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useState } from "react";
-import { debounce } from "lodash";
+import { debounce } from "@/utils";
 
 type Selected = {
   name: string;

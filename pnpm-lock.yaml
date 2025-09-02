@@ -45,9 +45,6 @@ catalogs:
     '@types/jest-image-snapshot':
       specifier: ^6.4.0
       version: 6.4.0
-    '@types/lodash':
-      specifier: ^4.17.14
-      version: 4.17.16
     '@types/mocha':
       specifier: ^10.0.10
       version: 10.0.10
@@ -84,9 +81,6 @@ catalogs:
     jest-image-snapshot:
       specifier: ^6.4.0
       version: 6.4.0
-    lodash:
-      specifier: ^4.17.21
-      version: 4.17.21
     playwright:
       specifier: ^1.49.1
       version: 1.52.0
@@ -588,9 +582,6 @@ importers:
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
-      lodash:
-        specifier: 'catalog:'
-        version: 4.17.21
       micro-sol-signer:
         specifier: ^0.5.0
         version: 0.5.0
@@ -664,9 +655,6 @@ importers:
       '@types/jest-image-snapshot':
         specifier: 'catalog:'
         version: 6.4.0
-      '@types/lodash':
-        specifier: 'catalog:'
-        version: 4.17.16
       '@types/node':
         specifier: 'catalog:'
         version: 18.19.87
@@ -3618,9 +3606,6 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
-
-  '@types/lodash@4.17.16':
-    resolution: {integrity: sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==}
 
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
@@ -13090,8 +13075,6 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
-
-  '@types/lodash@4.17.16': {}
 
   '@types/mdx@2.0.13': {}
 
