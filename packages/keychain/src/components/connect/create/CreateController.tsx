@@ -1,3 +1,4 @@
+import { NavigationHeader } from "@/components";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
@@ -14,12 +15,11 @@ import {
   LayoutFooter,
   Sheet,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
 import { ChangeWallet } from "../buttons/change-wallet";
-import { credentialToAuth, LoginMode } from "../types";
+import { credentialToAuth } from "../types";
 import { ChooseSignupMethodForm } from "./ChooseSignupMethodForm";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
@@ -257,7 +257,6 @@ export function CreateController({
     authMethod,
   } = useCreateController({
     isSlot,
-    loginMode: isSlot ? LoginMode.Webauthn : LoginMode.Controller,
   });
 
   const handleFormSubmit = useCallback(
