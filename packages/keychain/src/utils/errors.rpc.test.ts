@@ -160,9 +160,15 @@ describe("parseExecutionError - RPC Nested Error Format", () => {
 
     expect(result.summary).toBe("Not active");
     expect(result.stack[0].error).toEqual(["Not active"]);
-    expect(result.stack[0].address).toBe("0x4bb778faff2bfcc23e97b3a184c9658e8048351ab68dc56e1f493bac3b20794");
-    expect(result.stack[0].class).toBe("0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf");
-    expect(result.stack[0].selector).toBe("0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad");
+    expect(result.stack[0].address).toBe(
+      "0x4bb778faff2bfcc23e97b3a184c9658e8048351ab68dc56e1f493bac3b20794",
+    );
+    expect(result.stack[0].class).toBe(
+      "0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+    );
+    expect(result.stack[0].selector).toBe(
+      "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+    );
   });
 
   it("should handle ENTRYPOINT_NOT_FOUND with empty error and display generic message", () => {
@@ -179,8 +185,14 @@ describe("parseExecutionError - RPC Nested Error Format", () => {
     const result = parseExecutionError(error, 0);
 
     expect(result.summary).toBe("Transaction execution failed");
-    expect(result.stack[0].address).toBe("0x04fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b");
-    expect(result.stack[0].class).toBe("0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf");
-    expect(result.stack[0].selector).toBe("0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad");
+    expect(result.stack[0].address).toBe(
+      "0x04fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b",
+    );
+    expect(result.stack[0].class).toBe(
+      "0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+    );
+    expect(result.stack[0].selector).toBe(
+      "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+    );
   });
 });
