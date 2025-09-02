@@ -1,43 +1,24 @@
 import { useConnection } from "@/hooks/connection";
-import {
-  ControllerQuery,
-  useControllerQuery,
-} from "@cartridge/ui/utils/api/cartridge";
-import { useMemo } from "react";
-import { QueryObserverResult } from "react-query";
+import { processControllerQuery } from "@/utils/signers";
+import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { constants } from "starknet";
 import { AddSigner } from "./signers/add-signer/add-signer";
 
 export function AddSignerRoute() {
   const { controller, chainId } = useConnection();
 
-  const controllerQueryRaw = useControllerQuery(
+  const controllerQuery = useControllerQuery(
     {
       username: controller?.username() ?? "",
       chainId: constants.NetworkName.SN_MAIN,
     },
     {
       refetchOnMount: "always",
+      select: (data) => processControllerQuery(data, chainId ?? ""),
+      enabled: !!chainId,
+      queryKey: ["controller", controller?.username(), chainId],
     },
   );
-
-  const controllerQuery = useMemo(() => {
-    if (chainId === constants.StarknetChainId.SN_MAIN) {
-      return controllerQueryRaw;
-    }
-    return {
-      ...controllerQueryRaw,
-      data: {
-        controller: {
-          ...controllerQueryRaw.data?.controller,
-          signers: controllerQueryRaw.data?.controller?.signers
-            ? [controllerQueryRaw.data?.controller?.signers[0]]
-            : undefined,
-        },
-        ...controllerQueryRaw.data,
-      },
-    } as QueryObserverResult<ControllerQuery>;
-  }, [chainId, controllerQueryRaw]);
 
   return <AddSigner controllerQuery={controllerQuery} />;
 }
