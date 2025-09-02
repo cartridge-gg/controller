@@ -36,17 +36,6 @@ export const isCurrentSigner = (
   return signerGuid === controllerGuid;
 };
 
-export const sortSignersByCreationDate = <T extends { createdAt: string }>(
-  signers: T[],
-): T[] => {
-  return [...signers].sort((a, b) => {
-    if (a.createdAt === b.createdAt) {
-      throw new Error("Signers have the same creation timestamp");
-    }
-    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-  });
-};
-
 export const processControllerQuery = (
   data: ControllerQuery,
   chainId: string,
@@ -69,12 +58,14 @@ export const processControllerQuery = (
     };
   }
 
-  const signers = sortSignersByCreationDate(validSigners ?? []);
   return {
     ...data,
     controller: {
       ...data.controller,
-      signers: signers ? [signers[0]] : undefined,
+      signers:
+        validSigners && validSigners.length > 0
+          ? validSigners.filter((x) => x.isOriginal)
+          : undefined,
     },
   };
 };
