@@ -336,10 +336,10 @@ export function parseExecutionError(
 
       // Extract all error messages from the nested content
       // Match both single-quoted strings and double-quoted strings
-      const singleQuoted = [...nestedContent.matchAll(/'([^']+)'/g)].map(
+      const singleQuoted = [...nestedContent.matchAll(/'([^']*)'/g)].map(
         (match) => match[1],
       );
-      const doubleQuoted = [...nestedContent.matchAll(/"([^"]+)"/g)].map(
+      const doubleQuoted = [...nestedContent.matchAll(/"([^"]*)"/g)].map(
         (match) => match[1],
       );
       const allErrors = [...singleQuoted, ...doubleQuoted];
@@ -349,9 +349,11 @@ export function parseExecutionError(
         (err) =>
           err !== "argent/multicall-failed" &&
           err !== "ENTRYPOINT_FAILED" &&
+          err !== "ENTRYPOINT_NOT_FOUND" &&
           err !== "0x0" && // Exclude separator
           !err.match(/^0x[0-9a-fA-F]+$/) && // Exclude pure hex values
-          err !== "0x1", // Exclude other separators
+          err !== "0x1" && // Exclude other separators
+          err !== "", // Exclude empty strings
       );
 
       // Extract contract details from the execution error
@@ -390,7 +392,7 @@ export function parseExecutionError(
     // Parse the tuple error format
     const tupleMatch = errorMessage.match(/^\((.*)\)$/);
     if (tupleMatch) {
-      const allErrors = [...tupleMatch[1].matchAll(/'([^']+)'/g)].map(
+      const allErrors = [...tupleMatch[1].matchAll(/'([^']*)'/g)].map(
         (match) => match[1],
       );
       const meaningfulError =
@@ -398,7 +400,9 @@ export function parseExecutionError(
           (err) =>
             err !== "argent/multicall-failed" &&
             err !== "ENTRYPOINT_FAILED" &&
+            err !== "ENTRYPOINT_NOT_FOUND" &&
             err !== "0x0" && // Exclude separator
+            err !== "" && // Exclude empty strings
             !err.match(/^0x[0-9a-fA-F]+$/), // Exclude hex values that might leak through
         ) || allErrors[0];
 
@@ -511,7 +515,7 @@ export function parseExecutionError(
         );
         if (tupleMatch) {
           // Extract all quoted strings from the tuple
-          const allErrors = [...tupleMatch[1].matchAll(/'([^']+)'/g)].map(
+          const allErrors = [...tupleMatch[1].matchAll(/'([^']*)'/g)].map(
             (match) => match[1],
           );
 
@@ -520,7 +524,9 @@ export function parseExecutionError(
             (err) =>
               err !== "argent/multicall-failed" &&
               err !== "ENTRYPOINT_FAILED" &&
+              err !== "ENTRYPOINT_NOT_FOUND" &&
               err !== "0x0" && // Exclude separator like 0x0
+              err !== "" && // Exclude empty strings
               !err.match(/^0x[0-9a-fA-F]+$/), // Exclude hex values that might leak through
           );
 
@@ -603,10 +609,12 @@ export function parseExecutionError(
           (err: string) =>
             err !== "argent/multicall-failed" &&
             err !== "ENTRYPOINT_FAILED" &&
+            err !== "ENTRYPOINT_NOT_FOUND" &&
             err !== "0x0" && // Exclude separator
+            err !== "" && // Exclude empty strings
             !err.match(/^0x[0-9a-fA-F]+$/), // Exclude hex values
         );
-        summary = actualError || "Multicall failed";
+        summary = actualError || "Transaction execution failed";
       } else {
         // Try to find a meaningful error message instead of raw hex or technical errors
         const meaningfulError = lastError.find(
