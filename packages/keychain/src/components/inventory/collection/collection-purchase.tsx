@@ -45,7 +45,11 @@ import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
 import { createExecuteUrl } from "@/utils/connection/execute";
-import { CLIENT_FEE_NUMERATOR, CLIENT_FEE_RECEIVER } from "@/constants";
+import {
+  CLIENT_FEE_DENOMINATOR,
+  CLIENT_FEE_NUMERATOR,
+  CLIENT_FEE_RECEIVER,
+} from "@/constants";
 
 const FEE_ENTRYPOINT = "royalty_info";
 
@@ -164,8 +168,12 @@ export function CollectionPurchase() {
       (acc, order) => acc + Number(order?.price),
       0,
     );
-    const formatted = total / Math.pow(10, token?.metadata.decimals || 0);
-    return { totalPrice: total, floatPrice: formatted };
+    const fees = Math.floor(
+      total * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR),
+    );
+    const formatted =
+      (total + fees) / Math.pow(10, token?.metadata.decimals || 0);
+    return { totalPrice: total + fees, floatPrice: formatted, fees };
   }, [tokenOrders, token?.metadata.decimals]);
 
   const addRoyalties = useCallback(
