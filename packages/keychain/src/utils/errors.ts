@@ -335,9 +335,14 @@ export function parseExecutionError(
       const nestedContent = nestedMatch[1];
 
       // Extract all error messages from the nested content
-      const allErrors = [...nestedContent.matchAll(/'([^']+)'/g)].map(
+      // Match both single-quoted strings and double-quoted strings
+      const singleQuoted = [...nestedContent.matchAll(/'([^']+)'/g)].map(
         (match) => match[1],
       );
+      const doubleQuoted = [...nestedContent.matchAll(/"([^"]+)"/g)].map(
+        (match) => match[1],
+      );
+      const allErrors = [...singleQuoted, ...doubleQuoted];
 
       // Find the most meaningful error, excluding common framework errors
       const meaningfulError = allErrors.find(
@@ -1280,6 +1285,32 @@ export const starknetTransactionExecutionErrorTestCases = [
           selector:
             "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
           error: ["ERC20: insufficient balance"],
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Contract address= 0x596990bd2774a49a4a8578e9bae58b76fe82183088bfcc439226c8388b63c09, Class hash= 0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: (0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x1, \"Wallet Connection Required for Double or Nothing Spin\", 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'))",
+      },
+    },
+    expected: {
+      raw: "Contract address= 0x596990bd2774a49a4a8578e9bae58b76fe82183088bfcc439226c8388b63c09, Class hash= 0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: (0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x1, \"Wallet Connection Required for Double or Nothing Spin\", 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'))",
+      summary: "Wallet Connection Required for Double or Nothing Spin",
+      stack: [
+        {
+          address:
+            "0x596990bd2774a49a4a8578e9bae58b76fe82183088bfcc439226c8388b63c09",
+          class:
+            "0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+          selector:
+            "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          error: ["Wallet Connection Required for Double or Nothing Spin"],
         },
       ],
     },
