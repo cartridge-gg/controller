@@ -32,12 +32,11 @@
       "require": "./dist/node/index.cjs"
     }
   },
-  "peerDependencies": {
-    "@solana/web3.js": "catalog:"
-  },
   "dependencies": {
     "@cartridge/controller-wasm": "catalog:",
     "@cartridge/penpal": "catalog:",
+    "micro-sol-signer": "^0.5.0",
+    "bs58": "^6.0.0",
     "ethers": "^6.13.5",
     "@starknet-io/types-js": "0.9.1",
     "@telegram-apps/sdk": "^2.4.0",
