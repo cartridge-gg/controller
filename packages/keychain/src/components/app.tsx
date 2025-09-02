@@ -76,7 +76,10 @@ export function App() {
           <Route path="claim/:key/:address" element={<Claim />} />
           <Route path="method/:platforms?" element={<PaymentMethod />} />
           <Route path="network/:platforms?" element={<ChooseNetwork />} />
-          <Route path="wallet/:platforms?" element={<SelectWallet />} />
+          <Route
+            path="wallet/:platforms?/:mainnet?"
+            element={<SelectWallet />}
+          />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/crypto" element={<CryptoCheckout />} />
           <Route path="review" element={<></>} />

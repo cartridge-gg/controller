@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ReviewPurchase } from "./review";
-import { PurchaseItemType } from "@/context/purchase";
+import { ItemType } from "@/context/purchase";
 
 const meta = {
   component: ReviewPurchase,
@@ -17,13 +17,13 @@ export const Starterpack: Story = {
         title: "Village",
         subtitle: "Eternum Village",
         icon: "https://r2.quddus.my/Frame%203231.png",
-        type: PurchaseItemType.NFT,
+        type: ItemType.NFT,
       },
       {
         title: "Credits",
         value: 500,
         icon: "/ERC-20-Icon.svg",
-        type: PurchaseItemType.CREDIT,
+        type: ItemType.CREDIT,
       },
     ],
     costDetails: {
@@ -43,7 +43,7 @@ export const CreditsOnly: Story = {
         title: "Credits",
         value: 1000,
         icon: "/ERC-20-Icon.svg",
-        type: PurchaseItemType.CREDIT,
+        type: ItemType.CREDIT,
       },
     ],
     costDetails: {
@@ -63,19 +63,19 @@ export const MultipleItems: Story = {
         title: "Village",
         subtitle: "Eternum Village",
         icon: "https://r2.quddus.my/Frame%203231.png",
-        type: PurchaseItemType.NFT,
+        type: ItemType.NFT,
       },
       {
         title: "Warrior Pack",
         subtitle: "Battle Collection",
         icon: "https://r2.quddus.my/Frame%203231.png",
-        type: PurchaseItemType.NFT,
+        type: ItemType.NFT,
       },
       {
         title: "Credits",
         value: 750,
         icon: "/ERC-20-Icon.svg",
-        type: PurchaseItemType.CREDIT,
+        type: ItemType.CREDIT,
       },
     ],
     costDetails: {
@@ -95,13 +95,13 @@ export const Loading: Story = {
         title: "Village",
         subtitle: "Eternum Village",
         icon: "https://r2.quddus.my/Frame%203231.png",
-        type: PurchaseItemType.NFT,
+        type: ItemType.NFT,
       },
       {
         title: "Credits",
         value: 500,
         icon: "/ERC-20-Icon.svg",
-        type: PurchaseItemType.CREDIT,
+        type: ItemType.CREDIT,
       },
     ],
     costDetails: {

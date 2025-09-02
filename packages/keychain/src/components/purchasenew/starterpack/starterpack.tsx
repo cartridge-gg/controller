@@ -80,7 +80,8 @@ export function StarterPackInner({
         navigate("/purchase/method/ethereum;solana;base;arbitrum;optimism");
         break;
       case StarterpackAcquisitionType.Claimed:
-        navigate("/purchase/wallet/starknet;ethereum;");
+        // claim will always be against mainnet for now
+        navigate("/purchase/wallet/starknet;ethereum;/true");
         break;
       default:
         throw new Error(`Invalid acquisition type: ${acquisitionType}`);

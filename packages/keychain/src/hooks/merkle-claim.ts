@@ -5,7 +5,15 @@ import {
   MerkleClaimsForAddressQuery,
   MerkleDropNetwork,
 } from "@cartridge/ui/utils/api/cartridge";
-import { cairo, Call, CallData, hash, num, shortString } from "starknet";
+import {
+  cairo,
+  Call,
+  Calldata,
+  CallData,
+  hash,
+  num,
+  shortString,
+} from "starknet";
 import { useConnection } from "./connection";
 import { parseSignature } from "viem";
 
@@ -82,47 +90,53 @@ export const useMerkleClaim = ({
   }, [key, address, controller]);
 
   const onSendClaim = useCallback(async () => {
-    if (!merkleTreeKey || !leafData || !controller) {
+    if (!merkleTreeKey || !leafData || !controller || !claims.length) {
       const error = new Error("Missing required data");
       setError(error);
       throw error;
     }
 
     try {
-      const claim = claims[0];
-      const receipient = ["0x0", controller.address()];
-      const msg = `Claim on starknet with: ${num.toHex(controller.address())}`;
-      const { result, error } = await externalSignMessage(address, msg);
+      const isEvm = claims[0].network === MerkleDropNetwork.Ethereum;
+      let ethSignature: Calldata;
+      if (isEvm) {
+        const msg = `Claim on starknet with: ${num.toHex(controller.address())}`;
+        const { result, error } = await externalSignMessage(address, msg);
+        if (error) {
+          throw new Error(error);
+        }
 
-      if (error) {
-        throw error;
+        const { r, s, v } = parseSignature(result as `0x${string}`);
+        ethSignature = CallData.compile([
+          num.toHex(v!),
+          cairo.uint256(r),
+          cairo.uint256(s),
+        ]);
+        ethSignature.unshift("0x0");
       }
 
-      const { r, s, v } = parseSignature(result as `0x${string}`);
-      const ethSignature = CallData.compile([
-        num.toHex(v!),
-        cairo.uint256(r),
-        cairo.uint256(s),
-      ]);
-      ethSignature.unshift("0x0");
+      const calls = claims.map((claim) => {
+        const raw = {
+          merkle_tree_key: merkleTreeKey(claim),
+          proof: claim.merkleProof,
+          leaf_data: CallData.compile(leafData(address, claim)),
+          recipient: { ...["0x0", controller.address()] },
+          eth_signature: { ...["0x1"] },
+        };
 
-      const calldata = CallData.compile({
-        merkle_tree_key: merkleTreeKey(claim),
-        proof: claim.merkleProof,
-        leaf_data: CallData.compile(leafData(address, claim)),
-        recipient: { ...receipient },
-        eth_signature: { ...ethSignature },
+        if (isEvm) {
+          raw.eth_signature = ethSignature;
+        }
+        const calldata = CallData.compile(raw);
+
+        return {
+          contractAddress: FORWARDER_CONTRACT,
+          entrypoint: "verify_and_forward",
+          calldata,
+        };
       });
 
-      const call: Call = {
-        contractAddress: FORWARDER_CONTRACT,
-        entrypoint: "verify_and_forward",
-        calldata,
-      };
-
-      const { transaction_hash } = await controller.executeFromOutsideV3([
-        call,
-      ]);
+      const { transaction_hash } = await controller.executeFromOutsideV3(calls);
       return transaction_hash;
     } catch (error) {
       setError(error as Error);

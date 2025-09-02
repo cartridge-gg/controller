@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { dummyCollections, StarterPackInner } from "./starterpack";
+import { StarterPackInner } from "./starterpack";
 import { StarterItemType } from "@/hooks/starterpack";
 import { NavigationProvider } from "@/context";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
@@ -42,7 +42,6 @@ export const StarterPackWithCollections: Story = {
     name: "Starterpack",
     supply: 10,
     acquisitionType: StarterpackAcquisitionType.Claimed,
-    collections: dummyCollections,
     starterpackItems: [
       {
         title: "Starter NFT",

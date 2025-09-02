@@ -11,7 +11,6 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { ExternalWallet } from "@cartridge/controller";
 import { useWallets } from "@/hooks/wallets";
-import { useConnection } from "@/hooks/connection";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import {
   MerkleDropNetwork,
@@ -20,8 +19,7 @@ import {
 
 export function SelectWallet() {
   const { navigate } = useNavigation();
-  const { platforms } = useParams();
-  const { isMainnet } = useConnection();
+  const { platforms, mainnet } = useParams();
   const { starterpackDetails, onExternalConnect, clearError } =
     usePurchaseContext();
   const { wallets, isConnecting: isWalletConnecting } = useWallets();
@@ -61,7 +59,7 @@ export function SelectWallet() {
       );
 
       const chainId = network.chains?.find(
-        (chain) => chain.isMainnet === isMainnet,
+        (chain) => chain.isMainnet === (mainnet === "true"),
       )?.chainId;
 
       if (chainId) {
@@ -75,7 +73,7 @@ export function SelectWallet() {
 
     setChainIds(newChainIds);
     setAvailableWallets(newAvailableWallets);
-  }, [wallets, isMainnet, selectedNetworks]);
+  }, [wallets, mainnet, selectedNetworks]);
 
   useEffect(() => {
     return () => clearError();

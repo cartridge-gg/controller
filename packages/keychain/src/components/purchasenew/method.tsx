@@ -11,11 +11,13 @@ import { useState } from "react";
 import { ErrorAlert } from "../ErrorAlert";
 import { networkWalletData } from "./wallet/data";
 import { useParams } from "react-router-dom";
+import { useConnection } from "@/hooks/connection";
 
 export function PaymentMethod() {
   const { platforms } = useParams();
   const { navigate } = useNavigation();
-  const { onCreditCard, displayError } = usePurchaseContext();
+  const { isMainnet } = useConnection();
+  const { onCreditCardPurchase, displayError } = usePurchaseContext();
   const [isLoading, setIsLoading] = useState(false);
 
   return (
@@ -30,7 +32,7 @@ export function PaymentMethod() {
           icon={<CreditCardIcon variant="solid" />}
           onClick={async () => {
             setIsLoading(true);
-            await onCreditCard();
+            await onCreditCardPurchase();
             navigate("/purchase/checkout/stripe");
           }}
         />
@@ -45,7 +47,11 @@ export function PaymentMethod() {
               key={network.platform}
               text={network.name}
               icon={network.icon}
-              onClick={() => navigate(`/purchase/wallet/${network.platform}`)}
+              onClick={() =>
+                navigate(
+                  `/purchase/wallet/${network.platform}/${isMainnet ? "true" : "false"}`,
+                )
+              }
             />
           );
         })}
