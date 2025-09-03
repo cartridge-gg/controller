@@ -98,7 +98,7 @@ export const useMerkleClaim = ({
 
     try {
       const isEvm = claims[0].network === MerkleDropNetwork.Ethereum;
-      let ethSignature: Calldata;
+      let ethSignature: Calldata = { ...["0x1"] };
       if (isEvm) {
         const msg = `Claim on starknet with: ${num.toHex(controller.address())}`;
         const { result, error } = await externalSignMessage(address, msg);
@@ -124,15 +124,10 @@ export const useMerkleClaim = ({
           eth_signature: ethSignature,
         };
 
-        if (isEvm) {
-          raw.eth_signature = { ...ethSignature };
-        }
-        const calldata = CallData.compile(raw);
-
         return {
           contractAddress: FORWARDER_CONTRACT,
           entrypoint: "verify_and_forward",
-          calldata,
+          calldata: CallData.compile(raw),
         };
       });
 

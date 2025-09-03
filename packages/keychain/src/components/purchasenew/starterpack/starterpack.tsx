@@ -81,7 +81,7 @@ export function StarterPackInner({
         break;
       case StarterpackAcquisitionType.Claimed:
         // claim will always be against mainnet for now
-        navigate("/purchase/wallet/starknet;ethereum;/true");
+        navigate("/purchase/wallet/starknet;ethereum/true");
         break;
       default:
         throw new Error(`Invalid acquisition type: ${acquisitionType}`);
