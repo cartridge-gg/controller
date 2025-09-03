@@ -40,6 +40,11 @@ export type AuthOption =
 
 export type AuthOptions = Omit<AuthOption, "phantom" | "argent">[];
 
+export interface ConnectOptions {
+  username?: string;
+  authMethod?: AuthOption;
+}
+
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
   NOT_CONNECTED = "NOT_CONNECTED",
@@ -119,6 +124,10 @@ export interface Keychain {
     policies: SessionPolicies,
     rpcUrl: string,
     signupOptions?: AuthOptions,
+    headlessOptions?: {
+      username: string;
+      authMethod: AuthOption;
+    },
   ): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
