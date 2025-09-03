@@ -1,14 +1,13 @@
 import {
+  MerkleDrop,
   StarterItemData,
   StarterItemType,
-  useStarterPack,
 } from "@/hooks/starterpack";
 import {
   Button,
   HeaderInner,
   LayoutContent,
   LayoutFooter,
-  Skeleton,
 } from "@cartridge/ui";
 import {
   MintAllowance,
@@ -19,99 +18,39 @@ import { Supply } from "./supply";
 import { useParams } from "react-router-dom";
 import { useNavigation, usePurchaseContext } from "@/context";
 import { useEffect } from "react";
-import { PurchaseItem, PurchaseItemType } from "@/context/purchase";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { CollectionItem, Collections } from "./collections";
-import { ExternalPlatform } from "@cartridge/controller";
-
-// Placeholder collections
-export const dummyCollections: CollectionItem[] = [
-  {
-    name: "Realms",
-    image: "https://placehold.co/80x80",
-    platforms: ["starknet", "ethereum"] as ExternalPlatform[],
-  },
-  {
-    name: "Dopewars",
-    image: "https://placehold.co/80x80",
-    platforms: ["optimism"] as ExternalPlatform[],
-  },
-  {
-    name: "Loot",
-    image: "https://placehold.co/80x80",
-    platforms: ["ethereum"] as ExternalPlatform[],
-  },
-  {
-    name: "Blob Arena",
-    image: "https://placehold.co/80x80",
-    platforms: ["starknet"] as ExternalPlatform[],
-  },
-  {
-    name: "Something",
-    image: "https://placehold.co/80x80",
-    platforms: ["arbitrum"] as ExternalPlatform[],
-  },
-];
+import { MerkleDrops } from "./merkledrop";
+import { LoadingState } from "../loading";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
-  const {
-    name,
-    items,
-    supply,
-    mintAllowance,
-    priceUsd,
-    acquisitionType,
-    isLoading,
-    error,
-  } = useStarterPack(starterpackId);
-  const { setStarterpackId, setPurchaseItems, setUsdAmount } =
-    usePurchaseContext();
 
-  if (!starterpackId) {
-    throw new Error("Starterpack ID is required");
-  }
+  const {
+    isStarterpackLoading,
+    starterpackDetails: details,
+    displayError,
+    setStarterpackId,
+  } = usePurchaseContext();
 
   useEffect(() => {
-    if (!isLoading && starterpackId) {
+    if (!isStarterpackLoading && starterpackId) {
       setStarterpackId(starterpackId);
-      setUsdAmount(priceUsd);
-      const purchaseItems = items.map((item) => {
-        return {
-          title: item.title,
-          icon: item.image,
-          value: item.value,
-          type:
-            item.type === StarterItemType.NFT
-              ? PurchaseItemType.NFT
-              : PurchaseItemType.CREDIT,
-        } as PurchaseItem;
-      });
-      setPurchaseItems(purchaseItems);
     }
-  }, [
-    starterpackId,
-    isLoading,
-    items,
-    priceUsd,
-    setStarterpackId,
-    setUsdAmount,
-    setPurchaseItems,
-  ]);
+  }, [starterpackId, isStarterpackLoading, setStarterpackId]);
 
-  if (isLoading) {
+  if (isStarterpackLoading || !details) {
     return <LoadingState />;
   }
 
   return (
     <StarterPackInner
-      name={name}
-      supply={supply}
-      mintAllowance={mintAllowance}
-      acquisitionType={acquisitionType}
-      starterpackItems={items}
-      collections={dummyCollections}
-      error={error}
+      name={details.name}
+      supply={details.supply}
+      mintAllowance={details.mintAllowance}
+      merkleDrops={details.merkleDrops}
+      acquisitionType={details.acquisitionType}
+      starterpackItems={details.starterPackItems}
+      error={displayError}
     />
   );
 }
@@ -121,16 +60,16 @@ export function StarterPackInner({
   supply,
   mintAllowance,
   acquisitionType,
+  merkleDrops = [],
   starterpackItems = [],
-  collections = [],
   error,
 }: {
   name: string;
   supply?: number;
   mintAllowance?: MintAllowance;
+  merkleDrops?: MerkleDrop[];
   acquisitionType: StarterpackAcquisitionType;
   starterpackItems?: StarterItemData[];
-  collections?: CollectionItem[];
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();
@@ -138,10 +77,11 @@ export function StarterPackInner({
   const onProceed = () => {
     switch (acquisitionType) {
       case StarterpackAcquisitionType.Paid:
-        navigate("/purchase/method");
+        navigate("/purchase/method/ethereum;solana;base;arbitrum;optimism");
         break;
       case StarterpackAcquisitionType.Claimed:
-        navigate("/purchase/network");
+        // claim will always be against mainnet for now
+        navigate("/purchase/wallet/starknet;ethereum/true");
         break;
       default:
         throw new Error(`Invalid acquisition type: ${acquisitionType}`);
@@ -182,7 +122,7 @@ export function StarterPackInner({
             </div>
           </div>
           {acquisitionType === StarterpackAcquisitionType.Claimed && (
-            <Collections collections={collections} />
+            <MerkleDrops merkleDrops={merkleDrops} />
           )}
         </div>
       </LayoutContent>
@@ -197,14 +137,3 @@ export function StarterPackInner({
     </>
   );
 }
-
-const LoadingState = () => {
-  return (
-    <LayoutContent>
-      <Skeleton className="min-h-10 w-full rounded" />
-      <Skeleton className="min-h-10 w-full rounded" />
-      <Skeleton className="min-h-[180px] w-full rounded" />
-      <Skeleton className="min-h-[180px] w-full rounded" />
-    </LayoutContent>
-  );
-};

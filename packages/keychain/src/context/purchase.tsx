@@ -18,6 +18,7 @@ import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
+import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -33,18 +34,18 @@ export interface Network {
   icon: React.ReactElement;
 }
 
-export enum PurchaseItemType {
+export enum ItemType {
   CREDIT = "CREDIT",
   ERC20 = "ERC20",
   NFT = "NFT",
 }
 
-export type PurchaseItem = {
+export type Item = {
   title: string;
   subtitle?: string;
   icon: string | React.ReactNode;
   value?: number;
-  type: PurchaseItemType;
+  type: ItemType;
 };
 
 export type PaymentMethod = "stripe" | "crypto";
@@ -52,10 +53,13 @@ export type PaymentMethod = "stripe" | "crypto";
 export interface PurchaseContextType {
   // Purchase details
   usdAmount: number;
-  starterpackId?: string;
+  starterpackDetails?: StarterPackDetails;
+
   teamId?: string;
-  purchaseItems: PurchaseItem[];
+  purchaseItems: Item[];
+  claimItems: Item[];
   layerswapFees?: string;
+  isFetchingFees: boolean;
 
   // Payment state
   paymentMethod?: PaymentMethod;
@@ -75,6 +79,7 @@ export interface PurchaseContextType {
   // Loading states
   isStripeLoading: boolean;
   isCryptoLoading: boolean;
+  isStarterpackLoading: boolean;
 
   // Error state
   displayError?: Error;
@@ -82,18 +87,21 @@ export interface PurchaseContextType {
 
   // Actions
   setUsdAmount: (amount: number) => void;
-  setPurchaseItems: (items: PurchaseItem[]) => void;
+  setPurchaseItems: (items: Item[]) => void;
+  setClaimItems: (items: Item[]) => void;
   setStarterpackId: (id: string) => void;
+  setTransactionHash: (hash: string) => void;
 
   // Payment actions
-  onCreditCard: () => Promise<void>;
-  onCrypto: () => Promise<void>;
+  onCreditCardPurchase: () => Promise<void>;
+  onCryptoPurchase: () => Promise<void>;
   onExternalConnect: (
     wallet: ExternalWallet,
     platform: ExternalPlatform,
     chainId?: string,
-  ) => Promise<void>;
+  ) => Promise<string | undefined>;
   waitForPayment: (paymentId: string) => Promise<boolean>;
+  fetchFees: () => Promise<void>;
 }
 
 const PurchaseContext = createContext<PurchaseContextType | undefined>(
@@ -111,6 +119,32 @@ export const PurchaseProvider = ({
 }: PurchaseProviderProps) => {
   const { controller } = useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
+  const [starterpackId, setStarterpackId] = useState<string | undefined>();
+  const [starterpackDetails, setStarterpackDetails] = useState<
+    StarterPackDetails | undefined
+  >();
+  const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
+  const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
+  const [purchaseItems, setPurchaseItems] = useState<Item[]>([]);
+  const [claimItems, setClaimItems] = useState<Item[]>([]);
+  const [paymentId, setPaymentId] = useState<string | undefined>();
+  const [explorer, setExplorer] = useState<Explorer | undefined>();
+  const [transactionHash, setTransactionHash] = useState<string | undefined>();
+  const [walletAddress, setWalletAddress] = useState<string>();
+  const [walletType, setWalletType] = useState<ExternalWalletType>();
+  const [clientSecret, setClientSecret] = useState<string | undefined>();
+  const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
+  const [displayError, setDisplayError] = useState<Error | undefined>();
+  const [isFetchingFees, setIsFetchingFees] = useState(false);
+  const [selectedWallet, setSelectedWallet] = useState<
+    ExternalWallet | undefined
+  >();
+  const [selectedPlatform, setSelectedPlatform] = useState<
+    ExternalPlatform | undefined
+  >();
+  const [paymentMethod, setPaymentMethod] = useState<
+    PaymentMethod | undefined
+  >();
 
   const {
     stripePromise,
@@ -127,40 +161,68 @@ export const PurchaseProvider = ({
     waitForPayment,
   } = useCryptoPayment();
 
-  const [paymentMethod, setPaymentMethod] = useState<
-    PaymentMethod | undefined
-  >();
-  const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
-  const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
-  const [starterpackId, setStarterpackId] = useState<string | undefined>();
-  const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
-  const [paymentId, setPaymentId] = useState<string | undefined>();
-  const [explorer, setExplorer] = useState<Explorer | undefined>();
-  const [transactionHash, setTransactionHash] = useState<string | undefined>();
-
-  const [walletAddress, setWalletAddress] = useState<string>();
-  const [walletType, setWalletType] = useState<ExternalWalletType>();
-  const [selectedWallet, setSelectedWallet] = useState<
-    ExternalWallet | undefined
-  >();
-  const [selectedPlatform, setSelectedPlatform] = useState<
-    ExternalPlatform | undefined
-  >();
-
-  const [clientSecret, setClientSecret] = useState<string | undefined>();
-  const [costDetails, setCostDetails] = useState<CostDetails | undefined>();
-
-  const [displayError, setDisplayError] = useState<Error | undefined>();
+  const {
+    name,
+    items,
+    supply,
+    mintAllowance,
+    merkleDrops,
+    priceUsd,
+    acquisitionType,
+    isLoading: isStarterpackLoading,
+    error: starterpackError,
+  } = useStarterPack(starterpackId);
 
   useEffect(() => {
-    setDisplayError(stripeError || walletError || cryptoError || undefined);
-  }, [stripeError, walletError, cryptoError]);
+    if (!starterpackId) return;
+
+    const purchaseItems: Item[] = items.map((item) => ({
+      title: item.title,
+      subtitle: item.description,
+      icon: item.image,
+      value: priceUsd,
+      type: ItemType.NFT,
+    }));
+
+    setPurchaseItems(purchaseItems);
+    setUsdAmount(priceUsd);
+
+    setStarterpackDetails({
+      id: starterpackId,
+      name,
+      starterPackItems: items,
+      supply,
+      mintAllowance,
+      merkleDrops,
+      priceUsd,
+      acquisitionType,
+    });
+  }, [
+    starterpackId,
+    items,
+    priceUsd,
+    name,
+    supply,
+    mintAllowance,
+    merkleDrops,
+    acquisitionType,
+  ]);
+
+  useEffect(() => {
+    setDisplayError(
+      stripeError ||
+        walletError ||
+        cryptoError ||
+        starterpackError ||
+        undefined,
+    );
+  }, [stripeError, walletError, cryptoError, starterpackError]);
 
   const clearError = useCallback(() => {
     setDisplayError(undefined);
   }, []);
 
-  const onCreditCard = useCallback(async () => {
+  const onCreditCardPurchase = useCallback(async () => {
     if (!controller) return;
 
     try {
@@ -179,7 +241,7 @@ export const PurchaseProvider = ({
     }
   }, [usdAmount, controller, starterpackId, createPaymentIntent]);
 
-  const onCrypto = useCallback(async () => {
+  const onCryptoPurchase = useCallback(async () => {
     if (
       !controller ||
       !selectedPlatform ||
@@ -210,6 +272,7 @@ export const PurchaseProvider = ({
       throw e;
     }
   }, [
+    usdAmount,
     controller,
     selectedPlatform,
     walletAddress,
@@ -224,38 +287,50 @@ export const PurchaseProvider = ({
       wallet: ExternalWallet,
       platform: ExternalPlatform,
       chainId?: string | number,
-    ) => {
+    ): Promise<string | undefined> => {
       if (!controller) return;
 
-      setSelectedWallet(wallet);
-      setSelectedPlatform(platform);
-      if (chainId) {
-        const res = await switchChain(wallet.type, chainId.toString());
-        if (!res) {
+      try {
+        setSelectedWallet(wallet);
+        setSelectedPlatform(platform);
+        const res = await connectWallet(wallet.type);
+        if (!res?.success) {
           const error = new Error(
-            `${wallet.name} failed to switch chain (${chainId})`,
+            `Failed to connect to ${wallet.name} - ${res?.error || "Unknown error"}`,
           );
-          setDisplayError(error);
           throw error;
         }
-      }
 
-      const res = await connectWallet(wallet.type);
-      if (res?.success) {
-        if (!res.account) {
-          const error = new Error(
-            `Connected to ${wallet.name} but no wallet address found`,
-          );
-          setDisplayError(error);
-          throw error;
-        }
         setWalletAddress(res.account);
         setWalletType(wallet.type);
+
+        if (chainId) {
+          const res = await switchChain(wallet.type, chainId.toString());
+          if (!res) {
+            const error = new Error(
+              `${wallet.name} failed to switch chain (${chainId})`,
+            );
+            throw error;
+          }
+        }
+
+        return res.account;
+      } catch (e) {
+        setDisplayError(e as Error);
+        throw e;
       }
+    },
+    [controller, connectWallet, switchChain],
+  );
+
+  const fetchFees = useCallback(async () => {
+    if (!controller || !selectedPlatform) return;
+    try {
+      setIsFetchingFees(true);
 
       const quote = await quotePaymentFees(
         controller.username(),
-        platform,
+        selectedPlatform,
         usdToCredits(usdAmount),
         undefined,
         starterpackId,
@@ -273,16 +348,28 @@ export const PurchaseProvider = ({
         processingFeeInCents: cartridgeFees + layerswapFeesInCents,
         totalInCents,
       });
-    },
-    [controller, usdAmount, starterpackId, quotePaymentFees],
-  );
+    } catch (e) {
+      setDisplayError(e as Error);
+      throw e;
+    } finally {
+      setIsFetchingFees(false);
+    }
+  }, [
+    controller,
+    usdAmount,
+    starterpackId,
+    selectedPlatform,
+    quotePaymentFees,
+  ]);
 
   const contextValue: PurchaseContextType = {
     // Purchase details
     usdAmount,
-    starterpackId,
+    starterpackDetails,
     purchaseItems,
+    claimItems,
     layerswapFees,
+    isFetchingFees,
 
     // Payment state
     paymentMethod,
@@ -301,6 +388,7 @@ export const PurchaseProvider = ({
     // Loading states
     isStripeLoading,
     isCryptoLoading,
+    isStarterpackLoading,
 
     // Error state
     displayError,
@@ -308,14 +396,17 @@ export const PurchaseProvider = ({
 
     // Setters
     setUsdAmount,
-    setStarterpackId,
     setPurchaseItems,
+    setClaimItems,
+    setStarterpackId,
+    setTransactionHash,
 
     // Actions
-    onCreditCard,
-    onCrypto,
+    onCreditCardPurchase,
+    onCryptoPurchase,
     onExternalConnect,
     waitForPayment,
+    fetchFees,
   };
 
   return (

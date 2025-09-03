@@ -109,6 +109,41 @@ export const useCryptoPayment = () => {
     },
     [externalSendTransaction],
   );
+
+  const requestEvmPayment = useCallback(
+    async (
+      walletAddress: string,
+      walletType: ExternalWalletType,
+      depositAddress: string,
+      tokenAmount: number,
+      tokenAddress: string,
+    ): Promise<string> => {
+      const iface = new ethers.Interface(erc20abi);
+      const data = iface.encodeFunctionData("transfer", [
+        depositAddress,
+        tokenAmount,
+      ]);
+
+      const {
+        success,
+        result: hash,
+        error,
+      } = await externalSendTransaction(walletType, {
+        from: walletAddress,
+        to: tokenAddress,
+        data,
+        value: "0x0", // ERC-20 transfer sends no ETH
+      });
+
+      if (!success) {
+        throw new Error(error);
+      }
+
+      return hash as string;
+    },
+    [externalSendTransaction],
+  );
+
   const sendPayment = useCallback(
     async (
       walletAddress: string,
@@ -190,7 +225,7 @@ export const useCryptoPayment = () => {
         setIsLoading(false);
       }
     },
-    [controller, isMainnet, requestPhantomPayment],
+    [controller, isMainnet, requestPhantomPayment, requestEvmPayment],
   );
 
   const quotePaymentFees = useCallback(
@@ -301,37 +336,6 @@ export const useCryptoPayment = () => {
     };
   }
 
-  async function requestEvmPayment(
-    walletAddress: string,
-    walletType: ExternalWalletType,
-    depositAddress: string,
-    tokenAmount: number,
-    tokenAddress: string,
-  ): Promise<string> {
-    const iface = new ethers.Interface(erc20abi);
-    const data = iface.encodeFunctionData("transfer", [
-      depositAddress,
-      tokenAmount,
-    ]);
-
-    const {
-      success,
-      result: hash,
-      error,
-    } = await externalSendTransaction(walletType, {
-      from: walletAddress,
-      to: tokenAddress,
-      data,
-      value: "0x0", // ERC-20 transfer sends no ETH
-    });
-
-    if (!success) {
-      throw new Error(error);
-    }
-
-    return hash as string;
-  }
-
   return {
     sendPayment,
     quotePaymentFees,
@@ -372,7 +376,7 @@ export interface Explorer {
   url: string;
 }
 
-const getExplorer = (
+export const getExplorer = (
   platform: ExternalPlatform,
   txHash: string,
   isMainnet?: boolean,

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ClaimFreeStarterpackDocument,
   ClaimFreeStarterpackMutation,
+  MerkleDropNetwork,
   StarterpackAcquisitionType,
   StarterPackDocument,
   StarterpackInput,
@@ -36,11 +37,20 @@ export interface StarterPackDetails {
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
   starterPackItems: StarterItemData[];
+  merkleDrops?: MerkleDrop[];
 }
 
 export interface MintAllowance {
   count: number;
   limit: number;
+}
+
+export interface MerkleDrop {
+  key: string;
+  network: MerkleDropNetwork;
+  contract: string;
+  entrypoint: string;
+  merkleRoot: string;
 }
 
 export function useStarterPack(starterpackId?: string) {
@@ -53,6 +63,7 @@ export function useStarterPack(starterpackId?: string) {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [priceUsd, setPriceUsd] = useState<number>(0);
+  const [merkleDrops, setMerkleDrops] = useState<MerkleDrop[]>([]);
   const [acquisitionType, setAcquisitionType] =
     useState<StarterpackAcquisitionType>(StarterpackAcquisitionType.Paid);
   const [mintAllowance, setMintAllowance] = useState<MintAllowance | undefined>(
@@ -64,7 +75,6 @@ export function useStarterPack(starterpackId?: string) {
       if (!controller) {
         throw new Error("Controller not found");
       }
-
       const result = await controller.provider.callContract({
         contractAddress: contractAddress,
         entrypoint: entrypoint,
@@ -156,6 +166,23 @@ export function useStarterPack(starterpackId?: string) {
         }
 
         setItems(items);
+
+        if (details.starterpack?.merkleDrops?.edges) {
+          const drops: MerkleDrop[] = details.starterpack.merkleDrops.edges
+            .filter((edge): edge is NonNullable<typeof edge> => edge !== null)
+            .map((edge) => {
+              if (!edge.node) return null;
+              return {
+                key: edge.node.key,
+                network: edge.node.network,
+                contract: edge.node.contract,
+                entrypoint: edge.node.entrypoint,
+                merkleRoot: edge.node.merkleRoot,
+              };
+            })
+            .filter((drop): drop is NonNullable<typeof drop> => drop !== null);
+          setMerkleDrops(drops);
+        }
       })
       .catch(setError)
       .finally(() => setIsLoading(false));
@@ -199,6 +226,7 @@ export function useStarterPack(starterpackId?: string) {
     items,
     priceUsd,
     supply,
+    merkleDrops,
     mintAllowance,
     acquisitionType,
     isLoading,

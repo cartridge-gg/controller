@@ -8,16 +8,26 @@ import {
   Thumbnail,
 } from "@cartridge/ui";
 import { ReceivingProps } from "./types";
-import { PurchaseItemType } from "@/context/purchase";
+import { ItemType } from "@/context/purchase";
 
-export function Receiving({ title, items, isLoading }: ReceivingProps) {
+export function Receiving({
+  title,
+  items,
+  showTotal,
+  isLoading,
+}: ReceivingProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between h-10">
         <CardTitle className="normal-case font-semibold text-xs">
           {title ?? "Balance"}
         </CardTitle>
         {isLoading && <Spinner size="sm" />}
+        {showTotal && !isLoading && (
+          <div className="bg-background-300 text-foreground-300 rounded-full px-2 py-0.5 text-xs">
+            {items.length} total
+          </div>
+        )}
       </CardHeader>
 
       <CardListContent>
@@ -31,16 +41,14 @@ export function Receiving({ title, items, isLoading }: ReceivingProps) {
                 size="lg"
                 icon={item.icon}
                 variant="light"
-                rounded={item.type === PurchaseItemType.CREDIT}
+                rounded={item.type === ItemType.CREDIT}
               />
               <div className="flex flex-col gap-0.5">
                 <p className="text-foreground-100 font-medium text-sm">
-                  {item.type === PurchaseItemType.CREDIT
-                    ? "Credits"
-                    : item.title}
+                  {item.type === ItemType.CREDIT ? "Credits" : item.title}
                 </p>
                 <p className="text-foreground-300 font-normal text-xs">
-                  {item.type === PurchaseItemType.NFT
+                  {item.type === ItemType.NFT
                     ? item.subtitle
                     : `${item.value?.toLocaleString()} Credits`}
                 </p>

@@ -1,4 +1,4 @@
-import { PurchaseItem } from "@/context/purchase";
+import { Item } from "@/context/purchase";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 
 export interface Wallet {
@@ -6,7 +6,6 @@ export interface Wallet {
   type: ExternalWalletType;
   icon: React.ReactNode;
   color?: string;
-  enabled?: boolean;
 }
 
 export interface Network {
@@ -18,7 +17,6 @@ export interface Network {
   }[];
   icon: React.ReactNode;
   subIcon?: React.ReactNode;
-  enabled?: boolean;
   wallets: Map<string, Wallet>;
 }
 
@@ -34,6 +32,7 @@ export type CostDetails = {
 
 export type ReceivingProps = {
   title?: string;
-  items: PurchaseItem[];
+  items: Item[];
   isLoading?: boolean;
+  showTotal?: boolean;
 };

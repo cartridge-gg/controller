@@ -9,26 +9,37 @@ import {
   Spinner,
 } from "@cartridge/ui";
 import { Receiving } from "./receiving";
-import {
-  PaymentMethod,
-  PurchaseItem,
-  usePurchaseContext,
-} from "@/context/purchase";
-import { Explorer } from "@/hooks/payments/crypto";
+import { PaymentMethod, Item, usePurchaseContext } from "@/context/purchase";
+import { Explorer, getExplorer } from "@/hooks/payments/crypto";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
-export function PurchasePending() {
+export function Pending() {
   const {
+    starterpackDetails,
     purchaseItems,
+    claimItems,
     explorer,
     paymentMethod,
     selectedWallet,
     paymentId,
     transactionHash,
   } = usePurchaseContext();
+
+  if (
+    starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Claimed
+  ) {
+    return (
+      <ClaimPendingInner
+        items={claimItems}
+        transactionHash={transactionHash!}
+      />
+    );
+  }
+
   return (
     <PurchasePendingInner
       items={purchaseItems}
@@ -49,7 +60,7 @@ export function PurchasePendingInner({
   explorer,
   wallet,
 }: {
-  items: PurchaseItem[];
+  items: Item[];
   paymentMethod?: PaymentMethod;
   transactionHash?: string;
   paymentId?: string;
@@ -125,6 +136,42 @@ export function PurchasePendingInner({
             </div>
           </div>
         )}
+      </LayoutFooter>
+    </>
+  );
+}
+
+export function ClaimPendingInner({
+  items,
+  transactionHash,
+}: {
+  items: Item[];
+  transactionHash: string;
+}) {
+  const { isMainnet, controller } = useConnection();
+  const { navigate } = useNavigation();
+  const [isClaiming, setIsClaiming] = useState(true);
+
+  useEffect(() => {
+    controller?.provider
+      .waitForTransaction(transactionHash, { retryInterval: 1000 })
+      .then(() => {
+        setIsClaiming(false);
+        navigate("/purchase/success", { reset: true });
+      });
+  }, [controller, transactionHash, navigate]);
+  return (
+    <>
+      <HeaderInner title="Pending Confirmation" icon={<Spinner />} />
+      <LayoutContent>
+        <Receiving title="Receiving" items={items} isLoading={true} />
+      </LayoutContent>
+      <LayoutFooter>
+        <ConfirmingTransaction
+          title="Claiming"
+          externalLink={getExplorer("starknet", transactionHash, isMainnet).url}
+          isLoading={isClaiming}
+        />
       </LayoutFooter>
     </>
   );
