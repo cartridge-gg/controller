@@ -21,10 +21,10 @@ export const Starterpack = () => {
 
     if (num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       setPurchaseSpId("sick-starterpack-mainnet");
-      setClaimSpId("claim-starterpack-mainnet");
+      setClaimSpId("ls2-starterpack-mainnet");
     } else {
       setPurchaseSpId("sick-starterpack-sepolia");
-      setClaimSpId("claim-starterpack-sepolia");
+      setClaimSpId("ls2-starterpack-sepolia");
     }
   }, [chain, account]);
 
