@@ -121,11 +121,11 @@ export const useMerkleClaim = ({
           proof: claim.merkleProof,
           leaf_data: CallData.compile(leafData(address, claim)),
           recipient: { ...["0x0", controller.address()] },
-          eth_signature: { ...["0x1"] },
+          eth_signature: ethSignature,
         };
 
         if (isEvm) {
-          raw.eth_signature = ethSignature;
+          raw.eth_signature = { ...ethSignature };
         }
         const calldata = CallData.compile(raw);
 

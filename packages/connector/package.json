@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.10.0-alpha.0",
+  "version": "0.10.0-alpha.1",
   "description": "Cartridge Controler Connector",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -46,7 +46,7 @@
     "dts": "resolve"
   },
   "peerDependencies": {
-    "@starknet-react/core": "catalog:"
+    "@starknet-react/core": "^5.0.1"
   },
   "dependencies": {
     "@cartridge/controller": "workspace:*"

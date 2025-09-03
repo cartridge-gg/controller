@@ -1,12 +1,11 @@
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
-import { doLogin, doSignup } from "@/hooks/account";
+import { doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
-import { Owner, Signer } from "@cartridge/controller-wasm";
+import Controller from "@/utils/controller";
+import { Owner } from "@cartridge/controller-wasm";
 import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
 import { shortString } from "starknet";
-import { LoginMode } from "../../types";
-import { createController } from "../useCreateController";
 
 export function useWebauthnAuthentication() {
   const { origin, rpcUrl, chainId, setController } = useConnection();
@@ -44,14 +43,14 @@ export function useWebauthnAuthentication() {
       if (!controllerNode || !finalUsername || !chainId || !rpcUrl || !origin)
         return;
 
-      const controller = await createController(
-        origin,
+      const controller = await Controller.create({
+        appId: origin,
+        classHash: controllerNode.constructorCalldata[0],
         chainId,
         rpcUrl,
-        finalUsername,
-        controllerNode.constructorCalldata[0],
-        controllerNode.address,
-        {
+        address: controllerNode.address,
+        username: finalUsername,
+        owner: {
           signer: {
             webauthn: {
               rpId: import.meta.env.VITE_RP_ID!,
@@ -60,7 +59,7 @@ export function useWebauthnAuthentication() {
             },
           },
         },
-      );
+      });
 
       window.controller = controller;
       setController(controller);
@@ -70,48 +69,42 @@ export function useWebauthnAuthentication() {
 
   const login = useCallback(
     async (
-      controller: ControllerQuery["controller"],
-      webauthnsSigner: Signer,
-      loginMode: LoginMode,
+      controllerQuery: ControllerQuery["controller"],
+      webauthnsSigner: Owner,
       isSlot: boolean,
     ) => {
-      if (!controller) throw new Error("No controller found");
+      if (!controllerQuery) throw new Error("No controller found");
+      if (!chainId) throw new Error("No chainId found");
 
-      const initialOwner: Owner = {
-        signer: {
-          webauthn: {
-            rpId: import.meta.env.VITE_RP_ID!,
-            credentialId: webauthnsSigner.webauthns?.[0]?.credentialId ?? "",
-            publicKey: webauthnsSigner.webauthns?.[0]?.publicKey ?? "",
-          },
-        },
-      };
-      const controllerObject = await createController(
-        origin!,
-        chainId!,
-        rpcUrl!,
-        controller.accountID,
-        controller.constructorCalldata[0],
-        controller.address,
-        initialOwner,
-      );
-
-      if (loginMode === LoginMode.Webauthn) {
-        await doLogin({
-          name: controller.accountID,
-          credentialId: initialOwner.signer?.webauthn?.credentialId ?? "",
-          finalize: !!isSlot,
+      let controller: Controller;
+      if (isSlot) {
+        controller = await Controller.apiLogin({
+          appId: origin,
+          classHash: controllerQuery.constructorCalldata[0],
+          rpcUrl,
+          chainId,
+          address: controllerQuery.address,
+          username: controllerQuery.accountID,
+          owner: webauthnsSigner,
         });
       } else {
-        await controllerObject.login(
-          now() + DEFAULT_SESSION_DURATION,
-          true,
-          webauthnsSigner,
-        );
+        const { controller: loginController } = await Controller.login({
+          appId: origin,
+          classHash: controllerQuery.constructorCalldata[0],
+          rpcUrl,
+          chainId,
+          address: controllerQuery.address,
+          username: controllerQuery.accountID,
+          owner: webauthnsSigner,
+          cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
+          session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
+          isControllerRegistered: true,
+        });
+        controller = loginController;
       }
 
-      window.controller = controllerObject;
-      setController(controllerObject);
+      window.controller = controller;
+      setController(controller);
     },
     [chainId, rpcUrl, origin, setController],
   );

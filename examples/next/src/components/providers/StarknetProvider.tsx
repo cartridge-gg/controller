@@ -172,8 +172,8 @@ const controller = new ControllerConnector({
   policies,
   // With the defaults, you can omit chains if you want to use:
   // - chains: [
-  //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia" },
-  //     { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet" },
+  //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9" },
+  //     { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9" },
   //   ]
   //
   // However, if you want to use custom RPC URLs, you can still specify them:

@@ -1,7 +1,7 @@
 {
   "name": "@cartridge/controller-example-next",
   "private": true,
-  "version": "0.10.0-alpha.0",
+  "version": "0.10.0-alpha.1",
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
@@ -19,13 +19,13 @@
     "@cartridge/controller": "workspace:*",
     "@cartridge/ui": "catalog:",
     "@starknet-react/chains": "catalog:",
-    "@starknet-react/core": "catalog:",
+    "@starknet-react/core": "^5.0.1",
     "next": "^15.1.5",
     "next-themes": "^0.3.0",
     "prettier": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "starknet": "catalog:"
+    "starknet": "^8.5.2"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",

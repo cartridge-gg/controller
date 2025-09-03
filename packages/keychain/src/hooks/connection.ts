@@ -4,6 +4,7 @@ import {
   ConnectionContextValue,
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
+import { useNavigation } from "@/context/navigation";
 import { ConnectionCtx, connectToController } from "@/utils/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
@@ -38,6 +39,7 @@ import {
 import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { SemVer } from "semver";
 import {
   constants,
@@ -46,8 +48,6 @@ import {
   shortString,
 } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
-import { useNavigation } from "@/context/navigation";
-import { useSearchParams } from "react-router-dom";
 
 const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
@@ -275,20 +275,19 @@ export function useConnectionValue() {
 
     (async () => {
       try {
-        const controllerResponse = await fetchController(
+        const controllerQuery = await fetchController(
           chainId,
           controller.username(),
           new AbortController().signal,
         );
-
         if (
-          !controllerResponse.controller ||
-          !controllerResponse.controller.signers
+          !controllerQuery.controller ||
+          !controllerQuery.controller.signers
         ) {
           return;
         }
 
-        const signers = controllerResponse.controller.signers.filter(
+        const signers = controllerQuery.controller.signers.filter(
           (signer) =>
             signer.metadata.__typename === "Eip191Credentials" &&
             (signer.metadata.eip191?.[0]?.provider === "discord" ||
@@ -351,13 +350,6 @@ export function useConnectionValue() {
 
   // Handle controller initialization
   useEffect(() => {
-    // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
-    if (!isIframe()) {
-      if (controller) {
-        setController(controller);
-      }
-    }
-
     setIsMainnet(
       import.meta.env.PROD &&
         controller?.chainId() === constants.StarknetChainId.SN_MAIN,

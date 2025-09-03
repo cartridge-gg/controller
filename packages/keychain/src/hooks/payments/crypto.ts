@@ -2,11 +2,11 @@ import { useState, useCallback } from "react";
 import {
   CreateLayerswapPaymentDocument,
   CreateLayerswapPaymentMutation,
-  LayerswapNetwork,
   CryptoPaymentQuery,
   CryptoPaymentDocument,
   LayerswapQuoteQuery,
   LayerswapQuoteDocument,
+  LayerswapSourceNetwork,
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
@@ -16,12 +16,10 @@ import {
   Connection,
   PublicKey,
   Transaction,
-} from "@solana/web3.js";
-import {
   createAssociatedTokenAccountInstruction,
   createTransferInstruction,
   getAssociatedTokenAddress,
-} from "@solana/spl-token";
+} from "../../utils/solana";
 import { ethers } from "ethers";
 import erc20abi from "./erc20abi.json" assert { type: "json" };
 
@@ -81,11 +79,16 @@ export const useCryptoPayment = () => {
         tokenAmount,
       );
 
-      const txn = new Transaction().add(createAtaIx, transferInstruction);
-      txn.feePayer = senderPublicKey;
+      // Build transaction using micro-sol-signer
       const { blockhash } = await connection.getLatestBlockhash();
+
+      // Create a new transaction and add instructions
+      const txn = new Transaction();
+      txn.add(createAtaIx, transferInstruction);
+      txn.feePayer = senderPublicKey;
       txn.recentBlockhash = blockhash;
 
+      // Serialize for sending
       const serializedTxn = txn.serialize({ requireAllSignatures: false });
       const res = await externalSendTransaction(
         "phantom",
@@ -242,7 +245,7 @@ export const useCryptoPayment = () => {
               amount: wholeCredits,
               decimals: 0,
             },
-            sourceNetwork: mapPlatformToLayerswapNetwork(platform),
+            sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
             purchaseType: starterpackId
               ? PurchaseType.STARTERPACK
               : PurchaseType.CREDITS,
@@ -312,7 +315,7 @@ export const useCryptoPayment = () => {
             amount: wholeCredits,
             decimals: 0,
           },
-          sourceNetwork: mapPlatformToLayerswapNetwork(platform),
+          sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
           purchaseType: starterpackId
             ? PurchaseType.STARTERPACK
             : PurchaseType.CREDITS,
@@ -423,18 +426,40 @@ export const getExplorer = (
 
 function mapPlatformToLayerswapNetwork(
   platform: ExternalPlatform,
-): LayerswapNetwork {
+  isMainnet: boolean,
+): LayerswapSourceNetwork {
   switch (platform) {
     case "solana":
-      return LayerswapNetwork.Solana;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.SolanaMainnet;
+      } else {
+        return LayerswapSourceNetwork.SolanaDevnet;
+      }
     case "ethereum":
-      return LayerswapNetwork.Ethereum;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.EthereumMainnet;
+      } else {
+        return LayerswapSourceNetwork.EthereumSepolia;
+      }
     case "base":
-      return LayerswapNetwork.Base;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.BaseMainnet;
+      } else {
+        return LayerswapSourceNetwork.BaseSepolia;
+      }
     case "arbitrum":
-      return LayerswapNetwork.Arbitrum;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.ArbitrumMainnet;
+      } else {
+        return LayerswapSourceNetwork.ArbitrumSepolia;
+      }
     case "optimism":
-      return LayerswapNetwork.Optimism;
+      if (isMainnet) {
+        return LayerswapSourceNetwork.OptimismMainnet;
+      } else {
+        return LayerswapSourceNetwork.OptimismSepolia;
+      }
+    // Starknet supported natively
     default:
       throw new Error(`Unsupported platform: ${platform}`);
   }

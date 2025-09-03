@@ -49,10 +49,10 @@
 		defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
 		chains: [
 			{
-				rpcUrl: 'https://api.cartridge.gg/x/starknet/sepolia'
+				rpcUrl: 'https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9'
 			},
 			{
-				rpcUrl: 'https://api.cartridge.gg/x/starknet/mainnet'
+				rpcUrl: 'https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9'
 			}
 		]
 	});

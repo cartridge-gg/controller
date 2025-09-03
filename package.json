@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@cartridge/presets": "github:cartridge-gg/presets#d246ec1",
-    "@cartridge/ui": "github:cartridge-gg/ui#d873235",
+    "@cartridge/ui": "github:cartridge-gg/ui#4aad1ab",
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
@@ -46,11 +46,13 @@
     "overrides": {
       "@radix-ui/react-accordion": "1.2.1",
       "typescript": "catalog:",
-      "starknet": "catalog:",
       "@noble/curves": "catalog:",
       "@noble/hashes": "catalog:",
       "@dojoengine/core": "catalog:",
       "@dojoengine/torii-wasm": "catalog:",
+      "@dojoengine/sdk": "^1.7.0-preview.2",
+      "@starknet-react/core": "catalog:",
+      "@starknet-react/chains": "catalog:",
       "@starknet-io/types-js": "catalog:"
     }
   },
