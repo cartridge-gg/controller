@@ -178,6 +178,7 @@ const controller = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
+  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
   url: keychainUrl,
   signupOptions: [
     "google",

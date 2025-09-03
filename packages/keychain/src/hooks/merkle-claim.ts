@@ -18,7 +18,7 @@ import { useConnection } from "./connection";
 import { parseSignature } from "viem";
 
 const FORWARDER_CONTRACT =
-  "0x1bee43fc5b696088e7eef7b78d7b2b42e0b88e1e58c93c6d304e35603b582cf";
+  "0x74684e34ede36ed8dc47f519932a586ad3934f93612121d7e2cb36a1e680df0";
 
 export interface MerkleClaim {
   network: MerkleDropNetwork;
