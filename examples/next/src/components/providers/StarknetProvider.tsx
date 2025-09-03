@@ -178,8 +178,7 @@ const controller = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
-  url: "https://x.cartridge.gg",
+  url: keychainUrl,
   signupOptions: [
     "google",
     "webauthn",
@@ -212,7 +211,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={sepolia.id}
+      defaultChainId={mainnet.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}
