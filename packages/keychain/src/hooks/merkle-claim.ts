@@ -118,7 +118,7 @@ export const useMerkleClaim = ({
           proof: claim.merkleProof,
           leaf_data: CallData.compile(leafData(address, claim)),
           recipient: { ...["0x0", controller.address()] },
-          eth_signature: ethSignature,
+          eth_signature: { ...ethSignature },
         };
 
         return {
