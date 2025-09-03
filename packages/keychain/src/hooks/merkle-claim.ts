@@ -17,9 +17,6 @@ import {
 import { useConnection } from "./connection";
 import { parseSignature } from "viem";
 
-const FORWARDER_CONTRACT =
-  "0x1bee43fc5b696088e7eef7b78d7b2b42e0b88e1e58c93c6d304e35603b582cf";
-
 export interface MerkleClaim {
   network: MerkleDropNetwork;
   data: string[];
@@ -70,7 +67,7 @@ export const useMerkleClaim = ({
 
         const claim = claims[0];
         const call: Call = {
-          contractAddress: FORWARDER_CONTRACT,
+          contractAddress: import.meta.env.VITE_FORWARDER_CONTRACT,
           entrypoint: "is_consumed",
           calldata: CallData.compile({
             merkle_tree_key: merkleTreeKey(claim),
@@ -125,7 +122,7 @@ export const useMerkleClaim = ({
         };
 
         return {
-          contractAddress: FORWARDER_CONTRACT,
+          contractAddress: import.meta.env.VITE_FORWARDER_CONTRACT,
           entrypoint: "verify_and_forward",
           calldata: CallData.compile(raw),
         };
