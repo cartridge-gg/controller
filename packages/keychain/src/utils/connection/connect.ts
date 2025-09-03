@@ -1,4 +1,4 @@
-import { AuthOptions, ConnectReply } from "@cartridge/controller";
+import { AuthOption, AuthOptions, ConnectReply } from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
 import { ConnectCtx, ConnectionCtx } from "./types";
 
@@ -16,6 +16,10 @@ export function connect({
       policies: Policies,
       rpcUrl: string,
       signupOptions?: AuthOptions,
+      headlessOptions?: {
+        username: string;
+        authMethod: AuthOption;
+      },
     ): Promise<ConnectReply> => {
       setRpcUrl(rpcUrl);
 
@@ -34,6 +38,7 @@ export function connect({
           policies,
           resolve,
           reject,
+          headless: headlessOptions,
         } as ConnectCtx);
       }).finally(() => {
         setContext(undefined);
