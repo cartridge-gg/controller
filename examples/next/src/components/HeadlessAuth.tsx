@@ -67,7 +67,7 @@ export function HeadlessAuth() {
             placeholder="Enter username"
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium mb-1">Auth Method</label>
           <select
@@ -96,9 +96,17 @@ export function HeadlessAuth() {
         </Button>
 
         <div className="text-xs text-gray-500 space-y-1">
-          <p><strong>Note:</strong> This demonstrates headless authentication where no modal is shown.</p>
-          <p><strong>Supported methods:</strong> MetaMask, Rabby, WalletConnect</p>
-          <p><strong>Not supported:</strong> WebAuthn (requires user interaction), Social logins</p>
+          <p>
+            <strong>Note:</strong> This demonstrates headless authentication
+            where no modal is shown.
+          </p>
+          <p>
+            <strong>Supported methods:</strong> MetaMask, Rabby, WalletConnect
+          </p>
+          <p>
+            <strong>Not supported:</strong> WebAuthn (requires user
+            interaction), Social logins
+          </p>
         </div>
       </div>
     </div>
