@@ -16,7 +16,8 @@ export type ConnectionCtx =
   | SignMessageCtx
   | OpenSettingsCtx
   | OpenPurchaseCreditsCtx
-  | OpenStarterPackCtx;
+  | OpenStarterPackCtx
+  | OpenStarterPackWithDataCtx;
 
 export type ConnectCtx = {
   origin: string;
@@ -81,6 +82,18 @@ export type OpenPurchaseCreditsCtx = {
 export type OpenStarterPackCtx = {
   type: "open-starter-pack";
   starterpackId: string;
+  resolve: (res: ConnectError) => void;
+  reject: (reason?: unknown) => void;
+};
+
+export type OpenStarterPackWithDataCtx = {
+  type: "open-starterpack-with-data";
+  starterPackData: {
+    starterpackId: string;
+    starterPack: Record<string, unknown>;
+    outsideExecution: Record<string, unknown>;
+    totalPrice: number;
+  };
   resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;
 };
