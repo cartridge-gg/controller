@@ -73,6 +73,18 @@ export function connectToController<ParentMethods extends object>({
           reject: () => Promise.reject(),
         });
       },
+      openStarterPack: () => (starterpackId: string) => {
+        navigate(`/purchase/starterpack/${starterpackId}`);
+      },
+      openStarterPackWithData: () => (data: Record<string, unknown>) => {
+        setContext({
+          type: "open-starterpack-with-data",
+          resolve: () => Promise.resolve(),
+          reject: () => Promise.reject(),
+          starterPackData: data as any,
+        });
+        navigate(`/purchase/starterpack/${data.starterpackId}`);
+      },
       switchChain: () => switchChain({ setController, setRpcUrl }),
     },
   });

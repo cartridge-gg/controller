@@ -22,8 +22,15 @@ import {
   ProbeReply,
   ProfileContextTypeVariant,
   ResponseCodes,
+  StarterPackOptions,
 } from "./types";
 import { parseChainId } from "./utils";
+import {
+  calculateStarterPackPrice,
+  aggregateStarterPackCalls,
+  generateNonce,
+  getDefaultExpiry,
+} from "./utils/starterpack";
 
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
@@ -355,18 +362,48 @@ export default class ControllerProvider extends BaseProvider {
     });
   }
 
-  openStarterPack(starterpackId: string) {
+  async openStarterPack(options: string | StarterPackOptions): Promise<void> {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    // Navigate first, then open the iframe
-    this.keychain
-      .navigate(`/purchase/starterpack/${starterpackId}`)
-      .then(() => {
+    // Handle backward compatibility
+    if (typeof options === "string") {
+      // Existing behavior - just navigate to the starterpack page
+      this.keychain.navigate(`/purchase/starterpack/${options}`).then(() => {
         this.iframes.keychain?.open();
       });
+    } else {
+      // New behavior - pass full StarterPack definition
+      const { starterpackId, starterPack, outsideExecutionConfig } = options;
+
+      // Calculate total price
+      const totalPrice = calculateStarterPackPrice(starterPack);
+
+      // Aggregate all calls into multicall
+      const multicall = aggregateStarterPackCalls(starterPack);
+
+      // Construct outside execution
+      const outsideExecution = {
+        caller: outsideExecutionConfig?.caller || "0x0",
+        nonce: outsideExecutionConfig?.nonce || generateNonce(),
+        execute_after: outsideExecutionConfig?.executeAfter || 0,
+        execute_before:
+          outsideExecutionConfig?.executeBefore || getDefaultExpiry(),
+        calls: multicall,
+      };
+
+      // Pass everything to keychain
+      await this.keychain.openStarterPackWithData({
+        starterpackId,
+        starterPack,
+        outsideExecution,
+        totalPrice,
+      });
+
+      this.iframes.keychain?.open();
+    }
   }
 
   async openExecute(calls: any, chainId?: string) {
