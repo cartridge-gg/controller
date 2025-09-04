@@ -14,6 +14,7 @@ import {
   SheetClose,
   SheetContent,
   SheetFooter,
+  SheetTitle,
   Skeleton,
   SpinnerIcon,
   StarknetIcon,
@@ -106,6 +107,7 @@ export const SignerCard = React.forwardRef<
           className="border-background-100 p-6 gap-6 rounded-t-xl"
           showClose={false}
         >
+          <SheetTitle className="hidden"></SheetTitle>
           <div className="flex flex-row items-center gap-3 mb-6">
             <Button
               type="button"
@@ -116,7 +118,7 @@ export const SignerCard = React.forwardRef<
               {isLoading ? (
                 <SpinnerIcon className="animate-spin" size="lg" />
               ) : (
-                <SignerIcon signerType={signerType} />
+                <SignerIcon signerType={signerType} size="lg" />
               )}
             </Button>
             <div className="flex flex-col items-start gap-1">
@@ -160,30 +162,46 @@ export const SignerCard = React.forwardRef<
 SignerCard.displayName = "SignerCard";
 
 const SignerIcon = React.memo(
-  ({ signerType }: { signerType: AuthOption | undefined }) => {
+  ({
+    signerType,
+    size = "default",
+  }: {
+    signerType: AuthOption | undefined;
+    size?:
+      | "xs"
+      | "sm"
+      | "lg"
+      | "default"
+      | "2xs"
+      | "xl"
+      | "2xl"
+      | "3xl"
+      | null
+      | undefined;
+  }) => {
     if (!signerType) {
       return <TouchIcon size="sm" />;
     }
 
     switch (signerType) {
       case "argent":
-        return <StarknetIcon size="sm" />;
+        return <StarknetIcon size={size} />;
       case "webauthn":
-        return <TouchIcon size="sm" />;
+        return <TouchIcon size={size} />;
       case "phantom":
-        return <PhantomIcon size="sm" />;
+        return <PhantomIcon size={size} />;
       case "rabby":
-        return <RabbyIcon size="sm" />;
+        return <RabbyIcon size={size} />;
       case "metamask":
-        return <MetaMaskIcon size="sm" />;
+        return <MetaMaskIcon size={size} />;
       case "discord":
-        return <DiscordIcon size="sm" />;
+        return <DiscordIcon size={size} />;
       case "google":
-        return <GoogleIcon size="sm" />;
+        return <GoogleIcon size={size} />;
       case "walletconnect":
-        return <WalletConnectIcon size="sm" />;
+        return <WalletConnectIcon size={size} />;
       default:
-        return <TouchIcon size="sm" />;
+        return <TouchIcon size={size} />;
     }
   },
 );
