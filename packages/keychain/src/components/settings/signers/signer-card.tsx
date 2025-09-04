@@ -35,6 +35,11 @@ export interface SignerCardProps extends Signer {
   isOriginalSigner: boolean;
 }
 
+let AAGUIDS: Record<string, Record<string, string>> | undefined = undefined;
+let AAGUIDS_PROMISE:
+  | Promise<Record<string, Record<string, string>>>
+  | undefined = undefined;
+
 export const SignerCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SignerCardProps
@@ -57,7 +62,7 @@ export const SignerCard = React.forwardRef<
           setSignerIdentifyingInfo(username);
         },
       );
-    }, [signer, controller]);
+    }, [signer, controller, controller?.username()]);
 
     return (
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -201,7 +206,24 @@ const getSignerIdentifyingInfo = async (
           return formatAddress(credentialToAddress(signer)!, { size: "xs" });
       }
     case "WebauthnCredentials":
-      return undefined;
+      if (!signer.webauthn?.[0].AAGUID) return;
+
+      if (AAGUIDS) {
+        return AAGUIDS[signer.webauthn?.[0].AAGUID]?.["name"];
+      }
+
+      if (AAGUIDS_PROMISE) {
+        AAGUIDS = await AAGUIDS_PROMISE;
+        return AAGUIDS[signer.webauthn?.[0].AAGUID]?.["name"];
+      }
+
+      AAGUIDS_PROMISE = fetch(
+        "https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/aaguid.json",
+      ).then((res) => res.json());
+
+      AAGUIDS = await AAGUIDS_PROMISE;
+      return AAGUIDS[signer.webauthn?.[0].AAGUID]?.["name"];
+
     case "SIWSCredentials":
       return "Phantom";
     case "StarknetCredentials":

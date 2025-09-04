@@ -1,3 +1,4 @@
+import { now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import { Skeleton } from "@cartridge/ui";
 import { useSessionsQuery } from "@cartridge/ui/utils/api/cartridge";
@@ -57,24 +58,29 @@ export const SessionsSection = () => {
         {sessionsQuery.isLoading ? (
           <LoadingState />
         ) : (
-          sessionsQuery.data?.map((session, index: number) => (
-            <SessionCard
-              sessionOs={session?.metadata?.os ?? "Unknown"}
-              key={index}
-              sessionName={session?.appID ?? ""}
-              expiresAt={BigInt(session?.expiresAt ?? 0)}
-              onDelete={async () => {
-                await controller?.revokeSession({
-                  app_id: session?.appID,
-                  chain_id: shortString.encodeShortString(
-                    session?.chainID ?? "",
-                  ),
-                  session_hash: session?.id ?? "",
-                });
-                await sessionsQuery.refetch();
-              }}
-            />
-          ))
+          sessionsQuery.data?.map((session, index: number) => {
+            const isExpired =
+              !session?.expiresAt || BigInt(session.expiresAt) < now();
+            if (isExpired) return;
+            return (
+              <SessionCard
+                sessionOs={session?.metadata?.os ?? "Unknown"}
+                key={index}
+                sessionName={session?.appID ?? ""}
+                expiresAt={BigInt(session?.expiresAt ?? 0)}
+                onDelete={async () => {
+                  await controller?.revokeSession({
+                    app_id: session?.appID,
+                    chain_id: shortString.encodeShortString(
+                      session?.chainID ?? "",
+                    ),
+                    session_hash: session?.id ?? "",
+                  });
+                  await sessionsQuery.refetch();
+                }}
+              />
+            );
+          })
         )}
       </div>
       {/* <Button
