@@ -9,17 +9,27 @@ export const StarterItem = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & StarterItemData
 >(
   (
-    { title, description, image, type, className, price, value, ...props },
+    {
+      title,
+      description,
+      image,
+      type,
+      className,
+      price,
+      value,
+      fancy = false,
+      ...props
+    },
     ref,
   ) => {
     return (
       <div className={cn("relative pt-1", className)} ref={ref} {...props}>
-        <Card className="relative bg-background-100 overflow-visible h-[88px]">
+        <Card className="relative overflow-visible h-[88px] select-none">
           {/* Price tag */}
           <div className="absolute -top-1 right-4">
-            {price !== 0 && <Badge price={price} />}
+            {price !== 0 && !fancy && <Badge price={price} />}
           </div>
-          <CardContent className="py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3">
+          <CardContent className="bg-background-200 hover:bg-background-300  py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3">
             {/* <img src={image} alt={title} className="size-16 object-cover" /> */}
             <Thumbnail
               rounded={type === StarterItemType.CREDIT}
@@ -28,11 +38,21 @@ export const StarterItem = React.forwardRef<
               className="size-16 p-1"
             />
             <div className="flex flex-col gap-1 flex-1 min-w-0">
-              <h3 className="text-sm font-medium text-foreground-100 truncate">
-                {type === StarterItemType.CREDIT && value
-                  ? `${value} Credits`
-                  : title}
-              </h3>
+              <div className="flex flex-row items-start justify-between self-stretch">
+                <h3 className="text-sm font-medium text-foreground-100 truncate">
+                  {type === StarterItemType.CREDIT && value
+                    ? `${value} Credits`
+                    : title}
+                </h3>
+                {fancy && (
+                  <h3 className="text-sm font-medium text-foreground-100 truncate">
+                    {`$${price.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`}
+                  </h3>
+                )}
+              </div>
               <CardDescription className="font-normal text-xs text-foreground-200 line-clamp-2">
                 {description}
               </CardDescription>

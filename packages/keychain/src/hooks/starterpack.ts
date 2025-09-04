@@ -26,6 +26,7 @@ export interface StarterItemData {
   image?: string;
   type: StarterItemType;
   value?: number;
+  fancy?: boolean;
 }
 
 export interface StarterPackDetails {

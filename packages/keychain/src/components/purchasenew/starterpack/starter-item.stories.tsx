@@ -20,6 +20,18 @@ const meta: Meta<typeof StarterItem> = {
 export default meta;
 type Story = StoryObj<typeof StarterItem>;
 
+export const FancyCard: Story = {
+  args: {
+    type: StarterItemType.NFT,
+    title: "Starter NFT",
+    description: "A unique starter NFT for your collection",
+    image:
+      "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
+    price: 100,
+    fancy: true,
+  },
+};
+
 export const NFT: Story = {
   args: {
     type: StarterItemType.NFT,
