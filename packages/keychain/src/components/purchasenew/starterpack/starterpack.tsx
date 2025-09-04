@@ -22,7 +22,7 @@ import { useEffect, useMemo } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { MerkleDrops } from "./merkledrop";
 import { LoadingState } from "../loading";
-import { CostBreakdown } from "@/components/purchase/CostBreakdown";
+import { CostBreakdown } from "../review/cost";
 import { PricingDetails } from "@/components/purchase/types";
 
 export function PurchaseStarterpack() {
@@ -157,9 +157,10 @@ export function StarterPackInner({
         ) : (
           <CostBreakdown
             rails="stripe"
-            price={price}
+            costDetails={price}
             displayFees={false}
             paymentUnit="usdc"
+            displayCosts={false}
           />
         )}
         <Button onClick={onProceed} disabled={!!error}>
