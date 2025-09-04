@@ -27,7 +27,7 @@ export const StarterItem = React.forwardRef<
         <Card className="relative overflow-visible h-[88px] select-none">
           {/* Price tag */}
           <div className="absolute -top-1 right-4">
-            {price !== 0 && !fancy && <Badge price={price} />}
+            {price !== 0 && fancy && <Badge price={price} />}
           </div>
           <CardContent className="bg-background-200 hover:bg-background-300  py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3">
             {/* <img src={image} alt={title} className="size-16 object-cover" /> */}
@@ -44,7 +44,7 @@ export const StarterItem = React.forwardRef<
                     ? `${value} Credits`
                     : title}
                 </h3>
-                {fancy && (
+                {!fancy && (
                   <h3 className="text-sm font-medium text-foreground-100 truncate">
                     {`$${price.toLocaleString(undefined, {
                       minimumFractionDigits: 2,

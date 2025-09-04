@@ -18,10 +18,12 @@ import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
 import { useParams } from "react-router-dom";
 import { useNavigation, usePurchaseContext } from "@/context";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { MerkleDrops } from "./merkledrop";
 import { LoadingState } from "../loading";
+import { CostBreakdown } from "@/components/purchase/CostBreakdown";
+import { PricingDetails } from "@/components/purchase/types";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -92,6 +94,17 @@ export function StarterPackInner({
         throw new Error(`Invalid acquisition type: ${acquisitionType}`);
     }
   };
+
+  const price = useMemo(() => {
+    const total = starterpackItems.reduce((acc, item) => acc + item.price, 0);
+
+    return {
+      baseCostInCents: total * 100,
+      processingFeeInCents: 0,
+      totalInCents: total * 100,
+    } satisfies PricingDetails;
+  }, [starterpackItems]);
+
   return (
     <>
       <HeaderInner
@@ -139,7 +152,16 @@ export function StarterPackInner({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error ? (
+          <ErrorAlert title="Error" description={error.message} />
+        ) : (
+          <CostBreakdown
+            rails="stripe"
+            price={price}
+            displayFees={false}
+            paymentUnit="usdc"
+          />
+        )}
         <Button onClick={onProceed} disabled={!!error}>
           {acquisitionType === StarterpackAcquisitionType.Paid
             ? "Purchase"
