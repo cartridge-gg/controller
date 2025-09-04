@@ -1,18 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
-import { Button } from "@cartridge/ui/components/ui/button";
-import { Input } from "@cartridge/ui/components/ui/input";
+import ControllerConnector from "@cartridge/connector/controller";
+import { Button, Input } from "@cartridge/ui";
 import { AuthOption } from "@cartridge/controller";
 
 export function HeadlessAuth() {
-  const { connect } = useConnect();
+  const { connectors } = useConnect();
   const { isConnected, address } = useAccount();
   const [username, setUsername] = useState("");
   const [authMethod, setAuthMethod] = useState<AuthOption>("metamask");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+
+  const controllerConnector = useMemo(
+    () => ControllerConnector.fromConnectors(connectors),
+    [connectors],
+  );
 
   const handleHeadlessConnect = async () => {
     if (!username.trim()) {
@@ -24,8 +29,8 @@ export function HeadlessAuth() {
     setError(undefined);
 
     try {
-      // This will automatically use headless mode since username and authMethod are provided
-      await connect({
+      // Use headless authentication via the controller's connect method
+      await controllerConnector.controller.connect({
         username: username.trim(),
         authMethod,
       });
