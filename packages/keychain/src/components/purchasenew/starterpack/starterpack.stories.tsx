@@ -54,3 +54,43 @@ export const StarterPackWithCollections: Story = {
     ],
   },
 };
+
+export const StarterPackWithVerifiedEdition: Story = {
+  args: {
+    name: "Starterpack",
+    supply: 10,
+    acquisitionType: StarterpackAcquisitionType.Claimed,
+    edition: "Season 0: Genesis",
+    isVerified: true,
+    starterpackItems: [
+      {
+        title: "Starter NFT",
+        description: "A unique starter NFT for your collection",
+        image:
+          "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
+        type: StarterItemType.NFT,
+        price: 0,
+      },
+    ],
+  },
+};
+
+export const StarterPackWithUnverifiedEdition: Story = {
+  args: {
+    name: "Starterpack",
+    supply: 10,
+    acquisitionType: StarterpackAcquisitionType.Claimed,
+    edition: "Season 0: Genesis",
+    isVerified: false,
+    starterpackItems: [
+      {
+        title: "Starter NFT",
+        description: "A unique starter NFT for your collection",
+        image:
+          "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
+        type: StarterItemType.NFT,
+        price: 0,
+      },
+    ],
+  },
+};

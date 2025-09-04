@@ -8,6 +8,7 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
+  VerifiedIcon,
 } from "@cartridge/ui";
 import {
   MintAllowance,
@@ -57,6 +58,8 @@ export function PurchaseStarterpack() {
 
 export function StarterPackInner({
   name,
+  edition,
+  isVerified,
   supply,
   mintAllowance,
   acquisitionType,
@@ -65,6 +68,8 @@ export function StarterPackInner({
   error,
 }: {
   name: string;
+  edition?: string;
+  isVerified?: boolean;
   supply?: number;
   mintAllowance?: MintAllowance;
   merkleDrops?: MerkleDrop[];
@@ -91,8 +96,15 @@ export function StarterPackInner({
     <>
       <HeaderInner
         title={name}
+        description={
+          edition ? (
+            <span className="text-foreground-200 text-xs font-normal flex items-center gap-1 leading-none">
+              {isVerified && <VerifiedIcon size="xs" />}
+              {edition}
+            </span>
+          ) : undefined
+        }
         right={supply ? <Supply amount={supply} /> : undefined}
-        hideIcon
       />
       <LayoutContent>
         <div className="flex flex-col gap-3">
