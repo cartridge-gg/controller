@@ -1,29 +1,85 @@
+import {
+  StarterPack,
+  StarterPackItem,
+  StarterPackItemType,
+} from "@cartridge/controller";
 import { Call } from "starknet";
 
-export interface StarterPackItem {
-  type: "NONFUNGIBLE" | "FUNGIBLE";
-  name: string;
-  description: string;
-  iconURL?: string;
-  amount?: number;
-  price?: number;
-  call: Call[];
+/**
+ * Runtime guard for StarterPackItem
+ */
+export function isStarterPackItem(value: unknown): value is StarterPackItem {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<StarterPackItem> & Record<string, unknown>;
+  const hasValidType =
+    typeof candidate.type === "string" &&
+    (candidate.type === StarterPackItemType.NONFUNGIBLE ||
+      candidate.type === StarterPackItemType.FUNGIBLE);
+  const hasValidName = typeof candidate.name === "string";
+  const hasValidDescription = typeof candidate.description === "string";
+  const hasValidIconUrl =
+    candidate.iconURL === undefined || typeof candidate.iconURL === "string";
+  const hasValidAmount =
+    candidate.amount === undefined || typeof candidate.amount === "number";
+  const hasValidPrice =
+    candidate.price === undefined ||
+    typeof candidate.price === "bigint" ||
+    typeof (candidate as Record<string, unknown>).price === "number" ||
+    typeof (candidate as Record<string, unknown>).price === "string";
+  const hasValidCall =
+    candidate.call === undefined || Array.isArray(candidate.call);
+
+  return (
+    hasValidType &&
+    hasValidName &&
+    hasValidDescription &&
+    hasValidIconUrl &&
+    hasValidAmount &&
+    hasValidPrice &&
+    hasValidCall
+  );
 }
 
-export interface StarterPack {
-  name: string;
-  description: string;
-  iconURL?: string;
-  items?: StarterPackItem[];
+/**
+ * Runtime guard for StarterPack
+ */
+export function isStarterPack(value: unknown): value is StarterPack {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<StarterPack> & Record<string, unknown>;
+  const hasValidName = typeof candidate.name === "string";
+  const hasValidDescription = typeof candidate.description === "string";
+  const hasValidIconUrl =
+    candidate.iconURL === undefined || typeof candidate.iconURL === "string";
+  const hasValidItems =
+    Array.isArray(candidate.items) &&
+    candidate.items.every((it) => isStarterPackItem(it));
+
+  return (
+    hasValidName && hasValidDescription && hasValidIconUrl && hasValidItems
+  );
 }
 
-export function calculateStarterPackPrice(starterPack: StarterPack): number {
-  if (!starterPack.items) return 0;
+/**
+ * Normalize a price-like value to bigint, accepting bigint | number | string | undefined
+ */
+export function normalizePriceToBigInt(value: unknown): bigint {
+  if (typeof value === "bigint") return value;
+  if (typeof value === "number") return BigInt(Math.trunc(value));
+  if (typeof value === "string" && value.trim() !== "") return BigInt(value);
+  return 0n;
+}
+
+export function calculateStarterPackPrice(starterPack: StarterPack): bigint {
+  if (!starterPack.items) return 0n;
 
   return starterPack.items.reduce((total, item) => {
-    const itemTotal = (item.price || 0) * (item.amount || 1);
+    const price = normalizePriceToBigInt(
+      (item as unknown as Record<string, unknown>).price ?? item.price,
+    );
+    const amount = BigInt(item.amount || 1);
+    const itemTotal = price * amount;
     return total + itemTotal;
-  }, 0);
+  }, 0n);
 }
 
 export function aggregateStarterPackCalls(starterPack: StarterPack): Call[] {
@@ -41,13 +97,4 @@ export function aggregateStarterPackCalls(starterPack: StarterPack): Call[] {
   }
 
   return allCalls;
-}
-
-export function generateNonce(): string {
-  return Math.floor(Math.random() * 1000000).toString();
-}
-
-export function getDefaultExpiry(): number {
-  // Default to 1 hour from now
-  return Math.floor(Date.now() / 1000) + 3600;
 }

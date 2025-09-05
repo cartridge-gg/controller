@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { StarterPackInner } from "./starterpack";
-import { StarterItemType } from "@/hooks/starterpack";
 import { NavigationProvider } from "@/context";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { StarterPackItemType } from "@cartridge/controller";
 
 const meta = {
   component: StarterPackInner,
@@ -26,12 +26,12 @@ export const Default: Story = {
     acquisitionType: StarterpackAcquisitionType.Paid,
     starterpackItems: [
       {
-        title: "Starter NFT",
+        name: "Starter NFT",
         description: "A unique starter NFT for your collection",
-        image:
+        iconURL:
           "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
-        type: StarterItemType.NFT,
-        price: 100,
+        type: StarterPackItemType.NONFUNGIBLE,
+        price: 100n,
       },
     ],
   },
@@ -44,12 +44,12 @@ export const StarterPackWithCollections: Story = {
     acquisitionType: StarterpackAcquisitionType.Claimed,
     starterpackItems: [
       {
-        title: "Starter NFT",
+        name: "Starter NFT",
         description: "A unique starter NFT for your collection",
-        image:
+        iconURL:
           "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
-        type: StarterItemType.NFT,
-        price: 0,
+        type: StarterPackItemType.NONFUNGIBLE,
+        price: 0n,
       },
     ],
   },

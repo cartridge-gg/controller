@@ -8,7 +8,7 @@ import {
 import {
   Abi,
   BigNumberish,
-  Call as StarknetCall,
+  Call,
   constants,
   InvocationsDetails,
 } from "starknet";
@@ -127,7 +127,7 @@ export interface Keychain {
 
   deploy(): Promise<DeployReply | ConnectError>;
   execute(
-    calls: StarknetCall | StarknetCall[],
+    calls: Call | Call[],
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
@@ -147,9 +147,9 @@ export interface Keychain {
   delegateAccount(): string;
   username(): string;
   openPurchaseCredits(): void;
-  openExecute(calls: StarknetCall[]): Promise<void>;
+  openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
-  openStarterPack(options: string | StarterPackOptions): Promise<void>;
+  openStarterPack(options: string | StarterPack): Promise<void>;
   navigate(path: string): Promise<void>;
 
   // External wallet methods
@@ -245,24 +245,24 @@ export type Tokens = {
   erc20?: Token[];
 };
 
+export enum StarterPackItemType {
+  NONFUNGIBLE = "NONFUNGIBLE",
+  FUNGIBLE = "FUNGIBLE",
+}
+
 export interface StarterPackItem {
-  type: "NONFUNGIBLE" | "FUNGIBLE";
+  type: StarterPackItemType;
   name: string;
   description: string;
   iconURL?: string;
   amount?: number;
-  price?: number;
-  call: StarknetCall[];
+  price?: bigint;
+  call?: Call[];
 }
 
 export interface StarterPack {
   name: string;
   description: string;
   iconURL?: string;
-  items?: StarterPackItem[];
-}
-
-export interface StarterPackOptions {
-  starterpackId: string;
-  starterPack: StarterPack;
+  items: StarterPackItem[];
 }

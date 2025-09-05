@@ -18,6 +18,7 @@ import { useNavigation, usePurchaseContext } from "@/context";
 import { useEffect } from "react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { LoadingState } from "../loading";
+import { StarterPackItem } from "@cartridge/controller";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -63,7 +64,7 @@ export function StarterPackInner({
   supply?: number;
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
-  starterpackItems?: StarterItemData[];
+  starterpackItems?: StarterPackItem[];
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();

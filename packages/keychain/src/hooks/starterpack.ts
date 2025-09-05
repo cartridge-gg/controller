@@ -13,36 +13,23 @@ import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
 import { uint256 } from "starknet";
 import { ConnectionContext } from "@/components/provider/connection";
-import {
-  StarterPack,
-  StarterPackItem,
-  calculateStarterPackPrice,
-} from "@/utils/starterpack";
+import { calculateStarterPackPrice, isStarterPack } from "@/utils/starterpack";
+import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 
 export const enum StarterItemType {
   NFT = "NFT",
   CREDIT = "CREDIT",
 }
 
-export interface StarterItemData {
-  title: string;
-  collectionName?: string;
-  description: string;
-  price: number;
-  image?: string;
-  type: StarterItemType;
-  value?: number;
-}
-
 export interface StarterPackDetails {
-  id: string;
+  id?: string;
   name: string;
   description?: string;
   priceUsd: number;
   supply?: number;
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
-  starterPackItems: StarterItemData[];
+  starterPackItems: StarterPackItem[];
   merkleDrops?: MerkleDrop[];
 }
 
@@ -66,7 +53,7 @@ export function useStarterPack(starterpackId?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [isClaiming, setIsClaiming] = useState(false);
   const [supply, setSupply] = useState<number | undefined>(undefined);
-  const [items, setItems] = useState<StarterItemData[]>([]);
+  const [items, setItems] = useState<StarterPackItem[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -108,53 +95,30 @@ export function useStarterPack(starterpackId?: string) {
       return;
     }
 
-    // Check if we have custom StarterPack data from the connection context
-    const isCustomStarterPack =
-      connectionContext?.context?.type === "open-starterpack-with-data" &&
-      connectionContext.context.starterPackData?.starterpackId ===
-        starterpackId;
-
-    if (isCustomStarterPack && connectionContext?.context) {
-      // Handle custom StarterPack data without querying the backend
-      try {
-        const context = connectionContext.context;
-        if (context.type === "open-starterpack-with-data") {
-          const { starterPack } = context.starterPackData;
-          const typedStarterPack = starterPack as unknown as StarterPack;
-
-          setName(typedStarterPack.name || "");
-          setDescription(typedStarterPack.description || "");
-          setAcquisitionType(StarterpackAcquisitionType.Paid);
-
-          // Calculate price from items
-          const totalPrice = calculateStarterPackPrice(typedStarterPack);
-          setPriceUsd(totalPrice);
-
-          // Convert custom StarterPack items to StarterItemData format
-          const customItems: StarterItemData[] =
-            typedStarterPack.items?.map((item: StarterPackItem) => ({
-              title: item.name || "",
-              description: item.description || "",
-              price: item.price || 0,
-              image: item.iconURL || "",
-              type: StarterItemType.NFT,
-            })) || [];
-
-          setItems(customItems);
-        }
-        setIsLoading(false);
-      } catch (err) {
-        setError(err as Error);
-        setIsLoading(false);
-      }
+    if (connectionContext?.context?.type !== "open-starter-pack") {
       return;
     }
 
-    // Original GraphQL query for backend-defined starter packs
+    const context = connectionContext.context;
+    if (isStarterPack(context.starterpack)) {
+      const starterpack = context.starterpack;
+
+      setName(starterpack.name || "");
+      setDescription(starterpack.description || "");
+      setAcquisitionType(StarterpackAcquisitionType.Paid);
+
+      // Calculate price from items
+      const totalPrice = calculateStarterPackPrice(starterpack);
+      setPriceUsd(Number(totalPrice));
+      setItems(starterpack.items);
+
+      return;
+    }
+
     client
       .request<StarterPackQuery>(StarterPackDocument, {
         input: {
-          starterpackId: starterpackId,
+          starterpackId: context.starterpack,
           accountId: controller?.username(),
         },
       })
@@ -172,17 +136,17 @@ export function useStarterPack(starterpackId?: string) {
           setMintAllowance(details.mintAllowance);
         }
 
-        const items: StarterItemData[] = [];
+        const items: StarterPackItem[] = [];
         if (details.starterpack) {
           let minSupply;
           if (details.starterpack.starterpackContract?.edges) {
             for (const edge of details.starterpack.starterpackContract.edges) {
               items.push({
-                title: edge?.node?.name ?? "",
+                name: edge?.node?.name ?? "",
                 description: edge?.node?.description ?? "",
-                price: priceUSD,
-                image: edge?.node?.iconURL ?? "",
-                type: StarterItemType.NFT,
+                price: BigInt(priceUSD),
+                iconURL: edge?.node?.iconURL ?? "",
+                type: StarterPackItemType.NONFUNGIBLE,
               });
 
               if (edge?.node?.supplyEntryPoint) {
@@ -202,12 +166,12 @@ export function useStarterPack(starterpackId?: string) {
           if (Number(details.bonusCredits.amount) > 0) {
             const factor = 10 ** details.bonusCredits.decimals;
             items.push({
-              title: `${details.bonusCredits} Credits`,
+              name: `${details.bonusCredits} Credits`,
               description: "Credits cover service fee(s).",
-              price: 0,
-              image: "/ERC-20-Icon.svg",
-              type: StarterItemType.CREDIT,
-              value: Number(details.bonusCredits.amount) / factor,
+              price: 0n,
+              iconURL: "/ERC-20-Icon.svg",
+              type: StarterPackItemType.FUNGIBLE,
+              amount: Number(details.bonusCredits.amount) / factor,
             });
           }
 
@@ -239,7 +203,7 @@ export function useStarterPack(starterpackId?: string) {
       })
       .catch(setError)
       .finally(() => setIsLoading(false));
-  }, [starterpackId, controller, checkSupply, connectionContext?.context]);
+  }, [controller, checkSupply, connectionContext?.context]);
 
   const claim = useCallback(async () => {
     if (!controller || !starterpackId) {
