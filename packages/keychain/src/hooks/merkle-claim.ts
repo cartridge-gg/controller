@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { client } from "@/utils/graphql";
 import {
   MerkleClaimsForAddressDocument,
@@ -18,65 +18,58 @@ import { useConnection } from "./connection";
 import { parseSignature } from "viem";
 
 export interface MerkleClaim {
+  key: string;
   network: MerkleDropNetwork;
+  salt: string;
   data: string[];
   claimed: boolean;
+  loading: boolean;
   merkleProof: string[];
   merkleRoot: string;
   contract: string;
   entrypoint: string;
+  description?: string | null;
 }
 
 export const useMerkleClaim = ({
-  key,
+  keys,
   address,
 }: {
-  key: string;
+  keys: string;
   address: string;
 }) => {
   const { controller, externalSignMessage } = useConnection();
   const [error, setError] = useState<Error | null>(null);
   const [claims, setClaims] = useState<MerkleClaim[]>([]);
-  const [isClaimed, setIsClaimed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const checkedClaimsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!controller) {
-      return;
-    }
-
     setIsLoading(true);
     client
       .request<MerkleClaimsForAddressQuery>(MerkleClaimsForAddressDocument, {
-        key,
+        keys: keys.split(";"),
         address,
       })
       .then(async (result) => {
         const claims: MerkleClaim[] = result.merkleClaimsForAddress.map(
           (claim) => ({
+            key: claim.merkleDrop.key,
             network: claim.merkleDrop.network,
             data: claim.data,
-            claimed: claim.claimed,
+            salt: claim.merkleDrop.salt,
             merkleProof: claim.merkleProof ?? [],
             merkleRoot: claim.merkleDrop.merkleRoot,
             contract: claim.merkleDrop.contract,
             entrypoint: claim.merkleDrop.entrypoint,
+            description: claim.merkleDrop.description,
+            claimed: false,
+            loading: true,
           }),
         );
         setClaims(claims);
-
-        const claim = claims[0];
-        const call: Call = {
-          contractAddress: import.meta.env.VITE_FORWARDER_CONTRACT,
-          entrypoint: "is_consumed",
-          calldata: CallData.compile({
-            merkle_tree_key: merkleTreeKey(claim),
-            leaf_data: CallData.compile(leafData(address, claim)),
-          }),
-        };
-
-        const claimResult = await controller.provider.callContract(call);
-        setIsClaimed(claimResult[0] === "0x1");
+        // Reset checked claims when new claims are loaded
+        checkedClaimsRef.current = new Set();
       })
       .catch((error) => {
         setError(error as Error);
@@ -84,7 +77,73 @@ export const useMerkleClaim = ({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [key, address, controller]);
+  }, [keys, address]);
+
+  const checkAllClaims = useCallback(
+    async (claimsToCheck: MerkleClaim[]) => {
+      if (claimsToCheck.length === 0 || !controller) {
+        return;
+      }
+
+      const updatedClaims = await Promise.all(
+        claimsToCheck.map(async (claim) => {
+          try {
+            // https://github.com/cartridge-gg/merkle_drop/blob/main/src/types/leaf.cairo
+            let leafHash = hash.computePoseidonHashOnElements(
+              CallData.compile(leafData(address, claim)),
+            );
+            leafHash = hash.computePedersenHash(0, leafHash);
+            leafHash = hash.computePedersenHash(leafHash, 1);
+            leafHash = hash.computePedersenHash(0, leafHash);
+
+            const call: Call = {
+              contractAddress: import.meta.env.VITE_FORWARDER_CONTRACT,
+              entrypoint: "is_consumed",
+              calldata: CallData.compile({
+                merkle_tree_key: merkleTreeKey(claim),
+                leaf_hash: leafHash,
+              }),
+            };
+
+            const result = await controller.provider.callContract(call);
+            return {
+              ...claim,
+              claimed: result[0] === "0x1",
+              loading: false,
+            };
+          } catch (error) {
+            setError(error as Error);
+            console.error("Error checking claim:", error);
+            return {
+              ...claim,
+              loading: false,
+            };
+          }
+        }),
+      );
+
+      setClaims(updatedClaims);
+    },
+    [controller, address],
+  );
+
+  useEffect(() => {
+    if (claims.length === 0 || !controller) {
+      return;
+    }
+
+    // Create a unique key for the current set of claims
+    const claimsKey = claims
+      .map((claim) => `${claim.key}-${claim.salt}`)
+      .sort()
+      .join("|");
+
+    // Only check if we haven't checked this exact set of claims before
+    if (!checkedClaimsRef.current.has(claimsKey)) {
+      checkedClaimsRef.current.add(claimsKey);
+      checkAllClaims(claims);
+    }
+  }, [claims, controller, checkAllClaims]);
 
   const onSendClaim = useCallback(async () => {
     if (!merkleTreeKey || !leafData || !controller || !claims.length) {
@@ -138,7 +197,6 @@ export const useMerkleClaim = ({
 
   return {
     claims,
-    isClaimed,
     isLoading,
     error,
     onSendClaim,
@@ -150,6 +208,7 @@ const merkleTreeKey = (claim: MerkleClaim) => {
     chain_id: shortString.encodeShortString(claim.network),
     claim_contract_address: claim.contract,
     selector: hash.getSelectorFromName(claim.entrypoint),
+    salt: claim.salt,
   };
 };
 

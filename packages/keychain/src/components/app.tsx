@@ -46,6 +46,7 @@ import { Purchase } from "./purchase";
 import { PurchaseType } from "@/hooks/payments/crypto";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
+import { Collections } from "./purchasenew/starterpack/collections";
 
 export function App() {
   const { navigate } = useNavigation();
@@ -73,7 +74,8 @@ export function App() {
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}
           />
-          <Route path="claim/:key/:address" element={<Claim />} />
+          <Route path="starterpack/collections" element={<Collections />} />
+          <Route path="claim/:keys/:address" element={<Claim />} />
           <Route path="method/:platforms?" element={<PaymentMethod />} />
           <Route path="network/:platforms?" element={<ChooseNetwork />} />
           <Route
