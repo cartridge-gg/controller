@@ -13,6 +13,7 @@ import {
   LayoutContent,
   LayoutFooter,
   OptimismIcon,
+  Spinner,
   StarknetIcon,
   Thumbnail,
 } from "@cartridge/ui";
@@ -78,10 +79,12 @@ export const CollectionItem = ({
   name,
   network,
   numAvailable,
+  isLoading,
 }: {
   name: string;
   network: MerkleDropNetwork;
   numAvailable?: number;
+  isLoading?: boolean;
 }) => {
   const networkIcon = useCallback((network: MerkleDropNetwork) => {
     switch (network) {
@@ -103,9 +106,13 @@ export const CollectionItem = ({
   return (
     <>
       <div className="flex flex-row gap-2">
-        {numAvailable && (
-          <div className="flex items-center justify-center text-primary text-xs font-semibold rounded bg-background-300 px-2">
-            {numAvailable}
+        {numAvailable !== undefined && (
+          <div className="flex items-center justify-center text-primary text-xs font-semibold rounded bg-background-300 w-[30px]">
+            {isLoading ? (
+              <Spinner size="sm" className="p-0 m-0" />
+            ) : (
+              numAvailable
+            )}
           </div>
         )}
         {name}

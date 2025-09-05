@@ -174,21 +174,23 @@ export const useMerkleClaim = ({
         ethSignature.unshift("0x0");
       }
 
-      const calls = claims.map((claim) => {
-        const raw = {
-          merkle_tree_key: merkleTreeKey(claim),
-          proof: claim.merkleProof,
-          leaf_data: CallData.compile(leafData(address, claim)),
-          recipient: { ...["0x0", controller.address()] },
-          eth_signature: { ...ethSignature },
-        };
+      const calls = claims
+        .filter((claim) => !claim.claimed)
+        .map((claim) => {
+          const raw = {
+            merkle_tree_key: merkleTreeKey(claim),
+            proof: claim.merkleProof,
+            leaf_data: CallData.compile(leafData(address, claim)),
+            recipient: { ...["0x0", controller.address()] },
+            eth_signature: { ...ethSignature },
+          };
 
-        return {
-          contractAddress: FORWARDER_CONTRACT,
-          entrypoint: "verify_and_forward",
-          calldata: CallData.compile(raw),
-        };
-      });
+          return {
+            contractAddress: FORWARDER_CONTRACT,
+            entrypoint: "verify_and_forward",
+            calldata: CallData.compile(raw),
+          };
+        });
 
       const { transaction_hash } = await controller.executeFromOutsideV3(calls);
       return transaction_hash;
