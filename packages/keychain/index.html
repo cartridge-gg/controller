@@ -13,7 +13,7 @@
 
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user=scalable=no, interactive-widget=resizes-content"
     />
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:creator" content="@cartridge_gg" />
@@ -36,6 +36,43 @@
       content="{CartridgeTheme.semanticTokens.colors.brand}"
     />
     <script src="/noflash.js"></script>
+    <script>
+      if ("virtualKeyboard" in navigator) {
+        navigator.virtualKeyboard.overlaysContent = true;
+      }
+    </script>
+
+    <script>
+      window.addEventListener(
+        "touchstart",
+        (e) => {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        },
+        { passive: false },
+      );
+
+      window.addEventListener(
+        "touchmove",
+        (e) => {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        },
+        { passive: false },
+      );
+
+      window.addEventListener(
+        "touchend",
+        (e) => {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        },
+        { passive: false },
+      );
+    </script>
   </head>
   <body class="h-dvh bg-background text-foreground overflow-y-auto">
     <div id="root"></div>
