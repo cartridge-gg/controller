@@ -22,14 +22,13 @@ import { StarterpackReceiving } from "../starterpack/starterpack";
 export function Claim() {
   const { keys, address: externalAddress } = useParams();
   const { goBack, navigate } = useNavigation();
-  const { claimItems, starterpackDetails, setClaimItems, setTransactionHash } =
+  const { starterpackDetails, setClaimItems, setTransactionHash } =
     usePurchaseContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const {
     claims: claimsData,
-    error: claimsError,
     isLoading: isLoadingClaims,
     onSendClaim,
   } = useMerkleClaim({
@@ -44,15 +43,17 @@ export function Claim() {
     }
 
     const items: Item[] = [];
-    claimsData.forEach((c) => {
-      c.data.forEach((d) => {
-        items.push({
-          title: `Token ID: ${d}`,
-          type: ItemType.NFT,
-          icon: <GiftIcon variant="solid" />,
+    claimsData
+      .filter((c) => !c.claimed)
+      .forEach((c) => {
+        c.data.forEach((d) => {
+          items.push({
+            title: `${c.description ?? c.key} - Token ID: ${d}`,
+            type: ItemType.NFT,
+            icon: <GiftIcon variant="solid" />,
+          });
         });
       });
-    });
 
     setClaimItems(items);
   }, [claimsData, setClaimItems]);
@@ -98,7 +99,7 @@ export function Claim() {
       <LayoutContent>
         {claimsData.length === 0 ? (
           <Empty
-            icon="inventory"
+            icon="claim"
             title="Nothing to claim from this wallet"
             className="h-full md:h-[420px]"
           />
@@ -122,7 +123,8 @@ export function Claim() {
                       <CollectionItem
                         name={claim.description ?? claim.key}
                         network={claim.network}
-                        numAvailable={claim.data.length}
+                        numAvailable={claim.claimed ? 0 : claim.data.length}
+                        isLoading={claim.loading}
                       />
                     </CardListItem>
                   ))}
@@ -134,9 +136,6 @@ export function Claim() {
       </LayoutContent>
       <LayoutFooter>
         {error && <ErrorAlert title="Error" description={error.message} />}
-        {claimsError && (
-          <ErrorAlert title="Error" description={claimsError.message} />
-        )}
         {/* {claimItems.length > 0 && (
           <CardContent className="relative flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
             <div className="absolute -top-1 right-4">
@@ -147,13 +146,13 @@ export function Claim() {
             </div>
           </CardContent>
         )} */}
-        {claimItems.length === 0 ? (
+        {claimsData.length === 0 ? (
           <Button onClick={() => goBack()}>Check Another Wallet</Button>
         ) : (
           <Button
             onClick={onSubmit}
             isLoading={isSubmitting}
-            disabled={isClaimed || isCheckingClaimed || claimsError !== null}
+            disabled={isClaimed || isCheckingClaimed || error !== null}
           >
             {isClaimed
               ? "Already Claimed"
