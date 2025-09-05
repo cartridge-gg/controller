@@ -232,6 +232,19 @@ export default class Controller {
       toJsCalls(calls),
     )) as FeeEstimate;
     res.unit = "FRI";
+
+    // Scale all resource bounds by 1.5x
+    res.l1_gas_consumed = Math.ceil(
+      Number(res.l1_gas_consumed) * 1.5,
+    ).toString();
+    res.l2_gas_consumed = Math.ceil(
+      Number(res.l2_gas_consumed) * 1.5,
+    ).toString();
+    res.l1_data_gas_consumed = Math.ceil(
+      Number(res.l1_data_gas_consumed) * 1.5,
+    ).toString();
+    res.overall_fee = Math.ceil(Number(res.overall_fee) * 1.5).toString();
+
     return res;
   }
 
