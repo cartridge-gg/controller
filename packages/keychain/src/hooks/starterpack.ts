@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useContext } from "react";
 import {
   ClaimFreeStarterpackDocument,
   ClaimFreeStarterpackMutation,
@@ -12,6 +12,12 @@ import { client } from "@/utils/graphql";
 import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
 import { uint256 } from "starknet";
+import { ConnectionContext } from "@/components/provider/connection";
+import {
+  StarterPack,
+  StarterPackItem,
+  calculateStarterPackPrice,
+} from "@/utils/starterpack";
 
 export const enum StarterItemType {
   NFT = "NFT",
@@ -56,6 +62,7 @@ export interface MerkleDrop {
 
 export function useStarterPack(starterpackId?: string) {
   const { controller } = useController();
+  const connectionContext = useContext(ConnectionContext);
   const [isLoading, setIsLoading] = useState(true);
   const [isClaiming, setIsClaiming] = useState(false);
   const [supply, setSupply] = useState<number | undefined>(undefined);
@@ -101,6 +108,49 @@ export function useStarterPack(starterpackId?: string) {
       return;
     }
 
+    // Check if we have custom StarterPack data from the connection context
+    const isCustomStarterPack =
+      connectionContext?.context?.type === "open-starterpack-with-data" &&
+      connectionContext.context.starterPackData?.starterpackId ===
+        starterpackId;
+
+    if (isCustomStarterPack && connectionContext?.context) {
+      // Handle custom StarterPack data without querying the backend
+      try {
+        const context = connectionContext.context;
+        if (context.type === "open-starterpack-with-data") {
+          const { starterPack } = context.starterPackData;
+          const typedStarterPack = starterPack as unknown as StarterPack;
+
+          setName(typedStarterPack.name || "");
+          setDescription(typedStarterPack.description || "");
+          setAcquisitionType(StarterpackAcquisitionType.Paid);
+
+          // Calculate price from items
+          const totalPrice = calculateStarterPackPrice(typedStarterPack);
+          setPriceUsd(totalPrice);
+
+          // Convert custom StarterPack items to StarterItemData format
+          const customItems: StarterItemData[] =
+            typedStarterPack.items?.map((item: StarterPackItem) => ({
+              title: item.name || "",
+              description: item.description || "",
+              price: item.price || 0,
+              image: item.iconURL || "",
+              type: StarterItemType.NFT,
+            })) || [];
+
+          setItems(customItems);
+        }
+        setIsLoading(false);
+      } catch (err) {
+        setError(err as Error);
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Original GraphQL query for backend-defined starter packs
     client
       .request<StarterPackQuery>(StarterPackDocument, {
         input: {
@@ -189,7 +239,7 @@ export function useStarterPack(starterpackId?: string) {
       })
       .catch(setError)
       .finally(() => setIsLoading(false));
-  }, [starterpackId, controller, checkSupply]);
+  }, [starterpackId, controller, checkSupply, connectionContext?.context]);
 
   const claim = useCallback(async () => {
     if (!controller || !starterpackId) {

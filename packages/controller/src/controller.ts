@@ -362,24 +362,9 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    // Handle backward compatibility
-    if (typeof options === "string") {
-      // Existing behavior - just navigate to the starterpack page
-      this.keychain.navigate(`/purchase/starterpack/${options}`).then(() => {
-        this.iframes.keychain?.open();
-      });
-    } else {
-      // New behavior - pass full StarterPack definition
-      const { starterpackId, starterPack } = options;
-
-      // Pass StarterPack data to keychain for processing
-      await this.keychain.openStarterPackWithData({
-        starterpackId,
-        starterPack,
-      });
-
-      this.iframes.keychain?.open();
-    }
+    // Pass options directly to keychain's unified openStarterPack method
+    await this.keychain.openStarterPack(options);
+    this.iframes.keychain?.open();
   }
 
   async openExecute(calls: any, chainId?: string) {

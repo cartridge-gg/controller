@@ -23,12 +23,6 @@ import {
 } from "@/utils/starterpack";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
-interface StarterPackContextData {
-  starterPackData: {
-    starterPack: StarterPack;
-    starterpackId: string;
-  };
-}
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
@@ -200,15 +194,15 @@ export const PurchaseProvider = ({
   useEffect(() => {
     if (
       connectionContext?.context?.type === "open-starterpack-with-data" &&
-      (connectionContext.context as StarterPackContextData).starterPackData
+      connectionContext.context.starterPackData
     ) {
-      const data = connectionContext.context as StarterPackContextData;
-      const { starterPack, starterpackId: customId } = data.starterPackData;
+      const context = connectionContext.context;
+      const { starterPack, starterpackId: customId } = context.starterPackData;
 
       setStarterpackId(customId);
 
       // Cast to get proper typing
-      const typedStarterPack = starterPack as StarterPack;
+      const typedStarterPack = starterPack as unknown as StarterPack;
 
       // Calculate total price from items
       const totalPrice = calculateStarterPackPrice(typedStarterPack);
@@ -253,7 +247,9 @@ export const PurchaseProvider = ({
     }
   }, [
     connectionContext?.context?.type,
-    (connectionContext?.context as StarterPackContextData | undefined)?.starterPackData,
+    connectionContext?.context?.type === "open-starterpack-with-data"
+      ? connectionContext.context.starterPackData
+      : undefined,
   ]);
 
   useEffect(() => {
@@ -262,7 +258,7 @@ export const PurchaseProvider = ({
     // Skip default logic if we have custom starterpack data
     if (
       connectionContext?.context?.type === "open-starterpack-with-data" &&
-      (connectionContext.context as StarterPackContextData).starterPackData
+      connectionContext.context.starterPackData
     ) {
       return;
     }
@@ -348,12 +344,12 @@ export const PurchaseProvider = ({
       // Check if we have custom starterpack data
       if (
         connectionContext?.context?.type === "open-starterpack-with-data" &&
-        (connectionContext.context as StarterPackContextData).starterPackData &&
+        connectionContext.context.starterPackData &&
         createStarterPackPayment
       ) {
         // Process custom starter pack data
-        const data = (connectionContext.context as StarterPackContextData).starterPackData;
-        const typedStarterPack = data.starterPack as StarterPack;
+        const data = connectionContext.context.starterPackData;
+        const typedStarterPack = data.starterPack as unknown as StarterPack;
 
         // Calculate total price and aggregate calls
         const totalPrice = calculateStarterPackPrice(typedStarterPack);
