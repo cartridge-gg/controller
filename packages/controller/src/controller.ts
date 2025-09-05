@@ -15,6 +15,7 @@ import BaseProvider from "./provider";
 import {
   Chain,
   ConnectError,
+  ConnectOptions,
   ConnectReply,
   ControllerOptions,
   IFrames,
@@ -137,10 +138,12 @@ export default class ControllerProvider extends BaseProvider {
     return this.account;
   }
 
-  async connect(): Promise<WalletAccount | undefined> {
+  async connect(options?: ConnectOptions): Promise<WalletAccount | undefined> {
     if (this.account) {
       return this.account;
     }
+
+    const isHeadless = !!(options?.username && options?.authMethod);
 
     // Ensure iframe is created if using lazy loading
     if (!this.iframes.keychain) {
@@ -161,7 +164,10 @@ export default class ControllerProvider extends BaseProvider {
       }
     }
 
-    this.iframes.keychain.open();
+    // Only open modal if not in headless mode
+    if (!isHeadless) {
+      this.iframes.keychain.open();
+    }
 
     try {
       let response = await this.keychain.connect(
@@ -176,6 +182,12 @@ export default class ControllerProvider extends BaseProvider {
             : this.options.policies || {},
         this.rpcUrl(),
         this.options.signupOptions,
+        isHeadless
+          ? {
+              username: options!.username!,
+              authMethod: options!.authMethod!,
+            }
+          : undefined,
       );
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
@@ -195,7 +207,10 @@ export default class ControllerProvider extends BaseProvider {
     } catch (e) {
       console.log(e);
     } finally {
-      this.iframes.keychain.close();
+      // Only close modal if not in headless mode
+      if (!isHeadless) {
+        this.iframes.keychain.close();
+      }
     }
   }
 
