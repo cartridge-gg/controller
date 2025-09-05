@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/keychain",
-  "version": "0.10.0-alpha.1",
+  "version": "0.10.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -45,10 +45,10 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
     "@auth0/auth0-spa-js": "^2.1.3",
-    "@cartridge/arcade": "0.3.0-alpha.0",
+    "@cartridge/arcade": "catalog:",
     "@cartridge/controller": "workspace:*",
     "@cartridge/controller-wasm": "catalog:",
-    "@cartridge/marketplace": "0.0.14",
+    "@cartridge/marketplace": "catalog:",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",
     "@dojoengine/torii-wasm": "catalog:",

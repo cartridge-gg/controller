@@ -55,7 +55,7 @@ export function Settings() {
       signers: true,
       registeredAccounts: false,
       currency: false,
-      recovery: true,
+      recovery: false,
       delegate: true,
     }),
     [],

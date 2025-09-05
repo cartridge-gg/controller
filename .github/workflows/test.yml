@@ -33,6 +33,8 @@ jobs:
         with:
           run_install: |
             - args: [--frozen-lockfile]
+      - name: Clean iframe dist directory
+        run: rm -rf packages/controller/dist
       - run: pnpm build
       - run: pnpm test:ci --coverage
       - uses: codecov/codecov-action@v3

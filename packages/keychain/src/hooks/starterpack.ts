@@ -51,6 +51,7 @@ export interface MerkleDrop {
   contract: string;
   entrypoint: string;
   merkleRoot: string;
+  description?: string | null;
 }
 
 export function useStarterPack(starterpackId?: string) {
@@ -178,9 +179,11 @@ export function useStarterPack(starterpackId?: string) {
                 contract: edge.node.contract,
                 entrypoint: edge.node.entrypoint,
                 merkleRoot: edge.node.merkleRoot,
+                description: edge.node.description,
               };
             })
-            .filter((drop): drop is NonNullable<typeof drop> => drop !== null);
+            .filter((drop): drop is NonNullable<typeof drop> => drop !== null)
+            .sort((a, b) => a.network.localeCompare(b.network));
           setMerkleDrops(drops);
         }
       })

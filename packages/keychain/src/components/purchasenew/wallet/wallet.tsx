@@ -30,16 +30,34 @@ export function SelectWallet() {
     Map<string, ExternalWallet[]>
   >(new Map());
 
-  const selectedNetworks = useMemo(
-    () =>
+  const selectedNetworks = useMemo(() => {
+    let networks =
       platforms
         ?.split(";")
         .map((platform) =>
           networkWalletData.networks.find((n) => n.platform === platform),
         )
-        .filter(Boolean) || [],
-    [platforms],
-  );
+        .filter(Boolean) || [];
+
+    // If acquisition type is claimed, filter networks to only show those with merkle drop support
+    if (
+      starterpackDetails?.acquisitionType ===
+        StarterpackAcquisitionType.Claimed &&
+      starterpackDetails.merkleDrops?.length
+    ) {
+      const supportedNetworkPlatforms = new Set(
+        starterpackDetails.merkleDrops.map((drop) =>
+          drop.network.toLowerCase(),
+        ),
+      );
+
+      networks = networks.filter(
+        (network) => network && supportedNetworkPlatforms.has(network.platform),
+      );
+    }
+
+    return networks;
+  }, [platforms, starterpackDetails]);
 
   useEffect(() => {
     if (!selectedNetworks.length || !wallets) {
@@ -126,12 +144,16 @@ export function SelectWallet() {
                       starterpackDetails?.acquisitionType ===
                       StarterpackAcquisitionType.Claimed
                     ) {
-                      const key = starterpackDetails?.merkleDrops?.find(
-                        (drop) =>
-                          drop.network ===
-                          (network.platform.toUpperCase() as MerkleDropNetwork),
-                      )?.key;
-                      navigate(`/purchase/claim/${key}/${address}`);
+                      const keys = starterpackDetails?.merkleDrops
+                        ?.filter(
+                          (drop) =>
+                            drop.network ===
+                            (network.platform.toUpperCase() as MerkleDropNetwork),
+                        )
+                        .map((drop) => drop.key)
+                        .join(";");
+
+                      navigate(`/purchase/claim/${keys}/${address}`);
                     } else {
                       navigate(`/purchase/checkout/crypto`);
                     }

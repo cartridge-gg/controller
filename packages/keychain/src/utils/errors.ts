@@ -392,9 +392,14 @@ export function parseExecutionError(
     // Parse the tuple error format
     const tupleMatch = errorMessage.match(/^\((.*)\)$/);
     if (tupleMatch) {
-      const allErrors = [...tupleMatch[1].matchAll(/'([^']*)'/g)].map(
+      // Extract all quoted strings from the tuple (both single and double quotes)
+      const singleQuoted = [...tupleMatch[1].matchAll(/'([^']*)'/g)].map(
         (match) => match[1],
       );
+      const doubleQuoted = [...tupleMatch[1].matchAll(/"([^"]*)"/g)].map(
+        (match) => match[1],
+      );
+      const allErrors = [...singleQuoted, ...doubleQuoted];
       const meaningfulError =
         allErrors.find(
           (err) =>
@@ -514,10 +519,14 @@ export function parseExecutionError(
           /Failure reason:\s*\n?\s*\((.*)\)\./s,
         );
         if (tupleMatch) {
-          // Extract all quoted strings from the tuple
-          const allErrors = [...tupleMatch[1].matchAll(/'([^']*)'/g)].map(
+          // Extract all quoted strings from the tuple (both single and double quotes)
+          const singleQuoted = [...tupleMatch[1].matchAll(/'([^']*)'/g)].map(
             (match) => match[1],
           );
+          const doubleQuoted = [...tupleMatch[1].matchAll(/"([^"]*)"/g)].map(
+            (match) => match[1],
+          );
+          const allErrors = [...singleQuoted, ...doubleQuoted];
 
           // Find the most meaningful error, excluding common framework errors
           const meaningfulError = allErrors.find(
@@ -1319,6 +1328,32 @@ export const starknetTransactionExecutionErrorTestCases = [
           selector:
             "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
           error: ["Wallet Connection Required for Double or Nothing Spin"],
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x013f1386e3d4267a1502d8ca782d34b63634d969d3c527a511814c2ef67b84c4, class hash: 0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x0 (''), \"Jackpot has ended\", 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      },
+    },
+    expected: {
+      raw: "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x013f1386e3d4267a1502d8ca782d34b63634d969d3c527a511814c2ef67b84c4, class hash: 0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x0 (''), \"Jackpot has ended\", 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      summary: "Jackpot has ended",
+      stack: [
+        {
+          address:
+            "0x013f1386e3d4267a1502d8ca782d34b63634d969d3c527a511814c2ef67b84c4",
+          class:
+            "0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+          selector:
+            "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          error: ["Jackpot has ended"],
         },
       ],
     },
