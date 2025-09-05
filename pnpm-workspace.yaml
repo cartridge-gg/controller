@@ -4,14 +4,17 @@ packages:
   - examples/svelte
   - packages/*
 catalog:
+  "@cartridge/arcade": "0.3.1"
+  "@cartridge/marketplace": "0.0.15"
   "@cartridge/controller-wasm": "^0.3.3"
   "@cartridge/penpal": "^6.2.4"
   "@cartridge/ui": "github:cartridge-gg/ui#b097f98"
   "@eslint/js": "^9.18.0"
   "@noble/curves": "^1.9.0"
   "@noble/hashes": "^1.8.0"
-  "@dojoengine/core": "^1.7.0-preview.2"
-  "@dojoengine/torii-wasm": "^1.7.0-preview.2"
+  "@dojoengine/core": "^1.7.0-preview.3"
+  "@dojoengine/sdk": "^1.7.0-preview.3"
+  "@dojoengine/torii-wasm": "^1.7.0-preview.3"
   "@starknet-io/types-js": "^0.8.4"
   "@starknet-react/chains": "^5.0.1"
   "@starknet-react/core": "^5.0.1"

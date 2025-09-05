@@ -50,7 +50,7 @@
       "@noble/hashes": "catalog:",
       "@dojoengine/core": "catalog:",
       "@dojoengine/torii-wasm": "catalog:",
-      "@dojoengine/sdk": "^1.7.0-preview.2",
+      "@dojoengine/sdk": "catalog:",
       "@starknet-react/core": "catalog:",
       "@starknet-react/chains": "catalog:",
       "@starknet-io/types-js": "catalog:"
