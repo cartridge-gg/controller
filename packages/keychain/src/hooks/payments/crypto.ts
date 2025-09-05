@@ -336,10 +336,69 @@ export const useCryptoPayment = () => {
     };
   }
 
+  async function createStarterPackPayment(
+    username: string,
+    platform: ExternalPlatform,
+    data: {
+      starterpackId: string;
+      starterPack: {
+        name: string;
+        description: string;
+        iconURL?: string;
+        items?: Array<{
+          name: string;
+          description: string;
+          iconURL?: string;
+          price?: number;
+          amount?: number;
+          type: "NONFUNGIBLE" | "FUNGIBLE";
+        }>;
+      };
+      outsideExecution: Record<string, unknown>;
+      totalPrice: number;
+    },
+    teamId?: string,
+    isMainnet: boolean = false,
+  ) {
+    const result = await client.request<CreateLayerswapPaymentMutation>(
+      CreateLayerswapPaymentDocument,
+      {
+        input: {
+          username,
+          credits: {
+            amount: data.totalPrice,
+            decimals: 2,
+          },
+          sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
+          purchaseType: PurchaseType.STARTERPACK,
+          starterpackId: data.starterpackId,
+          teamId,
+          isMainnet,
+          outsideExecution: JSON.stringify(data.outsideExecution),
+          metadata: JSON.stringify({
+            name: data.starterPack.name,
+            description: data.starterPack.description,
+            iconURL: data.starterPack.iconURL,
+            items: data.starterPack.items,
+          }),
+        },
+      },
+    );
+
+    return {
+      id: result.createLayerswapPayment.cryptoPaymentId,
+      depositAddress: result.createLayerswapPayment.sourceDepositAddress,
+      tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
+      tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
+      swapId: result.createLayerswapPayment.swapId,
+    };
+  }
+
   return {
     sendPayment,
     quotePaymentFees,
     waitForPayment,
+    createStarterPackPayment,
     isLoading,
     error,
   };

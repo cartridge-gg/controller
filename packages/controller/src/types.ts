@@ -8,7 +8,7 @@ import {
 import {
   Abi,
   BigNumberish,
-  Call,
+  Call as StarknetCall,
   constants,
   InvocationsDetails,
 } from "starknet";
@@ -127,7 +127,7 @@ export interface Keychain {
 
   deploy(): Promise<DeployReply | ConnectError>;
   execute(
-    calls: Call | Call[],
+    calls: StarknetCall | StarknetCall[],
     abis?: Abi[],
     transactionsDetail?: InvocationsDetails,
     sync?: boolean,
@@ -147,9 +147,13 @@ export interface Keychain {
   delegateAccount(): string;
   username(): string;
   openPurchaseCredits(): void;
-  openExecute(calls: Call[]): Promise<void>;
+  openExecute(calls: StarknetCall[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
   openStarterPack(starterpackId: string): void;
+  openStarterPackWithData(data: {
+    starterpackId: string;
+    starterPack: StarterPack;
+  }): Promise<void>;
   navigate(path: string): Promise<void>;
 
   // External wallet methods
@@ -244,3 +248,25 @@ export type Token = "eth" | "strk" | "lords" | "usdc" | "usdt";
 export type Tokens = {
   erc20?: Token[];
 };
+
+export interface StarterPackItem {
+  type: "NONFUNGIBLE" | "FUNGIBLE";
+  name: string;
+  description: string;
+  iconURL?: string;
+  amount?: number;
+  price?: number;
+  call: StarknetCall[];
+}
+
+export interface StarterPack {
+  name: string;
+  description: string;
+  iconURL?: string;
+  items?: StarterPackItem[];
+}
+
+export interface StarterPackOptions {
+  starterpackId: string;
+  starterPack: StarterPack;
+}

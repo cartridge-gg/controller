@@ -22,6 +22,7 @@ import {
   ProbeReply,
   ProfileContextTypeVariant,
   ResponseCodes,
+  StarterPackOptions,
 } from "./types";
 import { parseChainId } from "./utils";
 
@@ -355,18 +356,30 @@ export default class ControllerProvider extends BaseProvider {
     });
   }
 
-  openStarterPack(starterpackId: string) {
+  async openStarterPack(options: string | StarterPackOptions): Promise<void> {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    // Navigate first, then open the iframe
-    this.keychain
-      .navigate(`/purchase/starterpack/${starterpackId}`)
-      .then(() => {
+    // Handle backward compatibility
+    if (typeof options === "string") {
+      // Existing behavior - just navigate to the starterpack page
+      this.keychain.navigate(`/purchase/starterpack/${options}`).then(() => {
         this.iframes.keychain?.open();
       });
+    } else {
+      // New behavior - pass full StarterPack definition
+      const { starterpackId, starterPack } = options;
+
+      // Pass StarterPack data to keychain for processing
+      await this.keychain.openStarterPackWithData({
+        starterpackId,
+        starterPack,
+      });
+
+      this.iframes.keychain?.open();
+    }
   }
 
   async openExecute(calls: any, chainId?: string) {
