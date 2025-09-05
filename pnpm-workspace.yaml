@@ -8,7 +8,7 @@ catalog:
   "@cartridge/marketplace": "0.0.15"
   "@cartridge/controller-wasm": "^0.3.3"
   "@cartridge/penpal": "^6.2.4"
-  "@cartridge/ui": "github:cartridge-gg/ui#b097f98"
+  "@cartridge/ui": "github:cartridge-gg/ui#8fde96d"
   "@eslint/js": "^9.18.0"
   "@noble/curves": "^1.9.0"
   "@noble/hashes": "^1.8.0"
