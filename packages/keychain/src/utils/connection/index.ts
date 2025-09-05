@@ -81,7 +81,7 @@ export function connectToController<ParentMethods extends object>({
           type: "open-starterpack-with-data",
           resolve: () => Promise.resolve(),
           reject: () => Promise.reject(),
-          starterPackData: data as any,
+          starterPackData: data as { starterpackId: string; starterPack: Record<string, unknown> },
         });
         navigate(`/purchase/starterpack/${data.starterpackId}`);
       },

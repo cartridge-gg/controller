@@ -25,12 +25,6 @@ import {
   StarterPackOptions,
 } from "./types";
 import { parseChainId } from "./utils";
-import {
-  calculateStarterPackPrice,
-  aggregateStarterPackCalls,
-  generateNonce,
-  getDefaultExpiry,
-} from "./utils/starterpack";
 
 export default class ControllerProvider extends BaseProvider {
   private keychain?: AsyncMethodReturns<Keychain>;
@@ -376,30 +370,12 @@ export default class ControllerProvider extends BaseProvider {
       });
     } else {
       // New behavior - pass full StarterPack definition
-      const { starterpackId, starterPack, outsideExecutionConfig } = options;
+      const { starterpackId, starterPack } = options;
 
-      // Calculate total price
-      const totalPrice = calculateStarterPackPrice(starterPack);
-
-      // Aggregate all calls into multicall
-      const multicall = aggregateStarterPackCalls(starterPack);
-
-      // Construct outside execution
-      const outsideExecution = {
-        caller: outsideExecutionConfig?.caller || "0x0",
-        nonce: outsideExecutionConfig?.nonce || generateNonce(),
-        execute_after: outsideExecutionConfig?.executeAfter || 0,
-        execute_before:
-          outsideExecutionConfig?.executeBefore || getDefaultExpiry(),
-        calls: multicall,
-      };
-
-      // Pass everything to keychain
+      // Pass StarterPack data to keychain for processing
       await this.keychain.openStarterPackWithData({
         starterpackId,
         starterPack,
-        outsideExecution,
-        totalPrice,
       });
 
       this.iframes.keychain?.open();

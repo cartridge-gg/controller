@@ -153,8 +153,6 @@ export interface Keychain {
   openStarterPackWithData(data: {
     starterpackId: string;
     starterPack: StarterPack;
-    outsideExecution: any;
-    totalPrice: number;
   }): Promise<void>;
   navigate(path: string): Promise<void>;
 
@@ -251,12 +249,6 @@ export type Tokens = {
   erc20?: Token[];
 };
 
-export interface Call {
-  to: string;
-  selector: string;
-  calldata: string[];
-}
-
 export interface StarterPackItem {
   type: "NONFUNGIBLE" | "FUNGIBLE";
   name: string;
@@ -264,7 +256,7 @@ export interface StarterPackItem {
   iconURL?: string;
   amount?: number;
   price?: number;
-  call: Call[];
+  call: StarknetCall[];
 }
 
 export interface StarterPack {
@@ -277,10 +269,4 @@ export interface StarterPack {
 export interface StarterPackOptions {
   starterpackId: string;
   starterPack: StarterPack;
-  outsideExecutionConfig?: {
-    caller?: string;
-    nonce?: string;
-    executeAfter?: number;
-    executeBefore?: number;
-  };
 }
