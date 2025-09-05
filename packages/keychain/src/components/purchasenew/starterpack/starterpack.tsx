@@ -103,7 +103,7 @@ export function StarterPackInner({
               </h1>
               {mintAllowance && (
                 <h1 className="text-xs font-semibold text-foreground-400">
-                  Mints Remaining: {mintAllowance.limit - mintAllowance.count} /{" "}
+                  Remaining: {mintAllowance.limit - mintAllowance.count} /{" "}
                   {mintAllowance.limit}
                 </h1>
               )}
