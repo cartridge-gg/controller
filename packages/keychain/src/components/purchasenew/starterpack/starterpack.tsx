@@ -1,8 +1,5 @@
-import {
-  MerkleDrop,
-  StarterItemData,
-  StarterItemType,
-} from "@/hooks/starterpack";
+import { MerkleDrop } from "@/hooks/starterpack";
+import { StarterPackItem, StarterPackItemType } from "@/utils/starterpack";
 import {
   Button,
   HeaderInner,
@@ -69,7 +66,7 @@ export function StarterPackInner({
   mintAllowance?: MintAllowance;
   merkleDrops?: MerkleDrop[];
   acquisitionType: StarterpackAcquisitionType;
-  starterpackItems?: StarterItemData[];
+  starterpackItems?: StarterPackItem[];
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();
@@ -110,12 +107,12 @@ export function StarterPackInner({
             </div>
             <div className="flex flex-col gap-4">
               {starterpackItems
-                .filter((item) => item.type === StarterItemType.NFT)
+                .filter((item) => item.type === StarterPackItemType.NONFUNGIBLE)
                 .map((item, index) => (
                   <StarterItem key={index} {...item} />
                 ))}
               {starterpackItems
-                .filter((item) => item.type === StarterItemType.CREDIT)
+                .filter((item) => item.type === StarterPackItemType.FUNGIBLE)
                 .map((item, index) => (
                   <StarterItem key={index} {...item} />
                 ))}

@@ -17,7 +17,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
   InfoIcon,
-  useUI,
   SelectValue,
   CaratIcon,
   SelectTrigger,
@@ -54,7 +53,6 @@ import {
 const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectionPurchase() {
-  const { closeModal } = useUI();
   const { address: contractAddress, tokenId } = useParams();
   const { project } = useConnection();
   const { tokens } = useTokens();
@@ -227,15 +225,7 @@ export function CollectionPurchase() {
     } finally {
       setLoading(false);
     }
-  }, [
-    closeModal,
-    token,
-    tokenOrders,
-    totalPrice,
-    provider,
-    navigate,
-    location,
-  ]);
+  }, [token, tokenOrders, totalPrice, provider, navigate, location]);
 
   const status = useMemo(() => {
     if (collectionStatus === "error" || assetsStatus === "error")

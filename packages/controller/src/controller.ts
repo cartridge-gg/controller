@@ -22,7 +22,7 @@ import {
   ProbeReply,
   ProfileContextTypeVariant,
   ResponseCodes,
-  StarterPackOptions,
+  StarterPack,
 } from "./types";
 import { parseChainId } from "./utils";
 
@@ -356,7 +356,7 @@ export default class ControllerProvider extends BaseProvider {
     });
   }
 
-  async openStarterPack(options: string | StarterPackOptions): Promise<void> {
+  async openStarterPack(options: string | StarterPack): Promise<void> {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;

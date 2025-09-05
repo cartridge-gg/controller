@@ -7,6 +7,9 @@ import {
   LayerswapQuoteQuery,
   LayerswapQuoteDocument,
   LayerswapSourceNetwork,
+  PurchaseType,
+  CreateLayerswapPaymentInput,
+  LayerswapDestinationNetwork,
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
@@ -22,11 +25,7 @@ import {
 } from "../../utils/solana";
 import { ethers } from "ethers";
 import erc20abi from "./erc20abi.json" assert { type: "json" };
-
-export enum PurchaseType {
-  CREDITS = "CREDITS",
-  STARTERPACK = "STARTERPACK",
-}
+import { num, OutsideTransaction } from "starknet";
 
 export interface SendPaymentResult {
   paymentId: string;
@@ -245,13 +244,15 @@ export const useCryptoPayment = () => {
               amount: wholeCredits,
               decimals: 0,
             },
-            sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
+            sourceNetwork: mapPlatformToLayerswapSourceNetwork(
+              platform,
+              isMainnet,
+            ),
             purchaseType: starterpackId
-              ? PurchaseType.STARTERPACK
-              : PurchaseType.CREDITS,
+              ? PurchaseType.Starterpack
+              : PurchaseType.Credits,
             starterpackId,
             teamId,
-            isMainnet,
           },
         },
       );
@@ -315,10 +316,13 @@ export const useCryptoPayment = () => {
             amount: wholeCredits,
             decimals: 0,
           },
-          sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
+          sourceNetwork: mapPlatformToLayerswapSourceNetwork(
+            platform,
+            isMainnet,
+          ),
           purchaseType: starterpackId
-            ? PurchaseType.STARTERPACK
-            : PurchaseType.CREDITS,
+            ? PurchaseType.Starterpack
+            : PurchaseType.Credits,
           starterpackId,
           layerswapFees,
           teamId,
@@ -339,51 +343,34 @@ export const useCryptoPayment = () => {
   async function createStarterPackPayment(
     username: string,
     platform: ExternalPlatform,
-    data: {
-      starterpackId: string;
-      starterPack: {
-        name: string;
-        description: string;
-        iconURL?: string;
-        items?: Array<{
-          name: string;
-          description: string;
-          iconURL?: string;
-          price?: number;
-          amount?: number;
-          type: "NONFUNGIBLE" | "FUNGIBLE";
-        }>;
-      };
-      outsideExecution: Record<string, unknown>;
-      totalPrice: number;
-    },
-    teamId?: string,
+    outsideTransaction: OutsideTransaction,
+    amount: bigint,
     isMainnet: boolean = false,
   ) {
-    const result = await client.request<CreateLayerswapPaymentMutation>(
-      CreateLayerswapPaymentDocument,
-      {
-        input: {
-          username,
-          credits: {
-            amount: data.totalPrice,
-            decimals: 2,
+    const result = await client.request<
+      CreateLayerswapPaymentMutation,
+      { input: CreateLayerswapPaymentInput }
+    >(CreateLayerswapPaymentDocument, {
+      input: {
+        username,
+        sourceNetwork: mapPlatformToLayerswapSourceNetwork(platform, isMainnet),
+        destinationNetwork: isMainnet
+          ? LayerswapDestinationNetwork.StarknetMainnet
+          : LayerswapDestinationNetwork.StarknetSepolia,
+        purchaseType: PurchaseType.Starterpack,
+        outsideExecution: {
+          address: num.toHex(outsideTransaction.signerAddress),
+          execution: outsideTransaction.outsideExecution,
+          signature: outsideTransaction.signature as string[],
+          swap: {
+            tokenAddress: isMainnet
+              ? "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8"
+              : "0x04a762673b08014b8e7a969f94cc752a93b8ae209ace1aa01fea14a22f8a865c",
+            amount: num.toHex(amount),
           },
-          sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
-          purchaseType: PurchaseType.STARTERPACK,
-          starterpackId: data.starterpackId,
-          teamId,
-          isMainnet,
-          outsideExecution: JSON.stringify(data.outsideExecution),
-          metadata: JSON.stringify({
-            name: data.starterPack.name,
-            description: data.starterPack.description,
-            iconURL: data.starterPack.iconURL,
-            items: data.starterPack.items,
-          }),
         },
       },
-    );
+    });
 
     return {
       id: result.createLayerswapPayment.cryptoPaymentId,
@@ -483,7 +470,7 @@ export const getExplorer = (
   }
 };
 
-function mapPlatformToLayerswapNetwork(
+function mapPlatformToLayerswapSourceNetwork(
   platform: ExternalPlatform,
   isMainnet: boolean,
 ): LayerswapSourceNetwork {

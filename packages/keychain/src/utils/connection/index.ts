@@ -74,21 +74,16 @@ export function connectToController<ParentMethods extends object>({
         });
       },
       openStarterPack: () => (options: string | Record<string, unknown>) => {
+        setContext({
+          type: "open-starter-pack",
+          starterpack: options,
+          resolve: () => Promise.resolve(),
+          reject: () => Promise.reject(),
+        });
+
+        // Navigate based on the type of options
         if (typeof options === "string") {
-          // Handle backward compatibility - string ID
           navigate(`/purchase/starterpack/${options}`);
-        } else {
-          // Handle new behavior - StarterPackOptions object
-          setContext({
-            type: "open-starterpack-with-data",
-            resolve: () => Promise.resolve(),
-            reject: () => Promise.reject(),
-            starterPackData: options as {
-              starterpackId: string;
-              starterPack: Record<string, unknown>;
-            },
-          });
-          navigate(`/purchase/starterpack/${options.starterpackId}`);
         }
       },
       switchChain: () => switchChain({ setController, setRpcUrl }),

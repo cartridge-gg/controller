@@ -1,6 +1,6 @@
+import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { AmountSelection } from "../funding/AmountSelection";
 import { Balance, BalanceType } from "./Balance";
-import { PurchaseType } from "@/hooks/payments/crypto";
 import { PurchaseState } from "./types";
 
 export type PurchaseContentProps = {
@@ -19,7 +19,7 @@ export function PurchaseContent({
   onAmountChanged,
 }: PurchaseContentProps) {
   if (state === PurchaseState.SELECTION) {
-    if (type === PurchaseType.CREDITS) {
+    if (type === PurchaseType.Credits) {
       return (
         <AmountSelection
           onChange={onAmountChanged}

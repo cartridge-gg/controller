@@ -6,10 +6,10 @@ import { client } from "@/utils/graphql";
 import {
   CreateStripePaymentIntentDocument,
   CreateStripePaymentIntentMutation,
+  PurchaseType,
   StripePaymentDocument,
   StripePaymentQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { PurchaseType } from "./crypto";
 
 const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
   const { controller } = useConnection();
@@ -75,8 +75,8 @@ const useStripePayment = ({ isSlot }: { isSlot?: boolean }) => {
               teamId,
               starterpackId,
               purchaseType: starterpackId
-                ? PurchaseType.STARTERPACK
-                : PurchaseType.CREDITS,
+                ? PurchaseType.Starterpack
+                : PurchaseType.Credits,
               isMainnet: isLiveMode,
             },
           },

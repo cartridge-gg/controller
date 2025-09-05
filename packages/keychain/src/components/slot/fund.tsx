@@ -3,7 +3,7 @@ import Controller from "@/utils/controller";
 import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/ui/utils/api/cartridge";
 import { Purchase } from "../purchase";
-import { PurchaseType } from "@/hooks/payments/crypto";
+import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import {
   Button,
   Card,
@@ -87,7 +87,7 @@ export function Fund() {
     return (
       <Purchase
         title={`Fund ${selectedTeam?.name}`}
-        type={PurchaseType.CREDITS}
+        type={PurchaseType.Credits}
         isSlot={true}
         teamId={selectedTeam?.id}
         // onBack={() => {

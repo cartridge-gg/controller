@@ -49,7 +49,7 @@ const OFFSET = 10;
 export function CollectibleAsset() {
   const account = useAccount();
   const address = account?.address || "";
-  const { chainId, project, controller } = useConnection();
+  const { chainId, project } = useConnection();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [cap, setCap] = useState(OFFSET);
@@ -188,15 +188,7 @@ export function CollectibleAsset() {
         setLoading(false);
       }
     },
-    [
-      contractAddress,
-      asset,
-      provider,
-      controller,
-      selfOrders,
-      navigate,
-      location,
-    ],
+    [contractAddress, asset, provider, selfOrders, navigate, location],
   );
 
   const status = useMemo(() => {

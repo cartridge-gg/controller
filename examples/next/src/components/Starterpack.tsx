@@ -44,7 +44,7 @@ export const Starterpack = () => {
         description: "A powerful starting weapon",
         iconURL: "https://example.com/sword.png",
         amount: 1,
-        price: 50,
+        price: 50000000,
         call: [
           {
             contractAddress:
@@ -60,7 +60,7 @@ export const Starterpack = () => {
         description: "In-game currency",
         iconURL: "https://example.com/gold.png",
         amount: 1000,
-        price: 0.01,
+        price: 10000,
         call: [
           {
             contractAddress:
@@ -76,7 +76,7 @@ export const Starterpack = () => {
         description: "Restore health",
         iconURL: "https://example.com/potions.png",
         amount: 5,
-        price: 10,
+        price: 10000000,
         call: [
           {
             contractAddress:
@@ -115,7 +115,6 @@ export const Starterpack = () => {
           <Button
             onClick={() => {
               controllerConnector.controller.openStarterPack({
-                starterpackId: "custom-warrior-pack",
                 starterPack: customStarterPack,
               });
             }}
@@ -123,34 +122,6 @@ export const Starterpack = () => {
             Custom Warrior Pack ($110)
           </Button>
         </div>
-      </div>
-
-      <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">
-          Custom Starter Pack Example
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-          This example shows how to create a custom starter pack. Contract calls
-          are automatically executed via outside execution after payment:
-        </p>
-        <ul className="list-disc list-inside text-sm space-y-1">
-          <li>
-            <strong>Legendary Sword</strong> (NFT): $50 - Mints a unique weapon
-          </li>
-          <li>
-            <strong>Gold Coins</strong> (Fungible): $10 (1000 × $0.01) - In-game
-            currency
-          </li>
-          <li>
-            <strong>Health Potions</strong> (Fungible): $50 (5 × $10) -
-            Consumable items
-          </li>
-        </ul>
-        <p className="text-sm font-semibold mt-2">Total: $110</p>
-        <p className="text-xs text-gray-500 mt-1">
-          All contract calls are automatically executed via outside execution
-          after successful payment
-        </p>
       </div>
     </div>
   );

@@ -16,10 +16,8 @@ import { ConnectionContext } from "@/components/provider/connection";
 import {
   StarterPack,
   StarterPackItem,
+  StarterPackItemType,
   calculateStarterPackPrice,
-  aggregateStarterPackCalls,
-  generateNonce,
-  getDefaultExpiry,
 } from "@/utils/starterpack";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
@@ -29,11 +27,8 @@ import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
-import {
-  StarterPackDetails,
-  useStarterPack,
-  StarterItemType,
-} from "@/hooks/starterpack";
+import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
+import { OutsideTransaction } from "starknet";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -193,20 +188,23 @@ export const PurchaseProvider = ({
   // Handle custom starterpack data from controller
   useEffect(() => {
     if (
-      connectionContext?.context?.type === "open-starterpack-with-data" &&
-      connectionContext.context.starterPackData
+      connectionContext?.context?.type === "open-starter-pack" &&
+      typeof connectionContext.context.starterpack === "object" &&
+      connectionContext.context.starterpack !== null
     ) {
       const context = connectionContext.context;
-      const { starterPack, starterpackId: customId } = context.starterPackData;
-
-      setStarterpackId(customId);
+      const starterpackData = context.starterpack as {
+        starterpackId: string;
+        starterPack: Record<string, unknown>;
+      };
+      const { starterPack, starterpackId: customId } = starterpackData;
 
       // Cast to get proper typing
       const typedStarterPack = starterPack as unknown as StarterPack;
 
       // Calculate total price from items
       const totalPrice = calculateStarterPackPrice(typedStarterPack);
-      setUsdAmount(totalPrice);
+      setUsdAmount(Number(totalPrice) / 1000000);
 
       // Create items from the custom starterpack data
       const customPurchaseItems: Item[] =
@@ -214,8 +212,11 @@ export const PurchaseProvider = ({
           title: item.name,
           subtitle: item.description,
           icon: item.iconURL || "🎁",
-          value: (item.price || 0) * (item.amount || 1),
-          type: item.type === "NONFUNGIBLE" ? ItemType.NFT : ItemType.CREDIT,
+          value: Number((item.price || 0n) * BigInt(item.amount || 1)),
+          type:
+            item.type === StarterPackItemType.NONFUNGIBLE
+              ? ItemType.NFT
+              : ItemType.CREDIT,
         })) || [];
 
       setPurchaseItems(customPurchaseItems);
@@ -224,22 +225,11 @@ export const PurchaseProvider = ({
       setStarterpackDetails({
         id: customId,
         name: typedStarterPack.name,
-        starterPackItems:
-          typedStarterPack.items?.map((item: StarterPackItem) => ({
-            title: item.name,
-            description: item.description,
-            image: item.iconURL || "",
-            price: item.price || 0,
-            type:
-              item.type === "NONFUNGIBLE"
-                ? StarterItemType.NFT
-                : StarterItemType.CREDIT,
-            contractAddress: item.call?.[0]?.contractAddress || "",
-          })) || [],
+        starterPackItems: typedStarterPack.items || [],
         supply: 0, // Just a number, not an object
         mintAllowance: { count: 1, limit: 1 },
         merkleDrops: [],
-        priceUsd: totalPrice,
+        priceUsd: Number(totalPrice),
         acquisitionType: StarterpackAcquisitionType.Paid,
       });
 
@@ -247,8 +237,9 @@ export const PurchaseProvider = ({
     }
   }, [
     connectionContext?.context?.type,
-    connectionContext?.context?.type === "open-starterpack-with-data"
-      ? connectionContext.context.starterPackData
+    connectionContext?.context?.type === "open-starter-pack" &&
+    typeof connectionContext.context.starterpack === "object"
+      ? connectionContext.context.starterpack
       : undefined,
   ]);
 
@@ -257,16 +248,17 @@ export const PurchaseProvider = ({
 
     // Skip default logic if we have custom starterpack data
     if (
-      connectionContext?.context?.type === "open-starterpack-with-data" &&
-      connectionContext.context.starterPackData
+      connectionContext?.context?.type === "open-starter-pack" &&
+      typeof connectionContext.context.starterpack === "object" &&
+      connectionContext.context.starterpack !== null
     ) {
       return;
     }
 
     const purchaseItems: Item[] = items.map((item) => ({
-      title: item.title,
+      title: item.name,
       subtitle: item.description,
-      icon: item.image,
+      icon: item.iconURL,
       value: priceUsd,
       type: ItemType.NFT,
     }));
@@ -343,38 +335,37 @@ export const PurchaseProvider = ({
 
       // Check if we have custom starterpack data
       if (
-        connectionContext?.context?.type === "open-starterpack-with-data" &&
-        connectionContext.context.starterPackData &&
+        connectionContext?.context?.type === "open-starter-pack" &&
+        typeof connectionContext.context.starterpack === "object" &&
+        connectionContext.context.starterpack !== null &&
         createStarterPackPayment
       ) {
         // Process custom starter pack data
-        const data = connectionContext.context.starterPackData;
-        const typedStarterPack = data.starterPack as unknown as StarterPack;
-
-        // Calculate total price and aggregate calls
-        const totalPrice = calculateStarterPackPrice(typedStarterPack);
-        const multicall = aggregateStarterPackCalls(typedStarterPack);
-
-        // Generate outside execution parameters
-        const outsideExecution = {
-          caller: "0x0", // Default caller
-          nonce: generateNonce(),
-          execute_after: 0,
-          execute_before: getDefaultExpiry(),
-          calls: multicall,
+        const starterpackData = connectionContext.context.starterpack as {
+          starterpackId: string;
+          starterPack: Record<string, unknown>;
         };
+        const typedStarterPack =
+          starterpackData.starterPack as unknown as StarterPack;
+
+        // Calculate total price
+        const totalPrice = calculateStarterPackPrice(typedStarterPack);
+
+        // // Generate outside execution parameters
+        // const outsideExecution = {
+        //   caller: "0x0", // Default caller
+        //   nonce: generateNonce(),
+        //   execute_after: 0,
+        //   execute_before: getDefaultExpiry(),
+        //   calls: multicall,
+        // };
 
         // Create payment with processed data
         const result = await createStarterPackPayment(
           controller.username(),
           selectedPlatform!,
-          {
-            starterpackId: data.starterpackId,
-            starterPack: typedStarterPack,
-            outsideExecution,
-            totalPrice,
-          },
-          undefined,
+          {} as unknown as OutsideTransaction,
+          totalPrice,
           connectionContext.isMainnet || false,
         );
         setPaymentId(result.id);
