@@ -1,4 +1,21 @@
-import { StarterPack, Call } from "../types";
+import { Call } from "starknet";
+
+export interface StarterPackItem {
+  type: "NONFUNGIBLE" | "FUNGIBLE";
+  name: string;
+  description: string;
+  iconURL?: string;
+  amount?: number;
+  price?: number;
+  call: Call[];
+}
+
+export interface StarterPack {
+  name: string;
+  description: string;
+  iconURL?: string;
+  items?: StarterPackItem[];
+}
 
 export function calculateStarterPackPrice(starterPack: StarterPack): number {
   if (!starterPack.items) return 0;

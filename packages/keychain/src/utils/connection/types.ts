@@ -91,8 +91,6 @@ export type OpenStarterPackWithDataCtx = {
   starterPackData: {
     starterpackId: string;
     starterPack: Record<string, unknown>;
-    outsideExecution: Record<string, unknown>;
-    totalPrice: number;
   };
   resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;

@@ -47,8 +47,9 @@ export const Starterpack = () => {
         price: 50,
         call: [
           {
-            to: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-            selector: "mint",
+            contractAddress:
+              "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            entrypoint: "mint",
             calldata: [account?.address || "0x0", "1", "0"],
           },
         ],
@@ -62,8 +63,9 @@ export const Starterpack = () => {
         price: 0.01,
         call: [
           {
-            to: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-            selector: "transfer",
+            contractAddress:
+              "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            entrypoint: "transfer",
             calldata: [account?.address || "0x0", "1000", "0"],
           },
         ],
@@ -72,12 +74,14 @@ export const Starterpack = () => {
         type: "FUNGIBLE",
         name: "Health Potions",
         description: "Restore health",
+        iconURL: "https://example.com/potions.png",
         amount: 5,
         price: 10,
         call: [
           {
-            to: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-            selector: "transfer",
+            contractAddress:
+              "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            entrypoint: "transfer",
             calldata: [account?.address || "0x0", "5", "0"],
           },
         ],
@@ -113,9 +117,6 @@ export const Starterpack = () => {
               controllerConnector.controller.openStarterPack({
                 starterpackId: "custom-warrior-pack",
                 starterPack: customStarterPack,
-                outsideExecutionConfig: {
-                  executeBefore: Math.floor(Date.now() / 1000) + 3600, // 1 hour
-                },
               });
             }}
           >
@@ -129,8 +130,8 @@ export const Starterpack = () => {
           Custom Starter Pack Example
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-          This example shows how to create a custom starter pack with outside
-          execution:
+          This example shows how to create a custom starter pack. Contract calls
+          are automatically executed via outside execution after payment:
         </p>
         <ul className="list-disc list-inside text-sm space-y-1">
           <li>
@@ -147,8 +148,8 @@ export const Starterpack = () => {
         </ul>
         <p className="text-sm font-semibold mt-2">Total: $110</p>
         <p className="text-xs text-gray-500 mt-1">
-          All contract calls will be executed via outside execution after
-          payment
+          All contract calls are automatically executed via outside execution
+          after successful payment
         </p>
       </div>
     </div>

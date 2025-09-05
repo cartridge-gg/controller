@@ -13,15 +13,33 @@ import {
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { ConnectionContext } from "@/components/provider/connection";
-import { StarterPackItem } from "@cartridge/controller";
+import {
+  StarterPack,
+  StarterPackItem,
+  calculateStarterPackPrice,
+  aggregateStarterPackCalls,
+  generateNonce,
+  getDefaultExpiry,
+} from "@/utils/starterpack";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+
+interface StarterPackContextData {
+  starterPackData: {
+    starterPack: StarterPack;
+    starterpackId: string;
+  };
+}
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
-import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
+import {
+  StarterPackDetails,
+  useStarterPack,
+  StarterItemType,
+} from "@/hooks/starterpack";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -182,20 +200,19 @@ export const PurchaseProvider = ({
   useEffect(() => {
     if (
       connectionContext?.context?.type === "open-starterpack-with-data" &&
-      (connectionContext.context as any).starterPackData
+      (connectionContext.context as StarterPackContextData).starterPackData
     ) {
-      const data = connectionContext.context as any;
-      const {
-        starterPack,
-        totalPrice,
-        starterpackId: customId,
-      } = data.starterPackData;
+      const data = connectionContext.context as StarterPackContextData;
+      const { starterPack, starterpackId: customId } = data.starterPackData;
 
       setStarterpackId(customId);
-      setUsdAmount(totalPrice);
 
       // Cast to get proper typing
-      const typedStarterPack = starterPack as any;
+      const typedStarterPack = starterPack as StarterPack;
+
+      // Calculate total price from items
+      const totalPrice = calculateStarterPackPrice(typedStarterPack);
+      setUsdAmount(totalPrice);
 
       // Create items from the custom starterpack data
       const customPurchaseItems: Item[] =
@@ -218,7 +235,12 @@ export const PurchaseProvider = ({
             title: item.name,
             description: item.description,
             image: item.iconURL || "",
-            contractAddress: item.call?.[0]?.to || "",
+            price: item.price || 0,
+            type:
+              item.type === "NONFUNGIBLE"
+                ? StarterItemType.NFT
+                : StarterItemType.CREDIT,
+            contractAddress: item.call?.[0]?.contractAddress || "",
           })) || [],
         supply: 0, // Just a number, not an object
         mintAllowance: { count: 1, limit: 1 },
@@ -231,7 +253,7 @@ export const PurchaseProvider = ({
     }
   }, [
     connectionContext?.context?.type,
-    (connectionContext?.context as any)?.starterPackData,
+    (connectionContext?.context as StarterPackContextData | undefined)?.starterPackData,
   ]);
 
   useEffect(() => {
@@ -240,7 +262,7 @@ export const PurchaseProvider = ({
     // Skip default logic if we have custom starterpack data
     if (
       connectionContext?.context?.type === "open-starterpack-with-data" &&
-      (connectionContext.context as any).starterPackData
+      (connectionContext.context as StarterPackContextData).starterPackData
     ) {
       return;
     }
@@ -326,14 +348,36 @@ export const PurchaseProvider = ({
       // Check if we have custom starterpack data
       if (
         connectionContext?.context?.type === "open-starterpack-with-data" &&
-        (connectionContext.context as any).starterPackData &&
+        (connectionContext.context as StarterPackContextData).starterPackData &&
         createStarterPackPayment
       ) {
-        // Use custom payment method for custom starterpack
+        // Process custom starter pack data
+        const data = (connectionContext.context as StarterPackContextData).starterPackData;
+        const typedStarterPack = data.starterPack as StarterPack;
+
+        // Calculate total price and aggregate calls
+        const totalPrice = calculateStarterPackPrice(typedStarterPack);
+        const multicall = aggregateStarterPackCalls(typedStarterPack);
+
+        // Generate outside execution parameters
+        const outsideExecution = {
+          caller: "0x0", // Default caller
+          nonce: generateNonce(),
+          execute_after: 0,
+          execute_before: getDefaultExpiry(),
+          calls: multicall,
+        };
+
+        // Create payment with processed data
         const result = await createStarterPackPayment(
           controller.username(),
           selectedPlatform!,
-          (connectionContext.context as any).starterPackData,
+          {
+            starterpackId: data.starterpackId,
+            starterPack: typedStarterPack,
+            outsideExecution,
+            totalPrice,
+          },
           undefined,
           connectionContext.isMainnet || false,
         );
