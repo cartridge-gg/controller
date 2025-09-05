@@ -6,10 +6,21 @@ import { Badge } from "./badge";
 
 export const StarterItem = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & StarterItemData
+  React.HTMLAttributes<HTMLDivElement> &
+    StarterItemData & { contractAddress?: string }
 >(
   (
-    { title, description, image, type, className, price, value, ...props },
+    {
+      title,
+      description,
+      image,
+      type,
+      className,
+      price,
+      value,
+      contractAddress, // eslint-disable-line @typescript-eslint/no-unused-vars
+      ...props
+    },
     ref,
   ) => {
     return (
