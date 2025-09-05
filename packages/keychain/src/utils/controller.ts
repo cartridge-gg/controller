@@ -237,13 +237,18 @@ export default class Controller {
     res.l1_gas_consumed = Math.ceil(
       Number(res.l1_gas_consumed) * 1.5,
     ).toString();
+    res.l1_gas_price = Math.ceil(Number(res.l1_gas_price) * 1.5).toString();
     res.l2_gas_consumed = Math.ceil(
       Number(res.l2_gas_consumed) * 1.5,
     ).toString();
+    res.l2_gas_price = Math.ceil(Number(res.l2_gas_price) * 1.5).toString();
     res.l1_data_gas_consumed = Math.ceil(
       Number(res.l1_data_gas_consumed) * 1.5,
     ).toString();
-    res.overall_fee = Math.ceil(Number(res.overall_fee) * 1.5).toString();
+    res.l1_data_gas_price = Math.ceil(
+      Number(res.l1_data_gas_price) * 1.5,
+    ).toString();
+    res.overall_fee = Math.ceil(Number(res.overall_fee) * 1.5 * 1.5).toString();
 
     return res;
   }
