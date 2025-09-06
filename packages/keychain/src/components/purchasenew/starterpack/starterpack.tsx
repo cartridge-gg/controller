@@ -1,4 +1,7 @@
-import { StarterItemData, StarterItemType } from "@/hooks/starterpack";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { useNavigation, usePurchaseContext } from "@/context";
+import { MerkleDrop, StarterItemData, StarterItemType } from "@/hooks/starterpack";
+import { StarterPackItem } from "@cartridge/controller";
 import {
   Button,
   Card,
@@ -11,17 +14,18 @@ import {
   MintAllowance,
   StarterpackAcquisitionType,
 } from "@cartridge/ui/utils/api/cartridge";
+import { useEffect } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import { LoadingState } from "../loading";
+import { MerkleDrops } from "./merkledrop";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
-import { useParams } from "react-router-dom";
-import { useNavigation, usePurchaseContext } from "@/context";
-import { useEffect } from "react";
-import { ErrorAlert } from "@/components/ErrorAlert";
-import { LoadingState } from "../loading";
-import { StarterPackItem } from "@cartridge/controller";
+import { decodeStarterPack } from "@/utils/starterpack-url";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
+  const [searchParams] = useSearchParams();
+  const data = searchParams.get("data");
 
   const {
     isStarterpackLoading,

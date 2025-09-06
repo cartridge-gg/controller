@@ -10,16 +10,9 @@ import {
   ExternalPlatform,
   ExternalWallet,
   ExternalWalletType,
-  StarterPackItem,
+  StarterPack,
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { ConnectionContext } from "@/components/provider/connection";
-import {
-  calculateStarterPackPrice,
-  isStarterPack,
-  normalizePriceToBigInt,
-} from "@/utils/starterpack";
-import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -28,7 +21,8 @@ import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
 import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
-import { OutsideTransaction } from "starknet";
+import { starterPackToLayerswapInput } from "@/utils/payments";
+import { CreateLayerswapPaymentInput } from "@cartridge/ui/utils/api/cartridge";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -99,7 +93,7 @@ export interface PurchaseContextType {
   setUsdAmount: (amount: number) => void;
   setPurchaseItems: (items: Item[]) => void;
   setClaimItems: (items: Item[]) => void;
-  setStarterpackId: (id: string) => void;
+  setStarterpack: (starterpack: string | StarterPack) => void;
   setTransactionHash: (hash: string) => void;
 
   // Payment actions
@@ -127,10 +121,9 @@ export const PurchaseProvider = ({
   children,
   isSlot = false,
 }: PurchaseProviderProps) => {
-  const { controller } = useConnection();
-  const connectionContext = useContext(ConnectionContext);
+  const { controller, isMainnet } = useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
-  const [starterpackId, setStarterpackId] = useState<string | undefined>();
+  const [starterpack, setStarterpack] = useState<string | StarterPack>();
   const [starterpackDetails, setStarterpackDetails] = useState<
     StarterPackDetails | undefined
   >();
@@ -168,9 +161,8 @@ export const PurchaseProvider = ({
     error: cryptoError,
     isLoading: isCryptoLoading,
     sendPayment,
-    quotePaymentFees,
+    estimateStarterPackFees,
     waitForPayment,
-    createStarterPackPayment,
   } = useCryptoPayment();
 
   const {
@@ -183,70 +175,30 @@ export const PurchaseProvider = ({
     acquisitionType,
     isLoading: isStarterpackLoading,
     error: starterpackError,
-  } = useStarterPack(starterpackId);
+  } = useStarterPack(starterpack);
 
-  // Handle custom starterpack data from controller
-  useEffect(() => {
-    if (connectionContext?.context?.type !== "open-starter-pack") {
-      return;
-    }
-
-    const context = connectionContext.context;
-    if (isStarterPack(context.starterpack)) {
-      const starterpack = context.starterpack;
-
-      // Calculate total price from items
-      const totalPrice = calculateStarterPackPrice(starterpack);
-      setUsdAmount(Number(totalPrice) / 1000000);
-
-      // Create items from the custom starterpack data
-      const customPurchaseItems: Item[] =
-        starterpack.items?.map((item: StarterPackItem) => ({
-          title: item.name,
-          subtitle: item.description,
-          icon: item.iconURL || "🎁",
-          value: Number(
-            normalizePriceToBigInt(
-              (item as unknown as Record<string, unknown>).price ?? item.price,
-            ) * BigInt(item.amount || 1),
-          ),
-          type: item.type === "NONFUNGIBLE" ? ItemType.NFT : ItemType.CREDIT,
-        })) || [];
-
-      setPurchaseItems(customPurchaseItems);
-
-      // Create custom starter pack details
-      setStarterpackDetails({
-        name: starterpack.name,
-        starterPackItems: starterpack.items || [],
-        supply: 0, // Just a number, not an object
-        mintAllowance: { count: 1, limit: 1 },
-        merkleDrops: [],
-        priceUsd: Number(totalPrice),
-        acquisitionType: StarterpackAcquisitionType.Paid,
-      });
-
-      return; // Skip the default useStarterPack logic
-    }
-  }, [
-    connectionContext?.context?.type,
-    connectionContext?.context?.type === "open-starter-pack" &&
-    typeof connectionContext.context.starterpack === "object"
-      ? connectionContext.context.starterpack
-      : undefined,
-  ]);
+  const [swapInput, setSwapInput] = useState<CreateLayerswapPaymentInput>();
 
   useEffect(() => {
-    if (!starterpackId) return;
+    const getSwapInput = async () => {
+      if (!controller || !starterpack || !selectedPlatform) {
+        setSwapInput(undefined);
+        return;
+      }
+      const input = await starterPackToLayerswapInput(
+        starterpack,
+        controller.username(),
+        selectedPlatform,
+        isMainnet,
+        controller,
+      );
+      setSwapInput(input);
+    };
+    getSwapInput();
+  }, [controller, starterpack, selectedPlatform, isMainnet]);
 
-    // Skip default logic if we have custom starterpack data
-    if (
-      connectionContext?.context?.type === "open-starter-pack" &&
-      typeof connectionContext.context.starterpack === "object" &&
-      connectionContext.context.starterpack !== null
-    ) {
-      return;
-    }
+  useEffect(() => {
+    if (!starterpack) return;
 
     const purchaseItems: Item[] = items.map((item) => ({
       title: item.name,
@@ -260,7 +212,7 @@ export const PurchaseProvider = ({
     setUsdAmount(priceUsd);
 
     setStarterpackDetails({
-      id: starterpackId,
+      id: typeof starterpack == "string" ? starterpack : undefined,
       name,
       starterPackItems: items,
       supply,
@@ -270,7 +222,7 @@ export const PurchaseProvider = ({
       acquisitionType,
     });
   }, [
-    starterpackId,
+    starterpack,
     items,
     priceUsd,
     name,
@@ -303,7 +255,7 @@ export const PurchaseProvider = ({
         usdToCredits(usdAmount),
         controller.username(),
         undefined,
-        starterpackId,
+        typeof starterpack == "string" ? starterpack : undefined,
       );
       setClientSecret(paymentIntent.clientSecret);
       setCostDetails(paymentIntent.pricing);
@@ -311,7 +263,7 @@ export const PurchaseProvider = ({
       setDisplayError(e as Error);
       throw e;
     }
-  }, [usdAmount, controller, starterpackId, createPaymentIntent]);
+  }, [usdAmount, controller, starterpack, createPaymentIntent]);
 
   const onCryptoPurchase = useCallback(async () => {
     if (
@@ -319,76 +271,40 @@ export const PurchaseProvider = ({
       !selectedPlatform ||
       !walletAddress ||
       !walletType ||
-      !layerswapFees
+      !layerswapFees ||
+      !swapInput
     )
       return;
 
     try {
       setPaymentMethod("crypto");
 
-      // Check if we have custom starterpack data
-      if (
-        connectionContext?.context?.type === "open-starter-pack" &&
-        typeof connectionContext.context.starterpack === "object" &&
-        connectionContext.context.starterpack !== null &&
-        isStarterPack(connectionContext.context.starterpack) &&
-        createStarterPackPayment
-      ) {
-        // Process custom starter pack data
-        const starterpack = connectionContext.context.starterpack;
-        // Calculate total price
-        const totalPrice = calculateStarterPackPrice(starterpack);
+      swapInput.layerswapFees = layerswapFees;
 
-        // // Generate outside execution parameters
-        // const outsideExecution = {
-        //   caller: "0x0", // Default caller
-        //   nonce: generateNonce(),
-        //   execute_after: 0,
-        //   execute_before: getDefaultExpiry(),
-        //   calls: multicall,
-        // };
-
-        // Create payment with processed data
-        const result = await createStarterPackPayment(
-          controller.username(),
-          selectedPlatform!,
-          {} as unknown as OutsideTransaction,
-          totalPrice,
-          connectionContext.isMainnet || false,
-        );
-        setPaymentId(result.id);
-      } else {
-        // Use existing payment method
-        const { paymentId, transactionHash } = await sendPayment(
-          walletAddress,
-          walletType,
-          selectedPlatform,
-          usdToCredits(usdAmount),
-          undefined,
-          starterpackId,
-          layerswapFees,
-          (explorer) => {
-            setExplorer(explorer);
-          },
-        );
-        setPaymentId(paymentId);
-        setTransactionHash(transactionHash);
-      }
+      // Use existing payment method
+      const { paymentId, transactionHash } = await sendPayment(
+        swapInput,
+        walletAddress,
+        walletType,
+        selectedPlatform,
+        (explorer) => {
+          setExplorer(explorer);
+        },
+      );
+      setPaymentId(paymentId);
+      setTransactionHash(transactionHash);
     } catch (e) {
       setDisplayError(e as Error);
       throw e;
     }
   }, [
-    usdAmount,
     controller,
     selectedPlatform,
     walletAddress,
     walletType,
-    starterpackId,
+    swapInput,
     layerswapFees,
     sendPayment,
-    connectionContext,
-    createStarterPackPayment,
   ]);
 
   const onExternalConnect = useCallback(
@@ -433,17 +349,12 @@ export const PurchaseProvider = ({
   );
 
   const fetchFees = useCallback(async () => {
-    if (!controller || !selectedPlatform) return;
+    if (!swapInput) return;
+
     try {
       setIsFetchingFees(true);
 
-      const quote = await quotePaymentFees(
-        controller.username(),
-        selectedPlatform,
-        usdToCredits(usdAmount),
-        undefined,
-        starterpackId,
-      );
+      const quote = await estimateStarterPackFees(swapInput);
 
       const amountInCents = usdAmount * 100;
       const cartridgeFees = amountInCents * CARTRIDGE_FEE;
@@ -464,11 +375,9 @@ export const PurchaseProvider = ({
       setIsFetchingFees(false);
     }
   }, [
-    controller,
+    swapInput,
     usdAmount,
-    starterpackId,
-    selectedPlatform,
-    quotePaymentFees,
+    estimateStarterPackFees
   ]);
 
   const contextValue: PurchaseContextType = {
@@ -507,7 +416,7 @@ export const PurchaseProvider = ({
     setUsdAmount,
     setPurchaseItems,
     setClaimItems,
-    setStarterpackId,
+    setStarterpack,
     setTransactionHash,
 
     // Actions

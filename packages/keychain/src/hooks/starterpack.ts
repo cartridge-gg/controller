@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useContext } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ClaimFreeStarterpackDocument,
   ClaimFreeStarterpackMutation,
@@ -12,9 +12,8 @@ import { client } from "@/utils/graphql";
 import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
 import { uint256 } from "starknet";
-import { ConnectionContext } from "@/components/provider/connection";
-import { calculateStarterPackPrice, isStarterPack } from "@/utils/starterpack";
-import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
+import { calculateStarterPackPrice } from "@/utils/starterpack";
+import { StarterPack, StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 
 export const enum StarterItemType {
   NFT = "NFT",
@@ -47,9 +46,8 @@ export interface MerkleDrop {
   description?: string | null;
 }
 
-export function useStarterPack(starterpackId?: string) {
+export function useStarterPack(starterpack: string | StarterPack | undefined) {
   const { controller } = useController();
-  const connectionContext = useContext(ConnectionContext);
   const [isLoading, setIsLoading] = useState(true);
   const [isClaiming, setIsClaiming] = useState(false);
   const [supply, setSupply] = useState<number | undefined>(undefined);
@@ -90,19 +88,13 @@ export function useStarterPack(starterpackId?: string) {
     setIsLoading(true);
     setError(null);
 
-    if (!controller || !starterpackId) {
+    if (!controller || !starterpack) {
       setIsLoading(false);
       return;
     }
 
-    if (connectionContext?.context?.type !== "open-starter-pack") {
-      return;
-    }
-
-    const context = connectionContext.context;
-    if (isStarterPack(context.starterpack)) {
-      const starterpack = context.starterpack;
-
+    // Handle custom starter packs from URL
+    if (typeof starterpack == "object") {
       setName(starterpack.name || "");
       setDescription(starterpack.description || "");
       setAcquisitionType(StarterpackAcquisitionType.Paid);
@@ -112,13 +104,14 @@ export function useStarterPack(starterpackId?: string) {
       setPriceUsd(Number(totalPrice));
       setItems(starterpack.items);
 
-      return;
+      setIsLoading(false);
+      return
     }
 
     client
       .request<StarterPackQuery>(StarterPackDocument, {
         input: {
-          starterpackId: context.starterpack,
+          starterpackId: starterpack,
           accountId: controller?.username(),
         },
       })
@@ -201,12 +194,15 @@ export function useStarterPack(starterpackId?: string) {
           setMerkleDrops(drops);
         }
       })
-      .catch(setError)
+      .catch((error) => {
+        console.error(error)
+        setError(error)
+      })
       .finally(() => setIsLoading(false));
-  }, [controller, checkSupply, connectionContext?.context]);
+  }, [controller, checkSupply, starterpack]);
 
   const claim = useCallback(async () => {
-    if (!controller || !starterpackId) {
+    if (!controller || !starterpack || typeof starterpack != "string") {
       throw new Error("Controller or starterpack ID not found");
     }
 
@@ -214,7 +210,7 @@ export function useStarterPack(starterpackId?: string) {
     setError(null);
 
     const input: StarterpackInput = {
-      starterpackId: starterpackId,
+      starterpackId: starterpack,
       accountId: controller.username(),
     };
 
@@ -235,7 +231,7 @@ export function useStarterPack(starterpackId?: string) {
     } finally {
       setIsClaiming(false);
     }
-  }, [starterpackId, controller]);
+  }, [starterpack, controller]);
 
   return {
     name,

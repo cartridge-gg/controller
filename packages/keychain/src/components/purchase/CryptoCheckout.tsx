@@ -29,6 +29,8 @@ import { useCryptoPayment } from "@/hooks/payments/crypto";
 import { CostBreakdown } from "./CostBreakdown";
 import { StarterPackDetails } from "@/hooks/starterpack";
 import { creditsToUSD } from "@/hooks/tokens";
+import { useConnection } from "@/hooks/connection";
+import { creditsPurchaseToLayerswapInput } from "@/utils/payments";
 export const WALLET_CONFIG = {
   argent: {
     icon: ArgentIcon,
@@ -78,6 +80,7 @@ export function CryptoCheckout({
   initialState?: CheckoutState;
   onComplete: () => void;
 }) {
+  const { controller, isMainnet } = useConnection();
   const [error, setError] = useState<Error>();
   const { sendPayment, waitForPayment } = useCryptoPayment();
   const [state, setState] = useState<CheckoutState>(initialState);
@@ -103,17 +106,20 @@ export function CryptoCheckout({
   }, [starterpackDetails, wholeCredits]);
 
   const handleSendTransaction = useCallback(async () => {
+    if (!controller) {
+      return;
+    }
+
     setError(undefined);
+
     try {
       setState(CheckoutState.REQUESTING_PAYMENT);
+      const input = creditsPurchaseToLayerswapInput(controller.username(), starterpackDetails?.id, selectedWallet.platform!, isMainnet, wholeCredits, teamId)
       const res = await sendPayment(
+        input,
         walletAddress,
         selectedWallet.type,
         selectedWallet.platform!,
-        wholeCredits,
-        teamId,
-        starterpackDetails?.id,
-        undefined,
         (explorer) => {
           setState(CheckoutState.TRANSACTION_SUBMITTED);
           setExplorer(explorer);
@@ -130,13 +136,14 @@ export function CryptoCheckout({
       setState(CheckoutState.REVIEW_PURCHASE);
     }
   }, [
+    controller,
+    isMainnet,
     sendPayment,
     selectedWallet,
     wholeCredits,
     onComplete,
     walletAddress,
     teamId,
-    starterpackDetails?.id,
     waitForPayment,
   ]);
 

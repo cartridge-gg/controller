@@ -14,6 +14,7 @@ import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
 import { ConnectionCtx } from "./types";
+import { encodeStarterPack } from "@/utils/starterpack-url";
 
 export function connectToController<ParentMethods extends object>({
   setRpcUrl,
@@ -74,16 +75,15 @@ export function connectToController<ParentMethods extends object>({
         });
       },
       openStarterPack: () => (options: string | StarterPack) => {
-        setContext({
-          type: "open-starter-pack",
-          starterpack: options,
-          resolve: () => Promise.resolve(),
-          reject: () => Promise.reject(),
-        });
-
         // Navigate based on the type of options
         if (typeof options === "string") {
-          navigate(`/purchase/starterpack/${options}`);
+          navigate(`/purchase/starterpack/${options}`, { replace: true });
+        } else {
+          // For custom StarterPack objects, encode them in the URL
+          const encodedData = encodeStarterPack(options);
+          navigate(`/purchase/starterpack/custom?data=${encodedData}`, {
+            replace: true,
+          });
         }
       },
       switchChain: () => switchChain({ setController, setRpcUrl }),
