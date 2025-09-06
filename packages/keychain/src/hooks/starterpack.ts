@@ -168,7 +168,17 @@ export function useStarterPack(starterpackId?: string) {
 
         setItems(items);
 
-        if (details.starterpack?.merkleDrops?.edges) {
+        // For CLAIMED starterpacks, merkle drops are required
+        if (
+          details.starterpack!.acquisitionType ===
+          StarterpackAcquisitionType.Claimed
+        ) {
+          if (!details.starterpack!.merkleDrops?.edges?.length) {
+            throw new Error(
+              "No merkle drop snapshots associated with this starterpack",
+            );
+          }
+
           const drops: MerkleDrop[] = details.starterpack.merkleDrops.edges
             .filter((edge): edge is NonNullable<typeof edge> => edge !== null)
             .map((edge) => {
@@ -184,10 +194,17 @@ export function useStarterPack(starterpackId?: string) {
             })
             .filter((drop): drop is NonNullable<typeof drop> => drop !== null)
             .sort((a, b) => a.network.localeCompare(b.network));
+
           setMerkleDrops(drops);
         }
       })
-      .catch(setError)
+      .catch((error) => {
+        if (error.message && error.message.includes("Starterpack not found")) {
+          setError(new Error("Starterpack not found"));
+        } else {
+          setError(error as Error);
+        }
+      })
       .finally(() => setIsLoading(false));
   }, [starterpackId, controller, checkSupply]);
 
