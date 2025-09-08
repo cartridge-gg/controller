@@ -233,6 +233,22 @@ export default class Controller {
       toJsCalls(calls),
     )) as FeeEstimate;
     res.unit = "FRI";
+
+    // Scale all fee estimate values by 50% (equivalent to 1.5x)
+    // Using starknet.js addPercent pattern for consistency
+    const addPercent = (number: string | number, percent: number): string => {
+      const bigIntNum = BigInt(number);
+      return (bigIntNum + (bigIntNum * BigInt(percent)) / 100n).toString();
+    };
+
+    res.l1_gas_consumed = addPercent(res.l1_gas_consumed, 50);
+    res.l1_gas_price = addPercent(res.l1_gas_price, 50);
+    res.l2_gas_consumed = addPercent(res.l2_gas_consumed, 50);
+    res.l2_gas_price = addPercent(res.l2_gas_price, 50);
+    res.l1_data_gas_consumed = addPercent(res.l1_data_gas_consumed, 50);
+    res.l1_data_gas_price = addPercent(res.l1_data_gas_price, 50);
+    res.overall_fee = addPercent(addPercent(res.overall_fee, 50), 50); // 2.25x total
+
     return res;
   }
 
