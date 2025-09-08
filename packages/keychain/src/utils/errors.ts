@@ -298,6 +298,11 @@ function parseGraphQLErrorMessage(
   };
 }
 
+function capitalizeFirstLetter(str: string): string {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export function parseExecutionError(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any,
@@ -319,7 +324,7 @@ export function parseExecutionError(
   if (!executionError) {
     return {
       raw: JSON.stringify(error.data),
-      summary: error.message,
+      summary: capitalizeFirstLetter(error.message),
       stack: [],
     };
   }
@@ -367,7 +372,9 @@ export function parseExecutionError(
 
       return {
         raw: executionError,
-        summary: meaningfulError || "Transaction execution failed",
+        summary: capitalizeFirstLetter(
+          meaningfulError || "Transaction execution failed",
+        ),
         stack: [
           {
             address: contractMatch?.[1],
@@ -413,7 +420,9 @@ export function parseExecutionError(
 
       return {
         raw: JSON.stringify(executionError),
-        summary: "There was an error in the transaction",
+        summary: capitalizeFirstLetter(
+          meaningfulError || "There was an error in the transaction",
+        ),
         stack: [
           {
             address: objectError.contract_address,
@@ -648,7 +657,7 @@ export function parseExecutionError(
 
   return {
     raw: executionErrorRaw,
-    summary: summaryOveride ? summaryOveride : summary,
+    summary: summaryOveride ? summaryOveride : capitalizeFirstLetter(summary),
     stack: processedStack,
   };
 }
@@ -795,7 +804,7 @@ export const starknetTransactionExecutionErrorTestCases = [
     },
     expected: {
       raw: "Transaction reverted: Transaction execution has failed:\n0: Error in the called contract (contract address: 0x057156ef71dcfb930a272923dcbdc54392b6676497fdc143042ee1d4a7a861c1, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x2, 0x736561736f6e206973207374696c6c206f70656e6564 ('season is still opened'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
-      summary: "season is still opened",
+      summary: "Season is still opened",
       stack: [
         {
           address:
@@ -1240,7 +1249,7 @@ export const starknetTransactionExecutionErrorTestCases = [
     },
     expected: {
       raw: '{"class_hash":"0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf","contract_address":"0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b","error":"(0x617267656e742f6d756c746963616c6c2d6661696c6564 (\'argent/multicall-failed\'), 0x1, 0x753235365f737562204f766572666c6f77 (\'u256_sub Overflow\'), 0x454e545259504f494e545f4641494c4544 (\'ENTRYPOINT_FAILED\'))","selector":"0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad"}',
-      summary: "There was an error in the transaction",
+      summary: "U256_sub Overflow",
       stack: [
         {
           address:
