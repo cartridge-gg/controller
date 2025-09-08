@@ -109,7 +109,7 @@ export function StarterPackInner({
             mintAllowance={mintAllowance}
             starterpackItems={starterpackItems}
           />
-          {acquisitionType === StarterpackAcquisitionType.Claimed && (
+          {acquisitionType === StarterpackAcquisitionType.Claimed && !error && (
             <Card>
               <CardContent
                 className="flex flex-row justify-center items-center text-foreground-300 text-sm cursor-pointer h-[40px]"
