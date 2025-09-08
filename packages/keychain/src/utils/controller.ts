@@ -23,6 +23,7 @@ import {
   JsRegisterResponse,
   JsRemoveSignerInput,
   JsRevokableSession,
+  JsSignedOutsideExecution,
   Owner,
   Signer,
 } from "@cartridge/controller-wasm/controller";
@@ -237,6 +238,12 @@ export default class Controller {
 
   async signMessage(typedData: TypedData): Promise<Signature> {
     return this.cartridge.signMessage(JSON.stringify(typedData));
+  }
+
+  async signExecuteFromOutside(
+    calls: Call[],
+  ): Promise<JsSignedOutsideExecution> {
+    return await this.cartridge.signExecuteFromOutside(toJsCalls(calls));
   }
 
   async selfDeploy(maxFee?: FeeEstimate): Promise<DeployedAccountTransaction> {
