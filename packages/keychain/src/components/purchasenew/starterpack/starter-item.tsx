@@ -6,6 +6,7 @@ import { Badge } from "./badge";
 
 interface Props {
   containerClassName?: string;
+  showPrice?: boolean;
 }
 
 export const StarterItem = React.forwardRef<
@@ -22,6 +23,7 @@ export const StarterItem = React.forwardRef<
       containerClassName,
       price,
       value,
+      showPrice = true,
       fancy = false,
       ...props
     },
@@ -36,7 +38,7 @@ export const StarterItem = React.forwardRef<
         <Card className="relative overflow-visible h-[88px] select-none">
           {/* Price tag */}
           <div className="absolute -top-1 right-4">
-            {price !== 0 && fancy && <Badge price={price} />}
+            {price !== 0 && fancy && showPrice && <Badge price={price} />}
           </div>
           <CardContent
             className={cn(
@@ -57,7 +59,7 @@ export const StarterItem = React.forwardRef<
                     ? `${value} Credits`
                     : title}
                 </h3>
-                {!fancy && (
+                {!fancy && showPrice && (
                   <h3 className="text-sm font-medium text-foreground-100 truncate">
                     {`$${price.toLocaleString(undefined, {
                       minimumFractionDigits: 2,

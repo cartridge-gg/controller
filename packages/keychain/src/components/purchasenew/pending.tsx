@@ -12,11 +12,11 @@ import { Receiving } from "./receiving";
 import { PaymentMethod, Item, usePurchaseContext } from "@/context/purchase";
 import { Explorer, getExplorer } from "@/hooks/payments/crypto";
 import { ExternalWallet, humanizeString } from "@cartridge/controller";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
-import { StarterItemData } from "@/hooks/starterpack";
+import { StarterItemData, StarterItemType } from "@/hooks/starterpack";
 
 export function Pending() {
   const {
@@ -160,11 +160,24 @@ export function ClaimPendingInner({
         navigate("/purchase/success", { reset: true });
       });
   }, [controller, transactionHash, navigate]);
+
+  const claimItems = useMemo<Array<StarterItemData>>(() => {
+    return items.map((item) => ({
+      title: item.title,
+      description: item.subtitle || "",
+      image: item.icon?.toString() || "",
+      type: item.type as unknown as StarterItemType,
+      price: 0,
+      value: item.value,
+      fancy: false,
+    }));
+  }, [items]);
+
   return (
     <>
       <HeaderInner title="Pending Confirmation" icon={<Spinner />} />
       <LayoutContent>
-        <Receiving title="Receiving" items={items} isLoading={true} />
+        <Receiving title="Receiving" items={claimItems} isLoading={true} />
       </LayoutContent>
       <LayoutFooter>
         <ConfirmingTransaction

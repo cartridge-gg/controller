@@ -40,6 +40,8 @@ export function CostBreakdown({
     return <></>;
   }
 
+  console.log("cost details: ", costDetails);
+
   return (
     <Card className="gap-3">
       {rails === "crypto" && platform && (

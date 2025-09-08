@@ -35,4 +35,5 @@ export type ReceivingProps = {
   items: StarterItemData[];
   isLoading?: boolean;
   showTotal?: boolean;
+  showPrice?: boolean;
 };

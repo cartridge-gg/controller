@@ -14,6 +14,7 @@ export function Receiving({
   items,
   showTotal,
   isLoading,
+  showPrice,
 }: ReceivingProps) {
   return (
     <Card>
@@ -36,6 +37,7 @@ export function Receiving({
             <StarterItem
               key={index}
               {...item}
+              showPrice={showPrice}
               containerClassName="pt-0"
               className="rounded-none"
             />

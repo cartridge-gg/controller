@@ -61,7 +61,12 @@ export function PurchaseSuccessInner({
         icon={<CheckIcon />}
       />
       <LayoutContent>
-        <Receiving title="You Received" items={items} isLoading={false} />
+        <Receiving
+          title="You Received"
+          items={items}
+          isLoading={false}
+          showPrice={false}
+        />
       </LayoutContent>
       <LayoutFooter>
         <Button variant="secondary" onClick={closeModal}>

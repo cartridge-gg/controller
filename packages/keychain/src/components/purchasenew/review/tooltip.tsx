@@ -38,6 +38,9 @@ export const FeesTooltip = ({
     }
   }, [costDetails, isStripe]);
 
+  console.log("cartridge fee: ", cartridgeFee);
+  console.log("stripe fee: ", stripeFee);
+
   return (
     <TooltipProvider>
       <Tooltip defaultOpen={defaultOpen}>
