@@ -235,7 +235,7 @@ export default class Controller {
 
     // Scale all fee estimate values by 50% (equivalent to 1.5x)
     // Using starknet.js addPercent pattern for consistency
-    const addPercent = (number: string, percent: number): string => {
+    const addPercent = (number: string | number, percent: number): string => {
       const bigIntNum = BigInt(number);
       return (bigIntNum + (bigIntNum * BigInt(percent)) / 100n).toString();
     };
