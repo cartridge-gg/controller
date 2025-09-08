@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { PurchasePendingInner } from "./pending";
 import { CreditIcon } from "@cartridge/ui";
-import { ItemType } from "@/context/purchase";
+import { StarterItemType } from "@/hooks/starterpack";
 
 const meta = {
   component: PurchasePendingInner,
@@ -16,9 +16,10 @@ export const Credits: Story = {
     items: [
       {
         title: "Credits",
-        icon: <CreditIcon />,
-        value: 1000,
-        type: ItemType.CREDIT,
+        description: "Get 1000 credits to use in the marketplace",
+        image: CreditIcon.toString(),
+        price: 1000,
+        type: StarterItemType.CREDIT,
       },
     ],
   },
@@ -29,8 +30,10 @@ export const NFT: Story = {
     items: [
       {
         title: "Village pass",
-        icon: "https://r2.quddus.my/Frame%203231.png",
-        type: ItemType.NFT,
+        description: "Eternum Village",
+        price: 100,
+        image: "https://r2.quddus.my/Frame%203231.png",
+        type: StarterItemType.NFT,
       },
     ],
   },

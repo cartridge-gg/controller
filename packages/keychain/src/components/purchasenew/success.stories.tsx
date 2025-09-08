@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { PurchaseSuccessInner } from "./success";
 import { CreditIcon } from "@cartridge/ui";
-import { ItemType } from "@/context/purchase";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { StarterItemType } from "@/hooks/starterpack";
 
 const meta = {
   component: PurchaseSuccessInner,
@@ -18,9 +18,10 @@ export const Credits: Story = {
     items: [
       {
         title: "Credits",
-        icon: <CreditIcon />,
-        value: 1000,
-        type: ItemType.CREDIT,
+        description: "Get 1000 credits to use in the marketplace",
+        image: CreditIcon.toString(),
+        price: 1000,
+        type: StarterItemType.CREDIT,
       },
     ],
   },
@@ -32,8 +33,10 @@ export const NFT: Story = {
     items: [
       {
         title: "Village pass",
-        icon: "https://r2.quddus.my/Frame%203231.png",
-        type: ItemType.NFT,
+        description: "Eternum Village",
+        price: 100,
+        image: "https://r2.quddus.my/Frame%203231.png",
+        type: StarterItemType.NFT,
       },
     ],
   },

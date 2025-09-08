@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ReviewPurchase } from "./review";
-import { ItemType } from "@/context/purchase";
 import { StarterItemType } from "@/hooks/starterpack";
 
 const meta = {
@@ -45,9 +44,10 @@ export const CreditsOnly: Story = {
     items: [
       {
         title: "Credits",
-        value: 1000,
-        icon: "/ERC-20-Icon.svg",
-        type: ItemType.CREDIT,
+        description: "Get 1000 credits to use in the marketplace",
+        price: 1000,
+        image: "/ERC-20-Icon.svg",
+        type: StarterItemType.CREDIT,
       },
     ],
     costDetails: {
@@ -65,21 +65,24 @@ export const MultipleItems: Story = {
     items: [
       {
         title: "Village",
-        subtitle: "Eternum Village",
-        icon: "https://r2.quddus.my/Frame%203231.png",
-        type: ItemType.NFT,
+        description: "Eternum Village",
+        price: 100,
+        image: "https://r2.quddus.my/Frame%203231.png",
+        type: StarterItemType.NFT,
       },
       {
         title: "Warrior Pack",
-        subtitle: "Battle Collection",
-        icon: "https://r2.quddus.my/Frame%203231.png",
-        type: ItemType.NFT,
+        description: "Battle Collection",
+        price: 100,
+        image: "https://r2.quddus.my/Frame%203231.png",
+        type: StarterItemType.NFT,
       },
       {
         title: "Credits",
-        value: 750,
-        icon: "/ERC-20-Icon.svg",
-        type: ItemType.CREDIT,
+        description: "Get 750 credits to use in the marketplace",
+        price: 750,
+        image: "/ERC-20-Icon.svg",
+        type: StarterItemType.CREDIT,
       },
     ],
     costDetails: {
@@ -97,15 +100,17 @@ export const Loading: Story = {
     items: [
       {
         title: "Village",
-        subtitle: "Eternum Village",
-        icon: "https://r2.quddus.my/Frame%203231.png",
-        type: ItemType.NFT,
+        description: "Eternum Village",
+        price: 100,
+        image: "https://r2.quddus.my/Frame%203231.png",
+        type: StarterItemType.NFT,
       },
       {
         title: "Credits",
-        value: 500,
-        icon: "/ERC-20-Icon.svg",
-        type: ItemType.CREDIT,
+        description: "Get 500 credits to use in the marketplace",
+        price: 500,
+        image: "/ERC-20-Icon.svg",
+        type: StarterItemType.CREDIT,
       },
     ],
     costDetails: {
