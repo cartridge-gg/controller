@@ -1,6 +1,10 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useNavigation, usePurchaseContext } from "@/context";
-import { StarterPack, StarterPackItem, StarterPackItemType } from "@cartridge/controller";
+import {
+  StarterPack,
+  StarterPackItem,
+  StarterPackItemType,
+} from "@cartridge/controller";
 import {
   Button,
   Card,
