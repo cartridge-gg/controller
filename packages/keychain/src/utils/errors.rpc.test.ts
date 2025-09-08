@@ -209,7 +209,7 @@ describe("parseExecutionError - RPC Nested Error Format", () => {
 
     const result = parseExecutionError(error, 0);
 
-    expect(result.summary).toBe("free games exceeds max");
+    expect(result.summary).toBe("Free games exceeds max");
     expect(result.stack[0].address).toBe(
       "0x6a953c60b4ada1551b363c9171b3f89c6814df1432c51f6b5ba2c9ba938b48f",
     );
