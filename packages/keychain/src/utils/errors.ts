@@ -28,6 +28,75 @@ export function parseGraphQLError(error: unknown): {
   if (typeof error === "string") {
     // Handle string errors that might contain GraphQL error information
     try {
+      // Check if the error has the format: "{description}: {JSON_context}"
+      const jsonContextMatch = error.match(/^(.+?): (\{.*\})\.?$/);
+      if (jsonContextMatch) {
+        const [, description, jsonContext] = jsonContextMatch;
+        let formattedJson: string;
+        let parsedJson: unknown;
+
+        try {
+          // Try to parse and pretty-format the JSON
+          parsedJson = JSON.parse(jsonContext);
+          formattedJson = JSON.stringify(parsedJson, null, 2);
+        } catch {
+          // If JSON parsing fails, use the original
+          formattedJson = jsonContext;
+        }
+
+        // Check if the description contains an RPC error format
+        const rpcMatch = description.match(
+          /^rpc error: code = (\w+) desc = (.+)$/,
+        );
+        if (rpcMatch) {
+          const [, code, rpcDescription] = rpcMatch;
+          return {
+            raw: formattedJson,
+            summary: rpcDescription,
+            details: {
+              rpcError: `${code}: ${rpcDescription}`,
+            },
+          };
+        }
+
+        // Check if there's an RPC error in the JSON context
+        if (
+          parsedJson &&
+          typeof parsedJson === "object" &&
+          "response" in parsedJson &&
+          parsedJson.response &&
+          typeof parsedJson.response === "object" &&
+          "errors" in parsedJson.response &&
+          Array.isArray(parsedJson.response.errors) &&
+          parsedJson.response.errors.length > 0 &&
+          parsedJson.response.errors[0] &&
+          typeof parsedJson.response.errors[0] === "object" &&
+          "message" in parsedJson.response.errors[0] &&
+          typeof parsedJson.response.errors[0].message === "string"
+        ) {
+          const contextMessage = parsedJson.response.errors[0].message;
+          const contextRpcMatch = contextMessage.match(
+            /^rpc error: code = (\w+) desc = (.+)$/,
+          );
+          if (contextRpcMatch) {
+            const [, code, rpcDescription] = contextRpcMatch;
+            return {
+              raw: formattedJson,
+              summary: rpcDescription,
+              details: {
+                rpcError: `${code}: ${rpcDescription}`,
+              },
+            };
+          }
+        }
+
+        return {
+          raw: formattedJson,
+          summary: description,
+          details: {},
+        };
+      }
+
       if (error.includes("GraphQLErrors")) {
         // Parse the GraphQLErrors format: GraphQLErrors([Error { ... }])
         const match = error.match(/GraphQLErrors\(\[(.*)\]\)$/);
@@ -233,7 +302,7 @@ function parseGraphQLErrorMessage(
     } else if (code === "InvalidArgument") {
       return {
         raw: raw || message,
-        summary: "Invalid request parameters",
+        summary: description,
         details,
       };
     } else if (code === "PermissionDenied") {
@@ -1421,7 +1490,7 @@ export const graphqlErrorTestCases = [
     },
     expected: {
       raw: '{"errors":[{"message":"rpc error: code = InvalidArgument desc = invalid session token","path":["authenticate"],"extensions":{"code":"INVALID_TOKEN"}}]}',
-      summary: "Invalid request parameters",
+      summary: "invalid session token",
       details: {
         operation: "authenticate",
         rpcError: "InvalidArgument: invalid session token",
@@ -1448,6 +1517,27 @@ export const graphqlErrorTestCases = [
     },
   },
   {
+    input: {
+      errors: [
+        {
+          message:
+            "rpc error: code = InvalidArgument desc = Credits must be less than or equal to 2500000",
+          path: ["layerswapQuote"],
+        },
+      ],
+    },
+    expected: {
+      raw: '{"errors":[{"message":"rpc error: code = InvalidArgument desc = Credits must be less than or equal to 2500000","path":["layerswapQuote"]}]}',
+      summary: "Credits must be less than or equal to 2500000",
+      details: {
+        operation: "layerswapQuote",
+        rpcError:
+          "InvalidArgument: Credits must be less than or equal to 2500000",
+        path: ["layerswapQuote"],
+      },
+    },
+  },
+  {
     input: "Generic error message without GraphQL formatting",
     expected: {
       raw: "Generic error message without GraphQL formatting",
@@ -1463,6 +1553,51 @@ export const graphqlErrorTestCases = [
       raw: "Something went wrong with GraphQL",
       summary: "GraphQL request failed",
       details: {},
+    },
+  },
+  {
+    input:
+      'Credits must be less than or equal to 2500000: {"response":{"errors":[{"message":"rpc error: code = InvalidArgument desc = Credits must be less than or equal to 2500000","path":["layerswapQuote"]}],"data":null,"status":200,"headers":{}},"request":{"query":"\\n query LayerswapQuote($input: CreateLayerswapPaymentInput!) {\\n layerswapQuote(input: $input) {\\n requestedAmount\\n receivedAmount\\n totalFees\\n averageCompletionTime\\n }\\n}\\n ","variables":{"input":{"username":"test","credits":{"amount":11000000000,"decimals":0},"sourceNetwork":"ETHEREUM_SEPOLIA","destinationNetwork":"STARKNET_SEPOLIA","purchaseType":"CREDITS"}}}}',
+    expected: {
+      raw: JSON.stringify(
+        {
+          response: {
+            errors: [
+              {
+                message:
+                  "rpc error: code = InvalidArgument desc = Credits must be less than or equal to 2500000",
+                path: ["layerswapQuote"],
+              },
+            ],
+            data: null,
+            status: 200,
+            headers: {},
+          },
+          request: {
+            query:
+              "\n query LayerswapQuote($input: CreateLayerswapPaymentInput!) {\n layerswapQuote(input: $input) {\n requestedAmount\n receivedAmount\n totalFees\n averageCompletionTime\n }\n}\n ",
+            variables: {
+              input: {
+                username: "test",
+                credits: {
+                  amount: 11000000000,
+                  decimals: 0,
+                },
+                sourceNetwork: "ETHEREUM_SEPOLIA",
+                destinationNetwork: "STARKNET_SEPOLIA",
+                purchaseType: "CREDITS",
+              },
+            },
+          },
+        },
+        null,
+        2,
+      ),
+      summary: "Credits must be less than or equal to 2500000",
+      details: {
+        rpcError:
+          "InvalidArgument: Credits must be less than or equal to 2500000",
+      },
     },
   },
 ];

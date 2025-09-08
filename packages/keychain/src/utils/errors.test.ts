@@ -103,7 +103,7 @@ describe("parseGraphQLError", () => {
 
     expect(result).toEqual({
       raw: JSON.stringify(error),
-      summary: "Invalid request parameters",
+      summary: "invalid session token",
       details: {
         operation: "authenticate",
         rpcError: "InvalidArgument: invalid session token",
