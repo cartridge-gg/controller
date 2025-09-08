@@ -24,15 +24,15 @@ export const FeesTooltip = ({
 
   const cartridgeFee = useMemo(() => {
     if (isStripe) {
-      return convertCentsToDollars(costDetails.baseCostInCents * 5);
+      return convertCentsToDollars(costDetails.baseCostInCents * 0.05); // 5% fee for Stripe payments
     } else {
-      return convertCentsToDollars(costDetails.baseCostInCents * 2.5);
+      return convertCentsToDollars(costDetails.baseCostInCents * 0.025); // 2.5% fee for crypto payments
     }
   }, [costDetails, isStripe]);
 
   const stripeFee = useMemo(() => {
     if (isStripe) {
-      return convertCentsToDollars(costDetails.baseCostInCents * 3.9);
+      return convertCentsToDollars(costDetails.baseCostInCents * 0.039); // 3.9% fee for Stripe payments
     } else {
       return convertCentsToDollars(0);
     }
