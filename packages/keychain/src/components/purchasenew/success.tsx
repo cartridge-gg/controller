@@ -8,22 +8,34 @@ import {
 import { Receiving } from "./receiving";
 import { useConnection } from "@/hooks/connection";
 import { usePurchaseContext } from "@/context";
-import { Item } from "@/context/purchase";
 import { useMemo } from "react";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { StarterItemData, StarterItemType } from "@/hooks/starterpack";
 
 export function Success() {
   const { purchaseItems, claimItems, starterpackDetails } =
     usePurchaseContext();
 
-  const items = useMemo(() => {
+  const items = useMemo<Array<StarterItemData>>(() => {
     if (
       starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Claimed
     ) {
-      return claimItems;
+      return claimItems.map((item) => ({
+        title: item.title,
+        description: item.subtitle || "",
+        price: item.value || 0,
+        type: item.type as unknown as StarterItemType,
+        image: item.icon?.toString() || "",
+      }));
     }
 
-    return purchaseItems;
+    return purchaseItems.map((item) => ({
+      title: item.title,
+      description: item.subtitle || "",
+      price: item.value || 0,
+      type: item.type as unknown as StarterItemType,
+      image: item.icon?.toString() || "",
+    }));
   }, [starterpackDetails, claimItems, purchaseItems]);
 
   return (
@@ -38,7 +50,7 @@ export function PurchaseSuccessInner({
   items,
   acquisitionType,
 }: {
-  items: Item[];
+  items: StarterItemData[];
   acquisitionType: StarterpackAcquisitionType;
 }) {
   const { closeModal } = useConnection();

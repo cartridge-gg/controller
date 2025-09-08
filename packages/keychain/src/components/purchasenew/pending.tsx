@@ -16,11 +16,11 @@ import { useEffect, useState } from "react";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { StarterItemData } from "@/hooks/starterpack";
 
 export function Pending() {
   const {
     starterpackDetails,
-    purchaseItems,
     claimItems,
     explorer,
     paymentMethod,
@@ -42,7 +42,7 @@ export function Pending() {
 
   return (
     <PurchasePendingInner
-      items={purchaseItems}
+      items={starterpackDetails?.starterPackItems || []}
       paymentId={paymentId}
       transactionHash={transactionHash}
       paymentMethod={paymentMethod}
@@ -60,7 +60,7 @@ export function PurchasePendingInner({
   explorer,
   wallet,
 }: {
-  items: Item[];
+  items: StarterItemData[];
   paymentMethod?: PaymentMethod;
   transactionHash?: string;
   paymentId?: string;

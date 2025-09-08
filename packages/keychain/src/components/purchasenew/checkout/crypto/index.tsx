@@ -43,7 +43,7 @@ export function CryptoCheckout() {
         icon={<GiftIcon variant="solid" />}
       />
       <LayoutContent>
-        <Receiving title="Receiving" items={details?.starterPackItems} />
+        <Receiving title="Receiving" items={details?.starterPackItems || []} />
       </LayoutContent>
       <LayoutFooter>
         {!isFetchingFees && (

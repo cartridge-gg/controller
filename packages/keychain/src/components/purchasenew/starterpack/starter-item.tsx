@@ -44,7 +44,6 @@ export const StarterItem = React.forwardRef<
               className,
             )}
           >
-            {/* <img src={image} alt={title} className="size-16 object-cover" /> */}
             <Thumbnail
               rounded={type === StarterItemType.CREDIT}
               icon={image}

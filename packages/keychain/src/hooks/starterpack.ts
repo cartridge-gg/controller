@@ -16,6 +16,7 @@ import { uint256 } from "starknet";
 export const enum StarterItemType {
   NFT = "NFT",
   CREDIT = "CREDIT",
+  ERC20 = "ERC20",
 }
 
 export interface StarterItemData {

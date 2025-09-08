@@ -34,7 +34,7 @@ export interface Network {
   icon: React.ReactElement;
 }
 
-export enum ItemType {
+export const enum ItemType {
   CREDIT = "CREDIT",
   ERC20 = "ERC20",
   NFT = "NFT",

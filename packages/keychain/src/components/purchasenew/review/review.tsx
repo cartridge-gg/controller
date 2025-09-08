@@ -8,11 +8,11 @@ import {
 import { CostDetails } from "../types";
 import { CostBreakdown } from "./cost";
 import { Receiving } from "../receiving";
-import { Item } from "@/context/purchase";
 import { ExternalPlatform } from "@cartridge/controller";
+import { StarterItemData } from "@/hooks/starterpack";
 
 type ReviewPurchaseProps = {
-  items: Item[];
+  items: StarterItemData[];
   costDetails: CostDetails;
   platform?: ExternalPlatform;
   isLoading?: boolean;
