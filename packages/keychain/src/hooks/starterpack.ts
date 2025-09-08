@@ -19,11 +19,6 @@ import {
   StarterPackItemType,
 } from "@cartridge/controller";
 
-export const enum StarterItemType {
-  NFT = "NFT",
-  CREDIT = "CREDIT",
-}
-
 export interface StarterPackDetails {
   id?: string;
   name: string;
@@ -123,8 +118,7 @@ export function useStarterPack(starterpack: string | StarterPack | undefined) {
       .then(async (result) => {
         const details = result.starterpack!;
         const price = details.price.amount;
-        const factor = 10 ** details.price.decimals;
-        const priceUSD = creditsToUSD(Number(price) / factor);
+        const priceUSD = creditsToUSD(Number(price));
         setPriceUsd(priceUSD);
         setName(details.starterpack!.name);
         setDescription(details.starterpack!.description ?? "");
@@ -143,7 +137,7 @@ export function useStarterPack(starterpack: string | StarterPack | undefined) {
                 name: edge?.node?.name ?? "",
                 description: edge?.node?.description ?? "",
                 price: BigInt(priceUSD),
-                iconURL: edge?.node?.iconURL ?? "",
+                iconURL: edge?.node?.iconURL || "/placeholder.svg",
                 type: StarterPackItemType.NONFUNGIBLE,
               });
 

@@ -190,10 +190,6 @@ export default class Controller {
     );
   }
 
-  // async signExecuteFromOutside(calls: Call[]) {
-  //   return await this.cartridge.signO
-  // }
-
   async execute(
     calls: Call[],
     maxFee?: FeeEstimate,

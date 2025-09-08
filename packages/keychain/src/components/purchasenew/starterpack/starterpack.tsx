@@ -1,7 +1,6 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useNavigation, usePurchaseContext } from "@/context";
-import { MerkleDrop, StarterItemData, StarterItemType } from "@/hooks/starterpack";
-import { StarterPackItem } from "@cartridge/controller";
+import { StarterPack, StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 import {
   Button,
   Card,
@@ -17,7 +16,6 @@ import {
 import { useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { LoadingState } from "../loading";
-import { MerkleDrops } from "./merkledrop";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
 import { decodeStarterPack } from "@/utils/starterpack-url";
@@ -31,14 +29,22 @@ export function PurchaseStarterpack() {
     isStarterpackLoading,
     starterpackDetails: details,
     displayError,
-    setStarterpackId,
+    setStarterpack,
   } = usePurchaseContext();
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
-      setStarterpackId(starterpackId);
+      let starterpack: string | StarterPack = starterpackId;
+      if (data) {
+        try {
+          starterpack = decodeStarterPack(data);
+        } catch (error) {
+          console.error("Failed to decode starterpack data:", error);
+        }
+      }
+      setStarterpack(starterpack);
     }
-  }, [starterpackId, isStarterpackLoading, setStarterpackId]);
+  }, [starterpackId, data, isStarterpackLoading, setStarterpack]);
 
   if (isStarterpackLoading || !details) {
     return <LoadingState />;
@@ -128,7 +134,7 @@ export const StarterpackReceiving = ({
   starterpackItems = [],
 }: {
   mintAllowance?: MintAllowance;
-  starterpackItems?: StarterItemData[];
+  starterpackItems?: StarterPackItem[];
 }) => {
   return (
     <div className="flex flex-col gap-2">
@@ -145,12 +151,12 @@ export const StarterpackReceiving = ({
       </div>
       <div className="flex flex-col gap-4">
         {starterpackItems
-          .filter((item) => item.type === StarterItemType.NFT)
+          .filter((item) => item.type === StarterPackItemType.NONFUNGIBLE)
           .map((item, index) => (
             <StarterItem key={index} {...item} />
           ))}
         {starterpackItems
-          .filter((item) => item.type === StarterItemType.CREDIT)
+          .filter((item) => item.type === StarterPackItemType.FUNGIBLE)
           .map((item, index) => (
             <StarterItem key={index} {...item} />
           ))}

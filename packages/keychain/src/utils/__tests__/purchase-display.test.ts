@@ -102,6 +102,7 @@ describe("Purchase page display fixes", () => {
         name: "Free Welcome NFT",
         description: "A welcome gift NFT",
         amount: 1,
+        price: undefined as bigint | undefined,
         // No price field (free item)
       };
 

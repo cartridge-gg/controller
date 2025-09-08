@@ -99,7 +99,7 @@ export const Starterpack = () => {
               controllerConnector.controller.openStarterPack(purchaseSpId);
             }}
           >
-            Purchase Starterpack (Backend)
+            Purchase Starterpack
           </Button>
         </div>
         <div className="flex items-center gap-2">
@@ -108,7 +108,7 @@ export const Starterpack = () => {
               controllerConnector.controller.openStarterPack(claimSpId);
             }}
           >
-            Claim Starterpack (Backend)
+            Claim Starterpack
           </Button>
         </div>
         <div className="flex items-center gap-2">
