@@ -2,13 +2,12 @@ import {
   Card,
   CardHeader,
   CardListContent,
-  CardListItem,
   CardTitle,
   Spinner,
-  Thumbnail,
 } from "@cartridge/ui";
 import { ReceivingProps } from "./types";
-import { ItemType } from "@/context/purchase";
+import { StarterItemType } from "@/hooks/starterpack";
+import { StarterItem } from "./starterpack/starter-item";
 
 export function Receiving({
   title,
@@ -31,31 +30,21 @@ export function Receiving({
       </CardHeader>
 
       <CardListContent>
-        {items.map((item) => (
-          <CardListItem
-            key={item.title}
-            className="flex flex-row items-center p-3"
-          >
-            <div className="flex flex-row items-center gap-3">
-              <Thumbnail
-                size="lg"
-                icon={item.icon}
-                variant="light"
-                rounded={item.type === ItemType.CREDIT}
-              />
-              <div className="flex flex-col gap-0.5">
-                <p className="text-foreground-100 font-medium text-sm">
-                  {item.type === ItemType.CREDIT ? "Credits" : item.title}
-                </p>
-                <p className="text-foreground-300 font-normal text-xs">
-                  {item.type === ItemType.NFT
-                    ? item.subtitle
-                    : `${item.value?.toLocaleString()} Credits`}
-                </p>
-              </div>
-            </div>
-          </CardListItem>
-        ))}
+        {items
+          .filter((item) => item.type === StarterItemType.NFT)
+          .map((item, index) => (
+            <StarterItem
+              key={index}
+              {...item}
+              containerClassName="pt-0"
+              className="rounded-none"
+            />
+          ))}
+        {items
+          .filter((item) => item.type === StarterItemType.CREDIT)
+          .map((item, index) => (
+            <StarterItem key={index} {...item} />
+          ))}
       </CardListContent>
     </Card>
   );

@@ -1,4 +1,4 @@
-import { Item } from "@/context/purchase";
+import { StarterItemData } from "@/hooks/starterpack";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 
 export interface Wallet {
@@ -32,7 +32,7 @@ export type CostDetails = {
 
 export type ReceivingProps = {
   title?: string;
-  items: Item[];
+  items: StarterItemData[];
   isLoading?: boolean;
   showTotal?: boolean;
 };

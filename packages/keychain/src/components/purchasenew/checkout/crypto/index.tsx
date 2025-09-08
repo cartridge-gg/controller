@@ -13,7 +13,7 @@ import { ErrorAlert } from "@/components/ErrorAlert";
 
 export function CryptoCheckout() {
   const {
-    purchaseItems,
+    starterpackDetails: details,
     isCryptoLoading,
     displayError,
     selectedWallet,
@@ -43,7 +43,7 @@ export function CryptoCheckout() {
         icon={<GiftIcon variant="solid" />}
       />
       <LayoutContent>
-        <Receiving title="Receiving" items={purchaseItems} />
+        <Receiving title="Receiving" items={details?.starterPackItems} />
       </LayoutContent>
       <LayoutFooter>
         {!isFetchingFees && (
