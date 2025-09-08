@@ -12,11 +12,12 @@ import { client } from "@/utils/graphql";
 import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
 import { uint256 } from "starknet";
+import { ItemType } from "@/context/purchase";
 
 export const enum StarterItemType {
-  NFT = "NFT",
-  CREDIT = "CREDIT",
-  ERC20 = "ERC20",
+  NFT = ItemType.NFT,
+  CREDIT = ItemType.CREDIT,
+  ERC20 = ItemType.ERC20,
 }
 
 export interface StarterItemData {

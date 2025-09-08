@@ -9,6 +9,8 @@ import {
 import { convertCentsToDollars } from "./cost";
 import { useMemo } from "react";
 
+const STRIPE_FIXED_FEE_CENTS = 30; // $0.30
+
 export const FeesTooltip = ({
   trigger,
   defaultOpen,
@@ -22,21 +24,20 @@ export const FeesTooltip = ({
 }) => {
   const { layerswapFees } = usePurchaseContext();
 
-  const cartridgeFee = useMemo(() => {
-    if (isStripe) {
-      return convertCentsToDollars(costDetails.baseCostInCents * 0.05); // 5% fee for Stripe payments
-    } else {
-      return convertCentsToDollars(costDetails.baseCostInCents * 0.025); // 2.5% fee for crypto payments
-    }
-  }, [costDetails, isStripe]);
+  const cartridgeFeeInCents = useMemo(() => {
+    const percent = isStripe ? 0.05 : 0.025;
+    // round to nearest cent
+    return Math.round(costDetails.baseCostInCents * percent);
+  }, [costDetails.baseCostInCents, isStripe]);
 
-  const stripeFee = useMemo(() => {
-    if (isStripe) {
-      return convertCentsToDollars(costDetails.baseCostInCents * 0.039); // 3.9% fee for Stripe payments
-    } else {
-      return convertCentsToDollars(0);
-    }
-  }, [costDetails, isStripe]);
+  const stripeFeeInCents = useMemo(() => {
+    if (!isStripe) return 0;
+    const percentFee = Math.round(costDetails.baseCostInCents * 0.039); // 3.9% percent part
+    return percentFee + STRIPE_FIXED_FEE_CENTS; // include fixed fee
+  }, [costDetails.baseCostInCents, isStripe]);
+
+  const cartridgeFee = convertCentsToDollars(cartridgeFeeInCents);
+  const stripeFee = convertCentsToDollars(stripeFeeInCents);
 
   console.log("cartridge fee: ", cartridgeFee);
   console.log("stripe fee: ", stripeFee);
