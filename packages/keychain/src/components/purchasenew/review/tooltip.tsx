@@ -1,4 +1,4 @@
-import { usePurchaseContext } from "@/context";
+import { CostDetails, usePurchaseContext } from "@/context";
 import {
   Separator,
   Tooltip,
@@ -6,17 +6,38 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@cartridge/ui";
+import { convertCentsToDollars } from "./cost";
+import { useMemo } from "react";
 
 export const FeesTooltip = ({
   trigger,
   defaultOpen,
   isStripe,
+  costDetails,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
   isStripe: boolean;
+  costDetails: CostDetails;
 }) => {
   const { layerswapFees } = usePurchaseContext();
+
+  const cartridgeFee = useMemo(() => {
+    if (isStripe) {
+      return convertCentsToDollars(costDetails.baseCostInCents * 5);
+    } else {
+      return convertCentsToDollars(costDetails.baseCostInCents * 2.5);
+    }
+  }, [costDetails, isStripe]);
+
+  const stripeFee = useMemo(() => {
+    if (isStripe) {
+      return convertCentsToDollars(costDetails.baseCostInCents * 3.9);
+    } else {
+      return convertCentsToDollars(0);
+    }
+  }, [costDetails, isStripe]);
+
   return (
     <TooltipProvider>
       <Tooltip defaultOpen={defaultOpen}>
@@ -26,15 +47,20 @@ export const FeesTooltip = ({
           align="start"
           className="flex flex-col gap-2 bg-spacer-100 border border-background-150 text-foreground-400 min-w-[240px]"
         >
-          <div>Processing Fees:</div>
+          <div className="flex flex-row justify-between text-foreground-300">
+            <span>Credits:</span>
+            <span>{convertCentsToDollars(costDetails.baseCostInCents)}</span>
+          </div>
           <Separator className="bg-background-125" />
           {isStripe && (
             <div className="flex flex-row justify-between text-foreground-300">
-              Stripe Processing Fee: <div>3.9%</div>
+              <span>Stripe Fee:</span>
+              <span>{stripeFee}</span>
             </div>
           )}
           <div className="flex flex-row justify-between text-foreground-300">
-            Cartridge Processing Fee: <div>{isStripe ? "5%" : "2.5%"}</div>
+            <span>Cartridge Fee:</span>
+            <span>{cartridgeFee}</span>
           </div>
           {layerswapFees && (
             <div className="flex flex-row justify-between text-foreground-300">

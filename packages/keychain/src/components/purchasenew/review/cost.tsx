@@ -13,6 +13,10 @@ import { WALLET_CONFIG } from "@/components/purchase/CryptoCheckout";
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
 
+export const convertCentsToDollars = (cents: number): string => {
+  return `$${(cents / 100).toFixed(2)}`;
+};
+
 export function CostBreakdown({
   rails,
   costDetails,
@@ -20,8 +24,6 @@ export function CostBreakdown({
   platform,
   paymentUnit,
   openFeesTooltip = false,
-  displayFees = true,
-  displayCosts = true,
 }: {
   rails: PaymentRails;
   costDetails?: CostDetails;
@@ -29,13 +31,7 @@ export function CostBreakdown({
   platform?: ExternalPlatform;
   paymentUnit?: PaymentUnit;
   openFeesTooltip?: boolean;
-  displayFees?: boolean;
-  displayCosts?: boolean;
 }) {
-  const formatCurrency = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`;
-  };
-
   if (rails === "crypto" && !walletType) {
     return;
   }
@@ -43,6 +39,8 @@ export function CostBreakdown({
   if (!costDetails) {
     return <></>;
   }
+
+  console.log(costDetails);
 
   return (
     <Card className="gap-3">
@@ -54,35 +52,23 @@ export function CostBreakdown({
         </CardContent>
       )}
 
-      {displayCosts && (
-        <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
-          <div className="flex justify-between text-xs font-medium">
-            Cost
-            <div>{formatCurrency(costDetails.baseCostInCents)}</div>
-          </div>
-          {walletType && displayFees ? (
-            <div className="flex justify-between text-xs font-medium">
-              <div className="flex gap-2  text-xs font-medium">
-                Fees
+      <div className="flex flex-row gap-3 h-[40px]">
+        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+          <div className="flex justify-between text-sm font-medium w-full">
+            <div className="flex flex-row items-center gap-1">
+              <span>Total</span>
+              {costDetails.processingFeeInCents > 0 && (
                 <FeesTooltip
                   trigger={<InfoIcon size="xs" />}
                   isStripe={rails === "stripe"}
                   defaultOpen={openFeesTooltip}
+                  costDetails={costDetails}
                 />
-              </div>
-              <div>{formatCurrency(costDetails.processingFeeInCents)}</div>
+              )}
             </div>
-          ) : null}
-        </CardContent>
-      )}
-
-      <div className="flex flex-row gap-3 h-[40px]">
-        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
-          <div className="flex justify-between text-sm font-medium w-full">
-            Total
-            <div className="text-foreground-100">
-              {formatCurrency(costDetails.totalInCents)}
-            </div>
+            <span className="text-foreground-100">
+              {convertCentsToDollars(costDetails.totalInCents)}
+            </span>
           </div>
         </CardContent>
         <PaymentType unit={paymentUnit} />

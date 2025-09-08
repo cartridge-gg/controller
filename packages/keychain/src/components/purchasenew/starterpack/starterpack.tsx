@@ -158,9 +158,7 @@ export function StarterPackInner({
           <CostBreakdown
             rails="stripe"
             costDetails={price}
-            displayFees={false}
             paymentUnit="usdc"
-            displayCosts={false}
           />
         )}
         <Button onClick={onProceed} disabled={!!error}>
