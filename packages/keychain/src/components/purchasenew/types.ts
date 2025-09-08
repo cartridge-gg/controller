@@ -3,7 +3,7 @@ import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 
 export interface Wallet {
   name: string;
-  type: ExternalWalletType;
+  type: ExternalWalletType | "controller";
   icon: React.ReactNode;
   color?: string;
 }
