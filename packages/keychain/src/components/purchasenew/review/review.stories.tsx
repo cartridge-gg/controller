@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ReviewPurchase } from "./review";
 import { ItemType } from "@/context/purchase";
+import { StarterItemType } from "@/hooks/starterpack";
 
 const meta = {
   component: ReviewPurchase,
@@ -15,15 +16,18 @@ export const Starterpack: Story = {
     items: [
       {
         title: "Village",
-        subtitle: "Eternum Village",
-        icon: "https://r2.quddus.my/Frame%203231.png",
-        type: ItemType.NFT,
+        description: "Eternum Village",
+        image: "https://r2.quddus.my/Frame%203231.png",
+        type: StarterItemType.NFT,
+        price: 100,
       },
       {
         title: "Credits",
+        description: "Get 500 credits to use in the marketplace",
         value: 500,
-        icon: "/ERC-20-Icon.svg",
-        type: ItemType.CREDIT,
+        price: 500,
+        image: "/ERC-20-Icon.svg",
+        type: StarterItemType.CREDIT,
       },
     ],
     costDetails: {
