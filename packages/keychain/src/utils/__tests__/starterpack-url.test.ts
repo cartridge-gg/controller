@@ -1,8 +1,5 @@
 import { StarterPack, StarterPackItemType } from "@cartridge/controller";
-import {
-  encodeStarterPack,
-  decodeStarterPack,
-} from "../starterpack-url";
+import { encodeStarterPack, decodeStarterPack } from "../starterpack-url";
 
 describe("starterpack-url", () => {
   const mockStarterPack: StarterPack = {

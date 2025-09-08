@@ -114,7 +114,14 @@ export function CryptoCheckout({
 
     try {
       setState(CheckoutState.REQUESTING_PAYMENT);
-      const input = creditsPurchaseToLayerswapInput(controller.username(), starterpackDetails?.id, selectedWallet.platform!, isMainnet, wholeCredits, teamId)
+      const input = creditsPurchaseToLayerswapInput(
+        controller.username(),
+        starterpackDetails?.id,
+        selectedWallet.platform!,
+        isMainnet,
+        wholeCredits,
+        teamId,
+      );
       const res = await sendPayment(
         input,
         walletAddress,

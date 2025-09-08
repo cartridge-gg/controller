@@ -1,7 +1,4 @@
-import {
-  StarterPack,
-  ExternalPlatform,
-} from "@cartridge/controller";
+import { StarterPack, ExternalPlatform } from "@cartridge/controller";
 import {
   CreateLayerswapPaymentInput,
   LayerswapDestinationNetwork,
@@ -9,7 +6,10 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { num } from "starknet";
 import { mapPlatformToLayerswapSourceNetwork } from "@/hooks/payments/crypto";
-import { aggregateStarterPackCalls, calculateStarterPackPrice } from "./starterpack";
+import {
+  aggregateStarterPackCalls,
+  calculateStarterPackPrice,
+} from "./starterpack";
 import Controller from "./controller";
 
 /**
@@ -29,7 +29,10 @@ export async function starterPackToLayerswapInput(
   isMainnet: boolean,
   controller: Controller,
 ): Promise<CreateLayerswapPaymentInput> {
-  const sourceNetwork = mapPlatformToLayerswapSourceNetwork(platform, isMainnet);
+  const sourceNetwork = mapPlatformToLayerswapSourceNetwork(
+    platform,
+    isMainnet,
+  );
   const destinationNetwork = isMainnet
     ? LayerswapDestinationNetwork.StarknetMainnet
     : LayerswapDestinationNetwork.StarknetSepolia;
@@ -54,7 +57,7 @@ export async function starterPackToLayerswapInput(
       purchaseType: PurchaseType.OutsideExecution,
       outsideExecution: {
         address: controller.address(),
-        execution: signedExecution.outside_execution,
+        execution: JSON.stringify(signedExecution.outside_execution),
         signature: signedExecution.signature,
         swap: {
           tokenAddress: isMainnet
@@ -85,7 +88,10 @@ export function creditsPurchaseToLayerswapInput(
   wholeCredits: number,
   teamId?: string,
 ): CreateLayerswapPaymentInput {
-  const sourceNetwork = mapPlatformToLayerswapSourceNetwork(platform, isMainnet);
+  const sourceNetwork = mapPlatformToLayerswapSourceNetwork(
+    platform,
+    isMainnet,
+  );
   const destinationNetwork = isMainnet
     ? LayerswapDestinationNetwork.StarknetMainnet
     : LayerswapDestinationNetwork.StarknetSepolia;

@@ -13,7 +13,11 @@ import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
 import { uint256 } from "starknet";
 import { calculateStarterPackPrice } from "@/utils/starterpack";
-import { StarterPack, StarterPackItem, StarterPackItemType } from "@cartridge/controller";
+import {
+  StarterPack,
+  StarterPackItem,
+  StarterPackItemType,
+} from "@cartridge/controller";
 
 export const enum StarterItemType {
   NFT = "NFT",
@@ -105,7 +109,7 @@ export function useStarterPack(starterpack: string | StarterPack | undefined) {
       setItems(starterpack.items);
 
       setIsLoading(false);
-      return
+      return;
     }
 
     client
@@ -195,8 +199,8 @@ export function useStarterPack(starterpack: string | StarterPack | undefined) {
         }
       })
       .catch((error) => {
-        console.error(error)
-        setError(error)
+        console.error(error);
+        setError(error);
       })
       .finally(() => setIsLoading(false));
   }, [controller, checkSupply, starterpack]);

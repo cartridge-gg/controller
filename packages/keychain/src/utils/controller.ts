@@ -244,8 +244,10 @@ export default class Controller {
     return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
-  async signExecuteFromOutside(calls: Call[]): Promise<JsSignedOutsideExecution> {
-    return await this.cartridge.signExecuteFromOutside(toJsCalls(calls))
+  async signExecuteFromOutside(
+    calls: Call[],
+  ): Promise<JsSignedOutsideExecution> {
+    return await this.cartridge.signExecuteFromOutside(toJsCalls(calls));
   }
 
   async selfDeploy(maxFee?: FeeEstimate): Promise<DeployedAccountTransaction> {

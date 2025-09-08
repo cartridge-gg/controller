@@ -374,11 +374,7 @@ export const PurchaseProvider = ({
     } finally {
       setIsFetchingFees(false);
     }
-  }, [
-    swapInput,
-    usdAmount,
-    estimateStarterPackFees
-  ]);
+  }, [swapInput, usdAmount, estimateStarterPackFees]);
 
   const contextValue: PurchaseContextType = {
     // Purchase details

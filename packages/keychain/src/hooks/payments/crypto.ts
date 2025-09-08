@@ -163,9 +163,7 @@ export const useCryptoPayment = () => {
           depositAddress,
           tokenAmount,
           tokenAddress,
-        } = await createCryptoPayment(
-          input
-        );
+        } = await createCryptoPayment(input);
 
         let transactionHash: string | undefined;
 
@@ -218,15 +216,13 @@ export const useCryptoPayment = () => {
   );
 
   const estimateStarterPackFees = useCallback(
-    async (
-      input:  CreateLayerswapPaymentInput
-    ) => {
-      const result = await client.request<LayerswapQuoteQuery, LayerswapQuoteQueryVariables>(
-        LayerswapQuoteDocument,
-        {
-          input: input,
-        },
-      );
+    async (input: CreateLayerswapPaymentInput) => {
+      const result = await client.request<
+        LayerswapQuoteQuery,
+        LayerswapQuoteQueryVariables
+      >(LayerswapQuoteDocument, {
+        input: input,
+      });
 
       return result.layerswapQuote;
     },
@@ -269,14 +265,12 @@ export const useCryptoPayment = () => {
     );
   }, []);
 
-  async function createCryptoPayment(
-    input: CreateLayerswapPaymentInput
-  ) {
+  async function createCryptoPayment(input: CreateLayerswapPaymentInput) {
     const result = await client.request<CreateLayerswapPaymentMutation>(
       CreateLayerswapPaymentDocument,
       {
         input,
-      }
+      },
     );
 
     return {
@@ -288,9 +282,7 @@ export const useCryptoPayment = () => {
     };
   }
 
-  async function createStarterPackPayment(
-    input: CreateLayerswapPaymentInput,
-  ) {
+  async function createStarterPackPayment(input: CreateLayerswapPaymentInput) {
     const result = await client.request<
       CreateLayerswapPaymentMutation,
       CreateLayerswapPaymentMutationVariables
