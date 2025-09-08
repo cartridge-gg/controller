@@ -63,7 +63,6 @@ async function fetchCollections(
         direction: "Forward",
       },
     });
-    console.log({tokens});
     if (tokens.items.length !== 0) {
       return {
         items: tokens.items,
@@ -108,7 +107,7 @@ async function fetchBalances(
     return { items: [], cursor: undefined };
   } catch (err) {
     console.error(err);
-    return { items: [], cursor: undefined};
+    return { items: [], cursor: undefined };
   }
 }
 
@@ -123,28 +122,49 @@ export function useCollection({
   const { project } = useConnection();
 
   const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
-  const [collection, setCollection] = useState<Collection | undefined>(undefined);
+  const [collection, setCollection] = useState<Collection | undefined>(
+    undefined,
+  );
   const [trigger, setTrigger] = useState(true);
-  const [client, setClient] = useState<torii.ToriiClient | undefined>(undefined);
+  const [client, setClient] = useState<torii.ToriiClient | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (!project) return;
     getToriiClient(project).then((client) => setClient(client));
   }, [project]);
-  
+
   useEffect(() => {
     if (!client || !address || !trigger || !contractAddress) return;
     setTrigger(false);
     const getCollections = async () => {
-      const rawBalances = await fetchBalances(client, [contractAddress], address, LIMIT, undefined);
-      const balances = rawBalances.items.filter((b) => BigInt(b.balance) !== 0n && BigInt(b.token_id || "0") !== 0n);
+      const rawBalances = await fetchBalances(
+        client,
+        [contractAddress],
+        address,
+        LIMIT,
+        undefined,
+      );
+      const balances = rawBalances.items.filter(
+        (b) => BigInt(b.balance) !== 0n && BigInt(b.token_id || "0") !== 0n,
+      );
       if (balances.length === 0) return;
-      const tokenIds = balances.filter((b) => b.contract_address === contractAddress).map((b) => b.token_id?.replace("0x", "")).filter((b) => b !== undefined);
+      const tokenIds = balances
+        .filter((b) => b.contract_address === contractAddress)
+        .map((b) => b.token_id?.replace("0x", ""))
+        .filter((b) => b !== undefined);
       if (tokenIds.length === 0) return;
-      const collection = await fetchCollections(client, [contractAddress], tokenIds, LIMIT, undefined);
+      const collection = await fetchCollections(
+        client,
+        [contractAddress],
+        tokenIds,
+        LIMIT,
+        undefined,
+      );
       if (collection.items.length === 0) return;
       const asset = collection.items[0];
-      let metadata: { name?: string, image?: string } = {};
+      let metadata: { name?: string; image?: string } = {};
       try {
         metadata = JSON.parse(!asset.metadata ? "{}" : asset.metadata);
       } catch (error) {
@@ -160,22 +180,31 @@ export function useCollection({
       };
       setCollection(newCollection);
       const newAssets: { [key: string]: Asset } = {};
-      collection.items.filter((asset) => asset.token_id).forEach((asset) => {
-        let metadata: { name?: string, image?: string, description?: string, attributes?: string } = {};
-        try {
-          metadata = JSON.parse(!asset.metadata ? "{}" : asset.metadata);
-        } catch (error) {
-          console.error(error);
-        }
-        if (!metadata.name || !metadata.image) return;
-        newAssets[`${contractAddress}-${asset.token_id || ""}`] = {
-          tokenId: asset.token_id || "",
-          name: metadata.name || asset.name,
-          description: metadata.description,
-          imageUrl: metadata?.image || "",
-          attributes: Array.isArray(metadata.attributes) ? metadata.attributes : [],
-        };
-      });
+      collection.items
+        .filter((asset) => asset.token_id)
+        .forEach((asset) => {
+          let metadata: {
+            name?: string;
+            image?: string;
+            description?: string;
+            attributes?: string;
+          } = {};
+          try {
+            metadata = JSON.parse(!asset.metadata ? "{}" : asset.metadata);
+          } catch (error) {
+            console.error(error);
+          }
+          if (!metadata.name || !metadata.image) return;
+          newAssets[`${contractAddress}-${asset.token_id || ""}`] = {
+            tokenId: asset.token_id || "",
+            name: metadata.name || asset.name,
+            description: metadata.description,
+            imageUrl: metadata?.image || "",
+            attributes: Array.isArray(metadata.attributes)
+              ? metadata.attributes
+              : [],
+          };
+        });
       setAssets(newAssets);
     };
     getCollections();
@@ -226,43 +255,66 @@ export function useCollections(): UseCollectionsResponse {
   const [collections, setCollections] = useState<{ [key: string]: Collection }>(
     {},
   );
-  const [client, setClient] = useState<torii.ToriiClient | undefined>(undefined);
+  const [client, setClient] = useState<torii.ToriiClient | undefined>(
+    undefined,
+  );
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
     if (!project) return;
     getToriiClient(project).then((client) => setClient(client));
   }, [project]);
-  
+
   useEffect(() => {
     if (!client || !address || !trigger) return;
     setTrigger(false);
     const getCollections = async () => {
-      const rawBalances = await fetchBalances(client, [], address, LIMIT, undefined);
-      const balances = rawBalances.items.filter((b) => BigInt(b.balance) !== 0n && BigInt(b.token_id || "0") !== 0n);
-      const contractAddresses = Array.from(new Set(balances.map((b) => b.contract_address)));
-      const collections : { [key: string]: Collection } = {};
-      await Promise.all(contractAddresses.map(async (contractAddress) => {
-        const tokenIds = balances.filter((b) => b.contract_address === contractAddress).map((b) => b.token_id?.replace("0x", "")).filter((b) => b !== undefined);
-        if (tokenIds.length === 0) return;
-        const collection = await fetchCollections(client, [contractAddress], tokenIds, LIMIT, undefined);
-        if (collection.items.length === 0) return;
-        let asset = collection.items[0];
-        let metadata: { name?: string, image?: string } = {};
-        try {
-          metadata = JSON.parse(collection.items[0].metadata);
-        } catch (error) {
-          console.error(error);
-        }
-        if (!metadata.name || !metadata.image) return;
-        collections[contractAddress] = {
-          address: contractAddress,
-          name: asset.name || metadata.name,
-          type: TYPE,
-          imageUrl: metadata.image,
-          totalCount: tokenIds.length,
-        };
-      }));
+      const rawBalances = await fetchBalances(
+        client,
+        [],
+        address,
+        LIMIT,
+        undefined,
+      );
+      const balances = rawBalances.items.filter(
+        (b) => BigInt(b.balance) !== 0n && BigInt(b.token_id || "0") !== 0n,
+      );
+      const contractAddresses = Array.from(
+        new Set(balances.map((b) => b.contract_address)),
+      );
+      const collections: { [key: string]: Collection } = {};
+      await Promise.all(
+        contractAddresses.map(async (contractAddress) => {
+          const tokenIds = balances
+            .filter((b) => b.contract_address === contractAddress)
+            .map((b) => b.token_id?.replace("0x", ""))
+            .filter((b) => b !== undefined);
+          if (tokenIds.length === 0) return;
+          const collection = await fetchCollections(
+            client,
+            [contractAddress],
+            tokenIds,
+            LIMIT,
+            undefined,
+          );
+          if (collection.items.length === 0) return;
+          const asset = collection.items[0];
+          let metadata: { name?: string; image?: string } = {};
+          try {
+            metadata = JSON.parse(collection.items[0].metadata);
+          } catch (error) {
+            console.error(error);
+          }
+          if (!metadata.name || !metadata.image) return;
+          collections[contractAddress] = {
+            address: contractAddress,
+            name: asset.name || metadata.name,
+            type: TYPE,
+            imageUrl: metadata.image,
+            totalCount: tokenIds.length,
+          };
+        }),
+      );
       setCollections(collections);
     };
     getCollections();
