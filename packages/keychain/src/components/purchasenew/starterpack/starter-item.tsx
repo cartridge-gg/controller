@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, Thumbnail } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { Badge } from "./badge";
 import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
+import { usdcToUsd } from "@/utils/starterpack";
 
 export const StarterItem = React.forwardRef<
   HTMLDivElement,
@@ -20,7 +21,7 @@ export const StarterItem = React.forwardRef<
         <Card className="relative bg-background-100 overflow-visible h-[88px]">
           {/* Price tag */}
           <div className="absolute -top-1 right-4">
-            {price !== 0n && <Badge price={Number(price || 0n)} />}
+            {price !== 0n && <Badge price={price ? usdcToUsd(price) : 0} />}
           </div>
           <CardContent className="py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3">
             {/* <img src={image} alt={title} className="size-16 object-cover" /> */}

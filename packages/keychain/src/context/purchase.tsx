@@ -13,6 +13,7 @@ import {
   StarterPack,
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
+import { usdcToUsd } from "@/utils/starterpack";
 
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -200,13 +201,20 @@ export const PurchaseProvider = ({
   useEffect(() => {
     if (!starterpack) return;
 
-    const purchaseItems: Item[] = items.map((item) => ({
-      title: item.name,
-      subtitle: item.description,
-      icon: item.iconURL,
-      value: priceUsd,
-      type: ItemType.NFT,
-    }));
+    const purchaseItems: Item[] = items.map((item) => {
+      // Calculate individual item price in USD
+      const itemPriceUsd = item.price
+        ? usdcToUsd(item.price) * (item.amount || 1)
+        : 0;
+
+      return {
+        title: item.name,
+        subtitle: item.description,
+        icon: item.iconURL,
+        value: itemPriceUsd,
+        type: ItemType.NFT,
+      };
+    });
 
     setPurchaseItems(purchaseItems);
     setUsdAmount(priceUsd);

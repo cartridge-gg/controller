@@ -13,14 +13,14 @@ describe("starterpack-url", () => {
         description: "A test NFT item",
         iconURL: "https://example.com/nft.png",
         amount: 1,
-        price: BigInt("1000000000000000000"), // 1 ETH in wei
+        price: BigInt("1000000"), // 1.00 USDC (6 decimals)
       },
       {
         type: StarterPackItemType.FUNGIBLE,
         name: "Test Token",
         description: "A test fungible token",
         amount: 100,
-        price: BigInt("5000000000000000000"), // 5 ETH in wei
+        price: BigInt("2500000"), // 2.50 USDC (6 decimals)
       },
     ],
   };
@@ -67,8 +67,8 @@ describe("starterpack-url", () => {
       expect(decoded.items).toHaveLength(2);
 
       // Check that BigInt prices are correctly restored
-      expect(decoded.items[0].price).toBe(BigInt("1000000000000000000"));
-      expect(decoded.items[1].price).toBe(BigInt("5000000000000000000"));
+      expect(decoded.items[0].price).toBe(BigInt("1000000")); // 1.00 USDC
+      expect(decoded.items[1].price).toBe(BigInt("2500000")); // 2.50 USDC
     });
 
     it("should throw on invalid encoded data", () => {

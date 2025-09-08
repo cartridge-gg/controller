@@ -12,7 +12,7 @@ import { client } from "@/utils/graphql";
 import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
 import { uint256 } from "starknet";
-import { calculateStarterPackPrice } from "@/utils/starterpack";
+import { calculateStarterPackPrice, usdcToUsd } from "@/utils/starterpack";
 import {
   StarterPack,
   StarterPackItem,
@@ -103,9 +103,10 @@ export function useStarterPack(starterpack: string | StarterPack | undefined) {
       setDescription(starterpack.description || "");
       setAcquisitionType(StarterpackAcquisitionType.Paid);
 
-      // Calculate price from items
-      const totalPrice = calculateStarterPackPrice(starterpack);
-      setPriceUsd(Number(totalPrice));
+      // Calculate price from items (USDC with 6 decimals)
+      const totalPriceUsdc = calculateStarterPackPrice(starterpack);
+      const totalPriceUsd = usdcToUsd(totalPriceUsdc);
+      setPriceUsd(totalPriceUsd);
       setItems(starterpack.items);
 
       setIsLoading(false);
