@@ -73,7 +73,7 @@ function CreateControllerForm({
   authMethod,
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
-  const keyboardState = useDetectKeyboardOpen();
+  const { isOpen: keyboardIsOpen, viewportHeight } = useDetectKeyboardOpen();
 
   // appKey is undefined for unknown applications which we're
   // assuming are dojo applications which implement AASA and
@@ -82,11 +82,7 @@ function CreateControllerForm({
   const isInAppBrowser = isInApp && !!appKey;
 
   return (
-    <div
-      style={{
-        height: "50vh",
-      }}
-    >
+    <>
       <NavigationHeader
         variant="expanded"
         title={
@@ -99,11 +95,11 @@ function CreateControllerForm({
         hideSettings
       />
 
-      <pre>{JSON.stringify(keyboardState, null, 2)}</pre>
       <form
-        className="flex flex-col flex-1 overflow-y-scroll"
+        className="flex flex-col overflow-y-scroll"
         style={{
           scrollbarWidth: "none",
+          height: keyboardIsOpen ? viewportHeight : "100%",
         }}
         onSubmit={(e) => {
           e.preventDefault();
@@ -163,7 +159,7 @@ function CreateControllerForm({
           <CartridgeFooter />
         </LayoutFooter>
       </form>
-    </div>
+    </>
   );
 }
 

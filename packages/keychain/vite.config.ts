@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => ({
   ],
   server: {
     port: mode === "development" ? 3001 : undefined,
+    allowedHosts: ["qud-macbook.quddus.sfs.elyas.my"],
   },
   resolve: {
     alias: {
