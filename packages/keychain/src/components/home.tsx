@@ -28,7 +28,10 @@ export function Home() {
     }
   }, [context?.type, posthog]);
 
-  // Popup flow authentication
+  if (pathname.startsWith("/mocked")) {
+    return <Outlet />;
+  }
+
   if (pathname.startsWith("/authenticate")) {
     return <Authenticate />;
   }
