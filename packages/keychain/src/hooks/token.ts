@@ -295,15 +295,23 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     return newData;
   }, [rpcData, toriiTokens, countervalues]);
 
-  // Determine combined status - only show loading if both sources are loading
+  // Determine combined status based on actual data availability
   const combinedStatus = useMemo(() => {
-    // If we have tokens from either source, consider it success
-    if (tokens.tokens.length > 0) return "success";
-    // Only show loading if torii is actively loading
-    if (toriiStatus === "loading") return "loading";
-    // Default to success to prevent empty state flickering
+    // If torii is still loading on initial mount, show loading
+    if (
+      toriiStatus === "loading" &&
+      toriiTokens.length === 0 &&
+      rpcData.length === 0
+    ) {
+      return "loading";
+    }
+    // If torii had an error, return error
+    if (toriiStatus === "error") {
+      return "error";
+    }
+    // Otherwise we have successfully loaded (even if empty)
     return "success";
-  }, [tokens.tokens.length, toriiStatus]);
+  }, [toriiStatus, toriiTokens.length, rpcData.length]);
 
   return { tokens: tokens.tokens, credits, status: combinedStatus };
 }
