@@ -32,25 +32,32 @@ export const Starterpack = () => {
 
   // Track the current expected defaults to detect network changes
   const expectedDefaultsRef = useRef(defaultIds);
+  const previousChainRef = useRef(chain);
 
   // Update defaults when network changes, but only if current values match expected defaults
   useEffect(() => {
-    if (!chain) return;
+    if (!chain || chain === previousChainRef.current) return;
 
     const newDefaults = getDefaultStarterpackIds();
     const currentExpected = expectedDefaultsRef.current;
 
     // Only update if the values haven't been manually modified by the user
-    if (purchaseSpId === currentExpected.purchase) {
-      setPurchaseSpId(newDefaults.purchase);
-    }
-    if (claimSpId === currentExpected.claim) {
-      setClaimSpId(newDefaults.claim);
-    }
+    setPurchaseSpId((currentPurchaseSpId) => {
+      return currentPurchaseSpId === currentExpected.purchase
+        ? newDefaults.purchase
+        : currentPurchaseSpId;
+    });
 
-    // Update our reference to the new expected defaults
+    setClaimSpId((currentClaimSpId) => {
+      return currentClaimSpId === currentExpected.claim
+        ? newDefaults.claim
+        : currentClaimSpId;
+    });
+
+    // Update our references after successful comparison and update
     expectedDefaultsRef.current = newDefaults;
-  }, [chain, purchaseSpId, claimSpId]);
+    previousChainRef.current = chain;
+  }, [chain]);
 
   if (!account) {
     return null;
