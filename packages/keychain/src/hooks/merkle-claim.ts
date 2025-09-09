@@ -221,7 +221,15 @@ export const useMerkleClaim = ({
       setError(error as Error);
       throw error;
     }
-  }, [address, controller, claims, externalSignMessage]);
+  }, [
+    type,
+    address,
+    controller,
+    claims,
+    isMainnet,
+    externalSignMessage,
+    externalSignTypedData,
+  ]);
 
   return {
     claims,
