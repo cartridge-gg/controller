@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.10.0",
   "scripts": {
-    "dev": "next dev -p 3002 --experimental-https --experimental-https-key ./certificates/wildcard.forthify.tech.key --experimental-https-cert ./certificates/wildcard.forthify.tech.crt",
+    "dev": "next dev -p 3004 --experimental-https --experimental-https-key ./certificates/wildcard.forthify.tech.key --experimental-https-cert ./certificates/wildcard.forthify.tech.crt",
     "build": "next build",
     "build:compat": "npm pkg set dependencies[@cartridge/controller]=0.9.0 dependencies[@cartridge/connector]=0.9.0 && next build && npm pkg set dependencies[@cartridge/controller]='workspace:*' dependencies[@cartridge/connector]='workspace:*'",
     "e2e": "playwright test",

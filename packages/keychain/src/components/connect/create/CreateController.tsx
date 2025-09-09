@@ -25,7 +25,10 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
-import { useDetectKeyboardOpen } from "@/hooks/keyboard";
+import {
+  useDetectKeyboardOpen,
+  usePreventOverScrolling,
+} from "@/hooks/viewport";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -81,6 +84,8 @@ function CreateControllerForm({
   // https://docs.cartridge.gg/controller/presets#apple-app-site-association
   const isInAppBrowser = isInApp && !!appKey;
 
+  const layoutRef = usePreventOverScrolling<HTMLFormElement>();
+
   return (
     <>
       <NavigationHeader
@@ -94,13 +99,18 @@ function CreateControllerForm({
         hideUsername
         hideSettings
       />
-
+      <p>
+        Is keyboard open?
+        {keyboardIsOpen ? " Yes" : " No"}
+      </p>
+      <p>Viewport height: {viewportHeight}px</p>
       <form
         className="flex flex-col overflow-y-scroll"
         style={{
           scrollbarWidth: "none",
           height: keyboardIsOpen ? viewportHeight : "100%",
         }}
+        ref={layoutRef}
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit();
@@ -187,6 +197,18 @@ export function CreateControllerView({
       setAuthenticationStep(AuthenticationStep.FillForm);
     }
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      window.scrollTo(0, 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <LayoutContainer>

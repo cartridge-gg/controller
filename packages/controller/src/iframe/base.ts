@@ -79,6 +79,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.transition = "opacity 0.2s ease";
     container.style.opacity = "0";
     container.style.pointerEvents = "auto";
+    container.style.overscrollBehaviorY = "contain";
     container.appendChild(iframe);
 
     // Disables pinch to zoom
