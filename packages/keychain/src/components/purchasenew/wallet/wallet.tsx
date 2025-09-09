@@ -21,8 +21,8 @@ import { useConnection } from "@/hooks/connection";
 
 export function SelectWallet() {
   const { navigate } = useNavigation();
-  const { platforms, mainnet } = useParams();
-  const { controller } = useConnection();
+  const { platforms } = useParams();
+  const { controller, isMainnet } = useConnection();
   const { starterpackDetails, onExternalConnect, clearError } =
     usePurchaseContext();
   const { wallets, isConnecting: isWalletConnecting } = useWallets();
@@ -80,7 +80,7 @@ export function SelectWallet() {
       );
 
       const chainId = network.chains?.find(
-        (chain) => chain.isMainnet === (mainnet === "true"),
+        (chain) => chain.isMainnet === isMainnet,
       )?.chainId;
 
       if (chainId) {
@@ -94,7 +94,7 @@ export function SelectWallet() {
 
     setChainIds(newChainIds);
     setAvailableWallets(newAvailableWallets);
-  }, [wallets, mainnet, selectedNetworks]);
+  }, [wallets, isMainnet, selectedNetworks]);
 
   useEffect(() => {
     return () => clearError();
@@ -113,7 +113,7 @@ export function SelectWallet() {
       .map((drop) => drop.key)
       .join(";");
 
-    navigate(`/purchase/claim/${keys}/${controller!.address()}`);
+    navigate(`/purchase/claim/${keys}/${controller!.address()}/controller`);
   }, [navigate, starterpackDetails, controller]);
 
   const onExternalWalletSelect = useCallback(
@@ -144,7 +144,7 @@ export function SelectWallet() {
           .map((drop) => drop.key)
           .join(";");
 
-        navigate(`/purchase/claim/${keys}/${address}`);
+        navigate(`/purchase/claim/${keys}/${address}/${wallet.type}`);
       } catch (e) {
         setError(e as Error);
       } finally {
