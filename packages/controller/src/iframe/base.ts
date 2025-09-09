@@ -73,6 +73,37 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.pointerEvents = "auto";
     container.appendChild(iframe);
 
+    // Disables pinch to zoom
+    container.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
+
+    container.addEventListener(
+      "touchmove",
+      (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
+
+    container.addEventListener(
+      "touchend",
+      (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
+
     // Add click event listener to close iframe when clicking outside
     container.addEventListener("click", (e) => {
       if (e.target === container) {
