@@ -18,9 +18,10 @@ import { Item, ItemType, usePurchaseContext } from "@/context/purchase";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
 import { StarterpackReceiving } from "../starterpack/starterpack";
+import { ExternalWalletType } from "@cartridge/controller";
 
 export function Claim() {
-  const { keys, address: externalAddress } = useParams();
+  const { keys, address: externalAddress, type } = useParams();
   const { goBack, navigate } = useNavigation();
   const { starterpackDetails, setClaimItems, setTransactionHash } =
     usePurchaseContext();
@@ -34,6 +35,7 @@ export function Claim() {
   } = useMerkleClaim({
     keys: keys!,
     address: externalAddress!,
+    type: type as ExternalWalletType,
   });
 
   useEffect(() => {

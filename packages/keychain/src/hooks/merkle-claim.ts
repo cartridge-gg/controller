@@ -13,12 +13,14 @@ import {
   hash,
   num,
   shortString,
+  TypedData,
 } from "starknet";
 import { useConnection } from "./connection";
 import { parseSignature } from "viem";
+import { ExternalWalletType } from "@cartridge/controller";
 
 const FORWARDER_CONTRACT =
-  "0x61b791d91ba93940a863f659a852bfb1f68749b84dacada407e122f41453141";
+  "0x1dbdc112f9639fb3ef2481d67470edbd10a31486371b108a62bcefc310b6025";
 
 export interface MerkleClaim {
   key: string;
@@ -37,11 +39,14 @@ export interface MerkleClaim {
 export const useMerkleClaim = ({
   keys,
   address,
+  type,
 }: {
   keys: string;
   address: string;
+  type: ExternalWalletType | "controller";
 }) => {
-  const { controller, externalSignMessage } = useConnection();
+  const { controller, isMainnet, externalSignMessage, externalSignTypedData } =
+    useConnection();
   const [error, setError] = useState<Error | null>(null);
   const [claims, setClaims] = useState<MerkleClaim[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,6 +153,7 @@ export const useMerkleClaim = ({
     }
   }, [claims, controller, checkAllClaims]);
 
+  // TODO: Use ABI to generate the calldata
   const onSendClaim = useCallback(async () => {
     if (!merkleTreeKey || !leafData || !controller || !claims.length) {
       const error = new Error("Missing required data");
@@ -158,8 +164,10 @@ export const useMerkleClaim = ({
     try {
       const isEvm = claims[0].network === MerkleDropNetwork.Ethereum;
       let ethSignature: Calldata = { ...["0x1"] };
+      let snSignature: Calldata = { ...["0x1"] };
+
       if (isEvm) {
-        const msg = `Claim on starknet with: ${num.toHex(controller.address())}`;
+        const msg = evmMessage(controller.address());
         const { result, error } = await externalSignMessage(address, msg);
         if (error) {
           throw new Error(error);
@@ -171,7 +179,19 @@ export const useMerkleClaim = ({
           cairo.uint256(r),
           cairo.uint256(s),
         ]);
-        ethSignature.unshift("0x0");
+        ethSignature.unshift("0x0"); // Option some
+      } else {
+        const { result, error } = await externalSignTypedData(
+          type,
+          starknetMessage(controller.address(), isMainnet),
+        );
+        if (error) {
+          throw new Error(error);
+        }
+
+        snSignature = result as Array<string>;
+        snSignature.unshift(num.toHex(snSignature.length));
+        snSignature.unshift("0x0"); // Option Some
       }
 
       const calls = claims
@@ -183,6 +203,7 @@ export const useMerkleClaim = ({
             leaf_data: CallData.compile(leafData(address, claim)),
             recipient: { ...["0x0", controller.address()] },
             eth_signature: { ...ethSignature },
+            sn_signature: { ...snSignature },
           };
 
           return {
@@ -223,5 +244,33 @@ const leafData = (address: string, claim: MerkleClaim) => {
     claim_contract_address: claim.contract,
     selector: hash.getSelectorFromName(claim.entrypoint),
     data: claim.data,
+  };
+};
+
+const evmMessage = (address: string): string => {
+  return `Claim on starknet with: ${num.toHex(address)}`;
+};
+
+const starknetMessage = (address: string, isMainnet: boolean): TypedData => {
+  return {
+    types: {
+      StarknetDomain: [
+        { name: "name", type: "shortstring" },
+        { name: "version", type: "shortstring" },
+        { name: "chainId", type: "shortstring" },
+        { name: "revision", type: "shortstring" },
+      ],
+      Claim: [{ name: "recipient", type: "ContractAddress" }],
+    },
+    primaryType: "Claim",
+    domain: {
+      name: "Merkle Drop",
+      version: "1",
+      revision: "1",
+      chainId: isMainnet ? "SN_MAIN" : "SN_SEPOLIA",
+    },
+    message: {
+      recipient: address,
+    },
   };
 };
