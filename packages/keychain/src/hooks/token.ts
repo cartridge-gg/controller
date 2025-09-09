@@ -200,14 +200,15 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
 
   // Get token data from rpc (based on url options without those fetched from torii)
   const contractAddress = useMemo(() => {
-    if (toriiStatus === "loading") return [];
+    // Don't filter out tokens during loading to prevent empty arrays
+    if (!options) return [];
     return options?.filter(
       (token) =>
         !toriiTokens.find(
           (t) => BigInt(t.metadata.address || "0x0") === BigInt(token),
         ),
     );
-  }, [options, toriiTokens, toriiStatus]);
+  }, [options, toriiTokens]);
 
   const { data: rpcData }: UseERC20BalanceResponse = useERC20Balance({
     address: accountAddress ?? address,
@@ -294,9 +295,17 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     return newData;
   }, [rpcData, toriiTokens, countervalues]);
 
-  // Convert idle status to loading to prevent jitter on initial load
+  // Determine combined status - only show loading if both sources are loading
+  const combinedStatus = useMemo(() => {
+    // If we have tokens from either source, consider it success
+    if (tokens.tokens.length > 0) return "success";
+    // Only show loading if torii is actively loading
+    if (toriiStatus === "loading") return "loading";
+    // Default to success to prevent empty state flickering
+    return "success";
+  }, [tokens.tokens.length, toriiStatus]);
 
-  return { tokens: tokens.tokens, credits, status: toriiStatus };
+  return { tokens: tokens.tokens, credits, status: combinedStatus };
 }
 
 export type UseTokenResponse = UseBalanceResponse;
