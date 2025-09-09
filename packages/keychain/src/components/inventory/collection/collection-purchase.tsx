@@ -565,7 +565,7 @@ export const FeesTooltip = ({
 
 const LoadingState = () => {
   return (
-    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+    <LayoutContent className="select-none h-full overflow-hidden">
       <Skeleton className="min-h-10 w-full rounded" />
       <Skeleton className="min-h-[200px] w-full rounded" />
       <div className="flex flex-col gap-4 grow">

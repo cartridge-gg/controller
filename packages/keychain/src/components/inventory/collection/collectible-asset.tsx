@@ -207,7 +207,7 @@ export function CollectibleAsset() {
         <EmptyState />
       ) : (
         <>
-          <LayoutContent className="p-6 pb-0 flex flex-col gap-6 overflow-hidden">
+          <LayoutContent className="pb-0 flex flex-col overflow-hidden">
             <CollectionHeader
               image={edition?.properties.icon || theme?.icon}
               title={title}
@@ -220,7 +220,7 @@ export function CollectibleAsset() {
               }
             />
             <div
-              className="flex flex-col gap-6 overflow-scroll relative"
+              className="flex flex-col overflow-scroll relative"
               style={{ scrollbarWidth: "none" }}
             >
               <CollectiblePreview
@@ -548,7 +548,7 @@ const Price = ({ amount, image }: { amount?: number; image?: string }) => {
 
 const LoadingState = () => {
   return (
-    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+    <LayoutContent className="select-none h-full overflow-hidden">
       <Skeleton className="min-h-10 w-full rounded" />
       <Skeleton className="min-h-[200px] w-full rounded" />
       <div className="flex flex-col gap-4 grow">

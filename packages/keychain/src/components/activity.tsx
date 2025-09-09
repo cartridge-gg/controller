@@ -65,7 +65,7 @@ export function Activity() {
   ) : status === "error" || !data.length ? (
     <EmptyState />
   ) : (
-    <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
+    <LayoutContent className="flex flex-col pt-6 pb-6 overflow-y-auto">
       {dates.map((current) => {
         return (
           <div key={current} className="flex flex-col gap-y-2 select-none">

@@ -163,7 +163,7 @@ export function SendCollectible() {
         <EmptyState />
       ) : (
         <>
-          <LayoutContent className="p-6 flex flex-col gap-6">
+          <LayoutContent className="flex flex-col">
             <SendHeader image={image} title={title} />
             <SendRecipient
               to={to}
@@ -241,7 +241,7 @@ const Warning = ({
 
 const LoadingState = () => {
   return (
-    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+    <LayoutContent className="select-none h-full overflow-hidden">
       <Skeleton className="min-h-10 w-full rounded" />
       <div className="flex flex-col">
         <Skeleton className="min-h-4 my-3 w-8 rounded" />

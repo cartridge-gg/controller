@@ -106,7 +106,7 @@ export function SendToken() {
 
   return (
     <>
-      <LayoutContent className="pb-4 gap-6">
+      <LayoutContent className="pb-4">
         <div className="flex items-center gap-3">
           <Thumbnail
             icon={

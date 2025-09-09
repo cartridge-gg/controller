@@ -16,7 +16,7 @@ import { Tokens } from "./token";
 
 export function Inventory() {
   return (
-    <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
+    <LayoutContent className="flex flex-col pt-6 pb-6 overflow-y-auto">
       <Tokens />
       <Collections />
     </LayoutContent>

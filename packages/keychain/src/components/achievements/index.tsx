@@ -62,7 +62,7 @@ export function Achievements() {
   ) : status === "error" || !achievements.length ? (
     <EmptyState />
   ) : (
-    <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto select-none">
+    <LayoutContent className="flex flex-col pt-6 pb-6 overflow-y-auto select-none">
       <Trophies
         achievements={achievements}
         pinneds={pinneds}

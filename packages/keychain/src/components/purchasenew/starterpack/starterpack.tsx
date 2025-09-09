@@ -99,11 +99,12 @@ export function StarterPackInner({
   return (
     <>
       <HeaderInner
+        className="p-4 pb-0"
         title={name}
         right={supply ? <Supply amount={supply} /> : undefined}
         hideIcon
       />
-      <LayoutContent>
+      <LayoutContent className="p-4">
         <div className="flex flex-col gap-3">
           <StarterpackReceiving
             mintAllowance={mintAllowance}
@@ -121,7 +122,7 @@ export function StarterPackInner({
           )}
         </div>
       </LayoutContent>
-      <LayoutFooter>
+      <LayoutFooter className="p-4">
         {error && <ErrorAlert title="Error" description={error.message} />}
         <Button onClick={onProceed} disabled={!!error}>
           {acquisitionType === StarterpackAcquisitionType.Paid
