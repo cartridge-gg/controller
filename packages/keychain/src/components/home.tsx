@@ -1,5 +1,5 @@
 import { Signature } from "starknet";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, SignMessageCtx } from "@/utils/connection";
@@ -12,6 +12,7 @@ import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
 import { Outlet, useLocation } from "react-router-dom";
 import { Authenticate } from "./authenticate";
+import { now } from "@/constants";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
@@ -19,6 +20,27 @@ export function Home() {
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
+
+  const createSessionForVerifiedPolicies = useCallback(async () => {
+    if (!controller || !policies) return;
+
+    try {
+      // Use a default duration for verified sessions (24 hours)
+      const duration = 24 * 60 * 60; // 24 hours in seconds
+      const expiresAt = duration + now();
+
+      await controller.createSession(expiresAt, policies);
+
+      context?.resolve({
+        code: ResponseCodes.SUCCESS,
+        address: controller.address(),
+      });
+    } catch (e) {
+      console.error("Failed to create verified session:", e);
+      // Fall back to showing the UI if auto-creation fails
+      context?.reject?.(e);
+    }
+  }, [controller, policies, context]);
 
   useEffect(() => {
     if (context?.type) {
@@ -64,6 +86,12 @@ export function Home() {
                 address: controller!.address(),
               });
 
+              return <></>;
+            }
+
+            // Bypass session approval screen for verified sessions
+            if (policies?.verified) {
+              createSessionForVerifiedPolicies();
               return <></>;
             }
 
