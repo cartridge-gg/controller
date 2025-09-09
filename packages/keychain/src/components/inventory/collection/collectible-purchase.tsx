@@ -226,7 +226,7 @@ export function CollectiblePurchase() {
       const executeUrl = createExecuteUrl(calls);
 
       // Navigate to execute screen with returnTo parameter to come back to current page
-      const currentPath = `${location.pathname.split("/").slice(0, -5).join("/")}${location.search}`;
+      const currentPath = `${location.pathname.split("/").slice(0, -5).join("/")}?ps=${searchParams.get("ps")}`;
       const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
       navigate(executeUrlWithReturn);
     } catch (error) {
@@ -235,7 +235,7 @@ export function CollectiblePurchase() {
     } finally {
       setLoading(false);
     }
-  }, [token, tokenOrders, totalPrice, provider, navigate, location]);
+  }, [token, tokenOrders, totalPrice, provider, navigate, location, searchParams]);
 
   const status = useMemo(() => {
     if (collectionStatus === "error" || assetsStatus === "error")
