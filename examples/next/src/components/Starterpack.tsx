@@ -2,7 +2,7 @@
 
 import { useAccount, useNetwork } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button } from "@cartridge/ui";
+import { Button, Input } from "@cartridge/ui";
 import { useState, useEffect, useRef } from "react";
 import { constants, num } from "starknet";
 import { StarterPack, StarterPackItemType } from "@cartridge/controller";
@@ -120,12 +120,12 @@ export const Starterpack = () => {
         <div className="flex flex-col gap-2">
           <h3>Purchase Starterpack</h3>
           <div className="flex items-center gap-2">
-            <input
+            <Input
+              className="max-w-80"
               type="text"
               value={purchaseSpId}
               onChange={(e) => setPurchaseSpId(e.target.value)}
               placeholder="Enter starterpack ID"
-              className="border rounded px-2 py-1 min-w-0 flex-1"
             />
             <Button
               onClick={() => {
@@ -145,12 +145,12 @@ export const Starterpack = () => {
         <div className="flex flex-col gap-2">
           <h3>Claim Starterpack</h3>
           <div className="flex items-center gap-2">
-            <input
+            <Input
+              className="max-w-80"
               type="text"
               value={claimSpId}
               onChange={(e) => setClaimSpId(e.target.value)}
               placeholder="Enter starterpack ID"
-              className="border rounded px-2 py-1 min-w-0 flex-1"
             />
             <Button
               onClick={() => {
