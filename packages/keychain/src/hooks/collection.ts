@@ -320,7 +320,7 @@ export function useCollections(): UseCollectionsResponse {
       setCollections(collections);
     };
     getCollections();
-  }, [client, address, trigger]);
+  }, [client, address, project, trigger]);
 
   const refetch = useCallback(() => {
     setTrigger(true);
