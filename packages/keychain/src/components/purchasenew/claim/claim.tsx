@@ -35,7 +35,7 @@ export function Claim() {
   } = useMerkleClaim({
     keys: keys!,
     address: externalAddress!,
-    type: type as ExternalWalletType,
+    type: type as ExternalWalletType | "controller",
   });
 
   useEffect(() => {

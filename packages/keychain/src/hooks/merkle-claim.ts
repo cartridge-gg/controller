@@ -179,17 +179,21 @@ export const useMerkleClaim = ({
           cairo.uint256(r),
           cairo.uint256(s),
         ]);
+
         ethSignature.unshift("0x0"); // Option some
       } else {
-        const { result, error } = await externalSignTypedData(
-          type,
-          starknetMessage(controller.address(), isMainnet),
-        );
-        if (error) {
-          throw new Error(error);
+        const msg: TypedData = starknetMessage(controller.address(), isMainnet);
+        if (type === "controller") {
+          const result = await controller.signMessage(msg);
+          snSignature = result as Array<string>;
+        } else {
+          const { result, error } = await externalSignTypedData(type, msg);
+          if (error) {
+            throw new Error(error);
+          }
+          snSignature = result as Array<string>;
         }
 
-        snSignature = result as Array<string>;
         snSignature.unshift(num.toHex(snSignature.length));
         snSignature.unshift("0x0"); // Option Some
       }
