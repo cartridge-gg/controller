@@ -3,7 +3,7 @@
 import { useAccount, useNetwork } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button } from "@cartridge/ui";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { constants, num } from "starknet";
 import { StarterPack, StarterPackItemType } from "@cartridge/controller";
 
@@ -29,6 +29,28 @@ export const Starterpack = () => {
   const defaultIds = getDefaultStarterpackIds();
   const [purchaseSpId, setPurchaseSpId] = useState<string>(defaultIds.purchase);
   const [claimSpId, setClaimSpId] = useState<string>(defaultIds.claim);
+
+  // Track the current expected defaults to detect network changes
+  const expectedDefaultsRef = useRef(defaultIds);
+
+  // Update defaults when network changes, but only if current values match expected defaults
+  useEffect(() => {
+    if (!chain) return;
+
+    const newDefaults = getDefaultStarterpackIds();
+    const currentExpected = expectedDefaultsRef.current;
+
+    // Only update if the values haven't been manually modified by the user
+    if (purchaseSpId === currentExpected.purchase) {
+      setPurchaseSpId(newDefaults.purchase);
+    }
+    if (claimSpId === currentExpected.claim) {
+      setClaimSpId(newDefaults.claim);
+    }
+
+    // Update our reference to the new expected defaults
+    expectedDefaultsRef.current = newDefaults;
+  }, [chain, purchaseSpId, claimSpId]);
 
   if (!account) {
     return null;
