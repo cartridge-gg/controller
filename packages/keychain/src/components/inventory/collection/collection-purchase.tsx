@@ -216,7 +216,7 @@ export function CollectionPurchase() {
       const executeUrl = createExecuteUrl(calls);
 
       // Navigate to execute screen with returnTo parameter to come back to current page
-      const currentPath = `${location.pathname.split("/").slice(0, -5).join("/")}`;
+      const currentPath = `${location.pathname.split("/").slice(0, -5).join("/")}${location.search}`;
       const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
       navigate(executeUrlWithReturn, { reset: true });
     } catch (error) {
