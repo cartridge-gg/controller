@@ -41,6 +41,14 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     this.url = url;
 
+    const docHead = document.head;
+
+    const meta = document.createElement("meta");
+    meta.name = "viewport";
+    meta.content =
+      "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content";
+    docHead.appendChild(meta);
+
     const iframe = document.createElement("iframe");
     iframe.src = url.toString();
     iframe.id = id;
