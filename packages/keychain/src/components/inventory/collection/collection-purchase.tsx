@@ -225,7 +225,15 @@ export function CollectionPurchase() {
     } finally {
       setLoading(false);
     }
-  }, [token, tokenOrders, totalPrice, provider, navigate, location, searchParams]);
+  }, [
+    token,
+    tokenOrders,
+    totalPrice,
+    provider,
+    navigate,
+    location,
+    searchParams,
+  ]);
 
   const status = useMemo(() => {
     if (collectionStatus === "error" || assetsStatus === "error")
