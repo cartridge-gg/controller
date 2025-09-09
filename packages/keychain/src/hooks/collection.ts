@@ -195,11 +195,12 @@ export function useCollection({
             console.error(error);
           }
           if (!metadata.name || !metadata.image) return;
+          const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
           newAssets[`${contractAddress}-${asset.token_id || ""}`] = {
             tokenId: asset.token_id || "",
             name: metadata.name || asset.name,
             description: metadata.description,
-            imageUrl: metadata?.image || "",
+            imageUrl: image || metadata?.image || "",
             attributes: Array.isArray(metadata.attributes)
               ? metadata.attributes
               : [],
@@ -208,7 +209,7 @@ export function useCollection({
       setAssets(newAssets);
     };
     getCollections();
-  }, [client, address, trigger, contractAddress]);
+  }, [client, address, trigger, project, contractAddress]);
 
   const refetch = useCallback(() => {
     setTrigger(true);
@@ -306,11 +307,12 @@ export function useCollections(): UseCollectionsResponse {
             console.error(error);
           }
           if (!metadata.name || !metadata.image) return;
+          const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
           collections[contractAddress] = {
             address: contractAddress,
             name: asset.name || metadata.name,
             type: TYPE,
-            imageUrl: metadata.image,
+            imageUrl: image || metadata?.image || "",
             totalCount: tokenIds.length,
           };
         }),
@@ -318,7 +320,7 @@ export function useCollections(): UseCollectionsResponse {
       setCollections(collections);
     };
     getCollections();
-  }, [client, address, trigger]);
+  }, [client, address, project, trigger]);
 
   const refetch = useCallback(() => {
     setTrigger(true);
