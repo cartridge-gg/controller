@@ -109,7 +109,7 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
   );
 
   const projects = useMemo(() => {
-    return project ? [project, TOKENS_TORII_INSTANCE] : [];
+    return project ? [project, TOKENS_TORII_INSTANCE] : [TOKENS_TORII_INSTANCE];
   }, [project]);
 
   const { data, status } = useBalancesQuery(
