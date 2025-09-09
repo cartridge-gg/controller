@@ -19,7 +19,13 @@ import {
   PlusIcon,
   MinusIcon,
 } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+import {
+  cn,
+  ETH_CONTRACT_ADDRESS,
+  LORDS_CONTRACT_ADDRESS,
+  STRK_CONTRACT_ADDRESS,
+  USDC_CONTRACT_ADDRESS,
+} from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import placeholder from "/placeholder.svg?url";
@@ -36,6 +42,12 @@ import { useCollectible } from "@/hooks/collectible";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
+const ALLOWED_TOKENS = [
+  ETH_CONTRACT_ADDRESS,
+  STRK_CONTRACT_ADDRESS,
+  USDC_CONTRACT_ADDRESS,
+  LORDS_CONTRACT_ADDRESS,
+];
 
 const WEEK = 60 * 60 * 24 * 7;
 const MONTH = 60 * 60 * 24 * 30;
@@ -52,7 +64,7 @@ export function CollectibleListing() {
   const { provider } = useMarketplace();
   useConnection();
   const { address: contractAddress, tokenId } = useParams();
-  const { tokens } = useTokens();
+  const { tokens: allTokens } = useTokens();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Token | undefined>();
@@ -65,6 +77,13 @@ export function CollectibleListing() {
   const [quantity, setQuantity] = useState<number>(1);
 
   const { navigate } = useNavigation();
+
+  const tokens = useMemo(() => {
+    const whitelisted = ALLOWED_TOKENS.map((address) => BigInt(address));
+    return allTokens.filter((token) =>
+      whitelisted.includes(BigInt(token.metadata.address)),
+    );
+  }, [allTokens]);
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
