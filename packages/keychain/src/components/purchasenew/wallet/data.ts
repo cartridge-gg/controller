@@ -17,6 +17,7 @@ import {
   StarknetIcon,
   ArgentColorIcon,
   BraavosColorIcon,
+  ControllerColorIcon,
 } from "@cartridge/ui";
 import { NetworkWalletData, Wallet } from "../types";
 import { constants } from "starknet";
@@ -67,6 +68,14 @@ export const networkWalletData: NetworkWalletData = {
       icon: React.createElement(StarknetColorIcon),
       subIcon: React.createElement(StarknetIcon),
       wallets: new Map([
+        [
+          "controller",
+          {
+            name: "Controller",
+            type: "controller",
+            icon: React.createElement(ControllerColorIcon),
+          },
+        ],
         [
           "argent",
           {

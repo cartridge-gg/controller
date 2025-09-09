@@ -1,7 +1,9 @@
 import { useNavigation } from "@/context";
 import {
   Button,
-  CardContent,
+  Card,
+  CardListContent,
+  CardListItem,
   Empty,
   GiftIcon,
   HeaderInner,
@@ -9,28 +11,28 @@ import {
   LayoutFooter,
   Skeleton,
 } from "@cartridge/ui";
-import { Receiving } from "../receiving";
-import { useCallback, useEffect, useState } from "react";
-import { Badge } from "../starterpack/badge";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMerkleClaim } from "@/hooks/merkle-claim";
-import { ItemType, usePurchaseContext } from "@/context/purchase";
+import { Item, ItemType, usePurchaseContext } from "@/context/purchase";
 import { ErrorAlert } from "@/components/ErrorAlert";
+import { CollectionItem } from "../starterpack/collections";
+import { StarterpackReceiving } from "../starterpack/starterpack";
 
 export function Claim() {
-  const { key, address: externalAddress } = useParams();
+  const { keys, address: externalAddress } = useParams();
   const { goBack, navigate } = useNavigation();
-  const { claimItems, setClaimItems, setTransactionHash } =
+  const { starterpackDetails, setClaimItems, setTransactionHash } =
     usePurchaseContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
   const {
     claims: claimsData,
-    isClaimed,
     isLoading: isLoadingClaims,
     onSendClaim,
   } = useMerkleClaim({
-    key: key!,
+    keys: keys!,
     address: externalAddress!,
   });
 
@@ -40,13 +42,20 @@ export function Claim() {
       return;
     }
 
-    setClaimItems(
-      claimsData[0].data.map((data) => ({
-        title: data,
-        type: ItemType.NFT,
-        icon: <GiftIcon variant="solid" />,
-      })),
-    );
+    const items: Item[] = [];
+    claimsData
+      .filter((c) => !c.claimed)
+      .forEach((c) => {
+        c.data.forEach((d) => {
+          items.push({
+            title: `${c.description ?? c.key} - Token ID: ${d}`,
+            type: ItemType.NFT,
+            icon: <GiftIcon variant="solid" />,
+          });
+        });
+      });
+
+    setClaimItems(items);
   }, [claimsData, setClaimItems]);
 
   const onSubmit = useCallback(async () => {
@@ -63,6 +72,20 @@ export function Claim() {
     }
   }, [onSendClaim, setTransactionHash, navigate]);
 
+  const isClaimed = useMemo(() => {
+    return claimsData.every((claim) => claim.claimed);
+  }, [claimsData]);
+
+  const isCheckingClaimed = useMemo(() => {
+    return claimsData.every((claim) => claim.loading);
+  }, [claimsData]);
+
+  const totalClaimable = useMemo(() => {
+    return claimsData
+      .filter((claim) => !claim.claimed)
+      .reduce((acc, claim) => acc + claim.data.length, 0);
+  }, [claimsData]);
+
   if (isLoadingClaims) {
     return <LoadingState />;
   }
@@ -74,19 +97,46 @@ export function Claim() {
         icon={<GiftIcon variant="solid" />}
       />
       <LayoutContent>
-        {claimItems.length === 0 ? (
+        {claimsData.length === 0 ? (
           <Empty
-            icon="inventory"
-            title="Nothing to Claim from this Wallet"
+            icon="claim"
+            title="Nothing to claim from this wallet"
             className="h-full md:h-[420px]"
           />
         ) : (
-          <Receiving title="Receiving" items={claimItems} showTotal />
+          <div className="flex flex-col gap-4">
+            <StarterpackReceiving
+              mintAllowance={starterpackDetails?.mintAllowance}
+              starterpackItems={starterpackDetails?.starterPackItems}
+            />
+            <div className="flex flex-col gap-2">
+              <div className="text-foreground-400 text-xs font-semibold">
+                Your Collections
+              </div>
+              <Card>
+                <CardListContent>
+                  {claimsData.map((claim, i) => (
+                    <CardListItem
+                      key={i}
+                      className="flex flex-row justify-between"
+                    >
+                      <CollectionItem
+                        name={claim.description ?? claim.key}
+                        network={claim.network}
+                        numAvailable={claim.claimed ? 0 : claim.data.length}
+                        isLoading={claim.loading}
+                      />
+                    </CardListItem>
+                  ))}
+                </CardListContent>
+              </Card>
+            </div>
+          </div>
         )}
       </LayoutContent>
       <LayoutFooter>
         {error && <ErrorAlert title="Error" description={error.message} />}
-        {claimItems.length > 0 && (
+        {/* {claimItems.length > 0 && (
           <CardContent className="relative flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
             <div className="absolute -top-1 right-4">
               <Badge price={0} />
@@ -95,16 +145,20 @@ export function Claim() {
               Network Fees
             </div>
           </CardContent>
-        )}
-        {claimItems.length === 0 ? (
+        )} */}
+        {claimsData.length === 0 ? (
           <Button onClick={() => goBack()}>Check Another Wallet</Button>
         ) : (
           <Button
             onClick={onSubmit}
             isLoading={isSubmitting}
-            disabled={isClaimed}
+            disabled={isClaimed || isCheckingClaimed || error !== null}
           >
-            {isClaimed ? "Already Claimed" : "Claim"}
+            {isClaimed
+              ? "Already Claimed"
+              : isCheckingClaimed
+                ? "Loading..."
+                : `Claim (${totalClaimable}) `}
           </Button>
         )}
       </LayoutFooter>

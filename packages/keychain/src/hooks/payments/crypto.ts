@@ -7,6 +7,9 @@ import {
   LayerswapQuoteQuery,
   LayerswapQuoteDocument,
   LayerswapSourceNetwork,
+  CreateLayerswapPaymentInput,
+  LayerswapQuoteQueryVariables,
+  CreateLayerswapPaymentMutationVariables,
 } from "@cartridge/ui/utils/api/cartridge";
 import { client } from "@/utils/graphql";
 import { useConnection } from "../connection";
@@ -22,11 +25,6 @@ import {
 } from "../../utils/solana";
 import { ethers } from "ethers";
 import erc20abi from "./erc20abi.json" assert { type: "json" };
-
-export enum PurchaseType {
-  CREDITS = "CREDITS",
-  STARTERPACK = "STARTERPACK",
-}
 
 export interface SendPaymentResult {
   paymentId: string;
@@ -146,13 +144,10 @@ export const useCryptoPayment = () => {
 
   const sendPayment = useCallback(
     async (
+      input: CreateLayerswapPaymentInput,
       walletAddress: string,
       walletType: ExternalWalletType,
       platform: ExternalPlatform,
-      wholeCredits: number,
-      teamId?: string,
-      starterpackId?: string,
-      layerswapFees?: string,
       onSubmitted?: (explorer: Explorer) => void,
     ): Promise<SendPaymentResult> => {
       if (!controller) {
@@ -168,15 +163,7 @@ export const useCryptoPayment = () => {
           depositAddress,
           tokenAmount,
           tokenAddress,
-        } = await createCryptoPayment(
-          controller.username(),
-          platform,
-          wholeCredits,
-          teamId,
-          starterpackId,
-          layerswapFees,
-          isMainnet,
-        );
+        } = await createCryptoPayment(input);
 
         let transactionHash: string | undefined;
 
@@ -228,37 +215,18 @@ export const useCryptoPayment = () => {
     [controller, isMainnet, requestPhantomPayment, requestEvmPayment],
   );
 
-  const quotePaymentFees = useCallback(
-    async (
-      username: string,
-      platform: ExternalPlatform,
-      wholeCredits: number,
-      teamId?: string,
-      starterpackId?: string,
-    ) => {
-      const result = await client.request<LayerswapQuoteQuery>(
-        LayerswapQuoteDocument,
-        {
-          input: {
-            username,
-            credits: {
-              amount: wholeCredits,
-              decimals: 0,
-            },
-            sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
-            purchaseType: starterpackId
-              ? PurchaseType.STARTERPACK
-              : PurchaseType.CREDITS,
-            starterpackId,
-            teamId,
-            isMainnet,
-          },
-        },
-      );
+  const estimateStarterPackFees = useCallback(
+    async (input: CreateLayerswapPaymentInput) => {
+      const result = await client.request<
+        LayerswapQuoteQuery,
+        LayerswapQuoteQueryVariables
+      >(LayerswapQuoteDocument, {
+        input: input,
+      });
 
       return result.layerswapQuote;
     },
-    [isMainnet],
+    [],
   );
 
   const waitForPayment = useCallback(async (paymentId: string) => {
@@ -297,33 +265,11 @@ export const useCryptoPayment = () => {
     );
   }, []);
 
-  async function createCryptoPayment(
-    username: string,
-    platform: ExternalPlatform,
-    wholeCredits: number,
-    teamId?: string,
-    starterpackId?: string,
-    layerswapFees?: string,
-    isMainnet: boolean = false,
-  ) {
+  async function createCryptoPayment(input: CreateLayerswapPaymentInput) {
     const result = await client.request<CreateLayerswapPaymentMutation>(
       CreateLayerswapPaymentDocument,
       {
-        input: {
-          username,
-          credits: {
-            amount: wholeCredits,
-            decimals: 0,
-          },
-          sourceNetwork: mapPlatformToLayerswapNetwork(platform, isMainnet),
-          purchaseType: starterpackId
-            ? PurchaseType.STARTERPACK
-            : PurchaseType.CREDITS,
-          starterpackId,
-          layerswapFees,
-          teamId,
-          isMainnet,
-        },
+        input,
       },
     );
 
@@ -336,10 +282,28 @@ export const useCryptoPayment = () => {
     };
   }
 
+  async function createStarterPackPayment(input: CreateLayerswapPaymentInput) {
+    const result = await client.request<
+      CreateLayerswapPaymentMutation,
+      CreateLayerswapPaymentMutationVariables
+    >(CreateLayerswapPaymentDocument, {
+      input,
+    });
+
+    return {
+      id: result.createLayerswapPayment.cryptoPaymentId,
+      depositAddress: result.createLayerswapPayment.sourceDepositAddress,
+      tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
+      tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
+      swapId: result.createLayerswapPayment.swapId,
+    };
+  }
+
   return {
     sendPayment,
-    quotePaymentFees,
+    estimateStarterPackFees,
     waitForPayment,
+    createStarterPackPayment,
     isLoading,
     error,
   };
@@ -424,7 +388,7 @@ export const getExplorer = (
   }
 };
 
-function mapPlatformToLayerswapNetwork(
+export function mapPlatformToLayerswapSourceNetwork(
   platform: ExternalPlatform,
   isMainnet: boolean,
 ): LayerswapSourceNetwork {

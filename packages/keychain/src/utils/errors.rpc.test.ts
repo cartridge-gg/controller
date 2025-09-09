@@ -195,4 +195,30 @@ describe("parseExecutionError - RPC Nested Error Format", () => {
       "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
     );
   });
+
+  it('should correctly parse "free games exceeds max" error', () => {
+    const error = {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Contract address= 0x6a953c60b4ada1551b363c9171b3f89c6814df1432c51f6b5ba2c9ba938b48f, Class hash= 0xe2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: (0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x0 (''), \"free games exceeds max\", 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'))",
+      },
+    };
+
+    const result = parseExecutionError(error, 0);
+
+    expect(result.summary).toBe("Free games exceeds max");
+    expect(result.stack[0].address).toBe(
+      "0x6a953c60b4ada1551b363c9171b3f89c6814df1432c51f6b5ba2c9ba938b48f",
+    );
+    expect(result.stack[0].class).toBe(
+      "0xe2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6",
+    );
+    expect(result.stack[0].selector).toBe(
+      "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+    );
+    expect(result.stack[0].error).toEqual(["free games exceeds max"]);
+  });
 });

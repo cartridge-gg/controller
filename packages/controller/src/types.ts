@@ -149,7 +149,7 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
-  openStarterPack(starterpackId: string): void;
+  openStarterPack(options: string | StarterPack): Promise<void>;
   navigate(path: string): Promise<void>;
 
   // External wallet methods
@@ -244,3 +244,25 @@ export type Token = "eth" | "strk" | "lords" | "usdc" | "usdt";
 export type Tokens = {
   erc20?: Token[];
 };
+
+export enum StarterPackItemType {
+  NONFUNGIBLE = "NONFUNGIBLE",
+  FUNGIBLE = "FUNGIBLE",
+}
+
+export interface StarterPackItem {
+  type: StarterPackItemType;
+  name: string;
+  description: string;
+  iconURL?: string;
+  amount?: number;
+  price?: bigint;
+  call?: Call[];
+}
+
+export interface StarterPack {
+  name: string;
+  description: string;
+  iconURL?: string;
+  items: StarterPackItem[];
+}

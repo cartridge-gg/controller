@@ -43,9 +43,10 @@ import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
 import { useNavigation } from "@/context";
 import { Purchase } from "./purchase";
-import { PurchaseType } from "@/hooks/payments/crypto";
+import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
+import { Collections } from "./purchasenew/starterpack/collections";
 
 export function App() {
   const { navigate } = useNavigation();
@@ -67,13 +68,14 @@ export function App() {
         <Route path="/purchase" element={<Outlet />}>
           <Route
             path="credits"
-            element={<Purchase type={PurchaseType.CREDITS} />}
+            element={<Purchase type={PurchaseType.Credits} />}
           />
           <Route
             path="starterpack/:starterpackId"
             element={<PurchaseStarterpack />}
           />
-          <Route path="claim/:key/:address" element={<Claim />} />
+          <Route path="starterpack/collections" element={<Collections />} />
+          <Route path="claim/:keys/:address" element={<Claim />} />
           <Route path="method/:platforms?" element={<PaymentMethod />} />
           <Route path="network/:platforms?" element={<ChooseNetwork />} />
           <Route
@@ -112,7 +114,7 @@ export function App() {
           path="/funding/credits"
           element={
             <Purchase
-              type={PurchaseType.CREDITS}
+              type={PurchaseType.Credits}
               // onBack={() => {
               //   const searchParams = new URLSearchParams(
               //     window.location.search,

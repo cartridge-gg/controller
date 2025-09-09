@@ -17,7 +17,7 @@ import { erc20Metadata } from "@cartridge/presets";
 import { useUsername } from "./username";
 
 const LIMIT = 1000;
-export const TOKENS_TORII_INSTANCE = "c7e-arcade-tokens";
+export const TOKENS_TORII_INSTANCE = "c7e-arcade-tokens-alpha";
 
 export type Balance = {
   amount: number;
@@ -109,7 +109,7 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
   );
 
   const projects = useMemo(() => {
-    return project ? [project, TOKENS_TORII_INSTANCE] : [];
+    return project ? [project, TOKENS_TORII_INSTANCE] : [TOKENS_TORII_INSTANCE];
   }, [project]);
 
   const { data, status } = useBalancesQuery(
