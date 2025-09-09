@@ -20,7 +20,7 @@ import { parseSignature } from "viem";
 import { ExternalWalletType } from "@cartridge/controller";
 
 const FORWARDER_CONTRACT =
-  "0x1dbdc112f9639fb3ef2481d67470edbd10a31486371b108a62bcefc310b6025";
+  "0x4cbdf4905e417cd7492f4ab7c57468389b8187fb219264799e1f751e999b1cd";
 
 export interface MerkleClaim {
   key: string;
@@ -163,9 +163,8 @@ export const useMerkleClaim = ({
 
     try {
       const isEvm = claims[0].network === MerkleDropNetwork.Ethereum;
-      let ethSignature: Calldata = { ...["0x1"] };
-      let snSignature: Calldata = { ...["0x1"] };
 
+      let signature: Calldata;
       if (isEvm) {
         const msg = evmMessage(controller.address());
         const { result, error } = await externalSignMessage(address, msg);
@@ -174,28 +173,28 @@ export const useMerkleClaim = ({
         }
 
         const { r, s, v } = parseSignature(result as `0x${string}`);
-        ethSignature = CallData.compile([
+        signature = CallData.compile([
           num.toHex(v!),
           cairo.uint256(r),
           cairo.uint256(s),
         ]);
 
-        ethSignature.unshift("0x0"); // Option some
+        signature.unshift("0x0"); // Enum Ethereum Signature
       } else {
         const msg: TypedData = starknetMessage(controller.address(), isMainnet);
         if (type === "controller") {
           const result = await controller.signMessage(msg);
-          snSignature = result as Array<string>;
+          signature = result as Array<string>;
         } else {
           const { result, error } = await externalSignTypedData(type, msg);
           if (error) {
             throw new Error(error);
           }
-          snSignature = result as Array<string>;
+          signature = result as Array<string>;
         }
 
-        snSignature.unshift(num.toHex(snSignature.length));
-        snSignature.unshift("0x0"); // Option Some
+        signature.unshift(num.toHex(signature.length));
+        signature.unshift("0x1"); // Enum Starknet Signature
       }
 
       const calls = claims
@@ -205,9 +204,8 @@ export const useMerkleClaim = ({
             merkle_tree_key: merkleTreeKey(claim),
             proof: claim.merkleProof,
             leaf_data: CallData.compile(leafData(address, claim)),
-            recipient: { ...["0x0", controller.address()] },
-            eth_signature: { ...ethSignature },
-            sn_signature: { ...snSignature },
+            recipient: controller.address(),
+            signature: { ...signature },
           };
 
           return {
