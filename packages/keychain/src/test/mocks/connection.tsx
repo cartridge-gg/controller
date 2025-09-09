@@ -31,6 +31,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   namespace: null,
   verified: false,
   isConfigLoading: false,
+  isControllerInitialized: true,
   isMainnet: false,
   theme: {
     verified: true,

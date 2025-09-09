@@ -194,6 +194,7 @@ export function useConnectionValue() {
     AuthOptions | undefined
   >(["google", "webauthn", "discord", "walletconnect", "metamask", "rabby"]);
   const [controller, setController] = useState(window.controller);
+  const [isControllerInitialized, setIsControllerInitialized] = useState(false);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
   const [onModalClose, setOnModalCloseInternal] = useState<
@@ -204,11 +205,16 @@ export function useConnectionValue() {
     setOnModalCloseInternal(() => fn);
   }, []);
 
+  // Initialize controller state - check once on mount
   useEffect(() => {
+    // Mark as initialized after checking for controller
+    // This prevents the flash by distinguishing between "checking" and "not found"
     if (window.controller) {
       setRpcUrl(window.controller.rpcUrl());
+      setController(window.controller);
     }
-  }, [window.controller]);
+    setIsControllerInitialized(true);
+  }, []);
 
   const [searchParams] = useSearchParams();
 
@@ -623,6 +629,7 @@ export function useConnectionValue() {
     parent,
     context,
     controller,
+    isControllerInitialized,
     origin,
     rpcUrl,
     policies,

@@ -14,7 +14,13 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Authenticate } from "./authenticate";
 
 export function Home() {
-  const { context, controller, policies, isConfigLoading } = useConnection();
+  const {
+    context,
+    controller,
+    policies,
+    isConfigLoading,
+    isControllerInitialized,
+  } = useConnection();
   const { pathname } = useLocation();
 
   const upgrade = useUpgrade();
@@ -33,7 +39,12 @@ export function Home() {
     return <Authenticate />;
   }
 
-  // No controller, send to login
+  // Still checking for controller - show loading to prevent flash
+  if (!isControllerInitialized) {
+    return <PageLoading />;
+  }
+
+  // No controller after initialization check, send to login
   if (!controller) {
     return <CreateController isSlot={pathname.startsWith("/slot")} />;
   }

@@ -20,6 +20,7 @@ export type ConnectionContextValue = {
   parent: ParentMethods | undefined;
   context?: ConnectionCtx;
   controller?: Controller;
+  isControllerInitialized: boolean;
   origin: string;
   rpcUrl: string;
   project: string | null;
