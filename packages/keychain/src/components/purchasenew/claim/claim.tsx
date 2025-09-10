@@ -13,7 +13,7 @@ import {
 } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useMerkleClaim } from "@/hooks/merkle-claim";
+import { useMerkleClaim, MerkleClaim } from "@/hooks/merkle-claim";
 import { Item, ItemType, usePurchaseContext } from "@/context/purchase";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
@@ -52,7 +52,7 @@ export function Claim() {
       .forEach((c) => {
         c.data.forEach((d) => {
           items.push({
-            title: `${c.description ?? c.key} - Token ID: ${d}`,
+            title: `(${Number(d)}) ${c.description ?? c.key}`,
             type: ItemType.NFT,
             icon: <GiftIcon variant="solid" />,
           });
@@ -131,7 +131,7 @@ export function Claim() {
                       <CollectionItem
                         name={claim.description ?? claim.key}
                         network={claim.network}
-                        numAvailable={claim.claimed ? 0 : claim.data.length}
+                        numAvailable={claimAmount(claim)}
                         isLoading={claim.loading}
                       />
                     </CardListItem>
@@ -182,4 +182,12 @@ export const LoadingState = () => {
       <Skeleton className="min-h-[180px] w-full rounded" />
     </LayoutContent>
   );
+};
+
+const claimAmount = (claim: MerkleClaim) => {
+  if (claim.data.length === 1) {
+    return Number(claim.data[0]);
+  }
+
+  return claim.data.length;
 };
