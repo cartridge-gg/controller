@@ -180,6 +180,7 @@ export function useConnectionValue() {
     import.meta.env.VITE_RPC_SEPOLIA,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
+  const [hasSession, setHasSession] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
   const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
   const [isMainnet, setIsMainnet] = useState<boolean>(false);
@@ -433,6 +434,25 @@ export function useConnectionValue() {
     }
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
+  // Check session status when controller or policies change
+  useEffect(() => {
+    if (controller && policies) {
+      controller
+        .isRequestedSession(policies)
+        .then(setHasSession)
+        .catch((error) => {
+          console.error("Failed to check session status:", error);
+          setHasSession(false);
+        });
+    } else if (controller && !policies) {
+      // No policies means no session check needed
+      setHasSession(true);
+    } else {
+      // No controller means no session
+      setHasSession(false);
+    }
+  }, [controller, policies]);
+
   useThemeEffect({ theme, assetUrl: "" });
 
   useEffect(() => {
@@ -626,6 +646,7 @@ export function useConnectionValue() {
     origin,
     rpcUrl,
     policies,
+    hasSession,
     onModalClose,
     setOnModalClose,
     theme,
