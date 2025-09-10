@@ -52,6 +52,18 @@
         "**/pkg-session/**"
       ]
     },
+    "dev:live": {
+      "persistent": true,
+      "dependsOn": [
+        "^build:deps"
+      ],
+      "outputs": [
+        ".next/**",
+        "dist/**",
+        "**/pkg-controller/**",
+        "**/pkg-session/**"
+      ]
+    },
     "storybook": {
       "persistent": true,
       "dependsOn": [
