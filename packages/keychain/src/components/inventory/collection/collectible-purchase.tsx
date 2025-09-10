@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
   InfoIcon,
 } from "@cartridge/ui";
-import { cn, useCountervalue } from "@cartridge/ui/utils";
+import { cn } from "@cartridge/ui/utils";
 import {
   addAddressPadding,
   AllowArray,
@@ -313,7 +313,7 @@ export function CollectiblePurchase() {
                       price={args.price}
                       token={token}
                       entrypoints={entrypoints}
-                      tokenId={args.tokenId}
+                      tokenId={args.tokenId ?? ""}
                       addRoyalties={addRoyalties}
                     />
                   ))}
@@ -423,18 +423,6 @@ const Order = ({
     };
   }, [price, token]);
 
-  const countervalue = useCountervalue({
-    tokens: [
-      {
-        balance: finalPrice.amount,
-        address: token.metadata.address,
-      },
-    ],
-  });
-  const priceDollar =
-    typeof countervalue === "object" && "countervalues" in countervalue
-      ? countervalue.countervalues?.[0]?.value || ""
-      : "";
 
   useEffect(() => {
     if (royaltyInfo?.royaltyFee) {
@@ -460,7 +448,7 @@ const Order = ({
         </div>
         <div className="flex items-center gap-1 justify-between text-xs text-foreground-300">
           <p className="truncate">{collection}</p>
-          <p>{priceDollar}</p>
+          <p></p>
         </div>
       </div>
     </div>

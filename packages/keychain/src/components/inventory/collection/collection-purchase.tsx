@@ -1,25 +1,17 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
-  Button,
-  LayoutFooter,
   Skeleton,
   Empty,
   TagIcon,
   Token,
   Thumbnail,
   ThumbnailCollectible,
-  Select,
-  SelectContent,
-  SelectItem,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
   InfoIcon,
-  SelectValue,
-  CaratIcon,
-  SelectTrigger,
 } from "@cartridge/ui";
 import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
@@ -154,7 +146,7 @@ export function CollectionPurchase() {
           collection: collection.name,
           collectionAddress: collection.contract_address,
           price: order.price,
-          tokenId: asset.token_id,
+          tokenId: asset.token_id ?? "",
         };
       })
       .filter((value) => value !== undefined);
@@ -427,10 +419,18 @@ const Order = ({
       },
     ],
   });
-  const priceDollar =
-    typeof countervalue === "object" && "countervalues" in countervalue
-      ? countervalue.countervalues?.[0]?.value || ""
-      : "";
+  // Simplified type handling for countervalue
+  const priceDollar = (() => {
+    try {
+      if (countervalue && typeof countervalue === "object") {
+        const cv = countervalue as any;
+        return cv.countervalues?.[0]?.value?.toString() || "";
+      }
+      return "";
+    } catch {
+      return "";
+    }
+  })();
 
   useEffect(() => {
     if (royaltyInfo?.royaltyFee) {
