@@ -19,8 +19,8 @@ import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 
 export function Pending() {
   const {
-    purchaseItems,
     starterpackDetails,
+    purchaseItems,
     claimItems,
     explorer,
     paymentMethod,
@@ -160,7 +160,6 @@ export function ClaimPendingInner({
         navigate("/purchase/success", { reset: true });
       });
   }, [controller, transactionHash, navigate]);
-
   return (
     <>
       <HeaderInner title="Pending Confirmation" icon={<Spinner />} />
