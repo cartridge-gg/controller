@@ -423,7 +423,6 @@ const Order = ({
     };
   }, [price, token]);
 
-
   useEffect(() => {
     if (royaltyInfo?.royaltyFee) {
       addRoyalties(orderId, royaltyInfo.royaltyFee);

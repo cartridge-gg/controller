@@ -423,7 +423,9 @@ const Order = ({
   const priceDollar = (() => {
     try {
       if (countervalue && typeof countervalue === "object") {
-        const cv = countervalue as any;
+        const cv = countervalue as {
+          countervalues?: Array<{ value?: number | string }>;
+        };
         return cv.countervalues?.[0]?.value?.toString() || "";
       }
       return "";
