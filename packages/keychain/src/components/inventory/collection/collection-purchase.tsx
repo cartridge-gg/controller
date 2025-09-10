@@ -17,7 +17,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
   InfoIcon,
-  useUI,
   SelectValue,
   CaratIcon,
   SelectTrigger,
@@ -54,7 +53,6 @@ import {
 const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectionPurchase() {
-  const { closeModal } = useUI();
   const { address: contractAddress, tokenId } = useParams();
   const { project } = useConnection();
   const { tokens } = useTokens();
@@ -218,9 +216,9 @@ export function CollectionPurchase() {
       const executeUrl = createExecuteUrl(calls);
 
       // Navigate to execute screen with returnTo parameter to come back to current page
-      const currentPath = `${location.pathname.split("/").slice(0, -5).join("/")}`;
+      const currentPath = `${location.pathname.split("/").slice(0, -5).join("/")}?ps=${searchParams.get("ps")}`;
       const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
-      navigate(executeUrlWithReturn, { reset: true });
+      navigate(executeUrlWithReturn);
     } catch (error) {
       console.error(error);
       toast.error(`Failed to purchase asset(s)`);
@@ -228,13 +226,13 @@ export function CollectionPurchase() {
       setLoading(false);
     }
   }, [
-    closeModal,
     token,
     tokenOrders,
     totalPrice,
     provider,
     navigate,
     location,
+    searchParams,
   ]);
 
   const status = useMemo(() => {

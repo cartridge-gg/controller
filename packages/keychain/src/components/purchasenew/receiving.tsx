@@ -6,15 +6,14 @@ import {
   Spinner,
 } from "@cartridge/ui";
 import { ReceivingProps } from "./types";
-import { StarterItemType } from "@/hooks/starterpack";
 import { StarterItem } from "./starterpack/starter-item";
+import { ItemType } from "@/context/purchase";
 
 export function Receiving({
   title,
   items,
   showTotal,
   isLoading,
-  showPrice,
 }: ReceivingProps) {
   return (
     <Card>
@@ -32,20 +31,37 @@ export function Receiving({
 
       <CardListContent>
         {items
-          .filter((item) => item.type === StarterItemType.NFT)
+          .filter((item) => item.type === ItemType.CREDIT)
           .map((item, index) => (
             <StarterItem
               key={index}
               {...item}
-              showPrice={showPrice}
+              showPrice={false}
               containerClassName="pt-0"
               className="rounded-none"
             />
           ))}
         {items
-          .filter((item) => item.type === StarterItemType.CREDIT)
+          .filter((item) => item.type === ItemType.ERC20)
           .map((item, index) => (
-            <StarterItem key={index} {...item} />
+            <StarterItem
+              key={index}
+              {...item}
+              showPrice={false}
+              containerClassName="pt-0"
+              className="rounded-none"
+            />
+          ))}
+        {items
+          .filter((item) => item.type === ItemType.NFT)
+          .map((item, index) => (
+            <StarterItem
+              key={index}
+              {...item}
+              showPrice={false}
+              containerClassName="pt-0"
+              className="rounded-none"
+            />
           ))}
       </CardListContent>
     </Card>

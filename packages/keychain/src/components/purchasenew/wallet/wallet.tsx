@@ -8,7 +8,7 @@ import {
 import { networkWalletData } from "./data";
 import { useNavigation, usePurchaseContext } from "@/context";
 import { useParams } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { ExternalWallet } from "@cartridge/controller";
 import { useWallets } from "@/hooks/wallets";
 import { ErrorAlert } from "@/components/ErrorAlert";
@@ -16,10 +16,13 @@ import {
   MerkleDropNetwork,
   StarterpackAcquisitionType,
 } from "@cartridge/ui/utils/api/cartridge";
+import { Network } from "../types";
+import { useConnection } from "@/hooks/connection";
 
 export function SelectWallet() {
   const { navigate } = useNavigation();
-  const { platforms, mainnet } = useParams();
+  const { platforms } = useParams();
+  const { controller, isMainnet } = useConnection();
   const { starterpackDetails, onExternalConnect, clearError } =
     usePurchaseContext();
   const { wallets, isConnecting: isWalletConnecting } = useWallets();
@@ -77,7 +80,7 @@ export function SelectWallet() {
       );
 
       const chainId = network.chains?.find(
-        (chain) => chain.isMainnet === (mainnet === "true"),
+        (chain) => chain.isMainnet === isMainnet,
       )?.chainId;
 
       if (chainId) {
@@ -91,11 +94,65 @@ export function SelectWallet() {
 
     setChainIds(newChainIds);
     setAvailableWallets(newAvailableWallets);
-  }, [wallets, mainnet, selectedNetworks]);
+  }, [wallets, isMainnet, selectedNetworks]);
 
   useEffect(() => {
     return () => clearError();
   }, [clearError]);
+
+  const onControllerWalletSelect = useCallback(() => {
+    if (
+      starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Paid
+    ) {
+      navigate(`/purchase/checkout/crypto`);
+      return;
+    }
+
+    const keys = starterpackDetails?.merkleDrops
+      ?.filter((drop) => drop.network === "STARKNET")
+      .map((drop) => drop.key)
+      .join(";");
+
+    navigate(`/purchase/claim/${keys}/${controller!.address()}/controller`);
+  }, [navigate, starterpackDetails, controller]);
+
+  const onExternalWalletSelect = useCallback(
+    async (wallet: ExternalWallet, network: Network) => {
+      setIsLoading(true);
+      try {
+        const address = await onExternalConnect(
+          wallet,
+          network.platform,
+          chainIds.get(network.platform),
+        );
+
+        if (
+          starterpackDetails?.acquisitionType ===
+          StarterpackAcquisitionType.Paid
+        ) {
+          navigate(`/purchase/checkout/crypto`);
+          return;
+        }
+
+        // Claim starterpack
+        const keys = starterpackDetails?.merkleDrops
+          ?.filter(
+            (drop) =>
+              drop.network ===
+              (network.platform.toUpperCase() as MerkleDropNetwork),
+          )
+          .map((drop) => drop.key)
+          .join(";");
+
+        navigate(`/purchase/claim/${keys}/${address}/${wallet.type}`);
+      } catch (e) {
+        setError(e as Error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [onExternalConnect, navigate, starterpackDetails, chainIds],
+  );
 
   if (!selectedNetworks.length) {
     return (
@@ -119,58 +176,55 @@ export function SelectWallet() {
       />
       <LayoutContent>
         {selectedNetworks.map((network) => {
-          if (!network || !availableWallets.has(network.platform)) return null;
+          if (!network) return null;
 
-          return availableWallets.get(network.platform)?.map((wallet) => {
+          const allwallets = availableWallets.get(network.platform) || [];
+          const walletElements = [];
+
+          // Add Controller wallet for Starknet
+          if (network.platform === "starknet") {
+            const controllerWallet = network.wallets.get("controller");
+            if (controllerWallet) {
+              walletElements.push(
+                <PurchaseCard
+                  key={`${network.platform}-controller`}
+                  text={controllerWallet.name}
+                  icon={controllerWallet.icon}
+                  network={network.name}
+                  networkIcon={network.subIcon}
+                  onClick={() => onControllerWalletSelect()}
+                  className={
+                    isWalletConnecting || isLoading
+                      ? "opacity-50 pointer-events-none"
+                      : ""
+                  }
+                />,
+              );
+            }
+          }
+
+          // Add other external wallets
+          allwallets.forEach((wallet) => {
             const walletConfig = network.wallets.get(wallet.type);
 
-            return (
+            walletElements.push(
               <PurchaseCard
                 key={`${network.platform}-${wallet.type}`}
                 text={walletConfig?.name || wallet.type}
                 icon={walletConfig?.icon}
                 network={network.name}
                 networkIcon={network.subIcon}
-                onClick={async () => {
-                  setIsLoading(true);
-                  try {
-                    const address = await onExternalConnect(
-                      wallet,
-                      network.platform,
-                      chainIds.get(network.platform),
-                    );
-
-                    if (
-                      starterpackDetails?.acquisitionType ===
-                      StarterpackAcquisitionType.Claimed
-                    ) {
-                      const keys = starterpackDetails?.merkleDrops
-                        ?.filter(
-                          (drop) =>
-                            drop.network ===
-                            (network.platform.toUpperCase() as MerkleDropNetwork),
-                        )
-                        .map((drop) => drop.key)
-                        .join(";");
-
-                      navigate(`/purchase/claim/${keys}/${address}`);
-                    } else {
-                      navigate(`/purchase/checkout/crypto`);
-                    }
-                  } catch (e) {
-                    setError(e as Error);
-                  } finally {
-                    setIsLoading(false);
-                  }
-                }}
+                onClick={() => onExternalWalletSelect(wallet, network)}
                 className={
                   isWalletConnecting || isLoading
                     ? "opacity-50 pointer-events-none"
                     : ""
                 }
-              />
+              />,
             );
           });
+
+          return walletElements;
         })}
       </LayoutContent>
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { StarterItem } from "./starter-item";
-import { StarterItemType } from "@/hooks/starterpack";
+import { StarterPackItemType } from "@cartridge/controller";
 
 const meta: Meta<typeof StarterItem> = {
   component: StarterItem,
@@ -22,45 +22,45 @@ type Story = StoryObj<typeof StarterItem>;
 
 export const FancyCard: Story = {
   args: {
-    type: StarterItemType.NFT,
-    title: "Starter NFT",
+    type: StarterPackItemType.NONFUNGIBLE,
+    name: "Starter NFT",
     description: "A unique starter NFT for your collection",
-    image:
+    iconURL:
       "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
-    price: 100,
+    price: 100n,
     fancy: true,
   },
 };
 
 export const NFT: Story = {
   args: {
-    type: StarterItemType.NFT,
-    title: "Starter NFT",
+    type: StarterPackItemType.NONFUNGIBLE,
+    name: "Starter NFT",
     description: "A unique starter NFT for your collection",
-    image:
+    iconURL:
       "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
-    price: 100,
+    price: 100n,
   },
 };
 
 export const Credit: Story = {
   args: {
-    type: StarterItemType.CREDIT,
-    title: "100 Credits",
+    type: StarterPackItemType.FUNGIBLE,
+    name: "100 Credits",
     description: "Get 100 credits to use in the marketplace",
-    image: "https://static.cartridge.gg/presets/credit/icon.svg",
-    price: 10,
-    value: 100,
+    iconURL: "https://static.cartridge.gg/presets/credit/icon.svg",
+    price: 10n,
+    amount: 100,
   },
 };
 
 export const FreeCredit: Story = {
   args: {
-    type: StarterItemType.CREDIT,
-    title: "Free Credits",
+    type: StarterPackItemType.FUNGIBLE,
+    name: "Free Credits",
     description: "Get 50 free credits to start your journey",
-    image: "https://static.cartridge.gg/presets/credit/icon.svg",
-    price: 0,
-    value: 50,
+    iconURL: "https://static.cartridge.gg/presets/credit/icon.svg",
+    price: 0n,
+    amount: 50,
   },
 };

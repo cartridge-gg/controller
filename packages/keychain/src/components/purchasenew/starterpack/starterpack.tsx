@@ -1,4 +1,10 @@
-import { StarterItemData, StarterItemType } from "@/hooks/starterpack";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  StarterPack,
+  StarterPackItem,
+  StarterPackItemType,
+} from "@cartridge/controller";
 import {
   Button,
   Card,
@@ -12,31 +18,40 @@ import {
   MintAllowance,
   StarterpackAcquisitionType,
 } from "@cartridge/ui/utils/api/cartridge";
+import { useParams, useSearchParams } from "react-router-dom";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
-import { useParams } from "react-router-dom";
-import { useNavigation, usePurchaseContext } from "@/context";
 import { useEffect, useMemo } from "react";
-import { ErrorAlert } from "@/components/ErrorAlert";
 import { LoadingState } from "../loading";
 import { CostBreakdown } from "../review/cost";
 import { PricingDetails } from "@/components/purchase/types";
+import { decodeStarterPack } from "@/utils/starterpack-url";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
+  const [searchParams] = useSearchParams();
+  const data = searchParams.get("data");
 
   const {
     isStarterpackLoading,
     starterpackDetails: details,
     displayError,
-    setStarterpackId,
+    setStarterpack,
   } = usePurchaseContext();
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
-      setStarterpackId(starterpackId);
+      let starterpack: string | StarterPack = starterpackId;
+      if (data) {
+        try {
+          starterpack = decodeStarterPack(data);
+        } catch (error) {
+          console.error("Failed to decode starterpack data:", error);
+        }
+      }
+      setStarterpack(starterpack);
     }
-  }, [starterpackId, isStarterpackLoading, setStarterpackId]);
+  }, [starterpackId, data, isStarterpackLoading, setStarterpack]);
 
   if (isStarterpackLoading || !details) {
     return <LoadingState />;
@@ -70,7 +85,7 @@ export function StarterPackInner({
   supply?: number;
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
-  starterpackItems?: StarterItemData[];
+  starterpackItems?: StarterPackItem[];
   error?: Error | null;
 }) {
   const { navigate } = useNavigation();
@@ -81,8 +96,7 @@ export function StarterPackInner({
         navigate("/purchase/method/ethereum;solana;base;arbitrum;optimism");
         break;
       case StarterpackAcquisitionType.Claimed:
-        // claim will always be against mainnet for now
-        navigate("/purchase/wallet/starknet;ethereum/true");
+        navigate(`/purchase/wallet/starknet;ethereum`);
         break;
       default:
         throw new Error(`Invalid acquisition type: ${acquisitionType}`);
@@ -90,7 +104,10 @@ export function StarterPackInner({
   };
 
   const price = useMemo(() => {
-    const total = starterpackItems.reduce((acc, item) => acc + item.price, 0);
+    const total = starterpackItems.reduce(
+      (acc, item) => acc + Number(item.price),
+      0,
+    );
 
     return {
       baseCostInCents: total * 100,
@@ -156,7 +173,7 @@ export const StarterpackReceiving = ({
   starterpackItems = [],
 }: {
   mintAllowance?: MintAllowance;
-  starterpackItems?: StarterItemData[];
+  starterpackItems?: StarterPackItem[];
 }) => {
   return (
     <div className="flex flex-col gap-2">
@@ -173,12 +190,12 @@ export const StarterpackReceiving = ({
       </div>
       <div className="flex flex-col gap-4">
         {starterpackItems
-          .filter((item) => item.type === StarterItemType.NFT)
+          .filter((item) => item.type === StarterPackItemType.NONFUNGIBLE)
           .map((item, index) => (
             <StarterItem key={index} {...item} />
           ))}
         {starterpackItems
-          .filter((item) => item.type === StarterItemType.CREDIT)
+          .filter((item) => item.type === StarterPackItemType.FUNGIBLE)
           .map((item, index) => (
             <StarterItem key={index} {...item} />
           ))}

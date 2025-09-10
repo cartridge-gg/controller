@@ -1,9 +1,9 @@
-import { StarterItemData } from "@/hooks/starterpack";
+import { Item } from "@/context/purchase";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 
 export interface Wallet {
   name: string;
-  type: ExternalWalletType;
+  type: ExternalWalletType | "controller";
   icon: React.ReactNode;
   color?: string;
 }
@@ -32,7 +32,7 @@ export type CostDetails = {
 
 export type ReceivingProps = {
   title?: string;
-  items: StarterItemData[];
+  items: Item[];
   isLoading?: boolean;
   showTotal?: boolean;
   showPrice?: boolean;

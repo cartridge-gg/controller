@@ -17,7 +17,7 @@ import { erc20Metadata } from "@cartridge/presets";
 import { useUsername } from "./username";
 
 const LIMIT = 1000;
-export const TOKENS_TORII_INSTANCE = "c7e-arcade-tokens";
+export const TOKENS_TORII_INSTANCE = "c7e-arcade-tokens-alpha";
 
 export type Balance = {
   amount: number;
@@ -109,7 +109,7 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
   );
 
   const projects = useMemo(() => {
-    return project ? [project, TOKENS_TORII_INSTANCE] : [];
+    return project ? [project, TOKENS_TORII_INSTANCE] : [TOKENS_TORII_INSTANCE];
   }, [project]);
 
   const { data, status } = useBalancesQuery(
@@ -200,14 +200,15 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
 
   // Get token data from rpc (based on url options without those fetched from torii)
   const contractAddress = useMemo(() => {
-    if (toriiStatus === "loading") return [];
+    // Don't filter out tokens during loading to prevent empty arrays
+    if (!options) return [];
     return options?.filter(
       (token) =>
         !toriiTokens.find(
           (t) => BigInt(t.metadata.address || "0x0") === BigInt(token),
         ),
     );
-  }, [options, toriiTokens, toriiStatus]);
+  }, [options, toriiTokens]);
 
   const { data: rpcData }: UseERC20BalanceResponse = useERC20Balance({
     address: accountAddress ?? address,
@@ -294,9 +295,25 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     return newData;
   }, [rpcData, toriiTokens, countervalues]);
 
-  // Convert idle status to loading to prevent jitter on initial load
+  // Determine combined status based on actual data availability
+  const combinedStatus = useMemo(() => {
+    // If torii is still loading on initial mount, show loading
+    if (
+      toriiStatus === "loading" &&
+      toriiTokens.length === 0 &&
+      rpcData.length === 0
+    ) {
+      return "loading";
+    }
+    // If torii had an error, return error
+    if (toriiStatus === "error") {
+      return "error";
+    }
+    // Otherwise we have successfully loaded (even if empty)
+    return "success";
+  }, [toriiStatus, toriiTokens.length, rpcData.length]);
 
-  return { tokens: tokens.tokens, credits, status: toriiStatus };
+  return { tokens: tokens.tokens, credits, status: combinedStatus };
 }
 
 export type UseTokenResponse = UseBalanceResponse;
