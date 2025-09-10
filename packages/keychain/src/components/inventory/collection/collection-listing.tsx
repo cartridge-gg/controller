@@ -60,7 +60,7 @@ const EXPIRATIONS = [
 export function CollectionListing() {
   const { provider } = useMarketplace();
   const { controller } = useConnection();
-  const { navigate } = useNavigation();
+  const { goBack } = useNavigation();
   const { address: contractAddress, tokenId } = useParams();
   const { tokens: allTokens } = useTokens();
   const [searchParams] = useSearchParams();
@@ -240,25 +240,19 @@ export function CollectionListing() {
       try {
         await controller.execute(buildTransactions, maxFee);
 
-        toast.success("Listing transaction submitted successfully!");
+        toast.success("Listing transaction submitted successfully!", {
+          duration: 10000,
+        });
 
-        // Check if there's a returnTo URL parameter and navigate there
-        const returnTo = searchParams.get("returnTo");
-        if (returnTo) {
-          navigate(returnTo, { replace: true });
-        } else {
-          // Navigate back to the parent collection page
-          navigate(`/inventory/collection/${contractAddress}`, {
-            replace: true,
-          });
-        }
+        // Navigate back to the parent collection page with proper account path
+        goBack();
       } catch (error) {
         console.error(error);
         toast.error("Failed to list asset(s)");
         throw error; // Re-throw to let ExecutionContainer handle the error display
       }
     },
-    [buildTransactions, controller, searchParams, navigate, contractAddress],
+    [buildTransactions, controller, goBack],
   );
 
   useEffect(() => {
@@ -361,7 +355,7 @@ const ListingConfirmation = ({
   totalPriceDisplay: string;
 }) => {
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="p-6 pb-0 flex flex-col gap-4 overflow-hidden h-full">
       <div
         className="grow flex flex-col gap-px rounded overflow-y-scroll"
         style={{ scrollbarWidth: "none" }}
@@ -463,7 +457,8 @@ const Price = ({
 
   useEffect(() => {
     if (!price) {
-      setError(undefined);
+      const message = "Price cannot be null";
+      setError(new Error(message));
       return;
     }
     setError(undefined);

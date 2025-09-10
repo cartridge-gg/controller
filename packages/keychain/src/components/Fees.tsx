@@ -18,14 +18,13 @@ export function Fees({
   const isLoading = isEstimating || isPriceLoading;
 
   useEffect(() => {
-    console.log(maxFee, token)
     if (isLoading || error || !token) {
       return;
     }
 
-    if (maxFee && (maxFee.overall_fee == "0x0" || maxFee.overall_fee == "0")){
+    if (maxFee && (maxFee.overall_fee == "0x0" || maxFee.overall_fee == "0")) {
       setFormattedFee("FREE");
-      return
+      return;
     }
 
     if (maxFee && maxFee.overall_fee && token.price) {
@@ -50,13 +49,15 @@ export function Fees({
 
   return (
     <div className="w-full overflow-hidden rounded">
-      {formattedFee ? formattedFee == "FREE" ? undefined : (
-        <LineItem
-          name="Network Fee"
-          amount={formattedFee}
-          token={token}
-          isLoading={isLoading}
-        />
+      {formattedFee ? (
+        formattedFee == "FREE" ? undefined : (
+          <LineItem
+            name="Network Fee"
+            amount={formattedFee}
+            token={token}
+            isLoading={isLoading}
+          />
+        )
       ) : (
         <LineItem name="Calculating Fees" isLoading />
       )}
