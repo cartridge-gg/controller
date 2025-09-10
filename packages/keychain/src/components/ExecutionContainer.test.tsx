@@ -138,9 +138,9 @@ describe("ExecutionContainer", () => {
       code: 113, // ErrorCode.InsufficientBalance,
       message: "Insufficient balance",
     });
-    const estimateInvokeFee = vi.fn().mockImplementation(async () => ({
+    const estimateInvokeFee = vi.fn().mockResolvedValue({
       suggestedMaxFee: BigInt(1000),
-    }));
+    });
 
     await act(async () => {
       renderWithProviders(
@@ -167,18 +167,24 @@ describe("ExecutionContainer", () => {
       );
     });
 
-    // Wait for fee estimation to complete
+    // Wait for fee estimation to be called and complete
     await waitFor(() => {
       expect(estimateInvokeFee).toHaveBeenCalled();
     });
 
-    // Wait for fee calculation to finish
+    // Give time for state updates to propagate
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    });
+
+    // Now check if the button is available and not disabled
     await waitFor(() => {
-      expect(screen.queryByText("Calculating Fees")).not.toBeInTheDocument();
+      const submitButton = screen.getByText("SUBMIT");
+      expect(submitButton).toBeInTheDocument();
+      expect(submitButton).not.toBeDisabled();
     });
 
     const submitButton = screen.getByText("SUBMIT");
-    expect(submitButton).not.toBeDisabled();
 
     await act(async () => {
       fireEvent.click(submitButton);
