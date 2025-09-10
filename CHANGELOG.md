@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.10.1] - 2025-09-10
+
+### ✨ New Features
+- **@cartridge/keychain**: Added StarkNet wallets account changed listener for improved wallet integration and event handling (#1999)
+- **@cartridge/keychain**: Enhanced claim UI to display connected wallet address for better user transparency (#2000)
+- **@cartridge/keychain**: Added starterpack ID input support to example application for easier testing and development (#1998)
+- **@cartridge/keychain**: Implemented merkle drop StarkNet claim signature verification for enhanced security (#1993)
+- **@cartridge/keychain**: Added merkle-drop wallet selection with controller integration for streamlined claiming process (#1986)
+- **@cartridge/controller**: Added outsideExecution support to StarterPack API for improved transaction handling (#1972)
+- **@cartridge/controller**: Migrated collection listing to use ExecutionContainer for direct execution, improving performance (#2002)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced fee estimation by scaling resource bounds by 1.5x for more reliable transaction processing (#1978)
+- **@cartridge/keychain**: Restricted token support to only USDC, ETH, LORDS and STRK tokens for improved security and user experience (#1996)
+- **Development**: Added dev:live scripts for production API testing to streamline development workflow (#2001)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed controller crash after purchase to ensure stable operation (#1997)
+- **@cartridge/keychain**: Resolved inventory assets disappearing after tab navigation (#1990)
+- **@cartridge/keychain**: Fixed navigation stack reset issues in collection components (#1995)
+- **@cartridge/keychain**: Fixed loot box image display issues (#1991)
+- **@cartridge/keychain**: Resolved inventory view problems after purchase completion (#1989)
+- **@cartridge/keychain**: Fixed token page empty state display (#1988)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#1994, #1992)
+
 ## [0.10.0] - 2025-09-03
 
 ### ✨ New Features
