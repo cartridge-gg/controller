@@ -26,6 +26,7 @@ import { LoadingState } from "../loading";
 import { CostBreakdown } from "../review/cost";
 import { PricingDetails } from "@/components/purchase/types";
 import { decodeStarterPack } from "@/utils/starterpack-url";
+import { usdcToUsd } from "@/utils/starterpack";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -65,6 +66,7 @@ export function PurchaseStarterpack() {
       acquisitionType={details.acquisitionType}
       starterpackItems={details.starterPackItems}
       error={displayError}
+      costDetails={details.priceUsd}
     />
   );
 }
@@ -105,7 +107,7 @@ export function StarterPackInner({
 
   const price = useMemo(() => {
     const total = starterpackItems.reduce(
-      (acc, item) => acc + Number(item.price),
+      (acc, item) => acc + usdcToUsd(item.price || 0n),
       0,
     );
 
