@@ -8,6 +8,7 @@
     "build": "turbo build:deps build",
     "build:compat": "turbo build:deps build:compat",
     "dev": "turbo build:deps dev",
+    "dev:live": "turbo build:deps dev:live",
     "storybook": "pnpm turbo build:deps storybook",
     "e2e": "turbo build:deps dev e2e",
     "e2e:ui": "turbo build:deps dev e2e:ui",
