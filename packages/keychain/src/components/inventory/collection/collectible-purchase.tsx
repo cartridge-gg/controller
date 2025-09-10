@@ -424,10 +424,14 @@ const Order = ({
   }, [price, token]);
 
   const countervalue = useCountervalue({
-    amount: finalPrice.amount,
-    token: token.metadata.symbol,
+    tokens: [{
+      balance: finalPrice.amount,
+      address: token.metadata.address,
+    }],
   });
-  const priceDollar = countervalue?.countervalues?.[0]?.value || "";
+  const priceDollar = typeof countervalue === 'object' && 'countervalues' in countervalue 
+    ? countervalue.countervalues?.[0]?.value || ""
+    : "";
 
   useEffect(() => {
     if (royaltyInfo?.royaltyFee) {
