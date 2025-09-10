@@ -41,11 +41,13 @@ export function connectToController<ParentMethods extends object>({
           setConfigSignupOptions,
         }),
       ),
-      deploy: () => deployFactory(setContext),
+      deploy: () =>
+        deployFactory((path: string) => navigate(path, { replace: true })),
       execute: () => execute({ navigate }),
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),
-      signMessage: () => signMessageFactory(setContext),
+      signMessage: () =>
+        signMessageFactory((path: string) => navigate(path, { replace: true })),
       openSettings: () => openSettingsFactory(),
       navigate: () => navigateFactory(),
       reset: () => () => {

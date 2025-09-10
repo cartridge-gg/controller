@@ -41,7 +41,9 @@ import { CollectiblePurchase } from "./inventory/collection/collectible-purchase
 import { Execute } from "./Execute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
-import { useNavigation } from "@/context";
+import { DeployControllerRoute } from "./DeployControllerRoute";
+import { SignMessageRoute } from "./SignMessageRoute";
+import { useNavigation } from "@/context/navigation";
 import { Purchase } from "./purchase";
 import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
@@ -107,6 +109,9 @@ export function App() {
             />
           }
         />
+        <Route path="/execute" element={<Execute />} />
+        <Route path="/deploy" element={<DeployControllerRoute />} />
+        <Route path="/sign-message" element={<SignMessageRoute />} />
         <Route
           path="/funding/credits"
           element={
