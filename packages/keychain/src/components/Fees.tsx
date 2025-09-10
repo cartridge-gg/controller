@@ -18,8 +18,14 @@ export function Fees({
   const isLoading = isEstimating || isPriceLoading;
 
   useEffect(() => {
+    console.log(maxFee, token)
     if (isLoading || error || !token) {
       return;
+    }
+
+    if (maxFee && (maxFee.overall_fee == "0x0" || maxFee.overall_fee == "0")){
+      setFormattedFee("FREE");
+      return
     }
 
     if (maxFee && maxFee.overall_fee && token.price) {
@@ -29,8 +35,6 @@ export function Fees({
         token.price,
       );
       setFormattedFee(formatted);
-    } else {
-      setFormattedFee("FREE");
     }
   }, [maxFee, token, error, isLoading]);
 
@@ -46,7 +50,7 @@ export function Fees({
 
   return (
     <div className="w-full overflow-hidden rounded">
-      {formattedFee ? (
+      {formattedFee ? formattedFee == "FREE" ? undefined : (
         <LineItem
           name="Network Fee"
           amount={formattedFee}
