@@ -66,7 +66,6 @@ export function PurchaseStarterpack() {
       acquisitionType={details.acquisitionType}
       starterpackItems={details.starterPackItems}
       error={displayError}
-      costDetails={details.priceUsd}
     />
   );
 }
