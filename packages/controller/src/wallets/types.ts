@@ -52,4 +52,5 @@ export interface WalletAdapter {
     txHash: string,
     timeoutMs?: number,
   ): Promise<ExternalWalletResponse<any>>;
+  disconnect?(): void;
 }
