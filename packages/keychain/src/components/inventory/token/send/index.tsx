@@ -12,7 +12,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
 import { Call, uint256, FeeEstimate } from "starknet";
 import { SendRecipient } from "@/components/modules/recipient";
@@ -149,7 +149,7 @@ export function SendToken() {
               <p className="text-semibold text-lg">Sending</p>
               {selectedToken && (
                 <div className="flex items-center gap-2">
-                  <Thumbnail icon={selectedToken.metadata.logo} size="sm" />
+                  <Thumbnail icon={selectedToken.metadata.image} size="sm" />
                   <p className="text-sm font-medium">
                     {selectedToken.metadata.symbol}
                   </p>

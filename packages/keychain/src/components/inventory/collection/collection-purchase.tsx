@@ -394,7 +394,7 @@ const Order = ({
             sale_price: cairo.uint256(price),
           }),
         });
-        const [[receiver], [fee]] = response.result;
+        const [[receiver], [fee]] = response;
         const royaltyFee = Number(fee);
         if (royaltyFee > 0) {
           return { receiver, royaltyFee };
@@ -419,7 +419,11 @@ const Order = ({
     };
   }, [price, token]);
 
-  const priceDollar = useCountervalue(finalPrice.amount, token.metadata.symbol);
+  const countervalue = useCountervalue({
+    amount: finalPrice.amount,
+    token: token.metadata.symbol,
+  });
+  const priceDollar = countervalue?.countervalues?.[0]?.value || "";
 
   useEffect(() => {
     if (royaltyInfo?.royaltyFee) {
@@ -483,75 +487,6 @@ const FeesTooltip = ({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  );
-};
-
-const TokenSelect = ({
-  tokens,
-  selected,
-  setSelected,
-}: {
-  tokens: Token[];
-  selected: Token;
-  setSelected: (token: Token) => void;
-}) => {
-  return (
-    <Select
-      value={selected?.metadata.address}
-      onValueChange={(value) => {
-        const token = tokens.find((t) => t.metadata.address === value);
-        if (token) setSelected(token);
-      }}
-      defaultValue={selected?.metadata.address}
-      disabled
-    >
-      <SelectTrigger className="h-10 w-fit rounded flex gap-2 items-center p-2">
-        <div className="flex items-center gap-2">
-          {selected?.metadata.image ? (
-            <Thumbnail
-              icon={selected.metadata.image}
-              rounded
-              size="sm"
-              variant="light"
-            />
-          ) : (
-            <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />
-          )}
-          <span className="font-medium text-sm">
-            {selected?.metadata.symbol}
-          </span>
-        </div>
-        <SelectValue />
-        <CaratIcon variant="solid" size="xs" />
-      </SelectTrigger>
-      <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
-        {tokens.map((token) => (
-          <SelectItem
-            key={token.metadata.address}
-            simplified
-            value={token.metadata.address}
-            className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer rounded-none"
-          >
-            <div className="flex items-center gap-2">
-              {token.metadata.image ? (
-                <Thumbnail
-                  icon={token.metadata.image}
-                  rounded
-                  size="sm"
-                  variant="light"
-                  className="group-hover:bg-background-400"
-                />
-              ) : (
-                <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />
-              )}
-              <span className="font-medium text-sm">
-                {token.metadata.symbol}
-              </span>
-            </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 };
 

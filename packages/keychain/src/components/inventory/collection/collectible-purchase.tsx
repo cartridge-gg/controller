@@ -309,7 +309,7 @@ export function CollectiblePurchase() {
                       image={args.image}
                       name={args.name}
                       collection={args.collection}
-                      collectionAddress={args.collectionAddress || ""}
+                      collectionAddress={args.collectionAddress ?? ""}
                       price={args.price}
                       token={token}
                       entrypoints={entrypoints}
@@ -398,7 +398,7 @@ const Order = ({
             sale_price: cairo.uint256(price),
           }),
         });
-        const [[receiver], [fee]] = response.result;
+        const [[receiver], [fee]] = response;
         const royaltyFee = Number(fee);
         if (royaltyFee > 0) {
           return { receiver, royaltyFee };
@@ -423,7 +423,11 @@ const Order = ({
     };
   }, [price, token]);
 
-  const priceDollar = useCountervalue(finalPrice.amount, token.metadata.symbol);
+  const countervalue = useCountervalue({
+    amount: finalPrice.amount,
+    token: token.metadata.symbol,
+  });
+  const priceDollar = countervalue?.countervalues?.[0]?.value || "";
 
   useEffect(() => {
     if (royaltyInfo?.royaltyFee) {
