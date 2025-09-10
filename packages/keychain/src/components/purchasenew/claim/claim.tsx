@@ -19,6 +19,8 @@ import { ErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
 import { StarterpackReceiving } from "../starterpack/starterpack";
 import { ExternalWalletType } from "@cartridge/controller";
+import { getWallet } from "../wallet/data";
+import { formatAddress } from "@cartridge/ui/utils";
 
 export function Claim() {
   const { keys, address: externalAddress, type } = useParams();
@@ -59,6 +61,10 @@ export function Claim() {
 
     setClaimItems(items);
   }, [claimsData, setClaimItems]);
+
+  const wallet = useMemo(() => {
+    return getWallet(type as ExternalWalletType | "controller");
+  }, [type]);
 
   const onSubmit = useCallback(async () => {
     try {
@@ -138,16 +144,15 @@ export function Claim() {
       </LayoutContent>
       <LayoutFooter>
         {error && <ErrorAlert title="Error" description={error.message} />}
-        {/* {claimItems.length > 0 && (
-          <CardContent className="relative flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
-            <div className="absolute -top-1 right-4">
-              <Badge price={0} />
-            </div>
-            <div className="text-foreground-400 font-medium text-sm flex flex-row items-center gap-1">
-              Network Fees
-            </div>
-          </CardContent>
-        )} */}
+        <div className="flex justify-between border border-background-300 rounded py-2 px-3">
+          <div className="flex items-center gap-1 text-foreground-300 text-xs">
+            {wallet.subIcon} {wallet.name} (
+            {formatAddress(externalAddress!, { first: 5, last: 4 })})
+          </div>
+          <div className="flex items-center gap-1 text-foreground-300 text-xs">
+            Connected
+          </div>
+        </div>
         {claimsData.length === 0 ? (
           <Button onClick={() => goBack()}>Check Another Wallet</Button>
         ) : (
