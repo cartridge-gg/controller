@@ -180,7 +180,7 @@ export function useConnectionValue() {
     import.meta.env.VITE_RPC_SEPOLIA,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
-  const [hasSession, setHasSession] = useState<boolean>(false);
+  const [isSessionActive, setIsSessionActive] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
   const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
   const [isMainnet, setIsMainnet] = useState<boolean>(false);
@@ -439,17 +439,17 @@ export function useConnectionValue() {
     if (controller && policies) {
       controller
         .isRequestedSession(policies)
-        .then(setHasSession)
+        .then(setIsSessionActive)
         .catch((error) => {
           console.error("Failed to check session status:", error);
-          setHasSession(false);
+          setIsSessionActive(false);
         });
     } else if (controller && !policies) {
       // No policies means no session check needed
-      setHasSession(true);
+      setIsSessionActive(true);
     } else {
       // No controller means no session
-      setHasSession(false);
+      setIsSessionActive(false);
     }
   }, [controller, policies]);
 
@@ -646,7 +646,7 @@ export function useConnectionValue() {
     origin,
     rpcUrl,
     policies,
-    hasSession,
+    isSessionActive,
     onModalClose,
     setOnModalClose,
     theme,
