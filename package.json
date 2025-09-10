@@ -39,6 +39,7 @@
     "tailwindcss": "catalog:"
   },
   "devDependencies": {
+    "env-cmd": "^11.0.0",
     "husky": "^9.1.7",
     "turbo": "^2.5.4",
     "vercel": "^37.14.0"
