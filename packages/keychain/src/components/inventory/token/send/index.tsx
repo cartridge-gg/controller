@@ -14,18 +14,19 @@ import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
-import { Call, uint256 } from "starknet";
+import { Call, uint256, FeeEstimate } from "starknet";
 import { SendRecipient } from "@/components/modules/recipient";
 import { SendAmount } from "./amount";
-import { createExecuteUrl } from "@/utils/connection/execute";
+import { useConnection } from "@/hooks/connection";
+import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { toast } from "sonner";
 
 export function SendToken() {
-  const { address: tokenAddress, username } = useParams<{
+  const { address: tokenAddress } = useParams<{
     address: string;
-    username: string;
   }>();
-  const [searchParams] = useSearchParams();
-  const { navigate } = useNavigation();
+  const { controller } = useConnection();
+  const { goBack } = useNavigation();
   const [validated, setValidated] = useState(false);
   const [warning, setWarning] = useState<string>();
   const { token, status: tokenFetching } = useToken({
@@ -38,19 +39,19 @@ export function SendToken() {
   const [amount, setAmount] = useState<number | undefined>();
   const [amountError, setAmountError] = useState<Error | undefined>();
   const [toError, setToError] = useState<Error | undefined>();
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [selectedToken, setSelectedToken] = useState<Token | undefined>(token);
   const [recipientLoading, setRecipientLoading] = useState(false);
+  const [sendConfirmed, setSendConfirmed] = useState(false);
 
   const disabled = useMemo(() => {
     return (
       recipientLoading ||
       !!toError ||
       !!amountError ||
-      (!validated && !!warning)
+      (!validated && !!warning) ||
+      !amount
     );
-  }, [validated, warning, amountError, toError, recipientLoading]);
+  }, [validated, warning, amountError, toError, recipientLoading, amount]);
 
   useEffect(() => {
     setValidated(false);
@@ -71,33 +72,56 @@ export function SendToken() {
     [setSelectedToken, setAmount],
   );
 
-  const onSubmit = useCallback(
-    async (to: string, amount: number) => {
-      setSubmitted(true);
-      if (!selectedToken || !to || !amount) return;
+  // Build transactions when send is confirmed
+  const transactions = useMemo(() => {
+    if (
+      !sendConfirmed ||
+      !selectedToken ||
+      !to ||
+      !amount ||
+      !!toError ||
+      !!amountError
+    ) {
+      return undefined;
+    }
 
-      setLoading(true);
-      const formattedAmount = uint256.bnToUint256(
-        BigInt(amount * 10 ** selectedToken.metadata.decimals),
-      );
+    const formattedAmount = uint256.bnToUint256(
+      BigInt(amount * 10 ** selectedToken.metadata.decimals),
+    );
 
-      const calls: Call[] = [
-        {
-          contractAddress: selectedToken.metadata.address,
-          entrypoint: "transfer",
-          calldata: [to, formattedAmount],
-        },
-      ];
-      // Create execute URL with returnTo parameter pointing back to token page
-      const executeUrl = createExecuteUrl(calls);
+    const calls: Call[] = [
+      {
+        contractAddress: selectedToken.metadata.address,
+        entrypoint: "transfer",
+        calldata: [to, formattedAmount],
+      },
+    ];
 
-      // Navigate to execute screen with returnTo parameter to come back to token page
-      const inventoryPath = `/account/${username}/inventory?${searchParams.toString()}`;
-      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(inventoryPath)}`;
-      navigate(executeUrlWithReturn);
-      setLoading(false);
+    return calls;
+  }, [sendConfirmed, selectedToken, to, amount, toError, amountError]);
+
+  const onSubmitSend = useCallback(
+    async (maxFee?: FeeEstimate) => {
+      if (!maxFee || !transactions || !controller) {
+        return;
+      }
+
+      try {
+        await controller.execute(transactions, maxFee);
+
+        toast.success("Tokens sent successfully!", {
+          duration: 10000,
+        });
+
+        // Navigate back to inventory
+        goBack();
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to send tokens");
+        throw error;
+      }
     },
-    [selectedToken, navigate, username, searchParams],
+    [transactions, controller, goBack],
   );
 
   if (!token) {
@@ -106,75 +130,125 @@ export function SendToken() {
 
   return (
     <>
-      <LayoutContent className="pb-4 gap-6">
-        <div className="flex items-center gap-3">
-          <Thumbnail
-            icon={
-              <PaperPlaneIcon variant="solid" className="h-[30px] w-[30px]" />
-            }
-            size="lg"
-          />
-          <p className="text-semibold text-lg">Send</p>
-          {tokenFetching === "loading" ? (
-            <div className="flex items-center gap-2">
-              <Spinner size="sm" />
-              <p className="text-sm">Loading...</p>
-            </div>
-          ) : (
-            <TokenSelect
-              tokens={tokens.filter((item) => item.balance.amount > 0)}
-              onSelect={onChangeToken}
-              defaultToken={selectedToken}
+      {sendConfirmed && transactions ? (
+        <ExecutionContainer
+          title="Confirm Send"
+          icon={
+            <PaperPlaneIcon
+              variant="solid"
+              size="lg"
+              className="h-[30px] w-[30px]"
             />
-          )}
-        </div>
-        <SendRecipient
-          to={to}
-          submitted={submitted}
-          setTo={setTo}
-          setWarning={setWarning}
-          setError={setToError}
-          setParentLoading={setRecipientLoading}
-        />
-        {selectedToken && (
-          <SendAmount
-            token={selectedToken}
-            amount={amount}
-            submitted={submitted}
-            setAmount={setAmount}
-            setError={setAmountError}
-          />
-        )}
-      </LayoutContent>
-
-      <LayoutFooter>
-        <div
-          className={cn(
-            "border border-destructive-100 rounded flex items-center gap-2 p-2 cursor-pointer select-none",
-            !warning && "hidden",
-          )}
-          onClick={() => setValidated(!validated)}
+          }
+          transactions={transactions}
+          onSubmit={onSubmitSend}
+          buttonText="Send"
         >
-          {validated && (
-            <CheckboxCheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
-          )}
-          {!validated && (
-            <CheckboxUncheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
-          )}
-          <p className="text-xs text-destructive-100">{warning}</p>
-        </div>
-        <div className="flex flex-row items-center gap-3">
-          <Button
-            disabled={disabled}
-            type="submit"
-            className="w-full"
-            isLoading={loading}
-            onClick={() => onSubmit(to, amount!)}
-          >
-            Review Send
-          </Button>
-        </div>
-      </LayoutFooter>
+          <div className="p-6 pb-4 flex flex-col gap-6">
+            <div className="flex items-center gap-3">
+              <p className="text-semibold text-lg">Sending</p>
+              {selectedToken && (
+                <div className="flex items-center gap-2">
+                  <Thumbnail icon={selectedToken.metadata.logo} size="sm" />
+                  <p className="text-sm font-medium">
+                    {selectedToken.metadata.symbol}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-foreground-400">
+                Recipient
+              </p>
+              <p className="text-sm font-mono text-foreground-100">{to}</p>
+            </div>
+            {selectedToken && (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-medium text-foreground-400">
+                  Amount
+                </p>
+                <p className="text-lg font-medium text-foreground-100">
+                  {amount} {selectedToken.metadata.symbol}
+                </p>
+              </div>
+            )}
+          </div>
+        </ExecutionContainer>
+      ) : (
+        <>
+          <LayoutContent className="pb-4 gap-6">
+            <div className="flex items-center gap-3">
+              <Thumbnail
+                icon={
+                  <PaperPlaneIcon
+                    variant="solid"
+                    className="h-[30px] w-[30px]"
+                  />
+                }
+                size="lg"
+              />
+              <p className="text-semibold text-lg">Send</p>
+              {tokenFetching === "loading" ? (
+                <div className="flex items-center gap-2">
+                  <Spinner size="sm" />
+                  <p className="text-sm">Loading...</p>
+                </div>
+              ) : (
+                <TokenSelect
+                  tokens={tokens.filter((item) => item.balance.amount > 0)}
+                  onSelect={onChangeToken}
+                  defaultToken={selectedToken}
+                />
+              )}
+            </div>
+            <SendRecipient
+              to={to}
+              submitted={false}
+              setTo={setTo}
+              setWarning={setWarning}
+              setError={setToError}
+              setParentLoading={setRecipientLoading}
+            />
+            {selectedToken && (
+              <SendAmount
+                token={selectedToken}
+                amount={amount}
+                submitted={false}
+                setAmount={setAmount}
+                setError={setAmountError}
+              />
+            )}
+          </LayoutContent>
+
+          <LayoutFooter>
+            <div
+              className={cn(
+                "border border-destructive-100 rounded flex items-center gap-2 p-2 cursor-pointer select-none",
+                !warning && "hidden",
+              )}
+              onClick={() => setValidated(!validated)}
+            >
+              {validated && (
+                <CheckboxCheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
+              )}
+              {!validated && (
+                <CheckboxUncheckedIcon className="text-destructive-100 min-h-5 min-w-5 hover:opacity-80" />
+              )}
+              <p className="text-xs text-destructive-100">{warning}</p>
+            </div>
+            <div className="flex flex-row items-center gap-3">
+              <Button
+                disabled={disabled}
+                type="submit"
+                className="w-full"
+                onClick={() => setSendConfirmed(true)}
+              >
+                Review Send
+              </Button>
+            </div>
+          </LayoutFooter>
+        </>
+      )}
     </>
   );
 }

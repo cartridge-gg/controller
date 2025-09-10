@@ -1,4 +1,4 @@
-import { useLocation, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   LayoutContent,
   Button,
@@ -29,6 +29,7 @@ import {
   Call,
   CallData,
   getChecksumAddress,
+  FeeEstimate,
 } from "starknet";
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -43,7 +44,7 @@ import { useTokens } from "@/hooks/token";
 import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
-import { createExecuteUrl } from "@/utils/connection/execute";
+import { ExecutionContainer } from "@/components/ExecutionContainer";
 import {
   CLIENT_FEE_DENOMINATOR,
   CLIENT_FEE_NUMERATOR,
@@ -54,15 +55,13 @@ const FEE_ENTRYPOINT = "royalty_info";
 
 export function CollectionPurchase() {
   const { address: contractAddress, tokenId } = useParams();
-  const { project } = useConnection();
+  const { project, controller } = useConnection();
+  const { goBack } = useNavigation();
   const { tokens } = useTokens();
-  const [loading, setLoading] = useState(false);
   const [royalties, setRoyalties] = useState<{ [orderId: number]: number }>({});
   const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
   const { provider, orders, marketplaceFee, setAmount } = useMarketplace();
-  const { navigate } = useNavigation();
 
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const tokenOrders = useMemo(() => {
     const paramsOrders =
@@ -181,59 +180,75 @@ export function CollectionPurchase() {
     [setRoyalties],
   );
 
-  const handlePurchase = useCallback(async () => {
-    if (!token || !tokenOrders || tokenOrders.length === 0) return;
-    setLoading(true);
-    try {
-      const marketplaceAddress: string = provider.manifest.contracts.find(
-        (c: { tag: string }) => c.tag?.includes("Marketplace"),
-      )?.address;
-      const calls: AllowArray<Call> = [
-        {
-          contractAddress: getChecksumAddress(token?.metadata.address || ""),
-          entrypoint: "approve",
-          calldata: CallData.compile({
-            spender: marketplaceAddress,
-            amount: cairo.uint256(totalPrice),
-          }),
-        },
-        ...tokenOrders.map((order) => ({
-          contractAddress: marketplaceAddress,
-          entrypoint: "execute",
-          calldata: CallData.compile({
-            orderId: order.id,
-            collection: order.collection,
-            tokenId: cairo.uint256(order.tokenId),
-            assetId: cairo.uint256(order.tokenId),
-            quantity: 0, // 0 for ERC721
-            royalties: true,
-            clientFee: CLIENT_FEE_NUMERATOR,
-            clientFeeReceiver: CLIENT_FEE_RECEIVER,
-          }),
-        })),
-      ];
-      // Create execute URL with returnTo parameter pointing back to current page
-      const executeUrl = createExecuteUrl(calls);
+  // Memoize marketplace address
+  const marketplaceAddress = useMemo(() => {
+    return provider.manifest.contracts.find((c: { tag: string }) =>
+      c.tag?.includes("Marketplace"),
+    )?.address;
+  }, [provider.manifest.contracts]);
 
-      // Navigate to execute screen with returnTo parameter to come back to current page
-      const currentPath = `${location.pathname.split("/").slice(0, -5).join("/")}?ps=${searchParams.get("ps")}`;
-      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
-      navigate(executeUrlWithReturn);
-    } catch (error) {
-      console.error(error);
-      toast.error(`Failed to purchase asset(s)`);
-    } finally {
-      setLoading(false);
+  // Build transactions
+  const buildTransactions = useMemo(() => {
+    if (
+      !token ||
+      !tokenOrders ||
+      tokenOrders.length === 0 ||
+      !marketplaceAddress
+    ) {
+      return undefined;
     }
-  }, [
-    token,
-    tokenOrders,
-    totalPrice,
-    provider,
-    navigate,
-    location,
-    searchParams,
-  ]);
+
+    const calls: AllowArray<Call> = [
+      {
+        contractAddress: getChecksumAddress(token?.metadata.address || ""),
+        entrypoint: "approve",
+        calldata: CallData.compile({
+          spender: marketplaceAddress,
+          amount: cairo.uint256(totalPrice),
+        }),
+      },
+      ...tokenOrders.map((order) => ({
+        contractAddress: marketplaceAddress,
+        entrypoint: "execute",
+        calldata: CallData.compile({
+          orderId: order.id,
+          collection: order.collection,
+          tokenId: cairo.uint256(order.tokenId),
+          assetId: cairo.uint256(order.tokenId),
+          quantity: 0, // 0 for ERC721
+          royalties: true,
+          clientFee: CLIENT_FEE_NUMERATOR,
+          clientFeeReceiver: CLIENT_FEE_RECEIVER,
+        }),
+      })),
+    ];
+
+    return calls;
+  }, [token, tokenOrders, totalPrice, marketplaceAddress]);
+
+  const onSubmitPurchase = useCallback(
+    async (maxFee?: FeeEstimate) => {
+      if (!maxFee || !buildTransactions || !controller) {
+        return;
+      }
+
+      try {
+        await controller.execute(buildTransactions, maxFee);
+
+        toast.success("Purchase completed successfully!", {
+          duration: 10000,
+        });
+
+        // Navigate back
+        goBack();
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to purchase asset(s)");
+        throw error;
+      }
+    },
+    [buildTransactions, controller, goBack],
+  );
 
   const status = useMemo(() => {
     if (collectionStatus === "error" || assetsStatus === "error")
@@ -260,95 +275,82 @@ export function CollectionPurchase() {
         <EmptyState />
       ) : (
         <>
-          <LayoutContent className="p-6 pb-0 flex flex-col gap-4 overflow-hidden select-none">
-            <div className="h-10 flex items-center justify-start gap-3 select-none">
-              <Thumbnail
-                icon={
-                  <TagIcon
-                    variant="solid"
-                    size="lg"
-                    className="h-[30px] w-[30px]"
-                  />
-                }
-                size="lg"
-              />
-              <p className="text-lg/[24px] font-semibold">Review Purchase</p>
-            </div>
-            <div
-              className="grow flex flex-col gap-px rounded overflow-y-scroll pb-6"
-              style={{ scrollbarWidth: "none" }}
+          {buildTransactions ? (
+            <ExecutionContainer
+              title="Review Purchase"
+              icon={
+                <TagIcon
+                  variant="solid"
+                  size="lg"
+                  className="h-[30px] w-[30px]"
+                />
+              }
+              transactions={buildTransactions}
+              onSubmit={onSubmitPurchase}
+              buttonText="Confirm"
             >
-              <div className="h-10 flex items-center justify-between bg-background-200 px-3 py-2.5">
-                <p className="text-xs tracking-wider text-foreground-400 font-semibold">
-                  Purchasing
-                </p>
-                <p
-                  className={cn(
-                    "px-1.5 py-0.5 text-xs bg-background-300 rounded-full font-medium text-foreground-300",
-                    props.length <= 1 && "hidden",
-                  )}
-                >{`${props.length} total`}</p>
-              </div>
-              {props.map((args) => (
-                <Order
-                  key={args.orderId}
-                  orderId={args.orderId}
-                  image={args.image}
-                  name={args.name}
-                  collection={args.collection}
-                  collectionAddress={args.collectionAddress}
-                  price={args.price}
-                  token={token}
-                  entrypoints={entrypoints}
-                  tokenId={args.tokenId}
-                  addRoyalties={addRoyalties}
-                />
-              ))}
-            </div>
-          </LayoutContent>
-
-          <LayoutFooter className="relative flex flex-col items-center justify-center gap-y-4 bg-background-100 pt-0 select-none">
-            <div className="flex flex-col gap-3 w-full">
-              <div className="w-full px-3 py-2.5 flex flex-col gap-1 bg-background-125 border border-background-200 rounded">
-                <div className="flex items-center justify-between text-xs text-foreground-400">
-                  <p>Cost</p>
-                  <p>{`${(floatPrice - total).toFixed(2)} ${token.metadata.symbol}`}</p>
-                </div>
-                <div className="flex items-center justify-between text-xs text-foreground-400">
-                  <div className="flex gap-2  text-xs font-medium">
-                    Fees
-                    <FeesTooltip trigger={<InfoIcon size="xs" />} fees={fees} />
-                  </div>
-                  <p>{`${total.toFixed(2)} ${token.metadata.symbol}`}</p>
-                </div>
-              </div>
-              <div className="flex gap-3 w-full">
-                <div className="w-full px-3 py-2.5 h-10 flex items-center justify-between bg-background-125 border border-background-200 rounded">
-                  <p className="text-sm font-medium text-foreground-400">
-                    Total
-                  </p>
-                  <p className="text-sm font-medium text-foreground-100">{`${floatPrice}`}</p>
-                </div>
-                <TokenSelect
-                  tokens={tokens}
-                  selected={token || tokens[0]}
-                  setSelected={() => {}}
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 w-full">
-              <div className="w-full flex items-center gap-3">
-                <Button
-                  type="submit"
-                  className="w-full"
-                  isLoading={loading}
-                  onClick={handlePurchase}
+              <div className="p-6 pb-0 flex flex-col gap-4 overflow-hidden h-full">
+                <div
+                  className="grow flex flex-col gap-px rounded overflow-y-scroll"
+                  style={{ scrollbarWidth: "none" }}
                 >
-                  Confirm
-                </Button>
+                  <div className="h-10 flex items-center justify-between bg-background-200 px-3 py-2.5">
+                    <p className="text-xs tracking-wider text-foreground-400 font-semibold">
+                      Purchasing
+                    </p>
+                    <p
+                      className={cn(
+                        "px-1.5 py-0.5 text-xs bg-background-300 rounded-full font-medium text-foreground-300",
+                        props.length <= 1 && "hidden",
+                      )}
+                    >{`${props.length} total`}</p>
+                  </div>
+                  {props.map((args) => (
+                    <Order
+                      key={args.orderId}
+                      orderId={args.orderId}
+                      image={args.image}
+                      name={args.name}
+                      collection={args.collection}
+                      collectionAddress={args.collectionAddress}
+                      price={args.price}
+                      token={token}
+                      entrypoints={entrypoints}
+                      tokenId={args.tokenId}
+                      addRoyalties={addRoyalties}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex flex-col gap-3 pb-6">
+                  <div className="w-full px-3 py-2.5 flex flex-col gap-1 bg-background-125 border border-background-200 rounded">
+                    <div className="flex items-center justify-between text-xs text-foreground-400">
+                      <p>Cost</p>
+                      <p>{`${(floatPrice - total).toFixed(2)} ${token.metadata.symbol}`}</p>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-foreground-400">
+                      <div className="flex gap-2  text-xs font-medium">
+                        Fees
+                        <FeesTooltip
+                          trigger={<InfoIcon size="xs" />}
+                          fees={fees}
+                        />
+                      </div>
+                      <p>{`${total.toFixed(2)} ${token.metadata.symbol}`}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 w-full">
+                    <div className="w-full px-3 py-2.5 h-10 flex items-center justify-between bg-background-125 border border-background-200 rounded">
+                      <p className="text-sm font-medium text-foreground-400">
+                        Total
+                      </p>
+                      <p className="text-sm font-medium text-foreground-100">{`${floatPrice} ${token.metadata.symbol}`}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </LayoutFooter>
+            </ExecutionContainer>
+          ) : null}
         </>
       )}
     </>
@@ -375,61 +377,55 @@ const Order = ({
   price: number;
   token: Token;
   entrypoints: string[];
-  tokenId?: string;
+  tokenId: string;
   addRoyalties: (orderId: number, royaltyFee: number) => void;
 }) => {
-  const { controller } = useConnection();
-  const { data: royalties } = useQuery({
-    enabled: !!collectionAddress && !!tokenId && !!price,
-    queryKey: ["fee", collectionAddress, tokenId, price],
-    queryFn: async () => {
-      if (!entrypoints || !entrypoints.includes(FEE_ENTRYPOINT)) return;
+  const { provider } = useMarketplace();
+  const { data: royaltyInfo } = useQuery(
+    ["royalty", collectionAddress, tokenId, price],
+    async () => {
+      if (!entrypoints.includes(FEE_ENTRYPOINT)) return;
       try {
-        return await controller?.provider?.callContract({
+        const response = await provider.provider.callContract({
           contractAddress: collectionAddress,
           entrypoint: FEE_ENTRYPOINT,
-          calldata: [
-            cairo.uint256(tokenId ?? "0x0"),
-            cairo.uint256(price || 0),
-          ],
+          calldata: CallData.compile({
+            token_id: cairo.uint256(tokenId),
+            sale_price: cairo.uint256(price),
+          }),
         });
-      } catch (error: unknown) {
-        console.log(error);
+        const [[receiver], [fee]] = response.result;
+        const royaltyFee = Number(fee);
+        if (royaltyFee > 0) {
+          return { receiver, royaltyFee };
+        }
+        return undefined;
+      } catch (error) {
+        console.error("Error fetching royalty info:", error);
+        return undefined;
       }
     },
-  });
-
-  const floatPrice = useMemo(() => {
-    if (!token) return 0;
-    return Number(price) / Math.pow(10, token.metadata.decimals);
-  }, [price, token]);
-
-  const royaltyFee = useMemo(() => {
-    if (!royalties) return 0;
-    return Number(royalties[1]);
-  }, [royalties]);
-
-  useEffect(() => {
-    if (!royalties) return;
-    addRoyalties(orderId, royaltyFee);
-  }, [addRoyalties, orderId, royaltyFee, royalties]);
-
-  const { countervalues } = useCountervalue(
     {
-      tokens: [
-        {
-          balance: `${floatPrice}`,
-          address: token?.metadata.address || "",
-        },
-      ],
+      enabled: !!collectionAddress && !!tokenId && !!price,
+      refetchOnWindowFocus: false,
     },
-    { enabled: !!floatPrice && !!token },
   );
 
-  const value = useMemo(() => {
-    if (!countervalues) return 0;
-    return countervalues[0]?.current.value || 0;
-  }, [countervalues]);
+  const finalPrice = useMemo(() => {
+    const formattedPrice = price / Math.pow(10, token.metadata.decimals);
+    return {
+      amount: formattedPrice.toFixed(2),
+      token: token.metadata.symbol,
+    };
+  }, [price, token]);
+
+  const priceDollar = useCountervalue(finalPrice.amount, token.metadata.symbol);
+
+  useEffect(() => {
+    if (royaltyInfo?.royaltyFee) {
+      addRoyalties(orderId, royaltyInfo.royaltyFee);
+    }
+  }, [royaltyInfo, orderId, addRoyalties]);
 
   return (
     <div className="h-16 flex items-center justify-between bg-background-200 px-4 py-3 gap-3">
@@ -443,16 +439,50 @@ const Order = ({
         <div className="flex items-center gap-6 justify-between text-sm font-medium capitalize">
           <p>{name}</p>
           <div className="flex items-center gap-1">
-            <Thumbnail icon={token.metadata.image} size="sm" />
-            <p>{floatPrice}</p>
+            <Thumbnail icon={token.metadata.image || ""} size="sm" />
+            <p>{finalPrice.amount}</p>
           </div>
         </div>
         <div className="flex items-center gap-1 justify-between text-xs text-foreground-300">
           <p className="truncate">{collection}</p>
-          <p>{`$${value.toFixed(2)}`}</p>
+          <p>{priceDollar}</p>
         </div>
       </div>
     </div>
+  );
+};
+
+const FeesTooltip = ({
+  trigger,
+  fees,
+}: {
+  trigger: React.ReactNode;
+  fees: { label: string; amount: string; percentage: string }[];
+}) => {
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+        <TooltipContent>
+          <div className="flex flex-col gap-1">
+            {fees.map((fee) => (
+              <div
+                key={fee.label}
+                className="flex items-center justify-between gap-4 text-xs"
+              >
+                <span className="text-foreground-400">{fee.label}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-foreground-100">{fee.amount}</span>
+                  <span className="text-foreground-400">
+                    ({fee.percentage})
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -465,39 +495,34 @@ const TokenSelect = ({
   selected: Token;
   setSelected: (token: Token) => void;
 }) => {
-  const onChangeToken = useCallback(
-    (address: string) => {
-      const token = tokens.find((token) => token.metadata.address === address);
-      if (token) {
-        setSelected(token);
-      }
-    },
-    [setSelected, tokens],
-  );
-
-  const disabled = useMemo(() => {
-    return true;
-  }, []);
-
-  if (tokens.length === 0) return null;
-
   return (
     <Select
       value={selected?.metadata.address}
-      onValueChange={onChangeToken}
+      onValueChange={(value) => {
+        const token = tokens.find((t) => t.metadata.address === value);
+        if (token) setSelected(token);
+      }}
       defaultValue={selected?.metadata.address}
-      disabled={disabled} // TODO: enable when swap is implemented
+      disabled
     >
-      <SelectTrigger className="h-10 w-fit rounded flex gap-2 items-center p-2 bg-background-200 hover:bg-background-200 disabled:opacity-100 disabled:cursor-default">
-        <SelectValue placeholder="Select Token" />
-        <CaratIcon
-          variant="down"
-          size="sm"
-          className={cn(
-            "text-foreground-300",
-            disabled && "text-foreground-400",
+      <SelectTrigger className="h-10 w-fit rounded flex gap-2 items-center p-2">
+        <div className="flex items-center gap-2">
+          {selected?.metadata.image ? (
+            <Thumbnail
+              icon={selected.metadata.image}
+              rounded
+              size="sm"
+              variant="light"
+            />
+          ) : (
+            <div className="w-5 h-5 bg-gray-200 rounded-full flex-shrink-0" />
           )}
-        />
+          <span className="font-medium text-sm">
+            {selected?.metadata.symbol}
+          </span>
+        </div>
+        <SelectValue />
+        <CaratIcon variant="solid" size="xs" />
       </SelectTrigger>
       <SelectContent viewPortClassName="gap-0 bg-background-100 flex flex-col gap-px">
         {tokens.map((token) => (
@@ -505,8 +530,7 @@ const TokenSelect = ({
             key={token.metadata.address}
             simplified
             value={token.metadata.address}
-            data-active={token.metadata.address === selected?.metadata.address}
-            className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer data-[active=true]:bg-background-200 data-[active=true]:hover:bg-background-300 data-[active=true]:text-foreground-100 rounded-none"
+            className="h-10 group bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-100 cursor-pointer rounded-none"
           >
             <div className="flex items-center gap-2">
               {token.metadata.image ? (
@@ -531,55 +555,15 @@ const TokenSelect = ({
   );
 };
 
-export const FeesTooltip = ({
-  trigger,
-  fees,
-}: {
-  trigger: React.ReactNode;
-  fees: {
-    label: string;
-    amount: string;
-    percentage: string;
-  }[];
-}) => {
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger>{trigger}</TooltipTrigger>
-        <TooltipContent
-          side="top"
-          align="start"
-          className="px-3 py-2 flex flex-col gap-2 bg-spacer-100 border border-background-150 text-foreground-400 min-w-[240px] select-none"
-        >
-          {fees.map((fee) => (
-            <div
-              key={fee.label}
-              className="flex flex-row gap-2 justify-between text-foreground-300"
-            >
-              {fee.label}:{" "}
-              <div>
-                <span className="text-foreground-400 text-xs">
-                  ({fee.percentage})
-                </span>{" "}
-                {fee.amount}
-              </div>
-            </div>
-          ))}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-};
-
 const LoadingState = () => {
   return (
-    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+    <LayoutContent className="gap-4 select-none h-full overflow-hidden">
       <Skeleton className="min-h-10 w-full rounded" />
-      <Skeleton className="min-h-[200px] w-full rounded" />
-      <div className="flex flex-col gap-4 grow">
+      <div className="flex flex-col">
+        <Skeleton className="min-h-4 my-3 w-8 rounded" />
         <Skeleton className="min-h-10 w-full rounded" />
-        <Skeleton className="grow w-full rounded" />
       </div>
+      <Skeleton className="min-h-[250px] w-full rounded" />
     </LayoutContent>
   );
 };
@@ -588,7 +572,7 @@ const EmptyState = () => {
   return (
     <LayoutContent className="select-none h-full">
       <Empty
-        title="No orders found for purchase."
+        title="No information found for this purchase."
         icon="inventory"
         className="h-full"
       />
