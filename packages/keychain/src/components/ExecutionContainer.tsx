@@ -72,6 +72,7 @@ export function ExecutionContainer({
         if (!executionError) {
           setCtrlError(undefined);
         }
+
         setMaxFee(maxFee);
         setIsEstimating(false);
       } catch (e) {

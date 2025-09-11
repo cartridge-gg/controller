@@ -1,5 +1,5 @@
 import { ExternalWallet } from "@cartridge/controller";
-import { PurchaseType } from "@/hooks/payments/crypto";
+import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { StarterPackDetails } from "@/hooks/starterpack";
 
 export enum PurchaseState {

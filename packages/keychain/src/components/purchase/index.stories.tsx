@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Purchase, PurchaseState } from ".";
 import { WalletsProvider } from "@/hooks/wallets";
-import { PurchaseType } from "@/hooks/payments/crypto";
-import { StarterItemType } from "@/hooks/starterpack";
+import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { StarterPackItemType } from "@cartridge/controller";
 
 const meta = {
   component: Purchase,
@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>;
 
 export const PurchaseCredits: Story = {
   args: {
-    type: PurchaseType.CREDITS,
+    type: PurchaseType.Credits,
     wallets: [
       {
         type: "phantom",
@@ -36,7 +36,7 @@ export const PurchaseCredits: Story = {
 
 export const FreeStarterpack: Story = {
   args: {
-    type: PurchaseType.STARTERPACK,
+    type: PurchaseType.Starterpack,
     wallets: [
       {
         type: "phantom",
@@ -55,13 +55,12 @@ export const FreeStarterpack: Story = {
       },
       starterPackItems: [
         {
-          title: "Booster Pack",
-          collectionName: "Chaos Surfers",
+          name: "Booster Pack",
           description: "Contains random playable agents",
-          price: 0,
-          image:
+          price: 0n,
+          iconURL:
             "https://storage.googleapis.com/c7e-prod-static/media/chaos.png",
-          type: StarterItemType.NFT,
+          type: StarterPackItemType.NONFUNGIBLE,
         },
       ],
     },
@@ -78,7 +77,7 @@ export const FreeStarterpack: Story = {
 
 export const FreeStarterpackLimitReached: Story = {
   args: {
-    type: PurchaseType.STARTERPACK,
+    type: PurchaseType.Starterpack,
     wallets: [
       {
         type: "phantom",
@@ -97,13 +96,12 @@ export const FreeStarterpackLimitReached: Story = {
       },
       starterPackItems: [
         {
-          title: "Booster Pack",
-          collectionName: "Chaos Surfers",
+          name: "Booster Pack",
           description: "Contains random playable agents",
-          price: 0,
-          image:
+          price: 0n,
+          iconURL:
             "https://storage.googleapis.com/c7e-prod-static/media/chaos.png",
-          type: StarterItemType.NFT,
+          type: StarterPackItemType.NONFUNGIBLE,
         },
       ],
     },
@@ -120,7 +118,7 @@ export const FreeStarterpackLimitReached: Story = {
 
 export const PurchaseStarterpack: Story = {
   args: {
-    type: PurchaseType.STARTERPACK,
+    type: PurchaseType.Starterpack,
     wallets: [
       {
         type: "phantom",
@@ -135,21 +133,20 @@ export const PurchaseStarterpack: Story = {
       acquisitionType: StarterpackAcquisitionType.Paid,
       starterPackItems: [
         {
-          title: "Village",
-          collectionName: "Eternum Village",
+          name: "Village",
           description:
             "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
-          price: 5,
-          image: "https://r2.quddus.my/Frame%203231.png",
-          type: StarterItemType.NFT,
+          price: 5n,
+          iconURL: "https://r2.quddus.my/Frame%203231.png",
+          type: StarterPackItemType.NONFUNGIBLE,
         },
         {
-          title: "20 Credits",
+          name: "20 Credits",
           description: "Credits cover service fee(s) in Eternum.",
-          price: 0,
-          image: "/ERC-20-Icon.svg",
-          type: StarterItemType.CREDIT,
-          value: 50,
+          price: 0n,
+          iconURL: "/ERC-20-Icon.svg",
+          type: StarterPackItemType.FUNGIBLE,
+          amount: 50,
         },
       ],
     },
@@ -166,7 +163,7 @@ export const PurchaseStarterpack: Story = {
 
 export const PurchaseStarterpackWithSupply: Story = {
   args: {
-    type: PurchaseType.STARTERPACK,
+    type: PurchaseType.Starterpack,
     wallets: [
       {
         type: "phantom",
@@ -182,21 +179,20 @@ export const PurchaseStarterpackWithSupply: Story = {
       acquisitionType: StarterpackAcquisitionType.Paid,
       starterPackItems: [
         {
-          title: "Village",
-          collectionName: "Eternum Village",
+          name: "Village",
           description:
             "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
-          price: 5,
-          image: "https://r2.quddus.my/Frame%203231.png",
-          type: StarterItemType.NFT,
+          price: 5n,
+          iconURL: "https://r2.quddus.my/Frame%203231.png",
+          type: StarterPackItemType.NONFUNGIBLE,
         },
         {
-          title: "20 Credits",
+          name: "20 Credits",
           description: "Credits cover service fee(s) in Eternum.",
-          price: 0,
-          image: "/ERC-20-Icon.svg",
-          type: StarterItemType.CREDIT,
-          value: 50,
+          price: 0n,
+          iconURL: "/ERC-20-Icon.svg",
+          type: StarterPackItemType.FUNGIBLE,
+          amount: 50,
         },
       ],
     },
@@ -213,7 +209,7 @@ export const PurchaseStarterpackWithSupply: Story = {
 
 export const PurchaseStarterpackSoldOut: Story = {
   args: {
-    type: PurchaseType.STARTERPACK,
+    type: PurchaseType.Starterpack,
     wallets: [
       {
         type: "phantom",
@@ -229,21 +225,20 @@ export const PurchaseStarterpackSoldOut: Story = {
       acquisitionType: StarterpackAcquisitionType.Paid,
       starterPackItems: [
         {
-          title: "Village",
-          collectionName: "Eternum Village",
+          name: "Village",
           description:
             "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
-          price: 5,
-          image: "https://r2.quddus.my/Frame%203231.png",
-          type: StarterItemType.NFT,
+          price: 5n,
+          iconURL: "https://r2.quddus.my/Frame%203231.png",
+          type: StarterPackItemType.NONFUNGIBLE,
         },
         {
-          title: "20 Credits",
+          name: "20 Credits",
           description: "Credits cover service fee(s) in Eternum.",
-          price: 0,
-          image: "/ERC-20-Icon.svg",
-          type: StarterItemType.CREDIT,
-          value: 50,
+          price: 0n,
+          iconURL: "/ERC-20-Icon.svg",
+          type: StarterPackItemType.FUNGIBLE,
+          amount: 50,
         },
       ],
     },
@@ -260,7 +255,7 @@ export const PurchaseStarterpackSoldOut: Story = {
 
 export const SuccessCredits: Story = {
   args: {
-    type: PurchaseType.CREDITS,
+    type: PurchaseType.Credits,
     wallets: [],
     initState: PurchaseState.SUCCESS,
   },
@@ -276,7 +271,7 @@ export const SuccessCredits: Story = {
 
 export const SuccessStarterpack: Story = {
   args: {
-    type: PurchaseType.STARTERPACK,
+    type: PurchaseType.Starterpack,
     wallets: [],
     initState: PurchaseState.SUCCESS,
     starterpackDetails: {
@@ -286,21 +281,20 @@ export const SuccessStarterpack: Story = {
       acquisitionType: StarterpackAcquisitionType.Paid,
       starterPackItems: [
         {
-          title: "Village",
-          collectionName: "Eternum Village",
+          name: "Village",
           description:
             "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
-          price: 5,
-          image: "https://r2.quddus.my/Frame%203231.png",
-          type: StarterItemType.NFT,
+          price: 5n,
+          iconURL: "https://r2.quddus.my/Frame%203231.png",
+          type: StarterPackItemType.NONFUNGIBLE,
         },
         {
-          title: "20 Credits",
+          name: "20 Credits",
           description: "Credits cover service fee(s) in Eternum.",
-          price: 0,
-          image: "/ERC-20-Icon.svg",
-          type: StarterItemType.CREDIT,
-          value: 50,
+          price: 0n,
+          iconURL: "/ERC-20-Icon.svg",
+          type: StarterPackItemType.FUNGIBLE,
+          amount: 50,
         },
       ],
     },

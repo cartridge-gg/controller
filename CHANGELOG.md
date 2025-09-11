@@ -1,5 +1,67 @@
 # Changelog
 
+## [0.10.1] - 2025-09-10
+
+### ✨ New Features
+- **@cartridge/keychain**: Added StarkNet wallets account changed listener for improved wallet integration and event handling (#1999)
+- **@cartridge/keychain**: Enhanced claim UI to display connected wallet address for better user transparency (#2000)
+- **@cartridge/keychain**: Added starterpack ID input support to example application for easier testing and development (#1998)
+- **@cartridge/keychain**: Implemented merkle drop StarkNet claim signature verification for enhanced security (#1993)
+- **@cartridge/keychain**: Added merkle-drop wallet selection with controller integration for streamlined claiming process (#1986)
+- **@cartridge/controller**: Added outsideExecution support to StarterPack API for improved transaction handling (#1972)
+- **@cartridge/controller**: Migrated collection listing to use ExecutionContainer for direct execution, improving performance (#2002)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced fee estimation by scaling resource bounds by 1.5x for more reliable transaction processing (#1978)
+- **@cartridge/keychain**: Restricted token support to only USDC, ETH, LORDS and STRK tokens for improved security and user experience (#1996)
+- **Development**: Added dev:live scripts for production API testing to streamline development workflow (#2001)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed controller crash after purchase to ensure stable operation (#1997)
+- **@cartridge/keychain**: Resolved inventory assets disappearing after tab navigation (#1990)
+- **@cartridge/keychain**: Fixed navigation stack reset issues in collection components (#1995)
+- **@cartridge/keychain**: Fixed loot box image display issues (#1991)
+- **@cartridge/keychain**: Resolved inventory view problems after purchase completion (#1989)
+- **@cartridge/keychain**: Fixed token page empty state display (#1988)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#1994, #1992)
+
+## [0.10.0] - 2025-09-03
+
+### ✨ New Features
+- **@cartridge/keychain**: Added starterpack claim merkle drop functionality, enabling efficient and secure starterpack distribution through merkle tree verification (#1928)
+- **@cartridge/controller**: Re-implemented controller creation factory pattern for improved instantiation and configuration management (#1956)
+- **@cartridge/keychain**: Removed feature flag for signers functionality, making multi-signer support generally available (#1961)
+
+### 🚀 Improvements  
+- **Bundle Size**: Massive bundle size reduction through multiple optimizations:
+  - Migrated from `@solana/web3.js` to lightweight `micro-sol-signer` library, reducing Solana-related code by ~450KB (#1951)
+  - Removed MetaMask SDK dependency and migrated Ethereum wallets to shared EIP-6963 base class, saving several MB (#1950)
+  - Replaced lodash dependency with custom utilities, eliminating unnecessary library weight (#1960)
+- **@cartridge/keychain**: Enhanced error parsing with improved test coverage for "Not active" and ENTRYPOINT_NOT_FOUND cases (#1958, #1957)
+- **@cartridge/keychain**: Improved nested error handling for better debugging and user experience (#1949)
+- **@cartridge/controller**: Removed unreliable original signer checks for more robust signer management (#1952)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed client fee calculation for ERC721 transactions (#1955)
+- **@cartridge/keychain**: Temporarily disabled Solana credits purchase due to reliability issues (#1948)
+
+### ⚠️ Breaking Changes
+- **StarkNet Dependencies**: Upgraded to StarkNet v8 with updated WalletAccount constructor API. Applications using WalletAccount directly may need to update from argument-based to object-based constructor parameters (#1939)
+- **Ethereum Wallet Integration**: Removed MetaMask SDK in favor of EIP-6963 standard wallet detection. Applications relying on MetaMask SDK-specific features may need updates (#1950)
+- **Dependencies**: Removed lodash dependency - any direct usage of lodash utilities from this package will need replacement (#1960)
+
+### 📦 Dependencies
+- **starknet**: Updated to ^8.1.2 for improved StarkNet integration and compatibility (#1939)
+- **@starknet-react/core**: Updated to ^5.0.1 for StarkNet v8 support (#1939)
+- **@starknet-react/chains**: Updated to ^5.0.1 for StarkNet v8 support (#1939)
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#1959, #1953, #1947, #1945)
+- **Dependencies Removed**: 
+  - lodash and @types/lodash (replaced with custom utilities)
+  - @solana/web3.js and @solana/spl-token (replaced with micro-sol-signer)
+  - @metamask/sdk (replaced with EIP-6963 standard)
+
 ## [0.10.0-alpha.1] - 2025-08-29
 
 ### 🐛 Bug Fixes

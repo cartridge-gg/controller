@@ -178,7 +178,7 @@ const controller = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  defaultChainId: constants.StarknetChainId.SN_SEPOLIA,
+  defaultChainId: constants.StarknetChainId.SN_MAIN,
   url: "https://x.cartridge.gg",
   signupOptions: [
     "google",
@@ -189,9 +189,9 @@ const controller = new ControllerConnector({
     "rabby",
     "password",
   ],
-  //slot: "pistols-mainnet",
-  //namespace: "pistols",
-  //preset: "pistols",
+  slot: "arcade-pistols",
+  namespace: "pistols",
+  preset: "pistols",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
@@ -212,7 +212,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={sepolia.id}
+      defaultChainId={mainnet.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}

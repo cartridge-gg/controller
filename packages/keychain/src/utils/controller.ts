@@ -23,6 +23,7 @@ import {
   JsRegisterResponse,
   JsRemoveSignerInput,
   JsRevokableSession,
+  JsSignedOutsideExecution,
   Owner,
   Signer,
 } from "@cartridge/controller-wasm/controller";
@@ -232,11 +233,33 @@ export default class Controller {
       toJsCalls(calls),
     )) as FeeEstimate;
     res.unit = "FRI";
+
+    // Scale all fee estimate values by 50% (equivalent to 1.5x)
+    // Using starknet.js addPercent pattern for consistency
+    const addPercent = (number: string | number, percent: number): string => {
+      const bigIntNum = BigInt(number);
+      return (bigIntNum + (bigIntNum * BigInt(percent)) / 100n).toString();
+    };
+
+    res.l1_gas_consumed = addPercent(res.l1_gas_consumed, 50);
+    res.l1_gas_price = addPercent(res.l1_gas_price, 50);
+    res.l2_gas_consumed = addPercent(res.l2_gas_consumed, 50);
+    res.l2_gas_price = addPercent(res.l2_gas_price, 50);
+    res.l1_data_gas_consumed = addPercent(res.l1_data_gas_consumed, 50);
+    res.l1_data_gas_price = addPercent(res.l1_data_gas_price, 50);
+    res.overall_fee = addPercent(addPercent(res.overall_fee, 50), 50); // 2.25x total
+
     return res;
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
     return this.cartridge.signMessage(JSON.stringify(typedData));
+  }
+
+  async signExecuteFromOutside(
+    calls: Call[],
+  ): Promise<JsSignedOutsideExecution> {
+    return await this.cartridge.signExecuteFromOutside(toJsCalls(calls));
   }
 
   async selfDeploy(maxFee?: FeeEstimate): Promise<DeployedAccountTransaction> {
