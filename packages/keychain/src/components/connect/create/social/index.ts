@@ -5,9 +5,10 @@ import { WalletAdapter } from "@cartridge/controller";
 import { useCallback } from "react";
 
 export const useSocialAuthentication = (
+  setError: (err: Error) => void,
   setChangeWallet?: (changeWallet: boolean) => void,
 ) => {
-  const { chainId } = useConnection();
+  const { chainId, rpcUrl } = useConnection();
 
   const signup = useCallback(
     async (
@@ -22,9 +23,13 @@ export const useSocialAuthentication = (
       const turnkeyWallet = new TurnkeyWallet(
         username,
         chainId,
+        rpcUrl,
         socialProvider,
       );
-      const { account, error, success } = await turnkeyWallet.connect(isSignup);
+      const { account, error, success } = await turnkeyWallet.connect(
+        isSignup,
+        setError,
+      );
       if (error?.includes("Account mismatch")) {
         setChangeWallet?.(true);
         return;
@@ -52,7 +57,7 @@ export const useSocialAuthentication = (
         type: socialProvider,
       };
     },
-    [setChangeWallet, chainId],
+    [setChangeWallet, chainId, rpcUrl],
   );
 
   return {

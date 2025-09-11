@@ -330,6 +330,7 @@ const RegularAuths = ({
             const turnkeyWallet = new TurnkeyWallet(
               controller.username(),
               controller.chainId(),
+              controller.rpcUrl(),
               "google",
             );
             const response = await turnkeyWallet.connect(false);
@@ -376,6 +377,7 @@ const RegularAuths = ({
             const turnkeyWallet = new TurnkeyWallet(
               controller.username(),
               controller.chainId(),
+              controller.rpcUrl(),
               "discord",
             );
             const response = await turnkeyWallet.connect(false);
