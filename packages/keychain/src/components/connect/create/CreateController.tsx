@@ -357,6 +357,8 @@ export function CreateController({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (validation.status !== "valid") return;
+
     if (e.key === "Enter") {
       e.preventDefault();
       handleFormSubmit();
