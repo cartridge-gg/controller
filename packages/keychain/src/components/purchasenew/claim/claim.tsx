@@ -13,14 +13,17 @@ import {
 } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useMerkleClaim } from "@/hooks/merkle-claim";
+import { useMerkleClaim, MerkleClaim } from "@/hooks/merkle-claim";
 import { Item, ItemType, usePurchaseContext } from "@/context/purchase";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
 import { StarterpackReceiving } from "../starterpack/starterpack";
+import { ExternalWalletType } from "@cartridge/controller";
+import { getWallet } from "../wallet/data";
+import { formatAddress } from "@cartridge/ui/utils";
 
 export function Claim() {
-  const { keys, address: externalAddress } = useParams();
+  const { keys, address: externalAddress, type } = useParams();
   const { goBack, navigate } = useNavigation();
   const { starterpackDetails, setClaimItems, setTransactionHash } =
     usePurchaseContext();
@@ -34,6 +37,7 @@ export function Claim() {
   } = useMerkleClaim({
     keys: keys!,
     address: externalAddress!,
+    type: type as ExternalWalletType | "controller",
   });
 
   useEffect(() => {
@@ -48,7 +52,7 @@ export function Claim() {
       .forEach((c) => {
         c.data.forEach((d) => {
           items.push({
-            title: `${c.description ?? c.key} - Token ID: ${d}`,
+            title: `(${Number(d)}) ${c.description ?? c.key}`,
             type: ItemType.NFT,
             icon: <GiftIcon variant="solid" />,
           });
@@ -57,6 +61,10 @@ export function Claim() {
 
     setClaimItems(items);
   }, [claimsData, setClaimItems]);
+
+  const wallet = useMemo(() => {
+    return getWallet(type as ExternalWalletType | "controller");
+  }, [type]);
 
   const onSubmit = useCallback(async () => {
     try {
@@ -123,7 +131,7 @@ export function Claim() {
                       <CollectionItem
                         name={claim.description ?? claim.key}
                         network={claim.network}
-                        numAvailable={claim.claimed ? 0 : claim.data.length}
+                        numAvailable={claimAmount(claim)}
                         isLoading={claim.loading}
                       />
                     </CardListItem>
@@ -136,16 +144,15 @@ export function Claim() {
       </LayoutContent>
       <LayoutFooter>
         {error && <ErrorAlert title="Error" description={error.message} />}
-        {/* {claimItems.length > 0 && (
-          <CardContent className="relative flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
-            <div className="absolute -top-1 right-4">
-              <Badge price={0} />
-            </div>
-            <div className="text-foreground-400 font-medium text-sm flex flex-row items-center gap-1">
-              Network Fees
-            </div>
-          </CardContent>
-        )} */}
+        <div className="flex justify-between border border-background-300 rounded py-2 px-3">
+          <div className="flex items-center gap-1 text-foreground-300 text-xs">
+            {wallet.subIcon} {wallet.name} (
+            {formatAddress(externalAddress!, { first: 5, last: 4 })})
+          </div>
+          <div className="flex items-center gap-1 text-foreground-300 text-xs">
+            Connected
+          </div>
+        </div>
         {claimsData.length === 0 ? (
           <Button onClick={() => goBack()}>Check Another Wallet</Button>
         ) : (
@@ -175,4 +182,12 @@ export const LoadingState = () => {
       <Skeleton className="min-h-[180px] w-full rounded" />
     </LayoutContent>
   );
+};
+
+const claimAmount = (claim: MerkleClaim) => {
+  if (claim.data.length === 1) {
+    return Number(claim.data[0]);
+  }
+
+  return claim.data.length;
 };

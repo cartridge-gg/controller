@@ -7,19 +7,24 @@ import {
   CheckboxUncheckedIcon,
   Skeleton,
   Empty,
+  PaperPlaneIcon,
+  WalletType,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
-import { uint256, Call } from "starknet";
+import { uint256, Call, FeeEstimate } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
+import { RecipientCard } from "../../../modules/RecipientCard";
 import { useCollection } from "@/hooks/collection";
 import { Sending } from "./collection-sending";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import placeholder from "/placeholder.svg?url";
-import { SendHeader } from "./header";
-import { createExecuteUrl } from "@/utils/connection/execute";
+import { ReviewHeader, SendHeader } from "./header";
+import { useConnection } from "@/hooks/connection";
+import { ExecutionContainer } from "@/components/ExecutionContainer";
+import { toast } from "sonner";
 
 const SAFE_TRANSFER_FROM_CAMEL_CASE = "safeTransferFrom";
 const SAFE_TRANSFER_FROM_SNAKE_CASE = "safe_transfer_from";
@@ -27,10 +32,14 @@ const TRANSFER_FROM_CAMEL_CASE = "transferFrom";
 const TRANSFER_FROM_SNAKE_CASE = "transfer_from";
 
 export function SendCollection() {
-  const { address: contractAddress, tokenId, username } = useParams();
+  const { address: contractAddress, tokenId } = useParams();
+  const { controller } = useConnection();
+  const { goBack } = useNavigation();
 
   const [searchParams] = useSearchParams();
-  const paramsTokenIds = searchParams.getAll("tokenIds");
+  const paramsTokenIds = useMemo(() => {
+    return searchParams.getAll("tokenIds");
+  }, [searchParams]);
 
   const { entrypoints } = useEntrypoints({
     address: contractAddress || "0x0",
@@ -40,13 +49,14 @@ export function SendCollection() {
   const [recipientValidated, setRecipientValidated] = useState(false);
   const [recipientWarning, setRecipientWarning] = useState<string>();
   const [recipientError, setRecipientError] = useState<Error | undefined>();
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [recipientLoading, setRecipientLoading] = useState(false);
-
-  const { navigate } = useNavigation();
+  const [sendConfirmed, setSendConfirmed] = useState(false);
 
   const [to, setTo] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientWalletType, setRecipientWalletType] = useState<
+    WalletType | undefined
+  >();
 
   const tokenIds = useMemo(() => {
     if (!tokenId) return [...paramsTokenIds];
@@ -86,48 +96,71 @@ export function SendCollection() {
     setRecipientValidated(false);
   }, [recipientWarning, setRecipientValidated]);
 
-  const onSubmit = useCallback(
-    async (to: string) => {
-      setSubmitted(true);
-      if (
-        !contractAddress ||
-        !tokenIds ||
-        !tokenIds.length ||
-        !to ||
-        !!recipientError ||
-        !entrypoint
-      )
-        return;
-      setLoading(true);
-      const calldata = entrypoint.includes("safe") ? [0] : [];
-      const calls: Call[] = tokenIds.map((id: string) => {
-        const tokenId = uint256.bnToUint256(BigInt(id));
-        return {
-          contractAddress: contractAddress,
-          entrypoint,
-          calldata: [address, to, tokenId, ...calldata],
-        };
-      });
-
-      // Create execute URL with returnTo parameter pointing back to inventory
-      const executeUrl = createExecuteUrl(calls);
-
-      // Navigate to execute screen with returnTo parameter to come back to inventory
-      const inventoryPath = `/account/${username}/inventory?${searchParams.toString()}`;
-      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(inventoryPath)}`;
-      navigate(executeUrlWithReturn);
-      setLoading(false);
+  const onRecipientSelected = useCallback(
+    (data: { name: string; address: string; walletType: WalletType }) => {
+      setRecipientName(data.name);
+      setRecipientWalletType(data.walletType);
     },
-    [
-      tokenIds,
-      contractAddress,
-      address,
-      recipientError,
-      entrypoint,
-      navigate,
-      searchParams,
-      username,
-    ],
+    [],
+  );
+
+  // Build transactions when send is confirmed
+  const transactions = useMemo(() => {
+    if (
+      !sendConfirmed ||
+      !contractAddress ||
+      !tokenIds ||
+      !tokenIds.length ||
+      !to ||
+      !!recipientError ||
+      !entrypoint
+    ) {
+      return undefined;
+    }
+
+    const calldata = entrypoint.includes("safe") ? [0] : [];
+    const calls: Call[] = tokenIds.map((id: string) => {
+      const tokenId = uint256.bnToUint256(BigInt(id));
+      return {
+        contractAddress: contractAddress,
+        entrypoint,
+        calldata: [address, to, tokenId, ...calldata],
+      };
+    });
+
+    return calls;
+  }, [
+    sendConfirmed,
+    tokenIds,
+    contractAddress,
+    address,
+    to,
+    recipientError,
+    entrypoint,
+  ]);
+
+  const onSubmitSend = useCallback(
+    async (maxFee?: FeeEstimate) => {
+      if (!maxFee || !transactions || !controller) {
+        return;
+      }
+
+      try {
+        await controller.execute(transactions, maxFee);
+
+        toast.success("Assets sent successfully!", {
+          duration: 10000,
+        });
+
+        // Navigate back to inventory
+        goBack();
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to send asset(s)");
+        throw error;
+      }
+    },
+    [transactions, controller, goBack],
   );
 
   const title = useMemo(() => {
@@ -150,41 +183,68 @@ export function SendCollection() {
         <EmptyState />
       ) : (
         <>
-          <LayoutContent className="p-6 flex flex-col gap-6">
-            <SendHeader image={image} title={title} />
-            <SendRecipient
-              to={to}
-              setTo={setTo}
-              submitted={submitted}
-              setWarning={setRecipientWarning}
-              setError={setRecipientError}
-              setParentLoading={setRecipientLoading}
-            />
-            <Sending assets={assets} description={collection.name} />
-          </LayoutContent>
+          {sendConfirmed && transactions ? (
+            <ExecutionContainer
+              icon={
+                <PaperPlaneIcon
+                  variant="solid"
+                  size="lg"
+                  className="h-[30px] w-[30px]"
+                />
+              }
+              transactions={transactions}
+              onSubmit={onSubmitSend}
+              buttonText="Send"
+            >
+              <div className="p-6 pt-0 flex flex-col gap-6">
+                <ReviewHeader />
+                <RecipientCard
+                  address={to}
+                  name={recipientName || undefined}
+                  walletType={recipientWalletType}
+                />
+                <Sending assets={assets} description={collection.name} />
+              </div>
+            </ExecutionContainer>
+          ) : (
+            <>
+              <LayoutContent className="p-6 flex flex-col gap-6">
+                <SendHeader image={image} title={title} />
+                <SendRecipient
+                  to={to}
+                  setTo={setTo}
+                  submitted={false}
+                  setWarning={setRecipientWarning}
+                  setError={setRecipientError}
+                  setParentLoading={setRecipientLoading}
+                  onRecipientSelected={onRecipientSelected}
+                />
+                <Sending assets={assets} description={collection.name} />
+              </LayoutContent>
 
-          <LayoutFooter
-            className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background",
-            )}
-          >
-            <Warning
-              warning={recipientWarning}
-              validated={recipientValidated}
-              setValidated={setRecipientValidated}
-            />
-            <div className="w-full flex items-center gap-3">
-              <Button
-                disabled={disabled}
-                type="submit"
-                className="w-full"
-                isLoading={loading}
-                onClick={() => onSubmit(to)}
+              <LayoutFooter
+                className={cn(
+                  "relative flex flex-col items-center justify-center gap-y-4 bg-background",
+                )}
               >
-                Send
-              </Button>
-            </div>
-          </LayoutFooter>
+                <Warning
+                  warning={recipientWarning}
+                  validated={recipientValidated}
+                  setValidated={setRecipientValidated}
+                />
+                <div className="w-full flex items-center gap-3">
+                  <Button
+                    disabled={disabled}
+                    type="submit"
+                    className="w-full"
+                    onClick={() => setSendConfirmed(true)}
+                  >
+                    Review
+                  </Button>
+                </div>
+              </LayoutFooter>
+            </>
+          )}
         </>
       )}
     </>

@@ -354,7 +354,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       signupWithWebauthn,
       signupWithWalletConnect,
       passwordAuth,
-      finishSignup,
     ],
   );
 
@@ -407,7 +406,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       window.controller = loginRet.controller;
       setController(loginRet.controller);
     },
-    [origin, chainId, rpcUrl, setController],
+    [origin, rpcUrl, setController],
   );
 
   const handleLogin = useCallback(
@@ -532,11 +531,9 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       loginWithWalletConnect,
       loginWithExternalWallet,
       chainId,
-      origin,
-      rpcUrl,
+      finishLogin,
+      passwordAuth,
       setWaitingForConfirmation,
-      setController,
-      setChangeWallet,
     ],
   );
 
@@ -603,14 +600,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
         }
       })();
     }
-  }, [
-    window.location.search,
-    finishLogin,
-    chainId,
-    finishSignup,
-    origin,
-    rpcUrl,
-  ]);
+  }, [error, finishLogin, chainId, finishSignup]);
 
   const handleSubmit = useCallback(
     async (

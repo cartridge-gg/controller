@@ -17,9 +17,17 @@ import {
   StarknetIcon,
   ArgentColorIcon,
   BraavosColorIcon,
+  ControllerColorIcon,
+  MetaMaskIcon,
+  RabbyIcon,
+  CoinbaseWalletIcon,
+  ArgentIcon,
+  BraavosIcon,
+  ControllerIcon,
 } from "@cartridge/ui";
 import { NetworkWalletData, Wallet } from "../types";
 import { constants } from "starknet";
+import { ExternalWalletType } from "@cartridge/controller";
 
 const evmWallets = new Map<string, Wallet>([
   [
@@ -28,6 +36,7 @@ const evmWallets = new Map<string, Wallet>([
       name: "MetaMask",
       type: "metamask",
       icon: React.createElement(MetaMaskColorIcon),
+      subIcon: React.createElement(MetaMaskIcon, { size: "xs" }),
       color: "#E88A39",
     },
   ],
@@ -37,6 +46,7 @@ const evmWallets = new Map<string, Wallet>([
       type: "rabby",
       name: "Rabby",
       icon: React.createElement(RabbyColorIcon),
+      subIcon: React.createElement(RabbyIcon, { size: "xs" }),
     },
   ],
   [
@@ -45,6 +55,38 @@ const evmWallets = new Map<string, Wallet>([
       type: "base",
       name: "Coinbase Wallet",
       icon: React.createElement(CoinbaseWalletColorIcon),
+      subIcon: React.createElement(CoinbaseWalletIcon, { size: "xs" }),
+    },
+  ],
+]);
+
+const snWallets = new Map<string, Wallet>([
+  [
+    "controller",
+    {
+      name: "Controller",
+      type: "controller",
+      icon: React.createElement(ControllerColorIcon),
+      subIcon: React.createElement(ControllerIcon, { size: "xs" }),
+    },
+  ],
+  [
+    "argent",
+    {
+      name: "Ready",
+      type: "argent",
+      icon: React.createElement(ArgentColorIcon),
+      subIcon: React.createElement(ArgentIcon, { size: "xs" }),
+      color: "#FF875B",
+    },
+  ],
+  [
+    "braavos",
+    {
+      name: "Braavos",
+      type: "braavos",
+      icon: React.createElement(BraavosColorIcon),
+      subIcon: React.createElement(BraavosIcon, { size: "xs" }),
     },
   ],
 ]);
@@ -66,25 +108,7 @@ export const networkWalletData: NetworkWalletData = {
       ],
       icon: React.createElement(StarknetColorIcon),
       subIcon: React.createElement(StarknetIcon),
-      wallets: new Map([
-        [
-          "argent",
-          {
-            name: "Ready",
-            type: "argent",
-            icon: React.createElement(ArgentColorIcon),
-            color: "#FF875B",
-          },
-        ],
-        [
-          "braavos",
-          {
-            name: "Braavos",
-            type: "braavos",
-            icon: React.createElement(BraavosColorIcon),
-          },
-        ],
-      ]),
+      wallets: snWallets,
     },
     {
       name: "Ethereum",
@@ -173,4 +197,12 @@ export const networkWalletData: NetworkWalletData = {
       wallets: evmWallets,
     },
   ],
+};
+
+export const getWallet = (type: ExternalWalletType | "controller") => {
+  const wallet = evmWallets.get(type) || snWallets.get(type);
+  if (!wallet) {
+    throw new Error(`Wallet ${type} not found`);
+  }
+  return wallet;
 };

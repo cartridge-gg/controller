@@ -10,8 +10,11 @@ import {
   ExternalPlatform,
   ExternalWallet,
   ExternalWalletType,
+  StarterPack,
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
+import { usdcToUsd } from "@/utils/starterpack";
+
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
 import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
@@ -19,6 +22,9 @@ import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
 import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
+import { starterPackToLayerswapInput } from "@/utils/payments";
+import { CreateLayerswapPaymentInput } from "@cartridge/ui/utils/api/cartridge";
+import { constants } from "starknet";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -89,7 +95,7 @@ export interface PurchaseContextType {
   setUsdAmount: (amount: number) => void;
   setPurchaseItems: (items: Item[]) => void;
   setClaimItems: (items: Item[]) => void;
-  setStarterpackId: (id: string) => void;
+  setStarterpack: (starterpack: string | StarterPack) => void;
   setTransactionHash: (hash: string) => void;
 
   // Payment actions
@@ -117,9 +123,9 @@ export const PurchaseProvider = ({
   children,
   isSlot = false,
 }: PurchaseProviderProps) => {
-  const { controller } = useConnection();
+  const { controller, isMainnet } = useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
-  const [starterpackId, setStarterpackId] = useState<string | undefined>();
+  const [starterpack, setStarterpack] = useState<string | StarterPack>();
   const [starterpackDetails, setStarterpackDetails] = useState<
     StarterPackDetails | undefined
   >();
@@ -157,7 +163,7 @@ export const PurchaseProvider = ({
     error: cryptoError,
     isLoading: isCryptoLoading,
     sendPayment,
-    quotePaymentFees,
+    estimateStarterPackFees,
     waitForPayment,
   } = useCryptoPayment();
 
@@ -171,24 +177,51 @@ export const PurchaseProvider = ({
     acquisitionType,
     isLoading: isStarterpackLoading,
     error: starterpackError,
-  } = useStarterPack(starterpackId);
+  } = useStarterPack(starterpack);
+
+  const [swapInput, setSwapInput] = useState<CreateLayerswapPaymentInput>();
 
   useEffect(() => {
-    if (!starterpackId) return;
+    const getSwapInput = async () => {
+      if (!controller || !starterpack || !selectedPlatform) {
+        setSwapInput(undefined);
+        return;
+      }
+      const input = await starterPackToLayerswapInput(
+        starterpack,
+        controller.username(),
+        selectedPlatform,
+        isMainnet,
+        controller,
+      );
+      setSwapInput(input);
+    };
+    getSwapInput();
+  }, [controller, starterpack, selectedPlatform, isMainnet]);
 
-    const purchaseItems: Item[] = items.map((item) => ({
-      title: item.title,
-      subtitle: item.description,
-      icon: item.image,
-      value: priceUsd,
-      type: ItemType.NFT,
-    }));
+  useEffect(() => {
+    if (!starterpack) return;
+
+    const purchaseItems: Item[] = items.map((item) => {
+      // Calculate individual item price in USD
+      const itemPriceUsd = item.price
+        ? usdcToUsd(item.price) * (item.amount || 1)
+        : 0;
+
+      return {
+        title: item.name,
+        subtitle: item.description,
+        icon: item.iconURL,
+        value: itemPriceUsd,
+        type: ItemType.NFT,
+      };
+    });
 
     setPurchaseItems(purchaseItems);
     setUsdAmount(priceUsd);
 
     setStarterpackDetails({
-      id: starterpackId,
+      id: typeof starterpack == "string" ? starterpack : undefined,
       name,
       starterPackItems: items,
       supply,
@@ -198,7 +231,7 @@ export const PurchaseProvider = ({
       acquisitionType,
     });
   }, [
-    starterpackId,
+    starterpack,
     items,
     priceUsd,
     name,
@@ -231,7 +264,7 @@ export const PurchaseProvider = ({
         usdToCredits(usdAmount),
         controller.username(),
         undefined,
-        starterpackId,
+        typeof starterpack == "string" ? starterpack : undefined,
       );
       setClientSecret(paymentIntent.clientSecret);
       setCostDetails(paymentIntent.pricing);
@@ -239,7 +272,7 @@ export const PurchaseProvider = ({
       setDisplayError(e as Error);
       throw e;
     }
-  }, [usdAmount, controller, starterpackId, createPaymentIntent]);
+  }, [usdAmount, controller, starterpack, createPaymentIntent]);
 
   const onCryptoPurchase = useCallback(async () => {
     if (
@@ -247,20 +280,22 @@ export const PurchaseProvider = ({
       !selectedPlatform ||
       !walletAddress ||
       !walletType ||
-      !layerswapFees
+      !layerswapFees ||
+      !swapInput
     )
       return;
 
     try {
       setPaymentMethod("crypto");
+
+      swapInput.layerswapFees = layerswapFees;
+
+      // Use existing payment method
       const { paymentId, transactionHash } = await sendPayment(
+        swapInput,
         walletAddress,
         walletType,
         selectedPlatform,
-        usdToCredits(usdAmount),
-        undefined,
-        starterpackId,
-        layerswapFees,
         (explorer) => {
           setExplorer(explorer);
         },
@@ -272,12 +307,11 @@ export const PurchaseProvider = ({
       throw e;
     }
   }, [
-    usdAmount,
     controller,
     selectedPlatform,
     walletAddress,
     walletType,
-    starterpackId,
+    swapInput,
     layerswapFees,
     sendPayment,
   ]);
@@ -305,12 +339,22 @@ export const PurchaseProvider = ({
         setWalletType(wallet.type);
 
         if (chainId) {
-          const res = await switchChain(wallet.type, chainId.toString());
-          if (!res) {
-            const error = new Error(
-              `${wallet.name} failed to switch chain (${chainId})`,
+          // WORKAROUND: Braavos doesn't support switching chains api so we remain on whatever chain is current
+          if (
+            chainId === constants.StarknetChainId.SN_SEPOLIA &&
+            wallet.type === "braavos"
+          ) {
+            console.warn(
+              "Braavos does not support `wallet_switchStarknetChain`",
             );
-            throw error;
+          } else {
+            const res = await switchChain(wallet.type, chainId.toString());
+            if (!res) {
+              const error = new Error(
+                `${wallet.name} failed to switch chain (${chainId})`,
+              );
+              throw error;
+            }
           }
         }
 
@@ -324,17 +368,12 @@ export const PurchaseProvider = ({
   );
 
   const fetchFees = useCallback(async () => {
-    if (!controller || !selectedPlatform) return;
+    if (!swapInput) return;
+
     try {
       setIsFetchingFees(true);
 
-      const quote = await quotePaymentFees(
-        controller.username(),
-        selectedPlatform,
-        usdToCredits(usdAmount),
-        undefined,
-        starterpackId,
-      );
+      const quote = await estimateStarterPackFees(swapInput);
 
       const amountInCents = usdAmount * 100;
       const cartridgeFees = amountInCents * CARTRIDGE_FEE;
@@ -354,13 +393,7 @@ export const PurchaseProvider = ({
     } finally {
       setIsFetchingFees(false);
     }
-  }, [
-    controller,
-    usdAmount,
-    starterpackId,
-    selectedPlatform,
-    quotePaymentFees,
-  ]);
+  }, [swapInput, usdAmount, estimateStarterPackFees]);
 
   const contextValue: PurchaseContextType = {
     // Purchase details
@@ -398,7 +431,7 @@ export const PurchaseProvider = ({
     setUsdAmount,
     setPurchaseItems,
     setClaimItems,
-    setStarterpackId,
+    setStarterpack,
     setTransactionHash,
 
     // Actions

@@ -13,6 +13,8 @@ export class ArgentWallet implements WalletAdapter {
   private wallet: StarknetWindowObject | undefined = undefined;
   private account: string | undefined = undefined;
   private connectedAccounts: string[] = [];
+  private accountChangeListener: ((accounts?: string[]) => void) | undefined =
+    undefined;
 
   isAvailable(): boolean {
     return typeof window !== "undefined" && !!window.starknet_argentX;
@@ -58,9 +60,12 @@ export class ArgentWallet implements WalletAdapter {
         throw new Error("No accounts found");
       }
 
+      this.removeAccountChangeListener();
+
       this.wallet = wallet;
       this.account = accounts[0];
       this.connectedAccounts = accounts;
+      this.setupAccountChangeListener();
       return { success: true, wallet: this.type, account: this.account };
     } catch (error) {
       console.error(`Error connecting to Argent:`, error);
@@ -174,5 +179,36 @@ export class ArgentWallet implements WalletAdapter {
       wallet: this.type,
       error: "waitForTransaction not supported for Argent wallet",
     };
+  }
+
+  private setupAccountChangeListener(): void {
+    if (!this.wallet) return;
+
+    this.accountChangeListener = (accounts: string[] | undefined) => {
+      if (accounts && accounts.length > 0) {
+        this.account = accounts[0];
+        this.connectedAccounts = accounts;
+      } else {
+        this.account = undefined;
+        this.connectedAccounts = [];
+      }
+    };
+
+    // Listen for account changes
+    this.wallet.on("accountsChanged", this.accountChangeListener);
+  }
+
+  private removeAccountChangeListener(): void {
+    if (this.wallet && this.accountChangeListener) {
+      this.wallet.off("accountsChanged", this.accountChangeListener);
+      this.accountChangeListener = undefined;
+    }
+  }
+
+  disconnect(): void {
+    this.removeAccountChangeListener();
+    this.wallet = undefined;
+    this.account = undefined;
+    this.connectedAccounts = [];
   }
 }
