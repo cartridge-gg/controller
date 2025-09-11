@@ -41,6 +41,7 @@ import { CollectiblePurchase } from "./inventory/collection/collectible-purchase
 import { Execute } from "./Execute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
+import { Prediction } from "./prediction";
 import { useNavigation } from "@/context";
 import { Purchase } from "./purchase";
 import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
@@ -129,6 +130,7 @@ export function App() {
           }
         />
         <Route path="/execute" element={<Execute />} />
+        <Route path="/prediction" element={<Prediction />} />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />

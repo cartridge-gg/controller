@@ -367,6 +367,17 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain?.open();
   }
 
+  async openPrediction() {
+    if (!this.keychain || !this.iframes.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return;
+    }
+
+    // Navigate to prediction page in keychain
+    await this.keychain.navigate("/prediction");
+    this.iframes.keychain.open();
+  }
+
   async openExecute(calls: any, chainId?: string) {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);

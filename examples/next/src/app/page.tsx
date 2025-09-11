@@ -12,6 +12,7 @@ import { Profile } from "components/Profile";
 import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
 import { Starterpack } from "components/Starterpack";
+import { Prediction } from "components/Prediction";
 
 const Home: FC = () => {
   return (
@@ -27,6 +28,7 @@ const Home: FC = () => {
       <Transfer />
       <ManualTransferEth />
       <Starterpack />
+      <Prediction />
       <DelegateAccount />
       <InvalidTxn />
       <SignMessage />

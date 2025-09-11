@@ -86,6 +86,9 @@ export function connectToController<ParentMethods extends object>({
           });
         }
       },
+      openPrediction: () => () => {
+        navigate("/prediction", { replace: true });
+      },
       switchChain: () => switchChain({ setController, setRpcUrl }),
     },
   });
