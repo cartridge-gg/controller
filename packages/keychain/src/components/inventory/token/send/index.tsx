@@ -16,6 +16,7 @@ import { useParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
 import { Call, uint256, FeeEstimate } from "starknet";
 import { SendRecipient } from "@/components/modules/recipient";
+import { RecipientCard } from "@/components/modules/RecipientCard";
 import { SendAmount } from "./amount";
 import { useConnection } from "@/hooks/connection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
@@ -156,12 +157,7 @@ export function SendToken() {
                 </div>
               )}
             </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-foreground-400">
-                Recipient
-              </p>
-              <p className="text-sm font-mono text-foreground-100">{to}</p>
-            </div>
+            <RecipientCard address={to} />
             {selectedToken && (
               <div className="flex flex-col gap-2">
                 <p className="text-sm font-medium text-foreground-400">

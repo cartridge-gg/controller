@@ -15,11 +15,12 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
 import { uint256, Call, FeeEstimate } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
+import { RecipientCard } from "../../../modules/RecipientCard";
 import { useCollection } from "@/hooks/collection";
 import { Sending } from "./collection-sending";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import placeholder from "/placeholder.svg?url";
-import { SendHeader } from "./header";
+import { ReviewHeader, SendHeader } from "./header";
 import { useConnection } from "@/hooks/connection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { toast } from "sonner";
@@ -171,7 +172,6 @@ export function SendCollection() {
         <>
           {sendConfirmed && transactions ? (
             <ExecutionContainer
-              title="Confirm Send"
               icon={
                 <PaperPlaneIcon
                   variant="solid"
@@ -183,14 +183,9 @@ export function SendCollection() {
               onSubmit={onSubmitSend}
               buttonText="Send"
             >
-              <div className="p-6 flex flex-col gap-6">
-                <SendHeader image={image} title={title} />
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-foreground-400">
-                    Recipient
-                  </p>
-                  <p className="text-sm font-mono text-foreground-100">{to}</p>
-                </div>
+              <div className="p-6 pt-0 flex flex-col gap-6">
+                <ReviewHeader />
+                <RecipientCard address={to} />
                 <Sending assets={assets} description={collection.name} />
               </div>
             </ExecutionContainer>

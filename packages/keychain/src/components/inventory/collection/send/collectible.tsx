@@ -15,11 +15,12 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useNavigation } from "@/context/navigation";
 import { Call, uint256, FeeEstimate } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
+import { RecipientCard } from "../../../modules/RecipientCard";
 import { useCollectible } from "@/hooks/collectible";
 import { Sending } from "./collectible-sending";
 import placeholder from "/placeholder.svg?url";
 import { SendAmount } from "./amount";
-import { SendHeader } from "./header";
+import { ReviewHeader, SendHeader } from "./header";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useConnection } from "@/hooks/connection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
@@ -197,13 +198,8 @@ export function SendCollectible() {
               buttonText="Send"
             >
               <div className="p-6 flex flex-col gap-6">
-                <SendHeader image={image} title={title} />
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-foreground-400">
-                    Recipient
-                  </p>
-                  <p className="text-sm font-mono text-foreground-100">{to}</p>
-                </div>
+                <ReviewHeader />
+                <RecipientCard address={to} />
                 <div className="flex flex-col gap-2">
                   <p className="text-sm font-medium text-foreground-400">
                     Amount
