@@ -28,4 +28,8 @@ export default class SessionConnector extends InjectedConnector {
     }
     return connector as SessionConnector;
   }
+
+  username() {
+    return this.controller.username();
+  }
 }

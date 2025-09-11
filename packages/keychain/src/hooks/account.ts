@@ -1,23 +1,22 @@
+import { client, ENDPOINT } from "@/utils/graphql";
 import {
   BeginLoginDocument,
   BeginRegistrationDocument,
   FinalizeLoginDocument,
-  FinalizeRegistrationDocument,
   FinalizeLoginMutation,
+  FinalizeRegistrationDocument,
   FinalizeRegistrationMutation,
   useAccountNameQuery,
   useAccountNamesQuery,
   useAddressByUsernameQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { Buffer } from "buffer";
-import { client, ENDPOINT } from "@/utils/graphql";
 import base64url from "base64url";
-import { useConnection } from "./connection";
 import { useEffect, useMemo, useState } from "react";
 import { useMatch, useSearchParams } from "react-router-dom";
+import { constants, getChecksumAddress } from "starknet";
+import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
-import { constants, getChecksumAddress } from "starknet";
 
 type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
@@ -49,7 +48,7 @@ const createCredentials = async (
   beginRegistration.publicKey.user.id = Buffer.from(name);
   beginRegistration.publicKey.challenge = base64url.toBuffer(
     beginRegistration.publicKey.challenge as unknown as string,
-  );
+  ) as unknown as ArrayBuffer;
 
   // https://chromium.googlesource.com/chromium/src/+/main/content/browser/webauth/pub_key_cred_params.md
   beginRegistration.publicKey.pubKeyCredParams = [
@@ -213,13 +212,13 @@ export async function doLogin({
     publicKey: {
       challenge: base64url.toBuffer(
         beginLoginData.beginLogin.publicKey.challenge,
-      ),
+      ) as unknown as ArrayBuffer,
       timeout: 60000,
       rpId: import.meta.env.VITE_RP_ID,
       allowCredentials: [
         {
           type: "public-key",
-          id: base64url.toBuffer(credentialId),
+          id: base64url.toBuffer(credentialId) as unknown as ArrayBuffer,
         },
       ],
       userVerification: "required",

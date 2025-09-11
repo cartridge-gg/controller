@@ -67,9 +67,11 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       external: (id) => {
-        // remove wasm files from bundle
-        const isWasmFile = id.endsWith('.wasm');
-        if (isWasmFile) {
+        if (id.includes("@cartridge/controller-wasm")) {
+          return true;
+        }
+
+        if (id.endsWith(".wasm")) {
           return true;
         }
 

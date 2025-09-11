@@ -105,7 +105,7 @@ export type ParentMethods = AsyncMethodReturns<{
  * @param policiesStr - The encoded policies string from the URL.
  * @returns ParsedSessionPolicies or undefined if parsing fails.
  */
-function parseUrlPolicies(
+export function parseUrlPolicies(
   policiesStr: string | null,
 ): ParsedSessionPolicies | undefined {
   if (!policiesStr) {
@@ -334,6 +334,7 @@ export function useConnectionValue() {
             const turnkeyWallet = new TurnkeyWallet(
               controller.username(),
               chainId,
+              controller.rpcUrl(),
               provider,
             );
             if (!turnkeyWallet) {
