@@ -19,9 +19,6 @@ import { useConnection } from "./connection";
 import { parseSignature } from "viem";
 import { ExternalWalletType } from "@cartridge/controller";
 
-const FORWARDER_CONTRACT =
-  "0x4cbdf4905e417cd7492f4ab7c57468389b8187fb219264799e1f751e999b1cd";
-
 export interface MerkleClaim {
   key: string;
   network: MerkleDropNetwork;
@@ -105,7 +102,7 @@ export const useMerkleClaim = ({
             leafHash = hash.computePedersenHash(0, leafHash);
 
             const call: Call = {
-              contractAddress: FORWARDER_CONTRACT,
+              contractAddress: import.meta.env.VITE_MERKLE_DROP_CONTRACT,
               entrypoint: "is_consumed",
               calldata: CallData.compile({
                 merkle_tree_key: merkleTreeKey(claim),
@@ -209,7 +206,7 @@ export const useMerkleClaim = ({
           };
 
           return {
-            contractAddress: FORWARDER_CONTRACT,
+            contractAddress: import.meta.env.VITE_MERKLE_DROP_CONTRACT,
             entrypoint: "verify_and_forward",
             calldata: CallData.compile(raw),
           };
