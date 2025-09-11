@@ -19,7 +19,7 @@ import {
   ExternalWalletType,
 } from "./wallets/types";
 
-export type Session = {
+export type KeychainSession = {
   chainId: constants.StarknetChainId;
   policies: Policy[];
   maxFee: BigNumberish;
@@ -140,9 +140,9 @@ export interface Keychain {
     async?: boolean,
   ): Promise<Signature | ConnectError>;
   openSettings(): Promise<void | ConnectError>;
-  session(): Promise<Session>;
+  session(): Promise<KeychainSession>;
   sessions(): Promise<{
-    [key: string]: Session;
+    [key: string]: KeychainSession;
   }>;
   delegateAccount(): string;
   username(): string;
