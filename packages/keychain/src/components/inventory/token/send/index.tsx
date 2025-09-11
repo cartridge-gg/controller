@@ -9,6 +9,7 @@ import {
   TokenSelect,
   Spinner,
   PaperPlaneIcon,
+  WalletType,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
@@ -37,6 +38,10 @@ export function SendToken() {
   const userSelectedToken = useRef(false);
 
   const [to, setTo] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientWalletType, setRecipientWalletType] = useState<
+    WalletType | undefined
+  >();
   const [amount, setAmount] = useState<number | undefined>();
   const [amountError, setAmountError] = useState<Error | undefined>();
   const [toError, setToError] = useState<Error | undefined>();
@@ -71,6 +76,14 @@ export function SendToken() {
       userSelectedToken.current = true;
     },
     [setSelectedToken, setAmount],
+  );
+
+  const onRecipientSelected = useCallback(
+    (data: { name: string; address: string; walletType: WalletType }) => {
+      setRecipientName(data.name);
+      setRecipientWalletType(data.walletType);
+    },
+    [],
   );
 
   // Build transactions when send is confirmed
@@ -133,7 +146,7 @@ export function SendToken() {
     <>
       {sendConfirmed && transactions ? (
         <ExecutionContainer
-          title="Confirm Send"
+          title="Review Transaction"
           icon={
             <PaperPlaneIcon
               variant="solid"
@@ -143,29 +156,58 @@ export function SendToken() {
           }
           transactions={transactions}
           onSubmit={onSubmitSend}
-          buttonText="Send"
+          buttonText="Confirm"
         >
-          <div className="p-6 pb-4 flex flex-col gap-6">
-            <div className="flex items-center gap-3">
-              <p className="text-semibold text-lg">Sending</p>
-              {selectedToken && (
-                <div className="flex items-center gap-2">
-                  <Thumbnail icon={selectedToken.metadata.image} size="sm" />
-                  <p className="text-sm font-medium">
-                    {selectedToken.metadata.symbol}
+          <div className="p-6 flex flex-col gap-6">
+            <RecipientCard
+              address={to}
+              name={recipientName || undefined}
+              walletType={recipientWalletType}
+            />
+            {selectedToken && (
+              <div className="flex flex-col gap-px rounded-[4px] overflow-hidden">
+                <div className="bg-background-200 box-border flex gap-1 items-center justify-start p-3">
+                  <p className="text-foreground-400 text-xs font-semibold tracking-[0.24px]">
+                    Sending
                   </p>
                 </div>
-              )}
-            </div>
-            <RecipientCard address={to} />
-            {selectedToken && (
-              <div className="flex flex-col gap-2">
-                <p className="text-sm font-medium text-foreground-400">
-                  Amount
-                </p>
-                <p className="text-lg font-medium text-foreground-100">
-                  {amount} {selectedToken.metadata.symbol}
-                </p>
+                <div className="bg-background-200 box-border flex gap-3 h-16 items-center justify-start overflow-hidden p-3">
+                  <div className="bg-background-300 box-border flex gap-2.5 items-center justify-center p-[3px] relative rounded-[20px] shrink-0">
+                    <Thumbnail
+                      icon={selectedToken.metadata.image}
+                      size="sm"
+                      className="!w-[34px] !h-[34px]"
+                    />
+                  </div>
+                  <div className="basis-0 content-stretch flex flex-col gap-0.5 grow items-start justify-start min-h-px min-w-px relative shrink-0">
+                    <div className="content-stretch flex font-medium items-center justify-between leading-[0] not-italic relative shrink-0 text-[14px] text-center text-nowrap text-white w-full">
+                      <div className="flex flex-col justify-center relative shrink-0">
+                        <p className="leading-[20px] text-nowrap whitespace-pre">
+                          {selectedToken.metadata.symbol}
+                        </p>
+                      </div>
+                      <div className="flex flex-col justify-center relative shrink-0">
+                        <p className="leading-[20px] text-nowrap whitespace-pre">
+                          $
+                          {amount && selectedToken.balance.value
+                            ? (
+                                amount *
+                                (selectedToken.balance.value /
+                                  selectedToken.balance.amount)
+                              ).toFixed(2)
+                            : "0.00"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="content-stretch flex gap-0.5 items-start justify-start relative shrink-0 w-full">
+                      <div className="flex flex-col font-normal justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-foreground-300 text-center text-nowrap">
+                        <p className="leading-[16px] whitespace-pre">
+                          {amount} {selectedToken.metadata.symbol}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -204,6 +246,7 @@ export function SendToken() {
               setWarning={setWarning}
               setError={setToError}
               setParentLoading={setRecipientLoading}
+              onRecipientSelected={onRecipientSelected}
             />
             {selectedToken && (
               <SendAmount

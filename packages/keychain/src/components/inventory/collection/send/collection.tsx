@@ -8,6 +8,7 @@ import {
   Skeleton,
   Empty,
   PaperPlaneIcon,
+  WalletType,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -52,6 +53,10 @@ export function SendCollection() {
   const [sendConfirmed, setSendConfirmed] = useState(false);
 
   const [to, setTo] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientWalletType, setRecipientWalletType] = useState<
+    WalletType | undefined
+  >();
 
   const tokenIds = useMemo(() => {
     if (!tokenId) return [...paramsTokenIds];
@@ -90,6 +95,14 @@ export function SendCollection() {
   useEffect(() => {
     setRecipientValidated(false);
   }, [recipientWarning, setRecipientValidated]);
+
+  const onRecipientSelected = useCallback(
+    (data: { name: string; address: string; walletType: WalletType }) => {
+      setRecipientName(data.name);
+      setRecipientWalletType(data.walletType);
+    },
+    [],
+  );
 
   // Build transactions when send is confirmed
   const transactions = useMemo(() => {
@@ -185,7 +198,11 @@ export function SendCollection() {
             >
               <div className="p-6 pt-0 flex flex-col gap-6">
                 <ReviewHeader />
-                <RecipientCard address={to} />
+                <RecipientCard
+                  address={to}
+                  name={recipientName || undefined}
+                  walletType={recipientWalletType}
+                />
                 <Sending assets={assets} description={collection.name} />
               </div>
             </ExecutionContainer>
@@ -200,6 +217,7 @@ export function SendCollection() {
                   setWarning={setRecipientWarning}
                   setError={setRecipientError}
                   setParentLoading={setRecipientLoading}
+                  onRecipientSelected={onRecipientSelected}
                 />
                 <Sending assets={assets} description={collection.name} />
               </LayoutContent>
