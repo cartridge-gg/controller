@@ -434,8 +434,8 @@ export function useConnectionValue() {
     }
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
-  // Check session status when controller or policies change
-  useEffect(() => {
+  // Function to refresh session status
+  const refreshSessionStatus = useCallback(() => {
     if (controller && policies) {
       controller
         .isRequestedSession(policies)
@@ -452,6 +452,11 @@ export function useConnectionValue() {
       setIsSessionActive(false);
     }
   }, [controller, policies]);
+
+  // Check session status when controller or policies change
+  useEffect(() => {
+    refreshSessionStatus();
+  }, [refreshSessionStatus]);
 
   useThemeEffect({ theme, assetUrl: "" });
 
@@ -647,6 +652,7 @@ export function useConnectionValue() {
     rpcUrl,
     policies,
     isSessionActive,
+    refreshSessionStatus,
     onModalClose,
     setOnModalClose,
     theme,

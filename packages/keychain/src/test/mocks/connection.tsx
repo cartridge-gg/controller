@@ -33,6 +33,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   isConfigLoading: false,
   isMainnet: false,
   isSessionActive: false,
+  refreshSessionStatus: vi.fn(),
   theme: {
     verified: true,
     name: "test",

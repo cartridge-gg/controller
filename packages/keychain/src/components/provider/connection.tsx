@@ -27,6 +27,7 @@ export type ConnectionContextValue = {
   tokens?: string[];
   policies?: ParsedSessionPolicies;
   isSessionActive: boolean;
+  refreshSessionStatus: () => void;
   theme: VerifiableControllerTheme;
   isConfigLoading: boolean;
   isMainnet: boolean;

@@ -22,7 +22,13 @@ export function ConfirmTransaction({
   transactions,
   executionError,
 }: ConfirmTransactionProps) {
-  const { controller, origin, policies, isSessionActive } = useConnection();
+  const {
+    controller,
+    origin,
+    policies,
+    isSessionActive,
+    refreshSessionStatus,
+  } = useConnection();
   const account = controller;
 
   const [skipSession, setSkipSession] = useState(false);
@@ -42,7 +48,9 @@ export function ConfirmTransaction({
       // Check if a session with the new policies would cover these calls
       // We'll simulate this by checking if the policies include the contracts/methods being called
       const checkCoverage = () => {
-        if (!policies.contracts) return false;
+        if (!policies.contracts) {
+          return false;
+        }
 
         return transactions.every((call) => {
           const normalizedCallAddress = normalizeAddress(call.contractAddress);
@@ -52,13 +60,17 @@ export function ConfirmTransaction({
             ([address]) => normalizeAddress(address) === normalizedCallAddress,
           )?.[1];
 
-          if (!contract) return false;
+          if (!contract) {
+            return false;
+          }
 
           // Check if the specific method is covered
           const methodName = call.entrypoint;
-          return contract.methods.some(
-            (method) => method.name === methodName && method.authorized,
+          const methodCovered = contract.methods.some(
+            (method) => method.entrypoint === methodName,
           );
+
+          return methodCovered;
         });
       };
 
@@ -100,6 +112,8 @@ export function ConfirmTransaction({
         policies={policies!}
         onConnect={async () => {
           try {
+            // Refresh session status after session update
+            refreshSessionStatus();
             const res = await executeCore(transactions);
             onComplete(res.transaction_hash);
           } catch (e) {
