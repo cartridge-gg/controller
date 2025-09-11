@@ -7,6 +7,7 @@ import { ExecutionContainer } from "@/components/ExecutionContainer";
 import { CreateSession } from "../connect";
 import { executeCore } from "@/utils/connection/execute";
 import { useEffect, useState } from "react";
+import { PageLoading } from "../Loading";
 
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
@@ -27,13 +28,20 @@ export function ConfirmTransaction({
   const [hasSession, setHasSession] = useState(false);
   const [skipSession, setSkipSession] = useState(false);
   const [error, setError] = useState<ControllerError | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (controller && policies) {
-      controller.isRequestedSession(policies).then(setHasSession);
-    } else if (controller && !policies) {
+      controller
+        .isRequestedSession(policies)
+        .then(setHasSession)
+        .finally(() => setLoading(false));
+      return;
+    }
+    if (controller && !policies) {
       setHasSession(true);
     }
+    setLoading(false);
   }, [controller, policies]);
 
   const onSubmit = async (maxFee?: FeeEstimate) => {
@@ -49,6 +57,10 @@ export function ConfirmTransaction({
       setError(e as ControllerError);
     }
   };
+
+  if (loading) {
+    return <PageLoading />;
+  }
 
   if (policies && !hasSession && !skipSession) {
     return (
