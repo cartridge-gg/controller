@@ -6,8 +6,6 @@ import { Button } from "@cartridge/ui";
 import { STRK_CONTRACT_ADDRESS } from "./providers/StarknetProvider";
 import { useEffect, useState } from "react";
 
-const ORDERS: number[] = [];
-
 export function Profile() {
   const { account, connector } = useAccount();
   const [username, setUsername] = useState<string | null>(null);
