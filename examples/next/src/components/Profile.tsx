@@ -107,53 +107,6 @@ export function Profile() {
             Open at Dark Shuffle Achievements
           </Button>
         </div>
-        <div className="flex flex-wrap gap-1">
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileAt(
-                `account/${username}/slot/dragarkbal/inventory/collection/0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420?ps=dragarkbal`,
-              )
-            }
-          >
-            Open at Dragark Collection
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileAt(
-                `account/${username}/slot/pistols-staging/inventory/collection/0x43f800e9f5f6e290a798379029fcb28ba7c34e9669f7b5fc77fce8a4ebdc893?ps=pistols-staging`,
-              )
-            }
-          >
-            Open at Pistols Collection
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileAt(
-                `account/${username}/slot/arcade-briq/inventory/collectible/0x48089694913599fb5e23e3e9ee01287c5ea9a54d7d48b08cbbf0091995d502e/token/1?address=0x06B0fDa70d073743a3b0f6b02cbc1Ab5C1c85f2a36d7c3c17ca5DBF8ea0883A0&tokenIds=1`,
-              )
-            }
-          >
-            Open at BRIQ Token 1
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileAt(
-                `account/${username}/slot/pistols-mainnet/inventory/collection/0x7aaa9866750a0db82a54ba8674c38620fa2f967d2fbb31133def48e0527c87f/purchase?&orders=${ORDERS.join(",")}`,
-              )
-            }
-          >
-            Open at Pistols Collection Purchase Orders
-          </Button>
-          <Button
-            onClick={() =>
-              ctrlConnector.controller.openProfileAt(
-                `account/${username}/slot/arcade-briq/inventory/collectible/0x48089694913599fb5e23e3e9ee01287c5ea9a54d7d48b08cbbf0091995d502e/purchase?&orders=${ORDERS.join(",")}`,
-              )
-            }
-          >
-            Open at BRIQ Collection Purchase Orders
-          </Button>
-        </div>
       </div>
     </div>
   );
