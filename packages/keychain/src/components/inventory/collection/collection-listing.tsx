@@ -49,11 +49,13 @@ const ALLOWED_TOKENS = [
 const WEEK = 60 * 60 * 24 * 7;
 const MONTH = 60 * 60 * 24 * 30;
 const THREE_MONTHS = 60 * 60 * 24 * 90;
-const NEVER = 0;
+const YEAR = 60 * 60 * 24 * 365;
+const NEVER = 60 * 60 * 24 * 365 * 1000;
 const EXPIRATIONS = [
   { duration: WEEK, label: "1w" },
   { duration: MONTH, label: "1mo" },
   { duration: THREE_MONTHS, label: "3mo" },
+  { duration: YEAR, label: "1y" },
   { duration: NEVER, label: "Never" },
 ];
 
