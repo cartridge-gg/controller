@@ -2,7 +2,7 @@ import { Signature } from "starknet";
 import { useEffect, useCallback } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { DeployCtx, SignMessageCtx } from "@/utils/connection";
+import { DeployCtx, SignMessageCtx, ConnectCtx } from "@/utils/connection";
 import { CreateController, CreateSession, Upgrade } from "./connect";
 import { DeployController } from "./DeployController";
 import { SignMessage } from "./SignMessage";
@@ -26,12 +26,11 @@ export function Home() {
 
     try {
       // Use a default duration for verified sessions (24 hours)
-      const duration = 24 * 60 * 60; // 24 hours in seconds
+      const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
       const expiresAt = duration + now();
 
       await controller.createSession(expiresAt, policies);
-
-      context?.resolve({
+      (context as ConnectCtx).resolve({
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
       });
