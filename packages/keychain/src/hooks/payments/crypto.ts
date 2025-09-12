@@ -364,10 +364,10 @@ export const getExplorer = (
       };
     case "starknet":
       return {
-        name: "Voyager",
+        name: "Cartridge Explorer",
         url: isMainnet
-          ? `https://voyager.online/tx/${txHash}`
-          : `https://goerli.voyager.online/tx/${txHash}`,
+          ? `https://explorer.cartridge.gg/tx/${txHash}`
+          : `https://starknet-sepolia.explorer.cartridge.gg/tx/${txHash}`,
       };
     case "arbitrum":
       return {

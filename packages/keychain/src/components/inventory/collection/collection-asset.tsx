@@ -26,7 +26,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "@/hooks/collection";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { VoyagerUrl } from "@cartridge/ui/utils";
+import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
@@ -45,6 +45,7 @@ const OFFSET = 10;
 export function CollectionAsset() {
   const { chainId, project } = useConnection();
   const account = useAccount();
+  const explorer = useExplorer();
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
   const { navigate } = useNavigation();
@@ -174,11 +175,12 @@ export function CollectionAsset() {
     return data.slice(0, cap);
   }, [data, cap]);
 
-  const to = useCallback((transactionHash: string) => {
-    return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
-      transactionHash,
-    );
-  }, []);
+  const to = useCallback(
+    (transactionHash: string) => {
+      return explorer.transaction(transactionHash);
+    },
+    [explorer],
+  );
 
   const status = useMemo(() => {
     if (
