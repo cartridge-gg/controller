@@ -8,9 +8,9 @@ import {
 import { Receiving } from "./receiving";
 import { useConnection } from "@/hooks/connection";
 import { usePurchaseContext } from "@/context";
-import { Item } from "@/context/purchase";
 import { useMemo } from "react";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { Item } from "@/context/purchase";
 
 export function Success() {
   const { purchaseItems, claimItems, starterpackDetails } =
@@ -49,7 +49,12 @@ export function PurchaseSuccessInner({
         icon={<CheckIcon />}
       />
       <LayoutContent>
-        <Receiving title="You Received" items={items} isLoading={false} />
+        <Receiving
+          title="You Received"
+          items={items}
+          isLoading={false}
+          showPrice={false}
+        />
       </LayoutContent>
       <LayoutFooter>
         <Button variant="secondary" onClick={closeModal}>

@@ -1,15 +1,24 @@
 import { TagIcon } from "@cartridge/ui";
+import { cn } from "@cartridge/ui";
+import React, { HTMLAttributes } from "react";
 
-export type SupplyProps = {
+export interface SupplyProps {
   amount: number;
-};
+}
 
-export function Supply({ amount }: SupplyProps) {
-  const color = amount <= 0 ? "text-destructive-100" : "text-primary-100";
-
+export const Supply = React.forwardRef<
+  HTMLDivElement,
+  HTMLAttributes<HTMLDivElement> & SupplyProps
+>(({ amount, className, ...props }, ref) => {
   return (
     <div
-      className={`flex gap-1 py-[2px] px-[8px] rounded-full bg-background-200 text-sm font-semibold ${color}`}
+      className={cn(
+        "flex gap-1 py-[2px] px-[8px] rounded-full bg-background-200 text-sm font-semibold",
+        amount > 0 ? "text-foreground-100" : "text-destructive-100",
+        className,
+      )}
+      ref={ref}
+      {...props}
     >
       {amount > 0 ? (
         <>
@@ -20,4 +29,6 @@ export function Supply({ amount }: SupplyProps) {
       )}
     </div>
   );
-}
+});
+
+Supply.displayName = "Supply";
