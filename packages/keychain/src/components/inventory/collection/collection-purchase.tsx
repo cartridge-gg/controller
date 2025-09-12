@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
   InfoIcon,
+  Separator,
 } from "@cartridge/ui";
 import { cn, useCountervalue } from "@cartridge/ui/utils";
 import {
@@ -101,35 +102,6 @@ export function CollectionPurchase() {
     );
   }, [tokens, tokenOrders]);
 
-  const { total, fees } = useMemo(() => {
-    const price = tokenOrders.reduce(
-      (acc, order) => acc + Number(order?.price),
-      0,
-    );
-    const royaltyFee = Object.values(royalties).reduce(
-      (acc, royalty) => acc + royalty,
-      0,
-    );
-    const formattedMarketplaceFee =
-      marketplaceFee / Math.pow(10, token?.metadata.decimals || 0);
-    const formattedRoyaltyFee =
-      royaltyFee / Math.pow(10, token?.metadata.decimals || 0);
-    const total = formattedMarketplaceFee + formattedRoyaltyFee;
-    const fees = [
-      {
-        label: "Marketplace Fee",
-        amount: `${formattedMarketplaceFee.toFixed(2)} ${token?.metadata.symbol}`,
-        percentage: `${(price ? (marketplaceFee / price) * 100 : 0).toFixed(2)}%`,
-      },
-      {
-        label: "Creator Royalties",
-        amount: `${formattedRoyaltyFee.toFixed(2)} ${token?.metadata.symbol}`,
-        percentage: `${(price ? (Number(royaltyFee) / price) * 100 : 0).toFixed(2)}%`,
-      },
-    ];
-    return { total, fees };
-  }, [marketplaceFee, royalties, token, tokenOrders]);
-
   const props = useMemo(() => {
     if (!assets || !collection || !tokenOrders) return [];
     return tokenOrders
@@ -152,7 +124,7 @@ export function CollectionPurchase() {
       .filter((value) => value !== undefined);
   }, [assets, collection, tokenOrders, contractAddress, project]);
 
-  const { totalPrice, floatPrice } = useMemo(() => {
+  const { totalPrice, floatPrice, fixedValue } = useMemo(() => {
     const total = tokenOrders.reduce(
       (acc, order) => acc + Number(order?.price),
       0,
@@ -162,8 +134,61 @@ export function CollectionPurchase() {
     );
     const formatted =
       (total + fees) / Math.pow(10, token?.metadata.decimals || 0);
-    return { totalPrice: total + fees, floatPrice: formatted, fees };
+    // Figure out the index of the highest digit from the price, e.g 1.00 is 0, 0.01 is 2, 0.1 is 1, etc.
+    const dotPosition = formatted
+      .toString()
+      .split("")
+      .findIndex((char) => char === ".");
+    const digitPosition = formatted
+      .toString()
+      .split("")
+      .findIndex((char) => char !== "0" && char !== ".");
+    return {
+      totalPrice: total + fees,
+      floatPrice: formatted,
+      fees,
+      fixedValue: Math.max(0, digitPosition - dotPosition),
+    };
   }, [tokenOrders, token?.metadata.decimals]);
+
+  const { total, fees, fixedFeeValue } = useMemo(() => {
+    const price = tokenOrders.reduce(
+      (acc, order) => acc + Number(order?.price),
+      0,
+    );
+    const royaltyFee = Object.values(royalties).reduce(
+      (acc, royalty) => acc + royalty,
+      0,
+    );
+    const formattedMarketplaceFee =
+      marketplaceFee / Math.pow(10, token?.metadata.decimals || 0);
+    const formattedRoyaltyFee =
+      royaltyFee / Math.pow(10, token?.metadata.decimals || 0);
+    const formattedClientFee =
+      (price * (CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR)) /
+      Math.pow(10, token?.metadata.decimals || 0);
+    const total =
+      formattedMarketplaceFee + formattedRoyaltyFee + formattedClientFee;
+    const fixedFeeValue = fixedValue + 3;
+    const fees = [
+      {
+        label: "Marketplace Fee",
+        amount: `${formattedMarketplaceFee.toFixed(fixedFeeValue)} ${token?.metadata.symbol}`,
+        percentage: `${(price ? (marketplaceFee / price) * 100 : 0).toFixed(2)}%`,
+      },
+      {
+        label: "Creator Royalties",
+        amount: `${formattedRoyaltyFee.toFixed(fixedFeeValue)} ${token?.metadata.symbol}`,
+        percentage: `${(price ? (Number(royaltyFee) / price) * 100 : 0).toFixed(2)}%`,
+      },
+      {
+        label: "Client Fee",
+        amount: `${formattedClientFee.toFixed(fixedFeeValue)} ${token?.metadata.symbol}`,
+        percentage: `${((CLIENT_FEE_NUMERATOR / CLIENT_FEE_DENOMINATOR) * 100).toFixed(2)}%`,
+      },
+    ];
+    return { total, fees, fixedFeeValue };
+  }, [marketplaceFee, royalties, token, tokenOrders, fixedValue]);
 
   const addRoyalties = useCallback(
     (orderId: number, royaltyFee: number) => {
@@ -281,7 +306,7 @@ export function CollectionPurchase() {
               onSubmit={onSubmitPurchase}
               buttonText="Confirm"
             >
-              <div className="p-6 pb-0 flex flex-col gap-4 overflow-hidden h-full">
+              <div className="p-6 pb-0 flex flex-col gap-4 overflow-hidden h-full select-none">
                 <div
                   className="grow flex flex-col gap-px rounded overflow-y-scroll"
                   style={{ scrollbarWidth: "none" }}
@@ -310,6 +335,7 @@ export function CollectionPurchase() {
                       entrypoints={entrypoints}
                       tokenId={args.tokenId}
                       addRoyalties={addRoyalties}
+                      fixedValue={Math.max(2, fixedValue)}
                     />
                   ))}
                 </div>
@@ -318,7 +344,7 @@ export function CollectionPurchase() {
                   <div className="w-full px-3 py-2.5 flex flex-col gap-1 bg-background-125 border border-background-200 rounded">
                     <div className="flex items-center justify-between text-xs text-foreground-400">
                       <p>Cost</p>
-                      <p>{`${(floatPrice - total).toFixed(2)} ${token.metadata.symbol}`}</p>
+                      <p>{`${(floatPrice - total).toFixed(fixedFeeValue)} ${token.metadata.symbol}`}</p>
                     </div>
                     <div className="flex items-center justify-between text-xs text-foreground-400">
                       <div className="flex gap-2  text-xs font-medium">
@@ -328,7 +354,7 @@ export function CollectionPurchase() {
                           fees={fees}
                         />
                       </div>
-                      <p>{`${total.toFixed(2)} ${token.metadata.symbol}`}</p>
+                      <p>{`${total.toFixed(fixedFeeValue)} ${token.metadata.symbol}`}</p>
                     </div>
                   </div>
                   <div className="flex gap-3 w-full">
@@ -360,6 +386,7 @@ const Order = ({
   entrypoints,
   tokenId,
   addRoyalties,
+  fixedValue,
 }: {
   orderId: number;
   image: string;
@@ -371,6 +398,7 @@ const Order = ({
   entrypoints: string[];
   tokenId: string;
   addRoyalties: (orderId: number, royaltyFee: number) => void;
+  fixedValue: number;
 }) => {
   const { provider } = useMarketplace();
   const { data: royaltyInfo } = useQuery(
@@ -406,7 +434,7 @@ const Order = ({
   const finalPrice = useMemo(() => {
     const formattedPrice = price / Math.pow(10, token.metadata.decimals);
     return {
-      amount: formattedPrice.toFixed(2),
+      amount: formattedPrice.toFixed(fixedValue),
       token: token.metadata.symbol,
     };
   }, [price, token]);
@@ -476,17 +504,21 @@ const FeesTooltip = ({
     <TooltipProvider>
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="ml-2 px-3 py-2 bg-spacer-100 border border-background-150 rounded flex flex-col gap-2 select-none">
+          <p className="text-foreground-400 font-medium text-xs">
+            Processing Fees
+          </p>
+          <Separator className="bg-background-100" />
           <div className="flex flex-col gap-1">
             {fees.map((fee) => (
               <div
                 key={fee.label}
                 className="flex items-center justify-between gap-4 text-xs"
               >
-                <span className="text-foreground-400">{fee.label}</span>
+                <span className="text-foreground-300">{fee.label}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-foreground-100">{fee.amount}</span>
-                  <span className="text-foreground-400">
+                  <span className="text-foreground-300">
                     ({fee.percentage})
                   </span>
                 </div>
