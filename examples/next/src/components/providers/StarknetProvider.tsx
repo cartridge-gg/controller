@@ -169,7 +169,6 @@ if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
 }
 
 const controller = new ControllerConnector({
-  policies,
   // With the defaults, you can omit chains if you want to use:
   // - chains: [
   //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9" },
@@ -178,7 +177,8 @@ const controller = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  url: keychainUrl,
+  defaultChainId: constants.StarknetChainId.SN_MAIN,
+  url: "https://x.cartridge.gg",
   signupOptions: [
     "google",
     "webauthn",
@@ -188,9 +188,7 @@ const controller = new ControllerConnector({
     "rabby",
     "password",
   ],
-  slot: "arcade-pistols",
-  namespace: "pistols",
-  preset: "pistols",
+  preset: "loot-survivor",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
