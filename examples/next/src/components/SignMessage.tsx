@@ -5,6 +5,7 @@ import { useAccount, useSignTypedData } from "@starknet-react/core";
 import { useCallback, useState } from "react";
 import {
   ArraySignatureType,
+  BlockTag,
   TypedData,
   shortString,
   typedData,
@@ -67,7 +68,7 @@ export function SignMessage() {
           ...(signature as ArraySignatureType),
         ],
       },
-      "pending",
+      BlockTag.PRE_CONFIRMED,
     );
 
     setIsValid(res[0] === shortString.encodeShortString("VALID"));

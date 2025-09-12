@@ -19,7 +19,7 @@ import { useMarketplace } from "@/hooks/marketplace";
 export function Collectible() {
   const { games, editions } = useArcade();
   const { address } = useParams<{ address: string }>();
-  const { project, namespace } = useConnection();
+  const { project } = useConnection();
   const theme = useControllerTheme();
   const { getCollectionOrders } = useMarketplace();
 
@@ -27,7 +27,7 @@ export function Collectible() {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
     );
-  }, [editions, project, namespace]);
+  }, [editions, project]);
 
   const game: GameModel | undefined = useMemo(() => {
     return Object.values(games).find((game) => game.id === edition?.gameId);
@@ -41,7 +41,7 @@ export function Collectible() {
 
   const orders = useMemo(() => {
     return getCollectionOrders(address || "");
-  }, [address]);
+  }, [address, getCollectionOrders]);
 
   return (
     <>

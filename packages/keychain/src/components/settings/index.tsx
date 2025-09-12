@@ -1,4 +1,6 @@
+import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
+import { processControllerQuery } from "@/utils/signers";
 import {
   Button,
   ControllerIcon,
@@ -15,12 +17,8 @@ import {
   SheetTrigger,
   SignOutIcon,
 } from "@cartridge/ui";
-import {
-  ControllerQuery,
-  useControllerQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+import { useControllerQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useMemo } from "react";
-import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
 import CurrencySelect from "./currency-select";
 import {
@@ -30,7 +28,6 @@ import {
 import { SectionHeader } from "./section-header";
 import { SessionsSection } from "./sessions/sessions-section";
 import { SignersSection } from "./signers/signers-section";
-import { useNavigation } from "@/context/navigation";
 
 // Feature flag configuration
 interface FeatureFlags {
@@ -58,39 +55,24 @@ export function Settings() {
       signers: true,
       registeredAccounts: false,
       currency: false,
-      recovery: true,
+      recovery: false,
       delegate: true,
     }),
     [],
   );
 
-  const controllerQueryRaw = useControllerQuery(
+  const controllerQuery = useControllerQuery(
     {
       username: controller?.username() ?? "",
       chainId: constants.NetworkName.SN_MAIN,
     },
     {
       refetchOnMount: "always",
+      select: (data) => processControllerQuery(data, chainId ?? ""),
+      enabled: !!chainId,
+      queryKey: ["controller", controller?.username(), chainId],
     },
   );
-
-  const controllerQuery = useMemo(() => {
-    if (chainId === constants.StarknetChainId.SN_MAIN) {
-      return controllerQueryRaw;
-    }
-    return {
-      ...controllerQueryRaw,
-      data: {
-        controller: {
-          ...controllerQueryRaw.data?.controller,
-          signers: controllerQueryRaw.data?.controller?.signers
-            ? [controllerQueryRaw.data?.controller?.signers[0]]
-            : undefined,
-        },
-        ...controllerQueryRaw.data,
-      },
-    } as QueryObserverResult<ControllerQuery>;
-  }, [chainId, controllerQueryRaw.data]);
 
   const handleLogout = useCallback(() => {
     try {
@@ -102,12 +84,7 @@ export function Settings() {
 
   return (
     <Sheet>
-      <HeaderInner
-        variant="compressed"
-        title="Settings"
-        Icon={GearIcon}
-        hideIcon
-      />
+      <HeaderInner variant="compressed" title="Settings" Icon={GearIcon} />
       <LayoutContent className="gap-6">
         {featureFlags.signers && (
           <SignersSection controllerQuery={controllerQuery} />
@@ -191,7 +168,7 @@ export function Settings() {
           </section>
         )}
 
-        <SessionsSection controllerQuery={controllerQuery} />
+        <SessionsSection />
       </LayoutContent>
 
       <LayoutFooter>

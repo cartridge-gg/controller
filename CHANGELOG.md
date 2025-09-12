@@ -1,5 +1,142 @@
 # Changelog
 
+## [0.10.2] - 2025-09-11
+
+### ✨ New Features
+- **@cartridge/keychain**: Added environment-based configuration for merkle drop contracts enabling flexible contract deployment across different environments (#2008)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Migrated 6 transaction flows to use ExecutionContainer for direct execution, eliminating page redirects and providing inline transaction confirmation for improved UX (#2005)
+- **@cartridge/keychain**: Enhanced session update prompting logic with better validation and synchronous rendering for improved transaction flow performance (#2007)
+- **Examples**: Cleaned up Next.js example Profile component by removing collection-related buttons (#2011)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed chain switching to always execute on request, ensuring reliable network changes (#2014)
+- **@cartridge/keychain**: Fixed login validation to prevent authentication before controller username validation is complete (#2012)
+- **@cartridge/keychain**: Fixed session creation flash issues for smoother session management (#2009)
+- **@cartridge/keychain**: Fixed Braavos wallet chain switching by adding proper skip logic (#2006)
+- **@cartridge/keychain**: Fixed merkle drop claim interface to properly display claim amounts (#2004)
+
+## [0.10.1] - 2025-09-10
+
+### ✨ New Features
+- **@cartridge/keychain**: Added StarkNet wallets account changed listener for improved wallet integration and event handling (#1999)
+- **@cartridge/keychain**: Enhanced claim UI to display connected wallet address for better user transparency (#2000)
+- **@cartridge/keychain**: Added starterpack ID input support to example application for easier testing and development (#1998)
+- **@cartridge/keychain**: Implemented merkle drop StarkNet claim signature verification for enhanced security (#1993)
+- **@cartridge/keychain**: Added merkle-drop wallet selection with controller integration for streamlined claiming process (#1986)
+- **@cartridge/controller**: Added outsideExecution support to StarterPack API for improved transaction handling (#1972)
+- **@cartridge/controller**: Migrated collection listing to use ExecutionContainer for direct execution, improving performance (#2002)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced fee estimation by scaling resource bounds by 1.5x for more reliable transaction processing (#1978)
+- **@cartridge/keychain**: Restricted token support to only USDC, ETH, LORDS and STRK tokens for improved security and user experience (#1996)
+- **Development**: Added dev:live scripts for production API testing to streamline development workflow (#2001)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed controller crash after purchase to ensure stable operation (#1997)
+- **@cartridge/keychain**: Resolved inventory assets disappearing after tab navigation (#1990)
+- **@cartridge/keychain**: Fixed navigation stack reset issues in collection components (#1995)
+- **@cartridge/keychain**: Fixed loot box image display issues (#1991)
+- **@cartridge/keychain**: Resolved inventory view problems after purchase completion (#1989)
+- **@cartridge/keychain**: Fixed token page empty state display (#1988)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#1994, #1992)
+
+## [0.10.0] - 2025-09-03
+
+### ✨ New Features
+- **@cartridge/keychain**: Added starterpack claim merkle drop functionality, enabling efficient and secure starterpack distribution through merkle tree verification (#1928)
+- **@cartridge/controller**: Re-implemented controller creation factory pattern for improved instantiation and configuration management (#1956)
+- **@cartridge/keychain**: Removed feature flag for signers functionality, making multi-signer support generally available (#1961)
+
+### 🚀 Improvements  
+- **Bundle Size**: Massive bundle size reduction through multiple optimizations:
+  - Migrated from `@solana/web3.js` to lightweight `micro-sol-signer` library, reducing Solana-related code by ~450KB (#1951)
+  - Removed MetaMask SDK dependency and migrated Ethereum wallets to shared EIP-6963 base class, saving several MB (#1950)
+  - Replaced lodash dependency with custom utilities, eliminating unnecessary library weight (#1960)
+- **@cartridge/keychain**: Enhanced error parsing with improved test coverage for "Not active" and ENTRYPOINT_NOT_FOUND cases (#1958, #1957)
+- **@cartridge/keychain**: Improved nested error handling for better debugging and user experience (#1949)
+- **@cartridge/controller**: Removed unreliable original signer checks for more robust signer management (#1952)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed client fee calculation for ERC721 transactions (#1955)
+- **@cartridge/keychain**: Temporarily disabled Solana credits purchase due to reliability issues (#1948)
+
+### ⚠️ Breaking Changes
+- **StarkNet Dependencies**: Upgraded to StarkNet v8 with updated WalletAccount constructor API. Applications using WalletAccount directly may need to update from argument-based to object-based constructor parameters (#1939)
+- **Ethereum Wallet Integration**: Removed MetaMask SDK in favor of EIP-6963 standard wallet detection. Applications relying on MetaMask SDK-specific features may need updates (#1950)
+- **Dependencies**: Removed lodash dependency - any direct usage of lodash utilities from this package will need replacement (#1960)
+
+### 📦 Dependencies
+- **starknet**: Updated to ^8.1.2 for improved StarkNet integration and compatibility (#1939)
+- **@starknet-react/core**: Updated to ^5.0.1 for StarkNet v8 support (#1939)
+- **@starknet-react/chains**: Updated to ^5.0.1 for StarkNet v8 support (#1939)
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#1959, #1953, #1947, #1945)
+- **Dependencies Removed**: 
+  - lodash and @types/lodash (replaced with custom utilities)
+  - @solana/web3.js and @solana/spl-token (replaced with micro-sol-signer)
+  - @metamask/sdk (replaced with EIP-6963 standard)
+
+## [0.10.0-alpha.1] - 2025-08-29
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed WalletAccount constructor to properly work with starknet.js v8.5.2, ensuring compatibility with the latest StarkNet library version (#1943)
+
+## [0.10.0-alpha.0] - 2025-08-28
+
+### ✨ New Features
+- **@cartridge/controller**: Added lazy load option to defer iframe mounting, improving initial page load performance and providing better control over when the controller iframe is loaded (#1934)
+- **@cartridge/keychain**: Added fallback redirect option for social login when popup windows don't work, ensuring better compatibility across different browsers and environments (#1929)
+- **@cartridge/controller**: Implemented StarkNet wallet switch chain and send transaction functionality, enabling seamless network switching and transaction execution with external wallets (#1927)
+- **@cartridge/keychain**: Enabled Braavos wallet integration, expanding wallet compatibility for users (#1925)
+- **@cartridge/keychain**: Combined payment method and network selection screens for a more streamlined user experience during transactions (#1920)
+- **@cartridge/keychain**: Added claim starterpack UI, providing an intuitive interface for users to claim their starter packages (#1922)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Enhanced multicall error parsing to extract more meaningful error messages, improving debugging and user experience during transaction failures (#1923)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed social native login/signup issues to ensure proper authentication flow in native applications (#1937)
+- **@cartridge/keychain**: Fixed starterpack hook functionality to ensure proper starterpack claiming and management (#1936)
+- **@cartridge/keychain**: Fixed social login issues in native apps, improving authentication reliability (#1932)
+- **@cartridge/controller**: Fixed issue where user cancellation of manual transactions was not properly propagated, ensuring proper event handling (#1931)
+- **@cartridge/controller**: Fixed connection destroyed on navigate issue, preventing connection loss during page navigation (#1926)
+- **@cartridge/keychain**: Fixed missing Base network block explorer integration (#1919)
+- **@cartridge/controller**: Fixed handling of transaction execution errors after session updates, improving error recovery and user feedback (#1916)
+
+### 📦 Dependencies
+- **starknet.js**: Updated to version 8.5.2 for improved StarkNet integration and bug fixes (#1940)
+- **@cartridge/ui**: Multiple updates to the UI component library for improved design consistency and functionality (#1938, #1933, #1930, #1921)
+
+## [0.9.3] - 2025-08-13
+
+### ✨ New Features
+- **@cartridge/keychain**: Added multichain purchase flow for starterpack, enabling seamless cross-chain purchasing with improved wallet and network selection (#1868)
+- **@cartridge/controller**: Enabled switch chain functionality for external wallets, allowing users to change networks when using external wallet connections (#1899)
+- **@cartridge/keychain**: Added ERC1155 listing and purchase support for enhanced NFT marketplace functionality (#1873)
+- **@cartridge/keychain**: Added remove signer functionality, allowing users to remove additional signers from their accounts (#1874)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Separated controller and sessions queries for improved performance and better data management (#1892)
+- **@cartridge/keychain**: Enhanced validation error display to provide clearer feedback to users during transactions and form submissions (#1877)
+- **Development**: Added Claude Code configuration for improved development workflow and AI-assisted coding (#1885)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed multi-purchase ERC721 functionality by replacing window.location pattern with useLocation hook and added proper search params handling (#1897)
+- **@cartridge/keychain**: Fixed tokens loading forever issue that prevented proper token balance and information display (#1896)
+- **@cartridge/keychain**: Fixed ERC721 listing detection to ensure proper marketplace functionality (#1893)
+- **@cartridge/keychain**: Fixed purchase page loading issues for better user experience during transactions (#1894)
+- **@cartridge/keychain**: Fixed navigation reset functionality to ensure proper routing after transactions (#1880)
+- **@cartridge/keychain**: Fixed sign message handling for boolean values to prevent signing errors (#1879)
+- **@cartridge/keychain**: Fixed external wallet transaction failures by improving error handling and transaction processing (#1878)
+- **@cartridge/keychain**: Fixed parameter updates for better transaction handling (#1888)
+- **CI/CD**: Removed non-working end-to-end CI tests to improve build reliability (#1895)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates to the UI component library for improved design consistency and functionality (#1886, #1882, #1881)
+
 ## [0.9.2] - 2025-07-23
 
 ### ✨ New Features

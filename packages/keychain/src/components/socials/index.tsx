@@ -119,7 +119,7 @@ export function Socials() {
           );
 
           // Navigate to execute screen with returnTo parameter to come back to socials
-          const currentPath = window.location.pathname + window.location.search;
+          const currentPath = `${location.pathname}${location.search}`;
           const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
           navigate(executeUrlWithReturn);
         } catch (error) {
@@ -130,7 +130,7 @@ export function Socials() {
       };
       process();
     },
-    [provider, navigate],
+    [provider, navigate, location],
   );
 
   useEffect(() => {

@@ -1,27 +1,32 @@
+import { now } from "@/constants";
 import { useConnection } from "@/hooks/connection";
 import { Skeleton } from "@cartridge/ui";
-import { ControllerQuery } from "@cartridge/ui/utils/api/cartridge";
-import { useMemo } from "react";
-import { QueryObserverResult } from "react-query";
-import { shortString } from "starknet";
+import { useSessionsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { constants, shortString } from "starknet";
 import { SectionHeader } from "../section-header";
 import { RevokeAllSessionsButton } from "./revoke-all-sessions";
 import { SessionCard } from "./session-card";
 
-export const SessionsSection = ({
-  controllerQuery,
-}: {
-  controllerQuery: QueryObserverResult<ControllerQuery>;
-}) => {
+export const SessionsSection = () => {
   const { controller } = useConnection();
 
-  const activeSessions = useMemo(() => {
-    return (
-      controllerQuery.data?.controller?.sessions?.filter(
-        (session) => !session.isRevoked,
-      ) ?? []
-    );
-  }, [controllerQuery.data?.controller?.sessions]);
+  const sessionsQuery = useSessionsQuery(
+    {
+      where: {
+        isRevoked: false,
+        hasControllerWith: [
+          {
+            accountID: controller?.username(),
+            networkContains: constants.NetworkName.SN_MAIN,
+          },
+        ],
+      },
+    },
+    {
+      select: (data) => data.sessions?.edges?.map((session) => session?.node),
+      enabled: !!controller?.username(),
+    },
+  );
 
   return (
     <section className="space-y-4">
@@ -30,42 +35,52 @@ export const SessionsSection = ({
         description="Session keys grant permission to your Controller to perform certain game actions on your behalf"
         showStatus={false}
         extraContent={
-          activeSessions.length > 0 && (
+          sessionsQuery.data &&
+          sessionsQuery.data.length > 0 && (
             <RevokeAllSessionsButton
               onClick={async () => {
                 await controller?.revokeSessions(
-                  activeSessions.map((session) => ({
-                    app_id: session.appID,
-                    chain_id: shortString.encodeShortString(session.chainID),
-                    session_hash: session.id,
+                  sessionsQuery.data?.map((session) => ({
+                    app_id: session?.appID,
+                    chain_id: shortString.encodeShortString(
+                      session?.chainID ?? "",
+                    ),
+                    session_hash: session?.id ?? "",
                   })) ?? [],
                 );
-                await controllerQuery.refetch();
+                await sessionsQuery.refetch();
               }}
             />
           )
         }
       />
       <div className="space-y-3">
-        {controllerQuery.isLoading ? (
+        {sessionsQuery.isLoading ? (
           <LoadingState />
         ) : (
-          activeSessions.map((session, index: number) => (
-            <SessionCard
-              sessionOs={session.metadata?.os ?? "Unknown"}
-              key={index}
-              sessionName={session.appID}
-              expiresAt={BigInt(session.expiresAt)}
-              onDelete={async () => {
-                await controller?.revokeSession({
-                  app_id: session.appID,
-                  chain_id: shortString.encodeShortString(session.chainID),
-                  session_hash: session.id,
-                });
-                await controllerQuery.refetch();
-              }}
-            />
-          ))
+          sessionsQuery.data?.map((session, index: number) => {
+            const isExpired =
+              !session?.expiresAt || BigInt(session.expiresAt) < now();
+            if (isExpired) return;
+            return (
+              <SessionCard
+                sessionOs={session?.metadata?.os ?? "Unknown"}
+                key={index}
+                sessionName={session?.appID ?? ""}
+                expiresAt={BigInt(session?.expiresAt ?? 0)}
+                onDelete={async () => {
+                  await controller?.revokeSession({
+                    app_id: session?.appID,
+                    chain_id: shortString.encodeShortString(
+                      session?.chainID ?? "",
+                    ),
+                    session_hash: session?.id ?? "",
+                  });
+                  await sessionsQuery.refetch();
+                }}
+              />
+            );
+          })
         )}
       </div>
       {/* <Button

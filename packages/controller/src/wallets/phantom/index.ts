@@ -1,4 +1,8 @@
-import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+import {
+  PublicKey,
+  Transaction,
+  VersionedTransaction,
+} from "../../utils/solana";
 import {
   ExternalPlatform,
   ExternalWallet,
@@ -176,5 +180,16 @@ export class PhantomWallet implements WalletAdapter {
         error: (error as Error).message || "Unknown error",
       };
     }
+  }
+
+  async waitForTransaction(
+    _txHash: string,
+    _timeoutMs?: number,
+  ): Promise<ExternalWalletResponse<any>> {
+    return {
+      success: false,
+      wallet: this.type,
+      error: "waitForTransaction not supported for Phantom wallet",
+    };
   }
 }

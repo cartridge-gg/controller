@@ -1,6 +1,4 @@
-import { TypedData } from "@starknet-io/types-js";
-import { connect, StarknetWindowObject } from "starknetkit";
-import { InjectedConnector } from "starknetkit/injected";
+import { Call, TypedData, StarknetWindowObject } from "@starknet-io/types-js";
 import {
   ExternalPlatform,
   ExternalWallet,
@@ -15,6 +13,8 @@ export class ArgentWallet implements WalletAdapter {
   private wallet: StarknetWindowObject | undefined = undefined;
   private account: string | undefined = undefined;
   private connectedAccounts: string[] = [];
+  private accountChangeListener: ((accounts?: string[]) => void) | undefined =
+    undefined;
 
   isAvailable(): boolean {
     return typeof window !== "undefined" && !!window.starknet_argentX;
@@ -45,16 +45,27 @@ export class ArgentWallet implements WalletAdapter {
         throw new Error("Argent is not available");
       }
 
-      const { wallet, connectorData } = await connect({
-        connectors: [new InjectedConnector({ options: { id: "argentX" } })],
-      });
-
+      const wallet = window.starknet_argentX as StarknetWindowObject;
       if (!wallet) {
         throw new Error("No wallet found");
       }
 
+      // Request accounts from the wallet
+      const accounts = await wallet.request({
+        type: "wallet_requestAccounts",
+        params: { silent_mode: false },
+      });
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No accounts found");
+      }
+
+      this.removeAccountChangeListener();
+
       this.wallet = wallet;
-      this.account = connectorData?.account;
+      this.account = accounts[0];
+      this.connectedAccounts = accounts;
+      this.setupAccountChangeListener();
       return { success: true, wallet: this.type, account: this.account };
     } catch (error) {
       console.error(`Error connecting to Argent:`, error);
@@ -92,19 +103,47 @@ export class ArgentWallet implements WalletAdapter {
     }
   }
 
-  async sendTransaction(_txn: any): Promise<ExternalWalletResponse<any>> {
-    return {
-      success: false,
-      wallet: this.type,
-      error: "Not implemented",
-    };
+  async sendTransaction(calls: Call[]): Promise<ExternalWalletResponse> {
+    if (!this.wallet) {
+      throw new Error("No wallet found");
+    }
+
+    try {
+      const result = await this.wallet.request({
+        type: "wallet_addInvokeTransaction",
+        params: {
+          calls,
+        },
+      });
+
+      return {
+        success: true,
+        wallet: this.type,
+        result,
+      };
+    } catch (error) {
+      console.error(`Error sending transaction with Argent:`, error);
+      return {
+        success: false,
+        wallet: this.type,
+        error: (error as Error).message || "Unknown error",
+      };
+    }
   }
 
-  async switchChain(_chainId: string): Promise<boolean> {
-    console.warn(
-      "Chain switching for Argent may require custom implementation",
-    );
-    return false;
+  async switchChain(chainId: string): Promise<boolean> {
+    if (!this.wallet) {
+      throw new Error("No wallet found");
+    }
+
+    const result = await this.wallet.request({
+      type: "wallet_switchStarknetChain",
+      params: {
+        chainId,
+      },
+    });
+
+    return result;
   }
 
   async getBalance(
@@ -129,5 +168,47 @@ export class ArgentWallet implements WalletAdapter {
         error: (error as Error).message || "Unknown error",
       };
     }
+  }
+
+  async waitForTransaction(
+    _txHash: string,
+    _timeoutMs?: number,
+  ): Promise<ExternalWalletResponse<any>> {
+    return {
+      success: false,
+      wallet: this.type,
+      error: "waitForTransaction not supported for Argent wallet",
+    };
+  }
+
+  private setupAccountChangeListener(): void {
+    if (!this.wallet) return;
+
+    this.accountChangeListener = (accounts: string[] | undefined) => {
+      if (accounts && accounts.length > 0) {
+        this.account = accounts[0];
+        this.connectedAccounts = accounts;
+      } else {
+        this.account = undefined;
+        this.connectedAccounts = [];
+      }
+    };
+
+    // Listen for account changes
+    this.wallet.on("accountsChanged", this.accountChangeListener);
+  }
+
+  private removeAccountChangeListener(): void {
+    if (this.wallet && this.accountChangeListener) {
+      this.wallet.off("accountsChanged", this.accountChangeListener);
+      this.accountChangeListener = undefined;
+    }
+  }
+
+  disconnect(): void {
+    this.removeAccountChangeListener();
+    this.wallet = undefined;
+    this.account = undefined;
+    this.connectedAccounts = [];
   }
 }

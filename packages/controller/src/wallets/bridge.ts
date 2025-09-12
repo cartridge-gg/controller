@@ -1,5 +1,6 @@
 import { getAddress } from "ethers";
 import { ArgentWallet } from "./argent";
+import { BaseWallet } from "./base";
 import { MetaMaskWallet } from "./metamask";
 import { PhantomWallet } from "./phantom";
 import { RabbyWallet } from "./rabby";
@@ -9,6 +10,7 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "./types";
+import { BraavosWallet } from "./braavos";
 
 export class WalletBridge {
   private readonly walletAdapters: Map<ExternalWalletType, WalletAdapter>;
@@ -29,8 +31,14 @@ export class WalletBridge {
     const argent = new ArgentWallet();
     argent.isAvailable() && this.walletAdapters.set("argent", argent);
 
+    const braavos = new BraavosWallet();
+    braavos.isAvailable() && this.walletAdapters.set("braavos", braavos);
+
     const rabby = new RabbyWallet();
     rabby.isAvailable() && this.walletAdapters.set("rabby", rabby);
+
+    const base = new BaseWallet();
+    base.isAvailable() && this.walletAdapters.set("base", base);
 
     window.wallet_bridge = this;
   }
@@ -56,6 +64,18 @@ export class WalletBridge {
         (_origin: string) =>
         (identifier: ExternalWalletType | string, tokenAddress?: string) =>
           this.getBalance(identifier, tokenAddress),
+      externalSwitchChain:
+        (_origin: string) =>
+        (identifier: ExternalWalletType | string, chainId: string) =>
+          this.switchChain(identifier, chainId),
+      externalWaitForTransaction:
+        (_origin: string) =>
+        (
+          identifier: ExternalWalletType | string,
+          txHash: string,
+          timeoutMs?: number,
+        ) =>
+          this.waitForTransaction(identifier, txHash, timeoutMs),
     };
   }
 
@@ -236,6 +256,38 @@ export class WalletBridge {
       );
     }
   }
+
+  async switchChain(
+    identifier: ExternalWalletType | string,
+    chainId: string,
+  ): Promise<boolean> {
+    try {
+      const wallet = this.getConnectedWalletAdapter(identifier);
+      return await wallet.switchChain(chainId);
+    } catch (error) {
+      console.error(`Error switching chain for ${identifier} wallet:`, error);
+      return false;
+    }
+  }
+
+  async waitForTransaction(
+    identifier: ExternalWalletType | string,
+    txHash: string,
+    timeoutMs?: number,
+  ): Promise<ExternalWalletResponse> {
+    let wallet: WalletAdapter | undefined;
+    try {
+      wallet = this.getConnectedWalletAdapter(identifier);
+      return await wallet.waitForTransaction(txHash, timeoutMs);
+    } catch (error) {
+      return this.handleError(
+        identifier,
+        error,
+        "waiting for transaction with",
+        wallet?.type,
+      );
+    }
+  }
 }
 
 declare global {
@@ -243,6 +295,7 @@ declare global {
     ethereum?: any;
     solana?: any;
     starknet_argentX?: any;
+    starknet_braavos?: any;
     wallet_bridge?: WalletBridge;
   }
 }

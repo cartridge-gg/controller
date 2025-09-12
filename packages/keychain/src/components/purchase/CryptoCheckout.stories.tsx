@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { CheckoutState, CryptoCheckout } from "./CryptoCheckout";
-import { StarterItemType } from "@/hooks/starterpack";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { StarterPackItemType } from "@cartridge/controller";
 
 const meta = {
   component: CryptoCheckout,
@@ -23,23 +24,23 @@ export const PurchaseStarterpack: Story = {
       id: "1",
       name: "Starter Pack Name",
       priceUsd: 5,
+      acquisitionType: StarterpackAcquisitionType.Paid,
       starterPackItems: [
         {
-          title: "Village",
-          collectionName: "Eternum Village",
+          name: "Village",
           description:
             "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
-          price: 5,
-          image: "https://r2.quddus.my/Frame%203231.png",
-          type: StarterItemType.NFT,
+          price: 5n,
+          iconURL: "https://r2.quddus.my/Frame%203231.png",
+          type: StarterPackItemType.NONFUNGIBLE,
         },
         {
-          title: "500 Credits",
+          name: "500 Credits",
           description: "Credits cover service fee(s) in Eternum.",
-          price: 0,
-          image: "/ERC-20-Icon.svg",
-          type: StarterItemType.CREDIT,
-          value: 500,
+          price: 0n,
+          iconURL: "/ERC-20-Icon.svg",
+          type: StarterPackItemType.FUNGIBLE,
+          amount: 500,
         },
       ],
     },
@@ -60,23 +61,23 @@ export const StarterpackTxnSubmitted: Story = {
       id: "1",
       name: "Starter Pack Name",
       priceUsd: 5,
+      acquisitionType: StarterpackAcquisitionType.Paid,
       starterPackItems: [
         {
-          title: "Village",
-          collectionName: "Eternum Village",
+          name: "Village",
           description:
             "Villages are the basic building block of eternum, they allow you to produce troops and resources.",
-          price: 5,
-          image: "https://r2.quddus.my/Frame%203231.png",
-          type: StarterItemType.NFT,
+          price: 5n,
+          iconURL: "https://r2.quddus.my/Frame%203231.png",
+          type: StarterPackItemType.NONFUNGIBLE,
         },
         {
-          title: "20 Credits",
+          name: "20 Credits",
           description: "Credits cover service fee(s) in Eternum.",
-          price: 0,
-          image: "/ERC-20-Icon.svg",
-          type: StarterItemType.CREDIT,
-          value: 500,
+          price: 0n,
+          iconURL: "/ERC-20-Icon.svg",
+          type: StarterPackItemType.FUNGIBLE,
+          amount: 500,
         },
       ],
     },

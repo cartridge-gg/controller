@@ -34,6 +34,7 @@ export function credentialToAuth(
   if (!signer) {
     throw new Error("No signer provided");
   }
+
   switch (signer.__typename) {
     case "Eip191Credentials":
       return signer.eip191?.[0].provider as AuthOption;
@@ -43,6 +44,8 @@ export function credentialToAuth(
       return "phantom";
     case "StarknetCredentials":
       return "argent";
+    case "PasswordCredentials":
+      return "password";
     default:
       throw new Error("Unknown controller signer");
   }
@@ -54,6 +57,7 @@ export function credentialToAddress(
   if (!signer) {
     return undefined;
   }
+
   switch (signer.__typename) {
     case "Eip191Credentials":
       return signer.eip191?.[0].ethAddress;
@@ -63,8 +67,11 @@ export function credentialToAddress(
       return signer.starknet?.[0].publicKey;
     case "WebauthnCredentials":
       return undefined;
+    case "PasswordCredentials":
+      // Access the password field (lowercase)
+      return signer.password?.[0]?.publicKey;
     default:
-      throw new Error("Unknown controller signer provider");
+      throw new Error("Unknown controller signer type");
   }
 }
 

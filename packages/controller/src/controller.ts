@@ -22,6 +22,7 @@ import {
   ProbeReply,
   ProfileContextTypeVariant,
   ResponseCodes,
+  StarterPack,
 } from "./types";
 import { parseChainId } from "./utils";
 
@@ -41,8 +42,8 @@ export default class ControllerProvider extends BaseProvider {
 
     // Default Cartridge chains that are always available
     const cartridgeChains: Chain[] = [
-      { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia" },
-      { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet" },
+      { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9" },
+      { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9" },
     ];
 
     // Merge user chains with default chains
@@ -53,19 +54,11 @@ export default class ControllerProvider extends BaseProvider {
 
     this.selectedChain = defaultChainId;
     this.chains = new Map<ChainId, Chain>();
+    this.options = { ...options, chains, defaultChainId };
 
     this.iframes = {
-      keychain: new KeychainIFrame({
-        ...options,
-        onClose: this.keychain?.reset,
-        onConnect: (keychain) => {
-          this.keychain = keychain;
-        },
-        version: version,
-      }),
+      keychain: options.lazyload ? undefined : this.createKeychainIframe(),
     };
-
-    this.options = { ...options, chains, defaultChainId };
 
     this.initializeChains(chains);
 
@@ -113,6 +106,11 @@ export default class ControllerProvider extends BaseProvider {
 
   async probe(): Promise<WalletAccount | undefined> {
     try {
+      // Ensure iframe is created if using lazy loading
+      if (!this.iframes.keychain) {
+        this.iframes.keychain = this.createKeychainIframe();
+      }
+
       await this.waitForKeychain();
 
       if (!this.keychain) {
@@ -143,6 +141,13 @@ export default class ControllerProvider extends BaseProvider {
   async connect(): Promise<WalletAccount | undefined> {
     if (this.account) {
       return this.account;
+    }
+
+    // Ensure iframe is created if using lazy loading
+    if (!this.iframes.keychain) {
+      this.iframes.keychain = this.createKeychainIframe();
+      // Wait for the keychain to be ready
+      await this.waitForKeychain();
     }
 
     if (!this.keychain || !this.iframes.keychain) {
@@ -201,17 +206,14 @@ export default class ControllerProvider extends BaseProvider {
       return false;
     }
 
+    const currentChain = this.selectedChain;
+
     try {
       this.selectedChain = chainId;
-      const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
-
-      if (response.rpcUrl === this.rpcUrl()) {
-        return true;
-      }
-
       await this.keychain.switchChain(this.rpcUrl());
     } catch (e) {
       console.error(e);
+      this.selectedChain = currentChain;
       return false;
     }
 
@@ -254,7 +256,13 @@ export default class ControllerProvider extends BaseProvider {
     const username = await this.keychain.username();
 
     // Navigate first, then open to avoid flash
-    await this.keychain.navigate(`/account/${username}/${tab}`);
+    const options = [];
+    if (this.options.slot) {
+      options.push(`ps=${this.options.slot}`);
+    }
+    await this.keychain.navigate(
+      `/account/${username}/${tab}?${options.join("&")}`,
+    );
     this.iframes.keychain.open();
   }
 
@@ -270,7 +278,13 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     const username = await this.keychain.username();
-    await this.keychain.navigate(`/account/${username}/${to}`);
+    const options = [];
+    if (this.options.slot) {
+      options.push(`ps=${this.options.slot}`);
+    }
+    await this.keychain.navigate(
+      `/account/${username}/${to}?${options.join("&")}`,
+    );
     this.iframes.keychain.open();
   }
 
@@ -334,20 +348,20 @@ export default class ControllerProvider extends BaseProvider {
       console.error(new NotReadyToConnect().message);
       return;
     }
-    this.iframes.keychain.open();
-    this.keychain.openPurchaseCredits();
+    this.keychain.navigate("/purchase/credits").then(() => {
+      this.iframes.keychain?.open();
+    });
   }
 
-  openStarterPack(starterpackId: string) {
+  async openStarterPack(options: string | StarterPack): Promise<void> {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    // Navigate first, then open the iframe
-    this.keychain.navigate(`/starter-pack/${starterpackId}`).then(() => {
-      this.iframes.keychain.open();
-    });
+    // Pass options directly to keychain's unified openStarterPack method
+    await this.keychain.openStarterPack(options);
+    this.iframes.keychain?.open();
   }
 
   async openExecute(calls: any, chainId?: string) {
@@ -406,7 +420,7 @@ export default class ControllerProvider extends BaseProvider {
         if ((isMainnet || isSepolia) && !(isCartridgeRpc || isLocalhost)) {
           throw new Error(
             `Only Cartridge RPC providers are allowed for ${isMainnet ? "mainnet" : "sepolia"}. ` +
-              `Please use: https://api.cartridge.gg/x/starknet/${isMainnet ? "mainnet" : "sepolia"}`,
+              `Please use: https://api.cartridge.gg/x/starknet/${isMainnet ? "mainnet" : "sepolia"}/rpc/v0_9`,
           );
         }
 
@@ -423,6 +437,17 @@ export default class ControllerProvider extends BaseProvider {
           `Available chains: ${Array.from(this.chains.keys()).join(", ")}`,
       );
     }
+  }
+
+  private createKeychainIframe(): KeychainIFrame {
+    return new KeychainIFrame({
+      ...this.options,
+      onClose: this.keychain?.reset,
+      onConnect: (keychain) => {
+        this.keychain = keychain;
+      },
+      version: version,
+    });
   }
 
   private waitForKeychain({

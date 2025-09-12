@@ -1,3 +1,4 @@
+import { NavigationHeader } from "@/components";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { VerifiableControllerTheme } from "@/components/provider/connection";
 import { usePostHog } from "@/components/provider/posthog";
@@ -14,12 +15,11 @@ import {
   LayoutFooter,
   Sheet,
 } from "@cartridge/ui";
-import { NavigationHeader } from "@/components";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
 import { ChangeWallet } from "../buttons/change-wallet";
-import { credentialToAuth, LoginMode } from "../types";
+import { credentialToAuth } from "../types";
 import { ChooseSignupMethodForm } from "./ChooseSignupMethodForm";
 import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
@@ -257,11 +257,10 @@ export function CreateController({
     authMethod,
   } = useCreateController({
     isSlot,
-    loginMode: isSlot ? LoginMode.Webauthn : LoginMode.Controller,
   });
 
   const handleFormSubmit = useCallback(
-    (authenticationMode?: AuthOption) => {
+    (authenticationMode?: AuthOption, password?: string) => {
       if (!usernameField.value) {
         return;
       }
@@ -300,7 +299,19 @@ export function CreateController({
               ? credentialToAuth(validation.signers[0])
               : authenticationMode;
 
-        handleSubmit(usernameField.value, accountExists, authenticationMethod);
+        // If password auth is detected and no password provided, show the auth method selection
+        // which will trigger the password form
+        if (authenticationMethod === "password" && !password) {
+          setAuthenticationStep(AuthenticationStep.ChooseMethod);
+          return;
+        }
+
+        handleSubmit(
+          usernameField.value,
+          accountExists,
+          authenticationMethod,
+          password,
+        );
       }
     },
     [
@@ -308,6 +319,7 @@ export function CreateController({
       usernameField.value,
       validation.exists,
       validation.status,
+      validation.signers,
       setAuthenticationStep,
       signupOptions,
     ],
@@ -345,6 +357,8 @@ export function CreateController({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (validation.status !== "valid") return;
+
     if (e.key === "Enter") {
       e.preventDefault();
       handleFormSubmit();

@@ -28,8 +28,9 @@ import { ExternalWallet, humanizeString } from "@cartridge/controller";
 import { useCryptoPayment } from "@/hooks/payments/crypto";
 import { CostBreakdown } from "./CostBreakdown";
 import { StarterPackDetails } from "@/hooks/starterpack";
-import { Receiving } from "../starterpack/receiving";
 import { creditsToUSD } from "@/hooks/tokens";
+import { useConnection } from "@/hooks/connection";
+import { creditsPurchaseToLayerswapInput } from "@/utils/payments";
 export const WALLET_CONFIG = {
   argent: {
     icon: ArgentIcon,
@@ -79,6 +80,7 @@ export function CryptoCheckout({
   initialState?: CheckoutState;
   onComplete: () => void;
 }) {
+  const { controller, isMainnet } = useConnection();
   const [error, setError] = useState<Error>();
   const { sendPayment, waitForPayment } = useCryptoPayment();
   const [state, setState] = useState<CheckoutState>(initialState);
@@ -104,22 +106,34 @@ export function CryptoCheckout({
   }, [starterpackDetails, wholeCredits]);
 
   const handleSendTransaction = useCallback(async () => {
+    if (!controller) {
+      return;
+    }
+
     setError(undefined);
+
     try {
       setState(CheckoutState.REQUESTING_PAYMENT);
-      const paymentId = await sendPayment(
-        walletAddress,
-        wholeCredits,
-        selectedWallet.platform!,
-        teamId,
+      const input = creditsPurchaseToLayerswapInput(
+        controller.username(),
         starterpackDetails?.id,
+        selectedWallet.platform!,
+        isMainnet,
+        wholeCredits,
+        teamId,
+      );
+      const res = await sendPayment(
+        input,
+        walletAddress,
+        selectedWallet.type,
+        selectedWallet.platform!,
         (explorer) => {
           setState(CheckoutState.TRANSACTION_SUBMITTED);
           setExplorer(explorer);
         },
       );
 
-      await waitForPayment(paymentId);
+      await waitForPayment(res.paymentId);
 
       onComplete();
     } catch (error) {
@@ -128,7 +142,17 @@ export function CryptoCheckout({
     } finally {
       setState(CheckoutState.REVIEW_PURCHASE);
     }
-  }, [sendPayment, selectedWallet, wholeCredits, onComplete]);
+  }, [
+    controller,
+    isMainnet,
+    sendPayment,
+    selectedWallet,
+    wholeCredits,
+    onComplete,
+    walletAddress,
+    teamId,
+    waitForPayment,
+  ]);
 
   return (
     <>
@@ -138,21 +162,13 @@ export function CryptoCheckout({
         hideIcon
       />
       <LayoutContent className="gap-6">
-        {starterpackDetails ? (
-          <Receiving
-            title={"Receiving"}
-            items={starterpackDetails.starterPackItems}
-            isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
-          />
-        ) : (
-          <ReviewToken
-            title={"Receiving"}
-            name={"Credits"}
-            icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
-            amount={wholeCredits.toLocaleString() + " Credits"}
-            isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
-          />
-        )}
+        <ReviewToken
+          title={"Receiving"}
+          name={"Credits"}
+          icon={"https://static.cartridge.gg/presets/credit/icon.svg"}
+          amount={wholeCredits.toLocaleString() + " Credits"}
+          isLoading={state === CheckoutState.TRANSACTION_SUBMITTED}
+        />
       </LayoutContent>
 
       <LayoutFooter>

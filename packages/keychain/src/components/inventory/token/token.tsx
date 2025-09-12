@@ -7,9 +7,9 @@ import {
   ERC20Detail,
   ERC20Header,
   PaperPlaneIcon,
-  Thumbnail,
   InfoIcon,
   Skeleton,
+  Thumbnail,
 } from "@cartridge/ui";
 
 import { useData } from "@/hooks/data";

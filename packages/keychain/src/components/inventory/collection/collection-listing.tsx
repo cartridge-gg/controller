@@ -16,40 +16,56 @@ import {
   TagIcon,
   ThumbnailCollectible,
 } from "@cartridge/ui";
-import { cn } from "@cartridge/ui/utils";
+import {
+  cn,
+  ETH_CONTRACT_ADDRESS,
+  LORDS_CONTRACT_ADDRESS,
+  STRK_CONTRACT_ADDRESS,
+  USDC_CONTRACT_ADDRESS,
+} from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useCollection } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { ListHeader } from "./send/header";
 import { useTokens } from "@/hooks/token";
-import { createExecuteUrl } from "@/utils/connection/execute";
-import { AllowArray, cairo, Call, CallData } from "starknet";
+import { AllowArray, cairo, Call, CallData, FeeEstimate } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
+import { useConnection } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
+import { ExecutionContainer } from "@/components/ExecutionContainer";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
 const SET_APPROVAL_FOR_ALL_SNAKE_CASE = "set_approval_for_all";
+const ALLOWED_TOKENS = [
+  ETH_CONTRACT_ADDRESS,
+  STRK_CONTRACT_ADDRESS,
+  USDC_CONTRACT_ADDRESS,
+  LORDS_CONTRACT_ADDRESS,
+];
 
 const WEEK = 60 * 60 * 24 * 7;
 const MONTH = 60 * 60 * 24 * 30;
 const THREE_MONTHS = 60 * 60 * 24 * 90;
-const NEVER = 0;
+const YEAR = 60 * 60 * 24 * 365;
+const NEVER = 60 * 60 * 24 * 365 * 1000;
 const EXPIRATIONS = [
   { duration: WEEK, label: "1w" },
   { duration: MONTH, label: "1mo" },
   { duration: THREE_MONTHS, label: "3mo" },
+  { duration: YEAR, label: "1y" },
   { duration: NEVER, label: "Never" },
 ];
 
 export function CollectionListing() {
-  const { chainId, provider } = useMarketplace();
+  const { provider } = useMarketplace();
+  const { controller } = useConnection();
+  const { goBack } = useNavigation();
   const { address: contractAddress, tokenId } = useParams();
-  const { tokens } = useTokens();
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { tokens: allTokens } = useTokens();
+  const [searchParams] = useSearchParams();
   const [selected, setSelected] = useState<Token | undefined>();
   const [duration, setDuration] = useState<number>(MONTH);
   const [price, setPrice] = useState<number | undefined>();
@@ -57,10 +73,17 @@ export function CollectionListing() {
   const [userSelected, setUserSelected] = useState<boolean>(false);
   const [validated, setValidated] = useState<boolean>(false);
 
-  const { navigate } = useNavigation();
+  const tokens = useMemo(() => {
+    const whitelisted = ALLOWED_TOKENS.map((address) => BigInt(address));
+    return allTokens.filter((token) =>
+      whitelisted.includes(BigInt(token.metadata.address)),
+    );
+  }, [allTokens]);
 
-  const [searchParams] = useSearchParams();
-  const paramsTokenIds = searchParams.getAll("tokenIds");
+  const paramsTokenIds = useMemo(() => {
+    return searchParams.getAll("tokenIds");
+  }, [searchParams]);
+
   const tokenIds = useMemo(() => {
     if (!tokenId) return [...paramsTokenIds];
     return [tokenId, ...paramsTokenIds];
@@ -128,7 +151,7 @@ export function CollectionListing() {
       value: conversion || "",
     };
     return { assets: tokens, currency };
-  }, [assets, collection, selected, price, conversion, placeholder]);
+  }, [assets, collection, selected, price, conversion]);
 
   const totalEarnings = useMemo(() => {
     if (!selected || !selected.balance.value || !price) return undefined;
@@ -146,79 +169,93 @@ export function CollectionListing() {
     [setSelected],
   );
 
-  const handleList = useCallback(async () => {
-    setSubmitted(true);
+  // Memoize marketplace address to prevent infinite useEffect loop
+  const marketplaceAddress = useMemo(() => {
+    return provider.manifest.contracts.find((c: { tag: string }) =>
+      c.tag?.includes("Marketplace"),
+    )?.address;
+  }, [provider.manifest.contracts]);
+
+  // Build transactions when validation is complete
+  const buildTransactions = useMemo(() => {
     if (
+      !validated ||
       !contractAddress ||
       !tokenIds ||
       !tokenIds.length ||
       !selected ||
       !price ||
       price === 0 ||
-      !entrypoint
-    )
-      return;
-    setLoading(true);
-    try {
-      const expiration = Math.floor(
-        new Date(Date.now() + duration * 1000).getTime() / 1000,
-      );
-      const marketplaceAddress: string = provider.manifest.contracts.find(
-        (c: { tag: string }) => c.tag?.includes("Marketplace"),
-      )?.address;
-      const amount = BigInt(price * 10 ** selected.metadata.decimals);
-
-      // Commented out calls for now
-      const calls: AllowArray<Call> = [
-        {
-          contractAddress: contractAddress,
-          entrypoint: entrypoint,
-          calldata: CallData.compile({
-            operator: marketplaceAddress,
-            approved: true,
-          }),
-        },
-        ...tokenIds.map((tokenId) => ({
-          contractAddress: marketplaceAddress,
-          entrypoint: "list",
-          calldata: CallData.compile({
-            collection: contractAddress,
-            tokenId: cairo.uint256(tokenId),
-            quantity: 0, // 0 for ERC721
-            price: amount.toString(),
-            currency: selected.metadata.address,
-            expiration: expiration,
-            royalties: true,
-          }),
-        })),
-      ];
-      // Create execute URL with returnTo parameter pointing back to current page
-      const executeUrl = createExecuteUrl(calls);
-
-      // Navigate to execute screen with returnTo parameter to come back to the parent page
-      const currentPath = `${window.location.pathname + window.location.search}`
-        .split("/")
-        .slice(0, -1)
-        .join("/");
-      const executeUrlWithReturn = `${executeUrl}&returnTo=${encodeURIComponent(currentPath)}`;
-      navigate(executeUrlWithReturn);
-    } catch (error) {
-      console.error(error);
-      toast.error(`Failed to list asset(s)`);
-    } finally {
-      setLoading(false);
+      !entrypoint ||
+      !marketplaceAddress
+    ) {
+      return undefined;
     }
+
+    const expiration = Math.floor(
+      new Date(Date.now() + duration * 1000).getTime() / 1000,
+    );
+    const amount = BigInt(price * 10 ** selected.metadata.decimals);
+
+    const calls: AllowArray<Call> = [
+      {
+        contractAddress: contractAddress,
+        entrypoint: entrypoint,
+        calldata: CallData.compile({
+          operator: marketplaceAddress,
+          approved: true,
+        }),
+      },
+      ...tokenIds.map((tokenId) => ({
+        contractAddress: marketplaceAddress,
+        entrypoint: "list",
+        calldata: CallData.compile({
+          collection: contractAddress,
+          tokenId: cairo.uint256(tokenId),
+          quantity: 0, // 0 for ERC721
+          price: amount.toString(),
+          currency: selected.metadata.address,
+          expiration: expiration,
+          royalties: true,
+        }),
+      })),
+    ];
+
+    return calls;
   }, [
-    tokenIds,
+    validated,
     contractAddress,
-    price,
+    tokenIds,
     selected,
-    duration,
-    navigate,
-    searchParams,
-    chainId,
+    price,
     entrypoint,
+    duration,
+    marketplaceAddress,
   ]);
+
+  const onSubmitListing = useCallback(
+    async (maxFee?: FeeEstimate) => {
+      if (!maxFee || !buildTransactions || !controller) {
+        return;
+      }
+
+      try {
+        await controller.execute(buildTransactions, maxFee);
+
+        toast.success("Listing transaction submitted successfully!", {
+          duration: 10000,
+        });
+
+        // Navigate back to the parent collection page with proper account path
+        goBack();
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to list asset(s)");
+        throw error; // Re-throw to let ExecutionContainer handle the error display
+      }
+    },
+    [buildTransactions, controller, goBack],
+  );
 
   useEffect(() => {
     if (userSelected || tokens.length === 0) return;
@@ -235,60 +272,64 @@ export function CollectionListing() {
         <EmptyState />
       ) : (
         <>
-          {validated ? (
-            <ListingConfirmation {...listingData} />
-          ) : (
-            <LayoutContent className="p-6 flex flex-col gap-4">
-              <ListHeader image={image} title={title} />
-              <Price
-                multiple={assets.length > 1}
-                submitted={submitted}
-                price={price}
-                conversion={conversion}
-                setPrice={setPrice}
-                tokens={tokens}
-                selected={selected}
-                setSelected={handleSelection}
-                error={priceError}
-                setError={setPriceError}
+          {validated && buildTransactions ? (
+            <ExecutionContainer
+              title="Review Listings"
+              icon={
+                <TagIcon
+                  variant="solid"
+                  size="lg"
+                  className="h-[30px] w-[30px]"
+                />
+              }
+              transactions={buildTransactions}
+              onSubmit={onSubmitListing}
+              buttonText="Confirm"
+            >
+              <ListingConfirmation
+                {...listingData}
+                totalEarnings={totalEarnings}
+                totalPriceDisplay={`${listingData.currency.price * listingData.assets.length} ${listingData.currency.name}`}
               />
-              <Expiration duration={duration} setDuration={setDuration} />
-            </LayoutContent>
-          )}
+            </ExecutionContainer>
+          ) : (
+            <>
+              <LayoutContent className="p-6 flex flex-col gap-4">
+                <ListHeader image={image} title={title} />
+                <Price
+                  multiple={assets.length > 1}
+                  price={price}
+                  conversion={conversion}
+                  setPrice={setPrice}
+                  tokens={tokens}
+                  selected={selected}
+                  setSelected={handleSelection}
+                  error={priceError}
+                  setError={setPriceError}
+                />
+                <Expiration duration={duration} setDuration={setDuration} />
+              </LayoutContent>
 
-          <LayoutFooter
-            className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background-100",
-            )}
-          >
-            <div className="flex flex-col gap-3 w-full">
-              <div
+              <LayoutFooter
                 className={cn(
-                  "h-10 w-full px-3 py-2.5 flex items-center justify-between bg-background-125 border border-background-200 rounded",
-                  !validated && "hidden",
+                  "relative flex flex-col items-center justify-center gap-y-4 bg-background-100",
                 )}
               >
-                <p className="text-sm font-medium text-foreground-400">
-                  Total potential earnings
-                </p>
-                <div className="flex gap-1.5">
-                  <p className="text-sm text-foreground-400">{`(${totalEarnings})`}</p>
-                  <p className="text-sm font-medium text-foreground-100">{`${listingData.currency.price * listingData.assets.length} ${listingData.currency.name}`}</p>
+                <div className="flex flex-col gap-3 w-full">
+                  <div className="w-full flex items-center gap-3">
+                    <Button
+                      disabled={disabled}
+                      type="submit"
+                      className="w-full"
+                      onClick={() => setValidated(true)}
+                    >
+                      Review
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <div className="w-full flex items-center gap-3">
-                <Button
-                  disabled={disabled}
-                  type="submit"
-                  className="w-full"
-                  isLoading={loading}
-                  onClick={validated ? handleList : () => setValidated(true)}
-                >
-                  {validated ? "Confirm" : "Review"}
-                </Button>
-              </div>
-            </div>
-          </LayoutFooter>
+              </LayoutFooter>
+            </>
+          )}
         </>
       )}
     </>
@@ -298,6 +339,8 @@ export function CollectionListing() {
 const ListingConfirmation = ({
   assets,
   currency,
+  totalEarnings,
+  totalPriceDisplay,
 }: {
   assets: {
     name: string;
@@ -310,73 +353,72 @@ const ListingConfirmation = ({
     price: number;
     value: string;
   };
+  totalEarnings?: string;
+  totalPriceDisplay: string;
 }) => {
   return (
-    <>
-      <LayoutContent className="p-6 pb-0 flex flex-col gap-4 overflow-hidden select-none">
-        <div className="h-10 flex items-center justify-start gap-3 select-none">
-          <Thumbnail
-            icon={
-              <TagIcon
-                variant="solid"
-                size="lg"
-                className="h-[30px] w-[30px]"
-              />
-            }
-            size="lg"
-          />
-          <p className="text-lg/[24px] font-semibold">Review Listings</p>
+    <div className="p-6 pb-0 flex flex-col gap-4 overflow-hidden h-full">
+      <div
+        className="grow flex flex-col gap-px rounded overflow-y-scroll"
+        style={{ scrollbarWidth: "none" }}
+      >
+        <div className="h-10 flex items-center justify-between bg-background-200 px-3 py-2.5">
+          <p className="text-xs tracking-wider text-foreground-400 font-semibold">
+            Listing
+          </p>
+          <p
+            className={cn(
+              "px-1.5 py-0.5 text-xs bg-background-300 rounded-full font-medium text-foreground-300",
+              assets.length <= 1 && "hidden",
+            )}
+          >{`${assets.length} total`}</p>
         </div>
-        <div
-          className="grow flex flex-col gap-px rounded overflow-y-scroll pb-6"
-          style={{ scrollbarWidth: "none" }}
-        >
-          <div className="h-10 flex items-center justify-between bg-background-200 px-3 py-2.5">
-            <p className="text-xs tracking-wider text-foreground-400 font-semibold">
-              Listing
-            </p>
-            <p
-              className={cn(
-                "px-1.5 py-0.5 text-xs bg-background-300 rounded-full font-medium text-foreground-300",
-                assets.length <= 1 && "hidden",
-              )}
-            >{`${assets.length} total`}</p>
-          </div>
-          {assets.map((asset, index) => (
-            <div
-              key={`${asset.name}-${index}`}
-              className="h-16 flex items-center justify-between bg-background-200 px-4 py-3 gap-3"
-            >
-              <ThumbnailCollectible
-                image={asset.image}
-                size="lg"
-                variant="light"
-                className="p-0"
-              />
-              <div className="flex flex-col gap-0.5 items-stretch grow overflow-hidden">
-                <div className="flex items-center gap-6 justify-between text-sm font-medium capitalize">
-                  <p>{asset.name}</p>
-                  <div className="flex items-center gap-1">
-                    <Thumbnail icon={currency.image} size="sm" />
-                    <p>{currency.price}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 justify-between text-xs text-foreground-300">
-                  <p className="truncate">{asset.collection}</p>
-                  <p>{currency.value}</p>
+        {assets.map((asset, index) => (
+          <div
+            key={`${asset.name}-${index}`}
+            className="h-16 flex items-center justify-between bg-background-200 px-4 py-3 gap-3"
+          >
+            <ThumbnailCollectible
+              image={asset.image}
+              size="lg"
+              variant="light"
+              className="p-0"
+            />
+            <div className="flex flex-col gap-0.5 items-stretch grow overflow-hidden">
+              <div className="flex items-center gap-6 justify-between text-sm font-medium capitalize">
+                <p>{asset.name}</p>
+                <div className="flex items-center gap-1">
+                  <Thumbnail icon={currency.image} size="sm" />
+                  <p>{currency.price}</p>
                 </div>
               </div>
+              <div className="flex items-center gap-1 justify-between text-xs text-foreground-300">
+                <p className="truncate">{asset.collection}</p>
+                <p>{currency.value}</p>
+              </div>
             </div>
-          ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Total Earnings Display */}
+      <div className="h-10 w-full px-3 py-2.5 flex items-center justify-between bg-background-125 border border-background-200 rounded">
+        <p className="text-sm font-medium text-foreground-400">
+          Total potential earnings
+        </p>
+        <div className="flex gap-1.5">
+          <p className="text-sm text-foreground-400">{`(${totalEarnings})`}</p>
+          <p className="text-sm font-medium text-foreground-100">
+            {totalPriceDisplay}
+          </p>
         </div>
-      </LayoutContent>
-    </>
+      </div>
+    </div>
   );
 };
 
 const Price = ({
   multiple,
-  submitted,
   price,
   conversion,
   setPrice,
@@ -387,7 +429,6 @@ const Price = ({
   setError,
 }: {
   multiple: boolean;
-  submitted: boolean;
   price: number | undefined;
   conversion: string | undefined;
   setPrice: (price: number | undefined) => void;
@@ -417,13 +458,13 @@ const Price = ({
   );
 
   useEffect(() => {
-    if (submitted && !price) {
+    if (!price) {
       const message = "Price cannot be null";
       setError(new Error(message));
       return;
     }
     setError(undefined);
-  }, [price, submitted, setError]);
+  }, [price, setError]);
 
   if (tokens.length === 0) return null;
 

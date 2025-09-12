@@ -4,9 +4,10 @@ import {
   ConnectReply,
   DeployReply,
   ExecuteReply,
+  StarterPack,
 } from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
-import { Call, EstimateFee, Signature, TypedData } from "starknet";
+import { Call, FeeEstimate, Signature, TypedData } from "starknet";
 
 export type ConnectionCtx =
   | ConnectCtx
@@ -43,7 +44,7 @@ export type ControllerError = {
 export type ExecuteCtx = {
   type: "execute";
   transactions: Call[];
-  feeEstimate?: EstimateFee;
+  feeEstimate?: FeeEstimate;
   error?: ControllerError;
   resolve?: (res: ExecuteReply | ConnectError) => void;
   reject?: (reason?: unknown) => void;
@@ -80,7 +81,7 @@ export type OpenPurchaseCreditsCtx = {
 
 export type OpenStarterPackCtx = {
   type: "open-starter-pack";
-  starterpackId: string;
+  starterpack: string | StarterPack;
   resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;
 };

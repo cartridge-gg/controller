@@ -31,6 +31,9 @@ export const defaultMockConnection: ConnectionContextValue = {
   namespace: null,
   verified: false,
   isConfigLoading: false,
+  isMainnet: false,
+  isSessionActive: false,
+  refreshSessionStatus: vi.fn(),
   theme: {
     verified: true,
     name: "test",
@@ -47,6 +50,7 @@ export const defaultMockConnection: ConnectionContextValue = {
   externalSignTypedData: vi.fn(),
   externalSendTransaction: vi.fn(),
   externalGetBalance: vi.fn(),
+  externalWaitForTransaction: vi.fn(),
   controllerVersion: new SemVer("1.0.0"),
 };
 

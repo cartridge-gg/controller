@@ -12,6 +12,16 @@ const mockUseUsernameValidation = vi.fn();
 const mockUseControllerTheme = vi.fn();
 const mockUseWallets = vi.fn().mockReturnValue({ wallets: [] });
 
+// Mock the ResizeObserver
+const ResizeObserverMock = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Stub the global ResizeObserver
+vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+
 // Mock the hooks
 vi.mock("@/hooks/posthog", () => ({
   usePostHog: () => ({
@@ -141,13 +151,19 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.ChooseMethod,
       setAuthenticationStep,
+      setChangeWallet: vi.fn(),
       signupOptions: ["webauthn"],
     });
     const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);
 
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith("validuser", false, "webauthn");
+      expect(handleSubmit).toHaveBeenCalledWith(
+        "validuser",
+        false,
+        "webauthn",
+        undefined,
+      );
     });
   });
 
@@ -231,7 +247,12 @@ describe("CreateController", () => {
     fireEvent.click(passkeyButton);
 
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith("validuser", false, "webauthn");
+      expect(handleSubmit).toHaveBeenCalledWith(
+        "validuser",
+        false,
+        "webauthn",
+        undefined,
+      );
     });
   });
 

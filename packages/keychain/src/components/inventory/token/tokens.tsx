@@ -1,5 +1,5 @@
 import { Empty, MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Token, useTokens } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
 import { useMemo, useState } from "react";
@@ -55,8 +55,9 @@ export function Tokens() {
 }
 
 function TokenCardContent({ token }: { token: Token }) {
+  const [searchParams] = useSearchParams();
   return (
-    <Link to={`./token/${token.metadata.address}`}>
+    <Link to={`./token/${token.metadata.address}?${searchParams.toString()}`}>
       <TokenCard
         image={token.metadata.image || placeholder}
         title={token.metadata.name}

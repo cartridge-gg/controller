@@ -14,7 +14,7 @@ import { type Appearance } from "@stripe/stripe-js";
 import { useMemo } from "react";
 import CheckoutForm from "./StripeCheckout";
 import { CryptoCheckout } from "./CryptoCheckout";
-import { PurchaseType } from "@/hooks/payments/crypto";
+import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { PaymentMethod } from "./PaymentMethod";
 import { Supply } from "./Supply";
 import { PurchaseContent } from "./PurchaseContent";
@@ -65,7 +65,7 @@ export function Purchase(props: PurchaseCreditsProps) {
 
     switch (state) {
       case PurchaseState.SELECTION:
-        return type === PurchaseType.CREDITS
+        return type === PurchaseType.Credits
           ? "Purchase Credits"
           : (starterpackDetails?.name ?? "Purchase Starter Pack");
       case PurchaseState.STRIPE_CHECKOUT:
@@ -73,7 +73,7 @@ export function Purchase(props: PurchaseCreditsProps) {
       case PurchaseState.SUCCESS:
         return "Purchase Complete";
     }
-  }, [state, starterpackDetails, type]);
+  }, [state, starterpackDetails, type, propsTitle]);
 
   const appearance = {
     theme: "flat",
@@ -136,7 +136,6 @@ export function Purchase(props: PurchaseCreditsProps) {
         <PurchaseContent
           state={state}
           type={type}
-          starterpackDetails={starterpackDetails}
           isStripeLoading={isStripeLoading}
           isLoadingWallets={isLoadingWallets}
           onAmountChanged={onAmountChanged}
@@ -152,7 +151,7 @@ export function Purchase(props: PurchaseCreditsProps) {
           />
         )}
 
-        {state !== PurchaseState.SUCCESS && type === PurchaseType.CREDITS && (
+        {state !== PurchaseState.SUCCESS && type === PurchaseType.Credits && (
           <Card className="bg-background-100 border border-background-200 p-3">
             <CardDescription className="flex flex-row items-start gap-3">
               <InfoIcon

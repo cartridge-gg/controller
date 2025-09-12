@@ -26,8 +26,11 @@ export type ConnectionContextValue = {
   namespace: string | null;
   tokens?: string[];
   policies?: ParsedSessionPolicies;
+  isSessionActive: boolean;
+  refreshSessionStatus: () => void;
   theme: VerifiableControllerTheme;
   isConfigLoading: boolean;
+  isMainnet: boolean;
   configSignupOptions?: AuthOptions;
   verified: boolean;
   chainId?: string;
@@ -35,6 +38,8 @@ export type ConnectionContextValue = {
   controllerVersion: SemVer | undefined;
   setContext: (ctx: ConnectionCtx | undefined) => void;
   closeModal?: () => Promise<void>;
+  onModalClose?: () => void;
+  setOnModalClose?: (onModalClose: () => void) => void;
   openModal: () => Promise<void>;
   logout: () => Promise<void>;
   openSettings: () => void;
@@ -60,6 +65,11 @@ export type ConnectionContextValue = {
   externalGetBalance: (
     identifier: string,
     tokenAddress?: string,
+  ) => Promise<ExternalWalletResponse>;
+  externalWaitForTransaction: (
+    identifier: string,
+    txHash: string,
+    timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
 };
 

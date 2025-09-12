@@ -14,7 +14,9 @@ import {
   SheetClose,
   SheetContent,
   SheetFooter,
+  SheetTitle,
   Skeleton,
+  SpinnerIcon,
   StarknetIcon,
   TouchIcon,
   TrashIcon,
@@ -29,127 +31,177 @@ export interface Signer {
 }
 
 export interface SignerCardProps extends Signer {
-  onDelete?: () => void;
+  onDelete?: () => Promise<void>;
   current?: boolean;
+  isOriginalSigner: boolean;
 }
+
+let AAGUIDS: Record<string, Record<string, string>> | undefined = undefined;
+let AAGUIDS_PROMISE:
+  | Promise<Record<string, Record<string, string>>>
+  | undefined = undefined;
 
 export const SignerCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SignerCardProps
->(({ className, signer, onDelete, current, ...props }, ref) => {
-  const signerType = credentialToAuth(signer);
-  const { controller } = useController();
+>(
+  (
+    { className, signer, onDelete, current, isOriginalSigner, ...props },
+    ref,
+  ) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const signerType = credentialToAuth(signer);
+    const { controller } = useController();
+    const [signerIdentifyingInfo, setSignerIdentifyingInfo] = useState<
+      string | undefined
+    >("pending");
 
-  const [signerIdentifyingInfo, setSignerIdentifyingInfo] = useState<
-    string | undefined
-  >("pending");
+    useEffect(() => {
+      getSignerIdentifyingInfo(signer, controller?.username()).then(
+        (username) => {
+          setSignerIdentifyingInfo(username);
+        },
+      );
+    }, [signer, controller, controller?.username()]);
 
-  useEffect(() => {
-    getSignerIdentifyingInfo(signer, controller?.username()).then(
-      (username) => {
-        setSignerIdentifyingInfo(username);
-      },
-    );
-  }, [signer, controller]);
-
-  return (
-    <Sheet>
-      <div
-        ref={ref}
-        className={cn("flex items-center gap-3", className)}
-        {...props}
-      >
-        <Card className="py-2.5 px-3 flex flex-1 flex-row justify-between items-center bg-background-200">
-          <div className="flex flex-row items-center gap-1.5">
-            <SignerIcon signerType={signerType} />
-            <p className="flex-1 text-sm font-normal">
-              {signerType
-                ? `${AUTH_METHODS_LABELS[signerType]} ${current ? "(current)" : ""}`
-                : "Unknown"}
-            </p>
-          </div>
-          {signerIdentifyingInfo === "pending" ? (
-            <Skeleton className="w-10 h-4" />
-          ) : (
-            <p className="text-sm font-normal text-foreground-300">
-              {signerIdentifyingInfo}
-            </p>
+    return (
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <div
+          ref={ref}
+          className={cn("flex items-center gap-3", className)}
+          {...props}
+        >
+          <Card className="py-2.5 px-3 flex flex-1 flex-row justify-between items-center bg-background-200">
+            <div className="flex flex-row items-center gap-1.5">
+              <SignerIcon signerType={signerType} />
+              <p className="flex-1 text-sm font-normal">
+                {signerType
+                  ? `${AUTH_METHODS_LABELS[signerType]} ${current ? "(current)" : ""} ${isOriginalSigner ? "(original)" : ""}`
+                  : "Unknown"}
+              </p>
+            </div>
+            {signerIdentifyingInfo === "pending" ? (
+              <Skeleton className="w-10 h-4" />
+            ) : (
+              <p className="text-sm font-normal text-foreground-300">
+                {signerIdentifyingInfo}
+              </p>
+            )}
+          </Card>
+          {!isOriginalSigner && !current && onDelete && (
+            <Button
+              variant="icon"
+              size="icon"
+              type="button"
+              onClick={() => setIsOpen(true)}
+            >
+              <TrashIcon size="default" className="text-foreground-300" />
+            </Button>
           )}
-        </Card>
-        {/* disabled until delete signer functionality is implemented */}
-        {/* <SheetTrigger asChild> */}
-        {/*   <Button variant="icon" size="icon" type="button"> */}
-        {/*     <TrashIcon size="default" className="text-foreground-300" /> */}
-        {/*   </Button> */}
-        {/* </SheetTrigger> */}
-      </div>
-
-      {/* DELETE SIGNER SHEET CONTENTS */}
-      <SheetContent
-        side="bottom"
-        className="border-background-100 p-6 gap-6 rounded-t-xl"
-        showClose={false}
-      >
-        <div className="flex flex-row items-center gap-3 mb-6">
-          <Button
-            type="button"
-            variant="icon"
-            size="icon"
-            className="flex items-center justify-center text-foreground-100"
-          >
-            <SignerIcon signerType={signerType} />
-          </Button>
-          <div className="flex flex-col items-start gap-1">
-            <h3 className="text-lg font-semibold text-foreground-100">
-              {signerType ? AUTH_METHODS_LABELS[signerType] : "Unknown"}
-            </h3>
-          </div>
         </div>
-        <SheetFooter className="flex flex-row items-center gap-4">
-          <SheetClose asChild className="flex-1">
-            <Button variant="secondary">Cancel</Button>
-          </SheetClose>
-          <Button
-            variant="secondary"
-            onClick={onDelete}
-            className="flex-1 text-destructive-100"
-          >
-            <TrashIcon size="default" />
-            <span>DELETE</span>
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-});
+
+        {/* DELETE SIGNER SHEET CONTENTS */}
+        <SheetContent
+          side="bottom"
+          className="border-background-100 p-6 gap-6 rounded-t-xl"
+          showClose={false}
+        >
+          <SheetTitle className="hidden"></SheetTitle>
+          <div className="flex flex-row items-center gap-3 mb-6">
+            <Button
+              type="button"
+              variant="icon"
+              size="icon"
+              className="flex items-center justify-center text-foreground-100"
+            >
+              {isLoading ? (
+                <SpinnerIcon className="animate-spin" size="lg" />
+              ) : (
+                <SignerIcon signerType={signerType} size="lg" />
+              )}
+            </Button>
+            <div className="flex flex-col items-start gap-1">
+              <h3 className="text-lg font-semibold text-foreground-100">
+                {signerType ? AUTH_METHODS_LABELS[signerType] : "Unknown"}
+              </h3>
+            </div>
+          </div>
+          <SheetFooter className="flex flex-row items-center gap-4">
+            <SheetClose asChild className="flex-1">
+              <Button variant="secondary" disabled={isLoading}>
+                Cancel
+              </Button>
+            </SheetClose>
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                setIsLoading(true);
+                try {
+                  await onDelete?.();
+                  setIsOpen(false);
+                } catch (error) {
+                  console.error(error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+              className="flex-1 text-destructive-100"
+              disabled={isLoading}
+            >
+              <TrashIcon size="default" />
+              <span>DELETE</span>
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    );
+  },
+);
 
 SignerCard.displayName = "SignerCard";
 
 const SignerIcon = React.memo(
-  ({ signerType }: { signerType: AuthOption | undefined }) => {
+  ({
+    signerType,
+    size = "default",
+  }: {
+    signerType: AuthOption | undefined;
+    size?:
+      | "xs"
+      | "sm"
+      | "lg"
+      | "default"
+      | "2xs"
+      | "xl"
+      | "2xl"
+      | "3xl"
+      | null
+      | undefined;
+  }) => {
     if (!signerType) {
       return <TouchIcon size="sm" />;
     }
 
     switch (signerType) {
       case "argent":
-        return <StarknetIcon size="sm" />;
+        return <StarknetIcon size={size} />;
       case "webauthn":
-        return <TouchIcon size="sm" />;
+        return <TouchIcon size={size} />;
       case "phantom":
-        return <PhantomIcon size="sm" />;
+        return <PhantomIcon size={size} />;
       case "rabby":
-        return <RabbyIcon size="sm" />;
+        return <RabbyIcon size={size} />;
       case "metamask":
-        return <MetaMaskIcon size="sm" />;
+        return <MetaMaskIcon size={size} />;
       case "discord":
-        return <DiscordIcon size="sm" />;
+        return <DiscordIcon size={size} />;
       case "google":
-        return <GoogleIcon size="sm" />;
+        return <GoogleIcon size={size} />;
       case "walletconnect":
-        return <WalletConnectIcon size="sm" />;
+        return <WalletConnectIcon size={size} />;
       default:
-        return <TouchIcon size="sm" />;
+        return <TouchIcon size={size} />;
     }
   },
 );
@@ -172,7 +224,24 @@ const getSignerIdentifyingInfo = async (
           return formatAddress(credentialToAddress(signer)!, { size: "xs" });
       }
     case "WebauthnCredentials":
-      return undefined;
+      if (!signer.webauthn?.[0].AAGUID) return;
+
+      if (AAGUIDS) {
+        return AAGUIDS[signer.webauthn?.[0].AAGUID]?.["name"];
+      }
+
+      if (AAGUIDS_PROMISE) {
+        AAGUIDS = await AAGUIDS_PROMISE;
+        return AAGUIDS[signer.webauthn?.[0].AAGUID]?.["name"];
+      }
+
+      AAGUIDS_PROMISE = fetch(
+        "https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/aaguid.json",
+      ).then((res) => res.json());
+
+      AAGUIDS = await AAGUIDS_PROMISE;
+      return AAGUIDS[signer.webauthn?.[0].AAGUID]?.["name"];
+
     case "SIWSCredentials":
       return "Phantom";
     case "StarknetCredentials":

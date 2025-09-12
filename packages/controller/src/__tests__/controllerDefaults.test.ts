@@ -22,13 +22,13 @@ describe("ControllerProvider defaults", () => {
     const controller = new ControllerProvider({});
 
     expect(controller.rpcUrl()).toBe(
-      "https://api.cartridge.gg/x/starknet/mainnet",
+      "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9",
     );
   });
 
   test("should use custom chains when provided", () => {
     const customChains = [
-      { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia" },
+      { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9" },
     ];
 
     const controller = new ControllerProvider({
@@ -37,13 +37,13 @@ describe("ControllerProvider defaults", () => {
     });
 
     expect(controller.rpcUrl()).toBe(
-      "https://api.cartridge.gg/x/starknet/sepolia",
+      "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9",
     );
   });
 
   test("should throw error when using non-Cartridge RPC for mainnet", async () => {
     const invalidChains = [
-      { rpcUrl: "https://some-other-provider.com/starknet/mainnet" },
+      { rpcUrl: "https://some-other-provider.com/starknet/mainnet/rpc/v0_9" },
     ];
 
     expect(() => {
@@ -56,7 +56,7 @@ describe("ControllerProvider defaults", () => {
 
   test("should throw error when using non-Cartridge RPC for sepolia", async () => {
     const invalidChains = [
-      { rpcUrl: "https://some-other-provider.com/starknet/sepolia" },
+      { rpcUrl: "https://some-other-provider.com/starknet/sepolia/rpc/v0_9" },
     ];
 
     expect(() => {

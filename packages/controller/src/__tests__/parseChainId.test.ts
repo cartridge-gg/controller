@@ -5,13 +5,17 @@ describe("parseChainId", () => {
   describe("Starknet chains", () => {
     test("identifies mainnet", () => {
       expect(
-        parseChainId(new URL("https://api.cartridge.gg/x/starknet/mainnet")),
+        parseChainId(
+          new URL("https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9"),
+        ),
       ).toBe(constants.StarknetChainId.SN_MAIN);
     });
 
     test("identifies sepolia", () => {
       expect(
-        parseChainId(new URL("https://api.cartridge.gg/x/starknet/sepolia")),
+        parseChainId(
+          new URL("https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9"),
+        ),
       ).toBe(constants.StarknetChainId.SN_SEPOLIA);
     });
   });

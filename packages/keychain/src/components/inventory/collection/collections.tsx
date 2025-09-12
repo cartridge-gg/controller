@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useCollections } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { CollectibleCard, Skeleton } from "@cartridge/ui";
@@ -16,14 +16,15 @@ export function Collections() {
   const { collectibles, status: CollectiblesStatus } = useCollectibles();
   const { editions } = useArcade();
   const { getCollectionOrders } = useMarketplace();
-  const { project, namespace } = useConnection();
+  const { project } = useConnection();
   const theme = useControllerTheme();
+  const [searchParams] = useSearchParams();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
     );
-  }, [editions, project, namespace]);
+  }, [editions, project]);
 
   const status = useMemo(() => {
     if (CollectionsStatus === "loading" && CollectiblesStatus === "loading") {
@@ -52,7 +53,7 @@ export function Collections() {
           <Link
             className="w-full group select-none"
             draggable={false}
-            to={`./collection/${collection.address}`}
+            to={`./collection/${collection.address}?${searchParams.toString()}`}
             key={collection.address}
           >
             <CollectibleCard
@@ -81,7 +82,7 @@ export function Collections() {
           <Link
             className="w-full group select-none"
             draggable={false}
-            to={`./collectible/${collectible.address}`}
+            to={`./collectible/${collectible.address}?${searchParams.toString()}`}
             key={collectible.address}
           >
             <CollectibleCard

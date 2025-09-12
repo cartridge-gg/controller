@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { mkdirSync, existsSync } from "fs";
 import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
@@ -8,11 +9,8 @@ import { visualizer } from "rollup-plugin-visualizer";
 
 // List peer dependencies, prevents bundling into library
 const externalDeps = [
-  "@solana/web3.js",
-  "@metamask/sdk", 
   "open",
   "starknet",
-  "starknetkit", 
 ];
 
 export default defineConfig(({ mode }) => ({
@@ -23,7 +21,15 @@ export default defineConfig(({ mode }) => ({
       entryRoot: 'src',
       insertTypesEntry: true,
       include: ["src/**/*.ts"],
-      exclude: ["src/**/*.test.ts"], 
+      exclude: ["src/**/*.test.ts"],
+      beforeWriteFile: (filePath, content) => {
+        // Ensure directory exists before writing
+        const dir = dirname(filePath);
+        if (!existsSync(dir)) {
+          mkdirSync(dir, { recursive: true });
+        }
+        return { filePath, content };
+      }
     }),
     mode === "production" &&
       visualizer({

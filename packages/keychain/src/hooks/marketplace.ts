@@ -80,7 +80,7 @@ export const useMarketplace = () => {
     return Object.values(collectionOrders[token] || {}).filter(
       (order) => order.status.value === StatusType.Placed,
     );
-  }, [orders, tokenId]);
+  }, [orders, tokenId, contractAddress]);
 
   const selfOrders = useMemo(() => {
     if (!address) return [];
@@ -101,13 +101,6 @@ export const useMarketplace = () => {
     if (tokenOrders.length === 0) return;
     return tokenOrders[0];
   }, [orders, contractAddress, tokenId]);
-
-  const isListed = useMemo(() => {
-    if (!address) return false;
-    return Object.values(tokenOrders).some(
-      (order) => BigInt(order.owner) === BigInt(address),
-    );
-  }, [address, tokenOrders]);
 
   const { entrypoints } = useEntrypoints({ address: contractAddress || "" });
 
@@ -156,7 +149,6 @@ export const useMarketplace = () => {
     collectionOrders,
     tokenOrders,
     selfOrders,
-    isListed,
     royalties,
     isLoading,
     getCollectionOrders,

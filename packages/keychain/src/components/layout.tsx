@@ -1,11 +1,11 @@
-import { LayoutContainer } from "@cartridge/ui";
 import { NavigationHeader } from "@/components";
-import { useConnection } from "@/hooks/connection";
-import { Outlet, useLocation } from "react-router-dom";
 import { LayoutBottomNav } from "@/components/bottom-nav";
+import { useConnection } from "@/hooks/connection";
+import { GearIcon, LayoutContainer } from "@cartridge/ui";
+import { Outlet, useLocation } from "react-router-dom";
 
 export function Layout({ children }: { children?: React.ReactNode }) {
-  const { closeModal } = useConnection();
+  const { closeModal, onModalClose } = useConnection();
   const location = useLocation();
   // Check if current page should have bottom navigation
   const hasBottomNav = [
@@ -21,7 +21,8 @@ export function Layout({ children }: { children?: React.ReactNode }) {
         <NavigationHeader
           variant="hidden"
           forceShowClose={hasBottomNav}
-          onClose={hasBottomNav ? closeModal : undefined}
+          icon={<GearIcon />}
+          onClose={hasBottomNav ? closeModal : onModalClose}
         />
 
         {children || <Outlet />}

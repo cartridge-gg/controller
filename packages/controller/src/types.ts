@@ -35,6 +35,7 @@ export type AuthOption =
   | "webauthn"
   | "discord"
   | "walletconnect"
+  | "password"
   | ExternalWalletType;
 
 export type AuthOptions = Omit<AuthOption, "phantom" | "argent">[];
@@ -85,7 +86,7 @@ export type DeployReply = {
 };
 
 export type IFrames = {
-  keychain: KeychainIFrame;
+  keychain?: KeychainIFrame;
   version?: number;
 };
 
@@ -148,7 +149,7 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
-  openStarterPack(starterpackId: string): void;
+  openStarterPack(options: string | StarterPack): Promise<void>;
   navigate(path: string): Promise<void>;
 
   // External wallet methods
@@ -170,6 +171,10 @@ export interface Keychain {
     type: ExternalWalletType,
     tokenAddress?: string,
   ): Promise<ExternalWalletResponse>;
+  externalSwitchChain(
+    type: ExternalWalletType,
+    chainId: string,
+  ): Promise<boolean>;
 }
 
 export interface Profile {
@@ -223,6 +228,8 @@ export type KeychainOptions = IFrameOptions & {
   namespace?: string;
   /** The tokens to be listed on Inventory modal */
   tokens?: Tokens;
+  /** When true, defer iframe mounting until connect() is called. Reduces initial load and resource fetching. */
+  lazyload?: boolean;
 };
 
 export type ProfileContextTypeVariant =
@@ -237,3 +244,25 @@ export type Token = "eth" | "strk" | "lords" | "usdc" | "usdt";
 export type Tokens = {
   erc20?: Token[];
 };
+
+export enum StarterPackItemType {
+  NONFUNGIBLE = "NONFUNGIBLE",
+  FUNGIBLE = "FUNGIBLE",
+}
+
+export interface StarterPackItem {
+  type: StarterPackItemType;
+  name: string;
+  description: string;
+  iconURL?: string;
+  amount?: number;
+  price?: bigint;
+  call?: Call[];
+}
+
+export interface StarterPack {
+  name: string;
+  description: string;
+  iconURL?: string;
+  items: StarterPackItem[];
+}

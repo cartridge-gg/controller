@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ClaimFreeStarterpackDocument,
   ClaimFreeStarterpackMutation,
+  MerkleDropNetwork,
+  StarterpackAcquisitionType,
   StarterPackDocument,
   StarterpackInput,
   StarterPackQuery,
@@ -10,30 +12,23 @@ import { client } from "@/utils/graphql";
 import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
 import { uint256 } from "starknet";
-
-export const enum StarterItemType {
-  NFT = "NFT",
-  CREDIT = "CREDIT",
-}
-
-export interface StarterItemData {
-  title: string;
-  collectionName?: string;
-  description: string;
-  price: number;
-  image?: string;
-  type: StarterItemType;
-  value?: number;
-}
+import { calculateStarterPackPrice, usdcToUsd } from "@/utils/starterpack";
+import {
+  StarterPack,
+  StarterPackItem,
+  StarterPackItemType,
+} from "@cartridge/controller";
 
 export interface StarterPackDetails {
-  id: string;
+  id?: string;
   name: string;
   description?: string;
   priceUsd: number;
   supply?: number;
   mintAllowance?: MintAllowance;
-  starterPackItems: StarterItemData[];
+  acquisitionType: StarterpackAcquisitionType;
+  starterPackItems: StarterPackItem[];
+  merkleDrops?: MerkleDrop[];
 }
 
 export interface MintAllowance {
@@ -41,16 +36,28 @@ export interface MintAllowance {
   limit: number;
 }
 
-export function useStarterPack(starterpackId?: string) {
+export interface MerkleDrop {
+  key: string;
+  network: MerkleDropNetwork;
+  contract: string;
+  entrypoint: string;
+  merkleRoot: string;
+  description?: string | null;
+}
+
+export function useStarterPack(starterpack: string | StarterPack | undefined) {
   const { controller } = useController();
   const [isLoading, setIsLoading] = useState(true);
   const [isClaiming, setIsClaiming] = useState(false);
   const [supply, setSupply] = useState<number | undefined>(undefined);
-  const [items, setItems] = useState<StarterItemData[]>([]);
+  const [items, setItems] = useState<StarterPackItem[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [priceUsd, setPriceUsd] = useState<number>(0);
+  const [merkleDrops, setMerkleDrops] = useState<MerkleDrop[]>([]);
+  const [acquisitionType, setAcquisitionType] =
+    useState<StarterpackAcquisitionType>(StarterpackAcquisitionType.Paid);
   const [mintAllowance, setMintAllowance] = useState<MintAllowance | undefined>(
     undefined,
   );
@@ -60,7 +67,6 @@ export function useStarterPack(starterpackId?: string) {
       if (!controller) {
         throw new Error("Controller not found");
       }
-
       const result = await controller.provider.callContract({
         contractAddress: contractAddress,
         entrypoint: entrypoint,
@@ -81,7 +87,23 @@ export function useStarterPack(starterpackId?: string) {
     setIsLoading(true);
     setError(null);
 
-    if (!controller || !starterpackId) {
+    if (!controller || !starterpack) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Handle custom starter packs from URL
+    if (typeof starterpack == "object") {
+      setName(starterpack.name || "");
+      setDescription(starterpack.description || "");
+      setAcquisitionType(StarterpackAcquisitionType.Paid);
+
+      // Calculate price from items (USDC with 6 decimals)
+      const totalPriceUsdc = calculateStarterPackPrice(starterpack);
+      const totalPriceUsd = usdcToUsd(totalPriceUsdc);
+      setPriceUsd(totalPriceUsd);
+      setItems(starterpack.items);
+
       setIsLoading(false);
       return;
     }
@@ -89,34 +111,34 @@ export function useStarterPack(starterpackId?: string) {
     client
       .request<StarterPackQuery>(StarterPackDocument, {
         input: {
-          starterpackId: starterpackId,
+          starterpackId: starterpack,
           accountId: controller?.username(),
         },
       })
       .then(async (result) => {
         const details = result.starterpack!;
         const price = details.price.amount;
-        const factor = 10 ** details.price.decimals;
-        const priceUSD = creditsToUSD(Number(price) / factor);
+        const priceUSD = creditsToUSD(Number(price));
         setPriceUsd(priceUSD);
         setName(details.starterpack!.name);
         setDescription(details.starterpack!.description ?? "");
+        setAcquisitionType(details.starterpack!.acquisitionType);
 
         if (details.mintAllowance) {
           setMintAllowance(details.mintAllowance);
         }
 
-        const items: StarterItemData[] = [];
+        const items: StarterPackItem[] = [];
         if (details.starterpack) {
           let minSupply;
           if (details.starterpack.starterpackContract?.edges) {
             for (const edge of details.starterpack.starterpackContract.edges) {
               items.push({
-                title: edge?.node?.name ?? "",
+                name: edge?.node?.name ?? "",
                 description: edge?.node?.description ?? "",
-                price: priceUSD,
-                image: edge?.node?.iconURL ?? "",
-                type: StarterItemType.NFT,
+                price: BigInt(priceUSD),
+                iconURL: edge?.node?.iconURL || "/placeholder.svg",
+                type: StarterPackItemType.NONFUNGIBLE,
               });
 
               if (edge?.node?.supplyEntryPoint) {
@@ -136,12 +158,12 @@ export function useStarterPack(starterpackId?: string) {
           if (Number(details.bonusCredits.amount) > 0) {
             const factor = 10 ** details.bonusCredits.decimals;
             items.push({
-              title: `${details.bonusCredits} Credits`,
+              name: `${details.bonusCredits} Credits`,
               description: "Credits cover service fee(s).",
-              price: 0,
-              image: "/ERC-20-Icon.svg",
-              type: StarterItemType.CREDIT,
-              value: Number(details.bonusCredits.amount) / factor,
+              price: 0n,
+              iconURL: "/ERC-20-Icon.svg",
+              type: StarterPackItemType.FUNGIBLE,
+              amount: Number(details.bonusCredits.amount) / factor,
             });
           }
 
@@ -151,13 +173,49 @@ export function useStarterPack(starterpackId?: string) {
         }
 
         setItems(items);
+
+        // For CLAIMED starterpacks, merkle drops are required
+        if (
+          details.starterpack!.acquisitionType ===
+          StarterpackAcquisitionType.Claimed
+        ) {
+          if (!details.starterpack!.merkleDrops?.edges?.length) {
+            throw new Error(
+              "No merkle drop snapshots associated with this starterpack",
+            );
+          }
+
+          const drops: MerkleDrop[] = details.starterpack.merkleDrops.edges
+            .filter((edge): edge is NonNullable<typeof edge> => edge !== null)
+            .map((edge) => {
+              if (!edge.node) return null;
+              return {
+                key: edge.node.key,
+                network: edge.node.network,
+                contract: edge.node.contract,
+                entrypoint: edge.node.entrypoint,
+                merkleRoot: edge.node.merkleRoot,
+                description: edge.node.description,
+              };
+            })
+            .filter((drop): drop is NonNullable<typeof drop> => drop !== null)
+            .sort((a, b) => a.network.localeCompare(b.network));
+
+          setMerkleDrops(drops);
+        }
       })
-      .catch(setError)
+      .catch((error) => {
+        if (error.message && error.message.includes("Starterpack not found")) {
+          setError(new Error("Starterpack not found"));
+        } else {
+          setError(error as Error);
+        }
+      })
       .finally(() => setIsLoading(false));
-  }, [starterpackId, controller]);
+  }, [controller, checkSupply, starterpack]);
 
   const claim = useCallback(async () => {
-    if (!controller || !starterpackId) {
+    if (!controller || !starterpack || typeof starterpack != "string") {
       throw new Error("Controller or starterpack ID not found");
     }
 
@@ -165,7 +223,7 @@ export function useStarterPack(starterpackId?: string) {
     setError(null);
 
     const input: StarterpackInput = {
-      starterpackId: starterpackId,
+      starterpackId: starterpack,
       accountId: controller.username(),
     };
 
@@ -186,7 +244,7 @@ export function useStarterPack(starterpackId?: string) {
     } finally {
       setIsClaiming(false);
     }
-  }, [starterpackId, controller]);
+  }, [starterpack, controller]);
 
   return {
     name,
@@ -194,7 +252,9 @@ export function useStarterPack(starterpackId?: string) {
     items,
     priceUsd,
     supply,
+    merkleDrops,
     mintAllowance,
+    acquisitionType,
     isLoading,
     isClaiming,
     error,

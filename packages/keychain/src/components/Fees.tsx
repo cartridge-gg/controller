@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Spinner } from "@cartridge/ui";
-import { EstimateFee } from "starknet";
+import { FeeEstimate } from "starknet";
 
 import { convertTokenAmountToUSD, useFeeToken } from "@/hooks/tokens";
 import { ErrorAlert } from "./ErrorAlert";
@@ -11,7 +11,7 @@ export function Fees({
   maxFee,
 }: {
   isLoading: boolean;
-  maxFee?: EstimateFee;
+  maxFee?: FeeEstimate;
 }) {
   const { isLoading: isPriceLoading, token, error } = useFeeToken();
   const [formattedFee, setFormattedFee] = useState<string>();
@@ -22,15 +22,18 @@ export function Fees({
       return;
     }
 
+    if (maxFee && (maxFee.overall_fee == "0x0" || maxFee.overall_fee == "0")) {
+      setFormattedFee("FREE");
+      return;
+    }
+
     if (maxFee && maxFee.overall_fee && token.price) {
       const formatted = convertTokenAmountToUSD(
-        maxFee.overall_fee,
+        BigInt(maxFee.overall_fee),
         18,
         token.price,
       );
       setFormattedFee(formatted);
-    } else {
-      setFormattedFee("FREE");
     }
   }, [maxFee, token, error, isLoading]);
 
@@ -47,12 +50,14 @@ export function Fees({
   return (
     <div className="w-full overflow-hidden rounded">
       {formattedFee ? (
-        <LineItem
-          name="Network Fee"
-          amount={formattedFee}
-          token={token}
-          isLoading={isLoading}
-        />
+        formattedFee == "FREE" ? undefined : (
+          <LineItem
+            name="Network Fee"
+            amount={formattedFee}
+            token={token}
+            isLoading={isLoading}
+          />
+        )
       ) : (
         <LineItem name="Calculating Fees" isLoading />
       )}

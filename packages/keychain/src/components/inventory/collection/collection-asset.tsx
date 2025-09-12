@@ -43,7 +43,7 @@ import { createExecuteUrl } from "@/utils/connection/execute";
 const OFFSET = 10;
 
 export function CollectionAsset() {
-  const { chainId, namespace, project, parent, controller } = useConnection();
+  const { chainId, project } = useConnection();
   const account = useAccount();
   const explorer = useExplorer();
   const address = account?.address || "";
@@ -53,13 +53,13 @@ export function CollectionAsset() {
   const theme = useControllerTheme();
   const { editions } = useArcade();
   const { tokens } = useTokens();
-  const { isListed, provider, selfOrders, order, setAmount } = useMarketplace();
+  const { provider, selfOrders, order, setAmount } = useMarketplace();
   const [loading, setLoading] = useState(false);
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
       (edition) => edition.config.project === project,
     );
-  }, [editions, project, namespace]);
+  }, [editions, project]);
 
   const { address: contractAddress, tokenId } = useParams();
   const {
@@ -90,6 +90,11 @@ export function CollectionAsset() {
     if (!address || !ownership?.accountAddress) return false;
     return BigInt(ownership.accountAddress) === BigInt(address);
   }, [ownership, address]);
+
+  const isListed = useMemo(() => {
+    if (!order) return false;
+    return BigInt(order.tokenId) === BigInt(tokenId ?? "");
+  }, [order, tokenId]);
 
   const asset = useMemo(() => {
     return assets?.[0];
@@ -159,14 +164,11 @@ export function CollectionAsset() {
     contractAddress,
     asset,
     isListed,
-    chainId,
-    parent,
     provider,
-    controller,
     order,
     isOwner,
     navigate,
-    searchParams,
+    selfOrders,
   ]);
 
   const events = useMemo(() => {
@@ -229,7 +231,7 @@ export function CollectionAsset() {
                   ? selfOrders[0].expiration
                   : undefined
               }
-              listingCount={isListed ? selfOrders.length : undefined}
+              listingCount={isListed && isOwner ? selfOrders.length : undefined}
             />
             <div
               className="flex flex-col gap-6 overflow-scroll relative"

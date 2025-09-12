@@ -57,7 +57,7 @@ export function Collection() {
     if (urlTokenIds.length > 0) {
       setSelectedTokenIds(urlTokenIds);
     }
-  }, []);
+  }, [searchParams]);
 
   const selection = useMemo(() => {
     return selectedTokenIds.length > 0;
@@ -185,7 +185,10 @@ export function Collection() {
           >
             <div className="flex gap-3 w-full">
               <Link
-                className="flex items-center justify-center gap-x-4 w-full"
+                className={cn(
+                  "flex items-center justify-center gap-x-4 w-full",
+                  !allUnlisted && "pointer-events-none",
+                )}
                 to={allUnlisted ? `list?${createNavigationParams()}` : ""}
               >
                 <Button

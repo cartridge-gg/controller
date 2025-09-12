@@ -3,16 +3,15 @@ import {
   CredentialMetadata,
 } from "@cartridge/ui/utils/api/cartridge";
 
+import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
-import { Signer, signerToGuid } from "@cartridge/controller-wasm";
+import { isCurrentSigner } from "@/utils/signers";
+import { JsRemoveSignerInput } from "@cartridge/controller-wasm";
 import { Button, PlusIcon, Skeleton } from "@cartridge/ui";
-import { useMemo } from "react";
 import { QueryObserverResult } from "react-query";
 import { constants } from "starknet";
-import { useNavigation } from "@/context/navigation";
 import { SectionHeader } from "../section-header";
 import { SignerCard } from "./signer-card";
-import { useFeature } from "@/hooks/features";
 
 export const SignersSection = ({
   controllerQuery,
@@ -20,26 +19,9 @@ export const SignersSection = ({
   controllerQuery: QueryObserverResult<ControllerQuery>;
 }) => {
   const { chainId, controller } = useConnection();
-  const isFeatureEnabled = useFeature("addSigner");
   const { navigate } = useNavigation();
 
-  const canAddSigner = isFeatureEnabled;
-
-  const signers = useMemo(
-    () =>
-      controllerQuery.data?.controller?.signers
-        ?.map((signer) => {
-          return {
-            ...signer,
-            isCurrent:
-              signerToGuid(
-                toJsSigner(signer.metadata as CredentialMetadata),
-              ) === controller?.ownerGuid(),
-          };
-        })
-        .sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent)),
-    [controllerQuery.data, controller],
-  );
+  const signers = controllerQuery.data?.controller?.signers;
 
   return (
     <section className="space-y-4">
@@ -52,13 +34,70 @@ export const SignersSection = ({
           <LoadingState />
         ) : controllerQuery.isError ? (
           <div>Error</div>
-        ) : controllerQuery.isSuccess && controllerQuery.data ? (
-          signers?.map((signer, index) => {
+        ) : controller && controllerQuery.isSuccess && signers ? (
+          signers.map((signer, index) => {
+            const isOriginalSigner = signer.isOriginal;
+            const isCurrent = isCurrentSigner(
+              signer.metadata as CredentialMetadata,
+              controller,
+            );
             return (
               <SignerCard
                 key={`${index}`}
-                current={signer.isCurrent}
+                current={isCurrent}
                 signer={signer.metadata as CredentialMetadata}
+                isOriginalSigner={isOriginalSigner}
+                onDelete={
+                  isCurrent || isOriginalSigner
+                    ? undefined
+                    : async () => {
+                        if (isOriginalSigner) {
+                          throw new Error("Cannot delete original signer");
+                        }
+                        let jsSigner: JsRemoveSignerInput | undefined;
+                        switch (signer.metadata.__typename) {
+                          case "Eip191Credentials":
+                            jsSigner = {
+                              type: "eip191",
+                              credential: JSON.stringify(
+                                signer.metadata.eip191?.[0],
+                              ),
+                            };
+                            break;
+                          case "WebauthnCredentials":
+                            jsSigner = {
+                              type: "webauthn",
+                              credential: JSON.stringify({
+                                ...signer.metadata.webauthn?.[0],
+                                rpId: import.meta.env.VITE_RP_ID,
+                              }),
+                            };
+                            break;
+                          case "SIWSCredentials":
+                            jsSigner = {
+                              type: "siws",
+                              credential: JSON.stringify(
+                                signer.metadata.siws?.[0],
+                              ),
+                            };
+                            break;
+                          case "StarknetCredentials": {
+                            jsSigner = {
+                              type: "starknet",
+                              credential: JSON.stringify(
+                                signer.metadata.starknet?.[0],
+                              ),
+                            };
+                            break;
+                          }
+                          default:
+                            throw new Error("Unimplemented");
+                        }
+                        await controller?.removeSigner(jsSigner);
+                        await controllerQuery.refetch();
+                        return;
+                      }
+                }
               />
             );
           })
@@ -66,22 +105,20 @@ export const SignersSection = ({
           <div>No data</div>
         )}
       </div>
-      {canAddSigner && (
-        <Button
-          type="button"
-          variant="outline"
-          className="bg-background-100 text-foreground-300 gap-1 w-fit px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200 hover:border-background-200"
-          disabled={chainId !== constants.StarknetChainId.SN_MAIN}
-          onClick={() => navigate("/settings/add-signer")}
-        >
-          <PlusIcon size="sm" variant="line" />
-          <span className="normal-case font-normal font-sans text-sm">
-            {chainId === constants.StarknetChainId.SN_MAIN
-              ? "Add Signer"
-              : "Must be on Mainnet"}
-          </span>
-        </Button>
-      )}
+      <Button
+        type="button"
+        variant="outline"
+        className="bg-background-100 text-foreground-300 gap-1 w-fit px-3 hover:bg-background-200 hover:text-foreground-100 border border-background-200 hover:border-background-200"
+        disabled={chainId !== constants.StarknetChainId.SN_MAIN}
+        onClick={() => navigate("/settings/add-signer")}
+      >
+        <PlusIcon size="sm" variant="line" />
+        <span className="normal-case font-normal font-sans text-sm">
+          {chainId === constants.StarknetChainId.SN_MAIN
+            ? "Add Signer"
+            : "Must be on Mainnet"}
+        </span>
+      </Button>
     </section>
   );
 };
@@ -92,25 +129,4 @@ const LoadingState = () => {
       <Skeleton className="h-10 w-full rounded" />
     </div>
   );
-};
-
-const toJsSigner = (signer: CredentialMetadata): Signer => {
-  switch (signer.__typename) {
-    case "Eip191Credentials":
-      return {
-        eip191: {
-          address: signer.eip191?.[0]?.ethAddress ?? "",
-        },
-      };
-    case "WebauthnCredentials":
-      return {
-        webauthn: {
-          publicKey: signer.webauthn?.[0]?.publicKey ?? "",
-          rpId: import.meta.env.VITE_RP_ID,
-          credentialId: signer.webauthn?.[0]?.id ?? "",
-        },
-      };
-    default:
-      throw new Error("Unimplemented");
-  }
 };

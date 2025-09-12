@@ -1,11 +1,11 @@
-import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
 import { useConnection } from "@/hooks/connection";
+import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
 import { ExecuteParams } from "@/utils/connection/execute";
 import { ConnectError, ResponseCodes } from "@cartridge/controller";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { InvokeFunctionResponse } from "starknet";
+import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 
 function parseExecuteParams(paramString: string): {
   params: ExecuteParams;
@@ -30,7 +30,7 @@ function parseExecuteParams(paramString: string): {
 }
 
 export function Execute() {
-  const { closeModal } = useConnection();
+  const { closeModal, setOnModalClose } = useConnection();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [params, setParams] =
@@ -58,6 +58,22 @@ export function Execute() {
       }
     };
   }, [params?.params.id]);
+
+  useEffect(() => {
+    if (!setOnModalClose || !params?.reject) {
+      return;
+    }
+    setOnModalClose(() => {
+      params.resolve!({
+        code: ResponseCodes.ERROR,
+        message: "User canceled",
+        error: {
+          message: "User canceled",
+          code: 0,
+        },
+      });
+    });
+  }, [params?.reject, params?.resolve, setOnModalClose]);
 
   if (!params) {
     return null;
@@ -90,16 +106,6 @@ export function Execute() {
           });
         }
         // For manual navigation, just stay on the page or show error
-      }}
-      onClose={() => {
-        if (params.resolve) {
-          params.resolve({
-            code: ResponseCodes.CANCELED,
-            message: "User canceled",
-          });
-
-          closeModal?.();
-        }
       }}
     />
   );

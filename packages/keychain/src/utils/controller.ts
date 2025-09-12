@@ -2,7 +2,7 @@ import {
   BigNumberish,
   Call,
   CallData,
-  EstimateFee,
+  FeeEstimate,
   InvokeFunctionResponse,
   Provider,
   RpcProvider,
@@ -14,60 +14,33 @@ import {
   AuthorizedSession,
   CartridgeAccount,
   CartridgeAccountMeta,
+  ControllerFactory,
+  JsAddSignerInput,
   JsCall,
   JsFeeSource,
   JsFelt,
   JsRegister,
   JsRegisterResponse,
+  JsRemoveSignerInput,
   JsRevokableSession,
-  JsSignerInput,
+  JsSignedOutsideExecution,
   Owner,
   Signer,
 } from "@cartridge/controller-wasm/controller";
 
 import { credentialToAuth } from "@/components/connect/types";
 import { ParsedSessionPolicies, toWasmPolicies } from "@/hooks/session";
-import { FeeSource } from "@cartridge/controller";
 import { CredentialMetadata } from "@cartridge/ui/utils/api/cartridge";
 import { DeployedAccountTransaction } from "@starknet-io/types-js";
-import { fromJsFeeEstimate, toJsFeeEstimate } from "./fee";
+import { toJsFeeEstimate } from "./fee";
 
 export default class Controller {
   private cartridge: CartridgeAccount;
   private cartridgeMeta: CartridgeAccountMeta;
   provider: Provider;
 
-  constructor({
-    appId,
-    classHash,
-    chainId,
-    rpcUrl,
-    address,
-    username,
-    owner,
-  }: {
-    appId: string;
-    classHash: string;
-    chainId: string;
-    rpcUrl: string;
-    address: string;
-    username: string;
-    owner: Owner;
-  }) {
-    const accountWithMeta = CartridgeAccount.new(
-      appId,
-      classHash,
-      rpcUrl,
-      chainId,
-      address,
-      username,
-      owner,
-      import.meta.env.VITE_CARTRIDGE_API_URL,
-    );
-
-    this.provider = new RpcProvider({ nodeUrl: rpcUrl });
-    this.cartridgeMeta = accountWithMeta.meta();
-    this.cartridge = accountWithMeta.intoAccount();
+  constructor() {
+    throw new Error("Initialize with Controller.login or Controller.create");
   }
 
   appId() {
@@ -105,22 +78,6 @@ export default class Controller {
   async disconnect() {
     await this.cartridge.disconnect();
     delete window.controller;
-  }
-
-  async login(
-    expiresAt: bigint,
-    isControllerRegistered?: boolean,
-    signer?: Signer,
-  ) {
-    if (!this.cartridge) {
-      throw new Error("Account not found");
-    }
-
-    return await this.cartridge.login(
-      expiresAt,
-      isControllerRegistered,
-      signer,
-    );
   }
 
   async register(registerInput: JsRegister): Promise<JsRegisterResponse> {
@@ -163,13 +120,20 @@ export default class Controller {
 
   async addOwner(
     owner: Signer | null,
-    signerInput: JsSignerInput | null,
+    signerInput: JsAddSignerInput | null,
     rp_id: string | null,
   ) {
     if (!this.cartridge) {
       throw new Error("Account not found");
     }
     await this.cartridge.addOwner(owner, signerInput, rp_id);
+  }
+
+  async removeSigner(signerInput: JsRemoveSignerInput) {
+    if (!this.cartridge) {
+      throw new Error("Account not found");
+    }
+    await this.cartridge.removeOwner(signerInput);
   }
 
   async registerSessionCalldata(
@@ -188,7 +152,7 @@ export default class Controller {
     expiresAt: bigint,
     policies: ParsedSessionPolicies,
     publicKey: string,
-    maxFee?: EstimateFee,
+    maxFee?: FeeEstimate,
   ): Promise<InvokeFunctionResponse> {
     if (!this.cartridge) {
       throw new Error("Account not found");
@@ -208,33 +172,33 @@ export default class Controller {
 
   async executeFromOutsideV2(
     calls: Call[],
-    feeSource?: FeeSource,
+    feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
     return await this.cartridge.executeFromOutsideV2(
       toJsCalls(calls),
-      toJsFeeSource(feeSource),
+      feeSource,
     );
   }
 
   async executeFromOutsideV3(
     calls: Call[],
-    feeSource?: FeeSource,
+    feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
     return await this.cartridge.executeFromOutsideV3(
       toJsCalls(calls),
-      toJsFeeSource(feeSource),
+      feeSource,
     );
   }
 
   async execute(
     calls: Call[],
-    maxFee?: EstimateFee,
-    feeSource?: FeeSource,
+    maxFee?: FeeEstimate,
+    feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
     return await this.cartridge.execute(
       toJsCalls(calls),
       toJsFeeEstimate(maxFee),
-      toJsFeeSource(feeSource),
+      feeSource,
     );
   }
 
@@ -264,16 +228,41 @@ export default class Controller {
     return await this.cartridge.hasRequestedSession(toWasmPolicies(policies));
   }
 
-  async estimateInvokeFee(calls: Call[]): Promise<EstimateFee> {
-    const res = await this.cartridge.estimateInvokeFee(toJsCalls(calls));
-    return fromJsFeeEstimate(res);
+  async estimateInvokeFee(calls: Call[]): Promise<FeeEstimate> {
+    const res = (await this.cartridge.estimateInvokeFee(
+      toJsCalls(calls),
+    )) as FeeEstimate;
+    res.unit = "FRI";
+
+    // Scale all fee estimate values by 50% (equivalent to 1.5x)
+    // Using starknet.js addPercent pattern for consistency
+    const addPercent = (number: string | number, percent: number): string => {
+      const bigIntNum = BigInt(number);
+      return (bigIntNum + (bigIntNum * BigInt(percent)) / 100n).toString();
+    };
+
+    res.l1_gas_consumed = addPercent(res.l1_gas_consumed, 50);
+    res.l1_gas_price = addPercent(res.l1_gas_price, 50);
+    res.l2_gas_consumed = addPercent(res.l2_gas_consumed, 50);
+    res.l2_gas_price = addPercent(res.l2_gas_price, 50);
+    res.l1_data_gas_consumed = addPercent(res.l1_data_gas_consumed, 50);
+    res.l1_data_gas_price = addPercent(res.l1_data_gas_price, 50);
+    res.overall_fee = addPercent(addPercent(res.overall_fee, 50), 50); // 2.25x total
+
+    return res;
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
     return this.cartridge.signMessage(JSON.stringify(typedData));
   }
 
-  async selfDeploy(maxFee?: EstimateFee): Promise<DeployedAccountTransaction> {
+  async signExecuteFromOutside(
+    calls: Call[],
+  ): Promise<JsSignedOutsideExecution> {
+    return await this.cartridge.signExecuteFromOutside(toJsCalls(calls));
+  }
+
+  async selfDeploy(maxFee?: FeeEstimate): Promise<DeployedAccountTransaction> {
     return await this.cartridge.deploySelf(toJsFeeEstimate(maxFee));
   }
 
@@ -289,8 +278,129 @@ export default class Controller {
     return await this.cartridge.revokeSessions(sessions);
   }
 
+  static async apiLogin({
+    appId,
+    classHash,
+    chainId,
+    rpcUrl,
+    address,
+    username,
+    owner,
+  }: {
+    appId: string;
+    classHash: string;
+    chainId: string;
+    rpcUrl: string;
+    address: string;
+    username: string;
+    owner: Owner;
+  }) {
+    const accountWithMeta = await ControllerFactory.apiLogin(
+      appId,
+      username,
+      classHash,
+      rpcUrl,
+      chainId,
+      address,
+      owner,
+      import.meta.env.VITE_CARTRIDGE_API_URL,
+    );
+
+    const controller = Object.create(Controller.prototype) as Controller;
+    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
+    controller.cartridgeMeta = accountWithMeta.meta();
+    controller.cartridge = accountWithMeta.intoAccount();
+
+    return controller;
+  }
+
+  static create({
+    appId,
+    classHash,
+    chainId,
+    rpcUrl,
+    address,
+    username,
+    owner,
+  }: {
+    appId: string;
+    classHash: string;
+    chainId: string;
+    rpcUrl: string;
+    address: string;
+    username: string;
+    owner: Owner;
+  }) {
+    const accountWithMeta = CartridgeAccount.new(
+      appId,
+      classHash,
+      rpcUrl,
+      chainId,
+      address,
+      username,
+      owner,
+      import.meta.env.VITE_CARTRIDGE_API_URL,
+    );
+
+    const controller = Object.create(Controller.prototype) as Controller;
+    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
+    controller.cartridgeMeta = accountWithMeta.meta();
+    controller.cartridge = accountWithMeta.intoAccount();
+
+    return controller;
+  }
+
+  static async login({
+    appId,
+    classHash,
+    rpcUrl,
+    chainId,
+    address,
+    username,
+    owner,
+    cartridgeApiUrl,
+    session_expires_at_s,
+    isControllerRegistered,
+  }: {
+    appId: string;
+    classHash: string;
+    rpcUrl: string;
+    chainId: string;
+    address: string;
+    username: string;
+    owner: Owner;
+    cartridgeApiUrl: string;
+    session_expires_at_s: number;
+    isControllerRegistered: boolean;
+  }) {
+    const loginResult = await ControllerFactory.login(
+      appId,
+      username,
+      classHash,
+      rpcUrl,
+      chainId,
+      address,
+      owner,
+      cartridgeApiUrl,
+      BigInt(session_expires_at_s),
+      isControllerRegistered,
+    );
+
+    const [accountWithMeta, session] = loginResult.intoValues();
+
+    const controller = Object.create(Controller.prototype) as Controller;
+    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
+    controller.cartridgeMeta = accountWithMeta.meta();
+    controller.cartridge = accountWithMeta.intoAccount();
+
+    return {
+      controller,
+      session,
+    };
+  }
+
   static fromStore(appId: string) {
-    const cartridgeWithMeta = CartridgeAccount.fromStorage(
+    const cartridgeWithMeta = ControllerFactory.fromStorage(
       appId,
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
@@ -313,23 +423,6 @@ function toJsCalls(calls: Call[]): JsCall[] {
     ...call,
     calldata: CallData.toHex(call.calldata),
   }));
-}
-
-function toJsFeeSource(
-  feeSource: FeeSource | undefined,
-): JsFeeSource | undefined {
-  if (!feeSource) {
-    return undefined;
-  }
-
-  switch (feeSource) {
-    case FeeSource.PAYMASTER:
-      return "PAYMASTER";
-    case FeeSource.CREDITS:
-      return "CREDITS";
-    default:
-      throw new Error("Invalid fee source");
-  }
 }
 
 export const allUseSameAuth = (signers: CredentialMetadata[]) => {

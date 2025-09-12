@@ -4,6 +4,7 @@ import {
   ConnectionContextValue,
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
+import { useNavigation } from "@/context/navigation";
 import { ConnectionCtx, connectToController } from "@/utils/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
@@ -27,7 +28,6 @@ import {
   Policies,
 } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
-import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import {
   ETH_CONTRACT_ADDRESS,
   isIframe,
@@ -36,12 +36,18 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
+import { Eip191Credentials } from "@cartridge/ui/utils/api/cartridge";
 import { getAddress } from "ethers";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { SemVer } from "semver";
-import { getChecksumAddress, RpcProvider, shortString } from "starknet";
+import {
+  constants,
+  getChecksumAddress,
+  RpcProvider,
+  shortString,
+} from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
-import { useNavigation } from "@/context/navigation";
 
 const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
@@ -82,6 +88,15 @@ export type ParentMethods = AsyncMethodReturns<{
   externalGetBalance: (
     identifier: string,
     tokenAddress?: string,
+  ) => Promise<ExternalWalletResponse>;
+  externalSwitchChain: (
+    identifier: string,
+    chainId: string,
+  ) => Promise<boolean>;
+  externalWaitForTransaction: (
+    identifier: string,
+    txHash: string,
+    timeoutMs?: number,
   ) => Promise<ExternalWalletResponse>;
 }>;
 
@@ -165,8 +180,10 @@ export function useConnectionValue() {
     import.meta.env.VITE_RPC_SEPOLIA,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
+  const [isSessionActive, setIsSessionActive] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
   const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
+  const [isMainnet, setIsMainnet] = useState<boolean>(false);
   const [configData, setConfigData] = useState<Record<string, unknown> | null>(
     null,
   );
@@ -176,13 +193,28 @@ export function useConnectionValue() {
   });
   const [configSignupOptions, setConfigSignupOptions] = useState<
     AuthOptions | undefined
-  >();
+  >(["google", "webauthn", "discord", "walletconnect", "metamask", "rabby"]);
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
+  const [onModalClose, setOnModalCloseInternal] = useState<
+    (() => void) | undefined
+  >();
+
+  const setOnModalClose = useCallback((fn: (() => void) | undefined) => {
+    setOnModalCloseInternal(() => fn);
+  }, []);
+
+  useEffect(() => {
+    if (window.controller) {
+      setRpcUrl(window.controller.rpcUrl());
+    }
+  }, [window.controller]);
+
+  const [searchParams] = useSearchParams();
 
   const urlParams = useMemo(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(searchParams);
     const theme = urlParams.get("theme");
     const preset = window.location.pathname.startsWith("/slot")
       ? "slot"
@@ -214,7 +246,7 @@ export function useConnectionValue() {
       namespace,
       tokens,
     };
-  }, []);
+  }, [searchParams]);
 
   // Fetch chain ID from RPC provider when rpcUrl changes
   useEffect(() => {
@@ -244,20 +276,19 @@ export function useConnectionValue() {
 
     (async () => {
       try {
-        const controllerResponse = await fetchController(
+        const controllerQuery = await fetchController(
           chainId,
           controller.username(),
           new AbortController().signal,
         );
-
         if (
-          !controllerResponse.controller ||
-          !controllerResponse.controller.signers
+          !controllerQuery.controller ||
+          !controllerQuery.controller.signers
         ) {
           return;
         }
 
-        const signers = controllerResponse.controller.signers.filter(
+        const signers = controllerQuery.controller.signers.filter(
           (signer) =>
             signer.metadata.__typename === "Eip191Credentials" &&
             (signer.metadata.eip191?.[0]?.provider === "discord" ||
@@ -294,7 +325,11 @@ export function useConnectionValue() {
               walletConnectWallet as WalletAdapter,
             );
           } else if (provider === "discord" || provider === "google") {
-            const turnkeyWallet = new TurnkeyWallet(provider);
+            const turnkeyWallet = new TurnkeyWallet(
+              controller.username(),
+              chainId,
+              provider,
+            );
             if (!turnkeyWallet) {
               throw new Error("Embedded Turnkey wallet not found");
             }
@@ -312,16 +347,14 @@ export function useConnectionValue() {
         console.error("Failed to add embedded wallet:", error);
       }
     })();
-  }, [controller?.username, chainId]);
+  }, [controller?.username, chainId, controller]);
 
   // Handle controller initialization
   useEffect(() => {
-    // if we're not embedded (eg Slot auth/session) load controller from store and set origin/rpcUrl
-    if (!isIframe()) {
-      if (controller) {
-        setController(controller);
-      }
-    }
+    setIsMainnet(
+      import.meta.env.PROD &&
+        controller?.chainId() === constants.StarknetChainId.SN_MAIN,
+    );
   }, [controller]);
 
   // Check if preset is verified for the current origin, supporting wildcards
@@ -401,6 +434,30 @@ export function useConnectionValue() {
     }
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
+  // Function to refresh session status
+  const refreshSessionStatus = useCallback(() => {
+    if (controller && policies) {
+      controller
+        .isRequestedSession(policies)
+        .then(setIsSessionActive)
+        .catch((error) => {
+          console.error("Failed to check session status:", error);
+          setIsSessionActive(false);
+        });
+    } else if (controller && !policies) {
+      // No policies means no session check needed
+      setIsSessionActive(true);
+    } else {
+      // No controller means no session
+      setIsSessionActive(false);
+    }
+  }, [controller, policies]);
+
+  // Check session status when controller or policies change
+  useEffect(() => {
+    refreshSessionStatus();
+  }, [refreshSessionStatus]);
+
   useThemeEffect({ theme, assetUrl: "" });
 
   useEffect(() => {
@@ -447,9 +504,12 @@ export function useConnectionValue() {
         externalSendTransaction:
           iframeMethods.externalSendTransaction(currentOrigin),
         externalGetBalance: iframeMethods.externalGetBalance(currentOrigin),
+        externalSwitchChain: iframeMethods.externalSwitchChain(currentOrigin),
+        externalWaitForTransaction:
+          iframeMethods.externalWaitForTransaction(currentOrigin),
       });
     }
-  }, [setOrigin, setRpcUrl, setContext, setController, setConfigSignupOptions]);
+  }, []); // Empty dependency array since we only want to run this once
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
@@ -465,7 +525,7 @@ export function useConnectionValue() {
         message: "User logged out",
       });
     }
-  }, [context, parent, setController]);
+  }, [context, parent]);
 
   const openSettings = useCallback(() => {
     window.dispatchEvent(
@@ -574,6 +634,16 @@ export function useConnectionValue() {
     [parent],
   );
 
+  const externalWaitForTransaction = useCallback(
+    (identifier: string, txHash: string, timeoutMs?: number) => {
+      if (!parent) {
+        return Promise.reject(new Error("Parent connection not ready."));
+      }
+      return parent.externalWaitForTransaction(identifier, txHash, timeoutMs);
+    },
+    [parent],
+  );
+
   return {
     parent,
     context,
@@ -581,11 +651,16 @@ export function useConnectionValue() {
     origin,
     rpcUrl,
     policies,
+    isSessionActive,
+    refreshSessionStatus,
+    onModalClose,
+    setOnModalClose,
     theme,
     project: urlParams.project,
     namespace: urlParams.namespace,
     tokens: urlParams.tokens,
     isConfigLoading,
+    isMainnet,
     verified,
     chainId,
     configSignupOptions,
@@ -602,6 +677,7 @@ export function useConnectionValue() {
     externalSignTypedData,
     externalSendTransaction,
     externalGetBalance,
+    externalWaitForTransaction,
   };
 }
 

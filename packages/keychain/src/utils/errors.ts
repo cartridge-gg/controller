@@ -298,6 +298,11 @@ function parseGraphQLErrorMessage(
   };
 }
 
+function capitalizeFirstLetter(str: string): string {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export function parseExecutionError(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any,
@@ -319,9 +324,71 @@ export function parseExecutionError(
   if (!executionError) {
     return {
       raw: JSON.stringify(error.data),
-      summary: error.message,
+      summary: capitalizeFirstLetter(error.message),
       stack: [],
     };
+  }
+
+  // Handle the "Nested error" format from JSON-RPC responses
+  if (
+    typeof executionError === "string" &&
+    executionError.includes("Nested error:")
+  ) {
+    // Extract the nested error details
+    const nestedMatch = executionError.match(/Nested error:\s*\((.*)\)/s);
+    if (nestedMatch) {
+      const nestedContent = nestedMatch[1];
+
+      // Extract all error messages from the nested content
+      // Match both single-quoted strings and double-quoted strings
+      const singleQuoted = [...nestedContent.matchAll(/'([^']*)'/g)].map(
+        (match) => match[1],
+      );
+      const doubleQuoted = [...nestedContent.matchAll(/"([^"]*)"/g)].map(
+        (match) => match[1],
+      );
+      const allErrors = [...singleQuoted, ...doubleQuoted];
+
+      // Find the most meaningful error, excluding common framework errors
+      const meaningfulError = allErrors.find(
+        (err) =>
+          err !== "argent/multicall-failed" &&
+          err !== "ENTRYPOINT_FAILED" &&
+          err !== "ENTRYPOINT_NOT_FOUND" &&
+          err !== "0x0" && // Exclude separator
+          !err.match(/^0x[0-9a-fA-F]+$/) && // Exclude pure hex values
+          err !== "0x1" && // Exclude other separators
+          err !== "", // Exclude empty strings
+      );
+
+      // Extract contract details from the execution error
+      const contractMatch = executionError.match(
+        /Contract address=\s*(0x[a-fA-F0-9]+)/,
+      );
+      const classMatch = executionError.match(/Class hash=\s*(0x[a-fA-F0-9]+)/);
+      const selectorMatch = executionError.match(
+        /Selector=\s*(0x[a-fA-F0-9]+)/,
+      );
+
+      return {
+        raw: executionError,
+        summary: capitalizeFirstLetter(
+          meaningfulError || "Transaction execution failed",
+        ),
+        stack: [
+          {
+            address: contractMatch?.[1],
+            class: classMatch?.[1],
+            selector: selectorMatch?.[1],
+            error: meaningfulError
+              ? [meaningfulError]
+              : allErrors.length > 0
+                ? allErrors
+                : ["Transaction execution failed"],
+          },
+        ],
+      };
+    }
   }
 
   // Handle object format execution error
@@ -332,18 +399,30 @@ export function parseExecutionError(
     // Parse the tuple error format
     const tupleMatch = errorMessage.match(/^\((.*)\)$/);
     if (tupleMatch) {
-      const allErrors = [...tupleMatch[1].matchAll(/'([^']+)'/g)].map(
+      // Extract all quoted strings from the tuple (both single and double quotes)
+      const singleQuoted = [...tupleMatch[1].matchAll(/'([^']*)'/g)].map(
         (match) => match[1],
       );
+      const doubleQuoted = [...tupleMatch[1].matchAll(/"([^"]*)"/g)].map(
+        (match) => match[1],
+      );
+      const allErrors = [...singleQuoted, ...doubleQuoted];
       const meaningfulError =
         allErrors.find(
           (err) =>
-            err !== "argent/multicall-failed" && err !== "ENTRYPOINT_FAILED",
+            err !== "argent/multicall-failed" &&
+            err !== "ENTRYPOINT_FAILED" &&
+            err !== "ENTRYPOINT_NOT_FOUND" &&
+            err !== "0x0" && // Exclude separator
+            err !== "" && // Exclude empty strings
+            !err.match(/^0x[0-9a-fA-F]+$/), // Exclude hex values that might leak through
         ) || allErrors[0];
 
       return {
         raw: JSON.stringify(executionError),
-        summary: "There was an error in the transaction",
+        summary: capitalizeFirstLetter(
+          meaningfulError || "There was an error in the transaction",
+        ),
         stack: [
           {
             address: objectError.contract_address,
@@ -443,14 +522,38 @@ export function parseExecutionError(
         extractedInfo.error = ["Function not found in the contract."];
       } else if (errorLines[0].includes("Failure reason:")) {
         // Check if it's a tuple format with multiple errors
-        const tupleMatch = errorLines[0].match(/Failure reason: \((.*)\)\./);
+        // Handle both inline and multiline formats
+        const fullError = errorLines.join("\n");
+        const tupleMatch = fullError.match(
+          /Failure reason:\s*\n?\s*\((.*)\)\./s,
+        );
         if (tupleMatch) {
-          // Extract all quoted strings from the tuple
-          const allErrors = [...tupleMatch[1].matchAll(/'([^']+)'/g)].map(
+          // Extract all quoted strings from the tuple (both single and double quotes)
+          const singleQuoted = [...tupleMatch[1].matchAll(/'([^']*)'/g)].map(
             (match) => match[1],
           );
-          extractedInfo.error =
-            allErrors.length > 0 ? allErrors : [tupleMatch[1]];
+          const doubleQuoted = [...tupleMatch[1].matchAll(/"([^"]*)"/g)].map(
+            (match) => match[1],
+          );
+          const allErrors = [...singleQuoted, ...doubleQuoted];
+
+          // Find the most meaningful error, excluding common framework errors
+          const meaningfulError = allErrors.find(
+            (err) =>
+              err !== "argent/multicall-failed" &&
+              err !== "ENTRYPOINT_FAILED" &&
+              err !== "ENTRYPOINT_NOT_FOUND" &&
+              err !== "0x0" && // Exclude separator like 0x0
+              err !== "" && // Exclude empty strings
+              !err.match(/^0x[0-9a-fA-F]+$/), // Exclude hex values that might leak through
+          );
+
+          // Use the meaningful error if found, otherwise fall back to all errors
+          extractedInfo.error = meaningfulError
+            ? [meaningfulError]
+            : allErrors.length > 0
+              ? allErrors
+              : [tupleMatch[1]];
         } else {
           // Single error format
           const failureReason = errorLines[0].match(/'([^']+)'/)?.[1];
@@ -522,19 +625,39 @@ export function parseExecutionError(
         // If multicall failed, look for the actual error
         const actualError = lastError.find(
           (err: string) =>
-            err !== "argent/multicall-failed" && err !== "ENTRYPOINT_FAILED",
+            err !== "argent/multicall-failed" &&
+            err !== "ENTRYPOINT_FAILED" &&
+            err !== "ENTRYPOINT_NOT_FOUND" &&
+            err !== "0x0" && // Exclude separator
+            err !== "" && // Exclude empty strings
+            !err.match(/^0x[0-9a-fA-F]+$/), // Exclude hex values
         );
-        summary = actualError || "Multicall failed";
+        summary = actualError || "Transaction execution failed";
       } else {
-        summary = lastErrorMessage;
-        lastError[lastError.length - 1] = summary;
+        // Try to find a meaningful error message instead of raw hex or technical errors
+        const meaningfulError = lastError.find(
+          (err: string) =>
+            !err.match(/^0x[0-9a-fA-F]+$/) &&
+            err !== "ENTRYPOINT_FAILED" &&
+            err !== "0x0" &&
+            !err.startsWith("Cairo traceback") &&
+            !err.startsWith("Unknown location"),
+        );
+
+        // Use the meaningful error if found, otherwise use generic "Execution error"
+        summary = meaningfulError || "Execution error";
+
+        // Only update last error if we found something meaningful
+        if (meaningfulError && meaningfulError !== "Execution error") {
+          lastError[lastError.length - 1] = summary;
+        }
       }
     }
   }
 
   return {
     raw: executionErrorRaw,
-    summary: summaryOveride ? summaryOveride : summary,
+    summary: summaryOveride ? summaryOveride : capitalizeFirstLetter(summary),
     stack: processedStack,
   };
 }
@@ -669,6 +792,32 @@ export const jsonRpcExecutionErrorTestCase = {
 };
 
 export const starknetTransactionExecutionErrorTestCases = [
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Transaction reverted: Transaction execution has failed:\n0: Error in the called contract (contract address: 0x057156ef71dcfb930a272923dcbdc54392b6676497fdc143042ee1d4a7a861c1, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x2, 0x736561736f6e206973207374696c6c206f70656e6564 ('season is still opened'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      },
+    },
+    expected: {
+      raw: "Transaction reverted: Transaction execution has failed:\n0: Error in the called contract (contract address: 0x057156ef71dcfb930a272923dcbdc54392b6676497fdc143042ee1d4a7a861c1, class hash: 0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x2, 0x736561736f6e206973207374696c6c206f70656e6564 ('season is still opened'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      summary: "Season is still opened",
+      stack: [
+        {
+          address:
+            "0x057156ef71dcfb930a272923dcbdc54392b6676497fdc143042ee1d4a7a861c1",
+          class:
+            "0x00e2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6",
+          selector:
+            "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          error: ["season is still opened"],
+        },
+      ],
+    },
+  },
   {
     input: {
       message: "Unexpected Error",
@@ -1100,7 +1249,7 @@ export const starknetTransactionExecutionErrorTestCases = [
     },
     expected: {
       raw: '{"class_hash":"0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf","contract_address":"0x4fdcb829582d172a6f3858b97c16da38b08da5a1df7101a5d285b868d89921b","error":"(0x617267656e742f6d756c746963616c6c2d6661696c6564 (\'argent/multicall-failed\'), 0x1, 0x753235365f737562204f766572666c6f77 (\'u256_sub Overflow\'), 0x454e545259504f494e545f4641494c4544 (\'ENTRYPOINT_FAILED\'))","selector":"0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad"}',
-      summary: "There was an error in the transaction",
+      summary: "U256_sub Overflow",
       stack: [
         {
           address:
@@ -1110,6 +1259,110 @@ export const starknetTransactionExecutionErrorTestCases = [
           error: ["u256_sub Overflow"],
           selector:
             "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        execution_error:
+          "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x03f301af12fb7d7ed8266639594b1867c33b511824d2a1d6bc7fa25ea8eb477c, class hash: 0x0360783345096514626504edc9fb252328d1a240e4e948bef8d0c08dff45927f, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x0, 'Already joined in!', 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+        transaction_index: 0,
+      },
+    },
+    expected: {
+      raw: "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x03f301af12fb7d7ed8266639594b1867c33b511824d2a1d6bc7fa25ea8eb477c, class hash: 0x0360783345096514626504edc9fb252328d1a240e4e948bef8d0c08dff45927f, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x0, 'Already joined in!', 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      summary: "Already joined in!",
+      stack: [
+        {
+          address:
+            "0x03f301af12fb7d7ed8266639594b1867c33b511824d2a1d6bc7fa25ea8eb477c",
+          class:
+            "0x0360783345096514626504edc9fb252328d1a240e4e948bef8d0c08dff45927f",
+          selector:
+            "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          error: ["Already joined in!"],
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Contract address= 0x13f1386e3d4267a1502d8ca782d34b63634d969d3c527a511814c2ef67b84c4, Class hash= 0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: (0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x1, 0x45524332303a20696e73756666696369656e742062616c616e6365 ('ERC20: insufficient balance'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'))",
+      },
+    },
+    expected: {
+      raw: "Contract address= 0x13f1386e3d4267a1502d8ca782d34b63634d969d3c527a511814c2ef67b84c4, Class hash= 0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: (0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x1, 0x45524332303a20696e73756666696369656e742062616c616e6365 ('ERC20: insufficient balance'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'))",
+      summary: "ERC20: insufficient balance",
+      stack: [
+        {
+          address:
+            "0x13f1386e3d4267a1502d8ca782d34b63634d969d3c527a511814c2ef67b84c4",
+          class:
+            "0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+          selector:
+            "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          error: ["ERC20: insufficient balance"],
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Contract address= 0x596990bd2774a49a4a8578e9bae58b76fe82183088bfcc439226c8388b63c09, Class hash= 0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: (0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x1, \"Wallet Connection Required for Double or Nothing Spin\", 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'))",
+      },
+    },
+    expected: {
+      raw: "Contract address= 0x596990bd2774a49a4a8578e9bae58b76fe82183088bfcc439226c8388b63c09, Class hash= 0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: (0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x1, \"Wallet Connection Required for Double or Nothing Spin\", 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'))",
+      summary: "Wallet Connection Required for Double or Nothing Spin",
+      stack: [
+        {
+          address:
+            "0x596990bd2774a49a4a8578e9bae58b76fe82183088bfcc439226c8388b63c09",
+          class:
+            "0x743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+          selector:
+            "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          error: ["Wallet Connection Required for Double or Nothing Spin"],
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x013f1386e3d4267a1502d8ca782d34b63634d969d3c527a511814c2ef67b84c4, class hash: 0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x0 (''), \"Jackpot has ended\", 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      },
+    },
+    expected: {
+      raw: "Transaction execution has failed:\n0: Error in the called contract (contract address: 0x013f1386e3d4267a1502d8ca782d34b63634d969d3c527a511814c2ef67b84c4, class hash: 0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf, selector: 0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad):\nExecution failed. Failure reason:\n(0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x0 (''), \"Jackpot has ended\", 0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED')).\n",
+      summary: "Jackpot has ended",
+      stack: [
+        {
+          address:
+            "0x013f1386e3d4267a1502d8ca782d34b63634d969d3c527a511814c2ef67b84c4",
+          class:
+            "0x0743c83c41ce99ad470aa308823f417b2141e02e04571f5c0004e743556e7faf",
+          selector:
+            "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+          error: ["Jackpot has ended"],
         },
       ],
     },
