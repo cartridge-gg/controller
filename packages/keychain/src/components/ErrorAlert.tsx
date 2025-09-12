@@ -1,5 +1,9 @@
 import { ControllerError } from "@/utils/connection";
-import { parseExecutionError, parseValidationError } from "@/utils/errors";
+import {
+  parseExecutionError,
+  parseValidationError,
+  parseGraphQLError,
+} from "@/utils/errors";
 import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
   Accordion,
@@ -144,8 +148,31 @@ export function ControllerErrorAlert({
   let copyText: string | undefined;
 
   if (!isControllerError(error)) {
-    title = "Unknown error";
-    description = error.message;
+    // Check if this is a GraphQL/RPC error
+    if (error.message.includes("rpc error:")) {
+      // Extract just the RPC error part before any JSON
+      const rpcMatch = error.message.match(
+        /rpc error: code = (\w+) desc = ([^:]+)/,
+      );
+      if (rpcMatch) {
+        const [, , desc] = rpcMatch;
+        // Just use the description directly for cleaner display
+        title = "Error";
+        description = desc.trim();
+      } else {
+        title = "Unknown error";
+        description = error.message;
+      }
+    } else if (error.message.includes("GraphQL")) {
+      const parsed = parseGraphQLError(error.message);
+      title = parsed.summary;
+      description = parsed.details.rpcError
+        ? parsed.details.rpcError.replace(/^\w+:\s*/, "") // Remove the code prefix like "Internal: "
+        : error.message;
+    } else {
+      title = "Unknown error";
+      description = error.message;
+    }
 
     return (
       <ErrorAlert
