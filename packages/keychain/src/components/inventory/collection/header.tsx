@@ -31,16 +31,19 @@ export function CollectionHeader({
     hours: number;
     days: number;
     months: number;
+    years: number;
   }>({
     seconds: 0,
     minutes: 0,
     hours: 0,
     days: 0,
     months: 0,
+    years: 0,
   });
 
   const expirationLabel = useMemo(() => {
-    if (state.months > 0) return `${state.months}m`;
+    if (state.years > 0) return `${state.years}y`;
+    if (state.months > 0) return `${state.months}mo`;
     if (state.days > 0) return `${state.days}d`;
     if (state.hours > 0) return `${state.hours}h`;
     if (state.minutes > 0) return `${state.minutes}m`;
@@ -59,6 +62,7 @@ export function CollectionHeader({
           hours: 0,
           days: 0,
           months: 0,
+          years: 0,
         });
         return;
       }
@@ -68,6 +72,7 @@ export function CollectionHeader({
         hours: Math.floor(diff / (1000 * 60 * 60)),
         days: Math.floor(diff / (1000 * 60 * 60 * 24)),
         months: Math.floor(diff / (1000 * 60 * 60 * 24 * 30)),
+        years: Math.floor(diff / (1000 * 60 * 60 * 24 * 365)),
       });
     }, 1000);
 
