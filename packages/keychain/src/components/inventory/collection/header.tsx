@@ -42,6 +42,7 @@ export function CollectionHeader({
   });
 
   const expirationLabel = useMemo(() => {
+    if (state.years > 100) return "∞";
     if (state.years > 0) return `${state.years}y`;
     if (state.months > 0) return `${state.months}mo`;
     if (state.days > 0) return `${state.days}d`;
