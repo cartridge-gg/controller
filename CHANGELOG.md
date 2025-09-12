@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.10.2] - 2025-09-11
+
+### ✨ New Features
+- **@cartridge/keychain**: Added environment-based configuration for merkle drop contracts enabling flexible contract deployment across different environments (#2008)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Migrated 6 transaction flows to use ExecutionContainer for direct execution, eliminating page redirects and providing inline transaction confirmation for improved UX (#2005)
+- **@cartridge/keychain**: Enhanced session update prompting logic with better validation and synchronous rendering for improved transaction flow performance (#2007)
+- **Examples**: Cleaned up Next.js example Profile component by removing collection-related buttons (#2011)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed chain switching to always execute on request, ensuring reliable network changes (#2014)
+- **@cartridge/keychain**: Fixed login validation to prevent authentication before controller username validation is complete (#2012)
+- **@cartridge/keychain**: Fixed session creation flash issues for smoother session management (#2009)
+- **@cartridge/keychain**: Fixed Braavos wallet chain switching by adding proper skip logic (#2006)
+- **@cartridge/keychain**: Fixed merkle drop claim interface to properly display claim amounts (#2004)
+
 ## [0.10.1] - 2025-09-10
 
 ### ✨ New Features
