@@ -229,7 +229,7 @@ export function CollectionAsset() {
                   ? selfOrders[0].expiration
                   : undefined
               }
-              listingCount={isListed ? selfOrders.length : undefined}
+              listingCount={isListed && isOwner ? selfOrders.length : undefined}
             />
             <div
               className="flex flex-col gap-6 overflow-scroll relative"
