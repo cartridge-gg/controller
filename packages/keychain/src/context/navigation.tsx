@@ -205,7 +205,6 @@ export function NavigationProvider({
       to: string | number,
       options?: { replace?: boolean; state?: unknown; reset?: boolean },
     ) => {
-      console.log(to);
       if (typeof to === "number") {
         // Handle relative navigation
         const newIndex = currentIndex + to;

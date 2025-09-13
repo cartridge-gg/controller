@@ -1,4 +1,23 @@
 import { ControllerError } from "@/utils/connection";
+
+interface GraphQLErrorDetails {
+  raw: string;
+  summary: string;
+  errors?: Array<{
+    message: string;
+    path?: Array<string | number>;
+  }>;
+  details: {
+    operation?: string;
+    network?: string;
+    rpcError?: string;
+    path?: Array<string | number>;
+  };
+}
+
+interface ErrorWithGraphQL extends Error {
+  graphqlError?: GraphQLErrorDetails;
+}
 import {
   parseExecutionError,
   parseValidationError,
@@ -137,7 +156,7 @@ export function ControllerErrorAlert({
   isPaymaster = false,
   className,
 }: {
-  error: ControllerError | Error;
+  error: ControllerError | Error | ErrorWithGraphQL;
   isPaymaster?: boolean;
   className?: string;
 }) {
@@ -148,22 +167,58 @@ export function ControllerErrorAlert({
   let copyText: string | undefined;
 
   if (!isControllerError(error)) {
-    // Check if this is a GraphQL/RPC error
-    if (error.message.includes("rpc error:")) {
-      // Extract just the RPC error part before any JSON
+    // Check if this error has parsed GraphQL error details attached
+    if ("graphqlError" in error && error.graphqlError) {
+      const graphqlError = error.graphqlError as GraphQLErrorDetails;
+
+      // Use the summary (which contains the desc field) as the title
+      title = graphqlError.summary;
+
+      // Build description from the GraphQL errors
+      if (graphqlError.errors && graphqlError.errors.length > 0) {
+        if (graphqlError.errors.length === 1) {
+          // Single error - show it cleanly
+          const err = graphqlError.errors[0];
+          const pathStr = err.path ? `Path: ${err.path.join(" → ")}` : "";
+          description = pathStr;
+        } else {
+          // Multiple errors - show them as a list
+          description = (
+            <div className="flex flex-col gap-2 text-xs">
+              {graphqlError.errors.map((err, i) => (
+                <div key={i} className="flex flex-col gap-1">
+                  <div>• {err.message}</div>
+                  {err.path && (
+                    <div className="ml-3 opacity-70">
+                      Path: {err.path.join(" → ")}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        }
+      } else {
+        description = "";
+      }
+
+      copyText = graphqlError.raw;
+      isExpanded = false; // Keep closed by default
+    } else if (error.message.includes("rpc error:")) {
+      // Fallback for unparsed RPC errors
       const rpcMatch = error.message.match(
         /rpc error: code = (\w+) desc = ([^:]+)/,
       );
       if (rpcMatch) {
         const [, , desc] = rpcMatch;
-        // Just use the description directly for cleaner display
-        title = "Error";
-        description = desc.trim();
+        title = desc.trim();
+        description = "";
       } else {
         title = "Unknown error";
         description = error.message;
       }
     } else if (error.message.includes("GraphQL")) {
+      // Fallback for unparsed GraphQL errors
       const parsed = parseGraphQLError(error.message);
       title = parsed.summary;
       description = parsed.details.rpcError
