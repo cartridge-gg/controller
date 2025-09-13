@@ -9,7 +9,7 @@ import {
 import { Receiving } from "../../receiving";
 import { CostBreakdown } from "../../review/cost";
 import { useCallback, useEffect } from "react";
-import { ErrorAlert } from "@/components/ErrorAlert";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
 
 export function CryptoCheckout() {
   const {
@@ -55,9 +55,7 @@ export function CryptoCheckout() {
             costDetails={costDetails}
           />
         )}
-        {displayError && (
-          <ErrorAlert title="Error" description={displayError.message} />
-        )}
+        {displayError && <ControllerErrorAlert error={displayError} />}
         <Button
           onClick={onPurchase}
           isLoading={isCryptoLoading || isFetchingFees}

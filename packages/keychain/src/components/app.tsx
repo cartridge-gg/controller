@@ -76,9 +76,9 @@ export function App() {
           />
           <Route path="starterpack/collections" element={<Collections />} />
           <Route path="claim/:keys/:address/:type" element={<Claim />} />
-          <Route path="method/:platforms?" element={<PaymentMethod />} />
-          <Route path="network/:platforms?" element={<ChooseNetwork />} />
-          <Route path="wallet/:platforms?" element={<SelectWallet />} />
+          <Route path="method/:platforms" element={<PaymentMethod />} />
+          <Route path="network/:platforms" element={<ChooseNetwork />} />
+          <Route path="wallet/:platforms" element={<SelectWallet />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/crypto" element={<CryptoCheckout />} />
           <Route path="review" element={<></>} />

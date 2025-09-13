@@ -20,7 +20,7 @@ export function SendAmount({
     const value = token.balance.value;
     const max = token.balance.amount;
     const total = (value * amount) / max;
-    return `~$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    return `$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   }, [token, amount]);
 
   const handleMax = useCallback(

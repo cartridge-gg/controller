@@ -130,7 +130,7 @@ export function CollectionListing() {
     const value = selected.balance.value;
     const max = selected.balance.amount;
     const total = (value * price) / max;
-    return `~$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    return `$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   }, [selected, price]);
 
   const listingData = useMemo(() => {
@@ -158,7 +158,7 @@ export function CollectionListing() {
     const value = selected.balance.value;
     const max = selected.balance.amount;
     const total = (listingData.assets.length * (value * price)) / max;
-    return `~$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    return `$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   }, [selected, price, listingData]);
 
   const handleSelection = useCallback(

@@ -33,7 +33,7 @@ export function Funding({ title, isSlot }: FundingProps) {
           typeof title === "string"
             ? title
             : controller
-              ? `Fund ${controller.username()}`
+              ? `Add funds for ${controller.username()}`
               : ""
         }
         icon={<ControllerIcon size="lg" />}
