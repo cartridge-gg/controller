@@ -11,7 +11,7 @@ import {
   LayerswapQuoteQueryVariables,
   CreateLayerswapPaymentMutationVariables,
 } from "@cartridge/ui/utils/api/cartridge";
-import { client } from "@/utils/graphql";
+import { request } from "@/utils/graphql";
 import { useConnection } from "../connection";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 import {
@@ -25,26 +25,6 @@ import {
 } from "../../utils/solana";
 import { ethers } from "ethers";
 import erc20abi from "./erc20abi.json" assert { type: "json" };
-import { parseClientError } from "@/utils/errors";
-
-interface GraphQLErrorDetails {
-  raw: string;
-  summary: string;
-  errors?: Array<{
-    message: string;
-    path?: Array<string | number>;
-  }>;
-  details: {
-    operation?: string;
-    network?: string;
-    rpcError?: string;
-    path?: Array<string | number>;
-  };
-}
-
-interface ErrorWithGraphQL extends Error {
-  graphqlError?: GraphQLErrorDetails;
-}
 
 export interface SendPaymentResult {
   paymentId: string;
@@ -237,28 +217,14 @@ export const useCryptoPayment = () => {
 
   const estimateStarterPackFees = useCallback(
     async (input: CreateLayerswapPaymentInput) => {
-      try {
-        const result = await client.request<
-          LayerswapQuoteQuery,
-          LayerswapQuoteQueryVariables
-        >(LayerswapQuoteDocument, {
-          input: input,
-        });
+      const result = await request<
+        LayerswapQuoteQuery,
+        LayerswapQuoteQueryVariables
+      >(LayerswapQuoteDocument, {
+        input: input,
+      });
 
-        return result.layerswapQuote;
-      } catch (err) {
-        // Try to parse as a GraphQL ClientError
-        const parsedError = parseClientError(err);
-        if (parsedError) {
-          // Create a proper Error with the parsed summary as the message
-          const error = new Error(parsedError.summary) as ErrorWithGraphQL;
-          // Attach the full parsed error details for debugging
-          error.graphqlError = parsedError;
-          throw error;
-        }
-        // If not a ClientError, throw as is
-        throw err;
-      }
+      return result.layerswapQuote;
     },
     [],
   );
@@ -269,39 +235,25 @@ export const useCryptoPayment = () => {
     const startTime = Date.now();
 
     while (Date.now() - startTime < MAX_WAIT_TIME) {
-      try {
-        const result = await client.request<CryptoPaymentQuery>(
-          CryptoPaymentDocument,
-          {
-            id: paymentId,
-          },
-        );
+      const result = await request<CryptoPaymentQuery>(CryptoPaymentDocument, {
+        id: paymentId,
+      });
 
-        const payment = result.cryptoPayment;
-        if (!payment) {
-          throw new Error("Payment not found");
-        }
+      const payment = result.cryptoPayment;
+      if (!payment) {
+        throw new Error("Payment not found");
+      }
 
-        switch (payment.status) {
-          case "CONFIRMED":
-            return true;
-          case "FAILED":
-            throw new Error(`Payment failed, ref id: ${paymentId}`);
-          case "EXPIRED":
-            throw new Error(`Payment expired, ref id: ${paymentId}`);
-          case "PENDING":
-            await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
-            break;
-        }
-      } catch (err) {
-        // Try to parse as a GraphQL ClientError
-        const parsedError = parseClientError(err);
-        if (parsedError) {
-          const error = new Error(parsedError.summary) as ErrorWithGraphQL;
-          error.graphqlError = parsedError;
-          throw error;
-        }
-        throw err;
+      switch (payment.status) {
+        case "CONFIRMED":
+          return true;
+        case "FAILED":
+          throw new Error(`Payment failed, ref id: ${paymentId}`);
+        case "EXPIRED":
+          throw new Error(`Payment expired, ref id: ${paymentId}`);
+        case "PENDING":
+          await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
+          break;
       }
     }
 
@@ -311,57 +263,37 @@ export const useCryptoPayment = () => {
   }, []);
 
   async function createCryptoPayment(input: CreateLayerswapPaymentInput) {
-    try {
-      const result = await client.request<CreateLayerswapPaymentMutation>(
-        CreateLayerswapPaymentDocument,
-        {
-          input,
-        },
-      );
+    const result = await request<CreateLayerswapPaymentMutation>(
+      CreateLayerswapPaymentDocument,
+      {
+        input,
+      },
+    );
 
-      return {
-        id: result.createLayerswapPayment.cryptoPaymentId,
-        depositAddress: result.createLayerswapPayment.sourceDepositAddress,
-        tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
-        tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
-        swapId: result.createLayerswapPayment.swapId,
-      };
-    } catch (err) {
-      const parsedError = parseClientError(err);
-      if (parsedError) {
-        const error = new Error(parsedError.summary) as ErrorWithGraphQL;
-        error.graphqlError = parsedError;
-        throw error;
-      }
-      throw err;
-    }
+    return {
+      id: result.createLayerswapPayment.cryptoPaymentId,
+      depositAddress: result.createLayerswapPayment.sourceDepositAddress,
+      tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
+      tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
+      swapId: result.createLayerswapPayment.swapId,
+    };
   }
 
   async function createStarterPackPayment(input: CreateLayerswapPaymentInput) {
-    try {
-      const result = await client.request<
-        CreateLayerswapPaymentMutation,
-        CreateLayerswapPaymentMutationVariables
-      >(CreateLayerswapPaymentDocument, {
-        input,
-      });
+    const result = await request<
+      CreateLayerswapPaymentMutation,
+      CreateLayerswapPaymentMutationVariables
+    >(CreateLayerswapPaymentDocument, {
+      input,
+    });
 
-      return {
-        id: result.createLayerswapPayment.cryptoPaymentId,
-        depositAddress: result.createLayerswapPayment.sourceDepositAddress,
-        tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
-        tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
-        swapId: result.createLayerswapPayment.swapId,
-      };
-    } catch (err) {
-      const parsedError = parseClientError(err);
-      if (parsedError) {
-        const error = new Error(parsedError.summary) as ErrorWithGraphQL;
-        error.graphqlError = parsedError;
-        throw error;
-      }
-      throw err;
-    }
+    return {
+      id: result.createLayerswapPayment.cryptoPaymentId,
+      depositAddress: result.createLayerswapPayment.sourceDepositAddress,
+      tokenAmount: result.createLayerswapPayment.sourceTokenAmount,
+      tokenAddress: result.createLayerswapPayment.sourceTokenAddress,
+      swapId: result.createLayerswapPayment.swapId,
+    };
   }
 
   return {

@@ -373,6 +373,28 @@ export function parseClientError(error: unknown): {
   return null;
 }
 
+/**
+ * Type definitions for GraphQL errors with RPC error details
+ */
+export interface GraphQLErrorDetails {
+  raw: string;
+  summary: string;
+  errors?: Array<{
+    message: string;
+    path?: Array<string | number>;
+  }>;
+  details: {
+    operation?: string;
+    network?: string;
+    rpcError?: string;
+    path?: Array<string | number>;
+  };
+}
+
+export interface ErrorWithGraphQL extends Error {
+  graphqlError?: GraphQLErrorDetails;
+}
+
 function capitalizeFirstLetter(str: string): string {
   if (!str) return str;
   return str.charAt(0).toUpperCase() + str.slice(1);

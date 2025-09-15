@@ -1,27 +1,10 @@
 import { ControllerError } from "@/utils/connection";
-
-interface GraphQLErrorDetails {
-  raw: string;
-  summary: string;
-  errors?: Array<{
-    message: string;
-    path?: Array<string | number>;
-  }>;
-  details: {
-    operation?: string;
-    network?: string;
-    rpcError?: string;
-    path?: Array<string | number>;
-  };
-}
-
-interface ErrorWithGraphQL extends Error {
-  graphqlError?: GraphQLErrorDetails;
-}
 import {
   parseExecutionError,
   parseValidationError,
   parseGraphQLError,
+  type GraphQLErrorDetails,
+  type ErrorWithGraphQL,
 } from "@/utils/errors";
 import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
