@@ -18,6 +18,24 @@ import {
   StarterPackItem,
   StarterPackItemType,
 } from "@cartridge/controller";
+import { ItemType } from "@/context/purchase";
+
+export const enum StarterItemType {
+  NFT = ItemType.NFT,
+  CREDIT = ItemType.CREDIT,
+  ERC20 = ItemType.ERC20,
+}
+
+export interface StarterItemData {
+  title: string;
+  collectionName?: string;
+  description: string;
+  price: number;
+  image?: string;
+  type: StarterItemType;
+  value?: number;
+  fancy?: boolean;
+}
 
 export interface StarterPackDetails {
   id?: string;

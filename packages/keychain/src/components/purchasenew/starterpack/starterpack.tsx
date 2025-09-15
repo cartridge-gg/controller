@@ -12,17 +12,21 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
+  VerifiedIcon,
 } from "@cartridge/ui";
 import {
   MintAllowance,
   StarterpackAcquisitionType,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { LoadingState } from "../loading";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
+import { useEffect, useMemo } from "react";
+import { LoadingState } from "../loading";
+import { CostBreakdown } from "../review/cost";
+import { PricingDetails } from "@/components/purchase/types";
 import { decodeStarterPack } from "@/utils/starterpack-url";
+import { usdcToUsd } from "@/utils/starterpack";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -68,6 +72,8 @@ export function PurchaseStarterpack() {
 
 export function StarterPackInner({
   name,
+  edition,
+  isVerified,
   supply,
   mintAllowance,
   acquisitionType,
@@ -75,6 +81,8 @@ export function StarterPackInner({
   error,
 }: {
   name: string;
+  edition?: string;
+  isVerified?: boolean;
   supply?: number;
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
@@ -95,12 +103,33 @@ export function StarterPackInner({
         throw new Error(`Invalid acquisition type: ${acquisitionType}`);
     }
   };
+
+  const price = useMemo(() => {
+    const total = starterpackItems.reduce(
+      (acc, item) => acc + usdcToUsd(item.price || 0n),
+      0,
+    );
+
+    return {
+      baseCostInCents: total * 100,
+      processingFeeInCents: 0,
+      totalInCents: total * 100,
+    } satisfies PricingDetails;
+  }, [starterpackItems]);
+
   return (
     <>
       <HeaderInner
         title={name}
+        description={
+          edition ? (
+            <span className="text-foreground-200 text-xs font-normal flex items-center gap-1 leading-none">
+              {isVerified && <VerifiedIcon size="xs" />}
+              {edition}
+            </span>
+          ) : undefined
+        }
         right={supply ? <Supply amount={supply} /> : undefined}
-        hideIcon
       />
       <LayoutContent>
         <div className="flex flex-col gap-3">
@@ -121,7 +150,15 @@ export function StarterPackInner({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error ? (
+          <ErrorAlert title="Error" description={error.message} />
+        ) : (
+          <CostBreakdown
+            rails="stripe"
+            costDetails={price}
+            paymentUnit="usdc"
+          />
+        )}
         <Button onClick={onProceed} disabled={!!error}>
           {acquisitionType === StarterpackAcquisitionType.Paid
             ? "Purchase"
