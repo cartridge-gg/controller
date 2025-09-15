@@ -8,15 +8,13 @@ import {
   PurchaseCard,
 } from "@cartridge/ui";
 import { useState } from "react";
-import { ErrorAlert } from "../ErrorAlert";
+import { ControllerErrorAlert } from "../ErrorAlert";
 import { networkWalletData } from "./wallet/data";
 import { useParams } from "react-router-dom";
-import { useConnection } from "@/hooks/connection";
 
 export function PaymentMethod() {
   const { platforms } = useParams();
   const { navigate } = useNavigation();
-  const { isMainnet } = useConnection();
   const { onCreditCardPurchase, displayError } = usePurchaseContext();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,23 +45,13 @@ export function PaymentMethod() {
               key={network.platform}
               text={network.name}
               icon={network.icon}
-              onClick={() =>
-                navigate(
-                  `/purchase/wallet/${network.platform}/${isMainnet ? "true" : "false"}`,
-                )
-              }
+              onClick={() => navigate(`/purchase/wallet/${network.platform}`)}
             />
           );
         })}
       </LayoutContent>
       <LayoutFooter>
-        {displayError && (
-          <ErrorAlert
-            variant="error"
-            title="Purchase Error"
-            description={displayError.message}
-          />
-        )}
+        {displayError && <ControllerErrorAlert error={displayError} />}
       </LayoutFooter>
     </>
   );

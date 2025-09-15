@@ -11,7 +11,7 @@ import {
   LayerswapQuoteQueryVariables,
   CreateLayerswapPaymentMutationVariables,
 } from "@cartridge/ui/utils/api/cartridge";
-import { client } from "@/utils/graphql";
+import { request } from "@/utils/graphql";
 import { useConnection } from "../connection";
 import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
 import {
@@ -217,7 +217,7 @@ export const useCryptoPayment = () => {
 
   const estimateStarterPackFees = useCallback(
     async (input: CreateLayerswapPaymentInput) => {
-      const result = await client.request<
+      const result = await request<
         LayerswapQuoteQuery,
         LayerswapQuoteQueryVariables
       >(LayerswapQuoteDocument, {
@@ -235,12 +235,9 @@ export const useCryptoPayment = () => {
     const startTime = Date.now();
 
     while (Date.now() - startTime < MAX_WAIT_TIME) {
-      const result = await client.request<CryptoPaymentQuery>(
-        CryptoPaymentDocument,
-        {
-          id: paymentId,
-        },
-      );
+      const result = await request<CryptoPaymentQuery>(CryptoPaymentDocument, {
+        id: paymentId,
+      });
 
       const payment = result.cryptoPayment;
       if (!payment) {
@@ -266,7 +263,7 @@ export const useCryptoPayment = () => {
   }, []);
 
   async function createCryptoPayment(input: CreateLayerswapPaymentInput) {
-    const result = await client.request<CreateLayerswapPaymentMutation>(
+    const result = await request<CreateLayerswapPaymentMutation>(
       CreateLayerswapPaymentDocument,
       {
         input,
@@ -283,7 +280,7 @@ export const useCryptoPayment = () => {
   }
 
   async function createStarterPackPayment(input: CreateLayerswapPaymentInput) {
-    const result = await client.request<
+    const result = await request<
       CreateLayerswapPaymentMutation,
       CreateLayerswapPaymentMutationVariables
     >(CreateLayerswapPaymentDocument, {
