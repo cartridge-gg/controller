@@ -21,6 +21,7 @@ export const credits = {
 
 export const useTokens: Mock<() => UseTokensResponse> = fn(() => ({
   tokens: Object.values(tokens) as Token[],
+  contracts: [],
   credits: credits,
   status: "success" as const,
 })).mockName("useTokens");
