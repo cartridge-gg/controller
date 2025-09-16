@@ -16,11 +16,13 @@ export const FeesTooltip = ({
   defaultOpen,
   isStripe,
   costDetails,
+  items,
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
   isStripe: boolean;
   costDetails: CostDetails;
+  items?: Record<string, string>;
 }) => {
   const { layerswapFees } = usePurchaseContext();
 
@@ -39,9 +41,6 @@ export const FeesTooltip = ({
   const cartridgeFee = convertCentsToDollars(cartridgeFeeInCents);
   const stripeFee = convertCentsToDollars(stripeFeeInCents);
 
-  console.log("cartridge fee: ", cartridgeFee);
-  console.log("stripe fee: ", stripeFee);
-
   return (
     <TooltipProvider>
       <Tooltip defaultOpen={defaultOpen}>
@@ -54,6 +53,16 @@ export const FeesTooltip = ({
           <div className="flex flex-row justify-between text-foreground-300">
             <span>Credits:</span>
             <span>{convertCentsToDollars(costDetails.baseCostInCents)}</span>
+            {items && (
+              <div className="flex flex-col text-xs text-foreground-300 mt-1">
+                {Object.entries(items).map(([key, value]) => (
+                  <div key={key} className="flex justify-between">
+                    <span>{key}:</span>
+                    <span>{value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <Separator className="bg-background-125" />
           {isStripe && (

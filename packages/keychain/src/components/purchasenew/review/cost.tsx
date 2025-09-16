@@ -20,6 +20,7 @@ export const convertCentsToDollars = (cents: number): string => {
 };
 
 export interface CostBreakdownProps {
+  items?: Record<string, string>;
   rails: PaymentRails;
   costDetails?: CostDetails;
   walletType?: ExternalWalletType;

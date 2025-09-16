@@ -18,6 +18,9 @@ export function Fees({
   const isLoading = isEstimating || isPriceLoading;
 
   useEffect(() => {
+    console.log("maxFee: ", maxFee);
+    console.log("token: ", token);
+    console.log("error: ", error);
     if (isLoading || error || !token) {
       return;
     }
