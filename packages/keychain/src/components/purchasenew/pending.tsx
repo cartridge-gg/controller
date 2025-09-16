@@ -18,6 +18,45 @@ import { useConnection } from "@/hooks/connection";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 import { TransactionFinalityStatus } from "starknet";
 
+// Retry utility for waitForTransaction
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 5,
+  baseDelay: number = 2000,
+  backoffMultiplier: number = 1.5,
+  maxDelay: number = 30000,
+): Promise<T> {
+  let lastError: Error;
+  let delay = baseDelay;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      // If this is the last attempt, don't wait and rethrow
+      if (attempt === maxRetries) {
+        throw lastError;
+      }
+
+      // Wait before retrying
+      if (attempt > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay = Math.min(delay * backoffMultiplier, maxDelay);
+      }
+
+      console.warn(
+        `waitForTransaction attempt ${attempt + 1}/${maxRetries + 1} failed:`,
+        lastError.message,
+        `Retrying in ${delay}ms...`,
+      );
+    }
+  }
+
+  throw lastError!;
+}
+
 export function Pending() {
   const {
     starterpackDetails,
@@ -77,9 +116,17 @@ export function PurchasePendingInner({
 
   useEffect(() => {
     if (wallet && transactionHash) {
-      externalWaitForTransaction(wallet.type, transactionHash).then(() =>
-        setDepositCompleted(true),
-      );
+      retryWithBackoff(() =>
+        externalWaitForTransaction(wallet.type, transactionHash),
+      )
+        .then(() => setDepositCompleted(true))
+        .catch((error) => {
+          console.error(
+            "Failed to wait for external transaction after retries:",
+            error,
+          );
+          // Could set an error state here if needed
+        });
     }
   }, [wallet, transactionHash, externalWaitForTransaction, navigate]);
 
@@ -154,21 +201,25 @@ export function ClaimPendingInner({
   const [isClaiming, setIsClaiming] = useState(true);
 
   useEffect(() => {
-    controller?.provider
-      .waitForTransaction(transactionHash, {
-        retryInterval: 1000,
-        successStates: [
-          TransactionFinalityStatus.PRE_CONFIRMED,
-          TransactionFinalityStatus.ACCEPTED_ON_L2,
-        ],
-      })
-      .then(() => {
-        setIsClaiming(false);
-        navigate("/purchase/success", { reset: true });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    if (controller) {
+      retryWithBackoff(() =>
+        controller.provider.waitForTransaction(transactionHash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionFinalityStatus.PRE_CONFIRMED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        }),
+      )
+        .then(() => {
+          setIsClaiming(false);
+          navigate("/purchase/success", { reset: true });
+        })
+        .catch((error) => {
+          console.error("Failed to wait for transaction after retries:", error);
+          // Could set an error state here if needed
+        });
+    }
   }, [controller, transactionHash, navigate]);
 
   return (
