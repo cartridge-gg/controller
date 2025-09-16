@@ -16,6 +16,7 @@ import type { Call, FeeEstimate } from "starknet";
 import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { useNavigation } from "@/context/navigation";
+import { useMutation } from "react-query";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -26,6 +27,7 @@ interface ExecutionContainerProps {
   buttonText?: string;
   children: React.ReactNode;
   right?: React.ReactElement;
+  hideIcon?: boolean;
 }
 
 export function ExecutionContainer({
@@ -40,6 +42,7 @@ export function ExecutionContainer({
   buttonText = "SUBMIT",
   right,
   children,
+  hideIcon = true,
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
   const { controller } = useConnection();
@@ -109,18 +112,29 @@ export function ExecutionContainer({
     setCtrlError(executionError);
   }, [executionError]);
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
+  const { mutate } = useMutation({
+    mutationKey: ["executeTransaction", transactions, maxFee],
+    mutationFn: async () => {
       await onSubmit(maxFee);
-    } catch (e) {
-      console.error(e);
-      const error = parseControllerError(e as unknown as ControllerError);
-      onError?.(error);
-      setCtrlError(error);
-    } finally {
+    },
+    onMutate: () => {
+      setIsLoading(true);
+    },
+    onError: (error) => {
+      console.error(error);
+      const parsedError = parseControllerError(
+        error as unknown as ControllerError,
+      );
+      onError?.(parsedError);
+      setCtrlError(parsedError);
+    },
+    onSettled: () => {
       setIsLoading(false);
-    }
+    },
+  });
+
+  const handleSubmit = () => {
+    mutate();
   };
 
   const resetState = () => {
@@ -152,10 +166,11 @@ export function ExecutionContainer({
         description={description}
         icon={icon}
         right={right}
-        hideIcon
+        hideIcon={hideIcon}
       />
       {children}
       <LayoutFooter>
+        <Fees isLoading={isEstimating} maxFee={maxFee} />
         {(() => {
           switch (ctrlError?.code) {
             case ErrorCode.CartridgeControllerNotDeployed:
