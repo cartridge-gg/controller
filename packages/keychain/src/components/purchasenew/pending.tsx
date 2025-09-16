@@ -158,8 +158,11 @@ export function ClaimPendingInner({
       .then(() => {
         setIsClaiming(false);
         navigate("/purchase/success", { reset: true });
+      }).catch((error) => {
+        console.error(error);
       });
   }, [controller, transactionHash, navigate]);
+
   return (
     <>
       <HeaderInner title="Pending Confirmation" icon={<Spinner />} />
