@@ -54,8 +54,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   );
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const {
     origin,
     rpcUrl,
@@ -67,7 +66,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
-    useSocialAuthentication(setError, setChangeWallet);
+    useSocialAuthentication(setChangeWallet);
   const { signup: signupWithExternalWallet, login: loginWithExternalWallet } =
     useExternalWalletAuthentication();
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =

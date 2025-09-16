@@ -5,7 +5,6 @@ import { WalletAdapter } from "@cartridge/controller";
 import { useCallback } from "react";
 
 export const useSocialAuthentication = (
-  setError: (err: Error) => void,
   setChangeWallet?: (changeWallet: boolean) => void,
 ) => {
   const { chainId, rpcUrl } = useConnection();
@@ -26,10 +25,7 @@ export const useSocialAuthentication = (
         rpcUrl,
         socialProvider,
       );
-      const { account, error, success } = await turnkeyWallet.connect(
-        isSignup,
-        setError,
-      );
+      const { account, error, success } = await turnkeyWallet.connect(isSignup);
       if (error?.includes("Account mismatch")) {
         setChangeWallet?.(true);
         return;
