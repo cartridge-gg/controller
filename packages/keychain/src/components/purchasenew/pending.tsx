@@ -155,7 +155,13 @@ export function ClaimPendingInner({
 
   useEffect(() => {
     controller?.provider
-      .waitForTransaction(transactionHash, { retryInterval: 1000, successStates: [TransactionFinalityStatus.PRE_CONFIRMED, TransactionFinalityStatus.ACCEPTED_ON_L2] })
+      .waitForTransaction(transactionHash, {
+        retryInterval: 1000,
+        successStates: [
+          TransactionFinalityStatus.PRE_CONFIRMED,
+          TransactionFinalityStatus.ACCEPTED_ON_L2,
+        ],
+      })
       .then(() => {
         setIsClaiming(false);
         navigate("/purchase/success", { reset: true });
