@@ -634,6 +634,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     finishLogin,
     finishSignup,
     setSearchParams,
+    chainId,
   ]);
 
   const handleSubmit = useCallback(
