@@ -24,13 +24,7 @@ export function Tokens() {
       .sort((a, b) => {
         const aIn = contracts.includes(getChecksumAddress(a.metadata.address));
         const bIn = contracts.includes(getChecksumAddress(b.metadata.address));
-        if (aIn && bIn) {
-          return 0;
-        }
-        if (aIn && !bIn) {
-          return -1;
-        }
-        return 1;
+        return !aIn && bIn ? 1 : aIn && !bIn ? -1 : 0;
       });
   }, [tokens, contracts]);
 
