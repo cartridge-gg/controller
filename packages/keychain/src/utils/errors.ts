@@ -431,61 +431,88 @@ export function parseExecutionError(
     typeof executionError === "string" &&
     executionError.includes("Nested error:")
   ) {
-    // Extract the nested error details
-    const nestedMatch = executionError.match(/Nested error:\s*\((.*)\)/s);
-    if (nestedMatch) {
-      const nestedContent = nestedMatch[1];
+    // Extract the final meaningful error from nested errors
+    // Look for patterns like "Nested error: ... Nested error: ... 0x... ('actual error')"
+    const hexAndTextPattern = /0x[a-fA-F0-9]+\s*\('([^']+)'\)/g;
+    const allMatches = [...executionError.matchAll(hexAndTextPattern)];
 
-      // Extract all error messages from the nested content
-      // Match both single-quoted strings and double-quoted strings
-      const singleQuoted = [...nestedContent.matchAll(/'([^']*)'/g)].map(
-        (match) => match[1],
-      );
-      const doubleQuoted = [...nestedContent.matchAll(/"([^"]*)"/g)].map(
-        (match) => match[1],
-      );
-      const allErrors = [...singleQuoted, ...doubleQuoted];
-
-      // Find the most meaningful error, excluding common framework errors
-      const meaningfulError = allErrors.find(
-        (err) =>
-          err !== "argent/multicall-failed" &&
-          err !== "ENTRYPOINT_FAILED" &&
-          err !== "ENTRYPOINT_NOT_FOUND" &&
-          err !== "0x0" && // Exclude separator
-          !err.match(/^0x[0-9a-fA-F]+$/) && // Exclude pure hex values
-          err !== "0x1" && // Exclude other separators
-          err !== "", // Exclude empty strings
-      );
-
-      // Extract contract details from the execution error
-      const contractMatch = executionError.match(
-        /Contract address=\s*(0x[a-fA-F0-9]+)/,
-      );
-      const classMatch = executionError.match(/Class hash=\s*(0x[a-fA-F0-9]+)/);
-      const selectorMatch = executionError.match(
-        /Selector=\s*(0x[a-fA-F0-9]+)/,
-      );
-
-      return {
-        raw: executionError,
-        summary: capitalizeFirstLetter(
-          meaningfulError || "Transaction execution failed",
-        ),
-        stack: [
-          {
-            address: contractMatch?.[1],
-            class: classMatch?.[1],
-            selector: selectorMatch?.[1],
-            error: meaningfulError
-              ? [meaningfulError]
-              : allErrors.length > 0
-                ? allErrors
-                : ["Transaction execution failed"],
-          },
-        ],
-      };
+    // Find the last meaningful error that's not a generic framework error
+    let meaningfulError = null;
+    for (let i = allMatches.length - 1; i >= 0; i--) {
+      const err = allMatches[i][1];
+      if (
+        err !== "argent/multicall-failed" &&
+        err !== "ENTRYPOINT_FAILED" &&
+        err !== "ENTRYPOINT_NOT_FOUND" &&
+        err !== "" // Exclude empty strings
+      ) {
+        meaningfulError = err;
+        break;
+      }
     }
+
+    // If no meaningful error found in hex format, try to extract from the nested content
+    if (!meaningfulError) {
+      const nestedMatch = executionError.match(/Nested error:\s*\((.*)\)/s);
+      if (nestedMatch) {
+        const nestedContent = nestedMatch[1];
+
+        // Extract all error messages from the nested content
+        // Match both single-quoted strings and double-quoted strings
+        const singleQuoted = [...nestedContent.matchAll(/'([^']*)'/g)].map(
+          (match) => match[1],
+        );
+        const doubleQuoted = [...nestedContent.matchAll(/"([^"]*)"/g)].map(
+          (match) => match[1],
+        );
+        const allErrors = [...singleQuoted, ...doubleQuoted];
+
+        // Find the most meaningful error, excluding common framework errors
+        meaningfulError = allErrors.find(
+          (err) =>
+            err !== "argent/multicall-failed" &&
+            err !== "ENTRYPOINT_FAILED" &&
+            err !== "ENTRYPOINT_NOT_FOUND" &&
+            err !== "0x0" && // Exclude separator
+            !err.match(/^0x[0-9a-fA-F]+$/) && // Exclude pure hex values
+            err !== "0x1" && // Exclude other separators
+            err !== "", // Exclude empty strings
+        );
+      }
+    }
+
+    // Extract all contract details from the execution error (there may be multiple due to nesting)
+    const contractMatches = [
+      ...executionError.matchAll(/Contract address=\s*(0x[a-fA-F0-9]+)/g),
+    ];
+    const classMatches = [
+      ...executionError.matchAll(/Class hash=\s*(0x[a-fA-F0-9]+)/g),
+    ];
+    const selectorMatches = [
+      ...executionError.matchAll(/Selector=\s*(0x[a-fA-F0-9]+)/g),
+    ];
+
+    // Use the last (deepest) contract details if multiple are found
+    const lastContractMatch = contractMatches[contractMatches.length - 1];
+    const lastClassMatch = classMatches[classMatches.length - 1];
+    const lastSelectorMatch = selectorMatches[selectorMatches.length - 1];
+
+    return {
+      raw: executionError,
+      summary: capitalizeFirstLetter(
+        meaningfulError || "Transaction execution failed",
+      ),
+      stack: [
+        {
+          address: lastContractMatch?.[1],
+          class: lastClassMatch?.[1],
+          selector: lastSelectorMatch?.[1],
+          error: meaningfulError
+            ? [meaningfulError]
+            : ["Transaction execution failed"],
+        },
+      ],
+    };
   }
 
   // Handle object format execution error
@@ -1460,6 +1487,32 @@ export const starknetTransactionExecutionErrorTestCases = [
           selector:
             "0x015d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
           error: ["Jackpot has ended"],
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Contract address= 0x4c001bb4e136a2846d946fe14c6cd97fcccb29b7e3c4b994bd901463f24d60b, Class hash= 0xe2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: Contract address= 0x4c001bb4e136a2846d946fe14c6cd97fcccb29b7e3c4b994bd901463f24d60b, Class hash= 0xe2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: Contract address= 0x51fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f, Class hash= 0x6982d79b2c1da29974bb766df7e642960ce61de0c4d6211adf1aa8a16ae32b6, Selector= 0x112b534028a89c7062d4f90ab082e3bb5a7c63c1af793c03bd040a66dc50839, Nested error: 0x56726650726f76696465723a206e6f7420636f6e73756d6564 ('VrfProvider: not consumed')",
+      },
+    },
+    expected: {
+      raw: "Contract address= 0x4c001bb4e136a2846d946fe14c6cd97fcccb29b7e3c4b994bd901463f24d60b, Class hash= 0xe2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: Contract address= 0x4c001bb4e136a2846d946fe14c6cd97fcccb29b7e3c4b994bd901463f24d60b, Class hash= 0xe2eb8f5672af4e6a4e8a8f1b44989685e668489b0a25437733756c5a34a1d6, Selector= 0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad, Nested error: Contract address= 0x51fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f, Class hash= 0x6982d79b2c1da29974bb766df7e642960ce61de0c4d6211adf1aa8a16ae32b6, Selector= 0x112b534028a89c7062d4f90ab082e3bb5a7c63c1af793c03bd040a66dc50839, Nested error: 0x56726650726f76696465723a206e6f7420636f6e73756d6564 ('VrfProvider: not consumed')",
+      summary: "VrfProvider: not consumed",
+      stack: [
+        {
+          address:
+            "0x51fea4450da9d6aee758bdeba88b2f665bcbf549d2c61421aa724e9ac0ced8f",
+          class:
+            "0x6982d79b2c1da29974bb766df7e642960ce61de0c4d6211adf1aa8a16ae32b6",
+          selector:
+            "0x112b534028a89c7062d4f90ab082e3bb5a7c63c1af793c03bd040a66dc50839",
+          error: ["VrfProvider: not consumed"],
         },
       ],
     },
