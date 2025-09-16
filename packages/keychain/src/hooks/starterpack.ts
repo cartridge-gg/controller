@@ -18,12 +18,11 @@ import {
   StarterPackItem,
   StarterPackItemType,
 } from "@cartridge/controller";
-import { ItemType } from "@/context/purchase";
 
 export const enum StarterItemType {
-  NFT = ItemType.NFT,
-  CREDIT = ItemType.CREDIT,
-  ERC20 = ItemType.ERC20,
+  NFT = "NFT",
+  CREDIT = "CREDIT",
+  ERC20 = "ERC20",
 }
 
 export interface StarterItemData {

@@ -4,7 +4,7 @@ import { cn } from "@cartridge/ui/utils";
 import { Badge } from "./badge";
 import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 import { usdcToUsd } from "@/utils/starterpack";
-import { Item } from "@/context/purchase";
+import { Item, ItemType } from "@/context/purchase";
 
 interface Props {
   containerClassName?: string;
@@ -28,7 +28,6 @@ export const StarterItem = React.forwardRef<
 >(
   (
     {
-      type,
       className,
       containerClassName,
       fancy = false,
@@ -42,6 +41,13 @@ export const StarterItem = React.forwardRef<
     // Determine which type we're dealing with
     const starterPackItem = isStarterPackItem(item) ? item : null;
     const purchaseItem = isPurchaseItem(item) ? item : null;
+
+    const type = isStarterPackItem(item)
+      ? starterPackItem?.type
+      : purchaseItem?.type === ItemType.ERC20 ||
+          purchaseItem?.type === ItemType.CREDIT
+        ? StarterPackItemType.FUNGIBLE
+        : StarterPackItemType.NONFUNGIBLE;
 
     // Extract common properties with fallbacks
     const name = starterPackItem?.name || purchaseItem?.title || "";
