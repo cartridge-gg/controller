@@ -25,9 +25,9 @@ export async function retryWithBackoff<T>(
 ): Promise<T> {
   const {
     maxRetries,
-    baseDelay = 1000,
-    maxDelay = 10000,
-    backoffMultiplier = 2,
+    baseDelay = 100,
+    maxDelay = 1000,
+    backoffMultiplier = 1.5,
   } = options;
 
   let lastError: Error;
@@ -78,8 +78,8 @@ export async function waitForTransactionWithRetry<T>(
 ): Promise<T> {
   return retryWithBackoff(() => waitForTransactionFn(txHash, timeoutMs), {
     maxRetries,
-    baseDelay: 2000, // Start with 2 second delay
-    maxDelay: 30000, // Max 30 second delay
+    baseDelay: 200, // Start with 200ms delay
+    maxDelay: 1000, // Max 1 second delay
     backoffMultiplier: 1.5, // Moderate backoff
   });
 }
