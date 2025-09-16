@@ -497,6 +497,20 @@ export function parseExecutionError(
     const lastClassMatch = classMatches[classMatches.length - 1];
     const lastSelectorMatch = selectorMatches[selectorMatches.length - 1];
 
+    // For the error array in stack, include all found errors even if not "meaningful"
+    let errorArray: string[] = [];
+    if (meaningfulError) {
+      errorArray = [meaningfulError];
+    } else {
+      // If no meaningful error found, include all errors from the matches
+      errorArray = allMatches
+        .map((match) => match[1])
+        .filter((err) => err !== "");
+      if (errorArray.length === 0) {
+        errorArray = ["Transaction execution failed"];
+      }
+    }
+
     return {
       raw: executionError,
       summary: capitalizeFirstLetter(
@@ -507,9 +521,7 @@ export function parseExecutionError(
           address: lastContractMatch?.[1],
           class: lastClassMatch?.[1],
           selector: lastSelectorMatch?.[1],
-          error: meaningfulError
-            ? [meaningfulError]
-            : ["Transaction execution failed"],
+          error: errorArray,
         },
       ],
     };
