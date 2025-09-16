@@ -129,7 +129,7 @@ export class TurnkeyWallet {
         await auth0Client.loginWithRedirect({
           authorizationParams: {
             connection: Auth0SocialProviderName[this.socialProvider],
-            redirect_uri: redirect_uri.toString(),
+            redirect_uri: import.meta.env.VITE_ORIGIN,
             nonce,
             tknonce: nonce,
           },
@@ -151,7 +151,7 @@ export class TurnkeyWallet {
         {
           authorizationParams: {
             connection: Auth0SocialProviderName[this.socialProvider],
-            redirect_uri: redirect_uri.toString(),
+            redirect_uri: import.meta.env.VITE_ORIGIN,
             nonce,
             display: "touch",
             tknonce: nonce,

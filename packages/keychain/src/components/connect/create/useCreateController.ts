@@ -72,7 +72,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
-  const { wallets } = useWallets();
+  const { supportedWalletsForAuth } = useWallets();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -160,11 +160,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const signupOptions: AuthOption[] = useMemo(() => {
     return [
       "webauthn" as AuthOption,
-      ...wallets
-        .filter(
-          (wallet) => wallet.type !== "argent" && wallet.type !== "phantom",
-        )
-        .map((wallet) => wallet.type),
+      ...supportedWalletsForAuth,
       "discord" as AuthOption,
       "google" as AuthOption,
       "walletconnect" as AuthOption,
@@ -172,7 +168,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
-  }, [wallets, configSignupOptions]);
+  }, [supportedWalletsForAuth, configSignupOptions]);
 
   const finishSignup = useCallback(
     async ({
@@ -634,6 +630,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     finishLogin,
     finishSignup,
     setSearchParams,
+    chainId,
   ]);
 
   const handleSubmit = useCallback(
