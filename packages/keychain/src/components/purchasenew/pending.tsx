@@ -22,9 +22,9 @@ import { TransactionFinalityStatus } from "starknet";
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 5,
-  baseDelay: number = 2000,
+  baseDelay: number = 200,
   backoffMultiplier: number = 1.5,
-  maxDelay: number = 30000,
+  maxDelay: number = 1000,
 ): Promise<T> {
   let lastError: Error;
   let delay = baseDelay;
