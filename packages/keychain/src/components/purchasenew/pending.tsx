@@ -158,7 +158,8 @@ export function ClaimPendingInner({
       .then(() => {
         setIsClaiming(false);
         navigate("/purchase/success", { reset: true });
-      }).catch((error) => {
+      })
+      .catch((error) => {
         console.error(error);
       });
   }, [controller, transactionHash, navigate]);

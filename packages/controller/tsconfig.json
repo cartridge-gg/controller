@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@cartridge/tsconfig/base.json",
+  "extends": "../tsconfig/base.json",
   "compilerOptions": {
     "lib": [
       "ES2017",
