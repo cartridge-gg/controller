@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { useNavigation } from "@/context";
 import { useConnection } from "@/hooks/connection";
 import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
+import { TransactionFinalityStatus } from "starknet";
 
 export function Pending() {
   const {
@@ -154,7 +155,7 @@ export function ClaimPendingInner({
 
   useEffect(() => {
     controller?.provider
-      .waitForTransaction(transactionHash, { retryInterval: 1000 })
+      .waitForTransaction(transactionHash, { retryInterval: 1000, successStates: [TransactionFinalityStatus.PRE_CONFIRMED, TransactionFinalityStatus.ACCEPTED_ON_L2] })
       .then(() => {
         setIsClaiming(false);
         navigate("/purchase/success", { reset: true });
