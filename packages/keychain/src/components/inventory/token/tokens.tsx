@@ -20,7 +20,18 @@ export function Tokens() {
           token.balance.amount > 0 ||
           contracts.includes(getChecksumAddress(token.metadata.address)),
       )
-      .sort((a, b) => b.balance.value - a.balance.value);
+      .sort((a, b) => b.balance.value - a.balance.value)
+      .sort((a, b) => {
+        const aIn = contracts.includes(getChecksumAddress(a.metadata.address));
+        const bIn = contracts.includes(getChecksumAddress(b.metadata.address));
+        if (aIn && bIn) {
+          return 0;
+        }
+        if (aIn && !bIn) {
+          return -1;
+        }
+        return 1;
+      });
   }, [tokens, contracts]);
 
   return status === "loading" ? (
