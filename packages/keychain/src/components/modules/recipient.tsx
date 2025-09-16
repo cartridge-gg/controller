@@ -23,6 +23,7 @@ export const SendRecipient = ({
   setWarning,
   setError,
   setParentLoading,
+  onRecipientSelected,
 }: {
   to: string;
   submitted: boolean;
@@ -30,6 +31,11 @@ export const SendRecipient = ({
   setWarning: (warning: string) => void;
   setError: (error: Error | undefined) => void;
   setParentLoading: (loading: boolean) => void;
+  onRecipientSelected?: (data: {
+    name: string;
+    address: string;
+    walletType: WalletType;
+  }) => void;
 }) => {
   const [focus, setFocus] = useState(false);
   const [value, setValue] = useState("");
@@ -106,6 +112,15 @@ export const SendRecipient = ({
     if (newSelected.address !== selected.address) {
       setSelected(newSelected);
     }
+
+    // Call the callback with recipient data
+    if (onRecipientSelected && name && wallet) {
+      onRecipientSelected({
+        name: name,
+        address: address,
+        walletType: wallet,
+      });
+    }
   }, [
     name,
     address,
@@ -117,6 +132,7 @@ export const SendRecipient = ({
     setValue,
     setFocus,
     setWarning,
+    onRecipientSelected,
   ]);
 
   return (

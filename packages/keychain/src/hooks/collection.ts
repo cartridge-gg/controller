@@ -8,7 +8,7 @@ import { addAddressPadding } from "starknet";
 import * as torii from "@dojoengine/torii-wasm";
 
 const TYPE = "ERC-721";
-const LIMIT = 5000;
+const LIMIT = 1000;
 
 export type Collection = {
   address: string;

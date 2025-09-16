@@ -91,7 +91,7 @@ export function Claim() {
   const totalClaimable = useMemo(() => {
     return claimsData
       .filter((claim) => !claim.claimed)
-      .reduce((acc, claim) => acc + claim.data.length, 0);
+      .reduce((acc, claim) => acc + claimAmount(claim), 0);
   }, [claimsData]);
 
   if (isLoadingClaims) {

@@ -180,6 +180,7 @@ export function useConnectionValue() {
     import.meta.env.VITE_RPC_SEPOLIA,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
+  const [isSessionActive, setIsSessionActive] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
   const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
   const [isMainnet, setIsMainnet] = useState<boolean>(false);
@@ -230,7 +231,13 @@ export function useConnectionValue() {
           .split(",")
           .map((token) => TOKEN_ADDRESSES[token as Token] || null)
           .filter((address) => address !== null)
-      : [STRK_CONTRACT_ADDRESS];
+      : [
+          STRK_CONTRACT_ADDRESS,
+          ETH_CONTRACT_ADDRESS,
+          USDC_CONTRACT_ADDRESS,
+          USDT_CONTRACT_ADDRESS,
+          LORDS_CONTRACT_ADDRESS,
+        ];
 
     if (rpcUrl) {
       setRpcUrl(rpcUrl);
@@ -433,6 +440,30 @@ export function useConnectionValue() {
     }
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
+  // Function to refresh session status
+  const refreshSessionStatus = useCallback(() => {
+    if (controller && policies) {
+      controller
+        .isRequestedSession(policies)
+        .then(setIsSessionActive)
+        .catch((error) => {
+          console.error("Failed to check session status:", error);
+          setIsSessionActive(false);
+        });
+    } else if (controller && !policies) {
+      // No policies means no session check needed
+      setIsSessionActive(true);
+    } else {
+      // No controller means no session
+      setIsSessionActive(false);
+    }
+  }, [controller, policies]);
+
+  // Check session status when controller or policies change
+  useEffect(() => {
+    refreshSessionStatus();
+  }, [refreshSessionStatus]);
+
   useThemeEffect({ theme, assetUrl: "" });
 
   useEffect(() => {
@@ -626,6 +657,8 @@ export function useConnectionValue() {
     origin,
     rpcUrl,
     policies,
+    isSessionActive,
+    refreshSessionStatus,
     onModalClose,
     setOnModalClose,
     theme,

@@ -206,17 +206,14 @@ export default class ControllerProvider extends BaseProvider {
       return false;
     }
 
+    const currentChain = this.selectedChain;
+
     try {
       this.selectedChain = chainId;
-      const response = (await this.keychain.probe(this.rpcUrl())) as ProbeReply;
-
-      if (response.rpcUrl === this.rpcUrl()) {
-        return true;
-      }
-
       await this.keychain.switchChain(this.rpcUrl());
     } catch (e) {
       console.error(e);
+      this.selectedChain = currentChain;
       return false;
     }
 

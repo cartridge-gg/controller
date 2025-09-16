@@ -254,6 +254,13 @@ function parseGraphQLErrorMessage(
         summary: "Service temporarily unavailable",
         details,
       };
+    } else if (code === "Internal") {
+      // For Internal errors, use the description as the summary
+      return {
+        raw: raw || message,
+        summary: description || "Internal server error",
+        details,
+      };
     } else {
       return {
         raw: raw || message,
@@ -296,6 +303,96 @@ function parseGraphQLErrorMessage(
     summary: message.length > 100 ? message.substring(0, 100) + "..." : message,
     details,
   };
+}
+
+/**
+ * Parses a ClientError from graphql-request library
+ * ClientError structure includes response with errors array and request details
+ */
+export function parseClientError(error: unknown): {
+  raw: string;
+  summary: string;
+  errors: Array<{
+    message: string;
+    path?: Array<string | number>;
+  }>;
+  details: {
+    operation?: string;
+    network?: string;
+    rpcError?: string;
+    path?: Array<string | number>;
+  };
+} | null {
+  // Check if this is a ClientError from graphql-request
+  if (typeof error === "object" && error !== null && "response" in error) {
+    const errorWithResponse = error as { response: unknown };
+    if (
+      typeof errorWithResponse.response === "object" &&
+      errorWithResponse.response !== null &&
+      "errors" in errorWithResponse.response
+    ) {
+      const clientError = error as {
+        response: {
+          errors?: GraphQLError[];
+          data?: unknown;
+          status?: number;
+          headers?: unknown;
+        };
+        request?: {
+          query?: string;
+          variables?: unknown;
+        };
+      };
+
+      // Use the existing parseGraphQLError function to parse the response
+      if (
+        clientError.response.errors &&
+        clientError.response.errors.length > 0
+      ) {
+        const result = parseGraphQLError({
+          errors: clientError.response.errors,
+        });
+
+        // Store the full ClientError as the raw error for debugging
+        result.raw = JSON.stringify(error);
+
+        // Add all errors to the result
+        const enhancedResult = {
+          ...result,
+          errors: clientError.response.errors.map((err) => ({
+            message: err.message,
+            path: err.path,
+          })),
+        };
+
+        return enhancedResult;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Type definitions for GraphQL errors with RPC error details
+ */
+export interface GraphQLErrorDetails {
+  raw: string;
+  summary: string;
+  errors?: Array<{
+    message: string;
+    path?: Array<string | number>;
+  }>;
+  details: {
+    operation?: string;
+    network?: string;
+    rpcError?: string;
+    path?: Array<string | number>;
+  };
+}
+
+export interface ErrorWithGraphQL extends Error {
+  graphqlError?: GraphQLErrorDetails;
 }
 
 function capitalizeFirstLetter(str: string): string {

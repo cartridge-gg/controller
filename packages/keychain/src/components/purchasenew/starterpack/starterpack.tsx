@@ -152,13 +152,13 @@ export function StarterPackInner({
       <LayoutFooter>
         {error ? (
           <ErrorAlert title="Error" description={error.message} />
-        ) : (
+        ) : acquisitionType === StarterpackAcquisitionType.Paid ? (
           <CostBreakdown
             rails="stripe"
             costDetails={price}
             paymentUnit="usdc"
           />
-        )}
+        ) : null}
         <Button onClick={onProceed} disabled={!!error}>
           {acquisitionType === StarterpackAcquisitionType.Paid
             ? "Purchase"
