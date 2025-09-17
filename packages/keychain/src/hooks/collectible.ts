@@ -1,4 +1,4 @@
-import { useAccount, useAccountProfile } from "./account";
+import { useAccountProfile } from "./account";
 import { useEffect, useMemo, useState } from "react";
 import {
   useCollectibleQuery,
@@ -40,7 +40,7 @@ export function useCollectible({
   contractAddress?: string;
   tokenIds?: string[];
 }): UseCollectibleResponse {
-  const { address } = useAccountProfile({ overridable: true });
+  const { address } = useAccountProfile();
   const { project } = useConnection();
 
   const { data, status, refetch } = useCollectibleQuery(
@@ -144,16 +144,8 @@ export type CollectibleType = {
   count: number;
 };
 
-export function useCollectibles(
-  accountAddress?: string,
-): UseCollectiblesResponse {
-  const account = useAccount();
-  const connectedAddress = account?.address;
-  const { address: profileAddress } = useAccountProfile({ overridable: true });
-  const address = useMemo(
-    () => accountAddress ?? profileAddress ?? connectedAddress,
-    [accountAddress, profileAddress, connectedAddress],
-  );
+export function useCollectibles(): UseCollectiblesResponse {
+  const { address } = useAccountProfile();
   const { project } = useConnection();
   const [offset, setOffset] = useState(0);
   const [collectibles, setCollectibles] = useState<{

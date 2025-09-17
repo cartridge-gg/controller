@@ -46,15 +46,15 @@ const OFFSET = 10;
 export function CollectionAsset() {
   const { chainId, project } = useConnection();
   const account = useAccount();
-  const { address: viewerAddress, isViewOnly } = useViewerAddress();
+  const { canPerformActions } = useViewerAddress();
   const explorer = useExplorer();
-  const address = viewerAddress || account?.address || "";
+  const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
   const { navigate } = useNavigation();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
   const { editions } = useArcade();
-  const { tokens } = useTokens(viewerAddress);
+  const { tokens } = useTokens();
   const { provider, selfOrders, order, setAmount } = useMarketplace();
   const [loading, setLoading] = useState(false);
   const edition: EditionModel | undefined = useMemo(() => {
@@ -71,7 +71,6 @@ export function CollectionAsset() {
   } = useCollection({
     contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
-    accountAddress: viewerAddress,
   });
 
   const { ownership, status: ownershipStatus } = useOwnership({
@@ -308,7 +307,7 @@ export function CollectionAsset() {
             </div>
           </LayoutContent>
 
-          {!isViewOnly && (
+          {canPerformActions && (
             <LayoutFooter
               className={cn(
                 "relative flex flex-col items-center justify-center gap-y-4 bg-background-100 pt-0 select-none",

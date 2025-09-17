@@ -1,4 +1,4 @@
-import { useAccount, useAccountProfile } from "@/hooks/account";
+import { useAccountProfile } from "@/hooks/account";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Collections, Marketplace } from "@cartridge/marketplace";
 import { Token, ToriiClient } from "@dojoengine/torii-wasm";
@@ -114,18 +114,12 @@ async function fetchBalances(
 export function useCollection({
   contractAddress,
   tokenIds = [],
-  accountAddress,
 }: {
   contractAddress?: string;
   tokenIds?: string[];
-  accountAddress?: string;
 }): UseCollectionResponse {
-  const { address: profileAddress } = useAccountProfile({ overridable: true });
+  const { address } = useAccountProfile();
   const { project } = useConnection();
-  const address = useMemo(
-    () => accountAddress ?? profileAddress,
-    [accountAddress, profileAddress],
-  );
 
   const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
   const [collection, setCollection] = useState<Collection | undefined>(
@@ -255,16 +249,8 @@ export type CollectionType = {
   count: number;
 };
 
-export function useCollections(
-  accountAddress?: string,
-): UseCollectionsResponse {
-  const account = useAccount();
-  const connectedAddress = account?.address;
-  const { address: profileAddress } = useAccountProfile({ overridable: true });
-  const address = useMemo(
-    () => accountAddress ?? profileAddress ?? connectedAddress,
-    [accountAddress, profileAddress, connectedAddress],
-  );
+export function useCollections(): UseCollectionsResponse {
+  const { address } = useAccountProfile();
   const { project } = useConnection();
   const [collections, setCollections] = useState<{ [key: string]: Collection }>(
     {},

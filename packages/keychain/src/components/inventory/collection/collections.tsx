@@ -7,15 +7,13 @@ import { useCollectibles } from "@/hooks/collectible";
 import { useArcade } from "@/hooks/arcade";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { EditionModel } from "@cartridge/arcade";
-import { useViewerAddress } from "@/hooks/viewer";
 
 import { getChecksumAddress } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";
 
 export function Collections() {
-  const { address } = useViewerAddress();
-  const { collections, status: CollectionsStatus } = useCollections(address);
-  const { collectibles, status: CollectiblesStatus } = useCollectibles(address);
+  const { collections, status: CollectionsStatus } = useCollections();
+  const { collectibles, status: CollectiblesStatus } = useCollectibles();
   const { editions } = useArcade();
   const { getCollectionOrders } = useMarketplace();
   const { project } = useConnection();

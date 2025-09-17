@@ -9,7 +9,7 @@ import {
   useBalanceQuery,
   useBalancesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useAccount } from "./account";
+import { useAccountProfile } from "./account";
 import { useConnection } from "@/hooks/connection";
 import { getChecksumAddress } from "starknet";
 import { useEffect, useMemo, useState } from "react";
@@ -69,8 +69,7 @@ export function useBalance({
 }: {
   tokenAddress?: string;
 }): UseBalanceResponse {
-  const account = useAccount();
-  const address = account?.address || "";
+  const { address } = useAccountProfile();
   const { project } = useConnection();
   const [token, setToken] = useState<Token | undefined>(undefined);
   const { status } = useBalanceQuery(
@@ -121,12 +120,11 @@ export type UseBalancesResponse = {
 };
 
 export function useBalances(accountAddress?: string): UseBalancesResponse {
-  const account = useAccount();
-  const connectedAddress = account?.address;
+  const { address: profileAddress } = useAccountProfile();
   const { project } = useConnection();
   const address = useMemo(
-    () => accountAddress ?? connectedAddress,
-    [accountAddress, connectedAddress],
+    () => accountAddress ?? profileAddress,
+    [accountAddress, profileAddress],
   );
 
   const projects = useMemo(() => {
@@ -187,11 +185,10 @@ export type UseTokensResponse = {
   status: "success" | "error" | "idle" | "loading";
 };
 
-export function useTokens(accountAddress?: string): UseTokensResponse {
+export function useTokens(): UseTokensResponse {
   const { tokens: options, controller } = useConnection();
   const provider = controller?.provider;
-  const account = useAccount();
-  const address = account?.address || "";
+  const { address } = useAccountProfile();
   const { project } = useConnection();
   const [contracts, setContracts] = useState<string[]>([]);
 
@@ -231,8 +228,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   }, [creditBalance]);
 
   // Get token data from torii
-  const { tokens: toriiTokens, status: toriiStatus } =
-    useBalances(accountAddress);
+  const { tokens: toriiTokens, status: toriiStatus } = useBalances(address);
 
   // Get token data from rpc (based on url options without those fetched from torii)
   const contractAddresses = useMemo(() => {
@@ -246,7 +242,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   }, [options, toriiTokens, contracts]);
 
   const { data: rpcData }: UseERC20BalanceResponse = useERC20Balance({
-    address: accountAddress ?? address,
+    address: address,
     contractAddress: contractAddresses,
     provider,
     interval: 30000,
@@ -355,12 +351,10 @@ export type UseTokenResponse = UseBalanceResponse;
 
 export function useToken({
   tokenAddress,
-  accountAddress,
 }: {
-  accountAddress?: string;
   tokenAddress: string;
 }): UseTokenResponse {
-  const { tokens, status } = useTokens(accountAddress);
+  const { tokens, status } = useTokens();
   return {
     token: tokens.find(
       (token) =>

@@ -3,7 +3,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Token, useTokens } from "@/hooks/token";
 import placeholder from "/placeholder.svg?url";
 import { useMemo, useState } from "react";
-import { useViewerAddress } from "@/hooks/viewer";
 
 import { cn } from "@cartridge/ui/utils";
 import { getChecksumAddress } from "starknet";
@@ -11,8 +10,7 @@ import { getChecksumAddress } from "starknet";
 const DEFAULT_TOKENS_COUNT = 2;
 
 export function Tokens() {
-  const { address } = useViewerAddress();
-  const { tokens, contracts, credits, status } = useTokens(address);
+  const { tokens, contracts, credits, status } = useTokens();
   const [unfolded, setUnfolded] = useState(false);
 
   const filteredTokens = useMemo(() => {
@@ -68,34 +66,26 @@ export function Tokens() {
 
 function TokenCardContent({ token }: { token: Token }) {
   const [searchParams] = useSearchParams();
-  const { isViewOnly } = useViewerAddress();
 
-  const content = (
-    <TokenCard
-      image={token.metadata.image || placeholder}
-      title={token.metadata.name}
-      amount={`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
-      value={
-        token.balance.value
-          ? `$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-          : ""
-      }
-      change={
-        token.balance.change === 0
-          ? undefined
-          : token.balance.change > 0
-            ? `+$${token.balance.change.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-            : `-$${(-token.balance.change).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-      }
-    />
-  );
-
-  // Only wrap in Link if not in view-only mode (allowing navigation but not sending)
-  return isViewOnly ? (
-    content
-  ) : (
+  return (
     <Link to={`./token/${token.metadata.address}?${searchParams.toString()}`}>
-      {content}
+      <TokenCard
+        image={token.metadata.image || placeholder}
+        title={token.metadata.name}
+        amount={`${token.balance.amount.toLocaleString(undefined, { maximumFractionDigits: 5 })} ${token.metadata.symbol}`}
+        value={
+          token.balance.value
+            ? `$${token.balance.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+            : ""
+        }
+        change={
+          token.balance.change === 0
+            ? undefined
+            : token.balance.change > 0
+              ? `+$${token.balance.change.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+              : `-$${(-token.balance.change).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+        }
+      />
     </Link>
   );
 }

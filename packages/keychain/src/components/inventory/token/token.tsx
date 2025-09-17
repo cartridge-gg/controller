@@ -39,7 +39,7 @@ function Credits() {
   // TODO: Get parent from keychain connection if needed
   const { navigate } = useNavigation();
   const account = useAccount();
-  const { isViewOnly } = useViewerAddress();
+  const { canPerformActions } = useViewerAddress();
   const username = account?.username || "";
   const credit = useCreditBalance({
     username,
@@ -72,7 +72,7 @@ function Credits() {
         </div>
       </LayoutContent>
 
-      {!isViewOnly && (
+      {canPerformActions && (
         <LayoutFooter className="gap-4">
           <Button
             onClick={() => {
@@ -116,9 +116,8 @@ const CreditsLoadingState = () => {
 
 function ERC20() {
   const { address } = useParams<{ address: string }>();
-  const account = useAccount();
-  const { address: viewerAddress, isViewOnly } = useViewerAddress();
-  const accountAddress = viewerAddress || account?.address || "";
+  const { address: profileAddress, canPerformActions } = useViewerAddress();
+  const accountAddress = profileAddress || "";
   const { controller } = useConnection();
   const explorer = useExplorer();
   const { transfers } = useData();
@@ -127,7 +126,6 @@ function ERC20() {
   const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
   const { token } = useToken({
     tokenAddress: address!,
-    accountAddress: viewerAddress,
   });
   const [searchParams] = useSearchParams();
 
@@ -233,7 +231,7 @@ function ERC20() {
         </div>
       </LayoutContent>
 
-      {compatibility && controller && !isViewOnly && (
+      {compatibility && controller && canPerformActions && (
         <LayoutFooter>
           <Link to={`send?${searchParams.toString()}`} className="w-full">
             <Button className="w-full space-x-2">

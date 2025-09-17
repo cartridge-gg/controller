@@ -12,7 +12,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import base64url from "base64url";
 import { useEffect, useMemo, useState } from "react";
-import { useMatch, useSearchParams } from "react-router-dom";
+import { useMatch } from "react-router-dom";
 import { constants, getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
@@ -413,15 +413,10 @@ export type UseAccountResponse = {
   address: string;
 };
 
-export function useAccountProfile({
-  overridable,
-}: {
-  overridable?: boolean;
-} = {}): UseAccountResponse {
+export function useAccountProfile(): UseAccountResponse {
   // To be used in top level provider (Above Route component)
   // Ref: https://stackoverflow.com/a/75462921
   const match = useMatch("/account/:username/*");
-  const [searchParams] = useSearchParams();
 
   const username = match?.params.username ?? "";
   const { data: usernameData } = useAddressByUsernameQuery(
@@ -437,31 +432,8 @@ export function useAccountProfile({
     [usernameData],
   );
 
-  const addressParam = searchParams.get("address");
-  const { data: addressData } = useAccountNameQuery(
-    { address: addressParam || "" },
-    {
-      enabled:
-        !!addressParam &&
-        addressParam.startsWith("0x") &&
-        !!addressParam.replace("0x", "").match(/^[0-9a-fA-F]+$/) &&
-        overridable,
-    },
-  );
-  const usernameParam = useMemo(() => {
-    if (
-      !addressParam ||
-      !addressParam.startsWith("0x") ||
-      !addressParam.replace("0x", "").match(/^[0-9a-fA-F]+$/)
-    )
-      return;
-    const username = addressData?.accounts?.edges?.[0]?.node?.username;
-    if (!username) return `0x${BigInt(addressParam).toString(16)}`.slice(0, 9);
-    return username;
-  }, [addressParam, addressData]);
-
   return {
-    username: overridable && usernameParam ? usernameParam : username,
-    address: overridable && addressParam ? addressParam : address,
+    username,
+    address,
   };
 }

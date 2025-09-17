@@ -34,7 +34,7 @@ export function Collection() {
   const { project } = useConnection();
   const { collectionOrders: orders } = useMarketplace();
   const theme = useControllerTheme();
-  const { address: viewerAddress, isViewOnly } = useViewerAddress();
+  const { canPerformActions } = useViewerAddress();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -50,7 +50,6 @@ export function Collection() {
   const [searchParams] = useSearchParams();
   const { collection, assets, status } = useCollection({
     contractAddress,
-    accountAddress: viewerAddress,
   });
 
   // Use local state for selection instead of URL parameters
@@ -124,7 +123,7 @@ export function Collection() {
               certified
             />
 
-            {!isViewOnly && (
+            {canPerformActions && (
               <div
                 className={cn(
                   "flex items-center gap-x-1.5 text-xs cursor-pointer self-start text-foreground-300",
@@ -157,7 +156,7 @@ export function Collection() {
                     state={location.state}
                     key={asset.tokenId}
                     onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      if (selection && !isViewOnly) {
+                      if (selection && canPerformActions) {
                         e.preventDefault();
                         handleSelect(asset.tokenId);
                       }
@@ -172,11 +171,11 @@ export function Collection() {
                           : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
                       }
                       image={asset.imageUrl || placeholder}
-                      selectable={!isViewOnly}
+                      selectable={canPerformActions}
                       selected={isSelected}
                       listingCount={listingCount}
                       onSelect={() =>
-                        !isViewOnly && handleSelect(asset.tokenId)
+                        canPerformActions && handleSelect(asset.tokenId)
                       }
                       className="rounded overflow-hidden"
                     />
@@ -186,7 +185,7 @@ export function Collection() {
             </div>
           </LayoutContent>
 
-          {!isViewOnly && (
+          {canPerformActions && (
             <LayoutFooter
               className={cn(
                 "relative flex flex-col items-center justify-center gap-y-4 bg-background",
