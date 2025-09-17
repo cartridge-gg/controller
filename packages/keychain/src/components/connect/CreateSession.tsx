@@ -114,7 +114,7 @@ const CreateSessionLayout = ({
       {/* <OcclusionDetector /> */}
       <>
         <HeaderInner
-          className="px-6 pt-6 pb-0"
+          className="pb-0"
           title={!isUpdate ? "Create Session" : "Update Session"}
           description={isUpdate ? "The policies were updated" : undefined}
           right={
@@ -132,7 +132,7 @@ const CreateSessionLayout = ({
             ) : undefined
           }
         />
-        <LayoutContent className="px-6 mt-3">
+        <LayoutContent className="pb-0">
           <SessionConsent isVerified={policies?.verified} />
           {policies?.verified ? (
             <VerifiedSessionSummary
