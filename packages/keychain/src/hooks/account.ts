@@ -418,19 +418,42 @@ export function useAccountProfile(): UseAccountResponse {
   // Ref: https://stackoverflow.com/a/75462921
   const match = useMatch("/account/:username/*");
 
-  const username = match?.params.username ?? "";
-  const { data: usernameData } = useAddressByUsernameQuery(
-    { username },
-    { enabled: !!username },
+  const usernameOrAddress = match?.params.username ?? "";
+  
+  // Check if it's an address (starts with 0x) or username
+  const isAddress = useMemo(
+    () => usernameOrAddress.startsWith("0x"),
+    [usernameOrAddress],
   );
 
-  const address = useMemo(
-    () =>
-      (import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS as string) ??
-      usernameData?.account?.controllers.edges?.[0]?.node?.address ??
-      "",
-    [usernameData],
+  // If it's an address, use it directly; otherwise fetch it from username
+  const { data: usernameData } = useAddressByUsernameQuery(
+    { username: isAddress ? "" : usernameOrAddress },
+    { enabled: !isAddress && !!usernameOrAddress },
   );
+
+  // If it's an address, fetch the username for it
+  const { data: addressData } = useAccountNameQuery(
+    { address: isAddress ? usernameOrAddress : "" },
+    { enabled: isAddress },
+  );
+
+  const address = useMemo(() => {
+    if (import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS) {
+      return import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS as string;
+    }
+    if (isAddress) {
+      return usernameOrAddress;
+    }
+    return usernameData?.account?.controllers.edges?.[0]?.node?.address ?? "";
+  }, [isAddress, usernameOrAddress, usernameData]);
+
+  const username = useMemo(() => {
+    if (isAddress) {
+      return addressData?.accounts?.edges?.[0]?.node?.username ?? "";
+    }
+    return usernameOrAddress;
+  }, [isAddress, usernameOrAddress, addressData]);
 
   return {
     username,
