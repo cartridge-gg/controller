@@ -58,7 +58,7 @@ export function Home() {
   const publicPaths = [
     "/account/", // Allow viewing any account inventory
   ];
-  const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
+  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
   // No controller, send to login (unless on public path)
   if (!controller && !isPublicPath) {
@@ -84,7 +84,7 @@ export function Home() {
         if (!controller && isPublicPath) {
           return <Outlet />;
         }
-        
+
         switch (context?.type) {
           case "connect": {
             // if no policies, we can connect immediately
