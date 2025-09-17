@@ -1537,6 +1537,60 @@ export const starknetTransactionExecutionErrorTestCases = [
       ],
     },
   },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Contract address= 0xabc123, Class hash= 0xdef456, Selector= 0x789012, Nested error: (0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x454e545259504f494e545f4e4f545f464f554e44 ('ENTRYPOINT_NOT_FOUND'))",
+      },
+    },
+    expected: {
+      raw: "Contract address= 0xabc123, Class hash= 0xdef456, Selector= 0x789012, Nested error: (0x454e545259504f494e545f4641494c4544 ('ENTRYPOINT_FAILED'), 0x617267656e742f6d756c746963616c6c2d6661696c6564 ('argent/multicall-failed'), 0x454e545259504f494e545f4e4f545f464f554e44 ('ENTRYPOINT_NOT_FOUND'))",
+      summary: "Transaction execution failed",
+      stack: [
+        {
+          address: "0xabc123",
+          class: "0xdef456",
+          selector: "0x789012",
+          error: [
+            "ENTRYPOINT_FAILED",
+            "argent/multicall-failed",
+            "ENTRYPOINT_NOT_FOUND",
+          ],
+        },
+      ],
+    },
+  },
+  {
+    input: {
+      code: 41,
+      message: "Transaction execution error",
+      data: {
+        transaction_index: 0,
+        execution_error:
+          "Contract address= 0x111222, Class hash= 0x333444, Selector= 0x555666, Nested error: ('ENTRYPOINT_FAILED', \"argent/multicall-failed\", 'ENTRYPOINT_NOT_FOUND')",
+      },
+    },
+    expected: {
+      raw: "Contract address= 0x111222, Class hash= 0x333444, Selector= 0x555666, Nested error: ('ENTRYPOINT_FAILED', \"argent/multicall-failed\", 'ENTRYPOINT_NOT_FOUND')",
+      summary: "Transaction execution failed",
+      stack: [
+        {
+          address: "0x111222",
+          class: "0x333444",
+          selector: "0x555666",
+          error: [
+            "ENTRYPOINT_FAILED",
+            "ENTRYPOINT_NOT_FOUND",
+            "argent/multicall-failed",
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 export const starknetTransactionValidationErrorTestCases = [
