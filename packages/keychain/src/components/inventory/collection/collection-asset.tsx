@@ -217,10 +217,7 @@ export function CollectionAsset() {
       ) : (
         <>
           <LayoutContent
-            className={cn(
-              "p-6 flex flex-col gap-6 overflow-hidden",
-              (isListed || isOwner) && "pb-0",
-            )}
+            className={cn("overflow-hidden", (isListed || isOwner) && "pb-0")}
           >
             <CollectionHeader
               image={edition?.properties.icon || theme?.icon}
@@ -417,7 +414,7 @@ const Price = ({ amount, image }: { amount?: number; image?: string }) => {
 
 const LoadingState = () => {
   return (
-    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+    <LayoutContent className="select-none h-full overflow-hidden">
       <Skeleton className="min-h-10 w-full rounded" />
       <Skeleton className="min-h-[200px] w-full rounded" />
       <div className="flex flex-col gap-4 grow">

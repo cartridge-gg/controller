@@ -161,7 +161,7 @@ function DepositInner({ onComplete }: DepositProps) {
         hideIcon
       />
 
-      <LayoutContent className="gap-6">
+      <LayoutContent>
         <Balance types={[BalanceType.FEE_TOKEN]} />
       </LayoutContent>
 

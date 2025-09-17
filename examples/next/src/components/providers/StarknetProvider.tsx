@@ -162,11 +162,11 @@ if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
     rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
   });
 }
-if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
-  controllerConnectorChains.unshift({
-    rpcUrl: process.env.NEXT_PUBLIC_RPC_LOCAL,
-  });
-}
+// if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
+//   controllerConnectorChains.unshift({
+//     rpcUrl: process.env.NEXT_PUBLIC_RPC_LOCAL,
+//   });
+// }
 
 const controller = new ControllerConnector({
   policies,
