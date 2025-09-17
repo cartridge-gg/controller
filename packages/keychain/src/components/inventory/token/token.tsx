@@ -22,6 +22,7 @@ import { useCallback, useMemo } from "react";
 import { useConnection } from "@/hooks/connection";
 import { useVersion } from "@/hooks/version";
 import { useNavigation } from "@/context/navigation";
+import { useViewerAddress } from "@/hooks/viewer";
 
 export function Token() {
   const { address } = useParams<{ address: string }>();
@@ -38,6 +39,7 @@ function Credits() {
   // TODO: Get parent from keychain connection if needed
   const { navigate } = useNavigation();
   const account = useAccount();
+  const { isViewOnly } = useViewerAddress();
   const username = account?.username || "";
   const credit = useCreditBalance({
     username,
@@ -70,15 +72,17 @@ function Credits() {
         </div>
       </LayoutContent>
 
-      <LayoutFooter className="gap-4">
-        <Button
-          onClick={() => {
-            navigate("/funding/credits");
-          }}
-        >
-          Purchase
-        </Button>
-      </LayoutFooter>
+      {!isViewOnly && (
+        <LayoutFooter className="gap-4">
+          <Button
+            onClick={() => {
+              navigate("/funding/credits");
+            }}
+          >
+            Purchase
+          </Button>
+        </LayoutFooter>
+      )}
     </>
   );
 }
@@ -113,14 +117,18 @@ const CreditsLoadingState = () => {
 function ERC20() {
   const { address } = useParams<{ address: string }>();
   const account = useAccount();
-  const accountAddress = account?.address || "";
+  const { address: viewerAddress, isViewOnly } = useViewerAddress();
+  const accountAddress = viewerAddress || account?.address || "";
   const { controller } = useConnection();
   const explorer = useExplorer();
   const { transfers } = useData();
   const { isControllerGte } = useVersion();
 
   const chainId = constants.StarknetChainId.SN_MAIN; // Use mainnet as default
-  const { token } = useToken({ tokenAddress: address! });
+  const { token } = useToken({
+    tokenAddress: address!,
+    accountAddress: viewerAddress,
+  });
   const [searchParams] = useSearchParams();
 
   const compatibility = useMemo(() => {
@@ -225,7 +233,7 @@ function ERC20() {
         </div>
       </LayoutContent>
 
-      {compatibility && controller && (
+      {compatibility && controller && !isViewOnly && (
         <LayoutFooter>
           <Link to={`send?${searchParams.toString()}`} className="w-full">
             <Button className="w-full space-x-2">

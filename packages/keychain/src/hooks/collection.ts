@@ -114,12 +114,18 @@ async function fetchBalances(
 export function useCollection({
   contractAddress,
   tokenIds = [],
+  accountAddress,
 }: {
   contractAddress?: string;
   tokenIds?: string[];
+  accountAddress?: string;
 }): UseCollectionResponse {
-  const { address } = useAccountProfile({ overridable: true });
+  const { address: profileAddress } = useAccountProfile({ overridable: true });
   const { project } = useConnection();
+  const address = useMemo(
+    () => accountAddress ?? profileAddress,
+    [accountAddress, profileAddress],
+  );
 
   const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
   const [collection, setCollection] = useState<Collection | undefined>(
@@ -249,9 +255,16 @@ export type CollectionType = {
   count: number;
 };
 
-export function useCollections(): UseCollectionsResponse {
+export function useCollections(
+  accountAddress?: string,
+): UseCollectionsResponse {
   const account = useAccount();
-  const address = account?.address;
+  const connectedAddress = account?.address;
+  const { address: profileAddress } = useAccountProfile({ overridable: true });
+  const address = useMemo(
+    () => accountAddress ?? profileAddress ?? connectedAddress,
+    [accountAddress, profileAddress, connectedAddress],
+  );
   const { project } = useConnection();
   const [collections, setCollections] = useState<{ [key: string]: Collection }>(
     {},

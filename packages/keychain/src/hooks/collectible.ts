@@ -144,9 +144,16 @@ export type CollectibleType = {
   count: number;
 };
 
-export function useCollectibles(): UseCollectiblesResponse {
+export function useCollectibles(
+  accountAddress?: string,
+): UseCollectiblesResponse {
   const account = useAccount();
-  const address = account?.address;
+  const connectedAddress = account?.address;
+  const { address: profileAddress } = useAccountProfile({ overridable: true });
+  const address = useMemo(
+    () => accountAddress ?? profileAddress ?? connectedAddress,
+    [accountAddress, profileAddress, connectedAddress],
+  );
   const { project } = useConnection();
   const [offset, setOffset] = useState(0);
   const [collectibles, setCollectibles] = useState<{

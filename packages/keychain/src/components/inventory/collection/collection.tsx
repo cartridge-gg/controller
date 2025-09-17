@@ -26,6 +26,7 @@ import { useControllerTheme } from "@/hooks/connection";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
+import { useViewerAddress } from "@/hooks/viewer";
 
 export function Collection() {
   const { games, editions } = useArcade();
@@ -33,6 +34,7 @@ export function Collection() {
   const { project } = useConnection();
   const { collectionOrders: orders } = useMarketplace();
   const theme = useControllerTheme();
+  const { address: viewerAddress, isViewOnly } = useViewerAddress();
 
   const edition: EditionModel | undefined = useMemo(() => {
     return Object.values(editions).find(
@@ -46,7 +48,10 @@ export function Collection() {
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { collection, assets, status } = useCollection({ contractAddress });
+  const { collection, assets, status } = useCollection({
+    contractAddress,
+    accountAddress: viewerAddress,
+  });
 
   // Use local state for selection instead of URL parameters
   const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
@@ -119,23 +124,25 @@ export function Collection() {
               certified
             />
 
-            <div
-              className={cn(
-                "flex items-center gap-x-1.5 text-xs cursor-pointer self-start text-foreground-300",
-              )}
-              onClick={handleSelectAll}
-            >
-              <CheckboxIcon
-                className={cn(selection && "text-foreground-100")}
-                variant={selection ? "minus-line" : "unchecked-line"}
-                size="sm"
-              />
-              <div>
-                {selection
-                  ? `${selectedTokenIds.length} Selected`
-                  : "Select all"}
+            {!isViewOnly && (
+              <div
+                className={cn(
+                  "flex items-center gap-x-1.5 text-xs cursor-pointer self-start text-foreground-300",
+                )}
+                onClick={handleSelectAll}
+              >
+                <CheckboxIcon
+                  className={cn(selection && "text-foreground-100")}
+                  variant={selection ? "minus-line" : "unchecked-line"}
+                  size="sm"
+                />
+                <div>
+                  {selection
+                    ? `${selectedTokenIds.length} Selected`
+                    : "Select all"}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4 place-items-center">
               {assets.map((asset) => {
@@ -150,7 +157,7 @@ export function Collection() {
                     state={location.state}
                     key={asset.tokenId}
                     onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      if (selection) {
+                      if (selection && !isViewOnly) {
                         e.preventDefault();
                         handleSelect(asset.tokenId);
                       }
@@ -165,10 +172,12 @@ export function Collection() {
                           : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
                       }
                       image={asset.imageUrl || placeholder}
-                      selectable
+                      selectable={!isViewOnly}
                       selected={isSelected}
                       listingCount={listingCount}
-                      onSelect={() => handleSelect(asset.tokenId)}
+                      onSelect={() =>
+                        !isViewOnly && handleSelect(asset.tokenId)
+                      }
                       className="rounded overflow-hidden"
                     />
                   </Link>
@@ -177,40 +186,42 @@ export function Collection() {
             </div>
           </LayoutContent>
 
-          <LayoutFooter
-            className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background",
-              !selection && "hidden",
-            )}
-          >
-            <div className="flex gap-3 w-full">
-              <Link
-                className={cn(
-                  "flex items-center justify-center gap-x-4 w-full",
-                  !allUnlisted && "pointer-events-none",
-                )}
-                to={allUnlisted ? `list?${createNavigationParams()}` : ""}
-              >
-                <Button
-                  variant="secondary"
-                  className={cn("w-full gap-2")}
-                  disabled={!allUnlisted}
+          {!isViewOnly && (
+            <LayoutFooter
+              className={cn(
+                "relative flex flex-col items-center justify-center gap-y-4 bg-background",
+                !selection && "hidden",
+              )}
+            >
+              <div className="flex gap-3 w-full">
+                <Link
+                  className={cn(
+                    "flex items-center justify-center gap-x-4 w-full",
+                    !allUnlisted && "pointer-events-none",
+                  )}
+                  to={allUnlisted ? `list?${createNavigationParams()}` : ""}
                 >
-                  <TagIcon variant="solid" size="sm" />
-                  List
-                </Button>
-              </Link>
-              <Link
-                className="flex items-center justify-center gap-x-4 w-full"
-                to={`send?${createNavigationParams()}`}
-              >
-                <Button variant="secondary" className="w-full gap-2">
-                  <PaperPlaneIcon variant="solid" size="sm" />
-                  Send
-                </Button>
-              </Link>
-            </div>
-          </LayoutFooter>
+                  <Button
+                    variant="secondary"
+                    className={cn("w-full gap-2")}
+                    disabled={!allUnlisted}
+                  >
+                    <TagIcon variant="solid" size="sm" />
+                    List
+                  </Button>
+                </Link>
+                <Link
+                  className="flex items-center justify-center gap-x-4 w-full"
+                  to={`send?${createNavigationParams()}`}
+                >
+                  <Button variant="secondary" className="w-full gap-2">
+                    <PaperPlaneIcon variant="solid" size="sm" />
+                    Send
+                  </Button>
+                </Link>
+              </div>
+            </LayoutFooter>
+          )}
         </>
       )}
     </>
