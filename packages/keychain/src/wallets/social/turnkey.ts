@@ -111,15 +111,20 @@ export class TurnkeyWallet {
 
       const auth0Client = await this.getAuth0Client(10_000);
 
-      const redirect_uri = new URL(window.location.toString());
+      const windowUri = new URL(window.location.toString());
 
-      const urlParams = Object.fromEntries(redirect_uri.searchParams.entries());
-      redirect_uri.search = "";
+      const urlParams = Object.fromEntries(windowUri.searchParams.entries());
+      windowUri.search = "";
 
       const urlParamsString = JSON.stringify(urlParams);
 
       localStorage.setItem(URL_PARAMS_KEY, urlParamsString);
       localStorage.setItem(RPC_URL_KEY, this.rpcUrl);
+
+      const redirectUri =
+        windowUri.pathname === "/session"
+          ? windowUri.origin + windowUri.pathname
+          : windowUri.origin;
 
       // cases:
       // we are not in an iFrame -> use redirect flow
@@ -129,7 +134,7 @@ export class TurnkeyWallet {
         await auth0Client.loginWithRedirect({
           authorizationParams: {
             connection: Auth0SocialProviderName[this.socialProvider],
-            redirect_uri: import.meta.env.VITE_ORIGIN,
+            redirect_uri: redirectUri,
             nonce,
             tknonce: nonce,
           },
@@ -151,7 +156,7 @@ export class TurnkeyWallet {
         {
           authorizationParams: {
             connection: Auth0SocialProviderName[this.socialProvider],
-            redirect_uri: import.meta.env.VITE_ORIGIN,
+            redirect_uri: redirectUri,
             nonce,
             display: "touch",
             tknonce: nonce,
