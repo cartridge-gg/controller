@@ -115,13 +115,13 @@ export function Home() {
                 onConnect={() => {
                   context.resolve({
                     code: ResponseCodes.SUCCESS,
-                    address: controller.address(),
+                    address: controller!.address(),
                   });
                 }}
                 onSkip={() => {
                   context.resolve({
                     code: ResponseCodes.SUCCESS,
-                    address: controller.address(),
+                    address: controller!.address(),
                   });
                 }}
               />
