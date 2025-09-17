@@ -187,6 +187,7 @@ const controller = new ControllerConnector({
     "metamask",
     "rabby",
     "password",
+    "argent",
   ],
   preset: "loot-survivor",
   // By default, preset policies take precedence over manually provided policies
