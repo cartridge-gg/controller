@@ -436,6 +436,11 @@ export function parseExecutionError(
     const hexAndTextPattern = /0x[a-fA-F0-9]+\s*\('([^']+)'\)/g;
     const allMatches = [...executionError.matchAll(hexAndTextPattern)];
 
+    // Keep track of all errors found for fallback
+    let allFoundErrors: string[] = allMatches
+      .map((match) => match[1])
+      .filter((err) => err !== "");
+
     // Find the last meaningful error that's not a generic framework error
     let meaningfulError = null;
     for (let i = allMatches.length - 1; i >= 0; i--) {
@@ -466,6 +471,11 @@ export function parseExecutionError(
           (match) => match[1],
         );
         const allErrors = [...singleQuoted, ...doubleQuoted];
+
+        // Update allFoundErrors with the fallback parsing results if they're more comprehensive
+        if (allErrors.length > allFoundErrors.length) {
+          allFoundErrors = allErrors.filter((err) => err !== "");
+        }
 
         // Find the most meaningful error, excluding common framework errors
         meaningfulError = allErrors.find(
@@ -502,13 +512,11 @@ export function parseExecutionError(
     if (meaningfulError) {
       errorArray = [meaningfulError];
     } else {
-      // If no meaningful error found, include all errors from the matches
-      errorArray = allMatches
-        .map((match) => match[1])
-        .filter((err) => err !== "");
-      if (errorArray.length === 0) {
-        errorArray = ["Transaction execution failed"];
-      }
+      // If no meaningful error found, include all errors that were found
+      errorArray =
+        allFoundErrors.length > 0
+          ? allFoundErrors
+          : ["Transaction execution failed"];
     }
 
     return {
