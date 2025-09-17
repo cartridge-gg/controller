@@ -419,7 +419,7 @@ export function useAccountProfile(): UseAccountResponse {
   const match = useMatch("/account/:username/*");
 
   const usernameOrAddress = match?.params.username ?? "";
-  
+
   // Check if it's an address (starts with 0x) or username
   const isAddress = useMemo(
     () => usernameOrAddress.startsWith("0x"),

@@ -54,23 +54,37 @@ export function Home() {
     return <Authenticate />;
   }
 
-  // No controller, send to login
-  if (!controller) {
+  // Allow viewing certain pages without controller
+  const publicPaths = [
+    "/account/", // Allow viewing any account inventory
+  ];
+  const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
+
+  // No controller, send to login (unless on public path)
+  if (!controller && !isPublicPath) {
     return <CreateController isSlot={pathname.startsWith("/slot")} />;
   }
 
-  if (!upgrade.isSynced || isConfigLoading) {
-    // This is likely never observable in a real application but just in case.
-    return <PageLoading />;
-  }
+  // Skip upgrade checks if no controller (viewing public path)
+  if (controller) {
+    if (!upgrade.isSynced || isConfigLoading) {
+      // This is likely never observable in a real application but just in case.
+      return <PageLoading />;
+    }
 
-  if (upgrade.available) {
-    return <Upgrade />;
+    if (upgrade.available) {
+      return <Upgrade />;
+    }
   }
 
   return (
     <Layout>
       {(() => {
+        // If no controller and on public path, just show the outlet
+        if (!controller && isPublicPath) {
+          return <Outlet />;
+        }
+        
         switch (context?.type) {
           case "connect": {
             // if no policies, we can connect immediately
