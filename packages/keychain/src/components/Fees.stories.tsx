@@ -54,7 +54,8 @@ const meta: Meta<typeof Fees> = {
     layout: "centered",
     docs: {
       description: {
-        component: "A component that displays network fees for transactions. Shows loading states, free transactions, and USD-converted fee amounts.",
+        component:
+          "A component that displays network fees for transactions. Shows loading states, free transactions, and USD-converted fee amounts.",
       },
     },
   },
