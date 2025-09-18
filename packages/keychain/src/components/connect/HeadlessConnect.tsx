@@ -1,24 +1,17 @@
 import { useConnection } from "@/hooks/connection";
 import { ConnectCtx } from "@/utils/connection";
-import { ResponseCodes } from "@cartridge/controller";
+import { ResponseCodes, AuthOption } from "@cartridge/controller";
 import { useCallback, useEffect, useState } from "react";
 import { fetchController } from "./create/utils";
-import { useWebauthnAuthentication } from "./create/webauthn";
-import { useExternalWalletAuthentication } from "./create/external-wallet";
-import { useWalletConnectAuthentication } from "./create/wallet-connect";
+import { useCreateController } from "./create/useCreateController";
 
 interface HeadlessConnectProps {
   context: ConnectCtx & { headless: { username: string; authMethod: string } };
 }
 
 export function HeadlessConnect({ context }: HeadlessConnectProps) {
-  const { chainId } = useConnection();
-  const { signup: signupWithWebauthn, login: loginWithWebauthn } =
-    useWebauthnAuthentication();
-  const { signup: signupWithExternalWallet, login: loginWithExternalWallet } =
-    useExternalWalletAuthentication();
-  const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
-    useWalletConnectAuthentication();
+  const { chainId, controller } = useConnection();
+  const { handleSubmit } = useCreateController({ isSlot: false });
   const [error, setError] = useState<Error>();
 
   const handleHeadlessAuth = useCallback(async () => {
@@ -33,71 +26,25 @@ export function HeadlessConnect({ context }: HeadlessConnectProps) {
       const { username, authMethod } = context.headless!;
 
       // Check if user exists by fetching controller
-      let controllerQuery = null;
-      let isSignup = false;
+      let userExists = false;
 
       try {
         const result = await fetchController(chainId, username);
-        controllerQuery = result.controller;
-        isSignup = false;
+        userExists = !!result.controller;
       } catch (e) {
         if ((e as Error).message !== "ent: controller not found") {
           throw e;
         }
-        isSignup = true;
+        userExists = false;
       }
 
-      // Handle different auth methods using existing hooks
+      // Validate auth method for headless mode
       switch (authMethod) {
         case "webauthn": {
-          if (isSignup) {
-            // WebAuthn signup - This requires user interaction for credential creation
-            throw new Error(
-              "WebAuthn signup requires user interaction and cannot be done headlessly",
-            );
-          } else {
-            // WebAuthn login - This also requires user interaction for credential assertion
-            if (!controllerQuery) {
-              throw new Error("Controller not found for login");
-            }
-
-            const webauthnCred = controllerQuery.signers?.find(
-              (s) => s.metadata?.__typename === "WebauthnCredentials",
-            )?.metadata;
-            if (
-              !webauthnCred ||
-              webauthnCred.__typename !== "WebauthnCredentials"
-            ) {
-              throw new Error("No WebAuthn credentials found for user");
-            }
-
-            // WebAuthn requires user interaction and cannot be done headlessly
-            throw new Error(
-              "WebAuthn login requires user interaction and cannot be done headlessly",
-            );
-          }
-        }
-
-        case "metamask":
-        case "rabby": {
-          if (isSignup) {
-            await signupWithExternalWallet(authMethod);
-          } else {
-            if (!controllerQuery) {
-              throw new Error("Controller not found for login");
-            }
-            await loginWithExternalWallet(authMethod);
-          }
-          break;
-        }
-
-        case "walletconnect": {
-          if (isSignup) {
-            await signupWithWalletConnect();
-          } else {
-            await loginWithWalletConnect();
-          }
-          break;
+          // WebAuthn requires user interaction and cannot be done headlessly
+          throw new Error(
+            "WebAuthn requires user interaction and cannot be done headlessly",
+          );
         }
 
         case "google":
@@ -108,23 +55,17 @@ export function HeadlessConnect({ context }: HeadlessConnectProps) {
           );
         }
 
+        case "metamask":
+        case "rabby":
+        case "walletconnect": {
+          // These are supported, continue with authentication
+          await handleSubmit(username, userExists, authMethod as AuthOption);
+          break;
+        }
+
         default:
           throw new Error(`Unsupported auth method: ${authMethod}`);
       }
-
-      // If we get here, authentication was successful
-      const controller =
-        "controller" in window
-          ? (window as { controller?: { address: () => string } }).controller
-          : undefined;
-      if (!controller) {
-        throw new Error("Controller not created after authentication");
-      }
-
-      context.resolve({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address(),
-      });
     } catch (e) {
       const error = e as Error;
       setError(error);
@@ -133,20 +74,21 @@ export function HeadlessConnect({ context }: HeadlessConnectProps) {
         message: error.message,
       });
     }
-  }, [
-    context,
-    chainId,
-    signupWithWebauthn,
-    loginWithWebauthn,
-    signupWithExternalWallet,
-    loginWithExternalWallet,
-    signupWithWalletConnect,
-    loginWithWalletConnect,
-  ]);
+  }, [context, chainId, handleSubmit]);
 
   useEffect(() => {
     handleHeadlessAuth();
   }, [handleHeadlessAuth]);
+
+  // Watch for controller to be set and resolve when ready
+  useEffect(() => {
+    if (controller) {
+      context.resolve({
+        code: ResponseCodes.SUCCESS,
+        address: controller.address(),
+      });
+    }
+  }, [controller, context]);
 
   // Return null since this component doesn't render anything
   if (error) {
