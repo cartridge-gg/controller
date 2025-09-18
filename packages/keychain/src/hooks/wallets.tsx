@@ -70,6 +70,7 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     const intervalId = setInterval(async () => {
       const detected = await parent.externalDetectWallets();
+      console.log("detected", detected);
 
       const getWalletIdentifier = (wallet: ExternalWallet) => {
         const sortedAccounts = [...(wallet.connectedAccounts || [])]
