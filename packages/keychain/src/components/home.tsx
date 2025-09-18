@@ -13,6 +13,7 @@ import { Layout } from "@/components/layout";
 import { Outlet, useLocation } from "react-router-dom";
 import { Authenticate } from "./authenticate";
 import { now } from "@/constants";
+import { useConnection } from "@/hooks/connection";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
