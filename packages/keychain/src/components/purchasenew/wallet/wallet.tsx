@@ -100,7 +100,7 @@ export function SelectWallet() {
       setAvailableWallets(newAvailableWallets);
     };
 
-    getWallets();
+    getWallets().catch((e) => setError(e as Error));
   }, [externalDetectWallets, isMainnet, selectedNetworks]);
 
   useEffect(() => {
