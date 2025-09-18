@@ -1,6 +1,6 @@
 {
   "name": "@cartridge/controller",
-  "version": "0.10.3",
+  "version": "0.10.4",
   "description": "Cartridge Controller",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
