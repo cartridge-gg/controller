@@ -5,7 +5,6 @@ import { useWallets } from "@/hooks/wallets";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
-  AuthOptions,
   ExternalWalletResponse,
   ExternalWalletType,
   WalletAdapter,
@@ -33,7 +32,7 @@ import {
   ControllerQuery,
   CredentialMetadata,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { QueryObserverResult } from "react-query";
 import { SignerAlert } from "../signer-alert";
 
@@ -187,20 +186,8 @@ const WalletAuths = ({
     authFn: (auth: SignerMethodKind) => Promise<string | undefined>,
   ) => void;
 }) => {
-  const { wallets, connectWallet } = useWallets();
+  const { supportedWalletsForAuth, connectWallet } = useWallets();
   const { controller } = useController();
-  const supportedWallets = useMemo(
-    () =>
-      [
-        ...wallets
-          .filter(
-            (wallet) => wallet.type !== "argent" && wallet.type !== "phantom",
-          )
-          .map((wallet) => wallet.type),
-        "walletconnect",
-      ] as AuthOptions,
-    [wallets],
-  );
 
   const handleClickInner = useCallback(
     async (wallet: SignerMethodKind) => {
@@ -270,7 +257,7 @@ const WalletAuths = ({
 
   return (
     <>
-      {supportedWallets.map((wallet) => (
+      {supportedWalletsForAuth.map((wallet) => (
         <SignerMethod
           key={wallet as string}
           kind={wallet as SignerMethodKind}
@@ -330,6 +317,7 @@ const RegularAuths = ({
             const turnkeyWallet = new TurnkeyWallet(
               controller.username(),
               controller.chainId(),
+              controller.rpcUrl(),
               "google",
             );
             const response = await turnkeyWallet.connect(false);
@@ -376,6 +364,7 @@ const RegularAuths = ({
             const turnkeyWallet = new TurnkeyWallet(
               controller.username(),
               controller.chainId(),
+              controller.rpcUrl(),
               "discord",
             );
             const response = await turnkeyWallet.connect(false);

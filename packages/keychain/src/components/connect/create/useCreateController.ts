@@ -5,7 +5,7 @@ import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
-import { AuthOption } from "@cartridge/controller";
+import { AuthOption, WalletAdapter } from "@cartridge/controller";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
 import {
   AccountQuery,
@@ -17,7 +17,8 @@ import {
   WebauthnCredentials,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { shortString } from "starknet";
+import { useSearchParams } from "react-router-dom";
+import { constants, shortString } from "starknet";
 import {
   credentialToAddress,
   credentialToAuth,
@@ -53,9 +54,15 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   );
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
-
-  const { origin, rpcUrl, chainId, setController, configSignupOptions } =
-    useConnection();
+  const [, setSearchParams] = useSearchParams();
+  const {
+    origin,
+    rpcUrl,
+    chainId,
+    setController,
+    configSignupOptions,
+    context,
+  } = useConnection();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -65,7 +72,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const { signup: signupWithWalletConnect, login: loginWithWalletConnect } =
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
-  const { wallets } = useWallets();
+  const { supportedWalletsForAuth } = useWallets();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -153,11 +160,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const signupOptions: AuthOption[] = useMemo(() => {
     return [
       "webauthn" as AuthOption,
-      ...wallets
-        .filter(
-          (wallet) => wallet.type !== "argent" && wallet.type !== "phantom",
-        )
-        .map((wallet) => wallet.type),
+      ...supportedWalletsForAuth,
       "discord" as AuthOption,
       "google" as AuthOption,
       "walletconnect" as AuthOption,
@@ -165,15 +168,22 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
-  }, [wallets, configSignupOptions]);
+  }, [supportedWalletsForAuth, configSignupOptions]);
 
   const finishSignup = useCallback(
-    async (
-      username: string,
-      chainId: string,
-      signupResponse: SignupResponse,
-      signer: SignerInput,
-    ) => {
+    async ({
+      username,
+      chainId,
+      rpcUrl,
+      signupResponse,
+      signer,
+    }: {
+      username: string;
+      chainId: string;
+      rpcUrl: string;
+      signupResponse: SignupResponse;
+      signer: SignerInput;
+    }) => {
       const classHash = STABLE_CONTROLLER.hash;
       const owner = {
         signer: signupResponse.signer,
@@ -214,7 +224,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
         setController(controller);
       }
     },
-    [setController, rpcUrl, origin],
+    [setController, origin],
   );
 
   const handleSignup = useCallback(
@@ -303,45 +313,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
         throw new Error("Signup failed");
       }
 
-      const classHash = STABLE_CONTROLLER.hash;
-      const owner = {
-        signer: signupResponse.signer,
-      };
-      const salt = shortString.encodeShortString(username);
-      const address = computeAccountAddress(classHash, owner, salt);
-
-      const { controller, session } = await Controller.login({
-        appId: origin,
-        classHash,
-        rpcUrl,
-        chainId,
-        address,
-        username,
-        owner,
-        cartridgeApiUrl: import.meta.env.VITE_CARTRIDGE_API_URL,
-        session_expires_at_s: Number(now() + DEFAULT_SESSION_DURATION),
-        isControllerRegistered: false,
-      });
-
-      const registerRet = await controller.register({
-        username,
-        chainId: shortString.decodeShortString(chainId),
-        owner: signer,
-        session: {
-          expiresAt: session.expiresAt,
-          guardianKeyGuid: session.guardianKeyGuid,
-          metadataHash: session.metadataHash,
-          sessionKeyGuid: session.sessionKeyGuid,
-          allowedPoliciesRoot: session.allowedPoliciesRoot,
-          authorization: session.authorization ?? [],
-          appId: origin,
-        },
-      });
-
-      if (registerRet.register.username) {
-        window.controller = controller;
-        setController(controller);
-      }
+      await finishSignup({ username, chainId, rpcUrl, signupResponse, signer });
     },
     [
       chainId,
@@ -354,17 +326,23 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       signupWithWebauthn,
       signupWithWalletConnect,
       passwordAuth,
-      finishSignup,
     ],
   );
 
   const finishLogin = useCallback(
-    async (
-      controller: NonNullable<ControllerQuery["controller"]>,
-      chainId: string,
-      loginResponse: LoginResponse,
-      authenticationMethod: AuthOption,
-    ) => {
+    async ({
+      controller,
+      chainId,
+      rpcUrl,
+      loginResponse,
+      authenticationMethod,
+    }: {
+      controller: NonNullable<ControllerQuery["controller"]>;
+      chainId: string;
+      rpcUrl: string;
+      loginResponse: LoginResponse;
+      authenticationMethod: AuthOption;
+    }) => {
       // Verify correct EVM wallet account is selected
       if (authenticationMethod !== "password") {
         const connectedAddress = signerToAddress(loginResponse.signer);
@@ -374,7 +352,12 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
             authenticationMethod,
         );
         if (!possibleSigners || possibleSigners.length === 0) {
-          throw new Error("No signers found for controller");
+          throw new Error(
+            "No signers found for controller expected " +
+              connectedAddress +
+              "found" +
+              possibleSigners,
+          );
         }
 
         if (
@@ -407,7 +390,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       window.controller = loginRet.controller;
       setController(loginRet.controller);
     },
-    [origin, chainId, rpcUrl, setController],
+    [origin, setController],
   );
 
   const handleLogin = useCallback(
@@ -518,12 +501,13 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
         throw new Error("Login failed");
       }
 
-      await finishLogin(
+      await finishLogin({
         controller,
         chainId,
         loginResponse,
         authenticationMethod,
-      );
+        rpcUrl,
+      });
     },
     [
       isSlot,
@@ -532,84 +516,121 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       loginWithWalletConnect,
       loginWithExternalWallet,
       chainId,
-      origin,
-      rpcUrl,
+      finishLogin,
+      passwordAuth,
       setWaitingForConfirmation,
-      setController,
-      setChangeWallet,
     ],
   );
 
   useEffect(() => {
-    if (!chainId) {
-      return;
-    }
-
+    if (!chainId) return;
     if (
       window.location.search.includes("code") &&
       window.location.search.includes("state")
     ) {
       (async () => {
-        const turnkeyWallet = new TurnkeyWallet("", chainId, undefined);
-        const { account, username, isSignup, socialProvider } =
-          await turnkeyWallet.handleRedirect(window.location.href);
-        if (error) {
-          throw error;
-        }
-        if (!username || !isSignup || !socialProvider || !account) {
-          return;
-        }
-
-        if (isSignup) {
-          finishSignup(
-            username,
-            chainId,
-            {
-              address: account,
-              signer: {
-                eip191: {
-                  address: account,
-                },
-              },
-              type: socialProvider as AuthOption,
-            },
-            {
-              type: SignerType.Eip191,
-              credential: JSON.stringify({
-                provider: socialProvider,
-                eth_address: account,
-              }),
-            },
+        setIsLoading(true);
+        try {
+          const turnkeyWallet = new TurnkeyWallet(
+            "unknown",
+            constants.StarknetChainId.SN_SEPOLIA,
+            "unknown",
+            undefined,
           );
-        } else {
-          const controller = (await fetchController(chainId, username))
-            ?.controller;
-          if (!controller) {
-            throw new Error("Controller not found");
+
+          const {
+            account,
+            username,
+            socialProvider,
+            isSignup,
+            searchParams,
+            chainId,
+            rpcUrl,
+          } = await turnkeyWallet.handleRedirect(
+            window.location.href,
+            setError,
+          );
+
+          if (error) {
+            throw error;
+          }
+          if (
+            !username ||
+            isSignup === undefined ||
+            !socialProvider ||
+            !account
+          ) {
+            return;
+          }
+          if (searchParams) {
+            setSearchParams(searchParams);
           }
 
-          finishLogin(
-            controller,
-            chainId,
-            {
+          if (!window.keychain_wallets) {
+            throw new Error("Keychain wallets isn't present");
+          }
+          window.keychain_wallets?.addEmbeddedWallet(
+            account,
+            turnkeyWallet as unknown as WalletAdapter,
+          );
+
+          if (isSignup) {
+            await finishSignup({
+              username,
+              chainId,
+              rpcUrl,
+              signupResponse: {
+                address: account,
+                signer: {
+                  eip191: {
+                    address: account,
+                  },
+                },
+                type: socialProvider as AuthOption,
+              },
               signer: {
-                eip191: {
-                  address: account,
+                type: SignerType.Eip191,
+                credential: JSON.stringify({
+                  provider: socialProvider,
+                  eth_address: account,
+                }),
+              },
+            });
+          } else {
+            const controller = await fetchController(chainId, username);
+            if (!controller || !controller.controller) {
+              throw new Error("Controller not found");
+            }
+
+            await finishLogin({
+              controller: controller.controller,
+              chainId,
+              loginResponse: {
+                signer: {
+                  eip191: {
+                    address: account,
+                  },
                 },
               },
-            },
-            socialProvider as AuthOption,
-          );
+              authenticationMethod: socialProvider as AuthOption,
+              rpcUrl,
+            });
+          }
+        } catch (e) {
+          setError(e as Error);
+        } finally {
+          setIsLoading(false);
         }
       })();
     }
   }, [
+    error,
     window.location.search,
+    setIsLoading,
     finishLogin,
-    chainId,
     finishSignup,
-    origin,
-    rpcUrl,
+    setSearchParams,
+    chainId,
   ]);
 
   const handleSubmit = useCallback(
@@ -657,7 +678,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       }
       setIsLoading(false);
     },
-    [handleLogin, handleSignup, doPopupFlow, setAuthMethod],
+    [handleLogin, handleSignup, doPopupFlow, setAuthMethod, context],
   );
 
   return {

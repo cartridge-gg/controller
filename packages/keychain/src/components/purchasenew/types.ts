@@ -36,4 +36,5 @@ export type ReceivingProps = {
   items: Item[];
   isLoading?: boolean;
   showTotal?: boolean;
+  showPrice?: boolean;
 };

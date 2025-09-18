@@ -23,22 +23,22 @@ export class WalletBridge {
     }
 
     const metamask = new MetaMaskWallet();
-    metamask.isAvailable() && this.walletAdapters.set("metamask", metamask);
+    this.walletAdapters.set("metamask", metamask);
 
     const phantom = new PhantomWallet();
-    phantom.isAvailable() && this.walletAdapters.set("phantom", phantom);
+    this.walletAdapters.set("phantom", phantom);
 
     const argent = new ArgentWallet();
-    argent.isAvailable() && this.walletAdapters.set("argent", argent);
+    this.walletAdapters.set("argent", argent);
 
     const braavos = new BraavosWallet();
-    braavos.isAvailable() && this.walletAdapters.set("braavos", braavos);
+    this.walletAdapters.set("braavos", braavos);
 
     const rabby = new RabbyWallet();
-    rabby.isAvailable() && this.walletAdapters.set("rabby", rabby);
+    this.walletAdapters.set("rabby", rabby);
 
     const base = new BaseWallet();
-    base.isAvailable() && this.walletAdapters.set("base", base);
+    this.walletAdapters.set("base", base);
 
     window.wallet_bridge = this;
   }

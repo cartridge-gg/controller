@@ -7,7 +7,7 @@ import { useCallback } from "react";
 export const useSocialAuthentication = (
   setChangeWallet?: (changeWallet: boolean) => void,
 ) => {
-  const { chainId } = useConnection();
+  const { chainId, rpcUrl } = useConnection();
 
   const signup = useCallback(
     async (
@@ -22,6 +22,7 @@ export const useSocialAuthentication = (
       const turnkeyWallet = new TurnkeyWallet(
         username,
         chainId,
+        rpcUrl,
         socialProvider,
       );
       const { account, error, success } = await turnkeyWallet.connect(isSignup);
@@ -52,7 +53,7 @@ export const useSocialAuthentication = (
         type: socialProvider,
       };
     },
-    [setChangeWallet, chainId],
+    [setChangeWallet, chainId, rpcUrl],
   );
 
   return {

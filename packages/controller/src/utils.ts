@@ -95,7 +95,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
       ([target, { methods }]) =>
         toArray(methods).map((m) => ({
           target,
-          method: m.entrypoint,
+          method: hash.getSelectorFromName(m.entrypoint),
           authorized: m.authorized,
         })),
     ),
