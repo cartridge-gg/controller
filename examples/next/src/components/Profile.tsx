@@ -64,6 +64,11 @@ export function Profile() {
           >
             Following
           </Button>
+          <Button
+            onClick={() => ctrlConnector.controller.openProfileAt("/funding")}
+          >
+            Funding
+          </Button>
         </div>
         <div className="flex flex-wrap gap-1">
           <Button

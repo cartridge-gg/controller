@@ -1,5 +1,50 @@
 # Changelog
 
+## [0.10.3] - 2025-09-17
+
+### ✨ New Features
+- **@cartridge/keychain**: Added native social login functionality, enabling seamless authentication in native applications (#2010)
+- **@cartridge/keychain**: Implemented robust retry logic with exponential backoff for transaction waiting operations, improving reliability for both external wallet and StarkNet transactions (#2032)
+- **@cartridge/keychain**: Enhanced starter pack and cost breakdown UI with improved tooltips, verified/unverified edition support, and better item display (#1982)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Migrated all explorer URLs from StarkScan to Cartridge Explorer for consistent block exploration experience (#1883)
+- **@cartridge/controller**: Improved nested execution error parsing to extract meaningful error messages from deeply nested JSON-RPC responses, showing specific contract errors instead of generic messages (#2033)
+- **@cartridge/keychain**: Enhanced RPC error display in ExecutionContainer to show clean error descriptions instead of full JSON responses (#2023)
+- **@cartridge/keychain**: Improved token ordering and balance handling for better user experience (#2029, #2024)
+- **Dependencies**: Updated presets package and various UI components for improved functionality
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed social authentication redirect URL handling for improved login reliability (#2035)
+- **@cartridge/keychain**: Added comprehensive error handling to claim operations to prevent silent failures (#2030)
+- **@cartridge/keychain**: Fixed cost component display to only show for paid starter packs, removing confusing cost breakdown from free claims (#2025)
+- **@cartridge/keychain**: Fixed various UI regressions including useEffect dependencies, wallet integration, and controller creation flows (#2028, #2027)
+- **@cartridge/keychain**: Fixed token balance display issues for accounts with no prior interactions (#2024)
+- **@cartridge/keychain**: Resolved minor asset display issues in collection components (#2019)
+- **@cartridge/keychain**: Fixed total claimable amount calculation (#2018)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality
+- **controller-rs**: Updated to latest version for enhanced backend functionality
+- **Various**: Updated workspace dependencies and lockfile maintenance
+
+## [0.10.2] - 2025-09-11
+
+### ✨ New Features
+- **@cartridge/keychain**: Added environment-based configuration for merkle drop contracts enabling flexible contract deployment across different environments (#2008)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Migrated 6 transaction flows to use ExecutionContainer for direct execution, eliminating page redirects and providing inline transaction confirmation for improved UX (#2005)
+- **@cartridge/keychain**: Enhanced session update prompting logic with better validation and synchronous rendering for improved transaction flow performance (#2007)
+- **Examples**: Cleaned up Next.js example Profile component by removing collection-related buttons (#2011)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed chain switching to always execute on request, ensuring reliable network changes (#2014)
+- **@cartridge/keychain**: Fixed login validation to prevent authentication before controller username validation is complete (#2012)
+- **@cartridge/keychain**: Fixed session creation flash issues for smoother session management (#2009)
+- **@cartridge/keychain**: Fixed Braavos wallet chain switching by adding proper skip logic (#2006)
+- **@cartridge/keychain**: Fixed merkle drop claim interface to properly display claim amounts (#2004)
+
 ## [0.10.1] - 2025-09-10
 
 ### ✨ New Features

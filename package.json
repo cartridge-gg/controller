@@ -34,8 +34,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@cartridge/presets": "github:cartridge-gg/presets#d246ec1",
-    "@cartridge/ui": "github:cartridge-gg/ui#6d13471",
+    "@cartridge/presets": "github:cartridge-gg/presets#f60358b",
+    "@cartridge/ui": "github:cartridge-gg/ui#2313a28",
     "tailwindcss": "catalog:"
   },
   "devDependencies": {

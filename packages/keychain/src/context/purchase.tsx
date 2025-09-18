@@ -24,7 +24,6 @@ import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
 import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
 import { starterPackToLayerswapInput } from "@/utils/payments";
 import { CreateLayerswapPaymentInput } from "@cartridge/ui/utils/api/cartridge";
-import { constants } from "starknet";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -340,10 +339,7 @@ export const PurchaseProvider = ({
 
         if (chainId) {
           // WORKAROUND: Braavos doesn't support switching chains api so we remain on whatever chain is current
-          if (
-            chainId === constants.StarknetChainId.SN_SEPOLIA &&
-            wallet.type === "braavos"
-          ) {
+          if (wallet.type === "braavos") {
             console.warn(
               "Braavos does not support `wallet_switchStarknetChain`",
             );

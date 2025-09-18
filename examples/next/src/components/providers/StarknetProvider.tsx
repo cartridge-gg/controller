@@ -204,6 +204,7 @@ const session = new SessionConnector({
   chainId: constants.StarknetChainId.SN_MAIN,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   keychainUrl,
+  apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
 });
 
 export function StarknetProvider({ children }: PropsWithChildren) {

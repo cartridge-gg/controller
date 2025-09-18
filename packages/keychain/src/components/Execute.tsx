@@ -73,7 +73,7 @@ export function Execute() {
         },
       });
     });
-  }, [params?.reject, setOnModalClose]);
+  }, [params?.reject, params?.resolve, setOnModalClose]);
 
   if (!params) {
     return null;

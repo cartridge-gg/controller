@@ -1,12 +1,17 @@
 import { ec, stark, WalletAccount } from "starknet";
 
-import SessionAccount from "./account";
-import { KEYCHAIN_URL } from "../constants";
-import BaseProvider from "../provider";
-import { toWasmPolicies } from "../utils";
+import {
+  signerToGuid,
+  subscribeCreateSession,
+} from "@cartridge/controller-wasm";
 import { SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
+import { encode } from "starknet";
+import { KEYCHAIN_URL } from "../constants";
 import { ParsedSessionPolicies } from "../policies";
+import BaseProvider from "../provider";
+import { toWasmPolicies } from "../utils";
+import SessionAccount from "./account";
 
 interface SessionRegistration {
   username: string;
@@ -25,6 +30,7 @@ export type SessionOptions = {
   policies: SessionPolicies;
   redirectUrl: string;
   keychainUrl?: string;
+  apiUrl?: string;
 };
 
 export default class SessionProvider extends BaseProvider {
@@ -37,6 +43,7 @@ export default class SessionProvider extends BaseProvider {
   protected _redirectUrl: string;
   protected _policies: ParsedSessionPolicies;
   protected _keychainUrl: string;
+  protected _apiUrl?: string;
 
   constructor({
     rpc,
@@ -44,6 +51,7 @@ export default class SessionProvider extends BaseProvider {
     policies,
     redirectUrl,
     keychainUrl,
+    apiUrl,
   }: SessionOptions) {
     super();
 
@@ -73,6 +81,7 @@ export default class SessionProvider extends BaseProvider {
     this._chainId = chainId;
     this._redirectUrl = redirectUrl;
     this._keychainUrl = keychainUrl || KEYCHAIN_URL;
+    this._apiUrl = apiUrl;
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller_session = this;
@@ -161,9 +170,42 @@ export default class SessionProvider extends BaseProvider {
     )}&rpc_url=${this._rpcUrl}`;
 
     localStorage.setItem("lastUsedConnector", this.id);
-    window.open(url, "_blank");
+    const openedWindow = window.open(url, "_blank");
 
-    return this.account;
+    try {
+      const formattedPk = encode.addHexPrefix(pk);
+
+      const sessionKeyGuid = signerToGuid({
+        starknet: { privateKey: formattedPk },
+      });
+
+      const cartridgeApiUrl = this._apiUrl ?? "https://api.cartridge.gg";
+      const sessionResult = await subscribeCreateSession(
+        sessionKeyGuid,
+        cartridgeApiUrl,
+      );
+
+      // auth is: [shortstring!('authorization-by-registered'), owner_guid]
+      const ownerGuid = sessionResult.authorization[1];
+      const session: SessionRegistration = {
+        username: sessionResult.controller.accountID,
+        address: sessionResult.controller.address,
+        ownerGuid,
+        expiresAt: sessionResult.expiresAt,
+        guardianKeyGuid: "0x0",
+        metadataHash: "0x0",
+        sessionKeyGuid,
+      };
+      localStorage.setItem("session", JSON.stringify(session));
+
+      this.tryRetrieveFromQueryOrStorage();
+
+      openedWindow?.close();
+
+      return this.account;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   switchStarknetChain(_chainId: string): Promise<boolean> {
@@ -192,12 +234,26 @@ export default class SessionProvider extends BaseProvider {
     const signer = signerString ? JSON.parse(signerString) : null;
     let sessionRegistration: SessionRegistration | null = null;
 
+    const sessionString = localStorage.getItem("session");
+    if (sessionString) {
+      sessionRegistration = JSON.parse(sessionString);
+    }
+
     if (window.location.search.includes("startapp")) {
       const params = new URLSearchParams(window.location.search);
       const session = params.get("startapp");
       if (session) {
-        sessionRegistration = JSON.parse(atob(session));
-        localStorage.setItem("session", JSON.stringify(sessionRegistration));
+        const possibleNewSession: SessionRegistration = JSON.parse(
+          atob(session),
+        );
+
+        if (
+          Number(possibleNewSession.expiresAt) !==
+          Number(sessionRegistration?.expiresAt)
+        ) {
+          sessionRegistration = possibleNewSession;
+          localStorage.setItem("session", JSON.stringify(sessionRegistration));
+        }
 
         // Remove the session query parameter
         params.delete("startapp");
@@ -206,13 +262,6 @@ export default class SessionProvider extends BaseProvider {
           (params.toString() ? `?${params.toString()}` : "") +
           window.location.hash;
         window.history.replaceState({}, document.title, newUrl);
-      }
-    }
-
-    if (!sessionRegistration) {
-      const sessionString = localStorage.getItem("session");
-      if (sessionString) {
-        sessionRegistration = JSON.parse(sessionString);
       }
     }
 

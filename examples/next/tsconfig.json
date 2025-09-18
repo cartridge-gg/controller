@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@cartridge/tsconfig/react.json",
+  "extends": "../../packages/tsconfig/react.json",
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
