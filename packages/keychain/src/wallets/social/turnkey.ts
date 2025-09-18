@@ -111,6 +111,21 @@ export class TurnkeyWallet {
 
       const auth0Client = await this.getAuth0Client(10_000);
 
+      // In the case of a signup, we definitely want to user to choose an account on its social provider
+      // If it's a login, it means we are already authed via the cookies
+      if (!isSignup && (await auth0Client.isAuthenticated())) {
+        // Skip the authentication to the social provider and get directly the turnkey accounts
+        const connectResult = await this.finishConnect({
+          nonce,
+        });
+        // If no account is specified this is a typical login flow, continue with the redirect
+        // If an account is specified and we're connected to the right account, return now
+        // otherwise continue the flow
+        if (this.account && this.account === connectResult.account) {
+          return connectResult;
+        }
+      }
+
       const windowUri = new URL(window.location.toString());
 
       const urlParams = Object.fromEntries(windowUri.searchParams.entries());
