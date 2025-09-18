@@ -87,7 +87,35 @@ export function SelectWallet() {
         newChainIds.set(network.platform, chainId);
       }
 
-      if (matchingWallets.length > 0) {
+      // For Starknet networks, always include Argent and Braavos wallets as fallback
+      // even if they're not detected by the wallet detection mechanism
+      if (network.platform === "starknet") {
+        const starknetWallets = [...matchingWallets];
+
+        // Add Argent wallet if not already detected
+        if (!matchingWallets.some((wallet) => wallet.type === "argent")) {
+          starknetWallets.push({
+            type: "argent",
+            available: true,
+            platform: "starknet",
+            name: "Argent",
+          });
+        }
+
+        // Add Braavos wallet if not already detected
+        if (!matchingWallets.some((wallet) => wallet.type === "braavos")) {
+          starknetWallets.push({
+            type: "braavos",
+            available: true,
+            platform: "starknet",
+            name: "Braavos",
+          });
+        }
+
+        if (starknetWallets.length > 0) {
+          newAvailableWallets.set(network.platform, starknetWallets);
+        }
+      } else if (matchingWallets.length > 0) {
         newAvailableWallets.set(network.platform, matchingWallets);
       }
     });
@@ -229,7 +257,16 @@ export function SelectWallet() {
       </LayoutContent>
 
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error && (
+          <ErrorAlert
+            title="Error"
+            description={
+              error.message.includes("Unknown error")
+                ? error.message.replace("Unknown error", "Not available")
+                : error.message
+            }
+          />
+        )}
       </LayoutFooter>
     </>
   );
