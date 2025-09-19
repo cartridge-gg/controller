@@ -14,6 +14,8 @@ import {
 } from "starknet";
 import { KeychainIFrame } from "./iframe";
 import {
+  AUTH_EXTERNAL_WALLETS,
+  EXTERNAL_WALLETS,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -30,15 +32,29 @@ export type KeychainSession = {
   };
 };
 
-export type AuthOption =
-  | "google"
-  | "webauthn"
-  | "discord"
-  | "walletconnect"
-  | "password"
-  | ExternalWalletType;
+export const EMBEDDED_WALLETS = [
+  "google",
+  "webauthn",
+  "discord",
+  "walletconnect",
+  "password",
+] as const;
 
-export type AuthOptions = Omit<AuthOption, "phantom" | "argent">[];
+export type EmbeddedWallet = (typeof EMBEDDED_WALLETS)[number];
+
+export const ALL_AUTH_OPTIONS = [
+  ...EMBEDDED_WALLETS,
+  ...EXTERNAL_WALLETS,
+] as const;
+
+export type AuthOption = (typeof ALL_AUTH_OPTIONS)[number];
+
+export const IMPLEMENTED_AUTH_OPTIONS = [
+  ...EMBEDDED_WALLETS,
+  ...AUTH_EXTERNAL_WALLETS,
+];
+
+export type AuthOptions = (typeof IMPLEMENTED_AUTH_OPTIONS)[number][];
 
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",
