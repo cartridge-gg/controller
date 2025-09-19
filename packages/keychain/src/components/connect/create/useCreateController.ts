@@ -4,8 +4,13 @@ import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
-import { TurnkeyWallet } from "@/wallets/social/turnkey";
-import { AuthOption, WalletAdapter } from "@cartridge/controller";
+import { OAuthWallet } from "@/wallets/social/turnkey";
+import {
+  AuthOption,
+  AuthOptions,
+  EMBEDDED_WALLETS,
+  WalletAdapter,
+} from "@cartridge/controller";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
 import {
   AccountQuery,
@@ -26,6 +31,7 @@ import {
 } from "../types";
 import { useExternalWalletAuthentication } from "./external-wallet";
 import { usePasswordAuthentication } from "./password";
+import { useSmsAuthentication } from "./sms";
 import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
@@ -73,6 +79,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
   const { supportedWalletsForAuth } = useWallets();
+  const { signup: signupWithSms, login: loginWithSms } = useSmsAuthentication();
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -157,18 +164,15 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     [setPendingUsername],
   );
 
-  const signupOptions: AuthOption[] = useMemo(() => {
+  const supportedSignupOptions: AuthOptions = useMemo(() => {
     return [
-      "webauthn" as AuthOption,
-      ...supportedWalletsForAuth,
-      "discord" as AuthOption,
-      "google" as AuthOption,
-      "walletconnect" as AuthOption,
-      "password" as AuthOption,
+      ...EMBEDDED_WALLETS,
+      ...(supportedWalletsForAuth as AuthOptions),
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
   }, [supportedWalletsForAuth, configSignupOptions]);
+  console.log(configSignupOptions);
 
   const finishSignup = useCallback(
     async ({
@@ -259,6 +263,16 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
           break;
         case "walletconnect":
           signupResponse = await signupWithWalletConnect();
+          signer = {
+            type: SignerType.Eip191,
+            credential: JSON.stringify({
+              provider: authenticationMode,
+              eth_address: signupResponse.address,
+            }),
+          };
+          break;
+        case "sms":
+          signupResponse = await signupWithSms(username);
           signer = {
             type: SignerType.Eip191,
             credential: JSON.stringify({
@@ -444,6 +458,11 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
           }
           break;
         }
+        case "sms": {
+          setWaitingForConfirmation(true);
+          loginResponse = await loginWithSms(username);
+          break;
+        }
         case "rabby":
         case "metamask": {
           setWaitingForConfirmation(true);
@@ -531,7 +550,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       (async () => {
         setIsLoading(true);
         try {
-          const turnkeyWallet = new TurnkeyWallet(
+          const turnkeyWallet = new OAuthWallet(
             "unknown",
             constants.StarknetChainId.SN_SEPOLIA,
             "unknown",
@@ -694,7 +713,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     setOverlay,
     changeWallet,
     setChangeWallet,
-    signupOptions,
+    supportedSignupOptions,
     authMethod,
   };
 }

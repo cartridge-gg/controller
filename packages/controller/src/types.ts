@@ -17,6 +17,7 @@ import {
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
+  externalWalletTypes,
 } from "./wallets/types";
 
 export type KeychainSession = {
@@ -30,15 +31,31 @@ export type KeychainSession = {
   };
 };
 
-export type AuthOption =
-  | "google"
-  | "webauthn"
-  | "discord"
-  | "walletconnect"
-  | "password"
-  | ExternalWalletType;
+export const EMBEDDED_WALLETS = [
+  "sms",
+  "google",
+  "webauthn",
+  "discord",
+  "walletconnect",
+  "password",
+] as const;
 
-export type AuthOptions = Omit<AuthOption, "phantom" | "argent">[];
+export type EmbeddedWallet = (typeof EMBEDDED_WALLETS)[number];
+
+export const ALL_AUTH_OPTIONS = [
+  ...EMBEDDED_WALLETS,
+  ...externalWalletTypes,
+] as const;
+
+export type AuthOption = (typeof ALL_AUTH_OPTIONS)[number];
+
+export const VALID_AUTH_OPTIONS = [
+  ...ALL_AUTH_OPTIONS.filter(
+    (x) => x !== "phantom" && x !== "argent" && x !== "braavos" && x !== "base",
+  ),
+] as const;
+
+export type AuthOptions = (typeof VALID_AUTH_OPTIONS)[number][];
 
 export enum ResponseCodes {
   SUCCESS = "SUCCESS",

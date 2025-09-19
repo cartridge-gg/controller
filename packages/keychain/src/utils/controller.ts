@@ -404,6 +404,8 @@ export default class Controller {
       appId,
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
+    console.log("appId", appId);
+    console.log("cartridgeWithMeta", cartridgeWithMeta);
     if (!cartridgeWithMeta) {
       return;
     }

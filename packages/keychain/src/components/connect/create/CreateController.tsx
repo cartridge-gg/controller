@@ -5,7 +5,7 @@ import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
 import { allUseSameAuth } from "@/utils/controller";
-import { AuthOption } from "@cartridge/controller";
+import { AuthOption, AuthOptions } from "@cartridge/controller";
 import {
   CartridgeLogo,
   ControllerIcon,
@@ -46,7 +46,7 @@ interface CreateControllerViewProps {
   waitingForConfirmation: boolean;
   changeWallet: boolean;
   setChangeWallet: (value: boolean) => void;
-  authOptions: AuthOption[];
+  authOptions: AuthOptions;
   authMethod: AuthOption | undefined;
 }
 
@@ -253,7 +253,7 @@ export function CreateController({
     waitingForConfirmation,
     changeWallet,
     setChangeWallet,
-    signupOptions,
+    supportedSignupOptions,
     authMethod,
   } = useCreateController({
     isSlot,
@@ -285,14 +285,14 @@ export function CreateController({
         if (
           authenticationMode === undefined &&
           !accountExists &&
-          signupOptions.length > 1
+          supportedSignupOptions.length > 1
         ) {
           setAuthenticationStep(AuthenticationStep.ChooseMethod);
           return;
         }
         const authenticationMethod =
-          signupOptions.length === 1 && !accountExists
-            ? signupOptions[0]
+          supportedSignupOptions.length === 1 && !accountExists
+            ? supportedSignupOptions[0]
             : validation.signers &&
                 (validation.signers.length == 1 ||
                   allUseSameAuth(validation.signers))
@@ -321,7 +321,7 @@ export function CreateController({
       validation.status,
       validation.signers,
       setAuthenticationStep,
-      signupOptions,
+      supportedSignupOptions,
     ],
   );
 
@@ -384,7 +384,7 @@ export function CreateController({
         waitingForConfirmation={waitingForConfirmation}
         changeWallet={changeWallet}
         setChangeWallet={setChangeWallet}
-        authOptions={signupOptions}
+        authOptions={supportedSignupOptions}
         authMethod={authMethod}
       />
       {overlay}
