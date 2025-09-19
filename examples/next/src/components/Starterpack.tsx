@@ -17,12 +17,12 @@ export const Starterpack = () => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       return {
         purchase: "sick-starterpack-mainnet",
-        claim: "claim-starterpack-mainnet",
+        claim: "ls2-starterpack-mainnet",
       };
     }
     return {
       purchase: "sick-starterpack-sepolia",
-      claim: "claim-starterpack-sepolia",
+      claim: "ls2-starterpack-sepolia",
     };
   };
 
