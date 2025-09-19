@@ -316,7 +316,7 @@ export function CollectibleListing() {
             </ExecutionContainer>
           ) : (
             <>
-              <LayoutContent className="p-6 flex flex-col gap-4">
+              <LayoutContent>
                 <ListHeader image={image} title={title} />
                 <Quantity
                   quantity={quantity}

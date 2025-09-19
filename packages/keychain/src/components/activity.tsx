@@ -62,7 +62,7 @@ export function Activity() {
   ) : status === "error" || !data.length ? (
     <EmptyState />
   ) : (
-    <LayoutContent className="flex flex-col pt-6 pb-6 gap-6 overflow-y-auto">
+    <LayoutContent>
       {dates.map((current) => {
         return (
           <div key={current} className="flex flex-col gap-y-2 select-none">
@@ -154,7 +154,7 @@ export function Activity() {
 
 const LoadingState = () => {
   return (
-    <LayoutContent className="flex flex-col gap-4 p-6 overflow-hidden">
+    <LayoutContent>
       <Skeleton className="w-1/5 h-4 py-4 rounded" />
       <div className="flex flex-col gap-2">
         {Array.from({ length: 20 }).map((_, index) => (
@@ -167,7 +167,7 @@ const LoadingState = () => {
 
 const EmptyState = () => {
   return (
-    <LayoutContent className="flex flex-col gap-4 p-6">
+    <LayoutContent>
       <Empty
         title="No activity has been detected for this profile."
         icon="activity"

@@ -58,7 +58,7 @@ export function Leaderboard() {
   ) : status === "error" || !data.length ? (
     <EmptyState />
   ) : (
-    <LayoutContent className="flex flex-col pt-6 pb-0 gap-6 overflow-y-auto">
+    <LayoutContent className="pb-0">
       <LeaderboardTable className="flex">
         {data.map((item, index) => (
           <LeaderboardRow
