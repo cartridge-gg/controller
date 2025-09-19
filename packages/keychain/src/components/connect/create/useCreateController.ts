@@ -5,7 +5,12 @@ import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
-import { AuthOption, WalletAdapter } from "@cartridge/controller";
+import {
+  AuthOption,
+  AuthOptions,
+  EMBEDDED_WALLETS,
+  WalletAdapter,
+} from "@cartridge/controller";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
 import {
   AccountQuery,
@@ -151,15 +156,8 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     [setPendingUsername],
   );
 
-  const signupOptions: AuthOption[] = useMemo(() => {
-    return [
-      "webauthn" as AuthOption,
-      ...supportedWalletsForAuth,
-      "discord" as AuthOption,
-      "google" as AuthOption,
-      "walletconnect" as AuthOption,
-      "password" as AuthOption,
-    ].filter(
+  const signupOptions: AuthOptions = useMemo(() => {
+    return [...EMBEDDED_WALLETS, ...supportedWalletsForAuth].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
   }, [supportedWalletsForAuth, configSignupOptions]);

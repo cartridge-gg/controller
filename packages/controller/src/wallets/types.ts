@@ -1,10 +1,21 @@
-export type ExternalWalletType =
-  | "argent"
-  | "braavos"
-  | "metamask"
-  | "phantom"
-  | "rabby"
-  | "base";
+export const AUTH_EXTERNAL_WALLETS = ["metamask", "rabby"] as const;
+export type AuthExternalWallet = (typeof AUTH_EXTERNAL_WALLETS)[number];
+
+export const EXTRA_EXTERNAL_WALLETS = [
+  "argent",
+  "braavos",
+  "phantom",
+  "base",
+] as const;
+export type ExtraExternalWallet = (typeof EXTRA_EXTERNAL_WALLETS)[number];
+
+export const EXTERNAL_WALLETS = [
+  ...AUTH_EXTERNAL_WALLETS,
+  ...EXTRA_EXTERNAL_WALLETS,
+] as const;
+
+export type ExternalWalletType = (typeof EXTERNAL_WALLETS)[number];
+
 export type ExternalPlatform =
   | "starknet"
   | "ethereum"
