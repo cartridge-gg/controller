@@ -20,7 +20,7 @@
     "@cartridge/controller": "workspace:*",
     "@cartridge/ui": "catalog:",
     "@starknet-react/chains": "catalog:",
-    "@starknet-react/core": "^5.0.1",
+    "@starknet-react/core": "catalog:",
     "next": "^15.1.5",
     "next-themes": "^0.3.0",
     "prettier": "catalog:",
