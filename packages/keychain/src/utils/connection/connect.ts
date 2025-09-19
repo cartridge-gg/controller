@@ -23,6 +23,7 @@ export function connect({
         throw new Error("If defined, signup options cannot be empty");
       }
 
+      console.log(signupOptions);
       if (signupOptions) {
         setConfigSignupOptions(signupOptions);
       }

@@ -409,11 +409,8 @@ const RegularAuths = ({
           if (!controller?.username()) {
             throw new Error("No username");
           }
-          const smsWallet = new SmsWallet();
-          const response = await smsWallet.connect(
-            controller.username()!,
-            "add-signer",
-          );
+          const smsWallet = new SmsWallet(controller.username()!, "add-signer");
+          const response = await smsWallet.connect();
           if (!response || !response.success || !response.account) {
             throw new Error(response?.error || "Wallet auth: unknown error");
           }

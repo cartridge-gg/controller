@@ -17,6 +17,7 @@ import {
   toArray,
   Token,
   toSessionPolicies,
+  VALID_AUTH_OPTIONS,
   WalletAdapter,
   WalletBridge,
 } from "@cartridge/controller";
@@ -193,7 +194,8 @@ export function useConnectionValue() {
   });
   const [configSignupOptions, setConfigSignupOptions] = useState<
     AuthOptions | undefined
-  >(["google", "webauthn", "discord", "walletconnect", "metamask", "rabby"]);
+  >([...VALID_AUTH_OPTIONS]);
+
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
@@ -350,7 +352,10 @@ export function useConnectionValue() {
             oauthWallet.account = getAddress(ethAddress);
             oauthWallet.subOrganizationId = undefined;
 
-            window.keychain_wallets!.addEmbeddedWallet(ethAddress, oauthWallet);
+            window.keychain_wallets!.addEmbeddedWallet(
+              ethAddress,
+              oauthWallet as unknown as WalletAdapter,
+            );
           }
         }
       } catch (error) {

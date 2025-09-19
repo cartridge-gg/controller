@@ -1,21 +1,16 @@
-import { useKeychainWallets } from "@/components/provider/keychain-wallets";
 import { SmsWallet } from "@/wallets/social/sms-wallet";
 import { AuthOption, WalletAdapter } from "@cartridge/controller";
 import { useCallback } from "react";
 
 export const useSmsAuthentication = () => {
-  const { setOtpDisplayType } = useKeychainWallets();
-
   const signup = useCallback(
     async (
       connectType: "signup" | "login" | "add-signer",
       username: string,
     ) => {
-      const smsWallet = new SmsWallet();
+      const smsWallet = new SmsWallet(username, connectType);
 
-      setOtpDisplayType(connectType);
-
-      const response = await smsWallet.connect(username, connectType);
+      const response = await smsWallet.connect();
 
       if (!response.success || !response.account) {
         throw new Error(response.error);
@@ -29,7 +24,6 @@ export const useSmsAuthentication = () => {
         response.account,
         smsWallet as unknown as WalletAdapter,
       );
-      setOtpDisplayType(null);
 
       return {
         address: response.account,
@@ -37,7 +31,7 @@ export const useSmsAuthentication = () => {
         type: "sms" as AuthOption,
       };
     },
-    [setOtpDisplayType],
+    [],
   );
 
   return {

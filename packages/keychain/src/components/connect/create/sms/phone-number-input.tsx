@@ -23,12 +23,10 @@ import { useEffect, useState } from "react";
 
 export const PhoneNumberInput = ({
   onSubmit,
-  onCancel,
   phoneNumber,
   setPhoneNumber,
 }: {
   onSubmit: (phoneNumber: string) => void;
-  onCancel: () => void;
   phoneNumber: string;
   setPhoneNumber: (phoneNumber: string) => void;
 }) => {
@@ -225,7 +223,7 @@ export const PhoneNumberInput = ({
       </LayoutContent>
       <div className="flex flex-row items-center justify-center py-4 pr-4 pl-4">
         <div className="flex flex-row border-t border-t-spacer-100 w-full h-fit pt-4 justify-between gap-4">
-          <Button variant="secondary" className="px-8" onClick={onCancel}>
+          <Button variant="secondary" className="px-8">
             Cancel
           </Button>
           <Button

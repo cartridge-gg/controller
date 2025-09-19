@@ -245,11 +245,10 @@ export const createSmsSuborg = async (
   ).subOrganizationId;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getSmsSuborg = async (username: string, _phoneNumber: string) => {
+export const getSmsSuborg = async (phoneNumber: string) => {
   const getSuborgsResponse = await fetchApi<GetSuborgsResponse>("suborgs", {
-    filterType: "NAME",
-    filterValue: username,
+    filterType: "PHONE_NUMBER",
+    filterValue: phoneNumber,
   });
 
   if (getSuborgsResponse.organizationIds.length === 0) {

@@ -6,15 +6,11 @@ import {
   useEffect,
   useState,
 } from "react";
-import {
-  DisplayType,
-  SmsAuthentication,
-} from "../connect/create/sms/sms-authentication";
+import { SmsAuthentication } from "../connect/create/sms/sms-authentication";
 import { QRCodeOverlay } from "../connect/create/wallet-connect/qr-code-overlay";
 
-export interface KeychainWalletsInterface {
-  setOtpDisplayType: (otpDisplayType: DisplayType | null) => void;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface KeychainWalletsInterface {}
 
 export const KeychainWalletsContext = createContext<
   KeychainWalletsInterface | undefined
@@ -22,20 +18,18 @@ export const KeychainWalletsContext = createContext<
 
 export function KeychainWalletsProvider({ children }: PropsWithChildren) {
   const [overlayUri, setOverlayUri] = useState<string | null>(null);
-  const [otpDisplayType, setOtpDisplayType] = useState<DisplayType | null>(
-    null,
-  );
+  const [showSms, setShowSms] = useState<boolean>(false);
 
   useEffect(() => {
     window.addEventListener(
       "show-sms-authentication",
-      (event: CustomEventInit<DisplayType>) => {
+      (event: CustomEventInit<boolean>) => {
         if (event.detail !== undefined) {
-          setOtpDisplayType(event.detail);
+          setShowSms(event.detail);
         }
       },
     );
-  }, [setOtpDisplayType]);
+  }, [setShowSms]);
 
   useEffect(() => {
     window.addEventListener(
@@ -56,15 +50,12 @@ export function KeychainWalletsProvider({ children }: PropsWithChildren) {
   }, [setOverlayUri]);
 
   return (
-    <KeychainWalletsContext.Provider value={{ setOtpDisplayType }}>
+    <KeychainWalletsContext.Provider value={{}}>
       {children}
-      {otpDisplayType !== null && (
+      {showSms && (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
           <div className="pointer-events-auto">
-            <SmsAuthentication
-              displayType={otpDisplayType}
-              setOtpDisplayType={setOtpDisplayType}
-            />
+            <SmsAuthentication />
           </div>
         </div>
       )}

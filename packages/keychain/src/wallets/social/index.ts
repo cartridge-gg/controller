@@ -170,9 +170,11 @@ export abstract class TurnkeyWallet implements WalletAdapter {
   }
 
   async waitForTransaction(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _txHash: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _timeoutMs?: number,
-  ): Promise<ExternalWalletResponse<any>> {
+  ): Promise<ExternalWalletResponse<unknown>> {
     return {
       success: false,
       wallet: this.type,

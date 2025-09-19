@@ -3,15 +3,7 @@ import { useCallback, useState } from "react";
 import { OtpCodeInput } from "./otp-code-input";
 import { PhoneNumberInput } from "./phone-number-input";
 
-export type DisplayType = "signup" | "login" | "add-signer";
-
-export const SmsAuthentication = ({
-  displayType,
-  setOtpDisplayType,
-}: {
-  displayType: DisplayType;
-  setOtpDisplayType: (otpDisplayType: DisplayType | null) => void;
-}) => {
+export const SmsAuthentication = () => {
   const [step, setStep] = useState<"phone-number" | "otp-code">("phone-number");
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>(undefined);
 
@@ -42,24 +34,12 @@ export const SmsAuthentication = ({
       <LayoutHeader
         icon={<MobileIcon variant="solid" size="lg" />}
         variant="compressed"
-        title={
-          displayType === "signup"
-            ? "Signup with SMS"
-            : displayType === "login"
-              ? "Login with SMS"
-              : "Add SMS Signer"
-        }
-        onBack={() => {
-          setOtpDisplayType(null);
-        }}
+        title={"SMS signer"}
         hideSettings
       />
       {step === "phone-number" && (
         <PhoneNumberInput
           onSubmit={onPhoneNumberSubmit}
-          onCancel={() => {
-            setOtpDisplayType(null);
-          }}
           phoneNumber={phoneNumber!}
           setPhoneNumber={setPhoneNumber}
         />

@@ -4,8 +4,13 @@ import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
-import { TurnkeyWallet } from "@/wallets/social/turnkey";
-import { AuthOption, WalletAdapter } from "@cartridge/controller";
+import { OAuthWallet } from "@/wallets/social/turnkey";
+import {
+  AuthOption,
+  AuthOptions,
+  EMBEDDED_WALLETS,
+  WalletAdapter,
+} from "@cartridge/controller";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
 import {
   AccountQuery,
@@ -159,19 +164,15 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     [setPendingUsername],
   );
 
-  const signupOptions: AuthOption[] = useMemo(() => {
+  const supportedSignupOptions: AuthOptions = useMemo(() => {
     return [
-      "webauthn" as AuthOption,
-      ...supportedWalletsForAuth,
-      "discord" as AuthOption,
-      "google" as AuthOption,
-      "sms" as AuthOption,
-      "walletconnect" as AuthOption,
-      "password" as AuthOption,
+      ...EMBEDDED_WALLETS,
+      ...(supportedWalletsForAuth as AuthOptions),
     ].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
   }, [supportedWalletsForAuth, configSignupOptions]);
+  console.log(configSignupOptions);
 
   const finishSignup = useCallback(
     async ({
@@ -549,7 +550,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       (async () => {
         setIsLoading(true);
         try {
-          const turnkeyWallet = new TurnkeyWallet(
+          const turnkeyWallet = new OAuthWallet(
             "unknown",
             constants.StarknetChainId.SN_SEPOLIA,
             "unknown",
@@ -712,7 +713,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     setOverlay,
     changeWallet,
     setChangeWallet,
-    signupOptions,
+    supportedSignupOptions,
     authMethod,
   };
 }

@@ -1,4 +1,3 @@
-import { DisplayType } from "@/components/connect/create/sms/sms-authentication";
 import { getPromiseWithResolvers } from "@/utils/promises";
 import {
   ExternalWallet,
@@ -19,7 +18,10 @@ export class SmsWallet extends TurnkeyWallet {
   private phoneNumberPromise: Promise<string> | undefined = undefined;
   private smsOtpPromise: Promise<string> | undefined = undefined;
 
-  constructor() {
+  constructor(
+    private username: string,
+    private connectType: "signup" | "login" | "add-signer",
+  ) {
     super();
     this.type = "sms" as ExternalWalletType;
   }
@@ -42,10 +44,7 @@ export class SmsWallet extends TurnkeyWallet {
     };
   }
 
-  async connect(
-    username: string,
-    connectType: "signup" | "login" | "add-signer",
-  ): Promise<ExternalWalletResponse> {
+  async connect(): Promise<ExternalWalletResponse> {
     const {
       promise: phoneNumberPromise,
       resolve: phoneNumberResolve,
@@ -79,7 +78,7 @@ export class SmsWallet extends TurnkeyWallet {
 
     window.dispatchEvent(
       new CustomEvent("show-sms-authentication", {
-        detail: connectType as DisplayType,
+        detail: this.connectType,
       }),
     );
 
@@ -89,10 +88,10 @@ export class SmsWallet extends TurnkeyWallet {
     try {
       const phoneNumber = await this.phoneNumberPromise;
       let subOrganizationId: string | undefined = undefined;
-      if (connectType === "login" || connectType === "add-signer") {
-        subOrganizationId = await getSmsSuborg(username, phoneNumber);
+      if (this.connectType === "login" || this.connectType === "add-signer") {
+        subOrganizationId = await getSmsSuborg(phoneNumber);
       } else {
-        subOrganizationId = await createSmsSuborg(username, phoneNumber);
+        subOrganizationId = await createSmsSuborg(this.username, phoneNumber);
       }
       if (!subOrganizationId) {
         throw new Error("No subOrganizationId");
@@ -124,7 +123,7 @@ export class SmsWallet extends TurnkeyWallet {
 
       const turnkeyAddress = await getOrCreateWallet(
         subOrganizationId,
-        username,
+        this.username,
         turnkeyIframeClient!,
       );
 
