@@ -130,6 +130,7 @@ export function StarterPackInner({
           ) : undefined
         }
         right={supply ? <Supply amount={supply} /> : undefined}
+        hideIcon
       />
       <LayoutContent>
         <div className="flex flex-col gap-3">

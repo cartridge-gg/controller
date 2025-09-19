@@ -66,7 +66,7 @@ export const StarterItem = React.forwardRef<
           </div>
           <CardContent
             className={cn(
-              "bg-background-200 hover:bg-background-300 py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3",
+              "bg-background-200 py-3 px-4 overflow-visible h-full rounded-lg flex flex-row items-center gap-3",
               className,
             )}
           >
