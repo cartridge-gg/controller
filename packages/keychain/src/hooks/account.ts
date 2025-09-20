@@ -12,7 +12,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import base64url from "base64url";
 import { useEffect, useMemo, useState } from "react";
-import { useMatch, useSearchParams } from "react-router-dom";
+import { useMatch } from "react-router-dom";
 import { constants, getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
@@ -413,55 +413,50 @@ export type UseAccountResponse = {
   address: string;
 };
 
-export function useAccountProfile({
-  overridable,
-}: {
-  overridable?: boolean;
-} = {}): UseAccountResponse {
+export function useAccountProfile(): UseAccountResponse {
   // To be used in top level provider (Above Route component)
   // Ref: https://stackoverflow.com/a/75462921
   const match = useMatch("/account/:username/*");
-  const [searchParams] = useSearchParams();
 
-  const username = match?.params.username ?? "";
+  const usernameOrAddress = match?.params.username ?? "";
+
+  // Check if it's an address (starts with 0x) or username
+  const isAddress = useMemo(
+    () => usernameOrAddress.startsWith("0x"),
+    [usernameOrAddress],
+  );
+
+  // If it's an address, use it directly; otherwise fetch it from username
   const { data: usernameData } = useAddressByUsernameQuery(
-    { username },
-    { enabled: !!username },
+    { username: isAddress ? "" : usernameOrAddress },
+    { enabled: !isAddress && !!usernameOrAddress },
   );
 
-  const address = useMemo(
-    () =>
-      (import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS as string) ??
-      usernameData?.account?.controllers.edges?.[0]?.node?.address ??
-      "",
-    [usernameData],
-  );
-
-  const addressParam = searchParams.get("address");
+  // If it's an address, fetch the username for it
   const { data: addressData } = useAccountNameQuery(
-    { address: addressParam || "" },
-    {
-      enabled:
-        !!addressParam &&
-        addressParam.startsWith("0x") &&
-        !!addressParam.replace("0x", "").match(/^[0-9a-fA-F]+$/) &&
-        overridable,
-    },
+    { address: isAddress ? usernameOrAddress : "" },
+    { enabled: isAddress },
   );
-  const usernameParam = useMemo(() => {
-    if (
-      !addressParam ||
-      !addressParam.startsWith("0x") ||
-      !addressParam.replace("0x", "").match(/^[0-9a-fA-F]+$/)
-    )
-      return;
-    const username = addressData?.accounts?.edges?.[0]?.node?.username;
-    if (!username) return `0x${BigInt(addressParam).toString(16)}`.slice(0, 9);
-    return username;
-  }, [addressParam, addressData]);
+
+  const address = useMemo(() => {
+    if (import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS) {
+      return import.meta.env.VITE_MOCKED_ACCOUNT_ADDRESS as string;
+    }
+    if (isAddress) {
+      return usernameOrAddress;
+    }
+    return usernameData?.account?.controllers.edges?.[0]?.node?.address ?? "";
+  }, [isAddress, usernameOrAddress, usernameData]);
+
+  const username = useMemo(() => {
+    if (isAddress) {
+      return addressData?.accounts?.edges?.[0]?.node?.username ?? "";
+    }
+    return usernameOrAddress;
+  }, [isAddress, usernameOrAddress, addressData]);
 
   return {
-    username: overridable && usernameParam ? usernameParam : username,
-    address: overridable && addressParam ? addressParam : address,
+    username,
+    address,
   };
 }

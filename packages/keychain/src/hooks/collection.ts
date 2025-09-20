@@ -1,4 +1,4 @@
-import { useAccount, useAccountProfile } from "@/hooks/account";
+import { useAccountProfile } from "@/hooks/account";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Collections, Marketplace } from "@cartridge/marketplace";
 import { Token, ToriiClient } from "@dojoengine/torii-wasm";
@@ -118,7 +118,7 @@ export function useCollection({
   contractAddress?: string;
   tokenIds?: string[];
 }): UseCollectionResponse {
-  const { address } = useAccountProfile({ overridable: true });
+  const { address } = useAccountProfile();
   const { project } = useConnection();
 
   const [assets, setAssets] = useState<{ [key: string]: Asset }>({});
@@ -250,8 +250,7 @@ export type CollectionType = {
 };
 
 export function useCollections(): UseCollectionsResponse {
-  const account = useAccount();
-  const address = account?.address;
+  const { address } = useAccountProfile();
   const { project } = useConnection();
   const [collections, setCollections] = useState<{ [key: string]: Collection }>(
     {},

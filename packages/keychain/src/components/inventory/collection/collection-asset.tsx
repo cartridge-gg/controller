@@ -39,12 +39,14 @@ import { useAccount } from "@/hooks/account";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useNavigation } from "@/context/navigation";
 import { createExecuteUrl } from "@/utils/connection/execute";
+import { useViewerAddress } from "@/hooks/viewer";
 
 const OFFSET = 10;
 
 export function CollectionAsset() {
   const { chainId, project } = useConnection();
   const account = useAccount();
+  const { canPerformActions } = useViewerAddress();
   const explorer = useExplorer();
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
@@ -305,66 +307,68 @@ export function CollectionAsset() {
             </div>
           </LayoutContent>
 
-          <LayoutFooter
-            className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background-100 pt-0 select-none",
-              !isListed && !isOwner && "hidden",
-            )}
-          >
-            <div className="flex gap-3 w-full">
-              <Button
-                variant="secondary"
-                isLoading={loading}
-                onClick={handleUnlist}
-                className={cn(
-                  "w-full gap-2 text-destructive-100",
-                  (!isListed || !isOwner) && "hidden",
-                )}
-              >
-                <TagIcon variant="solid" size="sm" />
-                Unlist
-              </Button>
-              <Link
-                className={cn(
-                  "flex items-center justify-center gap-x-4 w-full",
-                  (isListed || !isOwner) && "hidden",
-                )}
-                to={`list?${searchParams.toString()}`}
-              >
-                <Button variant="secondary" className={cn("w-full gap-2")}>
-                  <TagIcon variant="solid" size="sm" />
-                  List
-                </Button>
-              </Link>
-              <Link
-                className={cn(
-                  "flex items-center justify-center gap-x-4 w-full",
-                  (!isListed || isOwner) && "hidden",
-                )}
-                to={`purchase?${searchParams.toString()}`}
-              >
+          {canPerformActions && (
+            <LayoutFooter
+              className={cn(
+                "relative flex flex-col items-center justify-center gap-y-4 bg-background-100 pt-0 select-none",
+                !isListed && !isOwner && "hidden",
+              )}
+            >
+              <div className="flex gap-3 w-full">
                 <Button
+                  variant="secondary"
                   isLoading={loading}
-                  variant="primary"
-                  className="w-full gap-2"
+                  onClick={handleUnlist}
+                  className={cn(
+                    "w-full gap-2 text-destructive-100",
+                    (!isListed || !isOwner) && "hidden",
+                  )}
                 >
-                  Purchase
+                  <TagIcon variant="solid" size="sm" />
+                  Unlist
                 </Button>
-              </Link>
-              <Link
-                className={cn(
-                  "flex items-center justify-center gap-x-4 w-full",
-                  !isOwner && "hidden",
-                )}
-                to={`send?${searchParams.toString()}`}
-              >
-                <Button variant="secondary" className="w-full gap-2">
-                  <PaperPlaneIcon variant="solid" size="sm" />
-                  Send
-                </Button>
-              </Link>
-            </div>
-          </LayoutFooter>
+                <Link
+                  className={cn(
+                    "flex items-center justify-center gap-x-4 w-full",
+                    (isListed || !isOwner) && "hidden",
+                  )}
+                  to={`list?${searchParams.toString()}`}
+                >
+                  <Button variant="secondary" className={cn("w-full gap-2")}>
+                    <TagIcon variant="solid" size="sm" />
+                    List
+                  </Button>
+                </Link>
+                <Link
+                  className={cn(
+                    "flex items-center justify-center gap-x-4 w-full",
+                    (!isListed || isOwner) && "hidden",
+                  )}
+                  to={`purchase?${searchParams.toString()}`}
+                >
+                  <Button
+                    isLoading={loading}
+                    variant="primary"
+                    className="w-full gap-2"
+                  >
+                    Purchase
+                  </Button>
+                </Link>
+                <Link
+                  className={cn(
+                    "flex items-center justify-center gap-x-4 w-full",
+                    !isOwner && "hidden",
+                  )}
+                  to={`send?${searchParams.toString()}`}
+                >
+                  <Button variant="secondary" className="w-full gap-2">
+                    <PaperPlaneIcon variant="solid" size="sm" />
+                    Send
+                  </Button>
+                </Link>
+              </div>
+            </LayoutFooter>
+          )}
         </>
       )}
     </>
