@@ -43,6 +43,20 @@ export default class SessionAccount extends WalletAccount {
       address,
     });
 
+    console.log(
+          rpcUrl,
+          privateKey,
+          address,
+          ownerGuid,
+          chainId,
+          {
+            expiresAt,
+            policies,
+            guardianKeyGuid,
+            metadataHash,
+            sessionKeyGuid,
+          },
+        );
     this.address = address;
     this.controller = CartridgeSessionAccount.newAsRegistered(
       rpcUrl,
