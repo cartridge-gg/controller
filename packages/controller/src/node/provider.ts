@@ -1,6 +1,7 @@
-import { ec, stark, WalletAccount } from "starknet";
+import { ec, encode, stark, WalletAccount } from "starknet";
 import { SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
+import { signerToGuid } from "@cartridge/controller-wasm";
 
 import SessionAccount from "./account";
 import { KEYCHAIN_URL } from "../constants";
@@ -153,10 +154,16 @@ export default class SessionProvider extends BaseProvider {
     const sessionData = await this._backend.waitForCallback();
     if (sessionData) {
       const sessionRegistration = JSON.parse(atob(sessionData));
+      const formattedPk = encode.addHexPrefix(publicKey);
       // Ensure addresses are properly formatted
       sessionRegistration.address = sessionRegistration.address.toLowerCase();
       sessionRegistration.ownerGuid =
         sessionRegistration.ownerGuid.toLowerCase();
+      sessionRegistration.guardianKeyGuid = "0x0";
+      sessionRegistration.metadataHash = "0x0";
+      sessionRegistration.sessionKeyGuid = signerToGuid({
+        starknet: { privateKey: formattedPk },
+      });
       await this._backend.set("session", JSON.stringify(sessionRegistration));
       return this.probe();
     }
