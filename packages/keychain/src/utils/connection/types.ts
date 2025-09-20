@@ -1,5 +1,6 @@
 import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
+  AuthOption,
   ConnectError,
   ConnectReply,
   DeployReply,
@@ -25,6 +26,10 @@ export type ConnectCtx = {
   policies: Policies;
   resolve: (res: ConnectReply | ConnectError) => void;
   reject: (reason?: unknown) => void;
+  headless?: {
+    username: string;
+    authMethod: AuthOption;
+  };
 };
 
 export type LogoutCtx = {
