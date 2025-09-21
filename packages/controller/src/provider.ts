@@ -106,6 +106,12 @@ export default abstract class BaseProvider implements StarknetWindowObject {
       }
 
       case "wallet_requestChainId":
+        this.account = await this.safeProbe();
+
+        if (!this.account) {
+          this.account = await this.connect();
+        }
+
         if (!this.account) {
           throw {
             code: 63,
