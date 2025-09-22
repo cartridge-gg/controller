@@ -1,9 +1,9 @@
 import { Signature } from "starknet";
 import { useEffect, useCallback } from "react";
 import { ResponseCodes } from "@cartridge/controller";
-import { useConnection } from "@/hooks/connection";
-import { DeployCtx, SignMessageCtx, ConnectCtx } from "@/utils/connection";
+import { ConnectCtx, DeployCtx, SignMessageCtx } from "@/utils/connection";
 import { CreateController, CreateSession, Upgrade } from "./connect";
+import { HeadlessConnect } from "./connect/HeadlessConnect";
 import { DeployController } from "./DeployController";
 import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
@@ -13,6 +13,7 @@ import { Layout } from "@/components/layout";
 import { Outlet, useLocation } from "react-router-dom";
 import { Authenticate } from "./authenticate";
 import { now } from "@/constants";
+import { useConnection } from "@/hooks/connection";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
@@ -54,8 +55,20 @@ export function Home() {
     return <Authenticate />;
   }
 
-  // No controller, send to login
+  // No controller, check if headless or send to login
   if (!controller) {
+    // Handle headless connection when no controller exists
+    if (context?.type === "connect" && (context as ConnectCtx).headless) {
+      return (
+        <HeadlessConnect
+          context={
+            context as ConnectCtx & {
+              headless: { username: string; authMethod: string };
+            }
+          }
+        />
+      );
+    }
     return <CreateController isSlot={pathname.startsWith("/slot")} />;
   }
 
@@ -73,6 +86,21 @@ export function Home() {
       {(() => {
         switch (context?.type) {
           case "connect": {
+            const connectCtx = context as ConnectCtx;
+
+            // Handle headless connection
+            if (connectCtx.headless) {
+              return (
+                <HeadlessConnect
+                  context={
+                    connectCtx as ConnectCtx & {
+                      headless: { username: string; authMethod: string };
+                    }
+                  }
+                />
+              );
+            }
+
             // if no policies, we can connect immediately
             if (
               !policies ||
