@@ -15,6 +15,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./controller": "./dist/controller.js",
+    "./controllerWithStarknetFeatures": "./dist/controllerWithStarknetFeatures.js",
     "./session": "./dist/session.js",
     "./telegram": "./dist/telegram.js"
   },
@@ -22,6 +23,9 @@
     "*": {
       "controller": [
         "./dist/controller.d.ts"
+      ],
+      "controllerWithStarknetFeatures": [
+        "./dist/controllerWithStarknetFeatures.d.ts"
       ],
       "session": [
         "./dist/session.d.ts"
@@ -34,6 +38,7 @@
   "tsup": {
     "entry": [
       "src/controller.ts",
+      "src/controllerWithStarknetFeatures.ts",
       "src/session.ts",
       "src/index.ts"
     ],
@@ -49,7 +54,10 @@
     "@starknet-react/core": "^5.0.1"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:*"
+    "@cartridge/controller": "workspace:*",
+    "@starknet-io/get-starknet-core": "^4.0.7",
+    "@starknet-io/get-starknet-wallet-standard": "5.0.0-beta.0",
+    "@wallet-standard/features": "^1.1.0"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",
