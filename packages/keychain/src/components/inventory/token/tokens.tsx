@@ -66,6 +66,7 @@ export function Tokens() {
 
 function TokenCardContent({ token }: { token: Token }) {
   const [searchParams] = useSearchParams();
+
   return (
     <Link to={`./token/${token.metadata.address}?${searchParams.toString()}`}>
       <TokenCard
