@@ -130,6 +130,7 @@ export function StarterPackInner({
           ) : undefined
         }
         right={supply ? <Supply amount={supply} /> : undefined}
+        hideIcon
       />
       <LayoutContent>
         <div className="flex flex-col gap-3">
@@ -153,11 +154,7 @@ export function StarterPackInner({
         {error ? (
           <ErrorAlert title="Error" description={error.message} />
         ) : acquisitionType === StarterpackAcquisitionType.Paid ? (
-          <CostBreakdown
-            rails="stripe"
-            costDetails={price}
-            paymentUnit="usdc"
-          />
+          <CostBreakdown rails="stripe" costDetails={price} />
         ) : null}
         <Button onClick={onProceed} disabled={!!error}>
           {acquisitionType === StarterpackAcquisitionType.Paid

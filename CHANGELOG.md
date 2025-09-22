@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.10.5] - 2025-09-20
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed session key GUID registration by adding proper signerToGuid generation and debug logging to SessionAccount constructor, ensuring proper session registration for Node.js provider (#2047)
+- **@cartridge/keychain**: Fixed USDC payment type box visibility on Starter Pack pages by removing redundant USDC denomination badge from cost breakdown display (#2046)
+- **@cartridge/keychain**: Fixed claim wallet detection to properly identify available wallets during claiming process, improving wallet selection reliability (#2045)
+- **@cartridge/keychain**: Fixed starter pack UI by removing unintentional hover states from non-selectable starter items and hiding unnecessary icons in starter pack page header (#2026)
+
+## [0.10.4] - 2025-09-18
+
+### ✨ New Features
+- **@cartridge/keychain**: Added cookie-based authentication for already connected accounts, improving user experience by maintaining login state across sessions (#2039)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed external wallet availability detection to handle cases where StarkNet window objects are not immediately available on initialization, ensuring reliable StarkNet wallet detection (#2043)
+
 ## [0.10.3] - 2025-09-17
 
 ### ✨ New Features
