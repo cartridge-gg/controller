@@ -1,6 +1,6 @@
 import { Signature } from "starknet";
 import { useEffect, useCallback } from "react";
-import { ResponseCodes } from "@cartridge/controller";
+import { ResponseCodes, USER_REFUSED_OP } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { DeployCtx, SignMessageCtx, ConnectCtx } from "@/utils/connection";
 import { CreateController, CreateSession, Upgrade } from "./connect";
@@ -120,12 +120,7 @@ export function Home() {
               <SignMessage
                 typedData={ctx.typedData}
                 onSign={(sig: Signature) => context.resolve(sig)}
-                onCancel={() =>
-                  ctx.resolve({
-                    code: ResponseCodes.CANCELED,
-                    message: "Canceled",
-                  })
-                }
+                onCancel={() => ctx.reject(USER_REFUSED_OP)}
               />
             );
           }
@@ -133,14 +128,7 @@ export function Home() {
           case "deploy": {
             const ctx = context as DeployCtx;
             return (
-              <DeployController
-                onClose={() =>
-                  ctx.resolve({
-                    code: ResponseCodes.CANCELED,
-                    message: "Canceled",
-                  })
-                }
-              />
+              <DeployController onClose={() => ctx.reject(USER_REFUSED_OP)} />
             );
           }
           default:

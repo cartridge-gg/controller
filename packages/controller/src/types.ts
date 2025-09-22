@@ -48,6 +48,12 @@ export enum ResponseCodes {
   USER_INTERACTION_REQUIRED = "USER_INTERACTION_REQUIRED",
 }
 
+// RPC spec compliant error codes
+export const USER_REFUSED_OP = {
+  code: 113,
+  message: "An error occurred (USER_REFUSED_OP)",
+} as const;
+
 export type ConnectError = {
   code: ResponseCodes;
   message: string;
