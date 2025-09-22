@@ -391,10 +391,12 @@ export function useConnectionValue() {
   useEffect(() => {
     const { preset } = urlParams;
 
+    // Skip if the theme has already been set
+    if (theme.name !== defaultTheme.name) return;
+
     if (
       preset &&
       !isConfigLoading &&
-      configData &&
       configData &&
       "theme" in configData
     ) {
