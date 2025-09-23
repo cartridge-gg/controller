@@ -244,8 +244,25 @@ export function useConnectionValue() {
   }, [searchParams]);
 
   const [rpcUrl, setRpcUrl] = useState<string>(
-    import.meta.env.VITE_RPC_SEPOLIA,
+    urlParams.rpcUrl ?? import.meta.env.VITE_RPC_SEPOLIA,
   );
+
+  // Fetch chain ID from RPC provider when rpcUrl changes
+  useEffect(() => {
+    const fetchChainId = async () => {
+      try {
+        const provider = new RpcProvider({ nodeUrl: rpcUrl });
+        const id = await provider.getChainId();
+        setChainId(id);
+      } catch (e) {
+        console.error("Failed to fetch chain ID:", e);
+      }
+    };
+
+    if (rpcUrl) {
+      fetchChainId();
+    }
+  }, [rpcUrl]);
 
   // Consolidated switchChain method for both SDK calls and URL param changes
   const switchChain = useCallback(
