@@ -55,13 +55,8 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [, setSearchParams] = useSearchParams();
-  const {
-    origin,
-    rpcUrl,
-    chainId,
-    setController,
-    configSignupOptions,
-  } = useConnection();
+  const { origin, rpcUrl, chainId, setController, configSignupOptions } =
+    useConnection();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =

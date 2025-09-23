@@ -243,32 +243,34 @@ export function useConnectionValue() {
     };
   }, [searchParams]);
 
-  const [rpcUrl, setRpcUrl] = useState<string>(urlParams.rpcUrl ?? import.meta.env.VITE_RPC_SEPOLIA);
+  const [rpcUrl, setRpcUrl] = useState<string>(
+    urlParams.rpcUrl ?? import.meta.env.VITE_RPC_SEPOLIA,
+  );
 
   // Handle RPC URL override
   useEffect(() => {
-    const handleRpcUrlOverride = async () => {
-      if (!urlParams.rpcUrl || !window.controller) return;
+    const handleRpcUrlChange = async () => {
+      if (!rpcUrl || !window.controller) return;
 
       const currentRpcUrl = window.controller.rpcUrl();
-      if (urlParams.rpcUrl === currentRpcUrl) return;
+      if (rpcUrl === currentRpcUrl) return;
 
       try {
         const controller: Controller = window.controller;
-        const provider = new RpcProvider({ nodeUrl: urlParams.rpcUrl });
+        const provider = new RpcProvider({ nodeUrl: rpcUrl });
         const chainId = await provider.getChainId();
 
         const nextController = Controller.create({
           appId: controller.appId(),
           classHash: controller.classHash(),
           chainId,
-          rpcUrl: urlParams.rpcUrl,
+          rpcUrl,
           address: controller.address(),
           username: controller.username(),
           owner: controller.owner(),
         });
 
-        setRpcUrl(urlParams.rpcUrl);
+        setChainId(chainId);
         setController(nextController);
         window.controller = nextController;
       } catch (error) {
@@ -276,24 +278,7 @@ export function useConnectionValue() {
       }
     };
 
-    handleRpcUrlOverride();
-  }, [urlParams.rpcUrl]);
-
-  // Fetch chain ID from RPC provider when rpcUrl changes
-  useEffect(() => {
-    const fetchChainId = async () => {
-      try {
-        const provider = new RpcProvider({ nodeUrl: rpcUrl });
-        const id = await provider.getChainId();
-        setChainId(id);
-      } catch (e) {
-        console.error("Failed to fetch chain ID:", e);
-      }
-    };
-
-    if (rpcUrl) {
-      fetchChainId();
-    }
+    handleRpcUrlChange();
   }, [rpcUrl]);
 
   useEffect(() => {
@@ -436,7 +421,7 @@ export function useConnectionValue() {
         ...defaultTheme,
       });
     }
-  }, [urlParams, verified, configData, isConfigLoading]);
+  }, [urlParams, verified, configData, isConfigLoading, theme.name]);
 
   useEffect(() => {
     if (urlParams.version) {
