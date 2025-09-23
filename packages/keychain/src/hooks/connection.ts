@@ -506,7 +506,7 @@ export function useConnectionValue() {
         setController,
         setConfigSignupOptions,
         navigate,
-        switchChainFromHook: switchChain,
+        switchChain,
       });
 
       connection.promise

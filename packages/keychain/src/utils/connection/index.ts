@@ -11,7 +11,7 @@ import { execute } from "./execute";
 import { probe } from "./probe";
 import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
-import { switchChain } from "./switchChain";
+import { switchChain as switchChainFactory } from "./switchChain";
 import { navigateFactory } from "./navigate";
 import { ConnectionCtx } from "./types";
 import { encodeStarterPack } from "@/utils/starterpack-url";
@@ -22,7 +22,7 @@ export function connectToController<ParentMethods extends object>({
   setController,
   setConfigSignupOptions,
   navigate,
-  switchChainFromHook,
+  switchChain,
 }: {
   setRpcUrl: (url: string) => void;
   setContext: (ctx: ConnectionCtx | undefined) => void;
@@ -32,7 +32,7 @@ export function connectToController<ParentMethods extends object>({
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
   ) => void;
-  switchChainFromHook: (rpcUrl: string) => Promise<void>;
+  switchChain: (rpcUrl: string) => Promise<void>;
 }) {
   return connectToParent<ParentMethods>({
     methods: {
@@ -88,7 +88,7 @@ export function connectToController<ParentMethods extends object>({
           });
         }
       },
-      switchChain: () => switchChain({ switchChainFromHook }),
+      switchChain: () => switchChainFactory({ switchChain }),
     },
   });
 }

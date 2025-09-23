@@ -1,9 +1,9 @@
 export function switchChain({
-  switchChainFromHook,
+  switchChain,
 }: {
-  switchChainFromHook: (rpcUrl: string) => Promise<void>;
+  switchChain: (rpcUrl: string) => Promise<void>;
 }) {
   return async (rpcUrl: string): Promise<void> => {
-    return switchChainFromHook(rpcUrl);
+    return switchChain(rpcUrl);
   };
 }
