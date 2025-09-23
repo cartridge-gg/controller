@@ -1,4 +1,4 @@
-import { Call, TypedData, StarknetWindowObject } from "@starknet-io/types-js";
+import { TypedData, StarknetWindowObject, Call } from "@starknet-io/types-js";
 import {
   ExternalPlatform,
   ExternalWallet,
