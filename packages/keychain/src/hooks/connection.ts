@@ -244,42 +244,60 @@ export function useConnectionValue() {
   }, [searchParams]);
 
   const [rpcUrl, setRpcUrl] = useState<string>(
-    urlParams.rpcUrl ?? import.meta.env.VITE_RPC_SEPOLIA,
+    import.meta.env.VITE_RPC_SEPOLIA,
   );
 
-  // Handle RPC URL override
-  useEffect(() => {
-    const handleRpcUrlChange = async () => {
-      if (!rpcUrl || !window.controller) return;
+  // Consolidated switchChain method for both SDK calls and URL param changes
+  const switchChain = useCallback(
+    async (newRpcUrl: string): Promise<void> => {
+      if (!window.controller) {
+        return Promise.reject({
+          code: ResponseCodes.NOT_CONNECTED,
+        });
+      }
 
       const currentRpcUrl = window.controller.rpcUrl();
-      if (rpcUrl === currentRpcUrl) return;
+      if (newRpcUrl === currentRpcUrl) {
+        return Promise.resolve();
+      }
 
       try {
         const controller: Controller = window.controller;
-        const provider = new RpcProvider({ nodeUrl: rpcUrl });
+        const provider = new RpcProvider({ nodeUrl: newRpcUrl });
         const chainId = await provider.getChainId();
 
         const nextController = Controller.create({
           appId: controller.appId(),
           classHash: controller.classHash(),
           chainId,
-          rpcUrl,
+          rpcUrl: newRpcUrl,
           address: controller.address(),
           username: controller.username(),
           owner: controller.owner(),
         });
 
+        setRpcUrl(newRpcUrl);
         setChainId(chainId);
         setController(nextController);
         window.controller = nextController;
-      } catch (error) {
-        console.error("Failed to override RPC URL:", error);
-      }
-    };
 
-    handleRpcUrlChange();
-  }, [rpcUrl]);
+        return Promise.resolve();
+      } catch (error) {
+        console.error("Failed to switch chain:", error);
+        return Promise.reject(error);
+      }
+    },
+    [setController],
+  );
+
+  // Handle RPC URL from URL params on mount/change
+  useEffect(() => {
+    if (urlParams.rpcUrl && window.controller) {
+      switchChain(urlParams.rpcUrl).catch((error) => {
+        console.error("Failed to switch chain from URL params:", error);
+      });
+    }
+  }, [urlParams.rpcUrl, switchChain]);
 
   useEffect(() => {
     if (
@@ -488,6 +506,7 @@ export function useConnectionValue() {
         setController,
         setConfigSignupOptions,
         navigate,
+        switchChainFromHook: switchChain,
       });
 
       connection.promise
@@ -529,7 +548,14 @@ export function useConnectionValue() {
           iframeMethods.externalWaitForTransaction(currentOrigin),
       });
     }
-  }, []); // Empty dependency array since we only want to run this once
+  }, [
+    navigate,
+    setConfigSignupOptions,
+    setContext,
+    setController,
+    setRpcUrl,
+    switchChain,
+  ]);
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
@@ -698,6 +724,7 @@ export function useConnectionValue() {
     externalSendTransaction,
     externalGetBalance,
     externalWaitForTransaction,
+    switchChain,
   };
 }
 

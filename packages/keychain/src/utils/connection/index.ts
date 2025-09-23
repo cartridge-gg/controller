@@ -22,6 +22,7 @@ export function connectToController<ParentMethods extends object>({
   setController,
   setConfigSignupOptions,
   navigate,
+  switchChainFromHook,
 }: {
   setRpcUrl: (url: string) => void;
   setContext: (ctx: ConnectionCtx | undefined) => void;
@@ -31,6 +32,7 @@ export function connectToController<ParentMethods extends object>({
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
   ) => void;
+  switchChainFromHook: (rpcUrl: string) => Promise<void>;
 }) {
   return connectToParent<ParentMethods>({
     methods: {
@@ -86,7 +88,7 @@ export function connectToController<ParentMethods extends object>({
           });
         }
       },
-      switchChain: () => switchChain({ setController, setRpcUrl }),
+      switchChain: () => switchChain({ switchChainFromHook }),
     },
   });
 }
