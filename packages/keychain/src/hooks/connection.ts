@@ -177,9 +177,6 @@ export function useConnectionValue() {
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>(window.location.origin);
-  const [rpcUrl, setRpcUrl] = useState<string>(
-    import.meta.env.VITE_RPC_SEPOLIA,
-  );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [isSessionActive, setIsSessionActive] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
@@ -204,12 +201,6 @@ export function useConnectionValue() {
 
   const setOnModalClose = useCallback((fn: (() => void) | undefined) => {
     setOnModalCloseInternal(() => fn);
-  }, []);
-
-  useEffect(() => {
-    if (window.controller) {
-      setRpcUrl(window.controller.rpcUrl());
-    }
   }, []);
 
   const [searchParams] = useSearchParams();
@@ -251,6 +242,8 @@ export function useConnectionValue() {
       tokens,
     };
   }, [searchParams]);
+
+  const [rpcUrl, setRpcUrl] = useState<string>(urlParams.rpcUrl ?? import.meta.env.VITE_RPC_SEPOLIA);
 
   // Handle RPC URL override
   useEffect(() => {
