@@ -27,6 +27,7 @@ import { CostBreakdown } from "../review/cost";
 import { PricingDetails } from "@/components/purchase/types";
 import { decodeStarterPack } from "@/utils/starterpack-url";
 import { usdcToUsd } from "@/utils/starterpack";
+import { useConnection } from "@/hooks/connection";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -39,6 +40,8 @@ export function PurchaseStarterpack() {
     displayError,
     setStarterpack,
   } = usePurchaseContext();
+
+  const { isMainnet } = useConnection();
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
@@ -65,6 +68,7 @@ export function PurchaseStarterpack() {
       mintAllowance={details.mintAllowance}
       acquisitionType={details.acquisitionType}
       starterpackItems={details.starterPackItems}
+      isMainnet={isMainnet}
       error={displayError}
     />
   );
@@ -74,6 +78,7 @@ export function StarterPackInner({
   name,
   edition,
   isVerified,
+  isMainnet,
   supply,
   mintAllowance,
   acquisitionType,
@@ -83,6 +88,7 @@ export function StarterPackInner({
   name: string;
   edition?: string;
   isVerified?: boolean;
+  isMainnet?: boolean;
   supply?: number;
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
@@ -93,9 +99,14 @@ export function StarterPackInner({
 
   const onProceed = () => {
     switch (acquisitionType) {
-      case StarterpackAcquisitionType.Paid:
-        navigate("/purchase/method/ethereum;solana;base;arbitrum;optimism");
+      case StarterpackAcquisitionType.Paid: {
+        const methods = isMainnet
+          ? "ethereum;solana;base;arbitrum;optimism"
+          : "arbitrum";
+
+        navigate(`/purchase/method/${methods}`);
         break;
+      }
       case StarterpackAcquisitionType.Claimed:
         navigate(`/purchase/wallet/starknet;ethereum`);
         break;

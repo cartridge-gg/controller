@@ -1,14 +1,23 @@
 import {
+  ArbitrumIcon,
+  BaseIcon,
   Card,
   CardContent,
   CreditIcon,
+  EthereumIcon,
   InfoIcon,
+  OptimismIcon,
+  SolanaIcon,
+  StarknetIcon,
   Thumbnail,
 } from "@cartridge/ui";
 import { CostDetails } from "../types";
-import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
+import {
+  ExternalPlatform,
+  ExternalWalletType,
+  humanizeString,
+} from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
-import { WALLET_CONFIG } from "@/components/purchase/CryptoCheckout";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -45,7 +54,7 @@ export function CostBreakdown({
       {rails === "crypto" && platform && (
         <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
           <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
-            Purchase on <Network walletType={walletType} />
+            Purchase on <Network platform={platform} />
           </div>
         </CardContent>
       )}
@@ -99,18 +108,36 @@ const PaymentType = ({ unit }: { unit?: PaymentUnit }) => {
   );
 };
 
-const Network = ({ walletType }: { walletType?: ExternalWalletType }) => {
-  if (walletType) {
-    const NetworkIcon =
-      WALLET_CONFIG[walletType as keyof typeof WALLET_CONFIG].networkIcon;
+const Network = ({ platform }: { platform: ExternalPlatform }) => {
+  const getNetworkIconComponent = (platform: ExternalPlatform) => {
+    switch (platform) {
+      case "starknet":
+        return StarknetIcon;
+      case "ethereum":
+        return EthereumIcon;
+      case "solana":
+        return SolanaIcon;
+      case "base":
+        return BaseIcon;
+      case "arbitrum":
+        return ArbitrumIcon;
+      case "optimism":
+        return OptimismIcon;
+      default:
+        return null;
+    }
+  };
 
-    return (
-      <>
-        <NetworkIcon size="xs" className="inline-block" />
-        {WALLET_CONFIG[walletType as keyof typeof WALLET_CONFIG].network}
-      </>
-    );
+  const NetworkIcon = getNetworkIconComponent(platform);
+
+  if (!NetworkIcon) {
+    return <span>{humanizeString(platform)}</span>;
   }
 
-  return null;
+  return (
+    <>
+      <NetworkIcon size="xs" className="inline-block" />
+      {humanizeString(platform)}
+    </>
+  );
 };
