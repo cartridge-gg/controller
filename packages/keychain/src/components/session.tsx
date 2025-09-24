@@ -95,15 +95,6 @@ export function Session() {
       }
 
       if (queries.redirect_uri) {
-        if (
-          !(
-            queries.redirect_uri.startsWith("http") ||
-            queries.redirect_uri.startsWith("https")
-          )
-        ) {
-          window.close();
-          return;
-        }
         const url = decodeURIComponent(queries.redirect_uri);
         const query_name = queries.redirect_query_name ?? "session";
         window.location.href = `${url}?${query_name}=${encodedResponse}`;

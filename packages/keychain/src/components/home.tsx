@@ -13,6 +13,7 @@ import { Layout } from "@/components/layout";
 import { Outlet, useLocation } from "react-router-dom";
 import { Authenticate } from "./authenticate";
 import { now } from "@/constants";
+import { Disconnect } from "./disconnect";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
@@ -52,6 +53,10 @@ export function Home() {
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {
     return <Authenticate />;
+  }
+
+  if (pathname.startsWith("/disconnect")) {
+    return <Disconnect />;
   }
 
   // No controller, send to login

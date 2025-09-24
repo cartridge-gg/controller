@@ -62,6 +62,7 @@ async function fetchCollections(
         order_by: [],
         direction: "Forward",
       },
+      attribute_filters: [],
     });
     if (tokens.items.length !== 0) {
       return {
@@ -353,7 +354,7 @@ export function useToriiCollections(): UseToriiCollectionsResponse {
   const refetch = useCallback(() => {
     if (!client || !project) return;
     setStatus("loading");
-    Marketplace.fetchCollections({ [project]: client })
+    Marketplace.fetchCollections({ [project]: client }, LIMIT)
       .then((collections) => {
         setCollections(collections);
         setStatus("success");
@@ -431,6 +432,7 @@ export function useToriiCollection({
           direction: "Forward",
           order_by: [],
         },
+        attribute_filters: [],
       })
       .then((tokens) => {
         setTokens(tokens.items || []);
