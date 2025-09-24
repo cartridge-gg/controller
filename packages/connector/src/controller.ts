@@ -1,6 +1,9 @@
 import ControllerProvider, { ControllerOptions } from "@cartridge/controller";
 import { Connector, InjectedConnector } from "@starknet-react/core";
 
+import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
+import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
+
 export default class ControllerConnector extends InjectedConnector {
   public controller: ControllerProvider;
 
@@ -39,5 +42,9 @@ export default class ControllerConnector extends InjectedConnector {
       throw new Error("Controller connector not found");
     }
     return connector as ControllerConnector;
+  }
+
+  asWalletStandard(): WalletWithStarknetFeatures {
+    return new StarknetInjectedWallet(this.controller);
   }
 }
