@@ -213,7 +213,7 @@ export class IFrame<CallSender extends {}> implements Modal {
   withCancellation<T>(operation: Promise<T>, onCancel: () => void): Promise<T> {
     // Store the original onCancel
     const originalOnCancel = this.onCancel;
-    
+
     // Set a one-time handler that includes the provided callback
     this.onCancel = () => {
       onCancel();

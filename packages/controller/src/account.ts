@@ -86,7 +86,7 @@ class ControllerAccount extends WalletAccount {
       // Session call or Paymaster flow failed.
       // Session not avaialble, manual flow fallback
       this.modal.open();
-      
+
       // Check if modal supports cancellation (is a KeychainIFrame)
       if (this.modal instanceof KeychainIFrame) {
         const executePromise = this.keychain.execute(
@@ -97,9 +97,8 @@ class ControllerAccount extends WalletAccount {
           (sessionExecute as ConnectError).error,
         );
 
-        const resultPromise = this.modal.withCancellation(
-          executePromise,
-          () => reject(createUserRejectedError())
+        const resultPromise = this.modal.withCancellation(executePromise, () =>
+          reject(createUserRejectedError()),
         );
 
         const manualExecute = await resultPromise;
@@ -155,14 +154,13 @@ class ControllerAccount extends WalletAccount {
 
       // Session not avaialble, manual flow fallback
       this.modal.open();
-      
+
       // Check if modal supports cancellation (is a KeychainIFrame)
       if (this.modal instanceof KeychainIFrame) {
         const signPromise = this.keychain.signMessage(typedData, "", false);
-        
-        const resultPromise = this.modal.withCancellation(
-          signPromise,
-          () => reject(createUserRejectedError())
+
+        const resultPromise = this.modal.withCancellation(signPromise, () =>
+          reject(createUserRejectedError()),
         );
 
         const manualSign = await resultPromise;
@@ -175,7 +173,11 @@ class ControllerAccount extends WalletAccount {
         this.modal.close();
       } else {
         // Fallback for non-cancellable modals
-        const manualSign = await this.keychain.signMessage(typedData, "", false);
+        const manualSign = await this.keychain.signMessage(
+          typedData,
+          "",
+          false,
+        );
 
         if (!("code" in manualSign)) {
           resolve(manualSign as Signature);

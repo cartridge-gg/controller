@@ -182,35 +182,37 @@ export default class ControllerProvider extends BaseProvider {
             : this.options.policies || {},
         this.rpcUrl(),
         this.options.signupOptions,
-      ).then((response) => {
-        // Clear the pending rejection handler
-        this.pendingConnectRejection = undefined;
-        
-        if (response.code !== ResponseCodes.SUCCESS) {
+      )
+        .then((response) => {
+          // Clear the pending rejection handler
+          this.pendingConnectRejection = undefined;
+
+          if (response.code !== ResponseCodes.SUCCESS) {
+            this.iframes.keychain!.close();
+            reject(new Error(response.message));
+            return;
+          }
+
+          const connectReply = response as ConnectReply;
+          this.account = new ControllerAccount(
+            this,
+            this.rpcUrl(),
+            connectReply.address,
+            this.keychain!,
+            this.options,
+            this.iframes.keychain!,
+          );
+
           this.iframes.keychain!.close();
-          reject(new Error(response.message));
-          return;
-        }
-
-        const connectReply = response as ConnectReply;
-        this.account = new ControllerAccount(
-          this,
-          this.rpcUrl(),
-          connectReply.address,
-          this.keychain!,
-          this.options,
-          this.iframes.keychain!,
-        );
-
-        this.iframes.keychain!.close();
-        resolve(this.account);
-      }).catch((error) => {
-        // Clear the pending rejection handler
-        this.pendingConnectRejection = undefined;
-        this.iframes.keychain!.close();
-        console.log(error);
-        reject(error);
-      });
+          resolve(this.account);
+        })
+        .catch((error) => {
+          // Clear the pending rejection handler
+          this.pendingConnectRejection = undefined;
+          this.iframes.keychain!.close();
+          console.log(error);
+          reject(error);
+        });
     });
   }
 
