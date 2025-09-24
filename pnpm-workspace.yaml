@@ -5,7 +5,7 @@ packages:
   - packages/*
 catalog:
   "@cartridge/arcade": "0.3.1"
-  "@cartridge/marketplace": "0.0.15"
+  "@cartridge/marketplace": "0.0.16"
   "@cartridge/controller-wasm": "^0.3.6"
   "@cartridge/penpal": "^6.2.4"
   "@cartridge/ui": "github:cartridge-gg/ui#2313a28"
