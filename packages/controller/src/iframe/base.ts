@@ -14,6 +14,7 @@ export class IFrame<CallSender extends {}> implements Modal {
   private iframe?: HTMLIFrameElement;
   private container?: HTMLDivElement;
   private onClose?: () => void;
+  private onCancel?: () => void;
   private child?: AsyncMethodReturns<CallSender>;
   private closeTimeout?: NodeJS.Timeout;
 
@@ -22,12 +23,14 @@ export class IFrame<CallSender extends {}> implements Modal {
     url,
     preset,
     onClose,
+    onCancel,
     onConnect,
     methods = {},
   }: Pick<ControllerOptions, "preset"> & {
     id: string;
     url: URL;
     onClose?: () => void;
+    onCancel?: () => void;
     onConnect: (child: AsyncMethodReturns<CallSender>) => void;
     methods?: { [key: string]: (...args: any[]) => void };
   }) {
@@ -76,6 +79,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     // Add click event listener to close iframe when clicking outside
     container.addEventListener("click", (e) => {
       if (e.target === container) {
+        // User clicked outside - this is a cancellation
         // Attempting to reset(clear context) for keychain iframe (identified by ID)
         if (id === "controller-keychain" && this.child) {
           // Type assertion for keychain child only
@@ -83,6 +87,8 @@ export class IFrame<CallSender extends {}> implements Modal {
             .reset?.()
             .catch((e: any) => console.error("Error resetting context:", e));
         }
+        // Call onCancel to notify about user cancellation
+        this.onCancel?.();
         this.close();
       }
     });
@@ -129,6 +135,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     }
 
     this.onClose = onClose;
+    this.onCancel = onCancel;
   }
 
   open() {
@@ -200,5 +207,25 @@ export class IFrame<CallSender extends {}> implements Modal {
 
   isOpen() {
     return this.container?.style.display !== "none";
+  }
+
+  // Register a one-time cancellation handler for the current operation
+  withCancellation<T>(operation: Promise<T>, onCancel: () => void): Promise<T> {
+    // Store the original onCancel
+    const originalOnCancel = this.onCancel;
+    
+    // Set a one-time handler that includes the provided callback
+    this.onCancel = () => {
+      onCancel();
+      // Restore the original handler
+      this.onCancel = originalOnCancel;
+      // Call the original if it exists
+      originalOnCancel?.();
+    };
+
+    // When the operation completes (success or failure), restore the original handler
+    return operation.finally(() => {
+      this.onCancel = originalOnCancel;
+    });
   }
 }

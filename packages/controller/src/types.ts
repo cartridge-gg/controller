@@ -75,6 +75,18 @@ export type ControllerError = {
   data?: any;
 };
 
+// Helper function to create USER_REFUSED_OP error
+export function createUserRejectedError(): ConnectError {
+  return {
+    code: ResponseCodes.CANCELED,
+    message: "User rejected the operation",
+    error: {
+      code: 113,
+      message: "An error occurred (USER_REFUSED_OP)",
+    } as USER_REFUSED_OP,
+  };
+}
+
 export type ConnectReply = {
   code: ResponseCodes.SUCCESS;
   address: Address;
