@@ -48,6 +48,7 @@ import {
   shortString,
 } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
+import Controller from "@/utils/controller";
 
 const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
@@ -176,9 +177,6 @@ export function useConnectionValue() {
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>(window.location.origin);
-  const [rpcUrl, setRpcUrl] = useState<string>(
-    import.meta.env.VITE_RPC_SEPOLIA,
-  );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [verified, setVerified] = useState<boolean>(false);
   const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
@@ -203,12 +201,6 @@ export function useConnectionValue() {
   const setOnModalClose = useCallback((fn: (() => void) | undefined) => {
     setOnModalCloseInternal(() => fn);
   }, []);
-
-  useEffect(() => {
-    if (window.controller) {
-      setRpcUrl(window.controller.rpcUrl());
-    }
-  }, [window.controller]);
 
   const [searchParams] = useSearchParams();
 
@@ -238,13 +230,10 @@ export function useConnectionValue() {
           LORDS_CONTRACT_ADDRESS,
         ];
 
-    if (rpcUrl) {
-      setRpcUrl(rpcUrl);
-    }
-
     return {
       theme,
       preset,
+      rpcUrl,
       policies,
       version,
       project,
@@ -252,6 +241,10 @@ export function useConnectionValue() {
       tokens,
     };
   }, [searchParams]);
+
+  const [rpcUrl, setRpcUrl] = useState<string>(
+    urlParams.rpcUrl ?? import.meta.env.VITE_RPC_SEPOLIA,
+  );
 
   // Fetch chain ID from RPC provider when rpcUrl changes
   useEffect(() => {
@@ -269,6 +262,58 @@ export function useConnectionValue() {
       fetchChainId();
     }
   }, [rpcUrl]);
+
+  // Consolidated switchChain method for both SDK calls and URL param changes
+  const switchChain = useCallback(
+    async (newRpcUrl: string): Promise<void> => {
+      if (!window.controller) {
+        return Promise.reject({
+          code: ResponseCodes.NOT_CONNECTED,
+        });
+      }
+
+      const currentRpcUrl = window.controller.rpcUrl();
+      if (newRpcUrl === currentRpcUrl) {
+        return Promise.resolve();
+      }
+
+      try {
+        const controller: Controller = window.controller;
+        const provider = new RpcProvider({ nodeUrl: newRpcUrl });
+        const chainId = await provider.getChainId();
+
+        const nextController = Controller.create({
+          appId: controller.appId(),
+          classHash: controller.classHash(),
+          chainId,
+          rpcUrl: newRpcUrl,
+          address: controller.address(),
+          username: controller.username(),
+          owner: controller.owner(),
+        });
+
+        setRpcUrl(newRpcUrl);
+        setChainId(chainId);
+        setController(nextController);
+        window.controller = nextController;
+
+        return Promise.resolve();
+      } catch (error) {
+        console.error("Failed to switch chain:", error);
+        return Promise.reject(error);
+      }
+    },
+    [setController],
+  );
+
+  // Handle RPC URL from URL params on mount/change
+  useEffect(() => {
+    if (urlParams.rpcUrl && window.controller) {
+      switchChain(urlParams.rpcUrl).catch((error) => {
+        console.error("Failed to switch chain from URL params:", error);
+      });
+    }
+  }, [urlParams.rpcUrl, switchChain]);
 
   useEffect(() => {
     if (
@@ -410,7 +455,7 @@ export function useConnectionValue() {
         ...defaultTheme,
       });
     }
-  }, [urlParams, verified, configData, isConfigLoading]);
+  }, [urlParams, verified, configData, isConfigLoading, theme.name]);
 
   useEffect(() => {
     if (urlParams.version) {
@@ -453,6 +498,7 @@ export function useConnectionValue() {
         setController,
         setConfigSignupOptions,
         navigate,
+        switchChain,
       });
 
       connection.promise
@@ -494,7 +540,14 @@ export function useConnectionValue() {
           iframeMethods.externalWaitForTransaction(currentOrigin),
       });
     }
-  }, []); // Empty dependency array since we only want to run this once
+  }, [
+    navigate,
+    setConfigSignupOptions,
+    setContext,
+    setController,
+    setRpcUrl,
+    switchChain,
+  ]);
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
@@ -661,6 +714,7 @@ export function useConnectionValue() {
     externalSendTransaction,
     externalGetBalance,
     externalWaitForTransaction,
+    switchChain,
   };
 }
 
