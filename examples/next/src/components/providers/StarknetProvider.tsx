@@ -189,13 +189,13 @@ const controller = new ControllerConnector({
     "password",
     "argent",
   ],
-  preset: "loot-survivor",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
   tokens: {
     erc20: ["lords", "strk"],
   },
+  policies,
 });
 
 const session = new SessionConnector({
