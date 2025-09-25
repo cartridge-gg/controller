@@ -1,4 +1,12 @@
-import { ArcadeProvider, BookModel, EditionModel, GameModel, ListingEvent, OrderModel, SaleEvent } from "@cartridge/arcade";
+import {
+  ArcadeProvider,
+  BookModel,
+  EditionModel,
+  GameModel,
+  ListingEvent,
+  OrderModel,
+  SaleEvent,
+} from "@cartridge/arcade";
 import { createContext } from "react";
 
 /**
@@ -18,7 +26,9 @@ interface ArcadeContextType {
     [collection: string]: { [token: string]: { [order: string]: OrderModel } };
   };
   listings: {
-    [collection: string]: { [token: string]: { [listing: string]: ListingEvent } };
+    [collection: string]: {
+      [token: string]: { [listing: string]: ListingEvent };
+    };
   };
   sales: {
     [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };

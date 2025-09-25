@@ -76,7 +76,6 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
-
   const removeOrder = useCallback(
     (order: OrderModel) => {
       const collection = getChecksumAddress(order.collection);
