@@ -135,15 +135,10 @@ const provider = jsonRpcProvider({
 
 let keychainUrl = process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL;
 
-console.log("vercel env: ", process.env.NEXT_PUBLIC_VERCEL_ENV);
 if (
   process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" &&
   process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF
 ) {
-  console.log(
-    "vercel commit ref: ",
-    process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF,
-  );
   const branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
     /[^a-zA-Z0-9-]/g,
     "-",
