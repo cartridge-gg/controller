@@ -111,6 +111,7 @@ function CreateControllerForm({
             onUsernameFocus={onUsernameFocus}
             onUsernameClear={onUsernameClear}
             onKeyDown={onKeyDown}
+            showAutocomplete
           />
           <Legal />
         </LayoutContent>
