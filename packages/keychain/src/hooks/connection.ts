@@ -6,7 +6,7 @@ import {
 } from "@/components/provider/connection";
 import { useNavigation } from "@/context/navigation";
 import { ConnectionCtx, connectToController } from "@/utils/connection";
-import { TurnkeyWallet } from "@/wallets/social/turnkey";
+import { OAuthWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
   AuthOptions,
@@ -17,6 +17,7 @@ import {
   toArray,
   Token,
   toSessionPolicies,
+  VALID_AUTH_OPTIONS,
   WalletAdapter,
   WalletBridge,
 } from "@cartridge/controller";
@@ -177,7 +178,7 @@ export function useConnectionValue() {
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>(window.location.origin);
   const [rpcUrl, setRpcUrl] = useState<string>(
-    import.meta.env.VITE_RPC_SEPOLIA,
+    window.controller?.rpcUrl() || import.meta.env.VITE_RPC_SEPOLIA,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [verified, setVerified] = useState<boolean>(false);
@@ -192,7 +193,8 @@ export function useConnectionValue() {
   });
   const [configSignupOptions, setConfigSignupOptions] = useState<
     AuthOptions | undefined
-  >(["google", "webauthn", "discord", "walletconnect", "metamask", "rabby"]);
+  >([...VALID_AUTH_OPTIONS]);
+
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
@@ -271,6 +273,12 @@ export function useConnectionValue() {
   }, [rpcUrl]);
 
   useEffect(() => {
+    if (controller) {
+      setRpcUrl(controller.rpcUrl());
+    }
+  }, [controller]);
+
+  useEffect(() => {
     if (
       !controller?.username() ||
       !chainId ||
@@ -330,22 +338,22 @@ export function useConnectionValue() {
               walletConnectWallet as WalletAdapter,
             );
           } else if (provider === "discord" || provider === "google") {
-            const turnkeyWallet = new TurnkeyWallet(
+            const oauthWallet = new OAuthWallet(
               controller.username(),
               chainId,
               controller.rpcUrl(),
               provider,
             );
-            if (!turnkeyWallet) {
+            if (!oauthWallet) {
               throw new Error("Embedded Turnkey wallet not found");
             }
 
-            turnkeyWallet.account = getAddress(ethAddress);
-            turnkeyWallet.subOrganizationId = undefined;
+            oauthWallet.account = getAddress(ethAddress);
+            oauthWallet.subOrganizationId = undefined;
 
             window.keychain_wallets!.addEmbeddedWallet(
               ethAddress,
-              turnkeyWallet as unknown as WalletAdapter,
+              oauthWallet as unknown as WalletAdapter,
             );
           }
         }

@@ -1,9 +1,9 @@
 import { IdToken } from "@auth0/auth0-react";
 import { AuthOption } from "@cartridge/controller";
 import { fetchApiCreator } from "@cartridge/ui/utils";
-import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
+import { TurnkeyIframeClient, TurnkeySDKApiTypes } from "@turnkey/sdk-browser";
+import { OtpType } from "@turnkey/sdk-react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
-import { getIframePublicKey } from "./turnkey";
 
 export const getWallet = async (
   subOrgId: string,
@@ -110,7 +110,7 @@ interface DecodedIdToken extends JwtPayload {
   tknonce?: string;
 }
 
-export type SocialProvider = Extract<AuthOption, "discord" | "google">;
+export type SocialProvider = Extract<AuthOption, "sms" | "discord" | "google">;
 
 export const fetchApi = fetchApiCreator(
   `${import.meta.env.VITE_CARTRIDGE_API_URL}/oauth2`,
@@ -179,7 +179,7 @@ export const authenticateToTurnkey = async (
   oidcToken: string,
   authIframeClient: TurnkeyIframeClient,
 ) => {
-  const iframePublicKey = await getIframePublicKey(authIframeClient);
+  const iframePublicKey = await publicKeyFromIframe(authIframeClient);
 
   const authResponse = await fetchApi<AuthResponse>(
     `auth`,
@@ -202,6 +202,25 @@ export const authenticateToTurnkey = async (
   }
 };
 
+const resetIframePublicKey = async (
+  turnkeyIframeClient: TurnkeyIframeClient,
+): Promise<void> => {
+  await turnkeyIframeClient.clearEmbeddedKey();
+  await turnkeyIframeClient.initEmbeddedKey();
+};
+
+export const publicKeyFromIframe = async (
+  turnkeyIframeClient: TurnkeyIframeClient,
+): Promise<string> => {
+  const iframePublicKey = await turnkeyIframeClient.getEmbeddedPublicKey();
+
+  if (!iframePublicKey) {
+    await resetIframePublicKey(turnkeyIframeClient);
+    throw new Error("No iframe public key, please try again");
+  }
+  return iframePublicKey;
+};
+
 export type GetSuborgsResponse = {
   organizationIds: string[];
 };
@@ -212,4 +231,63 @@ type CreateSuborgResponse = {
 
 type AuthResponse = {
   credentialBundle: string;
+};
+
+export const createSmsSuborg = async (
+  username: string,
+  phoneNumber: string,
+) => {
+  return (
+    await fetchApi<CreateSuborgResponse>("create-suborg", {
+      rootUserUsername: username,
+      userPhoneNumber: phoneNumber,
+    })
+  ).subOrganizationId;
+};
+
+export const getSmsSuborg = async (phoneNumber: string) => {
+  const getSuborgsResponse = await fetchApi<GetSuborgsResponse>("suborgs", {
+    filterType: "PHONE_NUMBER",
+    filterValue: phoneNumber,
+  });
+
+  if (getSuborgsResponse.organizationIds.length === 0) {
+    throw new Error("No suborgs found");
+  }
+
+  return getSuborgsResponse.organizationIds[0];
+};
+
+export const initOtpAuth = async (
+  otpType: OtpType,
+  contact: string,
+  suborgID: string,
+) => {
+  const otpAuthResponse =
+    await fetchApi<TurnkeySDKApiTypes.TInitOtpAuthResponse>("init-otp", {
+      otpType,
+      contact,
+      suborgID,
+    });
+
+  return otpAuthResponse;
+};
+
+export const otpAuth = async (
+  otpId: string,
+  otpCode: string,
+  targetPublicKey: string,
+  suborgID: string,
+) => {
+  const otpAuthResponse = await fetchApi<TurnkeySDKApiTypes.TOtpAuthResponse>(
+    "verify-otp",
+    {
+      otpId,
+      otpCode,
+      suborgID,
+      targetPublicKey,
+    },
+  );
+
+  return otpAuthResponse;
 };

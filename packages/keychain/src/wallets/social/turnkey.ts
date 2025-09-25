@@ -8,8 +8,8 @@ import {
 import { isIframe } from "@cartridge/ui/utils";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
-import { Turnkey, TurnkeyIframeClient } from "@turnkey/sdk-browser";
-import { ethers, getAddress, getBytes, Signature } from "ethers";
+import { getAddress } from "ethers";
+import { TurnkeyWallet } from ".";
 import {
   authenticateToTurnkey,
   getAuth0OidcToken,
@@ -20,9 +20,13 @@ import {
   SocialProvider,
 } from "./turnkey_utils";
 
-export const Auth0SocialProviderName: Record<SocialProvider, string> = {
+export const Auth0SocialProviderName: Record<
+  SocialProvider,
+  string | undefined
+> = {
   discord: "discord",
   google: "google-oauth2",
+  sms: undefined,
 };
 
 let AUTH0_CLIENT_PROMISE: Promise<Auth0Client> | null = null;
@@ -30,13 +34,9 @@ let AUTH0_CLIENT_PROMISE: Promise<Auth0Client> | null = null;
 const URL_PARAMS_KEY = "auth0-url-params";
 const RPC_URL_KEY = "rpc-url-tk-storage";
 
-export class TurnkeyWallet {
+export class OAuthWallet extends TurnkeyWallet {
   readonly type: ExternalWalletType = "turnkey" as ExternalWalletType;
   readonly platform: ExternalPlatform = "ethereum";
-  account: string | undefined = undefined;
-  subOrganizationId: string | undefined = undefined;
-  private turnkeyIframePromise: Promise<TurnkeyIframeClient> | undefined =
-    undefined;
 
   constructor(
     private username: string,
@@ -53,32 +53,7 @@ export class TurnkeyWallet {
         useRefreshTokens: true,
       });
     }
-
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const turnkeyIframe = document.getElementById(
-      `turnkey-iframe-container-${randomId}`,
-    );
-    if (turnkeyIframe) {
-      document.body.removeChild(turnkeyIframe);
-    }
-    const turnkeySdk = new Turnkey({
-      apiBaseUrl: import.meta.env.VITE_TURNKEY_BASE_URL,
-      defaultOrganizationId: import.meta.env.VITE_TURNKEY_ORGANIZATION_ID,
-    });
-    const iframeContainer = document.createElement("div");
-    iframeContainer.style.display = "none";
-    iframeContainer.id = "turnkey-iframe-container";
-    document.body.appendChild(iframeContainer);
-
-    this.turnkeyIframePromise = turnkeySdk
-      .iframeClient({
-        iframeContainer: iframeContainer,
-        iframeUrl: import.meta.env.VITE_TURNKEY_IFRAME_URL,
-      })
-      .then(async (turnkeyIframeClient: TurnkeyIframeClient) => {
-        await turnkeyIframeClient.initEmbeddedKey();
-        return turnkeyIframeClient;
-      });
+    super();
   }
 
   isAvailable(): boolean {
@@ -288,225 +263,13 @@ export class TurnkeyWallet {
     };
   }
 
-  getConnectedAccounts(): string[] {
-    return this.account ? [this.account] : [];
-  }
-
-  async signTransaction(
-    transaction: string,
-  ): Promise<ExternalWalletResponse<string>> {
-    try {
-      if (!this.isAvailable() || !this.account) {
-        throw new Error("Turnkey is not connected");
-      }
-
-      const turnkeyIframeClient = await this.getTurnkeyIframeClient(10_000);
-
-      const result = (
-        await turnkeyIframeClient.signTransaction({
-          organizationId: this.subOrganizationId,
-          signWith: this.account,
-          unsignedTransaction: transaction,
-          type: "TRANSACTION_TYPE_ETHEREUM",
-        })
-      ).signedTransaction;
-
-      return {
-        success: true,
-        wallet: this.type,
-        result: result,
-      };
-    } catch (error) {
-      console.error(`Error signing transaction with Turnkey:`, error);
-      return {
-        success: false,
-        wallet: this.type,
-        error: (error as Error).message || "Unknown error",
-      };
-    }
-  }
-
-  async signMessage(message: string): Promise<ExternalWalletResponse<string>> {
-    try {
-      if (!this.isAvailable() || !this.account) {
-        throw new Error("Turnkey is not connected");
-      }
-
-      if (!this.subOrganizationId) {
-        const { success, error, account } = await this.connect(false);
-        if (!success) {
-          throw new Error(error);
-        }
-        if (account !== this.account) {
-          throw new Error("Account mismatch");
-        }
-      }
-
-      const paddedMessage = `0x${message.replace("0x", "").padStart(64, "0")}`;
-      const messageBytes = getBytes(paddedMessage);
-      const messageHash = ethers.hashMessage(messageBytes);
-
-      const turnkeyIframeClient = await this.getTurnkeyIframeClient(10_000);
-
-      const { r, s, v } = await turnkeyIframeClient.signRawPayload({
-        organizationId: this.subOrganizationId,
-        signWith: this.account,
-        payload: messageHash,
-        encoding: "PAYLOAD_ENCODING_HEXADECIMAL",
-        hashFunction: "HASH_FUNCTION_NO_OP",
-      });
-
-      const rHex = r.startsWith("0x") ? r : "0x" + r;
-      const sHex = s.startsWith("0x") ? s : "0x" + s;
-
-      const vNumber = parseInt(v, 16);
-
-      if (isNaN(vNumber)) {
-        console.error(`Invalid recovery ID (v) received from Turnkey: ${v}`);
-        throw new Error(`Invalid recovery ID (v) received: ${v}`);
-      }
-
-      const signature = Signature.from({
-        r: rHex,
-        s: sHex,
-        v: vNumber,
-      });
-
-      return {
-        success: true,
-        wallet: this.type,
-        result: signature.serialized,
-        account: this.account,
-      };
-    } catch (error) {
-      console.error(`Error signing message with Turnkey:`, error);
-      return {
-        success: false,
-        wallet: this.type,
-        error: (error as Error).message || "Unknown error",
-      };
-    }
-  }
-
-  async signTypedData(data: string): Promise<ExternalWalletResponse<string>> {
-    return this.signMessage(data);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async sendTransaction(_txn: string): Promise<ExternalWalletResponse> {
-    return {
-      success: false,
-      wallet: this.type,
-      error: "Not implemented",
-    };
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async switchChain(_chainId: string): Promise<boolean> {
-    return false;
-  }
-
-  async getBalance(
-    tokenAddress?: string,
-  ): Promise<ExternalWalletResponse<string>> {
-    try {
-      if (!this.isAvailable() || !this.account) {
-        throw new Error("Turnkey is not connected");
-      }
-
-      if (tokenAddress) {
-        return {
-          success: false,
-          wallet: this.type,
-          error: "Not implemented for ERC20",
-        };
-      } else {
-        return { success: true, wallet: this.type, result: "0" };
-      }
-    } catch (error) {
-      console.error(`Error getting balance from Turnkey:`, error);
-      return {
-        success: false,
-        wallet: this.type,
-        error: (error as Error).message || "Unknown error",
-      };
-    }
-  }
-
-  private pollIframePublicKey = async (pollTimeMs: number): Promise<string> => {
-    const intervalMs = 200;
-    let elapsedTime = 0;
-
-    const turnkeyIframeClient = await this.getTurnkeyIframeClient(10_000);
-    const iFramePublicKey = await turnkeyIframeClient.getEmbeddedPublicKey();
-    if (iFramePublicKey) {
-      return iFramePublicKey;
-    }
-
-    return new Promise((resolve, reject) => {
-      const intervalId = setInterval(async () => {
-        const iFramePublicKey =
-          await turnkeyIframeClient.getEmbeddedPublicKey();
-        if (iFramePublicKey) {
-          clearInterval(intervalId);
-          resolve(iFramePublicKey);
-        } else {
-          elapsedTime += intervalMs;
-          if (elapsedTime >= pollTimeMs) {
-            clearInterval(intervalId);
-            reject(new Error("Timeout waiting for Turnkey iframe public key."));
-          }
-        }
-      }, intervalMs);
-    });
-  };
-
-  private async getTurnkeyIframeClient(
-    timeoutMs: number,
-  ): Promise<TurnkeyIframeClient> {
-    if (!this.turnkeyIframePromise) {
-      throw new Error("Turnkey iframe client not initialized");
-    }
-    return this.getPromiseResult(this.turnkeyIframePromise, timeoutMs);
-  }
-
   private async getAuth0Client(timeoutMs: number): Promise<Auth0Client> {
     if (!AUTH0_CLIENT_PROMISE) {
       throw new Error("Auth0 client not initialized");
     }
     return this.getPromiseResult(AUTH0_CLIENT_PROMISE, timeoutMs);
   }
-
-  private async getPromiseResult<T>(
-    promise: Promise<T>,
-    timeoutMs: number,
-  ): Promise<T> {
-    const timeoutId = setTimeout(() => {
-      throw new Error("Timeout waiting for promise");
-    }, timeoutMs);
-
-    const result = await promise;
-    clearTimeout(timeoutId);
-
-    return result;
-  }
 }
-
-const resetIframePublicKey = async (authIframeClient: TurnkeyIframeClient) => {
-  await authIframeClient.clearEmbeddedKey();
-  await authIframeClient.initEmbeddedKey();
-};
-
-export const getIframePublicKey = async (
-  authIframeClient: TurnkeyIframeClient,
-) => {
-  const iframePublicKey = await authIframeClient.getEmbeddedPublicKey();
-  if (!iframePublicKey) {
-    await resetIframePublicKey(authIframeClient);
-    throw new Error("No iframe public key, please try again");
-  }
-  return iframePublicKey;
-};
 
 const openPopup = (url: string) => {
   const popup = window.open(

@@ -1,10 +1,13 @@
-export type ExternalWalletType =
-  | "argent"
-  | "braavos"
-  | "metamask"
-  | "phantom"
-  | "rabby"
-  | "base";
+export const externalWalletTypes = [
+  "argent",
+  "braavos",
+  "metamask",
+  "phantom",
+  "rabby",
+  "base",
+] as const;
+export type ExternalWalletType = (typeof externalWalletTypes)[number];
+
 export type ExternalPlatform =
   | "starknet"
   | "ethereum"

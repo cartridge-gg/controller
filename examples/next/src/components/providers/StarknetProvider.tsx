@@ -179,15 +179,6 @@ const controller = new ControllerConnector({
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
   url: keychainUrl,
-  signupOptions: [
-    "google",
-    "webauthn",
-    "discord",
-    "walletconnect",
-    "metamask",
-    "rabby",
-    "password",
-  ],
   slot: "arcade-pistols",
   namespace: "pistols",
   preset: "pistols",
