@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ResponseCodes } from "@cartridge/controller";
 import { shortString, Signature, TypedData } from "starknet";
 import {
   LayoutFooter,
@@ -12,9 +14,112 @@ import {
   HeaderInner,
 } from "@cartridge/ui";
 import { useConnection } from "@/hooks/connection";
-// import { OcclusionDetector } from "@/components/OcclusionDetector";
+import { cleanupCallbacks } from "@/utils/connection/callbacks";
+import { parseSignMessageParams } from "@/utils/connection/sign";
 
-export function SignMessage({
+const CANCEL_RESPONSE = {
+  code: ResponseCodes.CANCELED,
+  message: "Canceled",
+};
+
+export function SignMessage() {
+  const { closeModal, setOnModalClose } = useConnection();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [params, setParams] = useState<
+    ReturnType<typeof parseSignMessageParams>
+  >(null);
+
+  useEffect(() => {
+    const dataParam = searchParams.get("data");
+    if (dataParam) {
+      const parsed = parseSignMessageParams(dataParam);
+      if (parsed) {
+        setParams(parsed);
+        return;
+      }
+    }
+
+    navigate("/", { replace: true });
+  }, [searchParams, navigate]);
+
+  useEffect(() => {
+    return () => {
+      if (params?.params.id) {
+        cleanupCallbacks(params.params.id);
+      }
+    };
+  }, [params?.params.id]);
+
+  const returnTo = searchParams.get("returnTo");
+
+  const cancelWithoutClosing = useCallback(() => {
+    if (!params) {
+      return;
+    }
+
+    params.onCancel?.();
+    params.resolve?.(CANCEL_RESPONSE);
+    cleanupCallbacks(params.params.id);
+  }, [params]);
+
+  const handleCompletion = useCallback(() => {
+    setOnModalClose?.(undefined);
+    if (returnTo) {
+      navigate(returnTo, { replace: true });
+    } else {
+      void closeModal?.();
+    }
+  }, [returnTo, navigate, closeModal, setOnModalClose]);
+
+  const handleSign = useCallback(
+    (signature: Signature) => {
+      if (!params) {
+        return;
+      }
+
+      params.resolve?.(signature);
+      cleanupCallbacks(params.params.id);
+      handleCompletion();
+    },
+    [params, handleCompletion],
+  );
+
+  const handleCancel = useCallback(() => {
+    cancelWithoutClosing();
+    handleCompletion();
+  }, [cancelWithoutClosing, handleCompletion]);
+
+  useEffect(() => {
+    if (!setOnModalClose || !params?.resolve) {
+      return;
+    }
+
+    setOnModalClose(() => {
+      cancelWithoutClosing();
+    });
+
+    return () => {
+      setOnModalClose(undefined);
+    };
+  }, [setOnModalClose, params?.resolve, cancelWithoutClosing]);
+
+  const typedData = useMemo(() => params?.params.typedData, [params]);
+
+  if (!typedData) {
+    return null;
+  }
+
+  return (
+    <SignMessageView
+      typedData={typedData}
+      onSign={handleSign}
+      onCancel={handleCancel}
+    />
+  );
+}
+
+export function SignMessageView({
   typedData,
   onSign,
   onCancel,
@@ -51,14 +156,11 @@ export function SignMessage({
     if (!typedData) return;
     const primaryTypeData = typedData.types[typedData.primaryType];
 
-    // Recursively decodes all nested `felt*` types
-    // to their ASCII equivalents
     const convertFeltArraysToString = (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       initial: any,
       messageType: Array<{ name: string; type: string }>,
     ) => {
-      // Ensure messageType is actually an array before iterating
       if (!Array.isArray(messageType)) {
         return;
       }
@@ -69,8 +171,8 @@ export function SignMessage({
           );
           initial[typeMember.name] = stringArray.join("");
         } else if (
-          typedData.types[typeMember.type] && // Check if the type exists as a key in typedData.types
-          Array.isArray(typedData.types[typeMember.type]) // And ensure it's an array (a struct definition)
+          typedData.types[typeMember.type] &&
+          Array.isArray(typedData.types[typeMember.type])
         ) {
           convertFeltArraysToString(
             initial[typeMember.name],
@@ -98,7 +200,6 @@ export function SignMessage({
 
   return (
     <>
-      {/* <OcclusionDetector /> */}
       <HeaderInner
         title="Signature Request"
         description={`${origin} is asking you to sign a message`}

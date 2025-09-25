@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SignMessage } from "./SignMessage";
+import { SignMessageView } from "./SignMessage";
 
 const meta = {
-  component: SignMessage,
-} satisfies Meta<typeof SignMessage>;
+  component: SignMessageView,
+} satisfies Meta<typeof SignMessageView>;
 
 export default meta;
 
