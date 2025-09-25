@@ -55,8 +55,14 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController, configSignupOptions } =
-    useConnection();
+  const {
+    origin,
+    rpcUrl,
+    chainId,
+    setController,
+    configSignupOptions,
+    context,
+  } = useConnection();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -86,7 +92,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
           chainId &&
           origin
         ) {
-          const controller = Controller.create({
+          const controller = await Controller.create({
             appId: origin,
             chainId,
             rpcUrl,
@@ -311,9 +317,9 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     },
     [
       chainId,
-      finishSignup,
       rpcUrl,
       origin,
+      setController,
       doPopupFlow,
       signupWithExternalWallet,
       signupWithSocial,
@@ -512,7 +518,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       chainId,
       finishLogin,
       passwordAuth,
-      rpcUrl,
       setWaitingForConfirmation,
     ],
   );
@@ -620,6 +625,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     }
   }, [
     error,
+    window.location.search,
     setIsLoading,
     finishLogin,
     finishSignup,
@@ -672,7 +678,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       }
       setIsLoading(false);
     },
-    [handleLogin, handleSignup, doPopupFlow, setAuthMethod],
+    [handleLogin, handleSignup, doPopupFlow, setAuthMethod, context],
   );
 
   return {
