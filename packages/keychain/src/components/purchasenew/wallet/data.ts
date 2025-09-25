@@ -24,6 +24,7 @@ import {
   ArgentIcon,
   BraavosIcon,
   ControllerIcon,
+  PhantomIcon,
 } from "@cartridge/ui";
 import { NetworkWalletData, Wallet } from "../types";
 import { constants } from "starknet";
@@ -139,6 +140,7 @@ export const networkWalletData: NetworkWalletData = {
             name: "Phantom",
             type: "phantom",
             icon: React.createElement(PhantomColorIcon),
+            subIcon: React.createElement(PhantomIcon),
             color: "#AB9FF2",
             enabled: true,
           },
