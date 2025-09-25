@@ -11,7 +11,7 @@ catalog:
   "@eslint/js": "^9.18.0"
   "@noble/curves": "^1.9.0"
   "@noble/hashes": "^1.8.0"
-  "@dojoengine/core": "^1.7.0"
+  "@dojoengine/core": "^1.7.1"
   "@dojoengine/sdk": "^1.7.2"
   "@dojoengine/torii-wasm": "^1.7.2"
   "@starknet-io/types-js": "^0.8.4"
