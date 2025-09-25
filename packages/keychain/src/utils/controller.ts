@@ -203,7 +203,14 @@ export default class Controller {
   }
 
   async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
-    return await this.cartridge.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
+    const hasAuthorizedPoliciesForCalls = await this.cartridge.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
+    console.log("****CARTRIDGE DEBUG****")
+    console.log({address: this.cartridgeMeta.address()})
+    console.log({appId: this.cartridgeMeta.appId()})
+    console.log({rpcUrl: this.cartridgeMeta.rpcUrl()})
+    console.log({chainId: this.cartridgeMeta.chainId()})
+    console.log({hasAuthorizedPoliciesForCalls})
+    return hasAuthorizedPoliciesForCalls;
   }
 
   async hasAuthorizedPoliciesForMessage(
