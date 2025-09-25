@@ -25,6 +25,7 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
+import { AccountSearchResult } from "@cartridge/ui/utils";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -79,6 +80,21 @@ function CreateControllerForm({
   // https://docs.cartridge.gg/controller/presets#apple-app-site-association
   const isInAppBrowser = isInApp && !!appKey;
 
+  const [selectedAccount, setSelectedAccount] = useState<
+    AccountSearchResult | undefined
+  >();
+
+  const handleAccountSelect = (result: AccountSearchResult) => {
+    setSelectedAccount(result);
+    onUsernameChange(result.username);
+  };
+
+  const handleRemovePill = useCallback(() => {
+    setSelectedAccount(undefined);
+    onUsernameChange("");
+    onUsernameClear();
+  }, [onUsernameChange, onUsernameClear]);
+
   return (
     <>
       <NavigationHeader
@@ -111,7 +127,10 @@ function CreateControllerForm({
             onUsernameFocus={onUsernameFocus}
             onUsernameClear={onUsernameClear}
             onKeyDown={onKeyDown}
-            showAutocomplete
+            showAutocomplete={true}
+            selectedAccount={selectedAccount}
+            onAccountSelect={handleAccountSelect}
+            onSelectedUsernameRemove={handleRemovePill}
           />
           <Legal />
         </LayoutContent>
