@@ -49,7 +49,6 @@
     "@cartridge/arcade": "catalog:",
     "@cartridge/controller": "workspace:*",
     "@cartridge/controller-wasm": "catalog:",
-    "@cartridge/marketplace": "catalog:",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",
     "@dojoengine/torii-wasm": "catalog:",
