@@ -229,7 +229,9 @@ export const processPolicies = (
     Object.values(processPolicies.contracts).forEach((contract) => {
       contract.methods.forEach((method) => {
         delete method.id;
-        method.authorized = !toggleOff;
+        if (toggleOff !== undefined) {
+          method.authorized = !toggleOff;
+        }
       });
     });
   }
@@ -238,7 +240,9 @@ export const processPolicies = (
   if (processPolicies.messages) {
     processPolicies.messages.forEach((message) => {
       delete message.id;
-      message.authorized = !toggleOff;
+      if (toggleOff !== undefined) {
+        message.authorized = !toggleOff;
+      }
     });
   }
 
