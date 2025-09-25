@@ -118,7 +118,6 @@ function CreateControllerForm({
         }}
       >
         <LayoutContent className="gap-6 overflow-y-hidden">
-          <p>test</p>
           <CreateAccount
             usernameField={usernameField}
             validation={validation}
