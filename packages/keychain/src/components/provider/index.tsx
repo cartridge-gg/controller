@@ -20,7 +20,6 @@ import { TokensProvider } from "./tokens";
 import { UIProvider } from "./ui";
 import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
-import { MarketplaceProvider as ProfileMarketplaceProvider } from "@/components/provider/marketplace";
 import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { ErrorBoundary } from "../ErrorBoundary";
@@ -67,13 +66,11 @@ export function Provider({ children }: PropsWithChildren) {
                               provider={jsonRpcProvider({ rpc })}
                             >
                               <TokensProvider>
-                                <ProfileMarketplaceProvider>
-                                  <ProfileArcadeProvider>
-                                    <ProfileDataProvider>
-                                      {children}
-                                    </ProfileDataProvider>
-                                  </ProfileArcadeProvider>
-                                </ProfileMarketplaceProvider>
+                                <ProfileArcadeProvider>
+                                  <ProfileDataProvider>
+                                    {children}
+                                  </ProfileDataProvider>
+                                </ProfileArcadeProvider>
                               </TokensProvider>
                             </StarknetConfig>
                           </UIProvider>

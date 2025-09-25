@@ -1,6 +1,6 @@
 import { useAccount, useAccountProfile } from "@/hooks/account";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Collections, Marketplace } from "@cartridge/marketplace";
+import { Collections, Marketplace } from "@cartridge/arcade";
 import { Token, ToriiClient } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useConnection } from "@/hooks/connection";
