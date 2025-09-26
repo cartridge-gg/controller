@@ -11,7 +11,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "./account";
 import { useConnection } from "@/hooks/connection";
-import { getChecksumAddress } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { useEffect, useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
 import { useUsername } from "./username";
@@ -123,15 +123,21 @@ export type UseBalancesResponse = {
 export function useBalances(accountAddress?: string): UseBalancesResponse {
   const account = useAccount();
   const connectedAddress = account?.address;
-  const { project } = useConnection();
+  const { project, chainId } = useConnection();
   const address = useMemo(
     () => accountAddress ?? connectedAddress,
     [accountAddress, connectedAddress],
   );
 
   const projects = useMemo(() => {
-    return project ? [project, TOKENS_TORII_INSTANCE] : [TOKENS_TORII_INSTANCE];
-  }, [project]);
+    return chainId === constants.StarknetChainId.SN_MAIN
+      ? project
+        ? [project, TOKENS_TORII_INSTANCE]
+        : [TOKENS_TORII_INSTANCE]
+      : project
+        ? [project]
+        : [];
+  }, [project, chainId]);
 
   const { data, status } = useBalancesQuery(
     {
