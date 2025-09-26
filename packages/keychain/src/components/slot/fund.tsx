@@ -39,17 +39,29 @@ export function Fund() {
   } = useTeamsQuery(undefined, { refetchInterval: 1000 });
 
   useEffect(() => {
-    if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
-      navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
-        replace: true,
-      });
-    }
+    let cancelled = false;
 
     if (error) {
       navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
         replace: true,
       });
+      return () => {
+        cancelled = true;
+      };
     }
+
+    (async () => {
+      const controller = await Controller.fromStore(import.meta.env.VITE_ORIGIN!);
+      if (!controller && !cancelled) {
+        navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
+          replace: true,
+        });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigate, pathname, error]);
 
   const teams: Team[] = useMemo(

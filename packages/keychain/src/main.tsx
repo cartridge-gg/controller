@@ -11,24 +11,27 @@ import { PurchaseProvider } from "./context";
 
 declare global {
   interface Window {
-    controller: ReturnType<typeof Controller.fromStore>;
+    controller?: Awaited<ReturnType<typeof Controller.fromStore>>;
   }
 }
 
-// Initialize controller before React rendering
-window.controller = Controller.fromStore(import.meta.env.VITE_ORIGIN!);
+async function bootstrap() {
+  window.controller = await Controller.fromStore(import.meta.env.VITE_ORIGIN!);
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <NavigationProvider>
-        <Provider>
-          <PurchaseProvider>
-            <App />
-          </PurchaseProvider>
-        </Provider>
-      </NavigationProvider>
-      <SonnerToaster position="bottom-right" />
-    </BrowserRouter>
-  </StrictMode>,
-);
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <BrowserRouter>
+        <NavigationProvider>
+          <Provider>
+            <PurchaseProvider>
+              <App />
+            </PurchaseProvider>
+          </Provider>
+        </NavigationProvider>
+        <SonnerToaster position="bottom-right" />
+      </BrowserRouter>
+    </StrictMode>,
+  );
+}
+
+void bootstrap();

@@ -20,7 +20,7 @@ export function switchChain({
     const provider = new RpcProvider({ nodeUrl: rpcUrl });
     const chainId = await provider.getChainId();
 
-    const nextController = Controller.create({
+    const nextController = await Controller.create({
       appId: controller.appId(),
       classHash: controller.classHash(),
       chainId,

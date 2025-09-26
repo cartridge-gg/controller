@@ -294,7 +294,7 @@ export default class Controller {
     address: string;
     username: string;
     owner: Owner;
-  }) {
+  }): Promise<Controller> {
     const accountWithMeta = await ControllerFactory.apiLogin(
       appId,
       username,
@@ -314,7 +314,7 @@ export default class Controller {
     return controller;
   }
 
-  static create({
+  static async create({
     appId,
     classHash,
     chainId,
@@ -330,8 +330,8 @@ export default class Controller {
     address: string;
     username: string;
     owner: Owner;
-  }) {
-    const accountWithMeta = CartridgeAccount.new(
+  }): Promise<Controller> {
+    const accountWithMeta = await CartridgeAccount.new(
       appId,
       classHash,
       rpcUrl,
@@ -372,7 +372,10 @@ export default class Controller {
     cartridgeApiUrl: string;
     session_expires_at_s: number;
     isControllerRegistered: boolean;
-  }) {
+  }): Promise<{
+    controller: Controller;
+    session: JsRevokableSession;
+  }> {
     const loginResult = await ControllerFactory.login(
       appId,
       username,
@@ -399,13 +402,13 @@ export default class Controller {
     };
   }
 
-  static fromStore(appId: string) {
-    const cartridgeWithMeta = ControllerFactory.fromStorage(
+  static async fromStore(appId: string): Promise<Controller | undefined> {
+    const cartridgeWithMeta = await ControllerFactory.fromStorage(
       appId,
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
     if (!cartridgeWithMeta) {
-      return;
+      return undefined;
     }
 
     const meta = cartridgeWithMeta.meta();
