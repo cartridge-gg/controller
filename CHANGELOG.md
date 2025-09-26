@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.10.6] - 2025-09-26
+
+### ✨ New Features
+- **@cartridge/keychain**: Added marketplace integration with consolidated arcade provider functionality, streamlining marketplace operations and improving the gaming marketplace experience (#2063)
+- **@cartridge/keychain**: Added disconnect page with redirect deeplink support, enabling better session management and seamless app navigation (#2056)
+- **@cartridge/keychain**: Implemented dynamic RPC URL override support for enhanced flexibility in network configuration, allowing developers to specify custom RPC endpoints dynamically (#2052)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced Android native flow session provider with improved error handling and better session management reliability (#2066)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed purchase flow to use correct network icon, ensuring users see the appropriate network indicator during transactions (#2055)
+- **@cartridge/keychain**: Fixed verified session creation to improve session validation and authentication flow reliability (#2062)
+- **@cartridge/keychain**: Fixed game theme functionality for better theming consistency across gaming applications (#2050)
+
+### 📦 Dependencies
+- **Dojo**: Updated to latest version for improved gaming framework functionality (#2057)
+
 ## [0.10.5] - 2025-09-20
 
 ### 🐛 Bug Fixes
