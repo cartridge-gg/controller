@@ -437,7 +437,7 @@ const Order = ({
       amount: formattedPrice.toFixed(fixedValue),
       token: token.metadata.symbol,
     };
-  }, [price, token]);
+  }, [price, token, fixedValue]);
 
   const countervalue = useCountervalue({
     tokens: [
