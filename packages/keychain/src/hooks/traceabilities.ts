@@ -59,7 +59,7 @@ export function useTraceabilities({
         {
           project: project ?? "",
           date: "",
-          contractAddress: contractAddress,
+          contractAddress: contractAddress.toLowerCase(),
           tokenId: tokenId,
           limit: LIMIT,
         },
