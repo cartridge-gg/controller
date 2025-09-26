@@ -24,11 +24,6 @@ export const Transfer = () => {
         .execute([
           {
             contractAddress: STRK_CONTRACT_ADDRESS,
-            entrypoint: "approve",
-            calldata: [account?.address, amount, "0x0"],
-          },
-          {
-            contractAddress: STRK_CONTRACT_ADDRESS,
             entrypoint: "transfer",
             calldata: [account?.address, amount, "0x0"],
           },
