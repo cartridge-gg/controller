@@ -24,6 +24,7 @@ export type Asset = {
   description?: string;
   imageUrl: string;
   attributes: Record<string, unknown>[];
+  owner: string;
 };
 
 export type UseCollectionResponse = {
@@ -80,7 +81,8 @@ async function fetchCollections(
 async function fetchBalances(
   client: torii.ToriiClient,
   contractAddresses: string[],
-  accountAddress: string,
+  account_addresses: string[],
+  tokenIds: string[],
   count: number,
   cursor: string | undefined,
 ): Promise<{
@@ -90,8 +92,8 @@ async function fetchBalances(
   try {
     const balances = await client.getTokenBalances({
       contract_addresses: contractAddresses,
-      account_addresses: [accountAddress],
-      token_ids: [],
+      account_addresses: account_addresses,
+      token_ids: tokenIds.map((id) => addAddressPadding(id).replace("0x", "")),
       pagination: {
         cursor: cursor,
         limit: count,
@@ -143,7 +145,8 @@ export function useCollection({
       const rawBalances = await fetchBalances(
         client,
         [contractAddress],
-        address,
+        tokenIds ? [] : [address],
+        tokenIds ? [...tokenIds] : [],
         LIMIT,
         undefined,
       );
@@ -151,15 +154,15 @@ export function useCollection({
         (b) => BigInt(b.balance) !== 0n && BigInt(b.token_id || "0") !== 0n,
       );
       if (balances.length === 0) return;
-      const tokenIds = balances
-        .filter((b) => b.contract_address === contractAddress)
+      const ids = balances
+        .filter((b) => BigInt(b.contract_address) === BigInt(contractAddress))
         .map((b) => b.token_id?.replace("0x", ""))
         .filter((b) => b !== undefined);
-      if (tokenIds.length === 0) return;
+      if (ids.length === 0) return;
       const collection = await fetchCollections(
         client,
         [contractAddress],
-        tokenIds,
+        ids,
         LIMIT,
         undefined,
       );
@@ -177,12 +180,12 @@ export function useCollection({
         name: asset.name || metadata.name,
         type: TYPE,
         imageUrl: metadata.image,
-        totalCount: tokenIds.length,
+        totalCount: ids.length,
       };
       setCollection(newCollection);
       const newAssets: { [key: string]: Asset } = {};
       collection.items
-        .filter((asset) => asset.token_id)
+        .filter((asset) => !!asset.token_id)
         .forEach((asset) => {
           let metadata: {
             name?: string;
@@ -196,7 +199,11 @@ export function useCollection({
             console.error(error);
           }
           if (!metadata.name || !metadata.image) return;
-          const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
+          const owner = balances.find(
+            (b) => !!b?.token_id && b.token_id === asset?.token_id && BigInt(b.balance) !== 0n,
+          )?.account_address;
+          if (!owner) return; // Skip assets without owners
+          const image = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
           newAssets[`${contractAddress}-${asset.token_id || ""}`] = {
             tokenId: asset.token_id || "",
             name: metadata.name || asset.name,
@@ -205,6 +212,7 @@ export function useCollection({
             attributes: Array.isArray(metadata.attributes)
               ? metadata.attributes
               : [],
+            owner: owner,
           };
         });
       setAssets(newAssets);
@@ -274,7 +282,8 @@ export function useCollections(): UseCollectionsResponse {
       const rawBalances = await fetchBalances(
         client,
         [],
-        address,
+        [address],
+        [],
         LIMIT,
         undefined,
       );
