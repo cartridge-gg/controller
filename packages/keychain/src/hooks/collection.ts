@@ -145,8 +145,8 @@ export function useCollection({
       const rawBalances = await fetchBalances(
         client,
         [contractAddress],
-        tokenIds ? [] : [address],
-        tokenIds ? [...tokenIds] : [],
+        tokenIds.length > 0 ? [] : [address],
+        tokenIds.length > 0 ? [...tokenIds] : [],
         LIMIT,
         undefined,
       );
