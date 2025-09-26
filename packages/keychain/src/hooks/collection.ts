@@ -200,7 +200,10 @@ export function useCollection({
           }
           if (!metadata.name || !metadata.image) return;
           const owner = balances.find(
-            (b) => !!b?.token_id && b.token_id === asset?.token_id && BigInt(b.balance) !== 0n,
+            (b) =>
+              !!b?.token_id &&
+              b.token_id === asset?.token_id &&
+              BigInt(b.balance) !== 0n,
           )?.account_address;
           if (!owner) return; // Skip assets without owners
           const image = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
