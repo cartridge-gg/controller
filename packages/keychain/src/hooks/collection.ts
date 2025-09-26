@@ -67,7 +67,7 @@ async function fetchCollections(
     });
     if (tokens.items.length !== 0) {
       return {
-        items: tokens.items,
+        items: tokens.items.filter((token) => !!token.token_id),
         cursor: tokens.next_cursor,
       };
     }
@@ -198,7 +198,6 @@ export function useCollection({
           } catch (error) {
             console.error(error);
           }
-          if (!metadata.name || !metadata.image) return;
           const owner = balances.find(
             (b) =>
               !!b?.token_id &&
@@ -209,10 +208,10 @@ export function useCollection({
           const image = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
           newAssets[`${contractAddress}-${asset.token_id || ""}`] = {
             tokenId: asset.token_id || "",
-            name: metadata.name || asset.name,
-            description: metadata.description,
+            name: metadata?.name || asset.name,
+            description: metadata?.description,
             imageUrl: image || metadata?.image || "",
-            attributes: Array.isArray(metadata.attributes)
+            attributes: Array.isArray(metadata?.attributes)
               ? metadata.attributes
               : [],
             owner: owner,
@@ -319,11 +318,10 @@ export function useCollections(): UseCollectionsResponse {
           } catch (error) {
             console.error(error);
           }
-          if (!metadata.name || !metadata.image) return;
           const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
           collections[contractAddress] = {
             address: contractAddress,
-            name: asset.name || metadata.name,
+            name: asset.name || metadata?.name || "",
             type: TYPE,
             imageUrl: image || metadata?.image || "",
             totalCount: tokenIds.length,
@@ -447,7 +445,7 @@ export function useToriiCollection({
         attribute_filters: [],
       })
       .then((tokens) => {
-        setTokens(tokens.items || []);
+        setTokens(tokens.items.filter((token) => !!token.token_id) || []);
         setStatus("success");
       })
       .catch((error) => {
