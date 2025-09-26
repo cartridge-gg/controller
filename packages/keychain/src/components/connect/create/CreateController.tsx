@@ -101,7 +101,7 @@ function CreateControllerForm({
           onSubmit();
         }}
       >
-        <LayoutContent className="gap-6 overflow-y-hidden">
+        <LayoutContent className="overflow-y-hidden">
           <CreateAccount
             usernameField={usernameField}
             validation={validation}

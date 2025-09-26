@@ -129,7 +129,7 @@ export const StripeCheckoutContainer = ({
         title="Enter Payment Details"
         icon={<CreditCardIcon variant="solid" size="lg" />}
       />
-      <LayoutContent className="gap-6">{children}</LayoutContent>
+      <LayoutContent>{children}</LayoutContent>
       <LayoutFooter>
         {error && (
           <ErrorAlert

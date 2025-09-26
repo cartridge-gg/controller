@@ -44,7 +44,7 @@ export function Delegate() {
   return (
     <>
       <HeaderInner variant="compressed" title="Delegate account" hideIcon />
-      <LayoutContent className="gap-6">
+      <LayoutContent>
         <div className="flex flex-col gap-4">
           <div className="text-sm text-foreground-400 text-center">
             Your controller can be owned by an existing Starknet wallet which
