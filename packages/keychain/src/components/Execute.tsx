@@ -1,7 +1,11 @@
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
 import { ExecuteParams } from "@/utils/connection/execute";
-import { ConnectError, ResponseCodes } from "@cartridge/controller";
+import {
+  ConnectError,
+  ResponseCodes,
+  USER_REFUSED_OP,
+} from "@cartridge/controller";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { InvokeFunctionResponse } from "starknet";
@@ -64,14 +68,8 @@ export function Execute() {
       return;
     }
     setOnModalClose(() => {
-      params.resolve!({
-        code: ResponseCodes.ERROR,
-        message: "User canceled",
-        error: {
-          message: "User canceled",
-          code: 0,
-        },
-      });
+      // Return RPC spec compliant USER_REFUSED_OP error
+      params.reject!(USER_REFUSED_OP);
     });
   }, [params?.reject, params?.resolve, setOnModalClose]);
 
