@@ -36,7 +36,7 @@ export type UseCollectionResponse = {
 
 async function getToriiClient(project: string): Promise<torii.ToriiClient> {
   const url = `https://api.cartridge.gg/x/${project}/torii`;
-  const client = await new torii.ToriiClient({
+  const client = new torii.ToriiClient({
     toriiUrl: url,
     worldAddress: "0x0",
   });
@@ -220,7 +220,7 @@ export function useCollection({
       setAssets(newAssets);
     };
     getCollections();
-  }, [client, address, trigger, project, contractAddress]);
+  }, [client, address, trigger, project, contractAddress, tokenIds]);
 
   const refetch = useCallback(() => {
     setTrigger(true);
@@ -379,7 +379,7 @@ export function useToriiCollections(): UseToriiCollectionsResponse {
     if (!project) return;
     const getClients = async () => {
       const url = `https://api.cartridge.gg/x/${project}/torii`;
-      const client = await provider.getToriiClient(url);
+      const client = provider.getToriiClient(url);
       setClient(client);
     };
     getClients();
@@ -421,7 +421,7 @@ export function useToriiCollection({
     if (!project) return;
     const getClient = async () => {
       const url = `https://api.cartridge.gg/x/${project}/torii`;
-      const client = await provider.getToriiClient(url);
+      const client = provider.getToriiClient(url);
       setClient(client);
     };
     getClient();
