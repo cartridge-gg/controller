@@ -46,7 +46,6 @@ export function useWebauthnAuthentication() {
       const controller = await Controller.create({
         appId: origin,
         classHash: controllerNode.constructorCalldata[0],
-        chainId,
         rpcUrl,
         address: controllerNode.address,
         username: finalUsername,
@@ -82,7 +81,6 @@ export function useWebauthnAuthentication() {
           appId: origin,
           classHash: controllerQuery.constructorCalldata[0],
           rpcUrl,
-          chainId,
           address: controllerQuery.address,
           username: controllerQuery.accountID,
           owner: webauthnsSigner,
@@ -92,7 +90,6 @@ export function useWebauthnAuthentication() {
           appId: origin,
           classHash: controllerQuery.constructorCalldata[0],
           rpcUrl,
-          chainId,
           address: controllerQuery.address,
           username: controllerQuery.accountID,
           owner: webauthnsSigner,
