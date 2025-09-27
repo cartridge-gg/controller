@@ -281,7 +281,7 @@ export default class Controller {
   static async apiLogin({
     appId,
     classHash,
-    chainId,
+    chainId: _chainId, // eslint-disable-line @typescript-eslint/no-unused-vars
     rpcUrl,
     address,
     username,
@@ -300,7 +300,6 @@ export default class Controller {
       username,
       classHash,
       rpcUrl,
-      chainId,
       address,
       owner,
       import.meta.env.VITE_CARTRIDGE_API_URL,
@@ -317,7 +316,7 @@ export default class Controller {
   static async create({
     appId,
     classHash,
-    chainId,
+    chainId: _chainId, // eslint-disable-line @typescript-eslint/no-unused-vars
     rpcUrl,
     address,
     username,
@@ -335,7 +334,6 @@ export default class Controller {
       appId,
       classHash,
       rpcUrl,
-      chainId,
       address,
       username,
       owner,
@@ -354,7 +352,7 @@ export default class Controller {
     appId,
     classHash,
     rpcUrl,
-    chainId,
+    chainId: _chainId, // eslint-disable-line @typescript-eslint/no-unused-vars
     address,
     username,
     owner,
@@ -381,7 +379,6 @@ export default class Controller {
       username,
       classHash,
       rpcUrl,
-      chainId,
       address,
       owner,
       cartridgeApiUrl,

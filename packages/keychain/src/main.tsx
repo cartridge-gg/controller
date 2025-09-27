@@ -9,11 +9,7 @@ import "./index.css";
 import Controller from "./utils/controller";
 import { PurchaseProvider } from "./context";
 
-declare global {
-  interface Window {
-    controller?: Awaited<ReturnType<typeof Controller.fromStore>>;
-  }
-}
+// Controller type is already declared in vite-env.d.ts
 
 async function bootstrap() {
   window.controller = await Controller.fromStore(import.meta.env.VITE_ORIGIN!);
