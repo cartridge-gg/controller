@@ -1,5 +1,4 @@
 import { ResponseCodes } from "@cartridge/controller";
-import { RpcProvider } from "starknet";
 import Controller from "../controller";
 
 export function switchChain({
@@ -17,13 +16,10 @@ export function switchChain({
     }
 
     const controller: Controller = window.controller;
-    const provider = new RpcProvider({ nodeUrl: rpcUrl });
-    const chainId = await provider.getChainId();
 
     const nextController = await Controller.create({
       appId: controller.appId(),
       classHash: controller.classHash(),
-      chainId,
       rpcUrl,
       address: controller.address(),
       username: controller.username(),

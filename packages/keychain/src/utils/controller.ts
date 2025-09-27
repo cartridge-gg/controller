@@ -281,7 +281,6 @@ export default class Controller {
   static async apiLogin({
     appId,
     classHash,
-    chainId: _chainId, // eslint-disable-line @typescript-eslint/no-unused-vars
     rpcUrl,
     address,
     username,
@@ -289,7 +288,6 @@ export default class Controller {
   }: {
     appId: string;
     classHash: string;
-    chainId: string;
     rpcUrl: string;
     address: string;
     username: string;
@@ -316,7 +314,6 @@ export default class Controller {
   static async create({
     appId,
     classHash,
-    chainId: _chainId, // eslint-disable-line @typescript-eslint/no-unused-vars
     rpcUrl,
     address,
     username,
@@ -324,7 +321,6 @@ export default class Controller {
   }: {
     appId: string;
     classHash: string;
-    chainId: string;
     rpcUrl: string;
     address: string;
     username: string;
@@ -352,7 +348,6 @@ export default class Controller {
     appId,
     classHash,
     rpcUrl,
-    chainId: _chainId, // eslint-disable-line @typescript-eslint/no-unused-vars
     address,
     username,
     owner,
@@ -363,7 +358,6 @@ export default class Controller {
     appId: string;
     classHash: string;
     rpcUrl: string;
-    chainId: string;
     address: string;
     username: string;
     owner: Owner;

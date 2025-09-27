@@ -51,7 +51,9 @@ export function Fund() {
     }
 
     (async () => {
-      const controller = await Controller.fromStore(import.meta.env.VITE_ORIGIN!);
+      const controller = await Controller.fromStore(
+        import.meta.env.VITE_ORIGIN!,
+      );
       if (!controller && !cancelled) {
         navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
           replace: true,
