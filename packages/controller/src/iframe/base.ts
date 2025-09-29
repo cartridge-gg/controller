@@ -45,6 +45,7 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     const meta = document.createElement("meta");
     meta.name = "viewport";
+    meta.id = "controller-viewport";
     meta.content =
       "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content";
     docHead.appendChild(meta);

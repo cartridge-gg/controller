@@ -16,7 +16,7 @@ import {
   Sheet,
 } from "@cartridge/ui";
 import InAppSpy from "inapp-spy";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
 import { ChangeWallet } from "../buttons/change-wallet";
 import { credentialToAuth } from "../types";
@@ -86,6 +86,19 @@ function CreateControllerForm({
 
   const layoutRef = usePreventOverScrolling<HTMLFormElement>();
 
+  const layoutHeight = useMemo(() => {
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (keyboardIsOpen) {
+      if (!isSafari) {
+        return viewportHeight;
+      }
+
+      return viewportHeight - 450;
+    } else {
+      return "100%";
+    }
+  }, [keyboardIsOpen, viewportHeight]);
+
   return (
     <>
       <NavigationHeader
@@ -99,16 +112,17 @@ function CreateControllerForm({
         hideUsername
         hideSettings
       />
-      <p>
+      {/*<p>
         Is keyboard open?
         {keyboardIsOpen ? " Yes" : " No"}
       </p>
-      <p>Viewport height: {viewportHeight}px</p>
+      <p>Viewport height: {viewportHeight}px</p>*/}
       <form
         className="flex flex-col overflow-y-scroll"
         style={{
           scrollbarWidth: "none",
-          height: keyboardIsOpen ? viewportHeight : "100%",
+          // height: viewportHeight - 400,
+          height: layoutHeight,
         }}
         ref={layoutRef}
         onSubmit={(e) => {
@@ -198,6 +212,7 @@ export function CreateControllerView({
     }
   };
 
+  // Handles scroll to top on mobile when keyboard opens
   useEffect(() => {
     const handleScroll = () => {
       window.scrollTo(0, 0);
