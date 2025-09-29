@@ -29,6 +29,7 @@ export type SessionOptions = {
   chainId: string;
   policies: SessionPolicies;
   redirectUrl: string;
+  disconnectRedirectUrl?: string;
   keychainUrl?: string;
   apiUrl?: string;
 };
@@ -41,6 +42,7 @@ export default class SessionProvider extends BaseProvider {
   protected _rpcUrl: string;
   protected _username?: string;
   protected _redirectUrl: string;
+  protected _disconnectRedirectUrl?: string;
   protected _policies: ParsedSessionPolicies;
   protected _keychainUrl: string;
   protected _apiUrl: string;
@@ -53,6 +55,7 @@ export default class SessionProvider extends BaseProvider {
     chainId,
     policies,
     redirectUrl,
+    disconnectRedirectUrl,
     keychainUrl,
     apiUrl,
   }: SessionOptions) {
@@ -83,6 +86,7 @@ export default class SessionProvider extends BaseProvider {
     this._rpcUrl = rpc;
     this._chainId = chainId;
     this._redirectUrl = redirectUrl;
+    this._disconnectRedirectUrl = disconnectRedirectUrl;
     this._keychainUrl = keychainUrl || KEYCHAIN_URL;
     this._apiUrl = apiUrl ?? API_URL;
 
@@ -251,7 +255,16 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("sessionPolicies");
     this.account = undefined;
     this._username = undefined;
-    const openedWindow = window.open(`${this._keychainUrl}/disconnect`);
+    const disconnectUrl = new URL(`${this._keychainUrl}`);
+    disconnectUrl.pathname = "disconnect";
+
+    this._disconnectRedirectUrl &&
+      disconnectUrl.searchParams.append(
+        "redirect_url",
+        this._disconnectRedirectUrl,
+      );
+
+    const openedWindow = window.open(disconnectUrl);
     if (openedWindow === null) return Promise.resolve();
 
     const { resolve, promise } = Promise.withResolvers<void>();
