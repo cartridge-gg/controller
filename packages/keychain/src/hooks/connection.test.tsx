@@ -2,11 +2,9 @@ import { ReactNode } from "react";
 import { renderHook, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
-import { defaultTheme } from "@cartridge/presets";
+import { defaultTheme, loadConfig } from "@cartridge/presets";
+import { useThemeEffect } from "@cartridge/ui";
 import { isOriginVerified, useConnectionValue } from "./connection";
-
-const loadConfigMock = vi.fn();
-const useThemeEffectMock = vi.fn();
 
 vi.mock("@cartridge/presets", async () => {
   const actual =
@@ -16,7 +14,7 @@ vi.mock("@cartridge/presets", async () => {
 
   return {
     ...actual,
-    loadConfig: loadConfigMock,
+    loadConfig: vi.fn(),
   };
 });
 
@@ -26,7 +24,7 @@ vi.mock("@cartridge/ui", async () => {
 
   return {
     ...actual,
-    useThemeEffect: useThemeEffectMock,
+    useThemeEffect: vi.fn(),
   };
 });
 
@@ -96,6 +94,10 @@ vi.mock("@/utils/connection", () => ({
 }));
 
 // keychain_wallets type is defined in wallets.tsx, no need to redeclare it here
+
+// Get references to mocked functions
+const loadConfigMock = vi.mocked(loadConfig);
+const useThemeEffectMock = vi.mocked(useThemeEffect);
 
 describe("isOriginVerified", () => {
   const allowedOrigins = ["example.com", "*.example.com", "sub.test.com"];
