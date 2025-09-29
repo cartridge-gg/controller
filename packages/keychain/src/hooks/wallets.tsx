@@ -1,5 +1,7 @@
 import { credentialToAuth } from "@/components/connect/types";
 import {
+  AUTH_EXTERNAL_WALLETS,
+  AuthExternalWallet,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -20,7 +22,7 @@ import { ParentMethods, useConnection } from "./connection";
 
 interface WalletsContextValue {
   wallets: ExternalWallet[];
-  supportedWalletsForAuth: ExternalWalletType[];
+  supportedWalletsForAuth: AuthExternalWallet[];
   isLoading: boolean;
   isConnecting: boolean;
   error: Error | null;
@@ -184,16 +186,13 @@ export const WalletsProvider: React.FC<PropsWithChildren> = ({ children }) => {
     [wallets],
   );
 
-  const supportedWalletsForAuth = useMemo(
+  const supportedWalletsForAuth: AuthExternalWallet[] = useMemo(
     () => [
-      ...wallets
-        .filter(
-          (wallet) =>
-            wallet.type !== "argent" &&
-            wallet.type !== "phantom" &&
-            wallet.type !== "braavos",
-        )
-        .map((wallet) => wallet.type),
+      ...(wallets
+        .map((wallet) => wallet.type)
+        .filter((x) =>
+          AUTH_EXTERNAL_WALLETS.includes(x as AuthExternalWallet),
+        ) as AuthExternalWallet[]),
     ],
     [wallets],
   );

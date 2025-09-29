@@ -13,6 +13,7 @@ import {
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
+  IMPLEMENTED_AUTH_OPTIONS,
   ResponseCodes,
   toArray,
   Token,
@@ -192,7 +193,7 @@ export function useConnectionValue() {
   });
   const [configSignupOptions, setConfigSignupOptions] = useState<
     AuthOptions | undefined
-  >(["google", "webauthn", "discord", "walletconnect", "metamask", "rabby"]);
+  >([...IMPLEMENTED_AUTH_OPTIONS]);
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();

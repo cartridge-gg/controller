@@ -220,7 +220,7 @@ export function useCollection({
       setAssets(newAssets);
     };
     getCollections();
-  }, [client, address, trigger, project, contractAddress]);
+  }, [client, address, trigger, project, contractAddress, tokenIds]);
 
   const refetch = useCallback(() => {
     setTrigger(true);
