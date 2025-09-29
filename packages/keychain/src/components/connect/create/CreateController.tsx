@@ -166,7 +166,7 @@ function CreateControllerForm({
             username={usernameField.value}
           />
 
-          <CartridgeFooter />
+          {keyboardIsOpen ? null : <CartridgeFooter />}
         </LayoutFooter>
       </form>
     </>
