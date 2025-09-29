@@ -387,9 +387,7 @@ export function useConnectionValue() {
           setVerified(false);
         }
 
-        setConfigData(
-          config ? (config as Record<string, unknown>) : null,
-        );
+        setConfigData(config ? (config as Record<string, unknown>) : null);
       })
       .catch((error: Error) => {
         if (!isActive) return;
