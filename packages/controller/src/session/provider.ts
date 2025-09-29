@@ -1,12 +1,17 @@
 import { ec, stark, WalletAccount } from "starknet";
 
-import SessionAccount from "./account";
-import { KEYCHAIN_URL } from "../constants";
-import BaseProvider from "../provider";
-import { toWasmPolicies } from "../utils";
+import {
+  signerToGuid,
+  subscribeCreateSession,
+} from "@cartridge/controller-wasm";
 import { SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
+import { encode } from "starknet";
+import { API_URL, KEYCHAIN_URL } from "../constants";
 import { ParsedSessionPolicies } from "../policies";
+import BaseProvider from "../provider";
+import { toWasmPolicies } from "../utils";
+import SessionAccount from "./account";
 
 interface SessionRegistration {
   username: string;
@@ -25,6 +30,7 @@ export type SessionOptions = {
   policies: SessionPolicies;
   redirectUrl: string;
   keychainUrl?: string;
+  apiUrl?: string;
 };
 
 export default class SessionProvider extends BaseProvider {
@@ -37,6 +43,10 @@ export default class SessionProvider extends BaseProvider {
   protected _redirectUrl: string;
   protected _policies: ParsedSessionPolicies;
   protected _keychainUrl: string;
+  protected _apiUrl: string;
+  protected _publicKey: string;
+  protected _sessionKeyGuid: string;
+  public reopenBrowser: boolean = true;
 
   constructor({
     rpc,
@@ -44,6 +54,7 @@ export default class SessionProvider extends BaseProvider {
     policies,
     redirectUrl,
     keychainUrl,
+    apiUrl,
   }: SessionOptions) {
     super();
 
@@ -73,6 +84,37 @@ export default class SessionProvider extends BaseProvider {
     this._chainId = chainId;
     this._redirectUrl = redirectUrl;
     this._keychainUrl = keychainUrl || KEYCHAIN_URL;
+    this._apiUrl = apiUrl ?? API_URL;
+
+    const account = this.tryRetrieveFromQueryOrStorage();
+    if (!account) {
+      const pk = stark.randomAddress();
+      this._publicKey = ec.starkCurve.getStarkKey(pk);
+
+      localStorage.setItem(
+        "sessionSigner",
+        JSON.stringify({
+          privKey: pk,
+          pubKey: this._publicKey,
+        }),
+      );
+      this._sessionKeyGuid = signerToGuid({
+        starknet: { privateKey: encode.addHexPrefix(pk) },
+      });
+    } else {
+      const pk = localStorage.getItem("sessionSigner");
+      if (!pk) throw new Error("failed to get sessionSigner");
+
+      const jsonPk: {
+        privKey: string;
+        pubKey: string;
+      } = JSON.parse(pk);
+
+      this._publicKey = jsonPk.pubKey;
+      this._sessionKeyGuid = signerToGuid({
+        starknet: { privateKey: encode.addHexPrefix(jsonPk.privKey) },
+      });
+    }
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller_session = this;
@@ -125,7 +167,7 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
-    this.account = await this.tryRetrieveFromQueryOrStorage();
+    this.account = this.tryRetrieveFromQueryOrStorage();
     return this.account;
   }
 
@@ -134,36 +176,65 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
-    this.account = await this.tryRetrieveFromQueryOrStorage();
+    this.account = this.tryRetrieveFromQueryOrStorage();
     if (this.account) {
       return this.account;
     }
 
-    const pk = stark.randomAddress();
-    const publicKey = ec.starkCurve.getStarkKey(pk);
-
-    localStorage.setItem(
-      "sessionSigner",
-      JSON.stringify({
-        privKey: pk,
-        pubKey: publicKey,
-      }),
-    );
-
     localStorage.setItem("sessionPolicies", JSON.stringify(this._policies));
-
-    const url = `${
-      this._keychainUrl
-    }/session?public_key=${publicKey}&redirect_uri=${
-      this._redirectUrl
-    }&redirect_query_name=startapp&policies=${JSON.stringify(
-      this._policies,
-    )}&rpc_url=${this._rpcUrl}`;
-
     localStorage.setItem("lastUsedConnector", this.id);
-    window.open(url, "_blank");
 
-    return this.account;
+    try {
+      if (this.reopenBrowser) {
+        const pk = stark.randomAddress();
+        this._publicKey = ec.starkCurve.getStarkKey(pk);
+
+        localStorage.setItem(
+          "sessionSigner",
+          JSON.stringify({
+            privKey: pk,
+            pubKey: this._publicKey,
+          }),
+        );
+        this._sessionKeyGuid = signerToGuid({
+          starknet: { privateKey: encode.addHexPrefix(pk) },
+        });
+        const url = `${
+          this._keychainUrl
+        }/session?public_key=${this._publicKey}&redirect_uri=${
+          this._redirectUrl
+        }&redirect_query_name=startapp&policies=${JSON.stringify(
+          this._policies,
+        )}&rpc_url=${this._rpcUrl}`;
+
+        window.open(url, "_blank");
+      }
+
+      const sessionResult = await subscribeCreateSession(
+        this._sessionKeyGuid,
+        this._apiUrl,
+      );
+
+      // auth is: [shortstring!('authorization-by-registered'), owner_guid]
+      const ownerGuid = sessionResult.authorization[1];
+      const session: SessionRegistration = {
+        username: sessionResult.controller.accountID,
+        address: sessionResult.controller.address,
+        ownerGuid,
+        expiresAt: sessionResult.expiresAt,
+        guardianKeyGuid: "0x0",
+        metadataHash: "0x0",
+        sessionKeyGuid: this._sessionKeyGuid,
+      };
+      localStorage.setItem("session", JSON.stringify(session));
+
+      this.tryRetrieveFromQueryOrStorage();
+
+      return this.account;
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
   }
 
   switchStarknetChain(_chainId: string): Promise<boolean> {
@@ -180,10 +251,21 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("sessionPolicies");
     this.account = undefined;
     this._username = undefined;
-    return Promise.resolve();
+    const openedWindow = window.open(`${this._keychainUrl}/disconnect`);
+    if (openedWindow === null) return Promise.resolve();
+
+    const { resolve, promise } = Promise.withResolvers<void>();
+    function onWindowClose() {
+      if (openedWindow?.closed) {
+        resolve();
+        clearInterval(checkInterval);
+      }
+    }
+    const checkInterval = setInterval(onWindowClose, 500);
+    return promise;
   }
 
-  async tryRetrieveFromQueryOrStorage() {
+  tryRetrieveFromQueryOrStorage() {
     if (this.account) {
       return this.account;
     }
@@ -192,12 +274,26 @@ export default class SessionProvider extends BaseProvider {
     const signer = signerString ? JSON.parse(signerString) : null;
     let sessionRegistration: SessionRegistration | null = null;
 
+    const sessionString = localStorage.getItem("session");
+    if (sessionString) {
+      sessionRegistration = JSON.parse(sessionString);
+    }
+
     if (window.location.search.includes("startapp")) {
       const params = new URLSearchParams(window.location.search);
       const session = params.get("startapp");
       if (session) {
-        sessionRegistration = JSON.parse(atob(session));
-        localStorage.setItem("session", JSON.stringify(sessionRegistration));
+        const possibleNewSession: SessionRegistration = JSON.parse(
+          atob(session),
+        );
+
+        if (
+          Number(possibleNewSession.expiresAt) !==
+          Number(sessionRegistration?.expiresAt)
+        ) {
+          sessionRegistration = possibleNewSession;
+          localStorage.setItem("session", JSON.stringify(sessionRegistration));
+        }
 
         // Remove the session query parameter
         params.delete("startapp");
@@ -206,13 +302,6 @@ export default class SessionProvider extends BaseProvider {
           (params.toString() ? `?${params.toString()}` : "") +
           window.location.hash;
         window.history.replaceState({}, document.title, newUrl);
-      }
-    }
-
-    if (!sessionRegistration) {
-      const sessionString = localStorage.getItem("session");
-      if (sessionString) {
-        sessionRegistration = JSON.parse(sessionString);
       }
     }
 

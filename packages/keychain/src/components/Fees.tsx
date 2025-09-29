@@ -22,6 +22,11 @@ export function Fees({
       return;
     }
 
+    if (maxFee && (maxFee.overall_fee == "0x0" || maxFee.overall_fee == "0")) {
+      setFormattedFee("FREE");
+      return;
+    }
+
     if (maxFee && maxFee.overall_fee && token.price) {
       const formatted = convertTokenAmountToUSD(
         BigInt(maxFee.overall_fee),
@@ -29,8 +34,6 @@ export function Fees({
         token.price,
       );
       setFormattedFee(formatted);
-    } else {
-      setFormattedFee("FREE");
     }
   }, [maxFee, token, error, isLoading]);
 
@@ -47,12 +50,14 @@ export function Fees({
   return (
     <div className="w-full overflow-hidden rounded">
       {formattedFee ? (
-        <LineItem
-          name="Network Fee"
-          amount={formattedFee}
-          token={token}
-          isLoading={isLoading}
-        />
+        formattedFee == "FREE" ? undefined : (
+          <LineItem
+            name="Network Fee"
+            amount={formattedFee}
+            token={token}
+            isLoading={isLoading}
+          />
+        )
       ) : (
         <LineItem name="Calculating Fees" isLoading />
       )}

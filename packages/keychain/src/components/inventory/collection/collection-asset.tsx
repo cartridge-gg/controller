@@ -26,11 +26,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollection } from "@/hooks/collection";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
-import { VoyagerUrl } from "@cartridge/ui/utils";
+import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
-import { useOwnership } from "@/hooks/ownerships";
 import { useUsername } from "@/hooks/username";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
@@ -45,6 +44,7 @@ const OFFSET = 10;
 export function CollectionAsset() {
   const { chainId, project } = useConnection();
   const account = useAccount();
+  const explorer = useExplorer();
   const address = account?.address || "";
   const [searchParams, setSearchParams] = useSearchParams();
   const { navigate } = useNavigation();
@@ -70,25 +70,11 @@ export function CollectionAsset() {
     tokenIds: tokenId ? [tokenId] : [],
   });
 
-  const { ownership, status: ownershipStatus } = useOwnership({
-    contractAddress: contractAddress ?? "",
-    tokenId: tokenId ?? "",
-  });
-
   const { traceabilities: data, status: traceabilitiesStatus } =
     useTraceabilities({
       contractAddress: contractAddress ?? "",
       tokenId: tokenId ?? "",
     });
-
-  const { username } = useUsername({
-    address: ownership?.accountAddress ?? "",
-  });
-
-  const isOwner = useMemo(() => {
-    if (!address || !ownership?.accountAddress) return false;
-    return BigInt(ownership.accountAddress) === BigInt(address);
-  }, [ownership, address]);
 
   const isListed = useMemo(() => {
     if (!order) return false;
@@ -98,6 +84,15 @@ export function CollectionAsset() {
   const asset = useMemo(() => {
     return assets?.[0];
   }, [assets]);
+
+  const { username } = useUsername({
+    address: asset?.owner ?? "",
+  });
+
+  const isOwner = useMemo(() => {
+    if (!address || !asset?.owner) return false;
+    return BigInt(asset.owner) === BigInt(address);
+  }, [asset, address]);
 
   const title = useMemo(() => {
     if (!asset) return "";
@@ -174,27 +169,20 @@ export function CollectionAsset() {
     return data.slice(0, cap);
   }, [data, cap]);
 
-  const to = useCallback((transactionHash: string) => {
-    return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
-      transactionHash,
-    );
-  }, []);
+  const to = useCallback(
+    (transactionHash: string) => {
+      return explorer.transaction(transactionHash);
+    },
+    [explorer],
+  );
 
   const status = useMemo(() => {
-    if (
-      collectionStatus === "error" ||
-      traceabilitiesStatus === "error" ||
-      ownershipStatus === "error"
-    )
+    if (collectionStatus === "error" || traceabilitiesStatus === "error")
       return "error";
-    if (
-      collectionStatus === "loading" &&
-      traceabilitiesStatus === "loading" &&
-      ownershipStatus === "loading"
-    )
+    if (collectionStatus === "loading" && traceabilitiesStatus === "loading")
       return "loading";
     return "success";
-  }, [collectionStatus, traceabilitiesStatus, ownershipStatus]);
+  }, [collectionStatus, traceabilitiesStatus]);
 
   useEffect(() => {
     if (!order) return;
@@ -229,7 +217,7 @@ export function CollectionAsset() {
                   ? selfOrders[0].expiration
                   : undefined
               }
-              listingCount={isListed ? selfOrders.length : undefined}
+              listingCount={isListed && isOwner ? selfOrders.length : undefined}
             />
             <div
               className="flex flex-col gap-6 overflow-scroll relative"
@@ -261,7 +249,10 @@ export function CollectionAsset() {
                     address={collection.address}
                     tokenId={asset.tokenId}
                     standard={collection.type}
-                    owner={username}
+                    owner={
+                      username ||
+                      asset.owner.slice(0, 6) + "..." + asset.owner.slice(-4)
+                    }
                   />
                 </TabsContent>
                 <TabsContent

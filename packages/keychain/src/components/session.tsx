@@ -7,11 +7,11 @@ import {
 } from "@/components/connect";
 
 import { useConnection } from "@/hooks/connection";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { PageLoading } from "@/components/Loading";
-import { useSearchParams } from "react-router-dom";
 import { CheckIcon, HeaderInner } from "@cartridge/ui";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Failure } from "./failure";
+import { PageLoading } from "./Loading";
 
 type SessionResponse = {
   username: string;
@@ -136,12 +136,12 @@ export function Session() {
     // registered then return the exising session
     controller
       .isRegisteredSessionAuthorized(policies, queries.public_key)
-      .then(async (session) => {
+      .then((session) => {
         if (session) {
           onCallback({
             username: controller.username(),
             address: controller.address(),
-            ownerGuid: await controller.ownerGuid(),
+            ownerGuid: controller.ownerGuid(),
             alreadyRegistered: true,
             expiresAt: String(session.session.expiresAt),
           });

@@ -1,10 +1,11 @@
 {
   "name": "@cartridge/keychain",
-  "version": "0.10.0",
+  "version": "0.10.6",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "env-cmd -f .env.dev vite --host",
+    "dev:live": "env-cmd -f .env.live vite",
     "build": "tsc -b && vite build",
     "build:compat": "tsc -b && vite build",
     "preview": "vite preview --port 3001",
@@ -48,7 +49,6 @@
     "@cartridge/arcade": "catalog:",
     "@cartridge/controller": "workspace:*",
     "@cartridge/controller-wasm": "catalog:",
-    "@cartridge/marketplace": "catalog:",
     "@cartridge/penpal": "catalog:",
     "@cartridge/ui": "catalog:",
     "@dojoengine/torii-wasm": "catalog:",

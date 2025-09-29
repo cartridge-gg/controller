@@ -2,34 +2,64 @@
 
 import { useAccount, useNetwork } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button } from "@cartridge/ui";
-import { useEffect, useState } from "react";
+import { Button, Input } from "@cartridge/ui";
+import { useState, useEffect, useRef } from "react";
 import { constants, num } from "starknet";
 import { StarterPack, StarterPackItemType } from "@cartridge/controller";
 
 export const Starterpack = () => {
   const { account, connector } = useAccount();
-  const [purchaseSpId, setPurchaseSpId] = useState<string | null>(null);
-  const [claimSpId, setClaimSpId] = useState<string | null>(null);
   const { chain } = useNetwork();
 
   const controllerConnector = connector as unknown as ControllerConnector;
 
+  const getDefaultStarterpackIds = () => {
+    if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
+      return {
+        purchase: "sick-starterpack-mainnet",
+        claim: "claim-starterpack-mainnet",
+      };
+    }
+    return {
+      purchase: "sick-starterpack-sepolia",
+      claim: "claim-starterpack-sepolia",
+    };
+  };
+
+  const defaultIds = getDefaultStarterpackIds();
+  const [purchaseSpId, setPurchaseSpId] = useState<string>(defaultIds.purchase);
+  const [claimSpId, setClaimSpId] = useState<string>(defaultIds.claim);
+
+  // Track the current expected defaults to detect network changes
+  const expectedDefaultsRef = useRef(defaultIds);
+  const previousChainRef = useRef(chain);
+
+  // Update defaults when network changes, but only if current values match expected defaults
   useEffect(() => {
-    if (!account) {
-      return;
-    }
+    if (!chain || chain === previousChainRef.current) return;
 
-    if (num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
-      setPurchaseSpId("sick-starterpack-mainnet");
-      setClaimSpId("claim-starterpack-mainnet");
-    } else {
-      setPurchaseSpId("sick-starterpack-sepolia");
-      setClaimSpId("claim-starterpack-sepolia");
-    }
-  }, [chain, account]);
+    const newDefaults = getDefaultStarterpackIds();
+    const currentExpected = expectedDefaultsRef.current;
 
-  if (!account || !purchaseSpId || !claimSpId) {
+    // Only update if the values haven't been manually modified by the user
+    setPurchaseSpId((currentPurchaseSpId) => {
+      return currentPurchaseSpId === currentExpected.purchase
+        ? newDefaults.purchase
+        : currentPurchaseSpId;
+    });
+
+    setClaimSpId((currentClaimSpId) => {
+      return currentClaimSpId === currentExpected.claim
+        ? newDefaults.claim
+        : currentClaimSpId;
+    });
+
+    // Update our references after successful comparison and update
+    expectedDefaultsRef.current = newDefaults;
+    previousChainRef.current = chain;
+  }, [chain]);
+
+  if (!account) {
     return null;
   }
 
@@ -90,40 +120,76 @@ export const Starterpack = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       <h2>Starterpacks</h2>
-      <div className="flex flex-row gap-2">
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => {
-              controllerConnector.controller.openStarterPack(purchaseSpId);
-            }}
-          >
-            Purchase Starterpack
-          </Button>
+
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <h3>Purchase Starterpack</h3>
+          <div className="flex items-center gap-2">
+            <Input
+              className="max-w-80"
+              type="text"
+              value={purchaseSpId}
+              onChange={(e) => setPurchaseSpId(e.target.value)}
+              placeholder="Enter starterpack ID"
+            />
+            <Button
+              onClick={() => {
+                if (purchaseSpId.trim()) {
+                  controllerConnector.controller.openStarterPack(
+                    purchaseSpId.trim(),
+                  );
+                }
+              }}
+              disabled={!purchaseSpId.trim()}
+            >
+              Purchase Starterpack
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => {
-              controllerConnector.controller.openStarterPack(claimSpId);
-            }}
-          >
-            Claim Starterpack
-          </Button>
+
+        <div className="flex flex-col gap-2">
+          <h3>Claim Starterpack</h3>
+          <div className="flex items-center gap-2">
+            <Input
+              className="max-w-80"
+              type="text"
+              value={claimSpId}
+              onChange={(e) => setClaimSpId(e.target.value)}
+              placeholder="Enter starterpack ID"
+            />
+            <Button
+              onClick={() => {
+                if (claimSpId.trim()) {
+                  controllerConnector.controller.openStarterPack(
+                    claimSpId.trim(),
+                  );
+                }
+              }}
+              disabled={!claimSpId.trim()}
+            >
+              Claim Starterpack
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => {
-              controllerConnector.controller.openStarterPack({
-                items: customStarterPack.items,
-                name: customStarterPack.name,
-                description: customStarterPack.description,
-                iconURL: customStarterPack.iconURL,
-              });
-            }}
-          >
-            Custom Warrior Pack ($110)
-          </Button>
+
+        <div className="flex flex-col gap-2">
+          <h3>Custom Starterpack</h3>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => {
+                controllerConnector.controller.openStarterPack({
+                  items: customStarterPack.items,
+                  name: customStarterPack.name,
+                  description: customStarterPack.description,
+                  iconURL: customStarterPack.iconURL,
+                });
+              }}
+            >
+              Custom Warrior Pack ($110)
+            </Button>
+          </div>
         </div>
       </div>
     </div>

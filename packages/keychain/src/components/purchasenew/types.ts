@@ -5,6 +5,7 @@ export interface Wallet {
   name: string;
   type: ExternalWalletType | "controller";
   icon: React.ReactNode;
+  subIcon?: React.ReactNode;
   color?: string;
 }
 
@@ -35,4 +36,5 @@ export type ReceivingProps = {
   items: Item[];
   isLoading?: boolean;
   showTotal?: boolean;
+  showPrice?: boolean;
 };

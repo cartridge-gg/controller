@@ -1,8 +1,8 @@
 import { Signature } from "starknet";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { DeployCtx, SignMessageCtx } from "@/utils/connection";
+import { DeployCtx, SignMessageCtx, ConnectCtx } from "@/utils/connection";
 import { CreateController, CreateSession, Upgrade } from "./connect";
 import { DeployController } from "./DeployController";
 import { SignMessage } from "./SignMessage";
@@ -12,6 +12,9 @@ import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
 import { Outlet, useLocation } from "react-router-dom";
 import { Authenticate } from "./authenticate";
+import { now } from "@/constants";
+import { Disconnect } from "./disconnect";
+import { processPolicies } from "./connect/CreateSession";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
@@ -19,6 +22,27 @@ export function Home() {
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
+
+  const createSessionForVerifiedPolicies = useCallback(async () => {
+    if (!controller || !policies) return;
+
+    try {
+      // Use a default duration for verified sessions (24 hours)
+      const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
+      const expiresAt = duration + now();
+
+      const processedPolicies = processPolicies(policies, false);
+      await controller.createSession(expiresAt, processedPolicies);
+      (context as ConnectCtx).resolve({
+        code: ResponseCodes.SUCCESS,
+        address: controller.address(),
+      });
+    } catch (e) {
+      console.error("Failed to create verified session:", e);
+      // Fall back to showing the UI if auto-creation fails
+      context?.reject?.(e);
+    }
+  }, [controller, policies, context]);
 
   useEffect(() => {
     if (context?.type) {
@@ -31,6 +55,10 @@ export function Home() {
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {
     return <Authenticate />;
+  }
+
+  if (pathname.startsWith("/disconnect")) {
+    return <Disconnect />;
   }
 
   // No controller, send to login
@@ -64,6 +92,12 @@ export function Home() {
                 address: controller!.address(),
               });
 
+              return <></>;
+            }
+
+            // Bypass session approval screen for verified sessions
+            if (policies?.verified) {
+              createSessionForVerifiedPolicies();
               return <></>;
             }
 

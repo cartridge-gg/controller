@@ -133,18 +133,22 @@ const provider = jsonRpcProvider({
   },
 });
 
-let keychainUrl = process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL;
+const getKeychainUrl = () => {
+  if (
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" &&
+    process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF
+  ) {
+    const branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
+      /[^a-zA-Z0-9-]/g,
+      "-",
+    );
+    const keychainUrl = `https://keychain-git-${branchName}.preview.cartridge.gg/`;
 
-if (
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" &&
-  process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF
-) {
-  const branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
-    /[^a-zA-Z0-9-]/g,
-    "-",
-  );
-  keychainUrl = `https://keychain-git-${branchName}.preview.cartridge.gg/`;
-}
+    return keychainUrl;
+  } else {
+    return process.env.NEXT_PUBLIC_KEYCHAIN_FRAME_URL;
+  }
+};
 
 const starknetConfigChains = [mainnet, sepolia].filter(Boolean) as Chain[];
 if (localKatanaChain) {
@@ -178,7 +182,7 @@ const controller = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  url: keychainUrl,
+  url: getKeychainUrl(),
   signupOptions: [
     "google",
     "webauthn",
@@ -188,9 +192,9 @@ const controller = new ControllerConnector({
     "rabby",
     "password",
   ],
-  //slot: "pistols-mainnet",
-  //namespace: "pistols",
-  //preset: "pistols",
+  slot: "arcade-pistols",
+  namespace: "pistols",
+  preset: "pistols",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
@@ -204,7 +208,8 @@ const session = new SessionConnector({
   rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
   chainId: constants.StarknetChainId.SN_MAIN,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
-  keychainUrl,
+  keychainUrl: getKeychainUrl(),
+  apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
 });
 
 export function StarknetProvider({ children }: PropsWithChildren) {

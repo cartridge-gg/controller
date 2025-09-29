@@ -3,7 +3,7 @@ import { constants } from "starknet";
 import { CheckIcon, ExternalIcon, Spinner, StarknetIcon } from "@cartridge/ui";
 import { useController } from "@/hooks/controller";
 import { useChainName } from "@/hooks/chain";
-import { StarkscanUrl } from "@cartridge/ui/utils";
+import { useExplorer } from "@starknet-react/core";
 import { Link } from "react-router-dom";
 
 export type TransactionState = "pending" | "success" | "error";
@@ -24,6 +24,7 @@ export function Transaction({
   const [state, setState] = useState<TransactionState>("pending");
   const { icon } = useMemo(() => getColorIcon(state), [state]);
   const { controller } = useController();
+  const explorer = useExplorer();
 
   useEffect(() => {
     if (chainId && controller) {
@@ -60,7 +61,7 @@ export function Transaction({
           <StarknetIcon size="sm" />
           <div>{chainName}</div>
         </div>
-        <Link to={StarkscanUrl(chainId).transaction(hash)} target="_blank">
+        <Link to={explorer.transaction(hash)} target="_blank">
           <ExternalIcon size="sm" />
         </Link>
       </div>

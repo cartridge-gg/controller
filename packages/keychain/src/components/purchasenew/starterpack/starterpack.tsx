@@ -12,17 +12,22 @@ import {
   HeaderInner,
   LayoutContent,
   LayoutFooter,
+  VerifiedIcon,
 } from "@cartridge/ui";
 import {
   MintAllowance,
   StarterpackAcquisitionType,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { LoadingState } from "../loading";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
+import { useEffect, useMemo } from "react";
+import { LoadingState } from "../loading";
+import { CostBreakdown } from "../review/cost";
+import { PricingDetails } from "@/components/purchase/types";
 import { decodeStarterPack } from "@/utils/starterpack-url";
+import { usdcToUsd } from "@/utils/starterpack";
+import { useConnection } from "@/hooks/connection";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -35,6 +40,8 @@ export function PurchaseStarterpack() {
     displayError,
     setStarterpack,
   } = usePurchaseContext();
+
+  const { isMainnet } = useConnection();
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
@@ -61,6 +68,7 @@ export function PurchaseStarterpack() {
       mintAllowance={details.mintAllowance}
       acquisitionType={details.acquisitionType}
       starterpackItems={details.starterPackItems}
+      isMainnet={isMainnet}
       error={displayError}
     />
   );
@@ -68,6 +76,9 @@ export function PurchaseStarterpack() {
 
 export function StarterPackInner({
   name,
+  edition,
+  isVerified,
+  isMainnet,
   supply,
   mintAllowance,
   acquisitionType,
@@ -75,6 +86,9 @@ export function StarterPackInner({
   error,
 }: {
   name: string;
+  edition?: string;
+  isVerified?: boolean;
+  isMainnet?: boolean;
   supply?: number;
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
@@ -85,21 +99,47 @@ export function StarterPackInner({
 
   const onProceed = () => {
     switch (acquisitionType) {
-      case StarterpackAcquisitionType.Paid:
-        navigate("/purchase/method/ethereum;solana;base;arbitrum;optimism");
+      case StarterpackAcquisitionType.Paid: {
+        const methods = isMainnet
+          ? "ethereum;solana;base;arbitrum;optimism"
+          : "arbitrum";
+
+        navigate(`/purchase/method/${methods}`);
         break;
+      }
       case StarterpackAcquisitionType.Claimed:
-        // claim will always be against mainnet for now
-        navigate("/purchase/wallet/starknet;ethereum/true");
+        navigate(`/purchase/wallet/starknet;ethereum`);
         break;
       default:
         throw new Error(`Invalid acquisition type: ${acquisitionType}`);
     }
   };
+
+  const price = useMemo(() => {
+    const total = starterpackItems.reduce(
+      (acc, item) => acc + usdcToUsd(item.price || 0n),
+      0,
+    );
+
+    return {
+      baseCostInCents: total * 100,
+      processingFeeInCents: 0,
+      totalInCents: total * 100,
+    } satisfies PricingDetails;
+  }, [starterpackItems]);
+
   return (
     <>
       <HeaderInner
         title={name}
+        description={
+          edition ? (
+            <span className="text-foreground-200 text-xs font-normal flex items-center gap-1 leading-none">
+              {isVerified && <VerifiedIcon size="xs" />}
+              {edition}
+            </span>
+          ) : undefined
+        }
         right={supply ? <Supply amount={supply} /> : undefined}
         hideIcon
       />
@@ -122,7 +162,11 @@ export function StarterPackInner({
         </div>
       </LayoutContent>
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error ? (
+          <ErrorAlert title="Error" description={error.message} />
+        ) : acquisitionType === StarterpackAcquisitionType.Paid ? (
+          <CostBreakdown rails="stripe" costDetails={price} />
+        ) : null}
         <Button onClick={onProceed} disabled={!!error}>
           {acquisitionType === StarterpackAcquisitionType.Paid
             ? "Purchase"

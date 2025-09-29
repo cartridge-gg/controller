@@ -338,12 +338,19 @@ export const PurchaseProvider = ({
         setWalletType(wallet.type);
 
         if (chainId) {
-          const res = await switchChain(wallet.type, chainId.toString());
-          if (!res) {
-            const error = new Error(
-              `${wallet.name} failed to switch chain (${chainId})`,
+          // WORKAROUND: Braavos doesn't support switching chains api so we remain on whatever chain is current
+          if (wallet.type === "braavos") {
+            console.warn(
+              "Braavos does not support `wallet_switchStarknetChain`",
             );
-            throw error;
+          } else {
+            const res = await switchChain(wallet.type, chainId.toString());
+            if (!res) {
+              const error = new Error(
+                `${wallet.name} failed to switch chain (${chainId})`,
+              );
+              throw error;
+            }
           }
         }
 

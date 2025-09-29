@@ -5,18 +5,28 @@ import placeholder from "/placeholder.svg?url";
 import { useMemo, useState } from "react";
 
 import { cn } from "@cartridge/ui/utils";
+import { getChecksumAddress } from "starknet";
 
 const DEFAULT_TOKENS_COUNT = 2;
 
 export function Tokens() {
-  const { tokens, credits, status } = useTokens();
+  const { tokens, contracts, credits, status } = useTokens();
   const [unfolded, setUnfolded] = useState(false);
 
   const filteredTokens = useMemo(() => {
     return tokens
-      .filter((token) => token.balance.amount > 0)
-      .sort((a, b) => b.balance.value - a.balance.value);
-  }, [tokens]);
+      .filter(
+        (token) =>
+          token.balance.amount > 0 ||
+          contracts.includes(getChecksumAddress(token.metadata.address)),
+      )
+      .sort((a, b) => b.balance.value - a.balance.value)
+      .sort((a, b) => {
+        const aIn = contracts.includes(getChecksumAddress(a.metadata.address));
+        const bIn = contracts.includes(getChecksumAddress(b.metadata.address));
+        return !aIn && bIn ? 1 : aIn && !bIn ? -1 : 0;
+      });
+  }, [tokens, contracts]);
 
   return status === "loading" ? (
     <LoadingState />

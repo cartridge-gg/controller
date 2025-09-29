@@ -11,13 +11,35 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "./account";
 import { useConnection } from "@/hooks/connection";
-import { getChecksumAddress } from "starknet";
-import { useMemo, useState } from "react";
+import { constants, getChecksumAddress } from "starknet";
+import { useEffect, useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
 import { useUsername } from "./username";
+import * as torii from "@dojoengine/torii-wasm";
+
+const CONTRACT_TYPES: torii.ContractType[] = ["ERC20"];
+
+async function getToriiClient(project: string): Promise<torii.ToriiClient> {
+  const url = `https://api.cartridge.gg/x/${project}/torii`;
+  const client = await new torii.ToriiClient({
+    toriiUrl: url,
+    worldAddress: "0x0",
+  });
+  return client;
+}
+
+async function fetchContracts(
+  client: torii.ToriiClient,
+): Promise<torii.Contract[]> {
+  return client.getContracts({
+    contract_addresses: [],
+    contract_types: CONTRACT_TYPES,
+  });
+}
 
 const LIMIT = 1000;
-export const TOKENS_TORII_INSTANCE = "c7e-arcade-tokens-alpha";
+export const TORII_MAINNET_TOKENS = "c7e-arcade-tokens-alpha";
+export const TORII_SEPOLIA_TOKENS = "c7e-arcade-tokens-sepolia";
 
 export type Balance = {
   amount: number;
@@ -102,15 +124,25 @@ export type UseBalancesResponse = {
 export function useBalances(accountAddress?: string): UseBalancesResponse {
   const account = useAccount();
   const connectedAddress = account?.address;
-  const { project } = useConnection();
+  const { project, chainId } = useConnection();
   const address = useMemo(
     () => accountAddress ?? connectedAddress,
     [accountAddress, connectedAddress],
   );
 
   const projects = useMemo(() => {
-    return project ? [project, TOKENS_TORII_INSTANCE] : [TOKENS_TORII_INSTANCE];
-  }, [project]);
+    return chainId === constants.StarknetChainId.SN_MAIN
+      ? project
+        ? [project, TORII_MAINNET_TOKENS]
+        : [TORII_MAINNET_TOKENS]
+      : chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? project
+          ? [project, TORII_SEPOLIA_TOKENS]
+          : [TORII_SEPOLIA_TOKENS]
+        : project
+          ? [project]
+          : [];
+  }, [project, chainId]);
 
   const { data, status } = useBalancesQuery(
     {
@@ -161,6 +193,7 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
 
 export type UseTokensResponse = {
   tokens: Token[];
+  contracts: string[];
   credits: Token;
   status: "success" | "error" | "idle" | "loading";
 };
@@ -170,6 +203,20 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
   const provider = controller?.provider;
   const account = useAccount();
   const address = account?.address || "";
+  const { project } = useConnection();
+  const [contracts, setContracts] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function getContracts() {
+      if (!project || !address) return;
+      const client = await getToriiClient(project);
+      const contracts = await fetchContracts(client);
+      setContracts(
+        contracts.map((c) => getChecksumAddress(c.contract_address)),
+      );
+    }
+    getContracts();
+  }, [project, address]);
 
   // Fetch credits
   const { username } = useUsername({ address });
@@ -199,19 +246,19 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     useBalances(accountAddress);
 
   // Get token data from rpc (based on url options without those fetched from torii)
-  const contractAddress = useMemo(() => {
-    if (toriiStatus === "loading") return [];
-    return options?.filter(
+  const contractAddresses = useMemo(() => {
+    // Don't filter out tokens during loading to prevent empty arrays
+    return [...(contracts || []), ...(options || [])]?.filter(
       (token) =>
         !toriiTokens.find(
           (t) => BigInt(t.metadata.address || "0x0") === BigInt(token),
         ),
     );
-  }, [options, toriiTokens, toriiStatus]);
+  }, [options, toriiTokens, contracts]);
 
   const { data: rpcData }: UseERC20BalanceResponse = useERC20Balance({
     address: accountAddress ?? address,
-    contractAddress: contractAddress ?? [],
+    contractAddress: contractAddresses,
     provider,
     interval: 30000,
   });
@@ -294,9 +341,25 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
     return newData;
   }, [rpcData, toriiTokens, countervalues]);
 
-  // Convert idle status to loading to prevent jitter on initial load
+  // Determine combined status based on actual data availability
+  const combinedStatus = useMemo(() => {
+    // If torii is still loading on initial mount, show loading
+    if (
+      toriiStatus === "loading" &&
+      toriiTokens.length === 0 &&
+      rpcData.length === 0
+    ) {
+      return "loading";
+    }
+    // If torii had an error, return error
+    if (toriiStatus === "error") {
+      return "error";
+    }
+    // Otherwise we have successfully loaded (even if empty)
+    return "success";
+  }, [toriiStatus, toriiTokens.length, rpcData.length]);
 
-  return { tokens: tokens.tokens, credits, status: toriiStatus };
+  return { tokens: tokens.tokens, credits, contracts, status: combinedStatus };
 }
 
 export type UseTokenResponse = UseBalanceResponse;

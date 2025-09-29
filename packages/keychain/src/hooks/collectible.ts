@@ -5,6 +5,7 @@ import {
   useCollectiblesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useConnection } from "@/hooks/connection";
+import { addAddressPadding } from "starknet";
 
 const TYPE = "ERC-1155";
 const LIMIT = 1000;
@@ -24,6 +25,7 @@ export type Asset = {
   imageUrl: string;
   attributes: Record<string, unknown>[];
   amount: number;
+  owner: string;
 };
 
 export type UseCollectibleResponse = {
@@ -103,6 +105,7 @@ export function useCollectible({
         imageUrl: imageUrl || metadata?.image || "",
         attributes: attributes,
         amount: a.amount,
+        owner: addAddressPadding("0x0"),
       };
       newAssets[`${newCollectible.address}-${a.tokenId}`] = asset;
     });

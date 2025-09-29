@@ -1,5 +1,111 @@
 # Changelog
 
+## [0.10.6] - 2025-09-26
+
+### ✨ New Features
+- **@cartridge/keychain**: Added marketplace integration with consolidated arcade provider functionality, streamlining marketplace operations and improving the gaming marketplace experience (#2063)
+- **@cartridge/keychain**: Added disconnect page with redirect deeplink support, enabling better session management and seamless app navigation (#2056)
+- **@cartridge/keychain**: Implemented dynamic RPC URL override support for enhanced flexibility in network configuration, allowing developers to specify custom RPC endpoints dynamically (#2052)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced Android native flow session provider with improved error handling and better session management reliability (#2066)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed purchase flow to use correct network icon, ensuring users see the appropriate network indicator during transactions (#2055)
+- **@cartridge/keychain**: Fixed verified session creation to improve session validation and authentication flow reliability (#2062)
+- **@cartridge/keychain**: Fixed game theme functionality for better theming consistency across gaming applications (#2050)
+
+### 📦 Dependencies
+- **Dojo**: Updated to latest version for improved gaming framework functionality (#2057)
+
+## [0.10.5] - 2025-09-20
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed session key GUID registration by adding proper signerToGuid generation and debug logging to SessionAccount constructor, ensuring proper session registration for Node.js provider (#2047)
+- **@cartridge/keychain**: Fixed USDC payment type box visibility on Starter Pack pages by removing redundant USDC denomination badge from cost breakdown display (#2046)
+- **@cartridge/keychain**: Fixed claim wallet detection to properly identify available wallets during claiming process, improving wallet selection reliability (#2045)
+- **@cartridge/keychain**: Fixed starter pack UI by removing unintentional hover states from non-selectable starter items and hiding unnecessary icons in starter pack page header (#2026)
+
+## [0.10.4] - 2025-09-18
+
+### ✨ New Features
+- **@cartridge/keychain**: Added cookie-based authentication for already connected accounts, improving user experience by maintaining login state across sessions (#2039)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed external wallet availability detection to handle cases where StarkNet window objects are not immediately available on initialization, ensuring reliable StarkNet wallet detection (#2043)
+
+## [0.10.3] - 2025-09-17
+
+### ✨ New Features
+- **@cartridge/keychain**: Added native social login functionality, enabling seamless authentication in native applications (#2010)
+- **@cartridge/keychain**: Implemented robust retry logic with exponential backoff for transaction waiting operations, improving reliability for both external wallet and StarkNet transactions (#2032)
+- **@cartridge/keychain**: Enhanced starter pack and cost breakdown UI with improved tooltips, verified/unverified edition support, and better item display (#1982)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Migrated all explorer URLs from StarkScan to Cartridge Explorer for consistent block exploration experience (#1883)
+- **@cartridge/controller**: Improved nested execution error parsing to extract meaningful error messages from deeply nested JSON-RPC responses, showing specific contract errors instead of generic messages (#2033)
+- **@cartridge/keychain**: Enhanced RPC error display in ExecutionContainer to show clean error descriptions instead of full JSON responses (#2023)
+- **@cartridge/keychain**: Improved token ordering and balance handling for better user experience (#2029, #2024)
+- **Dependencies**: Updated presets package and various UI components for improved functionality
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed social authentication redirect URL handling for improved login reliability (#2035)
+- **@cartridge/keychain**: Added comprehensive error handling to claim operations to prevent silent failures (#2030)
+- **@cartridge/keychain**: Fixed cost component display to only show for paid starter packs, removing confusing cost breakdown from free claims (#2025)
+- **@cartridge/keychain**: Fixed various UI regressions including useEffect dependencies, wallet integration, and controller creation flows (#2028, #2027)
+- **@cartridge/keychain**: Fixed token balance display issues for accounts with no prior interactions (#2024)
+- **@cartridge/keychain**: Resolved minor asset display issues in collection components (#2019)
+- **@cartridge/keychain**: Fixed total claimable amount calculation (#2018)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality
+- **controller-rs**: Updated to latest version for enhanced backend functionality
+- **Various**: Updated workspace dependencies and lockfile maintenance
+
+## [0.10.2] - 2025-09-11
+
+### ✨ New Features
+- **@cartridge/keychain**: Added environment-based configuration for merkle drop contracts enabling flexible contract deployment across different environments (#2008)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Migrated 6 transaction flows to use ExecutionContainer for direct execution, eliminating page redirects and providing inline transaction confirmation for improved UX (#2005)
+- **@cartridge/keychain**: Enhanced session update prompting logic with better validation and synchronous rendering for improved transaction flow performance (#2007)
+- **Examples**: Cleaned up Next.js example Profile component by removing collection-related buttons (#2011)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed chain switching to always execute on request, ensuring reliable network changes (#2014)
+- **@cartridge/keychain**: Fixed login validation to prevent authentication before controller username validation is complete (#2012)
+- **@cartridge/keychain**: Fixed session creation flash issues for smoother session management (#2009)
+- **@cartridge/keychain**: Fixed Braavos wallet chain switching by adding proper skip logic (#2006)
+- **@cartridge/keychain**: Fixed merkle drop claim interface to properly display claim amounts (#2004)
+
+## [0.10.1] - 2025-09-10
+
+### ✨ New Features
+- **@cartridge/keychain**: Added StarkNet wallets account changed listener for improved wallet integration and event handling (#1999)
+- **@cartridge/keychain**: Enhanced claim UI to display connected wallet address for better user transparency (#2000)
+- **@cartridge/keychain**: Added starterpack ID input support to example application for easier testing and development (#1998)
+- **@cartridge/keychain**: Implemented merkle drop StarkNet claim signature verification for enhanced security (#1993)
+- **@cartridge/keychain**: Added merkle-drop wallet selection with controller integration for streamlined claiming process (#1986)
+- **@cartridge/controller**: Added outsideExecution support to StarterPack API for improved transaction handling (#1972)
+- **@cartridge/controller**: Migrated collection listing to use ExecutionContainer for direct execution, improving performance (#2002)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced fee estimation by scaling resource bounds by 1.5x for more reliable transaction processing (#1978)
+- **@cartridge/keychain**: Restricted token support to only USDC, ETH, LORDS and STRK tokens for improved security and user experience (#1996)
+- **Development**: Added dev:live scripts for production API testing to streamline development workflow (#2001)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed controller crash after purchase to ensure stable operation (#1997)
+- **@cartridge/keychain**: Resolved inventory assets disappearing after tab navigation (#1990)
+- **@cartridge/keychain**: Fixed navigation stack reset issues in collection components (#1995)
+- **@cartridge/keychain**: Fixed loot box image display issues (#1991)
+- **@cartridge/keychain**: Resolved inventory view problems after purchase completion (#1989)
+- **@cartridge/keychain**: Fixed token page empty state display (#1988)
+
+### 📦 Dependencies
+- **@cartridge/ui**: Multiple updates for improved design consistency and functionality (#1994, #1992)
+
 ## [0.10.0] - 2025-09-03
 
 ### ✨ New Features
