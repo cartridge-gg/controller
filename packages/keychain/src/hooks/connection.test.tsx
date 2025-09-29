@@ -9,9 +9,10 @@ const loadConfigMock = vi.fn();
 const useThemeEffectMock = vi.fn();
 
 vi.mock("@cartridge/presets", async () => {
-  const actual = await vi.importActual<
-    typeof import("@cartridge/presets")
-  >("@cartridge/presets");
+  const actual =
+    await vi.importActual<typeof import("@cartridge/presets")>(
+      "@cartridge/presets",
+    );
 
   return {
     ...actual,
@@ -20,9 +21,8 @@ vi.mock("@cartridge/presets", async () => {
 });
 
 vi.mock("@cartridge/ui", async () => {
-  const actual = await vi.importActual<typeof import("@cartridge/ui")>(
-    "@cartridge/ui",
-  );
+  const actual =
+    await vi.importActual<typeof import("@cartridge/ui")>("@cartridge/ui");
 
   return {
     ...actual,
@@ -31,9 +31,9 @@ vi.mock("@cartridge/ui", async () => {
 });
 
 vi.mock("@cartridge/ui/utils", async () => {
-  const actual = await vi.importActual<
-    typeof import("@cartridge/ui/utils")
-  >("@cartridge/ui/utils");
+  const actual = await vi.importActual<typeof import("@cartridge/ui/utils")>(
+    "@cartridge/ui/utils",
+  );
 
   return {
     ...actual,
