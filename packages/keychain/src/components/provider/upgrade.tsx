@@ -147,13 +147,13 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
 
   // Load feature flag
   useEffect(() => {
-    if (!posthog || !controller) return;
+    if (!posthog || !controller || featureFlagLoaded) return;
     posthog.onFeatureFlag("controller-beta", (value: string | boolean) => {
       const newValue = typeof value === "boolean" ? value : value === "true";
       setIsBeta(newValue);
       setFeatureFlagLoaded(true);
     });
-  }, [posthog, controller]);
+  }, [posthog, controller, featureFlagLoaded]);
 
   // Sync controller class hash
   useEffect(() => {
@@ -198,12 +198,12 @@ export const UpgradeProvider: React.FC<UpgradeProviderProps> = ({
 
   // Recalculate upgrade availability when effective controller changes
   useEffect(() => {
-    if (current && featureFlagLoaded && controllerSynced) {
+    if (current && controllerSynced) {
       const { available: newAvailable } = determineUpgradePath(current, isBeta);
       setAvailable(newAvailable);
       setIsSynced(true);
     }
-  }, [current, featureFlagLoaded, controllerSynced, isBeta]);
+  }, [current, controllerSynced, isBeta]);
 
   useEffect(() => {
     if (!controller || !effectiveController) {
