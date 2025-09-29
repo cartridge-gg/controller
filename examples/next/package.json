@@ -1,7 +1,7 @@
 {
   "name": "@cartridge/controller-example-next",
   "private": true,
-  "version": "0.10.3",
+  "version": "0.10.6",
   "scripts": {
     "dev": "env-cmd -f .env.dev next dev -p 3002",
     "dev:live": "env-cmd -f .env.live next dev -p 3002",
@@ -26,7 +26,7 @@
     "prettier": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "starknet": "^8.5.2"
+    "starknet": "^8.5.4"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",

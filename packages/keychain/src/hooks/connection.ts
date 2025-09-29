@@ -13,6 +13,7 @@ import {
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
+  IMPLEMENTED_AUTH_OPTIONS,
   ResponseCodes,
   toArray,
   Token,
@@ -180,7 +181,6 @@ export function useConnectionValue() {
     import.meta.env.VITE_RPC_SEPOLIA,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
-  const [isSessionActive, setIsSessionActive] = useState<boolean>(false);
   const [verified, setVerified] = useState<boolean>(false);
   const [isConfigLoading, setIsConfigLoading] = useState<boolean>(false);
   const [isMainnet, setIsMainnet] = useState<boolean>(false);
@@ -193,7 +193,7 @@ export function useConnectionValue() {
   });
   const [configSignupOptions, setConfigSignupOptions] = useState<
     AuthOptions | undefined
-  >(["google", "webauthn", "discord", "walletconnect", "metamask", "rabby"]);
+  >([...IMPLEMENTED_AUTH_OPTIONS]);
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
@@ -206,10 +206,10 @@ export function useConnectionValue() {
   }, []);
 
   useEffect(() => {
-    if (window.controller) {
-      setRpcUrl(window.controller.rpcUrl());
+    if (controller) {
+      setRpcUrl(controller.rpcUrl());
     }
-  }, [window.controller]);
+  }, [controller, setRpcUrl]);
 
   const [searchParams] = useSearchParams();
 
@@ -391,6 +391,9 @@ export function useConnectionValue() {
   useEffect(() => {
     const { preset } = urlParams;
 
+    // Skip if the theme has already been set and preset is not defined
+    if (theme.name !== defaultTheme.name && !preset) return;
+
     if (
       preset &&
       !isConfigLoading &&
@@ -408,7 +411,7 @@ export function useConnectionValue() {
         ...defaultTheme,
       });
     }
-  }, [urlParams, verified, configData, isConfigLoading]);
+  }, [urlParams, verified, configData, isConfigLoading, theme.name]);
 
   useEffect(() => {
     if (urlParams.version) {
@@ -440,30 +443,6 @@ export function useConnectionValue() {
       }
     }
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
-
-  // Function to refresh session status
-  const refreshSessionStatus = useCallback(() => {
-    if (controller && policies) {
-      controller
-        .isRequestedSession(policies)
-        .then(setIsSessionActive)
-        .catch((error) => {
-          console.error("Failed to check session status:", error);
-          setIsSessionActive(false);
-        });
-    } else if (controller && !policies) {
-      // No policies means no session check needed
-      setIsSessionActive(true);
-    } else {
-      // No controller means no session
-      setIsSessionActive(false);
-    }
-  }, [controller, policies]);
-
-  // Check session status when controller or policies change
-  useEffect(() => {
-    refreshSessionStatus();
-  }, [refreshSessionStatus]);
 
   useThemeEffect({ theme, assetUrl: "" });
 
@@ -516,7 +495,9 @@ export function useConnectionValue() {
           iframeMethods.externalWaitForTransaction(currentOrigin),
       });
     }
-  }, []); // Empty dependency array since we only want to run this once
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();
@@ -658,8 +639,6 @@ export function useConnectionValue() {
     origin,
     rpcUrl,
     policies,
-    isSessionActive,
-    refreshSessionStatus,
     onModalClose,
     setOnModalClose,
     theme,

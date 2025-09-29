@@ -5,7 +5,12 @@ import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
-import { AuthOption, WalletAdapter } from "@cartridge/controller";
+import {
+  AuthOption,
+  AuthOptions,
+  EMBEDDED_WALLETS,
+  WalletAdapter,
+} from "@cartridge/controller";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
 import {
   AccountQuery,
@@ -55,14 +60,8 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [, setSearchParams] = useSearchParams();
-  const {
-    origin,
-    rpcUrl,
-    chainId,
-    setController,
-    configSignupOptions,
-    context,
-  } = useConnection();
+  const { origin, rpcUrl, chainId, setController, configSignupOptions } =
+    useConnection();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -157,15 +156,8 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     [setPendingUsername],
   );
 
-  const signupOptions: AuthOption[] = useMemo(() => {
-    return [
-      "webauthn" as AuthOption,
-      ...supportedWalletsForAuth,
-      "discord" as AuthOption,
-      "google" as AuthOption,
-      "walletconnect" as AuthOption,
-      "password" as AuthOption,
-    ].filter(
+  const signupOptions: AuthOptions = useMemo(() => {
+    return [...EMBEDDED_WALLETS, ...supportedWalletsForAuth].filter(
       (option) => !configSignupOptions || configSignupOptions.includes(option),
     );
   }, [supportedWalletsForAuth, configSignupOptions]);
@@ -319,13 +311,13 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       chainId,
       rpcUrl,
       origin,
-      setController,
       doPopupFlow,
       signupWithExternalWallet,
       signupWithSocial,
       signupWithWebauthn,
       signupWithWalletConnect,
       passwordAuth,
+      finishSignup,
     ],
   );
 
@@ -516,6 +508,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       loginWithWalletConnect,
       loginWithExternalWallet,
       chainId,
+      rpcUrl,
       finishLogin,
       passwordAuth,
       setWaitingForConfirmation,
@@ -625,12 +618,12 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     }
   }, [
     error,
-    window.location.search,
     setIsLoading,
     finishLogin,
     finishSignup,
     setSearchParams,
     chainId,
+    setError,
   ]);
 
   const handleSubmit = useCallback(
@@ -678,7 +671,15 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
       }
       setIsLoading(false);
     },
-    [handleLogin, handleSignup, doPopupFlow, setAuthMethod, context],
+    [
+      handleLogin,
+      handleSignup,
+      doPopupFlow,
+      setAuthMethod,
+      setError,
+      setIsLoading,
+      setWaitingForConfirmation,
+    ],
   );
 
   return {

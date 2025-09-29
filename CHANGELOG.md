@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.10.6] - 2025-09-26
+
+### ✨ New Features
+- **@cartridge/keychain**: Added marketplace integration with consolidated arcade provider functionality, streamlining marketplace operations and improving the gaming marketplace experience (#2063)
+- **@cartridge/keychain**: Added disconnect page with redirect deeplink support, enabling better session management and seamless app navigation (#2056)
+- **@cartridge/keychain**: Implemented dynamic RPC URL override support for enhanced flexibility in network configuration, allowing developers to specify custom RPC endpoints dynamically (#2052)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced Android native flow session provider with improved error handling and better session management reliability (#2066)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed purchase flow to use correct network icon, ensuring users see the appropriate network indicator during transactions (#2055)
+- **@cartridge/keychain**: Fixed verified session creation to improve session validation and authentication flow reliability (#2062)
+- **@cartridge/keychain**: Fixed game theme functionality for better theming consistency across gaming applications (#2050)
+
+### 📦 Dependencies
+- **Dojo**: Updated to latest version for improved gaming framework functionality (#2057)
+
+## [0.10.5] - 2025-09-20
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed session key GUID registration by adding proper signerToGuid generation and debug logging to SessionAccount constructor, ensuring proper session registration for Node.js provider (#2047)
+- **@cartridge/keychain**: Fixed USDC payment type box visibility on Starter Pack pages by removing redundant USDC denomination badge from cost breakdown display (#2046)
+- **@cartridge/keychain**: Fixed claim wallet detection to properly identify available wallets during claiming process, improving wallet selection reliability (#2045)
+- **@cartridge/keychain**: Fixed starter pack UI by removing unintentional hover states from non-selectable starter items and hiding unnecessary icons in starter pack page header (#2026)
+
+## [0.10.4] - 2025-09-18
+
+### ✨ New Features
+- **@cartridge/keychain**: Added cookie-based authentication for already connected accounts, improving user experience by maintaining login state across sessions (#2039)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed external wallet availability detection to handle cases where StarkNet window objects are not immediately available on initialization, ensuring reliable StarkNet wallet detection (#2043)
+
 ## [0.10.3] - 2025-09-17
 
 ### ✨ New Features

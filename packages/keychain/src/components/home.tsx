@@ -13,6 +13,8 @@ import { Layout } from "@/components/layout";
 import { Outlet, useLocation } from "react-router-dom";
 import { Authenticate } from "./authenticate";
 import { now } from "@/constants";
+import { Disconnect } from "./disconnect";
+import { processPolicies } from "./connect/CreateSession";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
@@ -29,7 +31,8 @@ export function Home() {
       const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
       const expiresAt = duration + now();
 
-      await controller.createSession(expiresAt, policies);
+      const processedPolicies = processPolicies(policies, false);
+      await controller.createSession(expiresAt, processedPolicies);
       (context as ConnectCtx).resolve({
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
@@ -52,6 +55,10 @@ export function Home() {
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {
     return <Authenticate />;
+  }
+
+  if (pathname.startsWith("/disconnect")) {
+    return <Disconnect />;
   }
 
   // No controller, send to login

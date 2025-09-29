@@ -105,6 +105,8 @@ export function CryptoCheckout({
       : creditsToUSD(wholeCredits);
   }, [starterpackDetails, wholeCredits]);
 
+  const starterpackId = starterpackDetails?.id;
+
   const handleSendTransaction = useCallback(async () => {
     if (!controller) {
       return;
@@ -116,7 +118,7 @@ export function CryptoCheckout({
       setState(CheckoutState.REQUESTING_PAYMENT);
       const input = creditsPurchaseToLayerswapInput(
         controller.username(),
-        starterpackDetails?.id,
+        starterpackId,
         selectedWallet.platform!,
         isMainnet,
         wholeCredits,
@@ -152,6 +154,7 @@ export function CryptoCheckout({
     walletAddress,
     teamId,
     waitForPayment,
+    starterpackId,
   ]);
 
   return (

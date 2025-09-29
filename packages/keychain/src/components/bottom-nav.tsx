@@ -10,7 +10,7 @@ import {
 import { useMemo } from "react";
 
 export function LayoutBottomNav() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const { username, project } = useParams<{
     username: string;
     project?: string;
@@ -39,7 +39,7 @@ export function LayoutBottomNav() {
     <LayoutBottomTabs>
       <BottomTab status={active === "inventory" ? "active" : undefined}>
         <Link
-          to={`${basePath}/inventory`}
+          to={`${basePath}/inventory${search}`}
           className="h-full w-full flex items-center justify-center"
         >
           <ChestIcon variant="solid" size="lg" />
@@ -47,7 +47,7 @@ export function LayoutBottomNav() {
       </BottomTab>
       <BottomTab status={active === "achievements" ? "active" : undefined}>
         <Link
-          to={`${basePath}/achievements`}
+          to={`${basePath}/achievements${search}`}
           className="h-full w-full flex items-center justify-center"
         >
           <TrophyIcon size="lg" variant="solid" />
@@ -55,7 +55,7 @@ export function LayoutBottomNav() {
       </BottomTab>
       <BottomTab status={active === "leaderboard" ? "active" : undefined}>
         <Link
-          to={`${basePath}/leaderboard`}
+          to={`${basePath}/leaderboard${search}`}
           className="h-full w-full flex items-center justify-center"
         >
           <LeaderboardIcon size="lg" variant="solid" />
@@ -63,7 +63,7 @@ export function LayoutBottomNav() {
       </BottomTab>
       <BottomTab status={active === "activity" ? "active" : undefined}>
         <Link
-          to={`${basePath}/activity`}
+          to={`${basePath}/activity${search}`}
           className="h-full w-full flex items-center justify-center"
         >
           <PulseIcon size="lg" variant="solid" />

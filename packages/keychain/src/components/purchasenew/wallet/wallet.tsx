@@ -10,7 +10,6 @@ import { useNavigation, usePurchaseContext } from "@/context";
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { ExternalWallet } from "@cartridge/controller";
-import { useWallets } from "@/hooks/wallets";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import {
   MerkleDropNetwork,
@@ -22,10 +21,9 @@ import { useConnection } from "@/hooks/connection";
 export function SelectWallet() {
   const { navigate } = useNavigation();
   const { platforms } = useParams();
-  const { controller, isMainnet } = useConnection();
+  const { controller, isMainnet, externalDetectWallets } = useConnection();
   const { starterpackDetails, onExternalConnect, clearError } =
     usePurchaseContext();
-  const { wallets, isConnecting: isWalletConnecting } = useWallets();
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [chainIds, setChainIds] = useState<Map<string, string>>(new Map());
@@ -63,38 +61,47 @@ export function SelectWallet() {
   }, [platforms, starterpackDetails]);
 
   useEffect(() => {
-    if (!selectedNetworks.length || !wallets) {
+    if (!selectedNetworks.length) {
       setAvailableWallets(new Map());
       return;
     }
 
-    const newAvailableWallets = new Map<string, ExternalWallet[]>();
-    const newChainIds = new Map<string, string>();
+    const getWallets = async () => {
+      const newAvailableWallets = new Map<string, ExternalWallet[]>();
+      const newChainIds = new Map<string, string>();
+      const wallets = await externalDetectWallets();
 
-    selectedNetworks.forEach((network) => {
-      if (!network) return;
+      selectedNetworks.forEach((network) => {
+        if (!network) return;
 
-      const configuredWalletTypes = new Set(Array.from(network.wallets.keys()));
-      const matchingWallets = wallets.filter((detectedWallet) =>
-        configuredWalletTypes.has(detectedWallet.type),
-      );
+        const configuredWalletTypes = new Set(
+          Array.from(network.wallets.keys()),
+        );
+        const matchingWallets = wallets.filter(
+          (detectedWallet) =>
+            detectedWallet.available &&
+            configuredWalletTypes.has(detectedWallet.type),
+        );
 
-      const chainId = network.chains?.find(
-        (chain) => chain.isMainnet === isMainnet,
-      )?.chainId;
+        const chainId = network.chains?.find(
+          (chain) => chain.isMainnet === isMainnet,
+        )?.chainId;
 
-      if (chainId) {
-        newChainIds.set(network.platform, chainId);
-      }
+        if (chainId) {
+          newChainIds.set(network.platform, chainId);
+        }
 
-      if (matchingWallets.length > 0) {
-        newAvailableWallets.set(network.platform, matchingWallets);
-      }
-    });
+        if (matchingWallets.length > 0) {
+          newAvailableWallets.set(network.platform, matchingWallets);
+        }
+      });
 
-    setChainIds(newChainIds);
-    setAvailableWallets(newAvailableWallets);
-  }, [wallets, isMainnet, selectedNetworks]);
+      setChainIds(newChainIds);
+      setAvailableWallets(newAvailableWallets);
+    };
+
+    getWallets().catch((e) => setError(e as Error));
+  }, [externalDetectWallets, isMainnet, selectedNetworks]);
 
   useEffect(() => {
     return () => clearError();
@@ -193,11 +200,7 @@ export function SelectWallet() {
                   network={network.name}
                   networkIcon={network.subIcon}
                   onClick={() => onControllerWalletSelect()}
-                  className={
-                    isWalletConnecting || isLoading
-                      ? "opacity-50 pointer-events-none"
-                      : ""
-                  }
+                  className={isLoading ? "opacity-50 pointer-events-none" : ""}
                 />,
               );
             }
@@ -215,11 +218,7 @@ export function SelectWallet() {
                 network={network.name}
                 networkIcon={network.subIcon}
                 onClick={() => onExternalWalletSelect(wallet, network)}
-                className={
-                  isWalletConnecting || isLoading
-                    ? "opacity-50 pointer-events-none"
-                    : ""
-                }
+                className={isLoading ? "opacity-50 pointer-events-none" : ""}
               />,
             );
           });
