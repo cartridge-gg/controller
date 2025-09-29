@@ -95,19 +95,7 @@ vi.mock("@/utils/connection", () => ({
   })),
 }));
 
-declare global {
-  // Extend window used within tests without importing app-level types
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-  interface Window {
-    controller?: {
-      rpcUrl: () => string;
-      chainId: () => string;
-      disconnect: () => Promise<void> | void;
-      username: () => string | undefined;
-    };
-    keychain_wallets?: unknown;
-  }
-}
+// keychain_wallets type is defined in wallets.tsx, no need to redeclare it here
 
 describe("isOriginVerified", () => {
   const allowedOrigins = ["example.com", "*.example.com", "sub.test.com"];
