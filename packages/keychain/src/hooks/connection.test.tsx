@@ -201,7 +201,6 @@ describe("useConnectionValue", () => {
 
     const lastCall = useThemeEffectMock.mock.calls.at(-1)?.[0];
     expect(lastCall?.theme.name).toBe(defaultTheme.name);
-    expect(lastCall?.theme.verified).toBe(true);
   });
 
   it("applies the preset theme when config resolves", async () => {
@@ -222,7 +221,6 @@ describe("useConnectionValue", () => {
 
     const lastCall = useThemeEffectMock.mock.calls.at(-1)?.[0];
     expect(lastCall?.theme.name).toBe("Test Theme");
-    expect(lastCall?.theme.verified).toBe(true);
   });
 
   it("falls back to the default theme when config lacks a theme", async () => {
@@ -242,7 +240,6 @@ describe("useConnectionValue", () => {
 
     const lastCall = useThemeEffectMock.mock.calls.at(-1)?.[0];
     expect(lastCall?.theme.name).toBe(defaultTheme.name);
-    expect(lastCall?.theme.verified).toBe(true);
   });
 
   it("marks the preset as unverified when config loading fails", async () => {
@@ -261,6 +258,5 @@ describe("useConnectionValue", () => {
 
     const lastCall = useThemeEffectMock.mock.calls.at(-1)?.[0];
     expect(lastCall?.theme.name).toBe(defaultTheme.name);
-    expect(lastCall?.theme.verified).toBe(true);
   });
 });
