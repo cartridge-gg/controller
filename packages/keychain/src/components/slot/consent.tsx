@@ -66,18 +66,29 @@ export function Consent() {
   }, [callback_uri, allAccepted]);
 
   useEffect(() => {
-    if (!Controller.fromStore(import.meta.env.VITE_ORIGIN!)) {
-      navigate(
-        `/slot?returnTo=${encodeURIComponent(pathname)}${
-          callback_uri
-            ? `&callback_uri=${encodeURIComponent(callback_uri)}`
-            : ""
-        }`,
-        {
-          replace: true,
-        },
+    let cancelled = false;
+
+    (async () => {
+      const controller = await Controller.fromStore(
+        import.meta.env.VITE_ORIGIN!,
       );
-    }
+      if (!controller && !cancelled) {
+        navigate(
+          `/slot?returnTo=${encodeURIComponent(pathname)}${
+            callback_uri
+              ? `&callback_uri=${encodeURIComponent(callback_uri)}`
+              : ""
+          }`,
+          {
+            replace: true,
+          },
+        );
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigate, callback_uri, pathname]);
 
   return (

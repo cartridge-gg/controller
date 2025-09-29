@@ -93,7 +93,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
         ) {
           const controller = await Controller.create({
             appId: origin,
-            chainId,
             rpcUrl,
             username,
             classHash: controllerNode.constructorCalldata[0],
@@ -187,7 +186,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
         appId: origin,
         classHash,
         rpcUrl,
-        chainId,
         address,
         username,
         owner,
@@ -324,13 +322,11 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const finishLogin = useCallback(
     async ({
       controller,
-      chainId,
       rpcUrl,
       loginResponse,
       authenticationMethod,
     }: {
       controller: NonNullable<ControllerQuery["controller"]>;
-      chainId: string;
       rpcUrl: string;
       loginResponse: LoginResponse;
       authenticationMethod: AuthOption;
@@ -366,7 +362,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
 
       const loginRet = await Controller.login({
         appId: origin,
-        chainId,
         rpcUrl,
         username: controller.accountID,
         classHash: controller.constructorCalldata[0],
@@ -495,7 +490,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
 
       await finishLogin({
         controller,
-        chainId,
         loginResponse,
         authenticationMethod,
         rpcUrl,
@@ -597,7 +591,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
 
             await finishLogin({
               controller: controller.controller,
-              chainId,
               loginResponse: {
                 signer: {
                   eip191: {
