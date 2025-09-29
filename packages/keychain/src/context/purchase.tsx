@@ -370,8 +370,7 @@ export const PurchaseProvider = ({
       setIsFetchingFees(true);
 
       const quote = await estimateStarterPackFees(swapInput);
-
-      const amountInCents = usdAmount * 100;
+      const amountInCents = usdAmount / 1e4;
       const cartridgeFees = amountInCents * CARTRIDGE_FEE;
       const layerswapFeesInCents = Number(quote.totalFees) / 1e4;
       const totalFeesInCents = cartridgeFees + layerswapFeesInCents;
