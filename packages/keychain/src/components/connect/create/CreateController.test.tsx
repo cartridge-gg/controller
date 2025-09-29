@@ -2,7 +2,6 @@ import { vi } from "vitest";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { CreateController } from "./CreateController";
 import { describe, expect, beforeEach, it } from "vitest";
-import { LoginMode } from "../types";
 import { renderWithProviders } from "@/test/mocks/providers";
 import { AuthenticationStep } from "./utils";
 
@@ -77,8 +76,7 @@ vi.mock("./useCreateController", () => ({
 describe("CreateController", () => {
   const defaultProps = {
     isSlot: false,
-    loginMode: LoginMode.Webauthn,
-    onCreated: vi.fn(),
+    error: undefined,
   };
   beforeEach(() => {
     vi.clearAllMocks();
@@ -183,15 +181,17 @@ describe("CreateController", () => {
     expect(submitButton).toBeDisabled();
   });
   it("shows error message when validation fails", async () => {
-    const errorMessage = "Username is invalid";
+    const errorMessage =
+      "Username can only contain letters, numbers, and hyphens";
     mockUseUsernameValidation.mockReturnValue({
       status: "invalid",
       exists: false,
-      error: { message: errorMessage },
+      error: { name: "Error", message: errorMessage },
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "invalid@user" } });
+    fireEvent.blur(input);
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
