@@ -4,7 +4,6 @@ import { defineConfig } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import topLevelAwait from "vite-plugin-top-level-await";
 import wasm from "vite-plugin-wasm";
-import fs from "fs";
 
 export default defineConfig(({ mode }) => ({
   plugins: [
@@ -27,11 +26,6 @@ export default defineConfig(({ mode }) => ({
   ],
   server: {
     port: mode === "development" ? 3001 : undefined,
-    allowedHosts: ["qud-macbook.quddus.sfs.elyas.my"],
-    https: {
-      key: fs.readFileSync("./certificates/wildcard.forthify.tech.key"),
-      cert: fs.readFileSync("./certificates/wildcard.forthify.tech.crt"),
-    },
   },
   resolve: {
     alias: {

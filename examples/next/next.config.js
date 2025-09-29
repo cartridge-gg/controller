@@ -5,7 +5,6 @@ const nextConfig = {
   experimental: {
     externalDir: true,
   },
-  allowedDevOrigins: ["qud-macbook.quddus.sfs.elyas.my"],
   webpack: (config, { isServer, dev }) => {
     config.output.environment = {
       ...config.output.environment,

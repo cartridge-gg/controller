@@ -415,10 +415,7 @@ export default class ControllerProvider extends BaseProvider {
         const isSepolia = chainId === constants.StarknetChainId.SN_SEPOLIA;
         const isCartridgeRpc = url.hostname === "api.cartridge.gg";
         const isLocalhost =
-          url.hostname === "localhost" ||
-          url.hostname === "127.0.0.1" ||
-          url.hostname === "qud-macbook.quddus.sfs.elyas.my" ||
-          url.hostname === "localhost-p0irydpk.quddus.sfs.elyas.my";
+          url.hostname === "localhost" || url.hostname === "127.0.0.1";
 
         if ((isMainnet || isSepolia) && !(isCartridgeRpc || isLocalhost)) {
           throw new Error(
