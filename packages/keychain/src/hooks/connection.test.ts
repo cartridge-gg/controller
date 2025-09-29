@@ -1,5 +1,64 @@
-import { isOriginVerified } from "./connection";
+import { ReactNode } from "react";
+import { renderHook, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
+import { defaultTheme } from "@cartridge/presets";
+import { isOriginVerified, useConnectionValue } from "./connection";
+
+const loadConfigMock = vi.fn();
+const useThemeEffectMock = vi.fn();
+
+vi.mock("@cartridge/presets", async () => {
+  const actual = await vi.importActual<
+    typeof import("@cartridge/presets")
+  >("@cartridge/presets");
+
+  return {
+    ...actual,
+    loadConfig: loadConfigMock,
+  };
+});
+
+vi.mock("@cartridge/ui", async () => {
+  const actual = await vi.importActual<typeof import("@cartridge/ui")>(
+    "@cartridge/ui",
+  );
+
+  return {
+    ...actual,
+    useThemeEffect: useThemeEffectMock,
+  };
+});
+
+vi.mock("@cartridge/ui/utils", async () => {
+  const actual = await vi.importActual<
+    typeof import("@cartridge/ui/utils")
+  >("@cartridge/ui/utils");
+
+  return {
+    ...actual,
+    isIframe: () => true,
+    normalizeOrigin: (origin: string) => origin,
+  };
+});
+
+vi.mock("@/components/connect/create/utils", () => ({
+  fetchController: vi.fn(() => Promise.resolve({ controller: null })),
+}));
+
+declare global {
+  // Extend window used within tests without importing app-level types
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface Window {
+    controller?: {
+      rpcUrl: () => string;
+      chainId: () => string;
+      disconnect: () => Promise<void> | void;
+      username: () => string | undefined;
+    };
+    keychain_wallets?: unknown;
+  }
+}
 
 describe("isOriginVerified", () => {
   const allowedOrigins = ["example.com", "*.example.com", "sub.test.com"];
@@ -115,3 +174,103 @@ vi.mock("@/utils/connection", () => ({
     destroy: vi.fn(),
   })),
 }));
+
+describe("useConnectionValue", () => {
+  const createWrapper = (entry: string) =>
+    function Wrapper({ children }: { children: ReactNode }) {
+      return <MemoryRouter initialEntries={[entry]}>{children}</MemoryRouter>;
+    };
+
+  beforeEach(() => {
+    loadConfigMock.mockReset();
+    useThemeEffectMock.mockReset();
+    useThemeEffectMock.mockImplementation(() => undefined);
+    mockGetChainId.mockReset();
+    mockGetChainId.mockResolvedValue("0x1");
+
+    window.controller = {
+      rpcUrl: () => "https://rpc.example.com",
+      chainId: () => "0x534e5f534550",
+      disconnect: () => Promise.resolve(),
+      username: () => undefined,
+    };
+    window.keychain_wallets = undefined;
+  });
+
+  it("keeps the default theme when no preset is provided", async () => {
+    const { result } = renderHook(() => useConnectionValue(), {
+      wrapper: createWrapper("/connect"),
+    });
+
+    await waitFor(() => expect(useThemeEffectMock).toHaveBeenCalled());
+
+    expect(loadConfigMock).not.toHaveBeenCalled();
+    expect(result.current.theme.name).toBe(defaultTheme.name);
+    expect(result.current.theme.verified).toBe(true);
+    expect(result.current.verified).toBe(false);
+
+    const lastCall = useThemeEffectMock.mock.calls.at(-1)?.[0];
+    expect(lastCall?.theme.name).toBe(defaultTheme.name);
+    expect(lastCall?.theme.verified).toBe(true);
+  });
+
+  it("applies the preset theme when config resolves", async () => {
+    loadConfigMock.mockResolvedValue({
+      origin: ["test.com"],
+      theme: { ...defaultTheme, name: "Test Theme" },
+    });
+
+    const { result } = renderHook(() => useConnectionValue(), {
+      wrapper: createWrapper("/connect?preset=test"),
+    });
+
+    await waitFor(() => {
+      expect(loadConfigMock).toHaveBeenCalledWith("test");
+      expect(result.current.theme.name).toBe("Test Theme");
+      expect(result.current.verified).toBe(true);
+    });
+
+    const lastCall = useThemeEffectMock.mock.calls.at(-1)?.[0];
+    expect(lastCall?.theme.name).toBe("Test Theme");
+    expect(lastCall?.theme.verified).toBe(true);
+  });
+
+  it("falls back to the default theme when config lacks a theme", async () => {
+    loadConfigMock.mockResolvedValue({
+      origin: ["test.com"],
+    });
+
+    const { result } = renderHook(() => useConnectionValue(), {
+      wrapper: createWrapper("/connect?preset=test"),
+    });
+
+    await waitFor(() => {
+      expect(loadConfigMock).toHaveBeenCalledWith("test");
+      expect(result.current.verified).toBe(true);
+      expect(result.current.theme.name).toBe(defaultTheme.name);
+    });
+
+    const lastCall = useThemeEffectMock.mock.calls.at(-1)?.[0];
+    expect(lastCall?.theme.name).toBe(defaultTheme.name);
+    expect(lastCall?.theme.verified).toBe(true);
+  });
+
+  it("marks the preset as unverified when config loading fails", async () => {
+    loadConfigMock.mockRejectedValue(new Error("network error"));
+
+    const { result } = renderHook(() => useConnectionValue(), {
+      wrapper: createWrapper("/connect?preset=test"),
+    });
+
+    await waitFor(() => expect(loadConfigMock).toHaveBeenCalledWith("test"));
+
+    await waitFor(() => {
+      expect(result.current.verified).toBe(false);
+      expect(result.current.theme.name).toBe(defaultTheme.name);
+    });
+
+    const lastCall = useThemeEffectMock.mock.calls.at(-1)?.[0];
+    expect(lastCall?.theme.name).toBe(defaultTheme.name);
+    expect(lastCall?.theme.verified).toBe(true);
+  });
+});

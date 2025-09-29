@@ -365,52 +365,77 @@ export function useConnectionValue() {
 
   // Check if preset is verified for the current origin, supporting wildcards
   useEffect(() => {
-    if (!urlParams.preset) {
+    const preset = urlParams.preset;
+
+    if (!preset) {
+      setConfigData(null);
+      setVerified(false);
       return;
     }
 
+    let isActive = true;
+
     setIsConfigLoading(true);
-    loadConfig(urlParams.preset)
+    loadConfig(preset)
       .then((config) => {
+        if (!isActive) return;
+
         if (config && config.origin) {
           const allowedOrigins = toArray(config.origin as string | string[]);
           setVerified(isOriginVerified(origin, allowedOrigins));
-          setConfigData(config as Record<string, unknown>);
+        } else {
+          setVerified(false);
         }
+
+        setConfigData(
+          config ? (config as Record<string, unknown>) : null,
+        );
       })
       .catch((error: Error) => {
+        if (!isActive) return;
         console.error("Failed to load config:", error);
+        setConfigData(null);
+        setVerified(false);
       })
       .finally(() => {
+        if (!isActive) return;
         setIsConfigLoading(false);
       });
+
+    return () => {
+      isActive = false;
+    };
   }, [origin, urlParams]);
 
   // Handle theme configuration
   useEffect(() => {
     const { preset } = urlParams;
 
-    // Skip if the theme has already been set and preset is not defined
-    if (theme.name !== defaultTheme.name && !preset) return;
-
-    if (
-      preset &&
-      !isConfigLoading &&
-      configData &&
-      configData &&
-      "theme" in configData
-    ) {
-      setTheme({
-        verified,
-        ...(configData.theme as ControllerTheme),
-      });
-    } else {
+    if (!preset) {
       setTheme({
         verified: true,
         ...defaultTheme,
       });
+      return;
     }
-  }, [urlParams, verified, configData, isConfigLoading, theme.name]);
+
+    if (isConfigLoading) {
+      return;
+    }
+
+    if (configData && "theme" in configData) {
+      setTheme({
+        verified,
+        ...(configData.theme as ControllerTheme),
+      });
+      return;
+    }
+
+    setTheme({
+      verified: true,
+      ...defaultTheme,
+    });
+  }, [urlParams, verified, configData, isConfigLoading]);
 
   useEffect(() => {
     if (urlParams.version) {
