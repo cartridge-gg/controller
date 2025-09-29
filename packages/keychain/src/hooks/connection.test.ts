@@ -46,6 +46,55 @@ vi.mock("@/components/connect/create/utils", () => ({
   fetchController: vi.fn(() => Promise.resolve({ controller: null })),
 }));
 
+// Mock RpcProvider
+const mockGetChainId = vi.fn();
+vi.mock("starknet", async () => {
+  const actual = await vi.importActual("starknet");
+  return {
+    ...actual,
+    RpcProvider: vi.fn().mockImplementation(() => ({
+      getChainId: mockGetChainId,
+    })),
+  };
+});
+
+// Mock Controller
+const mockController = {
+  appId: () => "test-app",
+  classHash: () => "0x123",
+  chainId: () => "0x534e5f534550",
+  rpcUrl: () => "https://rpc.example.com",
+  address: () => "0x456",
+  username: () => "testuser",
+  owner: () => "0x789",
+};
+
+vi.mock("@/utils/controller", () => ({
+  default: vi.fn().mockImplementation((options: Record<string, unknown>) => ({
+    ...mockController,
+    chainId: () => options.chainId || mockController.chainId(),
+    rpcUrl: () => options.rpcUrl || mockController.rpcUrl(),
+  })),
+}));
+
+// Mock navigation hook
+const mockNavigate = vi.fn();
+vi.mock("@/context/navigation", () => ({
+  useNavigation: () => ({
+    navigate: mockNavigate,
+  }),
+}));
+
+// Mock other dependencies
+vi.mock("@/utils/connection", () => ({
+  connectToController: vi.fn(() => ({
+    promise: Promise.resolve({
+      origin: "https://test.com",
+    }),
+    destroy: vi.fn(),
+  })),
+}));
+
 declare global {
   // Extend window used within tests without importing app-level types
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -125,55 +174,6 @@ describe("isOriginVerified", () => {
     expect(isOriginVerified("https://example.co", allowedOrigins)).toBe(false);
   });
 });
-
-// Mock RpcProvider
-const mockGetChainId = vi.fn();
-vi.mock("starknet", async () => {
-  const actual = await vi.importActual("starknet");
-  return {
-    ...actual,
-    RpcProvider: vi.fn().mockImplementation(() => ({
-      getChainId: mockGetChainId,
-    })),
-  };
-});
-
-// Mock Controller
-const mockController = {
-  appId: () => "test-app",
-  classHash: () => "0x123",
-  chainId: () => "0x534e5f534550",
-  rpcUrl: () => "https://rpc.example.com",
-  address: () => "0x456",
-  username: () => "testuser",
-  owner: () => "0x789",
-};
-
-vi.mock("@/utils/controller", () => ({
-  default: vi.fn().mockImplementation((options: Record<string, unknown>) => ({
-    ...mockController,
-    chainId: () => options.chainId || mockController.chainId(),
-    rpcUrl: () => options.rpcUrl || mockController.rpcUrl(),
-  })),
-}));
-
-// Mock navigation hook
-const mockNavigate = vi.fn();
-vi.mock("@/context/navigation", () => ({
-  useNavigation: () => ({
-    navigate: mockNavigate,
-  }),
-}));
-
-// Mock other dependencies
-vi.mock("@/utils/connection", () => ({
-  connectToController: vi.fn(() => ({
-    promise: Promise.resolve({
-      origin: "https://test.com",
-    }),
-    destroy: vi.fn(),
-  })),
-}));
 
 describe("useConnectionValue", () => {
   const createWrapper = (entry: string) =>
