@@ -9,6 +9,7 @@ import {
   TypedData,
   shortString,
   typedData,
+  cairo,
 } from "starknet";
 
 const MESSAGE: TypedData = {
@@ -20,16 +21,16 @@ const MESSAGE: TypedData = {
       { name: "revision", type: "shortstring" },
     ],
     Person: [
-      { name: "name", type: "felt" },
-      { name: "wallet", type: "felt" },
+      { name: "name", type: "shortstring" },
+      { name: "wallet", type: "ContractAddress" },
     ],
     Mail: [
       { name: "from", type: "Person" },
       { name: "to", type: "Person" },
-      { name: "contents", type: "felt" },
+      { name: "contents", type: "shortstring" },
     ],
   },
-  primaryType: "StarknetDomain",
+  primaryType: "Mail",
   domain: {
     name: "StarkNet Mail",
     version: "1",
@@ -37,10 +38,15 @@ const MESSAGE: TypedData = {
     chainId: "SN_SEPOLIA",
   },
   message: {
-    name: "My DApp",
-    version: "1.0",
-    chainId: "SN_SEPOLIA",
-    revision: "1",
+    from: {
+      name: "Alice",
+      wallet: "0x028c7e5b0b0c6927a7c5b7e5d7f5c8e3d3c2b1a0928374655463728394a5b6c7",
+    },
+    to: {
+      name: "Bob",
+      wallet: "0x038c7e5b0b0c6927a7c5b7e5d7f5c8e3d3c2b1a0928374655463728394a5b6c8",
+    },
+    contents: "Hello Bob!",
   },
 };
 
@@ -58,21 +64,38 @@ export function SignMessage() {
     }
 
     setIsValid(null);
-    const res = await account.callContract(
-      {
-        contractAddress: address,
-        entrypoint: "is_valid_signature",
-        calldata: [
-          typedData.getMessageHash(message, address),
-          (signature as ArraySignatureType).length,
-          ...(signature as ArraySignatureType),
-        ],
-      },
-      BlockTag.PRE_CONFIRMED,
-    );
+    try {
+      const msgHash = typedData.getMessageHash(message, address);
+      const res = await account.callContract(
+        {
+          contractAddress: address,
+          entrypoint: "is_valid_signature",
+          calldata: [
+            msgHash,
+            (signature as ArraySignatureType).length,
+            ...(signature as ArraySignatureType),
+          ],
+        },
+        BlockTag.PRE_CONFIRMED,
+      );
 
-    setIsValid(res[0] === shortString.encodeShortString("VALID"));
+      setIsValid(res[0] === shortString.encodeShortString("VALID"));
+    } catch (error) {
+      console.error("Validation error:", error);
+      setIsValid(false);
+    }
   }, [address, message, signature, account]);
+
+  const openSignMessageModal = useCallback(() => {
+    const params = {
+      id: `sign-message-${Date.now()}`,
+      typedData: message,
+    };
+    // Opens the keychain sign message route
+    const keychainUrl = process.env.NEXT_PUBLIC_KEYCHAIN_URL || "http://localhost:3001";
+    const url = `${keychainUrl}/sign-message?data=${encodeURIComponent(JSON.stringify(params))}`;
+    window.open(url, "_blank", "width=400,height=600");
+  }, [message]);
 
   if (!account || !address) return <></>;
 
@@ -84,7 +107,7 @@ export function SignMessage() {
         value={JSON.stringify(message, null, 2)}
         onChange={(e) => setMessage(JSON.parse(e.target.value))}
       />
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button
           onClick={() => {
             setIsValid(null);
@@ -92,6 +115,10 @@ export function SignMessage() {
           }}
         >
           Sign Message
+        </Button>
+
+        <Button variant="secondary" onClick={openSignMessageModal}>
+          Open in Modal
         </Button>
 
         {signature && (
