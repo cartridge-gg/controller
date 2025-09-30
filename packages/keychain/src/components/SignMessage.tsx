@@ -64,7 +64,6 @@ export function SignMessage() {
   }, [params]);
 
   const handleCompletion = useCallback(() => {
-    setOnModalClose?.(undefined);
     if (returnTo) {
       navigate(returnTo, { replace: true });
     } else {
@@ -100,7 +99,7 @@ export function SignMessage() {
     });
 
     return () => {
-      setOnModalClose(undefined);
+      setOnModalClose(() => {});
     };
   }, [setOnModalClose, params?.resolve, cancelWithoutClosing]);
 

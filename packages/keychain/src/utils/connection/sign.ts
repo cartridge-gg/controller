@@ -27,7 +27,11 @@ export function createSignMessageUrl(
 
   if (options.resolve || options.reject || options.onCancel) {
     storeCallbacks(id, {
-      resolve: options.resolve,
+      resolve: options.resolve
+        ? (result) => {
+            options.resolve?.(result as Signature | ConnectError);
+          }
+        : undefined,
       reject: options.reject,
       onCancel: options.onCancel,
     });
@@ -53,11 +57,29 @@ export function parseSignMessageParams(
       ? (getCallbacks(params.id) as SignMessageCallback | undefined)
       : undefined;
 
+    const resolve = callbacks?.resolve
+      ? (value: Signature | ConnectError) => {
+          callbacks.resolve?.(value);
+        }
+      : undefined;
+
+    const reject = callbacks?.reject
+      ? (reason?: unknown) => {
+          callbacks.reject?.(reason);
+        }
+      : undefined;
+
+    const onCancel = callbacks?.onCancel
+      ? () => {
+          callbacks.onCancel?.();
+        }
+      : undefined;
+
     return {
       params,
-      resolve: callbacks?.resolve,
-      reject: callbacks?.reject,
-      onCancel: callbacks?.onCancel,
+      resolve,
+      reject,
+      onCancel,
     };
   } catch (error) {
     console.error("Failed to parse sign message params:", error);
