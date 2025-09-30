@@ -9,26 +9,25 @@ import "./index.css";
 import Controller from "./utils/controller";
 import { PurchaseProvider } from "./context";
 
-declare global {
-  interface Window {
-    controller: ReturnType<typeof Controller.fromStore>;
-  }
+// Controller type is already declared in vite-env.d.ts
+
+async function bootstrap() {
+  window.controller = await Controller.fromStore(import.meta.env.VITE_ORIGIN!);
+
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <BrowserRouter>
+        <NavigationProvider>
+          <Provider>
+            <PurchaseProvider>
+              <App />
+            </PurchaseProvider>
+          </Provider>
+        </NavigationProvider>
+        <SonnerToaster position="bottom-right" />
+      </BrowserRouter>
+    </StrictMode>,
+  );
 }
 
-// Initialize controller before React rendering
-window.controller = Controller.fromStore(import.meta.env.VITE_ORIGIN!);
-
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <NavigationProvider>
-        <Provider>
-          <PurchaseProvider>
-            <App />
-          </PurchaseProvider>
-        </Provider>
-      </NavigationProvider>
-      <SonnerToaster position="bottom-right" />
-    </BrowserRouter>
-  </StrictMode>,
-);
+void bootstrap();
