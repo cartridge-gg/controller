@@ -66,15 +66,7 @@ export function ConfirmTransaction({
     } catch (e) {
       const submitError = e as ControllerError;
       console.error("Transaction execution failed:", submitError);
-
-      // Check if it's a session refresh error
-      if (submitError.code === ErrorCode.SessionRefreshRequired) {
-        setNeedsSessionRefresh(true);
-        setError(undefined); // Clear error to avoid showing error UI
-      } else {
-        setError(submitError);
-        onError?.(submitError);
-      }
+      setError(submitError);
     }
   };
 
@@ -93,6 +85,7 @@ export function ConfirmTransaction({
             // Clear the error state
             setError(undefined);
             setNeedsSessionRefresh(false);
+
             // Retry the execution after session refresh
             const res = await executeCore(transactions);
             onComplete(res.transaction_hash);
@@ -102,13 +95,9 @@ export function ConfirmTransaction({
               "Transaction execution failed after session refresh:",
               retryError,
             );
-            // If it's still a session error, keep showing the refresh UI
-            if (retryError.code === ErrorCode.SessionRefreshRequired) {
-              setNeedsSessionRefresh(true);
-            } else {
-              setError(retryError);
-              onError?.(retryError);
-            }
+
+            setError(retryError);
+            onError?.(retryError);
           }
         }}
         onSkip={() => {

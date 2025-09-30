@@ -91,10 +91,7 @@ export async function executeCore(
   }
 
   const calls = normalizeCalls(transactions);
-
-  // Use the new trySessionExecute which handles all execution strategies internally
-  const res = await controller.trySessionExecute(calls, feeSource);
-  return res;
+  return await controller.trySessionExecute(calls, feeSource);
 }
 
 export function execute({
