@@ -293,7 +293,7 @@ export function CollectionAsset() {
 
           <LayoutFooter
             className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background-100 pt-0 select-none",
+              "relative flex flex-col items-center justify-center gap-y-4 bg-background-100 pt-4 select-none",
               !isListed && !isOwner && "hidden",
             )}
           >

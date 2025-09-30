@@ -322,7 +322,7 @@ export function CollectibleAsset() {
 
           <LayoutFooter
             className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-0",
+              "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-4",
             )}
           >
             <div className="flex gap-3 w-full">
