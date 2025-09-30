@@ -178,12 +178,7 @@ describe("useConnectionValue", () => {
     mockGetChainId.mockReset();
     mockGetChainId.mockResolvedValue("0x1");
 
-    window.controller = {
-      rpcUrl: () => "https://rpc.example.com",
-      chainId: () => "0x534e5f534550",
-      disconnect: () => Promise.resolve(),
-      username: () => undefined,
-    };
+    window.controller = undefined;
     window.keychain_wallets = undefined;
   });
 
