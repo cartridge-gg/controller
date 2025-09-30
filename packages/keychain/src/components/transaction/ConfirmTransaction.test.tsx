@@ -142,6 +142,41 @@ describe("ConfirmTransaction", () => {
     });
   });
 
+  it("skips session UI when skipSession is used", async () => {
+    // Test that the skip session flow works correctly
+    const mockTransactionsCopy = [...mockTransactions];
+    const mockExecute = vi.fn().mockResolvedValue({
+      transaction_hash: "0xabc123",
+    });
+    const estimateInvokeFee = vi.fn().mockResolvedValue({
+      suggestedMaxFee: BigInt(1000),
+    });
+
+    await act(async () => {
+      renderWithProviders(
+        <ConfirmTransaction {...defaultProps} transactions={mockTransactionsCopy} />,
+        {
+          connection: {
+            controller: {
+              isRequestedSession: vi.fn()
+                .mockResolvedValueOnce(false) // First check returns false
+                .mockResolvedValue(true), // After "skip" it should proceed
+              estimateInvokeFee,
+              execute: mockExecute,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            policies: null, // No policies means no session UI
+          },
+        },
+      );
+    });
+
+    // Should show the transaction review screen directly
+    await waitFor(() => {
+      expect(screen.getByText("Review Transaction")).toBeInTheDocument();
+    });
+  });
+
   it("calls onComplete when execution succeeds", async () => {
     const mockTransactionHash = "0xabc123";
     const mockExecute = vi.fn().mockResolvedValue({

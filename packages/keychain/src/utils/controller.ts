@@ -202,6 +202,16 @@ export default class Controller {
     );
   }
 
+  async trySessionExecute(
+    calls: Call[],
+    feeSource?: JsFeeSource,
+  ): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.trySessionExecute(
+      toJsCalls(calls),
+      feeSource,
+    );
+  }
+
   async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
     return await this.cartridge.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
   }
