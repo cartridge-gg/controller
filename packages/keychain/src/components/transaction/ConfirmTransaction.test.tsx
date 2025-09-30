@@ -165,7 +165,7 @@ describe("ConfirmTransaction", () => {
               execute: mockExecute,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
-            policies: null, // No policies means no session UI
+            policies: undefined, // No policies means no session UI
           },
         },
       );
