@@ -206,10 +206,7 @@ export default class Controller {
     calls: Call[],
     feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.trySessionExecute(
-      toJsCalls(calls),
-      feeSource,
-    );
+    return await this.cartridge.trySessionExecute(toJsCalls(calls), feeSource);
   }
 
   async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {

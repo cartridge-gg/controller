@@ -154,11 +154,15 @@ describe("ConfirmTransaction", () => {
 
     await act(async () => {
       renderWithProviders(
-        <ConfirmTransaction {...defaultProps} transactions={mockTransactionsCopy} />,
+        <ConfirmTransaction
+          {...defaultProps}
+          transactions={mockTransactionsCopy}
+        />,
         {
           connection: {
             controller: {
-              isRequestedSession: vi.fn()
+              isRequestedSession: vi
+                .fn()
                 .mockResolvedValueOnce(false) // First check returns false
                 .mockResolvedValue(true), // After "skip" it should proceed
               estimateInvokeFee,
