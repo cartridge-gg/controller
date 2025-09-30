@@ -25,7 +25,7 @@ export function PageLoading({
         hideIcon
       />
 
-      <LayoutContent className="gap-6 overflow-y-hidden">
+      <LayoutContent className="overflow-y-hidden">
         {/* Username input skeleton */}
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-20 rounded" />

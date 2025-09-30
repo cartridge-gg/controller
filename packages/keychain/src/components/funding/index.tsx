@@ -28,7 +28,6 @@ export function Funding({ title, isSlot }: FundingProps) {
   return (
     <>
       <HeaderInner
-        className="p-6"
         title={
           typeof title === "string"
             ? title
@@ -39,7 +38,7 @@ export function Funding({ title, isSlot }: FundingProps) {
         icon={<ControllerIcon size="lg" />}
         hideIcon
       />
-      <LayoutContent className="gap-6 px-6">
+      <LayoutContent>
         <Balance types={balances} />
       </LayoutContent>
       <LayoutFooter>
