@@ -4,6 +4,7 @@ import {
   LeaderboardRow,
   Empty,
   Skeleton,
+  cn,
 } from "@cartridge/ui";
 import { useAccount, useUsernames } from "@/hooks/account";
 import { useEffect, useMemo } from "react";
@@ -58,8 +59,15 @@ export function Leaderboard() {
   ) : status === "error" || !data.length ? (
     <EmptyState />
   ) : (
-    <LayoutContent>
-      <LeaderboardTable className="flex">
+    <LayoutContent
+      className={cn(data.some((d) => d.highlight) ? "pb-4" : "pb-0")}
+    >
+      <LeaderboardTable
+        className={cn(
+          "flex",
+          !data.some((d) => d.highlight) && "rounded-b-none",
+        )}
+      >
         {data.map((item, index) => (
           <LeaderboardRow
             key={index}
