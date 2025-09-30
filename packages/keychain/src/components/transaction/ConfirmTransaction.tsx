@@ -127,17 +127,10 @@ export function ConfirmTransaction({
       <CreateSession
         isUpdate
         policies={policies}
-        onConnect={async () => {
-          try {
-            const res = await executeCore(transactions);
-            onComplete(res.transaction_hash);
-          } catch (e) {
-            console.error(
-              "Transaction execution failed after session update:",
-              e,
-            );
-            onError?.(e as ControllerError);
-          }
+        onConnect={() => {
+          // Just mark that we've created a session, don't execute the transaction
+          // The transaction will be executed when user clicks Submit on ExecutionContainer
+          setSkipSession(true); // Move past the session creation screen
         }}
         onSkip={() => setSkipSession(true)}
       />
