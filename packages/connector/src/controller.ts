@@ -45,6 +45,13 @@ export default class ControllerConnector extends InjectedConnector {
   }
 
   asWalletStandard(): WalletWithStarknetFeatures {
+    if (typeof window !== "undefined") {
+      console.warn(
+        `Casting Controller to WalletWithStarknetFeatures is an experimental feature and may contain bugs. ` +
+          `Please report any issues at https://github.com/cartridge-gg/controller/issues`,
+      );
+    }
+
     return new StarknetInjectedWallet(this.controller);
   }
 }
