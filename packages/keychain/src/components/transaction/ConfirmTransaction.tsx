@@ -9,6 +9,9 @@ import { executeCore } from "@/utils/connection/execute";
 import { useEffect, useState } from "react";
 import { PageLoading } from "../Loading";
 
+// New error codes from trySessionExecute
+const SessionRefreshRequired = "SessionRefreshRequired";
+
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
   onError?: (error: ControllerError) => void;
@@ -29,6 +32,7 @@ export function ConfirmTransaction({
   const [skipSession, setSkipSession] = useState(false);
   const [error, setError] = useState<ControllerError | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [needsSessionRefresh, setNeedsSessionRefresh] = useState(false);
 
   useEffect(() => {
     if (controller && policies) {
@@ -44,6 +48,15 @@ export function ConfirmTransaction({
     setLoading(false);
   }, [controller, policies]);
 
+  // Check if we have a SessionRefreshRequired error
+  useEffect(() => {
+    const currentError = error || executionError;
+    if (currentError?.code === SessionRefreshRequired) {
+      setNeedsSessionRefresh(true);
+      setSkipSession(false); // Reset skip session when refresh is needed
+    }
+  }, [error, executionError]);
+
   const onSubmit = async (maxFee?: FeeEstimate) => {
     if (maxFee === undefined || !account) {
       return;
@@ -53,8 +66,17 @@ export function ConfirmTransaction({
       const { transaction_hash } = await account.execute(transactions, maxFee);
       onComplete(transaction_hash);
     } catch (e) {
-      console.error(e);
-      setError(e as ControllerError);
+      const submitError = e as ControllerError;
+      console.error("Transaction execution failed:", submitError);
+
+      // Check if it's a session refresh error
+      if (submitError.code === SessionRefreshRequired) {
+        setNeedsSessionRefresh(true);
+        setError(undefined); // Clear error to avoid showing error UI
+      } else {
+        setError(submitError);
+        onError?.(submitError);
+      }
     }
   };
 
@@ -62,11 +84,49 @@ export function ConfirmTransaction({
     return <PageLoading />;
   }
 
-  if (policies && !hasSession && !skipSession) {
+  // Show session refresh UI if SessionRefreshRequired error occurred
+  if (needsSessionRefresh && policies && !skipSession) {
     return (
       <CreateSession
         isUpdate
-        policies={policies!}
+        policies={policies}
+        onConnect={async () => {
+          try {
+            // Clear the error state
+            setError(undefined);
+            setNeedsSessionRefresh(false);
+            // Retry the execution after session refresh
+            const res = await executeCore(transactions);
+            onComplete(res.transaction_hash);
+          } catch (e) {
+            const retryError = e as ControllerError;
+            console.error(
+              "Transaction execution failed after session refresh:",
+              retryError,
+            );
+            // If it's still a session error, keep showing the refresh UI
+            if (retryError.code === SessionRefreshRequired) {
+              setNeedsSessionRefresh(true);
+            } else {
+              setError(retryError);
+              onError?.(retryError);
+            }
+          }
+        }}
+        onSkip={() => {
+          setSkipSession(true);
+          setNeedsSessionRefresh(false);
+        }}
+      />
+    );
+  }
+
+  // Show session creation for initial session setup
+  if (policies && !hasSession && !skipSession && !needsSessionRefresh) {
+    return (
+      <CreateSession
+        isUpdate
+        policies={policies}
         onConnect={async () => {
           try {
             const res = await executeCore(transactions);
