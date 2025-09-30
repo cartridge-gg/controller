@@ -3,11 +3,8 @@ import { act } from "react";
 import { ConfirmTransaction } from "./ConfirmTransaction";
 import { describe, expect, beforeEach, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/mocks/providers";
-import { ErrorCode } from "@cartridge/controller-wasm/controller";
+import { ErrorCode } from "@cartridge/controller-wasm";
 import type { ControllerError } from "@/utils/connection";
-
-// New error codes from trySessionExecute
-const SessionRefreshRequired = "SessionRefreshRequired";
 
 // Mock the tokens hook for ConfirmTransaction tests
 vi.mock("@/hooks/tokens", () => ({
@@ -196,7 +193,7 @@ describe("ConfirmTransaction", () => {
 
   it("shows session refresh UI when SessionRefreshRequired error occurs", async () => {
     const sessionRefreshError: ControllerError = {
-      code: SessionRefreshRequired,
+      code: ErrorCode.SessionRefreshRequired,
       message: "Session needs to be refreshed",
       data: "{}",
     };
@@ -218,6 +215,7 @@ describe("ConfirmTransaction", () => {
             } as any,
             policies: {
               contracts: {},
+              verified: true,
             },
           },
         },
@@ -235,7 +233,7 @@ describe("ConfirmTransaction", () => {
     const mockExecute = vi
       .fn()
       .mockRejectedValueOnce({
-        code: SessionRefreshRequired,
+        code: ErrorCode.SessionRefreshRequired,
         message: "Session needs refresh",
         data: "{}",
       })
@@ -257,7 +255,7 @@ describe("ConfirmTransaction", () => {
             trySessionExecute: vi
               .fn()
               .mockRejectedValueOnce({
-                code: SessionRefreshRequired,
+                code: ErrorCode.SessionRefreshRequired,
                 message: "Session needs refresh",
                 data: "{}",
               })

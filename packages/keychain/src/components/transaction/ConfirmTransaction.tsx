@@ -8,9 +8,7 @@ import { CreateSession } from "../connect";
 import { executeCore } from "@/utils/connection/execute";
 import { useEffect, useState } from "react";
 import { PageLoading } from "../Loading";
-
-// New error codes from trySessionExecute
-const SessionRefreshRequired = "SessionRefreshRequired";
+import { ErrorCode } from "@cartridge/controller-wasm";
 
 interface ConfirmTransactionProps {
   onComplete: (transaction_hash: string) => void;
@@ -51,7 +49,7 @@ export function ConfirmTransaction({
   // Check if we have a SessionRefreshRequired error
   useEffect(() => {
     const currentError = error || executionError;
-    if (currentError?.code === SessionRefreshRequired) {
+    if (currentError?.code === ErrorCode.SessionRefreshRequired) {
       setNeedsSessionRefresh(true);
       setSkipSession(false); // Reset skip session when refresh is needed
     }
@@ -70,7 +68,7 @@ export function ConfirmTransaction({
       console.error("Transaction execution failed:", submitError);
 
       // Check if it's a session refresh error
-      if (submitError.code === SessionRefreshRequired) {
+      if (submitError.code === ErrorCode.SessionRefreshRequired) {
         setNeedsSessionRefresh(true);
         setError(undefined); // Clear error to avoid showing error UI
       } else {
@@ -105,7 +103,7 @@ export function ConfirmTransaction({
               retryError,
             );
             // If it's still a session error, keep showing the refresh UI
-            if (retryError.code === SessionRefreshRequired) {
+            if (retryError.code === ErrorCode.SessionRefreshRequired) {
               setNeedsSessionRefresh(true);
             } else {
               setError(retryError);

@@ -6,13 +6,9 @@ import {
   normalizeCalls,
 } from "./execute";
 import { ResponseCodes } from "@cartridge/controller";
-import { ErrorCode } from "@cartridge/controller-wasm/controller";
+import { ErrorCode } from "@cartridge/controller-wasm";
 import { storeCallbacks, cleanupCallbacks } from "./callbacks";
 import { Call } from "starknet";
-
-// Define error codes if not available in ErrorCode enum
-const SessionRefreshRequired = "SessionRefreshRequired";
-const ManualExecutionRequired = "ManualExecutionRequired";
 
 // Mock the callbacks module
 vi.mock("./callbacks", () => ({
@@ -233,7 +229,7 @@ describe("execute utils", () => {
 
       // Simulate SessionRefreshRequired error
       mockController.trySessionExecute.mockRejectedValue({
-        code: SessionRefreshRequired,
+        code: ErrorCode.SessionRefreshRequired,
         message: "Session needs to be refreshed",
         data: "{}",
       });
@@ -251,7 +247,7 @@ describe("execute utils", () => {
       const dataParam = urlCall.split("?data=")[1];
       const decoded = JSON.parse(decodeURIComponent(dataParam));
       expect(decoded.error).toMatchObject({
-        code: SessionRefreshRequired,
+        code: ErrorCode.SessionRefreshRequired,
         message: "Session needs to be refreshed",
       });
 
@@ -273,7 +269,7 @@ describe("execute utils", () => {
 
       // Simulate ManualExecutionRequired error
       mockController.trySessionExecute.mockRejectedValue({
-        code: ManualExecutionRequired,
+        code: ErrorCode.ManualExecutionRequired,
         message: "Manual execution required",
         data: "{}",
       });
@@ -291,7 +287,7 @@ describe("execute utils", () => {
       const dataParam = urlCall.split("?data=")[1];
       const decoded = JSON.parse(decodeURIComponent(dataParam));
       expect(decoded.error).toMatchObject({
-        code: ManualExecutionRequired,
+        code: ErrorCode.ManualExecutionRequired,
         message: "Manual execution required",
       });
 
@@ -408,7 +404,7 @@ describe("execute utils", () => {
       // trySessionExecute will handle authorization checks internally
       // and throw an error if unauthorized
       mockController.trySessionExecute.mockRejectedValue({
-        code: SessionRefreshRequired,
+        code: ErrorCode.SessionRefreshRequired,
         message: "Session refresh required",
         data: "{}",
       });
