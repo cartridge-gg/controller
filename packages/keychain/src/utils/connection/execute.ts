@@ -53,7 +53,11 @@ export function createExecuteUrl(
     error: options.error,
   };
 
-  const paramString = encodeURIComponent(JSON.stringify(executeParams));
+  const paramString = encodeURIComponent(
+    JSON.stringify(executeParams, (_, value) =>
+      typeof value === "bigint" ? value.toString() : value,
+    ),
+  );
   return `/execute?data=${paramString}`;
 }
 

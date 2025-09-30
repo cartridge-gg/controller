@@ -113,6 +113,64 @@ describe("execute utils", () => {
 
       expect(decoded.error).toEqual(error);
     });
+
+    it("should serialize BigInt values in calldata", () => {
+      const transactions: Call[] = [
+        {
+          contractAddress: "0x123",
+          entrypoint: "transfer",
+          calldata: [
+            "0x456",
+            BigInt("1000000000000000000"), // 1 ETH in wei as BigInt
+            BigInt(0),
+          ],
+        },
+      ];
+
+      // This should not throw
+      const url = createExecuteUrl(transactions);
+
+      expect(url).toMatch(/^\/execute\?data=/);
+
+      // Decode and verify the data
+      const dataParam = url.split("?data=")[1];
+      const decoded = JSON.parse(decodeURIComponent(dataParam));
+
+      expect(decoded.transactions[0].calldata).toEqual([
+        "0x456",
+        "1000000000000000000",
+        "0",
+      ]);
+    });
+
+    it("should serialize mixed BigInt and string calldata", () => {
+      const transactions: Call[] = [
+        {
+          contractAddress: "0x123",
+          entrypoint: "complex_call",
+          calldata: [
+            "0x456",
+            BigInt("999999999999999999999"),
+            "regular_string",
+            BigInt(42),
+            "0x789",
+          ],
+        },
+      ];
+
+      const url = createExecuteUrl(transactions);
+
+      const dataParam = url.split("?data=")[1];
+      const decoded = JSON.parse(decodeURIComponent(dataParam));
+
+      expect(decoded.transactions[0].calldata).toEqual([
+        "0x456",
+        "999999999999999999999",
+        "regular_string",
+        "42",
+        "0x789",
+      ]);
+    });
   });
 
   describe("parseControllerError", () => {
