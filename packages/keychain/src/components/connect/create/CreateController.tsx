@@ -77,6 +77,26 @@ function CreateControllerForm({
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
   const { isOpen: keyboardIsOpen, viewportHeight } = useDetectKeyboardOpen();
+  const [pendingSubmitAfterKeyboardClose, setPendingSubmitAfterKeyboardClose] =
+    useState(false);
+  const prevKeyboardIsOpen = useRef(keyboardIsOpen);
+
+  // Track when keyboard closes and auto-submit if there was a pending submission
+  useEffect(() => {
+    if (
+      prevKeyboardIsOpen.current &&
+      !keyboardIsOpen &&
+      pendingSubmitAfterKeyboardClose
+    ) {
+      // Keyboard just closed and we have a pending submit
+      setPendingSubmitAfterKeyboardClose(false);
+      // Small delay to ensure keyboard animation is complete
+      setTimeout(() => {
+        onSubmit();
+      }, 100);
+    }
+    prevKeyboardIsOpen.current = keyboardIsOpen;
+  }, [keyboardIsOpen, pendingSubmitAfterKeyboardClose, onSubmit]);
 
   // appKey is undefined for unknown applications which we're
   // assuming are dojo applications which implement AASA and
@@ -93,7 +113,8 @@ function CreateControllerForm({
         return viewportHeight;
       }
 
-      return viewportHeight - 450;
+      // return viewportHeight - 450;
+      return viewportHeight - 200;
     } else {
       return "100%";
     }
@@ -116,18 +137,23 @@ function CreateControllerForm({
         Is keyboard open?
         {keyboardIsOpen ? " Yes" : " No"}
       </p>
-      <p>Viewport height: {viewportHeight}px</p>*/}
+      <p>Viewport height: {viewportHeight}px</p>
+      <p>Layout height: {layoutHeight}px</p>*/}
       <form
         className="flex flex-col overflow-y-scroll"
         style={{
           scrollbarWidth: "none",
-          // height: viewportHeight - 400,
           height: layoutHeight,
         }}
         ref={layoutRef}
         onSubmit={(e) => {
           e.preventDefault();
-          onSubmit();
+          if (keyboardIsOpen) {
+            // If keyboard is open, mark for pending submit after it closes
+            setPendingSubmitAfterKeyboardClose(true);
+          } else {
+            onSubmit();
+          }
         }}
       >
         <LayoutContent className="gap-6 overflow-y-hidden">
@@ -178,6 +204,12 @@ function CreateControllerForm({
             validation={validation}
             waitingForConfirmation={waitingForConfirmation}
             username={usernameField.value}
+            onMouseDown={() => {
+              if (keyboardIsOpen) {
+                // If keyboard is open, mark for pending submit after it closes
+                setPendingSubmitAfterKeyboardClose(true);
+              }
+            }}
           />
 
           {keyboardIsOpen ? null : <CartridgeFooter />}
