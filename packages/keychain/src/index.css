@@ -17,14 +17,18 @@
     @apply focus:outline-none focus:ring-0;
   }
 
-  /* Hide scrollbars globally while preserving scroll functionality */
   ::-webkit-scrollbar {
     width: 0px;
+    height: 0px;
     background: transparent;
+    display: none;
+    -webkit-appearance: none;
   }
 
   ::-webkit-scrollbar-thumb {
     background: transparent;
+    display: none;
+    -webkit-appearance: none;
   }
 
   html {
