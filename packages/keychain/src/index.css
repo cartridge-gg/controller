@@ -16,4 +16,24 @@
   * {
     @apply focus:outline-none focus:ring-0;
   }
+
+  /* Hide scrollbars globally while preserving scroll functionality */
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+
+  html {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
