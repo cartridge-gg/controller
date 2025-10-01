@@ -39,7 +39,7 @@ jobs:
       - name: Run tests with coverage
         run: pnpm test:ci --coverage
         env:
-          NODE_OPTIONS: --max-old-space-size=8192
+          NODE_OPTIONS: --max-old-space-size=16384
       - uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
