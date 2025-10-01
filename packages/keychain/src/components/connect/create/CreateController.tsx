@@ -29,6 +29,7 @@ import {
   useDetectKeyboardOpen,
   usePreventOverScrolling,
 } from "@/hooks/viewport";
+import { useDevice } from "@/hooks/device";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -79,6 +80,7 @@ function CreateControllerForm({
   const { isOpen: keyboardIsOpen, viewportHeight } = useDetectKeyboardOpen();
   const [pendingSubmitAfterKeyboardClose, setPendingSubmitAfterKeyboardClose] =
     useState(false);
+  const { isMobile } = useDevice();
   const prevKeyboardIsOpen = useRef(keyboardIsOpen);
 
   // Track when keyboard closes and auto-submit if there was a pending submission
@@ -107,18 +109,24 @@ function CreateControllerForm({
   const layoutRef = usePreventOverScrolling<HTMLFormElement>();
 
   const layoutHeight = useMemo(() => {
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if (keyboardIsOpen) {
-      if (!isSafari) {
-        return viewportHeight;
-      }
+    if (isMobile) {
+      const isSafari = /^((?!chrome|android).)*safari/i.test(
+        navigator.userAgent,
+      );
+      if (keyboardIsOpen) {
+        if (!isSafari) {
+          return viewportHeight;
+        }
 
-      // return viewportHeight - 450;
-      return viewportHeight - 200;
+        // return viewportHeight - 450;
+        return viewportHeight - 200;
+      } else {
+        return "100%";
+      }
     } else {
       return "100%";
     }
-  }, [keyboardIsOpen, viewportHeight]);
+  }, [isMobile, keyboardIsOpen, viewportHeight]);
 
   return (
     <>
@@ -137,6 +145,7 @@ function CreateControllerForm({
         Is keyboard open?
         {keyboardIsOpen ? " Yes" : " No"}
       </p>
+      <p>isMobile: {String(isMobile)}</p>
       <p>Viewport height: {viewportHeight}px</p>
       <p>Layout height: {layoutHeight}px</p>*/}
       <form
@@ -212,7 +221,7 @@ function CreateControllerForm({
             }}
           />
 
-          {keyboardIsOpen ? null : <CartridgeFooter />}
+          {keyboardIsOpen && isMobile ? null : <CartridgeFooter />}
         </LayoutFooter>
       </form>
     </>
