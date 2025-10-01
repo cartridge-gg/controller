@@ -286,9 +286,11 @@ describe("SignMessage", () => {
       setOnModalClose: undefined,
       controller: {
         signMessage: vi.fn(() => Promise.resolve(["0x1", "0x2"] as Signature)),
-      },
+      } as unknown as ReturnType<
+        typeof connectionHooks.useConnection
+      >["controller"],
       origin: "test-app.com",
-    });
+    } as ReturnType<typeof connectionHooks.useConnection>);
 
     const params = {
       id: "test-id",
