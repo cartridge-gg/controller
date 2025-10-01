@@ -290,7 +290,7 @@ describe("SignMessage", () => {
         typeof connectionHooks.useConnection
       >["controller"],
       origin: "test-app.com",
-    } as ReturnType<typeof connectionHooks.useConnection>);
+    } as unknown as ReturnType<typeof connectionHooks.useConnection>);
 
     const params = {
       id: "test-id",
