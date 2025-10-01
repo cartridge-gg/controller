@@ -42,7 +42,11 @@ export function createSignMessageUrl(
     typedData,
   };
 
-  return `/sign-message?data=${encodeURIComponent(JSON.stringify(params))}`;
+  return `/sign-message?data=${encodeURIComponent(
+    JSON.stringify(params, (_, value) =>
+      typeof value === "bigint" ? value.toString() : value,
+    ),
+  )}`;
 }
 
 export function parseSignMessageParams(

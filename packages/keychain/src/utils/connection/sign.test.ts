@@ -111,6 +111,56 @@ describe("sign message utils", () => {
 
       expect(storeCallbacks).not.toHaveBeenCalled();
     });
+
+    it("should serialize BigInt values in typedData message", () => {
+      const typedDataWithBigInt: TypedData = {
+        ...mockTypedData,
+        message: {
+          amount: BigInt("1000000000000000000"), // 1 ETH in wei as BigInt
+          recipient: "0x456",
+        },
+      };
+
+      // This should not throw
+      const url = createSignMessageUrl(typedDataWithBigInt);
+
+      expect(url).toMatch(/^\/sign-message\?data=/);
+
+      // Decode and verify the data
+      const dataParam = url.split("?data=")[1];
+      const decoded = JSON.parse(decodeURIComponent(dataParam));
+
+      expect(decoded.typedData.message).toEqual({
+        amount: "1000000000000000000",
+        recipient: "0x456",
+      });
+    });
+
+    it("should serialize mixed BigInt and other values in typedData", () => {
+      const typedDataWithMixed: TypedData = {
+        ...mockTypedData,
+        message: {
+          value1: BigInt("999999999999999999999"),
+          value2: "regular_string",
+          value3: BigInt(42),
+          value4: 123,
+          value5: "0x789",
+        },
+      };
+
+      const url = createSignMessageUrl(typedDataWithMixed);
+
+      const dataParam = url.split("?data=")[1];
+      const decoded = JSON.parse(decodeURIComponent(dataParam));
+
+      expect(decoded.typedData.message).toEqual({
+        value1: "999999999999999999999",
+        value2: "regular_string",
+        value3: "42",
+        value4: 123,
+        value5: "0x789",
+      });
+    });
   });
 
   describe("parseSignMessageParams", () => {
