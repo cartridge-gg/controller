@@ -2,9 +2,10 @@ import { describe, expect, it, vi, beforeEach, beforeAll } from "vitest";
 import { waitFor, screen } from "@testing-library/react";
 import { SignMessage } from "./SignMessage";
 import { renderWithProviders } from "@/test/mocks/providers";
-import { storeCallbacks, cleanupCallbacks } from "@/utils/connection/callbacks";
+import { storeCallbacks } from "@/utils/connection/callbacks";
 import { ResponseCodes } from "@cartridge/controller";
 import { Signature, TypedData } from "starknet";
+import * as connectionHooks from "@/hooks/connection";
 
 // Mock the navigation hook
 const mockNavigate = vi.fn();
@@ -21,7 +22,7 @@ vi.mock("react-router-dom", async () => {
 const mockCloseModal = vi.fn();
 const mockSetOnModalClose = vi.fn();
 vi.mock("@/hooks/connection", () => ({
-  useConnection: () => ({
+  useConnection: vi.fn(() => ({
     closeModal: mockCloseModal,
     setOnModalClose: mockSetOnModalClose,
     controller: {
@@ -30,7 +31,7 @@ vi.mock("@/hooks/connection", () => ({
       ),
     },
     origin: "test-app.com",
-  }),
+  })),
 }));
 
 const mockTypedData: TypedData = {
@@ -282,7 +283,7 @@ describe("SignMessage", () => {
   });
 
   it("should not set modal close handler when setOnModalClose is undefined", async () => {
-    vi.mocked(require("@/hooks/connection").useConnection).mockReturnValue({
+    vi.mocked(connectionHooks.useConnection).mockReturnValue({
       closeModal: mockCloseModal,
       setOnModalClose: undefined,
       controller: {

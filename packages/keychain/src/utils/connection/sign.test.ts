@@ -7,6 +7,7 @@ import {
 import { ResponseCodes } from "@cartridge/controller";
 import { storeCallbacks, cleanupCallbacks } from "./callbacks";
 import { Signature, TypedData } from "starknet";
+import * as callbacksModule from "./callbacks";
 
 // Mock the callbacks module
 vi.mock("./callbacks", () => ({
@@ -201,9 +202,7 @@ describe("sign message utils", () => {
       });
 
       // Mock getCallbacks to return the stored callbacks
-      vi.mocked(
-        require("./callbacks").getCallbacks,
-      ).mockReturnValue({
+      vi.mocked(callbacksModule.getCallbacks).mockReturnValue({
         resolve: mockResolve,
         reject: mockReject,
         onCancel: mockOnCancel,
@@ -231,9 +230,7 @@ describe("sign message utils", () => {
     });
 
     it("should return undefined callbacks when no callbacks stored", () => {
-      vi.mocked(require("./callbacks").getCallbacks).mockReturnValue(
-        undefined,
-      );
+      vi.mocked(callbacksModule.getCallbacks).mockReturnValue(undefined);
 
       const params = {
         id: "test-id",
@@ -363,7 +360,7 @@ describe("sign message utils", () => {
       const dataParam = url.split("?data=")[1];
 
       // Mock getCallbacks for parsing
-      vi.mocked(require("./callbacks").getCallbacks).mockReturnValue({
+      vi.mocked(callbacksModule.getCallbacks).mockReturnValue({
         resolve: mockResolve,
       });
 

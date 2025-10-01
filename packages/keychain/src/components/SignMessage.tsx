@@ -69,7 +69,7 @@ export function SignMessage() {
     } else {
       void closeModal?.();
     }
-  }, [returnTo, navigate, closeModal, setOnModalClose]);
+  }, [returnTo, navigate, closeModal]);
 
   const handleSign = useCallback(
     (signature: Signature) => {
