@@ -6,6 +6,11 @@ import { StarterPackItemType } from "@cartridge/controller";
 
 const meta = {
   component: StarterPackInner,
+  argTypes: {
+    starterpackItems: {
+      control: false, // Disable controls for BigInt serialization
+    },
+  },
   decorators: [
     (Story) => (
       <NavigationProvider>
@@ -22,7 +27,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     name: "Starterpack",
-    supply: 10,
     acquisitionType: StarterpackAcquisitionType.Paid,
     starterpackItems: [
       {
@@ -31,7 +35,26 @@ export const Default: Story = {
         iconURL:
           "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
         type: StarterPackItemType.NONFUNGIBLE,
-        price: 100n,
+        price: 5000000n,
+      },
+    ],
+  },
+};
+
+export const StarterPackWithNoSupply: Story = {
+  args: {
+    name: "Starterpack",
+    supply: 0,
+    acquisitionType: StarterpackAcquisitionType.Paid,
+    isVerified: false,
+    starterpackItems: [
+      {
+        name: "Starter NFT",
+        description: "A unique starter NFT for your collection",
+        iconURL:
+          "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
+        type: StarterPackItemType.NONFUNGIBLE,
+        price: 5000000n,
       },
     ],
   },
@@ -40,7 +63,6 @@ export const Default: Story = {
 export const StarterPackWithCollections: Story = {
   args: {
     name: "Starterpack",
-    supply: 10,
     acquisitionType: StarterpackAcquisitionType.Claimed,
     starterpackItems: [
       {
@@ -49,7 +71,6 @@ export const StarterPackWithCollections: Story = {
         iconURL:
           "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
         type: StarterPackItemType.NONFUNGIBLE,
-        price: 0n,
       },
     ],
   },
@@ -58,7 +79,6 @@ export const StarterPackWithCollections: Story = {
 export const StarterPackWithVerifiedEdition: Story = {
   args: {
     name: "Starterpack",
-    supply: 10,
     acquisitionType: StarterpackAcquisitionType.Claimed,
     edition: "Season 0: Genesis",
     isVerified: true,
@@ -69,7 +89,6 @@ export const StarterPackWithVerifiedEdition: Story = {
         iconURL:
           "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
         type: StarterPackItemType.NONFUNGIBLE,
-        price: 0n,
       },
     ],
   },
@@ -78,7 +97,6 @@ export const StarterPackWithVerifiedEdition: Story = {
 export const StarterPackWithUnverifiedEdition: Story = {
   args: {
     name: "Starterpack",
-    supply: 10,
     acquisitionType: StarterpackAcquisitionType.Claimed,
     edition: "Season 0: Genesis",
     isVerified: false,
@@ -89,8 +107,8 @@ export const StarterPackWithUnverifiedEdition: Story = {
         iconURL:
           "https://fastly.picsum.photos/id/641/200/200.jpg?hmac=9pd71nRRRsT7TXf0zn0hQ6tW6VQnQ-UtL1JXDhJZB8E",
         type: StarterPackItemType.NONFUNGIBLE,
-        price: 0n,
       },
     ],
   },
 };
+
