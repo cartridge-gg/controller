@@ -36,7 +36,10 @@ jobs:
       - name: Clean iframe dist directory
         run: rm -rf packages/controller/dist
       - run: pnpm build
-      - run: pnpm test:ci --coverage
+      - name: Run tests with coverage
+        run: pnpm test:ci --coverage
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
       - uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
