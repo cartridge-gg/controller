@@ -40,11 +40,13 @@ const MESSAGE: TypedData = {
   message: {
     from: {
       name: "Alice",
-      wallet: "0x028c7e5b0b0c6927a7c5b7e5d7f5c8e3d3c2b1a0928374655463728394a5b6c7",
+      wallet:
+        "0x028c7e5b0b0c6927a7c5b7e5d7f5c8e3d3c2b1a0928374655463728394a5b6c7",
     },
     to: {
       name: "Bob",
-      wallet: "0x038c7e5b0b0c6927a7c5b7e5d7f5c8e3d3c2b1a0928374655463728394a5b6c8",
+      wallet:
+        "0x038c7e5b0b0c6927a7c5b7e5d7f5c8e3d3c2b1a0928374655463728394a5b6c8",
     },
     contents: "Hello Bob!",
   },
@@ -92,7 +94,8 @@ export function SignMessage() {
       typedData: message,
     };
     // Opens the keychain sign message route
-    const keychainUrl = process.env.NEXT_PUBLIC_KEYCHAIN_URL || "http://localhost:3001";
+    const keychainUrl =
+      process.env.NEXT_PUBLIC_KEYCHAIN_URL || "http://localhost:3001";
     const url = `${keychainUrl}/sign-message?data=${encodeURIComponent(JSON.stringify(params))}`;
     window.open(url, "_blank", "width=400,height=600");
   }, [message]);
