@@ -6,7 +6,7 @@ import {
   normalizeCalls,
 } from "./execute";
 import { ResponseCodes } from "@cartridge/controller";
-import { ErrorCode } from "@cartridge/controller-wasm/controller";
+import { ErrorCode } from "@cartridge/controller-wasm";
 import { storeCallbacks, cleanupCallbacks } from "./callbacks";
 import { Call } from "starknet";
 
@@ -33,6 +33,9 @@ const mockController = {
   ),
   estimateInvokeFee: vi.fn(() => Promise.resolve({})),
   execute: vi.fn(() => Promise.resolve({ transaction_hash: "0x456" })),
+  trySessionExecute: vi.fn(() =>
+    Promise.resolve({ transaction_hash: "0x123" }),
+  ),
 };
 
 describe("execute utils", () => {
@@ -207,6 +210,94 @@ describe("execute utils", () => {
     });
   });
 
+  describe("session and manual execution error handling", () => {
+    const mockNavigate = vi.fn();
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it("should handle SessionRefreshRequired error from trySessionExecute", async () => {
+      const executeFunc = execute({ navigate: mockNavigate });
+      const transactions: Call[] = [
+        {
+          contractAddress: "0x123",
+          entrypoint: "transfer",
+          calldata: ["0x456", "100", "0"],
+        },
+      ];
+
+      // Simulate SessionRefreshRequired error
+      mockController.trySessionExecute.mockRejectedValue({
+        code: ErrorCode.SessionRefreshRequired,
+        message: "Session needs to be refreshed",
+        data: "{}",
+      });
+
+      const result = await executeFunc(transactions);
+
+      // Should navigate to UI for session refresh
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.stringMatching(/^\/execute\?data=/),
+        { replace: true },
+      );
+
+      // Parse the URL to verify error is included
+      const urlCall = mockNavigate.mock.calls[0][0];
+      const dataParam = urlCall.split("?data=")[1];
+      const decoded = JSON.parse(decodeURIComponent(dataParam));
+      expect(decoded.error).toMatchObject({
+        code: ErrorCode.SessionRefreshRequired,
+        message: "Session needs to be refreshed",
+      });
+
+      expect(result).toEqual({
+        code: ResponseCodes.USER_INTERACTION_REQUIRED,
+        message: "User interaction required",
+      });
+    });
+
+    it("should handle ManualExecutionRequired error from trySessionExecute", async () => {
+      const executeFunc = execute({ navigate: mockNavigate });
+      const transactions: Call[] = [
+        {
+          contractAddress: "0x123",
+          entrypoint: "transfer",
+          calldata: ["0x456", "100", "0"],
+        },
+      ];
+
+      // Simulate ManualExecutionRequired error
+      mockController.trySessionExecute.mockRejectedValue({
+        code: ErrorCode.ManualExecutionRequired,
+        message: "Manual execution required",
+        data: "{}",
+      });
+
+      const result = await executeFunc(transactions);
+
+      // Should navigate to UI for manual execution
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.stringMatching(/^\/execute\?data=/),
+        { replace: true },
+      );
+
+      // Parse the URL to verify error is included
+      const urlCall = mockNavigate.mock.calls[0][0];
+      const dataParam = urlCall.split("?data=")[1];
+      const decoded = JSON.parse(decodeURIComponent(dataParam));
+      expect(decoded.error).toMatchObject({
+        code: ErrorCode.ManualExecutionRequired,
+        message: "Manual execution required",
+      });
+
+      expect(result).toEqual({
+        code: ResponseCodes.USER_INTERACTION_REQUIRED,
+        message: "User interaction required",
+      });
+    });
+  });
+
   describe("normalizeCalls", () => {
     it("should normalize single call", () => {
       const calls: Call[] = [
@@ -287,7 +378,10 @@ describe("execute utils", () => {
         },
       ];
 
-      mockController.hasAuthorizedPoliciesForCalls.mockResolvedValue(true);
+      // trySessionExecute handles authorization internally
+      mockController.trySessionExecute.mockResolvedValue({
+        transaction_hash: "0x123",
+      });
 
       const result = await executeFunc(transactions);
 
@@ -307,7 +401,13 @@ describe("execute utils", () => {
         },
       ];
 
-      mockController.hasAuthorizedPoliciesForCalls.mockResolvedValue(false);
+      // trySessionExecute will handle authorization checks internally
+      // and throw an error if unauthorized
+      mockController.trySessionExecute.mockRejectedValue({
+        code: ErrorCode.SessionRefreshRequired,
+        message: "Session refresh required",
+        data: "{}",
+      });
 
       const result = await executeFunc(transactions);
 
@@ -332,8 +432,8 @@ describe("execute utils", () => {
         },
       ];
 
-      mockController.hasAuthorizedPoliciesForCalls.mockResolvedValue(true);
-      mockController.executeFromOutsideV3.mockRejectedValue({
+      // trySessionExecute throws an error which triggers UI navigation
+      mockController.trySessionExecute.mockRejectedValue({
         code: "EXECUTION_ERROR",
         message: "Transaction failed",
         data: "{}",
@@ -346,10 +446,10 @@ describe("execute utils", () => {
         { replace: true },
       );
 
+      // When trySessionExecute fails, we return USER_INTERACTION_REQUIRED
       expect(result).toEqual({
-        code: ResponseCodes.ERROR,
-        message: "Transaction failed",
-        error: expect.any(Object),
+        code: ResponseCodes.USER_INTERACTION_REQUIRED,
+        message: "User interaction required",
       });
     });
 

@@ -14,7 +14,7 @@ import {
   addAddressPadding,
 } from "starknet";
 import { ControllerError } from "./types";
-import { ErrorCode, JsCall } from "@cartridge/controller-wasm/controller";
+import { JsCall } from "@cartridge/controller-wasm/controller";
 import { mutex } from "./sync";
 import Controller from "../controller";
 import { storeCallbacks, generateCallbackId } from "./callbacks";
@@ -91,26 +91,7 @@ export async function executeCore(
   }
 
   const calls = normalizeCalls(transactions);
-
-  // Try paymaster flow
-  try {
-    const res = await controller.executeFromOutsideV3(calls, feeSource);
-    return res;
-  } catch (e) {
-    const error = e as ControllerError;
-    if (error.code !== ErrorCode.PaymasterNotSupported) {
-      throw error;
-    }
-  }
-
-  // User pays flow
-  const estimate = await controller.estimateInvokeFee(calls);
-  const res = await controller.execute(
-    transactions as Call[],
-    estimate,
-    feeSource,
-  );
-  return res;
+  return await controller.trySessionExecute(calls, feeSource);
 }
 
 export function execute({
@@ -155,21 +136,7 @@ export function execute({
           });
         }
 
-        // Check if calls are authorized by stored policies
-        if (!(await controller.hasAuthorizedPoliciesForCalls(calls))) {
-          const url = createExecuteUrl(toArray(transactions), {
-            resolve,
-            reject,
-          });
-          navigate(url, { replace: true });
-
-          return resolve({
-            code: ResponseCodes.USER_INTERACTION_REQUIRED,
-            message: "User interaction required",
-          });
-        }
-
-        // Use the consolidated execution logic
+        // Use trySessionExecute which handles session checks internally
         try {
           const { transaction_hash } = await executeCore(calls, feeSource);
           return resolve({
@@ -180,6 +147,8 @@ export function execute({
           const error = e as ControllerError;
           const parsedError = parseControllerError(error);
 
+          // Check for specific error codes that require user interaction
+          // SessionRefreshRequired and ManualExecutionRequired both need UI
           const url = createExecuteUrl(toArray(transactions), {
             error: parsedError,
             resolve,
@@ -188,9 +157,8 @@ export function execute({
           navigate(url, { replace: true });
 
           return resolve({
-            code: ResponseCodes.ERROR,
-            message: error.message,
-            error: parsedError,
+            code: ResponseCodes.USER_INTERACTION_REQUIRED,
+            message: "User interaction required",
           });
         }
       },

@@ -10,8 +10,8 @@ catalogs:
       specifier: 0.3.5
       version: 0.3.5
     '@cartridge/controller-wasm':
-      specifier: ^0.3.7
-      version: 0.3.7
+      specifier: ^0.3.10
+      version: 0.3.10
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -270,7 +270,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.7
+        version: 0.3.10
       starknet:
         specifier: 'catalog:'
         version: 8.5.4
@@ -302,13 +302,13 @@ importers:
         version: 9.25.1
       '@sveltejs/adapter-auto':
         specifier: ^4.0.0
-        version: 4.0.0(@sveltejs/kit@2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))
+        version: 4.0.0(@sveltejs/kit@2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))
       '@sveltejs/kit':
         specifier: ^2.16.1
-        version: 2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+        version: 2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       '@sveltejs/vite-plugin-svelte':
         specifier: ^5.0.3
-        version: 5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+        version: 5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       '@types/eslint':
         specifier: ^9.6.0
         version: 9.6.1
@@ -320,7 +320,7 @@ importers:
         version: 9.1.0(eslint@9.25.1(jiti@1.21.7))
       eslint-plugin-svelte:
         specifier: ^2.36.0
-        version: 2.46.1(eslint@9.25.1(jiti@1.21.7))(svelte@5.28.2)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.5.2)(typescript@5.8.3))
+        version: 2.46.1(eslint@9.25.1(jiti@1.21.7))(svelte@5.28.2)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.6.1)(typescript@5.8.3))
       globals:
         specifier: 'catalog:'
         version: 15.15.0
@@ -344,13 +344,13 @@ importers:
         version: 8.31.1(eslint@9.25.1(jiti@1.21.7))(typescript@5.8.3)
       vite:
         specifier: 'catalog:'
-        version: 6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
+        version: 6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
       vite-plugin-top-level-await:
         specifier: 'catalog:'
-        version: 1.5.0(@swc/helpers@0.5.17)(rollup@4.40.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+        version: 1.5.0(@swc/helpers@0.5.17)(rollup@4.40.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       vite-plugin-wasm:
         specifier: 'catalog:'
-        version: 3.4.1(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+        version: 3.4.1(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
 
   packages/connector:
     dependencies:
@@ -372,7 +372,7 @@ importers:
         version: 3.5.3
       tsup:
         specifier: 'catalog:'
-        version: 8.4.0(@microsoft/api-extractor@7.52.6(@types/node@24.5.2))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@1.21.7)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.7.1)
+        version: 8.4.0(@microsoft/api-extractor@7.52.6(@types/node@24.6.1))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@1.21.7)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.7.1)
       typescript:
         specifier: ^5.7.3
         version: 5.8.3
@@ -381,7 +381,7 @@ importers:
     dependencies:
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.7
+        version: 0.3.10
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -509,7 +509,7 @@ importers:
         version: link:../controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.7
+        version: 0.3.10
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -972,8 +972,8 @@ packages:
   '@cartridge/controller-wasm@0.2.1':
     resolution: {integrity: sha512-uB0ffQEHAlu7+2E4Y/EoWUgbIYNrjMXks2FYHS8lg9ngaFwETvrUFI5Y+Pp71VQTthEnuwVcNKBqluO5TSPAug==}
 
-  '@cartridge/controller-wasm@0.3.7':
-    resolution: {integrity: sha512-ZZe4e9+saOols71fDBXD29Zs33Bwwk1jJB6dA2Y7lvrZF7ph4grit4tNlcr3mvixzyUjNpSP9d9NR0oPpBocbA==}
+  '@cartridge/controller-wasm@0.3.10':
+    resolution: {integrity: sha512-VUSlP1pRw4ulGa2fZbz9PdNkalhR+7T+d4jRlxQHAXf+S9cZz1mMIP64VOHOLdLZTXzO6ZEPy/cpzJPw53kKcg==}
 
   '@cartridge/controller@0.9.0':
     resolution: {integrity: sha512-bIikpiIR+N16MaEyxjab/AN3uDvOj+pdixWbJLSVqGpItpUq58AiQ0GFwPKXnpAwKVT66aqNrVBINSuMWemRhQ==}
@@ -3729,8 +3729,8 @@ packages:
   '@types/node@22.7.5':
     resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
 
-  '@types/node@24.5.2':
-    resolution: {integrity: sha512-FYxk1I7wPv3K2XBaoyH2cTnocQEu8AOZ60hPbsyukMPLv5/5qr7V1i8PLHdl6Zf87I+xZXFvPCXYjiTFq+YSDQ==}
+  '@types/node@24.6.1':
+    resolution: {integrity: sha512-ljvjjs3DNXummeIaooB4cLBKg2U6SPI6Hjra/9rRIy7CpM0HpLtG9HptkMKAb4HYWy5S7HUvJEuWgr/y0U8SHw==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -4087,8 +4087,8 @@ packages:
     resolution: {integrity: sha512-DxybNfznr7aE/U9tJqvpEorUW2f/6kR0S1Zk78NqKam1Ex+BQFDM5j2Az3WayfFDZz3adkxkLAszfdorvPxDlw==}
     engines: {node: '>=18'}
 
-  '@walletconnect/core@2.21.9':
-    resolution: {integrity: sha512-SlSknLvbO4i9Y4y8zU0zeCuJv1klQIUX3HRSBs1BaYvQKVVkrdiWPgRj4jcrL2wEOINa9NXw6HXp6x5XCXOolA==}
+  '@walletconnect/core@2.21.10':
+    resolution: {integrity: sha512-azWSsDeUZupqK0E8V85w7toNYVm/uzLtxhNv28dvNMtUf8aKlww3DilQxP9T2HZ3z+3n0ocuRzi0nfktjsaHyw==}
     engines: {node: '>=18.20.8'}
 
   '@walletconnect/environment@1.0.1':
@@ -4144,8 +4144,8 @@ packages:
   '@walletconnect/sign-client@2.20.1':
     resolution: {integrity: sha512-QXzIAHbyZZ52+97Bp/+/SBkN3hX0pam8l4lnA4P7g+aFPrVZUrMwZPIf+FV7UbEswqqwo3xmFI41TKgj8w8B9w==}
 
-  '@walletconnect/sign-client@2.21.9':
-    resolution: {integrity: sha512-EKLDS97o1rk/0XilD0nQdSR9SNgRsVoIK5M5HpS9sDTvHPv2EF5pIqu6Xr2vLsKcQ0KnCx+D5bnpav8Yh4NVZg==}
+  '@walletconnect/sign-client@2.21.10':
+    resolution: {integrity: sha512-ZXpMhgxWehPXyL9Lfzg61Q+89rSoG4XQgAqA90UEB94BHuG9SSOjnmPCK3TZeil70E66ekwAOvO7kphnhQGd5A==}
 
   '@walletconnect/time@1.0.2':
     resolution: {integrity: sha512-uzdd9woDcJ1AaBZRhqy5rNC9laqWGErfc4dxA9a87mPdKOgWMD85mcFo9dIYIts/Jwocfwn07EC6EzclKubk/g==}
@@ -4156,8 +4156,8 @@ packages:
   '@walletconnect/types@2.20.1':
     resolution: {integrity: sha512-HM0YZxT+wNqskoZkuju5owbKTlqUXNKfGlJk/zh9pWaVWBR2QamvQ+47Cx09OoGPRQjQH0JmgRiUV4bOwWNeHg==}
 
-  '@walletconnect/types@2.21.9':
-    resolution: {integrity: sha512-+82TRNX3lGRO96WyLISaBs/FkLts7y4hVgmOI4we84I7XdBu1xsjgiJj0JwYXnurz+X94lTqzOkzPps+wadWKw==}
+  '@walletconnect/types@2.21.10':
+    resolution: {integrity: sha512-9oSvgxv1hE5aS+j4aHS9YgKeq50BP4iMh49tjubTW5574cBWqmt1bXfQhZddSTbq9OirwLSegl6W36itkzryBQ==}
 
   '@walletconnect/universal-provider@2.19.2':
     resolution: {integrity: sha512-LkKg+EjcSUpPUhhvRANgkjPL38wJPIWumAYD8OK/g4OFuJ4W3lS/XTCKthABQfFqmiNbNbVllmywiyE44KdpQg==}
@@ -4171,8 +4171,8 @@ packages:
   '@walletconnect/utils@2.20.1':
     resolution: {integrity: sha512-u/uyJkVyxLLUbHbpMv7MmuOkGfElG08l6P2kMTAfN7nAVyTgpb8g6kWLMNqfmYXVz+h+finf5FSV4DgL2vOvPQ==}
 
-  '@walletconnect/utils@2.21.9':
-    resolution: {integrity: sha512-FHagysDvp7yQl+74veIeuqwZZnMiTyTW3Lw0NXsbIKnlmlSQu5pma+4EnRD/CnSzbN6PV39k2t1KBaaZ4PjDgg==}
+  '@walletconnect/utils@2.21.10':
+    resolution: {integrity: sha512-LC5hmP3uxVoMyw7Ibea1JQdE98FTb7jZie60qiaybmaIsg/ApEUosU5uCLTFRJwEWUip2p3sJTb0n/3pU+yR/Q==}
 
   '@walletconnect/window-getters@1.0.1':
     resolution: {integrity: sha512-vHp+HqzGxORPAN8gY03qnbTMnhqIwjeRJNOMOAzePRg4xVEEE2WvYsI9G2NMjOknA8hnuYbU3/hwLcKbjhc8+Q==}
@@ -4203,6 +4203,17 @@ packages:
     peerDependencies:
       typescript: ^5.7.3
       zod: ^3 >=3.22.0
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+      zod:
+        optional: true
+
+  abitype@1.1.1:
+    resolution: {integrity: sha512-Loe5/6tAgsBukY95eGaPSDmQHIjRZYQq8PB1MpsNccDIK8WiV+Uw6WzaIXipvaxTEL2yEB0OpEaQv3gs8pkS9Q==}
+    peerDependencies:
+      typescript: ^5.7.3
+      zod: ^3.22.0 || ^4.0.0
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -7458,6 +7469,14 @@ packages:
       typescript:
         optional: true
 
+  ox@0.9.3:
+    resolution: {integrity: sha512-KzyJP+fPV4uhuuqrTZyok4DC7vFzi7HLUFiUNEmpbyh59htKWkOC98IONC1zgXJPbHAhQgqs6B0Z6StCGhmQvg==}
+    peerDependencies:
+      typescript: ^5.7.3
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   p-finally@2.0.1:
     resolution: {integrity: sha512-vpm09aKwq6H9phqRQzecoDpD8TmVyGw70qmWlyq5onxY7tqyTTFVvxMykxQSQKILBSFlbXpypIw2T1Ml7+DDtw==}
     engines: {node: '>=8'}
@@ -8984,8 +9003,8 @@ packages:
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
-  undici-types@7.12.0:
-    resolution: {integrity: sha512-goOacqME2GYyOZZfb5Lgtu+1IDmAlAEu5xnD3+xTzS10hT0vzpf0SPjkXwAw9Jm+4n/mQGDP3LO8CPbYROeBfQ==}
+  undici-types@7.13.0:
+    resolution: {integrity: sha512-Ov2Rr9Sx+fRgagJ5AX0qvItZG/JKKoBRAVITs1zk7IqZGTJUwgUr7qoYBpWwakpWilTZFM98rG/AFRocu10iIQ==}
 
   undici@5.28.4:
     resolution: {integrity: sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==}
@@ -9976,7 +9995,7 @@ snapshots:
 
   '@cartridge/controller-wasm@0.2.1': {}
 
-  '@cartridge/controller-wasm@0.3.7': {}
+  '@cartridge/controller-wasm@0.3.10': {}
 
   '@cartridge/controller@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(open@10.1.2)(react@18.3.1)(starknet@8.5.4)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@8.5.4)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
@@ -11156,11 +11175,11 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@microsoft/api-extractor-model@7.30.6(@types/node@24.5.2)':
+  '@microsoft/api-extractor-model@7.30.6(@types/node@24.6.1)':
     dependencies:
       '@microsoft/tsdoc': 0.15.1
       '@microsoft/tsdoc-config': 0.17.1
-      '@rushstack/node-core-library': 5.13.1(@types/node@24.5.2)
+      '@rushstack/node-core-library': 5.13.1(@types/node@24.6.1)
     transitivePeerDependencies:
       - '@types/node'
     optional: true
@@ -11183,15 +11202,15 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@microsoft/api-extractor@7.52.6(@types/node@24.5.2)':
+  '@microsoft/api-extractor@7.52.6(@types/node@24.6.1)':
     dependencies:
-      '@microsoft/api-extractor-model': 7.30.6(@types/node@24.5.2)
+      '@microsoft/api-extractor-model': 7.30.6(@types/node@24.6.1)
       '@microsoft/tsdoc': 0.15.1
       '@microsoft/tsdoc-config': 0.17.1
-      '@rushstack/node-core-library': 5.13.1(@types/node@24.5.2)
+      '@rushstack/node-core-library': 5.13.1(@types/node@24.6.1)
       '@rushstack/rig-package': 0.5.3
-      '@rushstack/terminal': 0.15.3(@types/node@24.5.2)
-      '@rushstack/ts-command-line': 5.0.1(@types/node@24.5.2)
+      '@rushstack/terminal': 0.15.3(@types/node@24.6.1)
+      '@rushstack/ts-command-line': 5.0.1(@types/node@24.6.1)
       lodash: 4.17.21
       minimatch: 3.0.8
       resolve: 1.22.10
@@ -12447,7 +12466,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 18.19.87
 
-  '@rushstack/node-core-library@5.13.1(@types/node@24.5.2)':
+  '@rushstack/node-core-library@5.13.1(@types/node@24.6.1)':
     dependencies:
       ajv: 8.13.0
       ajv-draft-04: 1.0.0(ajv@8.13.0)
@@ -12458,7 +12477,7 @@ snapshots:
       resolve: 1.22.10
       semver: 7.5.4
     optionalDependencies:
-      '@types/node': 24.5.2
+      '@types/node': 24.6.1
     optional: true
 
   '@rushstack/rig-package@0.5.3':
@@ -12473,12 +12492,12 @@ snapshots:
     optionalDependencies:
       '@types/node': 18.19.87
 
-  '@rushstack/terminal@0.15.3(@types/node@24.5.2)':
+  '@rushstack/terminal@0.15.3(@types/node@24.6.1)':
     dependencies:
-      '@rushstack/node-core-library': 5.13.1(@types/node@24.5.2)
+      '@rushstack/node-core-library': 5.13.1(@types/node@24.6.1)
       supports-color: 8.1.1
     optionalDependencies:
-      '@types/node': 24.5.2
+      '@types/node': 24.6.1
     optional: true
 
   '@rushstack/ts-command-line@5.0.1(@types/node@18.19.87)':
@@ -12490,9 +12509,9 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/ts-command-line@5.0.1(@types/node@24.5.2)':
+  '@rushstack/ts-command-line@5.0.1(@types/node@24.6.1)':
     dependencies:
-      '@rushstack/terminal': 0.15.3(@types/node@24.5.2)
+      '@rushstack/terminal': 0.15.3(@types/node@24.6.1)
       '@types/argparse': 1.0.38
       argparse: 1.0.10
       string-argv: 0.3.2
@@ -12926,14 +12945,14 @@ snapshots:
     dependencies:
       acorn: 8.14.1
 
-  '@sveltejs/adapter-auto@4.0.0(@sveltejs/kit@2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))':
+  '@sveltejs/adapter-auto@4.0.0(@sveltejs/kit@2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))':
     dependencies:
-      '@sveltejs/kit': 2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+      '@sveltejs/kit': 2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       import-meta-resolve: 4.1.0
 
-  '@sveltejs/kit@2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))':
+  '@sveltejs/kit@2.20.8(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+      '@sveltejs/vite-plugin-svelte': 5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       '@types/cookie': 0.6.0
       cookie: 0.6.0
       devalue: 5.1.1
@@ -12946,27 +12965,27 @@ snapshots:
       set-cookie-parser: 2.7.1
       sirv: 3.0.1
       svelte: 5.28.2
-      vite: 6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
+      vite: 6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
 
-  '@sveltejs/vite-plugin-svelte-inspector@4.0.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))':
+  '@sveltejs/vite-plugin-svelte-inspector@4.0.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+      '@sveltejs/vite-plugin-svelte': 5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       debug: 4.4.0
       svelte: 5.28.2
-      vite: 6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
+      vite: 6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))':
+  '@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 4.0.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+      '@sveltejs/vite-plugin-svelte-inspector': 4.0.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)))(svelte@5.28.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
       debug: 4.4.0
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.17
       svelte: 5.28.2
-      vite: 6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
-      vitefu: 1.0.6(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
+      vite: 6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
+      vitefu: 1.0.6(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -13380,9 +13399,9 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@24.5.2':
+  '@types/node@24.6.1':
     dependencies:
-      undici-types: 7.12.0
+      undici-types: 7.13.0
     optional: true
 
   '@types/parse-json@4.0.2': {}
@@ -13958,7 +13977,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@walletconnect/core@2.21.9(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@walletconnect/core@2.21.10(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-provider': 1.0.14
@@ -13971,8 +13990,8 @@ snapshots:
       '@walletconnect/relay-auth': 1.1.0
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.21.9
-      '@walletconnect/utils': 2.21.9(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@walletconnect/types': 2.21.10
+      '@walletconnect/utils': 2.21.10(typescript@5.8.3)(zod@3.24.4)
       '@walletconnect/window-getters': 1.0.1
       es-toolkit: 1.39.3
       events: 3.3.0
@@ -14207,16 +14226,16 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@walletconnect/sign-client@2.21.9(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@walletconnect/sign-client@2.21.10(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
-      '@walletconnect/core': 2.21.9(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@walletconnect/core': 2.21.10(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.21.9
-      '@walletconnect/utils': 2.21.9(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@walletconnect/types': 2.21.10
+      '@walletconnect/utils': 2.21.10(typescript@5.8.3)(zod@3.24.4)
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -14302,7 +14321,7 @@ snapshots:
       - ioredis
       - uploadthing
 
-  '@walletconnect/types@2.21.9':
+  '@walletconnect/types@2.21.10':
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
@@ -14494,7 +14513,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@walletconnect/utils@2.21.9(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@walletconnect/utils@2.21.10(typescript@5.8.3)(zod@3.24.4)':
     dependencies:
       '@msgpack/msgpack': 3.1.2
       '@noble/ciphers': 1.3.0
@@ -14507,14 +14526,14 @@ snapshots:
       '@walletconnect/relay-auth': 1.1.0
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.21.9
+      '@walletconnect/types': 2.21.10
       '@walletconnect/window-getters': 1.0.1
       '@walletconnect/window-metadata': 1.0.1
       blakejs: 1.2.1
       bs58: 6.0.0
       detect-browser: 5.3.0
+      ox: 0.9.3(typescript@5.8.3)(zod@3.24.4)
       uint8arrays: 3.1.1
-      viem: 2.36.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -14531,12 +14550,10 @@ snapshots:
       - '@vercel/blob'
       - '@vercel/kv'
       - aws4fetch
-      - bufferutil
       - db0
       - ioredis
       - typescript
       - uploadthing
-      - utf-8-validate
       - zod
 
   '@walletconnect/window-getters@1.0.1':
@@ -14568,6 +14585,11 @@ snapshots:
       zod: 3.22.4
 
   abitype@1.0.8(typescript@5.8.3)(zod@3.24.4):
+    optionalDependencies:
+      typescript: 5.8.3
+      zod: 3.24.4
+
+  abitype@1.1.1(typescript@5.8.3)(zod@3.24.4):
     optionalDependencies:
       typescript: 5.8.3
       zod: 3.24.4
@@ -16230,7 +16252,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-svelte@2.46.1(eslint@9.25.1(jiti@1.21.7))(svelte@5.28.2)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.5.2)(typescript@5.8.3)):
+  eslint-plugin-svelte@2.46.1(eslint@9.25.1(jiti@1.21.7))(svelte@5.28.2)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.6.1)(typescript@5.8.3)):
     dependencies:
       '@eslint-community/eslint-utils': 4.6.1(eslint@9.25.1(jiti@1.21.7))
       '@jridgewell/sourcemap-codec': 1.5.0
@@ -16239,7 +16261,7 @@ snapshots:
       esutils: 2.0.3
       known-css-properties: 0.35.0
       postcss: 8.5.3
-      postcss-load-config: 3.1.4(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.5.2)(typescript@5.8.3))
+      postcss-load-config: 3.1.4(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.6.1)(typescript@5.8.3))
       postcss-safe-parser: 6.0.0(postcss@8.5.3)
       postcss-selector-parser: 6.1.2
       semver: 7.7.1
@@ -18483,7 +18505,22 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
-      abitype: 1.0.8(typescript@5.8.3)(zod@3.24.4)
+      abitype: 1.1.1(typescript@5.8.3)(zod@3.24.4)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.8.3
+    transitivePeerDependencies:
+      - zod
+
+  ox@0.9.3(typescript@5.8.3)(zod@3.24.4):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/ciphers': 1.3.0
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.1(typescript@5.8.3)(zod@3.24.4)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.8.3
@@ -18712,13 +18749,13 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.5.3
 
-  postcss-load-config@3.1.4(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.5.2)(typescript@5.8.3)):
+  postcss-load-config@3.1.4(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.6.1)(typescript@5.8.3)):
     dependencies:
       lilconfig: 2.1.0
       yaml: 1.10.2
     optionalDependencies:
       postcss: 8.5.3
-      ts-node: 10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.5.2)(typescript@5.8.3)
+      ts-node: 10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.6.1)(typescript@5.8.3)
 
   postcss-load-config@4.0.2(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)):
     dependencies:
@@ -19518,7 +19555,7 @@ snapshots:
       '@starknet-io/types-js': 0.8.4
       '@trpc/client': 10.45.2(@trpc/server@10.45.2)
       '@trpc/server': 10.45.2
-      '@walletconnect/sign-client': 2.21.9(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@walletconnect/sign-client': 2.21.10(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       bowser: 2.12.1
       detect-browser: 5.3.0
       eventemitter3: 5.0.1
@@ -20088,14 +20125,14 @@ snapshots:
       '@swc/core': 1.11.24(@swc/helpers@0.5.17)
     optional: true
 
-  ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.5.2)(typescript@5.8.3):
+  ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@24.6.1)(typescript@5.8.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 24.5.2
+      '@types/node': 24.6.1
       acorn: 8.15.0
       acorn-walk: 8.3.4
       arg: 4.1.3
@@ -20159,7 +20196,7 @@ snapshots:
       - tsx
       - yaml
 
-  tsup@8.4.0(@microsoft/api-extractor@7.52.6(@types/node@24.5.2))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@1.21.7)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.7.1):
+  tsup@8.4.0(@microsoft/api-extractor@7.52.6(@types/node@24.6.1))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@1.21.7)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)(yaml@2.7.1):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.25.4)
       cac: 6.7.14
@@ -20178,7 +20215,7 @@ snapshots:
       tinyglobby: 0.2.13
       tree-kill: 1.2.2
     optionalDependencies:
-      '@microsoft/api-extractor': 7.52.6(@types/node@24.5.2)
+      '@microsoft/api-extractor': 7.52.6(@types/node@24.6.1)
       '@swc/core': 1.11.24(@swc/helpers@0.5.17)
       postcss: 8.5.3
       typescript: 5.8.3
@@ -20316,7 +20353,7 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@7.12.0:
+  undici-types@7.13.0:
     optional: true
 
   undici@5.28.4:
@@ -20631,12 +20668,12 @@ snapshots:
       - '@swc/helpers'
       - rollup
 
-  vite-plugin-top-level-await@1.5.0(@swc/helpers@0.5.17)(rollup@4.40.2)(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)):
+  vite-plugin-top-level-await@1.5.0(@swc/helpers@0.5.17)(rollup@4.40.2)(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)):
     dependencies:
       '@rollup/plugin-virtual': 3.0.2(rollup@4.40.2)
       '@swc/core': 1.11.24(@swc/helpers@0.5.17)
       uuid: 10.0.0
-      vite: 6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
+      vite: 6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
     transitivePeerDependencies:
       - '@swc/helpers'
       - rollup
@@ -20645,9 +20682,9 @@ snapshots:
     dependencies:
       vite: 6.3.4(@types/node@18.19.87)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
 
-  vite-plugin-wasm@3.4.1(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)):
+  vite-plugin-wasm@3.4.1(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)):
     dependencies:
-      vite: 6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
+      vite: 6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
 
   vite@5.4.19(@types/node@18.19.87):
     dependencies:
@@ -20673,7 +20710,7 @@ snapshots:
       tsx: 4.19.4
       yaml: 2.7.1
 
-  vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1):
+  vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1):
     dependencies:
       esbuild: 0.25.4
       fdir: 6.4.4(picomatch@4.0.2)
@@ -20682,15 +20719,15 @@ snapshots:
       rollup: 4.40.2
       tinyglobby: 0.2.13
     optionalDependencies:
-      '@types/node': 24.5.2
+      '@types/node': 24.6.1
       fsevents: 2.3.3
       jiti: 1.21.7
       tsx: 4.19.4
       yaml: 2.7.1
 
-  vitefu@1.0.6(vite@6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)):
+  vitefu@1.0.6(vite@6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)):
     optionalDependencies:
-      vite: 6.3.4(@types/node@24.5.2)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
+      vite: 6.3.4(@types/node@24.6.1)(jiti@1.21.7)(tsx@4.19.4)(yaml@2.7.1)
 
   vitest@2.1.8(@edge-runtime/vm@3.2.0)(@types/node@18.19.87)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
     dependencies:
