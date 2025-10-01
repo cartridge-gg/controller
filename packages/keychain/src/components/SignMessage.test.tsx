@@ -26,9 +26,7 @@ vi.mock("@/hooks/connection", () => ({
     closeModal: mockCloseModal,
     setOnModalClose: mockSetOnModalClose,
     controller: {
-      signMessage: vi.fn(() =>
-        Promise.resolve(["0x1", "0x2"] as Signature),
-      ),
+      signMessage: vi.fn(() => Promise.resolve(["0x1", "0x2"] as Signature)),
     },
     origin: "test-app.com",
   })),
@@ -287,9 +285,7 @@ describe("SignMessage", () => {
       closeModal: mockCloseModal,
       setOnModalClose: undefined,
       controller: {
-        signMessage: vi.fn(() =>
-          Promise.resolve(["0x1", "0x2"] as Signature),
-        ),
+        signMessage: vi.fn(() => Promise.resolve(["0x1", "0x2"] as Signature)),
       },
       origin: "test-app.com",
     });

@@ -26,9 +26,8 @@ export function SignMessage() {
   const { closeModal, setOnModalClose } = useConnection();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [params, setParams] = useState<
-    ReturnType<typeof parseSignMessageParams>
-  >(null);
+  const [params, setParams] =
+    useState<ReturnType<typeof parseSignMessageParams>>(null);
 
   useEffect(() => {
     const dataParam = searchParams.get("data");

@@ -106,10 +106,7 @@ export function signMessageFactory({
   ): Promise<Signature | ConnectError> => {
     const controller = window.controller;
 
-    const showSignMessage = ({
-      resolve,
-      reject,
-    }: SignMessageCallback = {}) => {
+    const showSignMessage = ({ resolve, reject }: SignMessageCallback = {}) => {
       const url = createSignMessageUrl(typedData, {
         resolve,
         reject,

@@ -9,7 +9,6 @@ import {
   TypedData,
   shortString,
   typedData,
-  cairo,
 } from "starknet";
 
 const MESSAGE: TypedData = {
