@@ -4,28 +4,120 @@ import {
   ResponseCodes,
 } from "@cartridge/controller";
 import { Signature, TypedData } from "starknet";
-import { ConnectionCtx, SignMessageCtx } from "./types";
 import { mutex } from "./sync";
 import { parseControllerError } from "./execute";
+import { generateCallbackId, storeCallbacks, getCallbacks } from "./callbacks";
 
-export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
+export interface SignMessageParams {
+  id: string;
+  typedData: TypedData;
+}
+
+type SignMessageCallback = {
+  resolve?: (result: Signature | ConnectError) => void;
+  reject?: (reason?: unknown) => void;
+  onCancel?: () => void;
+};
+
+export function createSignMessageUrl(
+  typedData: TypedData,
+  options: SignMessageCallback = {},
+): string {
+  const id = generateCallbackId();
+
+  if (options.resolve || options.reject || options.onCancel) {
+    storeCallbacks(id, {
+      resolve: options.resolve
+        ? (result) => {
+            options.resolve?.(result as Signature | ConnectError);
+          }
+        : undefined,
+      reject: options.reject,
+      onCancel: options.onCancel,
+    });
+  }
+
+  const params: SignMessageParams = {
+    id,
+    typedData,
+  };
+
+  return `/sign-message?data=${encodeURIComponent(
+    JSON.stringify(params, (_, value) =>
+      typeof value === "bigint" ? value.toString() : value,
+    ),
+  )}`;
+}
+
+export function parseSignMessageParams(
+  paramString: string,
+): (SignMessageCallback & { params: SignMessageParams }) | null {
+  try {
+    const params = JSON.parse(
+      decodeURIComponent(paramString),
+    ) as SignMessageParams;
+
+    const callbacks = params.id
+      ? (getCallbacks(params.id) as SignMessageCallback | undefined)
+      : undefined;
+
+    const resolve = callbacks?.resolve
+      ? (value: Signature | ConnectError) => {
+          callbacks.resolve?.(value);
+        }
+      : undefined;
+
+    const reject = callbacks?.reject
+      ? (reason?: unknown) => {
+          callbacks.reject?.(reason);
+        }
+      : undefined;
+
+    const onCancel = callbacks?.onCancel
+      ? () => {
+          callbacks.onCancel?.();
+        }
+      : undefined;
+
+    return {
+      params,
+      resolve,
+      reject,
+      onCancel,
+    };
+  } catch (error) {
+    console.error("Failed to parse sign message params:", error);
+    return null;
+  }
+}
+
+export function signMessageFactory({
+  navigate,
+}: {
+  navigate: (
+    to: string | number,
+    options?: { replace?: boolean; state?: unknown },
+  ) => void;
+}) {
   return async (
     typedData: TypedData,
-    account: string,
+    _account: string,
     async?: boolean,
   ): Promise<Signature | ConnectError> => {
     const controller = window.controller;
 
+    const showSignMessage = ({ resolve, reject }: SignMessageCallback = {}) => {
+      const url = createSignMessageUrl(typedData, {
+        resolve,
+        reject,
+      });
+
+      navigate(url, { replace: true });
+    };
+
     if (!async) {
-      return new Promise((resolve, reject) => {
-        setContext({
-          type: "sign-message",
-          origin,
-          typedData,
-          account,
-          resolve,
-          reject,
-        } as SignMessageCtx);
+      return await new Promise((resolve, reject) => {
+        showSignMessage({ resolve, reject });
       });
     }
 
@@ -40,14 +132,7 @@ export function signMessageFactory(setContext: (ctx: ConnectionCtx) => void) {
         // If a session call and there is no session available
         // fallback to manual apporval flow
         if (!(await controller.hasAuthorizedPoliciesForMessage(typedData))) {
-          setContext({
-            type: "sign-message",
-            origin,
-            typedData,
-            account,
-            resolve,
-            reject,
-          } as SignMessageCtx);
+          showSignMessage({ resolve, reject });
 
           return resolve({
             code: ResponseCodes.USER_INTERACTION_REQUIRED,

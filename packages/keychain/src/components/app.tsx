@@ -39,6 +39,7 @@ import { CryptoCheckout } from "./purchasenew/checkout/crypto";
 import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
 import { Execute } from "./Execute";
+import { SignMessage } from "./SignMessage";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
 import { useNavigation } from "@/context";
@@ -129,6 +130,7 @@ export function App() {
           }
         />
         <Route path="/execute" element={<Execute />} />
+        <Route path="/sign-message" element={<SignMessage />} />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />
