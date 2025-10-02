@@ -101,7 +101,7 @@ export function StarterPackInner({
     switch (acquisitionType) {
       case StarterpackAcquisitionType.Paid: {
         const methods = isMainnet
-          ? "ethereum;solana;base;arbitrum;optimism"
+          ? "ethereum;base;arbitrum;optimism"
           : "arbitrum";
 
         navigate(`/purchase/method/${methods}`);
