@@ -98,30 +98,15 @@ export class Transaction {
       throw new Error("Transaction requires feePayer and recentBlockhash");
     }
 
-    // Build the transaction message
-    const message = {
-      feePayer: this.feePayer.toString(),
-      instructions: this._instructions,
-      recentBlockhash: this.recentBlockhash,
-    };
+    // Use createTxComplex which returns a base64-encoded transaction with empty signatures
+    const txBase64 = sol.createTxComplex(
+      this.feePayer.toString(),
+      this._instructions,
+      this.recentBlockhash,
+    );
 
-    // Collect all unique signers (feePayer + instruction signers)
-    const signers = new Set<string>();
-    signers.add(this.feePayer.toString());
-    for (const ix of this._instructions) {
-      for (const key of ix.keys) {
-        if (key.sign) {
-          signers.add(key.address);
-        }
-      }
-    }
-
-    // Create empty signatures (64 bytes each) for all signers
-    const signatures = Array.from(signers).map(() => new Uint8Array(64));
-
-    // Encode the transaction with message and empty signatures
-    const tx = { message, signatures };
-    return Buffer.from(sol.Transaction.encode(tx));
+    // Decode the base64 string to get the transaction bytes
+    return Buffer.from(txBase64, "base64");
   }
 
   serializeMessage(): Buffer {
