@@ -309,6 +309,11 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
         (v) => BigInt(v?.address || "0x0") === BigInt(contractAddress),
       );
       const change = value ? value.current.value - value.period.value : 0;
+      const image = erc20Metadata.find(
+        (m) =>
+          getChecksumAddress(m.l2_token_address) ===
+          getChecksumAddress(contractAddress),
+      )?.logo_url;
       tokenMap[normalizedAddress] = {
         balance: {
           amount: Number(token.balance.value) / 10 ** token.meta.decimals,
@@ -320,7 +325,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
           symbol: token.meta.symbol,
           decimals: token.meta.decimals,
           address: getChecksumAddress(contractAddress),
-          image: token.meta.logoUrl,
+          image: token.meta.logoUrl || image,
         },
       };
     });

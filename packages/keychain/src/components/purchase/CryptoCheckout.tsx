@@ -164,7 +164,7 @@ export function CryptoCheckout({
         icon={<DepositIcon variant="solid" size="lg" />}
         hideIcon
       />
-      <LayoutContent className="gap-6">
+      <LayoutContent>
         <ReviewToken
           title={"Receiving"}
           name={"Credits"}

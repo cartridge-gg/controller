@@ -202,6 +202,13 @@ export default class Controller {
     );
   }
 
+  async trySessionExecute(
+    calls: Call[],
+    feeSource?: JsFeeSource,
+  ): Promise<InvokeFunctionResponse> {
+    return await this.cartridge.trySessionExecute(toJsCalls(calls), feeSource);
+  }
+
   async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
     return await this.cartridge.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
   }
@@ -281,7 +288,6 @@ export default class Controller {
   static async apiLogin({
     appId,
     classHash,
-    chainId,
     rpcUrl,
     address,
     username,
@@ -289,18 +295,16 @@ export default class Controller {
   }: {
     appId: string;
     classHash: string;
-    chainId: string;
     rpcUrl: string;
     address: string;
     username: string;
     owner: Owner;
-  }) {
+  }): Promise<Controller> {
     const accountWithMeta = await ControllerFactory.apiLogin(
       appId,
       username,
       classHash,
       rpcUrl,
-      chainId,
       address,
       owner,
       import.meta.env.VITE_CARTRIDGE_API_URL,
@@ -314,10 +318,9 @@ export default class Controller {
     return controller;
   }
 
-  static create({
+  static async create({
     appId,
     classHash,
-    chainId,
     rpcUrl,
     address,
     username,
@@ -325,17 +328,15 @@ export default class Controller {
   }: {
     appId: string;
     classHash: string;
-    chainId: string;
     rpcUrl: string;
     address: string;
     username: string;
     owner: Owner;
-  }) {
-    const accountWithMeta = CartridgeAccount.new(
+  }): Promise<Controller> {
+    const accountWithMeta = await CartridgeAccount.new(
       appId,
       classHash,
       rpcUrl,
-      chainId,
       address,
       username,
       owner,
@@ -354,7 +355,6 @@ export default class Controller {
     appId,
     classHash,
     rpcUrl,
-    chainId,
     address,
     username,
     owner,
@@ -365,20 +365,21 @@ export default class Controller {
     appId: string;
     classHash: string;
     rpcUrl: string;
-    chainId: string;
     address: string;
     username: string;
     owner: Owner;
     cartridgeApiUrl: string;
     session_expires_at_s: number;
     isControllerRegistered: boolean;
-  }) {
+  }): Promise<{
+    controller: Controller;
+    session: JsRevokableSession;
+  }> {
     const loginResult = await ControllerFactory.login(
       appId,
       username,
       classHash,
       rpcUrl,
-      chainId,
       address,
       owner,
       cartridgeApiUrl,
@@ -399,13 +400,13 @@ export default class Controller {
     };
   }
 
-  static fromStore(appId: string) {
-    const cartridgeWithMeta = ControllerFactory.fromStorage(
+  static async fromStore(appId: string): Promise<Controller | undefined> {
+    const cartridgeWithMeta = await ControllerFactory.fromStorage(
       appId,
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
     if (!cartridgeWithMeta) {
-      return;
+      return undefined;
     }
 
     const meta = cartridgeWithMeta.meta();

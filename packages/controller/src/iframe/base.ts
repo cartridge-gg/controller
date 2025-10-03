@@ -61,6 +61,9 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.sandbox.add("allow-same-origin");
     iframe.allow =
       "publickey-credentials-create *; publickey-credentials-get *; clipboard-write";
+    iframe.style.scrollbarWidth = "none";
+    iframe.style.setProperty("-ms-overflow-style", "none");
+    iframe.style.setProperty("-webkit-scrollbar", "none");
     if (!!document.hasStorageAccess) {
       iframe.sandbox.add("allow-storage-access-by-user-activation");
     }
@@ -81,6 +84,9 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.opacity = "0";
     container.style.pointerEvents = "auto";
     container.style.overscrollBehaviorY = "contain";
+    container.style.scrollbarWidth = "none";
+    container.style.setProperty("-ms-overflow-style", "none");
+    container.style.setProperty("-webkit-scrollbar", "none");
     container.appendChild(iframe);
 
     // Disables pinch to zoom
@@ -235,7 +241,7 @@ export class IFrame<CallSender extends {}> implements Modal {
     }
 
     this.iframe.style.height = "600px";
-   this.iframe.style.borderRadius = "8px";
+    this.iframe.style.borderRadius = "8px";
   }
 
   isOpen() {

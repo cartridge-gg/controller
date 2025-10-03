@@ -16,4 +16,28 @@
   * {
     @apply focus:outline-none focus:ring-0;
   }
+
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    background: transparent;
+    display: none;
+    -webkit-appearance: none;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: transparent;
+    display: none;
+    -webkit-appearance: none;
+  }
+
+  html {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }

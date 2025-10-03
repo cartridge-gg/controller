@@ -91,5 +91,25 @@ export default defineConfig(({ mode }) => ({
         inline: ["@cartridge/ui", "@cartridge/controller-wasm"],
       },
     },
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "lcov"],
+      exclude: [
+        "node_modules/**",
+        "src/test/**",
+        "**/*.test.{ts,tsx}",
+        "**/*.spec.{ts,tsx}",
+        "**/*.stories.{ts,tsx}",
+        "src/**/__mocks__/**",
+      ],
+    },
+    // Reduce parallelism to lower memory usage
+    pool: "threads",
+    poolOptions: {
+      threads: {
+        maxThreads: 2,
+        minThreads: 1,
+      },
+    },
   },
 }));

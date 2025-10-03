@@ -166,11 +166,11 @@ if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
     rpcUrl: process.env.NEXT_PUBLIC_RPC_MAINNET,
   });
 }
-if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
-  controllerConnectorChains.unshift({
-    rpcUrl: process.env.NEXT_PUBLIC_RPC_LOCAL,
-  });
-}
+// if (process.env.NEXT_PUBLIC_RPC_LOCAL) {
+//   controllerConnectorChains.unshift({
+//     rpcUrl: process.env.NEXT_PUBLIC_RPC_LOCAL,
+//   });
+// }
 
 const controller = new ControllerConnector({
   policies,
@@ -208,6 +208,7 @@ const session = new SessionConnector({
   rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
   chainId: constants.StarknetChainId.SN_MAIN,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
+  disconnectRedirectUrl: "whatsapp://",
   keychainUrl: getKeychainUrl(),
   apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
 });

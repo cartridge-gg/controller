@@ -1,7 +1,7 @@
 {
   "name": "@cartridge/connector",
-  "version": "0.10.6",
-  "description": "Cartridge Controler Connector",
+  "version": "0.10.7",
+  "description": "Cartridge Controller Connector",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -49,7 +49,8 @@
     "@starknet-react/core": "^5.0.1"
   },
   "dependencies": {
-    "@cartridge/controller": "workspace:*"
+    "@cartridge/controller": "workspace:*",
+    "@starknet-io/get-starknet-wallet-standard": "5.0.0-beta.0"
   },
   "devDependencies": {
     "@cartridge/tsconfig": "workspace:*",

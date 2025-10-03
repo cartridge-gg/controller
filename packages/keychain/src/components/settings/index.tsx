@@ -85,7 +85,7 @@ export function Settings() {
   return (
     <Sheet>
       <HeaderInner variant="compressed" title="Settings" Icon={GearIcon} />
-      <LayoutContent className="gap-6">
+      <LayoutContent>
         {featureFlags.signers && (
           <SignersSection controllerQuery={controllerQuery} />
         )}

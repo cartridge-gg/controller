@@ -122,7 +122,7 @@ export const StripeCheckoutContainer = ({
 }) => {
   return (
     <>
-      <LayoutContent className="gap-6">{children}</LayoutContent>
+      <LayoutContent>{children}</LayoutContent>
       <LayoutFooter>
         {error && (
           <ErrorAlert

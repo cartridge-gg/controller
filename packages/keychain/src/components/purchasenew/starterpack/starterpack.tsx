@@ -24,10 +24,10 @@ import { Supply } from "./supply";
 import { useEffect, useMemo } from "react";
 import { LoadingState } from "../loading";
 import { CostBreakdown } from "../review/cost";
-import { PricingDetails } from "@/components/purchase/types";
 import { decodeStarterPack } from "@/utils/starterpack-url";
 import { usdcToUsd } from "@/utils/starterpack";
 import { useConnection } from "@/hooks/connection";
+import { CostDetails } from "../types";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -101,7 +101,7 @@ export function StarterPackInner({
     switch (acquisitionType) {
       case StarterpackAcquisitionType.Paid: {
         const methods = isMainnet
-          ? "ethereum;solana;base;arbitrum;optimism"
+          ? "ethereum;base;arbitrum;optimism"
           : "arbitrum";
 
         navigate(`/purchase/method/${methods}`);
@@ -116,16 +116,17 @@ export function StarterPackInner({
   };
 
   const price = useMemo(() => {
-    const total = starterpackItems.reduce(
-      (acc, item) => acc + usdcToUsd(item.price || 0n),
-      0,
+    const totalUsdc = starterpackItems.reduce(
+      (acc, item) => acc + (item.price || 0n),
+      0n,
     );
+    const total = usdcToUsd(totalUsdc);
 
     return {
       baseCostInCents: total * 100,
       processingFeeInCents: 0,
       totalInCents: total * 100,
-    } satisfies PricingDetails;
+    } as CostDetails;
   }, [starterpackItems]);
 
   return (
@@ -140,7 +141,7 @@ export function StarterPackInner({
             </span>
           ) : undefined
         }
-        right={supply ? <Supply amount={supply} /> : undefined}
+        right={supply !== undefined ? <Supply amount={supply} /> : undefined}
         hideIcon
       />
       <LayoutContent>
@@ -167,7 +168,7 @@ export function StarterPackInner({
         ) : acquisitionType === StarterpackAcquisitionType.Paid ? (
           <CostBreakdown rails="stripe" costDetails={price} />
         ) : null}
-        <Button onClick={onProceed} disabled={!!error}>
+        <Button onClick={onProceed} disabled={!!error || supply === 0}>
           {acquisitionType === StarterpackAcquisitionType.Paid
             ? "Purchase"
             : "Check Eligibility"}

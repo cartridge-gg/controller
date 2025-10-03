@@ -11,6 +11,7 @@ import { useParams } from "react-router-dom";
 import { useData } from "@/hooks/data";
 import { useArcade } from "@/hooks/arcade";
 import { getChecksumAddress } from "starknet";
+import { useUsername } from "@/hooks/username";
 
 export function Leaderboard() {
   const account = useAccount();
@@ -33,8 +34,10 @@ export function Leaderboard() {
 
   const { address } = useParams<{ address: string }>();
 
+  const { username } = useUsername({ address: address || self });
+
   const data = useMemo(() => {
-    return players.map((player) => {
+    const playersList = players.map((player) => {
       return {
         address: player.address,
         name:
@@ -43,11 +46,36 @@ export function Leaderboard() {
               BigInt(user.address || "0x0") === BigInt(player.address),
           )?.username || player.address.slice(0, 9),
         points: player.earnings,
-        highlight: player.address === (address || self),
+        highlight:
+          getChecksumAddress(player.address) ===
+          getChecksumAddress(address || self),
         following: followings.includes(player.address),
       };
     });
-  }, [players, address, self, usernames, followings]);
+
+    // Check if current user is in the leaderboard
+    const currentUserAddress = address || self;
+    const isCurrentUserInList = playersList.some(
+      (player) =>
+        getChecksumAddress(player.address) ===
+        getChecksumAddress(currentUserAddress),
+    );
+
+    // If current user is not in the leaderboard, add them to the end with 0 points
+    if (!isCurrentUserInList && currentUserAddress) {
+      const currentUserName = username || currentUserAddress.slice(0, 9);
+
+      playersList.push({
+        address: currentUserAddress,
+        name: currentUserName,
+        points: 0,
+        highlight: true,
+        following: followings.includes(currentUserAddress),
+      });
+    }
+
+    return playersList;
+  }, [players, address, self, usernames, followings, username]);
 
   useEffect(() => {
     setAccountAddress(address || self || "");
@@ -58,7 +86,7 @@ export function Leaderboard() {
   ) : status === "error" || !data.length ? (
     <EmptyState />
   ) : (
-    <LayoutContent className="flex flex-col pt-6 pb-0 gap-6 overflow-y-auto">
+    <LayoutContent>
       <LeaderboardTable className="flex">
         {data.map((item, index) => (
           <LeaderboardRow
