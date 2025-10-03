@@ -60,6 +60,14 @@ type CreateControllerFormProps = Omit<
   "authenticationStep" | "setAuthenticationStep" | "authOptions"
 >;
 
+function getIOSVersion(userAgentString: string) {
+  const match = userAgentString.match(/Version\/(\d+)\.\d+/);
+  if (match && match[1]) {
+    return parseInt(match[1], 10); // Parse the captured string to an integer
+  }
+  return null; // Return null if not found, or a default like 0
+}
+
 function CreateControllerForm({
   theme,
   usernameField,
@@ -118,7 +126,17 @@ function CreateControllerForm({
           return viewportHeight;
         }
 
-        // return viewportHeight - 450;
+        const iOSVersion = getIOSVersion(navigator.userAgent);
+        if (!iOSVersion) {
+          return "100%";
+        }
+
+        // Liquid glass safari
+        if (iOSVersion >= 26) {
+          return viewportHeight - 475;
+        }
+
+        // old safari
         return viewportHeight - 200;
       } else {
         return "100%";
@@ -148,6 +166,7 @@ function CreateControllerForm({
       <p>isMobile: {String(isMobile)}</p>
       <p>Viewport height: {viewportHeight}px</p>
       <p>Layout height: {layoutHeight}px</p>*/}
+      {/*<p>userAgent: {navigator.userAgent}</p>*/}
       <form
         className="flex flex-col overflow-y-scroll"
         style={{
