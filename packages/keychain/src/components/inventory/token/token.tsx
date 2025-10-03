@@ -226,7 +226,7 @@ function ERC20() {
       </LayoutContent>
 
       {compatibility && controller && (
-        <LayoutFooter>
+        <LayoutFooter className="p-4">
           <Link to={`send?${searchParams.toString()}`} className="w-full">
             <Button className="w-full space-x-2">
               <PaperPlaneIcon variant="solid" />
