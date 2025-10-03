@@ -4,6 +4,13 @@ import {
   ChainId,
   Signature,
   TypedData,
+  Address,
+  AccountDeploymentData,
+  USER_REFUSED_OP,
+  INVALID_REQUEST_PAYLOAD,
+  API_VERSION_NOT_SUPPORTED,
+  UNKNOWN_ERROR,
+  ACCOUNT_ALREADY_DEPLOYED,
 } from "@starknet-io/types-js";
 import {
   Abi,
@@ -64,10 +71,18 @@ export enum ResponseCodes {
   USER_INTERACTION_REQUIRED = "USER_INTERACTION_REQUIRED",
 }
 
+// Standard wallet API error types
+export type WalletApiError =
+  | USER_REFUSED_OP
+  | INVALID_REQUEST_PAYLOAD
+  | API_VERSION_NOT_SUPPORTED
+  | UNKNOWN_ERROR
+  | ACCOUNT_ALREADY_DEPLOYED;
+
 export type ConnectError = {
   code: ResponseCodes;
   message: string;
-  error?: ControllerError;
+  error?: ControllerError | WalletApiError;
 };
 
 export type ControllerError = {
@@ -76,9 +91,21 @@ export type ControllerError = {
   data?: any;
 };
 
+// Helper function to create USER_REFUSED_OP error
+export function createUserRejectedError(): ConnectError {
+  return {
+    code: ResponseCodes.CANCELED,
+    message: "User rejected the operation",
+    error: {
+      code: 113,
+      message: "An error occurred (USER_REFUSED_OP)",
+    } as USER_REFUSED_OP,
+  };
+}
+
 export type ConnectReply = {
   code: ResponseCodes.SUCCESS;
-  address: string;
+  address: Address;
   policies?: SessionPolicies;
 };
 
@@ -92,13 +119,14 @@ export type ExecuteReply =
 
 export type ProbeReply = {
   code: ResponseCodes.SUCCESS;
-  address: string;
+  address: Address;
   rpcUrl?: string;
 };
 
 export type DeployReply = {
   code: ResponseCodes.SUCCESS;
   transaction_hash: string;
+  deployment_data?: AccountDeploymentData;
 };
 
 export type IFrames = {
