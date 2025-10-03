@@ -22,7 +22,7 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Configure Git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Set up Node.js
