@@ -41,7 +41,7 @@ export const Starterpack = () => {
     const newDefaults = getDefaultStarterpackIds();
     const currentExpected = expectedDefaultsRef.current;
 
-    // Only update if the values haven't been manually modified by the user
+    // Only update if the user hasn't manually modified the values
     setPurchaseSpId((currentPurchaseSpId) => {
       return currentPurchaseSpId === currentExpected.purchase
         ? newDefaults.purchase
