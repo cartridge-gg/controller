@@ -13,9 +13,8 @@ import {
   LayoutContent,
   LayoutFooter,
   Sheet,
-  CreateAccount,
 } from "@cartridge/ui";
-// import { CreateAccount } from "./username";
+import { CreateAccount } from "./username";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
