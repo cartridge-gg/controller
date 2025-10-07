@@ -48,9 +48,17 @@ import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
 import { Collections } from "./purchasenew/starterpack/collections";
+import { useArcade } from "@/hooks/arcade";
+import { useEffect } from "react";
 
 export function App() {
   const { navigate } = useNavigation();
+  const { setInitializable } = useArcade();
+
+  useEffect(() => {
+    setInitializable(true);
+  }, [setInitializable]);
+
   return (
     <Routes>
       <Route path="/" element={<Home />}>
