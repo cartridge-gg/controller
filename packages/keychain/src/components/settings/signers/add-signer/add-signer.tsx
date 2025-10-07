@@ -257,7 +257,7 @@ const WalletAuths = ({
 
   return (
     <>
-      {supportedWalletsForAuth.map((wallet) => (
+      {[...supportedWalletsForAuth, "walletconnect"].map((wallet) => (
         <SignerMethod
           key={wallet as string}
           kind={wallet as SignerMethodKind}

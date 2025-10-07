@@ -52,6 +52,9 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.sandbox.add("allow-same-origin");
     iframe.allow =
       "publickey-credentials-create *; publickey-credentials-get *; clipboard-write";
+    iframe.style.scrollbarWidth = "none";
+    iframe.style.setProperty("-ms-overflow-style", "none");
+    iframe.style.setProperty("-webkit-scrollbar", "none");
     if (!!document.hasStorageAccess) {
       iframe.sandbox.add("allow-storage-access-by-user-activation");
     }
@@ -71,6 +74,9 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.transition = "opacity 0.2s ease";
     container.style.opacity = "0";
     container.style.pointerEvents = "auto";
+    container.style.scrollbarWidth = "none";
+    container.style.setProperty("-ms-overflow-style", "none");
+    container.style.setProperty("-webkit-scrollbar", "none");
     container.appendChild(iframe);
 
     // Add click event listener to close iframe when clicking outside

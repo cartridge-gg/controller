@@ -13,6 +13,7 @@ import {
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
+  IMPLEMENTED_AUTH_OPTIONS,
   ResponseCodes,
   toArray,
   Token,
@@ -192,7 +193,7 @@ export function useConnectionValue() {
   });
   const [configSignupOptions, setConfigSignupOptions] = useState<
     AuthOptions | undefined
-  >(["google", "webauthn", "discord", "walletconnect", "metamask", "rabby"]);
+  >([...IMPLEMENTED_AUTH_OPTIONS]);
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
@@ -205,10 +206,10 @@ export function useConnectionValue() {
   }, []);
 
   useEffect(() => {
-    if (window.controller) {
-      setRpcUrl(window.controller.rpcUrl());
+    if (controller) {
+      setRpcUrl(controller.rpcUrl());
     }
-  }, [window.controller]);
+  }, [controller, setRpcUrl]);
 
   const [searchParams] = useSearchParams();
 
@@ -410,7 +411,7 @@ export function useConnectionValue() {
         ...defaultTheme,
       });
     }
-  }, [urlParams, verified, configData, isConfigLoading]);
+  }, [urlParams, verified, configData, isConfigLoading, theme.name]);
 
   useEffect(() => {
     if (urlParams.version) {
@@ -494,7 +495,9 @@ export function useConnectionValue() {
           iframeMethods.externalWaitForTransaction(currentOrigin),
       });
     }
-  }, []); // Empty dependency array since we only want to run this once
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const logout = useCallback(async () => {
     await window.controller?.disconnect();

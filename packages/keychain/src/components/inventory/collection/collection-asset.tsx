@@ -30,7 +30,6 @@ import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
-import { useOwnership } from "@/hooks/ownerships";
 import { useUsername } from "@/hooks/username";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
@@ -71,25 +70,11 @@ export function CollectionAsset() {
     tokenIds: tokenId ? [tokenId] : [],
   });
 
-  const { ownership, status: ownershipStatus } = useOwnership({
-    contractAddress: contractAddress ?? "",
-    tokenId: tokenId ?? "",
-  });
-
   const { traceabilities: data, status: traceabilitiesStatus } =
     useTraceabilities({
       contractAddress: contractAddress ?? "",
       tokenId: tokenId ?? "",
     });
-
-  const { username } = useUsername({
-    address: ownership?.accountAddress ?? "",
-  });
-
-  const isOwner = useMemo(() => {
-    if (!address || !ownership?.accountAddress) return false;
-    return BigInt(ownership.accountAddress) === BigInt(address);
-  }, [ownership, address]);
 
   const isListed = useMemo(() => {
     if (!order) return false;
@@ -99,6 +84,15 @@ export function CollectionAsset() {
   const asset = useMemo(() => {
     return assets?.[0];
   }, [assets]);
+
+  const { username } = useUsername({
+    address: asset?.owner ?? "",
+  });
+
+  const isOwner = useMemo(() => {
+    if (!address || !asset?.owner) return false;
+    return BigInt(asset.owner) === BigInt(address);
+  }, [asset, address]);
 
   const title = useMemo(() => {
     if (!asset) return "";
@@ -183,20 +177,12 @@ export function CollectionAsset() {
   );
 
   const status = useMemo(() => {
-    if (
-      collectionStatus === "error" ||
-      traceabilitiesStatus === "error" ||
-      ownershipStatus === "error"
-    )
+    if (collectionStatus === "error" || traceabilitiesStatus === "error")
       return "error";
-    if (
-      collectionStatus === "loading" &&
-      traceabilitiesStatus === "loading" &&
-      ownershipStatus === "loading"
-    )
+    if (collectionStatus === "loading" && traceabilitiesStatus === "loading")
       return "loading";
     return "success";
-  }, [collectionStatus, traceabilitiesStatus, ownershipStatus]);
+  }, [collectionStatus, traceabilitiesStatus]);
 
   useEffect(() => {
     if (!order) return;
@@ -217,10 +203,7 @@ export function CollectionAsset() {
       ) : (
         <>
           <LayoutContent
-            className={cn(
-              "p-6 flex flex-col gap-6 overflow-hidden",
-              (isListed || isOwner) && "pb-0",
-            )}
+            className={cn("overflow-hidden", (isListed || isOwner) && "pb-0")}
           >
             <CollectionHeader
               image={edition?.properties.icon || theme?.icon}
@@ -263,7 +246,10 @@ export function CollectionAsset() {
                     address={collection.address}
                     tokenId={asset.tokenId}
                     standard={collection.type}
-                    owner={username}
+                    owner={
+                      username ||
+                      asset.owner.slice(0, 6) + "..." + asset.owner.slice(-4)
+                    }
                   />
                 </TabsContent>
                 <TabsContent
@@ -307,7 +293,7 @@ export function CollectionAsset() {
 
           <LayoutFooter
             className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background-100 pt-0 select-none",
+              "relative flex flex-col items-center justify-center gap-y-4 bg-background-100 pt-4 select-none",
               !isListed && !isOwner && "hidden",
             )}
           >
@@ -417,7 +403,7 @@ const Price = ({ amount, image }: { amount?: number; image?: string }) => {
 
 const LoadingState = () => {
   return (
-    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+    <LayoutContent className="select-none h-full overflow-hidden">
       <Skeleton className="min-h-10 w-full rounded" />
       <Skeleton className="min-h-[200px] w-full rounded" />
       <div className="flex flex-col gap-4 grow">

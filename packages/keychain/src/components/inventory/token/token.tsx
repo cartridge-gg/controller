@@ -51,7 +51,7 @@ function Credits() {
 
   return (
     <>
-      <LayoutContent className="pb-4 gap-6">
+      <LayoutContent>
         <div className="flex gap-4 items-center">
           <Thumbnail
             icon="https://static.cartridge.gg/presets/credit/icon.svg"
@@ -86,7 +86,7 @@ function Credits() {
 const CreditsLoadingState = () => {
   return (
     <>
-      <LayoutContent className="pb-4 gap-6 select-none h-full overflow-hidden">
+      <LayoutContent className="select-none h-full overflow-hidden">
         {/* Credits header skeleton */}
         <div className="flex gap-4 items-center">
           <Skeleton className="w-16 h-16 rounded-full bg-background-300 animate-pulse" />
@@ -176,7 +176,7 @@ function ERC20() {
 
   return (
     <>
-      <LayoutContent className="pb-4 gap-6">
+      <LayoutContent>
         <ERC20Header token={token} />
 
         <ERC20Detail
@@ -226,7 +226,7 @@ function ERC20() {
       </LayoutContent>
 
       {compatibility && controller && (
-        <LayoutFooter>
+        <LayoutFooter className="p-4">
           <Link to={`send?${searchParams.toString()}`} className="w-full">
             <Button className="w-full space-x-2">
               <PaperPlaneIcon variant="solid" />

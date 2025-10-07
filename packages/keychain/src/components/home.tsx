@@ -1,11 +1,9 @@
-import { Signature } from "starknet";
 import { useEffect, useCallback } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { DeployCtx, SignMessageCtx, ConnectCtx } from "@/utils/connection";
+import { DeployCtx, ConnectCtx } from "@/utils/connection";
 import { CreateController, CreateSession, Upgrade } from "./connect";
 import { DeployController } from "./DeployController";
-import { SignMessage } from "./SignMessage";
 import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
@@ -117,22 +115,6 @@ export function Home() {
                     address: controller.address(),
                   });
                 }}
-              />
-            );
-          }
-
-          case "sign-message": {
-            const ctx = context as SignMessageCtx;
-            return (
-              <SignMessage
-                typedData={ctx.typedData}
-                onSign={(sig: Signature) => context.resolve(sig)}
-                onCancel={() =>
-                  ctx.resolve({
-                    code: ResponseCodes.CANCELED,
-                    message: "Canceled",
-                  })
-                }
               />
             );
           }

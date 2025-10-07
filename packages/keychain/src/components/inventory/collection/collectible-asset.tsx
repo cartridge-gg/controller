@@ -208,7 +208,7 @@ export function CollectibleAsset() {
         <EmptyState />
       ) : (
         <>
-          <LayoutContent className="p-6 pb-0 flex flex-col gap-6 overflow-hidden">
+          <LayoutContent className="pb-0 overflow-hidden">
             <CollectionHeader
               image={edition?.properties.icon || theme?.icon}
               title={title}
@@ -322,7 +322,7 @@ export function CollectibleAsset() {
 
           <LayoutFooter
             className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-0",
+              "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-4",
             )}
           >
             <div className="flex gap-3 w-full">
@@ -549,7 +549,7 @@ const Price = ({ amount, image }: { amount?: number; image?: string }) => {
 
 const LoadingState = () => {
   return (
-    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+    <LayoutContent className="select-none h-full overflow-hidden">
       <Skeleton className="min-h-10 w-full rounded" />
       <Skeleton className="min-h-[200px] w-full rounded" />
       <div className="flex flex-col gap-4 grow">

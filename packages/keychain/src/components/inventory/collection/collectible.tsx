@@ -50,7 +50,7 @@ export function Collectible() {
       ) : status === "error" ? (
         <EmptyState />
       ) : (
-        <LayoutContent className={cn("p-6 flex flex-col gap-y-4")}>
+        <LayoutContent className={cn("")}>
           <CollectionHeader
             image={edition?.properties.icon || theme?.icon}
             title={collectible.name}

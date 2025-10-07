@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.10.7] - 2025-10-01
+
+### ✨ New Features
+- **@cartridge/controller**: Added async/await pattern for controller initialization, providing better error handling and improved developer experience (#2070)
+- **@cartridge/keychain**: Added disconnect redirect URL support for session provider, enabling better session management and app navigation (#2074)
+
+### 🚀 Improvements  
+- **@cartridge/keychain**: Removed deprecated layout style overrides across components for cleaner UI rendering (#2040)
+- **@cartridge/keychain**: Extracted keychain URL logic into dedicated function for better code organization and maintainability (#2071)
+- **@cartridge/keychain**: Enhanced bottom navigation to preserve query parameters during navigation (#2072)
+- **@cartridge/keychain**: Improved token sorting in ERC20 lists for better user experience (#2083)
+- **Development**: Enforced React hook dependencies for improved code quality (#2065)
+
+### 🐛 Bug Fixes
+- **@cartridge/controller**: Fixed Ethereum wallet availability on mobile browsers by adding mobile detection to prevent unsupported wallet initialization (#2076)
+- **@cartridge/keychain**: Fixed BigInt serialization errors in execute URL parameters by adding proper JSON serialization handling (#2084)
+- **@cartridge/keychain**: Resolved circular dependency and BigInt handling issues in starterpack components (#2085)
+- **@cartridge/keychain**: Fixed starterpack crypto cost breakdown display for accurate pricing information (#2081)
+- **@cartridge/keychain**: Fixed controller loading state management for smoother user experience (#2078)
+- **@cartridge/keychain**: Fixed authentication method types for improved type safety (#2073)
+- **@cartridge/keychain**: Fixed inventory display issues and asset collection rendering (#2069, #2068)
+
+### 📦 Dependencies
+- **@cartridge/presets**: Updated to latest version for improved functionality (#2077)
+
+## [0.10.6] - 2025-09-26
+
+### ✨ New Features
+- **@cartridge/keychain**: Added marketplace integration with consolidated arcade provider functionality, streamlining marketplace operations and improving the gaming marketplace experience (#2063)
+- **@cartridge/keychain**: Added disconnect page with redirect deeplink support, enabling better session management and seamless app navigation (#2056)
+- **@cartridge/keychain**: Implemented dynamic RPC URL override support for enhanced flexibility in network configuration, allowing developers to specify custom RPC endpoints dynamically (#2052)
+
+### 🚀 Improvements  
+- **@cartridge/controller**: Enhanced Android native flow session provider with improved error handling and better session management reliability (#2066)
+
+### 🐛 Bug Fixes
+- **@cartridge/keychain**: Fixed purchase flow to use correct network icon, ensuring users see the appropriate network indicator during transactions (#2055)
+- **@cartridge/keychain**: Fixed verified session creation to improve session validation and authentication flow reliability (#2062)
+- **@cartridge/keychain**: Fixed game theme functionality for better theming consistency across gaming applications (#2050)
+
+### 📦 Dependencies
+- **Dojo**: Updated to latest version for improved gaming framework functionality (#2057)
+
 ## [0.10.5] - 2025-09-20
 
 ### 🐛 Bug Fixes

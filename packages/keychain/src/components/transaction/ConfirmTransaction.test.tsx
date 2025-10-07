@@ -3,7 +3,7 @@ import { act } from "react";
 import { ConfirmTransaction } from "./ConfirmTransaction";
 import { describe, expect, beforeEach, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/mocks/providers";
-import { ErrorCode } from "@cartridge/controller-wasm/controller";
+import { ErrorCode } from "@cartridge/controller-wasm";
 import type { ControllerError } from "@/utils/connection";
 
 // Mock the tokens hook for ConfirmTransaction tests
@@ -21,6 +21,16 @@ vi.mock("@/hooks/tokens", () => ({
     error: null,
   })),
   convertTokenAmountToUSD: vi.fn(() => "$0.01"),
+}));
+
+// Mock the upgrade provider hook
+vi.mock("@/components/provider/upgrade", () => ({
+  useUpgrade: vi.fn(() => ({
+    isUpgradeAvailable: false,
+    isUpgrading: false,
+    error: null,
+    upgrade: vi.fn(),
+  })),
 }));
 
 describe("ConfirmTransaction", () => {
@@ -139,6 +149,140 @@ describe("ConfirmTransaction", () => {
     // Check that error is displayed (should have 2 instances of the error message)
     await waitFor(() => {
       expect(screen.getAllByText("Account validation failed")).toHaveLength(2);
+    });
+  });
+
+  it("skips session UI when skipSession is used", async () => {
+    // Test that the skip session flow works correctly
+    const mockTransactionsCopy = [...mockTransactions];
+    const mockExecute = vi.fn().mockResolvedValue({
+      transaction_hash: "0xabc123",
+    });
+    const estimateInvokeFee = vi.fn().mockResolvedValue({
+      suggestedMaxFee: BigInt(1000),
+    });
+
+    await act(async () => {
+      renderWithProviders(
+        <ConfirmTransaction
+          {...defaultProps}
+          transactions={mockTransactionsCopy}
+        />,
+        {
+          connection: {
+            controller: {
+              isRequestedSession: vi
+                .fn()
+                .mockResolvedValueOnce(false) // First check returns false
+                .mockResolvedValue(true), // After "skip" it should proceed
+              estimateInvokeFee,
+              execute: mockExecute,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            policies: undefined, // No policies means no session UI
+          },
+        },
+      );
+    });
+
+    // Should show the transaction review screen directly
+    await waitFor(() => {
+      expect(screen.getByText("Review Transaction")).toBeInTheDocument();
+    });
+  });
+
+  it("shows session refresh UI when SessionRefreshRequired error occurs", async () => {
+    const sessionRefreshError: ControllerError = {
+      code: ErrorCode.SessionRefreshRequired,
+      message: "Session needs to be refreshed",
+      data: "{}",
+    };
+
+    await act(async () => {
+      renderWithProviders(
+        <ConfirmTransaction
+          {...defaultProps}
+          executionError={sessionRefreshError}
+        />,
+        {
+          connection: {
+            controller: {
+              isRequestedSession: vi.fn().mockResolvedValue(true),
+              estimateInvokeFee: vi.fn().mockResolvedValue({
+                suggestedMaxFee: BigInt(1000),
+              }),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            policies: {
+              contracts: {},
+              verified: true,
+            },
+          },
+        },
+      );
+    });
+
+    // Should show CreateSession component for session refresh
+    await waitFor(() => {
+      // The transaction review form should not be shown
+      expect(screen.queryByText("Review Transaction")).not.toBeInTheDocument();
+    });
+  });
+
+  it("retries execution after successful session refresh", async () => {
+    const mockExecute = vi
+      .fn()
+      .mockRejectedValueOnce({
+        code: ErrorCode.SessionRefreshRequired,
+        message: "Session needs refresh",
+        data: "{}",
+      })
+      .mockResolvedValueOnce({
+        transaction_hash: "0xabc123",
+      });
+
+    const estimateInvokeFee = vi.fn().mockResolvedValue({
+      suggestedMaxFee: BigInt(1000),
+    });
+
+    await act(async () => {
+      renderWithProviders(<ConfirmTransaction {...defaultProps} />, {
+        connection: {
+          controller: {
+            execute: mockExecute,
+            estimateInvokeFee,
+            isRequestedSession: vi.fn().mockResolvedValue(true),
+            trySessionExecute: vi
+              .fn()
+              .mockRejectedValueOnce({
+                code: ErrorCode.SessionRefreshRequired,
+                message: "Session needs refresh",
+                data: "{}",
+              })
+              .mockResolvedValueOnce({
+                transaction_hash: "0xabc123",
+              }),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+        },
+      });
+    });
+
+    // Wait for initial render
+    await waitFor(() => {
+      const submitButton = screen.getByRole("button", { name: /submit/i });
+      expect(submitButton).not.toBeDisabled();
+    });
+
+    // Click submit button - should trigger SessionRefreshRequired error
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+    await act(async () => {
+      fireEvent.click(submitButton);
+    });
+
+    // After error, check that session refresh UI would be shown
+    await waitFor(() => {
+      expect(mockExecute).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -5,7 +5,7 @@ import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
 import { allUseSameAuth } from "@/utils/controller";
-import { AuthOption } from "@cartridge/controller";
+import { AuthOption, AuthOptions } from "@cartridge/controller";
 import {
   CartridgeLogo,
   ControllerIcon,
@@ -47,7 +47,7 @@ interface CreateControllerViewProps {
   waitingForConfirmation: boolean;
   changeWallet: boolean;
   setChangeWallet: (value: boolean) => void;
-  authOptions: AuthOption[];
+  authOptions: AuthOptions;
   authMethod: AuthOption | undefined;
 }
 
@@ -117,7 +117,7 @@ function CreateControllerForm({
           onSubmit();
         }}
       >
-        <LayoutContent className="gap-6 overflow-y-hidden">
+        <LayoutContent className="overflow-y-hidden">
           <CreateAccount
             usernameField={usernameField}
             validation={validation}

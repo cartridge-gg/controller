@@ -1,3 +1,6 @@
+import { Policy } from "@cartridge/controller-wasm/controller";
+import { Policies, SessionPolicies } from "@cartridge/presets";
+import { ChainId } from "@starknet-io/types-js";
 import {
   addAddressPadding,
   Call,
@@ -9,9 +12,6 @@ import {
   typedData,
   TypedDataRevision,
 } from "starknet";
-import { Policy } from "@cartridge/controller-wasm/controller";
-import { Policies, SessionPolicies } from "@cartridge/presets";
-import { ChainId } from "@starknet-io/types-js";
 import { ParsedSessionPolicies } from "./policies";
 
 // Whitelist of allowed property names to prevent prototype pollution
@@ -205,4 +205,12 @@ export function parseChainId(url: URL): ChainId {
   }
 
   throw new Error(`Chain ${url.toString()} not supported`);
+}
+
+export function isMobile() {
+  return (
+    window.matchMedia("(max-width: 768px)").matches ||
+    "ontouchstart" in window ||
+    navigator.maxTouchPoints > 0
+  );
 }

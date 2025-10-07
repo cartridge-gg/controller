@@ -53,17 +53,16 @@ export const SignerCard = React.forwardRef<
     const [isLoading, setIsLoading] = useState(false);
     const signerType = credentialToAuth(signer);
     const { controller } = useController();
+    const controllerUsername = controller?.username();
     const [signerIdentifyingInfo, setSignerIdentifyingInfo] = useState<
       string | undefined
     >("pending");
 
     useEffect(() => {
-      getSignerIdentifyingInfo(signer, controller?.username()).then(
-        (username) => {
-          setSignerIdentifyingInfo(username);
-        },
-      );
-    }, [signer, controller, controller?.username()]);
+      getSignerIdentifyingInfo(signer, controllerUsername).then((username) => {
+        setSignerIdentifyingInfo(username);
+      });
+    }, [signer, controllerUsername]);
 
     return (
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
