@@ -15,6 +15,7 @@ type UseArcadeResponse = {
   followersCount: number;
   followedsCount: number;
   error?: string;
+  setInitializable: (initializable: boolean) => void;
 };
 
 /**
@@ -39,8 +40,16 @@ export const useArcade = (): UseArcadeResponse => {
     );
   }
 
-  const { chainId, provider, pins, followers, followeds, games, editions } =
-    context;
+  const {
+    chainId,
+    provider,
+    pins,
+    followers,
+    followeds,
+    games,
+    editions,
+    setInitializable,
+  } = context;
 
   const { followersCount, followedsCount } = useMemo(() => {
     if (!address) {
@@ -65,5 +74,6 @@ export const useArcade = (): UseArcadeResponse => {
     editions,
     followersCount,
     followedsCount,
+    setInitializable,
   };
 };

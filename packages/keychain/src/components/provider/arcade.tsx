@@ -64,6 +64,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   const [sales, setSales] = useState<{
     [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
   }>({});
+  const [initializable, setInitializable] = useState<boolean>(false);
   const [initialized, setInitialized] = useState<boolean>(false);
 
   if (currentValue) {
@@ -239,7 +240,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (initialized) return;
+    if (initialized || !initializable) return;
     const initialize = async () => {
       await Social.init(CHAIN_ID);
       await Registry.init(CHAIN_ID);
@@ -247,7 +248,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       setInitialized(true);
     };
     initialize();
-  }, [initialized, setInitialized]);
+  }, [initialized, initializable, setInitialized]);
 
   useEffect(() => {
     if (!initialized) return;
@@ -299,6 +300,8 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         sales,
         addOrder,
         removeOrder,
+        initializable,
+        setInitializable,
       }}
     >
       {children}
