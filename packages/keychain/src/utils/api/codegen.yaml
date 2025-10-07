@@ -1,6 +1,9 @@
 overwrite: true
 schema: https://api.cartridge.gg/query
 documents: packages/keychain/src/utils/api/**/*.graphql
+hooks:
+  afterAllFileWrite:
+    - node packages/keychain/node_modules/prettier/bin/prettier.cjs --write
 generates:
   packages/keychain/src/utils/api/generated.ts:
     plugins:

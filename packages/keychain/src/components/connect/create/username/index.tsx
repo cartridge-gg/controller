@@ -358,5 +358,3 @@ export const CreateAccount = React.forwardRef<
 );
 
 CreateAccount.displayName = "CreateAccount";
-
-export default CreateAccount;

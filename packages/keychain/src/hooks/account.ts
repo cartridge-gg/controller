@@ -17,7 +17,8 @@ import { constants, getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
-import { useAccountSearchQuery } from "@/utils/api";
+// import { useAccountSearchQuery } from "@/utils/api";
+import { useAccountSearchQuery } from "@cartridge/ui/utils/api/cartridge";
 
 type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;

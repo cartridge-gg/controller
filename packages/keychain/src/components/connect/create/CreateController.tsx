@@ -9,12 +9,12 @@ import { AuthOption, AuthOptions } from "@cartridge/controller";
 import {
   CartridgeLogo,
   ControllerIcon,
-  CreateAccount,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Sheet,
 } from "@cartridge/ui";
+import { CreateAccount } from "./username";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
@@ -25,7 +25,7 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
-import { AccountSearchResult } from "@cartridge/ui/utils";
+import { AccountSearchResult } from "@/hooks/account";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
