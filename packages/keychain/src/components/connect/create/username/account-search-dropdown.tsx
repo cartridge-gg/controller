@@ -75,10 +75,6 @@ export const AccountSearchDropdown = React.forwardRef<
     const error = mockError ?? hookData.error;
 
     const hasResults = results.length > 0;
-    const popoverRef = React.useRef<HTMLDivElement>(null);
-    const [popoverSide, setPopoverSide] = React.useState<"top" | "bottom">(
-      "bottom",
-    );
     const shouldShowDropdown = React.useMemo(() => {
       return Boolean(isOpen && query.length > 0 && (hasResults || isLoading));
     }, [isOpen, hasResults, isLoading, query.length]);
@@ -89,28 +85,6 @@ export const AccountSearchDropdown = React.forwardRef<
         onSelectedIndexChange?.(0);
       }
     }, [results, query, hasResults, onSelectedIndexChange]);
-
-    // Check popover position after it's rendered
-    React.useLayoutEffect(() => {
-      if (!shouldShowDropdown || !popoverRef.current || !ref) return;
-
-      const popoverElement = popoverRef.current;
-      const triggerElement = typeof ref === "object" && ref?.current;
-
-      if (triggerElement) {
-        const popoverRect = popoverElement.getBoundingClientRect();
-        const triggerRect = triggerElement.getBoundingClientRect();
-
-        // If popover is above the trigger, it's positioned on top
-        const isOnTop = popoverRect.bottom < triggerRect.top;
-        setPopoverSide(isOnTop ? "top" : "bottom");
-      }
-    }, [shouldShowDropdown, ref]);
-
-    // Determine display order based on popover position
-    const displayResults = React.useMemo(() => {
-      return popoverSide === "top" ? [...results].reverse() : results;
-    }, [results, popoverSide]);
 
     const handleSelect = React.useCallback(
       (result: AccountSearchResult) => {
@@ -131,12 +105,8 @@ export const AccountSearchDropdown = React.forwardRef<
             event.preventDefault();
             const nextIndex =
               selectedIndex === undefined
-                ? popoverSide === "top"
-                  ? results.length - 1
-                  : 0
-                : popoverSide === "top"
-                  ? Math.max(selectedIndex - 1, 0)
-                  : Math.min(selectedIndex + 1, results.length - 1);
+                ? 0
+                : Math.min(selectedIndex + 1, results.length - 1);
             onSelectedIndexChange?.(nextIndex);
             break;
           }
@@ -145,12 +115,8 @@ export const AccountSearchDropdown = React.forwardRef<
             event.preventDefault();
             const prevIndex =
               selectedIndex === undefined
-                ? popoverSide === "top"
-                  ? 0
-                  : results.length - 1
-                : popoverSide === "top"
-                  ? Math.min(selectedIndex + 1, results.length - 1)
-                  : Math.max(selectedIndex - 1, 0);
+                ? results.length - 1
+                : Math.max(selectedIndex - 1, 0);
             onSelectedIndexChange?.(prevIndex);
             break;
           }
@@ -178,7 +144,6 @@ export const AccountSearchDropdown = React.forwardRef<
         onSelectedIndexChange,
         onOpenChange,
         handleSelect,
-        popoverSide,
       ],
     );
 
@@ -201,7 +166,7 @@ export const AccountSearchDropdown = React.forwardRef<
         <PopoverAnchor ref={ref}>{children}</PopoverAnchor>
         {shouldShowDropdown && (
           <PopoverContent
-            ref={popoverRef}
+            side="bottom"
             className={cn(
               "w-[--radix-popover-trigger-width] p-0 bg-spacer border-none -translate-y-7 divide-y divide-spacer",
               "max-h-[300px] overflow-y-auto",
@@ -230,22 +195,16 @@ export const AccountSearchDropdown = React.forwardRef<
 
             {!isLoading &&
               !error &&
-              displayResults.map((result, displayIndex) => {
-                const originalIndex =
-                  popoverSide === "top"
-                    ? results.length - 1 - displayIndex
-                    : displayIndex;
-                return (
-                  <AccountSearchResultItem
-                    key={result.id}
-                    result={result}
-                    isSelected={selectedIndex === originalIndex}
-                    onClick={() => handleSelect(result)}
-                    onMouseEnter={() => onSelectedIndexChange?.(originalIndex)}
-                    onMouseLeave={() => onSelectedIndexChange?.(undefined)}
-                  />
-                );
-              })}
+              results.map((result, index) => (
+                <AccountSearchResultItem
+                  key={result.id}
+                  result={result}
+                  isSelected={selectedIndex === index}
+                  onClick={() => handleSelect(result)}
+                  onMouseEnter={() => onSelectedIndexChange?.(index)}
+                  onMouseLeave={() => onSelectedIndexChange?.(undefined)}
+                />
+              ))}
           </PopoverContent>
         )}
       </Popover>
