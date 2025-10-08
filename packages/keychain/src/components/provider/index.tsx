@@ -3,7 +3,6 @@ import { useConnectionValue } from "@/hooks/connection";
 import { WalletsProvider } from "@/hooks/wallets";
 import { ENDPOINT } from "@/utils/graphql";
 import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
-import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
   jsonRpcProvider,
@@ -22,24 +21,21 @@ import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
 import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
+import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
 
 export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
 
   const rpc = useCallback(() => {
-    let nodeUrl;
     switch (connection.controller?.chainId()) {
       case constants.StarknetChainId.SN_MAIN:
-        nodeUrl = import.meta.env.VITE_RPC_MAINNET;
-        break;
+        return import.meta.env.VITE_RPC_MAINNET;
       case constants.StarknetChainId.SN_SEPOLIA:
-        nodeUrl = import.meta.env.VITE_RPC_SEPOLIA;
-        break;
+        return import.meta.env.VITE_RPC_SEPOLIA;
       default:
-        nodeUrl = connection.rpcUrl;
+        return connection.rpcUrl;
     }
-    return { nodeUrl };
   }, [connection.rpcUrl, connection.controller]);
 
   const defaultChainId = useMemo(() => {

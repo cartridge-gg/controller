@@ -5,7 +5,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build:deps": "turbo build:deps",
-    "build": "turbo build:deps build",
+    "build": "turbo build:deps build && pnpm graphql:gen",
     "build:compat": "turbo build:deps build:compat",
     "dev": "turbo build:deps dev",
     "dev:live": "turbo build:deps dev:live",
@@ -25,6 +25,7 @@
     "book": "pnpm --filter @cartridge/documentation",
     "example:next": "pnpm --filter @cartridge/controller-example-next",
     "example:svelte": "pnpm --filter @cartridge/controller-example-svelte",
+    "graphql:gen": "graphql-codegen --config packages/keychain/src/utils/api/codegen.yaml",
     "test": "pnpm keychain test",
     "test:ci": "pnpm keychain test:ci",
     "test:storybook": "pnpm turbo build:deps test:storybook",
@@ -35,8 +36,12 @@
   },
   "dependencies": {
     "@cartridge/presets": "github:cartridge-gg/presets#0697bf3",
-    "@cartridge/ui": "github:cartridge-gg/ui#2313a28",
-    "tailwindcss": "catalog:"
+    "@cartridge/ui": "github:cartridge-gg/ui#0f09b6f",
+    "tailwindcss": "catalog:",
+    "@graphql-codegen/cli": "^2.6.2",
+    "@graphql-codegen/typescript": "^2.4.8",
+    "@graphql-codegen/typescript-operations": "^2.3.5",
+    "@graphql-codegen/typescript-react-query": "^3.5.9"
   },
   "devDependencies": {
     "env-cmd": "^11.0.0",

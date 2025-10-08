@@ -1,0 +1,25 @@
+overwrite: true
+schema: https://api.cartridge.gg/query
+documents: packages/keychain/src/utils/api/**/*.graphql
+hooks:
+  afterAllFileWrite:
+    - node packages/keychain/node_modules/prettier/bin/prettier.cjs --write
+generates:
+  packages/keychain/src/utils/api/generated.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-query
+    config:
+      fetcher:
+        func: ./fetcher#useFetchData
+        isReactHook: true
+      scalars:
+        BigInt: string
+        ChainID: string
+        Cursor: string
+        Felt: string
+        JSON: any
+        Long: string
+        Time: string
+        Upload: File

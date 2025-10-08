@@ -95,7 +95,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
             appId: origin,
             rpcUrl,
             username,
-            classHash: controllerNode.constructorCalldata[0],
+            classHash: STABLE_CONTROLLER.hash,
             address: controllerNode.address,
             owner: {
               signer: {
@@ -364,7 +364,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
         appId: origin,
         rpcUrl,
         username: controller.accountID,
-        classHash: controller.constructorCalldata[0],
+        classHash: STABLE_CONTROLLER.hash,
         address: controller.address,
         owner: {
           signer: loginResponse?.signer,
