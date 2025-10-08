@@ -138,10 +138,21 @@ const getKeychainUrl = () => {
     process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" &&
     process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF
   ) {
-    const branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
+    let branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
       /[^a-zA-Z0-9-]/g,
       "-",
     );
+
+    // sometimes branch name fallbacks to "update-ui", try to extract branch name from URL
+    if (branchName === "update-ui") {
+      const url = window.location.href;
+      const match = url.match(/git-([a-zA-Z0-9-]+)\.preview/);
+
+      if (match && match[1]) {
+        branchName = match[1];
+      }
+    }
+
     const keychainUrl = `https://keychain-git-${branchName}.preview.cartridge.gg/`;
 
     return keychainUrl;
