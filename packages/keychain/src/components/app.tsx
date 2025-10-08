@@ -24,7 +24,6 @@ import { Achievements } from "@/components/achievements";
 import { Activity } from "@/components/activity";
 import { Leaderboard } from "@/components/leaderboard";
 import { CollectionPurchase } from "@/components/inventory/collection/collection-purchase";
-import { Socials } from "@/components/socials/index";
 import { Settings } from "./settings";
 import { Recovery } from "./settings/Recovery";
 import { Delegate } from "./settings/Delegate";
@@ -48,16 +47,9 @@ import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
 import { Collections } from "./purchasenew/starterpack/collections";
-import { useArcade } from "@/hooks/arcade";
-import { useEffect } from "react";
 
 export function App() {
   const { navigate } = useNavigation();
-  const { setInitializable } = useArcade();
-
-  useEffect(() => {
-    setInitializable(true);
-  }, [setInitializable]);
 
   return (
     <Routes>
@@ -142,8 +134,6 @@ export function App() {
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />
-          <Route path="following" element={<Socials />} />
-          <Route path="followers" element={<Socials />} />
           <Route path="inventory/token/:address" element={<Token />} />
           <Route path="inventory/token/:address/send" element={<SendToken />} />
           <Route

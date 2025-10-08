@@ -9,7 +9,6 @@ import { useAccount, useUsernames } from "@/hooks/account";
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useData } from "@/hooks/data";
-import { useArcade } from "@/hooks/arcade";
 import { getChecksumAddress } from "starknet";
 import { useUsername } from "@/hooks/username";
 
@@ -20,11 +19,6 @@ export function Leaderboard() {
     trophies: { players, status },
     setAccountAddress,
   } = useData();
-  const { followeds } = useArcade();
-
-  const followings = useMemo(() => {
-    return self != "" ? followeds[getChecksumAddress(self)] || [] : [];
-  }, [followeds, self]);
 
   const addresses = useMemo(() => {
     return players.map((player) => `0x${BigInt(player.address).toString(16)}`);
@@ -49,7 +43,7 @@ export function Leaderboard() {
         highlight:
           getChecksumAddress(player.address) ===
           getChecksumAddress(address || self),
-        following: followings.includes(player.address),
+        following: false,
       };
     });
 
@@ -70,12 +64,12 @@ export function Leaderboard() {
         name: currentUserName,
         points: 0,
         highlight: true,
-        following: followings.includes(currentUserAddress),
+        following: false,
       });
     }
 
     return playersList;
-  }, [players, address, self, usernames, followings, username]);
+  }, [players, address, self, usernames, username]);
 
   useEffect(() => {
     setAccountAddress(address || self || "");
