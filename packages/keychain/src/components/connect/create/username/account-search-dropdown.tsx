@@ -162,7 +162,7 @@ export const AccountSearchDropdown = React.forwardRef<
     }, [shouldShowDropdown, handleKeyDown]);
 
     return (
-      <Popover open={isOpen} onOpenChange={onOpenChange}>
+      <Popover open={isOpen} onOpenChange={onOpenChange} modal={true}>
         <PopoverAnchor ref={ref}>{children}</PopoverAnchor>
         {shouldShowDropdown && (
           <PopoverContent
