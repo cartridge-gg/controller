@@ -118,21 +118,16 @@ export function ConnectRoute() {
       return undefined;
     }
 
+    // Always prefer context policies from preset configuration when available
+    // Preset policies take precedence over manually provided policies
+    if (contextPolicies) {
+      return contextPolicies;
+    }
+
+    // Fall back to URL policies if no preset is configured
     // Parse policies from URL params - convert Policies to ParsedSessionPolicies
     // Policies can be either Policy[] or SessionPolicies, so use toSessionPolicies
     const sessionPolicies = toSessionPolicies(params.params.policies);
-
-    // If policies are empty (when preset is used), fall back to context policies
-    // which are loaded from the preset configuration
-    const hasContracts =
-      sessionPolicies.contracts &&
-      Object.keys(sessionPolicies.contracts).length > 0;
-    const hasMessages =
-      sessionPolicies.messages && sessionPolicies.messages.length > 0;
-
-    if (!hasContracts && !hasMessages && contextPolicies) {
-      return contextPolicies;
-    }
 
     const parsed = parseSessionPolicies({
       verified: false, // URL policies are not verified by default
@@ -164,9 +159,6 @@ export function ConnectRoute() {
 
     // Bypass session approval screen for verified sessions
     if (policies?.verified) {
-      console.log(
-        "ConnectRoute - Auto-creating verified session (bypassing UI)",
-      );
       const createSessionForVerifiedPolicies = async () => {
         try {
           // Use a default duration for verified sessions (24 hours)
@@ -175,7 +167,6 @@ export function ConnectRoute() {
 
           const processedPolicies = processPolicies(policies, false);
           await controller.createSession(expiresAt, processedPolicies);
-          console.log("ConnectRoute - Verified session created successfully");
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),

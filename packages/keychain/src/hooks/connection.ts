@@ -176,7 +176,7 @@ export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
   const [context, setContext] = useState<ConnectionCtx>();
-  const [origin, setOrigin] = useState<string>(window.location.origin);
+  const [origin, setOrigin] = useState<string | undefined>(undefined);
   const [rpcUrl, setRpcUrl] = useState<string>(
     import.meta.env.VITE_RPC_MAINNET,
   );
@@ -365,8 +365,9 @@ export function useConnectionValue() {
   }, [controller]);
 
   // Check if preset is verified for the current origin, supporting wildcards
+  // Only run verification once we have the parent origin from penpal
   useEffect(() => {
-    if (!urlParams.preset) {
+    if (!urlParams.preset || !origin) {
       return;
     }
 
@@ -375,10 +376,11 @@ export function useConnectionValue() {
       .then((config) => {
         if (config && config.origin) {
           const allowedOrigins = toArray(config.origin as string | string[]);
-          // Always consider localhost as verified for development
-          const isLocalhost =
-            origin.includes("localhost") || origin.includes("127.0.0.1");
-          setVerified(isLocalhost || isOriginVerified(origin, allowedOrigins));
+          // Always consider localhost as verified for development (not 127.0.0.1)
+          const isLocalhost = origin.includes("localhost");
+          const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
+          const finalVerified = isLocalhost || isOriginAllowed;
+          setVerified(finalVerified);
           setConfigData(config as Record<string, unknown>);
         }
       })
@@ -430,11 +432,8 @@ export function useConnectionValue() {
   useEffect(() => {
     const { policies, preset } = urlParams;
 
-    const urlPolicies = parseUrlPolicies(policies);
-    if (urlPolicies) {
-      setPolicies(urlPolicies);
-    } else if (preset && !isConfigLoading) {
-      // Only try to load from config if a preset is defined and not isConfigLoading
+    // Always prioritize preset policies over URL policies
+    if (preset && !isConfigLoading) {
       const configPolicies = getConfigChainPolicies(
         configData,
         chainId,
@@ -443,7 +442,14 @@ export function useConnectionValue() {
 
       if (configPolicies) {
         setPolicies(configPolicies);
+        return;
       }
+    }
+
+    // Fall back to URL policies if no preset or preset has no policies
+    const urlPolicies = parseUrlPolicies(policies);
+    if (urlPolicies) {
+      setPolicies(urlPolicies);
     }
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
