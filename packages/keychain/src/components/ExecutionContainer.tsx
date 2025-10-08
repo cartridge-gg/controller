@@ -43,6 +43,7 @@ export function ExecutionContainer({
 }: ExecutionContainerProps &
   Pick<HeaderProps, "title" | "description" | "icon">) {
   const { controller } = useConnection();
+  const { navigate } = useNavigation();
   const [maxFee, setMaxFee] = useState<FeeEstimate | undefined>();
   const [ctrlError, setCtrlError] = useState<ControllerError | undefined>(
     executionError,
