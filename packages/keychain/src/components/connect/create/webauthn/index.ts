@@ -1,4 +1,3 @@
-import { STABLE_CONTROLLER } from "@/components/provider/upgrade";
 import { DEFAULT_SESSION_DURATION, now } from "@/constants";
 import { doSignup } from "@/hooks/account";
 import { useConnection } from "@/hooks/connection";
@@ -46,7 +45,7 @@ export function useWebauthnAuthentication() {
 
       const controller = await Controller.create({
         appId: origin,
-        classHash: STABLE_CONTROLLER.hash,
+        classHash: controllerNode.constructorCalldata[0],
         rpcUrl,
         address: controllerNode.address,
         username: finalUsername,
@@ -80,7 +79,7 @@ export function useWebauthnAuthentication() {
       if (isSlot) {
         controller = await Controller.apiLogin({
           appId: origin,
-          classHash: STABLE_CONTROLLER.hash,
+          classHash: controllerQuery.constructorCalldata[0],
           rpcUrl,
           address: controllerQuery.address,
           username: controllerQuery.accountID,
@@ -89,7 +88,7 @@ export function useWebauthnAuthentication() {
       } else {
         const { controller: loginController } = await Controller.login({
           appId: origin,
-          classHash: STABLE_CONTROLLER.hash,
+          classHash: controllerQuery.constructorCalldata[0],
           rpcUrl,
           address: controllerQuery.address,
           username: controllerQuery.accountID,
