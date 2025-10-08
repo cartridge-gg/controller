@@ -13,7 +13,7 @@ const CANCEL_RESPONSE = {
   message: "Canceled",
 };
 
-export function Connect() {
+export function ConnectRoute() {
   const {
     controller,
     closeModal,

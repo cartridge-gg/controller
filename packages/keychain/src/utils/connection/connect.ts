@@ -106,9 +106,15 @@ export function connect({
         throw new Error("If defined, signup options cannot be empty");
       }
 
-      return new Promise((resolve, reject) => {
+      return new Promise<ConnectReply>((resolve, reject) => {
         const url = createConnectUrl(origin, policies, rpcUrl, signupOptions, {
-          resolve,
+          resolve: (result) => {
+            if ("address" in result) {
+              resolve(result);
+            } else {
+              reject(result);
+            }
+          },
           reject,
         });
 

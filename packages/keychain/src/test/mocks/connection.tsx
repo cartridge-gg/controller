@@ -40,6 +40,8 @@ export const defaultMockConnection: ConnectionContextValue = {
   },
   setController: vi.fn(),
   setContext: vi.fn(),
+  setRpcUrl: vi.fn(),
+  setConfigSignupOptions: vi.fn(),
   openSettings: vi.fn(),
   controller: defaultMockController,
   externalDetectWallets: vi.fn(),
