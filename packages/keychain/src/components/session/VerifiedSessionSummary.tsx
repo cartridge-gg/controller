@@ -3,6 +3,7 @@ import { CodeIcon } from "@cartridge/ui";
 import { useMemo } from "react";
 import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";
+import { TokenConsent } from "../connect/token-consent";
 
 export function VerifiedSessionSummary({
   game,
@@ -38,6 +39,7 @@ export function VerifiedSessionSummary({
 
   return (
     <div className="flex flex-col gap-4">
+      <TokenConsent />
       <AggregateCard
         title={game}
         icon={<CodeIcon variant="solid" />}

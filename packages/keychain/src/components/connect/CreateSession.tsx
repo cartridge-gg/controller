@@ -1,5 +1,4 @@
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
-import { SessionConsent } from "@/components/connect";
 import { Upgrade } from "./Upgrade";
 import { UnverifiedSessionSummary } from "@/components/session/UnverifiedSessionSummary";
 import { VerifiedSessionSummary } from "@/components/session/VerifiedSessionSummary";
@@ -113,7 +112,12 @@ const CreateSessionLayout = ({
       <>
         <HeaderInner
           className="pb-0"
-          title={!isUpdate ? "Create Session" : "Update Session"}
+          // title={!isUpdate ? "Create Session" : "Update Session"}
+          title={
+            theme.name.toLowerCase() === "cartridge"
+              ? "Connect Controller"
+              : `Connect to ${theme.name}`
+          }
           description={isUpdate ? "The policies were updated" : undefined}
           right={
             !isEditable ? (
@@ -131,7 +135,7 @@ const CreateSessionLayout = ({
           }
         />
         <LayoutContent className="pb-0">
-          <SessionConsent isVerified={policies?.verified} />
+          {/*<SessionConsent isVerified={policies?.verified} />*/}
           {policies?.verified ? (
             <VerifiedSessionSummary
               game={theme.name}
