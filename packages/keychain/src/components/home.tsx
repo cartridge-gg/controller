@@ -1,9 +1,8 @@
 import { useEffect, useCallback } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
-import { DeployCtx, ConnectCtx } from "@/utils/connection";
+import { ConnectCtx } from "@/utils/connection";
 import { CreateController, CreateSession, Upgrade } from "./connect";
-import { DeployController } from "./DeployController";
 import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
@@ -119,19 +118,6 @@ export function Home() {
             );
           }
 
-          case "deploy": {
-            const ctx = context as DeployCtx;
-            return (
-              <DeployController
-                onClose={() =>
-                  ctx.resolve({
-                    code: ResponseCodes.CANCELED,
-                    message: "Canceled",
-                  })
-                }
-              />
-            );
-          }
           default:
             return <Outlet />;
         }

@@ -21,28 +21,13 @@ import { useCallback, useMemo, useEffect, useState } from "react";
 import { useCollection } from "@/hooks/collection";
 import placeholder from "/placeholder.svg?url";
 import { CollectionHeader } from "./header";
-import { useConnection } from "@/hooks/connection";
 import { useControllerTheme } from "@/hooks/connection";
-import { useArcade } from "@/hooks/arcade";
-import { EditionModel, GameModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 
 export function Collection() {
-  const { games, editions } = useArcade();
   const { address: contractAddress } = useParams();
-  const { project } = useConnection();
   const { collectionOrders: orders } = useMarketplace();
   const theme = useControllerTheme();
-
-  const edition: EditionModel | undefined = useMemo(() => {
-    return Object.values(editions).find(
-      (edition) => edition.config.project === project,
-    );
-  }, [editions, project]);
-
-  const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find((game) => game.id === edition?.gameId);
-  }, [games, edition]);
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -113,9 +98,9 @@ export function Collection() {
         <>
           <LayoutContent className={cn("")}>
             <CollectionHeader
-              image={edition?.properties.icon || theme?.icon}
+              image={theme?.icon}
               title={collection.name}
-              subtitle={game?.name || theme?.name || "---"}
+              subtitle={theme?.name || "---"}
               certified
             />
 
