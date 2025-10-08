@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { DeployController } from "./DeployController";
+import { DeployControllerView } from "./DeployController";
 import { constants, num } from "starknet";
 import { JsControllerError } from "@cartridge/controller-wasm/controller";
 import Controller from "@/utils/controller";
 
 const meta = {
-  component: DeployController,
+  component: DeployControllerView,
   parameters: {
     connection: {
       controller: {
@@ -19,7 +19,7 @@ const meta = {
       } as Partial<Controller>,
     },
   },
-} satisfies Meta<typeof DeployController>;
+} satisfies Meta<typeof DeployControllerView>;
 
 export default meta;
 
@@ -27,7 +27,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    onClose: () => {},
+    onCancel: () => {},
+    onComplete: (hash: string) => console.log("Deploy completed:", hash),
     ctrlError: {
       data: {
         fee_estimate: {
