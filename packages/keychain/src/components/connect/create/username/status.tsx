@@ -77,7 +77,7 @@ function Block({
         "flex justify-between items-center text-xs px-3 py-2 w-full box-border min-w-0",
         error
           ? "bg-destructive-100 text-destructive-foreground"
-          : "bg-background-150 text-primary-100",
+          : "bg-background-300 text-primary-100",
         className,
       )}
     >
