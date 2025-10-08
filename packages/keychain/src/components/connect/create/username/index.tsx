@@ -201,13 +201,9 @@ export const CreateAccount = React.forwardRef<
                 />
               )
             }
-            rank={selectedAccount?.type === "create-new" ? "empty" : undefined}
             variant="ghost"
-            size="lg"
+            size="xl"
             className="!w-8 !h-8"
-            badgeClassName={cn(
-              selectedAccount?.type === "create-new" && "text-foreground-400",
-            )}
           />
           <div className="flex flex-row items-center justify-between gap-1 flex-1">
             <p className="text-sm font-normal px-0.5 truncate">

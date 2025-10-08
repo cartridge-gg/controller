@@ -644,7 +644,7 @@ export function useConnectionValue() {
     parent,
     context,
     controller,
-    origin,
+    origin: origin || "",
     rpcUrl,
     policies,
     onModalClose,

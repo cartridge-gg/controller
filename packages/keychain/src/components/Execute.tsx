@@ -1,16 +1,15 @@
 import { useConnection } from "@/hooks/connection";
 import { getCallbacks } from "@/utils/connection/callbacks";
 import { ExecuteParams } from "@/utils/connection/execute";
-import { ConnectError, ResponseCodes } from "@cartridge/controller";
+import { ResponseCodes } from "@cartridge/controller";
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { InvokeFunctionResponse } from "starknet";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { useRouteParams, useRouteCompletion } from "@/hooks/route";
 
 function parseExecuteParams(paramString: string): {
   params: ExecuteParams;
-  resolve?: (res: InvokeFunctionResponse | ConnectError) => void;
+  resolve?: (result: unknown) => void;
   reject?: (reason?: unknown) => void;
   onCancel?: () => void;
 } | null {

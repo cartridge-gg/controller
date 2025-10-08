@@ -39,9 +39,12 @@ export function createDeployUrl(
   return `/deploy?data=${encodeURIComponent(JSON.stringify(params))}`;
 }
 
-export function parseDeployParams(
-  paramString: string,
-): (DeployCallback & { params: DeployParams }) | null {
+export function parseDeployParams(paramString: string): {
+  params: DeployParams;
+  resolve?: (result: unknown) => void;
+  reject?: (reason?: unknown) => void;
+  onCancel?: () => void;
+} | null {
   try {
     const params = JSON.parse(decodeURIComponent(paramString)) as DeployParams;
 
@@ -50,8 +53,8 @@ export function parseDeployParams(
       : undefined;
 
     const resolve = callbacks?.resolve
-      ? (value: { hash: string } | ConnectError) => {
-          callbacks.resolve?.(value);
+      ? (value: unknown) => {
+          callbacks.resolve?.(value as { hash: string } | ConnectError);
         }
       : undefined;
 

@@ -60,12 +60,10 @@ export const AccountSearchResultItem = React.forwardRef<
       >
         {/* User icon container with plus and dotted border - matching Figma design */}
         <AchievementPlayerBadge
-          rank="empty"
           icon={<PlusIcon variant="line" className="text-foreground-100" />}
           variant="ghost"
-          size="lg"
+          size="xl"
           className="!w-8 !h-8"
-          badgeClassName="text-foreground-400"
         />
 
         {/* Username text */}
@@ -111,7 +109,7 @@ export const AccountSearchResultItem = React.forwardRef<
           />
         }
         variant="ghost"
-        size="lg"
+        size="xl"
         className="!w-8 !h-8"
       />
       <div className="flex flex-row items-center justify-between gap-1 flex-1">

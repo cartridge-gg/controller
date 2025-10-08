@@ -49,9 +49,12 @@ export function createSignMessageUrl(
   )}`;
 }
 
-export function parseSignMessageParams(
-  paramString: string,
-): (SignMessageCallback & { params: SignMessageParams }) | null {
+export function parseSignMessageParams(paramString: string): {
+  params: SignMessageParams;
+  resolve?: (result: unknown) => void;
+  reject?: (reason?: unknown) => void;
+  onCancel?: () => void;
+} | null {
   try {
     const params = JSON.parse(
       decodeURIComponent(paramString),
@@ -62,8 +65,8 @@ export function parseSignMessageParams(
       : undefined;
 
     const resolve = callbacks?.resolve
-      ? (value: Signature | ConnectError) => {
-          callbacks.resolve?.(value);
+      ? (value: unknown) => {
+          callbacks.resolve?.(value as Signature | ConnectError);
         }
       : undefined;
 

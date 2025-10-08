@@ -48,9 +48,12 @@ export function createConnectUrl(
   return `/connect?data=${encodeURIComponent(JSON.stringify(params))}`;
 }
 
-export function parseConnectParams(
-  paramString: string,
-): (ConnectCallback & { params: ConnectParams }) | null {
+export function parseConnectParams(paramString: string): {
+  params: ConnectParams;
+  resolve?: (result: unknown) => void;
+  reject?: (reason?: unknown) => void;
+  onCancel?: () => void;
+} | null {
   try {
     const params = JSON.parse(decodeURIComponent(paramString)) as ConnectParams;
 
@@ -59,8 +62,8 @@ export function parseConnectParams(
       : undefined;
 
     const resolve = callbacks?.resolve
-      ? (value: ConnectReply | ConnectError) => {
-          callbacks.resolve?.(value);
+      ? (value: unknown) => {
+          callbacks.resolve?.(value as ConnectReply | ConnectError);
         }
       : undefined;
 
