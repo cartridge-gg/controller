@@ -142,7 +142,11 @@ const getKeychainUrl = () => {
       /[^a-zA-Z0-9-]/g,
       "-",
     );
+
+    // debug purpose // only runs on preview
+    console.log("branchName: ", branchName);
     const keychainUrl = `https://keychain-git-${branchName}.preview.cartridge.gg/`;
+    console.log("keychainUrl: ", keychainUrl);
 
     return keychainUrl;
   } else {
