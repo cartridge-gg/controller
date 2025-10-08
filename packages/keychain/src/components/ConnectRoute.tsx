@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo } from "react";
 import { ResponseCodes, toSessionPolicies } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
@@ -7,6 +6,11 @@ import { parseConnectParams } from "@/utils/connection/connect";
 import { CreateSession, processPolicies } from "./connect/CreateSession";
 import { now } from "@/constants";
 import { parseSessionPolicies } from "@/hooks/session";
+import {
+  useRouteParams,
+  useRouteCompletion,
+  useRouteCallbacks,
+} from "@/hooks/route";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -16,62 +20,24 @@ const CANCEL_RESPONSE = {
 export function ConnectRoute() {
   const {
     controller,
-    closeModal,
-    setOnModalClose,
     setRpcUrl,
     setConfigSignupOptions,
     policies: contextPolicies,
   } = useConnection();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [params, setParams] =
-    useState<ReturnType<typeof parseConnectParams>>(null);
 
+  const params = useRouteParams(parseConnectParams);
+  const handleCompletion = useRouteCompletion();
+  useRouteCallbacks(params, CANCEL_RESPONSE);
+
+  // Set RPC URL and signup options when params are loaded
   useEffect(() => {
-    const dataParam = searchParams.get("data");
-    if (dataParam) {
-      const parsed = parseConnectParams(dataParam);
-      if (parsed) {
-        setParams(parsed);
-        // Set the RPC URL and signup options from params
-        setRpcUrl(parsed.params.rpcUrl);
-        if (parsed.params.signupOptions) {
-          setConfigSignupOptions(parsed.params.signupOptions);
-        }
-        return;
+    if (params) {
+      setRpcUrl(params.params.rpcUrl);
+      if (params.params.signupOptions) {
+        setConfigSignupOptions(params.params.signupOptions);
       }
     }
-
-    navigate("/", { replace: true });
-  }, [searchParams, navigate, setRpcUrl, setConfigSignupOptions]);
-
-  useEffect(() => {
-    return () => {
-      if (params?.params.id) {
-        cleanupCallbacks(params.params.id);
-      }
-    };
-  }, [params?.params.id]);
-
-  const returnTo = searchParams.get("returnTo");
-
-  const cancelWithoutClosing = useCallback(() => {
-    if (!params) {
-      return;
-    }
-
-    params.onCancel?.();
-    params.resolve?.(CANCEL_RESPONSE);
-    cleanupCallbacks(params.params.id);
-  }, [params]);
-
-  const handleCompletion = useCallback(() => {
-    if (returnTo) {
-      navigate(returnTo, { replace: true });
-    } else {
-      void closeModal?.();
-    }
-  }, [returnTo, navigate, closeModal]);
+  }, [params, setRpcUrl, setConfigSignupOptions]);
 
   const handleConnect = useCallback(() => {
     if (!params || !controller) {
@@ -98,20 +64,6 @@ export function ConnectRoute() {
     cleanupCallbacks(params.params.id);
     handleCompletion();
   }, [params, controller, handleCompletion]);
-
-  useEffect(() => {
-    if (!setOnModalClose || !params?.resolve) {
-      return;
-    }
-
-    setOnModalClose(() => {
-      cancelWithoutClosing();
-    });
-
-    return () => {
-      setOnModalClose(() => {});
-    };
-  }, [setOnModalClose, params?.resolve, cancelWithoutClosing]);
 
   const policies = useMemo(() => {
     if (!params?.params.policies) {

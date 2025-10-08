@@ -1,11 +1,12 @@
 import { useConnection } from "@/hooks/connection";
-import { cleanupCallbacks, getCallbacks } from "@/utils/connection/callbacks";
+import { getCallbacks } from "@/utils/connection/callbacks";
 import { ExecuteParams } from "@/utils/connection/execute";
 import { ConnectError, ResponseCodes } from "@cartridge/controller";
-import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { InvokeFunctionResponse } from "starknet";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
+import { useRouteParams, useRouteCompletion } from "@/hooks/route";
 
 function parseExecuteParams(paramString: string): {
   params: ExecuteParams;
@@ -31,34 +32,11 @@ function parseExecuteParams(paramString: string): {
 
 export function Execute() {
   const { closeModal, setOnModalClose } = useConnection();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [params, setParams] =
-    useState<ReturnType<typeof parseExecuteParams>>(null);
+  const params = useRouteParams(parseExecuteParams);
+  const handleCompletion = useRouteCompletion();
 
-  useEffect(() => {
-    const dataParam = searchParams.get("data");
-    if (dataParam) {
-      const parsed = parseExecuteParams(dataParam);
-      if (parsed) {
-        setParams(parsed);
-        return;
-      }
-    }
-
-    // No valid data, redirect to home
-    navigate("/", { replace: true });
-  }, [searchParams, navigate]);
-
-  // Cleanup callbacks when component unmounts
-  useEffect(() => {
-    return () => {
-      if (params?.params.id) {
-        cleanupCallbacks(params.params.id);
-      }
-    };
-  }, [params?.params.id]);
-
+  // Execute has different cancel behavior - it resolves with ERROR instead of CANCELED
   useEffect(() => {
     if (!setOnModalClose || !params?.reject) {
       return;
@@ -87,7 +65,7 @@ export function Execute() {
         // Check if there's a returnTo URL parameter and navigate there
         const returnTo = searchParams.get("returnTo");
         if (returnTo) {
-          navigate(returnTo, { replace: true });
+          handleCompletion();
         } else if (params.resolve) {
           params.resolve({
             code: ResponseCodes.SUCCESS,
