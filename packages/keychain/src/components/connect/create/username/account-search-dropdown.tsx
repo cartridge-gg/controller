@@ -167,6 +167,7 @@ export const AccountSearchDropdown = React.forwardRef<
         {shouldShowDropdown && (
           <PopoverContent
             side="bottom"
+            avoidCollisions={false}
             className={cn(
               "w-[--radix-popover-trigger-width] p-0 bg-spacer border-none -translate-y-7 divide-y divide-spacer",
               "max-h-[300px] overflow-y-auto",
