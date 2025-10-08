@@ -20,7 +20,7 @@ export function connectToController<ParentMethods extends object>({
   setRpcUrl,
   setContext,
   setController,
-  setConfigSignupOptions: _setConfigSignupOptions,
+  setConfigSignupOptions: _setConfigSignupOptions, // eslint-disable-line @typescript-eslint/no-unused-vars
   navigate,
 }: {
   setRpcUrl: (url: string) => void;
