@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { Upgrade } from "./connect";
 import { PageLoading } from "./Loading";
@@ -50,12 +49,7 @@ export function Home() {
 
   return (
     <Layout>
-      {(() => {
-        switch (context?.type) {
-          default:
-            return <Outlet />;
-        }
-      })()}
+      <Outlet />
     </Layout>
   );
 }

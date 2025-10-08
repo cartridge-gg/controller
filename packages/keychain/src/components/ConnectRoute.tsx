@@ -25,19 +25,21 @@ export function ConnectRoute() {
     policies: contextPolicies,
   } = useConnection();
 
-  const params = useRouteParams(parseConnectParams);
-  const handleCompletion = useRouteCompletion();
-  useRouteCallbacks(params, CANCEL_RESPONSE);
-
-  // Set RPC URL and signup options when params are loaded
-  useEffect(() => {
-    if (params) {
-      setRpcUrl(params.params.rpcUrl);
-      if (params.params.signupOptions) {
-        setConfigSignupOptions(params.params.signupOptions);
+  // Parse params and set RPC URL immediately
+  const params = useRouteParams((dataParam: string) => {
+    const parsed = parseConnectParams(dataParam);
+    if (parsed) {
+      // Set RPC URL immediately when params are parsed to avoid race condition
+      setRpcUrl(parsed.params.rpcUrl);
+      if (parsed.params.signupOptions) {
+        setConfigSignupOptions(parsed.params.signupOptions);
       }
     }
-  }, [params, setRpcUrl, setConfigSignupOptions]);
+    return parsed;
+  });
+
+  const handleCompletion = useRouteCompletion();
+  useRouteCallbacks(params, CANCEL_RESPONSE);
 
   const handleConnect = useCallback(() => {
     if (!params || !controller) {
