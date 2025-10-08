@@ -35,6 +35,8 @@ export type ConnectionContextValue = {
   setController: (controller?: Controller) => void;
   controllerVersion: SemVer | undefined;
   setContext: (ctx: ConnectionCtx | undefined) => void;
+  setRpcUrl: (url: string) => void;
+  setConfigSignupOptions: (options: AuthOptions | undefined) => void;
   closeModal?: () => Promise<void>;
   onModalClose?: () => void;
   setOnModalClose?: (onModalClose: () => void) => void;

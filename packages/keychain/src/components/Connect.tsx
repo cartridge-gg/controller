@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ResponseCodes } from "@cartridge/controller";
+import { ResponseCodes, toSessionPolicies } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { CreateSession, processPolicies } from "./connect/CreateSession";
 import { now } from "@/constants";
+import { parseSessionPolicies } from "@/hooks/session";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -111,7 +112,17 @@ export function Connect() {
     };
   }, [setOnModalClose, params?.resolve, cancelWithoutClosing]);
 
-  const policies = useMemo(() => params?.params.policies, [params]);
+  const policies = useMemo(() => {
+    if (!params?.params.policies) {
+      return undefined;
+    }
+    // Parse policies from URL params - they need to be converted from
+    // raw Policies to ParsedSessionPolicies
+    return parseSessionPolicies({
+      verified: false, // URL policies are not verified by default
+      policies: toSessionPolicies(params.params.policies),
+    });
+  }, [params]);
 
   // Handle cases where we can connect immediately
   useEffect(() => {

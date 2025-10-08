@@ -652,6 +652,8 @@ export function useConnectionValue() {
     configSignupOptions,
     setController,
     setContext,
+    setRpcUrl,
+    setConfigSignupOptions,
     controllerVersion,
     closeModal: parent ? closeModal : undefined,
     openModal,
