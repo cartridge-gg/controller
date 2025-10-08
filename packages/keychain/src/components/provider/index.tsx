@@ -28,14 +28,18 @@ export function Provider({ children }: PropsWithChildren) {
   const connection = useConnectionValue();
 
   const rpc = useCallback(() => {
+    let nodeUrl;
     switch (connection.controller?.chainId()) {
       case constants.StarknetChainId.SN_MAIN:
-        return import.meta.env.VITE_RPC_MAINNET;
+        nodeUrl = import.meta.env.VITE_RPC_MAINNET;
+        break;
       case constants.StarknetChainId.SN_SEPOLIA:
-        return import.meta.env.VITE_RPC_SEPOLIA;
+        nodeUrl = import.meta.env.VITE_RPC_SEPOLIA;
+        break;
       default:
-        return connection.rpcUrl;
+        nodeUrl = connection.rpcUrl;
     }
+    return { nodeUrl };
   }, [connection.rpcUrl, connection.controller]);
 
   const defaultChainId = useMemo(() => {
