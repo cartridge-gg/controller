@@ -1,9 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import {
-  createDeployUrl,
-  parseDeployParams,
-  deployFactory,
-} from "./deploy";
+import { createDeployUrl, parseDeployParams, deployFactory } from "./deploy";
 import { ResponseCodes } from "@cartridge/controller";
 import { storeCallbacks, cleanupCallbacks } from "./callbacks";
 import * as callbacksModule from "./callbacks";

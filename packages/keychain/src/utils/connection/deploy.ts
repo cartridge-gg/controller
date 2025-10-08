@@ -116,7 +116,7 @@ export function deployFactory({
               message: "Account already deployed",
             });
           }
-        } catch (e) {
+        } catch {
           // If we can't check deployment status, show the deploy UI
         }
 
