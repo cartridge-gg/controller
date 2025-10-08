@@ -20,6 +20,7 @@ export function ConnectRoute() {
     setOnModalClose,
     setRpcUrl,
     setConfigSignupOptions,
+    policies: contextPolicies,
   } = useConnection();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -116,13 +117,29 @@ export function ConnectRoute() {
     if (!params?.params.policies) {
       return undefined;
     }
+
     // Parse policies from URL params - convert Policies to ParsedSessionPolicies
     // Policies can be either Policy[] or SessionPolicies, so use toSessionPolicies
-    return parseSessionPolicies({
+    const sessionPolicies = toSessionPolicies(params.params.policies);
+
+    // If policies are empty (when preset is used), fall back to context policies
+    // which are loaded from the preset configuration
+    const hasContracts =
+      sessionPolicies.contracts &&
+      Object.keys(sessionPolicies.contracts).length > 0;
+    const hasMessages =
+      sessionPolicies.messages && sessionPolicies.messages.length > 0;
+
+    if (!hasContracts && !hasMessages && contextPolicies) {
+      return contextPolicies;
+    }
+
+    const parsed = parseSessionPolicies({
       verified: false, // URL policies are not verified by default
-      policies: toSessionPolicies(params.params.policies),
+      policies: sessionPolicies,
     });
-  }, [params]);
+    return parsed;
+  }, [params, contextPolicies]);
 
   // Handle cases where we can connect immediately
   useEffect(() => {
