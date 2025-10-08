@@ -1,11 +1,5 @@
 import * as React from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverAnchor,
-  Skeleton,
-  cn,
-} from "@cartridge/ui";
+import { Skeleton, cn } from "@cartridge/ui";
 import {
   useAccountSearch,
   AccountSearchResult,
@@ -162,19 +156,14 @@ export const AccountSearchDropdown = React.forwardRef<
     }, [shouldShowDropdown, handleKeyDown]);
 
     return (
-      <Popover open={isOpen} onOpenChange={onOpenChange}>
-        <PopoverAnchor ref={ref}>{children}</PopoverAnchor>
+      <div className="relative" ref={ref}>
+        {children}
         {shouldShowDropdown && (
-          <PopoverContent
-            side="bottom"
+          <div
             className={cn(
-              "w-[--radix-popover-trigger-width] p-0 bg-spacer border-none -translate-y-7 divide-y divide-spacer",
+              "absolute -translate-y-6 top-full left-0 right-0 z-50 mt-1 p-0 bg-spacer border-none divide-y divide-spacer rounded-md shadow-lg",
               "max-h-[300px] overflow-y-auto",
             )}
-            align="start"
-            sideOffset={4}
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             {isLoading && <Skeleton className="h-12 w-full rounded-none" />}
 
@@ -205,9 +194,9 @@ export const AccountSearchDropdown = React.forwardRef<
                   onMouseLeave={() => onSelectedIndexChange?.(undefined)}
                 />
               ))}
-          </PopoverContent>
+          </div>
         )}
-      </Popover>
+      </div>
     );
   },
 );
