@@ -116,8 +116,8 @@ export function ConnectRoute() {
     if (!params?.params.policies) {
       return undefined;
     }
-    // Parse policies from URL params - they need to be converted from
-    // raw Policies to ParsedSessionPolicies
+    // Parse policies from URL params - convert Policies to ParsedSessionPolicies
+    // Policies can be either Policy[] or SessionPolicies, so use toSessionPolicies
     return parseSessionPolicies({
       verified: false, // URL policies are not verified by default
       policies: toSessionPolicies(params.params.policies),

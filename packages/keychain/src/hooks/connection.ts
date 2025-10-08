@@ -452,7 +452,6 @@ export function useConnectionValue() {
         setRpcUrl,
         setContext,
         setController,
-        setConfigSignupOptions,
         navigate,
       });
 
