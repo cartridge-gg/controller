@@ -41,7 +41,7 @@ export function connectToController<ParentMethods extends object>({
           setConfigSignupOptions,
         }),
       ),
-      deploy: () => deployFactory(setContext),
+      deploy: () => deployFactory({ navigate }),
       execute: () => execute({ navigate }),
       estimateInvokeFee: () => estimateInvokeFee,
       probe: normalize(probe({ setController })),

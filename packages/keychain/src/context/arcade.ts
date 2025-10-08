@@ -1,8 +1,6 @@
 import {
   ArcadeProvider,
   BookModel,
-  EditionModel,
-  GameModel,
   ListingEvent,
   OrderModel,
   SaleEvent,
@@ -16,11 +14,6 @@ interface ArcadeContextType {
   /** The Arcade client instance */
   chainId: string;
   provider: ArcadeProvider;
-  pins: { [playerId: string]: string[] };
-  followers: { [playerId: string]: string[] };
-  followeds: { [playerId: string]: string[] };
-  games: { [gameId: string]: GameModel };
-  editions: { [editionId: string]: EditionModel };
   book: BookModel | null;
   orders: {
     [collection: string]: { [token: string]: { [order: string]: OrderModel } };
@@ -35,6 +28,8 @@ interface ArcadeContextType {
   };
   addOrder: (order: OrderModel) => void;
   removeOrder: (order: OrderModel) => void;
+  initializable: boolean;
+  setInitializable: (initializable: boolean) => void;
 }
 
 /**

@@ -8,16 +8,6 @@ import {
 } from "react";
 import {
   ArcadeProvider as ExternalProvider,
-  Registry,
-  Social,
-  PinEvent,
-  GameModel,
-  RegistryModel,
-  SocialModel,
-  SocialOptions,
-  RegistryOptions,
-  FollowEvent,
-  EditionModel,
   BookModel,
   OrderModel,
   ListingEvent,
@@ -41,17 +31,6 @@ const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
  */
 export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   const currentValue = useContext(ArcadeContext);
-  const [pins, setPins] = useState<{ [playerId: string]: string[] }>({});
-  const [followers, setFollowers] = useState<{ [playerId: string]: string[] }>(
-    {},
-  );
-  const [followeds, setFolloweds] = useState<{ [playerId: string]: string[] }>(
-    {},
-  );
-  const [games, setGames] = useState<{ [gameId: string]: GameModel }>({});
-  const [editions, setEditions] = useState<{
-    [editionId: string]: EditionModel;
-  }>({});
   const [book, setBook] = useState<BookModel | null>(null);
   const [orders, setOrders] = useState<{
     [collection: string]: { [token: string]: { [order: string]: OrderModel } };
@@ -64,6 +43,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   const [sales, setSales] = useState<{
     [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
   }>({});
+  const [initializable, setInitializable] = useState<boolean>(false);
   const [initialized, setInitialized] = useState<boolean>(false);
 
   if (currentValue) {
@@ -162,111 +142,14 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [addOrder, removeOrder, setBook, setListings, setSales],
   );
 
-  const handleSocialEvents = useCallback((models: SocialModel[]) => {
-    models.forEach((model: SocialModel) => {
-      // Return if the model is not a PinEvent
-      if (PinEvent.isType(model as PinEvent)) {
-        const event = model as PinEvent;
-        // Return if the event is not a PinEvent
-        if (event.time == 0) {
-          // Remove the achievement from the player's list
-          setPins((prevPins) => {
-            const achievementIds = prevPins[event.playerId] || [];
-            return {
-              ...prevPins,
-              [event.playerId]: achievementIds.filter(
-                (id: string) => id !== event.achievementId,
-              ),
-            };
-          });
-        } else {
-          // Otherwise, add the achievement to the player's list
-          setPins((prevPins) => {
-            const achievementIds = prevPins[event.playerId] || [];
-            return {
-              ...prevPins,
-              [event.playerId]: [...achievementIds, event.achievementId],
-            };
-          });
-        }
-      } else if (FollowEvent.isType(model as FollowEvent)) {
-        const event = model as FollowEvent;
-        const follower = getChecksumAddress(event.follower);
-        const followed = getChecksumAddress(event.followed);
-        if (event.time == 0) {
-          setFollowers((prevFollowers) => ({
-            ...prevFollowers,
-            [followed]: (prevFollowers[followed] || []).filter(
-              (id: string) => id !== follower,
-            ),
-          }));
-          setFolloweds((prevFolloweds) => ({
-            ...prevFolloweds,
-            [follower]: (prevFolloweds[follower] || []).filter(
-              (id: string) => id !== followed,
-            ),
-          }));
-        } else {
-          setFollowers((prevFollowers) => ({
-            ...prevFollowers,
-            [followed]: [...(prevFollowers[followed] || []), follower],
-          }));
-          setFolloweds((prevFolloweds) => ({
-            ...prevFolloweds,
-            [follower]: [...(prevFolloweds[follower] || []), followed],
-          }));
-        }
-      }
-    });
-  }, []);
-
-  const handleRegistryModels = useCallback((models: RegistryModel[]) => {
-    models.forEach((model: RegistryModel) => {
-      if (GameModel.isType(model as GameModel)) {
-        const game = model as GameModel;
-        setGames((prevGames) => ({
-          ...prevGames,
-          [game.identifier]: game,
-        }));
-      } else if (EditionModel.isType(model as EditionModel)) {
-        const edition = model as EditionModel;
-        setEditions((prevEditions) => ({
-          ...prevEditions,
-          [edition.identifier]: edition,
-        }));
-      }
-    });
-  }, []);
-
   useEffect(() => {
-    if (initialized) return;
+    if (initialized || !initializable) return;
     const initialize = async () => {
-      await Social.init(CHAIN_ID);
-      await Registry.init(CHAIN_ID);
       await Marketplace.init(CHAIN_ID);
       setInitialized(true);
     };
     initialize();
-  }, [initialized, setInitialized]);
-
-  useEffect(() => {
-    if (!initialized) return;
-    const options: SocialOptions = { pin: true, follow: true };
-    Social.fetch(handleSocialEvents, options);
-    Social.sub(handleSocialEvents, options);
-    return () => {
-      Social.unsub();
-    };
-  }, [initialized, handleSocialEvents]);
-
-  useEffect(() => {
-    if (!initialized) return;
-    const options: RegistryOptions = { game: true, edition: true };
-    Registry.fetch(handleRegistryModels, options);
-    return () => {
-      Registry.unsub();
-    };
-  }, [initialized, handleRegistryModels]);
+  }, [initialized, initializable, setInitialized]);
 
   useEffect(() => {
     if (!initialized) return;
@@ -288,17 +171,14 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       value={{
         chainId: CHAIN_ID,
         provider,
-        pins,
-        followers,
-        followeds,
-        games,
-        editions,
         book,
         orders,
         listings,
         sales,
         addOrder,
         removeOrder,
+        initializable,
+        setInitializable,
       }}
     >
       {children}

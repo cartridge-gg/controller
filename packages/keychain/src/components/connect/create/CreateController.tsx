@@ -9,12 +9,12 @@ import { AuthOption, AuthOptions } from "@cartridge/controller";
 import {
   CartridgeLogo,
   ControllerIcon,
-  CreateAccount,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Sheet,
 } from "@cartridge/ui";
+import { CreateAccount } from "./username";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
@@ -30,6 +30,7 @@ import {
   usePreventOverScrolling,
 } from "@/hooks/viewport";
 import { useDevice } from "@/hooks/device";
+import { AccountSearchResult } from "@/hooks/account";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -146,6 +147,21 @@ function CreateControllerForm({
     }
   }, [isMobile, keyboardIsOpen, viewportHeight]);
 
+  const [selectedAccount, setSelectedAccount] = useState<
+    AccountSearchResult | undefined
+  >();
+
+  const handleAccountSelect = (result: AccountSearchResult) => {
+    setSelectedAccount(result);
+    onUsernameChange(result.username);
+  };
+
+  const handleRemovePill = useCallback(() => {
+    setSelectedAccount(undefined);
+    onUsernameChange("");
+    onUsernameClear();
+  }, [onUsernameChange, onUsernameClear]);
+
   return (
     <>
       <NavigationHeader
@@ -194,6 +210,10 @@ function CreateControllerForm({
             onUsernameFocus={onUsernameFocus}
             onUsernameClear={onUsernameClear}
             onKeyDown={onKeyDown}
+            showAutocomplete={true}
+            selectedAccount={selectedAccount}
+            onAccountSelect={handleAccountSelect}
+            onSelectedUsernameRemove={handleRemovePill}
           />
           <Legal />
         </LayoutContent>
@@ -409,7 +429,7 @@ export function CreateController({
         }
 
         handleSubmit(
-          usernameField.value,
+          usernameField.value.trim(),
           accountExists,
           authenticationMethod,
           password,
