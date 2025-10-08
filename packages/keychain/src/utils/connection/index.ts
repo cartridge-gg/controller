@@ -1,7 +1,7 @@
 export * from "./types";
 
 import Controller from "@/utils/controller";
-import { AuthOptions, StarterPack } from "@cartridge/controller";
+import { StarterPack } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
 import { normalize } from "@cartridge/ui/utils";
 import { connect } from "./connect";
@@ -20,13 +20,11 @@ export function connectToController<ParentMethods extends object>({
   setRpcUrl,
   setContext,
   setController,
-  setConfigSignupOptions,
   navigate,
 }: {
   setRpcUrl: (url: string) => void;
   setContext: (ctx: ConnectionCtx | undefined) => void;
   setController: (controller?: Controller) => void;
-  setConfigSignupOptions: (options: AuthOptions | undefined) => void;
   navigate: (
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
@@ -36,9 +34,7 @@ export function connectToController<ParentMethods extends object>({
     methods: {
       connect: normalize(
         connect({
-          setRpcUrl,
-          setContext,
-          setConfigSignupOptions,
+          navigate,
         }),
       ),
       deploy: () => deployFactory({ navigate }),

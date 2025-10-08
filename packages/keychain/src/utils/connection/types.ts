@@ -1,16 +1,13 @@
 import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import {
   ConnectError,
-  ConnectReply,
   DeployReply,
   ExecuteReply,
   StarterPack,
 } from "@cartridge/controller";
-import { Policies } from "@cartridge/presets";
 import { Call, FeeEstimate, Signature, TypedData } from "starknet";
 
 export type ConnectionCtx =
-  | ConnectCtx
   | DeployCtx
   | LogoutCtx
   | ExecuteCtx
@@ -18,14 +15,6 @@ export type ConnectionCtx =
   | OpenSettingsCtx
   | OpenPurchaseCreditsCtx
   | OpenStarterPackCtx;
-
-export type ConnectCtx = {
-  origin: string;
-  type: "connect";
-  policies: Policies;
-  resolve: (res: ConnectReply | ConnectError) => void;
-  reject: (reason?: unknown) => void;
-};
 
 export type LogoutCtx = {
   origin: string;
