@@ -1,11 +1,6 @@
-import {
-  ConnectError,
-  ControllerError,
-  ResponseCodes,
-} from "@cartridge/controller";
+import { ConnectError, ResponseCodes } from "@cartridge/controller";
 import { generateCallbackId, storeCallbacks, getCallbacks } from "./callbacks";
 import { mutex } from "./sync";
-import { parseControllerError } from "./execute";
 
 export interface DeployParams {
   id: string;

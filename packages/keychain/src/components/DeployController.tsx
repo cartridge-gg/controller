@@ -36,7 +36,7 @@ const CANCEL_RESPONSE = {
 };
 
 export function DeployController() {
-  const { controller, closeModal, setOnModalClose } = useConnection();
+  const { closeModal, setOnModalClose } = useConnection();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [params, setParams] =

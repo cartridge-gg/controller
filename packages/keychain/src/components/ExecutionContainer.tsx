@@ -13,9 +13,9 @@ import { isEqual } from "@/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { Call, FeeEstimate } from "starknet";
-import { DeployController } from "./DeployController";
 import { Fees } from "./Fees";
 import { useNavigation } from "@/context/navigation";
+import { createDeployUrl } from "@/utils/connection/deploy";
 
 interface ExecutionContainerProps {
   transactions: Call[];
@@ -123,27 +123,28 @@ export function ExecutionContainer({
     }
   };
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setCTAState("execute");
     setCtrlError(undefined);
     setIsLoading(false);
     estimateFees(transactions);
-  };
+  }, [estimateFees, transactions]);
 
-  if (
-    ctaState === "deploy" &&
-    ctrlError?.code === ErrorCode.CartridgeControllerNotDeployed
-  ) {
-    return (
-      <DeployController
-        onClose={() => {
+  useEffect(() => {
+    if (
+      ctaState === "deploy" &&
+      ctrlError?.code === ErrorCode.CartridgeControllerNotDeployed &&
+      controller
+    ) {
+      const url = createDeployUrl(controller.address(), {
+        resolve: () => {
           resetState();
           onDeploy?.();
-        }}
-        ctrlError={ctrlError}
-      />
-    );
-  }
+        },
+      });
+      navigate(url, { replace: true });
+    }
+  }, [ctaState, ctrlError, controller, navigate, onDeploy, resetState]);
 
   return (
     <>
