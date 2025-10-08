@@ -164,6 +164,9 @@ export function ConnectRoute() {
 
     // Bypass session approval screen for verified sessions
     if (policies?.verified) {
+      console.log(
+        "ConnectRoute - Auto-creating verified session (bypassing UI)",
+      );
       const createSessionForVerifiedPolicies = async () => {
         try {
           // Use a default duration for verified sessions (24 hours)
@@ -172,6 +175,7 @@ export function ConnectRoute() {
 
           const processedPolicies = processPolicies(policies, false);
           await controller.createSession(expiresAt, processedPolicies);
+          console.log("ConnectRoute - Verified session created successfully");
           params.resolve?.({
             code: ResponseCodes.SUCCESS,
             address: controller.address(),

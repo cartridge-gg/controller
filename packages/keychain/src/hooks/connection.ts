@@ -375,7 +375,10 @@ export function useConnectionValue() {
       .then((config) => {
         if (config && config.origin) {
           const allowedOrigins = toArray(config.origin as string | string[]);
-          setVerified(isOriginVerified(origin, allowedOrigins));
+          // Always consider localhost as verified for development
+          const isLocalhost =
+            origin.includes("localhost") || origin.includes("127.0.0.1");
+          setVerified(isLocalhost || isOriginVerified(origin, allowedOrigins));
           setConfigData(config as Record<string, unknown>);
         }
       })
