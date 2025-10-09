@@ -16,7 +16,18 @@ import {
 } from "starknet";
 
 import { DEFAULT_SESSION_DURATION } from "@/constants";
-import type { Policy } from "@cartridge/controller-wasm";
+import type { Policy, ApprovalPolicy } from "@cartridge/controller-wasm";
+
+// Extended method type to support approve-specific fields
+type ExtendedMethod = Method & {
+  spender?: string;
+  amount?: string;
+};
+
+// Maximum u256 value for approve amount (2^256 - 1)
+// We use the low limb of max u128 as a reasonable max for token amounts
+const MAX_APPROVE_AMOUNT =
+  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
 
@@ -40,7 +51,7 @@ export type SessionContracts = Record<
       type: ContractType;
       icon?: React.ReactNode | string;
     };
-    methods: (Method & { authorized?: boolean; id?: string })[];
+    methods: (ExtendedMethod & { authorized?: boolean; id?: string })[];
   }
 >;
 
@@ -132,11 +143,27 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
     ...Object.entries(policies.contracts ?? {}).flatMap(
       ([target, { methods }]) => {
         const methodsArr = Array.isArray(methods) ? methods : [methods];
-        return methodsArr.map((m) => ({
-          target,
-          method: hash.getSelectorFromName(m.entrypoint),
-          authorized: !!m.authorized,
-        }));
+        return methodsArr.map((m): Policy => {
+          // Check if this is an approve entrypoint
+          if (m.entrypoint === "approve") {
+            // Create an ApprovalPolicy for approve calls
+            // Spender defaults to the target contract if not specified
+            // Amount defaults to MAX_APPROVE_AMOUNT if not specified
+            const approvalPolicy: ApprovalPolicy = {
+              target,
+              spender: m.spender || target,
+              amount: m.amount || MAX_APPROVE_AMOUNT,
+            };
+            return approvalPolicy;
+          }
+
+          // For non-approve methods, create a regular CallPolicy
+          return {
+            target,
+            method: hash.getSelectorFromName(m.entrypoint),
+            authorized: !!m.authorized,
+          };
+        });
       },
     ),
     ...(policies.messages ?? []).map((p) => {
