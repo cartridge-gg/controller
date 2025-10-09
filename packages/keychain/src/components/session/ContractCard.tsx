@@ -5,16 +5,17 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  CardIcon,
+  CodeIcon,
   InfoIcon,
   Switch,
+  Thumbnail,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { isValidElement } from "react";
+import { useState } from "react";
 
 type MethodWithEnabled = Method & { authorized?: boolean; id?: string };
 
@@ -35,37 +36,45 @@ export function ContractCard({
   isExpanded = false,
   className,
 }: ContractCardProps) {
+  const [isOpened, setisOpened] = useState(isExpanded);
   const { onToggleMethod, isEditable } = useCreateSession();
 
   return (
     <Accordion
       type="single"
       collapsible
-      defaultValue={isExpanded ? "item" : undefined}
       className="bg-background-200 rounded"
+      onValueChange={(e) => setisOpened(e === "item")}
     >
-      <AccordionItem value="item" className="flex flex-col gap-2">
+      <AccordionItem value="item" className="flex flex-col">
         <AccordionTrigger
           parentClassName="h-11 p-3"
           className="flex items-center text-xs font-medium text-foreground-100 gap-1.5"
+          color={cn(isOpened ? "text-foreground-100" : "text-foreground-400")}
         >
-          {isValidElement(icon) ? (
-            <CardIcon>{icon}</CardIcon>
-          ) : (
-            <CardIcon src={icon as string} />
-          )}
+          <Thumbnail
+            variant={isOpened ? "light" : "ghost"}
+            size="xs"
+            icon={icon ?? <CodeIcon variant="solid" />}
+            centered={true}
+          />
           <p>{`Approve ${title}`}</p>
         </AccordionTrigger>
 
-        <AccordionContent className={cn("flex flex-col", className)}>
-          {methods
-            .filter((method) => (isEditable ? true : method.authorized))
-            .map((method) => (
-              <div
-                key={method.entrypoint}
-                className="flex flex-col bg-background-200 gap-4 p-3 text-xs"
-              >
-                <div className="flex items-center justify-between">
+        <AccordionContent
+          className={cn(
+            "flex flex-col rounded overflow-hidden gap-0 px-3 pb-3",
+            className,
+          )}
+        >
+          <div className="border border-background-100 divide-y divide-background-100 rounded">
+            {methods
+              .filter((method) => (isEditable ? true : method.authorized))
+              .map((method) => (
+                <div
+                  key={method.entrypoint}
+                  className="flex items-center justify-between p-3"
+                >
                   <div
                     className={cn(
                       "flex flex-row items-center gap-2",
@@ -103,76 +112,12 @@ export function ContractCard({
                     )}
                   />
                 </div>
-              </div>
-            ))}
+              ))}
+          </div>
         </AccordionContent>
       </AccordionItem>
     </Accordion>
   );
-
-  // return (
-  //   <AccordionCard
-  //     icon={icon ?? <CodeIcon variant="solid" />}
-  //     title={<div className="text-xs font-semibold">{title}</div>}
-  //     subtitle={explorerLink}
-  //     isExpanded={isExpanded}
-  //     trigger={
-  //       <div className="text-xs text-foreground-300">
-  //         Approve&nbsp;
-  //         <span className="text-foreground-200 font-bold">
-  //           {totalEnabledMethod} {totalEnabledMethod > 1 ? `methods` : "method"}
-  //         </span>
-  //       </div>
-  //     }
-  //     className="bg-background gap-px rounded overflow-auto border border-background"
-  //   >
-  //     {methods
-  //       .filter((method) => (isEditable ? true : method.authorized))
-  //       .map((method) => (
-  //         <div
-  //           key={method.entrypoint}
-  //           className="flex flex-col bg-background-200 gap-4 p-3 text-xs"
-  //         >
-  //           <div className="flex items-center justify-between">
-  //             <div
-  //               className={cn(
-  //                 "flex flex-row items-center gap-2",
-  //                 method.authorized
-  //                   ? "text-foreground-300"
-  //                   : "text-background-500",
-  //               )}
-  //             >
-  //               <p className="font-medium text-xs">
-  //                 {method.name ?? humanizeString(method.entrypoint)}
-  //               </p>
-  //               {method.description && (
-  //                 <TooltipProvider>
-  //                   <Tooltip>
-  //                     <TooltipTrigger>
-  //                       <InfoIcon size="sm" />
-  //                     </TooltipTrigger>
-  //                     <TooltipContent>
-  //                       <p>{method.description}</p>
-  //                     </TooltipContent>
-  //                   </Tooltip>
-  //                 </TooltipProvider>
-  //               )}
-  //             </div>
-  //             <Switch
-  //               checked={method.authorized ?? true}
-  //               onCheckedChange={(enabled) =>
-  //                 method.id ? onToggleMethod(address, method.id, enabled) : null
-  //               }
-  //               disabled={method.isRequired}
-  //               className={cn(
-  //                 isEditable ? "visible" : "invisible pointer-events-none", // use visible class to prevent layout shift
-  //               )}
-  //             />
-  //           </div>
-  //         </div>
-  //       ))}
-  //   </AccordionCard>
-  // );
 }
 
 function humanizeString(str: string): string {
