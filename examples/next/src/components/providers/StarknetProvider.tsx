@@ -53,6 +53,7 @@ const policies: SessionPolicies = {
         {
           name: "approve",
           entrypoint: "approve",
+          amount: "0xffffffffffffffffffffffffffffffff",
           description:
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
         },
@@ -67,6 +68,7 @@ const policies: SessionPolicies = {
         {
           name: "approve",
           entrypoint: "approve",
+          amount: "0xffffffffffffffffffffffffffffffff",
           description:
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
         },
