@@ -24,11 +24,6 @@ type ExtendedMethod = Method & {
   amount?: string;
 };
 
-// Maximum u256 value for approve amount (2^256 - 1)
-// We use the low limb of max u128 as a reasonable max for token amounts
-const MAX_APPROVE_AMOUNT =
-  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-
 export type ContractType = "ERC20" | "ERC721" | "VRF";
 
 export type ERC20Metadata = {
@@ -146,18 +141,25 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
         return methodsArr.map((m): Policy => {
           // Check if this is an approve entrypoint
           if (m.entrypoint === "approve") {
-            // Create an ApprovalPolicy for approve calls
-            // Spender defaults to the target contract if not specified
-            // Amount defaults to MAX_APPROVE_AMOUNT if not specified
-            const approvalPolicy: ApprovalPolicy = {
-              target,
-              spender: m.spender || target,
-              amount: m.amount || MAX_APPROVE_AMOUNT,
-            };
-            return approvalPolicy;
+            // Only create ApprovalPolicy if both spender and amount are defined
+            if (m.spender && m.amount) {
+              const approvalPolicy: ApprovalPolicy = {
+                target,
+                spender: m.spender,
+                amount: m.amount,
+              };
+              return approvalPolicy;
+            }
+
+            // Fall back to CallPolicy with deprecation warning
+            console.warn(
+              `[DEPRECATED] Approve method without spender and amount fields will be rejected by account-wasm 0.3.12+. ` +
+                `Please update your preset to include both 'spender' and 'amount' fields for approve calls on contract ${target}. ` +
+                `Example: { entrypoint: "approve", spender: "0x...", amount: "0x..." }`,
+            );
           }
 
-          // For non-approve methods, create a regular CallPolicy
+          // For non-approve methods and legacy approve, create a regular CallPolicy
           return {
             target,
             method: hash.getSelectorFromName(m.entrypoint),
