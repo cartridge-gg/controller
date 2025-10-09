@@ -178,7 +178,7 @@ export function useConnectionValue() {
   const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string>(window.location.origin);
   const [rpcUrl, setRpcUrl] = useState<string>(
-    import.meta.env.VITE_RPC_SEPOLIA,
+    import.meta.env.VITE_RPC_MAINNET,
   );
   const [policies, setPolicies] = useState<ParsedSessionPolicies>();
   const [verified, setVerified] = useState<boolean>(false);
