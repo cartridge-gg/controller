@@ -42,8 +42,6 @@ export function UnverifiedSessionSummary({
     return { tokenContracts, otherContracts };
   }, [contracts]);
 
-  console.log("tokenContracts: ", tokenContracts);
-
   return (
     <div className="flex flex-col gap-4">
       {/* Render other contracts first */}
@@ -59,6 +57,8 @@ export function UnverifiedSessionSummary({
         ))}
       </div>
 
+      {messages && messages.length > 0 && <MessageCard messages={messages} />}
+
       {/* Render token contracts after */}
       {tokenContracts && tokenContracts.length > 0 && (
         <>
@@ -70,14 +70,9 @@ export function UnverifiedSessionSummary({
               title={e.title}
               icon={e.icon}
               methods={e.methods}
-              isExpanded
             />
           ))}
         </>
-      )}
-
-      {messages && messages.length > 0 && (
-        <MessageCard messages={messages} isExpanded />
       )}
     </div>
   );

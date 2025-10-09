@@ -23,7 +23,10 @@ interface MessageCardProps {
   isExpanded?: boolean;
 }
 
-export function MessageCard({ messages, isExpanded }: MessageCardProps) {
+export function MessageCard({
+  messages,
+  isExpanded = false,
+}: MessageCardProps) {
   const totalEnabledMessages = messages.filter((m) => m.authorized).length;
 
   return (
