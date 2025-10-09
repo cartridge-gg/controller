@@ -177,12 +177,7 @@ export function Session() {
     return <Failure />;
   }
 
-  // Don't show CreateSession/RegisterSession when there are no policies
-  if (
-    !policies ||
-    ((!policies.contracts || Object.keys(policies.contracts).length === 0) &&
-      (!policies.messages || policies.messages.length === 0))
-  ) {
+  if (!policies) {
     return <>No Session Policies</>;
   }
 
