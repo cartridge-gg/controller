@@ -18,12 +18,7 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const {
-    controller,
-    setRpcUrl,
-    setConfigSignupOptions,
-    policies: contextPolicies,
-  } = useConnection();
+  const { controller, setRpcUrl, setConfigSignupOptions } = useConnection();
 
   // Parse params and set RPC URL immediately
   const params = useRouteParams((dataParam: string) => {
@@ -72,12 +67,6 @@ export function ConnectRoute() {
       return undefined;
     }
 
-    // Always prefer context policies from preset configuration when available
-    // Preset policies take precedence over manually provided policies
-    if (contextPolicies) {
-      return contextPolicies;
-    }
-
     // Fall back to URL policies if no preset is configured
     // Parse policies from URL params - convert Policies to ParsedSessionPolicies
     // Policies can be either Policy[] or SessionPolicies, so use toSessionPolicies
@@ -88,7 +77,7 @@ export function ConnectRoute() {
       policies: sessionPolicies,
     });
     return parsed;
-  }, [params, contextPolicies]);
+  }, [params]);
 
   // Handle cases where we can connect immediately
   useEffect(() => {
