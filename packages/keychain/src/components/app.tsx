@@ -48,6 +48,7 @@ import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
 import { Collections } from "./purchasenew/starterpack/collections";
+import { DeployController } from "./DeployController";
 
 export function App() {
   const { navigate } = useNavigation();

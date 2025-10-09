@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useConnection } from "@/hooks/connection";
-import { Upgrade } from "./connect";
+import { CreateController, Upgrade } from "./connect";
 import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
