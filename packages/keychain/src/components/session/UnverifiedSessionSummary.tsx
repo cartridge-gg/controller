@@ -4,6 +4,7 @@ import { toArray } from "@cartridge/controller";
 import { ContractCard } from "./ContractCard";
 import { MessageCard } from "./MessageCard";
 import { useMemo } from "react";
+import { TokenConsent } from "../connect/token-consent";
 
 export function UnverifiedSessionSummary({
   contracts,
@@ -12,7 +13,7 @@ export function UnverifiedSessionSummary({
   contracts?: SessionContracts;
   messages?: SessionMessages;
 }) {
-  const entries = useMemo(() => {
+  const { tokenContracts, otherContracts } = useMemo(() => {
     const formattedContracts = Object.entries(contracts ?? {}).map(
       ([address, contract]) => {
         const methods = toArray(contract.methods);
@@ -28,11 +29,35 @@ export function UnverifiedSessionSummary({
       },
     );
 
-    return formattedContracts;
+    // Separate token contracts (with approve method) from other contracts
+    const tokenContracts = formattedContracts.filter((contract) =>
+      contract.methods.some((method) => method.name === "approve"),
+    );
+
+    const otherContracts = formattedContracts.filter(
+      (contract) =>
+        !contract.methods.some((method) => method.name === "approve"),
+    );
+
+    return { tokenContracts, otherContracts };
   }, [contracts]);
   return (
     <div className="flex flex-col gap-4">
-      {entries.map((e) => (
+      {/* Render other contracts first */}
+      {otherContracts.map((e) => (
+        <ContractCard
+          key={e.address}
+          address={e.address}
+          title={e.title}
+          icon={e.icon}
+          methods={e.methods}
+          isExpanded
+        />
+      ))}
+
+      <TokenConsent />
+      {/* Render token contracts after */}
+      {tokenContracts.map((e) => (
         <ContractCard
           key={e.address}
           address={e.address}
