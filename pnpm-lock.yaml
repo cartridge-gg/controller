@@ -10,8 +10,8 @@ catalogs:
       specifier: 0.3.5
       version: 0.3.5
     '@cartridge/controller-wasm':
-      specifier: 0.3.12
-      version: 0.3.12
+      specifier: 0.3.13
+      version: 0.3.13
     '@cartridge/penpal':
       specifier: ^6.2.4
       version: 6.2.4
@@ -162,8 +162,8 @@ importers:
   .:
     dependencies:
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#ddb1d28
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/ddb1d28
+        specifier: github:cartridge-gg/presets#0c57c99
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/0c57c99
       '@cartridge/ui':
         specifier: github:cartridge-gg/ui#1a53ba8
         version: https://codeload.github.com/cartridge-gg/ui/tar.gz/1a53ba8(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.11.24(@swc/helpers@0.5.17))(@types/node@16.18.11)(typescript@5.8.3)))(viem@2.28.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))
@@ -282,7 +282,7 @@ importers:
         version: link:../../packages/controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.12
+        version: 0.3.13
       starknet:
         specifier: 'catalog:'
         version: 8.5.4
@@ -393,7 +393,7 @@ importers:
     dependencies:
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.12
+        version: 0.3.13
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -521,7 +521,7 @@ importers:
         version: link:../controller
       '@cartridge/controller-wasm':
         specifier: 'catalog:'
-        version: 0.3.12
+        version: 0.3.13
       '@cartridge/penpal':
         specifier: 'catalog:'
         version: 6.2.4
@@ -1189,8 +1189,8 @@ packages:
   '@cartridge/controller-wasm@0.2.1':
     resolution: {integrity: sha512-uB0ffQEHAlu7+2E4Y/EoWUgbIYNrjMXks2FYHS8lg9ngaFwETvrUFI5Y+Pp71VQTthEnuwVcNKBqluO5TSPAug==}
 
-  '@cartridge/controller-wasm@0.3.12':
-    resolution: {integrity: sha512-CWAvc+nQFXd9KVcJQPUqUu7YUsHdYb4hmIbZlimQibDpZF6YLoODKkhAOUvXsP+VScinrEth4h4vDTcN+V5F7w==}
+  '@cartridge/controller-wasm@0.3.13':
+    resolution: {integrity: sha512-jE5/zjLGGMdB4T16H6y5qJT1khZo55LYJhTuWyuLbOGC0XhP0uUB1MxYpYCd2wLwLTBsQzrMsenv8Ks3AgCy/w==}
 
   '@cartridge/controller@0.9.0':
     resolution: {integrity: sha512-bIikpiIR+N16MaEyxjab/AN3uDvOj+pdixWbJLSVqGpItpUq58AiQ0GFwPKXnpAwKVT66aqNrVBINSuMWemRhQ==}
@@ -1204,12 +1204,12 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/0c57c99':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/0c57c99}
     version: 0.0.1
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/ddb1d28':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/ddb1d28}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0}
     version: 0.0.1
 
   '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/1a53ba8':
@@ -11135,7 +11135,7 @@ snapshots:
 
   '@cartridge/controller-wasm@0.2.1': {}
 
-  '@cartridge/controller-wasm@0.3.12': {}
+  '@cartridge/controller-wasm@0.3.13': {}
 
   '@cartridge/controller@0.9.0(@metamask/sdk@0.32.1(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.20)(bufferutil@4.0.9)(encoding@0.1.13)(open@10.1.2)(react@18.3.1)(starknet@8.5.4)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@8.5.4)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
@@ -11182,11 +11182,11 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/0c57c99':
     dependencies:
       '@starknet-io/types-js': 0.8.4
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/ddb1d28':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0':
     dependencies:
       '@starknet-io/types-js': 0.8.4
 
