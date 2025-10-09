@@ -11,7 +11,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "./account";
 import { useConnection } from "@/hooks/connection";
-import { getChecksumAddress } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { useEffect, useMemo, useState } from "react";
 import { erc20Metadata } from "@cartridge/presets";
 import { useUsername } from "./username";
@@ -38,7 +38,8 @@ async function fetchContracts(
 }
 
 const LIMIT = 1000;
-export const TOKENS_TORII_INSTANCE = "c7e-arcade-tokens-alpha";
+export const TORII_MAINNET_TOKENS = "c7e-arcade-tokens-alpha";
+export const TORII_SEPOLIA_TOKENS = "c7e-arcade-tokens-sepolia";
 
 export type Balance = {
   amount: number;
@@ -123,15 +124,25 @@ export type UseBalancesResponse = {
 export function useBalances(accountAddress?: string): UseBalancesResponse {
   const account = useAccount();
   const connectedAddress = account?.address;
-  const { project } = useConnection();
+  const { project, chainId } = useConnection();
   const address = useMemo(
     () => accountAddress ?? connectedAddress,
     [accountAddress, connectedAddress],
   );
 
   const projects = useMemo(() => {
-    return project ? [project, TOKENS_TORII_INSTANCE] : [TOKENS_TORII_INSTANCE];
-  }, [project]);
+    return chainId === constants.StarknetChainId.SN_MAIN
+      ? project
+        ? [project, TORII_MAINNET_TOKENS]
+        : [TORII_MAINNET_TOKENS]
+      : chainId === constants.StarknetChainId.SN_SEPOLIA
+        ? project
+          ? [project, TORII_SEPOLIA_TOKENS]
+          : [TORII_SEPOLIA_TOKENS]
+        : project
+          ? [project]
+          : [];
+  }, [project, chainId]);
 
   const { data, status } = useBalancesQuery(
     {
@@ -298,6 +309,11 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
         (v) => BigInt(v?.address || "0x0") === BigInt(contractAddress),
       );
       const change = value ? value.current.value - value.period.value : 0;
+      const image = erc20Metadata.find(
+        (m) =>
+          getChecksumAddress(m.l2_token_address) ===
+          getChecksumAddress(contractAddress),
+      )?.logo_url;
       tokenMap[normalizedAddress] = {
         balance: {
           amount: Number(token.balance.value) / 10 ** token.meta.decimals,
@@ -309,7 +325,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
           symbol: token.meta.symbol,
           decimals: token.meta.decimals,
           address: getChecksumAddress(contractAddress),
-          image: token.meta.logoUrl,
+          image: token.meta.logoUrl || image,
         },
       };
     });

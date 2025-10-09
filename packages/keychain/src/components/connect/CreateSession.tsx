@@ -22,7 +22,6 @@ import {
   SliderIcon,
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState } from "react";
-import { type BigNumberish } from "starknet";
 // import { OcclusionDetector } from "../OcclusionDetector";
 import { useUpgrade } from "../provider/upgrade";
 
@@ -65,7 +64,6 @@ const CreateSessionLayout = ({
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
-  const [maxFee] = useState<BigNumberish>();
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
@@ -90,7 +88,7 @@ const CreateSessionLayout = ({
         setIsConnecting(true);
 
         const processedPolicies = processPolicies(policies, toggleOff);
-        await controller.createSession(expiresAt, processedPolicies, maxFee);
+        await controller.createSession(expiresAt, processedPolicies);
         successCallback?.();
       } catch (e) {
         setError(e as unknown as Error);
@@ -98,7 +96,7 @@ const CreateSessionLayout = ({
         setIsConnecting(false);
       }
     },
-    [controller, policies, maxFee, expiresAt],
+    [controller, policies, expiresAt],
   );
 
   if (!upgrade.isSynced) {
@@ -114,7 +112,7 @@ const CreateSessionLayout = ({
       {/* <OcclusionDetector /> */}
       <>
         <HeaderInner
-          className="px-6 pt-6 pb-0"
+          className="pb-0"
           title={!isUpdate ? "Create Session" : "Update Session"}
           description={isUpdate ? "The policies were updated" : undefined}
           right={
@@ -132,7 +130,7 @@ const CreateSessionLayout = ({
             ) : undefined
           }
         />
-        <LayoutContent className="gap-6 px-6 mt-3">
+        <LayoutContent className="pb-0">
           <SessionConsent isVerified={policies?.verified} />
           {policies?.verified ? (
             <VerifiedSessionSummary
@@ -217,7 +215,7 @@ const CreateSessionLayout = ({
  * @param policies The policies to clean
  * @param toggleOff Optional. When true, sets all policies to unauthorized (false)
  */
-const processPolicies = (
+export const processPolicies = (
   policies: ParsedSessionPolicies,
   toggleOff?: boolean,
 ): ParsedSessionPolicies => {
@@ -231,8 +229,8 @@ const processPolicies = (
     Object.values(processPolicies.contracts).forEach((contract) => {
       contract.methods.forEach((method) => {
         delete method.id;
-        if (toggleOff) {
-          method.authorized = false;
+        if (toggleOff !== undefined) {
+          method.authorized = !toggleOff;
         }
       });
     });
@@ -242,8 +240,8 @@ const processPolicies = (
   if (processPolicies.messages) {
     processPolicies.messages.forEach((message) => {
       delete message.id;
-      if (toggleOff) {
-        message.authorized = false;
+      if (toggleOff !== undefined) {
+        message.authorized = !toggleOff;
       }
     });
   }

@@ -1,5 +1,7 @@
 import { getAddress } from "ethers/address";
 import { createStore, EIP6963ProviderDetail } from "mipd";
+import { isMobile } from "../utils";
+import { chainIdToPlatform } from "./platform";
 import {
   ExternalPlatform,
   ExternalWallet,
@@ -7,7 +9,6 @@ import {
   ExternalWalletType,
   WalletAdapter,
 } from "./types";
-import { chainIdToPlatform } from "./platform";
 
 export abstract class EthereumWalletBase implements WalletAdapter {
   abstract readonly type: ExternalWalletType;
@@ -100,6 +101,10 @@ export abstract class EthereumWalletBase implements WalletAdapter {
   }
 
   isAvailable(): boolean {
+    if (isMobile()) {
+      return false;
+    }
+
     // Check dynamically each time, as the provider might be announced after instantiation
     const provider = this.getProvider();
 

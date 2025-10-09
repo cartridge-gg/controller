@@ -1,1 +1,2 @@
-pnpm run lint --ui stream
+pnpm run format --ui stream
+pnpm run lint:check --ui stream

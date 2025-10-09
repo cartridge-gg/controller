@@ -5,16 +5,16 @@ import { usePostHog } from "@/components/provider/posthog";
 import { useControllerTheme } from "@/hooks/connection";
 import { useDebounce } from "@/hooks/debounce";
 import { allUseSameAuth } from "@/utils/controller";
-import { AuthOption } from "@cartridge/controller";
+import { AuthOption, AuthOptions } from "@cartridge/controller";
 import {
   CartridgeLogo,
   ControllerIcon,
-  CreateAccount,
   LayoutContainer,
   LayoutContent,
   LayoutFooter,
   Sheet,
 } from "@cartridge/ui";
+import { CreateAccount } from "./username";
 import InAppSpy from "inapp-spy";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
@@ -25,6 +25,7 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
+import { AccountSearchResult } from "@/hooks/account";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -46,7 +47,7 @@ interface CreateControllerViewProps {
   waitingForConfirmation: boolean;
   changeWallet: boolean;
   setChangeWallet: (value: boolean) => void;
-  authOptions: AuthOption[];
+  authOptions: AuthOptions;
   authMethod: AuthOption | undefined;
 }
 
@@ -79,6 +80,21 @@ function CreateControllerForm({
   // https://docs.cartridge.gg/controller/presets#apple-app-site-association
   const isInAppBrowser = isInApp && !!appKey;
 
+  const [selectedAccount, setSelectedAccount] = useState<
+    AccountSearchResult | undefined
+  >();
+
+  const handleAccountSelect = (result: AccountSearchResult) => {
+    setSelectedAccount(result);
+    onUsernameChange(result.username);
+  };
+
+  const handleRemovePill = useCallback(() => {
+    setSelectedAccount(undefined);
+    onUsernameChange("");
+    onUsernameClear();
+  }, [onUsernameChange, onUsernameClear]);
+
   return (
     <>
       <NavigationHeader
@@ -101,7 +117,7 @@ function CreateControllerForm({
           onSubmit();
         }}
       >
-        <LayoutContent className="gap-6 overflow-y-hidden">
+        <LayoutContent className="overflow-y-hidden">
           <CreateAccount
             usernameField={usernameField}
             validation={validation}
@@ -111,6 +127,10 @@ function CreateControllerForm({
             onUsernameFocus={onUsernameFocus}
             onUsernameClear={onUsernameClear}
             onKeyDown={onKeyDown}
+            showAutocomplete={true}
+            selectedAccount={selectedAccount}
+            onAccountSelect={handleAccountSelect}
+            onSelectedUsernameRemove={handleRemovePill}
           />
           <Legal />
         </LayoutContent>
@@ -307,7 +327,7 @@ export function CreateController({
         }
 
         handleSubmit(
-          usernameField.value,
+          usernameField.value.trim(),
           accountExists,
           authenticationMethod,
           password,

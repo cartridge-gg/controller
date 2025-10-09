@@ -10,7 +10,7 @@ export function probe({
     // The ignored param is rpcUrl which is no longer needed but have to be kept for compatibility
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (_: string): Promise<ProbeReply> => {
-      const controller = Controller.fromStore(origin);
+      const controller = await Controller.fromStore(origin);
       if (!controller) {
         return Promise.reject({
           code: ResponseCodes.NOT_CONNECTED,

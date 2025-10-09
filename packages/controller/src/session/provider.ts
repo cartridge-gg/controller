@@ -7,7 +7,7 @@ import {
 import { SessionPolicies } from "@cartridge/presets";
 import { AddStarknetChainParameters } from "@starknet-io/types-js";
 import { encode } from "starknet";
-import { KEYCHAIN_URL } from "../constants";
+import { API_URL, KEYCHAIN_URL } from "../constants";
 import { ParsedSessionPolicies } from "../policies";
 import BaseProvider from "../provider";
 import { toWasmPolicies } from "../utils";
@@ -29,6 +29,7 @@ export type SessionOptions = {
   chainId: string;
   policies: SessionPolicies;
   redirectUrl: string;
+  disconnectRedirectUrl?: string;
   keychainUrl?: string;
   apiUrl?: string;
 };
@@ -41,15 +42,20 @@ export default class SessionProvider extends BaseProvider {
   protected _rpcUrl: string;
   protected _username?: string;
   protected _redirectUrl: string;
+  protected _disconnectRedirectUrl?: string;
   protected _policies: ParsedSessionPolicies;
   protected _keychainUrl: string;
-  protected _apiUrl?: string;
+  protected _apiUrl: string;
+  protected _publicKey: string;
+  protected _sessionKeyGuid: string;
+  public reopenBrowser: boolean = true;
 
   constructor({
     rpc,
     chainId,
     policies,
     redirectUrl,
+    disconnectRedirectUrl,
     keychainUrl,
     apiUrl,
   }: SessionOptions) {
@@ -80,8 +86,39 @@ export default class SessionProvider extends BaseProvider {
     this._rpcUrl = rpc;
     this._chainId = chainId;
     this._redirectUrl = redirectUrl;
+    this._disconnectRedirectUrl = disconnectRedirectUrl;
     this._keychainUrl = keychainUrl || KEYCHAIN_URL;
-    this._apiUrl = apiUrl;
+    this._apiUrl = apiUrl ?? API_URL;
+
+    const account = this.tryRetrieveFromQueryOrStorage();
+    if (!account) {
+      const pk = stark.randomAddress();
+      this._publicKey = ec.starkCurve.getStarkKey(pk);
+
+      localStorage.setItem(
+        "sessionSigner",
+        JSON.stringify({
+          privKey: pk,
+          pubKey: this._publicKey,
+        }),
+      );
+      this._sessionKeyGuid = signerToGuid({
+        starknet: { privateKey: encode.addHexPrefix(pk) },
+      });
+    } else {
+      const pk = localStorage.getItem("sessionSigner");
+      if (!pk) throw new Error("failed to get sessionSigner");
+
+      const jsonPk: {
+        privKey: string;
+        pubKey: string;
+      } = JSON.parse(pk);
+
+      this._publicKey = jsonPk.pubKey;
+      this._sessionKeyGuid = signerToGuid({
+        starknet: { privateKey: encode.addHexPrefix(jsonPk.privKey) },
+      });
+    }
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller_session = this;
@@ -134,7 +171,7 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
-    this.account = await this.tryRetrieveFromQueryOrStorage();
+    this.account = this.tryRetrieveFromQueryOrStorage();
     return this.account;
   }
 
@@ -143,46 +180,43 @@ export default class SessionProvider extends BaseProvider {
       return this.account;
     }
 
-    this.account = await this.tryRetrieveFromQueryOrStorage();
+    this.account = this.tryRetrieveFromQueryOrStorage();
     if (this.account) {
       return this.account;
     }
 
-    const pk = stark.randomAddress();
-    const publicKey = ec.starkCurve.getStarkKey(pk);
-
-    localStorage.setItem(
-      "sessionSigner",
-      JSON.stringify({
-        privKey: pk,
-        pubKey: publicKey,
-      }),
-    );
-
     localStorage.setItem("sessionPolicies", JSON.stringify(this._policies));
-
-    const url = `${
-      this._keychainUrl
-    }/session?public_key=${publicKey}&redirect_uri=${
-      this._redirectUrl
-    }&redirect_query_name=startapp&policies=${JSON.stringify(
-      this._policies,
-    )}&rpc_url=${this._rpcUrl}`;
-
     localStorage.setItem("lastUsedConnector", this.id);
-    const openedWindow = window.open(url, "_blank");
 
     try {
-      const formattedPk = encode.addHexPrefix(pk);
+      if (this.reopenBrowser) {
+        const pk = stark.randomAddress();
+        this._publicKey = ec.starkCurve.getStarkKey(pk);
 
-      const sessionKeyGuid = signerToGuid({
-        starknet: { privateKey: formattedPk },
-      });
+        localStorage.setItem(
+          "sessionSigner",
+          JSON.stringify({
+            privKey: pk,
+            pubKey: this._publicKey,
+          }),
+        );
+        this._sessionKeyGuid = signerToGuid({
+          starknet: { privateKey: encode.addHexPrefix(pk) },
+        });
+        const url = `${
+          this._keychainUrl
+        }/session?public_key=${this._publicKey}&redirect_uri=${
+          this._redirectUrl
+        }&redirect_query_name=startapp&policies=${JSON.stringify(
+          this._policies,
+        )}&rpc_url=${this._rpcUrl}`;
 
-      const cartridgeApiUrl = this._apiUrl ?? "https://api.cartridge.gg";
+        window.open(url, "_blank");
+      }
+
       const sessionResult = await subscribeCreateSession(
-        sessionKeyGuid,
-        cartridgeApiUrl,
+        this._sessionKeyGuid,
+        this._apiUrl,
       );
 
       // auth is: [shortstring!('authorization-by-registered'), owner_guid]
@@ -194,17 +228,16 @@ export default class SessionProvider extends BaseProvider {
         expiresAt: sessionResult.expiresAt,
         guardianKeyGuid: "0x0",
         metadataHash: "0x0",
-        sessionKeyGuid,
+        sessionKeyGuid: this._sessionKeyGuid,
       };
       localStorage.setItem("session", JSON.stringify(session));
 
       this.tryRetrieveFromQueryOrStorage();
 
-      openedWindow?.close();
-
       return this.account;
     } catch (e) {
       console.log(e);
+      throw e;
     }
   }
 
@@ -222,10 +255,30 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("sessionPolicies");
     this.account = undefined;
     this._username = undefined;
-    return Promise.resolve();
+    const disconnectUrl = new URL(`${this._keychainUrl}`);
+    disconnectUrl.pathname = "disconnect";
+
+    this._disconnectRedirectUrl &&
+      disconnectUrl.searchParams.append(
+        "redirect_url",
+        this._disconnectRedirectUrl,
+      );
+
+    const openedWindow = window.open(disconnectUrl);
+    if (openedWindow === null) return Promise.resolve();
+
+    const { resolve, promise } = Promise.withResolvers<void>();
+    function onWindowClose() {
+      if (openedWindow?.closed) {
+        resolve();
+        clearInterval(checkInterval);
+      }
+    }
+    const checkInterval = setInterval(onWindowClose, 500);
+    return promise;
   }
 
-  async tryRetrieveFromQueryOrStorage() {
+  tryRetrieveFromQueryOrStorage() {
     if (this.account) {
       return this.account;
     }

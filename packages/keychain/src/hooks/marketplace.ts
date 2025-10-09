@@ -1,8 +1,8 @@
-import { useCallback, useContext, useMemo, useState } from "react";
-import { MarketplaceContext } from "@/context/marketplace";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { ArcadeContext } from "@/context/arcade";
 import { useParams } from "react-router-dom";
 import { cairo, getChecksumAddress } from "starknet";
-import { OrderModel, StatusType } from "@cartridge/marketplace";
+import { OrderModel, StatusType } from "@cartridge/arcade";
 import { useQuery } from "react-query";
 import { useConnection } from "@/hooks/connection";
 import { useEntrypoints } from "./entrypoints";
@@ -21,7 +21,7 @@ const FEE_ENTRYPOINT = "royalty_info";
  * @throws {Error} If used outside of a MarketplaceProvider context
  */
 export const useMarketplace = () => {
-  const context = useContext(MarketplaceContext);
+  const context = useContext(ArcadeContext);
 
   if (!context) {
     throw new Error(
@@ -42,8 +42,13 @@ export const useMarketplace = () => {
     listings,
     sales,
     book,
+    setInitializable,
   } = context;
   const [amount, setAmount] = useState<number>(0);
+
+  useEffect(() => {
+    setInitializable(true);
+  }, [setInitializable]);
 
   const getCollectionOrders = useCallback(
     (contractAddress: string) => {

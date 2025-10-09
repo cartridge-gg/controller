@@ -3,7 +3,6 @@ import { useConnectionValue } from "@/hooks/connection";
 import { WalletsProvider } from "@/hooks/wallets";
 import { ENDPOINT } from "@/utils/graphql";
 import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
-import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
   jsonRpcProvider,
@@ -20,9 +19,9 @@ import { TokensProvider } from "./tokens";
 import { UIProvider } from "./ui";
 import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
-import { MarketplaceProvider as ProfileMarketplaceProvider } from "@/components/provider/marketplace";
 import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
+import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
 
 export function Provider({ children }: PropsWithChildren) {
@@ -67,13 +66,11 @@ export function Provider({ children }: PropsWithChildren) {
                               provider={jsonRpcProvider({ rpc })}
                             >
                               <TokensProvider>
-                                <ProfileMarketplaceProvider>
-                                  <ProfileArcadeProvider>
-                                    <ProfileDataProvider>
-                                      {children}
-                                    </ProfileDataProvider>
-                                  </ProfileArcadeProvider>
-                                </ProfileMarketplaceProvider>
+                                <ProfileArcadeProvider>
+                                  <ProfileDataProvider>
+                                    {children}
+                                  </ProfileDataProvider>
+                                </ProfileArcadeProvider>
                               </TokensProvider>
                             </StarknetConfig>
                           </UIProvider>

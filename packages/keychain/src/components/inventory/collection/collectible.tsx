@@ -9,29 +9,14 @@ import { cn } from "@cartridge/ui/utils";
 import { useMemo } from "react";
 import placeholder from "/placeholder.svg?url";
 import { CollectionHeader } from "./header";
-import { useConnection } from "@/hooks/connection";
 import { useControllerTheme } from "@/hooks/connection";
 import { useCollectible } from "@/hooks/collectible";
-import { useArcade } from "@/hooks/arcade";
-import { EditionModel, GameModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 
 export function Collectible() {
-  const { games, editions } = useArcade();
   const { address } = useParams<{ address: string }>();
-  const { project } = useConnection();
   const theme = useControllerTheme();
   const { getCollectionOrders } = useMarketplace();
-
-  const edition: EditionModel | undefined = useMemo(() => {
-    return Object.values(editions).find(
-      (edition) => edition.config.project === project,
-    );
-  }, [editions, project]);
-
-  const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find((game) => game.id === edition?.gameId);
-  }, [games, edition]);
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -50,11 +35,11 @@ export function Collectible() {
       ) : status === "error" ? (
         <EmptyState />
       ) : (
-        <LayoutContent className={cn("p-6 flex flex-col gap-y-4")}>
+        <LayoutContent className={cn("")}>
           <CollectionHeader
-            image={edition?.properties.icon || theme?.icon}
+            image={theme?.icon}
             title={collectible.name}
-            subtitle={game?.name || theme?.name || "---"}
+            subtitle={theme?.name || "---"}
             certified
           />
 

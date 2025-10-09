@@ -1,6 +1,9 @@
 import ControllerProvider, { ControllerOptions } from "@cartridge/controller";
 import { Connector, InjectedConnector } from "@starknet-react/core";
 
+import { StarknetInjectedWallet } from "@starknet-io/get-starknet-wallet-standard";
+import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
+
 export default class ControllerConnector extends InjectedConnector {
   public controller: ControllerProvider;
 
@@ -39,5 +42,16 @@ export default class ControllerConnector extends InjectedConnector {
       throw new Error("Controller connector not found");
     }
     return connector as ControllerConnector;
+  }
+
+  asWalletStandard(): WalletWithStarknetFeatures {
+    if (typeof window !== "undefined") {
+      console.warn(
+        `Casting Controller to WalletWithStarknetFeatures is an experimental feature and may contain bugs. ` +
+          `Please report any issues at https://github.com/cartridge-gg/controller/issues`,
+      );
+    }
+
+    return new StarknetInjectedWallet(this.controller);
   }
 }

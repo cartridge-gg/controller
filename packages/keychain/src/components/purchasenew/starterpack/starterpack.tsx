@@ -24,9 +24,10 @@ import { Supply } from "./supply";
 import { useEffect, useMemo } from "react";
 import { LoadingState } from "../loading";
 import { CostBreakdown } from "../review/cost";
-import { PricingDetails } from "@/components/purchase/types";
 import { decodeStarterPack } from "@/utils/starterpack-url";
 import { usdcToUsd } from "@/utils/starterpack";
+import { useConnection } from "@/hooks/connection";
+import { CostDetails } from "../types";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
@@ -39,6 +40,8 @@ export function PurchaseStarterpack() {
     displayError,
     setStarterpack,
   } = usePurchaseContext();
+
+  const { isMainnet } = useConnection();
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
@@ -65,6 +68,7 @@ export function PurchaseStarterpack() {
       mintAllowance={details.mintAllowance}
       acquisitionType={details.acquisitionType}
       starterpackItems={details.starterPackItems}
+      isMainnet={isMainnet}
       error={displayError}
     />
   );
@@ -74,6 +78,7 @@ export function StarterPackInner({
   name,
   edition,
   isVerified,
+  isMainnet,
   supply,
   mintAllowance,
   acquisitionType,
@@ -83,6 +88,7 @@ export function StarterPackInner({
   name: string;
   edition?: string;
   isVerified?: boolean;
+  isMainnet?: boolean;
   supply?: number;
   mintAllowance?: MintAllowance;
   acquisitionType: StarterpackAcquisitionType;
@@ -93,9 +99,14 @@ export function StarterPackInner({
 
   const onProceed = () => {
     switch (acquisitionType) {
-      case StarterpackAcquisitionType.Paid:
-        navigate("/purchase/method/ethereum;solana;base;arbitrum;optimism");
+      case StarterpackAcquisitionType.Paid: {
+        const methods = isMainnet
+          ? "ethereum;base;arbitrum;optimism"
+          : "arbitrum";
+
+        navigate(`/purchase/method/${methods}`);
         break;
+      }
       case StarterpackAcquisitionType.Claimed:
         navigate(`/purchase/wallet/starknet;ethereum`);
         break;
@@ -105,16 +116,17 @@ export function StarterPackInner({
   };
 
   const price = useMemo(() => {
-    const total = starterpackItems.reduce(
-      (acc, item) => acc + usdcToUsd(item.price || 0n),
-      0,
+    const totalUsdc = starterpackItems.reduce(
+      (acc, item) => acc + (item.price || 0n),
+      0n,
     );
+    const total = usdcToUsd(totalUsdc);
 
     return {
       baseCostInCents: total * 100,
       processingFeeInCents: 0,
       totalInCents: total * 100,
-    } satisfies PricingDetails;
+    } as CostDetails;
   }, [starterpackItems]);
 
   return (
@@ -129,7 +141,7 @@ export function StarterPackInner({
             </span>
           ) : undefined
         }
-        right={supply ? <Supply amount={supply} /> : undefined}
+        right={supply !== undefined ? <Supply amount={supply} /> : undefined}
         hideIcon
       />
       <LayoutContent>
@@ -156,7 +168,7 @@ export function StarterPackInner({
         ) : acquisitionType === StarterpackAcquisitionType.Paid ? (
           <CostBreakdown rails="stripe" costDetails={price} />
         ) : null}
-        <Button onClick={onProceed} disabled={!!error}>
+        <Button onClick={onProceed} disabled={!!error || supply === 0}>
           {acquisitionType === StarterpackAcquisitionType.Paid
             ? "Purchase"
             : "Check Eligibility"}
@@ -186,7 +198,7 @@ export const StarterpackReceiving = ({
           </h1>
         )}
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         {starterpackItems
           .filter((item) => item.type === StarterPackItemType.NONFUNGIBLE)
           .map((item, index) => (

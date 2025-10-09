@@ -34,10 +34,8 @@ import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
 import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
-import { useArcade } from "@/hooks/arcade";
-import { EditionModel } from "@cartridge/arcade";
+import { OrderModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
-import { OrderModel } from "@cartridge/marketplace";
 import { createExecuteUrl } from "@/utils/connection/execute";
 import { toast } from "sonner";
 import { useAccount, useUsername } from "@/hooks/account";
@@ -49,13 +47,12 @@ const OFFSET = 10;
 export function CollectibleAsset() {
   const account = useAccount();
   const address = account?.address || "";
-  const { chainId, project } = useConnection();
+  const { chainId } = useConnection();
   const explorer = useExplorer();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
-  const { editions } = useArcade();
   const { selfOrders, tokenOrders, provider } = useMarketplace();
   const [loading, setLoading] = useState(false);
   const { navigate } = useNavigation();
@@ -78,12 +75,6 @@ export function CollectibleAsset() {
     if (!main) return undefined;
     return main;
   }, [orders]);
-
-  const edition: EditionModel | undefined = useMemo(() => {
-    return Object.values(editions).find(
-      (edition) => edition.config.project === project,
-    );
-  }, [editions, project]);
 
   const { address: contractAddress, tokenId } = useParams();
   const {
@@ -209,9 +200,9 @@ export function CollectibleAsset() {
         <EmptyState />
       ) : (
         <>
-          <LayoutContent className="p-6 pb-0 flex flex-col gap-6 overflow-hidden">
+          <LayoutContent className="pb-0 overflow-hidden">
             <CollectionHeader
-              image={edition?.properties.icon || theme?.icon}
+              image={theme?.icon}
               title={title}
               subtitle={collectible.name}
               count={Number(asset.amount)}
@@ -323,7 +314,7 @@ export function CollectibleAsset() {
 
           <LayoutFooter
             className={cn(
-              "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-0",
+              "relative flex flex-col items-center justify-center gap-y-4 bg-background pt-4",
             )}
           >
             <div className="flex gap-3 w-full">
@@ -550,7 +541,7 @@ const Price = ({ amount, image }: { amount?: number; image?: string }) => {
 
 const LoadingState = () => {
   return (
-    <LayoutContent className="gap-6 select-none h-full overflow-hidden">
+    <LayoutContent className="select-none h-full overflow-hidden">
       <Skeleton className="min-h-10 w-full rounded" />
       <Skeleton className="min-h-[200px] w-full rounded" />
       <div className="flex flex-col gap-4 grow">
