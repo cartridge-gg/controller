@@ -34,6 +34,17 @@ export function ConfirmTransaction({
 
   useEffect(() => {
     if (controller && policies) {
+      // Check if policies are actually empty (no contracts and no messages)
+      const hasNoPolicies =
+        (!policies.contracts || Object.keys(policies.contracts).length === 0) &&
+        (!policies.messages || policies.messages.length === 0);
+
+      if (hasNoPolicies) {
+        setHasSession(true);
+        setLoading(false);
+        return;
+      }
+
       controller
         .isRequestedSession(policies)
         .then(setHasSession)
