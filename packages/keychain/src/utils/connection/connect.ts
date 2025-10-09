@@ -16,6 +16,16 @@ type ConnectCallback = {
   onCancel?: () => void;
 };
 
+function isConnectResult(value: unknown): value is ConnectReply | ConnectError {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
+  // ConnectReply has code and address
+  // ConnectError has code and message
+  return typeof obj.code === "string" && ("address" in obj || "message" in obj);
+}
+
 export function createConnectUrl(
   origin: string,
   policies: Policies,
@@ -63,7 +73,11 @@ export function parseConnectParams(paramString: string): {
 
     const resolve = callbacks?.resolve
       ? (value: unknown) => {
-          callbacks.resolve?.(value as ConnectReply | ConnectError);
+          if (!isConnectResult(value)) {
+            console.error("Invalid connect result type:", value);
+            return;
+          }
+          callbacks.resolve?.(value);
         }
       : undefined;
 

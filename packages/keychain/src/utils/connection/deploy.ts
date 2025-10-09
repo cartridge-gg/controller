@@ -13,6 +13,19 @@ type DeployCallback = {
   onCancel?: () => void;
 };
 
+function isDeployResult(
+  value: unknown,
+): value is { hash: string } | ConnectError {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
+  return (
+    ("hash" in obj && typeof obj.hash === "string") ||
+    (typeof obj.code === "string" && typeof obj.message === "string")
+  );
+}
+
 export function createDeployUrl(
   account: string,
   options: DeployCallback = {},
@@ -54,7 +67,11 @@ export function parseDeployParams(paramString: string): {
 
     const resolve = callbacks?.resolve
       ? (value: unknown) => {
-          callbacks.resolve?.(value as { hash: string } | ConnectError);
+          if (!isDeployResult(value)) {
+            console.error("Invalid deploy result type:", value);
+            return;
+          }
+          callbacks.resolve?.(value);
         }
       : undefined;
 

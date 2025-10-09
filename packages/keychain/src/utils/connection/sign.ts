@@ -19,6 +19,20 @@ type SignMessageCallback = {
   onCancel?: () => void;
 };
 
+function isSignMessageResult(
+  value: unknown,
+): value is Signature | ConnectError {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
+  // Signature is an array [r, s] or has code/message for ConnectError
+  return (
+    Array.isArray(value) ||
+    (typeof obj.code === "string" && typeof obj.message === "string")
+  );
+}
+
 export function createSignMessageUrl(
   typedData: TypedData,
   options: SignMessageCallback = {},
@@ -66,7 +80,11 @@ export function parseSignMessageParams(paramString: string): {
 
     const resolve = callbacks?.resolve
       ? (value: unknown) => {
-          callbacks.resolve?.(value as Signature | ConnectError);
+          if (!isSignMessageResult(value)) {
+            console.error("Invalid sign message result type:", value);
+            return;
+          }
+          callbacks.resolve?.(value);
         }
       : undefined;
 
