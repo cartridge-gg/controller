@@ -154,7 +154,6 @@ const getKeychainUrl = () => {
     }
 
     const keychainUrl = `https://keychain-git-${branchName}.preview.cartridge.gg/`;
-    console.log("keychainUrl: ", keychainUrl);
 
     return keychainUrl;
   } else {
