@@ -23,6 +23,7 @@ export interface MerkleClaim {
   key: string;
   network: MerkleDropNetwork;
   salt: string;
+  index: number;
   data: string[];
   claimed: boolean;
   loading: boolean;
@@ -62,6 +63,7 @@ export const useMerkleClaim = ({
             key: claim.merkleDrop.key,
             network: claim.merkleDrop.network,
             data: claim.data,
+            index: claim.index,
             salt: claim.merkleDrop.salt,
             merkleProof: claim.merkleProof ?? [],
             merkleRoot: claim.merkleDrop.merkleRoot,
@@ -248,6 +250,7 @@ const merkleTreeKey = (claim: MerkleClaim) => {
 const leafData = (address: string, claim: MerkleClaim) => {
   return {
     address: address,
+    index: claim.index,
     claim_contract_address: claim.contract,
     selector: hash.getSelectorFromName(claim.entrypoint),
     data: claim.data,

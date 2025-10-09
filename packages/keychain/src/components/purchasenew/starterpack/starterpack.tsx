@@ -198,7 +198,7 @@ export const StarterpackReceiving = ({
           </h1>
         )}
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         {starterpackItems
           .filter((item) => item.type === StarterPackItemType.NONFUNGIBLE)
           .map((item, index) => (
