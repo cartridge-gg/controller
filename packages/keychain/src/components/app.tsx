@@ -1,5 +1,4 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
-import { Home } from "./home";
 import { Session } from "./session";
 import { Failure } from "./failure";
 import { Pending } from "./pending";
@@ -49,13 +48,67 @@ import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
 import { Collections } from "./purchasenew/starterpack/collections";
 import { DeployController } from "./DeployController";
+import { useEffect } from "react";
+import { useConnection } from "@/hooks/connection";
+import { CreateController, Upgrade } from "./connect";
+import { PageLoading } from "./Loading";
+import { useUpgrade } from "./provider/upgrade";
+import { usePostHog } from "./provider/posthog";
+import { Layout } from "@/components/layout";
+import { Authenticate } from "./authenticate";
+import { Disconnect } from "./disconnect";
+
+function Authentication() {
+  const { context, controller, isConfigLoading } = useConnection();
+  const { pathname } = useLocation();
+
+  const upgrade = useUpgrade();
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    if (context?.type) {
+      posthog?.capture(
+        `Call ${context.type.charAt(0).toUpperCase() + context.type.slice(1)}`,
+      );
+    }
+  }, [context?.type, posthog]);
+
+  // Popup flow authentication
+  if (pathname.startsWith("/authenticate")) {
+    return <Authenticate />;
+  }
+
+  if (pathname.startsWith("/disconnect")) {
+    return <Disconnect />;
+  }
+
+  // No controller, send to login
+  if (!controller) {
+    return <CreateController isSlot={pathname.startsWith("/slot")} />;
+  }
+
+  if (!upgrade.isSynced || isConfigLoading) {
+    // This is likely never observable in a real application but just in case.
+    return <PageLoading />;
+  }
+
+  if (upgrade.available) {
+    return <Upgrade />;
+  }
+
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
+}
 
 export function App() {
   const { navigate } = useNavigation();
 
   return (
     <Routes>
-      <Route path="/" element={<Home />}>
+      <Route path="/" element={<Authentication />}>
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/recovery" element={<Recovery />} />
         <Route path="/settings/delegate" element={<Delegate />} />
