@@ -53,7 +53,7 @@ export function Status({
 
   return (
     <div className="flex flex-col bg-translucent-dark-100 gap-y-px">
-      <Block className={className} error={!!isError}>
+      <Block className={className} error={!!isError} validation={validation}>
         {message}
       </Block>
 
@@ -66,10 +66,12 @@ function Block({
   children,
   error,
   className,
+  validation,
 }: {
   children: React.ReactNode;
   error?: boolean;
   className?: string;
+  validation?: ValidationState;
 }) {
   return (
     <div
@@ -77,7 +79,9 @@ function Block({
         "flex justify-between items-center text-xs px-3 py-2 w-full box-border min-w-0",
         error
           ? "bg-destructive-100 text-destructive-foreground"
-          : "bg-background-300 text-primary-100",
+          : validation?.status === "valid"
+            ? "bg-background-150 text-primary-100"
+            : "bg-background-300 text-primary-100",
         className,
       )}
     >
