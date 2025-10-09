@@ -31,42 +31,50 @@ export function UnverifiedSessionSummary({
 
     // Separate token contracts (with approve method) from other contracts
     const tokenContracts = formattedContracts.filter((contract) =>
-      contract.methods.some((method) => method.name === "approve"),
+      contract.methods.some((method) => method.entrypoint === "approve"),
     );
 
     const otherContracts = formattedContracts.filter(
       (contract) =>
-        !contract.methods.some((method) => method.name === "approve"),
+        !contract.methods.some((method) => method.entrypoint === "approve"),
     );
 
     return { tokenContracts, otherContracts };
   }, [contracts]);
+
+  console.log("tokenContracts: ", tokenContracts);
+
   return (
     <div className="flex flex-col gap-4">
       {/* Render other contracts first */}
-      {otherContracts.map((e) => (
-        <ContractCard
-          key={e.address}
-          address={e.address}
-          title={e.title}
-          icon={e.icon}
-          methods={e.methods}
-          isExpanded
-        />
-      ))}
+      <div className="space-y-px">
+        {otherContracts.map((e) => (
+          <ContractCard
+            key={e.address}
+            address={e.address}
+            title={e.title}
+            icon={e.icon}
+            methods={e.methods}
+          />
+        ))}
+      </div>
 
-      <TokenConsent />
       {/* Render token contracts after */}
-      {tokenContracts.map((e) => (
-        <ContractCard
-          key={e.address}
-          address={e.address}
-          title={e.title}
-          icon={e.icon}
-          methods={e.methods}
-          isExpanded
-        />
-      ))}
+      {tokenContracts && tokenContracts.length > 0 && (
+        <>
+          <TokenConsent />
+          {tokenContracts.map((e) => (
+            <ContractCard
+              key={e.address}
+              address={e.address}
+              title={e.title}
+              icon={e.icon}
+              methods={e.methods}
+              isExpanded
+            />
+          ))}
+        </>
+      )}
 
       {messages && messages.length > 0 && (
         <MessageCard messages={messages} isExpanded />
