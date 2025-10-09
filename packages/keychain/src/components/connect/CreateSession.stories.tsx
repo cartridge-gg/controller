@@ -84,6 +84,7 @@ export const Default: Story = {
               {
                 name: "Approve",
                 entrypoint: "approve",
+                amount: "0xffffffffffffffffffffffffffffffff",
                 description:
                   "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
               },

@@ -1,8 +1,11 @@
-import { useConnection } from "@/hooks/connection";
 import { useCreateSession } from "@/hooks/session";
 import type { Method } from "@cartridge/presets";
 import {
-  CodeIcon,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  CardIcon,
   InfoIcon,
   Switch,
   Tooltip,
@@ -11,10 +14,7 @@ import {
   TooltipTrigger,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { formatAddress } from "@cartridge/ui/utils";
-import { useExplorer } from "@starknet-react/core";
-import { constants } from "starknet";
-import { AccordionCard } from "./AccordionCard";
+import { isValidElement } from "react";
 
 type MethodWithEnabled = Method & { authorized?: boolean; id?: string };
 
@@ -24,6 +24,7 @@ interface ContractCardProps {
   title: string;
   icon: React.ReactNode;
   isExpanded?: boolean;
+  className?: string;
 }
 
 export function ContractCard({
@@ -31,95 +32,147 @@ export function ContractCard({
   methods,
   title,
   icon,
-  isExpanded,
+  isExpanded = false,
+  className,
 }: ContractCardProps) {
-  const { controller } = useConnection();
-  const explorer = useExplorer();
   const { onToggleMethod, isEditable } = useCreateSession();
 
-  const explorerLink = (
-    <a
-      className="text-xs text-foreground-400 cursor-pointer hover:underline"
-      href={
-        controller?.chainId() === constants.StarknetChainId.SN_MAIN ||
-        controller?.chainId() === constants.StarknetChainId.SN_SEPOLIA
-          ? explorer.contract(address)
-          : `#`
-      }
-      target="_blank"
-      rel="noreferrer"
-    >
-      {formatAddress(address, { first: 5, last: 5 })}
-    </a>
-  );
-
-  const totalEnabledMethod = methods.filter(
-    (method) => method.authorized,
-  ).length;
-
   return (
-    <AccordionCard
-      icon={icon ?? <CodeIcon variant="solid" />}
-      title={<div className="text-xs font-semibold">{title}</div>}
-      subtitle={explorerLink}
-      isExpanded={isExpanded}
-      trigger={
-        <div className="text-xs text-foreground-300">
-          Approve&nbsp;
-          <span className="text-foreground-200 font-bold">
-            {totalEnabledMethod} {totalEnabledMethod > 1 ? `methods` : "method"}
-          </span>
-        </div>
-      }
-      className="bg-background gap-px rounded overflow-auto border border-background"
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue={isExpanded ? "item" : undefined}
+      className="bg-background-200 rounded"
     >
-      {methods
-        .filter((method) => (isEditable ? true : method.authorized))
-        .map((method) => (
-          <div
-            key={method.entrypoint}
-            className="flex flex-col bg-background-200 gap-4 p-3 text-xs"
-          >
-            <div className="flex items-center justify-between">
+      <AccordionItem value="item" className="flex flex-col gap-2">
+        <AccordionTrigger
+          parentClassName="h-11 p-3"
+          className="flex items-center text-xs font-medium text-foreground-100 gap-1.5"
+        >
+          {isValidElement(icon) ? (
+            <CardIcon>{icon}</CardIcon>
+          ) : (
+            <CardIcon src={icon as string} />
+          )}
+          <p>{`Approve ${title}`}</p>
+        </AccordionTrigger>
+
+        <AccordionContent className={cn("flex flex-col", className)}>
+          {methods
+            .filter((method) => (isEditable ? true : method.authorized))
+            .map((method) => (
               <div
-                className={cn(
-                  "flex flex-row items-center gap-2",
-                  method.authorized
-                    ? "text-foreground-300"
-                    : "text-background-500",
-                )}
+                key={method.entrypoint}
+                className="flex flex-col bg-background-200 gap-4 p-3 text-xs"
               >
-                <p className="font-medium text-xs">
-                  {method.name ?? humanizeString(method.entrypoint)}
-                </p>
-                {method.description && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <InfoIcon size="sm" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{method.description}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                <div className="flex items-center justify-between">
+                  <div
+                    className={cn(
+                      "flex flex-row items-center gap-2",
+                      method.authorized
+                        ? "text-foreground-300"
+                        : "text-background-500",
+                    )}
+                  >
+                    <p className="font-medium text-xs">
+                      {method.name ?? humanizeString(method.entrypoint)}
+                    </p>
+                    {method.description && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <InfoIcon size="sm" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{method.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                  <Switch
+                    checked={method.authorized ?? true}
+                    onCheckedChange={(enabled) =>
+                      method.id
+                        ? onToggleMethod(address, method.id, enabled)
+                        : null
+                    }
+                    disabled={method.isRequired}
+                    className={cn(
+                      isEditable ? "visible" : "invisible pointer-events-none", // use visible class to prevent layout shift
+                    )}
+                  />
+                </div>
               </div>
-              <Switch
-                checked={method.authorized ?? true}
-                onCheckedChange={(enabled) =>
-                  method.id ? onToggleMethod(address, method.id, enabled) : null
-                }
-                disabled={method.isRequired}
-                className={cn(
-                  isEditable ? "visible" : "invisible pointer-events-none", // use visible class to prevent layout shift
-                )}
-              />
-            </div>
-          </div>
-        ))}
-    </AccordionCard>
+            ))}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
+
+  // return (
+  //   <AccordionCard
+  //     icon={icon ?? <CodeIcon variant="solid" />}
+  //     title={<div className="text-xs font-semibold">{title}</div>}
+  //     subtitle={explorerLink}
+  //     isExpanded={isExpanded}
+  //     trigger={
+  //       <div className="text-xs text-foreground-300">
+  //         Approve&nbsp;
+  //         <span className="text-foreground-200 font-bold">
+  //           {totalEnabledMethod} {totalEnabledMethod > 1 ? `methods` : "method"}
+  //         </span>
+  //       </div>
+  //     }
+  //     className="bg-background gap-px rounded overflow-auto border border-background"
+  //   >
+  //     {methods
+  //       .filter((method) => (isEditable ? true : method.authorized))
+  //       .map((method) => (
+  //         <div
+  //           key={method.entrypoint}
+  //           className="flex flex-col bg-background-200 gap-4 p-3 text-xs"
+  //         >
+  //           <div className="flex items-center justify-between">
+  //             <div
+  //               className={cn(
+  //                 "flex flex-row items-center gap-2",
+  //                 method.authorized
+  //                   ? "text-foreground-300"
+  //                   : "text-background-500",
+  //               )}
+  //             >
+  //               <p className="font-medium text-xs">
+  //                 {method.name ?? humanizeString(method.entrypoint)}
+  //               </p>
+  //               {method.description && (
+  //                 <TooltipProvider>
+  //                   <Tooltip>
+  //                     <TooltipTrigger>
+  //                       <InfoIcon size="sm" />
+  //                     </TooltipTrigger>
+  //                     <TooltipContent>
+  //                       <p>{method.description}</p>
+  //                     </TooltipContent>
+  //                   </Tooltip>
+  //                 </TooltipProvider>
+  //               )}
+  //             </div>
+  //             <Switch
+  //               checked={method.authorized ?? true}
+  //               onCheckedChange={(enabled) =>
+  //                 method.id ? onToggleMethod(address, method.id, enabled) : null
+  //               }
+  //               disabled={method.isRequired}
+  //               className={cn(
+  //                 isEditable ? "visible" : "invisible pointer-events-none", // use visible class to prevent layout shift
+  //               )}
+  //             />
+  //           </div>
+  //         </div>
+  //       ))}
+  //   </AccordionCard>
+  // );
 }
 
 function humanizeString(str: string): string {

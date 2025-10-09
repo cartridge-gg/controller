@@ -21,7 +21,7 @@ export function VerifiedSessionSummary({
 
     const tokenContracts = allContracts.filter(([, contract]) => {
       const methods = toArray(contract.methods);
-      return methods.some((method) => method.name === "approve");
+      return methods.some((method) => method.entrypoint === "approve");
     });
 
     const vrfContracts = allContracts.filter(([, contract]) => {
@@ -30,7 +30,9 @@ export function VerifiedSessionSummary({
 
     const otherContracts = allContracts.filter(([, contract]) => {
       const methods = toArray(contract.methods);
-      const hasApprove = methods.some((method) => method.name === "approve");
+      const hasApprove = methods.some(
+        (method) => method.entrypoint === "approve",
+      );
       const isVRF = contract.meta?.type === "VRF";
       return !hasApprove && !isVRF;
     });
@@ -48,35 +50,41 @@ export function VerifiedSessionSummary({
 
   return (
     <div className="flex flex-col gap-4">
-      <AggregateCard
-        title={game}
-        icon={<CodeIcon variant="solid" />}
-        contracts={aggregate.contracts}
-        messages={messages}
-      />
-
-      {/* Render VRF contracts first */}
-      {vrfContracts.map(([address, contract]) => (
-        <ContractCard
-          key={address}
-          address={address}
-          title={contract.name || contract.meta?.name || "Contract"}
-          icon={contract.meta?.icon}
-          methods={contract.methods}
+      <div className="space-y-px">
+        <AggregateCard
+          title={game}
+          icon={<CodeIcon variant="solid" />}
+          contracts={aggregate.contracts}
+          messages={messages}
         />
-      ))}
 
-      <TokenConsent />
-      {/* Render token contracts after */}
-      {tokenContracts.map(([address, contract]) => (
-        <ContractCard
-          key={address}
-          address={address}
-          title={contract.name || contract.meta?.name || "Contract"}
-          icon={contract.meta?.icon}
-          methods={contract.methods}
-        />
-      ))}
+        {/* Render VRF contracts first */}
+        {vrfContracts.map(([address, contract]) => (
+          <ContractCard
+            key={address}
+            address={address}
+            title={contract.name || contract.meta?.name || "Contract"}
+            icon={contract.meta?.icon}
+            methods={contract.methods}
+          />
+        ))}
+      </div>
+
+      {tokenContracts && tokenContracts.length > 0 && (
+        <>
+          <TokenConsent />
+          {/* Render token contracts after */}
+          {tokenContracts.map(([address, contract]) => (
+            <ContractCard
+              key={address}
+              address={address}
+              title={contract.name || contract.meta?.name || "Contract"}
+              icon={contract.meta?.icon}
+              methods={contract.methods}
+            />
+          ))}
+        </>
+      )}
     </div>
   );
 }
