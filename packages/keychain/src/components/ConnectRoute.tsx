@@ -20,8 +20,7 @@ export function ConnectRoute() {
   const { controller, policies } = useConnection();
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
-    const parsed = parseConnectParams(searchParams);
-    return parsed;
+    return parseConnectParams(searchParams);
   });
 
   const handleCompletion = useRouteCompletion();
@@ -102,14 +101,7 @@ export function ConnectRoute() {
   }
 
   // Don't show UI for no-policy or verified-policy connections
-  if (
-    (!policies.contracts || Object.keys(policies.contracts).length === 0) &&
-    policies.messages?.length === 0
-  ) {
-    return null;
-  }
-
-  if (policies.verified) {
+  if (!policies || policies.verified) {
     return null;
   }
 
