@@ -153,7 +153,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 (attribute: { trait: string; value: string }) =>
                   attribute?.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
-            const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/0x${BigInt(transfer.contractAddress).toString(16)}/${addAddressPadding(transfer.tokenId)}/image`;
+            const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/${addAddressPadding(transfer.contractAddress)}/${transfer.tokenId}/image`;
             return {
               variant: "collectible",
               key: `${transfer.transactionHash}-${transfer.eventId}`,

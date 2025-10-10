@@ -149,7 +149,7 @@ export function Collection() {
                           ? asset.name
                           : `${asset.name} #${parseInt(BigInt(asset.tokenId).toString())}`
                       }
-                      image={asset.imageUrl || placeholder}
+                      images={[...asset.imageUrls, placeholder]}
                       selectable
                       selected={isSelected}
                       listingCount={listingCount}
