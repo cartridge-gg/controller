@@ -43,7 +43,7 @@ export type SessionContracts = Record<
     methods: (Method & {
       authorized?: boolean;
       id?: string;
-      amount?: string;
+      amount?: string | number;
     })[];
   }
 >;
