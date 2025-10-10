@@ -18,6 +18,20 @@ import {
   Thumbnail,
 } from "@cartridge/ui";
 
+// Maximum value for uint128: 2^128 - 1
+const MAX_UINT128 = "340282366920938463463374607431768211455";
+
+function formatAmount(amount: string | number): string {
+  const numAmount = BigInt(amount);
+  const maxUint128 = BigInt(MAX_UINT128);
+
+  if (numAmount >= maxUint128) {
+    return "Unlimited";
+  }
+
+  return Number(amount).toString();
+}
+
 export function UnverifiedSessionSummary({
   contracts,
   messages,
@@ -105,10 +119,10 @@ export function UnverifiedSessionSummary({
                   <div className="flex flex-col w-full">
                     <div className="w-full flex flex-row items-center justify-between text-sm font-medium text-foreground-100">
                       <p>{title}</p>
-                      <p>{Number(amount)}</p>
+                      <p>{formatAmount(amount)}</p>
                     </div>
                     <p className="text-foreground-400 text-xs font-medium">
-                      {Number(amount)}
+                      {formatAmount(amount)}
                     </p>
                   </div>
                 </CardContent>
