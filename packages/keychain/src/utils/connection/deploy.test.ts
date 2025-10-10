@@ -29,16 +29,12 @@ describe("deploy utils", () => {
       const account = "0x123456789";
       const url = createDeployUrl(account);
 
-      expect(url).toMatch(/^\/deploy\?data=/);
+      expect(url).toMatch(/^\/deploy\?/);
 
-      // Decode and verify the data
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
-
-      expect(decoded).toEqual({
-        id: "test-id",
-        account,
-      });
+      // Extract and verify the params
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      expect(searchParams.get("id")).toBe("test-id");
+      expect(searchParams.get("account")).toBe(account);
     });
 
     it("should create deploy URL with callbacks", () => {
@@ -59,7 +55,7 @@ describe("deploy utils", () => {
         onCancel: mockOnCancel,
       });
 
-      expect(url).toMatch(/^\/deploy\?data=/);
+      expect(url).toMatch(/^\/deploy\?/);
     });
 
     it("should wrap resolve callback to handle type casting", () => {
@@ -201,7 +197,7 @@ describe("deploy utils", () => {
       const result = await deploy("0x123456789");
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/deploy\?data=/),
+        expect.stringMatching(/^\/deploy\?/),
         { replace: true },
       );
 
@@ -235,7 +231,7 @@ describe("deploy utils", () => {
       const result = await deploy("0x123456789");
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/deploy\?data=/),
+        expect.stringMatching(/^\/deploy\?/),
         { replace: true },
       );
 
