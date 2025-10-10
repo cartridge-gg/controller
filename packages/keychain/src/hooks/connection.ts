@@ -5,7 +5,7 @@ import {
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
 import { useNavigation } from "@/context/navigation";
-import { ConnectionCtx, connectToController } from "@/utils/connection";
+import { connectToController } from "@/utils/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
@@ -14,7 +14,6 @@ import {
   ExternalWalletResponse,
   ExternalWalletType,
   IMPLEMENTED_AUTH_OPTIONS,
-  ResponseCodes,
   toArray,
   Token,
   toSessionPolicies,
@@ -175,7 +174,6 @@ function getConfigChainPolicies(
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
-  const [context, setContext] = useState<ConnectionCtx>();
   const [origin, setOrigin] = useState<string | undefined>(undefined);
   const [rpcUrl, setRpcUrl] = useState<string>(
     import.meta.env.VITE_RPC_MAINNET,
@@ -459,7 +457,6 @@ export function useConnectionValue() {
     if (isIframe()) {
       const connection = connectToController<ParentMethods>({
         setRpcUrl,
-        setContext,
         setController,
         navigate,
       });
@@ -514,14 +511,7 @@ export function useConnectionValue() {
       parent.close();
       parent.reload();
     }
-
-    if (context) {
-      context.resolve?.({
-        code: ResponseCodes.NOT_CONNECTED,
-        message: "User logged out",
-      });
-    }
-  }, [context, parent]);
+  }, [parent]);
 
   const openSettings = useCallback(() => {
     window.dispatchEvent(
@@ -541,32 +531,21 @@ export function useConnectionValue() {
       return;
     }
 
-    context?.resolve?.({
-      code: ResponseCodes.CANCELED,
-      message: "User aborted",
-    });
-
-    setContext(undefined);
-
     // Don't await parent.close() - let it run in the background
     parent.close().catch((e) => {
       console.error("Failed to close modal:", e);
     });
-  }, [context, parent, setContext]);
+  }, [parent]);
 
   const openModal = useCallback(async () => {
-    if (!parent || !context?.resolve) return;
+    if (!parent) return;
 
-    context.resolve({
-      code: ResponseCodes.USER_INTERACTION_REQUIRED,
-      message: "User interaction required",
-    });
     try {
       await parent.close();
     } catch (e) {
       console.error("Failed to open modal:", e);
     }
-  }, [context, parent]);
+  }, [parent]);
 
   const externalDetectWallets = useCallback(() => {
     if (!parent) {
@@ -642,7 +621,6 @@ export function useConnectionValue() {
 
   return {
     parent,
-    context,
     controller,
     origin: origin || "",
     rpcUrl,
@@ -659,7 +637,6 @@ export function useConnectionValue() {
     chainId,
     configSignupOptions,
     setController,
-    setContext,
     setRpcUrl,
     setConfigSignupOptions,
     controllerVersion,

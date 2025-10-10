@@ -13,11 +13,18 @@ import {
   InvokeFunctionResponse,
   addAddressPadding,
 } from "starknet";
-import { ControllerError } from "./types";
+import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import { JsCall } from "@cartridge/controller-wasm/controller";
 import { mutex } from "./sync";
 import Controller from "../controller";
 import { storeCallbacks, generateCallbackId } from "./callbacks";
+
+export type ControllerError = {
+  code: ErrorCode;
+  message: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data?: any;
+};
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 

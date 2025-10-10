@@ -48,30 +48,19 @@ import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
 import { Collections } from "./purchasenew/starterpack/collections";
 import { DeployController } from "./DeployController";
-import { useEffect } from "react";
 import { useConnection } from "@/hooks/connection";
 import { CreateController, Upgrade } from "./connect";
 import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
-import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
 import { Disconnect } from "./disconnect";
 
 function Authentication() {
-  const { context, controller, isConfigLoading } = useConnection();
+  const { controller, isConfigLoading } = useConnection();
   const { pathname } = useLocation();
 
   const upgrade = useUpgrade();
-  const posthog = usePostHog();
-
-  useEffect(() => {
-    if (context?.type) {
-      posthog?.capture(
-        `Call ${context.type.charAt(0).toUpperCase() + context.type.slice(1)}`,
-      );
-    }
-  }, [context?.type, posthog]);
 
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {

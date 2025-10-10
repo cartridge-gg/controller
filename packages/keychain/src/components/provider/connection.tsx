@@ -1,8 +1,8 @@
 import { ParentMethods } from "@/hooks/connection";
 import { ParsedSessionPolicies } from "@/hooks/session";
-import { ConnectionCtx } from "@/utils/connection";
 import Controller from "@/utils/controller";
 import {
+  AuthOptions,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -17,7 +17,6 @@ export const ConnectionContext = createContext<
 
 export type ConnectionContextValue = {
   parent: ParentMethods | undefined;
-  context?: ConnectionCtx;
   controller?: Controller;
   origin: string;
   rpcUrl: string;
@@ -30,10 +29,11 @@ export type ConnectionContextValue = {
   isMainnet: boolean;
   verified: boolean;
   chainId?: string;
+  configSignupOptions: AuthOptions | undefined;
   setController: (controller?: Controller) => void;
   controllerVersion: SemVer | undefined;
-  setContext: (ctx: ConnectionCtx | undefined) => void;
   setRpcUrl: (url: string) => void;
+  setConfigSignupOptions: (options: AuthOptions | undefined) => void;
   closeModal?: () => Promise<void>;
   onModalClose?: () => void;
   setOnModalClose?: (onModalClose: () => void) => void;
