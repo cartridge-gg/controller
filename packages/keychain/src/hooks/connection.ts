@@ -9,11 +9,9 @@ import { connectToController } from "@/utils/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
-  AuthOptions,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
-  IMPLEMENTED_AUTH_OPTIONS,
   toArray,
   Token,
   toSessionPolicies,
@@ -189,9 +187,6 @@ export function useConnectionValue() {
     verified: true,
     ...defaultTheme,
   });
-  const [configSignupOptions, setConfigSignupOptions] = useState<
-    AuthOptions | undefined
-  >([...IMPLEMENTED_AUTH_OPTIONS]);
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
@@ -635,10 +630,8 @@ export function useConnectionValue() {
     isMainnet,
     verified,
     chainId,
-    configSignupOptions,
     setController,
     setRpcUrl,
-    setConfigSignupOptions,
     controllerVersion,
     closeModal: parent ? closeModal : undefined,
     openModal,

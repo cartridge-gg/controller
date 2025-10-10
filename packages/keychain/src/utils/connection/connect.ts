@@ -113,7 +113,27 @@ export function connect({
   ) => void;
 }) {
   return () => {
-    return (signers?: AuthOptions): Promise<ConnectReply> => {
+    // Support both old and new signatures for backwards compatibility
+    // Old: connect(policies: SessionPolicies, rpcUrl: string, signupOptions?: AuthOptions)
+    // New: connect(signupOptions?: AuthOptions)
+    return (
+      policiesOrSigners?: SessionPolicies | AuthOptions,
+      rpcUrl?: string,
+      signupOptions?: AuthOptions,
+    ): Promise<ConnectReply> => {
+      let signers: AuthOptions | undefined;
+
+      // Detect which signature is being used
+      if (rpcUrl !== undefined) {
+        // Old signature: connect(policies, rpcUrl, signupOptions)
+        // In the old signature, the first arg is policies (not used in new flow)
+        // and the third arg is signupOptions
+        signers = signupOptions;
+      } else {
+        // New signature: connect(signupOptions)
+        signers = policiesOrSigners as AuthOptions | undefined;
+      }
+
       if (signers && signers.length === 0) {
         throw new Error("If defined, signup options cannot be empty");
       }

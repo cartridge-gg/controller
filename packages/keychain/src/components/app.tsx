@@ -1,4 +1,5 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { AuthOptions } from "@cartridge/controller";
 import { Session } from "./session";
 import { Failure } from "./failure";
 import { Pending } from "./pending";
@@ -58,7 +59,7 @@ import { Disconnect } from "./disconnect";
 
 function Authentication() {
   const { controller, isConfigLoading } = useConnection();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   const upgrade = useUpgrade();
 
@@ -73,7 +74,19 @@ function Authentication() {
 
   // No controller, send to login
   if (!controller) {
-    return <CreateController isSlot={pathname.startsWith("/slot")} />;
+    // Extract signers from URL if present (for connect flow)
+    const searchParams = new URLSearchParams(search);
+    const signersParam = searchParams.get("signers");
+    const signers = signersParam
+      ? (JSON.parse(decodeURIComponent(signersParam)) as AuthOptions)
+      : undefined;
+
+    return (
+      <CreateController
+        isSlot={pathname.startsWith("/slot")}
+        signers={signers}
+      />
+    );
   }
 
   if (!upgrade.isSynced || isConfigLoading) {

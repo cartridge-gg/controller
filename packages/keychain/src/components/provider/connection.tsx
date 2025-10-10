@@ -2,7 +2,6 @@ import { ParentMethods } from "@/hooks/connection";
 import { ParsedSessionPolicies } from "@/hooks/session";
 import Controller from "@/utils/controller";
 import {
-  AuthOptions,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
@@ -29,11 +28,9 @@ export type ConnectionContextValue = {
   isMainnet: boolean;
   verified: boolean;
   chainId?: string;
-  configSignupOptions: AuthOptions | undefined;
   setController: (controller?: Controller) => void;
   controllerVersion: SemVer | undefined;
   setRpcUrl: (url: string) => void;
-  setConfigSignupOptions: (options: AuthOptions | undefined) => void;
   closeModal?: () => Promise<void>;
   onModalClose?: () => void;
   setOnModalClose?: (onModalClose: () => void) => void;
