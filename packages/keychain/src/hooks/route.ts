@@ -20,7 +20,9 @@ export function useRouteParams<T extends { id: string }>(
   const [searchParams] = useSearchParams();
   const [params, setParams] = useState<ReturnType<typeof parseParams>>(null);
 
-  // Parse URL params on mount
+  // Parse URL params on mount or when searchParams change
+  // Note: parseParams is intentionally not in the dependency array to avoid infinite loops
+  // when inline functions are passed. The function should be stable or memoized by the caller.
   useEffect(() => {
     const parsed = parseParams(searchParams);
     if (parsed) {
@@ -29,7 +31,8 @@ export function useRouteParams<T extends { id: string }>(
       // No valid data, redirect to home
       navigate("/", { replace: true });
     }
-  }, [searchParams, navigate, parseParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, navigate]);
 
   // Cleanup callbacks on unmount
   useEffect(() => {

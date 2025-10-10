@@ -18,7 +18,6 @@ const CANCEL_RESPONSE = {
 
 export function ConnectRoute() {
   const { controller, policies } = useConnection();
-  console.log(policies);
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
     const parsed = parseConnectParams(searchParams);
