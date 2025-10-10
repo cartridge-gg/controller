@@ -135,7 +135,6 @@ const CreateSessionLayout = ({
           }
         />
         <LayoutContent className="pb-0">
-          {/*<SessionConsent isVerified={policies?.verified} />*/}
           {policies?.verified ? (
             <VerifiedSessionSummary
               game={theme.name}

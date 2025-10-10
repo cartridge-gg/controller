@@ -5,6 +5,7 @@ import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";
 import { TokenConsent } from "../connect/token-consent";
 import { toArray } from "@cartridge/controller";
+import { TokenContractCard } from "./TokenContractCard";
 
 export function VerifiedSessionSummary({
   game,
@@ -75,12 +76,15 @@ export function VerifiedSessionSummary({
           <TokenConsent />
           {/* Render token contracts after */}
           {tokenContracts.map(([address, contract]) => (
-            <ContractCard
+            <TokenContractCard
               key={address}
-              address={address}
               title={contract.name || contract.meta?.name || "Contract"}
               icon={contract.meta?.icon}
-              methods={contract.methods}
+              amount={
+                contract.methods.find(
+                  (method) => method.entrypoint === "approve",
+                )?.amount ?? "0"
+              }
             />
           ))}
         </>
