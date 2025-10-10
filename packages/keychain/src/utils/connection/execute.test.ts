@@ -61,16 +61,15 @@ describe("execute utils", () => {
 
       const url = createExecuteUrl(transactions);
 
-      expect(url).toMatch(/^\/execute\?data=/);
+      expect(url).toMatch(/^\/execute\?/);
 
-      // Decode and verify the data
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
-
-      expect(decoded).toEqual({
-        id: "test-id",
-        transactions,
-      });
+      // Decode and verify the params
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      expect(searchParams.get("id")).toBe("test-id");
+      const transactionsParam = searchParams.get("transactions");
+      expect(transactionsParam).toBeTruthy();
+      const decoded = JSON.parse(decodeURIComponent(transactionsParam!));
+      expect(decoded).toEqual(transactions);
     });
 
     it("should create execute URL with callbacks", () => {
@@ -98,7 +97,7 @@ describe("execute utils", () => {
         onCancel: mockOnCancel,
       });
 
-      expect(url).toMatch(/^\/execute\?data=/);
+      expect(url).toMatch(/^\/execute\?/);
     });
 
     it("should create execute URL with error", () => {
@@ -111,10 +110,12 @@ describe("execute utils", () => {
 
       const url = createExecuteUrl(transactions, { error });
 
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      const errorParam = searchParams.get("error");
+      expect(errorParam).toBeTruthy();
+      const decoded = JSON.parse(decodeURIComponent(errorParam!));
 
-      expect(decoded.error).toEqual(error);
+      expect(decoded).toEqual(error);
     });
 
     it("should serialize BigInt values in calldata", () => {
@@ -133,13 +134,15 @@ describe("execute utils", () => {
       // This should not throw
       const url = createExecuteUrl(transactions);
 
-      expect(url).toMatch(/^\/execute\?data=/);
+      expect(url).toMatch(/^\/execute\?/);
 
       // Decode and verify the data
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      const transactionsParam = searchParams.get("transactions");
+      expect(transactionsParam).toBeTruthy();
+      const decoded = JSON.parse(decodeURIComponent(transactionsParam!));
 
-      expect(decoded.transactions[0].calldata).toEqual([
+      expect(decoded[0].calldata).toEqual([
         "0x456",
         "1000000000000000000",
         "0",
@@ -163,10 +166,12 @@ describe("execute utils", () => {
 
       const url = createExecuteUrl(transactions);
 
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      const transactionsParam = searchParams.get("transactions");
+      expect(transactionsParam).toBeTruthy();
+      const decoded = JSON.parse(decodeURIComponent(transactionsParam!));
 
-      expect(decoded.transactions[0].calldata).toEqual([
+      expect(decoded[0].calldata).toEqual([
         "0x456",
         "999999999999999999999",
         "regular_string",
@@ -238,15 +243,17 @@ describe("execute utils", () => {
 
       // Should navigate to UI for session refresh
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/execute\?data=/),
+        expect.stringMatching(/^\/execute\?/),
         { replace: true },
       );
 
       // Parse the URL to verify error is included
       const urlCall = mockNavigate.mock.calls[0][0];
-      const dataParam = urlCall.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
-      expect(decoded.error).toMatchObject({
+      const searchParams = new URLSearchParams(urlCall.split("?")[1]);
+      const errorParam = searchParams.get("error");
+      expect(errorParam).toBeTruthy();
+      const decoded = JSON.parse(decodeURIComponent(errorParam!));
+      expect(decoded).toMatchObject({
         code: ErrorCode.SessionRefreshRequired,
         message: "Session needs to be refreshed",
       });
@@ -278,15 +285,17 @@ describe("execute utils", () => {
 
       // Should navigate to UI for manual execution
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/execute\?data=/),
+        expect.stringMatching(/^\/execute\?/),
         { replace: true },
       );
 
       // Parse the URL to verify error is included
       const urlCall = mockNavigate.mock.calls[0][0];
-      const dataParam = urlCall.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
-      expect(decoded.error).toMatchObject({
+      const searchParams = new URLSearchParams(urlCall.split("?")[1]);
+      const errorParam = searchParams.get("error");
+      expect(errorParam).toBeTruthy();
+      const decoded = JSON.parse(decodeURIComponent(errorParam!));
+      expect(decoded).toMatchObject({
         code: ErrorCode.ManualExecutionRequired,
         message: "Manual execution required",
       });
@@ -360,7 +369,7 @@ describe("execute utils", () => {
       const promise = executeFunc(transactions, undefined, undefined, true);
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/execute\?data=/),
+        expect.stringMatching(/^\/execute\?/),
         { replace: true },
       );
 
@@ -412,7 +421,7 @@ describe("execute utils", () => {
       const result = await executeFunc(transactions);
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/execute\?data=/),
+        expect.stringMatching(/^\/execute\?/),
         { replace: true },
       );
 
@@ -442,7 +451,7 @@ describe("execute utils", () => {
       const result = await executeFunc(transactions);
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/execute\?data=/),
+        expect.stringMatching(/^\/execute\?/),
         { replace: true },
       );
 

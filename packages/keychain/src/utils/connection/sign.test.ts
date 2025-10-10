@@ -57,16 +57,15 @@ describe("sign message utils", () => {
     it("should create sign message URL without callbacks", () => {
       const url = createSignMessageUrl(mockTypedData);
 
-      expect(url).toMatch(/^\/sign-message\?data=/);
+      expect(url).toMatch(/^\/sign-message\?/);
 
-      // Decode and verify the data
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
-
-      expect(decoded).toEqual({
-        id: "test-id",
-        typedData: mockTypedData,
-      });
+      // Decode and verify the params
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      expect(searchParams.get("id")).toBe("test-id");
+      const typedDataParam = searchParams.get("typedData");
+      expect(typedDataParam).toBeTruthy();
+      const decoded = JSON.parse(decodeURIComponent(typedDataParam!));
+      expect(decoded).toEqual(mockTypedData);
     });
 
     it("should create sign message URL with callbacks", () => {
@@ -86,7 +85,7 @@ describe("sign message utils", () => {
         onCancel: mockOnCancel,
       });
 
-      expect(url).toMatch(/^\/sign-message\?data=/);
+      expect(url).toMatch(/^\/sign-message\?/);
     });
 
     it("should wrap resolve callback to handle type casting", () => {
@@ -125,13 +124,15 @@ describe("sign message utils", () => {
       // This should not throw
       const url = createSignMessageUrl(typedDataWithBigInt);
 
-      expect(url).toMatch(/^\/sign-message\?data=/);
+      expect(url).toMatch(/^\/sign-message\?/);
 
       // Decode and verify the data
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      const typedDataParam = searchParams.get("typedData");
+      expect(typedDataParam).toBeTruthy();
+      const decoded = JSON.parse(decodeURIComponent(typedDataParam!));
 
-      expect(decoded.typedData.message).toEqual({
+      expect(decoded.message).toEqual({
         amount: "1000000000000000000",
         recipient: "0x456",
       });
@@ -151,10 +152,12 @@ describe("sign message utils", () => {
 
       const url = createSignMessageUrl(typedDataWithMixed);
 
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      const typedDataParam = searchParams.get("typedData");
+      expect(typedDataParam).toBeTruthy();
+      const decoded = JSON.parse(decodeURIComponent(typedDataParam!));
 
-      expect(decoded.typedData.message).toEqual({
+      expect(decoded.message).toEqual({
         value1: "999999999999999999999",
         value2: "regular_string",
         value3: "42",
@@ -290,7 +293,7 @@ describe("sign message utils", () => {
       const promise = signMessage(mockTypedData, "0x123", false);
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/sign-message\?data=/),
+        expect.stringMatching(/^\/sign-message\?/),
         { replace: true },
       );
 
@@ -319,7 +322,7 @@ describe("sign message utils", () => {
       const result = await signMessage(mockTypedData, "0x123", true);
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/sign-message\?data=/),
+        expect.stringMatching(/^\/sign-message\?/),
         { replace: true },
       );
 
