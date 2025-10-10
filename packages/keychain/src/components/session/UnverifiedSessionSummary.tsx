@@ -17,6 +17,7 @@ import {
   cn,
   Thumbnail,
 } from "@cartridge/ui";
+import { formatBalance } from "@/hooks/tokens";
 
 // Maximum value for uint128: 2^128 - 1
 const MAX_UINT128 = "340282366920938463463374607431768211455";
@@ -29,7 +30,7 @@ function formatAmount(amount: string | number): string {
     return "Unlimited";
   }
 
-  return Number(amount).toString();
+  return formatBalance(numAmount, 18);
 }
 
 export function UnverifiedSessionSummary({
