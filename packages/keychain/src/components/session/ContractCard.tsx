@@ -15,7 +15,7 @@ import {
   TooltipTrigger,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type MethodWithEnabled = Method & { authorized?: boolean; id?: string };
 
@@ -39,12 +39,20 @@ export function ContractCard({
   const [isOpened, setisOpened] = useState(isExpanded);
   const { onToggleMethod, isEditable } = useCreateSession();
 
+  // Auto-open accordion when isEditable becomes true
+  useEffect(() => {
+    if (isEditable) {
+      setisOpened(true);
+    }
+  }, [isEditable]);
+
   return (
     <Accordion
       type="single"
       collapsible
       className="bg-background-200 rounded"
-      onValueChange={(e) => setisOpened(e === "item")}
+      value={isOpened ? "item" : ""}
+      onValueChange={(value) => setisOpened(value === "item")}
     >
       <AccordionItem value="item" className="flex flex-col">
         <AccordionTrigger

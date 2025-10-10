@@ -16,7 +16,7 @@ import type {
   StarknetEnumType,
   StarknetMerkleType,
 } from "@starknet-io/types-js";
-import { type PropsWithChildren, useState } from "react";
+import { type PropsWithChildren, useState, useEffect } from "react";
 
 interface MessageCardProps {
   messages: SignMessagePolicyWithEnabled[];
@@ -28,13 +28,22 @@ export function MessageCard({
   isExpanded = false,
 }: MessageCardProps) {
   const [isOpened, setisOpened] = useState(isExpanded);
+  const { isEditable } = useCreateSession();
+
+  // Auto-open accordion when isEditable becomes true
+  useEffect(() => {
+    if (isEditable) {
+      setisOpened(true);
+    }
+  }, [isEditable]);
 
   return (
     <Accordion
       type="single"
       collapsible
       className="bg-background-200 rounded"
-      onValueChange={(e) => setisOpened(e === "item")}
+      value={isOpened ? "item" : ""}
+      onValueChange={(value) => setisOpened(value === "item")}
     >
       <AccordionItem value="item">
         <AccordionTrigger

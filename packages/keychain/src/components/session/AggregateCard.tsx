@@ -25,13 +25,14 @@ import { Link } from "react-router-dom";
 import { constants } from "starknet";
 import { MessageContent } from "./MessageCard";
 import { humanizeString } from "@cartridge/controller";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AggregateCardProps {
   title: string;
   icon: React.ReactNode;
   contracts?: SessionContracts;
   messages?: SessionMessages;
+  isExpanded?: boolean;
   className?: string;
 }
 
@@ -40,19 +41,28 @@ export function AggregateCard({
   icon,
   contracts,
   messages,
+  isExpanded = false,
   className,
 }: AggregateCardProps) {
-  const [isOpened, setisOpened] = useState(false);
+  const [isOpened, setisOpened] = useState(isExpanded);
   const { controller } = useConnection();
   const explorer = useExplorer();
   const { onToggleMethod, isEditable } = useCreateSession();
+
+  // Auto-open accordion when isEditable becomes true
+  useEffect(() => {
+    if (isEditable) {
+      setisOpened(true);
+    }
+  }, [isEditable]);
 
   return (
     <Accordion
       type="single"
       collapsible
       className="bg-background-200 rounded"
-      onValueChange={(e) => setisOpened(e === "item")}
+      value={isOpened ? "item" : ""}
+      onValueChange={(value) => setisOpened(value === "item")}
     >
       <AccordionItem value="item">
         <AccordionTrigger

@@ -1,4 +1,8 @@
-import type { SessionContracts, SessionMessages } from "@/hooks/session";
+import {
+  useCreateSession,
+  type SessionContracts,
+  type SessionMessages,
+} from "@/hooks/session";
 import { toArray } from "@cartridge/controller";
 
 import { ContractCard } from "./ContractCard";
@@ -20,6 +24,7 @@ export function UnverifiedSessionSummary({
   contracts?: SessionContracts;
   messages?: SessionMessages;
 }) {
+  const { isEditable } = useCreateSession();
   const { tokenContracts, otherContracts } = useMemo(() => {
     const formattedContracts = Object.entries(contracts ?? {}).map(
       ([address, contract]) => {
@@ -60,6 +65,7 @@ export function UnverifiedSessionSummary({
             title={e.title}
             icon={e.icon}
             methods={e.methods}
+            isExpanded={isEditable}
           />
         ))}
         {messages && messages.length > 0 && <MessageCard messages={messages} />}

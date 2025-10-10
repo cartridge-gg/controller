@@ -1,4 +1,8 @@
-import type { SessionContracts, SessionMessages } from "@/hooks/session";
+import {
+  useCreateSession,
+  type SessionContracts,
+  type SessionMessages,
+} from "@/hooks/session";
 import {
   Card,
   CardContent,
@@ -22,6 +26,7 @@ export function VerifiedSessionSummary({
   contracts?: SessionContracts;
   messages?: SessionMessages;
 }) {
+  const { isEditable } = useCreateSession();
   // Separate contracts based on methods and type
   const { tokenContracts, otherContracts, vrfContracts } = useMemo(() => {
     const allContracts = Object.entries(contracts ?? {});
@@ -73,6 +78,7 @@ export function VerifiedSessionSummary({
             title={contract.name || contract.meta?.name || "Contract"}
             icon={contract.meta?.icon}
             methods={contract.methods}
+            isExpanded={isEditable}
           />
         ))}
       </div>
