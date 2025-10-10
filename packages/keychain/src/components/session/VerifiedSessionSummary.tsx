@@ -18,6 +18,20 @@ import { ContractCard } from "./ContractCard";
 import { TokenConsent } from "../connect/token-consent";
 import { toArray } from "@cartridge/controller";
 
+// Maximum value for uint128: 2^128 - 1
+const MAX_UINT128 = "340282366920938463463374607431768211455";
+
+function formatAmount(amount: string): string {
+  const numAmount = BigInt(amount);
+  const maxUint128 = BigInt(MAX_UINT128);
+
+  if (numAmount >= maxUint128) {
+    return "Unlimited";
+  }
+
+  return Number(amount).toString();
+}
+
 export function VerifiedSessionSummary({
   game,
   contracts,
@@ -118,10 +132,10 @@ export function VerifiedSessionSummary({
                       <p>
                         {contract.name || contract.meta?.name || "Contract"}
                       </p>
-                      <p>{Number(amount)}</p>
+                      <p>{formatAmount(amount)}</p>
                     </div>
                     <p className="text-foreground-400 text-xs font-medium">
-                      {Number(amount)}
+                      {formatAmount(amount)}
                     </p>
                   </div>
                 </CardContent>
