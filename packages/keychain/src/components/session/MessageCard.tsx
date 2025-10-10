@@ -21,11 +21,13 @@ import { type PropsWithChildren, useState, useEffect } from "react";
 interface MessageCardProps {
   messages: SignMessagePolicyWithEnabled[];
   isExpanded?: boolean;
+  className?: string;
 }
 
 export function MessageCard({
   messages,
   isExpanded = false,
+  className,
 }: MessageCardProps) {
   const [isOpened, setisOpened] = useState(isExpanded);
   const { isEditable } = useCreateSession();
@@ -41,7 +43,7 @@ export function MessageCard({
     <Accordion
       type="single"
       collapsible
-      className="bg-background-200 rounded"
+      className={cn("bg-background-200 rounded", className)}
       value={isOpened ? "item" : ""}
       onValueChange={(value) => setisOpened(value === "item")}
     >
@@ -59,11 +61,7 @@ export function MessageCard({
           />
           <p>Sign Message</p>
         </AccordionTrigger>
-        <AccordionContent
-          className={cn(
-            "flex flex-col gap-2 px-3 pb-3 rounded overflow-hidden",
-          )}
-        >
+        <AccordionContent className="flex flex-col gap-2 px-3 pb-3 rounded overflow-hidden">
           <MessageContent messages={messages} />
         </AccordionContent>
       </AccordionItem>

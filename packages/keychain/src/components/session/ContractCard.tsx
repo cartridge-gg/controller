@@ -50,7 +50,7 @@ export function ContractCard({
     <Accordion
       type="single"
       collapsible
-      className="bg-background-200 rounded"
+      className={cn("bg-background-200 rounded", className)}
       value={isOpened ? "item" : ""}
       onValueChange={(value) => setisOpened(value === "item")}
     >
@@ -69,12 +69,7 @@ export function ContractCard({
           <p>{`Approve ${title}`}</p>
         </AccordionTrigger>
 
-        <AccordionContent
-          className={cn(
-            "flex flex-col rounded overflow-hidden gap-0 px-3 pb-3",
-            className,
-          )}
-        >
+        <AccordionContent className="flex flex-col overflow-hidden gap-0 px-3 pb-3">
           <div className="border border-background-100 divide-y divide-background-100 rounded">
             {methods
               .filter((method) => (isEditable ? true : method.authorized))

@@ -60,7 +60,7 @@ export function AggregateCard({
     <Accordion
       type="single"
       collapsible
-      className="bg-background-200 rounded"
+      className={cn("bg-background-200 rounded", className)}
       value={isOpened ? "item" : ""}
       onValueChange={(value) => setisOpened(value === "item")}
     >
@@ -79,12 +79,7 @@ export function AggregateCard({
           <p>{`Approve ${title}`}</p>
         </AccordionTrigger>
 
-        <AccordionContent
-          className={cn(
-            "flex flex-col gap-2 px-3 pb-3 rounded overflow-hidden",
-            className,
-          )}
-        >
+        <AccordionContent className="flex flex-col gap-2 px-3 pb-3">
           {Object.entries(contracts || {}).map(
             ([address, { name, methods }]) => (
               <div key={address} className="flex flex-col gap-2">
