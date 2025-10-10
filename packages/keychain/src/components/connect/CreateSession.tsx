@@ -152,7 +152,7 @@ const CreateSessionLayout = ({
           {!policies?.verified && (
             <div
               className={cn(
-                "flex items-center mb-3 mt-3 gap-2 border border-solid-primary rounded-md cursor-pointer text-destructive-100 bg-background-100",
+                "flex items-center mb-3 gap-2 border border-solid-primary rounded-md cursor-pointer text-destructive-100 bg-background-100 p-2",
                 isConsent ? "border-background-200" : "border-destructive-100",
               )}
               onClick={() => !isConnecting && setIsConsent(!isConsent)}
