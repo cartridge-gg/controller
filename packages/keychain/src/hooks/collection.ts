@@ -204,8 +204,8 @@ export function useCollection({
               b.token_id === asset?.token_id &&
               BigInt(b.balance) !== 0n,
           )?.account_address;
-          if (!owner) return; // Skip assets without owners
-          const image = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+          if (!owner || !asset.token_id) return; // Skip assets without owners
+          const image = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${addAddressPadding(asset.token_id)}/image`;
           newAssets[`${contractAddress}-${asset.token_id || ""}`] = {
             tokenId: asset.token_id || "",
             name: metadata?.name || asset.name,
@@ -318,7 +318,7 @@ export function useCollections(): UseCollectionsResponse {
           } catch (error) {
             console.error(error);
           }
-          const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
+          const image = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${addAddressPadding(asset.token_id || "0x0")}/image`;
           collections[contractAddress] = {
             address: contractAddress,
             name: asset.name || metadata?.name || "",

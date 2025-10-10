@@ -142,8 +142,8 @@ export function CollectiblePurchase() {
         const asset = assets.find(
           (asset) => BigInt(asset.token_id ?? "0x0") === BigInt(order.tokenId),
         );
-        if (!asset) return;
-        const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
+        if (!asset || !contractAddress) return;
+        const image = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
         return {
           orderId: order.id,
           image: image,
