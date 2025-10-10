@@ -149,7 +149,7 @@ const CreateSessionLayout = ({
             />
           )}
         </LayoutContent>
-        <LayoutFooter className="pt-2">
+        <LayoutFooter className="pt-4">
           {!policies?.verified && (
             <div
               className={cn(
