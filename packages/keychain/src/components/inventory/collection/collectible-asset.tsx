@@ -217,7 +217,7 @@ export function CollectibleAsset() {
               style={{ scrollbarWidth: "none" }}
             >
               <CollectiblePreview
-                image={asset.imageUrl || placeholder}
+                images={[...asset.imageUrls, placeholder]}
                 size="lg"
                 className="w-full self-center"
               />
@@ -288,7 +288,9 @@ export function CollectibleAsset() {
                         timestamp={props.timestamp}
                         category={props.category}
                         collectibleImage={
-                          asset.imageUrl || collectible.imageUrl || placeholder
+                          asset.imageUrls[0] ||
+                          collectible.imageUrls[0] ||
+                          placeholder
                         }
                         collectibleName={title || collectible.name}
                         currencyImage={props.currencyImage}
