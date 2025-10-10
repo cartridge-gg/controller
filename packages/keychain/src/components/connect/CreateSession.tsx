@@ -202,7 +202,11 @@ const CreateSessionLayout = ({
                 });
               }}
             >
-              {isUpdate ? "update" : "create"} session
+              {isUpdate
+                ? "update session"
+                : policies.verified
+                  ? "play"
+                  : "continue"}
             </Button>
           </div>
 

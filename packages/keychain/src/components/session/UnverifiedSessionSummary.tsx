@@ -14,6 +14,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  cn,
   Thumbnail,
 } from "@cartridge/ui";
 
@@ -66,9 +67,18 @@ export function UnverifiedSessionSummary({
             icon={e.icon}
             methods={e.methods}
             isExpanded={isEditable}
+            className={cn(
+              "rounded-none first:rounded-t",
+              messages && messages.length > 0 && "last:rounded-b-none",
+            )}
           />
         ))}
-        {messages && messages.length > 0 && <MessageCard messages={messages} />}
+        {messages && messages.length > 0 && (
+          <MessageCard
+            className={cn(otherContracts && "rounded-t-none")}
+            messages={messages}
+          />
+        )}
       </div>
 
       {/* Render token contracts after */}
