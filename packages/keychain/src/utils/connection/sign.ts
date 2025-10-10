@@ -79,19 +79,21 @@ export function parseSignMessageParams(searchParams: URLSearchParams): {
 
     const callbacks = getCallbacks(id) as SignMessageCallback | undefined;
 
-    const resolve = callbacks?.resolve
-      ? (value: unknown) => {
-          if (!isSignMessageResult(value)) {
-            console.error("Invalid sign message result type:", value);
-            return;
-          }
-          callbacks.resolve?.(value);
-        }
-      : undefined;
-
     const reject = callbacks?.reject
       ? (reason?: unknown) => {
           callbacks.reject?.(reason);
+        }
+      : undefined;
+
+    const resolve = callbacks?.resolve
+      ? (value: unknown) => {
+          if (!isSignMessageResult(value)) {
+            const error = new Error("Invalid sign message result type");
+            console.error(error.message, value);
+            reject?.(error);
+            return;
+          }
+          callbacks.resolve?.(value);
         }
       : undefined;
 

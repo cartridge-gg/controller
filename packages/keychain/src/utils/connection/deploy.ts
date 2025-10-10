@@ -64,19 +64,21 @@ export function parseDeployParams(searchParams: URLSearchParams): {
 
     const callbacks = getCallbacks(id) as DeployCallback | undefined;
 
-    const resolve = callbacks?.resolve
-      ? (value: unknown) => {
-          if (!isDeployResult(value)) {
-            console.error("Invalid deploy result type:", value);
-            return;
-          }
-          callbacks.resolve?.(value);
-        }
-      : undefined;
-
     const reject = callbacks?.reject
       ? (reason?: unknown) => {
           callbacks.reject?.(reason);
+        }
+      : undefined;
+
+    const resolve = callbacks?.resolve
+      ? (value: unknown) => {
+          if (!isDeployResult(value)) {
+            const error = new Error("Invalid deploy result type");
+            console.error(error.message, value);
+            reject?.(error);
+            return;
+          }
+          callbacks.resolve?.(value);
         }
       : undefined;
 

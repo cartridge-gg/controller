@@ -68,19 +68,21 @@ export function parseConnectParams(searchParams: URLSearchParams): {
 
     const callbacks = getCallbacks(id) as ConnectCallback | undefined;
 
-    const resolve = callbacks?.resolve
-      ? (value: unknown) => {
-          if (!isConnectResult(value)) {
-            console.error("Invalid connect result type:", value);
-            return;
-          }
-          callbacks.resolve?.(value);
-        }
-      : undefined;
-
     const reject = callbacks?.reject
       ? (reason?: unknown) => {
           callbacks.reject?.(reason);
+        }
+      : undefined;
+
+    const resolve = callbacks?.resolve
+      ? (value: unknown) => {
+          if (!isConnectResult(value)) {
+            const error = new Error("Invalid connect result type");
+            console.error(error.message, value);
+            reject?.(error);
+            return;
+          }
+          callbacks.resolve?.(value);
         }
       : undefined;
 
