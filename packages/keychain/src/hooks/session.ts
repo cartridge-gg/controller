@@ -40,7 +40,11 @@ export type SessionContracts = Record<
       type: ContractType;
       icon?: React.ReactNode | string;
     };
-    methods: (Method & { authorized?: boolean; id?: string })[];
+    methods: (Method & {
+      authorized?: boolean;
+      id?: string;
+      amount?: string;
+    })[];
   }
 >;
 

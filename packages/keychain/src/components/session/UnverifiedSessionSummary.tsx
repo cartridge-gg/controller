@@ -5,6 +5,7 @@ import { ContractCard } from "./ContractCard";
 import { MessageCard } from "./MessageCard";
 import { useMemo } from "react";
 import { TokenConsent } from "../connect/token-consent";
+import { TokenContractCard } from "./TokenContractCard";
 
 export function UnverifiedSessionSummary({
   contracts,
@@ -64,12 +65,14 @@ export function UnverifiedSessionSummary({
         <>
           <TokenConsent />
           {tokenContracts.map((e) => (
-            <ContractCard
+            <TokenContractCard
               key={e.address}
-              address={e.address}
               title={e.title}
               icon={e.icon}
-              methods={e.methods}
+              amount={
+                e.methods.find((method) => method.entrypoint === "approve")
+                  ?.amount ?? "0"
+              }
             />
           ))}
         </>

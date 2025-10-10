@@ -207,6 +207,7 @@ export const WithPreset: Story = {
                     name: "Approve",
                     description: "Approve paper usage",
                     entrypoint: "approve",
+                    amount: "0xffffffffffffffffffffffffffffffff",
                   },
                 ],
               },
