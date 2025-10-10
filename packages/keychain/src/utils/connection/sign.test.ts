@@ -166,20 +166,30 @@ describe("sign message utils", () => {
 
   describe("parseSignMessageParams", () => {
     it("should parse valid sign message params", () => {
-      const params = {
-        id: "test-id",
-        typedData: mockTypedData,
-      };
+      const searchParams = new URLSearchParams();
+      searchParams.set("id", "test-id");
+      searchParams.set(
+        "typedData",
+        encodeURIComponent(JSON.stringify(mockTypedData)),
+      );
 
-      const paramString = encodeURIComponent(JSON.stringify(params));
-      const result = parseSignMessageParams(paramString);
+      const result = parseSignMessageParams(searchParams);
 
       expect(result).toBeTruthy();
-      expect(result?.params).toEqual(params);
+      expect(result?.params).toEqual({
+        id: "test-id",
+        typedData: mockTypedData,
+      });
     });
 
-    it("should return null for invalid JSON", () => {
-      const result = parseSignMessageParams("invalid-json");
+    it("should return null for missing id", () => {
+      const searchParams = new URLSearchParams();
+      searchParams.set(
+        "typedData",
+        encodeURIComponent(JSON.stringify(mockTypedData)),
+      );
+
+      const result = parseSignMessageParams(searchParams);
 
       expect(result).toBeNull();
     });
@@ -188,11 +198,6 @@ describe("sign message utils", () => {
       const mockResolve = vi.fn();
       const mockReject = vi.fn();
       const mockOnCancel = vi.fn();
-
-      const params = {
-        id: "test-id",
-        typedData: mockTypedData,
-      };
 
       // Store callbacks first
       storeCallbacks("test-id", {
@@ -208,8 +213,14 @@ describe("sign message utils", () => {
         onCancel: mockOnCancel,
       });
 
-      const paramString = encodeURIComponent(JSON.stringify(params));
-      const result = parseSignMessageParams(paramString);
+      const searchParams = new URLSearchParams();
+      searchParams.set("id", "test-id");
+      searchParams.set(
+        "typedData",
+        encodeURIComponent(JSON.stringify(mockTypedData)),
+      );
+
+      const result = parseSignMessageParams(searchParams);
 
       expect(result).toBeTruthy();
       expect(result?.resolve).toBeDefined();
@@ -232,13 +243,14 @@ describe("sign message utils", () => {
     it("should return undefined callbacks when no callbacks stored", () => {
       vi.mocked(callbacksModule.getCallbacks).mockReturnValue(undefined);
 
-      const params = {
-        id: "test-id",
-        typedData: mockTypedData,
-      };
+      const searchParams = new URLSearchParams();
+      searchParams.set("id", "test-id");
+      searchParams.set(
+        "typedData",
+        encodeURIComponent(JSON.stringify(mockTypedData)),
+      );
 
-      const paramString = encodeURIComponent(JSON.stringify(params));
-      const result = parseSignMessageParams(paramString);
+      const result = parseSignMessageParams(searchParams);
 
       expect(result?.resolve).toBeUndefined();
       expect(result?.reject).toBeUndefined();
@@ -246,16 +258,15 @@ describe("sign message utils", () => {
     });
 
     it("should handle params without id", () => {
-      const params = {
-        typedData: mockTypedData,
-      };
+      const searchParams = new URLSearchParams();
+      searchParams.set(
+        "typedData",
+        encodeURIComponent(JSON.stringify(mockTypedData)),
+      );
 
-      const paramString = encodeURIComponent(JSON.stringify(params));
-      const result = parseSignMessageParams(paramString);
+      const result = parseSignMessageParams(searchParams);
 
-      expect(result?.resolve).toBeUndefined();
-      expect(result?.reject).toBeUndefined();
-      expect(result?.onCancel).toBeUndefined();
+      expect(result).toBeNull();
     });
   });
 
@@ -354,17 +365,17 @@ describe("sign message utils", () => {
         resolve: mockResolve,
       });
 
-      expect(url).toMatch(/^\/sign-message\?data=/);
+      expect(url).toMatch(/^\/sign-message\?/);
 
-      // Extract data param and parse it
-      const dataParam = url.split("?data=")[1];
+      // Extract search params from URL
+      const searchParams = new URLSearchParams(url.split("?")[1]);
 
       // Mock getCallbacks for parsing
       vi.mocked(callbacksModule.getCallbacks).mockReturnValue({
         resolve: mockResolve,
       });
 
-      const parsed = parseSignMessageParams(dataParam);
+      const parsed = parseSignMessageParams(searchParams);
 
       expect(parsed).toBeTruthy();
       expect(parsed?.params.typedData).toEqual(mockTypedData);
