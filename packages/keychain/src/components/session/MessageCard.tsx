@@ -8,6 +8,7 @@ import {
   CheckboxIcon,
   PencilIcon,
   Switch,
+  Thumbnail,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { ArrowTurnDownIcon, Badge } from "@cartridge/ui";
@@ -16,7 +17,6 @@ import type {
   StarknetMerkleType,
 } from "@starknet-io/types-js";
 import { type PropsWithChildren, useState } from "react";
-import { AccordionCard } from "./AccordionCard";
 
 interface MessageCardProps {
   messages: SignMessagePolicyWithEnabled[];
@@ -27,25 +27,38 @@ export function MessageCard({
   messages,
   isExpanded = false,
 }: MessageCardProps) {
-  const totalEnabledMessages = messages.filter((m) => m.authorized).length;
+  const [isOpened, setisOpened] = useState(isExpanded);
 
   return (
-    <AccordionCard
-      icon={<PencilIcon variant="solid" />}
-      title="Sign Message"
-      trigger={
-        <div className="text-xs text-foreground-300">
-          Approve&nbsp;
-          <span className="text-foreground-200 font-bold">
-            {totalEnabledMessages}{" "}
-            {totalEnabledMessages > 1 ? `messages` : "message"}
-          </span>
-        </div>
-      }
-      isExpanded={isExpanded}
+    <Accordion
+      type="single"
+      collapsible
+      className="bg-background-200 rounded"
+      onValueChange={(e) => setisOpened(e === "item")}
     >
-      <MessageContent messages={messages} />
-    </AccordionCard>
+      <AccordionItem value="item">
+        <AccordionTrigger
+          parentClassName="h-11 p-3"
+          className="flex items-center text-xs font-medium text-foreground-100 gap-1.5"
+          color={cn(isOpened ? "text-foreground-100" : "text-foreground-400")}
+        >
+          <Thumbnail
+            variant={isOpened ? "light" : "ghost"}
+            size="xs"
+            icon={<PencilIcon variant="solid" />}
+            centered={true}
+          />
+          <p>Sign Message</p>
+        </AccordionTrigger>
+        <AccordionContent
+          className={cn(
+            "flex flex-col gap-2 px-3 pb-3 rounded overflow-hidden",
+          )}
+        >
+          <MessageContent messages={messages} />
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 
