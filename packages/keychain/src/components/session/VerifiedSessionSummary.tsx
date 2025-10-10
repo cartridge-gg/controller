@@ -1,11 +1,17 @@
 import type { SessionContracts, SessionMessages } from "@/hooks/session";
-import { CodeIcon } from "@cartridge/ui";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CodeIcon,
+  Thumbnail,
+} from "@cartridge/ui";
 import { useMemo } from "react";
 import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";
 import { TokenConsent } from "../connect/token-consent";
 import { toArray } from "@cartridge/controller";
-import { TokenContractCard } from "./TokenContractCard";
 
 export function VerifiedSessionSummary({
   game,
@@ -75,7 +81,50 @@ export function VerifiedSessionSummary({
         <>
           <TokenConsent />
           {/* Render token contracts after */}
-          {tokenContracts.map(([address, contract]) => (
+          {tokenContracts && tokenContracts.length > 0 && (
+            <>
+              <TokenConsent />
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between h-10">
+                  <CardTitle className="normal-case font-semibold text-xs">
+                    Spending Limit
+                  </CardTitle>
+                </CardHeader>
+
+                {tokenContracts.map(([address, contract]) => {
+                  const amount =
+                    contract.methods.find((m) => m.entrypoint === "approve")
+                      ?.amount ?? "0";
+
+                  return (
+                    <CardContent
+                      key={address}
+                      className="flex flex-row gap-3 p-3 w-full"
+                    >
+                      <Thumbnail
+                        icon={contract.meta?.icon}
+                        size="md"
+                        variant="lighter"
+                        rounded
+                      />
+                      <div className="flex flex-col w-full">
+                        <div className="w-full flex flex-row items-center justify-between text-sm font-medium text-foreground-100">
+                          <p>
+                            {contract.name || contract.meta?.name || "Contract"}
+                          </p>
+                          <p>{Number(amount)}</p>
+                        </div>
+                        <p className="text-foreground-400 text-xs font-medium">
+                          {Number(amount)}
+                        </p>
+                      </div>
+                    </CardContent>
+                  );
+                })}
+              </Card>
+            </>
+          )}
+          {/*{tokenContracts.map(([address, contract]) => (
             <TokenContractCard
               key={address}
               title={contract.name || contract.meta?.name || "Contract"}
@@ -86,7 +135,14 @@ export function VerifiedSessionSummary({
                 )?.amount ?? "0"
               }
             />
-          ))}
+          ))}*/}
+          {/*<ContractCard
+            key={address}
+            address={address}
+            title={contract.name || contract.meta?.name || "Contract"}
+            icon={contract.meta?.icon}
+            methods={contract.methods}
+          />*/}
         </>
       )}
     </div>
