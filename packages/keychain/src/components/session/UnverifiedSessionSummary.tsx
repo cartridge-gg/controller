@@ -62,9 +62,8 @@ export function UnverifiedSessionSummary({
             methods={e.methods}
           />
         ))}
+        {messages && messages.length > 0 && <MessageCard messages={messages} />}
       </div>
-
-      {messages && messages.length > 0 && <MessageCard messages={messages} />}
 
       {/* Render token contracts after */}
       {tokenContracts && tokenContracts.length > 0 && (

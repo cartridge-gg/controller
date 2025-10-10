@@ -124,25 +124,6 @@ export function VerifiedSessionSummary({
               </Card>
             </>
           )}
-          {/*{tokenContracts.map(([address, contract]) => (
-            <TokenContractCard
-              key={address}
-              title={contract.name || contract.meta?.name || "Contract"}
-              icon={contract.meta?.icon}
-              amount={
-                contract.methods.find(
-                  (method) => method.entrypoint === "approve",
-                )?.amount ?? "0"
-              }
-            />
-          ))}*/}
-          {/*<ContractCard
-            key={address}
-            address={address}
-            title={contract.name || contract.meta?.name || "Contract"}
-            icon={contract.meta?.icon}
-            methods={contract.methods}
-          />*/}
         </>
       )}
     </div>
