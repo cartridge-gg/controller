@@ -5,11 +5,11 @@ import { cleanupCallbacks } from "@/utils/connection/callbacks";
 
 /**
  * Common hook for parsing route params from URL and managing callbacks
- * @param parseParams - Function to parse the data param from URL
+ * @param parseParams - Function to parse the URLSearchParams
  * @returns Parsed params with callbacks, or null if parsing failed
  */
 export function useRouteParams<T extends { id: string }>(
-  parseParams: (dataParam: string) => {
+  parseParams: (searchParams: URLSearchParams) => {
     params: T;
     resolve?: (result: unknown) => void;
     reject?: (reason?: unknown) => void;
@@ -22,17 +22,13 @@ export function useRouteParams<T extends { id: string }>(
 
   // Parse URL params on mount
   useEffect(() => {
-    const dataParam = searchParams.get("data");
-    if (dataParam) {
-      const parsed = parseParams(dataParam);
-      if (parsed) {
-        setParams(parsed);
-        return;
-      }
+    const parsed = parseParams(searchParams);
+    if (parsed) {
+      setParams(parsed);
+    } else {
+      // No valid data, redirect to home
+      navigate("/", { replace: true });
     }
-
-    // No valid data, redirect to home
-    navigate("/", { replace: true });
   }, [searchParams, navigate, parseParams]);
 
   // Cleanup callbacks on unmount

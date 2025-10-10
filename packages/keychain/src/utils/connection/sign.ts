@@ -51,32 +51,33 @@ export function createSignMessageUrl(
     });
   }
 
-  const params: SignMessageParams = {
-    id,
-    typedData,
-  };
+  const typedDataJson = JSON.stringify(typedData, (_, value) =>
+    typeof value === "bigint" ? value.toString() : value,
+  );
 
-  return `/sign-message?data=${encodeURIComponent(
-    JSON.stringify(params, (_, value) =>
-      typeof value === "bigint" ? value.toString() : value,
-    ),
-  )}`;
+  return `/sign-message?id=${encodeURIComponent(id)}&typedData=${encodeURIComponent(typedDataJson)}`;
 }
 
-export function parseSignMessageParams(paramString: string): {
+export function parseSignMessageParams(searchParams: URLSearchParams): {
   params: SignMessageParams;
   resolve?: (result: unknown) => void;
   reject?: (reason?: unknown) => void;
   onCancel?: () => void;
 } | null {
   try {
-    const params = JSON.parse(
-      decodeURIComponent(paramString),
-    ) as SignMessageParams;
+    const id = searchParams.get("id");
+    const typedDataParam = searchParams.get("typedData");
 
-    const callbacks = params.id
-      ? (getCallbacks(params.id) as SignMessageCallback | undefined)
-      : undefined;
+    if (!id || !typedDataParam) {
+      console.error("Missing required parameters");
+      return null;
+    }
+
+    const typedData = JSON.parse(
+      decodeURIComponent(typedDataParam),
+    ) as TypedData;
+
+    const callbacks = getCallbacks(id) as SignMessageCallback | undefined;
 
     const resolve = callbacks?.resolve
       ? (value: unknown) => {
@@ -101,7 +102,7 @@ export function parseSignMessageParams(paramString: string): {
       : undefined;
 
     return {
-      params,
+      params: { id, typedData },
       resolve,
       reject,
       onCancel,

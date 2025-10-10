@@ -47,18 +47,18 @@ export function createExecuteUrl(
     });
   }
 
-  const executeParams: ExecuteParams = {
-    id,
-    transactions,
-    error: options.error,
-  };
-
-  const paramString = encodeURIComponent(
-    JSON.stringify(executeParams, (_, value) =>
-      typeof value === "bigint" ? value.toString() : value,
-    ),
+  const transactionsJson = JSON.stringify(transactions, (_, value) =>
+    typeof value === "bigint" ? value.toString() : value,
   );
-  return `/execute?data=${paramString}`;
+
+  let url = `/execute?id=${encodeURIComponent(id)}&transactions=${encodeURIComponent(transactionsJson)}`;
+
+  if (options.error) {
+    const errorJson = JSON.stringify(options.error);
+    url += `&error=${encodeURIComponent(errorJson)}`;
+  }
+
+  return url;
 }
 
 export function parseControllerError(

@@ -18,17 +18,12 @@ export class KeychainIFrame extends IFrame<Keychain> {
     slot,
     namespace,
     tokens,
+    preset,
+    shouldOverridePresetPolicies,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
     const walletBridge = new WalletBridge();
-
-    if (policies) {
-      _url.searchParams.set(
-        "policies",
-        encodeURIComponent(JSON.stringify(policies)),
-      );
-    }
 
     if (version) {
       _url.searchParams.set("v", encodeURIComponent(version));
@@ -47,6 +42,19 @@ export class KeychainIFrame extends IFrame<Keychain> {
         "erc20",
         encodeURIComponent(tokens.erc20.toString()),
       );
+    }
+
+    // Policy precedence logic:
+    // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
+    // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
+    // 3. Otherwise, use provided policies or empty object
+    if ((!preset || shouldOverridePresetPolicies) && policies) {
+      _url.searchParams.set(
+        "policies",
+        encodeURIComponent(JSON.stringify(policies)),
+      );
+    } else if (preset) {
+      _url.searchParams.set("preset", preset);
     }
 
     super({

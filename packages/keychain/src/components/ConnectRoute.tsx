@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useMemo } from "react";
-import { ResponseCodes, toSessionPolicies } from "@cartridge/controller";
+import { useCallback, useEffect } from "react";
+import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { CreateSession, processPolicies } from "./connect/CreateSession";
 import { now } from "@/constants";
-import { parseSessionPolicies } from "@/hooks/session";
 import {
   useRouteParams,
   useRouteCompletion,
@@ -18,18 +17,11 @@ const CANCEL_RESPONSE = {
 };
 
 export function ConnectRoute() {
-  const { controller, setRpcUrl, setConfigSignupOptions } = useConnection();
-
+  const { controller, policies } = useConnection();
+  console.log(policies);
   // Parse params and set RPC URL immediately
-  const params = useRouteParams((dataParam: string) => {
-    const parsed = parseConnectParams(dataParam);
-    if (parsed) {
-      // Set RPC URL immediately when params are parsed to avoid race condition
-      setRpcUrl(parsed.params.rpcUrl);
-      if (parsed.params.signupOptions) {
-        setConfigSignupOptions(parsed.params.signupOptions);
-      }
-    }
+  const params = useRouteParams((searchParams: URLSearchParams) => {
+    const parsed = parseConnectParams(searchParams);
     return parsed;
   });
 
@@ -62,35 +54,14 @@ export function ConnectRoute() {
     handleCompletion();
   }, [params, controller, handleCompletion]);
 
-  const policies = useMemo(() => {
-    if (!params?.params.policies) {
-      return undefined;
-    }
-
-    // Fall back to URL policies if no preset is configured
-    // Parse policies from URL params - convert Policies to ParsedSessionPolicies
-    // Policies can be either Policy[] or SessionPolicies, so use toSessionPolicies
-    const sessionPolicies = toSessionPolicies(params.params.policies);
-
-    const parsed = parseSessionPolicies({
-      verified: false, // URL policies are not verified by default
-      policies: sessionPolicies,
-    });
-    return parsed;
-  }, [params]);
-
   // Handle cases where we can connect immediately
   useEffect(() => {
-    if (!params || !controller || !policies) {
+    if (!params || !controller) {
       return;
     }
 
     // if no policies, we can connect immediately
-    if (
-      !policies ||
-      ((!policies.contracts || Object.keys(policies.contracts).length === 0) &&
-        policies.messages?.length === 0)
-    ) {
+    if (!policies) {
       params.resolve?.({
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
@@ -101,7 +72,7 @@ export function ConnectRoute() {
     }
 
     // Bypass session approval screen for verified sessions
-    if (policies?.verified) {
+    if (policies.verified) {
       const createSessionForVerifiedPolicies = async () => {
         try {
           // Use a default duration for verified sessions (24 hours)

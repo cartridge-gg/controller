@@ -44,26 +44,25 @@ export function createDeployUrl(
     });
   }
 
-  const params: DeployParams = {
-    id,
-    account,
-  };
-
-  return `/deploy?data=${encodeURIComponent(JSON.stringify(params))}`;
+  return `/deploy?id=${encodeURIComponent(id)}&account=${encodeURIComponent(account)}`;
 }
 
-export function parseDeployParams(paramString: string): {
+export function parseDeployParams(searchParams: URLSearchParams): {
   params: DeployParams;
   resolve?: (result: unknown) => void;
   reject?: (reason?: unknown) => void;
   onCancel?: () => void;
 } | null {
   try {
-    const params = JSON.parse(decodeURIComponent(paramString)) as DeployParams;
+    const id = searchParams.get("id");
+    const account = searchParams.get("account");
 
-    const callbacks = params.id
-      ? (getCallbacks(params.id) as DeployCallback | undefined)
-      : undefined;
+    if (!id || !account) {
+      console.error("Missing required parameters");
+      return null;
+    }
+
+    const callbacks = getCallbacks(id) as DeployCallback | undefined;
 
     const resolve = callbacks?.resolve
       ? (value: unknown) => {
@@ -88,7 +87,7 @@ export function parseDeployParams(paramString: string): {
       : undefined;
 
     return {
-      params,
+      params: { id, account },
       resolve,
       reject,
       onCancel,

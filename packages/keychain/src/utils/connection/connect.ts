@@ -1,11 +1,11 @@
 import { AuthOptions, ConnectError, ConnectReply } from "@cartridge/controller";
-import { Policies } from "@cartridge/presets";
+import { SessionPolicies } from "@cartridge/presets";
 import { generateCallbackId, storeCallbacks, getCallbacks } from "./callbacks";
 
 export interface ConnectParams {
   id: string;
   origin: string;
-  policies: Policies;
+  policies: SessionPolicies | undefined;
   rpcUrl: string;
   signupOptions?: AuthOptions;
 }
@@ -27,9 +27,6 @@ function isConnectResult(value: unknown): value is ConnectReply | ConnectError {
 }
 
 export function createConnectUrl(
-  origin: string,
-  policies: Policies,
-  rpcUrl: string,
   signupOptions?: AuthOptions,
   options: ConnectCallback = {},
 ): string {
@@ -47,29 +44,29 @@ export function createConnectUrl(
     });
   }
 
-  const params: ConnectParams = {
-    id,
-    origin,
-    policies,
-    rpcUrl,
-    signupOptions,
-  };
-
-  return `/connect?data=${encodeURIComponent(JSON.stringify(params))}`;
+  return `/connect?id=${encodeURIComponent(id)}&signers=${encodeURIComponent(JSON.stringify(signupOptions))}`;
 }
 
-export function parseConnectParams(paramString: string): {
-  params: ConnectParams;
+export function parseConnectParams(searchParams: URLSearchParams): {
+  params: { id: string; signers: AuthOptions | undefined };
   resolve?: (result: unknown) => void;
   reject?: (reason?: unknown) => void;
   onCancel?: () => void;
 } | null {
   try {
-    const params = JSON.parse(decodeURIComponent(paramString)) as ConnectParams;
+    const id = searchParams.get("id");
+    const signersParam = searchParams.get("signers");
 
-    const callbacks = params.id
-      ? (getCallbacks(params.id) as ConnectCallback | undefined)
+    if (!id) {
+      console.error("Missing required id parameter");
+      return null;
+    }
+
+    const signers = signersParam
+      ? (JSON.parse(decodeURIComponent(signersParam)) as AuthOptions)
       : undefined;
+
+    const callbacks = getCallbacks(id) as ConnectCallback | undefined;
 
     const resolve = callbacks?.resolve
       ? (value: unknown) => {
@@ -94,7 +91,7 @@ export function parseConnectParams(paramString: string): {
       : undefined;
 
     return {
-      params,
+      params: { id, signers },
       resolve,
       reject,
       onCancel,
@@ -113,18 +110,14 @@ export function connect({
     options?: { replace?: boolean; state?: unknown },
   ) => void;
 }) {
-  return (origin: string) => {
-    return (
-      policies: Policies,
-      rpcUrl: string,
-      signupOptions?: AuthOptions,
-    ): Promise<ConnectReply> => {
-      if (signupOptions && signupOptions.length === 0) {
+  return () => {
+    return (signers?: AuthOptions): Promise<ConnectReply> => {
+      if (signers && signers.length === 0) {
         throw new Error("If defined, signup options cannot be empty");
       }
 
       return new Promise<ConnectReply>((resolve, reject) => {
-        const url = createConnectUrl(origin, policies, rpcUrl, signupOptions, {
+        const url = createConnectUrl(signers, {
           resolve: (result) => {
             if ("address" in result) {
               resolve(result);

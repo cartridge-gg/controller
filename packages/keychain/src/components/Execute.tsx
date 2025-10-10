@@ -7,17 +7,35 @@ import { useSearchParams } from "react-router-dom";
 import { ConfirmTransaction } from "./transaction/ConfirmTransaction";
 import { useRouteParams, useRouteCompletion } from "@/hooks/route";
 
-function parseExecuteParams(paramString: string): {
+function parseExecuteParams(searchParams: URLSearchParams): {
   params: ExecuteParams;
   resolve?: (result: unknown) => void;
   reject?: (reason?: unknown) => void;
   onCancel?: () => void;
 } | null {
   try {
-    const params: ExecuteParams = JSON.parse(decodeURIComponent(paramString));
+    const id = searchParams.get("id");
+    const transactionsParam = searchParams.get("transactions");
+    const errorParam = searchParams.get("error");
+
+    if (!id || !transactionsParam) {
+      console.error("Missing required parameters");
+      return null;
+    }
+
+    const transactions = JSON.parse(decodeURIComponent(transactionsParam));
+    const error = errorParam
+      ? JSON.parse(decodeURIComponent(errorParam))
+      : undefined;
+
+    const params: ExecuteParams = {
+      id,
+      transactions,
+      error,
+    };
 
     // Only get callbacks if there's an actual ID
-    const callbacks = params.id ? getCallbacks(params.id) : {};
+    const callbacks = getCallbacks(id) || {};
 
     return {
       params,
