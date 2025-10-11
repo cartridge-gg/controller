@@ -519,7 +519,9 @@ export function useAccountSearch(
     validationState,
   } = options;
 
-  const debouncedQuery = useDebounce(query.trim().toLowerCase(), debounceMs);
+  const trimmedQuery = query.trim().toLowerCase();
+  const debouncedQuery = useDebounce(trimmedQuery, debounceMs);
+  const isQueryChanging = trimmedQuery !== debouncedQuery;
   const shouldSearch = options.enabled || debouncedQuery.length >= minLength;
 
   const { data, isLoading, error } = useAccountSearchQuery(
@@ -536,6 +538,9 @@ export function useAccountSearch(
 
   const results = useMemo(() => {
     if (!shouldSearch) return [];
+
+    // If query is changing, don't show stale results
+    if (isQueryChanging) return [];
 
     const accountResults: AccountSearchResult[] = [];
 
@@ -586,11 +591,11 @@ export function useAccountSearch(
     }
 
     return accountResults;
-  }, [data, debouncedQuery, shouldSearch, validationState]);
+  }, [data, debouncedQuery, shouldSearch, validationState, isQueryChanging]);
 
   return {
     results,
-    isLoading: shouldSearch && isLoading,
+    isLoading: (shouldSearch && isLoading) || isQueryChanging,
     error: error as Error | undefined,
   };
 }
