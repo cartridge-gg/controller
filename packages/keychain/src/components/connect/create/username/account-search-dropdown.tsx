@@ -75,7 +75,9 @@ export const AccountSearchDropdown = React.forwardRef<
         : dataFromHook;
 
     const results = mockResults ?? hookData.results;
-    const isLoading = externalIsLoading ?? mockIsLoading ?? hookData.isLoading;
+    const isSearchLoading = mockIsLoading ?? hookData.isLoading;
+    const isValidating = validationState?.status === "validating";
+    const isLoading = externalIsLoading || isSearchLoading || isValidating;
     const error = mockError ?? hookData.error;
 
     const hasResults = results.length > 0;
