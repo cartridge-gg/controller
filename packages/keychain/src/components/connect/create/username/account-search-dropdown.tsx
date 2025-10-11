@@ -12,6 +12,7 @@ import {
   UseAccountSearchResult,
 } from "@/hooks/account";
 import { AccountSearchResultItem } from "./account-search-result";
+import { useDevice } from "@/hooks/device";
 
 export interface AccountSearchDropdownProps {
   query: string;
@@ -21,6 +22,7 @@ export interface AccountSearchDropdownProps {
   children: React.ReactNode;
   selectedIndex?: number;
   onSelectedIndexChange?: (index: number | undefined) => void;
+  isLoading?: boolean;
   // Optional mock data for Storybook
   mockResults?: AccountSearchResult[];
   mockIsLoading?: boolean;
@@ -40,18 +42,21 @@ export const AccountSearchDropdown = React.forwardRef<
       children,
       selectedIndex,
       onSelectedIndexChange,
+      isLoading: externalIsLoading = false,
       mockResults,
       mockIsLoading,
       mockError,
     },
     ref,
   ) => {
+    const { isMobile } = useDevice();
+
     const dataFromHook = useAccountSearch(
       mockResults !== undefined ? "" : query,
       {
         minLength: 1,
         debounceMs: 300,
-        maxResults: 5,
+        maxResults: isMobile ? 3 : 5,
         enabled: mockResults === undefined,
       },
     );
@@ -66,13 +71,20 @@ export const AccountSearchDropdown = React.forwardRef<
         : dataFromHook;
 
     const results = mockResults ?? hookData.results;
-    const isLoading = mockIsLoading ?? hookData.isLoading;
+    const isLoading = externalIsLoading ?? mockIsLoading ?? hookData.isLoading;
     const error = mockError ?? hookData.error;
 
     const hasResults = results.length > 0;
     const shouldShowDropdown = React.useMemo(() => {
       return Boolean(isOpen && query.length > 0 && (hasResults || isLoading));
     }, [isOpen, hasResults, isLoading, query.length]);
+
+    // Auto-focus first item if input value matches the first result
+    React.useEffect(() => {
+      if (hasResults && results.length > 0 && results[0].username === query) {
+        onSelectedIndexChange?.(0);
+      }
+    }, [results, query, hasResults, onSelectedIndexChange]);
 
     const handleSelect = React.useCallback(
       (result: AccountSearchResult) => {
@@ -150,10 +162,12 @@ export const AccountSearchDropdown = React.forwardRef<
     }, [shouldShowDropdown, handleKeyDown]);
 
     return (
-      <Popover open={isOpen} onOpenChange={onOpenChange}>
+      <Popover open={isOpen} onOpenChange={onOpenChange} modal={true}>
         <PopoverAnchor ref={ref}>{children}</PopoverAnchor>
         {shouldShowDropdown && (
           <PopoverContent
+            side="bottom"
+            avoidCollisions={false}
             className={cn(
               "w-[--radix-popover-trigger-width] p-0 bg-spacer border-none -translate-y-7 divide-y divide-spacer",
               "max-h-[300px] overflow-y-auto",

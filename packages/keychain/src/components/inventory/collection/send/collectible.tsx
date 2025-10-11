@@ -179,8 +179,8 @@ export function SendCollectible() {
 
   const image = useMemo(() => {
     if (!collectible || !assets) return placeholder;
-    if (assets.length > 1) return collectible.imageUrl || placeholder;
-    return assets[0].imageUrl || placeholder;
+    if (assets.length > 1) return collectible.imageUrls[0] || placeholder;
+    return assets[0].imageUrls[0] || placeholder;
   }, [collectible, assets]);
 
   const balance = useMemo(() => {

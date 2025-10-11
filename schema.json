@@ -7948,6 +7948,16 @@
             },
             {
               "defaultValue": null,
+              "description": "Index of the claim in the merkle tree",
+              "name": "index",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
               "description": null,
               "name": "data",
               "type": {
@@ -16862,6 +16872,22 @@
             {
               "args": [],
               "deprecationReason": null,
+              "description": "Index of the claim in the merkle tree",
+              "isDeprecated": false,
+              "name": "index",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "args": [],
+              "deprecationReason": null,
               "description": null,
               "isDeprecated": false,
               "name": "data",
@@ -17121,6 +17147,20 @@
                 "ofType": {
                   "kind": "SCALAR",
                   "name": "Felt",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "index",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
                   "ofType": null
                 }
               }
@@ -17519,6 +17559,102 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": "index field predicates",
+              "name": "index",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "indexNEQ",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "indexIn",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "indexNotIn",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "indexGT",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "indexGTE",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "indexLT",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": null,
+              "name": "indexLTE",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               }
             },
@@ -49768,6 +49904,16 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "defaultValue": null,
+              "description": "Index of the claim in the merkle tree",
+              "name": "index",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               }
             },

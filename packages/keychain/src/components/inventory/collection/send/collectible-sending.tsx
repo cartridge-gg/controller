@@ -31,7 +31,7 @@ export function Sending({
       {assets.map((asset) => (
         <CollectibleAssetCard
           key={asset.tokenId}
-          image={asset.imageUrl || placeholder}
+          image={asset.imageUrls[0] || placeholder}
           title={asset.name}
           description={description}
         />

@@ -138,10 +138,20 @@ const getKeychainUrl = () => {
     process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" &&
     process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF
   ) {
-    const branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
-      /[^a-zA-Z0-9-]/g,
-      "-",
-    );
+    let branchName: string;
+
+    const url = window.location.href;
+    const match = url.match(/git-([a-zA-Z0-9-]+)\.preview/);
+
+    if (match && match[1]) {
+      branchName = match[1];
+    } else {
+      branchName = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF.replace(
+        /[^a-zA-Z0-9-]/g,
+        "-",
+      );
+    }
+
     const keychainUrl = `https://keychain-git-${branchName}.preview.cartridge.gg/`;
 
     return keychainUrl;
