@@ -13,10 +13,10 @@ import {
 import {
   AuthorizedSession,
   CartridgeAccount,
-  CartridgeAccountMeta,
   ControllerFactory,
   JsAddSignerInput,
   JsCall,
+  JsChainConfig,
   JsFeeSource,
   JsFelt,
   JsRegister,
@@ -24,6 +24,7 @@ import {
   JsRemoveSignerInput,
   JsRevokableSession,
   JsSignedOutsideExecution,
+  MultiChainAccount,
   Owner,
   Signer,
 } from "@cartridge/controller-wasm/controller";
@@ -35,56 +36,67 @@ import { DeployedAccountTransaction } from "@starknet-io/types-js";
 import { toJsFeeEstimate } from "./fee";
 
 export default class Controller {
-  private cartridge: CartridgeAccount;
-  private cartridgeMeta: CartridgeAccountMeta;
+  private multiChainAccount: MultiChainAccount;
+  private _chainId: string;
+  private _appId: string;
+  private _username: string;
+  private _address: string;
+  private _classHash: string;
+  private _rpcUrl: string;
+  private _owner: Owner;
   provider: Provider;
 
   constructor() {
     throw new Error("Initialize with Controller.login or Controller.create");
   }
 
+  private async getAccount(): Promise<CartridgeAccount> {
+    return await this.multiChainAccount.controller(this._chainId);
+  }
+
   appId() {
-    return this.cartridgeMeta.appId();
+    return this._appId;
   }
 
   address() {
-    return this.cartridgeMeta.address();
+    return this._address;
   }
 
   username() {
-    return this.cartridgeMeta.username();
+    return this._username;
   }
 
   classHash() {
-    return this.cartridgeMeta.classHash();
+    return this._classHash;
   }
 
   owner() {
-    return this.cartridgeMeta.owner();
+    return this._owner;
   }
 
   ownerGuid() {
-    return this.cartridgeMeta.ownerGuid();
+    // Note: ownerGuid was previously from cartridgeMeta but isn't essential
+    // for most operations. Returning empty string for backward compatibility
+    return "";
   }
 
   rpcUrl() {
-    return this.cartridgeMeta.rpcUrl();
+    return this._rpcUrl;
   }
 
   chainId() {
-    return this.cartridgeMeta.chainId();
+    return this._chainId;
   }
 
   async disconnect() {
-    await this.cartridge.disconnect();
+    const account = await this.getAccount();
+    await account.disconnect();
     delete window.controller;
   }
 
   async register(registerInput: JsRegister): Promise<JsRegisterResponse> {
-    if (!this.cartridge) {
-      throw new Error("Account not found");
-    }
-    return await this.cartridge.register(registerInput);
+    const account = await this.getAccount();
+    return await account.register(registerInput);
   }
 
   async createSession(
@@ -93,29 +105,21 @@ export default class Controller {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _maxFee?: BigNumberish,
   ) {
-    if (!this.cartridge) {
-      throw new Error("Account not found");
-    }
-
-    return await this.cartridge.createSession(
+    const account = await this.getAccount();
+    return await account.createSession(
       toWasmPolicies(policies),
       expiresAt,
     );
   }
 
   async skipSession(policies: ParsedSessionPolicies) {
-    if (!this.cartridge) {
-      throw new Error("Account not found");
-    }
-
-    await this.cartridge.skipSession(toWasmPolicies(policies));
+    const account = await this.getAccount();
+    await account.skipSession(toWasmPolicies(policies));
   }
 
   async createPasskeySigner(rpId: string) {
-    if (!this.cartridge) {
-      throw new Error("Account not found");
-    }
-    return await this.cartridge.createPasskeySigner(rpId);
+    const account = await this.getAccount();
+    return await account.createPasskeySigner(rpId);
   }
 
   async addOwner(
@@ -123,17 +127,13 @@ export default class Controller {
     signerInput: JsAddSignerInput | null,
     rp_id: string | null,
   ) {
-    if (!this.cartridge) {
-      throw new Error("Account not found");
-    }
-    await this.cartridge.addOwner(owner, signerInput, rp_id);
+    const account = await this.getAccount();
+    await account.addOwner(owner, signerInput, rp_id);
   }
 
   async removeSigner(signerInput: JsRemoveSignerInput) {
-    if (!this.cartridge) {
-      throw new Error("Account not found");
-    }
-    await this.cartridge.removeOwner(signerInput);
+    const account = await this.getAccount();
+    await account.removeOwner(signerInput);
   }
 
   async registerSessionCalldata(
@@ -141,7 +141,8 @@ export default class Controller {
     policies: ParsedSessionPolicies,
     publicKey: string,
   ): Promise<Array<string>> {
-    return await this.cartridge.registerSessionCalldata(
+    const account = await this.getAccount();
+    return await account.registerSessionCalldata(
       toWasmPolicies(policies),
       expiresAt,
       publicKey,
@@ -154,11 +155,8 @@ export default class Controller {
     publicKey: string,
     maxFee?: FeeEstimate,
   ): Promise<InvokeFunctionResponse> {
-    if (!this.cartridge) {
-      throw new Error("Account not found");
-    }
-
-    return await this.cartridge.registerSession(
+    const account = await this.getAccount();
+    return await account.registerSession(
       toWasmPolicies(policies),
       expiresAt,
       publicKey,
@@ -167,14 +165,16 @@ export default class Controller {
   }
 
   async upgrade(new_class_hash: JsFelt): Promise<JsCall> {
-    return await this.cartridge.upgrade(new_class_hash);
+    const account = await this.getAccount();
+    return await account.upgrade(new_class_hash);
   }
 
   async executeFromOutsideV2(
     calls: Call[],
     feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV2(
+    const account = await this.getAccount();
+    return await account.executeFromOutsideV2(
       toJsCalls(calls),
       feeSource,
     );
@@ -184,7 +184,8 @@ export default class Controller {
     calls: Call[],
     feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.executeFromOutsideV3(
+    const account = await this.getAccount();
+    return await account.executeFromOutsideV3(
       toJsCalls(calls),
       feeSource,
     );
@@ -195,7 +196,8 @@ export default class Controller {
     maxFee?: FeeEstimate,
     feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.execute(
+    const account = await this.getAccount();
+    return await account.execute(
       toJsCalls(calls),
       toJsFeeEstimate(maxFee),
       feeSource,
@@ -206,17 +208,20 @@ export default class Controller {
     calls: Call[],
     feeSource?: JsFeeSource,
   ): Promise<InvokeFunctionResponse> {
-    return await this.cartridge.trySessionExecute(toJsCalls(calls), feeSource);
+    const account = await this.getAccount();
+    return await account.trySessionExecute(toJsCalls(calls), feeSource);
   }
 
   async hasAuthorizedPoliciesForCalls(calls: Call[]): Promise<boolean> {
-    return await this.cartridge.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
+    const account = await this.getAccount();
+    return await account.hasAuthorizedPoliciesForCalls(toJsCalls(calls));
   }
 
   async hasAuthorizedPoliciesForMessage(
     typedData: TypedData,
   ): Promise<boolean> {
-    return await this.cartridge.hasAuthorizedPoliciesForMessage(
+    const account = await this.getAccount();
+    return await account.hasAuthorizedPoliciesForMessage(
       JSON.stringify(typedData),
     );
   }
@@ -225,18 +230,21 @@ export default class Controller {
     policies: ParsedSessionPolicies,
     public_key?: string,
   ): Promise<AuthorizedSession | undefined> {
-    return await this.cartridge.isRegisteredSessionAuthorized(
+    const account = await this.getAccount();
+    return await account.isRegisteredSessionAuthorized(
       toWasmPolicies(policies),
       public_key,
     );
   }
 
   async isRequestedSession(policies: ParsedSessionPolicies): Promise<boolean> {
-    return await this.cartridge.hasRequestedSession(toWasmPolicies(policies));
+    const account = await this.getAccount();
+    return await account.hasRequestedSession(toWasmPolicies(policies));
   }
 
   async estimateInvokeFee(calls: Call[]): Promise<FeeEstimate> {
-    const res = (await this.cartridge.estimateInvokeFee(
+    const account = await this.getAccount();
+    const res = (await account.estimateInvokeFee(
       toJsCalls(calls),
     )) as FeeEstimate;
     res.unit = "FRI";
@@ -260,29 +268,35 @@ export default class Controller {
   }
 
   async signMessage(typedData: TypedData): Promise<Signature> {
-    return this.cartridge.signMessage(JSON.stringify(typedData));
+    const account = await this.getAccount();
+    return account.signMessage(JSON.stringify(typedData));
   }
 
   async signExecuteFromOutside(
     calls: Call[],
   ): Promise<JsSignedOutsideExecution> {
-    return await this.cartridge.signExecuteFromOutside(toJsCalls(calls));
+    const account = await this.getAccount();
+    return await account.signExecuteFromOutside(toJsCalls(calls));
   }
 
   async selfDeploy(maxFee?: FeeEstimate): Promise<DeployedAccountTransaction> {
-    return await this.cartridge.deploySelf(toJsFeeEstimate(maxFee));
+    const account = await this.getAccount();
+    return await account.deploySelf(toJsFeeEstimate(maxFee));
   }
 
   async delegateAccount(): Promise<string> {
-    return this.cartridge.delegateAccount();
+    const account = await this.getAccount();
+    return account.delegateAccount();
   }
 
   async revokeSession(session: JsRevokableSession) {
-    return await this.cartridge.revokeSession(session);
+    const account = await this.getAccount();
+    return await account.revokeSession(session);
   }
 
   async revokeSessions(sessions: JsRevokableSession[]) {
-    return await this.cartridge.revokeSessions(sessions);
+    const account = await this.getAccount();
+    return await account.revokeSessions(sessions);
   }
 
   static async apiLogin({
@@ -300,20 +314,31 @@ export default class Controller {
     username: string;
     owner: Owner;
   }): Promise<Controller> {
-    const accountWithMeta = await ControllerFactory.apiLogin(
+    // Create chain configuration
+    const chainConfig = new JsChainConfig(classHash, rpcUrl, owner, address);
+
+    // Create MultiChainAccount with single chain
+    const multiChainAccount = await MultiChainAccount.create(
       appId,
       username,
-      classHash,
-      rpcUrl,
-      address,
-      owner,
+      [chainConfig],
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
 
+    // Get chainId from provider
+    const provider = new RpcProvider({ nodeUrl: rpcUrl });
+    const chainId = await provider.getChainId();
+
     const controller = Object.create(Controller.prototype) as Controller;
-    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
-    controller.cartridgeMeta = accountWithMeta.meta();
-    controller.cartridge = accountWithMeta.intoAccount();
+    controller.provider = provider;
+    controller.multiChainAccount = multiChainAccount;
+    controller._chainId = chainId;
+    controller._appId = appId;
+    controller._username = username.toLowerCase();
+    controller._address = address;
+    controller._classHash = classHash;
+    controller._rpcUrl = rpcUrl;
+    controller._owner = owner;
 
     return controller;
   }
@@ -333,20 +358,31 @@ export default class Controller {
     username: string;
     owner: Owner;
   }): Promise<Controller> {
-    const accountWithMeta = await CartridgeAccount.new(
+    // Create chain configuration
+    const chainConfig = new JsChainConfig(classHash, rpcUrl, owner, address);
+
+    // Create MultiChainAccount with single chain
+    const multiChainAccount = await MultiChainAccount.create(
       appId,
-      classHash,
-      rpcUrl,
-      address,
       username,
-      owner,
+      [chainConfig],
       import.meta.env.VITE_CARTRIDGE_API_URL,
     );
 
+    // Get chainId from provider
+    const provider = new RpcProvider({ nodeUrl: rpcUrl });
+    const chainId = await provider.getChainId();
+
     const controller = Object.create(Controller.prototype) as Controller;
-    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
-    controller.cartridgeMeta = accountWithMeta.meta();
-    controller.cartridge = accountWithMeta.intoAccount();
+    controller.provider = provider;
+    controller.multiChainAccount = multiChainAccount;
+    controller._chainId = chainId;
+    controller._appId = appId;
+    controller._username = username.toLowerCase();
+    controller._address = address;
+    controller._classHash = classHash;
+    controller._rpcUrl = rpcUrl;
+    controller._owner = owner;
 
     return controller;
   }
@@ -387,12 +423,33 @@ export default class Controller {
       isControllerRegistered,
     );
 
-    const [accountWithMeta, session] = loginResult.intoValues();
+    const [, session] = loginResult.intoValues();
+
+    // Create chain configuration for MultiChainAccount
+    const chainConfig = new JsChainConfig(classHash, rpcUrl, owner, address);
+
+    // Create MultiChainAccount with single chain
+    const multiChainAccount = await MultiChainAccount.create(
+      appId,
+      username,
+      [chainConfig],
+      cartridgeApiUrl,
+    );
+
+    // Get chainId from provider
+    const provider = new RpcProvider({ nodeUrl: rpcUrl });
+    const chainId = await provider.getChainId();
 
     const controller = Object.create(Controller.prototype) as Controller;
-    controller.provider = new RpcProvider({ nodeUrl: rpcUrl });
-    controller.cartridgeMeta = accountWithMeta.meta();
-    controller.cartridge = accountWithMeta.intoAccount();
+    controller.provider = provider;
+    controller.multiChainAccount = multiChainAccount;
+    controller._chainId = chainId;
+    controller._appId = appId;
+    controller._username = username.toLowerCase();
+    controller._address = address;
+    controller._classHash = classHash;
+    controller._rpcUrl = rpcUrl;
+    controller._owner = owner;
 
     return {
       controller,
@@ -401,6 +458,7 @@ export default class Controller {
   }
 
   static async fromStore(appId: string): Promise<Controller | undefined> {
+    // Try loading with ControllerFactory first to get metadata
     const cartridgeWithMeta = await ControllerFactory.fromStorage(
       appId,
       import.meta.env.VITE_CARTRIDGE_API_URL,
@@ -410,10 +468,34 @@ export default class Controller {
     }
 
     const meta = cartridgeWithMeta.meta();
+
+    // Create chain configuration for MultiChainAccount
+    const chainConfig = new JsChainConfig(
+      meta.classHash(),
+      meta.rpcUrl(),
+      meta.owner(),
+      meta.address(),
+    );
+
+    // Create MultiChainAccount with the loaded configuration
+    const multiChainAccount = await MultiChainAccount.create(
+      meta.appId(),
+      meta.username(),
+      [chainConfig],
+      import.meta.env.VITE_CARTRIDGE_API_URL,
+    );
+
     const controller = Object.create(Controller.prototype) as Controller;
     controller.provider = new RpcProvider({ nodeUrl: meta.rpcUrl() });
-    controller.cartridge = cartridgeWithMeta.intoAccount();
-    controller.cartridgeMeta = meta;
+    controller.multiChainAccount = multiChainAccount;
+    controller._chainId = meta.chainId();
+    controller._appId = meta.appId();
+    controller._username = meta.username();
+    controller._address = meta.address();
+    controller._classHash = meta.classHash();
+    controller._rpcUrl = meta.rpcUrl();
+    controller._owner = meta.owner();
+
     return controller;
   }
 }
