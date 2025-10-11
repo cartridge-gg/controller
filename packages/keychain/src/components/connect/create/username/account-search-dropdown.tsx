@@ -10,6 +10,7 @@ import {
   useAccountSearch,
   AccountSearchResult,
   UseAccountSearchResult,
+  UseAccountSearchOptions,
 } from "@/hooks/account";
 import { AccountSearchResultItem } from "./account-search-result";
 import { useDevice } from "@/hooks/device";
@@ -23,6 +24,7 @@ export interface AccountSearchDropdownProps {
   selectedIndex?: number;
   onSelectedIndexChange?: (index: number | undefined) => void;
   isLoading?: boolean;
+  validationState?: UseAccountSearchOptions["validationState"];
   // Optional mock data for Storybook
   mockResults?: AccountSearchResult[];
   mockIsLoading?: boolean;
@@ -43,6 +45,7 @@ export const AccountSearchDropdown = React.forwardRef<
       selectedIndex,
       onSelectedIndexChange,
       isLoading: externalIsLoading = false,
+      validationState,
       mockResults,
       mockIsLoading,
       mockError,
@@ -58,6 +61,7 @@ export const AccountSearchDropdown = React.forwardRef<
         debounceMs: 300,
         maxResults: isMobile ? 3 : 5,
         enabled: mockResults === undefined,
+        validationState,
       },
     );
 
