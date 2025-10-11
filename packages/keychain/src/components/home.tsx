@@ -82,7 +82,8 @@ export function Home() {
               !policies ||
               ((!policies.contracts ||
                 Object.keys(policies.contracts).length === 0) &&
-                policies.messages?.length === 0)
+                policies.messages?.length === 0) || (Array.isArray(policies) && policies.length === 0) ||
+                              (typeof policies === 'object' && !Array.isArray(policies) && Object.keys(policies).length === 0)
             ) {
               context.resolve({
                 code: ResponseCodes.SUCCESS,
