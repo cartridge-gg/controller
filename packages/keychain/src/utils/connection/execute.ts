@@ -13,11 +13,18 @@ import {
   InvokeFunctionResponse,
   addAddressPadding,
 } from "starknet";
-import { ControllerError } from "./types";
+import { ErrorCode } from "@cartridge/controller-wasm/controller";
 import { JsCall } from "@cartridge/controller-wasm/controller";
 import { mutex } from "./sync";
 import Controller from "../controller";
 import { storeCallbacks, generateCallbackId } from "./callbacks";
+
+export type ControllerError = {
+  code: ErrorCode;
+  message: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data?: any;
+};
 
 export const ESTIMATE_FEE_PERCENTAGE = 10;
 
@@ -47,18 +54,18 @@ export function createExecuteUrl(
     });
   }
 
-  const executeParams: ExecuteParams = {
-    id,
-    transactions,
-    error: options.error,
-  };
-
-  const paramString = encodeURIComponent(
-    JSON.stringify(executeParams, (_, value) =>
-      typeof value === "bigint" ? value.toString() : value,
-    ),
+  const transactionsJson = JSON.stringify(transactions, (_, value) =>
+    typeof value === "bigint" ? value.toString() : value,
   );
-  return `/execute?data=${paramString}`;
+
+  let url = `/execute?id=${encodeURIComponent(id)}&transactions=${encodeURIComponent(transactionsJson)}`;
+
+  if (options.error) {
+    const errorJson = JSON.stringify(options.error);
+    url += `&error=${encodeURIComponent(errorJson)}`;
+  }
+
+  return url;
 }
 
 export function parseControllerError(

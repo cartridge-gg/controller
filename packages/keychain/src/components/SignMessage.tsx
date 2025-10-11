@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { ResponseCodes } from "@cartridge/controller";
 import { shortString, Signature, TypedData } from "starknet";
 import {
@@ -16,6 +15,11 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseSignMessageParams } from "@/utils/connection/sign";
+import {
+  useRouteParams,
+  useRouteCompletion,
+  useRouteCallbacks,
+} from "@/hooks/route";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -23,52 +27,9 @@ const CANCEL_RESPONSE = {
 };
 
 export function SignMessage() {
-  const { closeModal, setOnModalClose } = useConnection();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [params, setParams] =
-    useState<ReturnType<typeof parseSignMessageParams>>(null);
-
-  useEffect(() => {
-    const dataParam = searchParams.get("data");
-    if (dataParam) {
-      const parsed = parseSignMessageParams(dataParam);
-      if (parsed) {
-        setParams(parsed);
-        return;
-      }
-    }
-
-    navigate("/", { replace: true });
-  }, [searchParams, navigate]);
-
-  useEffect(() => {
-    return () => {
-      if (params?.params.id) {
-        cleanupCallbacks(params.params.id);
-      }
-    };
-  }, [params?.params.id]);
-
-  const returnTo = searchParams.get("returnTo");
-
-  const cancelWithoutClosing = useCallback(() => {
-    if (!params) {
-      return;
-    }
-
-    params.onCancel?.();
-    params.resolve?.(CANCEL_RESPONSE);
-    cleanupCallbacks(params.params.id);
-  }, [params]);
-
-  const handleCompletion = useCallback(() => {
-    if (returnTo) {
-      navigate(returnTo, { replace: true });
-    } else {
-      void closeModal?.();
-    }
-  }, [returnTo, navigate, closeModal]);
+  const params = useRouteParams(parseSignMessageParams);
+  const handleCompletion = useRouteCompletion();
+  const { cancelWithoutClosing } = useRouteCallbacks(params, CANCEL_RESPONSE);
 
   const handleSign = useCallback(
     (signature: Signature) => {
@@ -87,20 +48,6 @@ export function SignMessage() {
     cancelWithoutClosing();
     handleCompletion();
   }, [cancelWithoutClosing, handleCompletion]);
-
-  useEffect(() => {
-    if (!setOnModalClose || !params?.resolve) {
-      return;
-    }
-
-    setOnModalClose(() => {
-      cancelWithoutClosing();
-    });
-
-    return () => {
-      setOnModalClose(() => {});
-    };
-  }, [setOnModalClose, params?.resolve, cancelWithoutClosing]);
 
   const typedData = useMemo(() => params?.params.typedData, [params]);
 
