@@ -480,6 +480,10 @@ export interface UseAccountSearchOptions {
   debounceMs?: number;
   maxResults?: number;
   enabled?: boolean;
+  validationState?: {
+    status: "idle" | "validating" | "valid" | "invalid";
+    exists?: boolean;
+  };
 }
 
 export interface UseAccountSearchResult {
@@ -508,9 +512,16 @@ export function useAccountSearch(
   query: string,
   options: UseAccountSearchOptions = {},
 ): UseAccountSearchResult {
-  const { minLength = 1, debounceMs = 300, maxResults = 5 } = options;
+  const {
+    minLength = 1,
+    debounceMs = 300,
+    maxResults = 5,
+    validationState,
+  } = options;
 
-  const debouncedQuery = useDebounce(query.trim().toLowerCase(), debounceMs);
+  const trimmedQuery = query.trim().toLowerCase();
+  const debouncedQuery = useDebounce(trimmedQuery, debounceMs);
+  const isQueryChanging = trimmedQuery !== debouncedQuery;
   const shouldSearch = options.enabled || debouncedQuery.length >= minLength;
 
   const { data, isLoading, error } = useAccountSearchQuery(
@@ -527,6 +538,9 @@ export function useAccountSearch(
 
   const results = useMemo(() => {
     if (!shouldSearch) return [];
+
+    // If query is changing, don't show stale results
+    if (isQueryChanging) return [];
 
     const accountResults: AccountSearchResult[] = [];
 
@@ -559,20 +573,29 @@ export function useAccountSearch(
     );
 
     // If no exact match, add "Create New" option
+    // But only if validation is not in progress and the username doesn't exist
     if (!exactMatch && debouncedQuery.length >= 3) {
-      accountResults.unshift({
-        id: `create-new-${debouncedQuery}`,
-        type: "create-new",
-        username: debouncedQuery,
-      });
+      const shouldShowCreateNew =
+        !validationState ||
+        (validationState.status !== "validating" &&
+          validationState.status !== "idle" &&
+          !validationState.exists);
+
+      if (shouldShowCreateNew) {
+        accountResults.unshift({
+          id: `create-new-${debouncedQuery}`,
+          type: "create-new",
+          username: debouncedQuery,
+        });
+      }
     }
 
     return accountResults;
-  }, [data, debouncedQuery, shouldSearch]);
+  }, [data, debouncedQuery, shouldSearch, validationState, isQueryChanging]);
 
   return {
     results,
-    isLoading: shouldSearch && isLoading,
+    isLoading: (shouldSearch && isLoading) || isQueryChanging,
     error: error as Error | undefined,
   };
 }
