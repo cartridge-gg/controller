@@ -37,10 +37,12 @@ export function VerifiedSessionSummary({
   game,
   contracts,
   messages,
+  hideSpendingLimit,
 }: {
   game: string;
   contracts?: SessionContracts;
   messages?: SessionMessages;
+  hideSpendingLimit?: boolean;
 }) {
   const { isEditable } = useCreateSession();
   // Separate contracts based on methods and type
@@ -102,7 +104,7 @@ export function VerifiedSessionSummary({
       </div>
 
       {/* Render token contracts after */}
-      {tokenContracts && tokenContracts.length > 0 && (
+      {!hideSpendingLimit && tokenContracts && tokenContracts.length > 0 && (
         <>
           <TokenConsent />
           <Card>

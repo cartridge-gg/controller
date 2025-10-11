@@ -23,8 +23,11 @@ import {
 import { useCallback, useMemo, useState } from "react";
 // import { OcclusionDetector } from "../OcclusionDetector";
 import { useUpgrade } from "../provider/upgrade";
+import { SpendingLimitPage } from "./SpendingLimitPage";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
+
+type Step = "contracts" | "spending-limit";
 
 export function CreateSession({
   policies,
@@ -60,6 +63,7 @@ const CreateSessionLayout = ({
   onConnect: () => void;
   onSkip?: () => void;
 }) => {
+  const [step, setStep] = useState<Step>("contracts");
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
@@ -98,6 +102,14 @@ const CreateSessionLayout = ({
     [controller, policies, expiresAt],
   );
 
+  // Check if there are any token contracts with approve methods
+  const hasTokenContracts = useMemo(() => {
+    if (!policies?.contracts) return false;
+    return Object.values(policies.contracts).some((contract) =>
+      contract.methods.some((method) => method.entrypoint === "approve"),
+    );
+  }, [policies]);
+
   if (!upgrade.isSynced) {
     return <></>;
   }
@@ -106,13 +118,34 @@ const CreateSessionLayout = ({
     return <Upgrade />;
   }
 
+  // Show spending limit page
+  if (step === "spending-limit") {
+    return (
+      <SpendingLimitPage
+        policies={policies}
+        isConnecting={isConnecting}
+        error={error}
+        onBack={() => {
+          setStep("contracts");
+          setError(undefined);
+        }}
+        onConnect={async () => {
+          await createSession({
+            toggleOff: false,
+            successCallback: onConnect,
+          });
+        }}
+      />
+    );
+  }
+
+  // Show contracts page
   return (
     <>
       {/* <OcclusionDetector /> */}
       <>
         <HeaderInner
           className="pb-0"
-          // title={!isUpdate ? "Create Session" : "Update Session"}
           title={
             theme.name.toLowerCase() === "cartridge"
               ? "Connect Controller"
@@ -140,11 +173,13 @@ const CreateSessionLayout = ({
               game={theme.name}
               contracts={policies.contracts}
               messages={policies.messages}
+              hideSpendingLimit={true}
             />
           ) : (
             <UnverifiedSessionSummary
               contracts={policies.contracts}
               messages={policies.messages}
+              hideSpendingLimit={true}
             />
           )}
         </LayoutContent>
@@ -196,16 +231,24 @@ const CreateSessionLayout = ({
               disabled={isConnecting || (!policies?.verified && !isConsent)}
               isLoading={isConnecting}
               onClick={async () => {
-                await createSession({
-                  toggleOff: false,
-                  successCallback: onConnect,
-                });
+                // If there are token contracts, go to spending limit page
+                if (hasTokenContracts) {
+                  setStep("spending-limit");
+                } else {
+                  // Otherwise, directly create session
+                  await createSession({
+                    toggleOff: false,
+                    successCallback: onConnect,
+                  });
+                }
               }}
             >
               {isUpdate
                 ? "update session"
                 : policies.verified
-                  ? "play"
+                  ? hasTokenContracts
+                    ? "continue"
+                    : "play"
                   : "continue"}
             </Button>
           </div>
