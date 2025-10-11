@@ -21,8 +21,11 @@ import {
   SliderIcon,
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import { SpendingLimitPage } from "./SpendingLimitPage";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
+
+type Step = "contracts" | "spending-limit";
 
 export function CreateSession({
   policies,
@@ -58,6 +61,7 @@ const CreateSessionLayout = ({
   onConnect: () => void;
   onSkip?: () => void;
 }) => {
+  const [step, setStep] = useState<Step>("contracts");
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
@@ -95,6 +99,14 @@ const CreateSessionLayout = ({
     },
     [controller, policies, expiresAt],
   );
+
+  // Check if there are any token contracts with approve methods
+  const hasTokenContracts = useMemo(() => {
+    if (!policies?.contracts) return false;
+    return Object.values(policies.contracts).some((contract) =>
+      contract.methods.some((method) => method.entrypoint === "approve"),
+    );
+  }, [policies]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -136,6 +148,28 @@ const CreateSessionLayout = ({
     return () => document.removeEventListener("keydown", handleDocumentKeyDown);
   }, [handleKeyDown]);
 
+  // Show spending limit page
+  if (step === "spending-limit") {
+    return (
+      <SpendingLimitPage
+        policies={policies}
+        isConnecting={isConnecting}
+        error={error}
+        onBack={() => {
+          setStep("contracts");
+          setError(undefined);
+        }}
+        onConnect={async () => {
+          await createSession({
+            toggleOff: false,
+            successCallback: onConnect,
+          });
+        }}
+      />
+    );
+  }
+
+  // Show contracts page
   return (
     <>
       <HeaderInner
@@ -176,7 +210,7 @@ const CreateSessionLayout = ({
         {!policies?.verified && (
           <div
             className={cn(
-              "flex items-center p-2 mb-3 mt-3 gap-2 border border-solid-primary rounded-md cursor-pointer text-destructive-100 bg-background-100",
+              "flex items-center p-2 mt-3 gap-2 border border-solid-primary rounded-md cursor-pointer text-destructive-100 bg-background-100",
               isConsent ? "border-background-200" : "border-destructive-100",
             )}
             onClick={() => !isConnecting && setIsConsent(!isConsent)}
@@ -192,11 +226,7 @@ const CreateSessionLayout = ({
               size="sm"
               checked={isConsent}
               disabled={isConnecting}
-              onCheckedChange={() => setIsConsent(!isConsent)}
-              className="pointer-events-none !w-5 !h-5"
-              style={{
-                margin: "6px",
-              }}
+              className="px-8"
             />
             <h1 className="text-xs font-normal select-none">
               I agree to grant this application permission to execute the
@@ -221,22 +251,48 @@ const CreateSessionLayout = ({
           >
             Skip
           </Button>
+
+          <Button
+            className="flex-1"
+            disabled={isConnecting || (!policies?.verified && !isConsent)}
+            isLoading={isConnecting}
+            onClick={async () => {
+              // If there are token contracts, go to spending limit page
+              if (hasTokenContracts) {
+                setStep("spending-limit");
+              } else {
+                // Otherwise, directly create session
+                await createSession({
+                  toggleOff: false,
+                  successCallback: onConnect,
+                });
+              }
+            }}
+          />
           <Button
             ref={createButtonRef}
             className="flex-1"
             disabled={isConnecting || (!policies?.verified && !isConsent)}
             isLoading={isConnecting}
             onClick={async () => {
-              await createSession({
-                toggleOff: false,
-                successCallback: onConnect,
-              });
+              // If there are token contracts, go to spending limit page
+              if (hasTokenContracts) {
+                setStep("spending-limit");
+              } else {
+                // Otherwise, directly create session
+                await createSession({
+                  toggleOff: false,
+                  successCallback: onConnect,
+                });
+              }
             }}
           >
             {isUpdate
               ? "update session"
               : policies.verified
-                ? "play"
+                ? hasTokenContracts
+                  ? "continue"
+                  : "play"
                 : "continue"}
           </Button>
         </div>

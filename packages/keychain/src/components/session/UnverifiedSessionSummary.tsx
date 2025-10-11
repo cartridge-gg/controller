@@ -36,9 +36,11 @@ function formatAmount(amount: string | number): string {
 export function UnverifiedSessionSummary({
   contracts,
   messages,
+  hideSpendingLimit,
 }: {
   contracts?: SessionContracts;
   messages?: SessionMessages;
+  hideSpendingLimit?: boolean;
 }) {
   const { isEditable } = useCreateSession();
   const { tokenContracts, otherContracts } = useMemo(() => {
@@ -97,7 +99,7 @@ export function UnverifiedSessionSummary({
       </div>
 
       {/* Render token contracts after */}
-      {tokenContracts && tokenContracts.length > 0 && (
+      {!hideSpendingLimit && tokenContracts && tokenContracts.length > 0 && (
         <>
           <TokenConsent />
           <Card>
