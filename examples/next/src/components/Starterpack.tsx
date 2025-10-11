@@ -16,13 +16,13 @@ export const Starterpack = () => {
   const getDefaultStarterpackIds = () => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       return {
-        purchase: "sick-starterpack-mainnet",
-        claim: "claim-starterpack-mainnet",
+        purchase: "ls2-dungeon-ticket-mainnet",
+        claim: "pirate-nation-claim-mainnet",
       };
     }
     return {
-      purchase: "sick-starterpack-sepolia",
-      claim: "claim-starterpack-sepolia",
+      purchase: "ls2-dungeon-ticket-sepolia",
+      claim: "pirate-nation-claim-sepolia",
     };
   };
 
