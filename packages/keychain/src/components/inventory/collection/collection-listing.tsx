@@ -110,8 +110,8 @@ export function CollectionListing() {
 
   const image = useMemo(() => {
     if (!collection || !assets) return placeholder;
-    if (assets.length > 1) return collection.imageUrl || placeholder;
-    return assets[0].imageUrl || placeholder;
+    if (assets.length > 1) return collection.imageUrls[0] || placeholder;
+    return assets[0].imageUrls[0] || placeholder;
   }, [collection, assets]);
 
   const entrypoint: string | null = useMemo(() => {
@@ -141,7 +141,7 @@ export function CollectionListing() {
       };
     const tokens = assets.map((asset) => ({
       name: asset.name,
-      image: asset.imageUrl || collection.imageUrl || placeholder,
+      image: asset.imageUrls[0] || collection.imageUrls[0] || placeholder,
       collection: collection.name,
     }));
     const currency = {

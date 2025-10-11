@@ -49,7 +49,7 @@ export function Collections() {
             <CollectibleCard
               icon={theme?.icon || undefined}
               title={collection.name}
-              image={collection.imageUrl || placeholder}
+              images={[...collection.imageUrls, placeholder]}
               totalCount={collection.totalCount}
               listingCount={listingCount}
               selectable={false}
@@ -77,7 +77,7 @@ export function Collections() {
           >
             <CollectibleCard
               title={collectible.name}
-              image={collectible.imageUrl || placeholder}
+              images={[...collectible.imageUrls, placeholder]}
               totalCount={collectible.totalCount}
               listingCount={listingCount}
               selectable={false}

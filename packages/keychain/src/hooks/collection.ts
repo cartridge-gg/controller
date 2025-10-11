@@ -14,7 +14,7 @@ export type Collection = {
   address: string;
   name: string;
   type: string;
-  imageUrl: string;
+  imageUrls: string[];
   totalCount: number;
 };
 
@@ -22,7 +22,7 @@ export type Asset = {
   tokenId: string;
   name: string;
   description?: string;
-  imageUrl: string;
+  imageUrls: string[];
   attributes: Record<string, unknown>[];
   owner: string;
 };
@@ -175,11 +175,14 @@ export function useCollection({
         console.error(error);
       }
       if (!metadata.name || !metadata.image) return;
+      const contractImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/image`;
+      const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+      const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
       const newCollection: Collection = {
         address: contractAddress,
         name: asset.name || metadata.name,
         type: TYPE,
-        imageUrl: metadata.image,
+        imageUrls: [contractImage, newImage, oldImage, metadata.image],
         totalCount: ids.length,
       };
       setCollection(newCollection);
@@ -205,12 +208,13 @@ export function useCollection({
               BigInt(b.balance) !== 0n,
           )?.account_address;
           if (!owner) return; // Skip assets without owners
-          const image = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+          const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+          const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
           newAssets[`${contractAddress}-${asset.token_id || ""}`] = {
             tokenId: asset.token_id || "",
             name: metadata?.name || asset.name,
             description: metadata?.description,
-            imageUrl: image || metadata?.image || "",
+            imageUrls: [newImage, oldImage, metadata?.image || ""],
             attributes: Array.isArray(metadata?.attributes)
               ? metadata.attributes
               : [],
@@ -318,12 +322,13 @@ export function useCollections(): UseCollectionsResponse {
           } catch (error) {
             console.error(error);
           }
-          const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
+          const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
+          const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
           collections[contractAddress] = {
             address: contractAddress,
             name: asset.name || metadata?.name || "",
             type: TYPE,
-            imageUrl: image || metadata?.image || "",
+            imageUrls: [newImage, oldImage, metadata?.image || ""],
             totalCount: tokenIds.length,
           };
         }),

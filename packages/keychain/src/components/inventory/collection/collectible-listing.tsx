@@ -126,7 +126,7 @@ export function CollectibleListing() {
 
   const image = useMemo(() => {
     if (!collectible || !asset) return placeholder;
-    return asset.imageUrl || placeholder;
+    return asset.imageUrls[0] || placeholder;
   }, [collectible, asset]);
 
   const entrypoint: string | null = useMemo(() => {
@@ -157,7 +157,7 @@ export function CollectibleListing() {
     const tokens = Array.from({ length: split ? quantity : 1 }, () => ({
       name:
         !split && quantity > 1 ? `${quantity} ${asset.name}(ડ)` : asset.name,
-      image: asset.imageUrl || collectible.imageUrl || placeholder,
+      image: asset.imageUrls[0] || collectible.imageUrls[0] || placeholder,
       collection: collectible.name,
     }));
     const currency = {

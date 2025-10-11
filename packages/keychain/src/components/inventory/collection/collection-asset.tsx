@@ -213,7 +213,11 @@ export function CollectionAsset() {
               style={{ scrollbarWidth: "none" }}
             >
               <CollectiblePreview
-                image={asset.imageUrl || collection.imageUrl || placeholder}
+                images={[
+                  ...asset.imageUrls,
+                  ...collection.imageUrls,
+                  placeholder,
+                ]}
                 size="lg"
                 className="w-full self-center mt-0.5"
               />
@@ -260,7 +264,9 @@ export function CollectionAsset() {
                         category={props.category}
                         amount={props.amount}
                         collectibleImage={
-                          asset.imageUrl || collection.imageUrl || placeholder
+                          asset.imageUrls[0] ||
+                          collection.imageUrls[0] ||
+                          placeholder
                         }
                         collectibleName={title || collection.name}
                         currencyImage={props.currencyImage}
