@@ -9,6 +9,7 @@ import {
 import { AccountSearchResult } from "@/hooks/account";
 import { VariantProps, cva } from "class-variance-authority";
 import React, { HTMLAttributes } from "react";
+import { HighlightedText } from "./text-highlight";
 
 const accountSearchResultVariants = cva(
   "h-12 px-3 py-1 flex gap-1 items-center select-none cursor-pointer transition-colors duration-150 relative",
@@ -33,12 +34,13 @@ export interface AccountSearchResultItemProps
     VariantProps<typeof accountSearchResultVariants> {
   result: AccountSearchResult;
   isSelected?: boolean;
+  query?: string;
 }
 
 export const AccountSearchResultItem = React.forwardRef<
   HTMLDivElement,
   AccountSearchResultItemProps
->(({ result, isSelected, className, ...props }, ref) => {
+>(({ result, isSelected, query = "", className, ...props }, ref) => {
   const selectedVariant = isSelected
     ? "selected"
     : result.type === "create-new"
@@ -69,8 +71,13 @@ export const AccountSearchResultItem = React.forwardRef<
         />
 
         {/* Username text */}
-        <p className="flex-1 justify-center text-foreground-100 text-sm font-normal leading-tight">
-          {result.username}
+        <p className="flex-1 justify-center text-sm font-normal leading-tight">
+          <HighlightedText
+            text={result.username}
+            query={query}
+            highlightClassName="text-foreground-100"
+            defaultClassName="text-foreground-100"
+          />
         </p>
 
         {/* Create New tag with seedling icon */}
@@ -115,7 +122,14 @@ export const AccountSearchResultItem = React.forwardRef<
         className="!w-8 !h-8"
       />
       <div className="flex flex-row items-center justify-between gap-1 flex-1">
-        <p className="text-sm font-normal px-0.5 truncate">{result.username}</p>
+        <p className="text-sm font-normal px-0.5 truncate">
+          <HighlightedText
+            text={result.username}
+            query={query}
+            highlightClassName="text-foreground-100"
+            defaultClassName="text-foreground-300"
+          />
+        </p>
 
         {result.points ? (
           <div className="flex items-start gap-2.5 p-2">

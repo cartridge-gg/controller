@@ -94,3 +94,45 @@ export const MultipleResult: Story = {
     );
   },
 };
+
+export const WithHighlighting: Story = {
+  render: function WithHighlighting() {
+    const mockResults = [
+      {
+        id: "create-new-shin",
+        type: "create-new",
+        username: "shin",
+      },
+      {
+        id: "existing-shinto",
+        type: "existing",
+        username: "shinto",
+        points: 0,
+      },
+      {
+        id: "existing-shints",
+        type: "existing",
+        username: "shints",
+        points: 20800,
+      },
+      {
+        id: "existing-shinobi",
+        type: "existing",
+        username: "shinobi",
+        points: 20800,
+      },
+    ] satisfies Array<AccountSearchResult>;
+
+    return (
+      <div className="min-w-0 w-96 divide-y divide-spacer-100">
+        {mockResults.map((result) => (
+          <AccountSearchResultItem
+            key={result.id}
+            result={result}
+            query="shin"
+          />
+        ))}
+      </div>
+    );
+  },
+};
