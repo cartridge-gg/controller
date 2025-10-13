@@ -18,6 +18,7 @@ import {
   getTurnkeySuborg,
   getWallet,
   SocialProvider,
+  OIDC_INVALID_TOKEN_ERROR,
 } from "./turnkey_utils";
 
 export const Auth0SocialProviderName: Record<SocialProvider, string> = {
@@ -126,9 +127,9 @@ export class TurnkeyWallet {
             return connectResult;
           }
         } catch (error) {
-          // If we get "No oidcTokenString", the cached token is invalid
+          // If we get an invalid OIDC token, the cached token may be invalid
           // Force logout and continue with fresh authentication
-          if ((error as Error).message?.includes("No oidcTokenString")) {
+          if ((error as Error).message?.includes(OIDC_INVALID_TOKEN_ERROR)) {
             console.info(
               "[Turnkey] Cached Auth0 session invalid, forcing logout to obtain fresh token",
             );
@@ -260,10 +261,6 @@ export class TurnkeyWallet {
 
     const tokenClaims = await auth0Client.getIdTokenClaims();
     const oidcTokenString = await getAuth0OidcToken(tokenClaims, nonce);
-    if (!oidcTokenString) {
-      throw new Error("No oidcTokenString");
-    }
-    console.info("[Turnkey] Successfully obtained OIDC token with tknonce");
 
     const subOrganizationId = this.username
       ? await getOrCreateTurnkeySuborg(
