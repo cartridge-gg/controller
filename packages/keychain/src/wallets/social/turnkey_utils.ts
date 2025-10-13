@@ -118,7 +118,7 @@ export const getAuth0OidcToken = async (
     );
   }
 
-  return tokenClaims.__raw;
+  return oidcTokenString;
 };
 
 interface DecodedIdToken extends JwtPayload {
