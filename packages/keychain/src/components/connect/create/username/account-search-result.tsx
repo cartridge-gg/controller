@@ -131,22 +131,20 @@ export const AccountSearchResultItem = React.forwardRef<
           />
         </p>
 
-        {result.points ? (
-          <div className="flex items-start gap-2.5 p-2">
-            <div className="flex items-center justify-center gap-0.5 p-1 bg-background-300 rounded text-foreground-100">
-              <SparklesIcon
-                variant="solid"
-                size="xs"
-                className="text-foreground-100"
-              />
-              <div className="flex items-center gap-1">
-                <p className="text-xs font-medium text-foreground-100">
-                  {result.points?.toLocaleString() || 0}
-                </p>
-              </div>
+        <div className="flex items-start gap-2.5 p-2">
+          <div className="flex items-center justify-center gap-0.5 p-1 bg-background-300 rounded text-foreground-100">
+            <SparklesIcon
+              variant="solid"
+              size="xs"
+              className="text-foreground-100"
+            />
+            <div className="flex items-center gap-1">
+              <p className="text-xs font-medium text-foreground-100">
+                {result.points?.toLocaleString() || 0}
+              </p>
             </div>
           </div>
-        ) : null}
+        </div>
       </div>
     </div>
   );
