@@ -115,14 +115,24 @@ export class TurnkeyWallet {
       // If it's a login, it means we are already authed via the cookies
       if (!isSignup && (await auth0Client.isAuthenticated())) {
         // Skip the authentication to the social provider and get directly the turnkey accounts
-        const connectResult = await this.finishConnect({
-          nonce,
-        });
-        // If no account is specified this is a typical login flow, continue with the redirect
-        // If an account is specified and we're connected to the right account, return now
-        // otherwise continue the flow
-        if (this.account && this.account === connectResult.account) {
-          return connectResult;
+        try {
+          const connectResult = await this.finishConnect({
+            nonce,
+          });
+          // If no account is specified this is a typical login flow, continue with the redirect
+          // If an account is specified and we're connected to the right account, return now
+          // otherwise continue the flow
+          if (this.account && this.account === connectResult.account) {
+            return connectResult;
+          }
+        } catch (error) {
+          // If we get "No oidcTokenString", the cached token is invalid
+          // Force logout and continue with fresh authentication
+          if ((error as Error).message?.includes("No oidcTokenString")) {
+            await auth0Client.logout({ openUrl: false });
+          } else {
+            throw error;
+          }
         }
       }
 
