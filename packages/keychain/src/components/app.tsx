@@ -48,6 +48,7 @@ import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
 import { Collections } from "./purchasenew/starterpack/collections";
+import { PurchaseProvider } from "@/context";
 
 export function App() {
   const { navigate } = useNavigation();
@@ -67,7 +68,14 @@ export function App() {
         <Route path="success" element={<Success />} />
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />
-        <Route path="/purchase" element={<Outlet />}>
+        <Route
+          path="/purchase"
+          element={
+            <PurchaseProvider>
+              <Outlet />
+            </PurchaseProvider>
+          }
+        >
           <Route
             path="credits"
             element={<Purchase type={PurchaseType.Credits} />}
