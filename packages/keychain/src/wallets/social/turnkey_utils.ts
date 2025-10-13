@@ -94,6 +94,13 @@ export const getAuth0OidcToken = async (
 
   const decodedToken = jwtDecode<DecodedIdToken>(oidcTokenString);
   if (!decodedToken.tknonce) {
+    console.warn(
+      "[Auth0] Token missing tknonce parameter. Token may be from cached session.",
+      {
+        hasNonce: !!decodedToken.nonce,
+        tokenIssued: decodedToken.iat,
+      },
+    );
     return undefined;
   }
 

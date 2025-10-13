@@ -129,6 +129,9 @@ export class TurnkeyWallet {
           // If we get "No oidcTokenString", the cached token is invalid
           // Force logout and continue with fresh authentication
           if ((error as Error).message?.includes("No oidcTokenString")) {
+            console.info(
+              "[Turnkey] Cached Auth0 session invalid, forcing logout to obtain fresh token",
+            );
             await auth0Client.logout({ openUrl: false });
           } else {
             throw error;
@@ -260,6 +263,7 @@ export class TurnkeyWallet {
     if (!oidcTokenString) {
       throw new Error("No oidcTokenString");
     }
+    console.info("[Turnkey] Successfully obtained OIDC token with tknonce");
 
     const subOrganizationId = this.username
       ? await getOrCreateTurnkeySuborg(
