@@ -247,9 +247,6 @@ export class TurnkeyWallet {
 
     const tokenClaims = await auth0Client.getIdTokenClaims();
     const oidcTokenString = await getAuth0OidcToken(tokenClaims, nonce);
-    if (!oidcTokenString) {
-      throw new Error("No oidcTokenString");
-    }
 
     const subOrganizationId = this.username
       ? await getOrCreateTurnkeySuborg(

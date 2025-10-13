@@ -82,7 +82,7 @@ const WALLET_CONFIG = {
 export const getAuth0OidcToken = async (
   tokenClaims: IdToken | undefined,
   expectedNonce: string,
-) => {
+): Promise<string> => {
   if (!tokenClaims) {
     throw new Error("Not authenticated with Auth0 yet");
   }
@@ -94,7 +94,7 @@ export const getAuth0OidcToken = async (
 
   const decodedToken = jwtDecode<DecodedIdToken>(oidcTokenString);
   if (!decodedToken.tknonce) {
-    return undefined;
+    throw new Error("Provider nonce not found in decoded token");
   }
 
   if (decodedToken.tknonce !== expectedNonce) {
@@ -102,7 +102,8 @@ export const getAuth0OidcToken = async (
       `Nonce mismatch: expected ${expectedNonce}, got ${decodedToken.tknonce}`,
     );
   }
-  return tokenClaims.__raw;
+
+  return oidcTokenString;
 };
 
 interface DecodedIdToken extends JwtPayload {
