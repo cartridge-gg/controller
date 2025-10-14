@@ -12,7 +12,7 @@ import React, { HTMLAttributes } from "react";
 import { HighlightedText } from "./text-highlight";
 
 const accountSearchResultVariants = cva(
-  "h-12 px-3 py-1 flex gap-1 items-center select-none cursor-pointer transition-colors duration-150 relative",
+  "h-12 px-3 py-2 flex gap-1 items-center select-none cursor-pointer transition-colors duration-150 relative group",
   {
     variants: {
       variant: {
@@ -52,7 +52,7 @@ export const AccountSearchResultItem = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "h-12 px-3 py-1 flex items-center gap-1.5 select-none cursor-pointer transition-colors duration-150",
+          "h-12 px-3 py-2 flex items-center gap-1.5 select-none cursor-pointer transition-colors duration-150 group",
           isSelected
             ? "bg-background-400"
             : "bg-background-200 hover:bg-background-300",
@@ -81,8 +81,8 @@ export const AccountSearchResultItem = React.forwardRef<
         </p>
 
         {/* Create New tag with seedling icon */}
-        <div className="flex items-start gap-2.5 p-2">
-          <div className="p-1 bg-background-300 rounded inline-flex justify-center items-center gap-0.5">
+        <div className="flex items-start gap-2.5 p-1">
+          <div className="p-1 bg-background-300 group-hover:bg-background-400 rounded inline-flex justify-center items-center gap-0.5">
             <div className="flex justify-start items-center gap-0.5">
               <SeedlingIcon
                 variant="solid"
@@ -131,8 +131,8 @@ export const AccountSearchResultItem = React.forwardRef<
           />
         </p>
 
-        <div className="flex items-start gap-2.5 p-2">
-          <div className="flex items-center justify-center gap-0.5 p-1 bg-background-300 rounded text-foreground-100">
+        <div className="flex items-start gap-2.5 p-1">
+          <div className="flex items-center justify-center gap-0.5 p-1 bg-background-300 group-hover:bg-background-400 rounded text-foreground-100">
             <SparklesIcon
               variant="solid"
               size="xs"
