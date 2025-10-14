@@ -206,6 +206,7 @@ export const AccountSearchDropdown = React.forwardRef<
                 <AccountSearchResultItem
                   key={result.id}
                   result={result}
+                  query={query}
                   isSelected={selectedIndex === index}
                   onClick={() => handleSelect(result)}
                   onMouseEnter={() => onSelectedIndexChange?.(index)}
