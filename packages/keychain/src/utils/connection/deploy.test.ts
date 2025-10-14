@@ -29,16 +29,12 @@ describe("deploy utils", () => {
       const account = "0x123456789";
       const url = createDeployUrl(account);
 
-      expect(url).toMatch(/^\/deploy\?data=/);
+      expect(url).toMatch(/^\/deploy\?/);
 
-      // Decode and verify the data
-      const dataParam = url.split("?data=")[1];
-      const decoded = JSON.parse(decodeURIComponent(dataParam));
-
-      expect(decoded).toEqual({
-        id: "test-id",
-        account,
-      });
+      // Extract and verify the params
+      const searchParams = new URLSearchParams(url.split("?")[1]);
+      expect(searchParams.get("id")).toBe("test-id");
+      expect(searchParams.get("account")).toBe(account);
     });
 
     it("should create deploy URL with callbacks", () => {
@@ -59,7 +55,7 @@ describe("deploy utils", () => {
         onCancel: mockOnCancel,
       });
 
-      expect(url).toMatch(/^\/deploy\?data=/);
+      expect(url).toMatch(/^\/deploy\?/);
     });
 
     it("should wrap resolve callback to handle type casting", () => {
@@ -90,20 +86,24 @@ describe("deploy utils", () => {
 
   describe("parseDeployParams", () => {
     it("should parse valid deploy params", () => {
-      const params = {
-        id: "test-id",
-        account: "0x123456789",
-      };
+      const searchParams = new URLSearchParams();
+      searchParams.set("id", "test-id");
+      searchParams.set("account", "0x123456789");
 
-      const paramString = encodeURIComponent(JSON.stringify(params));
-      const result = parseDeployParams(paramString);
+      const result = parseDeployParams(searchParams);
 
       expect(result).toBeTruthy();
-      expect(result?.params).toEqual(params);
+      expect(result?.params).toEqual({
+        id: "test-id",
+        account: "0x123456789",
+      });
     });
 
-    it("should return null for invalid JSON", () => {
-      const result = parseDeployParams("invalid-json");
+    it("should return null for missing id", () => {
+      const searchParams = new URLSearchParams();
+      searchParams.set("account", "0x123456789");
+
+      const result = parseDeployParams(searchParams);
 
       expect(result).toBeNull();
     });
@@ -112,11 +112,6 @@ describe("deploy utils", () => {
       const mockResolve = vi.fn();
       const mockReject = vi.fn();
       const mockOnCancel = vi.fn();
-
-      const params = {
-        id: "test-id",
-        account: "0x123456789",
-      };
 
       // Store callbacks first
       storeCallbacks("test-id", {
@@ -132,8 +127,11 @@ describe("deploy utils", () => {
         onCancel: mockOnCancel,
       });
 
-      const paramString = encodeURIComponent(JSON.stringify(params));
-      const result = parseDeployParams(paramString);
+      const searchParams = new URLSearchParams();
+      searchParams.set("id", "test-id");
+      searchParams.set("account", "0x123456789");
+
+      const result = parseDeployParams(searchParams);
 
       expect(result).toBeTruthy();
       expect(result?.resolve).toBeDefined();
@@ -156,13 +154,11 @@ describe("deploy utils", () => {
     it("should return undefined callbacks when no callbacks stored", () => {
       vi.mocked(callbacksModule.getCallbacks).mockReturnValue(undefined);
 
-      const params = {
-        id: "test-id",
-        account: "0x123456789",
-      };
+      const searchParams = new URLSearchParams();
+      searchParams.set("id", "test-id");
+      searchParams.set("account", "0x123456789");
 
-      const paramString = encodeURIComponent(JSON.stringify(params));
-      const result = parseDeployParams(paramString);
+      const result = parseDeployParams(searchParams);
 
       expect(result?.resolve).toBeUndefined();
       expect(result?.reject).toBeUndefined();
@@ -170,16 +166,12 @@ describe("deploy utils", () => {
     });
 
     it("should handle params without id", () => {
-      const params = {
-        account: "0x123456789",
-      };
+      const searchParams = new URLSearchParams();
+      searchParams.set("account", "0x123456789");
 
-      const paramString = encodeURIComponent(JSON.stringify(params));
-      const result = parseDeployParams(paramString);
+      const result = parseDeployParams(searchParams);
 
-      expect(result?.resolve).toBeUndefined();
-      expect(result?.reject).toBeUndefined();
-      expect(result?.onCancel).toBeUndefined();
+      expect(result).toBeNull();
     });
   });
 
@@ -205,7 +197,7 @@ describe("deploy utils", () => {
       const result = await deploy("0x123456789");
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/deploy\?data=/),
+        expect.stringMatching(/^\/deploy\?/),
         { replace: true },
       );
 
@@ -239,7 +231,7 @@ describe("deploy utils", () => {
       const result = await deploy("0x123456789");
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/deploy\?data=/),
+        expect.stringMatching(/^\/deploy\?/),
         { replace: true },
       );
 
@@ -283,17 +275,17 @@ describe("deploy utils", () => {
         resolve: mockResolve,
       });
 
-      expect(url).toMatch(/^\/deploy\?data=/);
+      expect(url).toMatch(/^\/deploy\?/);
 
-      // Extract data param and parse it
-      const dataParam = url.split("?data=")[1];
+      // Extract search params from URL
+      const searchParams = new URLSearchParams(url.split("?")[1]);
 
       // Mock getCallbacks for parsing
       vi.mocked(callbacksModule.getCallbacks).mockReturnValue({
         resolve: mockResolve,
       });
 
-      const parsed = parseDeployParams(dataParam);
+      const parsed = parseDeployParams(searchParams);
 
       expect(parsed).toBeTruthy();
       expect(parsed?.params.account).toEqual(account);
@@ -318,14 +310,15 @@ describe("deploy utils", () => {
         onCancel: mockOnCancel,
       });
 
-      const dataParam = url.split("?data=")[1];
+      // Extract search params from URL
+      const searchParams = new URLSearchParams(url.split("?")[1]);
 
       vi.mocked(callbacksModule.getCallbacks).mockReturnValue({
         resolve: mockResolve,
         onCancel: mockOnCancel,
       });
 
-      const parsed = parseDeployParams(dataParam);
+      const parsed = parseDeployParams(searchParams);
 
       // Simulate user cancelling
       parsed?.onCancel?.();

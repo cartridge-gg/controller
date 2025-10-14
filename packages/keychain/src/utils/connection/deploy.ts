@@ -13,6 +13,19 @@ type DeployCallback = {
   onCancel?: () => void;
 };
 
+function isDeployResult(
+  value: unknown,
+): value is { hash: string } | ConnectError {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
+  return (
+    ("hash" in obj && typeof obj.hash === "string") ||
+    (typeof obj.code === "string" && typeof obj.message === "string")
+  );
+}
+
 export function createDeployUrl(
   account: string,
   options: DeployCallback = {},
@@ -31,33 +44,41 @@ export function createDeployUrl(
     });
   }
 
-  const params: DeployParams = {
-    id,
-    account,
-  };
-
-  return `/deploy?data=${encodeURIComponent(JSON.stringify(params))}`;
+  return `/deploy?id=${encodeURIComponent(id)}&account=${encodeURIComponent(account)}`;
 }
 
-export function parseDeployParams(
-  paramString: string,
-): (DeployCallback & { params: DeployParams }) | null {
+export function parseDeployParams(searchParams: URLSearchParams): {
+  params: DeployParams;
+  resolve?: (result: unknown) => void;
+  reject?: (reason?: unknown) => void;
+  onCancel?: () => void;
+} | null {
   try {
-    const params = JSON.parse(decodeURIComponent(paramString)) as DeployParams;
+    const id = searchParams.get("id");
+    const account = searchParams.get("account");
 
-    const callbacks = params.id
-      ? (getCallbacks(params.id) as DeployCallback | undefined)
-      : undefined;
+    if (!id || !account) {
+      console.error("Missing required parameters");
+      return null;
+    }
 
-    const resolve = callbacks?.resolve
-      ? (value: { hash: string } | ConnectError) => {
-          callbacks.resolve?.(value);
-        }
-      : undefined;
+    const callbacks = getCallbacks(id) as DeployCallback | undefined;
 
     const reject = callbacks?.reject
       ? (reason?: unknown) => {
           callbacks.reject?.(reason);
+        }
+      : undefined;
+
+    const resolve = callbacks?.resolve
+      ? (value: unknown) => {
+          if (!isDeployResult(value)) {
+            const error = new Error("Invalid deploy result type");
+            console.error(error.message, value);
+            reject?.(error);
+            return;
+          }
+          callbacks.resolve?.(value);
         }
       : undefined;
 
@@ -68,7 +89,7 @@ export function parseDeployParams(
       : undefined;
 
     return {
-      params,
+      params: { id, account },
       resolve,
       reject,
       onCancel,

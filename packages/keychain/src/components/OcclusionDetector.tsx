@@ -2,7 +2,7 @@ import { useConnection } from "@/hooks/connection";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 export function OcclusionDetector() {
-  const { context } = useConnection();
+  const { parent } = useConnection();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOccluded, setIsOccluded] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -25,7 +25,7 @@ export function OcclusionDetector() {
           (change as any).isVisible = true;
         }
 
-        if (context) {
+        if (parent) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if (change.isIntersecting && !(change as any).isVisible) {
             setIsOccluded(true);
@@ -39,7 +39,7 @@ export function OcclusionDetector() {
 
       timeoutRef.current = timeout;
     },
-    [context],
+    [parent],
   );
 
   useEffect(() => {

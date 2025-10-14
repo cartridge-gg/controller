@@ -1,5 +1,5 @@
 import { AsyncMethodReturns, connectToChild } from "@cartridge/penpal";
-import { ControllerOptions, Modal } from "../types";
+import { Modal } from "../types";
 
 export type IFrameOptions<CallSender> = Omit<
   ConstructorParameters<typeof IFrame>[0],
@@ -20,11 +20,10 @@ export class IFrame<CallSender extends {}> implements Modal {
   constructor({
     id,
     url,
-    preset,
     onClose,
     onConnect,
     methods = {},
-  }: Pick<ControllerOptions, "preset"> & {
+  }: {
     id: string;
     url: URL;
     onClose?: () => void;
@@ -33,10 +32,6 @@ export class IFrame<CallSender extends {}> implements Modal {
   }) {
     if (typeof document === "undefined" || typeof window === "undefined") {
       return;
-    }
-
-    if (preset) {
-      url.searchParams.set("preset", preset);
     }
 
     this.url = url;
