@@ -82,7 +82,12 @@ export const AccountSearchResultItem = React.forwardRef<
 
         {/* Create New tag with seedling icon */}
         <div className="flex items-start gap-2.5 p-1">
-          <div className="p-1 bg-background-300 group-hover:bg-background-400 rounded inline-flex justify-center items-center gap-0.5">
+          <div
+            className={cn(
+              "p-1 bg-background-300 rounded inline-flex justify-center items-center gap-0.5",
+              !isSelected && "group-hover:bg-background-400 ",
+            )}
+          >
             <div className="flex justify-start items-center gap-0.5">
               <SeedlingIcon
                 variant="solid"
@@ -132,7 +137,12 @@ export const AccountSearchResultItem = React.forwardRef<
         </p>
 
         <div className="flex items-start gap-2.5 p-1">
-          <div className="flex items-center justify-center gap-0.5 p-1 bg-background-300 group-hover:bg-background-400 rounded text-foreground-100">
+          <div
+            className={cn(
+              "flex items-center justify-center gap-0.5 p-1 bg-background-300 rounded text-foreground-100",
+              !isSelected && "group-hover:bg-background-400 ",
+            )}
+          >
             <SparklesIcon
               variant="solid"
               size="xs"
