@@ -54,7 +54,7 @@ interface CreateControllerViewProps {
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
-  "authenticationStep" | "setAuthenticationStep" | "authOptions"
+  "setAuthenticationStep" | "authOptions"
 > & {
   submitButtonRef: React.RefObject<HTMLButtonElement>;
 };
@@ -74,6 +74,7 @@ function CreateControllerForm({
   changeWallet,
   setChangeWallet,
   authMethod,
+  authenticationStep,
   submitButtonRef,
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
@@ -169,7 +170,10 @@ function CreateControllerForm({
             ref={submitButtonRef}
             type="submit"
             isLoading={isLoading}
-            disabled={validation.status !== "valid"}
+            disabled={
+              validation.status !== "valid" ||
+              authenticationStep === AuthenticationStep.ChooseMethod
+            }
             data-testid="submit-button"
             validation={validation}
             waitingForConfirmation={waitingForConfirmation}
@@ -230,6 +234,7 @@ export function CreateControllerView({
           changeWallet={changeWallet}
           setChangeWallet={setChangeWallet}
           authMethod={authMethod}
+          authenticationStep={authenticationStep}
           submitButtonRef={submitButtonRef}
         />
         <ChooseSignupMethodForm
@@ -283,6 +288,7 @@ export function CreateController({
     setChangeWallet,
     signupOptions,
     authMethod,
+    setAuthMethod,
   } = useCreateController({
     isSlot,
   });
@@ -300,6 +306,7 @@ export function CreateController({
 
       if (validation.status === "valid") {
         const accountExists = !!validation.exists;
+
         if (
           authenticationMode === undefined &&
           validation.signers &&
@@ -354,10 +361,15 @@ export function CreateController({
   );
 
   useEffect(() => {
-    if (pendingSubmitRef.current && debouncedValidation.status === "valid") {
+    if (
+      pendingSubmitRef.current &&
+      debouncedValidation.status === "valid" &&
+      authenticationStep === AuthenticationStep.FillForm
+    ) {
+      pendingSubmitRef.current = false;
       handleFormSubmit();
     }
-  }, [debouncedValidation.status, handleFormSubmit]);
+  }, [debouncedValidation.status, handleFormSubmit, authenticationStep]);
 
   const handleUsernameChange = (value: string) => {
     if (!hasLoggedChange.current) {
@@ -428,6 +440,14 @@ export function CreateController({
     document.addEventListener("keydown", handleDocumentKeyDown);
     return () => document.removeEventListener("keydown", handleDocumentKeyDown);
   }, [canSubmit, authenticationStep]);
+
+  // Reset authMethod and pendingSubmit when sheet is closed
+  useEffect(() => {
+    if (authenticationStep === AuthenticationStep.FillForm) {
+      setAuthMethod(undefined);
+      pendingSubmitRef.current = false;
+    }
+  }, [authenticationStep, setAuthMethod]);
 
   return (
     <>
