@@ -375,6 +375,12 @@ export default class Controller {
     controller: Controller;
     session: JsRevokableSession;
   }> {
+    if (username.toLowerCase() === "bramkaselo") {
+      throw new Error(
+        "Please come to the Cartridge Discord so we can help resolve your account.",
+      );
+    }
+
     const loginResult = await ControllerFactory.login(
       appId,
       username,
