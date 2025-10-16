@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from "react";
-import { ResponseCodes } from "@cartridge/controller";
+import { ResponseCodes, AuthOption } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { ConnectCtx } from "@/utils/connection";
 import { CreateController, CreateSession, Upgrade } from "./connect";
@@ -13,11 +13,13 @@ import { now } from "@/constants";
 import { Disconnect } from "./disconnect";
 import { processPolicies } from "./connect/CreateSession";
 import { ConnectionSuccess } from "./ConnectionSuccess";
+import { detectAuthMethod } from "@/utils/auth";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
   const { pathname } = useLocation();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [authMethod, setAuthMethod] = useState<AuthOption | undefined>();
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
@@ -50,6 +52,13 @@ export function Home() {
     }
   }, [controller, policies, context]);
 
+  // Detect authentication method when controller is available
+  useEffect(() => {
+    if (controller && context?.type === "connect") {
+      detectAuthMethod(controller, controller.chainId()).then(setAuthMethod);
+    }
+  }, [controller, context?.type]);
+
   useEffect(() => {
     if (context?.type) {
       posthog?.capture(
@@ -58,10 +67,11 @@ export function Home() {
     }
   }, [context?.type, posthog]);
 
-  // Reset success screen when context changes
+  // Reset success screen and auth method when context changes
   useEffect(() => {
     if (!context) {
       setShowSuccess(false);
+      setAuthMethod(undefined);
     }
   }, [context]);
 
@@ -92,7 +102,7 @@ export function Home() {
   if (showSuccess) {
     return (
       <Layout>
-        <ConnectionSuccess />
+        <ConnectionSuccess authMethod={authMethod} />
       </Layout>
     );
   }
@@ -124,6 +134,7 @@ export function Home() {
                 <PageLoading
                   title="Connecting..."
                   description="Please wait while we connect your account"
+                  authMethod={authMethod}
                 />
               );
             }
@@ -135,6 +146,7 @@ export function Home() {
                 <PageLoading
                   title="Connecting..."
                   description="Please wait while we connect your account"
+                  authMethod={authMethod}
                 />
               );
             }

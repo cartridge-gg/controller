@@ -47,3 +47,31 @@ export const ConnectionLoading: Story = {
     description: "Please wait while we connect your account",
   },
 };
+
+export const ConnectionLoadingWithPasskey: Story = {
+  args: {
+    title: "Connecting...",
+    authMethod: "webauthn",
+  },
+};
+
+export const ConnectionLoadingWithGoogle: Story = {
+  args: {
+    title: "Connecting...",
+    authMethod: "google",
+  },
+};
+
+export const ConnectionLoadingWithDiscord: Story = {
+  args: {
+    title: "Connecting...",
+    authMethod: "discord",
+  },
+};
+
+export const ConnectionLoadingWithWalletConnect: Story = {
+  args: {
+    title: "Connecting...",
+    authMethod: "walletconnect",
+  },
+};
