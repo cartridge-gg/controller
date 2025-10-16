@@ -40,3 +40,10 @@ export const WithReactElementDescription: Story = {
     ),
   },
 };
+
+export const ConnectionLoading: Story = {
+  args: {
+    title: "Connecting...",
+    description: "Please wait while we connect your account",
+  },
+};
