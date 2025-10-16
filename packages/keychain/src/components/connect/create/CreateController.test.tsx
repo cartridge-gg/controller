@@ -87,8 +87,15 @@ describe("CreateController", () => {
       setError: vi.fn(),
       handleSubmit: vi.fn().mockResolvedValue(undefined),
       authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep: vi.fn(),
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     mockUseUsernameValidation.mockReturnValue({
       status: "valid",
@@ -134,8 +141,14 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
@@ -149,8 +162,14 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.ChooseMethod,
       setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);
@@ -173,8 +192,14 @@ describe("CreateController", () => {
       handleSubmit: vi.fn(),
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep: vi.fn(),
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     renderComponent();
     const submitButton = screen.getByTestId("submit-button");
@@ -225,8 +250,14 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     renderWithProviders(<CreateController {...defaultProps} />);
     const input = screen.getByPlaceholderText("Username");
@@ -240,8 +271,14 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.ChooseMethod,
       setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     const passkeyButton = await screen.findByText("Passkey");
     fireEvent.click(passkeyButton);
