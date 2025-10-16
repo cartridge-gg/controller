@@ -1,5 +1,5 @@
-import { useEffect, useCallback } from "react";
-import { ResponseCodes } from "@cartridge/controller";
+import { useEffect, useCallback, useState } from "react";
+import { ResponseCodes, AuthOption } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { ConnectCtx } from "@/utils/connection";
 import { CreateController, CreateSession, Upgrade } from "./connect";
@@ -12,10 +12,14 @@ import { Authenticate } from "./authenticate";
 import { now } from "@/constants";
 import { Disconnect } from "./disconnect";
 import { processPolicies } from "./connect/CreateSession";
+import { ConnectionSuccess } from "./ConnectionSuccess";
+import { detectAuthMethod } from "@/utils/auth";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
   const { pathname } = useLocation();
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [authMethod, setAuthMethod] = useState<AuthOption | undefined>();
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
@@ -30,16 +34,30 @@ export function Home() {
 
       const processedPolicies = processPolicies(policies, false);
       await controller.createSession(expiresAt, processedPolicies);
-      (context as ConnectCtx).resolve({
-        code: ResponseCodes.SUCCESS,
-        address: controller.address(),
-      });
+
+      // Show success screen before resolving
+      setShowSuccess(true);
+
+      // Wait a moment to show the success screen, then resolve
+      setTimeout(() => {
+        (context as ConnectCtx).resolve({
+          code: ResponseCodes.SUCCESS,
+          address: controller.address(),
+        });
+      }, 1500);
     } catch (e) {
       console.error("Failed to create verified session:", e);
       // Fall back to showing the UI if auto-creation fails
       context?.reject?.(e);
     }
   }, [controller, policies, context]);
+
+  // Detect authentication method when controller is available
+  useEffect(() => {
+    if (controller && context?.type === "connect") {
+      detectAuthMethod(controller, controller.chainId()).then(setAuthMethod);
+    }
+  }, [controller, context?.type]);
 
   useEffect(() => {
     if (context?.type) {
@@ -48,6 +66,14 @@ export function Home() {
       );
     }
   }, [context?.type, posthog]);
+
+  // Reset success screen and auth method when context changes
+  useEffect(() => {
+    if (!context) {
+      setShowSuccess(false);
+      setAuthMethod(undefined);
+    }
+  }, [context]);
 
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {
@@ -72,6 +98,15 @@ export function Home() {
     return <Upgrade />;
   }
 
+  // Show success screen when connection is complete
+  if (showSuccess) {
+    return (
+      <Layout>
+        <ConnectionSuccess authMethod={authMethod} />
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       {(() => {
@@ -84,18 +119,36 @@ export function Home() {
                 Object.keys(policies.contracts).length === 0) &&
                 policies.messages?.length === 0)
             ) {
-              context.resolve({
-                code: ResponseCodes.SUCCESS,
-                address: controller!.address(),
-              });
+              // Show success screen before resolving
+              setShowSuccess(true);
 
-              return <></>;
+              // Wait a moment to show the success screen, then resolve
+              setTimeout(() => {
+                context.resolve({
+                  code: ResponseCodes.SUCCESS,
+                  address: controller!.address(),
+                });
+              }, 1500);
+
+              return (
+                <PageLoading
+                  title="Connecting..."
+                  description="Please wait while we connect your account"
+                  authMethod={authMethod}
+                />
+              );
             }
 
             // Bypass session approval screen for verified sessions
             if (policies?.verified) {
               createSessionForVerifiedPolicies();
-              return <></>;
+              return (
+                <PageLoading
+                  title="Connecting..."
+                  description="Please wait while we connect your account"
+                  authMethod={authMethod}
+                />
+              );
             }
 
             // TODO: show missing policies if mismatch
@@ -103,16 +156,28 @@ export function Home() {
               <CreateSession
                 policies={policies!}
                 onConnect={() => {
-                  context.resolve({
-                    code: ResponseCodes.SUCCESS,
-                    address: controller.address(),
-                  });
+                  // Show success screen before resolving
+                  setShowSuccess(true);
+
+                  // Wait a moment to show the success screen, then resolve
+                  setTimeout(() => {
+                    context.resolve({
+                      code: ResponseCodes.SUCCESS,
+                      address: controller.address(),
+                    });
+                  }, 1500);
                 }}
                 onSkip={() => {
-                  context.resolve({
-                    code: ResponseCodes.SUCCESS,
-                    address: controller.address(),
-                  });
+                  // Show success screen before resolving
+                  setShowSuccess(true);
+
+                  // Wait a moment to show the success screen, then resolve
+                  setTimeout(() => {
+                    context.resolve({
+                      code: ResponseCodes.SUCCESS,
+                      address: controller.address(),
+                    });
+                  }, 1500);
                 }}
               />
             );
