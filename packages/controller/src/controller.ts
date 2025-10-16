@@ -23,6 +23,7 @@ import {
   ProfileContextTypeVariant,
   ResponseCodes,
   StarterPack,
+  createUserRejectedError,
 } from "./types";
 import { parseChainId } from "./utils";
 
@@ -32,6 +33,7 @@ export default class ControllerProvider extends BaseProvider {
   private iframes: IFrames;
   private selectedChain: ChainId;
   private chains: Map<ChainId, Chain>;
+  private pendingConnectRejection?: (error: any) => void;
 
   isReady(): boolean {
     return !!this.keychain;
@@ -164,8 +166,11 @@ export default class ControllerProvider extends BaseProvider {
 
     this.iframes.keychain.open();
 
-    try {
-      let response = await this.keychain.connect(
+    return new Promise<WalletAccount | undefined>((resolve, reject) => {
+      // Track this pending connection for cancellation
+      this.pendingConnectRejection = reject;
+
+      this.keychain!.connect(
         // Policy precedence logic:
         // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
         // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
@@ -177,27 +182,38 @@ export default class ControllerProvider extends BaseProvider {
             : this.options.policies || {},
         this.rpcUrl(),
         this.options.signupOptions,
-      );
-      if (response.code !== ResponseCodes.SUCCESS) {
-        throw new Error(response.message);
-      }
+      )
+        .then((response) => {
+          // Clear the pending rejection handler
+          this.pendingConnectRejection = undefined;
 
-      response = response as ConnectReply;
-      this.account = new ControllerAccount(
-        this,
-        this.rpcUrl(),
-        response.address,
-        this.keychain,
-        this.options,
-        this.iframes.keychain,
-      );
+          if (response.code !== ResponseCodes.SUCCESS) {
+            this.iframes.keychain!.close();
+            reject(new Error(response.message));
+            return;
+          }
 
-      return this.account;
-    } catch (e) {
-      console.log(e);
-    } finally {
-      this.iframes.keychain.close();
-    }
+          const connectReply = response as ConnectReply;
+          this.account = new ControllerAccount(
+            this,
+            this.rpcUrl(),
+            connectReply.address,
+            this.keychain!,
+            this.options,
+            this.iframes.keychain!,
+          );
+
+          this.iframes.keychain!.close();
+          resolve(this.account);
+        })
+        .catch((error) => {
+          // Clear the pending rejection handler
+          this.pendingConnectRejection = undefined;
+          this.iframes.keychain!.close();
+          console.log(error);
+          reject(error);
+        });
+    });
   }
 
   async switchStarknetChain(chainId: string): Promise<boolean> {
@@ -443,6 +459,13 @@ export default class ControllerProvider extends BaseProvider {
     return new KeychainIFrame({
       ...this.options,
       onClose: this.keychain?.reset,
+      onCancel: () => {
+        // User cancelled by clicking outside - reject pending operations
+        if (this.pendingConnectRejection) {
+          this.pendingConnectRejection(createUserRejectedError());
+          this.pendingConnectRejection = undefined;
+        }
+      },
       onConnect: (keychain) => {
         this.keychain = keychain;
       },

@@ -6,6 +6,7 @@ import { IFrame, IFrameOptions } from "./base";
 type KeychainIframeOptions = IFrameOptions<Keychain> &
   KeychainOptions & {
     version?: string;
+    onCancel?: () => void;
   };
 
 export class KeychainIFrame extends IFrame<Keychain> {
