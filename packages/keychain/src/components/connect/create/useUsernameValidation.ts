@@ -57,7 +57,7 @@ export function useUsernameValidation(username: string) {
         setValidation({
           status: "invalid",
           error: new Error(
-            "Please come to the Cartridge Discord so we can help resolve your account.",
+            "Please come to the Cartridge Discord so we can help resolve your account: https://discord.com/invite/cartridge",
           ),
         });
         return;
