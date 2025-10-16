@@ -16,7 +16,7 @@ import {
 } from "@cartridge/ui";
 import { CreateAccount } from "./username";
 import InAppSpy from "inapp-spy";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
 import { ChangeWallet } from "../buttons/change-wallet";
 import { credentialToAuth } from "../types";
@@ -49,12 +49,15 @@ interface CreateControllerViewProps {
   setChangeWallet: (value: boolean) => void;
   authOptions: AuthOptions;
   authMethod: AuthOption | undefined;
+  submitButtonRef: React.RefObject<HTMLButtonElement>;
 }
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
   "authenticationStep" | "setAuthenticationStep" | "authOptions"
->;
+> & {
+  submitButtonRef: React.RefObject<HTMLButtonElement>;
+};
 
 function CreateControllerForm({
   theme,
@@ -71,6 +74,7 @@ function CreateControllerForm({
   changeWallet,
   setChangeWallet,
   authMethod,
+  submitButtonRef,
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
 
@@ -162,6 +166,7 @@ function CreateControllerForm({
           />
 
           <AuthButton
+            ref={submitButtonRef}
             type="submit"
             isLoading={isLoading}
             disabled={validation.status !== "valid"}
@@ -196,6 +201,7 @@ export function CreateControllerView({
   setChangeWallet,
   authOptions,
   authMethod,
+  submitButtonRef,
 }: CreateControllerViewProps) {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -224,6 +230,7 @@ export function CreateControllerView({
           changeWallet={changeWallet}
           setChangeWallet={setChangeWallet}
           authMethod={authMethod}
+          submitButtonRef={submitButtonRef}
         />
         <ChooseSignupMethodForm
           isLoading={isLoading}
@@ -247,6 +254,7 @@ export function CreateController({
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const [usernameField, setUsernameField] = useState({
     value: "",
@@ -385,6 +393,42 @@ export function CreateController({
     }
   };
 
+  // Handle keyboard shortcuts for Enter/Space to submit
+  const canSubmit = useMemo(() => {
+    return (
+      validation.status === "valid" &&
+      !isLoading &&
+      usernameField.value.trim() !== ""
+    );
+  }, [validation.status, isLoading, usernameField.value]);
+
+  useEffect(() => {
+    const handleDocumentKeyDown = (e: KeyboardEvent) => {
+      // Only handle if not in an input/textarea/contenteditable
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // Don't submit if in the ChooseMethod step
+      if (authenticationStep === AuthenticationStep.ChooseMethod) {
+        return;
+      }
+
+      if ((e.key === "Enter" || e.key === " ") && canSubmit) {
+        e.preventDefault();
+        submitButtonRef.current?.click();
+      }
+    };
+
+    document.addEventListener("keydown", handleDocumentKeyDown);
+    return () => document.removeEventListener("keydown", handleDocumentKeyDown);
+  }, [canSubmit, authenticationStep]);
+
   return (
     <>
       <CreateControllerView
@@ -406,6 +450,7 @@ export function CreateController({
         setChangeWallet={setChangeWallet}
         authOptions={signupOptions}
         authMethod={authMethod}
+        submitButtonRef={submitButtonRef}
       />
       {overlay}
     </>
