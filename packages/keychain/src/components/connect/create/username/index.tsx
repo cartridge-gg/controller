@@ -137,7 +137,7 @@ export const CreateAccount = React.forwardRef<
         setSelectedIndex(undefined);
         onDropdownOpenChange?.(false);
         onAccountSelect?.(result);
-        
+
         // Add a small delay to prevent immediate form submission
         // This ensures the dropdown state is updated before any form handlers fire
         setTimeout(() => {
