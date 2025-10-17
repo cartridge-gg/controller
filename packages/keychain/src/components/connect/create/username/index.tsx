@@ -137,6 +137,12 @@ export const CreateAccount = React.forwardRef<
         setSelectedIndex(undefined);
         onDropdownOpenChange?.(false);
         onAccountSelect?.(result);
+        
+        // Add a small delay to prevent immediate form submission
+        // This ensures the dropdown state is updated before any form handlers fire
+        setTimeout(() => {
+          // This timeout ensures the selection is processed before any other events
+        }, 50);
       },
       [onUsernameChange, onAccountSelect, onDropdownOpenChange],
     );
@@ -152,14 +158,21 @@ export const CreateAccount = React.forwardRef<
           return;
         }
 
-        // If autocomplete is shown and dropdown is open, let dropdown handle arrow keys and enter
+        // If autocomplete is shown and dropdown is open, let dropdown handle arrow keys
         if (
           showAutocomplete &&
           isDropdownOpen &&
-          (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter")
+          (e.key === "ArrowDown" || e.key === "ArrowUp")
         ) {
-          // Dropdown will handle these keys - prevent default to avoid form submission
-          e.preventDefault();
+          // Let dropdown handle arrow keys - don't prevent default or stop propagation
+          // The dropdown's global keydown handler will take care of navigation
+          return;
+        }
+
+        // If dropdown is open and Enter is pressed, let dropdown handle it
+        if (showAutocomplete && isDropdownOpen && e.key === "Enter") {
+          // Let dropdown handle Enter key - don't prevent default or stop propagation
+          // The dropdown's global keydown handler will take care of selection
           return;
         }
 

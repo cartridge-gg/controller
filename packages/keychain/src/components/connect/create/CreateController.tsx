@@ -309,6 +309,11 @@ export function CreateController({
 
   const handleFormSubmit = useCallback(
     (authenticationMode?: AuthOption, password?: string) => {
+      // Don't submit if dropdown is open - let dropdown handle the Enter key
+      if (isDropdownOpen) {
+        return;
+      }
+
       if (!usernameField.value) {
         return;
       }
@@ -364,6 +369,7 @@ export function CreateController({
       }
     },
     [
+      isDropdownOpen,
       handleSubmit,
       usernameField.value,
       validation.exists,
@@ -414,6 +420,10 @@ export function CreateController({
     if (validation.status !== "valid") return;
 
     if (e.key === "Enter") {
+      // Don't submit if dropdown is open - let dropdown handle the Enter key
+      if (isDropdownOpen) {
+        return;
+      }
       e.preventDefault();
       handleFormSubmit();
     }
@@ -445,6 +455,11 @@ export function CreateController({
         return;
       }
 
+      // Don't submit if dropdown is open or submit is temporarily disabled
+      if (isDropdownOpen) {
+        return;
+      }
+
       if ((e.key === "Enter" || e.key === " ") && canSubmit) {
         e.preventDefault();
         submitButtonRef.current?.click();
@@ -453,7 +468,7 @@ export function CreateController({
 
     document.addEventListener("keydown", handleDocumentKeyDown);
     return () => document.removeEventListener("keydown", handleDocumentKeyDown);
-  }, [canSubmit, authenticationStep]);
+  }, [canSubmit, authenticationStep, isDropdownOpen]);
 
   // Reset authMethod and pendingSubmit when sheet is closed
   useEffect(() => {
