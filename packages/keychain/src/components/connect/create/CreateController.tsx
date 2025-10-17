@@ -50,14 +50,14 @@ interface CreateControllerViewProps {
   authOptions: AuthOptions;
   authMethod: AuthOption | undefined;
   submitButtonRef: React.RefObject<HTMLButtonElement>;
+  isDropdownOpen: boolean;
+  onDropdownOpenChange: (isOpen: boolean) => void;
 }
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
   "setAuthenticationStep" | "authOptions"
-> & {
-  submitButtonRef: React.RefObject<HTMLButtonElement>;
-};
+>;
 
 function CreateControllerForm({
   theme,
@@ -76,6 +76,8 @@ function CreateControllerForm({
   authMethod,
   authenticationStep,
   submitButtonRef,
+  isDropdownOpen,
+  onDropdownOpenChange,
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
 
@@ -119,6 +121,10 @@ function CreateControllerForm({
         style={{ scrollbarWidth: "none" }}
         onSubmit={(e) => {
           e.preventDefault();
+          // Don't submit if dropdown is open
+          if (isDropdownOpen) {
+            return;
+          }
           onSubmit();
         }}
       >
@@ -136,6 +142,7 @@ function CreateControllerForm({
             selectedAccount={selectedAccount}
             onAccountSelect={handleAccountSelect}
             onSelectedUsernameRemove={handleRemovePill}
+            onDropdownOpenChange={onDropdownOpenChange}
           />
           <Legal />
         </LayoutContent>
@@ -172,7 +179,8 @@ function CreateControllerForm({
             isLoading={isLoading}
             disabled={
               validation.status !== "valid" ||
-              authenticationStep === AuthenticationStep.ChooseMethod
+              authenticationStep === AuthenticationStep.ChooseMethod ||
+              isDropdownOpen
             }
             data-testid="submit-button"
             validation={validation}
@@ -206,6 +214,8 @@ export function CreateControllerView({
   authOptions,
   authMethod,
   submitButtonRef,
+  isDropdownOpen,
+  onDropdownOpenChange,
 }: CreateControllerViewProps) {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -236,6 +246,8 @@ export function CreateControllerView({
           authMethod={authMethod}
           authenticationStep={authenticationStep}
           submitButtonRef={submitButtonRef}
+          isDropdownOpen={isDropdownOpen}
+          onDropdownOpenChange={onDropdownOpenChange}
         />
         <ChooseSignupMethodForm
           isLoading={isLoading}
@@ -265,6 +277,8 @@ export function CreateController({
     value: "",
     error: undefined,
   });
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Debounce validation quickly to reduce latency
   const { debouncedValue: validationUsername } = useDebounce(
@@ -471,6 +485,8 @@ export function CreateController({
         authOptions={signupOptions}
         authMethod={authMethod}
         submitButtonRef={submitButtonRef}
+        isDropdownOpen={isDropdownOpen}
+        onDropdownOpenChange={setIsDropdownOpen}
       />
       {overlay}
     </>

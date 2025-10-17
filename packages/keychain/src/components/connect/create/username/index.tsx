@@ -30,6 +30,7 @@ type CreateAccountProps = {
   onKeyDown: (e: React.KeyboardEvent) => void;
   onAccountSelect?: (result: AccountSearchResult) => void;
   onSelectedUsernameRemove?: () => void; // For removing pill
+  onDropdownOpenChange?: (isOpen: boolean) => void; // Notify parent of dropdown state
   // Mock data props for Storybook
   mockResults?: AccountSearchResult[];
   mockIsLoading?: boolean;
@@ -55,6 +56,7 @@ export const CreateAccount = React.forwardRef<
       onKeyDown,
       onAccountSelect,
       onSelectedUsernameRemove,
+      onDropdownOpenChange,
       mockResults,
       mockIsLoading,
       mockError,
@@ -97,39 +99,46 @@ export const CreateAccount = React.forwardRef<
       if (showAutocomplete) {
         const shouldOpen = usernameField.value.length > 0 || hasMockResults;
         setIsDropdownOpen(shouldOpen);
+        onDropdownOpenChange?.(shouldOpen);
       }
     }, [
       onUsernameFocus,
       showAutocomplete,
       usernameField.value,
       hasMockResults,
+      onDropdownOpenChange,
     ]);
 
-    const handleBlur = React.useCallback((e: React.FocusEvent) => {
-      // Only close if focus is not moving to the dropdown
-      const relatedTarget = e.relatedTarget as HTMLElement;
-      if (
-        relatedTarget &&
-        relatedTarget.closest("[data-radix-popover-content]")
-      ) {
-        return;
-      }
+    const handleBlur = React.useCallback(
+      (e: React.FocusEvent) => {
+        // Only close if focus is not moving to the dropdown
+        const relatedTarget = e.relatedTarget as HTMLElement;
+        if (
+          relatedTarget &&
+          relatedTarget.closest("[data-radix-popover-content]")
+        ) {
+          return;
+        }
 
-      // Small delay to allow for dropdown item clicks before closing
-      setTimeout(() => {
-        setIsDropdownOpen(false);
-        setSelectedIndex(undefined);
-      }, 150);
-    }, []);
+        // Small delay to allow for dropdown item clicks before closing
+        setTimeout(() => {
+          setIsDropdownOpen(false);
+          setSelectedIndex(undefined);
+          onDropdownOpenChange?.(false);
+        }, 150);
+      },
+      [onDropdownOpenChange],
+    );
 
     const handleAccountSelect = React.useCallback(
       (result: AccountSearchResult) => {
         onUsernameChange(result.username);
         setIsDropdownOpen(false);
         setSelectedIndex(undefined);
+        onDropdownOpenChange?.(false);
         onAccountSelect?.(result);
       },
-      [onUsernameChange, onAccountSelect],
+      [onUsernameChange, onAccountSelect, onDropdownOpenChange],
     );
 
     const handleKeyDown = React.useCallback(
@@ -139,6 +148,7 @@ export const CreateAccount = React.forwardRef<
           e.preventDefault();
           setIsDropdownOpen(false);
           setSelectedIndex(undefined);
+          onDropdownOpenChange?.(false);
           return;
         }
 
@@ -148,14 +158,15 @@ export const CreateAccount = React.forwardRef<
           isDropdownOpen &&
           (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter")
         ) {
-          // Dropdown will handle these keys
+          // Dropdown will handle these keys - prevent default to avoid form submission
+          e.preventDefault();
           return;
         }
 
         // Otherwise, pass to parent handler
         onKeyDown(e);
       },
-      [onKeyDown, showAutocomplete, isDropdownOpen],
+      [onKeyDown, showAutocomplete, isDropdownOpen, onDropdownOpenChange],
     );
 
     const handleInputChange = React.useCallback(
@@ -173,10 +184,11 @@ export const CreateAccount = React.forwardRef<
             );
             setIsDropdownOpen(shouldOpen);
             setSelectedIndex(undefined);
+            onDropdownOpenChange?.(shouldOpen);
           });
         }
       },
-      [onUsernameChange, showAutocomplete, mockResults],
+      [onUsernameChange, showAutocomplete, mockResults, onDropdownOpenChange],
     );
 
     // Render pill mode when selectedAccount is provided - simple pill design
@@ -252,6 +264,7 @@ export const CreateAccount = React.forwardRef<
                   if (showAutocomplete) {
                     setIsDropdownOpen(false);
                     setSelectedIndex(undefined);
+                    onDropdownOpenChange?.(false);
                   }
                 }}
               />
@@ -304,6 +317,7 @@ export const CreateAccount = React.forwardRef<
               if (showAutocomplete) {
                 setIsDropdownOpen(false);
                 setSelectedIndex(undefined);
+                onDropdownOpenChange?.(false);
               }
             }}
           />
