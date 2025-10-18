@@ -190,40 +190,38 @@ export function ChooseSignupMethodForm({
           <SheetTitle className="text-lg text-start font-semibold">
             {validation.exists ? "Login" : "Choose your method"}
           </SheetTitle>
-          {options.map((option, index) => {
-            const isWebauthn = option === "webauthn";
-            const isHighlighted = highlightedIndex === index;
+          <div className="flex flex-col gap-3">
+            {options.map((option, index) => {
+              const isWebauthn = option === "webauthn";
+              const isHighlighted = highlightedIndex === index;
 
-            return (
-              <div
-                key={option}
-                className={
-                  isWebauthn
-                    ? "border-b border-background-125 pb-4"
-                    : index === 0 && !options.includes("webauthn")
-                      ? ""
-                      : "mt-3"
-                }
-              >
-                <SignupButton
-                  ref={(el) => {
-                    buttonRefs.current[index] = el;
-                  }}
-                  authMethod={option}
-                  className={isWebauthn ? "justify-center" : "justify-start"}
-                  onClick={(e) => handleSelectedOption(e, option)}
-                  disabled={isLoading && selectedAuth !== option}
-                  isLoading={isLoading && selectedAuth === option}
-                  data-highlighted={isHighlighted}
-                  style={
-                    isHighlighted && !isLoading
-                      ? { outline: "2px solid rgba(255, 255, 255, 0.3)" }
-                      : undefined
+              return (
+                <div
+                  key={option}
+                  className={
+                    isWebauthn ? "border-b border-background-125 pb-4" : ""
                   }
-                />
-              </div>
-            );
-          })}
+                >
+                  <SignupButton
+                    ref={(el) => {
+                      buttonRefs.current[index] = el;
+                    }}
+                    authMethod={option}
+                    className={isWebauthn ? "justify-center" : "justify-start"}
+                    onClick={(e) => handleSelectedOption(e, option)}
+                    disabled={isLoading && selectedAuth !== option}
+                    isLoading={isLoading && selectedAuth === option}
+                    data-highlighted={isHighlighted}
+                    style={
+                      isHighlighted && !isLoading
+                        ? { outline: "2px solid rgba(255, 255, 255, 0.3)" }
+                        : undefined
+                    }
+                  />
+                </div>
+              );
+            })}
+          </div>
         </>
       )}
     </SheetContent>
