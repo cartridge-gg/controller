@@ -11,6 +11,7 @@ interface ChooseSignupMethodProps {
   validation: ReturnType<typeof useUsernameValidation>;
   onSubmit: (authenticationMode?: AuthOption, password?: string) => void;
   authOptions: AuthOption[];
+  isOpen?: boolean;
 }
 
 export function ChooseSignupMethodForm({
@@ -18,6 +19,7 @@ export function ChooseSignupMethodForm({
   validation,
   onSubmit,
   authOptions,
+  isOpen = true,
 }: ChooseSignupMethodProps) {
   const [selectedAuth, setSelectedAuth] = useState<AuthOption | undefined>(
     undefined,
@@ -81,7 +83,8 @@ export function ChooseSignupMethodForm({
   // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (showPasswordInput || isLoading) return;
+      // Only handle keyboard events when the sheet is actually open
+      if (!isOpen || showPasswordInput || isLoading) return;
 
       switch (e.key) {
         case "ArrowDown":
@@ -123,7 +126,7 @@ export function ChooseSignupMethodForm({
           break;
       }
     },
-    [showPasswordInput, isLoading, options, highlightedIndex, onSubmit],
+    [isOpen, showPasswordInput, isLoading, options, highlightedIndex, onSubmit],
   );
 
   useEffect(() => {

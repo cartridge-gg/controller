@@ -254,6 +254,7 @@ export function CreateControllerView({
           validation={validation}
           onSubmit={onSubmit}
           authOptions={authOptions}
+          isOpen={authenticationStep === AuthenticationStep.ChooseMethod}
         />
       </Sheet>
     </LayoutContainer>
@@ -309,6 +310,7 @@ export function CreateController({
 
   const handleFormSubmit = useCallback(
     (authenticationMode?: AuthOption, password?: string) => {
+      console.log(authenticationMode);
       // Don't submit if dropdown is open - let dropdown handle the Enter key
       if (isDropdownOpen) {
         return;
@@ -462,13 +464,21 @@ export function CreateController({
 
       if ((e.key === "Enter" || e.key === " ") && canSubmit) {
         e.preventDefault();
+        console.log("trigger here");
         submitButtonRef.current?.click();
+        handleFormSubmit();
       }
     };
 
     document.addEventListener("keydown", handleDocumentKeyDown);
     return () => document.removeEventListener("keydown", handleDocumentKeyDown);
-  }, [canSubmit, authenticationStep, isDropdownOpen]);
+  }, [
+    canSubmit,
+    authenticationStep,
+    isDropdownOpen,
+    setAuthMethod,
+    handleFormSubmit,
+  ]);
 
   // Reset authMethod and pendingSubmit when sheet is closed
   useEffect(() => {
