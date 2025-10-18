@@ -690,5 +690,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     setChangeWallet,
     signupOptions,
     authMethod,
+    setAuthMethod,
   };
 }

@@ -30,6 +30,7 @@ type CreateAccountProps = {
   onKeyDown: (e: React.KeyboardEvent) => void;
   onAccountSelect?: (result: AccountSearchResult) => void;
   onSelectedUsernameRemove?: () => void; // For removing pill
+  onDropdownOpenChange?: (isOpen: boolean) => void; // Notify parent of dropdown state
   // Mock data props for Storybook
   mockResults?: AccountSearchResult[];
   mockIsLoading?: boolean;
@@ -55,6 +56,7 @@ export const CreateAccount = React.forwardRef<
       onKeyDown,
       onAccountSelect,
       onSelectedUsernameRemove,
+      onDropdownOpenChange,
       mockResults,
       mockIsLoading,
       mockError,
@@ -97,39 +99,52 @@ export const CreateAccount = React.forwardRef<
       if (showAutocomplete) {
         const shouldOpen = usernameField.value.length > 0 || hasMockResults;
         setIsDropdownOpen(shouldOpen);
+        onDropdownOpenChange?.(shouldOpen);
       }
     }, [
       onUsernameFocus,
       showAutocomplete,
       usernameField.value,
       hasMockResults,
+      onDropdownOpenChange,
     ]);
 
-    const handleBlur = React.useCallback((e: React.FocusEvent) => {
-      // Only close if focus is not moving to the dropdown
-      const relatedTarget = e.relatedTarget as HTMLElement;
-      if (
-        relatedTarget &&
-        relatedTarget.closest("[data-radix-popover-content]")
-      ) {
-        return;
-      }
+    const handleBlur = React.useCallback(
+      (e: React.FocusEvent) => {
+        // Only close if focus is not moving to the dropdown
+        const relatedTarget = e.relatedTarget as HTMLElement;
+        if (
+          relatedTarget &&
+          relatedTarget.closest("[data-radix-popover-content]")
+        ) {
+          return;
+        }
 
-      // Small delay to allow for dropdown item clicks before closing
-      setTimeout(() => {
-        setIsDropdownOpen(false);
-        setSelectedIndex(undefined);
-      }, 150);
-    }, []);
+        // Small delay to allow for dropdown item clicks before closing
+        setTimeout(() => {
+          setIsDropdownOpen(false);
+          setSelectedIndex(undefined);
+          onDropdownOpenChange?.(false);
+        }, 150);
+      },
+      [onDropdownOpenChange],
+    );
 
     const handleAccountSelect = React.useCallback(
       (result: AccountSearchResult) => {
         onUsernameChange(result.username);
         setIsDropdownOpen(false);
         setSelectedIndex(undefined);
+        onDropdownOpenChange?.(false);
         onAccountSelect?.(result);
+
+        // Add a small delay to prevent immediate form submission
+        // This ensures the dropdown state is updated before any form handlers fire
+        setTimeout(() => {
+          // This timeout ensures the selection is processed before any other events
+        }, 50);
       },
-      [onUsernameChange, onAccountSelect],
+      [onUsernameChange, onAccountSelect, onDropdownOpenChange],
     );
 
     const handleKeyDown = React.useCallback(
@@ -139,23 +154,32 @@ export const CreateAccount = React.forwardRef<
           e.preventDefault();
           setIsDropdownOpen(false);
           setSelectedIndex(undefined);
+          onDropdownOpenChange?.(false);
           return;
         }
 
-        // If autocomplete is shown and dropdown is open, let dropdown handle arrow keys and enter
+        // If autocomplete is shown and dropdown is open, let dropdown handle arrow keys
         if (
           showAutocomplete &&
           isDropdownOpen &&
-          (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter")
+          (e.key === "ArrowDown" || e.key === "ArrowUp")
         ) {
-          // Dropdown will handle these keys
+          // Let dropdown handle arrow keys - don't prevent default or stop propagation
+          // The dropdown's global keydown handler will take care of navigation
+          return;
+        }
+
+        // If dropdown is open and Enter is pressed, let dropdown handle it
+        if (showAutocomplete && isDropdownOpen && e.key === "Enter") {
+          // Let dropdown handle Enter key - don't prevent default or stop propagation
+          // The dropdown's global keydown handler will take care of selection
           return;
         }
 
         // Otherwise, pass to parent handler
         onKeyDown(e);
       },
-      [onKeyDown, showAutocomplete, isDropdownOpen],
+      [onKeyDown, showAutocomplete, isDropdownOpen, onDropdownOpenChange],
     );
 
     const handleInputChange = React.useCallback(
@@ -173,10 +197,11 @@ export const CreateAccount = React.forwardRef<
             );
             setIsDropdownOpen(shouldOpen);
             setSelectedIndex(undefined);
+            onDropdownOpenChange?.(shouldOpen);
           });
         }
       },
-      [onUsernameChange, showAutocomplete, mockResults],
+      [onUsernameChange, showAutocomplete, mockResults, onDropdownOpenChange],
     );
 
     // Render pill mode when selectedAccount is provided - simple pill design
@@ -252,6 +277,7 @@ export const CreateAccount = React.forwardRef<
                   if (showAutocomplete) {
                     setIsDropdownOpen(false);
                     setSelectedIndex(undefined);
+                    onDropdownOpenChange?.(false);
                   }
                 }}
               />
@@ -304,6 +330,7 @@ export const CreateAccount = React.forwardRef<
               if (showAutocomplete) {
                 setIsDropdownOpen(false);
                 setSelectedIndex(undefined);
+                onDropdownOpenChange?.(false);
               }
             }}
           />
