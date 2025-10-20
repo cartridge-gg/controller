@@ -25,7 +25,6 @@ export const mockConnection = {
   closeModal: vi.fn(),
   openModal: vi.fn(),
   logout: vi.fn(),
-  context: {},
   origin: "https://test.com",
   rpcUrl: "https://test.rpc.com",
   chainId: "1",
@@ -34,7 +33,6 @@ export const mockConnection = {
   theme: {},
   error: null,
   setController: vi.fn(),
-  setContext: vi.fn(),
   openSettings: vi.fn(),
 };
 

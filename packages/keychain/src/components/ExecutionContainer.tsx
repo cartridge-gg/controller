@@ -64,6 +64,7 @@ export function ExecutionContainer({
   const estimateFees = useCallback(
     async (transactions: Call[]) => {
       if (!controller) {
+        setIsEstimating(false);
         return;
       }
 

@@ -1,5 +1,5 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
-import { Home } from "./home";
+import { AuthOptions } from "@cartridge/controller";
 import { Session } from "./session";
 import { Failure } from "./failure";
 import { Pending } from "./pending";
@@ -39,7 +39,7 @@ import { CollectibleListing } from "./inventory/collection/collectible-listing";
 import { CollectiblePurchase } from "./inventory/collection/collectible-purchase";
 import { Execute } from "./Execute";
 import { SignMessage } from "./SignMessage";
-import { DeployController } from "./DeployController";
+import { ConnectRoute } from "./ConnectRoute";
 import { Funding } from "./funding";
 import { Deposit } from "./funding/Deposit";
 import { useNavigation } from "@/context";
@@ -48,14 +48,77 @@ import { PurchaseType } from "@cartridge/ui/utils/api/cartridge";
 import { ChooseNetwork } from "./purchasenew/wallet/network";
 import { Claim } from "./purchasenew/claim/claim";
 import { Collections } from "./purchasenew/starterpack/collections";
+import { DeployController } from "./DeployController";
+import { useConnection } from "@/hooks/connection";
+import { CreateController, Upgrade } from "./connect";
+import { PageLoading } from "./Loading";
+import { useUpgrade } from "./provider/upgrade";
+import { Layout } from "@/components/layout";
+import { Authenticate } from "./authenticate";
+import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
+
+function Authentication() {
+  const { controller, isConfigLoading } = useConnection();
+  const { pathname, search } = useLocation();
+
+  const upgrade = useUpgrade();
+
+  // Popup flow authentication
+  if (pathname.startsWith("/authenticate")) {
+    return <Authenticate />;
+  }
+
+  if (pathname.startsWith("/disconnect")) {
+    return <Disconnect />;
+  }
+
+  // No controller, send to login
+  if (!controller) {
+    // Extract signers from URL if present (for connect flow)
+    const searchParams = new URLSearchParams(search);
+    const signersParam = searchParams.get("signers");
+    let signers: AuthOptions | undefined;
+
+    if (signersParam) {
+      try {
+        signers = JSON.parse(decodeURIComponent(signersParam)) as AuthOptions;
+      } catch (error) {
+        console.error("Failed to parse signers parameter:", error);
+        // Continue with undefined signers on parse error
+      }
+    }
+
+    return (
+      <CreateController
+        isSlot={pathname.startsWith("/slot")}
+        signers={signers}
+      />
+    );
+  }
+
+  if (!upgrade.isSynced || isConfigLoading) {
+    // This is likely never observable in a real application but just in case.
+    return <PageLoading />;
+  }
+
+  if (upgrade.available) {
+    return <Upgrade />;
+  }
+
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
+}
 
 export function App() {
   const { navigate } = useNavigation();
 
   return (
     <Routes>
-      <Route path="/" element={<Home />}>
+      <Route path="/" element={<Authentication />}>
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/recovery" element={<Recovery />} />
         <Route path="/settings/delegate" element={<Delegate />} />
@@ -141,6 +204,7 @@ export function App() {
         <Route path="/execute" element={<Execute />} />
         <Route path="/sign-message" element={<SignMessage />} />
         <Route path="/deploy" element={<DeployController />} />
+        <Route path="/connect" element={<ConnectRoute />} />
         <Route path="/feature/:name/:action" element={<FeatureToggle />} />
         <Route path="account/:username" element={<Account />}>
           <Route path="inventory" element={<Inventory />} />
