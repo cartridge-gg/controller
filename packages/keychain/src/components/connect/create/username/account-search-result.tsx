@@ -9,9 +9,10 @@ import {
 import { AccountSearchResult } from "@/hooks/account";
 import { VariantProps, cva } from "class-variance-authority";
 import React, { HTMLAttributes } from "react";
+import { HighlightedText } from "./text-highlight";
 
 const accountSearchResultVariants = cva(
-  "h-12 px-3 py-1 flex gap-1 items-center select-none cursor-pointer transition-colors duration-150 relative",
+  "h-12 px-3 py-2 flex gap-1 items-center select-none cursor-pointer transition-colors duration-150 relative group",
   {
     variants: {
       variant: {
@@ -33,12 +34,13 @@ export interface AccountSearchResultItemProps
     VariantProps<typeof accountSearchResultVariants> {
   result: AccountSearchResult;
   isSelected?: boolean;
+  query?: string;
 }
 
 export const AccountSearchResultItem = React.forwardRef<
   HTMLDivElement,
   AccountSearchResultItemProps
->(({ result, isSelected, className, ...props }, ref) => {
+>(({ result, isSelected, query = "", className, ...props }, ref) => {
   const selectedVariant = isSelected
     ? "selected"
     : result.type === "create-new"
@@ -50,7 +52,7 @@ export const AccountSearchResultItem = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "h-12 px-3 py-1 flex items-center gap-1.5 select-none cursor-pointer transition-colors duration-150",
+          "h-12 px-3 py-2 flex items-center gap-1.5 select-none cursor-pointer transition-colors duration-150 group",
           isSelected
             ? "bg-background-400"
             : "bg-background-200 hover:bg-background-300",
@@ -69,13 +71,23 @@ export const AccountSearchResultItem = React.forwardRef<
         />
 
         {/* Username text */}
-        <p className="flex-1 justify-center text-foreground-100 text-sm font-normal leading-tight">
-          {result.username}
+        <p className="flex-1 justify-center text-sm font-normal leading-tight">
+          <HighlightedText
+            text={result.username}
+            query={query}
+            highlightClassName="text-foreground-100"
+            defaultClassName="text-foreground-100"
+          />
         </p>
 
         {/* Create New tag with seedling icon */}
-        <div className="flex items-start gap-2.5 p-2">
-          <div className="p-1 bg-background-300 rounded inline-flex justify-center items-center gap-0.5">
+        <div className="flex items-start gap-2.5 p-1">
+          <div
+            className={cn(
+              "p-1 bg-background-300 rounded inline-flex justify-center items-center gap-0.5",
+              !isSelected && "group-hover:bg-background-400 ",
+            )}
+          >
             <div className="flex justify-start items-center gap-0.5">
               <SeedlingIcon
                 variant="solid"
@@ -115,24 +127,34 @@ export const AccountSearchResultItem = React.forwardRef<
         className="!w-8 !h-8"
       />
       <div className="flex flex-row items-center justify-between gap-1 flex-1">
-        <p className="text-sm font-normal px-0.5 truncate">{result.username}</p>
+        <p className="text-sm font-normal px-0.5 truncate">
+          <HighlightedText
+            text={result.username}
+            query={query}
+            highlightClassName="text-foreground-100"
+            defaultClassName="text-foreground-300"
+          />
+        </p>
 
-        {result.points ? (
-          <div className="flex items-start gap-2.5 p-2">
-            <div className="flex items-center justify-center gap-0.5 p-1 bg-background-300 rounded text-foreground-100">
-              <SparklesIcon
-                variant="solid"
-                size="xs"
-                className="text-foreground-100"
-              />
-              <div className="flex items-center gap-1">
-                <p className="text-xs font-medium text-foreground-100">
-                  {result.points?.toLocaleString() || 0}
-                </p>
-              </div>
+        <div className="flex items-start gap-2.5 p-1">
+          <div
+            className={cn(
+              "flex items-center justify-center gap-0.5 p-1 bg-background-300 rounded text-foreground-100",
+              !isSelected && "group-hover:bg-background-400 ",
+            )}
+          >
+            <SparklesIcon
+              variant="solid"
+              size="xs"
+              className="text-foreground-100"
+            />
+            <div className="flex items-center gap-1">
+              <p className="text-xs font-medium text-foreground-100">
+                {result.points?.toLocaleString() || 0}
+              </p>
             </div>
           </div>
-        ) : null}
+        </div>
       </div>
     </div>
   );

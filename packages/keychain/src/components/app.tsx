@@ -56,6 +56,7 @@ import { useUpgrade } from "./provider/upgrade";
 import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
 import { Disconnect } from "./disconnect";
+import { PurchaseProvider } from "@/context";
 
 function Authentication() {
   const { controller, isConfigLoading } = useConnection();
@@ -123,7 +124,14 @@ export function App() {
         <Route path="success" element={<Success />} />
         <Route path="failure" element={<Failure />} />
         <Route path="pending" element={<Pending />} />
-        <Route path="/purchase" element={<Outlet />}>
+        <Route
+          path="/purchase"
+          element={
+            <PurchaseProvider>
+              <Outlet />
+            </PurchaseProvider>
+          }
+        >
           <Route
             path="credits"
             element={<Purchase type={PurchaseType.Credits} />}
