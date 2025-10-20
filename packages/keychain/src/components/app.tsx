@@ -78,9 +78,16 @@ function Authentication() {
     // Extract signers from URL if present (for connect flow)
     const searchParams = new URLSearchParams(search);
     const signersParam = searchParams.get("signers");
-    const signers = signersParam
-      ? (JSON.parse(decodeURIComponent(signersParam)) as AuthOptions)
-      : undefined;
+    let signers: AuthOptions | undefined;
+
+    if (signersParam) {
+      try {
+        signers = JSON.parse(decodeURIComponent(signersParam)) as AuthOptions;
+      } catch (error) {
+        console.error("Failed to parse signers parameter:", error);
+        // Continue with undefined signers on parse error
+      }
+    }
 
     return (
       <CreateController
