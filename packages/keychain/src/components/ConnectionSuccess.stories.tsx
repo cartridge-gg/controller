@@ -43,3 +43,15 @@ export const WithMetaMask: Story = {
     authMethod: "metamask",
   },
 };
+
+export const WithPassword: Story = {
+  args: {
+    authMethod: "password",
+  },
+};
+
+export const WithBraavos: Story = {
+  args: {
+    authMethod: "braavos",
+  },
+};

@@ -100,11 +100,7 @@ export function Home() {
 
   // Show success screen when connection is complete
   if (showSuccess) {
-    return (
-      <Layout>
-        <ConnectionSuccess authMethod={authMethod} />
-      </Layout>
-    );
+    return <ConnectionSuccess authMethod={authMethod} />;
   }
 
   return (

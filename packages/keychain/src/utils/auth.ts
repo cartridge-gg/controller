@@ -1,6 +1,21 @@
 import { AuthOption } from "@cartridge/controller";
 import Controller from "./controller";
 import { fetchController } from "@/components/connect/create/utils";
+import { AUTH_METHODS_LABELS } from "./connection/constants";
+import {
+  ArgentColorIcon,
+  BraavosColorIcon,
+  DiscordColorIcon,
+  GoogleColorIcon,
+  IconProps,
+  LockIcon,
+  MetaMaskColorIcon,
+  PasskeyIcon,
+  PhantomColorIcon,
+  RabbyColorIcon,
+  WalletConnectColorIcon,
+} from "@cartridge/ui";
+import { ComponentType } from "react";
 
 /**
  * Gets a user-friendly display name for an authentication method
@@ -10,31 +25,43 @@ export function getAuthMethodDisplayName(authMethod?: AuthOption): string {
     return "your account";
   }
 
+  return AUTH_METHODS_LABELS[authMethod] || "your account";
+}
+
+/**
+ * Gets the icon component for an authentication method
+ */
+export function getAuthMethodIcon(
+  authMethod?: AuthOption,
+): ComponentType<IconProps> | undefined {
+  if (!authMethod) {
+    return undefined;
+  }
+
   switch (authMethod) {
     case "webauthn":
-      return "Passkey";
+      return PasskeyIcon;
     case "google":
-      return "Google";
+      return GoogleColorIcon;
     case "discord":
-      return "Discord";
+      return DiscordColorIcon;
     case "walletconnect":
-      return "WalletConnect";
-    case "password":
-      return "Password";
-    case "phantom":
-      return "Phantom";
+      return WalletConnectColorIcon;
     case "metamask":
-      return "MetaMask";
+      return MetaMaskColorIcon;
     case "rabby":
-      return "Rabby";
+      return RabbyColorIcon;
+    case "phantom":
+      return PhantomColorIcon;
     case "argent":
-      return "Argent";
+      return ArgentColorIcon;
     case "braavos":
-      return "Braavos";
+      return BraavosColorIcon;
+    case "password":
+      return LockIcon;
     case "base":
-      return "Base";
     default:
-      return "your account";
+      return undefined;
   }
 }
 
