@@ -71,8 +71,8 @@ describe("parseValidationError", () => {
       raw: "StarknetError { code: KnownErrorCode(ValidateFailure), message: 'Insufficient max L2Gas: max amount: 3829680, actual used: 24314560.' }",
       summary: "Insufficient max L2 gas amount",
       details: {
-        maxAmount: BigInt("3829680"),
-        actualUsed: BigInt("24314560"),
+        l2GasMaxAmount: BigInt("3829680"),
+        l2GasActualUsed: BigInt("24314560"),
       },
     });
   });
