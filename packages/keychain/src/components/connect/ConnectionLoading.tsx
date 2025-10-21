@@ -25,7 +25,7 @@ export function ConnectionLoading({
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={`${isNew ? "Sign Up" : "Log in"} with ${authDisplay}`}
+        title={`${isNew ? "Sign Up" : "Log In"} with ${authDisplay}`}
         icon={<Spinner />}
         hideUsername
         hideSettings

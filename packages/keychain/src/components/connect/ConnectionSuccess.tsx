@@ -8,16 +8,20 @@ import { AuthOption } from "@cartridge/controller";
 import { getAuthMethodDisplayName, getAuthMethodIcon } from "@/utils/auth";
 
 interface ConnectionSuccessProps {
+  isNew?: boolean;
   authMethod?: AuthOption;
 }
 
-export function ConnectionSuccess({ authMethod }: ConnectionSuccessProps) {
+export function ConnectionSuccess({
+  isNew,
+  authMethod,
+}: ConnectionSuccessProps) {
   const authDisplay = getAuthMethodDisplayName(authMethod);
 
   return (
     <LayoutContainer>
       <LayoutHeader
-        title={`Sign up with ${authDisplay}`}
+        title={`${isNew ? "Sign Up" : "Log In"} with ${authDisplay}`}
         icon={<CheckIcon />}
         hideUsername
         hideSettings
@@ -44,7 +48,9 @@ const SignerPendingCard = ({ authMethod }: ConnectionSuccessProps) => {
           Success!
         </p>
         <p className="text-foreground-400 text-center text-sm font-normal">
-          {`${authDisplay} ${authDisplay.toLowerCase() === "passkey" ? "Created" : "Connected"}`}
+          {authDisplay.toLowerCase() === "passkey"
+            ? "Authentication Complete"
+            : `${authDisplay} Connected`}
         </p>
       </div>
     </div>
