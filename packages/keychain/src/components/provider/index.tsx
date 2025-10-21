@@ -3,7 +3,6 @@ import { useConnectionValue } from "@/hooks/connection";
 import { WalletsProvider } from "@/hooks/wallets";
 import { ENDPOINT } from "@/utils/graphql";
 import { Auth0Provider, Auth0ProviderOptions } from "@auth0/auth0-react";
-import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { mainnet, sepolia } from "@starknet-react/chains";
 import {
   jsonRpcProvider,
@@ -22,6 +21,7 @@ import { FeatureProvider } from "@/hooks/features";
 import { ArcadeProvider as ProfileArcadeProvider } from "@/components/provider/arcade";
 import { DataProvider as ProfileDataProvider } from "@/components/provider/data";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
+import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { ErrorBoundary } from "../ErrorBoundary";
 
 export function Provider({ children }: PropsWithChildren) {

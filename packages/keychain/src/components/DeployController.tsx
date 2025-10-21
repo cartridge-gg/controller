@@ -26,12 +26,53 @@ import {
 import { ControllerErrorAlert, ErrorAlert } from "./ErrorAlert";
 import { Fees } from "./Fees";
 import { Funding } from "./funding";
+import { parseDeployParams } from "@/utils/connection/deploy";
+import { cleanupCallbacks } from "@/utils/connection/callbacks";
+import { ResponseCodes } from "@cartridge/controller";
+import {
+  useRouteParams,
+  useRouteCompletion,
+  useRouteCallbacks,
+} from "@/hooks/route";
 
-export function DeployController({
-  onClose,
+const CANCEL_RESPONSE = {
+  code: ResponseCodes.CANCELED,
+  message: "Canceled",
+};
+
+export function DeployController() {
+  const params = useRouteParams(parseDeployParams);
+  const handleCompletion = useRouteCompletion();
+  const { cancelWithoutClosing } = useRouteCallbacks(params, CANCEL_RESPONSE);
+
+  const handleCancel = useCallback(() => {
+    cancelWithoutClosing();
+    handleCompletion();
+  }, [cancelWithoutClosing, handleCompletion]);
+
+  if (!params) {
+    return null;
+  }
+
+  return (
+    <DeployControllerView
+      onCancel={handleCancel}
+      onComplete={(hash: string) => {
+        params.resolve?.({ hash });
+        cleanupCallbacks(params.params.id);
+        handleCompletion();
+      }}
+    />
+  );
+}
+
+export function DeployControllerView({
+  onCancel,
+  onComplete,
   ctrlError,
 }: {
-  onClose: () => void;
+  onCancel: () => void;
+  onComplete: (hash: string) => void;
   ctrlError?: ControllerError;
 }) {
   const { controller } = useConnection();
@@ -69,10 +110,13 @@ export function DeployController({
             TransactionFinalityStatus.ACCEPTED_ON_L2,
           ],
         })
-        .then(() => setAccountState("deployed"))
+        .then(() => {
+          setAccountState("deployed");
+          onComplete(deployHash);
+        })
         .catch((e) => setError(e));
     }
-  }, [deployHash, controller]);
+  }, [deployHash, controller, onComplete]);
 
   useEffect(() => {
     if (!feeEstimate || accountState != "fund" || !feeToken?.balance) return;
@@ -146,6 +190,9 @@ export function DeployController({
             <Button onClick={onDeploy} isLoading={isDeploying}>
               DEPLOY
             </Button>
+            <Button variant="secondary" onClick={onCancel}>
+              Cancel
+            </Button>
           </LayoutFooter>
         </>
       );
@@ -209,7 +256,7 @@ export function DeployController({
             ) : !deployHash && ctrlError ? (
               <ControllerErrorAlert error={ctrlError} />
             ) : null}
-            <Button onClick={onClose}>continue</Button>
+            <Button onClick={onCancel}>continue</Button>
           </LayoutFooter>
         </>
       );

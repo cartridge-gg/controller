@@ -34,8 +34,7 @@ import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
 import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
-import { useArcade } from "@/hooks/arcade";
-import { EditionModel, OrderModel } from "@cartridge/arcade";
+import { OrderModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { createExecuteUrl } from "@/utils/connection/execute";
 import { toast } from "sonner";
@@ -48,13 +47,12 @@ const OFFSET = 10;
 export function CollectibleAsset() {
   const account = useAccount();
   const address = account?.address || "";
-  const { chainId, project } = useConnection();
+  const { chainId } = useConnection();
   const explorer = useExplorer();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
-  const { editions } = useArcade();
   const { selfOrders, tokenOrders, provider } = useMarketplace();
   const [loading, setLoading] = useState(false);
   const { navigate } = useNavigation();
@@ -77,12 +75,6 @@ export function CollectibleAsset() {
     if (!main) return undefined;
     return main;
   }, [orders]);
-
-  const edition: EditionModel | undefined = useMemo(() => {
-    return Object.values(editions).find(
-      (edition) => edition.config.project === project,
-    );
-  }, [editions, project]);
 
   const { address: contractAddress, tokenId } = useParams();
   const {
@@ -210,7 +202,7 @@ export function CollectibleAsset() {
         <>
           <LayoutContent className="pb-0 overflow-hidden">
             <CollectionHeader
-              image={edition?.properties.icon || theme?.icon}
+              image={theme?.icon}
               title={title}
               subtitle={collectible.name}
               count={Number(asset.amount)}
@@ -225,7 +217,7 @@ export function CollectibleAsset() {
               style={{ scrollbarWidth: "none" }}
             >
               <CollectiblePreview
-                image={asset.imageUrl || placeholder}
+                images={[...asset.imageUrls, placeholder]}
                 size="lg"
                 className="w-full self-center"
               />
@@ -296,7 +288,9 @@ export function CollectibleAsset() {
                         timestamp={props.timestamp}
                         category={props.category}
                         collectibleImage={
-                          asset.imageUrl || collectible.imageUrl || placeholder
+                          asset.imageUrls[0] ||
+                          collectible.imageUrls[0] ||
+                          placeholder
                         }
                         collectibleName={title || collectible.name}
                         currencyImage={props.currencyImage}

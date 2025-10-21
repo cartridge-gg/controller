@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ArcadeContext } from "@/context/arcade";
 import { useParams } from "react-router-dom";
 import { cairo, getChecksumAddress } from "starknet";
@@ -42,8 +42,13 @@ export const useMarketplace = () => {
     listings,
     sales,
     book,
+    setInitializable,
   } = context;
   const [amount, setAmount] = useState<number>(0);
+
+  useEffect(() => {
+    setInitializable(true);
+  }, [setInitializable]);
 
   const getCollectionOrders = useCallback(
     (contractAddress: string) => {

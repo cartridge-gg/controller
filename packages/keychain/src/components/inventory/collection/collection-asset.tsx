@@ -28,8 +28,6 @@ import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
 import { useExplorer } from "@starknet-react/core";
 import { CardProps, useTraceabilities } from "@/hooks/traceabilities";
-import { useArcade } from "@/hooks/arcade";
-import { EditionModel } from "@cartridge/arcade";
 import { useUsername } from "@/hooks/username";
 import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
@@ -42,7 +40,7 @@ import { createExecuteUrl } from "@/utils/connection/execute";
 const OFFSET = 10;
 
 export function CollectionAsset() {
-  const { chainId, project } = useConnection();
+  const { chainId } = useConnection();
   const account = useAccount();
   const explorer = useExplorer();
   const address = account?.address || "";
@@ -50,15 +48,9 @@ export function CollectionAsset() {
   const { navigate } = useNavigation();
   const [cap, setCap] = useState(OFFSET);
   const theme = useControllerTheme();
-  const { editions } = useArcade();
   const { tokens } = useTokens();
   const { provider, selfOrders, order, setAmount } = useMarketplace();
   const [loading, setLoading] = useState(false);
-  const edition: EditionModel | undefined = useMemo(() => {
-    return Object.values(editions).find(
-      (edition) => edition.config.project === project,
-    );
-  }, [editions, project]);
 
   const { address: contractAddress, tokenId } = useParams();
   const {
@@ -206,7 +198,7 @@ export function CollectionAsset() {
             className={cn("overflow-hidden", (isListed || isOwner) && "pb-0")}
           >
             <CollectionHeader
-              image={edition?.properties.icon || theme?.icon}
+              image={theme?.icon}
               title={title}
               subtitle={collection.name}
               expiration={
@@ -221,7 +213,11 @@ export function CollectionAsset() {
               style={{ scrollbarWidth: "none" }}
             >
               <CollectiblePreview
-                image={asset.imageUrl || collection.imageUrl || placeholder}
+                images={[
+                  ...asset.imageUrls,
+                  ...collection.imageUrls,
+                  placeholder,
+                ]}
                 size="lg"
                 className="w-full self-center mt-0.5"
               />
@@ -268,7 +264,9 @@ export function CollectionAsset() {
                         category={props.category}
                         amount={props.amount}
                         collectibleImage={
-                          asset.imageUrl || collection.imageUrl || placeholder
+                          asset.imageUrls[0] ||
+                          collection.imageUrls[0] ||
+                          placeholder
                         }
                         collectibleName={title || collection.name}
                         currencyImage={props.currencyImage}

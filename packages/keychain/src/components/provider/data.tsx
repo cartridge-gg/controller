@@ -6,11 +6,9 @@ import {
   useTransfersQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAccount } from "@/hooks/account";
-import { useConnection } from "@/hooks/connection";
+import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
-import { useArcade } from "@/hooks/arcade";
-import { EditionModel, GameModel } from "@cartridge/arcade";
 import { getDate } from "@cartridge/ui/utils";
 
 export interface CardProps {
@@ -34,6 +32,7 @@ export interface CardProps {
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
+  const theme = useControllerTheme();
   const [accountAddress, setAccountAddress] = useState<string | undefined>(
     undefined,
   );
@@ -41,18 +40,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const account = useAccount();
   const address = account?.address || "";
   const { project } = useConnection();
-
-  const { games, editions } = useArcade();
-
-  const edition: EditionModel | undefined = useMemo(() => {
-    return Object.values(editions).find(
-      (edition) => edition.config.project === project,
-    );
-  }, [editions, project]);
-
-  const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find((game) => game.id === edition?.gameId);
-  }, [games, edition]);
 
   const projects = useMemo(() => {
     const projects = project ? [project] : [];
@@ -166,7 +153,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 (attribute: { trait: string; value: string }) =>
                   attribute?.trait?.toLowerCase() === "name",
               )?.value || metadata.name;
-            const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/0x${BigInt(transfer.contractAddress).toString(16)}/${addAddressPadding(transfer.tokenId)}/image`;
+            const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/${addAddressPadding(transfer.contractAddress)}/${transfer.tokenId}/image`;
             return {
               variant: "collectible",
               key: `${transfer.transactionHash}-${transfer.eventId}`,
@@ -208,9 +195,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
               contractAddress: contractAddress,
               transactionHash: transactionHash,
               title: entrypoint.replace(/_/g, " "),
-              image: edition?.properties.icon || game?.properties.icon || "",
-              website: edition?.socials.website || "",
-              certified: !!game,
+              image: theme?.icon || "",
+              website: "",
+              certified: false,
               timestamp: timestamp / 1000,
               date: date,
             } as CardProps;
@@ -218,7 +205,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ),
       ) || []
     );
-  }, [transactions, game, edition]);
+  }, [transactions, theme]);
 
   const achievements: CardProps[] = useMemo(() => {
     return trophies.achievements
@@ -234,8 +221,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
           image: item.icon,
           timestamp: item.timestamp,
           date: date,
-          website: game?.socials.website || "",
-          certified: !!game,
+          website: "",
+          certified: false,
           points: item.earning,
           amount: "",
           address: "",
@@ -245,7 +232,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           action: "mint",
         } as CardProps;
       });
-  }, [trophies, game]);
+  }, [trophies]);
 
   const events = useMemo(() => {
     return [...erc20s, ...erc721s, ...actions, ...achievements].sort(

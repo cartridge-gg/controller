@@ -17,6 +17,7 @@ import { constants, getChecksumAddress } from "starknet";
 import { useConnection } from "./connection";
 import { useStarkAddress } from "./starknetid";
 import { useWallet } from "./wallet";
+import { useAccountSearchQuery } from "@/utils/api";
 
 type RawAssertion = PublicKeyCredential & {
   response: AuthenticatorAssertionResponse;
@@ -463,5 +464,166 @@ export function useAccountProfile({
   return {
     username: overridable && usernameParam ? usernameParam : username,
     address: overridable && addressParam ? addressParam : address,
+  };
+}
+
+export interface AccountSearchResult {
+  id: string;
+  type: "existing" | "create-new";
+  username: string;
+  points?: number;
+  lastOnline?: Date;
+}
+
+export interface UseAccountSearchOptions {
+  minLength?: number;
+  debounceMs?: number;
+  maxResults?: number;
+  enabled?: boolean;
+  validationState?: {
+    status: "idle" | "validating" | "valid" | "invalid";
+    exists?: boolean;
+  };
+}
+
+export interface UseAccountSearchResult {
+  results: AccountSearchResult[];
+  isLoading: boolean;
+  error?: Error;
+}
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+export function useAccountSearch(
+  query: string,
+  options: UseAccountSearchOptions = {},
+): UseAccountSearchResult {
+  const {
+    minLength = 1,
+    debounceMs = 300,
+    maxResults = 5,
+    validationState,
+    enabled = true,
+  } = options;
+
+  const trimmedQuery = query.trim().toLowerCase();
+  const debouncedQuery = useDebounce(trimmedQuery, debounceMs);
+  const isQueryChanging = trimmedQuery !== debouncedQuery;
+  const shouldSearch = enabled && debouncedQuery.length >= minLength;
+
+  const { data, isLoading, error } = useAccountSearchQuery(
+    {
+      query: debouncedQuery,
+      limit: maxResults,
+    },
+    {
+      enabled: shouldSearch,
+      staleTime: 30 * 1000, // 30 seconds
+      cacheTime: 5 * 60 * 1000, // 5 minutes
+    },
+  );
+
+  const results = useMemo(() => {
+    if (!shouldSearch) return [];
+
+    // If query is changing, don't show stale results
+    if (isQueryChanging) return [];
+
+    const accountResults: AccountSearchResult[] = [];
+
+    // Add existing accounts from search results
+    if (data?.searchAccounts) {
+      accountResults.push(
+        ...data.searchAccounts.map((user) => {
+          const points = user.credits
+            ? Math.floor(
+                Number(user.credits.amount) /
+                  Math.pow(10, user.credits.decimals),
+              )
+            : undefined;
+
+          return {
+            id: `existing-${user.username}`,
+            type: "existing" as const,
+            username: user.username,
+            points: points,
+            lastOnline: user.updatedAt ? new Date(user.updatedAt) : undefined,
+          };
+        }),
+      );
+    }
+
+    // Check if exact match exists
+    const exactMatch = accountResults?.find(
+      (result) =>
+        result.username.toLowerCase() === debouncedQuery.toLowerCase(),
+    );
+
+    // If no exact match, add "Create New" option
+    // But only if validation is not in progress and the username doesn't exist
+    if (!exactMatch && debouncedQuery.length >= 3) {
+      const shouldShowCreateNew =
+        !validationState ||
+        (validationState.status !== "validating" &&
+          validationState.status !== "idle" &&
+          !validationState.exists);
+
+      if (shouldShowCreateNew) {
+        accountResults.unshift({
+          id: `create-new-${debouncedQuery}`,
+          type: "create-new",
+          username: debouncedQuery,
+        });
+      }
+    }
+
+    // Trim results based on maxResults and presence of create-new card
+    const hasCreateNewCard = accountResults.some(
+      (result) => result.type === "create-new",
+    );
+
+    if (hasCreateNewCard) {
+      // If there's a create-new card, limit to maxResults - 1 to keep consistent total
+      const otherResults = accountResults.filter(
+        (result) => result.type !== "create-new",
+      );
+      const trimmedOtherResults = otherResults.slice(0, maxResults - 1);
+      const createNewResult = accountResults.find(
+        (result) => result.type === "create-new",
+      );
+      return createNewResult
+        ? [createNewResult, ...trimmedOtherResults]
+        : trimmedOtherResults;
+    } else {
+      // No create-new card, keep all results up to maxResults
+      return accountResults.slice(0, maxResults);
+    }
+  }, [
+    data,
+    debouncedQuery,
+    shouldSearch,
+    validationState,
+    isQueryChanging,
+    maxResults,
+  ]);
+
+  return {
+    results,
+    isLoading: (shouldSearch && isLoading) || isQueryChanging,
+    error: error as Error | undefined,
   };
 }

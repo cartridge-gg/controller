@@ -4,9 +4,7 @@ import placeholder from "/placeholder.svg?url";
 import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useMemo } from "react";
 import { useCollectibles } from "@/hooks/collectible";
-import { useArcade } from "@/hooks/arcade";
-import { useConnection, useControllerTheme } from "@/hooks/connection";
-import { EditionModel } from "@cartridge/arcade";
+import { useControllerTheme } from "@/hooks/connection";
 
 import { getChecksumAddress } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";
@@ -14,17 +12,9 @@ import { useMarketplace } from "@/hooks/marketplace";
 export function Collections() {
   const { collections, status: CollectionsStatus } = useCollections();
   const { collectibles, status: CollectiblesStatus } = useCollectibles();
-  const { editions } = useArcade();
   const { getCollectionOrders } = useMarketplace();
-  const { project } = useConnection();
   const theme = useControllerTheme();
   const [searchParams] = useSearchParams();
-
-  const edition: EditionModel | undefined = useMemo(() => {
-    return Object.values(editions).find(
-      (edition) => edition.config.project === project,
-    );
-  }, [editions, project]);
 
   const status = useMemo(() => {
     if (CollectionsStatus === "loading" && CollectiblesStatus === "loading") {
@@ -57,9 +47,9 @@ export function Collections() {
             key={collection.address}
           >
             <CollectibleCard
-              icon={edition?.properties.icon || theme?.icon || undefined}
+              icon={theme?.icon || undefined}
               title={collection.name}
-              image={collection.imageUrl || placeholder}
+              images={[...collection.imageUrls, placeholder]}
               totalCount={collection.totalCount}
               listingCount={listingCount}
               selectable={false}
@@ -87,7 +77,7 @@ export function Collections() {
           >
             <CollectibleCard
               title={collectible.name}
-              image={collectible.imageUrl || placeholder}
+              images={[...collectible.imageUrls, placeholder]}
               totalCount={collectible.totalCount}
               listingCount={listingCount}
               selectable={false}

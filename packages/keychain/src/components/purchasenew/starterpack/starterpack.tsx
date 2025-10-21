@@ -150,16 +150,6 @@ export function StarterPackInner({
             mintAllowance={mintAllowance}
             starterpackItems={starterpackItems}
           />
-          {acquisitionType === StarterpackAcquisitionType.Claimed && !error && (
-            <Card>
-              <CardContent
-                className="flex flex-row justify-center items-center text-foreground-300 text-sm cursor-pointer h-[40px]"
-                onClick={() => navigate("/purchase/starterpack/collections")}
-              >
-                View Eligible Collections
-              </CardContent>
-            </Card>
-          )}
         </div>
       </LayoutContent>
       <LayoutFooter>
@@ -168,6 +158,16 @@ export function StarterPackInner({
         ) : acquisitionType === StarterpackAcquisitionType.Paid ? (
           <CostBreakdown rails="stripe" costDetails={price} />
         ) : null}
+        {acquisitionType === StarterpackAcquisitionType.Claimed && !error && (
+          <Card>
+            <CardContent
+              className="flex flex-row justify-center items-center text-foreground-300 text-sm cursor-pointer h-[40px]"
+              onClick={() => navigate("/purchase/starterpack/collections")}
+            >
+              View Eligible Collections
+            </CardContent>
+          </Card>
+        )}
         <Button onClick={onProceed} disabled={!!error || supply === 0}>
           {acquisitionType === StarterpackAcquisitionType.Paid
             ? "Purchase"
@@ -198,7 +198,7 @@ export const StarterpackReceiving = ({
           </h1>
         )}
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         {starterpackItems
           .filter((item) => item.type === StarterPackItemType.NONFUNGIBLE)
           .map((item, index) => (
