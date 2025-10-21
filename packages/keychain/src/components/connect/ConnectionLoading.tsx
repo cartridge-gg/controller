@@ -1,20 +1,23 @@
 import {
-  CheckIcon,
   LayoutContainer,
   LayoutContent,
   LayoutHeader,
+  Spinner,
 } from "@cartridge/ui";
 import { AuthOption } from "@cartridge/controller";
 import { getAuthMethodDisplayName, getAuthMethodIcon } from "@/utils/auth";
+import { Link } from "react-router-dom";
 
 interface ConnectionLoadingProps {
   isNew?: boolean;
   authMethod?: AuthOption;
+  fallbackUrl?: string;
 }
 
 export function ConnectionLoading({
   isNew,
   authMethod,
+  fallbackUrl,
 }: ConnectionLoadingProps) {
   const authDisplay = getAuthMethodDisplayName(authMethod);
 
@@ -22,19 +25,22 @@ export function ConnectionLoading({
     <LayoutContainer>
       <LayoutHeader
         title={`${isNew ? "Sign Up" : "Log in"} with ${authDisplay}`}
-        icon={<CheckIcon />}
+        icon={<Spinner />}
         hideUsername
         hideSettings
         onBack={() => {}}
       />
       <LayoutContent className="gap-4">
-        <SignerPendingCard authMethod={authMethod} />
+        <SignerPendingCard authMethod={authMethod} fallbackUrl={fallbackUrl} />
       </LayoutContent>
     </LayoutContainer>
   );
 }
 
-const SignerPendingCard = ({ authMethod }: ConnectionLoadingProps) => {
+const SignerPendingCard = ({
+  authMethod,
+  fallbackUrl,
+}: ConnectionLoadingProps) => {
   const authDisplay = getAuthMethodDisplayName(authMethod);
   const AuthIcon = getAuthMethodIcon(authMethod);
 
@@ -45,11 +51,14 @@ const SignerPendingCard = ({ authMethod }: ConnectionLoadingProps) => {
       </div>
       <div className=" flex flex-col items-center gap-2 self-stretch">
         <p className="text-foreground-200 text-center text-sm font-medium">
-          Success!
+          {`Connecting to ${authDisplay}...`}
         </p>
-        <p className="text-foreground-400 text-center text-sm font-medium">
-          {`${authDisplay} ${authDisplay.toLowerCase() === "passkey" ? "Created" : "Connected"}`}
-        </p>
+        <Link
+          to={fallbackUrl ?? "#"}
+          className="text-foreground-400 hover:text-foreground-300 text-center text-sm font-normal"
+        >
+          Continue in the other window
+        </Link>
       </div>
     </div>
   );
