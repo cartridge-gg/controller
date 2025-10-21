@@ -39,11 +39,11 @@ const SignerPendingCard = ({ authMethod }: ConnectionSuccessProps) => {
       <div className="flex items-center gap-2.5 p-2 rounded-full border border-background-200">
         {AuthIcon && <AuthIcon size="xl" />}
       </div>
-      <div className=" flex flex-col items-center gap-2 self-stretch">
+      <div className="flex flex-col items-center gap-2 self-stretch">
         <p className="text-foreground-200 text-center text-sm font-medium">
           Success!
         </p>
-        <p className="text-foreground-400 text-center text-sm font-medium">
+        <p className="text-foreground-400 text-center text-sm font-normal">
           {`${authDisplay} ${authDisplay.toLowerCase() === "passkey" ? "Created" : "Connected"}`}
         </p>
       </div>
