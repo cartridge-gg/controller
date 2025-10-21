@@ -467,7 +467,6 @@ export function CreateController({
       if ((e.key === "Enter" || e.key === " ") && canSubmit) {
         e.preventDefault();
         submitButtonRef.current?.click();
-        handleFormSubmit();
       }
     };
 
