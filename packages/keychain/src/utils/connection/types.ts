@@ -11,7 +11,6 @@ import { Call, FeeEstimate, Signature, TypedData } from "starknet";
 
 export type ConnectionCtx =
   | ConnectCtx
-  | ConnectingCtx
   | DeployCtx
   | LogoutCtx
   | ExecuteCtx
@@ -23,14 +22,6 @@ export type ConnectionCtx =
 export type ConnectCtx = {
   origin: string;
   type: "connect";
-  policies: Policies;
-  resolve: (res: ConnectReply | ConnectError) => void;
-  reject: (reason?: unknown) => void;
-};
-
-export type ConnectingCtx = {
-  origin: string;
-  type: "connecting";
   policies: Policies;
   resolve: (res: ConnectReply | ConnectError) => void;
   reject: (reason?: unknown) => void;

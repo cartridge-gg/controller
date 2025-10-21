@@ -4,33 +4,24 @@ import {
   LayoutFooter,
   Skeleton,
 } from "@cartridge/ui";
-import { AuthOption } from "@cartridge/controller";
-import { getAuthMethodDisplayName } from "@/utils/auth";
 
 interface PageLoadingProps {
   headerVariant?: "expanded" | "hidden";
   title?: string;
   description?: string | React.ReactElement;
-  authMethod?: AuthOption;
 }
 
 export function PageLoading({
   headerVariant = "expanded",
   title = "Connect Controller",
   description,
-  authMethod,
 }: PageLoadingProps = {}) {
-  const authDisplay = getAuthMethodDisplayName(authMethod);
-  const defaultDescription = authMethod
-    ? `Connecting with ${authDisplay}...`
-    : undefined;
-
   return (
     <>
       <HeaderInner
         variant={headerVariant}
         title={title}
-        description={description || defaultDescription}
+        description={description}
         hideIcon
       />
 
