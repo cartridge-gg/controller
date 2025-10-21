@@ -819,6 +819,8 @@ export function parseValidationError(error: ControllerError): {
         l1gasMaxAmount?: bigint;
         l1gasMaxPrice?: bigint;
         l1gasMaxFee?: bigint;
+        l2GasMaxAmount?: bigint;
+        l2GasActualUsed?: bigint;
       }
     | string;
 } {
@@ -874,6 +876,23 @@ export function parseValidationError(error: ControllerError): {
         details: {
           maxGasPrice,
           actualGasPrice,
+        },
+      };
+    }
+
+    // Handle StarknetError with insufficient max L2Gas
+    const l2GasMatch = error.data.match(
+      /Insufficient max L2Gas: max amount: (\d+), actual used: (\d+)/,
+    );
+    if (l2GasMatch) {
+      const l2GasMaxAmount = BigInt(l2GasMatch[1]);
+      const l2GasActualUsed = BigInt(l2GasMatch[2]);
+      return {
+        raw: error.data,
+        summary: "Insufficient max L2 gas amount",
+        details: {
+          l2GasMaxAmount,
+          l2GasActualUsed,
         },
       };
     }
