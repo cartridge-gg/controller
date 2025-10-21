@@ -80,23 +80,6 @@ export function Claim() {
     }
   }, [onSendClaim, setTransactionHash, navigate]);
 
-  const onClaimSingle = useCallback(
-    async (claimIndex: number) => {
-      try {
-        setIsSubmitting(true);
-        setError(null);
-        const hash = await onSendClaim(claimIndex);
-        setTransactionHash(hash);
-        navigate("/purchase/pending", { reset: true });
-      } catch (error) {
-        setError(error as Error);
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [onSendClaim, setTransactionHash, navigate],
-  );
-
   const isClaimed = useMemo(() => {
     return claimsData.every((claim) => claim.claimed);
   }, [claimsData]);
@@ -143,10 +126,7 @@ export function Claim() {
                   {claimsData.map((claim, i) => (
                     <CardListItem
                       key={i}
-                      className={`flex flex-row justify-between cursor-pointer hover:bg-background-100 transition-colors ${
-                        claim.claimed ? "opacity-50" : ""
-                      }`}
-                      onClick={() => !claim.claimed && onClaimSingle(i)}
+                      className="flex flex-row justify-between"
                     >
                       <CollectionItem
                         name={claim.description ?? claim.key}
@@ -154,16 +134,6 @@ export function Claim() {
                         numAvailable={claimAmount(claim)}
                         isLoading={claim.loading}
                       />
-                      {!claim.claimed && (
-                        <div className="text-xs text-primary-500 font-medium">
-                          Claim
-                        </div>
-                      )}
-                      {claim.claimed && (
-                        <div className="text-xs text-foreground-400">
-                          Claimed
-                        </div>
-                      )}
                     </CardListItem>
                   ))}
                 </CardListContent>
