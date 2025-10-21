@@ -77,9 +77,9 @@ export const StarterItem = React.forwardRef<
             />
             <div className="flex flex-col gap-1 flex-1 min-w-0">
               <div className="flex flex-row items-start justify-between self-stretch">
-              <h3 className="text-sm font-medium text-foreground-100 truncate">
-                {name}
-              </h3>
+                <h3 className="text-sm font-medium text-foreground-100 truncate">
+                  {name}
+                </h3>
                 {price !== 0n && !fancy && showPrice && (
                   <h3 className="text-sm font-medium text-foreground-100 truncate">
                     {`$${usdcToUsd(price ? price : 0n).toLocaleString(
