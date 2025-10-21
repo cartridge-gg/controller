@@ -1,5 +1,5 @@
 import { AuthOption } from "@cartridge/controller";
-import { SheetContent, SheetTitle } from "@cartridge/ui";
+import { cn, SheetContent, SheetTitle } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SignupButton } from "../buttons/signup-button";
 import { credentialToAuth } from "../types";
@@ -29,8 +29,9 @@ export function ChooseSignupMethodForm({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const options = useMemo(() => {
+    let opts: AuthOption[];
     if (validation.signers?.length) {
-      return Array.from(
+      opts = Array.from(
         new Set(
           validation.signers
             .map((signer) => credentialToAuth(signer))
@@ -38,8 +39,15 @@ export function ChooseSignupMethodForm({
         ),
       ) as AuthOption[];
     } else {
-      return authOptions;
+      opts = authOptions;
     }
+
+    // Sort to ensure webauthn is first if it exists
+    return opts.sort((a, b) => {
+      if (a === "webauthn") return -1;
+      if (b === "webauthn") return 1;
+      return 0;
+    });
   }, [validation.signers, authOptions]);
 
   // Initialize button refs array
@@ -197,29 +205,34 @@ export function ChooseSignupMethodForm({
             {options.map((option, index) => {
               const isWebauthn = option === "webauthn";
               const isHighlighted = highlightedIndex === index;
+              const hasWebauthn = options.includes("webauthn");
+              const isFirstAndWebauthn = index === 0 && isWebauthn;
 
               return (
                 <div
                   key={option}
-                  className={
-                    isWebauthn ? "border-b border-background-125 pb-4" : ""
-                  }
+                  className={cn(
+                    isFirstAndWebauthn &&
+                      hasWebauthn &&
+                      "border-b border-background-125 pb-4",
+                  )}
                 >
                   <SignupButton
                     ref={(el) => {
                       buttonRefs.current[index] = el;
                     }}
                     authMethod={option}
-                    className={isWebauthn ? "justify-center" : "justify-start"}
+                    className={cn(
+                      "ring-0 focus-visible:ring-0 ring-offset-0 focus-visible:ring-offset-0 outline-none",
+                      isWebauthn ? "justify-center" : "justify-start",
+                      isHighlighted &&
+                        (isWebauthn ? "opacity-80" : "bg-background-300"),
+                    )}
                     onClick={(e) => handleSelectedOption(e, option)}
+                    onKeyDown={(e) => handleSelectedOption(e, option)}
                     disabled={isLoading && selectedAuth !== option}
                     isLoading={isLoading && selectedAuth === option}
                     data-highlighted={isHighlighted}
-                    style={
-                      isHighlighted && !isLoading
-                        ? { outline: "2px solid rgba(255, 255, 255, 0.3)" }
-                        : undefined
-                    }
                   />
                 </div>
               );
