@@ -44,7 +44,12 @@ export function createConnectUrl(
     });
   }
 
-  return `/connect?id=${encodeURIComponent(id)}&signers=${encodeURIComponent(JSON.stringify(signupOptions))}`;
+  const params = new URLSearchParams({ id });
+  if (signupOptions !== undefined) {
+    params.set("signers", JSON.stringify(signupOptions));
+  }
+
+  return `/connect?${params.toString()}`;
 }
 
 export function parseConnectParams(searchParams: URLSearchParams): {
@@ -62,9 +67,19 @@ export function parseConnectParams(searchParams: URLSearchParams): {
       return null;
     }
 
-    const signers = signersParam
-      ? (JSON.parse(decodeURIComponent(signersParam)) as AuthOptions)
-      : undefined;
+    let signers: AuthOptions | undefined;
+    if (signersParam) {
+      try {
+        const decoded = decodeURIComponent(signersParam);
+        // Handle case where signupOptions was undefined and got stringified as "undefined"
+        if (decoded !== "undefined" && decoded !== "null") {
+          signers = JSON.parse(decoded) as AuthOptions;
+        }
+      } catch (e) {
+        console.error("Failed to parse signers parameter:", e);
+        // Continue with undefined signers on parse error
+      }
+    }
 
     const callbacks = getCallbacks(id) as ConnectCallback | undefined;
 
