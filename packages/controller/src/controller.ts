@@ -164,19 +164,7 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.open();
 
     try {
-      let response = await this.keychain.connect(
-        // Policy precedence logic:
-        // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
-        // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
-        // 3. Otherwise, use provided policies or empty object
-        this.options.shouldOverridePresetPolicies && this.options.policies
-          ? this.options.policies
-          : this.options.preset
-            ? {}
-            : this.options.policies || {},
-        this.rpcUrl(),
-        this.options.signupOptions,
-      );
+      let response = await this.keychain.connect(this.options.signupOptions);
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }

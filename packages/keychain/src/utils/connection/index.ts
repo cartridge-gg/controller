@@ -1,7 +1,4 @@
-export * from "./types";
-
 import Controller from "@/utils/controller";
-import { AuthOptions } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
 import { normalize } from "@cartridge/ui/utils";
 import { connect } from "./connect";
@@ -13,19 +10,16 @@ import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
-import { ConnectionCtx } from "./types";
+
+export type { ControllerError } from "./execute";
 
 export function connectToController<ParentMethods extends object>({
   setRpcUrl,
-  setContext,
   setController,
-  setConfigSignupOptions,
   navigate,
 }: {
   setRpcUrl: (url: string) => void;
-  setContext: (ctx: ConnectionCtx | undefined) => void;
   setController: (controller?: Controller) => void;
-  setConfigSignupOptions: (options: AuthOptions | undefined) => void;
   navigate: (
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
@@ -35,9 +29,7 @@ export function connectToController<ParentMethods extends object>({
     methods: {
       connect: normalize(
         connect({
-          setRpcUrl,
-          setContext,
-          setConfigSignupOptions,
+          navigate,
         }),
       ),
       deploy: () => deployFactory({ navigate }),
@@ -51,18 +43,16 @@ export function connectToController<ParentMethods extends object>({
       openSettings: () => openSettingsFactory(),
       navigate: () => navigateFactory(),
       reset: () => () => {
-        setContext(undefined);
+        // Reset handled by navigation
       },
       disconnect: () => async () => {
         // First clear the React state
-        setContext(undefined);
         setController(undefined);
         // Then cleanup the controller
         await window.controller?.disconnect();
       },
       logout: () => async () => {
         // First clear the React state
-        setContext(undefined);
         setController(undefined);
         // Then cleanup the controller
         await window.controller?.disconnect();
@@ -70,11 +60,7 @@ export function connectToController<ParentMethods extends object>({
       username: () => () => window.controller?.username(),
       delegateAccount: () => () => window.controller?.delegateAccount(),
       openPurchaseCredits: () => () => {
-        setContext({
-          type: "open-purchase-credits",
-          resolve: () => Promise.resolve(),
-          reject: () => Promise.reject(),
-        });
+        navigate("/funding", { replace: true });
       },
       openStarterPack: () => (starterpackId: string) => {
         navigate(`/purchase/starterpack/${starterpackId}`, { replace: true });

@@ -57,6 +57,25 @@ describe("parseValidationError", () => {
       },
     });
   });
+
+  it("should correctly parse StarknetError with insufficient max L2Gas", () => {
+    const error = {
+      code: 55,
+      message: "Account validation failed",
+      data: "StarknetError { code: KnownErrorCode(ValidateFailure), message: 'Insufficient max L2Gas: max amount: 3829680, actual used: 24314560.' }",
+    };
+
+    const result = parseValidationError(error);
+
+    expect(result).toEqual({
+      raw: "StarknetError { code: KnownErrorCode(ValidateFailure), message: 'Insufficient max L2Gas: max amount: 3829680, actual used: 24314560.' }",
+      summary: "Insufficient max L2 gas amount",
+      details: {
+        l2GasMaxAmount: BigInt("3829680"),
+        l2GasActualUsed: BigInt("24314560"),
+      },
+    });
+  });
 });
 
 describe("parseGraphQLError", () => {

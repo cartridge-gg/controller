@@ -131,11 +131,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(
-    policies: SessionPolicies,
-    rpcUrl: string,
-    signupOptions?: AuthOptions,
-  ): Promise<ConnectReply | ConnectError>;
+  connect(signupOptions?: AuthOptions): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
