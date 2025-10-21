@@ -4,7 +4,6 @@ import {
   ConnectReply,
   DeployReply,
   ExecuteReply,
-  StarterPack,
 } from "@cartridge/controller";
 import { Policies } from "@cartridge/presets";
 import { Call, FeeEstimate, Signature, TypedData } from "starknet";
@@ -81,7 +80,7 @@ export type OpenPurchaseCreditsCtx = {
 
 export type OpenStarterPackCtx = {
   type: "open-starter-pack";
-  starterpack: string | StarterPack;
+  starterpack: string;
   resolve: (res: ConnectError) => void;
   reject: (reason?: unknown) => void;
 };
