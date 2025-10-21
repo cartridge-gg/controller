@@ -1,5 +1,4 @@
 import Controller from "@/utils/controller";
-import { StarterPack } from "@cartridge/controller";
 import { connectToParent } from "@cartridge/penpal";
 import { normalize } from "@cartridge/ui/utils";
 import { connect } from "./connect";
@@ -11,7 +10,6 @@ import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
-import { encodeStarterPack } from "@/utils/starterpack-url";
 
 export type { ControllerError } from "./execute";
 
@@ -64,17 +62,8 @@ export function connectToController<ParentMethods extends object>({
       openPurchaseCredits: () => () => {
         navigate("/funding", { replace: true });
       },
-      openStarterPack: () => (options: string | StarterPack) => {
-        // Navigate based on the type of options
-        if (typeof options === "string") {
-          navigate(`/purchase/starterpack/${options}`, { replace: true });
-        } else {
-          // For custom StarterPack objects, encode them in the URL
-          const encodedData = encodeStarterPack(options);
-          navigate(`/purchase/starterpack/custom?data=${encodedData}`, {
-            replace: true,
-          });
-        }
+      openStarterPack: () => (starterpackId: string) => {
+        navigate(`/purchase/starterpack/${starterpackId}`, { replace: true });
       },
       switchChain: () => switchChain({ setController, setRpcUrl }),
     },

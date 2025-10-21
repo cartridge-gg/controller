@@ -161,7 +161,7 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
-  openStarterPack(options: string | StarterPack): Promise<void>;
+  openStarterPack(starterpackId: string): Promise<void>;
   navigate(path: string): Promise<void>;
 
   // External wallet methods
@@ -270,11 +270,4 @@ export interface StarterPackItem {
   amount?: number;
   price?: bigint;
   call?: Call[];
-}
-
-export interface StarterPack {
-  name: string;
-  description: string;
-  iconURL?: string;
-  items: StarterPackItem[];
 }

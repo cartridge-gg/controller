@@ -10,7 +10,6 @@ import {
   ExternalPlatform,
   ExternalWallet,
   ExternalWalletType,
-  StarterPack,
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
@@ -94,7 +93,7 @@ export interface PurchaseContextType {
   setUsdAmount: (amount: number) => void;
   setPurchaseItems: (items: Item[]) => void;
   setClaimItems: (items: Item[]) => void;
-  setStarterpack: (starterpack: string | StarterPack) => void;
+  setStarterpack: (starterpack: string) => void;
   setTransactionHash: (hash: string) => void;
 
   // Payment actions
@@ -124,7 +123,7 @@ export const PurchaseProvider = ({
 }: PurchaseProviderProps) => {
   const { controller, isMainnet } = useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
-  const [starterpack, setStarterpack] = useState<string | StarterPack>();
+  const [starterpack, setStarterpack] = useState<string>();
   const [starterpackDetails, setStarterpackDetails] = useState<
     StarterPackDetails | undefined
   >();
@@ -181,17 +180,16 @@ export const PurchaseProvider = ({
   const [swapInput, setSwapInput] = useState<CreateLayerswapPaymentInput>();
 
   useEffect(() => {
-    const getSwapInput = async () => {
+    const getSwapInput = () => {
       if (!controller || !starterpack || !selectedPlatform) {
         setSwapInput(undefined);
         return;
       }
-      const input = await starterPackToLayerswapInput(
+      const input = starterPackToLayerswapInput(
         starterpack,
         controller.username(),
         selectedPlatform,
         isMainnet,
-        controller,
       );
       setSwapInput(input);
     };
@@ -220,7 +218,7 @@ export const PurchaseProvider = ({
     setUsdAmount(priceUsd);
 
     setStarterpackDetails({
-      id: typeof starterpack == "string" ? starterpack : undefined,
+      id: starterpack,
       name,
       starterPackItems: items,
       supply,
