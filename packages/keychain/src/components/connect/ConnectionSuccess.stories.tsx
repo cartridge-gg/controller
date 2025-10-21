@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { ConnectionSuccess } from "./ConnectionSuccess";
 
 const meta: Meta<typeof ConnectionSuccess> = {
-  title: "Components/ConnectionSuccess",
   component: ConnectionSuccess,
   parameters: {
     layout: "fullscreen",
