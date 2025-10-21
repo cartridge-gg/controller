@@ -8,15 +8,17 @@ import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { usePostHog } from "./provider/posthog";
 import { Layout } from "@/components/layout";
-import { Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Authenticate } from "./authenticate";
 import { now } from "@/constants";
 import { Disconnect } from "./disconnect";
 import { processPolicies } from "./connect/CreateSession";
+import { useAccount } from "@/hooks/account";
 
 export function Home() {
   const { context, controller, policies, isConfigLoading } = useConnection();
   const { pathname } = useLocation();
+  const account = useAccount();
 
   const upgrade = useUpgrade();
   const posthog = usePostHog();
@@ -133,6 +135,15 @@ export function Home() {
             );
           }
           default:
+            // When logged in with no context and at root path, redirect to inventory
+            if (pathname === "/" && account?.username) {
+              return (
+                <Navigate
+                  to={`/account/${account.username}/inventory`}
+                  replace
+                />
+              );
+            }
             return <Outlet />;
         }
       })()}
