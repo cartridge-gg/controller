@@ -263,9 +263,11 @@ export function CreateControllerView({
 
 export function CreateController({
   isSlot,
+  signers,
 }: {
   isSlot?: boolean;
   error?: Error;
+  signers?: AuthOptions;
 }) {
   const posthog = usePostHog();
   const hasLoggedFocus = useRef(false);
@@ -306,6 +308,7 @@ export function CreateController({
     setAuthMethod,
   } = useCreateController({
     isSlot,
+    signers,
   });
 
   const handleFormSubmit = useCallback(

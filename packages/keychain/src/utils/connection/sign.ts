@@ -19,6 +19,20 @@ type SignMessageCallback = {
   onCancel?: () => void;
 };
 
+function isSignMessageResult(
+  value: unknown,
+): value is Signature | ConnectError {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
+  // Signature is an array [r, s] or has code/message for ConnectError
+  return (
+    Array.isArray(value) ||
+    (typeof obj.code === "string" && typeof obj.message === "string")
+  );
+}
+
 export function createSignMessageUrl(
   typedData: TypedData,
   options: SignMessageCallback = {},
@@ -37,39 +51,49 @@ export function createSignMessageUrl(
     });
   }
 
-  const params: SignMessageParams = {
-    id,
-    typedData,
-  };
+  const typedDataJson = JSON.stringify(typedData, (_, value) =>
+    typeof value === "bigint" ? value.toString() : value,
+  );
 
-  return `/sign-message?data=${encodeURIComponent(
-    JSON.stringify(params, (_, value) =>
-      typeof value === "bigint" ? value.toString() : value,
-    ),
-  )}`;
+  return `/sign-message?id=${encodeURIComponent(id)}&typedData=${encodeURIComponent(typedDataJson)}`;
 }
 
-export function parseSignMessageParams(
-  paramString: string,
-): (SignMessageCallback & { params: SignMessageParams }) | null {
+export function parseSignMessageParams(searchParams: URLSearchParams): {
+  params: SignMessageParams;
+  resolve?: (result: unknown) => void;
+  reject?: (reason?: unknown) => void;
+  onCancel?: () => void;
+} | null {
   try {
-    const params = JSON.parse(
-      decodeURIComponent(paramString),
-    ) as SignMessageParams;
+    const id = searchParams.get("id");
+    const typedDataParam = searchParams.get("typedData");
 
-    const callbacks = params.id
-      ? (getCallbacks(params.id) as SignMessageCallback | undefined)
-      : undefined;
+    if (!id || !typedDataParam) {
+      console.error("Missing required parameters");
+      return null;
+    }
 
-    const resolve = callbacks?.resolve
-      ? (value: Signature | ConnectError) => {
-          callbacks.resolve?.(value);
-        }
-      : undefined;
+    const typedData = JSON.parse(
+      decodeURIComponent(typedDataParam),
+    ) as TypedData;
+
+    const callbacks = getCallbacks(id) as SignMessageCallback | undefined;
 
     const reject = callbacks?.reject
       ? (reason?: unknown) => {
           callbacks.reject?.(reason);
+        }
+      : undefined;
+
+    const resolve = callbacks?.resolve
+      ? (value: unknown) => {
+          if (!isSignMessageResult(value)) {
+            const error = new Error("Invalid sign message result type");
+            console.error(error.message, value);
+            reject?.(error);
+            return;
+          }
+          callbacks.resolve?.(value);
         }
       : undefined;
 
@@ -80,7 +104,7 @@ export function parseSignMessageParams(
       : undefined;
 
     return {
-      params,
+      params: { id, typedData },
       resolve,
       reject,
       onCancel,
