@@ -71,6 +71,11 @@ export function ConfigurationPanel() {
     shouldOverridePresetPolicies !== config.shouldOverridePresetPolicies ||
     JSON.stringify(selectedTokens) !== JSON.stringify(config.tokens);
 
+  // Don't render when connected
+  if (address) {
+    return null;
+  }
+
   return (
     <div className="rounded-xl bg-base-100 p-8 shadow-lg border border-base-300">
       <h2 className="text-2xl font-bold mb-6 text-primary">
