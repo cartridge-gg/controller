@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useConnect, useDisconnect, useAccount } from "@starknet-react/core";
+import { useDisconnect, useAccount } from "@starknet-react/core";
 import { useControllerConfig } from "./providers/ControllerConfigProvider";
 
 export function ConfigurationPanel() {
   const { disconnect } = useDisconnect();
-  const { connect, connectors } = useConnect();
   const { address } = useAccount();
   const { config, updateConfig } = useControllerConfig();
 
@@ -40,7 +39,13 @@ export function ConfigurationPanel() {
     setIsApplying(true);
 
     try {
+      // If connected, disconnect first
+      if (address) {
+        await disconnect();
+      }
+
       // Update the configuration context
+      // This will trigger a remount of StarknetConfig with new connectors
       updateConfig({
         preset,
         slot,
@@ -49,20 +54,10 @@ export function ConfigurationPanel() {
         tokens: selectedTokens,
       });
 
-      // If connected, disconnect and reconnect with new config
-      if (address) {
-        await disconnect();
-        // Wait a bit for disconnect to complete
-        setTimeout(() => {
-          const controller = connectors[0];
-          if (controller) {
-            connect({ connector: controller });
-          }
-          setIsApplying(false);
-        }, 500);
-      } else {
+      // Allow time for remount
+      setTimeout(() => {
         setIsApplying(false);
-      }
+      }, 500);
     } catch (error) {
       console.error("Failed to apply configuration:", error);
       setIsApplying(false);

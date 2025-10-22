@@ -186,8 +186,27 @@ if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
 export function StarknetProvider({ children }: PropsWithChildren) {
   const { config } = useControllerConfig();
 
-  const controller = useMemo(() => {
-    return new ControllerConnector({
+  // Create a unique key from config to force remount when config changes
+  const configKey = useMemo(
+    () =>
+      JSON.stringify({
+        preset: config.preset,
+        slot: config.slot,
+        namespace: config.namespace,
+        shouldOverridePresetPolicies: config.shouldOverridePresetPolicies,
+        tokens: config.tokens,
+      }),
+    [
+      config.preset,
+      config.slot,
+      config.namespace,
+      config.shouldOverridePresetPolicies,
+      config.tokens,
+    ],
+  );
+
+  const connectors = useMemo(() => {
+    const controller = new ControllerConnector({
       policies: config.policies,
       chains: controllerConnectorChains,
       url: getKeychainUrl(),
@@ -208,6 +227,18 @@ export function StarknetProvider({ children }: PropsWithChildren) {
         erc20: config.tokens as ("eth" | "strk" | "lords" | "usdc" | "usdt")[],
       },
     });
+
+    const session = new SessionConnector({
+      policies,
+      rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
+      chainId: constants.StarknetChainId.SN_MAIN,
+      redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
+      disconnectRedirectUrl: "whatsapp://",
+      keychainUrl: getKeychainUrl(),
+      apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
+    });
+
+    return [controller, session];
   }, [
     config.slot,
     config.namespace,
@@ -217,24 +248,13 @@ export function StarknetProvider({ children }: PropsWithChildren) {
     config.policies,
   ]);
 
-  const session = useMemo(() => {
-    return new SessionConnector({
-      policies,
-      rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
-      chainId: constants.StarknetChainId.SN_MAIN,
-      redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
-      disconnectRedirectUrl: "whatsapp://",
-      keychainUrl: getKeychainUrl(),
-      apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
-    });
-  }, []);
-
   return (
     <StarknetConfig
+      key={configKey}
       autoConnect
       defaultChainId={mainnet.id}
       chains={starknetConfigChains}
-      connectors={[controller, session]}
+      connectors={connectors}
       explorer={cartridge}
       provider={provider}
     >
