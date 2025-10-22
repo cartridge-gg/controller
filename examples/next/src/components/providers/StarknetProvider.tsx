@@ -186,25 +186,6 @@ if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
 export function StarknetProvider({ children }: PropsWithChildren) {
   const { config } = useControllerConfig();
 
-  // Create a unique key from config to force remount when config changes
-  const configKey = useMemo(
-    () =>
-      JSON.stringify({
-        preset: config.preset,
-        slot: config.slot,
-        namespace: config.namespace,
-        shouldOverridePresetPolicies: config.shouldOverridePresetPolicies,
-        tokens: config.tokens,
-      }),
-    [
-      config.preset,
-      config.slot,
-      config.namespace,
-      config.shouldOverridePresetPolicies,
-      config.tokens,
-    ],
-  );
-
   const connectors = useMemo(() => {
     const controller = new ControllerConnector({
       policies: config.policies,
@@ -250,7 +231,6 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 
   return (
     <StarknetConfig
-      key={configKey}
       autoConnect
       defaultChainId={mainnet.id}
       chains={starknetConfigChains}
