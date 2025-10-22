@@ -13,6 +13,7 @@ import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
 import { Starterpack } from "components/Starterpack";
 import { ConfigurationPanel } from "components/ConfigurationPanel";
+import { ControllerDebug } from "components/ControllerDebug";
 
 const Home: FC = () => {
   return (
@@ -25,6 +26,7 @@ const Home: FC = () => {
       </div>
       <Header />
       <ConfigurationPanel />
+      <ControllerDebug />
       <Profile />
       <Transfer />
       <ManualTransferEth />
