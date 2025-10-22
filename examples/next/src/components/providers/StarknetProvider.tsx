@@ -9,8 +9,9 @@ import {
   jsonRpcProvider,
   StarknetConfig,
 } from "@starknet-react/core";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useMemo } from "react";
 import { constants, num, shortString } from "starknet";
+import { useControllerConfig } from "./ControllerConfigProvider";
 
 export const ETH_CONTRACT_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -182,48 +183,52 @@ if (process.env.NEXT_PUBLIC_RPC_MAINNET) {
 //   });
 // }
 
-const controller = new ControllerConnector({
-  // policies,
-  // With the defaults, you can omit chains if you want to use:
-  // - chains: [
-  //     { rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9" },
-  //     { rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9" },
-  //   ]
-  //
-  // However, if you want to use custom RPC URLs, you can still specify them:
-  chains: controllerConnectorChains,
-  url: getKeychainUrl(),
-  signupOptions: [
-    "google",
-    "webauthn",
-    "discord",
-    "walletconnect",
-    "metamask",
-    "rabby",
-    "password",
-  ],
-  slot: "arcade-pistols",
-  namespace: "pistols",
-  preset: "pistols",
-  // By default, preset policies take precedence over manually provided policies
-  // Set shouldOverridePresetPolicies to true if you want your policies to override preset
-  // shouldOverridePresetPolicies: true,
-  tokens: {
-    erc20: ["lords", "strk"],
-  },
-});
-
-const session = new SessionConnector({
-  policies,
-  rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
-  chainId: constants.StarknetChainId.SN_MAIN,
-  redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
-  disconnectRedirectUrl: "whatsapp://",
-  keychainUrl: getKeychainUrl(),
-  apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
-});
-
 export function StarknetProvider({ children }: PropsWithChildren) {
+  const { config } = useControllerConfig();
+
+  const controller = useMemo(() => {
+    return new ControllerConnector({
+      policies: config.policies,
+      chains: controllerConnectorChains,
+      url: getKeychainUrl(),
+      signupOptions: [
+        "google",
+        "webauthn",
+        "discord",
+        "walletconnect",
+        "metamask",
+        "rabby",
+        "password",
+      ],
+      slot: config.slot,
+      namespace: config.namespace,
+      preset: config.preset,
+      shouldOverridePresetPolicies: config.shouldOverridePresetPolicies,
+      tokens: {
+        erc20: config.tokens as ("eth" | "strk" | "lords" | "usdc" | "usdt")[],
+      },
+    });
+  }, [
+    config.slot,
+    config.namespace,
+    config.preset,
+    config.shouldOverridePresetPolicies,
+    config.tokens,
+    config.policies,
+  ]);
+
+  const session = useMemo(() => {
+    return new SessionConnector({
+      policies,
+      rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
+      chainId: constants.StarknetChainId.SN_MAIN,
+      redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
+      disconnectRedirectUrl: "whatsapp://",
+      keychainUrl: getKeychainUrl(),
+      apiUrl: process.env.NEXT_PUBLIC_CARTRIDGE_API_URL,
+    });
+  }, []);
+
   return (
     <StarknetConfig
       autoConnect

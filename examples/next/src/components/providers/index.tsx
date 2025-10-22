@@ -2,6 +2,7 @@
 
 import { PropsWithChildren } from "react";
 import { ThemeProvider } from "./ThemeProvider";
+import { ControllerConfigProvider } from "./ControllerConfigProvider";
 import dynamic from "next/dynamic";
 
 const StarknetProviderClient = dynamic(
@@ -17,7 +18,9 @@ export function Providers({ children }: PropsWithChildren) {
       enableSystem
       disableTransitionOnChange
     >
-      <StarknetProviderClient>{children}</StarknetProviderClient>
+      <ControllerConfigProvider>
+        <StarknetProviderClient>{children}</StarknetProviderClient>
+      </ControllerConfigProvider>
     </ThemeProvider>
   );
 }

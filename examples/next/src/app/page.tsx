@@ -12,6 +12,7 @@ import { Profile } from "components/Profile";
 import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
 import { Starterpack } from "components/Starterpack";
+import { ConfigurationPanel } from "components/ConfigurationPanel";
 
 const Home: FC = () => {
   return (
@@ -23,6 +24,7 @@ const Home: FC = () => {
         <ColorModeToggle />
       </div>
       <Header />
+      <ConfigurationPanel />
       <Profile />
       <Transfer />
       <ManualTransferEth />
