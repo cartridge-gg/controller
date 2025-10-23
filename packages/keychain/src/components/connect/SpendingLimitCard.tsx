@@ -23,7 +23,7 @@ interface SpendingLimitCardProps {
 export function SpendingLimitCard({
   className,
   policies,
-  showCost,
+  showCost = true,
 }: SpendingLimitCardProps) {
   const tokenContracts = useMemo(() => {
     if (!policies?.contracts) return [];

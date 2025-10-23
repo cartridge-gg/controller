@@ -226,7 +226,11 @@ const CreateSessionLayout = ({
               size="sm"
               checked={isConsent}
               disabled={isConnecting}
-              className="px-8"
+              onCheckedChange={() => setIsConsent(!isConsent)}
+              className="pointer-events-none !w-5 !h-5"
+              style={{
+                margin: "6px",
+              }}
             />
             <h1 className="text-xs font-normal select-none">
               I agree to grant this application permission to execute the
@@ -252,23 +256,6 @@ const CreateSessionLayout = ({
             Skip
           </Button>
 
-          <Button
-            className="flex-1"
-            disabled={isConnecting || (!policies?.verified && !isConsent)}
-            isLoading={isConnecting}
-            onClick={async () => {
-              // If there are token contracts, go to spending limit page
-              if (hasTokenContracts) {
-                setStep("spending-limit");
-              } else {
-                // Otherwise, directly create session
-                await createSession({
-                  toggleOff: false,
-                  successCallback: onConnect,
-                });
-              }
-            }}
-          />
           <Button
             ref={createButtonRef}
             className="flex-1"

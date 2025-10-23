@@ -3,41 +3,16 @@ import {
   type SessionContracts,
   type SessionMessages,
 } from "@/hooks/session";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  cn,
-  CodeIcon,
-  Thumbnail,
-} from "@cartridge/ui";
+import { cn, CodeIcon } from "@cartridge/ui";
 import { useMemo } from "react";
 import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";
-import { TokenConsent } from "../connect/token-consent";
 import { toArray } from "@cartridge/controller";
-import { formatBalance } from "@/hooks/tokens";
-
-// Maximum value for uint128: 2^128 - 1
-const MAX_UINT128 = "340282366920938463463374607431768211455";
-
-function formatAmount(amount: string | number): string {
-  const numAmount = BigInt(amount);
-  const maxUint128 = BigInt(MAX_UINT128);
-
-  if (numAmount >= maxUint128) {
-    return "Unlimited";
-  }
-
-  return formatBalance(numAmount, 18);
-}
 
 export function VerifiedSessionSummary({
   game,
   contracts,
   messages,
-  hideSpendingLimit,
 }: {
   game: string;
   contracts?: SessionContracts;
@@ -46,7 +21,7 @@ export function VerifiedSessionSummary({
 }) {
   const { isEditable } = useCreateSession();
   // Separate contracts based on methods and type
-  const { tokenContracts, otherContracts, vrfContracts } = useMemo(() => {
+  const { otherContracts, vrfContracts } = useMemo(() => {
     const allContracts = Object.entries(contracts ?? {});
 
     const tokenContracts = allContracts.filter(([, contract]) => {
@@ -102,51 +77,6 @@ export function VerifiedSessionSummary({
           />
         ))}
       </div>
-
-      {/* Render token contracts after */}
-      {!hideSpendingLimit && tokenContracts && tokenContracts.length > 0 && (
-        <>
-          <TokenConsent />
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between h-10">
-              <CardTitle className="normal-case font-semibold text-xs">
-                Spending Limit
-              </CardTitle>
-            </CardHeader>
-
-            {tokenContracts.map(([address, contract]) => {
-              const amount =
-                contract.methods.find((m) => m.entrypoint === "approve")
-                  ?.amount ?? "0";
-
-              return (
-                <CardContent
-                  key={address}
-                  className="flex flex-row gap-3 p-3 w-full"
-                >
-                  <Thumbnail
-                    icon={contract.meta?.icon}
-                    size="md"
-                    variant="lighter"
-                    rounded
-                  />
-                  <div className="flex flex-col w-full">
-                    <div className="w-full flex flex-row items-center justify-between text-sm font-medium text-foreground-100">
-                      <p>
-                        {contract.name || contract.meta?.name || "Contract"}
-                      </p>
-                      <p>{formatAmount(amount)}</p>
-                    </div>
-                    <p className="text-foreground-400 text-xs font-medium">
-                      {formatAmount(amount)}
-                    </p>
-                  </div>
-                </CardContent>
-              );
-            })}
-          </Card>
-        </>
-      )}
     </div>
   );
 }
