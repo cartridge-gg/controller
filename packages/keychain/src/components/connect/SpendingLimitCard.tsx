@@ -12,15 +12,19 @@ import type { ParsedSessionPolicies } from "@/hooks/session";
 // Maximum value for uint128: 2^128 - 1
 const MAX_UINT128 = "340282366920938463463374607431768211455";
 
-function formatAmount(amount: string | number): string {
+function formatAmount(amount: string | number, decimals?: number): string {
   const numAmount = BigInt(amount);
   const maxUint128 = BigInt(MAX_UINT128);
+
+  if (!decimals) {
+    decimals = 18; // Default to 18 decimals if not provided
+  }
 
   if (numAmount >= maxUint128) {
     return "Unlimited";
   }
 
-  return formatBalance(numAmount, 18);
+  return `$${formatBalance(numAmount, decimals)}`;
 }
 
 export function SpendingLimitCard({
@@ -69,7 +73,7 @@ export function SpendingLimitCard({
                 <p>{formatAmount(amount)}</p>
               </div>
               <p className="text-foreground-400 text-xs font-medium">
-                {`${formatAmount(amount)} ${contract.name || contract.meta?.name || "Contract"}`}
+                {`${BigInt(amount) >= BigInt(MAX_UINT128) ? "Unlimited" : Number(amount)} ${contract.name || contract.meta?.name || "Contract"}`}
               </p>
             </div>
           </CardContent>

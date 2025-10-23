@@ -32,7 +32,7 @@ const mockPoliciesWithLimitedAmount: ParsedSessionPolicies = {
       methods: [
         {
           entrypoint: "approve",
-          amount: "1000000000000000000", // 1 ETH
+          amount: "0x1", // 1 ETH
         },
       ],
     },
@@ -72,7 +72,7 @@ const mockPoliciesWithMultipleTokens: ParsedSessionPolicies = {
       methods: [
         {
           entrypoint: "approve",
-          amount: "5000000000000000000", // 5 ETH
+          amount: "0x1", // 5 ETH
         },
       ],
     },
@@ -86,7 +86,7 @@ const mockPoliciesWithMultipleTokens: ParsedSessionPolicies = {
       methods: [
         {
           entrypoint: "approve",
-          amount: "100000000", // 100 USDC (assuming 6 decimals)
+          amount: "0x3",
         },
       ],
     },

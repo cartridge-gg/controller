@@ -26,6 +26,8 @@ export function SpendingLimitPage({
 }) {
   const { theme } = useConnection();
 
+  console.log("policies: ", policies);
+
   return (
     <>
       <HeaderInner
