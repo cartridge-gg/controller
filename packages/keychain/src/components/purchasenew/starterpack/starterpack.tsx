@@ -1,5 +1,10 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  useNavigation,
+  usePurchaseContext,
+  isBackendStarterpack,
+  isOnchainStarterpack,
+} from "@/context";
 import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 import {
   Button,
@@ -46,17 +51,37 @@ export function PurchaseStarterpack() {
     return <LoadingState />;
   }
 
-  return (
-    <StarterPackInner
-      name={details.name}
-      supply={details.supply}
-      mintAllowance={details.mintAllowance}
-      acquisitionType={details.acquisitionType}
-      starterpackItems={details.starterPackItems}
-      isMainnet={isMainnet}
-      error={displayError}
-    />
-  );
+  // Handle backend starterpacks (GraphQL)
+  if (isBackendStarterpack(details)) {
+    return (
+      <StarterPackInner
+        name={details.name}
+        supply={details.supply}
+        mintAllowance={details.mintAllowance}
+        acquisitionType={details.acquisitionType}
+        starterpackItems={details.starterPackItems}
+        isMainnet={isMainnet}
+        error={displayError}
+      />
+    );
+  }
+
+  // Handle onchain starterpacks (Smart contract)
+  if (isOnchainStarterpack(details)) {
+    return (
+      <OnchainStarterPackInner
+        name={details.name}
+        description={details.description}
+        items={details.items}
+        quote={details.quote}
+        isMainnet={isMainnet}
+        error={displayError}
+      />
+    );
+  }
+
+  // Fallback (should never reach here with proper types)
+  return <LoadingState />;
 }
 
 export function StarterPackInner({
@@ -198,3 +223,132 @@ export const StarterpackReceiving = ({
     </div>
   );
 };
+
+/**
+ * Onchain StarterPack Component - for starterpacks registered on smart contracts
+ */
+export function OnchainStarterPackInner({
+  name,
+  description,
+  items,
+  quote,
+  isMainnet,
+  error,
+}: {
+  name: string;
+  description: string;
+  items: Array<{ name: string; description: string; imageUri: string }>;
+  quote: {
+    basePrice: bigint;
+    referralFee: bigint;
+    protocolFee: bigint;
+    totalCost: bigint;
+    paymentToken: string;
+  };
+  isMainnet?: boolean;
+  error?: Error | null;
+}) {
+  const { navigate } = useNavigation();
+
+  const onProceed = () => {
+    // Onchain starterpacks always use crypto payment (direct to contract)
+    const methods = isMainnet
+      ? "ethereum;base;arbitrum;optimism"
+      : "arbitrum";
+    navigate(`/purchase/method/${methods}`);
+  };
+
+  const price = useMemo(() => {
+    const total = usdcToUsd(quote.totalCost);
+
+    return {
+      baseCostInCents: total * 100,
+      processingFeeInCents: 0,
+      totalInCents: total * 100,
+    } as CostDetails;
+  }, [quote]);
+
+  return (
+    <>
+      <HeaderInner
+        title={name}
+        description={
+          <span className="text-foreground-200 text-xs font-normal">
+            {description}
+          </span>
+        }
+        hideIcon
+      />
+      <LayoutContent>
+        <div className="flex flex-col gap-3">
+          {/* Onchain Items Display */}
+          <div className="flex flex-col gap-2">
+            <h1 className="text-xs font-semibold text-foreground-400">
+              You receive
+            </h1>
+            <div className="flex flex-col gap-2">
+              {items.map((item, index) => (
+                <Card key={index}>
+                  <CardContent className="flex flex-row items-center gap-3 p-3">
+                    {item.imageUri && (
+                      <img
+                        src={item.imageUri}
+                        alt={item.name}
+                        className="w-12 h-12 rounded"
+                      />
+                    )}
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm font-semibold">{item.name}</p>
+                      <p className="text-xs text-foreground-300">
+                        {item.description}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Quote Breakdown */}
+          <Card>
+            <CardContent className="flex flex-col gap-2 p-3">
+              <h2 className="text-xs font-semibold text-foreground-400">
+                Price Breakdown
+              </h2>
+              <div className="flex justify-between text-sm">
+                <span className="text-foreground-300">Base Price</span>
+                <span>${usdcToUsd(quote.basePrice).toFixed(2)}</span>
+              </div>
+              {quote.protocolFee > 0n && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-foreground-300">Protocol Fee</span>
+                  <span>${usdcToUsd(quote.protocolFee).toFixed(2)}</span>
+                </div>
+              )}
+              {quote.referralFee > 0n && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-foreground-300">Referral Fee</span>
+                  <span>${usdcToUsd(quote.referralFee).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm font-semibold pt-2 border-t border-border">
+                <span>Total</span>
+                <span>${usdcToUsd(quote.totalCost).toFixed(2)}</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </LayoutContent>
+      <LayoutFooter>
+        {error ? (
+          <ErrorAlert title="Error" description={error.message} />
+        ) : (
+          <CostBreakdown rails="stripe" costDetails={price} />
+        )}
+        <Button onClick={onProceed} disabled={!!error}>
+          Purchase
+        </Button>
+      </LayoutFooter>
+    </>
+  );
+}
