@@ -36,6 +36,15 @@ export class IFrame<CallSender extends {}> implements Modal {
 
     this.url = url;
 
+    const docHead = document.head;
+
+    const meta = document.createElement("meta");
+    meta.name = "viewport";
+    meta.id = "controller-viewport";
+    meta.content =
+      "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content";
+    docHead.appendChild(meta);
+
     const iframe = document.createElement("iframe");
     iframe.src = url.toString();
     iframe.id = id;
@@ -69,10 +78,42 @@ export class IFrame<CallSender extends {}> implements Modal {
     container.style.transition = "opacity 0.2s ease";
     container.style.opacity = "0";
     container.style.pointerEvents = "auto";
+    container.style.overscrollBehaviorY = "contain";
     container.style.scrollbarWidth = "none";
     container.style.setProperty("-ms-overflow-style", "none");
     container.style.setProperty("-webkit-scrollbar", "none");
     container.appendChild(iframe);
+
+    // Disables pinch to zoom
+    container.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
+
+    container.addEventListener(
+      "touchmove",
+      (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
+
+    container.addEventListener(
+      "touchend",
+      (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
 
     // Add click event listener to close iframe when clicking outside
     container.addEventListener("click", (e) => {
