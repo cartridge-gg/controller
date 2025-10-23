@@ -14,7 +14,7 @@ import {
   WalletConnectIcon,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { useMemo } from "react";
+import { forwardRef, useMemo } from "react";
 import { useUsernameValidation } from "../create/useUsernameValidation";
 import { credentialToAuth } from "../types";
 
@@ -76,85 +76,85 @@ const OPTIONS: Partial<Record<string, LoginAuthConfig>> = {
   },
 };
 
-export function AuthButton({
-  waitingForConfirmation,
-  validation,
-  username,
-  ...props
-}: AuthButtonProps) {
-  const { isExtensionMissing } = useWallets();
+export const AuthButton = forwardRef<HTMLButtonElement, AuthButtonProps>(
+  ({ waitingForConfirmation, validation, username, ...props }, ref) => {
+    const { isExtensionMissing } = useWallets();
 
-  const { isLoading, disabled, ...restProps } = props;
+    const { isLoading, disabled, ...restProps } = props;
 
-  const option = useMemo(() => {
-    if (!validation.signers || validation.signers.length === 0) {
-      return;
-    }
-
-    if (allUseSameAuth(validation.signers)) {
-      return OPTIONS[credentialToAuth(validation.signers[0])];
-    } else {
-      return OPTIONS["webauthn"];
-    }
-  }, [validation.signers]);
-
-  const extensionsMissingForAllSigners = useMemo(() => {
-    if (!option?.isExtension) {
-      return false;
-    }
-    if (!validation.signers) {
-      return false;
-    }
-    return validation.signers.every((signer) => isExtensionMissing(signer));
-  }, [isExtensionMissing, validation.signers, option?.isExtension]);
-
-  const icon = useMemo(() => {
-    if (isLoading || waitingForConfirmation) {
-      return <Spinner size="sm" />;
-    }
-    const IconComponent = option?.Icon;
-    return IconComponent ? <IconComponent size="sm" /> : null;
-  }, [isLoading, waitingForConfirmation, option]);
-
-  const text = useMemo(() => {
-    if (waitingForConfirmation) {
-      return `Waiting for ${option?.label} confirmation`;
-    }
-    if (isLoading) {
-      return null;
-    }
-    return validation.exists || !username ? "log in" : "sign up";
-  }, [
-    option?.label,
-    isLoading,
-    waitingForConfirmation,
-    validation.exists,
-    username,
-  ]);
-
-  return (
-    <Button
-      {...restProps}
-      className={cn(
-        "transition-all duration-300 ease-in-out px-3 py-2.5",
-        restProps.className,
-        !waitingForConfirmation && ["w-full h-[40px] gap-2", option?.bgColor],
-        waitingForConfirmation && [
-          "justify-start pointer-events-none rounded-[4px] text-sm normal-case font-normal font-sans border border-background-200 gap-1",
-          "bg-background-125",
-          "text-foreground-300",
-        ],
-      )}
-      isLoading={false}
-      disabled={
-        isLoading ||
-        disabled ||
-        waitingForConfirmation ||
-        extensionsMissingForAllSigners
+    const option = useMemo(() => {
+      if (!validation.signers || validation.signers.length === 0) {
+        return;
       }
-    >
-      {icon}
-      {text}
-    </Button>
-  );
-}
+
+      if (allUseSameAuth(validation.signers)) {
+        return OPTIONS[credentialToAuth(validation.signers[0])];
+      } else {
+        return OPTIONS["webauthn"];
+      }
+    }, [validation.signers]);
+
+    const extensionsMissingForAllSigners = useMemo(() => {
+      if (!option?.isExtension) {
+        return false;
+      }
+      if (!validation.signers) {
+        return false;
+      }
+      return validation.signers.every((signer) => isExtensionMissing(signer));
+    }, [isExtensionMissing, validation.signers, option?.isExtension]);
+
+    const icon = useMemo(() => {
+      if (isLoading || waitingForConfirmation) {
+        return <Spinner size="sm" />;
+      }
+      const IconComponent = option?.Icon;
+      return IconComponent ? <IconComponent size="sm" /> : null;
+    }, [isLoading, waitingForConfirmation, option]);
+
+    const text = useMemo(() => {
+      if (waitingForConfirmation) {
+        return `Waiting for ${option?.label} confirmation`;
+      }
+      if (isLoading) {
+        return null;
+      }
+      return validation.exists || !username ? "log in" : "sign up";
+    }, [
+      option?.label,
+      isLoading,
+      waitingForConfirmation,
+      validation.exists,
+      username,
+    ]);
+
+    return (
+      <Button
+        ref={ref}
+        {...restProps}
+        className={cn(
+          "transition-all duration-300 ease-in-out px-3 py-2.5",
+          restProps.className,
+          !waitingForConfirmation && ["w-full h-[40px] gap-2", option?.bgColor],
+          waitingForConfirmation && [
+            "justify-start pointer-events-none rounded-[4px] text-sm normal-case font-normal font-sans border border-background-200 gap-1",
+            "bg-background-125",
+            "text-foreground-300",
+          ],
+        )}
+        isLoading={false}
+        disabled={
+          isLoading ||
+          disabled ||
+          waitingForConfirmation ||
+          extensionsMissingForAllSigners
+        }
+      >
+        {icon}
+        {text}
+      </Button>
+    );
+  },
+);
+
+AuthButton.displayName = "AuthButton";

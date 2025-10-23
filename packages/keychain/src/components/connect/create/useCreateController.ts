@@ -695,5 +695,6 @@ export function useCreateController({
     setChangeWallet,
     signupOptions,
     authMethod,
+    setAuthMethod,
   };
 }

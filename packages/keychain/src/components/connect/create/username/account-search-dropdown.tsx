@@ -82,15 +82,20 @@ export const AccountSearchDropdown = React.forwardRef<
 
     const hasResults = results.length > 0;
     const shouldShowDropdown = React.useMemo(() => {
-      return Boolean(isOpen && query.length > 0 && (hasResults || isLoading));
-    }, [isOpen, hasResults, isLoading, query.length]);
+      // Keep dropdown open and keyboard active whenever:
+      // - isOpen is true
+      // - query has content
+      return Boolean(isOpen && query.length > 0);
+    }, [isOpen, query.length]);
 
-    // Auto-focus first item if input value matches the first result
+    // Auto-select first item by default when results appear
     React.useEffect(() => {
-      if (hasResults && results.length > 0 && results[0].username === query) {
+      if (hasResults && results.length > 0) {
         onSelectedIndexChange?.(0);
+      } else {
+        onSelectedIndexChange?.(undefined);
       }
-    }, [results, query, hasResults, onSelectedIndexChange]);
+    }, [hasResults, results.length, onSelectedIndexChange]);
 
     const handleSelect = React.useCallback(
       (result: AccountSearchResult) => {
@@ -102,13 +107,14 @@ export const AccountSearchDropdown = React.forwardRef<
     );
 
     // Handle keyboard navigation
-    const handleKeyDown = React.useCallback(
-      (event: React.KeyboardEvent) => {
-        if (!shouldShowDropdown) return;
+    React.useEffect(() => {
+      const handleGlobalKeyDown = (event: KeyboardEvent) => {
+        if (!isOpen || !query.length) return;
 
         switch (event.key) {
           case "ArrowDown": {
             event.preventDefault();
+            if (results.length === 0) return;
             const nextIndex =
               selectedIndex === undefined
                 ? 0
@@ -119,6 +125,7 @@ export const AccountSearchDropdown = React.forwardRef<
 
           case "ArrowUp": {
             event.preventDefault();
+            if (results.length === 0) return;
             const prevIndex =
               selectedIndex === undefined
                 ? results.length - 1
@@ -142,35 +149,26 @@ export const AccountSearchDropdown = React.forwardRef<
             break;
           }
         }
-      },
-      [
-        shouldShowDropdown,
-        selectedIndex,
-        results,
-        onSelectedIndexChange,
-        onOpenChange,
-        handleSelect,
-      ],
-    );
-
-    // Attach keyboard event listener to the trigger element
-    React.useEffect(() => {
-      const handleGlobalKeyDown = (event: KeyboardEvent) => {
-        handleKeyDown(event as unknown as React.KeyboardEvent);
       };
 
-      if (shouldShowDropdown) {
-        document.addEventListener("keydown", handleGlobalKeyDown);
-        return () => {
-          document.removeEventListener("keydown", handleGlobalKeyDown);
-        };
-      }
-    }, [shouldShowDropdown, handleKeyDown]);
+      document.addEventListener("keydown", handleGlobalKeyDown);
+      return () => {
+        document.removeEventListener("keydown", handleGlobalKeyDown);
+      };
+    }, [
+      isOpen,
+      query.length,
+      selectedIndex,
+      results,
+      onSelectedIndexChange,
+      onOpenChange,
+      handleSelect,
+    ]);
 
     return (
       <Popover open={isOpen} onOpenChange={onOpenChange} modal={true}>
         <PopoverAnchor ref={ref}>{children}</PopoverAnchor>
-        {shouldShowDropdown && (
+        {shouldShowDropdown && (hasResults || isLoading) && (
           <PopoverContent
             side="bottom"
             avoidCollisions={false}
@@ -209,8 +207,6 @@ export const AccountSearchDropdown = React.forwardRef<
                   query={query}
                   isSelected={selectedIndex === index}
                   onClick={() => handleSelect(result)}
-                  onMouseEnter={() => onSelectedIndexChange?.(index)}
-                  onMouseLeave={() => onSelectedIndexChange?.(undefined)}
                 />
               ))}
           </PopoverContent>

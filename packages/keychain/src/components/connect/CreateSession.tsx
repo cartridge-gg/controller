@@ -20,7 +20,7 @@ import {
   LayoutFooter,
   SliderIcon,
 } from "@cartridge/ui";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -61,6 +61,7 @@ const CreateSessionLayout = ({
   const [isConsent, setIsConsent] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<ControllerError | Error>();
+  const createButtonRef = useRef<HTMLButtonElement>(null);
 
   const { policies, duration, isEditable, onToggleEditable } =
     useCreateSession();
@@ -94,6 +95,46 @@ const CreateSessionLayout = ({
     },
     [controller, policies, expiresAt],
   );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+
+        // If unverified and consent not given, check the consent box
+        if (!policies?.verified && !isConsent && !isConnecting) {
+          setIsConsent(true);
+          return;
+        }
+
+        // If consent is given (or verified session), trigger create button
+        if ((policies?.verified || isConsent) && !isConnecting) {
+          createButtonRef.current?.click();
+        }
+      }
+    },
+    [policies?.verified, isConsent, isConnecting],
+  );
+
+  // Add keyboard listener to the document
+  useEffect(() => {
+    const handleDocumentKeyDown = (e: KeyboardEvent) => {
+      // Only handle if not in an input/textarea
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      handleKeyDown(e as unknown as React.KeyboardEvent);
+    };
+
+    document.addEventListener("keydown", handleDocumentKeyDown);
+    return () => document.removeEventListener("keydown", handleDocumentKeyDown);
+  }, [handleKeyDown]);
 
   return (
     <>
@@ -139,6 +180,12 @@ const CreateSessionLayout = ({
               isConsent ? "border-background-200" : "border-destructive-100",
             )}
             onClick={() => !isConnecting && setIsConsent(!isConsent)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (!isConnecting) setIsConsent(!isConsent);
+              }
+            }}
           >
             <Checkbox
               variant="solid"
@@ -175,6 +222,7 @@ const CreateSessionLayout = ({
             Skip
           </Button>
           <Button
+            ref={createButtonRef}
             className="flex-1"
             disabled={isConnecting || (!policies?.verified && !isConsent)}
             isLoading={isConnecting}
