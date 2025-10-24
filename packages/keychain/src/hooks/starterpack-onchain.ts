@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useController } from "./controller";
 import { CairoByteArray, Call, uint256 } from "starknet";
 
@@ -38,6 +38,7 @@ export const useStarterPackOnchain = (
   const [quote, setQuote] = useState<QuoteOnchain | null>(null);
   const [supply, setSupply] = useState<number | undefined>(undefined);
 
+  // Fetch metadata and quote (static data)
   useEffect(() => {
     if (!controller || starterpackId === undefined) {
       setIsLoading(false);
@@ -45,12 +46,12 @@ export const useStarterPackOnchain = (
     }
 
     setIsLoading(true);
-    console.log("fetching starterpack onchain");
+    console.log("fetching starterpack metadata and quote");
     const fetch = async () => {
       setError(null);
 
       try {
-        const [metadataRes, quoteRes, supplyRes] = await Promise.all([
+        const [metadataRes, quoteRes] = await Promise.all([
           controller.provider.callContract({
             contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
             entrypoint: "metadata",
@@ -61,15 +62,7 @@ export const useStarterPackOnchain = (
             entrypoint: "quote",
             calldata: [starterpackId, amount ? amount : 1, hasReferral ? 1 : 0],
           } as Call),
-          controller.provider.callContract({
-            contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
-            entrypoint: "supply",
-            calldata: [starterpackId ],
-          } as Call),
         ]);
-
-        // Supply is Option<u32>
-        const supply = supplyRes[0] === "0x1" ? undefined : Number(supplyRes[1]);
 
         // Parse metadata ByteArray
         const metadataByteArray = CairoByteArray.factoryFromApiResponse(
@@ -103,7 +96,6 @@ export const useStarterPackOnchain = (
 
         setMetadata(metadata);
         setQuote(quote);
-        setSupply(supply);
       } catch (error) {
         console.error(error);
         setError(error as Error);
@@ -115,11 +107,44 @@ export const useStarterPackOnchain = (
     fetch();
   }, [controller, starterpackId, amount, hasReferral]);
 
+  // Refetch supply function (can be called manually)
+  const refetchSupply = useCallback(async () => {
+    if (!controller || starterpackId === undefined) {
+      return;
+    }
+
+    console.log("fetching starterpack supply");
+    try {
+      const supplyRes = await controller.provider.callContract({
+        contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
+        entrypoint: "supply",
+        calldata: [starterpackId],
+      } as Call);
+
+      // Supply is Option<u32>
+      // If first element is 0x0 (None), supply is undefined
+      // If first element is 0x1 (Some), second element contains the value
+      const supply =
+        supplyRes[0] === "0x0" ? undefined : Number(supplyRes[1]);
+
+      setSupply(supply);
+    } catch (error) {
+      console.error("Failed to fetch supply:", error);
+      // Don't set error state for supply failures, just log it
+    }
+  }, [controller, starterpackId]);
+
+  // Fetch supply separately (reactive/dynamic data)
+  useEffect(() => {
+    refetchSupply();
+  }, [refetchSupply]);
+
   return {
     isLoading,
     error,
     metadata,
     quote,
     supply,
+    refetchSupply,
   };
 };
