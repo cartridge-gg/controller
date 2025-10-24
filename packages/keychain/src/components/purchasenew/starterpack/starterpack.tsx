@@ -24,7 +24,7 @@ import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
 import { useEffect, useMemo } from "react";
 import { LoadingState } from "../loading";
-import { CostBreakdown } from "../review/cost";
+import { CostBreakdown, OnchainCostBreakdown } from "../review/cost";
 import { usdcToUsd } from "@/utils/starterpack";
 import { useConnection } from "@/hooks/connection";
 import { CostDetails } from "../types";
@@ -112,7 +112,7 @@ export function StarterPackInner({
       case StarterpackAcquisitionType.Paid: {
         const methods = isMainnet
           ? "ethereum;base;arbitrum;optimism"
-          : "arbitrum";
+          : "arbitrum;";
 
         navigate(`/purchase/method/${methods}`);
         break;
@@ -252,19 +252,9 @@ export function OnchainStarterPackInner({
 
   const onProceed = () => {
     // Onchain starterpacks always use crypto payment (direct to contract)
-    const methods = isMainnet ? "ethereum;base;arbitrum;optimism" : "arbitrum";
+    const methods = isMainnet ? "ethereum;base;arbitrum;optimism" : "starknet;arbitrum";
     navigate(`/purchase/method/${methods}`);
   };
-
-  const price = useMemo(() => {
-    const total = usdcToUsd(quote.totalCost);
-
-    return {
-      baseCostInCents: total * 100,
-      processingFeeInCents: 0,
-      totalInCents: total * 100,
-    } as CostDetails;
-  }, [quote]);
 
   return (
     <>
@@ -306,42 +296,13 @@ export function OnchainStarterPackInner({
               ))}
             </div>
           </div>
-
-          {/* Quote Breakdown */}
-          <Card>
-            <CardContent className="flex flex-col gap-2 p-3">
-              <h2 className="text-xs font-semibold text-foreground-400">
-                Price Breakdown
-              </h2>
-              <div className="flex justify-between text-sm">
-                <span className="text-foreground-300">Base Price</span>
-                <span>${usdcToUsd(quote.basePrice).toFixed(2)}</span>
-              </div>
-              {quote.protocolFee > 0n && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-foreground-300">Protocol Fee</span>
-                  <span>${usdcToUsd(quote.protocolFee).toFixed(2)}</span>
-                </div>
-              )}
-              {quote.referralFee > 0n && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-foreground-300">Referral Fee</span>
-                  <span>${usdcToUsd(quote.referralFee).toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-sm font-semibold pt-2 border-t border-border">
-                <span>Total</span>
-                <span>${usdcToUsd(quote.totalCost).toFixed(2)}</span>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </LayoutContent>
       <LayoutFooter>
         {error ? (
           <ErrorAlert title="Error" description={error.message} />
         ) : (
-          <CostBreakdown rails="stripe" costDetails={price} />
+          <OnchainCostBreakdown quote={quote} />
         )}
         <Button onClick={onProceed} disabled={!!error}>
           Purchase

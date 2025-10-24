@@ -18,6 +18,8 @@ import {
   humanizeString,
 } from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
+import { OnchainFeesTooltip } from "./onchain-tooltip";
+import { getTokenIcon, getTokenSymbol, tokenAmountToUsd } from "./token-utils";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -25,6 +27,17 @@ type PaymentUnit = "usdc" | "credits";
 export const convertCentsToDollars = (cents: number): string => {
   return `$${(cents / 100).toFixed(2)}`;
 };
+
+/**
+ * Onchain quote for token-based payments
+ */
+export interface OnchainQuote {
+  basePrice: bigint;
+  referralFee: bigint;
+  protocolFee: bigint;
+  totalCost: bigint;
+  paymentToken: string;
+}
 
 export function CostBreakdown({
   rails,
@@ -84,6 +97,59 @@ export function CostBreakdown({
   );
 }
 
+/**
+ * Onchain Cost Breakdown - for token-based payments directly to smart contracts
+ */
+export function OnchainCostBreakdown({
+  quote,
+  platform,
+  openFeesTooltip = false,
+}: {
+  quote: OnchainQuote;
+  platform?: ExternalPlatform;
+  openFeesTooltip?: boolean;
+}) {
+  const tokenSymbol = getTokenSymbol(quote.paymentToken);
+  const tokenIcon = getTokenIcon(quote.paymentToken);
+  const totalDisplay = tokenAmountToUsd(quote.totalCost, quote.paymentToken);
+
+  return (
+    <Card className="gap-3">
+      {platform && (
+        <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
+          <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
+            Purchase on <Network platform={platform} />
+          </div>
+        </CardContent>
+      )}
+
+      <div className="flex flex-row gap-3 h-[40px]">
+        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+          <div className="flex justify-between text-sm font-medium w-full">
+            <div className="flex flex-row items-center gap-1">
+              <span>Total</span>
+              {quote.referralFee > 0n && (
+                <OnchainFeesTooltip
+                  trigger={<InfoIcon size="xs" />}
+                  defaultOpen={openFeesTooltip}
+                  quote={{
+                    basePrice: quote.basePrice,
+                    referralFee: quote.referralFee,
+                    totalCost: quote.totalCost,
+                    paymentToken: quote.paymentToken,
+                  }}
+                />
+              )}
+            </div>
+            <span className="text-foreground-100">{totalDisplay}</span>
+          </div>
+        </CardContent>
+        <OnchainPaymentType symbol={tokenSymbol} icon={tokenIcon} />
+      </div>
+    </Card>
+  );
+}
+
 const PaymentType = ({ unit }: { unit?: PaymentUnit }) => {
   if (!unit) {
     return <></>;
@@ -104,6 +170,27 @@ const PaymentType = ({ unit }: { unit?: PaymentUnit }) => {
         rounded
       />
       {unit.toUpperCase()}
+    </CardContent>
+  );
+};
+
+const OnchainPaymentType = ({
+  symbol,
+  icon,
+}: {
+  symbol: string;
+  icon: string | null;
+}) => {
+  return (
+    <CardContent className="flex items-center px-3 bg-background-200 gap-2 rounded-[4px] text-sm font-medium">
+      {icon ? (
+        <Thumbnail size="sm" icon={icon} variant="light" rounded />
+      ) : (
+        <div className="w-6 h-6 rounded-full bg-background-300 flex items-center justify-center text-[10px]">
+          ?
+        </div>
+      )}
+      {symbol}
     </CardContent>
   );
 };
