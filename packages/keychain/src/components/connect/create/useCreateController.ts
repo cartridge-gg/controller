@@ -86,7 +86,6 @@ export function useCreateController({
           credentials?.webauthn?.[0] ?? {};
 
         const controllerNode = controllers?.edges?.[0]?.node;
-
         if (
           controllerNode &&
           username &&
