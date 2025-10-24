@@ -340,7 +340,7 @@ export default class ControllerProvider extends BaseProvider {
     });
   }
 
-  async openStarterPack(starterpackId: string): Promise<void> {
+  async openStarterPack(starterpackId: string | number): Promise<void> {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;

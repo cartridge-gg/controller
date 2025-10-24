@@ -124,8 +124,7 @@ export const useStarterPackOnchain = (
       // Supply is Option<u32>
       // If first element is 0x0 (None), supply is undefined
       // If first element is 0x1 (Some), second element contains the value
-      const supply =
-        supplyRes[0] === "0x0" ? undefined : Number(supplyRes[1]);
+      const supply = supplyRes[0] === "0x0" ? undefined : Number(supplyRes[1]);
 
       setSupply(supply);
     } catch (error) {

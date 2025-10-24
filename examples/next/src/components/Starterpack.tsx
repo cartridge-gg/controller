@@ -68,7 +68,7 @@ export const Starterpack = () => {
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h3>Purchase Starterpack</h3>
+          <h3>Purchase Starterpack (Backend)</h3>
           <div className="flex items-center gap-2">
             <Input
               className="max-w-80"
@@ -87,7 +87,30 @@ export const Starterpack = () => {
               }}
               disabled={!purchaseSpId.trim()}
             >
-              Purchase Starterpack
+              Purchase
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h3>Purchase Starterpack (Onchain)</h3>
+          <div className="flex items-center gap-2">
+            <Input
+              className="max-w-80"
+              type="text"
+              value={purchaseSpId}
+              onChange={(e) => setPurchaseSpId(e.target.value)}
+              placeholder="Enter starterpack ID"
+            />
+            <Button
+              onClick={() => {
+                if (purchaseSpId.trim()) {
+                  controllerConnector.controller.openStarterPack(0);
+                }
+              }}
+              disabled={!purchaseSpId.trim()}
+            >
+              Purchase Onchain
             </Button>
           </div>
         </div>
