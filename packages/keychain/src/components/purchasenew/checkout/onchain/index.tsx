@@ -15,7 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import { isOnchainStarterpack } from "@/context";
-import { uint256 } from "starknet";
+import { uint256, Call } from "starknet";
 import { getTokenSymbol } from "../../review/token-utils";
 
 export function OnchainCheckout() {
@@ -25,6 +25,7 @@ export function OnchainCheckout() {
     starterpackDetails,
     selectedWallet,
     walletAddress,
+    setTransactionHash,
     clearError,
   } = usePurchaseContext();
   const { navigate } = useNavigation();
@@ -33,12 +34,15 @@ export function OnchainCheckout() {
   const [balance, setBalance] = useState<bigint | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Extract quote from onchain starterpack
-  const quote = useMemo(() => {
+  // Extract quote and ID from onchain starterpack
+  const { quote, starterpackId } = useMemo(() => {
     if (!starterpackDetails || !isOnchainStarterpack(starterpackDetails)) {
-      return null;
+      return { quote: null, starterpackId: null };
     }
-    return starterpackDetails.quote;
+    return {
+      quote: starterpackDetails.quote,
+      starterpackId: starterpackDetails.id,
+    };
   }, [starterpackDetails]);
 
   // Check if user has sufficient balance
@@ -95,20 +99,68 @@ export function OnchainCheckout() {
   }, [controller, quote, selectedWallet, walletAddress]);
 
   const onPurchase = useCallback(async () => {
-    if (!quote || !hasSufficientBalance) return;
+    if (!controller || !quote || !starterpackId || !hasSufficientBalance)
+      return;
 
     setIsLoading(true);
     try {
-      // TODO: Implement onchain purchase flow
-      // This will call the starterpack contract's purchase function
-      console.log("Purchasing starterpack with onchain payment");
+      const registryContract = import.meta.env
+        .VITE_STARTERPACK_REGISTRY_CONTRACT;
+      const recipient = controller.address();
+
+      // Convert totalCost to u256 (low, high)
+      const amount256 = uint256.bnToUint256(quote.totalCost);
+
+      // Step 1: Approve payment token for the exact transfer amount
+      const approveCalls: Call[] = [
+        {
+          contractAddress: quote.paymentToken,
+          entrypoint: "approve",
+          calldata: [
+            registryContract, // spender
+            amount256.low, // amount low
+            amount256.high, // amount high
+          ],
+        },
+      ];
+
+      // Step 2: Issue the starterpack
+      // issue(recipient, starterpack_id, quantity, referrer: Option<ContractAddress>, referrer_group: Option<felt252>)
+      const issueCalls: Call[] = [
+        {
+          contractAddress: registryContract,
+          entrypoint: "issue",
+          calldata: [
+            recipient, // recipient
+            starterpackId, // starterpack_id: u32
+            0x1, // quantity: u32 (always 1 for now)
+            0x1, // referrer: Option<ContractAddress> (None)
+            0x1, // referrer_group: Option<felt252> (None)
+          ],
+        },
+      ];
+
+      // Execute both calls in sequence
+      const calls = [...approveCalls, ...issueCalls];
+      const result = await controller.execute(calls);
+
+      // Store transaction hash and navigate to pending
+      setTransactionHash(result.transaction_hash);
       navigate("/purchase/pending", { reset: true });
     } catch (error) {
       console.error("Purchase failed:", error);
+      // Error will be displayed via displayError in the UI
     } finally {
       setIsLoading(false);
     }
-  }, [quote, hasSufficientBalance, navigate]);
+  }, [
+    controller,
+    quote,
+    starterpackId,
+    hasSufficientBalance,
+    setTransactionHash,
+    navigate,
+  ]);
 
   useEffect(() => {
     clearError();
@@ -159,7 +211,7 @@ export function OnchainCheckout() {
         >
           {!hasSufficientBalance && !isChecking
             ? "Insufficient Balance"
-            : "Purchase"}
+            : "Confirm"}
         </Button>
       </LayoutFooter>
     </>
