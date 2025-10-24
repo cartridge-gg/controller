@@ -57,6 +57,19 @@ import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
 import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
+import { useAccount } from "@/hooks/account";
+
+function DefaultRoute() {
+  const account = useAccount();
+
+  // When logged in and at root path, redirect to inventory
+  if (account?.username) {
+    return <Navigate to={`/account/${account.username}/inventory`} replace />;
+  }
+
+  // If no account, render nothing (Authentication component will handle login)
+  return null;
+}
 
 function Authentication() {
   const { controller, isConfigLoading } = useConnection();
@@ -119,6 +132,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/" element={<Authentication />}>
+        <Route index element={<DefaultRoute />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/recovery" element={<Recovery />} />
         <Route path="/settings/delegate" element={<Delegate />} />
