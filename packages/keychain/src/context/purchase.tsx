@@ -397,7 +397,6 @@ export const PurchaseProvider = ({
   const onOnchainPurchase = useCallback(async () => {
     if (!controller || !starterpackDetails) return;
 
-    // Verify it's an onchain starterpack
     if (!isOnchainStarterpack(starterpackDetails)) {
       throw new Error("Not an onchain starterpack");
     }
