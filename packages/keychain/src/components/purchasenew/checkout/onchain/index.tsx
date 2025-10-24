@@ -16,11 +16,17 @@ import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import { isOnchainStarterpack } from "@/context";
 import { uint256 } from "starknet";
-import { tokenAmountToDecimal, getTokenSymbol } from "../../review/token-utils";
+import { getTokenSymbol } from "../../review/token-utils";
 
 export function OnchainCheckout() {
-  const { purchaseItems, displayError, starterpackDetails, clearError } =
-    usePurchaseContext();
+  const {
+    purchaseItems,
+    displayError,
+    starterpackDetails,
+    selectedWallet,
+    walletAddress,
+    clearError,
+  } = usePurchaseContext();
   const { navigate } = useNavigation();
   const { controller } = useConnection();
   const [isChecking, setIsChecking] = useState(true);
@@ -49,14 +55,21 @@ export function OnchainCheckout() {
         return;
       }
 
+      // Use external wallet address for Argent/Braavos, otherwise use controller address
+      const isExternalStarknetWallet =
+        selectedWallet?.type === "argent" || selectedWallet?.type === "braavos";
+      const addressToCheck =
+        isExternalStarknetWallet && walletAddress
+          ? walletAddress
+          : controller.address();
+
       try {
         setIsChecking(true);
-
         // Call balanceOf on the payment token contract
         const result = await controller.provider.callContract({
           contractAddress: quote.paymentToken,
           entrypoint: "balanceOf",
-          calldata: [controller.address],
+          calldata: [addressToCheck],
         });
 
         // Parse the u256 balance (2 felts: low, high)
@@ -76,7 +89,7 @@ export function OnchainCheckout() {
     };
 
     checkBalance();
-  }, [controller, quote]);
+  }, [controller, quote, selectedWallet, walletAddress]);
 
   const onPurchase = useCallback(async () => {
     if (!quote || !hasSufficientBalance) return;
@@ -108,15 +121,6 @@ export function OnchainCheckout() {
   }
 
   const tokenSymbol = getTokenSymbol(quote.paymentToken);
-  const balanceDisplay =
-    balance !== null
-      ? tokenAmountToDecimal(balance, quote.paymentToken).toFixed(6)
-      : "...";
-  const requiredDisplay = tokenAmountToDecimal(
-    quote.totalCost,
-    quote.paymentToken,
-  ).toFixed(6);
-
   return (
     <>
       <HeaderInner
@@ -125,25 +129,8 @@ export function OnchainCheckout() {
       />
       <LayoutContent>
         <Receiving title="Receiving" items={purchaseItems} />
-
-        {/* Balance Check Card */}
-        <Card>
-          <CardContent className="flex flex-col gap-2 p-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-foreground-300">Your Balance:</span>
-              <span className="font-medium">
-                {balanceDisplay} {tokenSymbol}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-foreground-300">Required:</span>
-              <span className="font-medium">
-                {requiredDisplay} {tokenSymbol}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
+      </LayoutContent>
+      <LayoutFooter>
         {/* Insufficient Balance Warning */}
         {!isChecking && !hasSufficientBalance && (
           <Card className="border-warning">
@@ -159,8 +146,7 @@ export function OnchainCheckout() {
             </CardContent>
           </Card>
         )}
-      </LayoutContent>
-      <LayoutFooter>
+
         <OnchainCostBreakdown quote={quote} />
         {displayError && <ControllerErrorAlert error={displayError} />}
         <Button
