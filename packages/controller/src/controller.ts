@@ -55,11 +55,11 @@ export default class ControllerProvider extends BaseProvider {
     this.chains = new Map<ChainId, Chain>();
     this.options = { ...options, chains, defaultChainId };
 
+    this.initializeChains(chains);
+
     this.iframes = {
       keychain: options.lazyload ? undefined : this.createKeychainIframe(),
     };
-
-    this.initializeChains(chains);
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;
@@ -428,6 +428,7 @@ export default class ControllerProvider extends BaseProvider {
   private createKeychainIframe(): KeychainIFrame {
     return new KeychainIFrame({
       ...this.options,
+      rpcUrl: this.rpcUrl(),
       onClose: this.keychain?.reset,
       onConnect: (keychain) => {
         this.keychain = keychain;

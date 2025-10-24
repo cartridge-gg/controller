@@ -20,6 +20,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     tokens,
     preset,
     shouldOverridePresetPolicies,
+    rpcUrl,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
@@ -42,6 +43,10 @@ export class KeychainIFrame extends IFrame<Keychain> {
         "erc20",
         encodeURIComponent(tokens.erc20.toString()),
       );
+    }
+
+    if (rpcUrl) {
+      _url.searchParams.set("rpc_url", encodeURIComponent(rpcUrl));
     }
 
     // Policy precedence logic:

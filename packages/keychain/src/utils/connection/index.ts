@@ -35,7 +35,7 @@ export function connectToController<ParentMethods extends object>({
       deploy: () => deployFactory({ navigate }),
       execute: () => execute({ navigate }),
       estimateInvokeFee: () => estimateInvokeFee,
-      probe: normalize(probe({ setController, setRpcUrl })),
+      probe: normalize(probe({ setController })),
       signMessage: () =>
         signMessageFactory({
           navigate,
