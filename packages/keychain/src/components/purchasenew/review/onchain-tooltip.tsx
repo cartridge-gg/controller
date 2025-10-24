@@ -12,6 +12,7 @@ import { tokenAmountToUsd } from "./token-utils";
  */
 interface OnchainQuoteBreakdown {
   basePrice: bigint;
+  protocolFee: bigint;
   referralFee: bigint;
   totalCost: bigint;
   paymentToken: string;
@@ -41,11 +42,21 @@ export const OnchainFeesTooltip = ({
           </div>
           <Separator className="bg-background-125" />
           <div className="flex flex-row justify-between text-foreground-300">
-            <span>Referral Fee:</span>
+            <span>Protocol Fee:</span>
             <span>
-              {tokenAmountToUsd(quote.referralFee, quote.paymentToken)}
+              {tokenAmountToUsd(quote.protocolFee, quote.paymentToken)}
             </span>
           </div>
+          {quote.referralFee > 0n && (
+            <>
+              <div className="flex flex-row justify-between text-foreground-300">
+                <span>Referral Fee:</span>
+                <span>
+                  {tokenAmountToUsd(quote.referralFee, quote.paymentToken)}
+                </span>
+              </div>
+            </>
+          )}
           <Separator className="bg-background-125" />
           <div className="flex flex-row justify-between text-foreground-100 font-medium">
             <span>Total:</span>

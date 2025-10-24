@@ -128,18 +128,17 @@ export function OnchainCostBreakdown({
           <div className="flex justify-between text-sm font-medium w-full">
             <div className="flex flex-row items-center gap-1">
               <span>Total</span>
-              {quote.referralFee > 0n && (
-                <OnchainFeesTooltip
-                  trigger={<InfoIcon size="xs" />}
-                  defaultOpen={openFeesTooltip}
-                  quote={{
-                    basePrice: quote.basePrice,
-                    referralFee: quote.referralFee,
-                    totalCost: quote.totalCost,
-                    paymentToken: quote.paymentToken,
-                  }}
-                />
-              )}
+              <OnchainFeesTooltip
+                trigger={<InfoIcon size="xs" />}
+                defaultOpen={openFeesTooltip}
+                quote={{
+                  basePrice: quote.basePrice,
+                  protocolFee: quote.protocolFee,
+                  referralFee: quote.referralFee,
+                  totalCost: quote.totalCost,
+                  paymentToken: quote.paymentToken,
+                }}
+              />
             </div>
             <span className="text-foreground-100">{totalDisplay}</span>
           </div>
