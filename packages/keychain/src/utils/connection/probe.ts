@@ -3,18 +3,24 @@ import Controller from "@/utils/controller";
 
 export function probe({
   setController,
+  setRpcUrl,
 }: {
   setController: (controller?: Controller) => void;
+  setRpcUrl?: (url: string) => void;
 }) {
   return (origin: string) =>
-    // The ignored param is rpcUrl which is no longer needed but have to be kept for compatibility
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async (_: string): Promise<ProbeReply> => {
+    async (rpcUrl: string): Promise<ProbeReply> => {
       const controller = await Controller.fromStore(origin);
       if (!controller) {
         return Promise.reject({
           code: ResponseCodes.NOT_CONNECTED,
         });
+      }
+
+      // Update the rpcUrl in the connection context if setRpcUrl is provided
+      // This ensures the keychain respects the defaultChainId from the controller
+      if (setRpcUrl && rpcUrl) {
+        setRpcUrl(rpcUrl);
       }
 
       setController(controller);
