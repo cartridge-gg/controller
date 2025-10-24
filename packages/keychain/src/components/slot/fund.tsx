@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from "react";
-import Controller from "@/utils/controller";
 import { useLocation } from "react-router-dom";
 import { useTeamsQuery } from "@cartridge/ui/utils/api/cartridge";
 import { Purchase } from "../purchase";
@@ -39,31 +38,11 @@ export function Fund() {
   } = useTeamsQuery(undefined, { refetchInterval: 1000 });
 
   useEffect(() => {
-    let cancelled = false;
-
     if (error) {
       navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
         replace: true,
       });
-      return () => {
-        cancelled = true;
-      };
     }
-
-    (async () => {
-      const controller = await Controller.fromStore(
-        import.meta.env.VITE_ORIGIN!,
-      );
-      if (!controller && !cancelled) {
-        navigate(`/slot?returnTo=${encodeURIComponent(pathname)}`, {
-          replace: true,
-        });
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
   }, [navigate, pathname, error]);
 
   const teams: Team[] = useMemo(
