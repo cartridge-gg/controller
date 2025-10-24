@@ -1,5 +1,5 @@
 import { ExternalIcon, cn } from "@cartridge/ui";
-import { useMemo } from "react";
+import { HTMLAttributes, useMemo } from "react";
 
 export type ValidationState = {
   status: "idle" | "validating" | "valid" | "invalid";
@@ -11,13 +11,15 @@ interface StatusProps {
   username: string;
   validation: ValidationState;
   error?: Error;
-  className?: string;
+  containerClassName?: HTMLAttributes<HTMLDivElement>["className"];
+  className?: HTMLAttributes<HTMLDivElement>["className"];
 }
 
 export function Status({
   username,
   validation,
   error,
+  containerClassName,
   className,
 }: StatusProps) {
   const isError = validation.status === "invalid" || error;
@@ -52,7 +54,12 @@ export function Status({
   }, [validation, errorMessage, username, isError]);
 
   return (
-    <div className="flex flex-col bg-translucent-dark-100 gap-y-px">
+    <div
+      className={cn(
+        "flex flex-col bg-translucent-dark-100 gap-y-px",
+        containerClassName,
+      )}
+    >
       <Block className={className} error={!!isError} validation={validation}>
         {message}
       </Block>

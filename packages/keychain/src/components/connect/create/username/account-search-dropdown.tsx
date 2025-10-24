@@ -25,6 +25,7 @@ export interface AccountSearchDropdownProps {
   onSelectedIndexChange?: (index: number | undefined) => void;
   isLoading?: boolean;
   validationState?: UseAccountSearchOptions["validationState"];
+  onContentVisibilityChange?: (hasContent: boolean) => void;
   // Optional mock data for Storybook
   mockResults?: AccountSearchResult[];
   mockIsLoading?: boolean;
@@ -46,6 +47,7 @@ export const AccountSearchDropdown = React.forwardRef<
       onSelectedIndexChange,
       isLoading: externalIsLoading = false,
       validationState,
+      onContentVisibilityChange,
       mockResults,
       mockIsLoading,
       mockError,
@@ -87,6 +89,13 @@ export const AccountSearchDropdown = React.forwardRef<
       // - query has content
       return Boolean(isOpen && query.length > 0);
     }, [isOpen, query.length]);
+
+    const hasDropdownContent = hasResults || isLoading;
+
+    // Notify parent when dropdown content visibility changes
+    React.useEffect(() => {
+      onContentVisibilityChange?.(shouldShowDropdown && hasDropdownContent);
+    }, [shouldShowDropdown, hasDropdownContent, onContentVisibilityChange]);
 
     // Auto-select first item by default when results appear
     React.useEffect(() => {
@@ -168,7 +177,7 @@ export const AccountSearchDropdown = React.forwardRef<
     return (
       <Popover open={isOpen} onOpenChange={onOpenChange} modal={true}>
         <PopoverAnchor ref={ref}>{children}</PopoverAnchor>
-        {shouldShowDropdown && (hasResults || isLoading) && (
+        {shouldShowDropdown && hasDropdownContent && (
           <PopoverContent
             side="bottom"
             avoidCollisions={false}

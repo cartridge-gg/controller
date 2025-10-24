@@ -85,6 +85,8 @@ export const CreateAccount = React.forwardRef<
     const [selectedIndex, setSelectedIndex] = React.useState<
       number | undefined
     >(undefined);
+    const [hasDropdownContent, setHasDropdownContent] =
+      React.useState<boolean>(false);
 
     // Use imperative handle to expose the input ref
     React.useImperativeHandle(ref, () => internalRef.current!);
@@ -365,7 +367,7 @@ export const CreateAccount = React.forwardRef<
               }
             }}
           />
-          {(!isDropdownOpen || usernameField.value === "") && (
+          {!hasDropdownContent && (
             <Status
               username={usernameField.value}
               validation={validation}
@@ -373,7 +375,7 @@ export const CreateAccount = React.forwardRef<
             />
           )}
         </div>
-        {isDropdownOpen && usernameField.value !== "" && (
+        {hasDropdownContent && (
           <div className="h-8 bg-background-150 border-none" /> // Placeholder to prevent layout shift when dropdown opens
         )}
       </>
@@ -398,6 +400,7 @@ export const CreateAccount = React.forwardRef<
           status: validation.status,
           exists: validation.exists,
         },
+        onContentVisibilityChange: setHasDropdownContent,
         mockResults,
         mockIsLoading: mockIsLoading ?? false,
         mockError,
