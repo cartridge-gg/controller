@@ -3,34 +3,16 @@ export { Consent } from "./consent";
 import { PageLoading } from "@/components/Loading";
 import { useMeQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useEffect } from "react";
-import {
-  Navigate,
-  Outlet,
-  useLocation,
-  useSearchParams,
-} from "react-router-dom";
+import { Outlet, useSearchParams } from "react-router-dom";
 import { CheckIcon, HeaderInner, LayoutContent } from "@cartridge/ui";
 import { useNavigation } from "@/context/navigation";
 import { useConnection } from "@/hooks/connection";
 
 export function Slot() {
-  const { pathname } = useLocation();
-  switch (pathname) {
-    case "/slot/auth":
-      return <Navigate to="/slot" replace />;
-    case "/slot/auth/success":
-      return <Success />;
-    case "/slot/auth/failure":
-      return <Navigate to="/failure" replace />;
-    case "/slot/consent":
-    case "/slot/fund":
-      return <Outlet />;
-    default:
-      return <Auth />;
-  }
+  return <Outlet />;
 }
 
-function Auth() {
+export function Auth() {
   const { navigate } = useNavigation();
   const [searchParams] = useSearchParams();
   const { logout, controller } = useConnection();
@@ -56,7 +38,7 @@ function Auth() {
 
       navigate(target, { replace: true });
     }
-  }, [user, isFetched, controller, navigate, searchParams, logout]);
+  }, [user, isFetched, controller, navigate, searchParams]);
 
   // Logout to send user back to login
   useEffect(() => {

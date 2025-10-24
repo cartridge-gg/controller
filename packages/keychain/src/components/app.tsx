@@ -1,9 +1,9 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { Auth } from "./slot/index";
 import { AuthOptions } from "@cartridge/controller";
 import { Session } from "./session";
 import { Failure } from "./failure";
 import { Pending } from "./pending";
-import { Slot } from "./slot";
 import { Consent, Success } from "./slot/index";
 import { Fund } from "./slot/fund";
 import { FeatureToggle } from "./feature-toggle";
@@ -124,7 +124,8 @@ export function App() {
         <Route path="/settings/delegate" element={<Delegate />} />
         <Route path="/settings/add-signer" element={<AddSignerRoute />} />
         <Route path="session" element={<Session />} />
-        <Route path="slot" element={<Slot />}>
+        <Route path="slot" element={<Outlet />}>
+          <Route index element={<Auth />} />
           <Route path="consent" element={<Consent />} />
           <Route path="fund" element={<Fund />} />
         </Route>

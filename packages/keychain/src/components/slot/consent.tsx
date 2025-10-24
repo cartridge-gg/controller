@@ -1,8 +1,6 @@
-import Controller from "@/utils/controller";
 import { LayoutFooter, Button, Checkbox, HeaderInner } from "@cartridge/ui";
-import { useCallback, useEffect, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
-import { useNavigation } from "@/context/navigation";
+import { useCallback, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 interface ConsentCheckboxProps {
   checked: boolean;
@@ -42,8 +40,6 @@ function ConsentCheckbox({
 }
 
 export function Consent() {
-  const { navigate } = useNavigation();
-  const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const callback_uri = searchParams.get("callback_uri")!;
 
@@ -64,32 +60,6 @@ export function Consent() {
 
     window.location.href = url;
   }, [callback_uri, allAccepted]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      const controller = await Controller.fromStore(
-        import.meta.env.VITE_ORIGIN!,
-      );
-      if (!controller && !cancelled) {
-        navigate(
-          `/slot?returnTo=${encodeURIComponent(pathname)}${
-            callback_uri
-              ? `&callback_uri=${encodeURIComponent(callback_uri)}`
-              : ""
-          }`,
-          {
-            replace: true,
-          },
-        );
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [navigate, callback_uri, pathname]);
 
   return (
     <>
