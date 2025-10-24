@@ -6,7 +6,7 @@ import {
   WalletIcon,
 } from "@cartridge/ui";
 import { networkWalletData } from "./data";
-import { useNavigation, usePurchaseContext } from "@/context";
+import { useNavigation, usePurchaseContext, isOnchainStarterpack } from "@/context";
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { ExternalWallet } from "@cartridge/controller";
@@ -111,7 +111,11 @@ export function SelectWallet() {
     if (
       starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Paid
     ) {
-      navigate(`/purchase/checkout/crypto`);
+      // Route to onchain checkout for onchain starterpacks, crypto for backend
+      const checkoutPath = isOnchainStarterpack(starterpackDetails)
+        ? `/purchase/checkout/onchain`
+        : `/purchase/checkout/crypto`;
+      navigate(checkoutPath);
       return;
     }
 
@@ -137,7 +141,11 @@ export function SelectWallet() {
           starterpackDetails?.acquisitionType ===
           StarterpackAcquisitionType.Paid
         ) {
-          navigate(`/purchase/checkout/crypto`);
+          // Route to onchain checkout for onchain starterpacks, crypto for backend
+          const checkoutPath = isOnchainStarterpack(starterpackDetails)
+            ? `/purchase/checkout/onchain`
+            : `/purchase/checkout/crypto`;
+          navigate(checkoutPath);
           return;
         }
 

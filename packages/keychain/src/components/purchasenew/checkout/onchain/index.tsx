@@ -19,12 +19,8 @@ import { uint256 } from "starknet";
 import { tokenAmountToDecimal, getTokenSymbol } from "../../review/token-utils";
 
 export function OnchainCheckout() {
-  const {
-    purchaseItems,
-    displayError,
-    starterpackDetails,
-    clearError,
-  } = usePurchaseContext();
+  const { purchaseItems, displayError, starterpackDetails, clearError } =
+    usePurchaseContext();
   const { navigate } = useNavigation();
   const { controller } = useConnection();
   const [isChecking, setIsChecking] = useState(true);
@@ -112,9 +108,10 @@ export function OnchainCheckout() {
   }
 
   const tokenSymbol = getTokenSymbol(quote.paymentToken);
-  const balanceDisplay = balance !== null
-    ? tokenAmountToDecimal(balance, quote.paymentToken).toFixed(6)
-    : "...";
+  const balanceDisplay =
+    balance !== null
+      ? tokenAmountToDecimal(balance, quote.paymentToken).toFixed(6)
+      : "...";
   const requiredDisplay = tokenAmountToDecimal(
     quote.totalCost,
     quote.paymentToken,
@@ -171,10 +168,11 @@ export function OnchainCheckout() {
           isLoading={isLoading || isChecking}
           disabled={!hasSufficientBalance || !!displayError || isChecking}
         >
-          {!hasSufficientBalance && !isChecking ? "Insufficient Balance" : "Purchase"}
+          {!hasSufficientBalance && !isChecking
+            ? "Insufficient Balance"
+            : "Purchase"}
         </Button>
       </LayoutFooter>
     </>
   );
 }
-
