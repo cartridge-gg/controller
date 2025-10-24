@@ -49,6 +49,10 @@ export function OnchainCheckout() {
 
   // Fetch user's token balance
   useEffect(() => {
+    // Reset balance when wallet selection changes
+    setBalance(null);
+    setIsChecking(true);
+
     const checkBalance = async () => {
       if (!controller || !quote) {
         setIsChecking(false);
@@ -64,7 +68,6 @@ export function OnchainCheckout() {
           : controller.address();
 
       try {
-        setIsChecking(true);
         // Call balanceOf on the payment token contract
         const result = await controller.provider.callContract({
           contractAddress: quote.paymentToken,
