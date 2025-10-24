@@ -97,6 +97,9 @@ export interface PurchaseContextType {
   displayError?: Error;
   clearError: () => void;
 
+  // Wallet management
+  clearSelectedWallet: () => void;
+
   // Actions
   setUsdAmount: (amount: number) => void;
   setPurchaseItems: (items: Item[]) => void;
@@ -323,6 +326,10 @@ export const PurchaseProvider = ({
     setDisplayError(undefined);
   }, []);
 
+  const clearSelectedWallet = useCallback(() => {
+    setSelectedWallet(undefined);
+  }, []);
+
   const onCreditCardPurchase = useCallback(async () => {
     if (!controller) return;
 
@@ -490,6 +497,9 @@ export const PurchaseProvider = ({
     // Error state
     displayError,
     clearError,
+
+    // Wallet management
+    clearSelectedWallet,
 
     // Setters
     setUsdAmount,

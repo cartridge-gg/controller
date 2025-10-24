@@ -105,7 +105,7 @@ export const Starterpack = () => {
             <Button
               onClick={() => {
                 if (purchaseSpId.trim()) {
-                  controllerConnector.controller.openStarterPack(0);
+                  controllerConnector.controller.openStarterPack(2);
                 }
               }}
               disabled={!purchaseSpId.trim()}

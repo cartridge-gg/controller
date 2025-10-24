@@ -252,7 +252,9 @@ export function OnchainStarterPackInner({
 
   const onProceed = () => {
     // Onchain starterpacks always use crypto payment (direct to contract)
-    const methods = isMainnet ? "ethereum;base;arbitrum;optimism" : "starknet;arbitrum";
+    const methods = isMainnet
+      ? "ethereum;base;arbitrum;optimism"
+      : "starknet;arbitrum";
     navigate(`/purchase/method/${methods}`);
   };
 

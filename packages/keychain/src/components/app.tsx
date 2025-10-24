@@ -57,6 +57,7 @@ import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
 import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
+import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 
 function Authentication() {
   const { controller, isConfigLoading } = useConnection();
@@ -154,6 +155,7 @@ export function App() {
           <Route path="wallet/:platforms" element={<SelectWallet />} />
           <Route path="checkout/stripe" element={<StripeCheckout />} />
           <Route path="checkout/crypto" element={<CryptoCheckout />} />
+          <Route path="checkout/onchain" element={<OnchainCheckout />} />
           <Route path="review" element={<></>} />
           <Route path="pending" element={<PurchasePending />} />
           <Route path="success" element={<PurchaseSuccess />} />
