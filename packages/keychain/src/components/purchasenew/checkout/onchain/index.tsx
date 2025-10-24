@@ -15,7 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import { isOnchainStarterpack } from "@/context";
-import { uint256, Call } from "starknet";
+import { uint256 } from "starknet";
 import { getTokenSymbol } from "../../review/token-utils";
 
 export function OnchainCheckout() {
@@ -25,7 +25,7 @@ export function OnchainCheckout() {
     starterpackDetails,
     selectedWallet,
     walletAddress,
-    setTransactionHash,
+    onOnchainPurchase,
     clearError,
   } = usePurchaseContext();
   const { navigate } = useNavigation();
@@ -34,15 +34,12 @@ export function OnchainCheckout() {
   const [balance, setBalance] = useState<bigint | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Extract quote and ID from onchain starterpack
-  const { quote, starterpackId } = useMemo(() => {
+  // Extract quote from onchain starterpack
+  const quote = useMemo(() => {
     if (!starterpackDetails || !isOnchainStarterpack(starterpackDetails)) {
-      return { quote: null, starterpackId: null };
+      return null;
     }
-    return {
-      quote: starterpackDetails.quote,
-      starterpackId: starterpackDetails.id,
-    };
+    return starterpackDetails.quote;
   }, [starterpackDetails]);
 
   // Check if user has sufficient balance
@@ -99,53 +96,11 @@ export function OnchainCheckout() {
   }, [controller, quote, selectedWallet, walletAddress]);
 
   const onPurchase = useCallback(async () => {
-    if (!controller || !quote || !starterpackId || !hasSufficientBalance)
-      return;
+    if (!hasSufficientBalance) return;
 
     setIsLoading(true);
     try {
-      const registryContract = import.meta.env
-        .VITE_STARTERPACK_REGISTRY_CONTRACT;
-      const recipient = controller.address();
-
-      // Convert totalCost to u256 (low, high)
-      const amount256 = uint256.bnToUint256(quote.totalCost);
-
-      // Step 1: Approve payment token for the exact transfer amount
-      const approveCalls: Call[] = [
-        {
-          contractAddress: quote.paymentToken,
-          entrypoint: "approve",
-          calldata: [
-            registryContract, // spender
-            amount256.low, // amount low
-            amount256.high, // amount high
-          ],
-        },
-      ];
-
-      // Step 2: Issue the starterpack
-      // issue(recipient, starterpack_id, quantity, referrer: Option<ContractAddress>, referrer_group: Option<felt252>)
-      const issueCalls: Call[] = [
-        {
-          contractAddress: registryContract,
-          entrypoint: "issue",
-          calldata: [
-            recipient, // recipient
-            starterpackId, // starterpack_id: u32
-            0x1, // quantity: u32 (always 1 for now)
-            0x1, // referrer: Option<ContractAddress> (None)
-            0x1, // referrer_group: Option<felt252> (None)
-          ],
-        },
-      ];
-
-      // Execute both calls in sequence
-      const calls = [...approveCalls, ...issueCalls];
-      const result = await controller.execute(calls);
-
-      // Store transaction hash and navigate to pending
-      setTransactionHash(result.transaction_hash);
+      await onOnchainPurchase();
       navigate("/purchase/pending", { reset: true });
     } catch (error) {
       console.error("Purchase failed:", error);
@@ -153,14 +108,7 @@ export function OnchainCheckout() {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    controller,
-    quote,
-    starterpackId,
-    hasSufficientBalance,
-    setTransactionHash,
-    navigate,
-  ]);
+  }, [hasSufficientBalance, onOnchainPurchase, navigate]);
 
   useEffect(() => {
     clearError();

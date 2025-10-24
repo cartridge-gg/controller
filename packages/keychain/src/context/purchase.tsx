@@ -13,6 +13,8 @@ import {
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
+import { uint256, Call } from "starknet";
+import { isOnchainStarterpack } from "./starterpack-types";
 
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -109,7 +111,8 @@ export interface PurchaseContextType {
 
   // Payment actions
   onCreditCardPurchase: () => Promise<void>;
-  onCryptoPurchase: () => Promise<void>;
+  onBackendCryptoPurchase: () => Promise<void>;
+  onOnchainPurchase: () => Promise<void>;
   onExternalConnect: (
     wallet: ExternalWallet,
     platform: ExternalPlatform,
@@ -349,7 +352,7 @@ export const PurchaseProvider = ({
     }
   }, [usdAmount, controller, starterpack, createPaymentIntent]);
 
-  const onCryptoPurchase = useCallback(async () => {
+  const onBackendCryptoPurchase = useCallback(async () => {
     if (
       !controller ||
       !selectedPlatform ||
@@ -390,6 +393,65 @@ export const PurchaseProvider = ({
     layerswapFees,
     sendPayment,
   ]);
+
+  const onOnchainPurchase = useCallback(async () => {
+    if (!controller || !starterpackDetails) return;
+
+    // Verify it's an onchain starterpack
+    if (!isOnchainStarterpack(starterpackDetails)) {
+      throw new Error("Not an onchain starterpack");
+    }
+
+    const { quote, id: starterpackId } = starterpackDetails;
+
+    try {
+      const registryContract = import.meta.env
+        .VITE_STARTERPACK_REGISTRY_CONTRACT;
+      const recipient = controller.address();
+
+      // Convert totalCost to u256 (low, high)
+      const amount256 = uint256.bnToUint256(quote.totalCost);
+
+      // Step 1: Approve payment token for the exact transfer amount
+      const approveCalls: Call[] = [
+        {
+          contractAddress: quote.paymentToken,
+          entrypoint: "approve",
+          calldata: [
+            registryContract, // spender
+            amount256.low, // amount low
+            amount256.high, // amount high
+          ],
+        },
+      ];
+
+      // Step 2: Issue the starterpack
+      // issue(recipient, starterpack_id, quantity, referrer: Option<ContractAddress>, referrer_group: Option<felt252>)
+      const issueCalls: Call[] = [
+        {
+          contractAddress: registryContract,
+          entrypoint: "issue",
+          calldata: [
+            recipient, // recipient
+            starterpackId, // starterpack_id: u32
+            0x1, // quantity: u32 (always 1 for now)
+            0x1, // referrer: Option<ContractAddress> (None)
+            0x1, // referrer_group: Option<felt252> (None)
+          ],
+        },
+      ];
+
+      // Execute both calls in sequence
+      const calls = [...approveCalls, ...issueCalls];
+      const result = await controller.execute(calls);
+
+      // Store transaction hash
+      setTransactionHash(result.transaction_hash);
+    } catch (e) {
+      setDisplayError(e as Error);
+      throw e;
+    }
+  }, [controller, starterpackDetails]);
 
   const onExternalConnect = useCallback(
     async (
@@ -510,7 +572,8 @@ export const PurchaseProvider = ({
 
     // Actions
     onCreditCardPurchase,
-    onCryptoPurchase,
+    onBackendCryptoPurchase,
+    onOnchainPurchase,
     onExternalConnect,
     waitForPayment,
     fetchFees,
