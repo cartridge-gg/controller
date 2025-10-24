@@ -30,6 +30,7 @@ type CreateAccountProps = {
   onKeyDown: (e: React.KeyboardEvent) => void;
   onAccountSelect?: (result: AccountSearchResult) => void;
   onSelectedUsernameRemove?: () => void; // For removing pill
+  onSelectedUsernameEdit?: () => void; // For editing pill (going back to input mode)
   onDropdownOpenChange?: (isOpen: boolean) => void; // Notify parent of dropdown state
   // Mock data props for Storybook
   mockResults?: AccountSearchResult[];
@@ -56,6 +57,7 @@ export const CreateAccount = React.forwardRef<
       onKeyDown,
       onAccountSelect,
       onSelectedUsernameRemove,
+      onSelectedUsernameEdit,
       onDropdownOpenChange,
       mockResults,
       mockIsLoading,
@@ -93,6 +95,20 @@ export const CreateAccount = React.forwardRef<
         internalRef.current.focus();
       }
     }, [autoFocus]);
+
+    // Focus input when returning from pill mode to edit mode
+    const previousSelectedAccount = React.useRef(selectedAccount);
+    React.useEffect(() => {
+      // If we had a selectedAccount before and now we don't, focus the input
+      if (
+        previousSelectedAccount.current &&
+        !selectedAccount &&
+        internalRef.current
+      ) {
+        internalRef.current.focus();
+      }
+      previousSelectedAccount.current = selectedAccount;
+    }, [selectedAccount]);
 
     const handleFocus = React.useCallback(() => {
       onUsernameFocus();
@@ -215,74 +231,89 @@ export const CreateAccount = React.forwardRef<
         )}
       >
         <div className="h-12 flex items-center justify-between gap-1 p-2 bg-background-200 rounded shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] z-10">
-          <AchievementPlayerBadge
-            icon={
-              selectedAccount?.type === "create-new" ? (
-                <PlusIcon variant="line" className="text-foreground-100" />
-              ) : (
-                <AchievementPlayerAvatar
-                  username={selectedAccount?.username || ""}
-                  className="!h-5 !w-5"
-                />
-              )
-            }
-            rank={selectedAccount?.type === "create-new" ? "empty" : undefined}
-            variant="ghost"
-            size="lg"
-            className="!w-8 !h-8"
-            badgeClassName={cn(
-              selectedAccount?.type === "create-new" && "text-foreground-400",
-            )}
-          />
-          <div className="flex flex-row items-center justify-between gap-1 flex-1">
-            <p className="text-sm font-normal px-0.5 truncate">
-              {selectedAccount?.username || "N/A"}
-            </p>
-
-            <div className="flex items-center gap-3">
-              {selectedAccount?.type === "create-new" ? (
-                <div className="p-1 bg-background-300 rounded inline-flex justify-center items-center gap-0.5">
-                  <div className="flex justify-start items-center gap-0.5">
-                    <SeedlingIcon
-                      variant="solid"
-                      className="text-primary"
-                      size="xs"
-                    />
-                  </div>
-                  <div className="px-0.5 flex justify-center items-center gap-2.5">
-                    <p className="text-center justify-center text-primary text-xs font-normal leading-none">
-                      Create New
-                    </p>
-                  </div>
-                </div>
-              ) : selectedAccount?.points ? (
-                <div className="flex items-center justify-center gap-0.5 p-1 bg-background-300 rounded text-foreground-100">
-                  <SparklesIcon
-                    variant="solid"
-                    size="xs"
-                    className="text-foreground-100"
+          <div
+            className="flex items-center justify-between gap-1 flex-1 cursor-pointer"
+            onClick={() => {
+              onSelectedUsernameEdit?.();
+              if (showAutocomplete) {
+                setIsDropdownOpen(false);
+                setSelectedIndex(undefined);
+                onDropdownOpenChange?.(false);
+              }
+            }}
+          >
+            <AchievementPlayerBadge
+              icon={
+                selectedAccount?.type === "create-new" ? (
+                  <PlusIcon variant="line" className="text-foreground-100" />
+                ) : (
+                  <AchievementPlayerAvatar
+                    username={selectedAccount?.username || ""}
+                    className="!h-5 !w-5"
                   />
-                  <div className="flex items-center gap-1">
-                    <p className="text-xs font-medium text-foreground-100">
-                      {selectedAccount.points.toLocaleString()}
-                    </p>
+                )
+              }
+              rank={
+                selectedAccount?.type === "create-new" ? "empty" : undefined
+              }
+              variant="ghost"
+              size="lg"
+              className="!w-8 !h-8"
+              badgeClassName={cn(
+                selectedAccount?.type === "create-new" && "text-foreground-400",
+              )}
+            />
+            <div className="flex flex-row items-center justify-between gap-1 flex-1">
+              <p className="text-sm font-normal px-0.5 truncate">
+                {selectedAccount?.username || "N/A"}
+              </p>
+
+              <div className="flex items-center gap-3">
+                {selectedAccount?.type === "create-new" ? (
+                  <div className="p-1 bg-background-300 rounded inline-flex justify-center items-center gap-0.5">
+                    <div className="flex justify-start items-center gap-0.5">
+                      <SeedlingIcon
+                        variant="solid"
+                        className="text-primary"
+                        size="xs"
+                      />
+                    </div>
+                    <div className="px-0.5 flex justify-center items-center gap-2.5">
+                      <p className="text-center justify-center text-primary text-xs font-normal leading-none">
+                        Create New
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ) : null}
-              <TimesIcon
-                size="sm"
-                className="text-foreground-400 hover:text-foreground-300 cursor-pointer"
-                onClick={() => {
-                  onSelectedUsernameRemove?.();
-                  if (showAutocomplete) {
-                    setIsDropdownOpen(false);
-                    setSelectedIndex(undefined);
-                    onDropdownOpenChange?.(false);
-                  }
-                }}
-              />
+                ) : selectedAccount?.points ? (
+                  <div className="flex items-center justify-center gap-0.5 p-1 bg-background-300 rounded text-foreground-100">
+                    <SparklesIcon
+                      variant="solid"
+                      size="xs"
+                      className="text-foreground-100"
+                    />
+                    <div className="flex items-center gap-1">
+                      <p className="text-xs font-medium text-foreground-100">
+                        {selectedAccount.points.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
+          <TimesIcon
+            size="sm"
+            className="text-foreground-400 hover:text-foreground-300 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectedUsernameRemove?.();
+              if (showAutocomplete) {
+                setIsDropdownOpen(false);
+                setSelectedIndex(undefined);
+                onDropdownOpenChange?.(false);
+              }
+            }}
+          />
         </div>
         <Status
           className="rounded-b-md"
