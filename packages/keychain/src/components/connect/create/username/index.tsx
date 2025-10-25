@@ -232,9 +232,9 @@ export const CreateAccount = React.forwardRef<
           className,
         )}
       >
-        <div className="h-12 flex items-center justify-between gap-1 p-2 bg-background-200 rounded shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] z-10">
+        <div className="flex items-center justify-between gap-1 bg-background-200 rounded shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] z-10">
           <div
-            className="flex items-center justify-between gap-1 flex-1 cursor-pointer"
+            className="h-12 flex items-center justify-between gap-1 flex-1 cursor-pointer p-2"
             onClick={() => {
               onSelectedUsernameEdit?.();
               if (showAutocomplete) {
@@ -303,9 +303,8 @@ export const CreateAccount = React.forwardRef<
               </div>
             </div>
           </div>
-          <TimesIcon
-            size="sm"
-            className="text-foreground-400 hover:text-foreground-300 cursor-pointer"
+          <div
+            className="p-2 pl-0 group cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               onSelectedUsernameRemove?.();
@@ -315,7 +314,12 @@ export const CreateAccount = React.forwardRef<
                 onDropdownOpenChange?.(false);
               }
             }}
-          />
+          >
+            <TimesIcon
+              size="sm"
+              className="text-foreground-400 group-hover:text-foreground-300"
+            />
+          </div>
         </div>
         <Status
           className="rounded-b-md"
