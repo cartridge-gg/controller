@@ -84,6 +84,8 @@ export const Default: Story = {
               {
                 name: "Approve",
                 entrypoint: "approve",
+                // amount: "0xffffffffffffffffffffffffffffffff",
+                amount: "5000000000000000000", // 5 ETH
                 description:
                   "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
               },
@@ -206,6 +208,7 @@ export const WithPreset: Story = {
                     name: "Approve",
                     description: "Approve paper usage",
                     entrypoint: "approve",
+                    amount: "0xffffffffffffffffffffffffffffffff",
                   },
                 ],
               },

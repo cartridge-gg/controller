@@ -53,6 +53,8 @@ const policies: SessionPolicies = {
         {
           name: "approve",
           entrypoint: "approve",
+          // amount: "0xffffffffffffffffffffffffffffffff",
+          amount: "0x3",
           description:
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
         },
@@ -67,6 +69,7 @@ const policies: SessionPolicies = {
         {
           name: "approve",
           entrypoint: "approve",
+          amount: "0xffffffffffffffffffffffffffffffff",
           description:
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
         },
@@ -202,9 +205,9 @@ const controller = new ControllerConnector({
     "rabby",
     "password",
   ],
-  slot: "arcade-pistols",
-  namespace: "pistols",
-  preset: "pistols",
+  // slot: "arcade-pistols",
+  // namespace: "pistols",
+  // preset: "pistols",
   // By default, preset policies take precedence over manually provided policies
   // Set shouldOverridePresetPolicies to true if you want your policies to override preset
   // shouldOverridePresetPolicies: true,
