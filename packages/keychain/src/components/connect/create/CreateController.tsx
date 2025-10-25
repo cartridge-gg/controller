@@ -102,6 +102,10 @@ function CreateControllerForm({
     onUsernameClear();
   }, [onUsernameChange, onUsernameClear]);
 
+  const handleEditPill = useCallback(() => {
+    setSelectedAccount(undefined);
+  }, []);
+
   return (
     <>
       <NavigationHeader
@@ -142,6 +146,7 @@ function CreateControllerForm({
             selectedAccount={selectedAccount}
             onAccountSelect={handleAccountSelect}
             onSelectedUsernameRemove={handleRemovePill}
+            onSelectedUsernameEdit={handleEditPill}
             onDropdownOpenChange={onDropdownOpenChange}
           />
           <Legal />

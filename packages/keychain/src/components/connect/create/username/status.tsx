@@ -1,5 +1,5 @@
 import { ExternalIcon, cn } from "@cartridge/ui";
-import { useMemo } from "react";
+import { HTMLAttributes, useMemo } from "react";
 
 export type ValidationState = {
   status: "idle" | "validating" | "valid" | "invalid";
@@ -11,13 +11,15 @@ interface StatusProps {
   username: string;
   validation: ValidationState;
   error?: Error;
-  className?: string;
+  containerClassName?: HTMLAttributes<HTMLDivElement>["className"];
+  className?: HTMLAttributes<HTMLDivElement>["className"];
 }
 
 export function Status({
   username,
   validation,
   error,
+  containerClassName,
   className,
 }: StatusProps) {
   const isError = validation.status === "invalid" || error;
@@ -52,8 +54,13 @@ export function Status({
   }, [validation, errorMessage, username, isError]);
 
   return (
-    <div className="flex flex-col bg-translucent-dark-100 gap-y-px">
-      <Block className={className} error={!!isError} validation={validation}>
+    <div
+      className={cn(
+        "flex flex-col bg-translucent-dark-100 gap-y-px",
+        containerClassName,
+      )}
+    >
+      <Block className={className} error={!!isError}>
         {message}
       </Block>
 
@@ -66,12 +73,10 @@ function Block({
   children,
   error,
   className,
-  validation,
 }: {
   children: React.ReactNode;
   error?: boolean;
   className?: string;
-  validation?: ValidationState;
 }) {
   return (
     <div
@@ -79,9 +84,7 @@ function Block({
         "flex justify-between items-center text-xs px-3 py-2 w-full box-border min-w-0",
         error
           ? "bg-destructive-100 text-destructive-foreground"
-          : validation?.status === "valid"
-            ? "bg-background-150 text-primary-100"
-            : "bg-background-300 text-primary-100",
+          : "bg-background-300 text-primary-100",
         className,
       )}
     >

@@ -3424,6 +3424,7 @@ export type Query = {
   pricePeriodByAddresses: Array<Price>;
   rpcApiKeys?: Maybe<RpcApiKeyConnection>;
   rpcCorsDomains?: Maybe<RpcCorsDomainConnection>;
+  rpcLogs?: Maybe<RpcLogConnection>;
   searchAccounts: Array<Account>;
   session?: Maybe<Session>;
   sessions?: Maybe<SessionConnection>;
@@ -3661,6 +3662,15 @@ export type QueryRpcCorsDomainsArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   teamName: Scalars["String"];
   where?: InputMaybe<RpcCorsDomainWhereInput>;
+};
+
+export type QueryRpcLogsArgs = {
+  after?: InputMaybe<Scalars["Cursor"]>;
+  before?: InputMaybe<Scalars["Cursor"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  teamName: Scalars["String"];
+  where?: InputMaybe<RpcLogWhereInput>;
 };
 
 export type QuerySearchAccountsArgs = {
