@@ -405,15 +405,9 @@ export default class ControllerProvider extends BaseProvider {
 
     const keychainUrl = new URL(this.options.url || KEYCHAIN_URL);
 
-    // Add redirect target
-    if (options.redirectTo) {
-      keychainUrl.searchParams.set("redirect_to", options.redirectTo);
-    } else if (options.returnTo) {
-      keychainUrl.searchParams.set("redirect_to", options.returnTo);
-    } else {
-      // Default: return to current page
-      keychainUrl.searchParams.set("redirect_to", window.location.href);
-    }
+    // Add redirect target (defaults to current page)
+    const redirectTo = options.redirectTo || window.location.href;
+    keychainUrl.searchParams.set("redirect_to", redirectTo);
 
     // Add controller configuration parameters
     if (this.options.slot) {

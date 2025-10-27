@@ -275,8 +275,6 @@ export interface StarterPackItem {
 }
 
 export type StandaloneAuthOptions = {
-  /** The URL to redirect to after authentication (e.g., game URL) */
+  /** The URL to redirect to after authentication (defaults to current page) */
   redirectTo?: string;
-  /** Alternative: return to the current app URL */
-  returnTo?: string;
 };
