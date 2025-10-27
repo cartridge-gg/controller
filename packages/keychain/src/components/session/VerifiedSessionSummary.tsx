@@ -7,7 +7,6 @@ import { cn, CodeIcon } from "@cartridge/ui";
 import { useMemo } from "react";
 import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";
-import { toArray } from "@cartridge/controller";
 
 export function VerifiedSessionSummary({
   game,
