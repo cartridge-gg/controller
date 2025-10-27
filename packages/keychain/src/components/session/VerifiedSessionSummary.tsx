@@ -24,25 +24,16 @@ export function VerifiedSessionSummary({
   const { otherContracts, vrfContracts } = useMemo(() => {
     const allContracts = Object.entries(contracts ?? {});
 
-    const tokenContracts = allContracts.filter(([, contract]) => {
-      const methods = toArray(contract.methods);
-      return methods.some((method) => method.entrypoint === "approve");
-    });
-
     const vrfContracts = allContracts.filter(([, contract]) => {
       return contract.meta?.type === "VRF";
     });
 
     const otherContracts = allContracts.filter(([, contract]) => {
-      const methods = toArray(contract.methods);
-      const hasApprove = methods.some(
-        (method) => method.entrypoint === "approve",
-      );
       const isVRF = contract.meta?.type === "VRF";
-      return !hasApprove && !isVRF;
+      return !isVRF;
     });
 
-    return { tokenContracts, otherContracts, vrfContracts };
+    return { otherContracts, vrfContracts };
   }, [contracts]);
 
   // Create aggregate contracts object for non-token, non-VRF contracts

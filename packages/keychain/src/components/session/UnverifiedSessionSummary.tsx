@@ -18,7 +18,7 @@ export function UnverifiedSessionSummary({
   messages?: SessionMessages;
 }) {
   const { isEditable } = useCreateSession();
-  const { otherContracts } = useMemo(() => {
+  const formattedContracts = useMemo(() => {
     const formattedContracts = Object.entries(contracts ?? {}).map(
       ([address, contract]) => {
         const methods = toArray(contract.methods);
@@ -34,24 +34,14 @@ export function UnverifiedSessionSummary({
       },
     );
 
-    // Separate token contracts (with approve method) from other contracts
-    const tokenContracts = formattedContracts.filter((contract) =>
-      contract.methods.some((method) => method.entrypoint === "approve"),
-    );
-
-    const otherContracts = formattedContracts.filter(
-      (contract) =>
-        !contract.methods.some((method) => method.entrypoint === "approve"),
-    );
-
-    return { tokenContracts, otherContracts };
+    return formattedContracts;
   }, [contracts]);
 
   return (
     <div className="flex flex-col gap-4">
       {/* Render other contracts first */}
       <div className="space-y-px">
-        {otherContracts.map((e) => (
+        {formattedContracts.map((e) => (
           <ContractCard
             key={e.address}
             address={e.address}
@@ -67,7 +57,7 @@ export function UnverifiedSessionSummary({
         ))}
         {messages && messages.length > 0 && (
           <MessageCard
-            className={cn(otherContracts && "rounded-t-none")}
+            className={cn(formattedContracts && "rounded-t-none")}
             messages={messages}
           />
         )}
