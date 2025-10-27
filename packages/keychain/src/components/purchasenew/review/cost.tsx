@@ -19,7 +19,6 @@ import {
 } from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
-import { getTokenIcon } from "./token-utils";
 import type { OnchainQuote } from "@/context";
 
 type PaymentRails = "stripe" | "crypto";
@@ -100,7 +99,6 @@ export function OnchainCostBreakdown({
   openFeesTooltip?: boolean;
 }) {
   const { symbol, decimals } = quote.paymentTokenMetadata;
-  const tokenIcon = getTokenIcon(quote.paymentToken);
 
   // Format amount with proper decimals
   const totalAmount = Number(quote.totalCost) / Math.pow(10, decimals);
@@ -127,14 +125,9 @@ export function OnchainCostBreakdown({
               />
             </div>
             <div className="flex items-center gap-2 text-foreground-100">
-              {tokenIcon ? (
-                <Thumbnail size="sm" icon={tokenIcon} variant="light" rounded />
-              ) : (
-                <div className="w-6 h-6 rounded-full bg-background-300 flex items-center justify-center text-[10px]">
-                  ?
-                </div>
-              )}
-              <span>{totalAmount.toFixed(2)} {symbol}</span>
+              <span>
+                {totalAmount.toFixed(2)} {symbol}
+              </span>
             </div>
           </div>
         </CardContent>
