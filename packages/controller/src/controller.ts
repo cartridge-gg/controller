@@ -403,10 +403,7 @@ export default class ControllerProvider extends BaseProvider {
       return;
     }
 
-    const keychainUrl = new URL(
-      "/auth/standalone",
-      this.options.url || KEYCHAIN_URL,
-    );
+    const keychainUrl = new URL(this.options.url || KEYCHAIN_URL);
 
     // Add redirect target
     if (options.redirectTo) {
@@ -417,9 +414,6 @@ export default class ControllerProvider extends BaseProvider {
       // Default: return to current page
       keychainUrl.searchParams.set("redirect_to", window.location.href);
     }
-
-    // Add origin for CORS validation
-    keychainUrl.searchParams.set("origin", window.location.origin);
 
     // Add controller configuration parameters
     if (this.options.slot) {
@@ -435,6 +429,10 @@ export default class ControllerProvider extends BaseProvider {
         "erc20",
         this.options.tokens.erc20.toString(),
       );
+    }
+
+    if (this.rpcUrl()) {
+      keychainUrl.searchParams.set("rpc_url", this.rpcUrl());
     }
 
     // Navigate to standalone keychain
