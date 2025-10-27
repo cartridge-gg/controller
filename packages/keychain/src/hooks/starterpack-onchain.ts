@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useController } from "./controller";
-import { CairoByteArray, Call, uint256 } from "starknet";
+import { CairoByteArray, Call, shortString, uint256 } from "starknet";
 
 interface ItemOnchain {
   name: string;
@@ -15,12 +15,18 @@ interface StarterPackMetadataOnchain {
   items: ItemOnchain[];
 }
 
+export interface TokenMetadata {
+  symbol: string;
+  decimals: number;
+}
+
 interface QuoteOnchain {
   basePrice: bigint;
   referralFee: bigint;
   protocolFee: bigint;
   totalCost: bigint;
   paymentToken: string;
+  paymentTokenMetadata: TokenMetadata;
 }
 
 export const useStarterPackOnchain = (
@@ -74,6 +80,25 @@ export const useStarterPackOnchain = (
         ) as StarterPackMetadataOnchain;
 
         // Parse quote with u256 values (2 felts each) + paymentToken (1 felt)
+        const paymentToken = quoteRes[8];
+
+        // Fetch token metadata (symbol and decimals)
+        const [symbolRes, decimalsRes] = await Promise.all([
+          controller.provider.callContract({
+            contractAddress: paymentToken,
+            entrypoint: "symbol",
+            calldata: [],
+          } as Call),
+          controller.provider.callContract({
+            contractAddress: paymentToken,
+            entrypoint: "decimals",
+            calldata: [],
+          } as Call),
+        ]);
+
+        const symbol = shortString.decodeShortString(symbolRes[0]);
+        const decimals = Number(decimalsRes[0]);
+
         const quote: QuoteOnchain = {
           basePrice: uint256.uint256ToBN({
             low: quoteRes[0],
@@ -91,7 +116,11 @@ export const useStarterPackOnchain = (
             low: quoteRes[6],
             high: quoteRes[7],
           }),
-          paymentToken: quoteRes[8],
+          paymentToken,
+          paymentTokenMetadata: {
+            symbol,
+            decimals,
+          },
         };
 
         setMetadata(metadata);
@@ -113,7 +142,6 @@ export const useStarterPackOnchain = (
       return;
     }
 
-    console.log("fetching starterpack supply");
     try {
       const supplyRes = await controller.provider.callContract({
         contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
