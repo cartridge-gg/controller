@@ -49,7 +49,6 @@ export const StarterItem = React.forwardRef<
       starterPackItem?.description || purchaseItem?.subtitle || "";
     const icon = starterPackItem?.iconURL || purchaseItem?.icon || "";
     const price = starterPackItem?.price || 0n;
-    const amount = starterPackItem?.amount;
 
     return (
       <div
@@ -79,9 +78,7 @@ export const StarterItem = React.forwardRef<
             <div className="flex flex-col gap-1 flex-1 min-w-0">
               <div className="flex flex-row items-start justify-between self-stretch">
                 <h3 className="text-sm font-medium text-foreground-100 truncate">
-                  {type === StarterPackItemType.FUNGIBLE && amount
-                    ? `${amount} Credits`
-                    : name}
+                  {name}
                 </h3>
                 {price !== 0n && !fancy && showPrice && (
                   <h3 className="text-sm font-medium text-foreground-100 truncate">

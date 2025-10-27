@@ -1,10 +1,6 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { useNavigation, usePurchaseContext } from "@/context";
-import {
-  StarterPack,
-  StarterPackItem,
-  StarterPackItemType,
-} from "@cartridge/controller";
+import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 import {
   Button,
   Card,
@@ -18,21 +14,18 @@ import {
   MintAllowance,
   StarterpackAcquisitionType,
 } from "@cartridge/ui/utils/api/cartridge";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
 import { useEffect, useMemo } from "react";
 import { LoadingState } from "../loading";
 import { CostBreakdown } from "../review/cost";
-import { decodeStarterPack } from "@/utils/starterpack-url";
 import { usdcToUsd } from "@/utils/starterpack";
 import { useConnection } from "@/hooks/connection";
 import { CostDetails } from "../types";
 
 export function PurchaseStarterpack() {
   const { starterpackId } = useParams();
-  const [searchParams] = useSearchParams();
-  const data = searchParams.get("data");
 
   const {
     isStarterpackLoading,
@@ -45,17 +38,9 @@ export function PurchaseStarterpack() {
 
   useEffect(() => {
     if (!isStarterpackLoading && starterpackId) {
-      let starterpack: string | StarterPack = starterpackId;
-      if (data) {
-        try {
-          starterpack = decodeStarterPack(data);
-        } catch (error) {
-          console.error("Failed to decode starterpack data:", error);
-        }
-      }
-      setStarterpack(starterpack);
+      setStarterpack(starterpackId);
     }
-  }, [starterpackId, data, isStarterpackLoading, setStarterpack]);
+  }, [starterpackId, isStarterpackLoading, setStarterpack]);
 
   if (isStarterpackLoading || !details) {
     return <LoadingState />;

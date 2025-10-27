@@ -12,12 +12,7 @@ import { client } from "@/utils/graphql";
 import { creditsToUSD } from "./tokens";
 import { useController } from "./controller";
 import { uint256 } from "starknet";
-import { calculateStarterPackPrice, usdcToUsd } from "@/utils/starterpack";
-import {
-  StarterPack,
-  StarterPackItem,
-  StarterPackItemType,
-} from "@cartridge/controller";
+import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 
 export const enum StarterItemType {
   NFT = "NFT",
@@ -62,7 +57,7 @@ export interface MerkleDrop {
   description?: string | null;
 }
 
-export function useStarterPack(starterpack: string | StarterPack | undefined) {
+export function useStarterPack(starterpack: string | undefined) {
   const { controller } = useController();
   const [isLoading, setIsLoading] = useState(true);
   const [isClaiming, setIsClaiming] = useState(false);
@@ -105,22 +100,6 @@ export function useStarterPack(starterpack: string | StarterPack | undefined) {
     setError(null);
 
     if (!controller || !starterpack) {
-      setIsLoading(false);
-      return;
-    }
-
-    // Handle custom starter packs from URL
-    if (typeof starterpack == "object") {
-      setName(starterpack.name || "");
-      setDescription(starterpack.description || "");
-      setAcquisitionType(StarterpackAcquisitionType.Paid);
-
-      // Calculate price from items (USDC with 6 decimals)
-      const totalPriceUsdc = calculateStarterPackPrice(starterpack);
-      const totalPriceUsd = usdcToUsd(totalPriceUsdc);
-      setPriceUsd(totalPriceUsd);
-      setItems(starterpack.items);
-
       setIsLoading(false);
       return;
     }
@@ -232,7 +211,7 @@ export function useStarterPack(starterpack: string | StarterPack | undefined) {
   }, [controller, checkSupply, starterpack]);
 
   const claim = useCallback(async () => {
-    if (!controller || !starterpack || typeof starterpack != "string") {
+    if (!controller || !starterpack) {
       throw new Error("Controller or starterpack ID not found");
     }
 

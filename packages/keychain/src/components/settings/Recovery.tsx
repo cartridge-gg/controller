@@ -9,10 +9,12 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { useCallback, useEffect, useState } from "react";
 import { CallData, num } from "starknet";
-import { ExecuteCtx } from "@/utils/connection";
+import { createExecuteUrl } from "@/utils/connection/execute";
+import { useNavigate } from "react-router-dom";
 
 export function Recovery() {
-  const { controller, context, setContext } = useConnection();
+  const { controller } = useConnection();
+  const navigate = useNavigate();
   const [externalOwnerAddress, setExternalOwnerAddress] = useState("");
   const [isValid, setIsValid] = useState(true);
 
@@ -26,20 +28,19 @@ export function Recovery() {
   }, [externalOwnerAddress]);
 
   const onSetRecovery = useCallback(() => {
-    if (!context || !controller) return;
-    setContext({
-      transactions: [
-        {
-          contractAddress: controller.address(),
-          entrypoint: "register_external_owner",
-          calldata: CallData.compile([externalOwnerAddress]),
-        },
-      ],
-      type: "execute",
-      resolve: context.resolve,
-      reject: context.reject,
-    } as ExecuteCtx);
-  }, [controller, externalOwnerAddress, context, setContext]);
+    if (!controller) return;
+
+    const transactions = [
+      {
+        contractAddress: controller.address(),
+        entrypoint: "register_external_owner",
+        calldata: CallData.compile([externalOwnerAddress]),
+      },
+    ];
+
+    const url = createExecuteUrl(transactions);
+    navigate(url, { replace: true });
+  }, [controller, externalOwnerAddress, navigate]);
 
   return (
     <>

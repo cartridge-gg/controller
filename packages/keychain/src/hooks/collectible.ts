@@ -8,7 +8,7 @@ import { useConnection } from "@/hooks/connection";
 import { addAddressPadding } from "starknet";
 
 const TYPE = "ERC-1155";
-const LIMIT = 1000;
+const LIMIT = 10000;
 
 export type Collectible = {
   address: string;

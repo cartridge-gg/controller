@@ -46,7 +46,13 @@ export interface LoginResponse {
   signer: Signer;
 }
 
-export function useCreateController({ isSlot }: { isSlot?: boolean }) {
+export function useCreateController({
+  isSlot,
+  signers,
+}: {
+  isSlot?: boolean;
+  signers?: AuthOptions;
+}) {
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error>();
@@ -60,8 +66,7 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController, configSignupOptions } =
-    useConnection();
+  const { origin, rpcUrl, chainId, setController } = useConnection();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -81,7 +86,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
           credentials?.webauthn?.[0] ?? {};
 
         const controllerNode = controllers?.edges?.[0]?.node;
-
         if (
           controllerNode &&
           username &&
@@ -157,9 +161,9 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
 
   const signupOptions: AuthOptions = useMemo(() => {
     return [...EMBEDDED_WALLETS, ...supportedWalletsForAuth].filter(
-      (option) => !configSignupOptions || configSignupOptions.includes(option),
+      (option) => !signers || signers.includes(option),
     );
-  }, [supportedWalletsForAuth, configSignupOptions]);
+  }, [supportedWalletsForAuth, signers]);
 
   const finishSignup = useCallback(
     async ({
@@ -690,5 +694,6 @@ export function useCreateController({ isSlot }: { isSlot?: boolean }) {
     setChangeWallet,
     signupOptions,
     authMethod,
+    setAuthMethod,
   };
 }

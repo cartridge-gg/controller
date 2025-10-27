@@ -5,6 +5,8 @@ import { TurnkeyIframeClient } from "@turnkey/sdk-browser";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { getIframePublicKey } from "./turnkey";
 
+export const OIDC_INVALID_TOKEN_ERROR = "Invalid OIDC token";
+
 export const getWallet = async (
   subOrgId: string,
   authIframeClient: TurnkeyIframeClient,
@@ -79,10 +81,15 @@ const WALLET_CONFIG = {
   addressFormat: "ADDRESS_FORMAT_ETHEREUM" as const,
 };
 
+/**
+ * Returns the OIDC token string extracted from the Auth0 claims.
+ *
+ * @throws {Error} If the OIDC token cannot be extracted from the claims.
+ */
 export const getAuth0OidcToken = async (
   tokenClaims: IdToken | undefined,
   expectedNonce: string,
-) => {
+): Promise<string> => {
   if (!tokenClaims) {
     throw new Error("Not authenticated with Auth0 yet");
   }
@@ -94,7 +101,15 @@ export const getAuth0OidcToken = async (
 
   const decodedToken = jwtDecode<DecodedIdToken>(oidcTokenString);
   if (!decodedToken.tknonce) {
-    return undefined;
+    console.error(
+      "[Auth0] Token missing tknonce parameter. Token may be from cached session.",
+      {
+        hasNonce: !!decodedToken.nonce,
+        tokenIssued: decodedToken.iat,
+      },
+    );
+
+    throw new Error(OIDC_INVALID_TOKEN_ERROR);
   }
 
   if (decodedToken.tknonce !== expectedNonce) {
@@ -102,7 +117,8 @@ export const getAuth0OidcToken = async (
       `Nonce mismatch: expected ${expectedNonce}, got ${decodedToken.tknonce}`,
     );
   }
-  return tokenClaims.__raw;
+
+  return oidcTokenString;
 };
 
 interface DecodedIdToken extends JwtPayload {

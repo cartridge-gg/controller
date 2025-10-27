@@ -5,16 +5,13 @@ import {
   VerifiableControllerTheme,
 } from "@/components/provider/connection";
 import { useNavigation } from "@/context/navigation";
-import { ConnectionCtx, connectToController } from "@/utils/connection";
+import { connectToController } from "@/utils/connection";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import { WalletConnectWallet } from "@/wallets/wallet-connect";
 import {
-  AuthOptions,
   ExternalWallet,
   ExternalWalletResponse,
   ExternalWalletType,
-  IMPLEMENTED_AUTH_OPTIONS,
-  ResponseCodes,
   toArray,
   Token,
   toSessionPolicies,
@@ -175,8 +172,7 @@ function getConfigChainPolicies(
 export function useConnectionValue() {
   const { navigate } = useNavigation();
   const [parent, setParent] = useState<ParentMethods>();
-  const [context, setContext] = useState<ConnectionCtx>();
-  const [origin, setOrigin] = useState<string>(window.location.origin);
+  const [origin, setOrigin] = useState<string | undefined>(undefined);
   const [rpcUrl, setRpcUrl] = useState<string>(
     import.meta.env.VITE_RPC_MAINNET,
   );
@@ -191,9 +187,6 @@ export function useConnectionValue() {
     verified: true,
     ...defaultTheme,
   });
-  const [configSignupOptions, setConfigSignupOptions] = useState<
-    AuthOptions | undefined
-  >([...IMPLEMENTED_AUTH_OPTIONS]);
   const [controller, setController] = useState(window.controller);
   const [chainId, setChainId] = useState<string>();
   const [controllerVersion, setControllerVersion] = useState<SemVer>();
@@ -224,7 +217,6 @@ export function useConnectionValue() {
     const version = urlParams.get("v");
     const project = urlParams.get("ps");
     const namespace = urlParams.get("ns");
-
     const erc20Param = urlParams.get("erc20");
     const tokens = erc20Param
       ? decodeURIComponent(erc20Param)
@@ -240,7 +232,7 @@ export function useConnectionValue() {
         ];
 
     if (rpcUrl) {
-      setRpcUrl(rpcUrl);
+      setRpcUrl(decodeURIComponent(rpcUrl));
     }
 
     return {
@@ -365,8 +357,9 @@ export function useConnectionValue() {
   }, [controller]);
 
   // Check if preset is verified for the current origin, supporting wildcards
+  // Only run verification once we have the parent origin from penpal
   useEffect(() => {
-    if (!urlParams.preset) {
+    if (!urlParams.preset || !origin) {
       return;
     }
 
@@ -375,7 +368,11 @@ export function useConnectionValue() {
       .then((config) => {
         if (config && config.origin) {
           const allowedOrigins = toArray(config.origin as string | string[]);
-          setVerified(isOriginVerified(origin, allowedOrigins));
+          // Always consider localhost as verified for development (not 127.0.0.1)
+          const isLocalhost = origin.includes("localhost");
+          const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
+          const finalVerified = isLocalhost || isOriginAllowed;
+          setVerified(finalVerified);
           setConfigData(config as Record<string, unknown>);
         }
       })
@@ -427,11 +424,8 @@ export function useConnectionValue() {
   useEffect(() => {
     const { policies, preset } = urlParams;
 
-    const urlPolicies = parseUrlPolicies(policies);
-    if (urlPolicies) {
-      setPolicies(urlPolicies);
-    } else if (preset && !isConfigLoading) {
-      // Only try to load from config if a preset is defined and not isConfigLoading
+    // Always prioritize preset policies over URL policies
+    if (preset && !isConfigLoading) {
       const configPolicies = getConfigChainPolicies(
         configData,
         chainId,
@@ -440,7 +434,14 @@ export function useConnectionValue() {
 
       if (configPolicies) {
         setPolicies(configPolicies);
+        return;
       }
+    }
+
+    // Fall back to URL policies if no preset or preset has no policies
+    const urlPolicies = parseUrlPolicies(policies);
+    if (urlPolicies) {
+      setPolicies(urlPolicies);
     }
   }, [urlParams, chainId, verified, configData, isConfigLoading]);
 
@@ -450,9 +451,7 @@ export function useConnectionValue() {
     if (isIframe()) {
       const connection = connectToController<ParentMethods>({
         setRpcUrl,
-        setContext,
         setController,
-        setConfigSignupOptions,
         navigate,
       });
 
@@ -506,14 +505,7 @@ export function useConnectionValue() {
       parent.close();
       parent.reload();
     }
-
-    if (context) {
-      context.resolve?.({
-        code: ResponseCodes.NOT_CONNECTED,
-        message: "User logged out",
-      });
-    }
-  }, [context, parent]);
+  }, [parent]);
 
   const openSettings = useCallback(() => {
     window.dispatchEvent(
@@ -533,32 +525,21 @@ export function useConnectionValue() {
       return;
     }
 
-    context?.resolve?.({
-      code: ResponseCodes.CANCELED,
-      message: "User aborted",
-    });
-
-    setContext(undefined);
-
     // Don't await parent.close() - let it run in the background
     parent.close().catch((e) => {
       console.error("Failed to close modal:", e);
     });
-  }, [context, parent, setContext]);
+  }, [parent]);
 
   const openModal = useCallback(async () => {
-    if (!parent || !context?.resolve) return;
+    if (!parent) return;
 
-    context.resolve({
-      code: ResponseCodes.USER_INTERACTION_REQUIRED,
-      message: "User interaction required",
-    });
     try {
       await parent.close();
     } catch (e) {
       console.error("Failed to open modal:", e);
     }
-  }, [context, parent]);
+  }, [parent]);
 
   const externalDetectWallets = useCallback(() => {
     if (!parent) {
@@ -634,9 +615,8 @@ export function useConnectionValue() {
 
   return {
     parent,
-    context,
     controller,
-    origin,
+    origin: origin || "",
     rpcUrl,
     policies,
     onModalClose,
@@ -649,9 +629,8 @@ export function useConnectionValue() {
     isMainnet,
     verified,
     chainId,
-    configSignupOptions,
     setController,
-    setContext,
+    setRpcUrl,
     controllerVersion,
     closeModal: parent ? closeModal : undefined,
     openModal,
