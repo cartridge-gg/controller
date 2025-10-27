@@ -1,0 +1,167 @@
+import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  Button,
+  GiftIcon,
+  HeaderInner,
+  LayoutContent,
+  LayoutFooter,
+  ErrorAlertIcon,
+  Card,
+  CardContent,
+} from "@cartridge/ui";
+import { Receiving } from "../../receiving";
+import { OnchainCostBreakdown } from "../../review/cost";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
+import { useConnection } from "@/hooks/connection";
+import { isOnchainStarterpack } from "@/context";
+import { uint256 } from "starknet";
+
+export function OnchainCheckout() {
+  const {
+    purchaseItems,
+    displayError,
+    starterpackDetails,
+    selectedWallet,
+    walletAddress,
+    onOnchainPurchase,
+    clearError,
+  } = usePurchaseContext();
+  const { navigate } = useNavigation();
+  const { controller } = useConnection();
+  const [isChecking, setIsChecking] = useState(true);
+  const [balance, setBalance] = useState<bigint | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Extract quote from onchain starterpack
+  const quote = useMemo(() => {
+    if (!starterpackDetails || !isOnchainStarterpack(starterpackDetails)) {
+      return null;
+    }
+    return starterpackDetails.quote;
+  }, [starterpackDetails]);
+
+  // Check if user has sufficient balance
+  const hasSufficientBalance = useMemo(() => {
+    if (!quote || balance === null) return false;
+    return balance >= quote.totalCost;
+  }, [balance, quote]);
+
+  // Fetch user's token balance
+  useEffect(() => {
+    // Reset balance when wallet selection changes
+    setBalance(null);
+    setIsChecking(true);
+
+    const checkBalance = async () => {
+      if (!controller || !quote) {
+        setIsChecking(false);
+        return;
+      }
+
+      // Use external wallet address for Argent/Braavos, otherwise use controller address
+      const isExternalStarknetWallet =
+        selectedWallet?.type === "argent" || selectedWallet?.type === "braavos";
+      const addressToCheck =
+        isExternalStarknetWallet && walletAddress
+          ? walletAddress
+          : controller.address();
+
+      try {
+        // Call balanceOf on the payment token contract
+        const result = await controller.provider.callContract({
+          contractAddress: quote.paymentToken,
+          entrypoint: "balanceOf",
+          calldata: [addressToCheck],
+        });
+
+        // Parse the u256 balance (2 felts: low, high)
+        const balanceBN = uint256.uint256ToBN({
+          low: result[0],
+          high: result[1],
+        });
+
+        setBalance(balanceBN);
+      } catch (error) {
+        console.error("Failed to fetch token balance:", error);
+        // Set balance to 0 on error so we show insufficient balance message
+        setBalance(0n);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkBalance();
+  }, [controller, quote, selectedWallet, walletAddress]);
+
+  const onPurchase = useCallback(async () => {
+    if (!hasSufficientBalance) return;
+
+    setIsLoading(true);
+    try {
+      await onOnchainPurchase();
+      navigate("/purchase/pending", { reset: true });
+    } catch (error) {
+      console.error("Purchase failed:", error);
+      // Error will be displayed via displayError in the UI
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hasSufficientBalance, onOnchainPurchase, navigate]);
+
+  useEffect(() => {
+    clearError();
+    return () => clearError();
+  }, [clearError]);
+
+  if (!quote) {
+    return (
+      <ControllerErrorAlert
+        error={new Error("Invalid starterpack configuration")}
+      />
+    );
+  }
+
+  const { symbol: tokenSymbol } = quote.paymentTokenMetadata;
+
+  return (
+    <>
+      <HeaderInner
+        title="Review Purchase"
+        icon={<GiftIcon variant="solid" />}
+      />
+      <LayoutContent>
+        <Receiving title="Receiving" items={purchaseItems} />
+      </LayoutContent>
+      <LayoutFooter>
+        {/* Insufficient Balance Warning */}
+        {!isChecking && !hasSufficientBalance && (
+          <Card className="border-warning">
+            <CardContent className="flex flex-row items-center gap-3 p-3 text-warning">
+              <ErrorAlertIcon variant="warning" size="sm" />
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-semibold">Insufficient Balance</p>
+                <p className="text-xs text-foreground-300">
+                  You need more {tokenSymbol} to complete this purchase. Please
+                  add funds or swap tokens.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <OnchainCostBreakdown quote={quote} />
+        {displayError && <ControllerErrorAlert error={displayError} />}
+        <Button
+          onClick={onPurchase}
+          isLoading={isLoading || isChecking}
+          disabled={!hasSufficientBalance || !!displayError || isChecking}
+        >
+          {!hasSufficientBalance && !isChecking
+            ? "Insufficient Balance"
+            : "Confirm"}
+        </Button>
+      </LayoutFooter>
+    </>
+  );
+}

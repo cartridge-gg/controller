@@ -6,7 +6,11 @@ import {
   WalletIcon,
 } from "@cartridge/ui";
 import { networkWalletData } from "./data";
-import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  useNavigation,
+  usePurchaseContext,
+  isOnchainStarterpack,
+} from "@/context";
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { ExternalWallet } from "@cartridge/controller";
@@ -22,8 +26,12 @@ export function SelectWallet() {
   const { navigate } = useNavigation();
   const { platforms } = useParams();
   const { controller, isMainnet, externalDetectWallets } = useConnection();
-  const { starterpackDetails, onExternalConnect, clearError } =
-    usePurchaseContext();
+  const {
+    starterpackDetails,
+    onExternalConnect,
+    clearError,
+    clearSelectedWallet,
+  } = usePurchaseContext();
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [chainIds, setChainIds] = useState<Map<string, string>>(new Map());
@@ -104,14 +112,20 @@ export function SelectWallet() {
   }, [externalDetectWallets, isMainnet, selectedNetworks]);
 
   useEffect(() => {
+    // Clear selected wallet when wallet selection screen mounts
+    clearSelectedWallet();
     return () => clearError();
-  }, [clearError]);
+  }, [clearError, clearSelectedWallet]);
 
   const onControllerWalletSelect = useCallback(() => {
     if (
       starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Paid
     ) {
-      navigate(`/purchase/checkout/crypto`);
+      // Route to onchain checkout for onchain starterpacks, crypto for backend
+      const checkoutPath = isOnchainStarterpack(starterpackDetails)
+        ? `/purchase/checkout/onchain`
+        : `/purchase/checkout/crypto`;
+      navigate(checkoutPath);
       return;
     }
 
@@ -137,7 +151,11 @@ export function SelectWallet() {
           starterpackDetails?.acquisitionType ===
           StarterpackAcquisitionType.Paid
         ) {
-          navigate(`/purchase/checkout/crypto`);
+          // Route to onchain checkout for onchain starterpacks, crypto for backend
+          const checkoutPath = isOnchainStarterpack(starterpackDetails)
+            ? `/purchase/checkout/onchain`
+            : `/purchase/checkout/crypto`;
+          navigate(checkoutPath);
           return;
         }
 
