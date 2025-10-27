@@ -273,3 +273,10 @@ export interface StarterPackItem {
   price?: bigint;
   call?: Call[];
 }
+
+export type StandaloneAuthOptions = {
+  /** The URL to redirect to after authentication (e.g., game URL) */
+  redirectTo?: string;
+  /** Alternative: return to the current app URL */
+  returnTo?: string;
+};

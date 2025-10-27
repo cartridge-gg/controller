@@ -180,6 +180,14 @@ const Header = () => {
         <div className="flex gap-2">
           <Button
             onClick={() => {
+              controllerConnector.controller.openStandaloneAuth();
+            }}
+            disabled={!isControllerReady}
+          >
+            Standalone
+          </Button>
+          <Button
+            onClick={() => {
               connect({ connector: controllerConnector });
             }}
             disabled={!isControllerReady}

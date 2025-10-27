@@ -9,6 +9,7 @@ import {
 import { constants, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
+import { KEYCHAIN_URL } from "./constants";
 import { NotReadyToConnect } from "./errors";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
@@ -22,6 +23,7 @@ import {
   ProbeReply,
   ProfileContextTypeVariant,
   ResponseCodes,
+  StandaloneAuthOptions,
 } from "./types";
 import { parseChainId } from "./utils";
 
@@ -388,6 +390,76 @@ export default class ControllerProvider extends BaseProvider {
     }
 
     return await this.keychain.delegateAccount();
+  }
+
+  /**
+   * Opens the keychain in standalone mode (first-party context) for authentication.
+   * This establishes first-party storage, enabling seamless iframe access across all games.
+   * @param options - Configuration for redirect after authentication
+   */
+  openStandaloneAuth(options: StandaloneAuthOptions = {}) {
+    if (typeof window === "undefined") {
+      console.error("openStandaloneAuth can only be called in browser context");
+      return;
+    }
+
+    const keychainUrl = new URL(
+      "/auth/standalone",
+      this.options.url || KEYCHAIN_URL,
+    );
+
+    // Add redirect target
+    if (options.redirectTo) {
+      keychainUrl.searchParams.set("redirect_to", options.redirectTo);
+    } else if (options.returnTo) {
+      keychainUrl.searchParams.set("redirect_to", options.returnTo);
+    } else {
+      // Default: return to current page
+      keychainUrl.searchParams.set("redirect_to", window.location.href);
+    }
+
+    // Add origin for CORS validation
+    keychainUrl.searchParams.set("origin", window.location.origin);
+
+    // Add controller configuration parameters
+    if (this.options.slot) {
+      keychainUrl.searchParams.set("ps", this.options.slot);
+    }
+
+    if (this.options.namespace) {
+      keychainUrl.searchParams.set("ns", this.options.namespace);
+    }
+
+    if (this.options.tokens?.erc20) {
+      keychainUrl.searchParams.set(
+        "erc20",
+        this.options.tokens.erc20.toString(),
+      );
+    }
+
+    // Navigate to standalone keychain
+    window.location.href = keychainUrl.toString();
+  }
+
+  /**
+   * Checks if the keychain iframe has first-party storage access.
+   * Returns true if the user has previously authenticated via standalone mode.
+   * @returns Promise<boolean> indicating if storage access is available
+   */
+  async hasFirstPartyAccess(): Promise<boolean> {
+    if (typeof document === "undefined" || !document.hasStorageAccess) {
+      // Browser doesn't support Storage Access API, assume access is available
+      return true;
+    }
+
+    try {
+      // Check if we already have storage access
+      const hasAccess = await document.hasStorageAccess();
+      return hasAccess;
+    } catch (error) {
+      console.error("Error checking storage access:", error);
+      return false;
+    }
   }
 
   private initializeChains(chains: Chain[]) {
