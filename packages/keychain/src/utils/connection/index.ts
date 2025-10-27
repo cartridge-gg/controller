@@ -30,6 +30,7 @@ export function connectToController<ParentMethods extends object>({
       connect: normalize(
         connect({
           navigate,
+          setRpcUrl,
         }),
       ),
       deploy: () => deployFactory({ navigate }),
