@@ -52,9 +52,9 @@ export default class SessionAccount extends WalletAccount {
       {
         expiresAt,
         policies,
-        guardianKeyGuid,
-        metadataHash,
-        sessionKeyGuid,
+        guardianKeyGuid: guardianKeyGuid ?? "0x0",
+        metadataHash: metadataHash ?? "0x0",
+        sessionKeyGuid: sessionKeyGuid,
       },
     );
   }
