@@ -216,6 +216,14 @@ export function useCreateController({
       if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
+
+        // Check for redirect_to parameter and redirect after successful signup
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectTo = searchParams.get("redirect_to");
+        if (redirectTo) {
+          // Redirect to the specified URL
+          window.location.href = redirectTo;
+        }
       }
     },
     [setController, origin],
@@ -380,6 +388,14 @@ export function useCreateController({
 
       window.controller = loginRet.controller;
       setController(loginRet.controller);
+
+      // Check for redirect_to parameter and redirect after successful login
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectTo = searchParams.get("redirect_to");
+      if (redirectTo) {
+        // Redirect to the specified URL
+        window.location.href = redirectTo;
+      }
     },
     [origin, setController],
   );
@@ -605,6 +621,14 @@ export function useCreateController({
               authenticationMethod: socialProvider as AuthOption,
               rpcUrl,
             });
+          }
+
+          // Check for redirect_to parameter after social auth
+          const redirectTo = new URLSearchParams(window.location.search).get(
+            "redirect_to",
+          );
+          if (redirectTo) {
+            window.location.href = redirectTo;
           }
         } catch (e) {
           setError(e as Error);
