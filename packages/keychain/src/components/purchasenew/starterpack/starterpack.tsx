@@ -244,6 +244,10 @@ export function OnchainStarterPackInner({
     protocolFee: bigint;
     totalCost: bigint;
     paymentToken: string;
+    paymentTokenMetadata: {
+      symbol: string;
+      decimals: number;
+    };
   };
   isMainnet?: boolean;
   error?: Error | null;

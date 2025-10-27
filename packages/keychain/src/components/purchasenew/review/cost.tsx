@@ -19,7 +19,7 @@ import {
 } from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
-import { getTokenIcon, getTokenSymbol, tokenAmountToUsd } from "./token-utils";
+import { getTokenIcon } from "./token-utils";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -37,6 +37,10 @@ export interface OnchainQuote {
   protocolFee: bigint;
   totalCost: bigint;
   paymentToken: string;
+  paymentTokenMetadata: {
+    symbol: string;
+    decimals: number;
+  };
 }
 
 export function CostBreakdown({
@@ -109,9 +113,12 @@ export function OnchainCostBreakdown({
   platform?: ExternalPlatform;
   openFeesTooltip?: boolean;
 }) {
-  const tokenSymbol = getTokenSymbol(quote.paymentToken);
+  const { symbol, decimals } = quote.paymentTokenMetadata;
   const tokenIcon = getTokenIcon(quote.paymentToken);
-  const totalDisplay = tokenAmountToUsd(quote.totalCost, quote.paymentToken);
+  
+  // Format amount with proper decimals
+  const totalAmount = Number(quote.totalCost) / Math.pow(10, decimals);
+  const totalDisplay = `$${totalAmount.toFixed(2)}`;
 
   return (
     <Card className="gap-3">
@@ -131,19 +138,13 @@ export function OnchainCostBreakdown({
               <OnchainFeesTooltip
                 trigger={<InfoIcon size="xs" />}
                 defaultOpen={openFeesTooltip}
-                quote={{
-                  basePrice: quote.basePrice,
-                  protocolFee: quote.protocolFee,
-                  referralFee: quote.referralFee,
-                  totalCost: quote.totalCost,
-                  paymentToken: quote.paymentToken,
-                }}
+                quote={quote}
               />
             </div>
             <span className="text-foreground-100">{totalDisplay}</span>
           </div>
         </CardContent>
-        <OnchainPaymentType symbol={tokenSymbol} icon={tokenIcon} />
+        <OnchainPaymentType symbol={symbol} icon={tokenIcon} />
       </div>
     </Card>
   );

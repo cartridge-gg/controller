@@ -16,7 +16,6 @@ import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { useConnection } from "@/hooks/connection";
 import { isOnchainStarterpack } from "@/context";
 import { uint256 } from "starknet";
-import { getTokenSymbol } from "../../review/token-utils";
 
 export function OnchainCheckout() {
   const {
@@ -123,7 +122,8 @@ export function OnchainCheckout() {
     );
   }
 
-  const tokenSymbol = getTokenSymbol(quote.paymentToken);
+  const { symbol: tokenSymbol } = quote.paymentTokenMetadata;
+
   return (
     <>
       <HeaderInner

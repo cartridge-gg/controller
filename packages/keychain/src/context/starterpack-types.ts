@@ -57,7 +57,15 @@ export interface OnchainItem {
 }
 
 /**
- * Onchain pricing quote (all values in USDC with 6 decimals)
+ * Token metadata for onchain payments
+ */
+export interface TokenMetadata {
+  symbol: string;
+  decimals: number;
+}
+
+/**
+ * Onchain pricing quote
  */
 export interface OnchainQuote {
   basePrice: bigint;
@@ -65,6 +73,7 @@ export interface OnchainQuote {
   protocolFee: bigint;
   totalCost: bigint;
   paymentToken: string;
+  paymentTokenMetadata: TokenMetadata;
 }
 
 /**

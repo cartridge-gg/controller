@@ -52,7 +52,6 @@ export const useStarterPackOnchain = (
     }
 
     setIsLoading(true);
-    console.log("fetching starterpack metadata and quote");
     const fetch = async () => {
       setError(null);
 

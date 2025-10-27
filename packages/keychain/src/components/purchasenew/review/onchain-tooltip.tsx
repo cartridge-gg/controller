@@ -5,7 +5,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@cartridge/ui";
-import { tokenAmountToUsd } from "./token-utils";
 
 /**
  * Onchain quote breakdown for tooltip
@@ -16,7 +15,19 @@ interface OnchainQuoteBreakdown {
   referralFee: bigint;
   totalCost: bigint;
   paymentToken: string;
+  paymentTokenMetadata: {
+    symbol: string;
+    decimals: number;
+  };
 }
+
+/**
+ * Format bigint token amount to USD string
+ */
+const formatTokenAmount = (amount: bigint, decimals: number): string => {
+  const value = Number(amount) / Math.pow(10, decimals);
+  return `$${value.toFixed(2)}`;
+};
 
 export const OnchainFeesTooltip = ({
   trigger,
@@ -27,6 +38,8 @@ export const OnchainFeesTooltip = ({
   defaultOpen?: boolean;
   quote: OnchainQuoteBreakdown;
 }) => {
+  const { decimals } = quote.paymentTokenMetadata;
+
   return (
     <TooltipProvider>
       <Tooltip defaultOpen={defaultOpen}>
@@ -38,29 +51,25 @@ export const OnchainFeesTooltip = ({
         >
           <div className="flex flex-row justify-between text-foreground-300">
             <span>Base Price:</span>
-            <span>{tokenAmountToUsd(quote.basePrice, quote.paymentToken)}</span>
+            <span>{formatTokenAmount(quote.basePrice, decimals)}</span>
           </div>
           <Separator className="bg-background-125" />
           <div className="flex flex-row justify-between text-foreground-300">
             <span>Protocol Fee:</span>
-            <span>
-              {tokenAmountToUsd(quote.protocolFee, quote.paymentToken)}
-            </span>
+            <span>{formatTokenAmount(quote.protocolFee, decimals)}</span>
           </div>
           {quote.referralFee > 0n && (
             <>
               <div className="flex flex-row justify-between text-foreground-300">
                 <span>Referral Fee:</span>
-                <span>
-                  {tokenAmountToUsd(quote.referralFee, quote.paymentToken)}
-                </span>
+                <span>{formatTokenAmount(quote.referralFee, decimals)}</span>
               </div>
             </>
           )}
           <Separator className="bg-background-125" />
           <div className="flex flex-row justify-between text-foreground-100 font-medium">
             <span>Total:</span>
-            <span>{tokenAmountToUsd(quote.totalCost, quote.paymentToken)}</span>
+            <span>{formatTokenAmount(quote.totalCost, decimals)}</span>
           </div>
         </TooltipContent>
       </Tooltip>
