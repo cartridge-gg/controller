@@ -97,14 +97,14 @@ export const AccountSearchDropdown = React.forwardRef<
       onContentVisibilityChange?.(shouldShowDropdown && hasDropdownContent);
     }, [shouldShowDropdown, hasDropdownContent, onContentVisibilityChange]);
 
-    // Auto-select first item by default when results appear
+    // Auto-select first item by default when results appear or when dropdown opens
     React.useEffect(() => {
-      if (hasResults && results.length > 0) {
+      if (isOpen && hasResults && results.length > 0) {
         onSelectedIndexChange?.(0);
-      } else {
+      } else if (!isOpen) {
         onSelectedIndexChange?.(undefined);
       }
-    }, [hasResults, results.length, onSelectedIndexChange]);
+    }, [isOpen, hasResults, results.length, onSelectedIndexChange]);
 
     const handleSelect = React.useCallback(
       (result: AccountSearchResult) => {
