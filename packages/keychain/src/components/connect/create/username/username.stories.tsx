@@ -320,6 +320,12 @@ export const InteractivePillDemo = {
       });
     };
 
+    const handleEditPill = () => {
+      console.log("Editing pill:", selectedAccount?.username);
+      setUsernameValue(selectedAccount?.username || "");
+      setSelectedAccount(undefined);
+    };
+
     return (
       <div className="w-96">
         <CreateAccount
@@ -355,6 +361,7 @@ export const InteractivePillDemo = {
           onKeyDown={() => {}}
           onAccountSelect={handleAccountSelect}
           onSelectedUsernameRemove={handleRemovePill}
+          onSelectedUsernameEdit={handleEditPill}
           mockResults={mockResults}
           mockIsLoading={false}
         />
@@ -363,7 +370,8 @@ export const InteractivePillDemo = {
           <ul className="space-y-1 text-foreground-300">
             <li>• Type in the input to see autocomplete suggestions</li>
             <li>• Click on any suggestion to create a pill</li>
-            <li>• Click the X button on the pill to remove it</li>
+            <li>• Click anywhere on the pill to edit it</li>
+            <li>• Click the X button on the pill to remove it completely</li>
             <li>• Try "shin" to see matching results</li>
           </ul>
           {selectedAccount && (
@@ -415,6 +423,7 @@ export const PillWithExistingUser: Story = {
     onUsernameClear: fn(),
     onKeyDown: fn(),
     onSelectedUsernameRemove: fn(),
+    onSelectedUsernameEdit: fn(),
   },
 };
 
@@ -443,6 +452,7 @@ export const PillWithExistingUserWithoutPoints: Story = {
     onUsernameClear: fn(),
     onKeyDown: fn(),
     onSelectedUsernameRemove: fn(),
+    onSelectedUsernameEdit: fn(),
   },
 };
 
@@ -470,6 +480,7 @@ export const PillWithNewUser: Story = {
     onUsernameClear: fn(),
     onKeyDown: fn(),
     onSelectedUsernameRemove: fn(),
+    onSelectedUsernameEdit: fn(),
   },
 };
 
@@ -496,5 +507,6 @@ export const DropdownLoadingState: Story = {
     onKeyDown: fn(),
     onAccountSelect: fn(),
     onSelectedUsernameRemove: fn(),
+    onSelectedUsernameEdit: fn(),
   },
 };

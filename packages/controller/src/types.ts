@@ -226,6 +226,8 @@ export type KeychainOptions = IFrameOptions & {
   url?: string;
   /** The origin of keychain */
   origin?: string;
+  /** The RPC URL to use (derived from defaultChainId) */
+  rpcUrl?: string;
   /** Propagate transaction errors back to caller instead of showing modal */
   propagateSessionErrors?: boolean;
   /** The fee source to use for execute from outside */

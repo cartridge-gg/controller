@@ -121,11 +121,13 @@ export function parseConnectParams(searchParams: URLSearchParams): {
 
 export function connect({
   navigate,
+  setRpcUrl,
 }: {
   navigate: (
     to: string | number,
     options?: { replace?: boolean; state?: unknown },
   ) => void;
+  setRpcUrl: (url: string) => void;
 }) {
   return () => {
     // Support both old and new signatures for backwards compatibility
@@ -144,6 +146,8 @@ export function connect({
         // In the old signature, the first arg is policies (not used in new flow)
         // and the third arg is signupOptions
         signers = signupOptions;
+        // Set the RPC URL for backwards compatibility
+        setRpcUrl(rpcUrl);
       } else {
         // New signature: connect(signupOptions)
         signers = policiesOrSigners as AuthOptions | undefined;

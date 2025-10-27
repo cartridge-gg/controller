@@ -8,6 +8,7 @@ import {
   CheckboxIcon,
   PencilIcon,
   Switch,
+  Thumbnail,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { ArrowTurnDownIcon, Badge } from "@cartridge/ui";
@@ -15,34 +16,56 @@ import type {
   StarknetEnumType,
   StarknetMerkleType,
 } from "@starknet-io/types-js";
-import { type PropsWithChildren, useState } from "react";
-import { AccordionCard } from "./AccordionCard";
+import { type PropsWithChildren, useState, useEffect } from "react";
 
 interface MessageCardProps {
   messages: SignMessagePolicyWithEnabled[];
   isExpanded?: boolean;
+  className?: string;
 }
 
-export function MessageCard({ messages, isExpanded }: MessageCardProps) {
-  const totalEnabledMessages = messages.filter((m) => m.authorized).length;
+export function MessageCard({
+  messages,
+  isExpanded = false,
+  className,
+}: MessageCardProps) {
+  const [isOpened, setisOpened] = useState(isExpanded);
+  const { isEditable } = useCreateSession();
+
+  // Auto-open accordion when isEditable becomes true
+  useEffect(() => {
+    if (isEditable) {
+      setisOpened(true);
+    }
+  }, [isEditable]);
 
   return (
-    <AccordionCard
-      icon={<PencilIcon variant="solid" />}
-      title="Sign Message"
-      trigger={
-        <div className="text-xs text-foreground-300">
-          Approve&nbsp;
-          <span className="text-foreground-200 font-bold">
-            {totalEnabledMessages}{" "}
-            {totalEnabledMessages > 1 ? `messages` : "message"}
-          </span>
-        </div>
-      }
-      isExpanded={isExpanded}
+    <Accordion
+      type="single"
+      collapsible
+      className={cn("bg-background-200 rounded", className)}
+      value={isOpened ? "item" : ""}
+      onValueChange={(value) => setisOpened(value === "item")}
     >
-      <MessageContent messages={messages} />
-    </AccordionCard>
+      <AccordionItem value="item">
+        <AccordionTrigger
+          parentClassName="h-11 p-3"
+          className="flex items-center text-xs font-medium text-foreground-100 gap-1.5"
+          color={cn(isOpened ? "text-foreground-100" : "text-foreground-400")}
+        >
+          <Thumbnail
+            variant={isOpened ? "light" : "ghost"}
+            size="xs"
+            icon={<PencilIcon variant="solid" />}
+            centered={true}
+          />
+          <p>Sign Message</p>
+        </AccordionTrigger>
+        <AccordionContent className="flex flex-col gap-2 px-3 pb-3 rounded overflow-hidden">
+          <MessageContent messages={messages} />
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 

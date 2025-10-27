@@ -217,7 +217,6 @@ export function useConnectionValue() {
     const version = urlParams.get("v");
     const project = urlParams.get("ps");
     const namespace = urlParams.get("ns");
-
     const erc20Param = urlParams.get("erc20");
     const tokens = erc20Param
       ? decodeURIComponent(erc20Param)
@@ -233,7 +232,7 @@ export function useConnectionValue() {
         ];
 
     if (rpcUrl) {
-      setRpcUrl(rpcUrl);
+      setRpcUrl(decodeURIComponent(rpcUrl));
     }
 
     return {
@@ -472,6 +471,8 @@ export function useConnectionValue() {
       const localWalletBridge = new WalletBridge();
       const iframeMethods = localWalletBridge.getIFrameMethods();
       const currentOrigin = window.location.origin;
+
+      setOrigin(currentOrigin);
 
       setParent({
         close: () => {

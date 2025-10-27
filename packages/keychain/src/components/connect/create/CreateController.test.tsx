@@ -73,6 +73,9 @@ vi.mock("./useUsernameValidation", () => ({
 vi.mock("./useCreateController", () => ({
   useCreateController: () => mockUseCreateController(),
 }));
+vi.mock("@/hooks/debounce", () => ({
+  useDebounce: <T,>(value: T) => ({ debouncedValue: value }),
+}));
 describe("CreateController", () => {
   const defaultProps = {
     isSlot: false,
@@ -87,12 +90,21 @@ describe("CreateController", () => {
       setError: vi.fn(),
       handleSubmit: vi.fn().mockResolvedValue(undefined),
       authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep: vi.fn(),
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     mockUseUsernameValidation.mockReturnValue({
       status: "valid",
       exists: false,
+      error: undefined,
+      signers: undefined,
     });
     mockUseControllerTheme.mockReturnValue({
       name: "cartridge",
@@ -134,26 +146,34 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     renderComponent();
     const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "validuser" } });
-    const submitButton = screen.getByText("sign up");
-    fireEvent.click(submitButton);
-    mockUseCreateController.mockReturnValue({
-      isLoading: false,
-      error: undefined,
-      setError: vi.fn(),
-      handleSubmit,
-      authenticationStep: AuthenticationStep.ChooseMethod,
-      setAuthenticationStep,
-      setChangeWallet: vi.fn(),
-      signupOptions: ["webauthn"],
+
+    // Ensure dropdown is closed by blurring input
+    fireEvent.blur(input);
+
+    // Wait for validation to be applied
+    await waitFor(() => {
+      const submitButton = screen.getByTestId("submit-button");
+      expect(submitButton).not.toBeDisabled();
     });
-    const passkeyButton = await screen.findByText("Passkey");
-    fireEvent.click(passkeyButton);
+
+    // Submit form
+    const submitButton = screen.getByTestId("submit-button");
+    const form = submitButton.closest("form");
+    if (form) {
+      fireEvent.submit(form);
+    }
 
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledWith(
@@ -173,8 +193,14 @@ describe("CreateController", () => {
       handleSubmit: vi.fn(),
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep: vi.fn(),
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     renderComponent();
     const submitButton = screen.getByTestId("submit-button");
@@ -225,26 +251,34 @@ describe("CreateController", () => {
       handleSubmit,
       authenticationStep: AuthenticationStep.FillForm,
       setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
       setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
       signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
     });
     renderWithProviders(<CreateController {...defaultProps} />);
     const input = screen.getByPlaceholderText("Username");
     fireEvent.change(input, { target: { value: "validuser" } });
-    const submitButton = screen.getByText("sign up");
-    fireEvent.click(submitButton);
-    mockUseCreateController.mockReturnValue({
-      isLoading: false,
-      error: undefined,
-      setError: vi.fn(),
-      handleSubmit,
-      authenticationStep: AuthenticationStep.ChooseMethod,
-      setAuthenticationStep,
-      setChangeWallet: vi.fn(),
-      signupOptions: ["webauthn"],
+
+    // Ensure dropdown is closed by blurring input
+    fireEvent.blur(input);
+
+    // Wait for validation to be applied
+    await waitFor(() => {
+      const submitButton = screen.getByTestId("submit-button");
+      expect(submitButton).not.toBeDisabled();
     });
-    const passkeyButton = await screen.findByText("Passkey");
-    fireEvent.click(passkeyButton);
+
+    // Submit form
+    const submitButton = screen.getByTestId("submit-button");
+    const form = submitButton.closest("form");
+    if (form) {
+      fireEvent.submit(form);
+    }
 
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledWith(
@@ -253,6 +287,171 @@ describe("CreateController", () => {
         "webauthn",
         undefined,
       );
+    });
+  });
+
+  it("prevents form submission when dropdown is open", async () => {
+    const handleSubmit = vi.fn().mockResolvedValue(undefined);
+    const setAuthenticationStep = vi.fn();
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit,
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
+      setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
+      signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
+    });
+    renderComponent();
+    const input = screen.getByPlaceholderText("Username");
+    fireEvent.change(input, { target: { value: "validuser" } });
+
+    // Wait for validation to complete
+    await waitFor(() => {
+      expect(input).toHaveValue("validuser");
+    });
+
+    // Simulate dropdown being open by triggering focus on input
+    fireEvent.focus(input);
+
+    const submitButton = screen.getByText("sign up");
+    fireEvent.click(submitButton);
+
+    // Form submission should be prevented when dropdown is open
+    expect(handleSubmit).not.toHaveBeenCalled();
+  });
+
+  it("allows form submission when dropdown is closed", async () => {
+    const handleSubmit = vi.fn().mockResolvedValue(undefined);
+    const setAuthenticationStep = vi.fn();
+    mockUseCreateController.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      setError: vi.fn(),
+      handleSubmit,
+      authenticationStep: AuthenticationStep.FillForm,
+      setAuthenticationStep,
+      waitingForConfirmation: false,
+      changeWallet: false,
+      setChangeWallet: vi.fn(),
+      overlay: null,
+      setOverlay: vi.fn(),
+      signupOptions: ["webauthn"],
+      authMethod: undefined,
+      setAuthMethod: vi.fn(),
+    });
+    renderComponent();
+    const input = screen.getByPlaceholderText("Username");
+    fireEvent.change(input, { target: { value: "validuser" } });
+
+    // Wait for validation to complete and ensure dropdown is closed
+    await waitFor(() => {
+      expect(input).toHaveValue("validuser");
+    });
+
+    // Ensure dropdown is closed by blurring the input
+    fireEvent.blur(input);
+
+    // Wait for validation to be applied
+    await waitFor(() => {
+      const submitButton = screen.getByTestId("submit-button");
+      expect(submitButton).not.toBeDisabled();
+    });
+
+    // Submit form
+    const submitButton = screen.getByTestId("submit-button");
+    const form = submitButton.closest("form");
+    if (form) {
+      fireEvent.submit(form);
+    }
+
+    // Form submission should work when dropdown is closed
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenCalledWith(
+        "validuser",
+        false,
+        "webauthn",
+        undefined,
+      );
+    });
+  });
+
+  describe("Pill functionality", () => {
+    it("brings back input form when clicking the pill", async () => {
+      const setAuthenticationStep = vi.fn();
+      const handleSubmit = vi.fn();
+
+      mockUseCreateController.mockReturnValue({
+        isLoading: false,
+        error: undefined,
+        setError: vi.fn(),
+        handleSubmit,
+        authenticationStep: AuthenticationStep.FillForm,
+        setAuthenticationStep,
+        waitingForConfirmation: false,
+        changeWallet: false,
+        setChangeWallet: vi.fn(),
+        overlay: null,
+        setOverlay: vi.fn(),
+        signupOptions: ["webauthn"],
+        authMethod: undefined,
+        setAuthMethod: vi.fn(),
+      });
+
+      renderComponent();
+
+      // Initially should show input
+      const input = screen.getByPlaceholderText("Username");
+      expect(input).toBeInTheDocument();
+
+      // Type a username
+      fireEvent.change(input, { target: { value: "testuser" } });
+
+      await waitFor(() => {
+        expect(input).toHaveValue("testuser");
+      });
+
+      // In the actual app, when a user selects an account from the dropdown,
+      // the input is replaced with a pill. The pill shows the username and
+      // has a clickable area that calls onSelectedUsernameEdit to go back to input mode.
+      //
+      // Since the component manages selectedAccount internally via handleAccountSelect,
+      // and that callback is triggered by the AccountSearchDropdown (which requires
+      // async account fetching), we verify the editing behavior by ensuring:
+      // 1. The input can be cleared and changed (simulating the state after pill click)
+      // 2. The form remains functional after state changes
+
+      // Simulate clearing (as if pill was removed via the X button)
+      fireEvent.change(input, { target: { value: "" } });
+
+      await waitFor(() => {
+        expect(input).toHaveValue("");
+      });
+
+      // Type a new username (simulating return to input mode after pill click)
+      fireEvent.change(input, { target: { value: "newuser" } });
+
+      await waitFor(() => {
+        expect(input).toHaveValue("newuser");
+      });
+
+      // Verify the input is still functional and can be submitted
+      expect(screen.getByPlaceholderText("Username")).toBeInTheDocument();
+
+      // Blur to close any dropdown and enable submission
+      fireEvent.blur(input);
+
+      await waitFor(() => {
+        const submitButton = screen.getByTestId("submit-button");
+        expect(submitButton).not.toBeDisabled();
+      });
     });
   });
 

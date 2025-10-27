@@ -15,11 +15,13 @@ export const Starterpack = () => {
   const getDefaultStarterpackIds = () => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       return {
+        purchaseOnchain: 0,
         purchase: "sick-starterpack-mainnet",
         claim: "claim-starterpack-mainnet",
       };
     }
     return {
+      purchaseOnchain: 0,
       purchase: "sick-starterpack-sepolia",
       claim: "claim-starterpack-sepolia",
     };
@@ -28,6 +30,9 @@ export const Starterpack = () => {
   const defaultIds = getDefaultStarterpackIds();
   const [purchaseSpId, setPurchaseSpId] = useState<string>(defaultIds.purchase);
   const [claimSpId, setClaimSpId] = useState<string>(defaultIds.claim);
+  const [purchaseOnchainSpId, setPurchaseOnchainSpId] = useState<number>(
+    defaultIds.purchaseOnchain,
+  );
 
   // Track the current expected defaults to detect network changes
   const expectedDefaultsRef = useRef(defaultIds);
@@ -51,6 +56,12 @@ export const Starterpack = () => {
       return currentClaimSpId === currentExpected.claim
         ? newDefaults.claim
         : currentClaimSpId;
+    });
+
+    setPurchaseOnchainSpId((currentPurchaseOnchainSpId) => {
+      return currentPurchaseOnchainSpId === currentExpected.purchaseOnchain
+        ? newDefaults.purchaseOnchain
+        : currentPurchaseOnchainSpId;
     });
 
     // Update our references after successful comparison and update
@@ -85,7 +96,6 @@ export const Starterpack = () => {
                   );
                 }
               }}
-              disabled={!purchaseSpId.trim()}
             >
               Purchase
             </Button>
@@ -98,17 +108,16 @@ export const Starterpack = () => {
             <Input
               className="max-w-80"
               type="text"
-              value={purchaseSpId}
-              onChange={(e) => setPurchaseSpId(e.target.value)}
+              value={purchaseOnchainSpId}
+              onChange={(e) => setPurchaseOnchainSpId(Number(e.target.value))}
               placeholder="Enter starterpack ID"
             />
             <Button
               onClick={() => {
-                if (purchaseSpId.trim()) {
-                  controllerConnector.controller.openStarterPack(0);
-                }
+                controllerConnector.controller.openStarterPack(
+                  purchaseOnchainSpId,
+                );
               }}
-              disabled={!purchaseSpId.trim()}
             >
               Purchase Onchain
             </Button>
@@ -133,7 +142,6 @@ export const Starterpack = () => {
                   );
                 }
               }}
-              disabled={!claimSpId.trim()}
             >
               Claim Starterpack
             </Button>
