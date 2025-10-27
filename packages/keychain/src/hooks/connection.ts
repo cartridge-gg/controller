@@ -472,6 +472,8 @@ export function useConnectionValue() {
       const iframeMethods = localWalletBridge.getIFrameMethods();
       const currentOrigin = window.location.origin;
 
+      setOrigin(currentOrigin);
+
       setParent({
         close: () => {
           throw new Error("Can't call this function when not in an iFrame");
