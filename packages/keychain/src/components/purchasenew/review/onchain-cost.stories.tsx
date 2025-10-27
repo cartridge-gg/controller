@@ -26,6 +26,10 @@ export const USDCPayment: Story = {
       referralFee: 5000000n, // $5 USDC referral fee
       totalCost: 107500000n, // $107.50 total
       paymentToken: USDC_ADDRESS,
+      paymentTokenMetadata: {
+        symbol: "USDC",
+        decimals: 6,
+      },
     },
     platform: "starknet",
   },
@@ -41,6 +45,10 @@ export const ETHPayment: Story = {
       totalCost: 53750000000000000n, // 0.05375 ETH
       paymentToken:
         "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", // ETH on Starknet
+      paymentTokenMetadata: {
+        symbol: "ETH",
+        decimals: 18,
+      },
     },
     platform: "starknet",
   },
@@ -55,6 +63,10 @@ export const NoReferral: Story = {
       referralFee: 0n, // No referral
       totalCost: 51250000n, // $51.25 total
       paymentToken: USDC_ADDRESS,
+      paymentTokenMetadata: {
+        symbol: "USDC",
+        decimals: 6,
+      },
     },
     platform: "base",
   },
@@ -69,6 +81,10 @@ export const WithTooltipOpen: Story = {
       referralFee: 1250000n, // $1.25 referral
       totalCost: 26875000n, // $26.875 total
       paymentToken: USDC_ADDRESS,
+      paymentTokenMetadata: {
+        symbol: "USDC",
+        decimals: 6,
+      },
     },
     platform: "ethereum",
     openFeesTooltip: true,

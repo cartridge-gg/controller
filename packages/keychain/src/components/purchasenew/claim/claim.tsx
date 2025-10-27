@@ -21,12 +21,20 @@ import { StarterpackReceiving } from "../starterpack/starterpack";
 import { ExternalWalletType } from "@cartridge/controller";
 import { getWallet } from "../wallet/data";
 import { formatAddress } from "@cartridge/ui/utils";
+import type { BackendStarterpackDetails } from "@/context";
 
 export function Claim() {
   const { keys, address: externalAddress, type } = useParams();
   const { goBack, navigate } = useNavigation();
-  const { starterpackDetails, setClaimItems, setTransactionHash } =
-    usePurchaseContext();
+  const {
+    starterpackDetails: starterpackDetailsRaw,
+    setClaimItems,
+    setTransactionHash,
+  } = usePurchaseContext();
+
+  const starterpackDetails = starterpackDetailsRaw as
+    | BackendStarterpackDetails
+    | undefined;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
