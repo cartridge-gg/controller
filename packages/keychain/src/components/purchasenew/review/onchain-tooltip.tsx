@@ -5,21 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@cartridge/ui";
-
-/**
- * Onchain quote breakdown for tooltip
- */
-interface OnchainQuoteBreakdown {
-  basePrice: bigint;
-  protocolFee: bigint;
-  referralFee: bigint;
-  totalCost: bigint;
-  paymentToken: string;
-  paymentTokenMetadata: {
-    symbol: string;
-    decimals: number;
-  };
-}
+import type { OnchainQuote } from "@/context";
 
 /**
  * Format bigint token amount to USD string
@@ -36,7 +22,7 @@ export const OnchainFeesTooltip = ({
 }: {
   trigger: React.ReactNode;
   defaultOpen?: boolean;
-  quote: OnchainQuoteBreakdown;
+  quote: OnchainQuote;
 }) => {
   const { decimals } = quote.paymentTokenMetadata;
 

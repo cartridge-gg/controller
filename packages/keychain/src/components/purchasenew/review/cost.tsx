@@ -20,6 +20,7 @@ import {
 import { FeesTooltip } from "./tooltip";
 import { OnchainFeesTooltip } from "./onchain-tooltip";
 import { getTokenIcon } from "./token-utils";
+import type { OnchainQuote } from "@/context";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -27,21 +28,6 @@ type PaymentUnit = "usdc" | "credits";
 export const convertCentsToDollars = (cents: number): string => {
   return `$${(cents / 100).toFixed(2)}`;
 };
-
-/**
- * Onchain quote for token-based payments
- */
-export interface OnchainQuote {
-  basePrice: bigint;
-  referralFee: bigint;
-  protocolFee: bigint;
-  totalCost: bigint;
-  paymentToken: string;
-  paymentTokenMetadata: {
-    symbol: string;
-    decimals: number;
-  };
-}
 
 export function CostBreakdown({
   rails,
@@ -115,7 +101,7 @@ export function OnchainCostBreakdown({
 }) {
   const { symbol, decimals } = quote.paymentTokenMetadata;
   const tokenIcon = getTokenIcon(quote.paymentToken);
-  
+
   // Format amount with proper decimals
   const totalAmount = Number(quote.totalCost) / Math.pow(10, decimals);
   const totalDisplay = `$${totalAmount.toFixed(2)}`;

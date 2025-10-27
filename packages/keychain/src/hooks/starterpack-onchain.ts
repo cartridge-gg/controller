@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useController } from "./controller";
 import { CairoByteArray, Call, shortString, uint256 } from "starknet";
+import type { OnchainQuote } from "@/context";
 
 interface ItemOnchain {
   name: string;
@@ -15,20 +16,6 @@ interface StarterPackMetadataOnchain {
   items: ItemOnchain[];
 }
 
-export interface TokenMetadata {
-  symbol: string;
-  decimals: number;
-}
-
-interface QuoteOnchain {
-  basePrice: bigint;
-  referralFee: bigint;
-  protocolFee: bigint;
-  totalCost: bigint;
-  paymentToken: string;
-  paymentTokenMetadata: TokenMetadata;
-}
-
 export const useStarterPackOnchain = (
   starterpackId?: number,
   amount?: number,
@@ -41,7 +28,7 @@ export const useStarterPackOnchain = (
   const [metadata, setMetadata] = useState<StarterPackMetadataOnchain | null>(
     null,
   );
-  const [quote, setQuote] = useState<QuoteOnchain | null>(null);
+  const [quote, setQuote] = useState<OnchainQuote | null>(null);
   const [supply, setSupply] = useState<number | undefined>(undefined);
 
   // Fetch metadata and quote (static data)
@@ -98,7 +85,7 @@ export const useStarterPackOnchain = (
         const symbol = shortString.decodeShortString(symbolRes[0]);
         const decimals = Number(decimalsRes[0]);
 
-        const quote: QuoteOnchain = {
+        const quote: OnchainQuote = {
           basePrice: uint256.uint256ToBN({
             low: quoteRes[0],
             high: quoteRes[1],
