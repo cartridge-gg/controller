@@ -51,7 +51,6 @@ import { Collections } from "./purchasenew/starterpack/collections";
 import { DeployController } from "./DeployController";
 import { useConnection } from "@/hooks/connection";
 import { CreateController, Upgrade } from "./connect";
-import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
@@ -59,6 +58,7 @@ import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
+import { useState, useCallback } from "react";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -75,8 +75,17 @@ function DefaultRoute() {
 function Authentication() {
   const { controller, isConfigLoading } = useConnection();
   const { pathname, search } = useLocation();
+  const [isCreatingController, setIsCreatingController] = useState(false);
 
   const upgrade = useUpgrade();
+
+  const handleLoadingChange = useCallback((isLoading: boolean) => {
+    setIsCreatingController(isLoading);
+  }, []);
+
+  // If controller was just created and upgrade hasn't synced yet, keep showing CreateController
+  const shouldShowCreateController =
+    !controller || (isCreatingController && !upgrade.isSynced);
 
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {
@@ -87,8 +96,8 @@ function Authentication() {
     return <Disconnect />;
   }
 
-  // No controller, send to login
-  if (!controller) {
+  // Show CreateController if no controller or if we're in creation flow and upgrade hasn't synced
+  if (shouldShowCreateController) {
     // Extract signers from URL if present (for connect flow)
     const searchParams = new URLSearchParams(search);
     const signersParam = searchParams.get("signers");
@@ -107,14 +116,16 @@ function Authentication() {
       <CreateController
         isSlot={pathname.startsWith("/slot")}
         signers={signers}
+        onLoadingChange={handleLoadingChange}
+        isLoading={!!controller && (!upgrade.isSynced || isConfigLoading)}
       />
     );
   }
 
-  if (!upgrade.isSynced || isConfigLoading) {
-    // This is likely never observable in a real application but just in case.
-    return <PageLoading />;
-  }
+  // if (!upgrade.isSynced || isConfigLoading) {
+  //   // This is likely never observable in a real application but just in case.
+  //   return <PageLoading />;
+  // }
 
   if (upgrade.available) {
     return <Upgrade />;
