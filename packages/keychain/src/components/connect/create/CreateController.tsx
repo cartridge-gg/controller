@@ -16,7 +16,7 @@ import {
 } from "@cartridge/ui";
 import { CreateAccount } from "./username";
 import InAppSpy from "inapp-spy";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthButton } from "../buttons/auth-button";
 import { ChangeWallet } from "../buttons/change-wallet";
 import { credentialToAuth } from "../types";
@@ -25,6 +25,11 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
+import {
+  useDetectKeyboardOpen,
+  usePreventOverScrolling,
+} from "@/hooks/viewport";
+import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
 
 interface CreateControllerViewProps {
@@ -49,12 +54,23 @@ interface CreateControllerViewProps {
   setChangeWallet: (value: boolean) => void;
   authOptions: AuthOptions;
   authMethod: AuthOption | undefined;
+  submitButtonRef: React.RefObject<HTMLButtonElement>;
+  isDropdownOpen: boolean;
+  onDropdownOpenChange: (isOpen: boolean) => void;
 }
 
 type CreateControllerFormProps = Omit<
   CreateControllerViewProps,
-  "authenticationStep" | "setAuthenticationStep" | "authOptions"
+  "setAuthenticationStep" | "authOptions"
 >;
+
+function getIOSVersion(userAgentString: string) {
+  const match = userAgentString.match(/Version\/(\d+)\.\d+/);
+  if (match && match[1]) {
+    return parseInt(match[1], 10); // Parse the captured string to an integer
+  }
+  return null; // Return null if not found, or a default like 0
+}
 
 function CreateControllerForm({
   theme,
@@ -71,14 +87,72 @@ function CreateControllerForm({
   changeWallet,
   setChangeWallet,
   authMethod,
+  authenticationStep,
+  submitButtonRef,
+  isDropdownOpen,
+  onDropdownOpenChange,
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
+  const { isOpen: keyboardIsOpen, viewportHeight } = useDetectKeyboardOpen();
+  const [pendingSubmitAfterKeyboardClose, setPendingSubmitAfterKeyboardClose] =
+    useState(false);
+  const { isMobile } = useDevice();
+  const prevKeyboardIsOpen = useRef(keyboardIsOpen);
+
+  // Track when keyboard closes and auto-submit if there was a pending submission
+  useEffect(() => {
+    if (
+      prevKeyboardIsOpen.current &&
+      !keyboardIsOpen &&
+      pendingSubmitAfterKeyboardClose
+    ) {
+      // Keyboard just closed and we have a pending submit
+      setPendingSubmitAfterKeyboardClose(false);
+      // Small delay to ensure keyboard animation is complete
+      setTimeout(() => {
+        onSubmit();
+      }, 100);
+    }
+    prevKeyboardIsOpen.current = keyboardIsOpen;
+  }, [keyboardIsOpen, pendingSubmitAfterKeyboardClose, onSubmit]);
 
   // appKey is undefined for unknown applications which we're
   // assuming are dojo applications which implement AASA and
   // support using passkeys in the inapp browser.
   // https://docs.cartridge.gg/controller/presets#apple-app-site-association
   const isInAppBrowser = isInApp && !!appKey;
+
+  const layoutRef = usePreventOverScrolling<HTMLFormElement>();
+
+  const layoutHeight = useMemo(() => {
+    if (isMobile) {
+      const isSafari = /^((?!chrome|android).)*safari/i.test(
+        navigator.userAgent,
+      );
+      if (keyboardIsOpen) {
+        if (!isSafari) {
+          return viewportHeight;
+        }
+
+        const iOSVersion = getIOSVersion(navigator.userAgent);
+        if (!iOSVersion) {
+          return "100%";
+        }
+
+        // Liquid glass safari
+        if (iOSVersion >= 26) {
+          return viewportHeight - 475;
+        }
+
+        // old safari
+        return viewportHeight - 200;
+      } else {
+        return "100%";
+      }
+    } else {
+      return "100%";
+    }
+  }, [isMobile, keyboardIsOpen, viewportHeight]);
 
   const [selectedAccount, setSelectedAccount] = useState<
     AccountSearchResult | undefined
@@ -95,6 +169,10 @@ function CreateControllerForm({
     onUsernameClear();
   }, [onUsernameChange, onUsernameClear]);
 
+  const handleEditPill = useCallback(() => {
+    setSelectedAccount(undefined);
+  }, []);
+
   return (
     <>
       <NavigationHeader
@@ -108,13 +186,34 @@ function CreateControllerForm({
         hideUsername
         hideSettings
       />
-
+      {/*<p>
+        Is keyboard open?
+        {keyboardIsOpen ? " Yes" : " No"}
+      </p>
+      <p>isMobile: {String(isMobile)}</p>
+      <p>Viewport height: {viewportHeight}px</p>
+      <p>Layout height: {layoutHeight}px</p>*/}
+      {/*<p>userAgent: {navigator.userAgent}</p>*/}
       <form
-        className="flex flex-col flex-1 overflow-y-scroll"
-        style={{ scrollbarWidth: "none" }}
+        className="flex flex-col overflow-y-scroll"
+        style={{
+          scrollbarWidth: "none",
+          height: layoutHeight,
+        }}
+        ref={layoutRef}
         onSubmit={(e) => {
           e.preventDefault();
-          onSubmit();
+          // Don't submit if dropdown is open
+          if (isDropdownOpen) {
+            return;
+          }
+
+          if (keyboardIsOpen) {
+            // If keyboard is open, mark for pending submit after it closes
+            setPendingSubmitAfterKeyboardClose(true);
+          } else {
+            onSubmit();
+          }
         }}
       >
         <LayoutContent className="overflow-y-hidden">
@@ -131,6 +230,8 @@ function CreateControllerForm({
             selectedAccount={selectedAccount}
             onAccountSelect={handleAccountSelect}
             onSelectedUsernameRemove={handleRemovePill}
+            onSelectedUsernameEdit={handleEditPill}
+            onDropdownOpenChange={onDropdownOpenChange}
           />
           <Legal />
         </LayoutContent>
@@ -162,16 +263,27 @@ function CreateControllerForm({
           />
 
           <AuthButton
+            ref={submitButtonRef}
             type="submit"
             isLoading={isLoading}
-            disabled={validation.status !== "valid"}
+            disabled={
+              validation.status !== "valid" ||
+              authenticationStep === AuthenticationStep.ChooseMethod ||
+              isDropdownOpen
+            }
             data-testid="submit-button"
             validation={validation}
             waitingForConfirmation={waitingForConfirmation}
             username={usernameField.value}
+            onMouseDown={() => {
+              if (keyboardIsOpen) {
+                // If keyboard is open, mark for pending submit after it closes
+                setPendingSubmitAfterKeyboardClose(true);
+              }
+            }}
           />
 
-          <CartridgeFooter />
+          {keyboardIsOpen && isMobile ? null : <CartridgeFooter />}
         </LayoutFooter>
       </form>
     </>
@@ -196,12 +308,28 @@ export function CreateControllerView({
   setChangeWallet,
   authOptions,
   authMethod,
+  submitButtonRef,
+  isDropdownOpen,
+  onDropdownOpenChange,
 }: CreateControllerViewProps) {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       setAuthenticationStep(AuthenticationStep.FillForm);
     }
   };
+
+  // Handles scroll to top on mobile when keyboard opens
+  useEffect(() => {
+    const handleScroll = () => {
+      window.scrollTo(0, 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <LayoutContainer>
@@ -224,12 +352,17 @@ export function CreateControllerView({
           changeWallet={changeWallet}
           setChangeWallet={setChangeWallet}
           authMethod={authMethod}
+          authenticationStep={authenticationStep}
+          submitButtonRef={submitButtonRef}
+          isDropdownOpen={isDropdownOpen}
+          onDropdownOpenChange={onDropdownOpenChange}
         />
         <ChooseSignupMethodForm
           isLoading={isLoading}
           validation={validation}
           onSubmit={onSubmit}
           authOptions={authOptions}
+          isOpen={authenticationStep === AuthenticationStep.ChooseMethod}
         />
       </Sheet>
     </LayoutContainer>
@@ -238,20 +371,25 @@ export function CreateControllerView({
 
 export function CreateController({
   isSlot,
+  signers,
 }: {
   isSlot?: boolean;
   error?: Error;
+  signers?: AuthOptions;
 }) {
   const posthog = usePostHog();
   const hasLoggedFocus = useRef(false);
   const hasLoggedChange = useRef(false);
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const [usernameField, setUsernameField] = useState({
     value: "",
     error: undefined,
   });
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Debounce validation quickly to reduce latency
   const { debouncedValue: validationUsername } = useDebounce(
@@ -275,12 +413,19 @@ export function CreateController({
     setChangeWallet,
     signupOptions,
     authMethod,
+    setAuthMethod,
   } = useCreateController({
     isSlot,
+    signers,
   });
 
   const handleFormSubmit = useCallback(
     (authenticationMode?: AuthOption, password?: string) => {
+      // Don't submit if dropdown is open - let dropdown handle the Enter key
+      if (isDropdownOpen) {
+        return;
+      }
+
       if (!usernameField.value) {
         return;
       }
@@ -292,6 +437,7 @@ export function CreateController({
 
       if (validation.status === "valid") {
         const accountExists = !!validation.exists;
+
         if (
           authenticationMode === undefined &&
           validation.signers &&
@@ -335,6 +481,7 @@ export function CreateController({
       }
     },
     [
+      isDropdownOpen,
       handleSubmit,
       usernameField.value,
       validation.exists,
@@ -346,10 +493,15 @@ export function CreateController({
   );
 
   useEffect(() => {
-    if (pendingSubmitRef.current && debouncedValidation.status === "valid") {
+    if (
+      pendingSubmitRef.current &&
+      debouncedValidation.status === "valid" &&
+      authenticationStep === AuthenticationStep.FillForm
+    ) {
+      pendingSubmitRef.current = false;
       handleFormSubmit();
     }
-  }, [debouncedValidation.status, handleFormSubmit]);
+  }, [debouncedValidation.status, handleFormSubmit, authenticationStep]);
 
   const handleUsernameChange = (value: string) => {
     if (!hasLoggedChange.current) {
@@ -380,10 +532,69 @@ export function CreateController({
     if (validation.status !== "valid") return;
 
     if (e.key === "Enter") {
+      // Don't submit if dropdown is open - let dropdown handle the Enter key
+      if (isDropdownOpen) {
+        return;
+      }
       e.preventDefault();
       handleFormSubmit();
     }
   };
+
+  // Handle keyboard shortcuts for Enter/Space to submit
+  const canSubmit = useMemo(() => {
+    return (
+      validation.status === "valid" &&
+      !isLoading &&
+      usernameField.value.trim() !== ""
+    );
+  }, [validation.status, isLoading, usernameField.value]);
+
+  useEffect(() => {
+    const handleDocumentKeyDown = (e: KeyboardEvent) => {
+      // Only handle if not in an input/textarea/contenteditable
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // Don't submit if in the ChooseMethod step
+      if (authenticationStep === AuthenticationStep.ChooseMethod) {
+        return;
+      }
+
+      // Don't submit if dropdown is open or submit is temporarily disabled
+      if (isDropdownOpen) {
+        return;
+      }
+
+      if ((e.key === "Enter" || e.key === " ") && canSubmit) {
+        e.preventDefault();
+        submitButtonRef.current?.click();
+      }
+    };
+
+    document.addEventListener("keydown", handleDocumentKeyDown);
+    return () => document.removeEventListener("keydown", handleDocumentKeyDown);
+  }, [
+    canSubmit,
+    authenticationStep,
+    isDropdownOpen,
+    setAuthMethod,
+    handleFormSubmit,
+  ]);
+
+  // Reset authMethod and pendingSubmit when sheet is closed
+  useEffect(() => {
+    if (authenticationStep === AuthenticationStep.FillForm) {
+      setAuthMethod(undefined);
+      pendingSubmitRef.current = false;
+    }
+  }, [authenticationStep, setAuthMethod]);
 
   return (
     <>
@@ -406,6 +617,9 @@ export function CreateController({
         setChangeWallet={setChangeWallet}
         authOptions={signupOptions}
         authMethod={authMethod}
+        submitButtonRef={submitButtonRef}
+        isDropdownOpen={isDropdownOpen}
+        onDropdownOpenChange={setIsDropdownOpen}
       />
       {overlay}
     </>

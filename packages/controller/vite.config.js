@@ -1,10 +1,8 @@
 import { defineConfig } from "vite";
-import { resolve, dirname } from "path";
-import { mkdirSync, existsSync } from "fs";
+import { resolve } from "path";
 import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
-import dts from "vite-plugin-dts"; 
+import dts from "vite-plugin-dts";
 import { visualizer } from "rollup-plugin-visualizer";
 
 // List peer dependencies, prevents bundling into library
@@ -22,14 +20,6 @@ export default defineConfig(({ mode }) => ({
       insertTypesEntry: true,
       include: ["src/**/*.ts"],
       exclude: ["src/**/*.test.ts"],
-      beforeWriteFile: (filePath, content) => {
-        // Ensure directory exists before writing
-        const dir = dirname(filePath);
-        if (!existsSync(dir)) {
-          mkdirSync(dir, { recursive: true });
-        }
-        return { filePath, content };
-      }
     }),
     mode === "production" &&
       visualizer({

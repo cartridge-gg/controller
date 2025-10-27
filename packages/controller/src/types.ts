@@ -131,11 +131,7 @@ export type ControllerAccounts = Record<ContractAddress, CartridgeID>;
 
 export interface Keychain {
   probe(rpcUrl: string): Promise<ProbeReply | ConnectError>;
-  connect(
-    policies: SessionPolicies,
-    rpcUrl: string,
-    signupOptions?: AuthOptions,
-  ): Promise<ConnectReply | ConnectError>;
+  connect(signupOptions?: AuthOptions): Promise<ConnectReply | ConnectError>;
   disconnect(): void;
 
   reset(): void;
@@ -165,7 +161,7 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
-  openStarterPack(options: string | StarterPack): Promise<void>;
+  openStarterPack(starterpackId: string): Promise<void>;
   navigate(path: string): Promise<void>;
 
   // External wallet methods
@@ -230,6 +226,8 @@ export type KeychainOptions = IFrameOptions & {
   url?: string;
   /** The origin of keychain */
   origin?: string;
+  /** The RPC URL to use (derived from defaultChainId) */
+  rpcUrl?: string;
   /** Propagate transaction errors back to caller instead of showing modal */
   propagateSessionErrors?: boolean;
   /** The fee source to use for execute from outside */
@@ -274,11 +272,4 @@ export interface StarterPackItem {
   amount?: number;
   price?: bigint;
   call?: Call[];
-}
-
-export interface StarterPack {
-  name: string;
-  description: string;
-  iconURL?: string;
-  items: StarterPackItem[];
 }

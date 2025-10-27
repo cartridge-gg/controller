@@ -22,7 +22,6 @@ import {
   ProbeReply,
   ProfileContextTypeVariant,
   ResponseCodes,
-  StarterPack,
 } from "./types";
 import { parseChainId } from "./utils";
 
@@ -56,11 +55,11 @@ export default class ControllerProvider extends BaseProvider {
     this.chains = new Map<ChainId, Chain>();
     this.options = { ...options, chains, defaultChainId };
 
+    this.initializeChains(chains);
+
     this.iframes = {
       keychain: options.lazyload ? undefined : this.createKeychainIframe(),
     };
-
-    this.initializeChains(chains);
 
     if (typeof window !== "undefined") {
       (window as any).starknet_controller = this;
@@ -165,19 +164,7 @@ export default class ControllerProvider extends BaseProvider {
     this.iframes.keychain.open();
 
     try {
-      let response = await this.keychain.connect(
-        // Policy precedence logic:
-        // 1. If shouldOverridePresetPolicies is true and policies are provided, use policies
-        // 2. Otherwise, if preset is defined, use empty object (let preset take precedence)
-        // 3. Otherwise, use provided policies or empty object
-        this.options.shouldOverridePresetPolicies && this.options.policies
-          ? this.options.policies
-          : this.options.preset
-            ? {}
-            : this.options.policies || {},
-        this.rpcUrl(),
-        this.options.signupOptions,
-      );
+      let response = await this.keychain.connect(this.options.signupOptions);
       if (response.code !== ResponseCodes.SUCCESS) {
         throw new Error(response.message);
       }
@@ -353,14 +340,13 @@ export default class ControllerProvider extends BaseProvider {
     });
   }
 
-  async openStarterPack(options: string | StarterPack): Promise<void> {
+  async openStarterPack(starterpackId: string): Promise<void> {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
     }
 
-    // Pass options directly to keychain's unified openStarterPack method
-    await this.keychain.openStarterPack(options);
+    await this.keychain.openStarterPack(starterpackId);
     this.iframes.keychain?.open();
   }
 
@@ -442,6 +428,7 @@ export default class ControllerProvider extends BaseProvider {
   private createKeychainIframe(): KeychainIFrame {
     return new KeychainIFrame({
       ...this.options,
+      rpcUrl: this.rpcUrl(),
       onClose: this.keychain?.reset,
       onConnect: (keychain) => {
         this.keychain = keychain;

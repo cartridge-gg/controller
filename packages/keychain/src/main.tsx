@@ -7,7 +7,6 @@ import { NavigationProvider } from "@/context/navigation";
 import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import Controller from "./utils/controller";
-import { PurchaseProvider } from "./context";
 
 // Controller type is already declared in vite-env.d.ts
 
@@ -19,9 +18,7 @@ async function bootstrap() {
       <BrowserRouter>
         <NavigationProvider>
           <Provider>
-            <PurchaseProvider>
-              <App />
-            </PurchaseProvider>
+            <App />
           </Provider>
         </NavigationProvider>
         <SonnerToaster position="bottom-right" />

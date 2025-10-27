@@ -142,11 +142,12 @@ export function CollectiblePurchase() {
         const asset = assets.find(
           (asset) => BigInt(asset.token_id ?? "0x0") === BigInt(order.tokenId),
         );
-        if (!asset) return;
-        const image = `https://api.cartridge.gg/x/${project}/torii/static/${contractAddress}/${asset.token_id}/image`;
+        if (!asset || !contractAddress) return;
+        const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
+        const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
         return {
           orderId: order.id,
-          image: image,
+          images: [newImage, oldImage],
           name: asset.name,
           collection: collection.name,
           collectionAddress: contractAddress,
@@ -306,7 +307,7 @@ export function CollectiblePurchase() {
                     <Order
                       key={args.orderId}
                       orderId={args.orderId}
-                      image={args.image}
+                      image={args.images[0]}
                       name={args.name}
                       collection={args.collection}
                       collectionAddress={args.collectionAddress ?? ""}

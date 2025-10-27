@@ -17,6 +17,7 @@ export function PaymentMethod() {
   const { navigate } = useNavigation();
   const { onCreditCardPurchase, displayError } = usePurchaseContext();
   const [isLoading, setIsLoading] = useState(false);
+  const showCreditCard = false;
 
   return (
     <>
@@ -25,15 +26,17 @@ export function PaymentMethod() {
         icon={<DepositIcon variant="solid" size="lg" />}
       />
       <LayoutContent className={isLoading ? "pointer-events-none" : ""}>
-        <PurchaseCard
-          text="Credit Card"
-          icon={<CreditCardIcon variant="solid" />}
-          onClick={async () => {
-            setIsLoading(true);
-            await onCreditCardPurchase();
-            navigate("/purchase/checkout/stripe");
-          }}
-        />
+        {showCreditCard && (
+          <PurchaseCard
+            text="Credit Card"
+            icon={<CreditCardIcon variant="solid" />}
+            onClick={async () => {
+              setIsLoading(true);
+              await onCreditCardPurchase();
+              navigate("/purchase/checkout/stripe");
+            }}
+          />
+        )}
 
         {networkWalletData.networks.map((network) => {
           if (platforms && !platforms.includes(network.platform)) {

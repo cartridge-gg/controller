@@ -51,6 +51,17 @@ export function useUsernameValidation(username: string) {
         });
         return;
       }
+
+      // Check for specific blocked username
+      if (username.toLowerCase() === "bramkaselo") {
+        setValidation({
+          status: "invalid",
+          error: new Error(
+            "Please come to the Cartridge Discord so we can help resolve your account: https://discord.com/invite/cartridge",
+          ),
+        });
+        return;
+      }
     } catch (e) {
       setValidation({
         status: "invalid",

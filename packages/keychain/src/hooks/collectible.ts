@@ -8,13 +8,13 @@ import { useConnection } from "@/hooks/connection";
 import { addAddressPadding } from "starknet";
 
 const TYPE = "ERC-1155";
-const LIMIT = 1000;
+const LIMIT = 10000;
 
 export type Collectible = {
   address: string;
   name: string;
   type: string;
-  imageUrl: string;
+  imageUrls: string[];
   totalCount: number;
 };
 
@@ -22,7 +22,7 @@ export type Asset = {
   tokenId: string;
   name: string;
   description?: string;
-  imageUrl: string;
+  imageUrls: string[];
   attributes: Record<string, unknown>[];
   amount: number;
   owner: string;
@@ -72,7 +72,7 @@ export function useCollectible({
       address: data.collectible.meta.contractAddress,
       name: name ? name : "---",
       type: TYPE,
-      imageUrl: data.collectible.meta.imagePath,
+      imageUrls: [data.collectible.meta.imagePath],
       totalCount: data.collectible.meta.assetCount,
     };
 
@@ -81,7 +81,7 @@ export function useCollectible({
     data.collectible.assets.forEach((a) => {
       let imageUrl = a.imageUrl;
       if (!imageUrl.includes("://")) {
-        imageUrl = newCollectible.imageUrl.replace(
+        imageUrl = newCollectible.imageUrls[0].replace(
           /0x[a-fA-F0-9]+(?=\/image$)/,
           a.tokenId,
         );
@@ -98,11 +98,13 @@ export function useCollectible({
       } catch (error) {
         console.warn(error, { data: a.metadata });
       }
+      const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(newCollectible.address).toString(16)}/${a.tokenId}/image`;
+      const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(newCollectible.address)}/${a.tokenId}/image`;
       const asset: Asset = {
         tokenId: a.tokenId,
         name: a.name,
         description: a.description ?? "",
-        imageUrl: imageUrl || metadata?.image || "",
+        imageUrls: [newImage, oldImage, metadata?.image || ""],
         attributes: attributes,
         amount: a.amount,
         owner: addAddressPadding("0x0"),
@@ -111,7 +113,7 @@ export function useCollectible({
     });
 
     return { collectible: newCollectible, assets: newAssets };
-  }, [data]);
+  }, [data, project]);
 
   const filteredAssets = useMemo(() => {
     if (!tokenIds.length) return Object.values(assets);
@@ -180,7 +182,7 @@ export function useCollectibles(): UseCollectiblesResponse {
       const count = e.node.meta.assetCount;
       newCollectibles[`${contractAddress}`] = {
         address: contractAddress,
-        imageUrl: imagePath,
+        imageUrls: [imagePath],
         name: name ? name : "---",
         totalCount: count,
         type: TYPE,
