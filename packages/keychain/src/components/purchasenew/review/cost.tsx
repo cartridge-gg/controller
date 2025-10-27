@@ -104,7 +104,6 @@ export function OnchainCostBreakdown({
 
   // Format amount with proper decimals
   const totalAmount = Number(quote.totalCost) / Math.pow(10, decimals);
-  const totalDisplay = `$${totalAmount.toFixed(2)}`;
 
   return (
     <Card className="gap-3">
@@ -127,10 +126,18 @@ export function OnchainCostBreakdown({
                 quote={quote}
               />
             </div>
-            <span className="text-foreground-100">{totalDisplay}</span>
+            <div className="flex items-center gap-2 text-foreground-100">
+              {tokenIcon ? (
+                <Thumbnail size="sm" icon={tokenIcon} variant="light" rounded />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-background-300 flex items-center justify-center text-[10px]">
+                  ?
+                </div>
+              )}
+              <span>{totalAmount.toFixed(2)} {symbol}</span>
+            </div>
           </div>
         </CardContent>
-        <OnchainPaymentType symbol={symbol} icon={tokenIcon} />
       </div>
     </Card>
   );
@@ -156,27 +163,6 @@ const PaymentType = ({ unit }: { unit?: PaymentUnit }) => {
         rounded
       />
       {unit.toUpperCase()}
-    </CardContent>
-  );
-};
-
-const OnchainPaymentType = ({
-  symbol,
-  icon,
-}: {
-  symbol: string;
-  icon: string | null;
-}) => {
-  return (
-    <CardContent className="flex items-center px-3 bg-background-200 gap-2 rounded-[4px] text-sm font-medium">
-      {icon ? (
-        <Thumbnail size="sm" icon={icon} variant="light" rounded />
-      ) : (
-        <div className="w-6 h-6 rounded-full bg-background-300 flex items-center justify-center text-[10px]">
-          ?
-        </div>
-      )}
-      {symbol}
     </CardContent>
   );
 };
