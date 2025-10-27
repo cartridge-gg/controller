@@ -7,9 +7,9 @@ export type {
   OnchainStarterpackDetails,
   OnchainItem,
   OnchainQuote,
-} from "./starterpack-types";
+} from "../types/starterpack-types";
 export {
   isBackendStarterpack,
   isOnchainStarterpack,
   detectStarterpackSource,
-} from "./starterpack-types";
+} from "../types/starterpack-types";

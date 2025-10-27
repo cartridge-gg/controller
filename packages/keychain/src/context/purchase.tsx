@@ -14,7 +14,7 @@ import {
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
 import { uint256, Call } from "starknet";
-import { isOnchainStarterpack } from "./starterpack-types";
+import { isOnchainStarterpack } from "@/types/starterpack-types";
 
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -32,7 +32,7 @@ import {
 import {
   StarterpackDetails,
   detectStarterpackSource,
-} from "./starterpack-types";
+} from "@/types/starterpack-types";
 
 const CARTRIDGE_FEE = 0.025;
 
