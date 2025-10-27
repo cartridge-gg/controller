@@ -25,6 +25,11 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
+import {
+  useDetectKeyboardOpen,
+  usePreventOverScrolling,
+} from "@/hooks/viewport";
+import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
 
 interface CreateControllerViewProps {
@@ -59,6 +64,14 @@ type CreateControllerFormProps = Omit<
   "setAuthenticationStep" | "authOptions"
 >;
 
+function getIOSVersion(userAgentString: string) {
+  const match = userAgentString.match(/Version\/(\d+)\.\d+/);
+  if (match && match[1]) {
+    return parseInt(match[1], 10); // Parse the captured string to an integer
+  }
+  return null; // Return null if not found, or a default like 0
+}
+
 function CreateControllerForm({
   theme,
   usernameField,
@@ -80,12 +93,66 @@ function CreateControllerForm({
   onDropdownOpenChange,
 }: CreateControllerFormProps) {
   const [{ isInApp, appKey, appName }] = useState(() => InAppSpy());
+  const { isOpen: keyboardIsOpen, viewportHeight } = useDetectKeyboardOpen();
+  const [pendingSubmitAfterKeyboardClose, setPendingSubmitAfterKeyboardClose] =
+    useState(false);
+  const { isMobile } = useDevice();
+  const prevKeyboardIsOpen = useRef(keyboardIsOpen);
+
+  // Track when keyboard closes and auto-submit if there was a pending submission
+  useEffect(() => {
+    if (
+      prevKeyboardIsOpen.current &&
+      !keyboardIsOpen &&
+      pendingSubmitAfterKeyboardClose
+    ) {
+      // Keyboard just closed and we have a pending submit
+      setPendingSubmitAfterKeyboardClose(false);
+      // Small delay to ensure keyboard animation is complete
+      setTimeout(() => {
+        onSubmit();
+      }, 100);
+    }
+    prevKeyboardIsOpen.current = keyboardIsOpen;
+  }, [keyboardIsOpen, pendingSubmitAfterKeyboardClose, onSubmit]);
 
   // appKey is undefined for unknown applications which we're
   // assuming are dojo applications which implement AASA and
   // support using passkeys in the inapp browser.
   // https://docs.cartridge.gg/controller/presets#apple-app-site-association
   const isInAppBrowser = isInApp && !!appKey;
+
+  const layoutRef = usePreventOverScrolling<HTMLFormElement>();
+
+  const layoutHeight = useMemo(() => {
+    if (isMobile) {
+      const isSafari = /^((?!chrome|android).)*safari/i.test(
+        navigator.userAgent,
+      );
+      if (keyboardIsOpen) {
+        if (!isSafari) {
+          return viewportHeight;
+        }
+
+        const iOSVersion = getIOSVersion(navigator.userAgent);
+        if (!iOSVersion) {
+          return "100%";
+        }
+
+        // Liquid glass safari
+        if (iOSVersion >= 26) {
+          return viewportHeight - 475;
+        }
+
+        // old safari
+        return viewportHeight - 200;
+      } else {
+        return "100%";
+      }
+    } else {
+      return "100%";
+    }
+  }, [isMobile, keyboardIsOpen, viewportHeight]);
 
   const [selectedAccount, setSelectedAccount] = useState<
     AccountSearchResult | undefined
@@ -119,17 +186,34 @@ function CreateControllerForm({
         hideUsername
         hideSettings
       />
-
+      {/*<p>
+        Is keyboard open?
+        {keyboardIsOpen ? " Yes" : " No"}
+      </p>
+      <p>isMobile: {String(isMobile)}</p>
+      <p>Viewport height: {viewportHeight}px</p>
+      <p>Layout height: {layoutHeight}px</p>*/}
+      {/*<p>userAgent: {navigator.userAgent}</p>*/}
       <form
-        className="flex flex-col flex-1 overflow-y-scroll"
-        style={{ scrollbarWidth: "none" }}
+        className="flex flex-col overflow-y-scroll"
+        style={{
+          scrollbarWidth: "none",
+          height: layoutHeight,
+        }}
+        ref={layoutRef}
         onSubmit={(e) => {
           e.preventDefault();
           // Don't submit if dropdown is open
           if (isDropdownOpen) {
             return;
           }
-          onSubmit();
+
+          if (keyboardIsOpen) {
+            // If keyboard is open, mark for pending submit after it closes
+            setPendingSubmitAfterKeyboardClose(true);
+          } else {
+            onSubmit();
+          }
         }}
       >
         <LayoutContent className="overflow-y-hidden">
@@ -191,9 +275,15 @@ function CreateControllerForm({
             validation={validation}
             waitingForConfirmation={waitingForConfirmation}
             username={usernameField.value}
+            onMouseDown={() => {
+              if (keyboardIsOpen) {
+                // If keyboard is open, mark for pending submit after it closes
+                setPendingSubmitAfterKeyboardClose(true);
+              }
+            }}
           />
 
-          <CartridgeFooter />
+          {keyboardIsOpen && isMobile ? null : <CartridgeFooter />}
         </LayoutFooter>
       </form>
     </>
@@ -227,6 +317,19 @@ export function CreateControllerView({
       setAuthenticationStep(AuthenticationStep.FillForm);
     }
   };
+
+  // Handles scroll to top on mobile when keyboard opens
+  useEffect(() => {
+    const handleScroll = () => {
+      window.scrollTo(0, 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <LayoutContainer>
