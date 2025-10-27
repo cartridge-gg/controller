@@ -16,8 +16,8 @@ import { PageLoading } from "./Loading";
 type SessionResponse = {
   username: string;
   address: string;
-  expiresAt: string;
   ownerGuid: string;
+  expiresAt: string;
   transactionHash?: string;
   alreadyRegistered?: boolean;
 };
@@ -49,6 +49,16 @@ export function Session() {
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [isFailure, setIsFailure] = useState<boolean>(false);
 
+  const hasExternalTarget = Boolean(
+    queries.callback_uri || queries.redirect_uri,
+  );
+
+  const markCompleted = useCallback(() => {
+    setIsFailure(false);
+    setIsSuccess(true);
+    setIsLoading(false);
+  }, []);
+
   // Handler for calling the callback uri.
   // Send the session details to the callback uri in the body of the
   // POST request. If the request is successful, then redirect to the
@@ -56,7 +66,7 @@ export function Session() {
   const onCallback = useCallback(
     async (response: SessionResponse) => {
       if (!queries.callback_uri && !queries.redirect_uri) {
-        setIsFailure(true);
+        markCompleted();
         return;
       }
 
@@ -83,12 +93,13 @@ export function Session() {
           });
 
           if (res.ok) {
-            setIsSuccess(true);
+            markCompleted();
             return;
           }
         } catch (e) {
           console.error("failed to call the callback url", e);
           setIsFailure(true);
+          setIsLoading(false);
         }
 
         return;
@@ -101,14 +112,15 @@ export function Session() {
         return;
       }
     },
-    [queries],
+    [queries, markCompleted],
   );
 
   // Handler when user clicks the Create button
   const onConnect = useCallback(
     async (transaction_hash?: string, expiresAt?: bigint) => {
-      if (!queries.callback_uri && !queries.redirect_uri) {
-        throw new Error("Expected either callback_uri or redirect_uri");
+      if (!hasExternalTarget) {
+        markCompleted();
+        return;
       }
 
       if (!controller) return;
@@ -121,7 +133,7 @@ export function Session() {
         expiresAt: String(expiresAt),
       });
     },
-    [queries.callback_uri, queries.redirect_uri, controller, onCallback],
+    [controller, hasExternalTarget, markCompleted, onCallback],
   );
 
   // Once we have a connected controller initialized, check if a session already exists.
@@ -138,6 +150,11 @@ export function Session() {
       .isRegisteredSessionAuthorized(policies, queries.public_key)
       .then((session) => {
         if (session) {
+          if (!hasExternalTarget) {
+            markCompleted();
+            return;
+          }
+
           onCallback({
             username: controller.username(),
             address: controller.address(),
@@ -151,14 +168,17 @@ export function Session() {
 
         setIsLoading(false);
       });
-  }, [controller, policies, queries.public_key, onCallback]);
+  }, [
+    controller,
+    policies,
+    queries.public_key,
+    hasExternalTarget,
+    markCompleted,
+    onCallback,
+  ]);
 
   if (!controller) {
     return <CreateController />;
-  }
-
-  if (isLoading) {
-    return <PageLoading />;
   }
 
   if (isSuccess) {
@@ -167,7 +187,7 @@ export function Session() {
         variant="expanded"
         Icon={CheckIcon}
         title="Session Registered!"
-        description="Return to the application to continue"
+        description="Return to the game to continue"
         hideIcon
       />
     );
@@ -175,6 +195,10 @@ export function Session() {
 
   if (isFailure) {
     return <Failure />;
+  }
+
+  if (isLoading) {
+    return <PageLoading />;
   }
 
   if (!policies) {
