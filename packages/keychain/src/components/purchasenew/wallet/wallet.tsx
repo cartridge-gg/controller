@@ -5,7 +5,7 @@ import {
   PurchaseCard,
   WalletIcon,
 } from "@cartridge/ui";
-import { networkWalletData } from "./data";
+import { networkWalletData, evmNetworks } from "./config";
 import {
   useNavigation,
   usePurchaseContext,
@@ -13,12 +13,9 @@ import {
 } from "@/context";
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { ExternalWallet } from "@cartridge/controller";
+import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import {
-  MerkleDropNetwork,
-  StarterpackAcquisitionType,
-} from "@cartridge/ui/utils/api/cartridge";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 import { Network } from "../types";
 import { useConnection } from "@/hooks/connection";
 
@@ -160,12 +157,19 @@ export function SelectWallet() {
         }
 
         // Claim starterpack
+        const isCurrentEvm = evmNetworks.includes(network.platform);
+
         const keys = starterpackDetails?.merkleDrops
-          ?.filter(
-            (drop) =>
-              drop.network ===
-              (network.platform.toUpperCase() as MerkleDropNetwork),
-          )
+          ?.filter((drop) => {
+            const dropNetwork = drop.network.toLowerCase() as ExternalPlatform;
+
+            // For EVM networks, include all EVM merkle drops
+            if (isCurrentEvm) {
+              return evmNetworks.includes(dropNetwork);
+            }
+            // For non-EVM networks, only include drops for that specific network
+            return dropNetwork === network.platform;
+          })
           .map((drop) => drop.key)
           .join(";");
 

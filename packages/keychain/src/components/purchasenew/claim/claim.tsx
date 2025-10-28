@@ -19,7 +19,7 @@ import { ErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
 import { StarterpackReceiving } from "../starterpack/starterpack";
 import { ExternalWalletType } from "@cartridge/controller";
-import { getWallet } from "../wallet/data";
+import { getWallet } from "../wallet/config";
 import { formatAddress } from "@cartridge/ui/utils";
 import type { BackendStarterpackDetails } from "@/context";
 
