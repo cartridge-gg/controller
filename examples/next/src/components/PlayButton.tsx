@@ -42,7 +42,7 @@ export const PlayButton = () => {
 
       if (!hasAccess) {
         // Redirect through standalone auth first to establish first-party storage
-        controllerConnector.controller.openStandaloneAuth({
+        controllerConnector.controller.open({
           redirectTo: game.url,
         });
       } else {

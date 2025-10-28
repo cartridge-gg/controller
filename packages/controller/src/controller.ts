@@ -397,9 +397,9 @@ export default class ControllerProvider extends BaseProvider {
    * This establishes first-party storage, enabling seamless iframe access across all games.
    * @param options - Configuration for redirect after authentication
    */
-  openStandaloneAuth(options: StandaloneAuthOptions = {}) {
+  open(options: StandaloneAuthOptions = {}) {
     if (typeof window === "undefined") {
-      console.error("openStandaloneAuth can only be called in browser context");
+      console.error("open can only be called in browser context");
       return;
     }
 
