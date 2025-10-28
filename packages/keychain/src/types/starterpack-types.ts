@@ -36,7 +36,8 @@ export interface OnchainStarterpackDetails {
   description: string;
   imageUri: string;
   items: OnchainItem[];
-  quote: OnchainQuote;
+  quote: OnchainQuote | null;
+  isQuoteLoading: boolean;
   acquisitionType: StarterpackAcquisitionType.Paid;
 }
 

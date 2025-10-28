@@ -9,9 +9,12 @@ import {
   uint256,
 } from "starknet";
 import type { OnchainQuote } from "@/context";
-import { fetchSwapQuote, type EkuboNetwork } from "@/utils/ekubo-quote";
 import {
-  USDC_CONTRACT_ADDRESS,
+  fetchSwapQuote,
+  USDC_ADDRESSES,
+  type EkuboNetwork,
+} from "@/utils/ekubo";
+import {
   USDT_CONTRACT_ADDRESS,
   STRK_CONTRACT_ADDRESS,
   ETH_CONTRACT_ADDRESS,
@@ -39,7 +42,13 @@ interface StarterPackMetadataOnchain {
  * Cached token metadata to avoid RPC calls for common tokens
  */
 const CACHED_TOKEN_METADATA: Record<string, TokenMetadata> = {
-  [USDC_CONTRACT_ADDRESS.toLowerCase()]: {
+  // USDC on mainnet
+  [USDC_ADDRESSES.mainnet.toLowerCase()]: {
+    symbol: "USDC",
+    decimals: 6,
+  },
+  // USDC on sepolia
+  [USDC_ADDRESSES.sepolia.toLowerCase()]: {
     symbol: "USDC",
     decimals: 6,
   },
@@ -115,6 +124,7 @@ export const useStarterPackOnchain = (
   const { controller } = useController();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isQuoteLoading, setIsQuoteLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [metadata, setMetadata] = useState<StarterPackMetadataOnchain | null>(
     null,
@@ -122,7 +132,7 @@ export const useStarterPackOnchain = (
   const [quote, setQuote] = useState<OnchainQuote | null>(null);
   const [supply, setSupply] = useState<number | undefined>(undefined);
 
-  // Fetch metadata and quote (static data)
+  // Fetch metadata first (fast)
   useEffect(() => {
     if (!controller || starterpackId === undefined) {
       setIsLoading(false);
@@ -130,22 +140,15 @@ export const useStarterPackOnchain = (
     }
 
     setIsLoading(true);
-    const fetch = async () => {
+    const fetchMetadata = async () => {
       setError(null);
 
       try {
-        const [metadataRes, quoteRes] = await Promise.all([
-          controller.provider.callContract({
-            contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
-            entrypoint: "metadata",
-            calldata: [starterpackId],
-          } as Call),
-          controller.provider.callContract({
-            contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
-            entrypoint: "quote",
-            calldata: [starterpackId, amount ? amount : 1, hasReferral ? 1 : 0],
-          } as Call),
-        ]);
+        const metadataRes = await controller.provider.callContract({
+          contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
+          entrypoint: "metadata",
+          calldata: [starterpackId],
+        } as Call);
 
         // Parse metadata ByteArray
         const metadataByteArray = CairoByteArray.factoryFromApiResponse(
@@ -155,6 +158,34 @@ export const useStarterPackOnchain = (
         const metadata = JSON.parse(
           metadataString,
         ) as StarterPackMetadataOnchain;
+
+        setMetadata(metadata);
+      } catch (error) {
+        console.error(error);
+        setError(error as Error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMetadata();
+  }, [controller, starterpackId]);
+
+  // Fetch quote separately (can be slower due to Ekubo conversion)
+  useEffect(() => {
+    if (!controller || starterpackId === undefined) {
+      setIsQuoteLoading(false);
+      return;
+    }
+
+    setIsQuoteLoading(true);
+    const fetchQuote = async () => {
+      try {
+        const quoteRes = await controller.provider.callContract({
+          contractAddress: import.meta.env.VITE_STARTERPACK_REGISTRY_CONTRACT,
+          entrypoint: "quote",
+          calldata: [starterpackId, amount ? amount : 1, hasReferral ? 1 : 0],
+        } as Call);
 
         // Parse quote with u256 values (2 felts each) + paymentToken (1 felt)
         const paymentToken = quoteRes[8];
@@ -189,10 +220,10 @@ export const useStarterPackOnchain = (
         };
 
         // Convert price to target token if specified and different from payment token
-        const targetTokenAddress = targetToken || USDC_CONTRACT_ADDRESS;
+        const network = chainIdToEkuboNetwork(controller.chainId());
+        const targetTokenAddress = targetToken || USDC_ADDRESSES[network];
         if (paymentToken.toLowerCase() !== targetTokenAddress.toLowerCase()) {
           try {
-            const network = chainIdToEkuboNetwork(controller.chainId());
             const swapQuote = await fetchSwapQuote(
               totalCost,
               paymentToken,
@@ -220,17 +251,16 @@ export const useStarterPackOnchain = (
           }
         }
 
-        setMetadata(metadata);
         setQuote(quote);
       } catch (error) {
-        console.error(error);
-        setError(error as Error);
+        console.error("Failed to fetch quote:", error);
+        // Don't set error state for quote failures to allow metadata to still be shown
       } finally {
-        setIsLoading(false);
+        setIsQuoteLoading(false);
       }
     };
 
-    fetch();
+    fetchQuote();
   }, [controller, starterpackId, amount, hasReferral, targetToken]);
 
   // Refetch supply function (can be called manually)
@@ -265,6 +295,7 @@ export const useStarterPackOnchain = (
 
   return {
     isLoading,
+    isQuoteLoading,
     error,
     metadata,
     quote,

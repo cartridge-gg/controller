@@ -10,6 +10,7 @@ import {
   SolanaIcon,
   StarknetIcon,
   Thumbnail,
+  Spinner,
 } from "@cartridge/ui";
 import { CostDetails } from "../types";
 import {
@@ -93,10 +94,12 @@ export function OnchainCostBreakdown({
   quote,
   platform,
   openFeesTooltip = false,
+  isQuoteLoading = false,
 }: {
   quote: OnchainQuote;
   platform?: ExternalPlatform;
   openFeesTooltip?: boolean;
+  isQuoteLoading?: boolean;
 }) {
   const { symbol, decimals } = quote.paymentTokenMetadata;
 
@@ -137,16 +140,16 @@ export function OnchainCostBreakdown({
               />
             </div>
             <div className="flex items-center gap-2">
-              {usdcEquivalent !== null && (
-                <span className="text-foreground-400">
-                  {formatAmount(paymentAmount)} {symbol}
-                </span>
-              )}
-              <span className="text-foreground-100">
-                {usdcEquivalent !== null
-                  ? `$${formatAmount(usdcEquivalent)}`
-                  : `${formatAmount(paymentAmount)} ${symbol}`}
+              <span className="text-foreground-400">
+                {formatAmount(paymentAmount)} {symbol}
               </span>
+              {isQuoteLoading ? (
+                <Spinner />
+              ) : usdcEquivalent !== null ? (
+                <span className="text-foreground-100">
+                  ${formatAmount(usdcEquivalent)}
+                </span>
+              ) : null}
             </div>
           </div>
         </CardContent>

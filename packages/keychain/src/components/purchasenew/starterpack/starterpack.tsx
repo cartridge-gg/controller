@@ -14,6 +14,7 @@ import {
   LayoutContent,
   LayoutFooter,
   VerifiedIcon,
+  Spinner,
 } from "@cartridge/ui";
 import {
   MintAllowance,
@@ -74,6 +75,7 @@ export function PurchaseStarterpack() {
         description={details.description}
         items={details.items}
         quote={details.quote}
+        isQuoteLoading={details.isQuoteLoading}
         isMainnet={isMainnet}
         error={displayError}
       />
@@ -232,13 +234,14 @@ export function OnchainStarterPackInner({
   description,
   items,
   quote,
+  isQuoteLoading,
   isMainnet,
   error,
 }: {
   name: string;
   description: string;
   items: Array<{ name: string; description: string; imageUri: string }>;
-  quote: {
+  quote?: {
     basePrice: bigint;
     referralFee: bigint;
     protocolFee: bigint;
@@ -248,7 +251,8 @@ export function OnchainStarterPackInner({
       symbol: string;
       decimals: number;
     };
-  };
+  } | null;
+  isQuoteLoading?: boolean;
   isMainnet?: boolean;
   error?: Error | null;
 }) {
@@ -307,10 +311,21 @@ export function OnchainStarterPackInner({
       <LayoutFooter>
         {error ? (
           <ErrorAlert title="Error" description={error.message} />
+        ) : quote ? (
+          <OnchainCostBreakdown quote={quote} isQuoteLoading={isQuoteLoading} />
         ) : (
-          <OnchainCostBreakdown quote={quote} />
+          <Card className="gap-3">
+            <div className="flex flex-row gap-3 h-[40px]">
+              <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+                <div className="flex justify-between text-sm font-medium w-full">
+                  <span>Total</span>
+                  <Spinner />
+                </div>
+              </CardContent>
+            </div>
+          </Card>
         )}
-        <Button onClick={onProceed} disabled={!!error}>
+        <Button onClick={onProceed} disabled={!!error || !quote}>
           Purchase
         </Button>
       </LayoutFooter>
