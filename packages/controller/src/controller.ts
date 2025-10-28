@@ -439,14 +439,14 @@ export default class ControllerProvider extends BaseProvider {
    * @returns Promise<boolean> indicating if storage access is available
    */
   async hasFirstPartyAccess(): Promise<boolean> {
-    if (typeof document === "undefined" || !document.hasStorageAccess) {
-      // Browser doesn't support Storage Access API, assume access is available
-      return true;
+    if (!this.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return false;
     }
 
     try {
-      // Check if we already have storage access
-      const hasAccess = await document.hasStorageAccess();
+      // Ask the keychain iframe if it has storage access
+      const hasAccess = await this.keychain.hasStorageAccess();
       return hasAccess;
     } catch (error) {
       console.error("Error checking storage access:", error);

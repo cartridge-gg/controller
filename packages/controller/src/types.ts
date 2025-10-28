@@ -163,6 +163,7 @@ export interface Keychain {
   switchChain(rpcUrl: string): Promise<void>;
   openStarterPack(starterpackId: string): Promise<void>;
   navigate(path: string): Promise<void>;
+  hasStorageAccess(): Promise<boolean>;
 
   // External wallet methods
   externalDetectWallets(): Promise<ExternalWallet[]>;
