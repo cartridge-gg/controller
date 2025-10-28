@@ -1,7 +1,26 @@
 import { useCallback, useEffect, useState } from "react";
 import { useController } from "./controller";
-import { CairoByteArray, Call, shortString, uint256 } from "starknet";
+import {
+  CairoByteArray,
+  Call,
+  constants,
+  RpcProvider,
+  shortString,
+  uint256,
+} from "starknet";
 import type { OnchainQuote } from "@/context";
+import { fetchSwapQuote, type EkuboNetwork } from "@/utils/ekubo-quote";
+import {
+  USDC_CONTRACT_ADDRESS,
+  USDT_CONTRACT_ADDRESS,
+  STRK_CONTRACT_ADDRESS,
+  ETH_CONTRACT_ADDRESS,
+} from "@cartridge/ui/utils";
+
+interface TokenMetadata {
+  symbol: string;
+  decimals: number;
+}
 
 interface ItemOnchain {
   name: string;
@@ -16,10 +35,82 @@ interface StarterPackMetadataOnchain {
   items: ItemOnchain[];
 }
 
+/**
+ * Cached token metadata to avoid RPC calls for common tokens
+ */
+const CACHED_TOKEN_METADATA: Record<string, TokenMetadata> = {
+  [USDC_CONTRACT_ADDRESS.toLowerCase()]: {
+    symbol: "USDC",
+    decimals: 6,
+  },
+  [USDT_CONTRACT_ADDRESS.toLowerCase()]: {
+    symbol: "USDT",
+    decimals: 6,
+  },
+  [STRK_CONTRACT_ADDRESS.toLowerCase()]: {
+    symbol: "STRK",
+    decimals: 18,
+  },
+  [ETH_CONTRACT_ADDRESS.toLowerCase()]: {
+    symbol: "ETH",
+    decimals: 18,
+  },
+};
+
+/**
+ * Get cached token metadata without RPC calls, or null if not cached
+ */
+function getCachedTokenMetadata(tokenAddress: string): TokenMetadata | null {
+  const normalized = tokenAddress.toLowerCase();
+  return CACHED_TOKEN_METADATA[normalized] || null;
+}
+
+/**
+ * Fetch token metadata via RPC calls
+ */
+async function fetchTokenMetadata(
+  tokenAddress: string,
+  provider: RpcProvider,
+): Promise<TokenMetadata> {
+  const [symbolRes, decimalsRes] = await Promise.all([
+    provider.callContract({
+      contractAddress: tokenAddress,
+      entrypoint: "symbol",
+      calldata: [],
+    } as Call),
+    provider.callContract({
+      contractAddress: tokenAddress,
+      entrypoint: "decimals",
+      calldata: [],
+    } as Call),
+  ]);
+
+  return {
+    symbol: shortString.decodeShortString(symbolRes[0]),
+    decimals: Number(decimalsRes[0]),
+  };
+}
+
+/**
+ * Convert chainId to Ekubo network type
+ */
+function chainIdToEkuboNetwork(chainId: string): EkuboNetwork {
+  switch (chainId) {
+    case constants.StarknetChainId.SN_MAIN:
+      return "mainnet";
+    case constants.StarknetChainId.SN_SEPOLIA:
+      return "sepolia";
+    default:
+      console.warn(`Unknown chainId ${chainId}, defaulting to mainnet`);
+      return "mainnet";
+  }
+}
+
 export const useStarterPackOnchain = (
   starterpackId?: number,
   amount?: number,
   hasReferral?: boolean,
+  targetToken?: string, // Token to convert prices to (defaults to USDC)
 ) => {
   const { controller } = useController();
 
@@ -68,22 +159,16 @@ export const useStarterPackOnchain = (
         // Parse quote with u256 values (2 felts each) + paymentToken (1 felt)
         const paymentToken = quoteRes[8];
 
-        // Fetch token metadata (symbol and decimals)
-        const [symbolRes, decimalsRes] = await Promise.all([
-          controller.provider.callContract({
-            contractAddress: paymentToken,
-            entrypoint: "symbol",
-            calldata: [],
-          } as Call),
-          controller.provider.callContract({
-            contractAddress: paymentToken,
-            entrypoint: "decimals",
-            calldata: [],
-          } as Call),
-        ]);
+        // Fetch payment token metadata via RPC
+        const paymentTokenMetadata = await fetchTokenMetadata(
+          paymentToken,
+          controller.provider,
+        );
 
-        const symbol = shortString.decodeShortString(symbolRes[0]);
-        const decimals = Number(decimalsRes[0]);
+        const totalCost = uint256.uint256ToBN({
+          low: quoteRes[6],
+          high: quoteRes[7],
+        });
 
         const quote: OnchainQuote = {
           basePrice: uint256.uint256ToBN({
@@ -98,16 +183,42 @@ export const useStarterPackOnchain = (
             low: quoteRes[4],
             high: quoteRes[5],
           }),
-          totalCost: uint256.uint256ToBN({
-            low: quoteRes[6],
-            high: quoteRes[7],
-          }),
+          totalCost,
           paymentToken,
-          paymentTokenMetadata: {
-            symbol,
-            decimals,
-          },
+          paymentTokenMetadata,
         };
+
+        // Convert price to target token if specified and different from payment token
+        const targetTokenAddress = targetToken || USDC_CONTRACT_ADDRESS;
+        if (paymentToken.toLowerCase() !== targetTokenAddress.toLowerCase()) {
+          try {
+            const network = chainIdToEkuboNetwork(controller.chainId());
+            const swapQuote = await fetchSwapQuote(
+              totalCost,
+              paymentToken,
+              targetTokenAddress,
+              network,
+            );
+
+            // Get target token metadata (use cache or fetch via RPC)
+            const targetTokenMetadata =
+              getCachedTokenMetadata(targetTokenAddress) ||
+              (await fetchTokenMetadata(
+                targetTokenAddress,
+                controller.provider,
+              ));
+
+            quote.convertedPrice = {
+              amount: swapQuote.total,
+              token: targetTokenAddress,
+              tokenMetadata: targetTokenMetadata,
+              priceImpact: swapQuote.impact,
+            };
+          } catch (error) {
+            console.error("Failed to fetch converted price:", error);
+            // Don't fail the entire quote if conversion fails
+          }
+        }
 
         setMetadata(metadata);
         setQuote(quote);
@@ -120,7 +231,7 @@ export const useStarterPackOnchain = (
     };
 
     fetch();
-  }, [controller, starterpackId, amount, hasReferral]);
+  }, [controller, starterpackId, amount, hasReferral, targetToken]);
 
   // Refetch supply function (can be called manually)
   const refetchSupply = useCallback(async () => {

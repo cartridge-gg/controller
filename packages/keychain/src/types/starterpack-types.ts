@@ -74,6 +74,13 @@ export interface OnchainQuote {
   totalCost: bigint;
   paymentToken: string;
   paymentTokenMetadata: TokenMetadata;
+  // Converted price in target token (e.g., USDC)
+  convertedPrice?: {
+    amount: bigint;
+    token: string;
+    tokenMetadata: TokenMetadata;
+    priceImpact: number;
+  };
 }
 
 /**
