@@ -10,6 +10,7 @@ import {
   SolanaIcon,
   StarknetIcon,
   Thumbnail,
+  Spinner,
 } from "@cartridge/ui";
 import { CostDetails } from "../types";
 import {
@@ -93,15 +94,29 @@ export function OnchainCostBreakdown({
   quote,
   platform,
   openFeesTooltip = false,
+  isQuoteLoading = false,
 }: {
   quote: OnchainQuote;
   platform?: ExternalPlatform;
   openFeesTooltip?: boolean;
+  isQuoteLoading?: boolean;
 }) {
   const { symbol, decimals } = quote.paymentTokenMetadata;
 
-  // Format amount with proper decimals
-  const totalAmount = Number(quote.totalCost) / Math.pow(10, decimals);
+  // Format payment token amount with proper decimals
+  const paymentAmount = Number(quote.totalCost) / Math.pow(10, decimals);
+
+  // Format USDC equivalent if available
+  const usdcEquivalent = quote.convertedPrice
+    ? Number(quote.convertedPrice.amount) /
+      Math.pow(10, quote.convertedPrice.tokenMetadata.decimals)
+    : null;
+
+  // Helper to format amount without trailing .00
+  const formatAmount = (amount: number): string => {
+    const formatted = amount.toFixed(2);
+    return formatted.endsWith(".00") ? formatted.slice(0, -3) : formatted;
+  };
 
   return (
     <Card className="gap-3">
@@ -124,10 +139,17 @@ export function OnchainCostBreakdown({
                 quote={quote}
               />
             </div>
-            <div className="flex items-center gap-2 text-foreground-100">
-              <span>
-                {totalAmount.toFixed(2)} {symbol}
+            <div className="flex items-center gap-2">
+              <span className="text-foreground-400">
+                {formatAmount(paymentAmount)} {symbol}
               </span>
+              {isQuoteLoading ? (
+                <Spinner />
+              ) : usdcEquivalent !== null ? (
+                <span className="text-foreground-100">
+                  ${formatAmount(usdcEquivalent)}
+                </span>
+              ) : null}
             </div>
           </div>
         </CardContent>
