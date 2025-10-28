@@ -1,4 +1,8 @@
-import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  useNavigation,
+  usePurchaseContext,
+  type BackendStarterpackDetails,
+} from "@/context";
 import { MerkleDrop } from "@/hooks/starterpack";
 import { humanizeString } from "@cartridge/controller";
 import {
@@ -21,8 +25,11 @@ import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
 import { useCallback } from "react";
 
 export const Collections = () => {
-  const { isStarterpackLoading, starterpackDetails: details } =
+  const { isStarterpackLoading, starterpackDetails: detailsRaw } =
     usePurchaseContext();
+
+  // MerkleDrops are backend-only (part of claims), so we can safely cast
+  const details = detailsRaw as BackendStarterpackDetails | undefined;
 
   if (isStarterpackLoading || !details) {
     return <></>;

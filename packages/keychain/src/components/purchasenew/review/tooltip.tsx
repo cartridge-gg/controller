@@ -39,9 +39,6 @@ export const FeesTooltip = ({
   const cartridgeFee = convertCentsToDollars(cartridgeFeeInCents);
   const stripeFee = convertCentsToDollars(stripeFeeInCents);
 
-  console.log("cartridge fee: ", cartridgeFee);
-  console.log("stripe fee: ", stripeFee);
-
   return (
     <TooltipProvider>
       <Tooltip defaultOpen={defaultOpen}>

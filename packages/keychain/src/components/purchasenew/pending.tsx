@@ -80,6 +80,16 @@ export function Pending() {
     );
   }
 
+  // If no paymentMethod is provided, it's an onchain purchase
+  if (!paymentMethod) {
+    return (
+      <OnchainPurchasePendingInner
+        items={purchaseItems}
+        transactionHash={transactionHash!}
+      />
+    );
+  }
+
   return (
     <PurchasePendingInner
       items={purchaseItems}
@@ -184,6 +194,56 @@ export function PurchasePendingInner({
             </div>
           </div>
         )}
+      </LayoutFooter>
+    </>
+  );
+}
+
+export function OnchainPurchasePendingInner({
+  items,
+  transactionHash,
+}: {
+  items: Item[];
+  transactionHash: string;
+}) {
+  const { isMainnet, controller } = useConnection();
+  const { navigate } = useNavigation();
+  const [isPurchasing, setIsPurchasing] = useState(true);
+
+  useEffect(() => {
+    if (controller) {
+      retryWithBackoff(() =>
+        controller.provider.waitForTransaction(transactionHash, {
+          retryInterval: 1000,
+          successStates: [
+            TransactionFinalityStatus.PRE_CONFIRMED,
+            TransactionFinalityStatus.ACCEPTED_ON_L2,
+          ],
+        }),
+      )
+        .then(() => {
+          setIsPurchasing(false);
+          navigate("/purchase/success", { reset: true });
+        })
+        .catch((error) => {
+          console.error("Failed to wait for transaction after retries:", error);
+          // Could set an error state here if needed
+        });
+    }
+  }, [controller, transactionHash, navigate]);
+
+  return (
+    <>
+      <HeaderInner title="Pending Confirmation" icon={<Spinner />} />
+      <LayoutContent>
+        <Receiving title="Receiving" items={items} isLoading={true} />
+      </LayoutContent>
+      <LayoutFooter>
+        <ConfirmingTransaction
+          title="Confirming on Starknet"
+          externalLink={getExplorer("starknet", transactionHash, isMainnet).url}
+          isLoading={isPurchasing}
+        />
       </LayoutFooter>
     </>
   );

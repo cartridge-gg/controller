@@ -15,11 +15,13 @@ export const Starterpack = () => {
   const getDefaultStarterpackIds = () => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       return {
+        purchaseOnchain: 0,
         purchase: "sick-starterpack-mainnet",
         claim: "claim-starterpack-mainnet",
       };
     }
     return {
+      purchaseOnchain: 0,
       purchase: "sick-starterpack-sepolia",
       claim: "claim-starterpack-sepolia",
     };
@@ -28,6 +30,9 @@ export const Starterpack = () => {
   const defaultIds = getDefaultStarterpackIds();
   const [purchaseSpId, setPurchaseSpId] = useState<string>(defaultIds.purchase);
   const [claimSpId, setClaimSpId] = useState<string>(defaultIds.claim);
+  const [purchaseOnchainSpId, setPurchaseOnchainSpId] = useState<number>(
+    defaultIds.purchaseOnchain,
+  );
 
   // Track the current expected defaults to detect network changes
   const expectedDefaultsRef = useRef(defaultIds);
@@ -53,6 +58,12 @@ export const Starterpack = () => {
         : currentClaimSpId;
     });
 
+    setPurchaseOnchainSpId((currentPurchaseOnchainSpId) => {
+      return currentPurchaseOnchainSpId === currentExpected.purchaseOnchain
+        ? newDefaults.purchaseOnchain
+        : currentPurchaseOnchainSpId;
+    });
+
     // Update our references after successful comparison and update
     expectedDefaultsRef.current = newDefaults;
     previousChainRef.current = chain;
@@ -68,7 +79,7 @@ export const Starterpack = () => {
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h3>Purchase Starterpack</h3>
+          <h3>Purchase Starterpack (Backend)</h3>
           <div className="flex items-center gap-2">
             <Input
               className="max-w-80"
@@ -85,9 +96,30 @@ export const Starterpack = () => {
                   );
                 }
               }}
-              disabled={!purchaseSpId.trim()}
             >
-              Purchase Starterpack
+              Purchase
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h3>Purchase Starterpack (Onchain)</h3>
+          <div className="flex items-center gap-2">
+            <Input
+              className="max-w-80"
+              type="text"
+              value={purchaseOnchainSpId}
+              onChange={(e) => setPurchaseOnchainSpId(Number(e.target.value))}
+              placeholder="Enter starterpack ID"
+            />
+            <Button
+              onClick={() => {
+                controllerConnector.controller.openStarterPack(
+                  purchaseOnchainSpId,
+                );
+              }}
+            >
+              Purchase Onchain
             </Button>
           </div>
         </div>
@@ -110,7 +142,6 @@ export const Starterpack = () => {
                   );
                 }
               }}
-              disabled={!claimSpId.trim()}
             >
               Claim Starterpack
             </Button>

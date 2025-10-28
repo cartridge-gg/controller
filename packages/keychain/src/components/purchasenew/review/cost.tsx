@@ -18,6 +18,8 @@ import {
   humanizeString,
 } from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
+import { OnchainFeesTooltip } from "./onchain-tooltip";
+import type { OnchainQuote } from "@/context";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -79,6 +81,56 @@ export function CostBreakdown({
           </div>
         </CardContent>
         <PaymentType unit={paymentUnit} />
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * Onchain Cost Breakdown - for token-based payments directly to smart contracts
+ */
+export function OnchainCostBreakdown({
+  quote,
+  platform,
+  openFeesTooltip = false,
+}: {
+  quote: OnchainQuote;
+  platform?: ExternalPlatform;
+  openFeesTooltip?: boolean;
+}) {
+  const { symbol, decimals } = quote.paymentTokenMetadata;
+
+  // Format amount with proper decimals
+  const totalAmount = Number(quote.totalCost) / Math.pow(10, decimals);
+
+  return (
+    <Card className="gap-3">
+      {platform && (
+        <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
+          <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
+            Purchase on <Network platform={platform} />
+          </div>
+        </CardContent>
+      )}
+
+      <div className="flex flex-row gap-3 h-[40px]">
+        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+          <div className="flex justify-between text-sm font-medium w-full">
+            <div className="flex flex-row items-center gap-1">
+              <span>Total</span>
+              <OnchainFeesTooltip
+                trigger={<InfoIcon size="xs" />}
+                defaultOpen={openFeesTooltip}
+                quote={quote}
+              />
+            </div>
+            <div className="flex items-center gap-2 text-foreground-100">
+              <span>
+                {totalAmount.toFixed(2)} {symbol}
+              </span>
+            </div>
+          </div>
+        </CardContent>
       </div>
     </Card>
   );

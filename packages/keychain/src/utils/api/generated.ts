@@ -5665,11 +5665,13 @@ export enum TokenPair {
 }
 
 export type ToriiCreateInput = {
+  observability?: InputMaybe<Scalars["Boolean"]>;
   replicas?: InputMaybe<Scalars["Int"]>;
   replication?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type ToriiUpdateInput = {
+  observability?: InputMaybe<Scalars["Boolean"]>;
   replicas?: InputMaybe<Scalars["Int"]>;
 };
 

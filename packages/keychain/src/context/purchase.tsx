@@ -13,6 +13,8 @@ import {
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
+import { uint256, Call } from "starknet";
+import { isOnchainStarterpack } from "@/types/starterpack-types";
 
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -20,9 +22,17 @@ import { USD_AMOUNTS } from "@/components/funding/AmountSelection";
 import { Stripe } from "@stripe/stripe-js";
 import { useWallets } from "@/hooks/wallets";
 import { Explorer, useCryptoPayment } from "@/hooks/payments/crypto";
-import { StarterPackDetails, useStarterPack } from "@/hooks/starterpack";
+import { useStarterPack } from "@/hooks/starterpack";
+import { useStarterPackOnchain } from "@/hooks/starterpack-onchain";
 import { starterPackToLayerswapInput } from "@/utils/payments";
-import { CreateLayerswapPaymentInput } from "@cartridge/ui/utils/api/cartridge";
+import {
+  CreateLayerswapPaymentInput,
+  StarterpackAcquisitionType,
+} from "@cartridge/ui/utils/api/cartridge";
+import {
+  StarterpackDetails,
+  detectStarterpackSource,
+} from "@/types/starterpack-types";
 
 const CARTRIDGE_FEE = 0.025;
 
@@ -57,7 +67,7 @@ export type PaymentMethod = "stripe" | "crypto";
 export interface PurchaseContextType {
   // Purchase details
   usdAmount: number;
-  starterpackDetails?: StarterPackDetails;
+  starterpackDetails?: StarterpackDetails;
 
   teamId?: string;
   purchaseItems: Item[];
@@ -89,16 +99,20 @@ export interface PurchaseContextType {
   displayError?: Error;
   clearError: () => void;
 
+  // Wallet management
+  clearSelectedWallet: () => void;
+
   // Actions
   setUsdAmount: (amount: number) => void;
   setPurchaseItems: (items: Item[]) => void;
   setClaimItems: (items: Item[]) => void;
-  setStarterpack: (starterpack: string) => void;
+  setStarterpack: (starterpack: string | number) => void;
   setTransactionHash: (hash: string) => void;
 
   // Payment actions
   onCreditCardPurchase: () => Promise<void>;
-  onCryptoPurchase: () => Promise<void>;
+  onBackendCryptoPurchase: () => Promise<void>;
+  onOnchainPurchase: () => Promise<void>;
   onExternalConnect: (
     wallet: ExternalWallet,
     platform: ExternalPlatform,
@@ -123,9 +137,9 @@ export const PurchaseProvider = ({
 }: PurchaseProviderProps) => {
   const { controller, isMainnet } = useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
-  const [starterpack, setStarterpack] = useState<string>();
+  const [starterpack, setStarterpack] = useState<string | number>();
   const [starterpackDetails, setStarterpackDetails] = useState<
-    StarterPackDetails | undefined
+    StarterpackDetails | undefined
   >();
   const [usdAmount, setUsdAmount] = useState<number>(USD_AMOUNTS[0]);
   const [layerswapFees, setLayerswapFees] = useState<string | undefined>();
@@ -165,17 +179,36 @@ export const PurchaseProvider = ({
     waitForPayment,
   } = useCryptoPayment();
 
+  // Detect which source (backend or onchain) based on starterpack ID
+  const source = detectStarterpackSource(starterpack);
+
+  // Backend hook (GraphQL) - only run if backend source
   const {
-    name,
-    items,
-    supply,
-    mintAllowance,
-    merkleDrops,
-    priceUsd,
-    acquisitionType,
-    isLoading: isStarterpackLoading,
-    error: starterpackError,
-  } = useStarterPack(starterpack);
+    name: backendName,
+    items: backendItems,
+    supply: backendSupply,
+    mintAllowance: backendMintAllowance,
+    merkleDrops: backendMerkleDrops,
+    priceUsd: backendPriceUsd,
+    acquisitionType: backendAcquisitionType,
+    isLoading: isBackendLoading,
+    error: backendError,
+  } = useStarterPack(source === "backend" ? String(starterpack) : undefined);
+
+  // Onchain hook (Smart contract) - only run if onchain source
+  const {
+    metadata: onchainMetadata,
+    quote: onchainQuote,
+    isLoading: isOnchainLoading,
+    error: onchainError,
+  } = useStarterPackOnchain(
+    source === "onchain" ? Number(starterpack) : undefined,
+  );
+
+  // Unified loading and error state
+  const isStarterpackLoading =
+    source === "backend" ? isBackendLoading : isOnchainLoading;
+  const starterpackError = source === "backend" ? backendError : onchainError;
 
   const [swapInput, setSwapInput] = useState<CreateLayerswapPaymentInput>();
 
@@ -185,57 +218,101 @@ export const PurchaseProvider = ({
         setSwapInput(undefined);
         return;
       }
-      const input = starterPackToLayerswapInput(
-        starterpack,
-        controller.username(),
-        selectedPlatform,
-        isMainnet,
-      );
-      setSwapInput(input);
+      // Layerswap only works for backend starterpacks currently
+      if (source === "backend") {
+        const input = starterPackToLayerswapInput(
+          String(starterpack),
+          controller.username(),
+          selectedPlatform,
+          isMainnet,
+        );
+        setSwapInput(input);
+      } else {
+        // TODO: Handle onchain starterpack payments (direct contract interaction)
+        setSwapInput(undefined);
+      }
     };
     getSwapInput();
-  }, [controller, starterpack, selectedPlatform, isMainnet]);
+  }, [controller, starterpack, selectedPlatform, isMainnet, source]);
 
+  // Transform data based on source (backend vs onchain)
   useEffect(() => {
     if (!starterpack) return;
 
-    const purchaseItems: Item[] = items.map((item) => {
-      // Calculate individual item price in USD
-      const itemPriceUsd = item.price
-        ? usdcToUsd(item.price) * (item.amount || 1)
-        : 0;
+    if (source === "backend") {
+      // Backend flow (existing)
+      const purchaseItems: Item[] = backendItems.map((item) => {
+        const itemPriceUsd = item.price
+          ? usdcToUsd(item.price) * (item.amount || 1)
+          : 0;
 
-      return {
-        title: item.name,
-        subtitle: item.description,
-        icon: item.iconURL,
-        value: itemPriceUsd,
-        type: ItemType.NFT,
-      };
-    });
+        return {
+          title: item.name,
+          subtitle: item.description,
+          icon: item.iconURL,
+          value: itemPriceUsd,
+          type: ItemType.NFT,
+        };
+      });
 
-    setPurchaseItems(purchaseItems);
-    setUsdAmount(priceUsd);
+      setPurchaseItems(purchaseItems);
+      setUsdAmount(backendPriceUsd);
 
-    setStarterpackDetails({
-      id: starterpack,
-      name,
-      starterPackItems: items,
-      supply,
-      mintAllowance,
-      merkleDrops,
-      priceUsd,
-      acquisitionType,
-    });
+      setStarterpackDetails({
+        source: "backend",
+        id: String(starterpack),
+        name: backendName,
+        starterPackItems: backendItems,
+        supply: backendSupply,
+        mintAllowance: backendMintAllowance,
+        merkleDrops: backendMerkleDrops,
+        priceUsd: backendPriceUsd,
+        acquisitionType: backendAcquisitionType,
+      });
+    } else if (source === "onchain" && onchainMetadata && onchainQuote) {
+      // Onchain flow (new)
+      const purchaseItems: Item[] = onchainMetadata.items.map((item) => {
+        // TODO: Calculate price per item if needed
+        return {
+          title: item.name,
+          subtitle: item.description,
+          icon: item.imageUri,
+          value: 0, // Will be calculated from quote
+          type: ItemType.NFT,
+        };
+      });
+
+      // Convert total cost from USDC (6 decimals) to USD
+      const totalUsd = usdcToUsd(onchainQuote.totalCost);
+
+      setPurchaseItems(purchaseItems);
+      setUsdAmount(totalUsd);
+
+      setStarterpackDetails({
+        source: "onchain",
+        id: Number(starterpack),
+        name: onchainMetadata.name,
+        description: onchainMetadata.description,
+        imageUri: onchainMetadata.imageUri,
+        items: onchainMetadata.items,
+        quote: onchainQuote,
+        acquisitionType: "PAID" as StarterpackAcquisitionType.Paid,
+      });
+    }
   }, [
     starterpack,
-    items,
-    priceUsd,
-    name,
-    supply,
-    mintAllowance,
-    merkleDrops,
-    acquisitionType,
+    source,
+    // Backend dependencies
+    backendItems,
+    backendPriceUsd,
+    backendName,
+    backendSupply,
+    backendMintAllowance,
+    backendMerkleDrops,
+    backendAcquisitionType,
+    // Onchain dependencies
+    onchainMetadata,
+    onchainQuote,
   ]);
 
   useEffect(() => {
@@ -250,6 +327,10 @@ export const PurchaseProvider = ({
 
   const clearError = useCallback(() => {
     setDisplayError(undefined);
+  }, []);
+
+  const clearSelectedWallet = useCallback(() => {
+    setSelectedWallet(undefined);
   }, []);
 
   const onCreditCardPurchase = useCallback(async () => {
@@ -271,7 +352,7 @@ export const PurchaseProvider = ({
     }
   }, [usdAmount, controller, starterpack, createPaymentIntent]);
 
-  const onCryptoPurchase = useCallback(async () => {
+  const onBackendCryptoPurchase = useCallback(async () => {
     if (
       !controller ||
       !selectedPlatform ||
@@ -312,6 +393,64 @@ export const PurchaseProvider = ({
     layerswapFees,
     sendPayment,
   ]);
+
+  const onOnchainPurchase = useCallback(async () => {
+    if (!controller || !starterpackDetails) return;
+
+    if (!isOnchainStarterpack(starterpackDetails)) {
+      throw new Error("Not an onchain starterpack");
+    }
+
+    const { quote, id: starterpackId } = starterpackDetails;
+
+    try {
+      const registryContract = import.meta.env
+        .VITE_STARTERPACK_REGISTRY_CONTRACT;
+      const recipient = controller.address();
+
+      // Convert totalCost to u256 (low, high)
+      const amount256 = uint256.bnToUint256(quote.totalCost);
+
+      // Step 1: Approve payment token for the exact transfer amount
+      const approveCalls: Call[] = [
+        {
+          contractAddress: quote.paymentToken,
+          entrypoint: "approve",
+          calldata: [
+            registryContract, // spender
+            amount256.low, // amount low
+            amount256.high, // amount high
+          ],
+        },
+      ];
+
+      // Step 2: Issue the starterpack
+      // issue(recipient, starterpack_id, quantity, referrer: Option<ContractAddress>, referrer_group: Option<felt252>)
+      const issueCalls: Call[] = [
+        {
+          contractAddress: registryContract,
+          entrypoint: "issue",
+          calldata: [
+            recipient, // recipient
+            starterpackId, // starterpack_id: u32
+            0x1, // quantity: u32 (always 1 for now)
+            0x1, // referrer: Option<ContractAddress> (None)
+            0x1, // referrer_group: Option<felt252> (None)
+          ],
+        },
+      ];
+
+      // Execute both calls in sequence
+      const calls = [...approveCalls, ...issueCalls];
+      const result = await controller.execute(calls);
+
+      // Store transaction hash
+      setTransactionHash(result.transaction_hash);
+    } catch (e) {
+      setDisplayError(e as Error);
+      throw e;
+    }
+  }, [controller, starterpackDetails]);
 
   const onExternalConnect = useCallback(
     async (
@@ -420,6 +559,9 @@ export const PurchaseProvider = ({
     displayError,
     clearError,
 
+    // Wallet management
+    clearSelectedWallet,
+
     // Setters
     setUsdAmount,
     setPurchaseItems,
@@ -429,7 +571,8 @@ export const PurchaseProvider = ({
 
     // Actions
     onCreditCardPurchase,
-    onCryptoPurchase,
+    onBackendCryptoPurchase,
+    onOnchainPurchase,
     onExternalConnect,
     waitForPayment,
     fetchFees,
