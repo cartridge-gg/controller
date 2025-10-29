@@ -100,13 +100,6 @@ export function storeReferral(
     const allReferrals = getAllReferrals();
     allReferrals[gameUrl] = referralData;
     saveAllReferrals(allReferrals);
-
-    console.log("[Referral] Stored referral data:", {
-      ref: referralData.ref,
-      gameUrl: gameUrl,
-      refGroup: referralData.refGroup,
-      expiresIn: `${ATTRIBUTION_WINDOW_DAYS} days`,
-    });
   } catch (error) {
     console.error("[Referral] Failed to store referral data:", error);
   }
@@ -133,20 +126,9 @@ export function getReferral(gameUrl: string): ReferralData | null {
 
     // Check if referral has expired
     if (now > referralData.expiresAt) {
-      console.log("[Referral] Referral has expired for game:", gameUrl);
       clearReferral(gameUrl);
       return null;
     }
-
-    const daysRemaining = Math.floor(
-      (referralData.expiresAt - now) / (24 * 60 * 60 * 1000),
-    );
-    console.log("[Referral] Retrieved valid referral:", {
-      ref: referralData.ref,
-      gameUrl: gameUrl,
-      refGroup: referralData.refGroup,
-      daysRemaining,
-    });
 
     return referralData;
   } catch (error) {
@@ -165,7 +147,6 @@ export function clearReferral(gameUrl?: string): void {
     if (!gameUrl) {
       // Clear all referrals
       localStorage.removeItem(REFERRAL_STORAGE_KEY);
-      console.log("[Referral] Cleared all referral data");
       return;
     }
 
@@ -173,7 +154,6 @@ export function clearReferral(gameUrl?: string): void {
     const allReferrals = getAllReferrals();
     delete allReferrals[gameUrl];
     saveAllReferrals(allReferrals);
-    console.log("[Referral] Cleared referral data for game:", gameUrl);
   } catch (error) {
     console.error("[Referral] Failed to clear referral data:", error);
   }
@@ -271,14 +251,8 @@ export async function lookupReferrerAddress(
       json.data?.account?.controllers?.edges?.[0]?.node?.address || null;
 
     if (!address) {
-      console.log("[Referral] No controller found for username:", username);
       return null;
     }
-
-    console.log("[Referral] Resolved referrer address:", {
-      username,
-      address,
-    });
 
     return address;
   } catch (error) {

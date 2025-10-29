@@ -43,11 +43,6 @@ export function useReferralCapture(): void {
       if (gameUrl) {
         // Store the referral data for this specific game
         storeReferral(ref, gameUrl, refGroup || undefined);
-        console.log("[Referral] Captured referral for game:", gameUrl);
-      } else {
-        console.log(
-          "[Referral] Could not determine game URL, skipping referral capture",
-        );
       }
 
       // Remove referral parameters from URL to keep it clean

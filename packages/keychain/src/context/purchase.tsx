@@ -444,11 +444,6 @@ export const PurchaseProvider = ({
       let referrerGroupOption = new CairoOption(CairoOptionVariant.None);
 
       if (referralData) {
-        console.log("[Purchase] Found referral data:", {
-          ref: referralData.ref,
-          refGroup: referralData.refGroup,
-        });
-
         // Look up referrer's contract address
         const referrerAddress = await lookupReferrerAddress(referralData.ref);
 
@@ -456,11 +451,6 @@ export const PurchaseProvider = ({
           referrerOption = new CairoOption(
             CairoOptionVariant.Some,
             referrerAddress,
-          );
-          console.log("[Purchase] Using referrer address:", referrerAddress);
-        } else {
-          console.log(
-            "[Purchase] Could not resolve referrer address, proceeding without referral",
           );
         }
 
@@ -474,10 +464,6 @@ export const PurchaseProvider = ({
               CairoOptionVariant.Some,
               refGroupFelt,
             );
-            console.log("[Purchase] Using referrer group:", {
-              original: referralData.refGroup,
-              encoded: refGroupFelt,
-            });
           } catch (error) {
             console.error("[Purchase] Failed to encode referrer group:", error);
           }
