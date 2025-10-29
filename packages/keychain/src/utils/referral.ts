@@ -6,6 +6,12 @@
  * the referring domain.
  */
 
+import { client } from "@/utils/graphql";
+import {
+  AddressByUsernameDocument,
+  AddressByUsernameQuery,
+} from "@cartridge/ui/utils/api/cartridge";
+
 const REFERRAL_STORAGE_KEY = "@cartridge/referral";
 const ATTRIBUTION_WINDOW_DAYS = 30;
 const ATTRIBUTION_WINDOW_MS = ATTRIBUTION_WINDOW_DAYS * 24 * 60 * 60 * 1000;
@@ -210,45 +216,13 @@ export async function lookupReferrerAddress(
   username: string,
 ): Promise<string | null> {
   try {
-    const apiUrl = `${import.meta.env.VITE_CARTRIDGE_API_URL}/query`;
-    const query = `
-      query AddressByUsername($username: String!) {
-        account(username: $username) {
-          controllers(first: 1) {
-            edges {
-              node {
-                address
-              }
-            }
-          }
-        }
-      }
-    `;
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query,
-        variables: { username },
-      }),
-    });
-
-    const json = await response.json();
-
-    if (json.errors) {
-      console.error(
-        "[Referral] GraphQL error looking up referrer:",
-        json.errors[0]?.message,
-      );
-      return null;
-    }
+    const data = await client.request<AddressByUsernameQuery>(
+      AddressByUsernameDocument,
+      { username },
+    );
 
     const address =
-      json.data?.account?.controllers?.edges?.[0]?.node?.address || null;
+      data?.account?.controllers?.edges?.[0]?.node?.address || null;
 
     if (!address) {
       return null;

@@ -131,7 +131,7 @@ function Authentication() {
 export function App() {
   const { navigate } = useNavigation();
 
-  // Capture referral parameters from URL (e.g., ?ref=username&ref_group=campaign)
+  // Capture referral parameters from URL (e.g., ?ref=username&ref_group=referral_group)
   // This automatically stores them in localStorage with a 30-day attribution window
   useReferralCapture();
 
