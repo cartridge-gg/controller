@@ -37,6 +37,10 @@ export function Claim() {
     | undefined;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [showIndividualClaims, setShowIndividualClaims] = useState(false);
+  const [claimingIndices, setClaimingIndices] = useState<Set<number>>(
+    new Set(),
+  );
 
   const {
     claims: claimsData,
@@ -83,10 +87,33 @@ export function Claim() {
       navigate("/purchase/pending", { reset: true });
     } catch (error) {
       setError(error as Error);
+      // Fallback to individual claims on error
+      setShowIndividualClaims(true);
     } finally {
       setIsSubmitting(false);
     }
   }, [onSendClaim, setTransactionHash, navigate]);
+
+  const onSubmitIndividual = useCallback(
+    async (claimIndex: number) => {
+      try {
+        setClaimingIndices((prev) => new Set(prev).add(claimIndex));
+        setError(null);
+        const hash = await onSendClaim([claimIndex]);
+        setTransactionHash(hash);
+        navigate("/purchase/pending", { reset: true });
+      } catch (error) {
+        setError(error as Error);
+      } finally {
+        setClaimingIndices((prev) => {
+          const next = new Set(prev);
+          next.delete(claimIndex);
+          return next;
+        });
+      }
+    },
+    [onSendClaim, setTransactionHash, navigate],
+  );
 
   const isClaimed = useMemo(() => {
     return claimsData.every((claim) => claim.claimed);
@@ -100,6 +127,13 @@ export function Claim() {
     return claimsData
       .filter((claim) => !claim.claimed)
       .reduce((acc, claim) => acc + claimAmount(claim), 0);
+  }, [claimsData]);
+
+  const combinedDescription = useMemo(() => {
+    const uniqueDescriptions = new Set(
+      claimsData.map((claim) => claim.description ?? claim.key),
+    );
+    return Array.from(uniqueDescriptions).join(", ");
   }, [claimsData]);
 
   if (isLoadingClaims) {
@@ -131,19 +165,47 @@ export function Claim() {
               </div>
               <Card>
                 <CardListContent>
-                  {claimsData.map((claim, i) => (
-                    <CardListItem
-                      key={i}
-                      className="flex flex-row justify-between"
-                    >
+                  {showIndividualClaims ? (
+                    // Show individual claims with individual claim buttons
+                    claimsData.map((claim, i) => (
+                      <CardListItem
+                        key={i}
+                        className="flex flex-row justify-between items-center"
+                      >
+                        <CollectionItem
+                          name={claim.description ?? claim.key}
+                          network={claim.network}
+                          numAvailable={claimAmount(claim)}
+                          isLoading={claim.loading}
+                        />
+                        {!claim.claimed && !claim.loading && (
+                          <Button
+                            onClick={() => onSubmitIndividual(i)}
+                            isLoading={claimingIndices.has(i)}
+                            disabled={claimingIndices.has(i)}
+                            className="h-8 px-3 text-xs"
+                          >
+                            Claim
+                          </Button>
+                        )}
+                        {claim.claimed && (
+                          <span className="text-foreground-400 text-xs">
+                            Claimed
+                          </span>
+                        )}
+                      </CardListItem>
+                    ))
+                  ) : (
+                    // Show combined display
+                    <CardListItem className="flex flex-row justify-between">
                       <CollectionItem
-                        name={claim.description ?? claim.key}
-                        network={claim.network}
-                        numAvailable={claimAmount(claim)}
-                        isLoading={claim.loading}
+                        name={combinedDescription}
+                        network={claimsData[0]?.network}
+                        numAvailable={totalClaimable}
+                        isLoading={isCheckingClaimed}
                       />
                     </CardListItem>
-                  ))}
+                  )}
                 </CardListContent>
               </Card>
             </div>
@@ -151,7 +213,16 @@ export function Claim() {
         )}
       </LayoutContent>
       <LayoutFooter>
-        {error && <ErrorAlert title="Error" description={error.message} />}
+        {error && (
+          <ErrorAlert
+            title="Error"
+            description={
+              showIndividualClaims
+                ? error.message
+                : `${error.message}. Switched to individual claiming mode.`
+            }
+          />
+        )}
         <div className="flex justify-between border border-background-300 rounded py-2 px-3">
           <div className="flex items-center gap-1 text-foreground-300 text-xs">
             {wallet.subIcon} {wallet.name} (
@@ -163,17 +234,21 @@ export function Claim() {
         </div>
         {claimsData.length === 0 ? (
           <Button onClick={() => goBack()}>Check Another Wallet</Button>
+        ) : showIndividualClaims ? (
+          <div className="text-foreground-300 text-sm text-center">
+            Claim items individually above
+          </div>
         ) : (
           <Button
             onClick={onSubmit}
             isLoading={isSubmitting}
-            disabled={isClaimed || isCheckingClaimed || error !== null}
+            disabled={isClaimed || isCheckingClaimed}
           >
             {isClaimed
               ? "Already Claimed"
               : isCheckingClaimed
                 ? "Loading..."
-                : `Claim (${totalClaimable}) `}
+                : `Claim All (${totalClaimable})`}
           </Button>
         )}
       </LayoutFooter>

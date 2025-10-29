@@ -153,52 +153,63 @@ export const useMerkleClaim = ({
   }, [claims, controller, checkAllClaims]);
 
   // TODO: Use ABI to generate the calldata
-  const onSendClaim = useCallback(async () => {
-    if (!merkleTreeKey || !leafData || !controller || !claims.length) {
-      const error = new Error("Missing required data");
-      setError(error);
-      throw error;
-    }
+  const onSendClaim = useCallback(
+    async (claimIndices?: number[]) => {
+      if (!merkleTreeKey || !leafData || !controller || !claims.length) {
+        const error = new Error("Missing required data");
+        setError(error);
+        throw error;
+      }
 
-    try {
-      const isEvm = claims[0].network === MerkleDropNetwork.Ethereum;
+      try {
+        // Filter claims based on provided indices, or use all unclaimed
+        const claimsToProcess = claimIndices
+          ? claims.filter((_, index) => claimIndices.includes(index))
+          : claims.filter((claim) => !claim.claimed);
 
-      let signature: Calldata;
-      if (isEvm) {
-        const msg = evmMessage(controller.address());
-        const { result, error } = await externalSignMessage(address, msg);
-        if (error) {
-          throw new Error(error);
+        if (claimsToProcess.length === 0) {
+          throw new Error("No claims to process");
         }
 
-        const { r, s, v } = parseSignature(result as `0x${string}`);
-        signature = CallData.compile([
-          num.toHex(v!),
-          cairo.uint256(r),
-          cairo.uint256(s),
-        ]);
+        const isEvm = claimsToProcess[0].network === MerkleDropNetwork.Ethereum;
 
-        signature.unshift("0x0"); // Enum Ethereum Signature
-      } else {
-        const msg: TypedData = starknetMessage(controller.address(), isMainnet);
-        if (type === "controller") {
-          const result = await controller.signMessage(msg);
-          signature = result as Array<string>;
-        } else {
-          const { result, error } = await externalSignTypedData(type, msg);
+        let signature: Calldata;
+        if (isEvm) {
+          const msg = evmMessage(controller.address());
+          const { result, error } = await externalSignMessage(address, msg);
           if (error) {
             throw new Error(error);
           }
-          signature = result as Array<string>;
+
+          const { r, s, v } = parseSignature(result as `0x${string}`);
+          signature = CallData.compile([
+            num.toHex(v!),
+            cairo.uint256(r),
+            cairo.uint256(s),
+          ]);
+
+          signature.unshift("0x0"); // Enum Ethereum Signature
+        } else {
+          const msg: TypedData = starknetMessage(
+            controller.address(),
+            isMainnet,
+          );
+          if (type === "controller") {
+            const result = await controller.signMessage(msg);
+            signature = result as Array<string>;
+          } else {
+            const { result, error } = await externalSignTypedData(type, msg);
+            if (error) {
+              throw new Error(error);
+            }
+            signature = result as Array<string>;
+          }
+
+          signature.unshift(num.toHex(signature.length));
+          signature.unshift("0x1"); // Enum Starknet Signature
         }
 
-        signature.unshift(num.toHex(signature.length));
-        signature.unshift("0x1"); // Enum Starknet Signature
-      }
-
-      const calls = claims
-        .filter((claim) => !claim.claimed)
-        .map((claim) => {
+        const calls = claimsToProcess.map((claim) => {
           const raw = {
             merkle_tree_key: merkleTreeKey(claim),
             proof: claim.merkleProof,
@@ -214,21 +225,24 @@ export const useMerkleClaim = ({
           };
         });
 
-      const { transaction_hash } = await controller.executeFromOutsideV3(calls);
-      return transaction_hash;
-    } catch (error) {
-      setError(error as Error);
-      throw error;
-    }
-  }, [
-    type,
-    address,
-    controller,
-    claims,
-    isMainnet,
-    externalSignMessage,
-    externalSignTypedData,
-  ]);
+        const { transaction_hash } =
+          await controller.executeFromOutsideV3(calls);
+        return transaction_hash;
+      } catch (error) {
+        setError(error as Error);
+        throw error;
+      }
+    },
+    [
+      type,
+      address,
+      controller,
+      claims,
+      isMainnet,
+      externalSignMessage,
+      externalSignTypedData,
+    ],
+  );
 
   return {
     claims,
