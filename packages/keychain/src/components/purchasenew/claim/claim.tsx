@@ -115,25 +115,6 @@ export function Claim() {
     [onSendClaim, setTransactionHash, navigate],
   );
 
-  const onSubmitGroup = useCallback(
-    async (indices: number[]) => {
-      try {
-        setIsSubmitting(true);
-        setError(null);
-        const hash = await onSendClaim(indices);
-        setTransactionHash(hash);
-        navigate("/purchase/pending", { reset: true });
-      } catch (error) {
-        setError(error as Error);
-        // Fallback to individual claims on error
-        setShowIndividualClaims(true);
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [onSendClaim, setTransactionHash, navigate],
-  );
-
   const isClaimed = useMemo(() => {
     return claimsData.every((claim) => claim.claimed);
   }, [claimsData]);
@@ -206,8 +187,8 @@ export function Claim() {
               </div>
               <Card>
                 <CardListContent>
-                  {showIndividualClaims ? (
-                    // Show individual claims with individual claim buttons
+                  {showIndividualClaims
+                    ? // Show individual claims with individual claim buttons
                     claimsData.map((claim, i) => (
                       <CardListItem
                         key={i}
@@ -236,8 +217,7 @@ export function Claim() {
                         )}
                       </CardListItem>
                     ))
-                  ) : (
-                    // Show grouped display by claim key
+                    : // Show grouped display by claim key (no buttons, use "Claim All" in footer)
                     groupedClaims.map((group) => (
                       <CardListItem
                         key={group.key}
@@ -249,46 +229,13 @@ export function Claim() {
                           numAvailable={group.totalAmount}
                           isLoading={group.isLoading}
                         />
-                        {!group.allClaimed &&
-                          !group.isLoading &&
-                          group.claims.length > 1 && (
-                            <Button
-                              onClick={() => onSubmitGroup(group.indices)}
-                              isLoading={isSubmitting}
-                              disabled={isSubmitting}
-                              className="h-8 px-3 text-xs"
-                            >
-                              Claim
-                            </Button>
-                          )}
-                        {!group.allClaimed &&
-                          !group.isLoading &&
-                          group.claims.length === 1 && (
-                            <Button
-                              onClick={() =>
-                                onSubmitIndividual(group.indices[0])
-                              }
-                              isLoading={
-                                claimingIndices.has(group.indices[0]) ||
-                                isSubmitting
-                              }
-                              disabled={
-                                claimingIndices.has(group.indices[0]) ||
-                                isSubmitting
-                              }
-                              className="h-8 px-3 text-xs"
-                            >
-                              Claim
-                            </Button>
-                          )}
                         {group.allClaimed && (
                           <span className="text-foreground-400 text-xs">
                             Claimed
                           </span>
                         )}
                       </CardListItem>
-                    ))
-                  )}
+                    ))}
                 </CardListContent>
               </Card>
             </div>
@@ -320,11 +267,6 @@ export function Claim() {
         ) : showIndividualClaims ? (
           <div className="text-foreground-300 text-sm text-center">
             Claim items individually above
-          </div>
-        ) : groupedClaims.length === 1 ? (
-          // If only one group, no need for "Claim All" button since it's already in the card
-          <div className="text-foreground-300 text-sm text-center">
-            {isClaimed ? "All items claimed" : "Claim items above"}
           </div>
         ) : (
           <Button
