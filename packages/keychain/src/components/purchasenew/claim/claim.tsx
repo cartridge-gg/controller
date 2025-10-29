@@ -23,7 +23,15 @@ import { getWallet } from "../wallet/config";
 import { formatAddress } from "@cartridge/ui/utils";
 import type { BackendStarterpackDetails } from "@/context";
 import { useConnection } from "@/hooks/connection";
-import { cairo, CallData, hash, num, shortString, TypedData } from "starknet";
+import {
+  cairo,
+  CallData,
+  Calldata,
+  hash,
+  num,
+  shortString,
+  TypedData,
+} from "starknet";
 import { parseSignature } from "viem";
 import { MerkleDropNetwork } from "@cartridge/ui/utils/api/cartridge";
 
@@ -35,7 +43,8 @@ export function Claim() {
     setClaimItems,
     setTransactionHash,
   } = usePurchaseContext();
-  const { controller, isMainnet, externalSignMessage, externalSignTypedData } = useConnection();
+  const { controller, isMainnet, externalSignMessage, externalSignTypedData } =
+    useConnection();
 
   const starterpackDetails = starterpackDetailsRaw as
     | BackendStarterpackDetails
@@ -43,7 +52,9 @@ export function Claim() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isFallbackMode, setIsFallbackMode] = useState(false);
-  const [individualClaimStates, setIndividualClaimStates] = useState<Map<string, boolean>>(new Map());
+  const [individualClaimStates, setIndividualClaimStates] = useState<
+    Map<string, boolean>
+  >(new Map());
 
   const {
     claims: claimsData,
@@ -127,13 +138,13 @@ export function Claim() {
       // Check if this is a transaction size/resource error and switch to fallback mode
       const errorMessage = err.message.toLowerCase();
       if (
-        errorMessage.includes('insufficient') ||
-        errorMessage.includes('resource') ||
-        errorMessage.includes('gas') ||
-        errorMessage.includes('limit') ||
-        errorMessage.includes('size') ||
-        errorMessage.includes('too large') ||
-        errorMessage.includes('out of resources')
+        errorMessage.includes("insufficient") ||
+        errorMessage.includes("resource") ||
+        errorMessage.includes("gas") ||
+        errorMessage.includes("limit") ||
+        errorMessage.includes("size") ||
+        errorMessage.includes("too large") ||
+        errorMessage.includes("out of resources")
       ) {
         setIsFallbackMode(true);
       }
@@ -142,75 +153,98 @@ export function Claim() {
     }
   }, [onSendClaim, setTransactionHash, navigate]);
 
-  const onSendIndividualClaim = useCallback(async (claim: MerkleClaim) => {
-    if (!controller) {
-      throw new Error("Controller not available");
-    }
+  const onSendIndividualClaim = useCallback(
+    async (claim: MerkleClaim) => {
+      if (!controller) {
+        throw new Error("Controller not available");
+      }
 
-    const claimKey = `${claim.key}-${claim.index}`;
+      const claimKey = `${claim.key}-${claim.index}`;
 
-    setIndividualClaimStates(prev => new Map(prev.set(claimKey, true)));
+      setIndividualClaimStates((prev) => new Map(prev.set(claimKey, true)));
 
-    try {
-      const isEvm = claim.network === MerkleDropNetwork.Ethereum;
+      try {
+        const isEvm = claim.network === MerkleDropNetwork.Ethereum;
 
-      let signature: any;
-      if (isEvm) {
-        const msg = evmMessage(controller.address());
-        const { result, error } = await externalSignMessage(externalAddress!, msg);
-        if (error) {
-          throw new Error(error);
-        }
-
-        const { r, s, v } = parseSignature(result as `0x${string}`);
-        signature = CallData.compile([
-          num.toHex(v!),
-          cairo.uint256(r),
-          cairo.uint256(s),
-        ]);
-
-        signature.unshift("0x0"); // Enum Ethereum Signature
-      } else {
-        const msg: TypedData = starknetMessage(controller.address(), isMainnet);
-        if (type === "controller") {
-          const result = await controller.signMessage(msg);
-          signature = result as Array<string>;
-        } else {
-          const { result, error } = await externalSignTypedData(type as ExternalWalletType, msg);
+        let signature: Calldata;
+        if (isEvm) {
+          const msg = evmMessage(controller.address());
+          const { result, error } = await externalSignMessage(
+            externalAddress!,
+            msg,
+          );
           if (error) {
             throw new Error(error);
           }
-          signature = result as Array<string>;
+
+          const { r, s, v } = parseSignature(result as `0x${string}`);
+          signature = CallData.compile([
+            num.toHex(v!),
+            cairo.uint256(r),
+            cairo.uint256(s),
+          ]);
+
+          signature.unshift("0x0"); // Enum Ethereum Signature
+        } else {
+          const msg: TypedData = starknetMessage(
+            controller.address(),
+            isMainnet,
+          );
+          if (type === "controller") {
+            const result = await controller.signMessage(msg);
+            signature = result as Array<string>;
+          } else {
+            const { result, error } = await externalSignTypedData(
+              type as ExternalWalletType,
+              msg,
+            );
+            if (error) {
+              throw new Error(error);
+            }
+            signature = result as Array<string>;
+          }
+
+          signature.unshift(num.toHex(signature.length));
+          signature.unshift("0x1"); // Enum Starknet Signature
         }
 
-        signature.unshift(num.toHex(signature.length));
-        signature.unshift("0x1"); // Enum Starknet Signature
+        const raw = {
+          merkle_tree_key: merkleTreeKey(claim),
+          proof: claim.merkleProof,
+          leaf_data: CallData.compile(leafData(externalAddress!, claim)),
+          recipient: controller.address(),
+          signature: { ...signature },
+        };
+
+        const call = {
+          contractAddress: import.meta.env.VITE_MERKLE_DROP_CONTRACT,
+          entrypoint: "verify_and_forward",
+          calldata: CallData.compile(raw),
+        };
+
+        const { transaction_hash } = await controller.executeFromOutsideV3([
+          call,
+        ]);
+        setTransactionHash(transaction_hash);
+        navigate("/purchase/pending", { reset: true });
+      } catch (error) {
+        setError(error as Error);
+        throw error;
+      } finally {
+        setIndividualClaimStates((prev) => new Map(prev.set(claimKey, false)));
       }
-
-      const raw = {
-        merkle_tree_key: merkleTreeKey(claim),
-        proof: claim.merkleProof,
-        leaf_data: CallData.compile(leafData(externalAddress!, claim)),
-        recipient: controller.address(),
-        signature: { ...signature },
-      };
-
-      const call = {
-        contractAddress: import.meta.env.VITE_MERKLE_DROP_CONTRACT,
-        entrypoint: "verify_and_forward",
-        calldata: CallData.compile(raw),
-      };
-
-      const { transaction_hash } = await controller.executeFromOutsideV3([call]);
-      setTransactionHash(transaction_hash);
-      navigate("/purchase/pending", { reset: true });
-    } catch (error) {
-      setError(error as Error);
-      throw error;
-    } finally {
-      setIndividualClaimStates(prev => new Map(prev.set(claimKey, false)));
-    }
-  }, [controller, externalAddress, externalSignMessage, externalSignTypedData, type, isMainnet, setTransactionHash, navigate]);
+    },
+    [
+      controller,
+      externalAddress,
+      externalSignMessage,
+      externalSignTypedData,
+      type,
+      isMainnet,
+      setTransactionHash,
+      navigate,
+    ],
+  );
 
   const isClaimed = useMemo(() => {
     return combinedClaims.every((item) => item.isClaimed);
@@ -256,7 +290,8 @@ export function Claim() {
                   </div>
                 </div>
                 <div className="text-orange-700 text-xs mt-1">
-                  Combined claim failed due to transaction size. Claim items individually below.
+                  Combined claim failed due to transaction size. Claim items
+                  individually below.
                 </div>
               </div>
             )}
@@ -267,51 +302,50 @@ export function Claim() {
               </div>
               <Card>
                 <CardListContent>
-                  {isFallbackMode ? (
-                    // Individual claim mode - show each claim separately
-                    claimsData
-                      .filter((claim) => !claim.claimed)
-                      .map((claim) => {
-                        const claimKey = `${claim.key}-${claim.index}`;
-                        const isSubmitting = individualClaimStates.get(claimKey) || false;
+                  {isFallbackMode
+                    ? // Individual claim mode - show each claim separately
+                      claimsData
+                        .filter((claim) => !claim.claimed)
+                        .map((claim) => {
+                          const claimKey = `${claim.key}-${claim.index}`;
+                          const isSubmitting =
+                            individualClaimStates.get(claimKey) || false;
 
-                        return (
-                          <CardListItem
-                            key={`${claim.key}-${claim.index}`}
-                            className="flex flex-row justify-between items-center"
-                          >
-                            <CollectionItem
-                              name={claim.description ?? claim.key}
-                              network={claim.network}
-                              numAvailable={claimAmount(claim)}
-                              isLoading={claim.loading}
-                            />
-                            <Button
-                              onClick={() => onSendIndividualClaim(claim)}
-                              isLoading={isSubmitting}
-                              disabled={isSubmitting}
+                          return (
+                            <CardListItem
+                              key={`${claim.key}-${claim.index}`}
+                              className="flex flex-row justify-between items-center"
                             >
-                              Claim
-                            </Button>
-                          </CardListItem>
-                        );
-                      })
-                  ) : (
-                    // Combined claim mode - show grouped items
-                    combinedClaims.map((item) => (
-                      <CardListItem
-                        key={item.key}
-                        className="flex flex-row justify-between"
-                      >
-                        <CollectionItem
-                          name={item.name}
-                          network={item.network}
-                          numAvailable={item.numAvailable}
-                          isLoading={item.isLoading}
-                        />
-                      </CardListItem>
-                    ))
-                  )}
+                              <CollectionItem
+                                name={claim.description ?? claim.key}
+                                network={claim.network}
+                                numAvailable={claimAmount(claim)}
+                                isLoading={claim.loading}
+                              />
+                              <Button
+                                onClick={() => onSendIndividualClaim(claim)}
+                                isLoading={isSubmitting}
+                                disabled={isSubmitting}
+                              >
+                                Claim
+                              </Button>
+                            </CardListItem>
+                          );
+                        })
+                    : // Combined claim mode - show grouped items
+                      combinedClaims.map((item) => (
+                        <CardListItem
+                          key={item.key}
+                          className="flex flex-row justify-between"
+                        >
+                          <CollectionItem
+                            name={item.name}
+                            network={item.network}
+                            numAvailable={item.numAvailable}
+                            isLoading={item.isLoading}
+                          />
+                        </CardListItem>
+                      ))}
                 </CardListContent>
               </Card>
             </div>
