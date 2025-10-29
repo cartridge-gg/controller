@@ -115,6 +115,25 @@ export function Claim() {
     [onSendClaim, setTransactionHash, navigate],
   );
 
+  const onSubmitGroup = useCallback(
+    async (indices: number[]) => {
+      try {
+        setIsSubmitting(true);
+        setError(null);
+        const hash = await onSendClaim(indices);
+        setTransactionHash(hash);
+        navigate("/purchase/pending", { reset: true });
+      } catch (error) {
+        setError(error as Error);
+        // Fallback to individual claims on error
+        setShowIndividualClaims(true);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [onSendClaim, setTransactionHash, navigate],
+  );
+
   const isClaimed = useMemo(() => {
     return claimsData.every((claim) => claim.claimed);
   }, [claimsData]);
@@ -129,11 +148,33 @@ export function Claim() {
       .reduce((acc, claim) => acc + claimAmount(claim), 0);
   }, [claimsData]);
 
-  const combinedDescription = useMemo(() => {
-    const uniqueDescriptions = new Set(
-      claimsData.map((claim) => claim.description ?? claim.key),
-    );
-    return Array.from(uniqueDescriptions).join(", ");
+  // Group claims by key (e.g., network/collection)
+  const groupedClaims = useMemo(() => {
+    const groups = new Map<
+      string,
+      { claims: MerkleClaim[]; indices: number[] }
+    >();
+
+    claimsData.forEach((claim, index) => {
+      if (!groups.has(claim.key)) {
+        groups.set(claim.key, { claims: [], indices: [] });
+      }
+      groups.get(claim.key)!.claims.push(claim);
+      groups.get(claim.key)!.indices.push(index);
+    });
+
+    return Array.from(groups.entries()).map(([key, { claims, indices }]) => ({
+      key,
+      claims,
+      indices,
+      description: claims[0].description ?? key,
+      network: claims[0].network,
+      totalAmount: claims
+        .filter((c) => !c.claimed)
+        .reduce((acc, c) => acc + claimAmount(c), 0),
+      allClaimed: claims.every((c) => c.claimed),
+      isLoading: claims.every((c) => c.loading),
+    }));
   }, [claimsData]);
 
   if (isLoadingClaims) {
@@ -196,15 +237,57 @@ export function Claim() {
                       </CardListItem>
                     ))
                   ) : (
-                    // Show combined display
-                    <CardListItem className="flex flex-row justify-between">
-                      <CollectionItem
-                        name={combinedDescription}
-                        network={claimsData[0]?.network}
-                        numAvailable={totalClaimable}
-                        isLoading={isCheckingClaimed}
-                      />
-                    </CardListItem>
+                    // Show grouped display by claim key
+                    groupedClaims.map((group) => (
+                      <CardListItem
+                        key={group.key}
+                        className="flex flex-row justify-between items-center"
+                      >
+                        <CollectionItem
+                          name={group.description}
+                          network={group.network}
+                          numAvailable={group.totalAmount}
+                          isLoading={group.isLoading}
+                        />
+                        {!group.allClaimed &&
+                          !group.isLoading &&
+                          group.claims.length > 1 && (
+                            <Button
+                              onClick={() => onSubmitGroup(group.indices)}
+                              isLoading={isSubmitting}
+                              disabled={isSubmitting}
+                              className="h-8 px-3 text-xs"
+                            >
+                              Claim
+                            </Button>
+                          )}
+                        {!group.allClaimed &&
+                          !group.isLoading &&
+                          group.claims.length === 1 && (
+                            <Button
+                              onClick={() =>
+                                onSubmitIndividual(group.indices[0])
+                              }
+                              isLoading={
+                                claimingIndices.has(group.indices[0]) ||
+                                isSubmitting
+                              }
+                              disabled={
+                                claimingIndices.has(group.indices[0]) ||
+                                isSubmitting
+                              }
+                              className="h-8 px-3 text-xs"
+                            >
+                              Claim
+                            </Button>
+                          )}
+                        {group.allClaimed && (
+                          <span className="text-foreground-400 text-xs">
+                            Claimed
+                          </span>
+                        )}
+                      </CardListItem>
+                    ))
                   )}
                 </CardListContent>
               </Card>
@@ -237,6 +320,11 @@ export function Claim() {
         ) : showIndividualClaims ? (
           <div className="text-foreground-300 text-sm text-center">
             Claim items individually above
+          </div>
+        ) : groupedClaims.length === 1 ? (
+          // If only one group, no need for "Claim All" button since it's already in the card
+          <div className="text-foreground-300 text-sm text-center">
+            {isClaimed ? "All items claimed" : "Claim items above"}
           </div>
         ) : (
           <Button
