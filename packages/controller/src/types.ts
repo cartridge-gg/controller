@@ -244,6 +244,10 @@ export type KeychainOptions = IFrameOptions & {
   tokens?: Tokens;
   /** When true, defer iframe mounting until connect() is called. Reduces initial load and resource fetching. */
   lazyload?: boolean;
+  /** Referral username (from ?ref= parameter) */
+  ref?: string;
+  /** Referral group name (from ?ref_group= parameter) */
+  refGroup?: string;
 };
 
 export type ProfileContextTypeVariant =

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useController } from "./controller";
+import { useConnection } from "./connection";
 import {
   CairoByteArray,
   Call,
@@ -122,6 +123,7 @@ export const useStarterPackOnchain = (
   targetToken?: string, // Token to convert prices to (defaults to USDC)
 ) => {
   const { controller } = useController();
+  const { origin } = useConnection();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isQuoteLoading, setIsQuoteLoading] = useState(true);
@@ -133,7 +135,7 @@ export const useStarterPackOnchain = (
   const [supply, setSupply] = useState<number | undefined>(undefined);
 
   // Auto-detect if there's a valid referral for the current game
-  const hasReferral = getCurrentReferral() !== null;
+  const hasReferral = getCurrentReferral(origin) !== null;
 
   // Fetch metadata first (fast)
   useEffect(() => {

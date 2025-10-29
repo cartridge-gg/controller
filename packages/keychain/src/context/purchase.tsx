@@ -142,7 +142,7 @@ export const PurchaseProvider = ({
   children,
   isSlot = false,
 }: PurchaseProviderProps) => {
-  const { controller, isMainnet } = useConnection();
+  const { controller, isMainnet, origin } = useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
   const [starterpack, setStarterpack] = useState<string | number>();
   const [starterpackDetails, setStarterpackDetails] = useState<
@@ -438,8 +438,8 @@ export const PurchaseProvider = ({
         },
       ];
 
-      // Get referral data for the current game (from window.location.origin)
-      const referralData = getCurrentReferral();
+      // Get referral data for the current game
+      const referralData = getCurrentReferral(origin);
       let referrerOption = new CairoOption(CairoOptionVariant.None);
       let referrerGroupOption = new CairoOption(CairoOptionVariant.None);
 
@@ -496,7 +496,7 @@ export const PurchaseProvider = ({
       setDisplayError(e as Error);
       throw e;
     }
-  }, [controller, starterpackDetails]);
+  }, [controller, starterpackDetails, origin]);
 
   const onExternalConnect = useCallback(
     async (

@@ -46,6 +46,7 @@ import {
   shortString,
 } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
+import { storeReferral } from "@/utils/referral";
 
 const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
@@ -217,6 +218,8 @@ export function useConnectionValue() {
     const version = urlParams.get("v");
     const project = urlParams.get("ps");
     const namespace = urlParams.get("ns");
+    const ref = urlParams.get("ref");
+    const refGroup = urlParams.get("ref_group");
     const erc20Param = urlParams.get("erc20");
     const tokens = erc20Param
       ? decodeURIComponent(erc20Param)
@@ -243,6 +246,8 @@ export function useConnectionValue() {
       project,
       namespace,
       tokens,
+      ref,
+      refGroup,
     };
   }, [searchParams]);
 
@@ -382,6 +387,21 @@ export function useConnectionValue() {
       .finally(() => {
         setIsConfigLoading(false);
       });
+  }, [origin, urlParams]);
+
+  // Store referral data when URL params are available
+  useEffect(() => {
+    const { ref, refGroup } = urlParams;
+
+    // Only store if ref parameter is present and origin is available
+    if (ref && origin) {
+      // Strip https:// from origin to get game URL
+      const gameUrl = origin.replace(/^https?:\/\//, "");
+
+      if (gameUrl) {
+        storeReferral(ref, gameUrl, refGroup || undefined);
+      }
+    }
   }, [origin, urlParams]);
 
   // Handle theme configuration
