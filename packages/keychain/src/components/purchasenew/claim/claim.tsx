@@ -126,7 +126,7 @@ export function Claim() {
   const totalClaimable = useMemo(() => {
     return claimsData
       .filter((claim) => !claim.claimed)
-      .reduce((acc, claim) => acc + claimAmount(claim), 0);
+      .reduce((acc, claim) => acc + claim.data.length, 0);
   }, [claimsData]);
 
   // Group claims by key (e.g., network/collection)
@@ -152,7 +152,7 @@ export function Claim() {
       network: claims[0].network,
       totalAmount: claims
         .filter((c) => !c.claimed)
-        .reduce((acc, c) => acc + claimAmount(c), 0),
+        .reduce((acc, c) => acc + c.data.length, 0),
       allClaimed: claims.every((c) => c.claimed),
       isLoading: claims.every((c) => c.loading),
     }));
@@ -189,53 +189,43 @@ export function Claim() {
                 <CardListContent>
                   {showIndividualClaims
                     ? // Show individual claims with individual claim buttons
-                    claimsData.map((claim, i) => (
-                      <CardListItem
-                        key={i}
-                        className="flex flex-row justify-between items-center"
-                      >
-                        <CollectionItem
-                          name={claim.description ?? claim.key}
-                          network={claim.network}
-                          numAvailable={claimAmount(claim)}
-                          isLoading={claim.loading}
-                        />
-                        {!claim.claimed && !claim.loading && (
-                          <Button
-                            onClick={() => onSubmitIndividual(i)}
-                            isLoading={claimingIndices.has(i)}
-                            disabled={claimingIndices.has(i)}
-                            className="h-8 px-3 text-xs"
-                          >
-                            Claim
-                          </Button>
-                        )}
-                        {claim.claimed && (
-                          <span className="text-foreground-400 text-xs">
-                            Claimed
-                          </span>
-                        )}
-                      </CardListItem>
-                    ))
+                      claimsData.map((claim, i) => (
+                        <CardListItem
+                          key={i}
+                          className="flex flex-row justify-between items-center"
+                        >
+                          <CollectionItem
+                            name={claim.description ?? claim.key}
+                            network={claim.network}
+                            numAvailable={claim.claimed ? 0 : claim.data.length}
+                            isLoading={claim.loading}
+                          />
+                          {!claim.loading && (
+                            <Button
+                              onClick={() => onSubmitIndividual(i)}
+                              isLoading={claimingIndices.has(i)}
+                              disabled={claimingIndices.has(i) || claim.claimed}
+                              className="h-6 w-[70px] px-2 text-xs"
+                            >
+                              {claim.claimed ? "Claimed" : "Claim"}
+                            </Button>
+                          )}
+                        </CardListItem>
+                      ))
                     : // Show grouped display by claim key (no buttons, use "Claim All" in footer)
-                    groupedClaims.map((group) => (
-                      <CardListItem
-                        key={group.key}
-                        className="flex flex-row justify-between items-center"
-                      >
-                        <CollectionItem
-                          name={group.description}
-                          network={group.network}
-                          numAvailable={group.totalAmount}
-                          isLoading={group.isLoading}
-                        />
-                        {group.allClaimed && (
-                          <span className="text-foreground-400 text-xs">
-                            Claimed
-                          </span>
-                        )}
-                      </CardListItem>
-                    ))}
+                      groupedClaims.map((group) => (
+                        <CardListItem
+                          key={group.key}
+                          className="flex flex-row justify-between items-center"
+                        >
+                          <CollectionItem
+                            name={group.description}
+                            network={group.network}
+                            numAvailable={group.totalAmount}
+                            isLoading={group.isLoading}
+                          />
+                        </CardListItem>
+                      ))}
                 </CardListContent>
               </Card>
             </div>
@@ -264,22 +254,22 @@ export function Claim() {
         </div>
         {claimsData.length === 0 ? (
           <Button onClick={() => goBack()}>Check Another Wallet</Button>
-        ) : showIndividualClaims ? (
-          <div className="text-foreground-300 text-sm text-center">
-            Claim items individually above
-          </div>
         ) : (
-          <Button
-            onClick={onSubmit}
-            isLoading={isSubmitting}
-            disabled={isClaimed || isCheckingClaimed}
-          >
-            {isClaimed
-              ? "Already Claimed"
-              : isCheckingClaimed
-                ? "Loading..."
-                : `Claim All (${totalClaimable})`}
-          </Button>
+          !showIndividualClaims && (
+            <Button
+              onClick={onSubmit}
+              isLoading={isSubmitting}
+              disabled={isClaimed || isCheckingClaimed}
+            >
+              {isClaimed
+                ? "Already Claimed"
+                : isCheckingClaimed
+                  ? "Loading..."
+                  : groupedClaims.length > 1
+                    ? `Claim All (${totalClaimable})`
+                    : `Claim (${totalClaimable})`}
+            </Button>
+          )
         )}
       </LayoutFooter>
     </>
@@ -295,12 +285,4 @@ export const LoadingState = () => {
       <Skeleton className="min-h-[180px] w-full rounded" />
     </LayoutContent>
   );
-};
-
-const claimAmount = (claim: MerkleClaim) => {
-  if (claim.data.length === 1) {
-    return Number(claim.data[0]);
-  }
-
-  return claim.data.length;
 };
