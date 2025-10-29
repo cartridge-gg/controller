@@ -199,12 +199,9 @@ export function getRemainingAttributionDays(gameUrl: string): number | null {
  *                 When running in iframe, pass the parent origin from useConnection() hook.
  * @returns Referral data if a valid referral exists for the current game, null otherwise
  */
-export function getCurrentReferral(origin?: string): ReferralData | null {
+export function getCurrentReferral(origin: string): ReferralData | null {
   // Use provided origin, or fall back to window.location.origin
-  const gameUrl = (origin || window.location.origin).replace(
-    /^https?:\/\//,
-    "",
-  );
+  const gameUrl = origin.replace(/^https?:\/\//, "");
   if (!gameUrl) {
     return null;
   }

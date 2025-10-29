@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useController } from "./controller";
 import { useConnection } from "./connection";
 import {
@@ -135,7 +135,10 @@ export const useStarterPackOnchain = (
   const [supply, setSupply] = useState<number | undefined>(undefined);
 
   // Auto-detect if there's a valid referral for the current game
-  const hasReferral = getCurrentReferral(origin) !== null;
+  const hasReferral = useMemo(
+    () => getCurrentReferral(origin) !== null,
+    [origin],
+  );
 
   // Fetch metadata first (fast)
   useEffect(() => {
