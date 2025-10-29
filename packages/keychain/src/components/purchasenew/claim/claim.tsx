@@ -258,16 +258,14 @@ export function Claim() {
           !showIndividualClaims && (
             <Button
               onClick={onSubmit}
-              isLoading={isSubmitting}
+              isLoading={isSubmitting || isCheckingClaimed}
               disabled={isClaimed || isCheckingClaimed}
             >
               {isClaimed
                 ? "Already Claimed"
-                : isCheckingClaimed
-                  ? "Loading..."
-                  : groupedClaims.length > 1
-                    ? `Claim All (${totalClaimable})`
-                    : `Claim (${totalClaimable})`}
+                : groupedClaims.length > 1
+                  ? `Claim All (${totalClaimable})`
+                  : `Claim (${totalClaimable})`}
             </Button>
           )
         )}

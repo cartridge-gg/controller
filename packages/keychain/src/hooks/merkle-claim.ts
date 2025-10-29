@@ -17,7 +17,8 @@ import {
 } from "starknet";
 import { useConnection } from "./connection";
 import { parseSignature } from "viem";
-import { ExternalWalletType } from "@cartridge/controller";
+import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
+import { evmNetworks } from "@/components/purchasenew/wallet/config";
 
 export interface MerkleClaim {
   key: string;
@@ -171,7 +172,15 @@ export const useMerkleClaim = ({
           throw new Error("No claims to process");
         }
 
-        const isEvm = claimsToProcess[0].network === MerkleDropNetwork.Ethereum;
+        // Verify all claims are homogeneously EVM or non-EVM
+        const claimTypes = claimsToProcess.map((claim) =>
+          evmNetworks.includes(claim.network.toLowerCase() as ExternalPlatform),
+        );
+        const isEvm = claimTypes[0];
+
+        if (!claimTypes.every((type) => type === isEvm)) {
+          throw new Error("Cannot mix EVM and non-EVM claims");
+        }
 
         let signature: Calldata;
         if (isEvm) {
@@ -253,8 +262,14 @@ export const useMerkleClaim = ({
 };
 
 const merkleTreeKey = (claim: MerkleClaim) => {
+  // Merkle Drop contract treats all EVM networks as Ethereum
+  let network: MerkleDropNetwork = claim.network;
+  if (evmNetworks.includes(network.toLowerCase() as ExternalPlatform)) {
+    network = MerkleDropNetwork.Ethereum;
+  }
+
   return {
-    chain_id: shortString.encodeShortString(claim.network),
+    chain_id: shortString.encodeShortString(network),
     claim_contract_address: claim.contract,
     selector: hash.getSelectorFromName(claim.entrypoint),
     salt: claim.salt,
