@@ -943,6 +943,7 @@ export type CreateMerkleDropInput = {
   description?: InputMaybe<Scalars["String"]>;
   entrypoint: Scalars["String"];
   key: Scalars["String"];
+  matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
   merkleRoot: Scalars["String"];
   network: MerkleDropNetwork;
   salt: Scalars["String"];
@@ -2080,6 +2081,7 @@ export type MerkleDrop = Node & {
   entrypoint: Scalars["String"];
   id: Scalars["ID"];
   key: Scalars["String"];
+  matchStarterpackItem: Scalars["Boolean"];
   merkleRoot: Scalars["String"];
   network: MerkleDropNetwork;
   salt: Scalars["String"];
@@ -2229,6 +2231,9 @@ export type MerkleDropWhereInput = {
   keyLTE?: InputMaybe<Scalars["String"]>;
   keyNEQ?: InputMaybe<Scalars["String"]>;
   keyNotIn?: InputMaybe<Array<Scalars["String"]>>;
+  /** match_starterpack_item field predicates */
+  matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
+  matchStarterpackItemNEQ?: InputMaybe<Scalars["Boolean"]>;
   /** merkle_root field predicates */
   merkleRoot?: InputMaybe<Scalars["String"]>;
   merkleRootContains?: InputMaybe<Scalars["String"]>;
@@ -5822,6 +5827,7 @@ export type UpdateMerkleDropInput = {
   description?: InputMaybe<Scalars["String"]>;
   entrypoint?: InputMaybe<Scalars["String"]>;
   key?: InputMaybe<Scalars["String"]>;
+  matchStarterpackItem?: InputMaybe<Scalars["Boolean"]>;
   merkleRoot?: InputMaybe<Scalars["String"]>;
   network?: InputMaybe<MerkleDropNetwork>;
   removeClaimIDs?: InputMaybe<Array<Scalars["ID"]>>;

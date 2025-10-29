@@ -5,7 +5,7 @@
  * support redirecting to external game domains (e.g., lootsurvivor.io)
  * after authentication, while blocking dangerous attack vectors.
  *
- * @param redirectUrl - The URL to validate (from redirect_to parameter)
+ * @param redirectUrl - The URL to validate (from redirect_url parameter)
  * @returns Object with isValid boolean and optional error message
  */
 export function validateRedirectUrl(redirectUrl: string): {

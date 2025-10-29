@@ -180,7 +180,9 @@ const Header = () => {
         <div className="flex gap-2">
           <Button
             onClick={() => {
-              controllerConnector.controller.open();
+              controllerConnector.controller.open({
+                redirectUrl: window.location.href,
+              });
             }}
             disabled={!isControllerReady}
           >
