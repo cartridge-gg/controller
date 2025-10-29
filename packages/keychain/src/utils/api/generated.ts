@@ -1159,6 +1159,7 @@ export type Deployment = Node & {
   events?: Maybe<Array<DeploymentLog>>;
   id: Scalars["ID"];
   logs: Logs;
+  observabilitySecret?: Maybe<Scalars["String"]>;
   project: Scalars["String"];
   regions: Array<Scalars["String"]>;
   replicas: Scalars["Int"];
@@ -1775,8 +1776,13 @@ export type InvoiceWhereInput = {
 
 export type KatanaCreateInput = {
   network?: InputMaybe<Scalars["String"]>;
+  observability?: InputMaybe<Scalars["Boolean"]>;
   provable?: InputMaybe<Scalars["Boolean"]>;
   saya?: InputMaybe<Scalars["Boolean"]>;
+};
+
+export type KatanaUpdateInput = {
+  observability?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export enum LayerswapDestinationNetwork {
@@ -5826,6 +5832,7 @@ export type UpdateMerkleDropInput = {
 
 export type UpdateServiceInput = {
   config?: InputMaybe<Scalars["String"]>;
+  katana?: InputMaybe<KatanaUpdateInput>;
   torii?: InputMaybe<ToriiUpdateInput>;
   type: DeploymentService;
   version?: InputMaybe<Scalars["String"]>;

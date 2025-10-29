@@ -8,6 +8,7 @@ import { DelegateAccount } from "components/DelegateAccount";
 import { InvalidTxn } from "components/InvalidTxn";
 import { LookupControllers } from "components/LookupControllers";
 import { ManualTransferEth } from "components/ManualTransferEth";
+import { PlayButton } from "components/PlayButton";
 import { Profile } from "components/Profile";
 import { SignMessage } from "components/SignMessage";
 import { Transfer } from "components/Transfer";
@@ -23,6 +24,7 @@ const Home: FC = () => {
         <ColorModeToggle />
       </div>
       <Header />
+      <PlayButton />
       <Profile />
       <Transfer />
       <ManualTransferEth />
