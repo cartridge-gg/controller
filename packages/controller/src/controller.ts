@@ -25,6 +25,7 @@ import {
   ResponseCodes,
   StandaloneAuthOptions,
 } from "./types";
+import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
 
 export default class ControllerProvider extends BaseProvider {
@@ -407,6 +408,17 @@ export default class ControllerProvider extends BaseProvider {
 
     // Add redirect target (defaults to current page)
     const redirectTo = options.redirectTo || window.location.href;
+
+    // Validate redirect URL to prevent XSS and open redirect attacks
+    const validation = validateRedirectUrl(redirectTo);
+    if (!validation.isValid) {
+      console.error(
+        `Invalid redirect URL: ${validation.error}`,
+        `URL: ${redirectTo}`,
+      );
+      return;
+    }
+
     keychainUrl.searchParams.set("redirect_to", redirectTo);
 
     // Add controller configuration parameters

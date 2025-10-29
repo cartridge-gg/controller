@@ -4,6 +4,7 @@ import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
+import { safeRedirect } from "@/utils/url-validator";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import {
   AuthOption,
@@ -221,8 +222,8 @@ export function useCreateController({
         const searchParams = new URLSearchParams(window.location.search);
         const redirectTo = searchParams.get("redirect_to");
         if (redirectTo) {
-          // Redirect to the specified URL
-          window.location.href = redirectTo;
+          // Safely redirect to the specified URL
+          safeRedirect(redirectTo);
         }
       }
     },
@@ -393,8 +394,8 @@ export function useCreateController({
       const searchParams = new URLSearchParams(window.location.search);
       const redirectTo = searchParams.get("redirect_to");
       if (redirectTo) {
-        // Redirect to the specified URL
-        window.location.href = redirectTo;
+        // Safely redirect to the specified URL
+        safeRedirect(redirectTo);
       }
     },
     [origin, setController],
@@ -628,7 +629,7 @@ export function useCreateController({
             "redirect_to",
           );
           if (redirectTo) {
-            window.location.href = redirectTo;
+            safeRedirect(redirectTo);
           }
         } catch (e) {
           setError(e as Error);
