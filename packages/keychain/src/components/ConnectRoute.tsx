@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useLayoutEffect } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
@@ -18,7 +18,6 @@ const CANCEL_RESPONSE = {
 
 export function ConnectRoute() {
   const { controller, policies } = useConnection();
-  const [isCompleting, setIsCompleting] = useState(false);
 
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
@@ -33,7 +32,6 @@ export function ConnectRoute() {
       return;
     }
 
-    setIsCompleting(true);
     params.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -47,7 +45,6 @@ export function ConnectRoute() {
       return;
     }
 
-    setIsCompleting(true);
     params.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -56,15 +53,14 @@ export function ConnectRoute() {
     handleCompletion();
   }, [params, controller, handleCompletion]);
 
-  // Handle cases where we can connect immediately
-  useEffect(() => {
+  // Handle cases where we can connect immediately - use useLayoutEffect to close before render
+  useLayoutEffect(() => {
     if (!params || !controller) {
       return;
     }
 
     // if no policies, we can connect immediately
     if (!policies) {
-      setIsCompleting(true);
       params.resolve?.({
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
@@ -78,7 +74,6 @@ export function ConnectRoute() {
     if (policies.verified) {
       const createSessionForVerifiedPolicies = async () => {
         try {
-          setIsCompleting(true);
           // Use a default duration for verified sessions (24 hours)
           const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
           const expiresAt = duration + now();
@@ -90,11 +85,10 @@ export function ConnectRoute() {
             address: controller.address(),
           });
           cleanupCallbacks(params.params.id);
-          handleCompletion();
+          await handleCompletion();
         } catch (e) {
           console.error("Failed to create verified session:", e);
           // Fall back to showing the UI if auto-creation fails
-          setIsCompleting(false);
           params.reject?.(e);
         }
       };
@@ -103,15 +97,16 @@ export function ConnectRoute() {
     }
   }, [params, controller, policies, handleCompletion]);
 
-  if (!policies || !controller) {
+  // Don't render anything if we don't have controller yet - CreateController handles loading
+  if (!controller) {
     return null;
   }
 
-  // Don't show UI for auto-completing connections - CreateController handles loading
-  if (isCompleting || !policies || policies.verified) {
+  // Don't show UI for auto-completing connections (no policies or verified policies)
+  // useLayoutEffect handles closing the modal before render
+  if (!policies || policies.verified) {
     return null;
   }
-
   return (
     <CreateSession
       policies={policies}

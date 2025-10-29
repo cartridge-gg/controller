@@ -55,11 +55,11 @@ export function useRouteCompletion() {
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo");
 
-  const handleCompletion = useCallback(() => {
+  const handleCompletion = useCallback(async () => {
     if (returnTo) {
       navigate(returnTo, { replace: true });
     } else {
-      void closeModal?.();
+      await closeModal?.();
     }
   }, [returnTo, navigate, closeModal]);
 

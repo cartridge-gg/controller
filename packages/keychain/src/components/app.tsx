@@ -58,7 +58,6 @@ import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
-import { useState, useCallback, useEffect } from "react";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -75,42 +74,8 @@ function DefaultRoute() {
 function Authentication() {
   const { controller, isConfigLoading } = useConnection();
   const { pathname, search } = useLocation();
-  const [isCreatingController, setIsCreatingController] = useState(false);
 
   const upgrade = useUpgrade();
-
-  const handleLoadingChange = useCallback((isLoading: boolean) => {
-    setIsCreatingController(isLoading);
-  }, []);
-
-  // Reset isCreatingController after controller is created and routes have had time to settle
-  useEffect(() => {
-    if (
-      controller &&
-      upgrade.isSynced &&
-      !isConfigLoading &&
-      isCreatingController
-    ) {
-      // Give routes a moment to check their state and decide if they'll auto-complete
-      const timer = setTimeout(() => {
-        setIsCreatingController(false);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [controller, upgrade.isSynced, isConfigLoading, isCreatingController]);
-
-  // Determine if we should keep showing CreateController to avoid blank screens
-  // Keep showing during:
-  // 1. No controller exists
-  // 2. Controller just created and upgrade not synced yet
-  // 3. Controller just created and on connect/session routes (they handle their own loading)
-  const isOnConnectOrSessionRoute =
-    pathname === "/connect" || pathname === "/session";
-
-  const shouldShowCreateController =
-    !controller ||
-    (isCreatingController && !upgrade.isSynced) ||
-    (isCreatingController && upgrade.isSynced && isOnConnectOrSessionRoute);
 
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {
@@ -121,8 +86,8 @@ function Authentication() {
     return <Disconnect />;
   }
 
-  // Show CreateController if no controller or if we're in creation flow and upgrade hasn't synced
-  if (shouldShowCreateController) {
+  // No controller, show CreateController
+  if (!controller) {
     // Extract signers from URL if present (for connect flow)
     const searchParams = new URLSearchParams(search);
     const signersParam = searchParams.get("signers");
@@ -141,8 +106,16 @@ function Authentication() {
       <CreateController
         isSlot={pathname.startsWith("/slot")}
         signers={signers}
-        onLoadingChange={handleLoadingChange}
-        isLoading={!!controller && (!upgrade.isSynced || isConfigLoading)}
+      />
+    );
+  }
+
+  // Controller exists but upgrade not synced - show CreateController with loading instead of PageLoading
+  if (!upgrade.isSynced || isConfigLoading) {
+    return (
+      <CreateController
+        isSlot={pathname.startsWith("/slot")}
+        isLoading={true}
       />
     );
   }

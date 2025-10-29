@@ -364,13 +364,11 @@ export function CreateControllerView({
 export function CreateController({
   isSlot,
   signers,
-  onLoadingChange,
   isLoading: externalIsLoading = false,
 }: {
   isSlot?: boolean;
   error?: Error;
   signers?: AuthOptions;
-  onLoadingChange?: (isLoading: boolean) => void;
   isLoading?: boolean;
 }) {
   const posthog = usePostHog();
@@ -417,11 +415,6 @@ export function CreateController({
 
   // Combine internal and external loading states
   const isLoading = internalIsLoading || externalIsLoading;
-
-  // Notify parent component about loading state changes
-  useEffect(() => {
-    onLoadingChange?.(internalIsLoading);
-  }, [internalIsLoading, onLoadingChange]);
 
   const handleFormSubmit = useCallback(
     (authenticationMode?: AuthOption, password?: string) => {
