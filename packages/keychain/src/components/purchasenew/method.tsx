@@ -9,7 +9,7 @@ import {
 } from "@cartridge/ui";
 import { useState } from "react";
 import { ControllerErrorAlert } from "../ErrorAlert";
-import { networkWalletData } from "./wallet/data";
+import { networkWalletData } from "./wallet/config";
 import { useParams } from "react-router-dom";
 
 export function PaymentMethod() {

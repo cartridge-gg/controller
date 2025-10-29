@@ -1,10 +1,4 @@
-/**
- * Constants and utilities for handling payment tokens
- */
-
-// USDC on Starknet mainnet (normalized: lowercase, no leading zeros)
-export const USDC_ADDRESS =
-  "0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8";
+import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
 
 /**
  * Normalize a token address for comparison
@@ -26,7 +20,7 @@ export function normalizeTokenAddress(address: string): string {
  * USDC = 6 decimals, everything else = 18 decimals
  */
 export function getTokenDecimals(tokenAddress: string): number {
-  return normalizeTokenAddress(tokenAddress) === USDC_ADDRESS ? 6 : 18;
+  return normalizeTokenAddress(tokenAddress) === USDC_CONTRACT_ADDRESS ? 6 : 18;
 }
 
 /**
@@ -54,7 +48,7 @@ export function tokenAmountToUsd(amount: bigint, tokenAddress: string): string {
  * Get a human-readable token symbol from address
  */
 export function getTokenSymbol(tokenAddress: string): string {
-  if (normalizeTokenAddress(tokenAddress) === USDC_ADDRESS) {
+  if (normalizeTokenAddress(tokenAddress) === USDC_CONTRACT_ADDRESS) {
     return "USDC";
   }
   // For unknown tokens, show shortened address
@@ -65,7 +59,7 @@ export function getTokenSymbol(tokenAddress: string): string {
  * Get token icon URL
  */
 export function getTokenIcon(tokenAddress: string): string | null {
-  if (normalizeTokenAddress(tokenAddress) === USDC_ADDRESS) {
+  if (normalizeTokenAddress(tokenAddress) === USDC_CONTRACT_ADDRESS) {
     return "https://static.cartridge.gg/tokens/usdc.svg";
   }
   return null;

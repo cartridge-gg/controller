@@ -200,6 +200,7 @@ export const PurchaseProvider = ({
     metadata: onchainMetadata,
     quote: onchainQuote,
     isLoading: isOnchainLoading,
+    isQuoteLoading: isOnchainQuoteLoading,
     error: onchainError,
   } = useStarterPackOnchain(
     source === "onchain" ? Number(starterpack) : undefined,
@@ -269,8 +270,8 @@ export const PurchaseProvider = ({
         priceUsd: backendPriceUsd,
         acquisitionType: backendAcquisitionType,
       });
-    } else if (source === "onchain" && onchainMetadata && onchainQuote) {
-      // Onchain flow (new)
+    } else if (source === "onchain" && onchainMetadata) {
+      // Onchain flow (new) - show metadata as soon as it's available
       const purchaseItems: Item[] = onchainMetadata.items.map((item) => {
         // TODO: Calculate price per item if needed
         return {
@@ -282,8 +283,8 @@ export const PurchaseProvider = ({
         };
       });
 
-      // Convert total cost from USDC (6 decimals) to USD
-      const totalUsd = usdcToUsd(onchainQuote.totalCost);
+      // Convert total cost from USDC (6 decimals) to USD if quote is available
+      const totalUsd = onchainQuote ? usdcToUsd(onchainQuote.totalCost) : 0;
 
       setPurchaseItems(purchaseItems);
       setUsdAmount(totalUsd);
@@ -296,6 +297,7 @@ export const PurchaseProvider = ({
         imageUri: onchainMetadata.imageUri,
         items: onchainMetadata.items,
         quote: onchainQuote,
+        isQuoteLoading: isOnchainQuoteLoading,
         acquisitionType: "PAID" as StarterpackAcquisitionType.Paid,
       });
     }
@@ -313,6 +315,7 @@ export const PurchaseProvider = ({
     // Onchain dependencies
     onchainMetadata,
     onchainQuote,
+    isOnchainQuoteLoading,
   ]);
 
   useEffect(() => {
@@ -402,6 +405,10 @@ export const PurchaseProvider = ({
     }
 
     const { quote, id: starterpackId } = starterpackDetails;
+
+    if (!quote) {
+      throw new Error("Quote not loaded yet");
+    }
 
     try {
       const registryContract = import.meta.env

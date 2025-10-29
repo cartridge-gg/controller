@@ -28,7 +28,14 @@ import {
 } from "@cartridge/ui";
 import { NetworkWalletData, Wallet } from "../types";
 import { constants } from "starknet";
-import { ExternalWalletType } from "@cartridge/controller";
+import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
+
+export const evmNetworks = [
+  "ethereum",
+  "base",
+  "arbitrum",
+  "optimism",
+] as ExternalPlatform[];
 
 const evmWallets = new Map<string, Wallet>([
   [

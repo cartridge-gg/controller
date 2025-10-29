@@ -186,14 +186,6 @@ function CreateControllerForm({
         hideUsername
         hideSettings
       />
-      {/*<p>
-        Is keyboard open?
-        {keyboardIsOpen ? " Yes" : " No"}
-      </p>
-      <p>isMobile: {String(isMobile)}</p>
-      <p>Viewport height: {viewportHeight}px</p>
-      <p>Layout height: {layoutHeight}px</p>*/}
-      {/*<p>userAgent: {navigator.userAgent}</p>*/}
       <form
         className="flex flex-col overflow-y-scroll"
         style={{
