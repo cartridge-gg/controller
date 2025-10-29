@@ -59,6 +59,7 @@ import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
+import { useReferralCapture } from "@/hooks/referral";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -129,6 +130,10 @@ function Authentication() {
 
 export function App() {
   const { navigate } = useNavigation();
+
+  // Capture referral parameters from URL (e.g., ?ref=username&ref_group=campaign)
+  // This automatically stores them in localStorage with a 30-day attribution window
+  useReferralCapture();
 
   return (
     <Routes>

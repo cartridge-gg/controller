@@ -13,8 +13,15 @@ import {
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
-import { uint256, Call } from "starknet";
+import {
+  uint256,
+  Call,
+  shortString,
+  CairoOption,
+  CairoOptionVariant,
+} from "starknet";
 import { isOnchainStarterpack } from "@/types/starterpack-types";
+import { getCurrentReferral, lookupReferrerAddress } from "@/utils/referral";
 
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -431,6 +438,52 @@ export const PurchaseProvider = ({
         },
       ];
 
+      // Get referral data for the current game (from window.location.origin)
+      const referralData = getCurrentReferral();
+      let referrerOption = new CairoOption(CairoOptionVariant.None);
+      let referrerGroupOption = new CairoOption(CairoOptionVariant.None);
+
+      if (referralData) {
+        console.log("[Purchase] Found referral data:", {
+          ref: referralData.ref,
+          refGroup: referralData.refGroup,
+        });
+
+        // Look up referrer's contract address
+        const referrerAddress = await lookupReferrerAddress(referralData.ref);
+
+        if (referrerAddress) {
+          referrerOption = new CairoOption(
+            CairoOptionVariant.Some,
+            referrerAddress,
+          );
+          console.log("[Purchase] Using referrer address:", referrerAddress);
+        } else {
+          console.log(
+            "[Purchase] Could not resolve referrer address, proceeding without referral",
+          );
+        }
+
+        // Encode referrer group as felt252 if present
+        if (referralData.refGroup) {
+          try {
+            const refGroupFelt = shortString.encodeShortString(
+              referralData.refGroup,
+            );
+            referrerGroupOption = new CairoOption(
+              CairoOptionVariant.Some,
+              refGroupFelt,
+            );
+            console.log("[Purchase] Using referrer group:", {
+              original: referralData.refGroup,
+              encoded: refGroupFelt,
+            });
+          } catch (error) {
+            console.error("[Purchase] Failed to encode referrer group:", error);
+          }
+        }
+      }
+
       // Step 2: Issue the starterpack
       // issue(recipient, starterpack_id, quantity, referrer: Option<ContractAddress>, referrer_group: Option<felt252>)
       const issueCalls: Call[] = [
@@ -441,8 +494,8 @@ export const PurchaseProvider = ({
             recipient, // recipient
             starterpackId, // starterpack_id: u32
             0x1, // quantity: u32 (always 1 for now)
-            0x1, // referrer: Option<ContractAddress> (None)
-            0x1, // referrer_group: Option<felt252> (None)
+            referrerOption, // referrer: Option<ContractAddress>
+            referrerGroupOption, // referrer_group: Option<felt252>
           ],
         },
       ];
