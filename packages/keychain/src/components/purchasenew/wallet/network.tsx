@@ -4,7 +4,7 @@ import {
   LayoutContent,
   PurchaseCard,
 } from "@cartridge/ui";
-import { networkWalletData } from "./data";
+import { networkWalletData } from "./config";
 import { useNavigation } from "@/context";
 import { useParams } from "react-router-dom";
 
