@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
@@ -18,6 +18,8 @@ const CANCEL_RESPONSE = {
 
 export function ConnectRoute() {
   const { controller, policies } = useConnection();
+  const [isCompleting, setIsCompleting] = useState(false);
+
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
     return parseConnectParams(searchParams);
@@ -31,6 +33,7 @@ export function ConnectRoute() {
       return;
     }
 
+    setIsCompleting(true);
     params.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -44,6 +47,7 @@ export function ConnectRoute() {
       return;
     }
 
+    setIsCompleting(true);
     params.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
@@ -60,6 +64,7 @@ export function ConnectRoute() {
 
     // if no policies, we can connect immediately
     if (!policies) {
+      setIsCompleting(true);
       params.resolve?.({
         code: ResponseCodes.SUCCESS,
         address: controller.address(),
@@ -73,6 +78,7 @@ export function ConnectRoute() {
     if (policies.verified) {
       const createSessionForVerifiedPolicies = async () => {
         try {
+          setIsCompleting(true);
           // Use a default duration for verified sessions (24 hours)
           const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
           const expiresAt = duration + now();
@@ -88,6 +94,7 @@ export function ConnectRoute() {
         } catch (e) {
           console.error("Failed to create verified session:", e);
           // Fall back to showing the UI if auto-creation fails
+          setIsCompleting(false);
           params.reject?.(e);
         }
       };
@@ -100,8 +107,8 @@ export function ConnectRoute() {
     return null;
   }
 
-  // Don't show UI for no-policy or verified-policy connections
-  if (!policies || policies.verified) {
+  // Don't show UI for auto-completing connections - CreateController handles loading
+  if (isCompleting || !policies || policies.verified) {
     return null;
   }
 

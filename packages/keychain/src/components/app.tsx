@@ -58,7 +58,7 @@ import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 function DefaultRoute() {
   const account = useAccount();
@@ -83,9 +83,34 @@ function Authentication() {
     setIsCreatingController(isLoading);
   }, []);
 
-  // If controller was just created and upgrade hasn't synced yet, keep showing CreateController
+  // Reset isCreatingController after controller is created and routes have had time to settle
+  useEffect(() => {
+    if (
+      controller &&
+      upgrade.isSynced &&
+      !isConfigLoading &&
+      isCreatingController
+    ) {
+      // Give routes a moment to check their state and decide if they'll auto-complete
+      const timer = setTimeout(() => {
+        setIsCreatingController(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [controller, upgrade.isSynced, isConfigLoading, isCreatingController]);
+
+  // Determine if we should keep showing CreateController to avoid blank screens
+  // Keep showing during:
+  // 1. No controller exists
+  // 2. Controller just created and upgrade not synced yet
+  // 3. Controller just created and on connect/session routes (they handle their own loading)
+  const isOnConnectOrSessionRoute =
+    pathname === "/connect" || pathname === "/session";
+
   const shouldShowCreateController =
-    !controller || (isCreatingController && !upgrade.isSynced);
+    !controller ||
+    (isCreatingController && !upgrade.isSynced) ||
+    (isCreatingController && upgrade.isSynced && isOnConnectOrSessionRoute);
 
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {
@@ -121,11 +146,6 @@ function Authentication() {
       />
     );
   }
-
-  // if (!upgrade.isSynced || isConfigLoading) {
-  //   // This is likely never observable in a real application but just in case.
-  //   return <PageLoading />;
-  // }
 
   if (upgrade.available) {
     return <Upgrade />;

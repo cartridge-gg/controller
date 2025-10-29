@@ -1159,6 +1159,7 @@ export type Deployment = Node & {
   events?: Maybe<Array<DeploymentLog>>;
   id: Scalars["ID"];
   logs: Logs;
+  observabilitySecret?: Maybe<Scalars["String"]>;
   project: Scalars["String"];
   regions: Array<Scalars["String"]>;
   replicas: Scalars["Int"];
