@@ -368,22 +368,25 @@ export function useConnectionValue() {
       .then((config) => {
         if (config && config.origin) {
           const allowedOrigins = toArray(config.origin as string | string[]);
-          
+
           // In standalone mode (no parent origin), verify preset if redirect_url matches preset whitelist
           if (!origin) {
             const searchParams = new URLSearchParams(window.location.search);
             const redirectUrl = searchParams.get("redirect_url");
-            
+
             if (redirectUrl) {
               try {
                 const redirectUrlObj = new URL(redirectUrl);
                 const redirectOrigin = redirectUrlObj.origin;
-                
+
                 // Always consider localhost as verified for development
                 const isLocalhost = redirectOrigin.includes("localhost");
-                const isOriginAllowed = isOriginVerified(redirectOrigin, allowedOrigins);
+                const isOriginAllowed = isOriginVerified(
+                  redirectOrigin,
+                  allowedOrigins,
+                );
                 const finalVerified = isLocalhost || isOriginAllowed;
-                
+
                 setVerified(finalVerified);
                 setConfigData(config as Record<string, unknown>);
                 return;
@@ -391,7 +394,7 @@ export function useConnectionValue() {
                 console.error("Failed to parse redirect_url:", error);
               }
             }
-            
+
             // No redirect_url or invalid redirect_url - don't verify preset in standalone mode
             setVerified(false);
             setConfigData(config as Record<string, unknown>);
