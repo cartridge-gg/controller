@@ -278,6 +278,4 @@ export interface StarterPackItem {
 export type OpenOptions = {
   /** The URL to redirect to after authentication (defaults to current page) */
   redirectUrl?: string;
-  /** The preset to use for the keychain */
-  preset?: string;
 };

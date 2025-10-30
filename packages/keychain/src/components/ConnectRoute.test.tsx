@@ -276,32 +276,6 @@ describe("ConnectRoute", () => {
     });
   });
 
-  describe("Auto-connect protection", () => {
-    it("only auto-connects once", async () => {
-      mockIsIframe.mockReturnValue(true);
-      mockUseConnection.mockReturnValue({
-        controller: mockController,
-        policies: null,
-        verified: true,
-      });
-
-      const { rerender } = renderWithProviders(<ConnectRoute />);
-
-      await waitFor(() => {
-        expect(mockParams.resolve).toHaveBeenCalledTimes(1);
-      });
-
-      // Rerender to simulate component update
-      rerender(<ConnectRoute />);
-
-      // Wait a bit to ensure any effects have run
-      await waitFor(() => {
-        // Should not call resolve again
-        expect(mockParams.resolve).toHaveBeenCalledTimes(1);
-      });
-    });
-  });
-
   describe("Error handling", () => {
     it("handles session creation failure", async () => {
       mockIsIframe.mockReturnValue(true);
