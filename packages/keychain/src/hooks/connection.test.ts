@@ -237,9 +237,9 @@ describe("Config Loading and Verification Separation", () => {
       expect(isOriginVerified("https://another.com", allowedOrigins)).toBe(
         true,
       );
-      expect(isOriginVerified("https://app.subdomain.com", allowedOrigins)).toBe(
-        true,
-      );
+      expect(
+        isOriginVerified("https://app.subdomain.com", allowedOrigins),
+      ).toBe(true);
       expect(isOriginVerified("https://notallowed.com", allowedOrigins)).toBe(
         false,
       );

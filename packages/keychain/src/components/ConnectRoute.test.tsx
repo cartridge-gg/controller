@@ -165,7 +165,9 @@ describe("ConnectRoute", () => {
       const { container } = renderWithProviders(<ConnectRoute />);
 
       // Should not render any UI during auto-connect
-      expect(container.querySelector('[data-testid="create-session"]')).toBeNull();
+      expect(
+        container.querySelector('[data-testid="create-session"]'),
+      ).toBeNull();
     });
   });
 
