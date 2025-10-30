@@ -95,22 +95,37 @@ export function storeReferral(
   refGroup?: string,
 ): ReferralData {
   const now = Date.now();
-  const referralData: ReferralData = {
-    ref: ref.trim(),
-    refGroup: refGroup?.trim(),
-    capturedAt: now,
-    expiresAt: now + ATTRIBUTION_WINDOW_MS,
-  };
 
   try {
     const allReferrals = getAllReferrals();
+    const existing = allReferrals[gameUrl];
+
+    // First-touch attribution: if there's already a valid (non-expired) referral, keep it
+    if (existing && existing.expiresAt > now) {
+      return existing;
+    }
+
+    // No existing referral or it expired, store the new one
+    const referralData: ReferralData = {
+      ref: ref.trim(),
+      refGroup: refGroup?.trim(),
+      capturedAt: now,
+      expiresAt: now + ATTRIBUTION_WINDOW_MS,
+    };
+
     allReferrals[gameUrl] = referralData;
     saveAllReferrals(allReferrals);
+    return referralData;
   } catch (error) {
     console.error("[Referral] Failed to store referral data:", error);
+    // Return a referral data object even on error
+    return {
+      ref: ref.trim(),
+      refGroup: refGroup?.trim(),
+      capturedAt: now,
+      expiresAt: now + ATTRIBUTION_WINDOW_MS,
+    };
   }
-
-  return referralData;
 }
 
 /**

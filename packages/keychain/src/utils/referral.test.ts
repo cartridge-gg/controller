@@ -78,6 +78,56 @@ describe("Referral Utilities", () => {
       expect(result.capturedAt).toBeGreaterThanOrEqual(now);
       expect(result.capturedAt).toBeLessThanOrEqual(Date.now());
     });
+
+    it("should not overwrite existing valid referral (first-touch attribution)", () => {
+      const gameUrl = "lootsurvivor.io";
+
+      // First referral
+      const firstRef = "alice";
+      const firstRefGroup = "campaign1";
+      const firstResult = storeReferral(firstRef, gameUrl, firstRefGroup);
+
+      // Try to store a different referral for the same game
+      const secondRef = "bob";
+      const secondRefGroup = "campaign2";
+      const secondResult = storeReferral(secondRef, gameUrl, secondRefGroup);
+
+      // Should return the first referral, not the second
+      expect(secondResult.ref).toBe(firstRef);
+      expect(secondResult.refGroup).toBe(firstRefGroup);
+      expect(secondResult.capturedAt).toBe(firstResult.capturedAt);
+      expect(secondResult.expiresAt).toBe(firstResult.expiresAt);
+
+      // Verify localStorage still has the first referral
+      const stored = getReferral(gameUrl);
+      expect(stored?.ref).toBe(firstRef);
+      expect(stored?.refGroup).toBe(firstRefGroup);
+    });
+
+    it("should allow new referral after previous one expires", () => {
+      const gameUrl = "lootsurvivor.io";
+
+      // Store first referral and manually expire it
+      storeReferral("alice", gameUrl, "campaign1");
+      const expiredData: ReferralData = {
+        ref: "alice",
+        refGroup: "campaign1",
+        capturedAt: Date.now() - 31 * 24 * 60 * 60 * 1000, // 31 days ago
+        expiresAt: Date.now() - 24 * 60 * 60 * 1000, // Expired yesterday
+      };
+      const storage = { [gameUrl]: expiredData };
+      localStorage.setItem("@cartridge/referral", JSON.stringify(storage));
+
+      // Try to store a new referral
+      const newRef = "bob";
+      const newRefGroup = "campaign2";
+      const result = storeReferral(newRef, gameUrl, newRefGroup);
+
+      // Should accept the new referral since the old one expired
+      expect(result.ref).toBe(newRef);
+      expect(result.refGroup).toBe(newRefGroup);
+      expect(result.expiresAt).toBeGreaterThan(Date.now());
+    });
   });
 
   describe("getReferral", () => {
