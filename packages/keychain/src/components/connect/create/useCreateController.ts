@@ -220,7 +220,7 @@ export function useCreateController({
 
         // Close modal immediately if no policies - no need to show session creation
         if (!policies) {
-          await closeModal?.();
+          void closeModal?.();
         }
       }
     },
@@ -389,7 +389,7 @@ export function useCreateController({
 
       // Close modal immediately if no policies - no need to show session creation
       if (!policies) {
-        await closeModal?.();
+        void closeModal?.();
       }
     },
     [origin, setController, policies, closeModal],

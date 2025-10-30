@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useLayoutEffect } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
@@ -54,7 +54,7 @@ export function ConnectRoute() {
   }, [params, controller, handleCompletion]);
 
   // Handle cases where we can connect immediately
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!params || !controller) {
       return;
     }
@@ -85,7 +85,7 @@ export function ConnectRoute() {
             address: controller.address(),
           });
           cleanupCallbacks(params.params.id);
-          await handleCompletion();
+          handleCompletion();
         } catch (e) {
           console.error("Failed to create verified session:", e);
           // Fall back to showing the UI if auto-creation fails
