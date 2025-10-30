@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
@@ -53,8 +53,8 @@ export function ConnectRoute() {
     handleCompletion();
   }, [params, controller, handleCompletion]);
 
-  // Handle cases where we can connect immediately - use useLayoutEffect to close before render
-  useLayoutEffect(() => {
+  // Handle cases where we can connect immediately
+  useEffect(() => {
     if (!params || !controller) {
       return;
     }
@@ -107,6 +107,7 @@ export function ConnectRoute() {
   if (!policies || policies.verified) {
     return null;
   }
+
   return (
     <CreateSession
       policies={policies}

@@ -66,7 +66,8 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController } = useConnection();
+  const { origin, rpcUrl, chainId, setController, policies, closeModal } =
+    useConnection();
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -216,9 +217,14 @@ export function useCreateController({
       if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
+
+        // Close modal immediately if no policies - no need to show session creation
+        if (!policies) {
+          await closeModal?.();
+        }
       }
     },
-    [setController, origin],
+    [setController, origin, policies, closeModal],
   );
 
   const handleSignup = useCallback(
@@ -380,8 +386,13 @@ export function useCreateController({
 
       window.controller = loginRet.controller;
       setController(loginRet.controller);
+
+      // Close modal immediately if no policies - no need to show session creation
+      if (!policies) {
+        await closeModal?.();
+      }
     },
-    [origin, setController],
+    [origin, setController, policies, closeModal],
   );
 
   const handleLogin = useCallback(

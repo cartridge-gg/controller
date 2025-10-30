@@ -8,7 +8,7 @@ import {
 
 import { useConnection } from "@/hooks/connection";
 import { CheckIcon, HeaderInner } from "@cartridge/ui";
-import { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Failure } from "./failure";
 
@@ -138,8 +138,7 @@ export function Session() {
   // Once we have a connected controller initialized, check if a session already exists.
   // If yes, check if the policies of the session are the same as the ones that are
   // currently being requested. Return existing session to the callback uri if policies match.
-  // Use useLayoutEffect to check and close faster, avoiding blank screen
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!controller || !policies) {
       return;
     }
