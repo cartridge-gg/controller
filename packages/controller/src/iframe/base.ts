@@ -59,6 +59,9 @@ export class IFrame<CallSender extends {}> implements Modal {
     iframe.style.scrollbarWidth = "none";
     iframe.style.setProperty("-ms-overflow-style", "none");
     iframe.style.setProperty("-webkit-scrollbar", "none");
+    // Enable Storage Access API for the iframe
+    // This allows the keychain iframe to request access to its first-party storage
+    // when embedded in third-party contexts (other games/apps)
     if (!!document.hasStorageAccess) {
       iframe.sandbox.add("allow-storage-access-by-user-activation");
     }
