@@ -111,6 +111,7 @@ describe("Referral Utilities", () => {
       storeReferral("alice", gameUrl, "campaign1");
       const expiredData: ReferralData = {
         ref: "alice",
+        refAddress: "",
         refGroup: "campaign1",
         capturedAt: Date.now() - 31 * 24 * 60 * 60 * 1000, // 31 days ago
         expiresAt: Date.now() - 24 * 60 * 60 * 1000, // Expired yesterday
@@ -157,6 +158,7 @@ describe("Referral Utilities", () => {
       // Manually set an expired referral for this game
       const expiredData: ReferralData = {
         ref,
+        refAddress: "",
         capturedAt: Date.now() - 31 * 24 * 60 * 60 * 1000, // 31 days ago
         expiresAt: Date.now() - 24 * 60 * 60 * 1000, // Expired yesterday
       };
@@ -179,6 +181,7 @@ describe("Referral Utilities", () => {
       const now = Date.now();
       const validData: ReferralData = {
         ref,
+        refAddress: "",
         capturedAt: now,
         expiresAt: now + 10 * 24 * 60 * 60 * 1000, // Expires in 10 days
       };
@@ -235,6 +238,7 @@ describe("Referral Utilities", () => {
       const gameUrl = "lootsurvivor.io";
       const expiredData: ReferralData = {
         ref: "testuser",
+        refAddress: "",
         capturedAt: Date.now() - 31 * 24 * 60 * 60 * 1000,
         expiresAt: Date.now() - 24 * 60 * 60 * 1000,
       };
@@ -288,6 +292,7 @@ describe("Referral Utilities", () => {
       const now = Date.now();
       const validData: ReferralData = {
         ref: "testuser",
+        refAddress: "",
         capturedAt: now,
         expiresAt: now + 15 * 24 * 60 * 60 * 1000, // 15 days from now
       };
@@ -305,6 +310,7 @@ describe("Referral Utilities", () => {
       const now = Date.now();
       const validData: ReferralData = {
         ref: "testuser",
+        refAddress: "",
         capturedAt: now - 29 * 24 * 60 * 60 * 1000,
         expiresAt: now + 60 * 1000, // Expires in 1 minute
       };
@@ -320,6 +326,7 @@ describe("Referral Utilities", () => {
       const gameUrl = "lootsurvivor.io";
       const expiredData: ReferralData = {
         ref: "testuser",
+        refAddress: "",
         capturedAt: Date.now() - 31 * 24 * 60 * 60 * 1000,
         expiresAt: Date.now() - 24 * 60 * 60 * 1000,
       };
