@@ -34,6 +34,7 @@ export default class ControllerProvider extends BaseProvider {
   private iframes: IFrames;
   private selectedChain: ChainId;
   private chains: Map<ChainId, Chain>;
+  private referral: { ref?: string; refGroup?: string };
 
   isReady(): boolean {
     return !!this.keychain;
@@ -56,6 +57,18 @@ export default class ControllerProvider extends BaseProvider {
 
     this.selectedChain = defaultChainId;
     this.chains = new Map<ChainId, Chain>();
+
+    // Auto-extract referral parameters from URL
+    // This allows games to pass referrals via their own URL: game.com/?ref=alice&ref_group=campaign1
+    const urlParams =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : null;
+    this.referral = {
+      ref: urlParams?.get("ref") ?? undefined,
+      refGroup: urlParams?.get("ref_group") ?? undefined,
+    };
+
     this.options = { ...options, chains, defaultChainId };
 
     this.initializeChains(chains);
@@ -510,6 +523,8 @@ export default class ControllerProvider extends BaseProvider {
         this.keychain = keychain;
       },
       version: version,
+      ref: this.referral.ref,
+      refGroup: this.referral.refGroup,
     });
   }
 
