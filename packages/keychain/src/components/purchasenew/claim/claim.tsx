@@ -15,7 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMerkleClaim, MerkleClaim } from "@/hooks/merkle-claim";
 import { Item, ItemType, usePurchaseContext } from "@/context/purchase";
-import { ErrorAlert } from "@/components/ErrorAlert";
+import { ControllerErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
 import { StarterpackReceiving } from "../starterpack/starterpack";
 import { ExternalWalletType, StarterPackItemType } from "@cartridge/controller";
@@ -304,16 +304,7 @@ export function Claim() {
         )}
       </LayoutContent>
       <LayoutFooter>
-        {error && (
-          <ErrorAlert
-            title="Error"
-            description={
-              showIndividualClaims
-                ? error.message
-                : `${error.message}. Switched to individual claiming mode.`
-            }
-          />
-        )}
+        {error && <ControllerErrorAlert error={error} />}
         <div className="flex justify-between border border-background-300 rounded py-2 px-3">
           <div className="flex items-center gap-1 text-foreground-300 text-xs">
             {wallet.subIcon} {wallet.name} (
