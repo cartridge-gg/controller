@@ -95,6 +95,9 @@ export function ConnectRoute() {
       return;
     }
 
+    // Mark as auto-connected immediately to prevent race conditions
+    setHasAutoConnected(true);
+
     // if no policies, we can connect immediately
     if (!policies) {
       params.resolve?.({
@@ -103,7 +106,6 @@ export function ConnectRoute() {
       });
       cleanupCallbacks(params.params.id);
       handleCompletion();
-      setHasAutoConnected(true);
       return;
     }
 
@@ -123,7 +125,6 @@ export function ConnectRoute() {
           });
           cleanupCallbacks(params.params.id);
           handleCompletion();
-          setHasAutoConnected(true);
         } catch (e) {
           console.error("Failed to create verified session:", e);
           // Fall back to showing the UI if auto-creation fails

@@ -11,9 +11,14 @@ vi.mock("@/utils/url-validator", () => ({
 }));
 
 const mockIsIframe = vi.fn();
-vi.mock("@cartridge/ui/utils", () => ({
-  isIframe: () => mockIsIframe(),
-}));
+vi.mock("@cartridge/ui/utils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@cartridge/ui/utils")>();
+  return {
+    ...actual,
+    isIframe: () => mockIsIframe(),
+    fetchDataCreator: vi.fn(() => vi.fn()),
+  };
+});
 
 const mockController = {
   username: vi.fn().mockReturnValue("testuser"),
@@ -182,6 +187,10 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        theme: {
+          name: "TestApp",
+          verified: true,
+        },
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -199,6 +208,10 @@ describe("ConnectRoute", () => {
           messages: [],
         },
         verified: true,
+        theme: {
+          name: "TestApp",
+          verified: true,
+        },
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -231,6 +244,10 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: false,
+        theme: {
+          name: "TestApp",
+          verified: false,
+        },
       });
 
       renderWithProviders(<ConnectRoute />);
@@ -277,8 +294,11 @@ describe("ConnectRoute", () => {
       // Rerender to simulate component update
       rerender(<ConnectRoute />);
 
-      // Should not call resolve again
-      expect(mockParams.resolve).toHaveBeenCalledTimes(1);
+      // Wait a bit to ensure any effects have run
+      await waitFor(() => {
+        // Should not call resolve again
+        expect(mockParams.resolve).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
@@ -327,6 +347,10 @@ describe("ConnectRoute", () => {
         controller: mockController,
         policies: null,
         verified: true,
+        theme: {
+          name: "TestApp",
+          verified: true,
+        },
       });
 
       renderWithProviders(<ConnectRoute />);
