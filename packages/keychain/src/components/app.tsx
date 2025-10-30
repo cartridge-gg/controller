@@ -78,9 +78,6 @@ function Authentication() {
 
   const upgrade = useUpgrade();
 
-  // Removed auto-redirect - users must click Connect button instead
-  // This prevents automatic redirects when user is already authenticated
-
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {
     return <Authenticate />;

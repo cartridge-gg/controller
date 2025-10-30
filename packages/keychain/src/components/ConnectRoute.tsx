@@ -12,6 +12,7 @@ import {
   useRouteCallbacks,
 } from "@/hooks/route";
 import { isIframe } from "@cartridge/ui/utils";
+import { safeRedirect } from "@/utils/url-validator";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -55,10 +56,7 @@ export function ConnectRoute() {
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     if (isStandalone && redirectUrl) {
-      // Import safeRedirect dynamically to avoid circular deps
-      import("@/utils/url-validator").then(({ safeRedirect }) => {
-        safeRedirect(redirectUrl);
-      });
+      safeRedirect(redirectUrl);
       return;
     }
 
@@ -78,9 +76,7 @@ export function ConnectRoute() {
 
     // In standalone mode with redirect_url, redirect instead of calling handleCompletion
     if (isStandalone && redirectUrl) {
-      import("@/utils/url-validator").then(({ safeRedirect }) => {
-        safeRedirect(redirectUrl);
-      });
+      safeRedirect(redirectUrl);
       return;
     }
 

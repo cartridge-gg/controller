@@ -216,9 +216,6 @@ export function useCreateController({
       if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
-
-        // Don't auto-redirect here - let the ConnectRoute handle it
-        // This allows users to see the connect screen before being redirected
       }
     },
     [setController, origin],
@@ -383,9 +380,6 @@ export function useCreateController({
 
       window.controller = loginRet.controller;
       setController(loginRet.controller);
-
-      // Don't auto-redirect here - let the ConnectRoute handle it
-      // This allows users to see the connect screen before being redirected
     },
     [origin, setController],
   );
@@ -612,9 +606,6 @@ export function useCreateController({
               rpcUrl,
             });
           }
-
-          // Don't auto-redirect here - let the ConnectRoute handle it
-          // This allows users to see the connect screen before being redirected
         } catch (e) {
           setError(e as Error);
         } finally {
