@@ -275,7 +275,7 @@ export interface StarterPackItem {
   call?: Call[];
 }
 
-export type StandaloneAuthOptions = {
+export type OpenOptions = {
   /** The URL to redirect to after authentication (defaults to current page) */
-  redirectTo?: string;
+  redirectUrl?: string;
 };

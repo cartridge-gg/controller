@@ -23,7 +23,7 @@ import {
   ProbeReply,
   ProfileContextTypeVariant,
   ResponseCodes,
-  StandaloneAuthOptions,
+  OpenOptions,
 } from "./types";
 import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
@@ -398,7 +398,7 @@ export default class ControllerProvider extends BaseProvider {
    * This establishes first-party storage, enabling seamless iframe access across all games.
    * @param options - Configuration for redirect after authentication
    */
-  open(options: StandaloneAuthOptions = {}) {
+  open(options: OpenOptions = {}) {
     if (typeof window === "undefined") {
       console.error("open can only be called in browser context");
       return;
@@ -407,19 +407,19 @@ export default class ControllerProvider extends BaseProvider {
     const keychainUrl = new URL(this.options.url || KEYCHAIN_URL);
 
     // Add redirect target (defaults to current page)
-    const redirectTo = options.redirectTo || window.location.href;
+    const redirectUrl = options.redirectUrl || window.location.href;
 
     // Validate redirect URL to prevent XSS and open redirect attacks
-    const validation = validateRedirectUrl(redirectTo);
+    const validation = validateRedirectUrl(redirectUrl);
     if (!validation.isValid) {
       console.error(
         `Invalid redirect URL: ${validation.error}`,
-        `URL: ${redirectTo}`,
+        `URL: ${redirectUrl}`,
       );
       return;
     }
 
-    keychainUrl.searchParams.set("redirect_to", redirectTo);
+    keychainUrl.searchParams.set("redirect_url", redirectUrl);
 
     // Add controller configuration parameters
     if (this.options.slot) {

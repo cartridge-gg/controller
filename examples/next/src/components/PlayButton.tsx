@@ -14,7 +14,7 @@ interface Game {
 const GAMES: Game[] = [
   {
     name: "Loot Survivor",
-    url: "https://lootsurvivor.io",
+    url: "https://x.cartridge.gg?redirect_url=https://lootsurvivor.io",
     description: "Survive the adventure, earn rewards",
   },
   // Add more games here as needed
@@ -43,7 +43,7 @@ export const PlayButton = () => {
       if (!hasAccess) {
         // Redirect through standalone auth first to establish first-party storage
         controllerConnector.controller.open({
-          redirectTo: game.url,
+          redirectUrl: game.url,
         });
       } else {
         // Direct navigation - user already authenticated via standalone

@@ -218,12 +218,12 @@ export function useCreateController({
         window.controller = controller;
         setController(controller);
 
-        // Check for redirect_to parameter and redirect after successful signup
+        // Check for redirect_url parameter and redirect after successful signup
         const searchParams = new URLSearchParams(window.location.search);
-        const redirectTo = searchParams.get("redirect_to");
-        if (redirectTo) {
+        const redirectUrl = searchParams.get("redirect_url");
+        if (redirectUrl) {
           // Safely redirect to the specified URL
-          safeRedirect(redirectTo);
+          safeRedirect(redirectUrl);
         }
       }
     },
@@ -390,12 +390,12 @@ export function useCreateController({
       window.controller = loginRet.controller;
       setController(loginRet.controller);
 
-      // Check for redirect_to parameter and redirect after successful login
+      // Check for redirect_url parameter and redirect after successful login
       const searchParams = new URLSearchParams(window.location.search);
-      const redirectTo = searchParams.get("redirect_to");
-      if (redirectTo) {
+      const redirectUrl = searchParams.get("redirect_url");
+      if (redirectUrl) {
         // Safely redirect to the specified URL
-        safeRedirect(redirectTo);
+        safeRedirect(redirectUrl);
       }
     },
     [origin, setController],
@@ -624,12 +624,12 @@ export function useCreateController({
             });
           }
 
-          // Check for redirect_to parameter after social auth
-          const redirectTo = new URLSearchParams(window.location.search).get(
-            "redirect_to",
+          // Check for redirect_url parameter after social auth
+          const redirectUrl = new URLSearchParams(window.location.search).get(
+            "redirect_url",
           );
-          if (redirectTo) {
-            safeRedirect(redirectTo);
+          if (redirectUrl) {
+            safeRedirect(redirectUrl);
           }
         } catch (e) {
           setError(e as Error);
