@@ -13,15 +13,9 @@ import {
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
-import {
-  uint256,
-  Call,
-  shortString,
-  CairoOption,
-  CairoOptionVariant,
-} from "starknet";
+import { uint256, Call, num } from "starknet";
 import { isOnchainStarterpack } from "@/types/starterpack-types";
-import { getCurrentReferral, lookupReferrerAddress } from "@/utils/referral";
+import { getCurrentReferral } from "@/utils/referral";
 
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -440,35 +434,6 @@ export const PurchaseProvider = ({
 
       // Get referral data for the current game
       const referralData = getCurrentReferral(origin);
-      let referrerOption = new CairoOption(CairoOptionVariant.None);
-      let referrerGroupOption = new CairoOption(CairoOptionVariant.None);
-
-      if (referralData) {
-        // Look up referrer's contract address
-        const referrerAddress = await lookupReferrerAddress(referralData.ref);
-
-        if (referrerAddress) {
-          referrerOption = new CairoOption(
-            CairoOptionVariant.Some,
-            referrerAddress,
-          );
-        }
-
-        // Encode referrer group as felt252 if present
-        if (referralData.refGroup) {
-          try {
-            const refGroupFelt = shortString.encodeShortString(
-              referralData.refGroup,
-            );
-            referrerGroupOption = new CairoOption(
-              CairoOptionVariant.Some,
-              refGroupFelt,
-            );
-          } catch (error) {
-            console.error("[Purchase] Failed to encode referrer group:", error);
-          }
-        }
-      }
 
       // Step 2: Issue the starterpack
       // issue(recipient, starterpack_id, quantity, referrer: Option<ContractAddress>, referrer_group: Option<felt252>)
@@ -480,8 +445,12 @@ export const PurchaseProvider = ({
             recipient, // recipient
             starterpackId, // starterpack_id: u32
             0x1, // quantity: u32 (always 1 for now)
-            referrerOption, // referrer: Option<ContractAddress>
-            referrerGroupOption, // referrer_group: Option<felt252>
+            ...(referralData?.ref
+              ? [0x0, num.toBigInt(referralData.ref.toString())]
+              : [0x1]),
+            ...(referralData?.refGroup
+              ? [0x0, num.toBigInt(referralData.refGroup.toString())]
+              : [0x1]),
           ],
         },
       ];
