@@ -245,8 +245,6 @@ export type KeychainOptions = IFrameOptions & {
   tokens?: Tokens;
   /** When true, defer iframe mounting until connect() is called. Reduces initial load and resource fetching. */
   lazyload?: boolean;
-  /** Additional query parameters to pass to the keychain iframe */
-  queryParams?: Record<string, string>;
 };
 
 export type ProfileContextTypeVariant =
@@ -282,6 +280,4 @@ export type OpenOptions = {
   redirectUrl?: string;
   /** The preset to use for the keychain */
   preset?: string;
-  /** Additional query parameters to pass to the keychain iframe */
-  queryParams?: Record<string, string>;
 };

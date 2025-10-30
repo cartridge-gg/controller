@@ -446,16 +446,6 @@ export default class ControllerProvider extends BaseProvider {
       keychainUrl.searchParams.set("rpc_url", this.rpcUrl());
     }
 
-    // Add additional query parameters if provided
-    if (options.queryParams) {
-      for (const [key, value] of Object.entries(options.queryParams)) {
-        // Don't override existing params
-        if (!keychainUrl.searchParams.has(key)) {
-          keychainUrl.searchParams.set(key, value);
-        }
-      }
-    }
-
     // Navigate to standalone keychain
     window.location.href = keychainUrl.toString();
   }
