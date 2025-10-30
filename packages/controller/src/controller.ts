@@ -421,6 +421,11 @@ export default class ControllerProvider extends BaseProvider {
 
     keychainUrl.searchParams.set("redirect_url", redirectUrl);
 
+    // Add preset if provided
+    if (options.preset) {
+      keychainUrl.searchParams.set("preset", options.preset);
+    }
+
     // Add controller configuration parameters
     if (this.options.slot) {
       keychainUrl.searchParams.set("ps", this.options.slot);
@@ -439,6 +444,16 @@ export default class ControllerProvider extends BaseProvider {
 
     if (this.rpcUrl()) {
       keychainUrl.searchParams.set("rpc_url", this.rpcUrl());
+    }
+
+    // Add additional query parameters if provided
+    if (options.queryParams) {
+      for (const [key, value] of Object.entries(options.queryParams)) {
+        // Don't override existing params
+        if (!keychainUrl.searchParams.has(key)) {
+          keychainUrl.searchParams.set(key, value);
+        }
+      }
     }
 
     // Navigate to standalone keychain

@@ -21,6 +21,7 @@ export class KeychainIFrame extends IFrame<Keychain> {
     preset,
     shouldOverridePresetPolicies,
     rpcUrl,
+    queryParams,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
@@ -60,6 +61,16 @@ export class KeychainIFrame extends IFrame<Keychain> {
       );
     } else if (preset) {
       _url.searchParams.set("preset", preset);
+    }
+
+    // Add additional query parameters if provided
+    if (queryParams) {
+      for (const [key, value] of Object.entries(queryParams)) {
+        // Don't override existing params
+        if (!_url.searchParams.has(key)) {
+          _url.searchParams.set(key, encodeURIComponent(value));
+        }
+      }
     }
 
     super({
