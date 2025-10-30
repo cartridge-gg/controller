@@ -18,7 +18,7 @@ import { Item, ItemType, usePurchaseContext } from "@/context/purchase";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { CollectionItem } from "../starterpack/collections";
 import { StarterpackReceiving } from "../starterpack/starterpack";
-import { ExternalWalletType } from "@cartridge/controller";
+import { ExternalWalletType, StarterPackItemType } from "@cartridge/controller";
 import { getWallet } from "../wallet/config";
 import { formatAddress } from "@cartridge/ui/utils";
 import type { BackendStarterpackDetails } from "@/context";
@@ -51,28 +51,6 @@ export function Claim() {
     address: externalAddress!,
     type: type as ExternalWalletType | "controller",
   });
-
-  useEffect(() => {
-    if (claimsData.length === 0) {
-      setClaimItems([]);
-      return;
-    }
-
-    const items: Item[] = [];
-    claimsData
-      .filter((c) => !c.claimed)
-      .forEach((c) => {
-        c.data.forEach((d) => {
-          items.push({
-            title: `(${Number(d)}) ${c.description ?? c.key}`,
-            type: ItemType.NFT,
-            icon: <GiftIcon variant="solid" />,
-          });
-        });
-      });
-
-    setClaimItems(items);
-  }, [claimsData, setClaimItems]);
 
   const wallet = useMemo(() => {
     return getWallet(type as ExternalWalletType | "controller");
@@ -129,6 +107,63 @@ export function Claim() {
       .reduce((acc, claim) => acc + claim.data.length, 0);
   }, [claimsData]);
 
+  // Filter starterpack items based on matchStarterpackItem flag
+  const filteredStarterpackItems = useMemo(() => {
+    if (!starterpackDetails?.starterPackItems) {
+      return undefined;
+    }
+
+    // Check if ANY claim requires filtering
+    const shouldFilterItems = claimsData.some(
+      (claim) => claim.matchStarterpackItem === true,
+    );
+
+    if (!shouldFilterItems) {
+      return starterpackDetails.starterPackItems;
+    }
+
+    // Get eligible claim names from unclaimed claims
+    const eligibleNames = claimsData
+      .filter((claim) => !claim.claimed)
+      .map((claim) => claim.description ?? claim.key)
+      .filter((name): name is string => name !== null);
+
+    // Filter items by name match
+    const filteredItems = starterpackDetails.starterPackItems.filter((item) =>
+      eligibleNames.some(
+        (name) =>
+          item.name.toLowerCase().includes(name.toLowerCase()) ||
+          name.toLowerCase().includes(item.name.toLowerCase()),
+      ),
+    );
+
+    // Fallback to all items if no matches found
+    return filteredItems.length > 0
+      ? filteredItems
+      : starterpackDetails.starterPackItems;
+  }, [claimsData, starterpackDetails]);
+
+  // Set claim items based on filtered starterpack items for display on pending/success screens
+  useEffect(() => {
+    if (!filteredStarterpackItems || filteredStarterpackItems.length === 0) {
+      setClaimItems([]);
+      return;
+    }
+
+    const items: Item[] = filteredStarterpackItems.map((item) => ({
+      title: item.name,
+      subtitle: item.description,
+      icon: item.iconURL ?? <GiftIcon variant="solid" />,
+      value: item.amount,
+      type:
+        item.type === StarterPackItemType.NONFUNGIBLE
+          ? ItemType.NFT
+          : ItemType.ERC20,
+    }));
+
+    setClaimItems(items);
+  }, [filteredStarterpackItems, setClaimItems]);
+
   // Group claims by key (e.g., network/collection)
   const groupedClaims = useMemo(() => {
     const groups = new Map<
@@ -179,7 +214,7 @@ export function Claim() {
           <div className="flex flex-col gap-4">
             <StarterpackReceiving
               mintAllowance={starterpackDetails?.mintAllowance}
-              starterpackItems={starterpackDetails?.starterPackItems}
+              starterpackItems={filteredStarterpackItems}
             />
             <div className="flex flex-col gap-2">
               <div className="text-foreground-400 text-xs font-semibold">
