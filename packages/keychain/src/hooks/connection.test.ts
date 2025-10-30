@@ -225,11 +225,7 @@ describe("Config Loading and Verification Separation", () => {
 
   describe("Multiple allowed origins verification", () => {
     it("should verify against multiple allowed origins", () => {
-      const allowedOrigins = [
-        "https://example.com",
-        "https://another.com",
-        "*.subdomain.com",
-      ];
+      const allowedOrigins = ["example.com", "another.com", "*.subdomain.com"];
 
       expect(isOriginVerified("https://example.com", allowedOrigins)).toBe(
         true,
