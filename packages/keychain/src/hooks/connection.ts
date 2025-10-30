@@ -154,11 +154,11 @@ function getConfigChainPolicies(
       decodedChainId in (configData.chains as object) &&
       (configData.chains as Record<string, unknown>)[decodedChainId] &&
       typeof (configData.chains as Record<string, unknown>)[decodedChainId] ===
-      "object" &&
+        "object" &&
       "policies" in
-      ((configData.chains as Record<string, unknown>)[
-        decodedChainId
-      ] as object)
+        ((configData.chains as Record<string, unknown>)[
+          decodedChainId
+        ] as object)
     ) {
       const chainConfig = (
         configData.chains as Record<string, Record<string, unknown>>
@@ -227,16 +227,16 @@ export function useConnectionValue() {
     const erc20Param = urlParams.get("erc20");
     const tokens = erc20Param
       ? decodeURIComponent(erc20Param)
-        .split(",")
-        .map((token) => TOKEN_ADDRESSES[token as Token] || null)
-        .filter((address) => address !== null)
+          .split(",")
+          .map((token) => TOKEN_ADDRESSES[token as Token] || null)
+          .filter((address) => address !== null)
       : [
-        STRK_CONTRACT_ADDRESS,
-        ETH_CONTRACT_ADDRESS,
-        USDC_CONTRACT_ADDRESS,
-        USDT_CONTRACT_ADDRESS,
-        LORDS_CONTRACT_ADDRESS,
-      ];
+          STRK_CONTRACT_ADDRESS,
+          ETH_CONTRACT_ADDRESS,
+          USDC_CONTRACT_ADDRESS,
+          USDT_CONTRACT_ADDRESS,
+          LORDS_CONTRACT_ADDRESS,
+        ];
 
     if (rpcUrl) {
       setRpcUrl(decodeURIComponent(rpcUrl));
@@ -361,7 +361,7 @@ export function useConnectionValue() {
   useEffect(() => {
     setIsMainnet(
       import.meta.env.PROD &&
-      controller?.chainId() === constants.StarknetChainId.SN_MAIN,
+        controller?.chainId() === constants.StarknetChainId.SN_MAIN,
     );
   }, [controller]);
 
@@ -410,7 +410,7 @@ export function useConnectionValue() {
         "[Referral] refGroup exceeds 31 characters or contains invalid characters:",
         refGroup,
       );
-      refGroupLocal = null
+      refGroupLocal = null;
     }
 
     // Strip https:// from origin to get game URL

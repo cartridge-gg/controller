@@ -94,9 +94,7 @@ export function isValidFelt(str: string): boolean {
   // Cairo shortstring can hold up to 31 ASCII characters
   // Also check that it only contains ASCII printable characters
   return (
-    trimmed.length > 0 &&
-    trimmed.length <= 31 &&
-    /^[\x20-\x7E]+$/.test(trimmed)
+    trimmed.length > 0 && trimmed.length <= 31 && /^[\x20-\x7E]+$/.test(trimmed)
   );
 }
 
