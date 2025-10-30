@@ -4,7 +4,6 @@ import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
-import { safeRedirect } from "@/utils/url-validator";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import {
   AuthOption,
@@ -218,13 +217,8 @@ export function useCreateController({
         window.controller = controller;
         setController(controller);
 
-        // Check for redirect_url parameter and redirect after successful signup
-        const searchParams = new URLSearchParams(window.location.search);
-        const redirectUrl = searchParams.get("redirect_url");
-        if (redirectUrl) {
-          // Safely redirect to the specified URL
-          safeRedirect(redirectUrl);
-        }
+        // Don't auto-redirect here - let the ConnectRoute handle it
+        // This allows users to see the connect screen before being redirected
       }
     },
     [setController, origin],
@@ -390,13 +384,8 @@ export function useCreateController({
       window.controller = loginRet.controller;
       setController(loginRet.controller);
 
-      // Check for redirect_url parameter and redirect after successful login
-      const searchParams = new URLSearchParams(window.location.search);
-      const redirectUrl = searchParams.get("redirect_url");
-      if (redirectUrl) {
-        // Safely redirect to the specified URL
-        safeRedirect(redirectUrl);
-      }
+      // Don't auto-redirect here - let the ConnectRoute handle it
+      // This allows users to see the connect screen before being redirected
     },
     [origin, setController],
   );
@@ -624,13 +613,8 @@ export function useCreateController({
             });
           }
 
-          // Check for redirect_url parameter after social auth
-          const redirectUrl = new URLSearchParams(window.location.search).get(
-            "redirect_url",
-          );
-          if (redirectUrl) {
-            safeRedirect(redirectUrl);
-          }
+          // Don't auto-redirect here - let the ConnectRoute handle it
+          // This allows users to see the connect screen before being redirected
         } catch (e) {
           setError(e as Error);
         } finally {
