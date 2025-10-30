@@ -22,6 +22,8 @@ const ATTRIBUTION_WINDOW_MS = ATTRIBUTION_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 export interface ReferralData {
   /** Controller username of the referrer */
   ref: string;
+  /** Starknet contract address of the referrer's controller */
+  refAddress: string;
   /** Optional referral group name */
   refGroup?: string;
   /** Timestamp when the referral expires (capturedAt + 30 days) */
@@ -82,17 +84,36 @@ function saveAllReferrals(referrals: ReferralStorage): void {
 }
 
 /**
+ * Validate if a string can fit into a Cairo felt252
+ * felt252 can hold up to 31 characters when encoded as shortstring
+ * @param str - The string to validate
+ * @returns true if string fits in felt252, false otherwise
+ */
+export function isValidFelt(str: string): boolean {
+  const trimmed = str.trim();
+  // Cairo shortstring can hold up to 31 ASCII characters
+  // Also check that it only contains ASCII printable characters
+  return (
+    trimmed.length > 0 &&
+    trimmed.length <= 31 &&
+    /^[\x20-\x7E]+$/.test(trimmed)
+  );
+}
+
+/**
  * Store referral attribution data for a specific game with a 30-day expiration window
  *
- * @param ref - Controller username of the referrer
+ * @param ref - Controller username or address of the referrer
  * @param gameUrl - Base URL of the referring game (e.g., "lootsurvivor.io")
  * @param refGroup - Optional referral group name
+ * @param refAddress - Optional Starknet contract address of the referrer
  * @returns The stored referral data
  */
 export function storeReferral(
   ref: string,
   gameUrl: string,
   refGroup?: string,
+  refAddress?: string,
 ): ReferralData {
   const now = Date.now();
 
@@ -108,6 +129,7 @@ export function storeReferral(
     // No existing referral or it expired, store the new one
     const referralData: ReferralData = {
       ref: ref.trim(),
+      refAddress: refAddress?.trim() || "",
       refGroup: refGroup?.trim(),
       capturedAt: now,
       expiresAt: now + ATTRIBUTION_WINDOW_MS,
@@ -121,6 +143,7 @@ export function storeReferral(
     // Return a referral data object even on error
     return {
       ref: ref.trim(),
+      refAddress: refAddress?.trim() || "",
       refGroup: refGroup?.trim(),
       capturedAt: now,
       expiresAt: now + ATTRIBUTION_WINDOW_MS,

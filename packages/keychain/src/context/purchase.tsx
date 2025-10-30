@@ -445,11 +445,11 @@ export const PurchaseProvider = ({
             recipient, // recipient
             starterpackId, // starterpack_id: u32
             0x1, // quantity: u32 (always 1 for now)
-            ...(referralData?.ref
-              ? [0x0, num.toBigInt(referralData.ref.toString())]
+            ...(referralData?.refAddress
+              ? [0x0, num.toBigInt(referralData?.refAddress?.toString())]
               : [0x1]),
             ...(referralData?.refGroup
-              ? [0x0, num.toBigInt(referralData.refGroup.toString())]
+              ? [0x0, num.toBigInt(referralData?.refGroup?.toString())]
               : [0x1]),
           ],
         },
