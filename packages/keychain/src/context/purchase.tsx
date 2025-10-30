@@ -220,6 +220,16 @@ export const PurchaseProvider = ({
         setSwapInput(undefined);
         return;
       }
+      // Skip Layerswap input creation for claim-only starterpacks
+      // Claim flows don't need payment/swap setup since they're merkle drops
+      // Note: Onchain starterpacks are always PAID, only backend can be CLAIMED
+      if (
+        source === "backend" &&
+        backendAcquisitionType === StarterpackAcquisitionType.Claimed
+      ) {
+        setSwapInput(undefined);
+        return;
+      }
       // Layerswap only works for backend starterpacks currently
       if (source === "backend") {
         const input = starterPackToLayerswapInput(
@@ -235,7 +245,14 @@ export const PurchaseProvider = ({
       }
     };
     getSwapInput();
-  }, [controller, starterpack, selectedPlatform, isMainnet, source]);
+  }, [
+    controller,
+    starterpack,
+    selectedPlatform,
+    isMainnet,
+    source,
+    backendAcquisitionType,
+  ]);
 
   // Transform data based on source (backend vs onchain)
   useEffect(() => {

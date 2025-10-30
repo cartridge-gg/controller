@@ -4,6 +4,7 @@ import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
+import { safeRedirect } from "@/utils/url-validator";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import {
   AuthOption,
@@ -216,6 +217,14 @@ export function useCreateController({
       if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
+
+        // Check for redirect_url parameter and redirect after successful signup
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectUrl = searchParams.get("redirect_url");
+        if (redirectUrl) {
+          // Safely redirect to the specified URL
+          safeRedirect(redirectUrl);
+        }
       }
     },
     [setController, origin],
@@ -380,6 +389,14 @@ export function useCreateController({
 
       window.controller = loginRet.controller;
       setController(loginRet.controller);
+
+      // Check for redirect_url parameter and redirect after successful login
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get("redirect_url");
+      if (redirectUrl) {
+        // Safely redirect to the specified URL
+        safeRedirect(redirectUrl);
+      }
     },
     [origin, setController],
   );
@@ -605,6 +622,14 @@ export function useCreateController({
               authenticationMethod: socialProvider as AuthOption,
               rpcUrl,
             });
+          }
+
+          // Check for redirect_url parameter after social auth
+          const redirectUrl = new URLSearchParams(window.location.search).get(
+            "redirect_url",
+          );
+          if (redirectUrl) {
+            safeRedirect(redirectUrl);
           }
         } catch (e) {
           setError(e as Error);
