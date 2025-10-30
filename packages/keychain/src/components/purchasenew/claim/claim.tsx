@@ -150,19 +150,55 @@ export function Claim() {
       return;
     }
 
-    const items: Item[] = filteredStarterpackItems.map((item) => ({
-      title: item.name,
-      subtitle: item.description,
-      icon: item.iconURL ?? <GiftIcon variant="solid" />,
-      value: item.amount,
-      type:
-        item.type === StarterPackItemType.NONFUNGIBLE
-          ? ItemType.NFT
-          : ItemType.ERC20,
-    }));
+    // Check if we should prepend amounts (when matchStarterpackItem is enabled)
+    const shouldPrependAmount = claimsData.some(
+      (claim) => claim.matchStarterpackItem === true,
+    );
+
+    const items: Item[] = filteredStarterpackItems.map((item) => {
+      let title = item.name;
+
+      // Prepend claim amount to item name if matching is enabled
+      if (shouldPrependAmount) {
+        // Find matching claim(s) for this item
+        const matchingClaims = claimsData.filter(
+          (claim) =>
+            !claim.claimed &&
+            (claim.description
+              ?.toLowerCase()
+              .includes(item.name.toLowerCase()) ||
+              item.name
+                .toLowerCase()
+                .includes(claim.description?.toLowerCase() ?? "") ||
+              claim.key.toLowerCase().includes(item.name.toLowerCase()) ||
+              item.name.toLowerCase().includes(claim.key.toLowerCase())),
+        );
+
+        // Calculate total amount from matching claims
+        const totalAmount = matchingClaims.reduce(
+          (acc, claim) => acc + claim.data.length,
+          0,
+        );
+
+        if (totalAmount > 0) {
+          title = `(${totalAmount}) ${item.name}`;
+        }
+      }
+
+      return {
+        title,
+        subtitle: item.description,
+        icon: item.iconURL ?? <GiftIcon variant="solid" />,
+        value: item.amount,
+        type:
+          item.type === StarterPackItemType.NONFUNGIBLE
+            ? ItemType.NFT
+            : ItemType.ERC20,
+      };
+    });
 
     setClaimItems(items);
-  }, [filteredStarterpackItems, setClaimItems]);
+  }, [filteredStarterpackItems, claimsData, setClaimItems]);
 
   // Group claims by key (e.g., network/collection)
   const groupedClaims = useMemo(() => {
