@@ -27,6 +27,21 @@ interface TokenMetadata {
   decimals: number;
 }
 
+// Raw JSON from contract (snake_case)
+interface ItemOnchainRaw {
+  name: string;
+  description: string;
+  image_uri: string;
+}
+
+interface StarterPackMetadataOnchainRaw {
+  name: string;
+  description: string;
+  image_uri: string;
+  items: ItemOnchainRaw[];
+}
+
+// TypeScript interface (camelCase)
 interface ItemOnchain {
   name: string;
   description: string;
@@ -38,6 +53,22 @@ interface StarterPackMetadataOnchain {
   description: string;
   imageUri: string;
   items: ItemOnchain[];
+}
+
+// Convert snake_case JSON from contract to camelCase TypeScript
+function convertMetadata(
+  raw: StarterPackMetadataOnchainRaw,
+): StarterPackMetadataOnchain {
+  return {
+    name: raw.name,
+    description: raw.description,
+    imageUri: raw.image_uri,
+    items: raw.items.map((item) => ({
+      name: item.name,
+      description: item.description,
+      imageUri: item.image_uri,
+    })),
+  };
 }
 
 /**
@@ -163,9 +194,12 @@ export const useStarterPackOnchain = (
           metadataRes[Symbol.iterator](),
         );
         const metadataString = metadataByteArray.decodeUtf8();
-        const metadata = JSON.parse(
+        const rawMetadata = JSON.parse(
           metadataString,
-        ) as StarterPackMetadataOnchain;
+        ) as StarterPackMetadataOnchainRaw;
+
+        // Convert snake_case to camelCase
+        const metadata = convertMetadata(rawMetadata);
 
         setMetadata(metadata);
       } catch (error) {

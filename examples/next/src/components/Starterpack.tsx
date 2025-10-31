@@ -16,19 +16,16 @@ export const Starterpack = () => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       return {
         purchaseOnchain: 0,
-        purchase: "sick-starterpack-mainnet",
         claim: "claim-dopewars-mainnet",
       };
     }
     return {
       purchaseOnchain: 0,
-      purchase: "sick-starterpack-sepolia",
       claim: "claim-dopewars-sepolia",
     };
   };
 
   const defaultIds = getDefaultStarterpackIds();
-  const [purchaseSpId, setPurchaseSpId] = useState<string>(defaultIds.purchase);
   const [claimSpId, setClaimSpId] = useState<string>(defaultIds.claim);
   const [purchaseOnchainSpId, setPurchaseOnchainSpId] = useState<number>(
     defaultIds.purchaseOnchain,
@@ -46,12 +43,6 @@ export const Starterpack = () => {
     const currentExpected = expectedDefaultsRef.current;
 
     // Only update if the values haven't been manually modified by the user
-    setPurchaseSpId((currentPurchaseSpId) => {
-      return currentPurchaseSpId === currentExpected.purchase
-        ? newDefaults.purchase
-        : currentPurchaseSpId;
-    });
-
     setClaimSpId((currentClaimSpId) => {
       return currentClaimSpId === currentExpected.claim
         ? newDefaults.claim
@@ -79,31 +70,7 @@ export const Starterpack = () => {
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h3>Purchase Starterpack (Backend)</h3>
-          <div className="flex items-center gap-2">
-            <Input
-              className="max-w-80"
-              type="text"
-              value={purchaseSpId}
-              onChange={(e) => setPurchaseSpId(e.target.value)}
-              placeholder="Enter starterpack ID"
-            />
-            <Button
-              onClick={() => {
-                if (purchaseSpId.trim()) {
-                  controllerConnector.controller.openStarterPack(
-                    purchaseSpId.trim(),
-                  );
-                }
-              }}
-            >
-              Purchase
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <h3>Purchase Starterpack (Onchain)</h3>
+          <h3>Purchase Starterpack</h3>
           <div className="flex items-center gap-2">
             <Input
               className="max-w-80"
@@ -119,7 +86,7 @@ export const Starterpack = () => {
                 );
               }}
             >
-              Purchase Onchain
+              Purchase
             </Button>
           </div>
         </div>
@@ -143,7 +110,7 @@ export const Starterpack = () => {
                 }
               }}
             >
-              Claim Starterpack
+              Claim
             </Button>
           </div>
         </div>

@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   ReactNode,
 } from "react";
 import {
@@ -13,9 +14,32 @@ import {
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
-import { uint256, Call, num } from "starknet";
+import {
+  uint256,
+  Call,
+  num,
+  cairo,
+  RpcProvider,
+  shortString,
+  getChecksumAddress,
+} from "starknet";
 import { isOnchainStarterpack } from "@/types/starterpack-types";
 import { getCurrentReferral } from "@/utils/referral";
+import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
+import { ERC20 as ERC20Contract } from "@cartridge/ui/utils";
+import {
+  DEFAULT_TOKENS,
+  type ERC20Metadata,
+} from "@/components/provider/tokens";
+import {
+  fetchSwapQuote,
+  generateSwapCalls,
+  chainIdToEkuboNetwork,
+  USDC_ADDRESSES,
+  EKUBO_ROUTER_ADDRESSES,
+  type SwapQuote,
+} from "@/utils/ekubo";
+import type { TokenMetadata } from "@/types/starterpack-types";
 
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -65,6 +89,15 @@ export type Item = {
 
 export type PaymentMethod = "stripe" | "crypto";
 
+export interface TokenOption {
+  name: string;
+  symbol: string;
+  decimals: number;
+  address: string;
+  icon: string;
+  contract: ERC20Contract;
+}
+
 export interface PurchaseContextType {
   // Purchase details
   usdAmount: number;
@@ -103,6 +136,17 @@ export interface PurchaseContextType {
   // Wallet management
   clearSelectedWallet: () => void;
 
+  // Token selection (for onchain purchases)
+  availableTokens: TokenOption[];
+  selectedToken?: TokenOption;
+  setSelectedToken: (token: TokenOption | undefined) => void;
+  convertedPrice: {
+    amount: bigint;
+    tokenMetadata: { symbol: string; decimals: number };
+  } | null;
+  swapQuote: SwapQuote | null; // Full swap quote for executing the swap
+  isFetchingConversion: boolean;
+
   // Actions
   setUsdAmount: (amount: number) => void;
   setPurchaseItems: (items: Item[]) => void;
@@ -136,7 +180,8 @@ export const PurchaseProvider = ({
   children,
   isSlot = false,
 }: PurchaseProviderProps) => {
-  const { controller, isMainnet, origin } = useConnection();
+  const { controller, isMainnet, origin, externalSendTransaction } =
+    useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
   const [starterpack, setStarterpack] = useState<string | number>();
   const [starterpackDetails, setStarterpackDetails] = useState<
@@ -164,6 +209,20 @@ export const PurchaseProvider = ({
   const [paymentMethod, setPaymentMethod] = useState<
     PaymentMethod | undefined
   >();
+  const [selectedToken, setSelectedTokenState] = useState<
+    TokenOption | undefined
+  >();
+  const [convertedPrice, setConvertedPrice] = useState<{
+    amount: bigint;
+    tokenMetadata: { symbol: string; decimals: number };
+  } | null>(null);
+  const [swapQuote, setSwapQuote] = useState<SwapQuote | null>(null);
+  const [isFetchingConversion, setIsFetchingConversion] = useState(false);
+
+  // Wrapper for setSelectedToken that ensures we always have a valid token
+  const setSelectedToken = useCallback((token: TokenOption | undefined) => {
+    setSelectedTokenState(token);
+  }, []);
 
   const {
     stripePromise,
@@ -179,6 +238,197 @@ export const PurchaseProvider = ({
     estimateStarterPackFees,
     waitForPayment,
   } = useCryptoPayment();
+
+  // Helper function to fetch token metadata
+  const fetchTokenMetadata = useCallback(
+    async (
+      tokenAddress: string,
+      provider: RpcProvider,
+    ): Promise<TokenMetadata> => {
+      const [symbolRes, decimalsRes] = await Promise.all([
+        provider.callContract({
+          contractAddress: tokenAddress,
+          entrypoint: "symbol",
+          calldata: [],
+        } as Call),
+        provider.callContract({
+          contractAddress: tokenAddress,
+          entrypoint: "decimals",
+          calldata: [],
+        } as Call),
+      ]);
+
+      return {
+        symbol: shortString.decodeShortString(symbolRes[0]),
+        decimals: Number(decimalsRes[0]),
+      };
+    },
+    [],
+  );
+
+  // Get network-specific USDC address
+  const usdcAddress = useMemo(() => {
+    if (!controller) return USDC_CONTRACT_ADDRESS;
+    const network = chainIdToEkuboNetwork(controller.chainId());
+    return USDC_ADDRESSES[network];
+  }, [controller]);
+
+  // Available tokens for onchain purchases (ETH, STRK, USDC)
+  const availableTokens = useMemo(() => {
+    if (!controller) return [];
+
+    // Use DEFAULT_TOKENS from provider and add network-specific USDC
+    const tokenMetadata: ERC20Metadata[] = [
+      ...DEFAULT_TOKENS,
+      {
+        address: usdcAddress,
+        name: "USD Coin",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "https://static.cartridge.gg/tokens/usdc.svg",
+      },
+    ];
+
+    const tokens: TokenOption[] = tokenMetadata.map((token) => ({
+      name: token.name,
+      symbol: token.symbol,
+      decimals: token.decimals,
+      address: getChecksumAddress(token.address),
+      icon: token.icon,
+      contract: new ERC20Contract({
+        address: getChecksumAddress(token.address),
+        provider: controller.provider,
+      }),
+    }));
+
+    return tokens;
+  }, [controller, usdcAddress]);
+
+  // Default to USDC if available, otherwise first token
+  const defaultToken = useMemo(() => {
+    const usdc = availableTokens.find(
+      (token: TokenOption) =>
+        token.address.toLowerCase() === usdcAddress.toLowerCase(),
+    );
+    return usdc || availableTokens[0];
+  }, [availableTokens, usdcAddress]);
+
+  // Initialize selected token immediately when default token becomes available
+  // This ensures USDC (or first token) is selected by default
+  useEffect(() => {
+    if (defaultToken && !selectedToken) {
+      setSelectedToken(defaultToken);
+    }
+  }, [defaultToken, selectedToken, setSelectedToken]);
+
+  // Also ensure selectedToken is set when tokens first become available
+  useEffect(() => {
+    if (availableTokens.length > 0 && defaultToken && !selectedToken) {
+      setSelectedToken(defaultToken);
+    }
+  }, [availableTokens.length, defaultToken, selectedToken, setSelectedToken]);
+
+  // Initialize convertedPrice from quote if available and matches selected token
+  useEffect(() => {
+    if (
+      starterpackDetails &&
+      isOnchainStarterpack(starterpackDetails) &&
+      selectedToken
+    ) {
+      const quote = starterpackDetails.quote;
+      const convertedPriceFromQuote = quote?.convertedPrice;
+      if (convertedPriceFromQuote) {
+        const targetToken = selectedToken.address.toLowerCase();
+        if (convertedPriceFromQuote.token.toLowerCase() === targetToken) {
+          setConvertedPrice({
+            amount: convertedPriceFromQuote.amount,
+            tokenMetadata: convertedPriceFromQuote.tokenMetadata,
+          });
+        }
+      }
+    }
+  }, [starterpackDetails, selectedToken]);
+
+  // Reset token selection when starterpack changes
+  useEffect(() => {
+    setSelectedToken(undefined);
+    setConvertedPrice(null);
+    setSwapQuote(null);
+  }, [starterpack, setSelectedToken]);
+
+  // Fetch conversion price when selected token or quote changes
+  useEffect(() => {
+    if (!controller || !selectedToken || !starterpackDetails) return;
+
+    if (!isOnchainStarterpack(starterpackDetails)) return;
+    const quote = starterpackDetails.quote;
+    if (!quote) return;
+
+    const paymentToken = quote.paymentToken.toLowerCase();
+    const targetToken = selectedToken.address.toLowerCase();
+
+    // Don't fetch if payment token is the same as selected token
+    if (paymentToken === targetToken) {
+      setConvertedPrice(null);
+      setSwapQuote(null);
+      setIsFetchingConversion(false);
+      return;
+    }
+
+    // Check if we already have a valid swap quote and converted price for this token
+    if (
+      convertedPrice &&
+      swapQuote &&
+      convertedPrice.tokenMetadata.symbol === selectedToken.symbol
+    ) {
+      // Already have valid data for this token, no need to refetch
+      return;
+    }
+
+    // Fetch new conversion price (we need the full swap quote for execution)
+    const fetchConversion = async () => {
+      setIsFetchingConversion(true);
+      try {
+        const network = chainIdToEkuboNetwork(controller.chainId());
+        const fetchedSwapQuote = await fetchSwapQuote(
+          quote.totalCost,
+          quote.paymentToken,
+          selectedToken.address,
+          network,
+        );
+
+        const tokenMetadata = await fetchTokenMetadata(
+          selectedToken.address,
+          controller.provider,
+        );
+
+        // Store both the converted price for display and the full quote for execution
+        setConvertedPrice({
+          amount: fetchedSwapQuote.total,
+          tokenMetadata: {
+            symbol: tokenMetadata.symbol,
+            decimals: tokenMetadata.decimals,
+          },
+        });
+        setSwapQuote(fetchedSwapQuote);
+      } catch (error) {
+        console.error("Failed to fetch conversion price:", error);
+        setConvertedPrice(null);
+        setSwapQuote(null);
+      } finally {
+        setIsFetchingConversion(false);
+      }
+    };
+
+    fetchConversion();
+  }, [
+    controller,
+    selectedToken,
+    starterpackDetails,
+    fetchTokenMetadata,
+    convertedPrice,
+    swapQuote,
+  ]);
 
   // Detect which source (backend or onchain) based on starterpack ID
   const source = detectStarterpackSource(starterpack);
@@ -433,56 +683,166 @@ export const PurchaseProvider = ({
         .VITE_STARTERPACK_REGISTRY_CONTRACT;
       const recipient = controller.address();
 
+      // Determine wallet type for execution
+      const walletType =
+        selectedWallet?.type === "argent" || selectedWallet?.type === "braavos"
+          ? selectedWallet.type
+          : "controller";
+
+      // Check if we need to swap tokens (selected token is different from payment token)
+      const needsSwap =
+        selectedToken &&
+        num.toHex(selectedToken.address) !== num.toHex(quote.paymentToken);
+
+      // Build all transaction calls
+      let allCalls: Call[] = [];
+
+      // Step 0: Add swap calls if needed (swap from selectedToken to paymentToken)
+      if (needsSwap && selectedToken) {
+        try {
+          if (!swapQuote) {
+            throw new Error("No swap quote found");
+          }
+
+          const network = chainIdToEkuboNetwork(controller.chainId());
+
+          // Generate swap calls
+          // swapQuote.total is the amount of selectedToken we need to spend
+          const routerAddress = EKUBO_ROUTER_ADDRESSES[network];
+          const swapAmount =
+            swapQuote.total < 0n ? -swapQuote.total : swapQuote.total;
+          const doubledTotal = swapAmount * 2n;
+          const totalQuoteSum =
+            doubledTotal < swapAmount + BigInt(1e19)
+              ? doubledTotal
+              : swapAmount + BigInt(1e19);
+
+          // Step 0a: Approve selected token for router
+          const approveSelectedTokenAmount = uint256.bnToUint256(totalQuoteSum);
+          const approveSelectedTokenCall: Call = {
+            contractAddress: selectedToken.address,
+            entrypoint: "approve",
+            calldata: [
+              routerAddress, // spender
+              approveSelectedTokenAmount.low,
+              approveSelectedTokenAmount.high,
+            ],
+          };
+
+          // Generate swap calls (includes transfer + clear calls)
+          const swapCallsWithoutApprove = generateSwapCalls(
+            selectedToken.address, // purchaseToken (selected token)
+            quote.paymentToken, // targetToken (payment token)
+            quote.totalCost, // minimumAmount (minimum payment token to receive)
+            swapQuote,
+            network,
+          );
+
+          // Add swap calls to the beginning
+          allCalls = [approveSelectedTokenCall, ...swapCallsWithoutApprove];
+        } catch (error) {
+          console.error("Failed to generate swap calls:", error);
+          throw new Error(
+            `Failed to prepare swap: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
+        }
+      }
+
       // Convert totalCost to u256 (low, high)
       const amount256 = uint256.bnToUint256(quote.totalCost);
 
       // Step 1: Approve payment token for the exact transfer amount
-      const approveCalls: Call[] = [
-        {
-          contractAddress: quote.paymentToken,
-          entrypoint: "approve",
-          calldata: [
-            registryContract, // spender
-            amount256.low, // amount low
-            amount256.high, // amount high
-          ],
-        },
-      ];
+      const approvePaymentTokenCall: Call = {
+        contractAddress: quote.paymentToken,
+        entrypoint: "approve",
+        calldata: [
+          registryContract, // spender
+          amount256.low, // amount low
+          amount256.high, // amount high
+        ],
+      };
 
       // Get referral data for the current game
       const referralData = getCurrentReferral(origin);
 
       // Step 2: Issue the starterpack
       // issue(recipient, starterpack_id, quantity, referrer: Option<ContractAddress>, referrer_group: Option<felt252>)
-      const issueCalls: Call[] = [
-        {
-          contractAddress: registryContract,
-          entrypoint: "issue",
-          calldata: [
-            recipient, // recipient
-            starterpackId, // starterpack_id: u32
-            0x1, // quantity: u32 (always 1 for now)
-            ...(referralData?.refAddress
-              ? [0x0, num.toBigInt(referralData?.refAddress?.toString())]
-              : [0x1]),
-            ...(referralData?.refGroup
-              ? [0x0, num.toBigInt(referralData?.refGroup?.toString())]
-              : [0x1]),
-          ],
-        },
-      ];
+      const issueCall: Call = {
+        contractAddress: registryContract,
+        entrypoint: "issue",
+        calldata: [
+          recipient, // recipient
+          starterpackId, // starterpack_id: u32
+          0x1, // quantity: u32 (always 1 for now)
+          ...(referralData?.refAddress
+            ? [0x0, num.toHex(referralData.refAddress)]
+            : [0x1]),
+          ...(referralData?.refGroup
+            ? [0x0, num.toHex(cairo.felt(referralData.refGroup))]
+            : [0x1]),
+        ],
+      };
 
-      // Execute both calls in sequence
-      const calls = [...approveCalls, ...issueCalls];
-      const result = await controller.execute(calls);
+      // Combine all calls: [swap calls (if needed)] + approve payment token + issue
+      allCalls = [...allCalls, approvePaymentTokenCall, issueCall];
 
-      // Store transaction hash
-      setTransactionHash(result.transaction_hash);
+      // Execute all calls in a single multicall using appropriate wallet
+      let purchaseTransactionHash: string;
+
+      if (walletType === "controller") {
+        const result = await controller.execute(allCalls);
+        purchaseTransactionHash = result.transaction_hash;
+      } else {
+        // Use external wallet - convert calls to snake_case format expected by Argent/Braavos
+        if (!externalSendTransaction) {
+          throw new Error(
+            "externalSendTransaction is required for external wallet type",
+          );
+        }
+
+        // Convert Call[] to format expected by external wallets (snake_case)
+        const externalCalls = allCalls.map((call) => ({
+          contract_address: call.contractAddress,
+          entry_point: call.entrypoint,
+          calldata: call.calldata,
+        }));
+
+        const response = await externalSendTransaction(
+          walletType,
+          externalCalls,
+        );
+        if (!response.success) {
+          throw new Error(
+            response.error || `Failed to execute purchase with ${walletType}`,
+          );
+        }
+        if (!response.result) {
+          throw new Error(`No transaction hash returned from ${walletType}`);
+        }
+        const result = response.result as { transaction_hash?: string };
+        const transactionHash = result.transaction_hash;
+        if (!transactionHash) {
+          throw new Error(
+            `Invalid response format from ${walletType}: missing transaction_hash`,
+          );
+        }
+        purchaseTransactionHash = transactionHash;
+      }
+
+      setTransactionHash(purchaseTransactionHash);
     } catch (e) {
       setDisplayError(e as Error);
       throw e;
     }
-  }, [controller, starterpackDetails, origin]);
+  }, [
+    controller,
+    starterpackDetails,
+    origin,
+    selectedToken,
+    swapQuote,
+    selectedWallet,
+    externalSendTransaction,
+  ]);
 
   const onExternalConnect = useCallback(
     async (
@@ -593,6 +953,14 @@ export const PurchaseProvider = ({
 
     // Wallet management
     clearSelectedWallet,
+
+    // Token selection (for onchain purchases)
+    availableTokens,
+    selectedToken,
+    setSelectedToken,
+    convertedPrice,
+    swapQuote,
+    isFetchingConversion,
 
     // Setters
     setUsdAmount,
