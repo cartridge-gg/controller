@@ -6,6 +6,7 @@ import { getChecksumAddress } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";
 import { erc20Metadata } from "@cartridge/presets";
 import { useConnection } from "@/hooks/connection";
+import makeBlockie from "ethereum-blockies-base64";
 
 const LIMIT = 0;
 
@@ -138,7 +139,8 @@ export function useTraceabilities({
         (metadata) =>
           BigInt(metadata.l2_token_address) === BigInt(sale.order.currency),
       );
-      const currencyImage = token?.logo_url;
+      const currencyImage =
+        token?.logo_url || makeBlockie(getChecksumAddress(sale.order.currency));
       const decimals = token?.decimals;
       const amount = sale.order.price / 10 ** (decimals || 0);
       return {
@@ -170,7 +172,9 @@ export function useTraceabilities({
         (metadata) =>
           BigInt(metadata.l2_token_address) === BigInt(listing.order.currency),
       );
-      const currencyImage = token?.logo_url;
+      const currencyImage =
+        token?.logo_url ||
+        makeBlockie(getChecksumAddress(listing.order.currency || ""));
       const decimals = token?.decimals;
       const amount = listing.order.price / 10 ** (decimals || 0);
       return {
