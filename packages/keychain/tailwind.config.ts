@@ -15,6 +15,9 @@ const config: Config = {
       height: {
         desktop: "600px",
       },
+      fontFamily: {
+        ld: ["LD Mono", "monospace"],
+      },
     },
   },
 };
