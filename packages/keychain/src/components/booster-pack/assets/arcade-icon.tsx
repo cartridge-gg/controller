@@ -49,4 +49,3 @@ export function ArcadeIcon({ color = "#DDD1FF", className }: ArcadeIconProps) {
     </svg>
   );
 }
-

@@ -80,4 +80,3 @@ export function ArcadeLogo({ color = "#DDD1FF", className }: ArcadeLogoProps) {
     </svg>
   );
 }
-

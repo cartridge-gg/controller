@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Confetti from "react-confetti";
-import { BackgroundStars } from "./background-stars";
-import { ArcadeLogo } from "./arcade-logo";
-import { ArcadeIcon } from "./arcade-icon";
-import { generateColorShades } from "./color-utils";
+import { BackgroundStars } from "./assets/background-stars";
+import { ArcadeLogo } from "./assets/arcade-logo";
+import { ArcadeIcon } from "./assets/arcade-icon";
+import { generateColorShades } from "../../utils/color-utils";
 
 interface BoosterPackProps {
   starColor?: string;
