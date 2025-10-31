@@ -16,12 +16,12 @@ export const Starterpack = () => {
     if (chain && num.toHex(chain.id) === constants.StarknetChainId.SN_MAIN) {
       return {
         purchaseOnchain: 0,
-        claim: "claim-dopewars-mainnet",
+        claim: "dopewars-claim-mainnet",
       };
     }
     return {
       purchaseOnchain: 0,
-      claim: "claim-dopewars-sepolia",
+      claim: "dopewars-claim-sepolia",
     };
   };
 
