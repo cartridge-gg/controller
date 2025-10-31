@@ -101,6 +101,10 @@ export function isValidFelt(str: string): boolean {
 /**
  * Store referral attribution data for a specific game with a 30-day expiration window
  *
+ * Uses first-touch attribution for the referrer (ref/refAddress) - once set, these cannot
+ * be changed within the attribution window. However, the refGroup can be updated at any
+ * time, as it doesn't affect the referrer's reward.
+ *
  * @param ref - Controller username or address of the referrer
  * @param gameUrl - Base URL of the referring game (e.g., "lootsurvivor.io")
  * @param refGroup - Optional referral group name
@@ -119,8 +123,24 @@ export function storeReferral(
     const allReferrals = getAllReferrals();
     const existing = allReferrals[gameUrl];
 
-    // First-touch attribution: if there's already a valid (non-expired) referral, keep it
+    // First-touch attribution for referrer, but allow refGroup updates
     if (existing && existing.expiresAt > now) {
+      // Keep existing referrer (ref and refAddress) locked
+      // But allow updating refGroup since it doesn't affect referrer rewards
+      const normalizedNewGroup = refGroup?.trim();
+      const normalizedExistingGroup = existing.refGroup?.trim();
+
+      if (normalizedNewGroup !== normalizedExistingGroup) {
+        const updatedReferralData: ReferralData = {
+          ...existing,
+          refGroup: normalizedNewGroup,
+        };
+        allReferrals[gameUrl] = updatedReferralData;
+        saveAllReferrals(allReferrals);
+        return updatedReferralData;
+      }
+
+      // No changes needed
       return existing;
     }
 
