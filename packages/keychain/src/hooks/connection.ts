@@ -365,33 +365,76 @@ export function useConnectionValue() {
     );
   }, [controller]);
 
-  // Check if preset is verified for the current origin, supporting wildcards
-  // Only run verification once we have the parent origin from penpal
+  // Load config when preset is provided
   useEffect(() => {
-    if (!urlParams.preset || !origin) {
+    if (!urlParams.preset) {
       return;
     }
 
     setIsConfigLoading(true);
     loadConfig(urlParams.preset)
       .then((config) => {
-        if (config && config.origin) {
-          const allowedOrigins = toArray(config.origin as string | string[]);
-          // Always consider localhost as verified for development (not 127.0.0.1)
-          const isLocalhost = origin.includes("localhost");
-          const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
-          const finalVerified = isLocalhost || isOriginAllowed;
-          setVerified(finalVerified);
-          setConfigData(config as Record<string, unknown>);
-        }
+        setConfigData((config as Record<string, unknown>) || null);
       })
       .catch((error: Error) => {
         console.error("Failed to load config:", error);
+        setConfigData(null);
       })
       .finally(() => {
         setIsConfigLoading(false);
       });
-  }, [origin, urlParams]);
+  }, [urlParams.preset]);
+
+  // Compute verified state separately once config is loaded and origin or redirect_url are available
+  useEffect(() => {
+    if (!configData || isConfigLoading) {
+      return;
+    }
+
+    if (!configData.origin) {
+      setVerified(false);
+      return;
+    }
+
+    const allowedOrigins = toArray(configData.origin as string | string[]);
+
+    // In standalone mode (no parent origin), verify preset if redirect_url matches preset whitelist
+    if (!origin) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get("redirect_url");
+
+      if (redirectUrl) {
+        try {
+          const redirectUrlObj = new URL(redirectUrl);
+          const redirectOrigin = redirectUrlObj.origin;
+
+          // Always consider localhost as verified for development
+          const isLocalhost = redirectOrigin.includes("localhost");
+          const isOriginAllowed = isOriginVerified(
+            redirectOrigin,
+            allowedOrigins,
+          );
+          const finalVerified = isLocalhost || isOriginAllowed;
+
+          setVerified(finalVerified);
+          return;
+        } catch (error) {
+          console.error("Failed to parse redirect_url:", error);
+        }
+      }
+
+      // No redirect_url or invalid redirect_url - don't verify preset in standalone mode
+      setVerified(false);
+      return;
+    }
+
+    // Embedded mode: verify against parent origin
+    // Always consider localhost as verified for development (not 127.0.0.1)
+    const isLocalhost = origin.includes("localhost");
+    const isOriginAllowed = isOriginVerified(origin, allowedOrigins);
+    const finalVerified = isLocalhost || isOriginAllowed;
+    setVerified(finalVerified);
+  }, [origin, configData, isConfigLoading]);
 
   // Store referral data when URL params are available
   useEffect(() => {
