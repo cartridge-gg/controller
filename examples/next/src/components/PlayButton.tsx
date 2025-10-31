@@ -14,7 +14,7 @@ interface Game {
 const GAMES: Game[] = [
   {
     name: "Loot Survivor",
-    url: "https://x.cartridge.gg?redirect_url=https://lootsurvivor.io",
+    url: "https://x.cartridge.gg?redirect_url=https://lootsurvivor.io&preset=loot-survivor",
     description: "Survive the adventure, earn rewards",
   },
   // Add more games here as needed
