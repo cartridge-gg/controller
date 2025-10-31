@@ -9,6 +9,7 @@ import {
   AuthOption,
   AuthOptions,
   EMBEDDED_WALLETS,
+  ResponseCodes,
   WalletAdapter,
 } from "@cartridge/controller";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
@@ -35,6 +36,15 @@ import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
+import { processPolicies } from "../CreateSession";
+import { cleanupCallbacks } from "@/utils/connection/callbacks";
+import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
+import { parseConnectParams } from "@/utils/connection/connect";
+
+const CANCEL_RESPONSE = {
+  code: ResponseCodes.CANCELED,
+  message: "Canceled",
+};
 
 export interface SignupResponse {
   address: string;
@@ -49,9 +59,11 @@ export interface LoginResponse {
 export function useCreateController({
   isSlot,
   signers,
+  onAuthenticationSuccess,
 }: {
   isSlot?: boolean;
   signers?: AuthOptions;
+  onAuthenticationSuccess?: () => void;
 }) {
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +80,14 @@ export function useCreateController({
   const [, setSearchParams] = useSearchParams();
   const { origin, rpcUrl, chainId, setController, policies, closeModal } =
     useConnection();
+
+  // Import route params and completion for connection resolution
+  const [searchParams] = useSearchParams();
+  const params = useMemo(() => {
+    return parseConnectParams(searchParams);
+  }, [searchParams]);
+  const handleCompletion = useRouteCompletion();
+
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -78,6 +98,8 @@ export function useCreateController({
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
   const { supportedWalletsForAuth } = useWallets();
+
+  useRouteCallbacks(params, CANCEL_RESPONSE);
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -218,13 +240,60 @@ export function useCreateController({
         window.controller = controller;
         setController(controller);
 
-        // Close modal immediately if no policies - no need to show session creation
+        // Handle no policies case - resolve connection and close modal
         if (!policies) {
+          if (params) {
+            params.resolve?.({
+              code: ResponseCodes.SUCCESS,
+              address: controller.address(),
+            });
+            cleanupCallbacks(params.params.id);
+            handleCompletion();
+          } else {
+            void closeModal?.();
+          }
+          return;
+        }
+
+        // Exit if params not available for verified policies
+        if (!params) {
           void closeModal?.();
+          return;
+        }
+
+        // create session if session is verified
+        try {
+          // Use a default duration for verified sessions (24 hours)
+          const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
+          const expiresAt = duration + now();
+
+          const processedPolicies = processPolicies(policies, false);
+          await controller.createSession(expiresAt, processedPolicies);
+          params.resolve?.({
+            code: ResponseCodes.SUCCESS,
+            address: controller.address(),
+          });
+          cleanupCallbacks(params.params.id);
+          handleCompletion();
+        } catch (e) {
+          console.error("Failed to create verified session:", e);
+          // Fall back to showing the UI if auto-creation fails
+          params.reject?.(e);
         }
       }
+
+      // Call the authentication success callback
+      onAuthenticationSuccess?.();
     },
-    [setController, origin, policies, closeModal],
+    [
+      setController,
+      origin,
+      policies,
+      closeModal,
+      handleCompletion,
+      params,
+      onAuthenticationSuccess,
+    ],
   );
 
   const handleSignup = useCallback(
@@ -387,12 +456,58 @@ export function useCreateController({
       window.controller = loginRet.controller;
       setController(loginRet.controller);
 
-      // Close modal immediately if no policies - no need to show session creation
+      // Handle no policies case - resolve connection and close modal
       if (!policies) {
-        void closeModal?.();
+        if (params) {
+          params.resolve?.({
+            code: ResponseCodes.SUCCESS,
+            address: loginRet.controller.address(),
+          });
+          cleanupCallbacks(params.params.id);
+          handleCompletion();
+        } else {
+          handleCompletion();
+        }
+        return;
       }
+
+      // Exit if params not available for verified policies
+      if (!params) {
+        handleCompletion();
+        return;
+      }
+
+      // create session if session is verified
+      try {
+        // Use a default duration for verified sessions (24 hours)
+        const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
+        const expiresAt = duration + now();
+
+        const processedPolicies = processPolicies(policies, false);
+        await loginRet.controller.createSession(expiresAt, processedPolicies);
+        params.resolve?.({
+          code: ResponseCodes.SUCCESS,
+          address: loginRet.controller.address(),
+        });
+        cleanupCallbacks(params.params.id);
+        handleCompletion();
+      } catch (e) {
+        console.error("Failed to create verified session:", e);
+        // Fall back to showing the UI if auto-creation fails
+        params.reject?.(e);
+      }
+
+      // Call the authentication success callback
+      onAuthenticationSuccess?.();
     },
-    [origin, setController, policies, closeModal],
+    [
+      origin,
+      setController,
+      policies,
+      handleCompletion,
+      params,
+      onAuthenticationSuccess,
+    ],
   );
 
   const handleLogin = useCallback(
