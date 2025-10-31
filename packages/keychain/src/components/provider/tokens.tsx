@@ -15,7 +15,7 @@ import {
 import { useQuery } from "react-query";
 import { getChecksumAddress } from "starknet";
 
-const DEFAULT_TOKENS = [
+export const DEFAULT_TOKENS = [
   {
     address:
       "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
@@ -34,7 +34,7 @@ const DEFAULT_TOKENS = [
   },
 ];
 
-const DEFAULT_FEE_TOKEN =
+export const DEFAULT_FEE_TOKEN =
   "0x04718f5a0Fc34cC1AF16A1cdee98fFB20C31f5cD61D6Ab07201858f4287c938D";
 
 export type ERC20Metadata = {

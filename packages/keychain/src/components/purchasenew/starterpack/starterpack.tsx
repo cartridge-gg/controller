@@ -5,6 +5,7 @@ import {
   isBackendStarterpack,
   isOnchainStarterpack,
 } from "@/context";
+import { ItemType } from "@/context/purchase";
 import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 import {
   Button,
@@ -260,9 +261,7 @@ export function OnchainStarterPackInner({
 
   const onProceed = () => {
     // Onchain starterpacks always use crypto payment (direct to contract)
-    const methods = isMainnet
-      ? "ethereum;base;arbitrum;optimism"
-      : "starknet;arbitrum";
+    const methods = isMainnet ? "ethereum;base;arbitrum;optimism" : "starknet";
     navigate(`/purchase/method/${methods}`);
   };
 
@@ -286,23 +285,14 @@ export function OnchainStarterPackInner({
             </h1>
             <div className="flex flex-col gap-2">
               {items.map((item, index) => (
-                <Card key={index}>
-                  <CardContent className="flex flex-row items-center gap-3 p-3">
-                    {item.imageUri && (
-                      <img
-                        src={item.imageUri}
-                        alt={item.name}
-                        className="w-12 h-12 rounded"
-                      />
-                    )}
-                    <div className="flex flex-col gap-1">
-                      <p className="text-sm font-semibold">{item.name}</p>
-                      <p className="text-xs text-foreground-300">
-                        {item.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                <StarterItem
+                  key={index}
+                  type={ItemType.NFT}
+                  title={item.name}
+                  subtitle={item.description}
+                  icon={item.imageUri}
+                  showPrice={false}
+                />
               ))}
             </div>
           </div>
