@@ -1,5 +1,3 @@
-import React from "react";
-
 interface ArcadeIconProps {
   color?: string;
   className?: string;

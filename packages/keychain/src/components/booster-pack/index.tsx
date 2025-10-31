@@ -13,6 +13,7 @@ interface BoosterPackProps {
 export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
   const { privateKey } = useParams<{ privateKey: string }>();
   const [showConfetti, setShowConfetti] = useState(false);
+  const [numberOfPieces, setNumberOfPieces] = useState(500);
   const [windowDimensions, setWindowDimensions] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -40,8 +41,13 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
   // Handle claim button click
   const handleClaim = () => {
     setShowConfetti(true);
-    // Stop confetti after 5 seconds
-    setTimeout(() => setShowConfetti(false), 5000);
+    setNumberOfPieces(500);
+
+    // Stop generating new pieces after 3 seconds
+    setTimeout(() => setNumberOfPieces(0), 3000);
+
+    // Unmount after all pieces have fallen (8 seconds total)
+    setTimeout(() => setShowConfetti(false), 8000);
   };
 
   return (
@@ -52,9 +58,10 @@ export function BoosterPack({ starColor = "#DDD1FF" }: BoosterPackProps) {
           width={windowDimensions.width}
           height={windowDimensions.height}
           colors={confettiColors}
-          numberOfPieces={500}
+          numberOfPieces={numberOfPieces}
           recycle={false}
           gravity={0.3}
+          tweenDuration={3000}
         />
       )}
 
