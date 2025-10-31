@@ -253,6 +253,7 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("sessionSigner");
     localStorage.removeItem("session");
     localStorage.removeItem("sessionPolicies");
+    localStorage.removeItem("lastUsedConnector");
     this.account = undefined;
     this._username = undefined;
     const disconnectUrl = new URL(`${this._keychainUrl}`);
@@ -368,5 +369,6 @@ export default class SessionProvider extends BaseProvider {
     localStorage.removeItem("sessionSigner");
     localStorage.removeItem("session");
     localStorage.removeItem("sessionPolicies");
+    localStorage.removeItem("lastUsedConnector");
   }
 }

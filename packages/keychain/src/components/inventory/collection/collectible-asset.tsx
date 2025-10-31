@@ -26,7 +26,14 @@ import {
   Thumbnail,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { AllowArray, cairo, Call, CallData, constants } from "starknet";
+import {
+  AllowArray,
+  cairo,
+  Call,
+  CallData,
+  constants,
+  getChecksumAddress,
+} from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCollectible } from "@/hooks/collectible";
@@ -41,6 +48,7 @@ import { toast } from "sonner";
 import { useAccount, useUsername } from "@/hooks/account";
 import { erc20Metadata } from "@cartridge/presets";
 import { useNavigation } from "@/context";
+import makeBlockie from "ethereum-blockies-base64";
 
 const OFFSET = 10;
 
@@ -443,7 +451,10 @@ const Item = ({
           owner={username}
           quantity={order.quantity}
           price={price}
-          logo={token?.logo_url || ""}
+          logo={
+            token?.logo_url ||
+            makeBlockie(getChecksumAddress(order.currency || ""))
+          }
           expiration={expiration}
           action="purchase"
           onActionClick={() => {}}

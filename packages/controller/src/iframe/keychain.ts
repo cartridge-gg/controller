@@ -6,6 +6,8 @@ import { IFrame, IFrameOptions } from "./base";
 type KeychainIframeOptions = IFrameOptions<Keychain> &
   KeychainOptions & {
     version?: string;
+    ref?: string;
+    refGroup?: string;
   };
 
 export class KeychainIFrame extends IFrame<Keychain> {
@@ -21,6 +23,8 @@ export class KeychainIFrame extends IFrame<Keychain> {
     preset,
     shouldOverridePresetPolicies,
     rpcUrl,
+    ref,
+    refGroup,
     ...iframeOptions
   }: KeychainIframeOptions) {
     const _url = new URL(url ?? KEYCHAIN_URL);
@@ -47,6 +51,14 @@ export class KeychainIFrame extends IFrame<Keychain> {
 
     if (rpcUrl) {
       _url.searchParams.set("rpc_url", encodeURIComponent(rpcUrl));
+    }
+
+    if (ref) {
+      _url.searchParams.set("ref", encodeURIComponent(ref));
+    }
+
+    if (refGroup) {
+      _url.searchParams.set("ref_group", encodeURIComponent(refGroup));
     }
 
     // Policy precedence logic:

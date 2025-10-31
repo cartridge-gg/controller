@@ -9,6 +9,7 @@ import {
 import { constants, shortString, WalletAccount } from "starknet";
 import { version } from "../package.json";
 import ControllerAccount from "./account";
+import { KEYCHAIN_URL } from "./constants";
 import { NotReadyToConnect } from "./errors";
 import { KeychainIFrame } from "./iframe";
 import BaseProvider from "./provider";
@@ -22,7 +23,9 @@ import {
   ProbeReply,
   ProfileContextTypeVariant,
   ResponseCodes,
+  OpenOptions,
 } from "./types";
+import { validateRedirectUrl } from "./url-validator";
 import { parseChainId } from "./utils";
 
 export default class ControllerProvider extends BaseProvider {
@@ -31,6 +34,7 @@ export default class ControllerProvider extends BaseProvider {
   private iframes: IFrames;
   private selectedChain: ChainId;
   private chains: Map<ChainId, Chain>;
+  private referral: { ref?: string; refGroup?: string };
 
   isReady(): boolean {
     return !!this.keychain;
@@ -53,6 +57,18 @@ export default class ControllerProvider extends BaseProvider {
 
     this.selectedChain = defaultChainId;
     this.chains = new Map<ChainId, Chain>();
+
+    // Auto-extract referral parameters from URL
+    // This allows games to pass referrals via their own URL: game.com/?ref=alice&ref_group=campaign1
+    const urlParams =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : null;
+    this.referral = {
+      ref: urlParams?.get("ref") ?? undefined,
+      refGroup: urlParams?.get("ref_group") ?? undefined,
+    };
+
     this.options = { ...options, chains, defaultChainId };
 
     this.initializeChains(chains);
@@ -340,7 +356,7 @@ export default class ControllerProvider extends BaseProvider {
     });
   }
 
-  async openStarterPack(starterpackId: string): Promise<void> {
+  async openStarterPack(starterpackId: string | number): Promise<void> {
     if (!this.keychain || !this.iframes.keychain) {
       console.error(new NotReadyToConnect().message);
       return;
@@ -390,6 +406,84 @@ export default class ControllerProvider extends BaseProvider {
     return await this.keychain.delegateAccount();
   }
 
+  /**
+   * Opens the keychain in standalone mode (first-party context) for authentication.
+   * This establishes first-party storage, enabling seamless iframe access across all games.
+   * @param options - Configuration for redirect after authentication
+   */
+  open(options: OpenOptions = {}) {
+    if (typeof window === "undefined") {
+      console.error("open can only be called in browser context");
+      return;
+    }
+
+    const keychainUrl = new URL(this.options.url || KEYCHAIN_URL);
+
+    // Add redirect target (defaults to current page)
+    const redirectUrl = options.redirectUrl || window.location.href;
+
+    // Validate redirect URL to prevent XSS and open redirect attacks
+    const validation = validateRedirectUrl(redirectUrl);
+    if (!validation.isValid) {
+      console.error(
+        `Invalid redirect URL: ${validation.error}`,
+        `URL: ${redirectUrl}`,
+      );
+      return;
+    }
+
+    keychainUrl.searchParams.set("redirect_url", redirectUrl);
+
+    // Add preset if provided
+    if (options.preset) {
+      keychainUrl.searchParams.set("preset", options.preset);
+    }
+
+    // Add controller configuration parameters
+    if (this.options.slot) {
+      keychainUrl.searchParams.set("ps", this.options.slot);
+    }
+
+    if (this.options.namespace) {
+      keychainUrl.searchParams.set("ns", this.options.namespace);
+    }
+
+    if (this.options.tokens?.erc20) {
+      keychainUrl.searchParams.set(
+        "erc20",
+        this.options.tokens.erc20.toString(),
+      );
+    }
+
+    if (this.rpcUrl()) {
+      keychainUrl.searchParams.set("rpc_url", this.rpcUrl());
+    }
+
+    // Navigate to standalone keychain
+    window.location.href = keychainUrl.toString();
+  }
+
+  /**
+   * Checks if the keychain iframe has first-party storage access.
+   * Returns true if the user has previously authenticated via standalone mode.
+   * @returns Promise<boolean> indicating if storage access is available
+   */
+  async hasFirstPartyAccess(): Promise<boolean> {
+    if (!this.keychain) {
+      console.error(new NotReadyToConnect().message);
+      return false;
+    }
+
+    try {
+      // Ask the keychain iframe if it has storage access
+      const hasAccess = await this.keychain.hasStorageAccess();
+      return hasAccess;
+    } catch (error) {
+      console.error("Error checking storage access:", error);
+      return false;
+    }
+  }
+
   private initializeChains(chains: Chain[]) {
     for (const chain of chains) {
       try {
@@ -434,6 +528,8 @@ export default class ControllerProvider extends BaseProvider {
         this.keychain = keychain;
       },
       version: version,
+      ref: this.referral.ref,
+      refGroup: this.referral.refGroup,
     });
   }
 

@@ -23,7 +23,7 @@ export function useDevice() {
   useEffect(() => {
     const handleResize = () => {
       setDevice(
-        window.innerWidth !== DESKTOP_WIDTH
+        window.innerWidth < DESKTOP_WIDTH
           ? DeviceType.MOBILE
           : DeviceType.DESKTOP,
       );

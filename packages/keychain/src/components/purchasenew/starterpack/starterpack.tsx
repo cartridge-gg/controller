@@ -1,5 +1,10 @@
 import { ErrorAlert } from "@/components/ErrorAlert";
-import { useNavigation, usePurchaseContext } from "@/context";
+import {
+  useNavigation,
+  usePurchaseContext,
+  isBackendStarterpack,
+  isOnchainStarterpack,
+} from "@/context";
 import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 import {
   Button,
@@ -9,6 +14,7 @@ import {
   LayoutContent,
   LayoutFooter,
   VerifiedIcon,
+  Spinner,
 } from "@cartridge/ui";
 import {
   MintAllowance,
@@ -19,7 +25,7 @@ import { StarterItem } from "./starter-item";
 import { Supply } from "./supply";
 import { useEffect, useMemo } from "react";
 import { LoadingState } from "../loading";
-import { CostBreakdown } from "../review/cost";
+import { CostBreakdown, OnchainCostBreakdown } from "../review/cost";
 import { usdcToUsd } from "@/utils/starterpack";
 import { useConnection } from "@/hooks/connection";
 import { CostDetails } from "../types";
@@ -46,17 +52,38 @@ export function PurchaseStarterpack() {
     return <LoadingState />;
   }
 
-  return (
-    <StarterPackInner
-      name={details.name}
-      supply={details.supply}
-      mintAllowance={details.mintAllowance}
-      acquisitionType={details.acquisitionType}
-      starterpackItems={details.starterPackItems}
-      isMainnet={isMainnet}
-      error={displayError}
-    />
-  );
+  // Handle backend starterpacks (GraphQL)
+  if (isBackendStarterpack(details)) {
+    return (
+      <StarterPackInner
+        name={details.name}
+        supply={details.supply}
+        mintAllowance={details.mintAllowance}
+        acquisitionType={details.acquisitionType}
+        starterpackItems={details.starterPackItems}
+        isMainnet={isMainnet}
+        error={displayError}
+      />
+    );
+  }
+
+  // Handle onchain starterpacks (Smart contract)
+  if (isOnchainStarterpack(details)) {
+    return (
+      <OnchainStarterPackInner
+        name={details.name}
+        description={details.description}
+        items={details.items}
+        quote={details.quote}
+        isQuoteLoading={details.isQuoteLoading}
+        isMainnet={isMainnet}
+        error={displayError}
+      />
+    );
+  }
+
+  // Fallback (should never reach here with proper types)
+  return <LoadingState />;
 }
 
 export function StarterPackInner({
@@ -87,7 +114,7 @@ export function StarterPackInner({
       case StarterpackAcquisitionType.Paid: {
         const methods = isMainnet
           ? "ethereum;base;arbitrum;optimism"
-          : "arbitrum";
+          : "arbitrum;";
 
         navigate(`/purchase/method/${methods}`);
         break;
@@ -198,3 +225,110 @@ export const StarterpackReceiving = ({
     </div>
   );
 };
+
+/**
+ * Onchain StarterPack Component - for starterpacks registered on smart contracts
+ */
+export function OnchainStarterPackInner({
+  name,
+  description,
+  items,
+  quote,
+  isQuoteLoading,
+  isMainnet,
+  error,
+}: {
+  name: string;
+  description: string;
+  items: Array<{ name: string; description: string; imageUri: string }>;
+  quote?: {
+    basePrice: bigint;
+    referralFee: bigint;
+    protocolFee: bigint;
+    totalCost: bigint;
+    paymentToken: string;
+    paymentTokenMetadata: {
+      symbol: string;
+      decimals: number;
+    };
+  } | null;
+  isQuoteLoading?: boolean;
+  isMainnet?: boolean;
+  error?: Error | null;
+}) {
+  const { navigate } = useNavigation();
+
+  const onProceed = () => {
+    // Onchain starterpacks always use crypto payment (direct to contract)
+    const methods = isMainnet
+      ? "ethereum;base;arbitrum;optimism"
+      : "starknet;arbitrum";
+    navigate(`/purchase/method/${methods}`);
+  };
+
+  return (
+    <>
+      <HeaderInner
+        title={name}
+        description={
+          <span className="text-foreground-200 text-xs font-normal">
+            {description}
+          </span>
+        }
+        hideIcon
+      />
+      <LayoutContent>
+        <div className="flex flex-col gap-3">
+          {/* Onchain Items Display */}
+          <div className="flex flex-col gap-2">
+            <h1 className="text-xs font-semibold text-foreground-400">
+              You receive
+            </h1>
+            <div className="flex flex-col gap-2">
+              {items.map((item, index) => (
+                <Card key={index}>
+                  <CardContent className="flex flex-row items-center gap-3 p-3">
+                    {item.imageUri && (
+                      <img
+                        src={item.imageUri}
+                        alt={item.name}
+                        className="w-12 h-12 rounded"
+                      />
+                    )}
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm font-semibold">{item.name}</p>
+                      <p className="text-xs text-foreground-300">
+                        {item.description}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </LayoutContent>
+      <LayoutFooter>
+        {error ? (
+          <ErrorAlert title="Error" description={error.message} />
+        ) : quote ? (
+          <OnchainCostBreakdown quote={quote} isQuoteLoading={isQuoteLoading} />
+        ) : (
+          <Card className="gap-3">
+            <div className="flex flex-row gap-3 h-[40px]">
+              <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+                <div className="flex justify-between text-sm font-medium w-full">
+                  <span>Total</span>
+                  <Spinner />
+                </div>
+              </CardContent>
+            </div>
+          </Card>
+        )}
+        <Button onClick={onProceed} disabled={!!error || !quote}>
+          Purchase
+        </Button>
+      </LayoutFooter>
+    </>
+  );
+}

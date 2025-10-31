@@ -10,6 +10,7 @@ import {
   SolanaIcon,
   StarknetIcon,
   Thumbnail,
+  Spinner,
 } from "@cartridge/ui";
 import { CostDetails } from "../types";
 import {
@@ -18,6 +19,8 @@ import {
   humanizeString,
 } from "@cartridge/controller";
 import { FeesTooltip } from "./tooltip";
+import { OnchainFeesTooltip } from "./onchain-tooltip";
+import type { OnchainQuote } from "@/context";
 
 type PaymentRails = "stripe" | "crypto";
 type PaymentUnit = "usdc" | "credits";
@@ -79,6 +82,77 @@ export function CostBreakdown({
           </div>
         </CardContent>
         <PaymentType unit={paymentUnit} />
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * Onchain Cost Breakdown - for token-based payments directly to smart contracts
+ */
+export function OnchainCostBreakdown({
+  quote,
+  platform,
+  openFeesTooltip = false,
+  isQuoteLoading = false,
+}: {
+  quote: OnchainQuote;
+  platform?: ExternalPlatform;
+  openFeesTooltip?: boolean;
+  isQuoteLoading?: boolean;
+}) {
+  const { symbol, decimals } = quote.paymentTokenMetadata;
+
+  // Format payment token amount with proper decimals
+  const paymentAmount = Number(quote.totalCost) / Math.pow(10, decimals);
+
+  // Format USDC equivalent if available
+  const usdcEquivalent = quote.convertedPrice
+    ? Number(quote.convertedPrice.amount) /
+      Math.pow(10, quote.convertedPrice.tokenMetadata.decimals)
+    : null;
+
+  // Helper to format amount without trailing .00
+  const formatAmount = (amount: number): string => {
+    const formatted = amount.toFixed(2);
+    return formatted.endsWith(".00") ? formatted.slice(0, -3) : formatted;
+  };
+
+  return (
+    <Card className="gap-3">
+      {platform && (
+        <CardContent className="flex flex-col gap-2 border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400">
+          <div className="text-foreground-400 font-normal text-xs flex flex-row items-center gap-1">
+            Purchase on <Network platform={platform} />
+          </div>
+        </CardContent>
+      )}
+
+      <div className="flex flex-row gap-3 h-[40px]">
+        <CardContent className="flex items-center border border-background-200 bg-[#181C19] rounded-[4px] text-xs text-foreground-400 w-full">
+          <div className="flex justify-between text-sm font-medium w-full">
+            <div className="flex flex-row items-center gap-1">
+              <span>Total</span>
+              <OnchainFeesTooltip
+                trigger={<InfoIcon size="xs" />}
+                defaultOpen={openFeesTooltip}
+                quote={quote}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-foreground-400">
+                {formatAmount(paymentAmount)} {symbol}
+              </span>
+              {isQuoteLoading ? (
+                <Spinner />
+              ) : usdcEquivalent !== null ? (
+                <span className="text-foreground-100">
+                  ${formatAmount(usdcEquivalent)}
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </CardContent>
       </div>
     </Card>
   );

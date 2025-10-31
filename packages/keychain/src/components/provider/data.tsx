@@ -10,6 +10,7 @@ import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/ui/utils";
+import makeBlockie from "ethereum-blockies-base64";
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
@@ -101,11 +102,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
             const value = `${(BigInt(transfer.amount) / BigInt(10 ** Number(transfer.decimals))).toString()} ${transfer.symbol}`;
             const timestamp = new Date(transfer.executedAt).getTime();
             const date = getDate(timestamp);
-            const image = erc20Metadata.find(
-              (m) =>
-                getChecksumAddress(m.l2_token_address) ===
-                getChecksumAddress(transfer.contractAddress),
-            )?.logo_url;
+            const image =
+              erc20Metadata.find(
+                (m) =>
+                  getChecksumAddress(m.l2_token_address) ===
+                  getChecksumAddress(transfer.contractAddress),
+              )?.logo_url ||
+              makeBlockie(getChecksumAddress(transfer.contractAddress));
             return {
               variant: "token",
               key: `${transfer.transactionHash}-${transfer.eventId}`,

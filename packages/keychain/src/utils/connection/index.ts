@@ -10,6 +10,7 @@ import { openSettingsFactory } from "./settings";
 import { signMessageFactory } from "./sign";
 import { switchChain } from "./switchChain";
 import { navigateFactory } from "./navigate";
+import { hasStorageAccessFactory } from "./storage-access";
 
 export type { ControllerError } from "./execute";
 
@@ -43,6 +44,7 @@ export function connectToController<ParentMethods extends object>({
         }),
       openSettings: () => openSettingsFactory(),
       navigate: () => navigateFactory(),
+      hasStorageAccess: () => hasStorageAccessFactory(),
       reset: () => () => {
         // Reset handled by navigation
       },

@@ -5,16 +5,17 @@ import {
   PurchaseCard,
   WalletIcon,
 } from "@cartridge/ui";
-import { networkWalletData } from "./data";
-import { useNavigation, usePurchaseContext } from "@/context";
+import { networkWalletData, evmNetworks } from "./config";
+import {
+  useNavigation,
+  usePurchaseContext,
+  isOnchainStarterpack,
+} from "@/context";
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { ExternalWallet } from "@cartridge/controller";
+import { ExternalPlatform, ExternalWallet } from "@cartridge/controller";
 import { ErrorAlert } from "@/components/ErrorAlert";
-import {
-  MerkleDropNetwork,
-  StarterpackAcquisitionType,
-} from "@cartridge/ui/utils/api/cartridge";
+import { StarterpackAcquisitionType } from "@cartridge/ui/utils/api/cartridge";
 import { Network } from "../types";
 import { useConnection } from "@/hooks/connection";
 
@@ -22,8 +23,12 @@ export function SelectWallet() {
   const { navigate } = useNavigation();
   const { platforms } = useParams();
   const { controller, isMainnet, externalDetectWallets } = useConnection();
-  const { starterpackDetails, onExternalConnect, clearError } =
-    usePurchaseContext();
+  const {
+    starterpackDetails,
+    onExternalConnect,
+    clearError,
+    clearSelectedWallet,
+  } = usePurchaseContext();
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [chainIds, setChainIds] = useState<Map<string, string>>(new Map());
@@ -104,14 +109,20 @@ export function SelectWallet() {
   }, [externalDetectWallets, isMainnet, selectedNetworks]);
 
   useEffect(() => {
+    // Clear selected wallet when wallet selection screen mounts
+    clearSelectedWallet();
     return () => clearError();
-  }, [clearError]);
+  }, [clearError, clearSelectedWallet]);
 
   const onControllerWalletSelect = useCallback(() => {
     if (
       starterpackDetails?.acquisitionType === StarterpackAcquisitionType.Paid
     ) {
-      navigate(`/purchase/checkout/crypto`);
+      // Route to onchain checkout for onchain starterpacks, crypto for backend
+      const checkoutPath = isOnchainStarterpack(starterpackDetails)
+        ? `/purchase/checkout/onchain`
+        : `/purchase/checkout/crypto`;
+      navigate(checkoutPath);
       return;
     }
 
@@ -137,17 +148,28 @@ export function SelectWallet() {
           starterpackDetails?.acquisitionType ===
           StarterpackAcquisitionType.Paid
         ) {
-          navigate(`/purchase/checkout/crypto`);
+          // Route to onchain checkout for onchain starterpacks, crypto for backend
+          const checkoutPath = isOnchainStarterpack(starterpackDetails)
+            ? `/purchase/checkout/onchain`
+            : `/purchase/checkout/crypto`;
+          navigate(checkoutPath);
           return;
         }
 
         // Claim starterpack
+        const isCurrentEvm = evmNetworks.includes(network.platform);
+
         const keys = starterpackDetails?.merkleDrops
-          ?.filter(
-            (drop) =>
-              drop.network ===
-              (network.platform.toUpperCase() as MerkleDropNetwork),
-          )
+          ?.filter((drop) => {
+            const dropNetwork = drop.network.toLowerCase() as ExternalPlatform;
+
+            // For EVM networks, include all EVM merkle drops
+            if (isCurrentEvm) {
+              return evmNetworks.includes(dropNetwork);
+            }
+            // For non-EVM networks, only include drops for that specific network
+            return dropNetwork === network.platform;
+          })
           .map((drop) => drop.key)
           .join(";");
 

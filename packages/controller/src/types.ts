@@ -161,8 +161,9 @@ export interface Keychain {
   openPurchaseCredits(): void;
   openExecute(calls: Call[]): Promise<void>;
   switchChain(rpcUrl: string): Promise<void>;
-  openStarterPack(starterpackId: string): Promise<void>;
+  openStarterPack(starterpackId: string | number): Promise<void>;
   navigate(path: string): Promise<void>;
+  hasStorageAccess(): Promise<boolean>;
 
   // External wallet methods
   externalDetectWallets(): Promise<ExternalWallet[]>;
@@ -273,3 +274,8 @@ export interface StarterPackItem {
   price?: bigint;
   call?: Call[];
 }
+
+export type OpenOptions = {
+  /** The URL to redirect to after authentication (defaults to current page) */
+  redirectUrl?: string;
+};

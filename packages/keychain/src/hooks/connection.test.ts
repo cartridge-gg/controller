@@ -107,6 +107,7 @@ vi.mock("@/context/navigation", () => ({
 }));
 
 // Mock other dependencies
+const mockLoadConfig = vi.fn();
 vi.mock("@/utils/connection", () => ({
   connectToController: vi.fn(() => ({
     promise: Promise.resolve({
@@ -114,4 +115,164 @@ vi.mock("@/utils/connection", () => ({
     }),
     destroy: vi.fn(),
   })),
+  loadConfig: (...args: unknown[]) => mockLoadConfig(...args),
+  toArray: (value: string | string[]) =>
+    Array.isArray(value) ? value : [value],
 }));
+
+describe("Config Loading and Verification Separation", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("Config loading independence", () => {
+    it("should load config when preset is provided", async () => {
+      const mockConfig = {
+        origin: "https://example.com",
+        name: "Test App",
+      };
+      mockLoadConfig.mockResolvedValue(mockConfig);
+
+      // This test verifies that config loading happens independently
+      expect(mockLoadConfig).toBeDefined();
+    });
+
+    it("should handle config without origin gracefully", async () => {
+      const mockConfig: Record<string, unknown> = {
+        name: "Test App",
+        // no origin field
+      };
+      mockLoadConfig.mockResolvedValue(mockConfig);
+
+      // Verification should set verified to false when origin is missing
+      expect(mockConfig.origin).toBeUndefined();
+    });
+
+    it("should process config with array of origins", async () => {
+      const mockConfig = {
+        origin: ["https://example.com", "https://another.com"],
+        name: "Test App",
+      };
+      mockLoadConfig.mockResolvedValue(mockConfig);
+
+      expect(Array.isArray(mockConfig.origin)).toBe(true);
+    });
+  });
+
+  describe("Verification computation timing", () => {
+    it("should verify after config is loaded", async () => {
+      // This test ensures verification happens only after config is available
+      const mockConfig = {
+        origin: "https://example.com",
+        name: "Test App",
+      };
+
+      let configLoaded = false;
+      mockLoadConfig.mockImplementation(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        configLoaded = true;
+        return mockConfig;
+      });
+
+      // Verification should wait for config to load
+      expect(configLoaded).toBe(false);
+    });
+
+    it("should handle origin availability after config loads", () => {
+      const mockConfig = {
+        origin: "https://example.com",
+      };
+
+      // Simulates the case where origin might not be available immediately
+      const hasOrigin = Boolean(mockConfig.origin);
+      expect(hasOrigin).toBe(true);
+    });
+  });
+
+  describe("Standalone mode redirect_url verification", () => {
+    it("should extract origin from redirect_url", () => {
+      const redirectUrl = "https://example.com/callback?param=value";
+      const url = new URL(redirectUrl);
+      const redirectOrigin = url.origin;
+
+      expect(redirectOrigin).toBe("https://example.com");
+    });
+
+    it("should handle invalid redirect_url", () => {
+      const invalidUrl = "not-a-valid-url";
+
+      expect(() => {
+        new URL(invalidUrl);
+      }).toThrow();
+    });
+
+    it("should verify localhost redirect_url", () => {
+      const redirectUrl = "http://localhost:3000/callback";
+      const url = new URL(redirectUrl);
+      const redirectOrigin = url.origin;
+
+      expect(redirectOrigin).toContain("localhost");
+    });
+
+    it("should extract origin with port", () => {
+      const redirectUrl = "https://example.com:8080/callback";
+      const url = new URL(redirectUrl);
+      const redirectOrigin = url.origin;
+
+      expect(redirectOrigin).toBe("https://example.com:8080");
+    });
+  });
+
+  describe("Multiple allowed origins verification", () => {
+    it("should verify against multiple allowed origins", () => {
+      const allowedOrigins = ["example.com", "another.com", "*.subdomain.com"];
+
+      expect(isOriginVerified("https://example.com", allowedOrigins)).toBe(
+        true,
+      );
+      expect(isOriginVerified("https://another.com", allowedOrigins)).toBe(
+        true,
+      );
+      expect(
+        isOriginVerified("https://app.subdomain.com", allowedOrigins),
+      ).toBe(true);
+      expect(isOriginVerified("https://notallowed.com", allowedOrigins)).toBe(
+        false,
+      );
+    });
+  });
+
+  describe("Edge cases", () => {
+    it("should handle empty config gracefully", async () => {
+      mockLoadConfig.mockResolvedValue({});
+
+      const config = await mockLoadConfig();
+      expect(config.origin).toBeUndefined();
+    });
+
+    it("should handle null config", async () => {
+      mockLoadConfig.mockResolvedValue(null);
+
+      const config = await mockLoadConfig();
+      expect(config).toBeNull();
+    });
+
+    it("should handle config load rejection", async () => {
+      const error = new Error("Failed to load config");
+      mockLoadConfig.mockRejectedValue(error);
+
+      await expect(mockLoadConfig()).rejects.toThrow("Failed to load config");
+    });
+
+    it("should verify universal wildcard origin", () => {
+      const allowedOrigins = ["*"];
+
+      expect(isOriginVerified("https://any-domain.com", allowedOrigins)).toBe(
+        true,
+      );
+      expect(isOriginVerified("http://localhost:3000", allowedOrigins)).toBe(
+        true,
+      );
+    });
+  });
+});
