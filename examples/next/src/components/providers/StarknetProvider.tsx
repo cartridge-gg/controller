@@ -195,7 +195,7 @@ const controller = new ControllerConnector({
   //
   // However, if you want to use custom RPC URLs, you can still specify them:
   chains: controllerConnectorChains,
-  url: getKeychainUrl(),
+  url: "https://x.cartridge.gg",
   signupOptions: [
     "google",
     "webauthn",
@@ -218,8 +218,8 @@ const controller = new ControllerConnector({
 
 const session = new SessionConnector({
   policies,
-  rpc: process.env.NEXT_PUBLIC_RPC_MAINNET!,
-  chainId: constants.StarknetChainId.SN_MAIN,
+  rpc: process.env.NEXT_PUBLIC_RPC_SEPOLIA!,
+  chainId: constants.StarknetChainId.SN_SEPOLIA,
   redirectUrl: typeof window !== "undefined" ? window.location.origin : "",
   disconnectRedirectUrl: "whatsapp://",
   keychainUrl: getKeychainUrl(),
@@ -230,7 +230,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      defaultChainId={mainnet.id}
+      defaultChainId={sepolia.id}
       chains={starknetConfigChains}
       connectors={[controller, session]}
       explorer={cartridge}
