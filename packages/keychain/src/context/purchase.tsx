@@ -13,8 +13,9 @@ import {
 } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { usdcToUsd } from "@/utils/starterpack";
-import { uint256, Call } from "starknet";
+import { uint256, Call, num } from "starknet";
 import { isOnchainStarterpack } from "@/types/starterpack-types";
+import { getCurrentReferral } from "@/utils/referral";
 
 import useStripePayment from "@/hooks/payments/stripe";
 import { usdToCredits } from "@/hooks/tokens";
@@ -135,7 +136,7 @@ export const PurchaseProvider = ({
   children,
   isSlot = false,
 }: PurchaseProviderProps) => {
-  const { controller, isMainnet } = useConnection();
+  const { controller, isMainnet, origin } = useConnection();
   const { error: walletError, connectWallet, switchChain } = useWallets();
   const [starterpack, setStarterpack] = useState<string | number>();
   const [starterpackDetails, setStarterpackDetails] = useState<
@@ -219,6 +220,16 @@ export const PurchaseProvider = ({
         setSwapInput(undefined);
         return;
       }
+      // Skip Layerswap input creation for claim-only starterpacks
+      // Claim flows don't need payment/swap setup since they're merkle drops
+      // Note: Onchain starterpacks are always PAID, only backend can be CLAIMED
+      if (
+        source === "backend" &&
+        backendAcquisitionType === StarterpackAcquisitionType.Claimed
+      ) {
+        setSwapInput(undefined);
+        return;
+      }
       // Layerswap only works for backend starterpacks currently
       if (source === "backend") {
         const input = starterPackToLayerswapInput(
@@ -234,7 +245,14 @@ export const PurchaseProvider = ({
       }
     };
     getSwapInput();
-  }, [controller, starterpack, selectedPlatform, isMainnet, source]);
+  }, [
+    controller,
+    starterpack,
+    selectedPlatform,
+    isMainnet,
+    source,
+    backendAcquisitionType,
+  ]);
 
   // Transform data based on source (backend vs onchain)
   useEffect(() => {
@@ -431,6 +449,9 @@ export const PurchaseProvider = ({
         },
       ];
 
+      // Get referral data for the current game
+      const referralData = getCurrentReferral(origin);
+
       // Step 2: Issue the starterpack
       // issue(recipient, starterpack_id, quantity, referrer: Option<ContractAddress>, referrer_group: Option<felt252>)
       const issueCalls: Call[] = [
@@ -441,8 +462,12 @@ export const PurchaseProvider = ({
             recipient, // recipient
             starterpackId, // starterpack_id: u32
             0x1, // quantity: u32 (always 1 for now)
-            0x1, // referrer: Option<ContractAddress> (None)
-            0x1, // referrer_group: Option<felt252> (None)
+            ...(referralData?.refAddress
+              ? [0x0, num.toBigInt(referralData?.refAddress?.toString())]
+              : [0x1]),
+            ...(referralData?.refGroup
+              ? [0x0, num.toBigInt(referralData?.refGroup?.toString())]
+              : [0x1]),
           ],
         },
       ];
@@ -457,7 +482,7 @@ export const PurchaseProvider = ({
       setDisplayError(e as Error);
       throw e;
     }
-  }, [controller, starterpackDetails]);
+  }, [controller, starterpackDetails, origin]);
 
   const onExternalConnect = useCallback(
     async (

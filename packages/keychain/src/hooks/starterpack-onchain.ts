@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useController } from "./controller";
+import { useConnection } from "./connection";
 import {
   CairoByteArray,
   Call,
@@ -19,6 +20,7 @@ import {
   STRK_CONTRACT_ADDRESS,
   ETH_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
+import { getCurrentReferral } from "@/utils/referral";
 
 interface TokenMetadata {
   symbol: string;
@@ -118,10 +120,10 @@ function chainIdToEkuboNetwork(chainId: string): EkuboNetwork {
 export const useStarterPackOnchain = (
   starterpackId?: number,
   amount?: number,
-  hasReferral?: boolean,
   targetToken?: string, // Token to convert prices to (defaults to USDC)
 ) => {
   const { controller } = useController();
+  const { origin } = useConnection();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isQuoteLoading, setIsQuoteLoading] = useState(true);
@@ -131,6 +133,12 @@ export const useStarterPackOnchain = (
   );
   const [quote, setQuote] = useState<OnchainQuote | null>(null);
   const [supply, setSupply] = useState<number | undefined>(undefined);
+
+  // Auto-detect if there's a valid referral for the current game
+  const hasReferral = useMemo(
+    () => getCurrentReferral(origin) !== null,
+    [origin],
+  );
 
   // Fetch metadata first (fast)
   useEffect(() => {

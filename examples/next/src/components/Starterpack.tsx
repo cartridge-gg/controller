@@ -17,13 +17,13 @@ export const Starterpack = () => {
       return {
         purchaseOnchain: 0,
         purchase: "sick-starterpack-mainnet",
-        claim: "claim-starterpack-mainnet",
+        claim: "claim-dopewars-mainnet",
       };
     }
     return {
       purchaseOnchain: 0,
       purchase: "sick-starterpack-sepolia",
-      claim: "claim-starterpack-sepolia",
+      claim: "claim-dopewars-sepolia",
     };
   };
 

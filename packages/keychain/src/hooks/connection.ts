@@ -46,6 +46,11 @@ import {
   shortString,
 } from "starknet";
 import { ParsedSessionPolicies, parseSessionPolicies } from "./session";
+import {
+  storeReferral,
+  lookupReferrerAddress,
+  isValidFelt,
+} from "@/utils/referral";
 
 const LORDS_CONTRACT_ADDRESS = getChecksumAddress(
   "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
@@ -217,6 +222,8 @@ export function useConnectionValue() {
     const version = urlParams.get("v");
     const project = urlParams.get("ps");
     const namespace = urlParams.get("ns");
+    const ref = urlParams.get("ref");
+    const refGroup = urlParams.get("ref_group");
     const erc20Param = urlParams.get("erc20");
     const tokens = erc20Param
       ? decodeURIComponent(erc20Param)
@@ -243,6 +250,8 @@ export function useConnectionValue() {
       project,
       namespace,
       tokens,
+      ref,
+      refGroup,
     };
   }, [searchParams]);
 
@@ -382,6 +391,54 @@ export function useConnectionValue() {
       .finally(() => {
         setIsConfigLoading(false);
       });
+  }, [origin, urlParams]);
+
+  // Store referral data when URL params are available
+  useEffect(() => {
+    const { ref, refGroup } = urlParams;
+
+    let refGroupLocal: string | null = refGroup;
+
+    // Only store if ref parameter is present and origin is available
+    if (!ref || !origin) {
+      return;
+    }
+
+    // Validation: check if refGroup fits in felt252
+    if (refGroup && !isValidFelt(refGroup)) {
+      console.error(
+        "[Referral] refGroup exceeds 31 characters or contains invalid characters:",
+        refGroup,
+      );
+      refGroupLocal = null;
+    }
+
+    // Strip https:// from origin to get game URL
+    const gameUrl = origin.replace(/^https?:\/\//, "");
+    if (!gameUrl) {
+      return;
+    }
+
+    // If ref is a username, lookup the address. If it's already an address, use it directly
+    const fetchAndStoreReferral = async () => {
+      try {
+        let refAddress: string = "";
+        // ref is a username, look up the address
+        const address = await lookupReferrerAddress(ref);
+        if (address) {
+          refAddress = address;
+        }
+
+        // Store the referral with the resolved address
+        storeReferral(ref, gameUrl, refGroupLocal || undefined, refAddress);
+      } catch (error) {
+        console.error("[Referral] Failed to fetch and store referral:", error);
+        // Store without address on error
+        storeReferral(ref, gameUrl, refGroupLocal || undefined);
+      }
+    };
+
+    fetchAndStoreReferral();
   }, [origin, urlParams]);
 
   // Handle theme configuration

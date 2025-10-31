@@ -17,7 +17,8 @@ import {
 } from "starknet";
 import { useConnection } from "./connection";
 import { parseSignature } from "viem";
-import { ExternalWalletType } from "@cartridge/controller";
+import { ExternalPlatform, ExternalWalletType } from "@cartridge/controller";
+import { evmNetworks } from "@/components/purchasenew/wallet/config";
 
 export interface MerkleClaim {
   key: string;
@@ -32,6 +33,7 @@ export interface MerkleClaim {
   contract: string;
   entrypoint: string;
   description?: string | null;
+  matchStarterpackItem?: boolean | null;
 }
 
 export const useMerkleClaim = ({
@@ -70,6 +72,7 @@ export const useMerkleClaim = ({
             contract: claim.merkleDrop.contract,
             entrypoint: claim.merkleDrop.entrypoint,
             description: claim.merkleDrop.description,
+            matchStarterpackItem: claim.merkleDrop.matchStarterpackItem,
             claimed: false,
             loading: true,
           }),
@@ -153,52 +156,71 @@ export const useMerkleClaim = ({
   }, [claims, controller, checkAllClaims]);
 
   // TODO: Use ABI to generate the calldata
-  const onSendClaim = useCallback(async () => {
-    if (!merkleTreeKey || !leafData || !controller || !claims.length) {
-      const error = new Error("Missing required data");
-      setError(error);
-      throw error;
-    }
+  const onSendClaim = useCallback(
+    async (claimIndices?: number[]) => {
+      if (!merkleTreeKey || !leafData || !controller || !claims.length) {
+        const error = new Error("Missing required data");
+        setError(error);
+        throw error;
+      }
 
-    try {
-      const isEvm = claims[0].network === MerkleDropNetwork.Ethereum;
+      try {
+        // Filter claims based on provided indices, or use all unclaimed
+        const claimsToProcess = claimIndices
+          ? claims.filter((_, index) => claimIndices.includes(index))
+          : claims.filter((claim) => !claim.claimed);
 
-      let signature: Calldata;
-      if (isEvm) {
-        const msg = evmMessage(controller.address());
-        const { result, error } = await externalSignMessage(address, msg);
-        if (error) {
-          throw new Error(error);
+        if (claimsToProcess.length === 0) {
+          throw new Error("No claims to process");
         }
 
-        const { r, s, v } = parseSignature(result as `0x${string}`);
-        signature = CallData.compile([
-          num.toHex(v!),
-          cairo.uint256(r),
-          cairo.uint256(s),
-        ]);
+        // Verify all claims are homogeneously EVM or non-EVM
+        const claimTypes = claimsToProcess.map((claim) =>
+          evmNetworks.includes(claim.network.toLowerCase() as ExternalPlatform),
+        );
+        const isEvm = claimTypes[0];
 
-        signature.unshift("0x0"); // Enum Ethereum Signature
-      } else {
-        const msg: TypedData = starknetMessage(controller.address(), isMainnet);
-        if (type === "controller") {
-          const result = await controller.signMessage(msg);
-          signature = result as Array<string>;
-        } else {
-          const { result, error } = await externalSignTypedData(type, msg);
+        if (!claimTypes.every((type) => type === isEvm)) {
+          throw new Error("Cannot mix EVM and non-EVM claims");
+        }
+
+        let signature: Calldata;
+        if (isEvm) {
+          const msg = evmMessage(controller.address());
+          const { result, error } = await externalSignMessage(address, msg);
           if (error) {
             throw new Error(error);
           }
-          signature = result as Array<string>;
+
+          const { r, s, v } = parseSignature(result as `0x${string}`);
+          signature = CallData.compile([
+            num.toHex(v!),
+            cairo.uint256(r),
+            cairo.uint256(s),
+          ]);
+
+          signature.unshift("0x0"); // Enum Ethereum Signature
+        } else {
+          const msg: TypedData = starknetMessage(
+            controller.address(),
+            isMainnet,
+          );
+          if (type === "controller") {
+            const result = await controller.signMessage(msg);
+            signature = result as Array<string>;
+          } else {
+            const { result, error } = await externalSignTypedData(type, msg);
+            if (error) {
+              throw new Error(error);
+            }
+            signature = result as Array<string>;
+          }
+
+          signature.unshift(num.toHex(signature.length));
+          signature.unshift("0x1"); // Enum Starknet Signature
         }
 
-        signature.unshift(num.toHex(signature.length));
-        signature.unshift("0x1"); // Enum Starknet Signature
-      }
-
-      const calls = claims
-        .filter((claim) => !claim.claimed)
-        .map((claim) => {
+        const calls = claimsToProcess.map((claim) => {
           const raw = {
             merkle_tree_key: merkleTreeKey(claim),
             proof: claim.merkleProof,
@@ -214,21 +236,24 @@ export const useMerkleClaim = ({
           };
         });
 
-      const { transaction_hash } = await controller.executeFromOutsideV3(calls);
-      return transaction_hash;
-    } catch (error) {
-      setError(error as Error);
-      throw error;
-    }
-  }, [
-    type,
-    address,
-    controller,
-    claims,
-    isMainnet,
-    externalSignMessage,
-    externalSignTypedData,
-  ]);
+        const { transaction_hash } =
+          await controller.executeFromOutsideV3(calls);
+        return transaction_hash;
+      } catch (error) {
+        setError(error as Error);
+        throw error;
+      }
+    },
+    [
+      type,
+      address,
+      controller,
+      claims,
+      isMainnet,
+      externalSignMessage,
+      externalSignTypedData,
+    ],
+  );
 
   return {
     claims,
@@ -239,8 +264,14 @@ export const useMerkleClaim = ({
 };
 
 const merkleTreeKey = (claim: MerkleClaim) => {
+  // Merkle Drop contract treats all EVM networks as Ethereum
+  let network: MerkleDropNetwork = claim.network;
+  if (evmNetworks.includes(network.toLowerCase() as ExternalPlatform)) {
+    network = MerkleDropNetwork.Ethereum;
+  }
+
   return {
-    chain_id: shortString.encodeShortString(claim.network),
+    chain_id: shortString.encodeShortString(network),
     claim_contract_address: claim.contract,
     selector: hash.getSelectorFromName(claim.entrypoint),
     salt: claim.salt,
