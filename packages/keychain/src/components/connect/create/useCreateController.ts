@@ -255,31 +255,36 @@ export function useCreateController({
           return;
         }
 
-        // Exit if params not available for verified policies
-        if (!params) {
-          void closeModal?.();
+        // Handle verified policies - create session automatically and close modal
+        if (policies.verified) {
+          // Exit if params not available for verified policies
+          if (!params) {
+            void closeModal?.();
+            return;
+          }
+
+          try {
+            // Use a default duration for verified sessions (24 hours)
+            const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
+            const expiresAt = duration + now();
+
+            const processedPolicies = processPolicies(policies, false);
+            await controller.createSession(expiresAt, processedPolicies);
+            params.resolve?.({
+              code: ResponseCodes.SUCCESS,
+              address: controller.address(),
+            });
+            cleanupCallbacks(params.params.id);
+            handleCompletion();
+          } catch (e) {
+            console.error("Failed to create verified session:", e);
+            // Fall back to showing the UI if auto-creation fails
+            params.reject?.(e);
+          }
           return;
         }
 
-        // create session if session is verified
-        try {
-          // Use a default duration for verified sessions (24 hours)
-          const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-          const expiresAt = duration + now();
-
-          const processedPolicies = processPolicies(policies, false);
-          await controller.createSession(expiresAt, processedPolicies);
-          params.resolve?.({
-            code: ResponseCodes.SUCCESS,
-            address: controller.address(),
-          });
-          cleanupCallbacks(params.params.id);
-          handleCompletion();
-        } catch (e) {
-          console.error("Failed to create verified session:", e);
-          // Fall back to showing the UI if auto-creation fails
-          params.reject?.(e);
-        }
+        // For unverified policies, continue with normal flow (don't auto-close)
       }
 
       // Call the authentication success callback
@@ -471,31 +476,36 @@ export function useCreateController({
         return;
       }
 
-      // Exit if params not available for verified policies
-      if (!params) {
-        handleCompletion();
+      // Handle verified policies - create session automatically and close modal
+      if (policies.verified) {
+        // Exit if params not available for verified policies
+        if (!params) {
+          handleCompletion();
+          return;
+        }
+
+        try {
+          // Use a default duration for verified sessions (24 hours)
+          const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
+          const expiresAt = duration + now();
+
+          const processedPolicies = processPolicies(policies, false);
+          await loginRet.controller.createSession(expiresAt, processedPolicies);
+          params.resolve?.({
+            code: ResponseCodes.SUCCESS,
+            address: loginRet.controller.address(),
+          });
+          cleanupCallbacks(params.params.id);
+          handleCompletion();
+        } catch (e) {
+          console.error("Failed to create verified session:", e);
+          // Fall back to showing the UI if auto-creation fails
+          params.reject?.(e);
+        }
         return;
       }
 
-      // create session if session is verified
-      try {
-        // Use a default duration for verified sessions (24 hours)
-        const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-        const expiresAt = duration + now();
-
-        const processedPolicies = processPolicies(policies, false);
-        await loginRet.controller.createSession(expiresAt, processedPolicies);
-        params.resolve?.({
-          code: ResponseCodes.SUCCESS,
-          address: loginRet.controller.address(),
-        });
-        cleanupCallbacks(params.params.id);
-        handleCompletion();
-      } catch (e) {
-        console.error("Failed to create verified session:", e);
-        // Fall back to showing the UI if auto-creation fails
-        params.reject?.(e);
-      }
+      // For unverified policies, continue with normal flow (don't auto-close)
 
       // Call the authentication success callback
       onAuthenticationSuccess?.();

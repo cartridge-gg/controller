@@ -57,8 +57,15 @@ export function ConnectRoute() {
     return null;
   }
 
-  // Show loading state for auto-completing connections to prevent blank screen
-  if (!policies || policies.verified) {
+  // No policies and verified policies are handled in useCreateController
+  // This component only handles unverified policies that need user consent
+  if (!policies) {
+    // This should not be reached as no policies case is handled in useCreateController
+    return null;
+  }
+
+  if (policies.verified) {
+    // This should not be reached as verified policies are handled in useCreateController
     return null;
   }
 
