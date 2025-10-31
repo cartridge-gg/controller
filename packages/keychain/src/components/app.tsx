@@ -62,6 +62,16 @@ import { useAccount } from "@/hooks/account";
 
 function DefaultRoute() {
   const account = useAccount();
+  const { search } = useLocation();
+
+  // Check if we have a redirect_url parameter
+  const searchParams = new URLSearchParams(search);
+  const redirectUrl = searchParams.get("redirect_url");
+
+  // If redirect_url is present, route to connect component
+  if (redirectUrl) {
+    return <Navigate to={`/connect${search}`} replace />;
+  }
 
   // When logged in and at root path, redirect to inventory
   if (account?.username) {
