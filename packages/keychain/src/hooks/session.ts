@@ -6,7 +6,7 @@ import {
   type TypedDataPolicy,
   erc20Metadata,
 } from "@cartridge/presets";
-import { CartridgeIcon, CoinsIcon } from "@cartridge/ui";
+import { CartridgeIcon } from "@cartridge/ui";
 import React, { createContext, useContext } from "react";
 import {
   TypedDataRevision,
@@ -17,6 +17,7 @@ import {
 
 import { DEFAULT_SESSION_DURATION } from "@/constants";
 import type { Policy } from "@cartridge/controller-wasm";
+import makeBlockie from "ethereum-blockies-base64";
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
 
@@ -107,8 +108,7 @@ export function parseSessionPolicies({
         symbol: meta.symbol,
         decimals: meta.decimals,
         type: "ERC20",
-        icon:
-          meta.logo_url || React.createElement(CoinsIcon, { variant: "line" }),
+        icon: meta.logo_url || makeBlockie(getChecksumAddress(address)),
       };
     }
   });
