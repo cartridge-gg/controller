@@ -79,7 +79,7 @@ describe("Referral Utilities", () => {
       expect(result.capturedAt).toBeLessThanOrEqual(Date.now());
     });
 
-    it("should not overwrite existing valid referral (first-touch attribution)", () => {
+    it("should not overwrite existing ref but allow refGroup updates", () => {
       const gameUrl = "lootsurvivor.io";
 
       // First referral
@@ -87,21 +87,99 @@ describe("Referral Utilities", () => {
       const firstRefGroup = "campaign1";
       const firstResult = storeReferral(firstRef, gameUrl, firstRefGroup);
 
-      // Try to store a different referral for the same game
+      // Try to store a different referral for the same game with a different refGroup
       const secondRef = "bob";
       const secondRefGroup = "campaign2";
       const secondResult = storeReferral(secondRef, gameUrl, secondRefGroup);
 
-      // Should return the first referral, not the second
+      // Should keep the first ref (first-touch attribution)
+      // But should update to the second refGroup
       expect(secondResult.ref).toBe(firstRef);
-      expect(secondResult.refGroup).toBe(firstRefGroup);
+      expect(secondResult.refGroup).toBe(secondRefGroup); // Updated!
       expect(secondResult.capturedAt).toBe(firstResult.capturedAt);
       expect(secondResult.expiresAt).toBe(firstResult.expiresAt);
 
-      // Verify localStorage still has the first referral
+      // Verify localStorage has the updated refGroup
       const stored = getReferral(gameUrl);
       expect(stored?.ref).toBe(firstRef);
-      expect(stored?.refGroup).toBe(firstRefGroup);
+      expect(stored?.refGroup).toBe(secondRefGroup);
+    });
+
+    it("should allow updating refGroup when ref stays the same", () => {
+      const gameUrl = "lootsurvivor.io";
+
+      // First referral with refGroup
+      const ref = "alice";
+      const firstRefGroup = "campaign1";
+      const firstResult = storeReferral(ref, gameUrl, firstRefGroup);
+
+      // Update with same ref but different refGroup
+      const secondRefGroup = "campaign2";
+      const secondResult = storeReferral(ref, gameUrl, secondRefGroup);
+
+      // Should keep same ref and update refGroup
+      expect(secondResult.ref).toBe(ref);
+      expect(secondResult.refGroup).toBe(secondRefGroup);
+      expect(secondResult.capturedAt).toBe(firstResult.capturedAt);
+      expect(secondResult.expiresAt).toBe(firstResult.expiresAt);
+    });
+
+    it("should not update when ref and refGroup are the same", () => {
+      const gameUrl = "lootsurvivor.io";
+
+      // First referral
+      const ref = "alice";
+      const refGroup = "campaign1";
+      const firstResult = storeReferral(ref, gameUrl, refGroup);
+
+      // Try to store the exact same referral again
+      const secondResult = storeReferral(ref, gameUrl, refGroup);
+
+      // Should return the same object without modification
+      expect(secondResult.ref).toBe(firstResult.ref);
+      expect(secondResult.refGroup).toBe(firstResult.refGroup);
+      expect(secondResult.capturedAt).toBe(firstResult.capturedAt);
+      expect(secondResult.expiresAt).toBe(firstResult.expiresAt);
+    });
+
+    it("should allow setting refGroup when it was initially undefined", () => {
+      const gameUrl = "lootsurvivor.io";
+
+      // First referral without refGroup
+      const ref = "alice";
+      const firstResult = storeReferral(ref, gameUrl);
+
+      expect(firstResult.refGroup).toBeUndefined();
+
+      // Update with refGroup
+      const refGroup = "campaign1";
+      const secondResult = storeReferral(ref, gameUrl, refGroup);
+
+      // Should keep same ref and add refGroup
+      expect(secondResult.ref).toBe(ref);
+      expect(secondResult.refGroup).toBe(refGroup);
+      expect(secondResult.capturedAt).toBe(firstResult.capturedAt);
+      expect(secondResult.expiresAt).toBe(firstResult.expiresAt);
+    });
+
+    it("should allow removing refGroup (setting to undefined)", () => {
+      const gameUrl = "lootsurvivor.io";
+
+      // First referral with refGroup
+      const ref = "alice";
+      const refGroup = "campaign1";
+      const firstResult = storeReferral(ref, gameUrl, refGroup);
+
+      expect(firstResult.refGroup).toBe(refGroup);
+
+      // Update without refGroup
+      const secondResult = storeReferral(ref, gameUrl);
+
+      // Should keep same ref and remove refGroup
+      expect(secondResult.ref).toBe(ref);
+      expect(secondResult.refGroup).toBeUndefined();
+      expect(secondResult.capturedAt).toBe(firstResult.capturedAt);
+      expect(secondResult.expiresAt).toBe(firstResult.expiresAt);
     });
 
     it("should allow new referral after previous one expires", () => {
