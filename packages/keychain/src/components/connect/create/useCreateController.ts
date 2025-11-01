@@ -41,6 +41,7 @@ import { processPolicies } from "../CreateSession";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
+import { ParsedSessionPolicies } from "@/hooks/session";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -56,6 +57,55 @@ export interface SignupResponse {
 export interface LoginResponse {
   signer: Signer;
 }
+
+const createSession = async ({
+  controller,
+  policies,
+  params,
+  handleCompletion,
+}: {
+  controller: Controller;
+  policies?: ParsedSessionPolicies;
+  params?: ReturnType<typeof parseConnectParams>;
+  handleCompletion: () => void;
+}) => {
+  // Exit if params not available for verified policies
+  if (!params) {
+    handleCompletion();
+    return;
+  }
+
+  // Handle no policies case - resolve connection and close modal
+  if (!policies) {
+    params.resolve?.({
+      code: ResponseCodes.SUCCESS,
+      address: controller.address(),
+    });
+    cleanupCallbacks(params.params.id);
+    handleCompletion();
+    return;
+  }
+
+  try {
+    // Use a default duration for verified sessions (24 hours)
+    const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
+    const expiresAt = duration + now();
+
+    const processedPolicies = processPolicies(policies, false);
+    await controller.createSession(expiresAt, processedPolicies);
+    params.resolve?.({
+      code: ResponseCodes.SUCCESS,
+      address: controller.address(),
+    });
+    cleanupCallbacks(params.params.id);
+    handleCompletion();
+  } catch (e) {
+    console.error("Failed to create verified session:", e);
+    // Fall back to showing the UI if auto-creation fails
+    params.reject?.(e);
+  }
+  return;
+};
 
 export function useCreateController({
   isSlot,
@@ -79,8 +129,7 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController, policies, closeModal } =
-    useConnection();
+  const { origin, rpcUrl, chainId, setController, policies } = useConnection();
 
   // Import route params and completion for connection resolution
   const [searchParams] = useSearchParams();
@@ -241,52 +290,14 @@ export function useCreateController({
         window.controller = controller;
         setController(controller);
 
-        // Handle no policies case - resolve connection and close modal
-        if (!policies) {
-          if (params) {
-            params.resolve?.({
-              code: ResponseCodes.SUCCESS,
-              address: controller.address(),
-            });
-            cleanupCallbacks(params.params.id);
-            handleCompletion();
-          } else {
-            void closeModal?.();
-          }
-          return;
-        }
-
-        // Handle verified policies - create session automatically and close modal
-        if (policies.verified) {
-          // Exit if params not available for verified policies
-          if (!params) {
-            void closeModal?.();
-            return;
-          }
-
-          try {
-            // Use a default duration for verified sessions (24 hours)
-            const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-            const expiresAt = duration + now();
-
-            const processedPolicies = processPolicies(policies, false);
-            await controller.createSession(expiresAt, processedPolicies);
-            params.resolve?.({
-              code: ResponseCodes.SUCCESS,
-              address: controller.address(),
-            });
-            cleanupCallbacks(params.params.id);
-            handleCompletion();
-          } catch (e) {
-            console.error("Failed to create verified session:", e);
-            // Fall back to showing the UI if auto-creation fails
-            params.reject?.(e);
-          }
-          return;
-        }
+        await createSession({
+          controller,
+          policies,
+          params,
+          handleCompletion,
+        });
 
         // For unverified policies, continue with normal flow (don't auto-close)
-
         // Check for redirect_url parameter and redirect after successful signup
         const searchParams = new URLSearchParams(window.location.search);
         const redirectUrl = searchParams.get("redirect_url");
@@ -303,7 +314,6 @@ export function useCreateController({
       setController,
       origin,
       policies,
-      closeModal,
       handleCompletion,
       params,
       onAuthenticationSuccess,
@@ -470,52 +480,14 @@ export function useCreateController({
       window.controller = loginRet.controller;
       setController(loginRet.controller);
 
-      // Handle no policies case - resolve connection and close modal
-      if (!policies) {
-        if (params) {
-          params.resolve?.({
-            code: ResponseCodes.SUCCESS,
-            address: loginRet.controller.address(),
-          });
-          cleanupCallbacks(params.params.id);
-          handleCompletion();
-        } else {
-          handleCompletion();
-        }
-        return;
-      }
-
-      // Handle verified policies - create session automatically and close modal
-      if (policies.verified) {
-        // Exit if params not available for verified policies
-        if (!params) {
-          handleCompletion();
-          return;
-        }
-
-        try {
-          // Use a default duration for verified sessions (24 hours)
-          const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
-          const expiresAt = duration + now();
-
-          const processedPolicies = processPolicies(policies, false);
-          await loginRet.controller.createSession(expiresAt, processedPolicies);
-          params.resolve?.({
-            code: ResponseCodes.SUCCESS,
-            address: loginRet.controller.address(),
-          });
-          cleanupCallbacks(params.params.id);
-          handleCompletion();
-        } catch (e) {
-          console.error("Failed to create verified session:", e);
-          // Fall back to showing the UI if auto-creation fails
-          params.reject?.(e);
-        }
-        return;
-      }
+      await createSession({
+        controller: loginRet.controller,
+        policies,
+        params,
+        handleCompletion,
+      });
 
       // For unverified policies, continue with normal flow (don't auto-close)
-
       // Call the authentication success callback
       onAuthenticationSuccess?.();
 
