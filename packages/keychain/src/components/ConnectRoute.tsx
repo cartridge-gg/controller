@@ -11,7 +11,6 @@ import {
   useRouteCompletion,
   useRouteCallbacks,
 } from "@/hooks/route";
-import { PageLoading } from "./Loading";
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
 
@@ -173,12 +172,12 @@ export function ConnectRoute() {
   // This component only handles unverified policies that need user consent
   if (!policies) {
     // This should not be reached as no policies case is handled in useCreateController
-    return <PageLoading title="Connecting..." />;
+    return null;
   }
 
   if (policies.verified) {
     // This should not be reached as verified policies are handled in useCreateController
-    return <PageLoading title="Connecting..." />;
+    return null;
   }
 
   // Show CreateSession for unverified sessions in embedded mode
