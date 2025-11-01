@@ -58,11 +58,19 @@ import { Disconnect } from "./disconnect";
 import { PurchaseProvider } from "@/context";
 import { OnchainCheckout } from "./purchasenew/checkout/onchain";
 import { useAccount } from "@/hooks/account";
-import { safeRedirect } from "@/utils/url-validator";
-import { useEffect } from "react";
 
 function DefaultRoute() {
   const account = useAccount();
+  const { search } = useLocation();
+
+  // Check if we have a redirect_url parameter
+  const searchParams = new URLSearchParams(search);
+  const redirectUrl = searchParams.get("redirect_url");
+
+  // If redirect_url is present, route to connect component
+  if (redirectUrl) {
+    return <Navigate to={`/connect${search}`} replace />;
+  }
 
   // When logged in and at root path, redirect to inventory
   if (account?.username) {
@@ -78,29 +86,6 @@ function Authentication() {
   const { pathname, search } = useLocation();
 
   const upgrade = useUpgrade();
-
-  // Check for redirect_url when user is already authenticated
-  useEffect(() => {
-    if (
-      controller &&
-      upgrade.isSynced &&
-      !isConfigLoading &&
-      !upgrade.available
-    ) {
-      const searchParams = new URLSearchParams(search);
-      const redirectUrl = searchParams.get("redirect_url");
-      if (redirectUrl) {
-        // Safely redirect to the specified URL
-        safeRedirect(redirectUrl);
-      }
-    }
-  }, [
-    controller,
-    upgrade.isSynced,
-    upgrade.available,
-    isConfigLoading,
-    search,
-  ]);
 
   // Popup flow authentication
   if (pathname.startsWith("/authenticate")) {

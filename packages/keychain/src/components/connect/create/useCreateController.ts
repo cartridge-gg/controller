@@ -4,7 +4,6 @@ import { useConnection } from "@/hooks/connection";
 import { useWallets } from "@/hooks/wallets";
 import Controller from "@/utils/controller";
 import { PopupCenter } from "@/utils/url";
-import { safeRedirect } from "@/utils/url-validator";
 import { TurnkeyWallet } from "@/wallets/social/turnkey";
 import {
   AuthOption,
@@ -42,6 +41,7 @@ import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { ParsedSessionPolicies } from "@/hooks/session";
+import { safeRedirect } from "@/utils/url-validator";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -290,14 +290,16 @@ export function useCreateController({
         window.controller = controller;
         setController(controller);
 
-        await createSession({
-          controller,
-          policies,
-          params,
-          handleCompletion,
-        });
+        // Handle session creation for auto-close cases (no policies or verified policies)
+        if (!policies || policies.verified) {
+          await createSession({
+            controller,
+            policies,
+            params,
+            handleCompletion,
+          });
+        }
 
-        // For unverified policies, continue with normal flow (don't auto-close)
         // Check for redirect_url parameter and redirect after successful signup
         const searchParams = new URLSearchParams(window.location.search);
         const redirectUrl = searchParams.get("redirect_url");
@@ -480,14 +482,16 @@ export function useCreateController({
       window.controller = loginRet.controller;
       setController(loginRet.controller);
 
-      await createSession({
-        controller: loginRet.controller,
-        policies,
-        params,
-        handleCompletion,
-      });
+      // Handle session creation for auto-close cases (no policies or verified policies)
+      if (!policies || policies.verified) {
+        await createSession({
+          controller: loginRet.controller,
+          policies,
+          params,
+          handleCompletion,
+        });
+      }
 
-      // For unverified policies, continue with normal flow (don't auto-close)
       // Call the authentication success callback
       onAuthenticationSuccess?.();
 
@@ -730,14 +734,6 @@ export function useCreateController({
               authenticationMethod: socialProvider as AuthOption,
               rpcUrl,
             });
-          }
-
-          // Check for redirect_url parameter after social auth
-          const redirectUrl = new URLSearchParams(window.location.search).get(
-            "redirect_url",
-          );
-          if (redirectUrl) {
-            safeRedirect(redirectUrl);
           }
         } catch (e) {
           setError(e as Error);

@@ -4,7 +4,7 @@ import { cn } from "@cartridge/ui/utils";
 import { Badge } from "./badge";
 import { StarterPackItem, StarterPackItemType } from "@cartridge/controller";
 import { usdcToUsd } from "@/utils/starterpack";
-import { Item } from "@/context/purchase";
+import { Item, ItemType } from "@/context/purchase";
 
 interface Props {
   containerClassName?: string;
@@ -28,7 +28,6 @@ export const StarterItem = React.forwardRef<
 >(
   (
     {
-      type,
       className,
       containerClassName,
       fancy = false,
@@ -50,6 +49,12 @@ export const StarterItem = React.forwardRef<
     const icon = starterPackItem?.iconURL || purchaseItem?.icon || "";
     const price = starterPackItem?.price || 0n;
 
+    // Determine if thumbnail should be rounded
+    const isRounded = starterPackItem
+      ? starterPackItem.type === StarterPackItemType.FUNGIBLE
+      : purchaseItem?.type === ItemType.CREDIT ||
+        purchaseItem?.type === ItemType.ERC20;
+
     return (
       <div
         className={cn("relative pt-1", containerClassName)}
@@ -70,7 +75,7 @@ export const StarterItem = React.forwardRef<
             )}
           >
             <Thumbnail
-              rounded={type === StarterPackItemType.FUNGIBLE}
+              rounded={isRounded}
               icon={icon}
               variant="light"
               className="size-16 p-1"

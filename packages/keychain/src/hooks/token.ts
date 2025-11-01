@@ -9,6 +9,7 @@ import {
   useBalanceQuery,
   useBalancesQuery,
 } from "@cartridge/ui/utils/api/cartridge";
+import makeBlockie from "ethereum-blockies-base64";
 import { useAccount } from "./account";
 import { useConnection } from "@/hooks/connection";
 import { constants, getChecksumAddress } from "starknet";
@@ -89,11 +90,12 @@ export function useBalance({
           meta;
         const previous = price !== 0 ? (value * periodPrice) / price : 0;
         const change = value - previous;
-        const image = erc20Metadata.find(
-          (m) =>
-            getChecksumAddress(m.l2_token_address) ===
-            getChecksumAddress(contractAddress),
-        )?.logo_url;
+        const image =
+          erc20Metadata.find(
+            (m) =>
+              getChecksumAddress(m.l2_token_address) ===
+              getChecksumAddress(contractAddress),
+          )?.logo_url || makeBlockie(getChecksumAddress(contractAddress));
         const token: Token = {
           balance: {
             amount: amount,
@@ -164,11 +166,12 @@ export function useBalances(accountAddress?: string): UseBalancesResponse {
         meta;
       const previous = price !== 0 ? (value * periodPrice) / price : 0;
       const change = value - previous;
-      const image = erc20Metadata.find(
-        (m) =>
-          getChecksumAddress(m.l2_token_address) ===
-          getChecksumAddress(contractAddress),
-      )?.logo_url;
+      const image =
+        erc20Metadata.find(
+          (m) =>
+            getChecksumAddress(m.l2_token_address) ===
+            getChecksumAddress(contractAddress),
+        )?.logo_url || makeBlockie(getChecksumAddress(contractAddress));
       const token: Token = {
         balance: {
           amount: amount,
@@ -309,11 +312,12 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
         (v) => BigInt(v?.address || "0x0") === BigInt(contractAddress),
       );
       const change = value ? value.current.value - value.period.value : 0;
-      const image = erc20Metadata.find(
-        (m) =>
-          getChecksumAddress(m.l2_token_address) ===
-          getChecksumAddress(contractAddress),
-      )?.logo_url;
+      const image =
+        erc20Metadata.find(
+          (m) =>
+            getChecksumAddress(m.l2_token_address) ===
+            getChecksumAddress(contractAddress),
+        )?.logo_url || makeBlockie(getChecksumAddress(contractAddress));
       tokenMap[normalizedAddress] = {
         balance: {
           amount: Number(token.balance.value) / 10 ** token.meta.decimals,
@@ -325,7 +329,7 @@ export function useTokens(accountAddress?: string): UseTokensResponse {
           symbol: token.meta.symbol,
           decimals: token.meta.decimals,
           address: getChecksumAddress(contractAddress),
-          image: token.meta.logoUrl || image,
+          image: image,
         },
       };
     });
