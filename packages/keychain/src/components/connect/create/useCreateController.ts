@@ -9,6 +9,7 @@ import {
   AuthOption,
   AuthOptions,
   EMBEDDED_WALLETS,
+  ResponseCodes,
   WalletAdapter,
 } from "@cartridge/controller";
 import { computeAccountAddress, Signer } from "@cartridge/controller-wasm";
@@ -35,6 +36,17 @@ import { useSocialAuthentication } from "./social";
 import { AuthenticationStep, fetchController } from "./utils";
 import { useWalletConnectAuthentication } from "./wallet-connect";
 import { useWebauthnAuthentication } from "./webauthn";
+import { processPolicies } from "../CreateSession";
+import { cleanupCallbacks } from "@/utils/connection/callbacks";
+import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
+import { parseConnectParams } from "@/utils/connection/connect";
+import { ParsedSessionPolicies } from "@/hooks/session";
+import { safeRedirect } from "@/utils/url-validator";
+
+const CANCEL_RESPONSE = {
+  code: ResponseCodes.CANCELED,
+  message: "Canceled",
+};
 
 export interface SignupResponse {
   address: string;
@@ -46,12 +58,63 @@ export interface LoginResponse {
   signer: Signer;
 }
 
+const createSession = async ({
+  controller,
+  policies,
+  params,
+  handleCompletion,
+}: {
+  controller: Controller;
+  policies?: ParsedSessionPolicies;
+  params?: ReturnType<typeof parseConnectParams>;
+  handleCompletion: () => void;
+}) => {
+  // Exit if params not available for verified policies
+  if (!params) {
+    handleCompletion();
+    return;
+  }
+
+  // Handle no policies case - resolve connection and close modal
+  if (!policies) {
+    params.resolve?.({
+      code: ResponseCodes.SUCCESS,
+      address: controller.address(),
+    });
+    cleanupCallbacks(params.params.id);
+    handleCompletion();
+    return;
+  }
+
+  try {
+    // Use a default duration for verified sessions (24 hours)
+    const duration = BigInt(24 * 60 * 60); // 24 hours in seconds
+    const expiresAt = duration + now();
+
+    const processedPolicies = processPolicies(policies, false);
+    await controller.createSession(expiresAt, processedPolicies);
+    params.resolve?.({
+      code: ResponseCodes.SUCCESS,
+      address: controller.address(),
+    });
+    cleanupCallbacks(params.params.id);
+    handleCompletion();
+  } catch (e) {
+    console.error("Failed to create verified session:", e);
+    // Fall back to showing the UI if auto-creation fails
+    params.reject?.(e);
+  }
+  return;
+};
+
 export function useCreateController({
   isSlot,
   signers,
+  onAuthenticationSuccess,
 }: {
   isSlot?: boolean;
   signers?: AuthOptions;
+  onAuthenticationSuccess?: () => void;
 }) {
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,7 +129,15 @@ export function useCreateController({
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
   const [, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController } = useConnection();
+  const { origin, rpcUrl, chainId, setController, policies } = useConnection();
+
+  // Import route params and completion for connection resolution
+  const [searchParams] = useSearchParams();
+  const params = useMemo(() => {
+    return parseConnectParams(searchParams);
+  }, [searchParams]);
+  const handleCompletion = useRouteCompletion();
+
   const { signup: signupWithWebauthn, login: loginWithWebauthn } =
     useWebauthnAuthentication();
   const { signup: signupWithSocial, login: loginWithSocial } =
@@ -77,6 +148,8 @@ export function useCreateController({
     useWalletConnectAuthentication();
   const passwordAuth = usePasswordAuthentication();
   const { supportedWalletsForAuth } = useWallets();
+
+  useRouteCallbacks(params, CANCEL_RESPONSE);
 
   const handleAccountQuerySuccess = useCallback(
     async (data: AccountQuery) => {
@@ -216,9 +289,37 @@ export function useCreateController({
       if (registerRet.register.username) {
         window.controller = controller;
         setController(controller);
+
+        // Handle session creation for auto-close cases (no policies or verified policies)
+        if (!policies || policies.verified) {
+          await createSession({
+            controller,
+            policies,
+            params,
+            handleCompletion,
+          });
+        }
+
+        // Check for redirect_url parameter and redirect after successful signup
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectUrl = searchParams.get("redirect_url");
+        if (redirectUrl) {
+          // Safely redirect to the specified URL
+          safeRedirect(redirectUrl);
+        }
       }
+
+      // Call the authentication success callback
+      onAuthenticationSuccess?.();
     },
-    [setController, origin],
+    [
+      setController,
+      origin,
+      policies,
+      handleCompletion,
+      params,
+      onAuthenticationSuccess,
+    ],
   );
 
   const handleSignup = useCallback(
@@ -380,8 +481,36 @@ export function useCreateController({
 
       window.controller = loginRet.controller;
       setController(loginRet.controller);
+
+      // Handle session creation for auto-close cases (no policies or verified policies)
+      if (!policies || policies.verified) {
+        await createSession({
+          controller: loginRet.controller,
+          policies,
+          params,
+          handleCompletion,
+        });
+      }
+
+      // Call the authentication success callback
+      onAuthenticationSuccess?.();
+
+      // Check for redirect_url parameter and redirect after successful login
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get("redirect_url");
+      if (redirectUrl) {
+        // Safely redirect to the specified URL
+        safeRedirect(redirectUrl);
+      }
     },
-    [origin, setController],
+    [
+      origin,
+      setController,
+      policies,
+      handleCompletion,
+      params,
+      onAuthenticationSuccess,
+    ],
   );
 
   const handleLogin = useCallback(

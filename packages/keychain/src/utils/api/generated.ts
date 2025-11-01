@@ -1160,6 +1160,7 @@ export type Deployment = Node & {
   events?: Maybe<Array<DeploymentLog>>;
   id: Scalars["ID"];
   logs: Logs;
+  observability: Scalars["Boolean"];
   observabilitySecret?: Maybe<Scalars["String"]>;
   project: Scalars["String"];
   regions: Array<Scalars["String"]>;
@@ -1417,6 +1418,9 @@ export type DeploymentWhereInput = {
   idNEQ?: InputMaybe<Scalars["ID"]>;
   idNotIn?: InputMaybe<Array<Scalars["ID"]>>;
   not?: InputMaybe<DeploymentWhereInput>;
+  /** observability field predicates */
+  observability?: InputMaybe<Scalars["Boolean"]>;
+  observabilityNEQ?: InputMaybe<Scalars["Boolean"]>;
   or?: InputMaybe<Array<DeploymentWhereInput>>;
   /** project field predicates */
   project?: InputMaybe<Scalars["String"]>;
@@ -1777,13 +1781,8 @@ export type InvoiceWhereInput = {
 
 export type KatanaCreateInput = {
   network?: InputMaybe<Scalars["String"]>;
-  observability?: InputMaybe<Scalars["Boolean"]>;
   provable?: InputMaybe<Scalars["Boolean"]>;
   saya?: InputMaybe<Scalars["Boolean"]>;
-};
-
-export type KatanaUpdateInput = {
-  observability?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export enum LayerswapDestinationNetwork {
@@ -2393,6 +2392,7 @@ export type MutationCreateCryptoPaymentArgs = {
 
 export type MutationCreateDeploymentArgs = {
   name: Scalars["String"];
+  observability?: InputMaybe<Scalars["Boolean"]>;
   regions?: InputMaybe<Array<Scalars["String"]>>;
   service: CreateServiceInput;
   team?: InputMaybe<Scalars["String"]>;
@@ -2534,6 +2534,7 @@ export type MutationTransferDeploymentArgs = {
 
 export type MutationUpdateDeploymentArgs = {
   name: Scalars["String"];
+  observability?: InputMaybe<Scalars["Boolean"]>;
   service: UpdateServiceInput;
   tier?: InputMaybe<DeploymentTier>;
   wait?: InputMaybe<Scalars["Boolean"]>;
@@ -5676,13 +5677,11 @@ export enum TokenPair {
 }
 
 export type ToriiCreateInput = {
-  observability?: InputMaybe<Scalars["Boolean"]>;
   replicas?: InputMaybe<Scalars["Int"]>;
   replication?: InputMaybe<Scalars["Boolean"]>;
 };
 
 export type ToriiUpdateInput = {
-  observability?: InputMaybe<Scalars["Boolean"]>;
   replicas?: InputMaybe<Scalars["Int"]>;
 };
 
@@ -5838,7 +5837,6 @@ export type UpdateMerkleDropInput = {
 
 export type UpdateServiceInput = {
   config?: InputMaybe<Scalars["String"]>;
-  katana?: InputMaybe<KatanaUpdateInput>;
   torii?: InputMaybe<ToriiUpdateInput>;
   type: DeploymentService;
   version?: InputMaybe<Scalars["String"]>;

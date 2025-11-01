@@ -110,6 +110,7 @@ export function ConnectRoute() {
     }
 
     // Bypass session approval screen for verified sessions in embedded mode
+    // Note: This is a fallback - main logic is handled in useCreateController
     if (policies.verified && !isStandalone) {
       const createSessionForVerifiedPolicies = async () => {
         try {
@@ -144,6 +145,7 @@ export function ConnectRoute() {
     hasAutoConnected,
   ]);
 
+  // Don't render anything if we don't have controller yet - CreateController handles loading
   if (!controller) {
     return null;
   }
@@ -166,8 +168,15 @@ export function ConnectRoute() {
     );
   }
 
-  // Embedded mode: Don't show UI for no-policy or verified-policy connections
-  if (!policies || policies.verified) {
+  // Embedded mode: No policies and verified policies are handled in useCreateController
+  // This component only handles unverified policies that need user consent
+  if (!policies) {
+    // This should not be reached as no policies case is handled in useCreateController
+    return null;
+  }
+
+  if (policies.verified) {
+    // This should not be reached as verified policies are handled in useCreateController
     return null;
   }
 

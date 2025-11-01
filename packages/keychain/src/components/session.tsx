@@ -11,7 +11,6 @@ import { CheckIcon, HeaderInner } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Failure } from "./failure";
-import { PageLoading } from "./Loading";
 
 type SessionResponse = {
   username: string;
@@ -198,7 +197,7 @@ export function Session() {
   }
 
   if (isLoading) {
-    return <PageLoading />;
+    return null;
   }
 
   if (!policies) {
