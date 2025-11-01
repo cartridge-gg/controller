@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout controller repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -79,7 +79,7 @@ jobs:
 
       - name: Checkout docs repository
         if: steps.check-docs.outputs.needs_update == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: cartridge-gg/docs
           token: ${{ secrets.CREATE_PR_TOKEN }}
