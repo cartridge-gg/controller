@@ -1,4 +1,5 @@
 import {
+  type Approval,
   type ContractPolicy,
   type Method,
   type SessionPolicies,
@@ -19,11 +20,8 @@ import { DEFAULT_SESSION_DURATION } from "@/constants";
 import type { Policy, ApprovalPolicy } from "@cartridge/controller-wasm";
 import makeBlockie from "ethereum-blockies-base64";
 
-// Extended method type to support approve-specific fields
-type ExtendedMethod = Method & {
-  spender?: string;
-  amount?: string;
-};
+// Extended method type to support both Method and Approval from presets
+type ExtendedMethod = Method | Approval;
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
 
@@ -164,11 +162,11 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
           // Check if this is an approve entrypoint
           if (m.entrypoint === "approve") {
             // Only create ApprovalPolicy if both spender and amount are defined
-            if (m.spender && m.amount) {
+            if ("spender" in m && "amount" in m && m.spender && m.amount) {
               const approvalPolicy: ApprovalPolicy = {
                 target,
                 spender: m.spender,
-                amount: m.amount,
+                amount: String(m.amount), // Convert to string as ApprovalPolicy expects string
               };
               return approvalPolicy;
             }
