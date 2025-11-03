@@ -505,6 +505,7 @@ export function humanizeString(str: string): string {
 /**
  * Serializes error details including all enumerable properties
  * This is especially useful for WASM/Rust errors that may have additional fields
+ * Handles circular references and non-serializable values safely
  */
 export function serializeErrorDetails(error: unknown): string {
   const errorObj: Record<string, unknown> = {};
@@ -540,6 +541,29 @@ export function serializeErrorDetails(error: unknown): string {
     errorObj.stack = err.stack;
   }
 
-  // Format as a readable string
-  return JSON.stringify(errorObj, null, 2);
+  // Format as a readable string with circular reference handling
+  try {
+    const seen = new WeakSet();
+    return JSON.stringify(
+      errorObj,
+      (key, value) => {
+        // Handle circular references
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) {
+            return "[Circular Reference]";
+          }
+          seen.add(value);
+        }
+        // Handle BigInt
+        if (typeof value === "bigint") {
+          return value.toString();
+        }
+        return value;
+      },
+      2,
+    );
+  } catch (e) {
+    // Fallback if JSON.stringify still fails
+    return `Error serialization failed: ${String(e)}. Original error: ${String(error)}`;
+  }
 }
