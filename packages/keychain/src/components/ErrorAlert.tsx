@@ -506,32 +506,38 @@ export function humanizeString(str: string): string {
  * Serializes error details including all enumerable properties
  * This is especially useful for WASM/Rust errors that may have additional fields
  */
-export function serializeErrorDetails(error: any): string {
-  const errorObj: Record<string, any> = {};
+export function serializeErrorDetails(error: unknown): string {
+  const errorObj: Record<string, unknown> = {};
+
+  // Type guard to ensure error is an object
+  if (typeof error !== "object" || error === null) {
+    return String(error);
+  }
 
   // Get all enumerable properties from the error
   for (const key in error) {
     try {
-      const value = error[key];
+      const value = (error as Record<string, unknown>)[key];
       // Skip functions and undefined values
       if (typeof value !== "function" && value !== undefined) {
         errorObj[key] = value;
       }
-    } catch (e) {
+    } catch () {
       // Skip properties that throw errors when accessed
       continue;
     }
   }
 
   // Also try to get standard Error properties that might not be enumerable
-  if (error.message && !errorObj.message) {
-    errorObj.message = error.message;
+  const err = error as Partial<Error>;
+  if (err.message && !errorObj.message) {
+    errorObj.message = err.message;
   }
-  if (error.name && !errorObj.name) {
-    errorObj.name = error.name;
+  if (err.name && !errorObj.name) {
+    errorObj.name = err.name;
   }
-  if (error.stack && !errorObj.stack) {
-    errorObj.stack = error.stack;
+  if (err.stack && !errorObj.stack) {
+    errorObj.stack = err.stack;
   }
 
   // Format as a readable string
