@@ -209,7 +209,9 @@ export function ControllerErrorAlert({
         : error.message;
     } else {
       title = "Unknown error";
-      description = error.message;
+      description = error.message || serializeErrorDetails(error);
+      copyText = serializeErrorDetails(error);
+      isExpanded = true;
     }
 
     return (
@@ -359,7 +361,9 @@ export function ControllerErrorAlert({
       break;
     case ErrorCode.StarknetUnexpectedError:
       title = "Unexpected Error";
-      description = error.data?.reason || JSON.stringify(error);
+      description = error.data?.reason || serializeErrorDetails(error);
+      isExpanded = true;
+      copyText = serializeErrorDetails(error);
       break;
     case ErrorCode.StarknetTransactionExecutionError:
       try {
@@ -395,6 +399,9 @@ export function ControllerErrorAlert({
     }
     default: {
       title = "Unknown Error";
+      description = serializeErrorDetails(error);
+      isExpanded = true;
+      copyText = serializeErrorDetails(error);
       break;
     }
   }
@@ -493,4 +500,40 @@ export function humanizeString(str: string): string {
       // Capitalize first letter
       .replace(/^\w/, (c) => c.toUpperCase())
   );
+}
+
+/**
+ * Serializes error details including all enumerable properties
+ * This is especially useful for WASM/Rust errors that may have additional fields
+ */
+export function serializeErrorDetails(error: any): string {
+  const errorObj: Record<string, any> = {};
+
+  // Get all enumerable properties from the error
+  for (const key in error) {
+    try {
+      const value = error[key];
+      // Skip functions and undefined values
+      if (typeof value !== "function" && value !== undefined) {
+        errorObj[key] = value;
+      }
+    } catch (e) {
+      // Skip properties that throw errors when accessed
+      continue;
+    }
+  }
+
+  // Also try to get standard Error properties that might not be enumerable
+  if (error.message && !errorObj.message) {
+    errorObj.message = error.message;
+  }
+  if (error.name && !errorObj.name) {
+    errorObj.name = error.name;
+  }
+  if (error.stack && !errorObj.stack) {
+    errorObj.stack = error.stack;
+  }
+
+  // Format as a readable string
+  return JSON.stringify(errorObj, null, 2);
 }
