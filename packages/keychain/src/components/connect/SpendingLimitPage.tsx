@@ -60,7 +60,7 @@ export function SpendingLimitPage({
             isLoading={isConnecting}
             onClick={onConnect}
           >
-            {policies.verified ? "play" : "confirm"}
+            Confirm
           </Button>
         </div>
 

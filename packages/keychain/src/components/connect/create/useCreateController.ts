@@ -40,10 +40,7 @@ import { processPolicies } from "../CreateSession";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { useRouteCallbacks, useRouteCompletion } from "@/hooks/route";
 import { parseConnectParams } from "@/utils/connection/connect";
-import {
-  ParsedSessionPolicies,
-  hasApprovalPolicies,
-} from "@/hooks/session";
+import { ParsedSessionPolicies, hasApprovalPolicies } from "@/hooks/session";
 import { safeRedirect } from "@/utils/url-validator";
 
 const CANCEL_RESPONSE = {
@@ -321,7 +318,10 @@ export function useCreateController({
         setController(controller);
 
         // Handle session creation for auto-close cases (no policies or verified policies without token approvals)
-        if (!policies || (policies.verified && !hasApprovalPolicies(policies))) {
+        if (
+          !policies ||
+          (policies.verified && !hasApprovalPolicies(policies))
+        ) {
           await createSession({
             controller,
             policies,
