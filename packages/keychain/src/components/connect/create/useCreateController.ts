@@ -63,26 +63,53 @@ const createSession = async ({
   policies,
   params,
   handleCompletion,
+  closeModal,
+  searchParams,
 }: {
   controller: Controller;
   policies?: ParsedSessionPolicies;
   params?: ReturnType<typeof parseConnectParams>;
   handleCompletion: () => void;
+  closeModal?: () => void;
+  searchParams: URLSearchParams;
 }) => {
-  // Exit if params not available for verified policies
-  if (!params) {
-    handleCompletion();
+  // Handle no policies case - try to resolve connection, fallback to just closing modal
+  if (!policies) {
+    if (params) {
+      // Ideal case: resolve connection promise properly
+      params.resolve?.({
+        code: ResponseCodes.SUCCESS,
+        address: controller.address(),
+      });
+      cleanupCallbacks(params.params.id);
+      handleCompletion();
+    } else {
+      // Fallback: just close modal if params not available (race condition)
+      console.warn(
+        "No params available for no-policies case, falling back to closeModal",
+      );
+      closeModal?.();
+    }
     return;
   }
 
-  // Handle no policies case - resolve connection and close modal
-  if (!policies) {
-    params.resolve?.({
-      code: ResponseCodes.SUCCESS,
-      address: controller.address(),
-    });
-    cleanupCallbacks(params.params.id);
-    handleCompletion();
+  // For verified policies, we need params to properly notify parent
+  // Try to wait for params briefly if not available
+  let currentParams = params;
+  if (!currentParams) {
+    // Brief wait for params to be available (up to 500ms)
+    for (let i = 0; i < 5; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      currentParams = parseConnectParams(searchParams);
+      if (currentParams) break;
+    }
+  }
+
+  if (!currentParams) {
+    console.error(
+      "Params not available for verified policies, cannot resolve connection",
+    );
+    // Don't close modal - let normal flow handle it
     return;
   }
 
@@ -93,16 +120,16 @@ const createSession = async ({
 
     const processedPolicies = processPolicies(policies, false);
     await controller.createSession(expiresAt, processedPolicies);
-    params.resolve?.({
+    currentParams.resolve?.({
       code: ResponseCodes.SUCCESS,
       address: controller.address(),
     });
-    cleanupCallbacks(params.params.id);
+    cleanupCallbacks(currentParams.params.id);
     handleCompletion();
   } catch (e) {
     console.error("Failed to create verified session:", e);
     // Fall back to showing the UI if auto-creation fails
-    params.reject?.(e);
+    currentParams.reject?.(e);
   }
   return;
 };
@@ -128,11 +155,11 @@ export function useCreateController({
   );
   const [authenticationStep, setAuthenticationStep] =
     useState<AuthenticationStep>(AuthenticationStep.FillForm);
-  const [, setSearchParams] = useSearchParams();
-  const { origin, rpcUrl, chainId, setController, policies } = useConnection();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { origin, rpcUrl, chainId, setController, policies, closeModal } =
+    useConnection();
 
   // Import route params and completion for connection resolution
-  const [searchParams] = useSearchParams();
   const params = useMemo(() => {
     return parseConnectParams(searchParams);
   }, [searchParams]);
@@ -217,13 +244,13 @@ export function useCreateController({
 
   const doPopupFlow = useCallback(
     (username: string) => {
-      const searchParams = new URLSearchParams(window.location.search);
-      searchParams.set("name", encodeURIComponent(username));
-      searchParams.set("action", "signup");
+      const popupSearchParams = new URLSearchParams(window.location.search);
+      popupSearchParams.set("name", encodeURIComponent(username));
+      popupSearchParams.set("action", "signup");
       setPendingUsername(username);
 
       PopupCenter(
-        `/authenticate?${searchParams.toString()}`,
+        `/authenticate?${popupSearchParams.toString()}`,
         "Cartridge Signup",
         480,
         640,
@@ -297,12 +324,14 @@ export function useCreateController({
             policies,
             params,
             handleCompletion,
+            closeModal,
+            searchParams,
           });
         }
 
         // Check for redirect_url parameter and redirect after successful signup
-        const searchParams = new URLSearchParams(window.location.search);
-        const redirectUrl = searchParams.get("redirect_url");
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlSearchParams.get("redirect_url");
         if (redirectUrl) {
           // Safely redirect to the specified URL
           safeRedirect(redirectUrl);
@@ -319,6 +348,8 @@ export function useCreateController({
       handleCompletion,
       params,
       onAuthenticationSuccess,
+      closeModal,
+      searchParams,
     ],
   );
 
@@ -489,6 +520,8 @@ export function useCreateController({
           policies,
           params,
           handleCompletion,
+          closeModal,
+          searchParams,
         });
       }
 
@@ -496,8 +529,8 @@ export function useCreateController({
       onAuthenticationSuccess?.();
 
       // Check for redirect_url parameter and redirect after successful login
-      const searchParams = new URLSearchParams(window.location.search);
-      const redirectUrl = searchParams.get("redirect_url");
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlSearchParams.get("redirect_url");
       if (redirectUrl) {
         // Safely redirect to the specified URL
         safeRedirect(redirectUrl);
@@ -510,6 +543,8 @@ export function useCreateController({
       handleCompletion,
       params,
       onAuthenticationSuccess,
+      closeModal,
+      searchParams,
     ],
   );
 
