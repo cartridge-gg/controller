@@ -9,6 +9,7 @@ import {
   type ContractType,
   type ParsedSessionPolicies,
   useCreateSession,
+  hasApprovalPolicies,
 } from "@/hooks/session";
 import type { ControllerError } from "@/utils/connection";
 import {
@@ -21,6 +22,7 @@ import {
   SliderIcon,
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import { SpendingLimitPage } from "./SpendingLimitPage";
 
 const requiredPolicies: Array<ContractType> = ["VRF"];
 
@@ -67,6 +69,23 @@ const CreateSessionLayout = ({
     useCreateSession();
   const { controller, theme } = useConnection();
 
+  const hasTokenApprovals = useMemo(
+    () => hasApprovalPolicies(policies),
+    [policies],
+  );
+
+  const defaultStep = useMemo<"summary" | "spending-limit">(() => {
+    return policies?.verified && hasTokenApprovals
+      ? "spending-limit"
+      : "summary";
+  }, [policies?.verified, hasTokenApprovals]);
+
+  const [step, setStep] = useState<"summary" | "spending-limit">(defaultStep);
+
+  useEffect(() => {
+    setStep(defaultStep);
+  }, [defaultStep]);
+
   const expiresAt = useMemo(() => {
     return duration + now();
   }, [duration]);
@@ -96,24 +115,50 @@ const CreateSessionLayout = ({
     [controller, policies, expiresAt],
   );
 
+  const handlePrimaryAction = useCallback(async () => {
+    if (!policies || isConnecting) {
+      return;
+    }
+
+    if (!policies.verified && !isConsent) {
+      setIsConsent(true);
+      return;
+    }
+
+    if (hasTokenApprovals && step === "summary") {
+      setStep("spending-limit");
+      return;
+    }
+
+    await createSession({
+      toggleOff: false,
+      successCallback: onConnect,
+    });
+  }, [
+    policies,
+    isConnecting,
+    isConsent,
+    hasTokenApprovals,
+    step,
+    createSession,
+    onConnect,
+  ]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
 
-        // If unverified and consent not given, check the consent box
-        if (!policies?.verified && !isConsent && !isConnecting) {
+        // If unverified and on the summary step without consent, check the consent box
+        if (!policies?.verified && step === "summary" && !isConsent) {
           setIsConsent(true);
           return;
         }
 
-        // If consent is given (or verified session), trigger create button
-        if ((policies?.verified || isConsent) && !isConnecting) {
-          createButtonRef.current?.click();
-        }
+        void handlePrimaryAction();
       }
     },
-    [policies?.verified, isConsent, isConnecting],
+    [policies?.verified, step, isConsent, handlePrimaryAction],
   );
 
   // Add keyboard listener to the document
@@ -135,6 +180,24 @@ const CreateSessionLayout = ({
     document.addEventListener("keydown", handleDocumentKeyDown);
     return () => document.removeEventListener("keydown", handleDocumentKeyDown);
   }, [handleKeyDown]);
+
+  if (!policies) {
+    return null;
+  }
+
+  if (hasTokenApprovals && step === "spending-limit") {
+    return (
+      <SpendingLimitPage
+        policies={policies}
+        isConnecting={isConnecting}
+        error={error}
+        onBack={() => setStep("summary")}
+        onConnect={() => {
+          void handlePrimaryAction();
+        }}
+      />
+    );
+  }
 
   return (
     <>
@@ -158,8 +221,8 @@ const CreateSessionLayout = ({
         }
       />
       <LayoutContent className="pb-0">
-        <SessionConsent isVerified={policies?.verified} />
-        {policies?.verified ? (
+        <SessionConsent isVerified={policies.verified} />
+        {policies.verified ? (
           <VerifiedSessionSummary
             game={theme.name}
             contracts={policies.contracts}
@@ -208,29 +271,28 @@ const CreateSessionLayout = ({
         {error && <ControllerErrorAlert className="mb-3" error={error} />}
 
         <div className="flex items-center gap-4">
-          <Button
-            variant="secondary"
-            onClick={async () => {
-              await createSession({
-                toggleOff: true,
-                successCallback: onSkip,
-              });
-            }}
-            disabled={isConnecting}
-            className="px-8"
-          >
-            Skip
-          </Button>
+          {!policies.verified && (
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                await createSession({
+                  toggleOff: true,
+                  successCallback: onSkip,
+                });
+              }}
+              disabled={isConnecting}
+              className="px-8"
+            >
+              Skip
+            </Button>
+          )}
           <Button
             ref={createButtonRef}
-            className="flex-1"
-            disabled={isConnecting || (!policies?.verified && !isConsent)}
+            className={cn("flex-1", policies.verified && "w-full")}
+            disabled={isConnecting || (!policies.verified && !isConsent)}
             isLoading={isConnecting}
-            onClick={async () => {
-              await createSession({
-                toggleOff: false,
-                successCallback: onConnect,
-              });
+            onClick={() => {
+              void handlePrimaryAction();
             }}
           >
             {isUpdate ? "update" : "create"} session

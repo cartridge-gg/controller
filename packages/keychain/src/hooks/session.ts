@@ -40,6 +40,24 @@ export type ParsedSessionPolicies = {
   messages?: SessionMessages;
 };
 
+export function hasApprovalPolicies(
+  policies?: ParsedSessionPolicies | null,
+): boolean {
+  if (!policies?.contracts) {
+    return false;
+  }
+
+  return Object.values(policies.contracts).some(({ methods }) =>
+    methods.some((method) => {
+      const entry =
+        ("entrypoint" in method && method.entrypoint) ||
+        // Support legacy tests/data that may only set name
+        ("name" in method ? method.name : undefined);
+      return typeof entry === "string" && entry.toLowerCase() === "approve";
+    }),
+  );
+}
+
 export type SessionContracts = Record<
   string,
   Omit<ContractPolicy, "methods"> & {
