@@ -61,7 +61,6 @@ const policies: SessionPolicies = {
         { name: "transfer", entrypoint: "transfer" },
         { name: "mint", entrypoint: "mint" },
         { name: "burn", entrypoint: "burn" },
-        { name: "allowance", entrypoint: "allowance" },
       ],
     },
     [STRK_CONTRACT_ADDRESS]: {

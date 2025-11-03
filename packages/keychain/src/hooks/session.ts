@@ -173,7 +173,7 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
 
             // Fall back to CallPolicy with deprecation warning
             console.warn(
-              `[DEPRECATED] Approve method without spender and amount fields will be rejected by account-wasm 0.3.13+. ` +
+              `[DEPRECATED] Approve method without spender and amount fields will be rejected in future versions. ` +
                 `Please update your preset or policies to include both 'spender' and 'amount' fields for approve calls on contract ${target}. ` +
                 `Example: { entrypoint: "approve", spender: "0x...", amount: "0x..." }`,
             );
