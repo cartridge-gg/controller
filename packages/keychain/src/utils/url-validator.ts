@@ -11,6 +11,7 @@
 export function validateRedirectUrl(redirectUrl: string): {
   isValid: boolean;
   error?: string;
+  validatedUrl?: string;
 } {
   // Check for empty or undefined
   if (!redirectUrl || redirectUrl.trim() === "") {
@@ -66,7 +67,7 @@ export function validateRedirectUrl(redirectUrl: string): {
   }
 
   // URL is safe to redirect to
-  return { isValid: true };
+  return { isValid: true, validatedUrl: url.href };
 }
 
 /**
@@ -88,6 +89,7 @@ export function safeRedirect(redirectUrl: string): boolean {
   }
 
   // Safe to redirect
-  window.location.href = redirectUrl;
+  // Use the canonical, validated URL instead of the raw input
+  window.location.href = validation.validatedUrl!;
   return true;
 }
