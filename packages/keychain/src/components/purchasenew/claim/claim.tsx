@@ -223,7 +223,7 @@ export function Claim() {
       network: claims[0].network,
       totalAmount: claims
         .filter((c) => !c.claimed)
-        .reduce((acc, c) => acc + c.data.length, 0),
+        .reduce((acc, c) => acc + Number(c.data[0] || 0), 0),
       allClaimed: claims.every((c) => c.claimed),
       isLoading: claims.every((c) => c.loading),
     }));
