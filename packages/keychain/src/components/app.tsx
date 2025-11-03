@@ -51,7 +51,6 @@ import { Collections } from "./purchasenew/starterpack/collections";
 import { DeployController } from "./DeployController";
 import { useConnection } from "@/hooks/connection";
 import { CreateController, Upgrade } from "./connect";
-import { PageLoading } from "./Loading";
 import { useUpgrade } from "./provider/upgrade";
 import { Layout } from "@/components/layout";
 import { Authenticate } from "./authenticate";
@@ -97,7 +96,7 @@ function Authentication() {
     return <Disconnect />;
   }
 
-  // No controller, send to login
+  // No controller, show CreateController
   if (!controller) {
     // Extract signers from URL if present (for connect flow)
     const searchParams = new URLSearchParams(search);
@@ -121,9 +120,14 @@ function Authentication() {
     );
   }
 
+  // Controller exists but upgrade not synced - show CreateController with loading instead of PageLoading
   if (!upgrade.isSynced || isConfigLoading) {
-    // This is likely never observable in a real application but just in case.
-    return <PageLoading />;
+    return (
+      <CreateController
+        isSlot={pathname.startsWith("/slot")}
+        isLoading={true}
+      />
+    );
   }
 
   if (upgrade.available) {

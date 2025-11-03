@@ -26,6 +26,9 @@ export function OnchainCheckout() {
     walletAddress,
     onOnchainPurchase,
     clearError,
+    selectedToken,
+    convertedPrice,
+    isFetchingConversion,
   } = usePurchaseContext();
   const { navigate } = useNavigation();
   const { controller } = useConnection();
@@ -41,20 +44,57 @@ export function OnchainCheckout() {
     return starterpackDetails.quote;
   }, [starterpackDetails]);
 
-  // Check if user has sufficient balance
+  // Determine which token to check balance for and required amount
+  const tokenToCheck = useMemo(() => {
+    if (!quote) return null;
+    // If a token is selected and it's different from payment token, check selected token
+    if (selectedToken && selectedToken.address !== quote.paymentToken) {
+      return {
+        address: selectedToken.address,
+        symbol: selectedToken.symbol,
+        requiredAmount: convertedPrice?.amount ?? null,
+      };
+    }
+    // Otherwise check payment token
+    return {
+      address: quote.paymentToken,
+      symbol: quote.paymentTokenMetadata.symbol,
+      requiredAmount: quote.totalCost,
+    };
+  }, [quote, selectedToken, convertedPrice]);
+
+  // Determine if we're still loading balance/conversion data
+  const isLoadingBalance = useMemo(() => {
+    return (
+      isChecking ||
+      isFetchingConversion ||
+      balance === null ||
+      tokenToCheck === null ||
+      tokenToCheck.requiredAmount === null
+    );
+  }, [isChecking, isFetchingConversion, balance, tokenToCheck]);
+
+  // Check if user has sufficient balance (only when not loading)
   const hasSufficientBalance = useMemo(() => {
-    if (!quote || balance === null) return false;
-    return balance >= quote.totalCost;
-  }, [balance, quote]);
+    if (isLoadingBalance) return false; // Don't show insufficient balance while loading
+    if (
+      !tokenToCheck ||
+      balance === null ||
+      tokenToCheck.requiredAmount === null
+    ) {
+      return false;
+    }
+    return balance >= tokenToCheck.requiredAmount;
+  }, [balance, tokenToCheck, isLoadingBalance]);
 
   // Fetch user's token balance
   useEffect(() => {
-    // Reset balance when wallet selection changes
+    // Reset balance when wallet selection or token selection changes
     setBalance(null);
     setIsChecking(true);
 
     const checkBalance = async () => {
-      if (!controller || !quote) {
+      if (!controller || !tokenToCheck) {
         setIsChecking(false);
         return;
       }
@@ -68,9 +108,9 @@ export function OnchainCheckout() {
           : controller.address();
 
       try {
-        // Call balanceOf on the payment token contract
+        // Call balanceOf on the token contract (selected token or payment token)
         const result = await controller.provider.callContract({
-          contractAddress: quote.paymentToken,
+          contractAddress: tokenToCheck.address,
           entrypoint: "balanceOf",
           calldata: [addressToCheck],
         });
@@ -92,7 +132,7 @@ export function OnchainCheckout() {
     };
 
     checkBalance();
-  }, [controller, quote, selectedWallet, walletAddress]);
+  }, [controller, tokenToCheck, selectedWallet, walletAddress]);
 
   const onPurchase = useCallback(async () => {
     if (!hasSufficientBalance) return;
@@ -122,7 +162,7 @@ export function OnchainCheckout() {
     );
   }
 
-  const { symbol: tokenSymbol } = quote.paymentTokenMetadata;
+  const tokenSymbol = tokenToCheck?.symbol ?? quote.paymentTokenMetadata.symbol;
 
   return (
     <>
@@ -135,29 +175,28 @@ export function OnchainCheckout() {
       </LayoutContent>
       <LayoutFooter>
         {/* Insufficient Balance Warning */}
-        {!isChecking && !hasSufficientBalance && (
+        {!isLoadingBalance && !hasSufficientBalance && (
           <Card className="border-warning">
             <CardContent className="flex flex-row items-center gap-3 p-3 text-warning">
               <ErrorAlertIcon variant="warning" size="sm" />
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-semibold">Insufficient Balance</p>
                 <p className="text-xs text-foreground-300">
-                  You need more {tokenSymbol} to complete this purchase. Please
-                  add funds or swap tokens.
+                  You need more {tokenSymbol} to complete this purchase.
                 </p>
               </div>
             </CardContent>
           </Card>
         )}
 
-        <OnchainCostBreakdown quote={quote} />
+        <OnchainCostBreakdown quote={quote} showTokenSelector />
         {displayError && <ControllerErrorAlert error={displayError} />}
         <Button
           onClick={onPurchase}
-          isLoading={isLoading || isChecking}
-          disabled={!hasSufficientBalance || !!displayError || isChecking}
+          isLoading={isLoading || isLoadingBalance}
+          disabled={!hasSufficientBalance || isLoadingBalance}
         >
-          {!hasSufficientBalance && !isChecking
+          {!hasSufficientBalance && !isLoadingBalance
             ? "Insufficient Balance"
             : "Confirm"}
         </Button>

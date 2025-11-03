@@ -1,5 +1,10 @@
-import { Call, num } from "starknet";
+import { Call, num, InvokeFunctionResponse, constants } from "starknet";
 import { USDC_CONTRACT_ADDRESS } from "@cartridge/ui/utils";
+import {
+  ExternalWalletResponse,
+  ExternalWalletType,
+} from "@cartridge/controller";
+import Controller from "@/utils/controller";
 
 /**
  * Supported networks for Ekubo quotes
@@ -178,8 +183,6 @@ export async function fetchSwapQuote(
 
   const url = `${baseUrl}/${receivedAmount}/${normalizedTokenFrom}/${normalizedTokenTo}`;
 
-  console.log("Ekubo API URL:", url); // Debug log
-
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < RETRY_CONFIG.maxRetries; attempt++) {
@@ -293,7 +296,7 @@ export async function fetchSwapQuote(
 /**
  * Fetch token price in USDC
  */
-export async function fetchTokenPriceInUsdc(
+export async function fetchSwapQuoteInUsdc(
   tokenAddress: string,
   amount: bigint,
   network: EkuboNetwork = "mainnet",
@@ -482,4 +485,104 @@ export function generateSwapCalls(
   }
 
   return [transferCall, ...swapCalls, clearCall];
+}
+
+/**
+ * Determine Ekubo network from Starknet chain ID
+ */
+export function chainIdToEkuboNetwork(chainId: string): EkuboNetwork {
+  switch (chainId) {
+    case constants.StarknetChainId.SN_MAIN:
+      return "mainnet";
+    case constants.StarknetChainId.SN_SEPOLIA:
+      return "sepolia";
+    default:
+      console.warn(`Unknown chainId ${chainId}, defaulting to mainnet`);
+      return "mainnet";
+  }
+}
+
+/**
+ * Execute swap calls using either controller or external wallet
+ *
+ * @param swapCalls - Array of calls to execute the swap
+ * @param walletType - Type of wallet to use ('controller' or external wallet type)
+ * @param controller - Controller instance (required for 'controller' wallet type)
+ * @param externalSendTransaction - External wallet transaction function (required for external wallets)
+ * @returns Promise resolving to transaction hash
+ * @throws Error if execution fails or required parameters are missing
+ */
+export async function executeSwap(
+  swapCalls: Call[],
+  walletType: "controller" | ExternalWalletType,
+  controller?: Controller,
+  externalSendTransaction?: (
+    identifier: string,
+    txn: Call[],
+  ) => Promise<ExternalWalletResponse>,
+): Promise<string> {
+  if (walletType === "controller") {
+    if (!controller) {
+      throw new Error("Controller is required for controller wallet type");
+    }
+
+    try {
+      const result: InvokeFunctionResponse =
+        await controller.execute(swapCalls);
+      return result.transaction_hash;
+    } catch (error) {
+      throw new Error(
+        `Failed to execute swap with controller: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  } else {
+    // External wallet (Argent, Braavos, etc.)
+    if (!externalSendTransaction) {
+      throw new Error(
+        "externalSendTransaction is required for external wallet type",
+      );
+    }
+
+    try {
+      // Convert Call[] to format expected by external wallets (snake_case)
+      const externalCalls = swapCalls.map((call) => ({
+        contract_address: call.contractAddress,
+        entry_point: call.entrypoint,
+        calldata: call.calldata,
+      }));
+
+      const response = await externalSendTransaction(
+        walletType,
+        externalCalls as unknown as Call[],
+      );
+
+      if (!response.success) {
+        throw new Error(
+          response.error || `Failed to execute swap with ${walletType}`,
+        );
+      }
+
+      if (!response.result) {
+        throw new Error(`No transaction hash returned from ${walletType}`);
+      }
+
+      // Extract transaction hash from response
+      // For Starknet wallets (Argent/Braavos), result is the raw wallet response
+      // which contains transaction_hash property
+      const result = response.result as { transaction_hash?: string };
+      const transactionHash = result.transaction_hash;
+
+      if (!transactionHash) {
+        throw new Error(
+          `Invalid response format from ${walletType}: missing transaction_hash. Result: ${JSON.stringify(result)}`,
+        );
+      }
+
+      return transactionHash;
+    } catch (error) {
+      throw new Error(
+        `Failed to execute swap with ${walletType}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  }
 }
