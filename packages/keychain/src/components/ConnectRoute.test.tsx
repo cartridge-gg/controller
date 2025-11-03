@@ -179,16 +179,17 @@ describe("ConnectRoute", () => {
         policies: {
           verified: true,
           contracts: {
-            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7": {
-              methods: [
-                {
-                  entrypoint: "approve",
-                  spender:
-                    "0x1234567890123456789012345678901234567890123456789012345678901234",
-                  amount: "1000",
-                },
-              ],
-            },
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7":
+              {
+                methods: [
+                  {
+                    entrypoint: "approve",
+                    spender:
+                      "0x1234567890123456789012345678901234567890123456789012345678901234",
+                    amount: "1000",
+                  },
+                ],
+              },
           },
           messages: [],
         },
