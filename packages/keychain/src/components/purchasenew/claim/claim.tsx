@@ -104,7 +104,7 @@ export function Claim() {
   const totalClaimable = useMemo(() => {
     return claimsData
       .filter((claim) => !claim.claimed)
-      .reduce((acc, claim) => acc + claim.data.length, 0);
+      .reduce((acc, claim) => acc + Number(claim.data[0] || 0), 0);
   }, [claimsData]);
 
   // Filter starterpack items based on matchStarterpackItem flag
@@ -176,7 +176,7 @@ export function Claim() {
 
         // Calculate total amount from matching claims
         const totalAmount = matchingClaims.reduce(
-          (acc, claim) => acc + claim.data.length,
+          (acc, claim) => acc + Number(claim.data[0] || 0),
           0,
         );
 
@@ -268,7 +268,9 @@ export function Claim() {
                           <CollectionItem
                             name={claim.description ?? claim.key}
                             network={claim.network}
-                            numAvailable={claim.claimed ? 0 : claim.data.length}
+                            numAvailable={
+                              claim.claimed ? 0 : Number(claim.data[0] || 0)
+                            }
                             isLoading={claim.loading}
                           />
                           {!claim.loading && (
