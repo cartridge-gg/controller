@@ -59,7 +59,7 @@ export function useRouteCompletion() {
     if (returnTo) {
       navigate(returnTo, { replace: true });
     } else {
-      void closeModal?.();
+      closeModal?.();
     }
   }, [returnTo, navigate, closeModal]);
 
