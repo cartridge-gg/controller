@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ResponseCodes } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
+import { hasApprovalPolicies } from "@/hooks/session";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
 import { CreateSession, processPolicies } from "./connect/CreateSession";
@@ -42,6 +43,11 @@ export function ConnectRoute() {
     }
     return null;
   }, [isStandalone]);
+
+  const hasTokenApprovals = useMemo(
+    () => hasApprovalPolicies(policies),
+    [policies],
+  );
 
   const handleConnect = useCallback(() => {
     if (!params || !controller) {
@@ -112,6 +118,10 @@ export function ConnectRoute() {
     // Bypass session approval screen for verified sessions in embedded mode
     // Note: This is a fallback - main logic is handled in useCreateController
     if (policies.verified && !isStandalone) {
+      if (hasTokenApprovals) {
+        return;
+      }
+
       const createSessionForVerifiedPolicies = async () => {
         try {
           // Use a default duration for verified sessions (24 hours)
@@ -143,6 +153,7 @@ export function ConnectRoute() {
     isStandalone,
     redirectUrl,
     hasAutoConnected,
+    hasTokenApprovals,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
@@ -152,8 +163,8 @@ export function ConnectRoute() {
 
   // In standalone mode with redirect_url, show connect UI
   if (isStandalone && redirectUrl) {
-    // If verified session, show simple connect screen
-    if (!policies || policies.verified) {
+    // If verified session without approvals, show simple connect screen
+    if (!policies || (policies.verified && !hasTokenApprovals)) {
       return (
         <StandaloneConnect redirectUrl={redirectUrl} isVerified={verified} />
       );
@@ -175,12 +186,13 @@ export function ConnectRoute() {
     return null;
   }
 
-  if (policies.verified) {
+  if (policies.verified && !hasTokenApprovals) {
     // This should not be reached as verified policies are handled in useCreateController
     return null;
   }
 
-  // Show CreateSession for unverified sessions in embedded mode
+  // Show CreateSession for sessions that require approval UI in embedded mode
+
   return (
     <CreateSession
       policies={policies}
