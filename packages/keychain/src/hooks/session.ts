@@ -1,4 +1,5 @@
 import {
+  type Approval,
   type ContractPolicy,
   type Method,
   type SessionPolicies,
@@ -16,8 +17,11 @@ import {
 } from "starknet";
 
 import { DEFAULT_SESSION_DURATION } from "@/constants";
-import type { Policy } from "@cartridge/controller-wasm";
+import type { Policy, ApprovalPolicy } from "@cartridge/controller-wasm";
 import makeBlockie from "ethereum-blockies-base64";
+
+// Extended method type to support both Method and Approval from presets
+type ExtendedMethod = Method | Approval;
 
 export type ContractType = "ERC20" | "ERC721" | "VRF";
 
@@ -34,6 +38,24 @@ export type ParsedSessionPolicies = {
   messages?: SessionMessages;
 };
 
+export function hasApprovalPolicies(
+  policies?: ParsedSessionPolicies | null,
+): boolean {
+  if (!policies?.contracts) {
+    return false;
+  }
+
+  return Object.values(policies.contracts).some(({ methods }) =>
+    methods.some((method) => {
+      const entry =
+        ("entrypoint" in method && method.entrypoint) ||
+        // Support legacy tests/data that may only set name
+        ("name" in method ? method.name : undefined);
+      return typeof entry === "string" && entry.toLowerCase() === "approve";
+    }),
+  );
+}
+
 export type SessionContracts = Record<
   string,
   Omit<ContractPolicy, "methods"> & {
@@ -41,7 +63,7 @@ export type SessionContracts = Record<
       type: ContractType;
       icon?: React.ReactNode | string;
     };
-    methods: (Method & {
+    methods: (ExtendedMethod & {
       authorized?: boolean;
       id?: string;
       amount?: string | number;
@@ -136,11 +158,34 @@ export function toWasmPolicies(policies: ParsedSessionPolicies): Policy[] {
     ...Object.entries(policies.contracts ?? {}).flatMap(
       ([target, { methods }]) => {
         const methodsArr = Array.isArray(methods) ? methods : [methods];
-        return methodsArr.map((m) => ({
-          target,
-          method: hash.getSelectorFromName(m.entrypoint),
-          authorized: !!m.authorized,
-        }));
+        return methodsArr.map((m): Policy => {
+          // Check if this is an approve entrypoint
+          if (m.entrypoint === "approve") {
+            // Only create ApprovalPolicy if both spender and amount are defined
+            if ("spender" in m && "amount" in m && m.spender && m.amount) {
+              const approvalPolicy: ApprovalPolicy = {
+                target,
+                spender: m.spender,
+                amount: String(m.amount), // Convert to string as ApprovalPolicy expects string
+              };
+              return approvalPolicy;
+            }
+
+            // Fall back to CallPolicy with deprecation warning
+            console.warn(
+              `[DEPRECATED] Approve method without spender and amount fields will be rejected in future versions. ` +
+                `Please update your preset or policies to include both 'spender' and 'amount' fields for approve calls on contract ${target}. ` +
+                `Example: { entrypoint: "approve", spender: "0x...", amount: "0x..." }`,
+            );
+          }
+
+          // For non-approve methods and legacy approve, create a regular CallPolicy
+          return {
+            target,
+            method: hash.getSelectorFromName(m.entrypoint),
+            authorized: !!m.authorized,
+          };
+        });
       },
     ),
     ...(policies.messages ?? []).map((p) => {

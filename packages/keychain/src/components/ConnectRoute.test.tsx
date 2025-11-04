@@ -142,7 +142,7 @@ describe("ConnectRoute", () => {
           verified: false,
           contracts: {
             "0xcontract": {
-              methods: [{ name: "transfer", authorized: true }],
+              methods: [{ entrypoint: "transfer", authorized: true }],
             },
           },
           messages: [],
@@ -156,7 +156,7 @@ describe("ConnectRoute", () => {
       expect(screen.getByText("Create Session")).toBeInTheDocument();
     });
 
-    it("does not show UI for verified policies", () => {
+    it("does not show UI for verified policies without approvals", () => {
       mockUseConnection.mockReturnValue({
         controller: mockController,
         policies: {
@@ -167,12 +167,43 @@ describe("ConnectRoute", () => {
         verified: true,
       });
 
-      const { container } = renderWithProviders(<ConnectRoute />);
+      renderWithProviders(<ConnectRoute />);
 
-      // Should not render any UI during auto-connect
-      expect(
-        container.querySelector('[data-testid="create-session"]'),
-      ).toBeNull();
+      expect(screen.queryByText("Create Session")).toBeNull();
+      expect(screen.queryByText("Spending Limit")).toBeNull();
+    });
+
+    it("shows spending limit page for verified policies with approvals", () => {
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: {
+          verified: true,
+          contracts: {
+            "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7":
+              {
+                methods: [
+                  {
+                    entrypoint: "approve",
+                    spender:
+                      "0x1234567890123456789012345678901234567890123456789012345678901234",
+                    amount: "1000",
+                  },
+                ],
+              },
+          },
+          messages: [],
+        },
+        verified: true,
+        theme: {
+          name: "TestApp",
+          verified: true,
+        },
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      expect(screen.getByText("Spending Limit")).toBeInTheDocument();
+      expect(mockController.createSession).not.toHaveBeenCalled();
     });
   });
 
@@ -226,7 +257,7 @@ describe("ConnectRoute", () => {
           verified: false,
           contracts: {
             "0xcontract": {
-              methods: [{ name: "transfer", authorized: true }],
+              methods: [{ entrypoint: "transfer", authorized: true }],
             },
           },
           messages: [],
@@ -368,10 +399,7 @@ describe("ConnectRoute", () => {
           verified: true,
           contracts: {
             "0xcontract": {
-              methods: [
-                { id: "1", name: "transfer", authorized: true },
-                { id: "2", name: "approve", authorized: false },
-              ],
+              methods: [{ id: "1", name: "transfer", authorized: true }],
             },
           },
           messages: [{ id: "3", content: "Sign this", authorized: true }],

@@ -26,16 +26,14 @@ export function SpendingLimitPage({
 }) {
   const { theme } = useConnection();
 
-  console.log("policies: ", policies);
-
   return (
     <>
       <HeaderInner
         className="pb-0"
         title={
-          theme.name.toLowerCase() === "cartridge"
-            ? "Connect Controller"
-            : `Connect to ${theme.name}`
+          theme?.name?.toLowerCase() !== "cartridge"
+            ? `Connect to ${theme?.name}`
+            : "Connect Controller"
         }
       />
       <LayoutContent className="pb-0">
@@ -62,7 +60,7 @@ export function SpendingLimitPage({
             isLoading={isConnecting}
             onClick={onConnect}
           >
-            {policies.verified ? "play" : "confirm"}
+            Confirm
           </Button>
         </div>
 

@@ -49,7 +49,7 @@ export const CreateSessionProvider = ({
     // Set all message policyState to authorized
     if (initialPolicies.messages) {
       initialPolicies.messages.forEach((message, i) => {
-        message.id = `${i}-${message.domain.name}-${message.name}`;
+        message.id = `${i}-${message.domain?.name || "unknown"}-${message.name || "message"}`;
         message.authorized = true;
       });
     }
