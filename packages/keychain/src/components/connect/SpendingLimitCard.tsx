@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -6,14 +6,17 @@ import {
   CardTitle,
   Thumbnail,
 } from "@cartridge/ui";
-import { convertTokenAmountToUSD, formatBalance } from "@/hooks/tokens";
+import {
+  convertTokenAmountToUSD,
+  formatBalance,
+  useTokens,
+} from "@/hooks/tokens";
 import type { ParsedSessionPolicies } from "@/hooks/session";
-import { usePriceByAddressesQuery } from "@cartridge/ui/utils/api/cartridge";
-import { Call, getChecksumAddress, RpcProvider } from "starknet";
-import { useConnection } from "@/hooks/connection";
+import { getChecksumAddress } from "starknet";
 
-// Maximum value for uint128: 2^128 - 1
-const MAX_UINT128 = "340282366920938463463374607431768211455";
+// Maximum value for uint256
+const MAX_UINT256 =
+  "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
 interface SpendingLimitCardProps {
   className?: string;
@@ -26,8 +29,7 @@ export function SpendingLimitCard({
   policies,
   showCost = true,
 }: SpendingLimitCardProps) {
-  const { rpcUrl } = useConnection();
-  const [decimalsMap, setDecimalsMap] = useState<Record<string, number>>({});
+  const { tokens, registerPair } = useTokens();
 
   const tokenContracts = useMemo(() => {
     if (!policies?.contracts) return [];
@@ -37,66 +39,15 @@ export function SpendingLimitCard({
     });
   }, [policies]);
 
-  const { data: tokenPrices } = usePriceByAddressesQuery({
-    addresses: tokenContracts.map(([address]) => address),
-  });
-
-  // Create a map of address to price for easy lookup
-  const priceMap = useMemo(() => {
-    if (!tokenPrices?.priceByAddresses) return {};
-
-    const map: Record<string, { amount: string; decimals: number }> = {};
-    tokenPrices.priceByAddresses.forEach((price) => {
-      const checksumAddress = getChecksumAddress(price.base);
-      map[checksumAddress] = {
-        amount: price.amount,
-        decimals: price.decimals,
-      };
-    });
-    return map;
-  }, [tokenPrices]);
-
-  // Fetch decimals for all token contracts
+  // Register any tokens from policies that aren't in the TokensProvider
   useEffect(() => {
-    if (tokenContracts.length === 0 || !rpcUrl) return;
-
-    const fetchAllDecimals = async () => {
-      const provider = new RpcProvider({ nodeUrl: rpcUrl });
-      const newDecimalsMap: Record<string, number> = {};
-
-      await Promise.all(
-        tokenContracts.map(async ([address, contract]) => {
-          const checksumAddress = getChecksumAddress(address);
-
-          // Use metadata if available
-          if (contract.meta?.decimals !== undefined) {
-            newDecimalsMap[checksumAddress] = contract.meta.decimals;
-            return;
-          }
-
-          try {
-            const result = await provider.callContract({
-              contractAddress: checksumAddress,
-              entrypoint: "decimals",
-              calldata: [],
-            } as Call);
-            newDecimalsMap[checksumAddress] = Number(result[0]);
-          } catch (error) {
-            console.error(
-              `Failed to fetch decimals for ${checksumAddress}:`,
-              error,
-            );
-            // Fallback to 18 if fetching fails
-            newDecimalsMap[checksumAddress] = 18;
-          }
-        }),
-      );
-
-      setDecimalsMap(newDecimalsMap);
-    };
-
-    fetchAllDecimals();
-  }, [tokenContracts, rpcUrl]);
+    tokenContracts.forEach(([address]) => {
+      const checksumAddress = getChecksumAddress(address);
+      if (!tokens[checksumAddress]) {
+        registerPair(checksumAddress);
+      }
+    });
+  }, [tokenContracts, tokens, registerPair]);
 
   if (tokenContracts.length === 0) {
     return null;
@@ -116,11 +67,18 @@ export function SpendingLimitCard({
           "0";
 
         const checksumAddress = getChecksumAddress(address);
-        const price = priceMap[checksumAddress];
-        // Use decimals from contract query, fallback to metadata, then 18
-        const decimals =
-          decimalsMap[checksumAddress] ?? contract.meta?.decimals ?? 18;
-        const isUnlimited = BigInt(amount) >= BigInt(MAX_UINT128);
+        const token = tokens[checksumAddress];
+
+        // Use decimals and price from TokensProvider, with fallbacks to metadata
+        const decimals = token?.decimals ?? contract.meta?.decimals ?? 18;
+        const price = token?.price;
+        const icon = token?.icon || contract.meta?.icon;
+        const symbol =
+          token?.symbol || contract.meta?.symbol || contract.name || "";
+        const name =
+          token?.name || contract.name || contract.meta?.name || "Contract";
+
+        const isUnlimited = BigInt(amount) >= BigInt(MAX_UINT256);
 
         // Format the token amount
         const formattedAmount = isUnlimited
@@ -135,21 +93,14 @@ export function SpendingLimitCard({
 
         return (
           <CardContent key={address} className="flex flex-row gap-3 p-3 w-full">
-            <Thumbnail
-              icon={contract.meta?.icon}
-              size="md"
-              variant="lighter"
-              rounded
-            />
+            <Thumbnail icon={icon} size="md" variant="lighter" rounded />
             <div className="flex flex-col w-full">
               <div className="w-full flex flex-row items-center justify-between text-sm font-medium text-foreground-100">
-                <p>{contract.name || contract.meta?.name || "Contract"}</p>
+                <p>{name}</p>
                 {showCost && usdValue ? <p>{usdValue}</p> : null}
               </div>
               <p className="text-foreground-400 text-xs font-medium">
-                {isUnlimited
-                  ? "Unlimited"
-                  : `${formattedAmount} ${contract.meta?.symbol || contract.name || ""}`}
+                {isUnlimited ? "Unlimited" : `${formattedAmount} ${symbol}`}
               </p>
             </div>
           </CardContent>
