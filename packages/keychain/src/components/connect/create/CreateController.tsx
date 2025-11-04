@@ -25,7 +25,6 @@ import { Legal } from "./Legal";
 import { useCreateController } from "./useCreateController";
 import { useUsernameValidation } from "./useUsernameValidation";
 import { AuthenticationStep } from "./utils";
-import { useConnection } from "@/hooks/connection";
 import {
   useDetectKeyboardOpen,
   usePreventOverScrolling,
@@ -33,7 +32,6 @@ import {
 import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
 import { ConnectionLoading } from "../ConnectionLoading";
-import { ConnectionSuccess } from "../ConnectionSuccess";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -380,7 +378,6 @@ export function CreateController({
   const theme = useControllerTheme();
   const pendingSubmitRef = useRef(false);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const [usernameField, setUsernameField] = useState({
     value: "",
@@ -397,8 +394,6 @@ export function CreateController({
 
   const validation = useUsernameValidation(validationUsername);
   const { debouncedValue: debouncedValidation } = useDebounce(validation, 200);
-
-  const { closeModal, policies } = useConnection();
 
   const {
     isLoading: internalIsLoading,
@@ -418,19 +413,8 @@ export function CreateController({
     isSlot,
     signers,
     onAuthenticationSuccess: () => {
-      setIsAuthenticated(true);
-      // After 500ms, handle based on policies
-      setTimeout(() => {
-        setIsAuthenticated(false);
-
-        // If there are no policies or verified policies, close the modal
-        // (these cases would have auto-connected via createSession)
-        if (!policies || policies.verified) {
-          closeModal?.();
-        }
-        // If there are unverified policies, let ConnectRoute handle showing CreateSession
-        // The routing will naturally transition to ConnectRoute since controller now exists
-      }, 500);
+      // Success screen is now handled in ConnectRoute
+      // Just hide the loading/form view so ConnectRoute can render
     },
   });
 
@@ -613,16 +597,6 @@ export function CreateController({
       pendingSubmitRef.current = false;
     }
   }, [authenticationStep, setAuthMethod]);
-
-  // Show ConnectionSuccess when authenticated, regardless of loading state
-  if (isAuthenticated) {
-    return (
-      <ConnectionSuccess
-        isNew={validation.exists === false}
-        authMethod={authMethod}
-      />
-    );
-  }
 
   return isLoading ? (
     <ConnectionLoading

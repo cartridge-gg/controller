@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ResponseCodes } from "@cartridge/controller";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ResponseCodes, AuthOption } from "@cartridge/controller";
 import { useConnection } from "@/hooks/connection";
 import { cleanupCallbacks } from "@/utils/connection/callbacks";
 import { parseConnectParams } from "@/utils/connection/connect";
@@ -13,6 +13,7 @@ import {
 } from "@/hooks/route";
 import { isIframe } from "@cartridge/ui/utils";
 import { safeRedirect } from "@/utils/url-validator";
+import { ConnectionSuccess } from "./connect/ConnectionSuccess";
 
 const CANCEL_RESPONSE = {
   code: ResponseCodes.CANCELED,
@@ -21,7 +22,96 @@ const CANCEL_RESPONSE = {
 
 export function ConnectRoute() {
   const { controller, policies, verified } = useConnection();
-  const [hasAutoConnected, setHasAutoConnected] = useState(false);
+
+  // Check for success screen synchronously on mount (before first render)
+  const shouldShowSuccess = sessionStorage.getItem("showSuccess");
+  const authMethodStr = sessionStorage.getItem("authMethod");
+  const isNewStr = sessionStorage.getItem("isNew");
+
+  const [hasAutoConnected, setHasAutoConnected] = useState(() => {
+    // If we should show success, mark as auto-connected immediately
+    return shouldShowSuccess === "true";
+  });
+
+  const [showSuccess, setShowSuccess] = useState(() => {
+    return shouldShowSuccess === "true" && !!controller;
+  });
+
+  const [authMethod, setAuthMethod] = useState<AuthOption | undefined>(() => {
+    if (authMethodStr) {
+      try {
+        return JSON.parse(authMethodStr) as AuthOption;
+      } catch (e) {
+        console.error("Failed to parse authMethod:", e);
+      }
+    }
+    return undefined;
+  });
+
+  const [isNew, setIsNew] = useState<boolean | undefined>(() => {
+    return isNewStr === "true";
+  });
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if we should show success screen (controller just created)
+  // This handles both initial mount and when controller becomes available after mount
+  useEffect(() => {
+    const checkShowSuccess = sessionStorage.getItem("showSuccess");
+
+    // If we should show success and controller exists
+    if (checkShowSuccess === "true" && controller) {
+      // If showSuccess is not already true, set it
+      if (!showSuccess) {
+        setShowSuccess(true);
+        // Mark as auto-connected to prevent immediate auto-connect
+        setHasAutoConnected(true);
+
+        // Get auth info if not already set
+        const authMethodStr = sessionStorage.getItem("authMethod");
+        const isNewStr = sessionStorage.getItem("isNew");
+
+        if (authMethodStr && !authMethod) {
+          try {
+            setAuthMethod(JSON.parse(authMethodStr) as AuthOption);
+          } catch (e) {
+            console.error("Failed to parse authMethod:", e);
+          }
+        }
+
+        if (isNewStr && isNew === undefined) {
+          setIsNew(isNewStr === "true");
+        }
+      } else {
+        // If already showing, still mark as auto-connected
+        setHasAutoConnected(true);
+      }
+
+      // Clear sessionStorage
+      sessionStorage.removeItem("showSuccess");
+      sessionStorage.removeItem("authMethod");
+      sessionStorage.removeItem("isNew");
+    }
+  }, [controller, showSuccess, authMethod, isNew]);
+
+  // Separate effect to handle timeout whenever showSuccess is true
+  useEffect(() => {
+    if (showSuccess && controller && !timeoutRef.current) {
+      timeoutRef.current = setTimeout(() => {
+        setShowSuccess(false);
+        // Reset hasAutoConnected so auto-connect can happen after success screen
+        setHasAutoConnected(false);
+        timeoutRef.current = null;
+      }, 1000);
+    }
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [showSuccess, controller]);
 
   // Parse params and set RPC URL immediately
   const params = useRouteParams((searchParams: URLSearchParams) => {
@@ -84,8 +174,9 @@ export function ConnectRoute() {
   }, [params, controller, handleCompletion, isStandalone, redirectUrl]);
 
   // Handle cases where we can connect immediately (embedded mode only)
+  // Don't run if we're showing success screen
   useEffect(() => {
-    if (!params || !controller || hasAutoConnected) {
+    if (!params || !controller || hasAutoConnected || showSuccess) {
       return;
     }
 
@@ -110,7 +201,6 @@ export function ConnectRoute() {
     }
 
     // Bypass session approval screen for verified sessions in embedded mode
-    // Note: This is a fallback - main logic is handled in useCreateController
     if (policies.verified && !isStandalone) {
       const createSessionForVerifiedPolicies = async () => {
         try {
@@ -143,11 +233,17 @@ export function ConnectRoute() {
     isStandalone,
     redirectUrl,
     hasAutoConnected,
+    showSuccess,
   ]);
 
   // Don't render anything if we don't have controller yet - CreateController handles loading
   if (!controller) {
     return null;
+  }
+
+  // Show success screen for 1 seconds when controller is first created
+  if (showSuccess) {
+    return <ConnectionSuccess isNew={isNew} authMethod={authMethod} />;
   }
 
   // In standalone mode with redirect_url, show connect UI
