@@ -444,7 +444,11 @@ export const PurchaseProvider = ({
     acquisitionType: backendAcquisitionType,
     isLoading: isBackendLoading,
     error: backendError,
-  } = useStarterPack(source === "backend" ? String(starterpack) : undefined);
+  } = useStarterPack(
+    source === "backend" && starterpack !== undefined
+      ? String(starterpack)
+      : undefined,
+  );
 
   // Onchain hook (Smart contract) - only run if onchain source
   const {
@@ -454,7 +458,9 @@ export const PurchaseProvider = ({
     isQuoteLoading: isOnchainQuoteLoading,
     error: onchainError,
   } = useStarterPackOnchain(
-    source === "onchain" ? Number(starterpack) : undefined,
+    source === "onchain" && starterpack !== undefined
+      ? Number(starterpack)
+      : undefined,
   );
 
   // Unified loading and error state

@@ -127,8 +127,13 @@ async function fetchTokenMetadata(
     } as Call),
   ]);
 
+  let symbol = shortString.decodeShortString(symbolRes[0]);
+  if (symbolRes.length > 1) {
+    symbol = shortString.decodeShortString(symbolRes[1]);
+  }
+
   return {
-    symbol: shortString.decodeShortString(symbolRes[1]),
+    symbol,
     decimals: Number(decimalsRes[0]),
   };
 }
@@ -194,16 +199,29 @@ export const useStarterPackOnchain = (
           metadataRes[Symbol.iterator](),
         );
         const metadataString = metadataByteArray.decodeUtf8();
-        const rawMetadata = JSON.parse(
-          metadataString,
-        ) as StarterPackMetadataOnchainRaw;
+
+        let rawMetadata: StarterPackMetadataOnchainRaw;
+        try {
+          rawMetadata = JSON.parse(
+            metadataString,
+          ) as StarterPackMetadataOnchainRaw;
+        } catch (parseError) {
+          console.error(
+            "Failed to parse starterpack metadata JSON:",
+            parseError,
+          );
+          console.error("Metadata string:", metadataString);
+          throw new Error(
+            "Invalid starterpack metadata. Please contact the starterpack creator.",
+          );
+        }
 
         // Convert snake_case to camelCase
         const metadata = convertMetadata(rawMetadata);
 
         setMetadata(metadata);
       } catch (error) {
-        console.error(error);
+        console.error("Failed to fetch starterpack metadata:", error);
         setError(error as Error);
       } finally {
         setIsLoading(false);
