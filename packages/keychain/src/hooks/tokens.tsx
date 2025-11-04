@@ -94,14 +94,15 @@ export function convertTokenAmountToUSD(
   // Convert price to BigInt
   const priceAmount = BigInt(price.amount);
 
-  // Calculate USD value entirely in BigInt
-  // Formula: (amount * priceAmount) / (10^token_decimals * 10^price_decimals)
-  // This accounts for both the token's decimals and the price's decimals
-  const totalDecimals = BigInt(10 ** decimals) * BigInt(10 ** price.decimals);
-  const valueInSmallestUnit = (amount * priceAmount) / totalDecimals;
+  // The price API returns price denominated in the token's decimals, not the price.decimals value
+  // Formula: (amount * priceAmount) / (10^token_decimals * 10^token_decimals)
+  // This is because both the amount and price are in the token's smallest unit
+  const decimalsDivisor = BigInt(10 ** decimals);
+  const valueInSmallestUnit =
+    (amount * priceAmount) / (decimalsDivisor * decimalsDivisor);
 
   console.log("Calculation steps:", {
-    totalDecimals: totalDecimals.toString(),
+    decimalsDivisor: decimalsDivisor.toString(),
     product: (amount * priceAmount).toString(),
     valueInSmallestUnit: valueInSmallestUnit.toString(),
   });
@@ -134,7 +135,8 @@ export function convertTokenAmountToUSD(
   const isWhole = formatted.endsWith(".00");
 
   // Return whole numbers without decimals, otherwise show exactly 2 decimal places
-  const result = "$" + (isWhole ? Math.floor(valueInUsd).toString() : formatted);
+  const result =
+    "$" + (isWhole ? Math.floor(valueInUsd).toString() : formatted);
   console.log("Final USD result:", result);
   return result;
 }
