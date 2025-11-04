@@ -401,7 +401,6 @@ describe("ConnectRoute", () => {
             "0xcontract": {
               methods: [
                 { id: "1", name: "transfer", authorized: true },
-                { id: "2", name: "approve", authorized: false },
               ],
             },
           },
