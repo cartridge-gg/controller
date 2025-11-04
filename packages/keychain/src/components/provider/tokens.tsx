@@ -202,7 +202,7 @@ export function TokensProvider({
   } = useQuery(
     ["token-prices-ekubo", addresses, chainId],
     async () => {
-      if (addresses.length === 0) return [];
+      if (addresses.length === 0 || !chainId) return [];
 
       const network = chainIdToEkuboNetwork(chainId);
       const USDC_DECIMALS = 6;
@@ -211,30 +211,34 @@ export function TokensProvider({
       const prices = await Promise.allSettled(
         addresses.map(async (address) => {
           try {
-            // Skip USDC itself
-            if (
-              getChecksumAddress(address) ===
-              getChecksumAddress(USDC_CONTRACT_ADDRESS)
-            ) {
+            const checksumAddress = getChecksumAddress(address);
+
+            // Get token decimals - tokens should exist by the time price query runs
+            const token = tokens[checksumAddress];
+            const tokenDecimals = token?.decimals ?? 18; // Default to 18 if not found
+
+            // USDC price is always 1:1
+            if (checksumAddress === getChecksumAddress(USDC_CONTRACT_ADDRESS)) {
               return {
                 base: address,
                 amount: String(AMOUNT_TO_QUOTE),
-                decimals: 18,
+                decimals: USDC_DECIMALS,
                 quote: "USDC",
               };
             }
 
-            // Fetch quote from Ekubo
-            const usdcAmount = await fetchSwapQuoteInUsdc(
+            // Fetch quote from Ekubo: how many token base units = 1 USDC
+            const tokenAmount = await fetchSwapQuoteInUsdc(
               address,
-              AMOUNT_TO_QUOTE,
+              BigInt(10 ** tokenDecimals),
               network,
             );
 
+            console.log(tokenAmount);
             return {
               base: address,
-              amount: String(usdcAmount),
-              decimals: 18,
+              amount: String(tokenAmount),
+              decimals: USDC_DECIMALS,
               quote: "USDC",
             };
           } catch (error) {
@@ -255,7 +259,7 @@ export function TokensProvider({
     {
       refetchInterval,
       enabled: addresses.length > 0,
-      staleTime: 30000, // Consider data fresh for 30 seconds
+      staleTime: 30000,
     },
   );
 
