@@ -36,7 +36,6 @@ import {
 } from "starknet";
 import { useConnection, useControllerTheme } from "@/hooks/connection";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useCollectible } from "@/hooks/collectible";
 import { CollectionHeader } from "./header";
 import placeholder from "/placeholder.svg?url";
 import { useExplorer } from "@starknet-react/core";
@@ -49,6 +48,7 @@ import { useAccount, useUsername } from "@/hooks/account";
 import { erc20Metadata } from "@cartridge/presets";
 import { useNavigation } from "@/context";
 import makeBlockie from "ethereum-blockies-base64";
+import { useCollection } from "@/hooks/collection";
 
 const OFFSET = 10;
 
@@ -86,10 +86,10 @@ export function CollectibleAsset() {
 
   const { address: contractAddress, tokenId } = useParams();
   const {
-    collectible,
+    collection: collectible,
     assets,
     status: collectibleStatus,
-  } = useCollectible({
+  } = useCollection({
     contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
   });
@@ -112,7 +112,7 @@ export function CollectibleAsset() {
   const remaining = useMemo(() => {
     if (!asset) return 0;
     return (
-      asset.amount - selfOrders.reduce((acc, order) => acc + order.quantity, 0)
+      (asset.amount || 0) - selfOrders.reduce((acc, order) => acc + order.quantity, 0)
     );
   }, [asset, selfOrders]);
 

@@ -37,7 +37,7 @@ import { useMarketplace } from "@/hooks/marketplace";
 import { toast } from "sonner";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
-import { useCollectible } from "@/hooks/collectible";
+import { useCollection } from "@/hooks/collection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 
 const SET_APPROVAL_FOR_ALL_CAMEL_CASE = "setApprovalForAll";
@@ -96,7 +96,7 @@ export function CollectibleListing() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collectible, assets, status } = useCollectible({
+  const { collection: collectible, assets, status } = useCollection({
     contractAddress: contractAddress,
     tokenIds,
   });

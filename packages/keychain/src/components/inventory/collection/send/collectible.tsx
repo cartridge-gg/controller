@@ -17,7 +17,7 @@ import { useNavigation } from "@/context/navigation";
 import { Call, uint256, FeeEstimate } from "starknet";
 import { SendRecipient } from "../../../modules/recipient";
 import { RecipientCard } from "../../../modules/RecipientCard";
-import { useCollectible } from "@/hooks/collectible";
+import { useCollection } from "@/hooks/collection";
 import { Sending } from "./collectible-sending";
 import placeholder from "/placeholder.svg?url";
 import { SendAmount } from "./amount";
@@ -64,7 +64,7 @@ export function SendCollectible() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collectible, assets, status } = useCollectible({
+  const { collection: collectible, assets, status } = useCollection({
     contractAddress: contractAddress,
     tokenIds,
   });
@@ -243,7 +243,7 @@ export function SendCollectible() {
                 />
                 <SendAmount
                   amount={amount}
-                  balance={balance}
+                  balance={balance || 0}
                   submitted={false}
                   setAmount={setAmount}
                   setError={setAmountError}
