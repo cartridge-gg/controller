@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -30,6 +30,7 @@ export function SpendingLimitCard({
   showCost = true,
 }: SpendingLimitCardProps) {
   const { tokens, registerPair } = useTokens();
+  const registeredAddresses = useRef<Set<string>>(new Set());
 
   const tokenContracts = useMemo(() => {
     if (!policies?.contracts) return [];
@@ -43,12 +44,16 @@ export function SpendingLimitCard({
   useEffect(() => {
     tokenContracts.forEach(([address]) => {
       const checksumAddress = getChecksumAddress(address);
-      if (!tokens[checksumAddress]) {
+      // Only register if we haven't already tried and it's not in tokens
+      if (
+        !tokens[checksumAddress] &&
+        !registeredAddresses.current.has(checksumAddress)
+      ) {
+        registeredAddresses.current.add(checksumAddress);
         registerPair(checksumAddress);
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tokenContracts, registerPair]);
+  }, [tokenContracts, tokens, registerPair]);
 
   if (tokenContracts.length === 0) {
     return null;
