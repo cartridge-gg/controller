@@ -206,7 +206,7 @@ export function TokensProvider({
 
       const network = chainIdToEkuboNetwork(chainId);
       const USDC_DECIMALS = 6;
-      const AMOUNT_TO_QUOTE = BigInt(10 ** USDC_DECIMALS); // 1 USDC
+      const ONE_USDC = BigInt(10 ** USDC_DECIMALS); // 1 USDC
 
       const prices = await Promise.allSettled(
         addresses.map(async (address) => {
@@ -221,7 +221,7 @@ export function TokensProvider({
             if (checksumAddress === getChecksumAddress(USDC_CONTRACT_ADDRESS)) {
               return {
                 base: address,
-                amount: String(AMOUNT_TO_QUOTE),
+                amount: String(ONE_USDC),
                 decimals: USDC_DECIMALS,
                 quote: "USDC",
               };
@@ -234,7 +234,6 @@ export function TokensProvider({
               network,
             );
 
-            console.log(tokenAmount);
             return {
               base: address,
               amount: String(tokenAmount),
