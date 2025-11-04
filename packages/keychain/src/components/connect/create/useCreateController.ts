@@ -235,12 +235,6 @@ export function useCreateController({
         setController(controller);
         setIsLoading(false);
 
-        // Store auth info for ConnectRoute to show success screen
-        sessionStorage.setItem(
-          "authMethod",
-          JSON.stringify(signupResponse.type),
-        );
-        sessionStorage.setItem("isNew", "true");
         sessionStorage.setItem("showSuccess", "true");
 
         // Show success screen - parent component will handle closing/moving forward after 3 seconds
@@ -260,11 +254,16 @@ export function useCreateController({
         throw new Error("Origin, chainId, or rpcUrl not found");
       }
 
+      // Store auth info for ConnectRoute to show success screen
+      sessionStorage.setItem("authMethod", JSON.stringify(authenticationMode));
+      sessionStorage.setItem("isNew", "true");
+
       let signupResponse: SignupResponse | undefined;
       let signer: SignerInput | undefined;
       switch (authenticationMode) {
         case "webauthn":
           await signupWithWebauthn(username, doPopupFlow);
+          sessionStorage.setItem("showSuccess", "true");
           return;
         case "google":
         case "discord":
@@ -364,6 +363,7 @@ export function useCreateController({
       loginResponse: LoginResponse;
       authenticationMethod: AuthOption;
     }) => {
+      console.log(authenticationMethod);
       // Verify correct EVM wallet account is selected
       if (authenticationMethod !== "password") {
         const connectedAddress = signerToAddress(loginResponse.signer);
@@ -411,12 +411,6 @@ export function useCreateController({
       setController(loginRet.controller);
       setIsLoading(false);
 
-      // Store auth info for ConnectRoute to show success screen
-      sessionStorage.setItem(
-        "authMethod",
-        JSON.stringify(authenticationMethod),
-      );
-      sessionStorage.setItem("isNew", "false");
       sessionStorage.setItem("showSuccess", "true");
 
       // Show success screen - parent component will handle closing/moving forward after 3 seconds
@@ -439,6 +433,13 @@ export function useCreateController({
       if (!controller) {
         throw new Error("Undefined controller");
       }
+
+      // Store auth info for ConnectRoute to show success screen
+      sessionStorage.setItem(
+        "authMethod",
+        JSON.stringify(authenticationMethod),
+      );
+      sessionStorage.setItem("isNew", "false");
 
       let loginResponse: LoginResponse | undefined;
       switch (authenticationMethod) {
@@ -465,6 +466,7 @@ export function useCreateController({
             },
             !!isSlot,
           );
+          sessionStorage.setItem("showSuccess", "true");
           return;
         }
         case "google":
