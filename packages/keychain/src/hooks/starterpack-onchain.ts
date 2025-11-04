@@ -128,7 +128,7 @@ async function fetchTokenMetadata(
   ]);
 
   return {
-    symbol: shortString.decodeShortString(symbolRes[0]),
+    symbol: shortString.decodeShortString(symbolRes[1]),
     decimals: Number(decimalsRes[0]),
   };
 }
