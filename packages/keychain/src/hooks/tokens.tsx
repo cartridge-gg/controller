@@ -94,6 +94,17 @@ export function convertTokenAmountToUSD(
   // Convert price to BigInt
   const priceAmount = BigInt(price.amount);
 
+  // Calculate token amount in base units for debugging
+  const tokenAmountInBaseUnits = Number(amount) / 10 ** decimals;
+  const pricePerToken = Number(priceAmount) / 10 ** decimals;
+  const calculatedUSD = tokenAmountInBaseUnits * pricePerToken;
+
+  console.log("Manual calculation:", {
+    tokenAmountInBaseUnits,
+    pricePerToken,
+    calculatedUSD,
+  });
+
   // The price API returns price denominated in the token's decimals, not the price.decimals value
   // Formula: (amount * priceAmount) / (10^token_decimals * 10^token_decimals)
   // This is because both the amount and price are in the token's smallest unit
