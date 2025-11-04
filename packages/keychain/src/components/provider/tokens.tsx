@@ -98,7 +98,7 @@ export function TokensProvider({
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedAddresses(addresses);
-    }, 1000);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [addresses]);
