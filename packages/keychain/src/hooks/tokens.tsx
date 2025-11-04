@@ -94,19 +94,18 @@ export function convertTokenAmountToUSD(
   // Convert price to BigInt
   const priceAmount = BigInt(price.amount);
 
-  // The price API returns prices quoted in USDC (6 decimals)
-  // Formula: (tokenAmount / 10^token_decimals) * (priceAmount / 10^6)
-  // In BigInt math: (amount * priceAmount) / (10^token_decimals * 10^6)
-  const USDC_DECIMALS = 6;
-  const tokenDecimalsDivisor = BigInt(10 ** decimals);
-  const priceDecimalsDivisor = BigInt(10 ** USDC_DECIMALS);
+  // The price API returns prices denominated in the token's decimals
+  // Formula: (tokenAmount / 10^token_decimals) * (priceAmount / 10^token_decimals)
+  // In BigInt math: (amount * priceAmount) / (10^token_decimals)^2
+  const decimalsDivisor = BigInt(10 ** decimals);
   const valueInSmallestUnit =
-    (amount * priceAmount) / (tokenDecimalsDivisor * priceDecimalsDivisor);
+    (amount * priceAmount) / (decimalsDivisor * decimalsDivisor);
 
   console.log("Calculation steps:", {
-    tokenDecimalsDivisor: tokenDecimalsDivisor.toString(),
-    priceDecimalsDivisor: priceDecimalsDivisor.toString(),
+    tokenDecimals: decimals,
+    decimalsDivisor: decimalsDivisor.toString(),
     product: (amount * priceAmount).toString(),
+    divisor: (decimalsDivisor * decimalsDivisor).toString(),
     valueInSmallestUnit: valueInSmallestUnit.toString(),
   });
 
