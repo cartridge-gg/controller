@@ -399,9 +399,7 @@ describe("ConnectRoute", () => {
           verified: true,
           contracts: {
             "0xcontract": {
-              methods: [
-                { id: "1", name: "transfer", authorized: true },
-              ],
+              methods: [{ id: "1", name: "transfer", authorized: true }],
             },
           },
           messages: [{ id: "3", content: "Sign this", authorized: true }],
