@@ -48,11 +48,11 @@ export function OnchainCheckout() {
   // Determine which token to check balance for and required amount
   const tokenToCheck = useMemo(() => {
     if (!quote) return null;
-    
+
     // If a token is selected and it's different from payment token, check selected token
     if (
       selectedToken &&
-      num.toHex(selectedToken.address)  !== num.toHex(quote.paymentToken)
+      num.toHex(selectedToken.address) !== num.toHex(quote.paymentToken)
     ) {
       return {
         address: selectedToken.address,
@@ -74,7 +74,7 @@ export function OnchainCheckout() {
   const isLoadingBalance = useMemo(() => {
     // If there's a conversion error and we need conversion, stop showing loading state
     if (conversionError && tokenToCheck?.needsConversion) return false;
-    
+
     return (
       isChecking ||
       (isFetchingConversion && tokenToCheck?.needsConversion) ||
@@ -82,7 +82,13 @@ export function OnchainCheckout() {
       tokenToCheck === null ||
       tokenToCheck.requiredAmount === null
     );
-  }, [isChecking, isFetchingConversion, balance, tokenToCheck, conversionError]);
+  }, [
+    isChecking,
+    isFetchingConversion,
+    balance,
+    tokenToCheck,
+    conversionError,
+  ]);
 
   // Check if user has sufficient balance (only when not loading)
   const hasSufficientBalance = useMemo(() => {
