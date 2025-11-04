@@ -63,7 +63,6 @@ const createSession = async ({
   policies,
   params,
   handleCompletion,
-  closeModal,
   searchParams,
 }: {
   controller: Controller;
@@ -82,13 +81,10 @@ const createSession = async ({
         address: controller.address(),
       });
       cleanupCallbacks(params.params.id);
-      handleCompletion();
+      // handleCompletion();
     } else {
       // Fallback: just close modal if params not available (race condition)
-      console.warn(
-        "No params available for no-policies case, falling back to closeModal",
-      );
-      closeModal?.();
+      console.warn("No params available for no-policies case");
     }
     return;
   }
