@@ -172,12 +172,14 @@ export function useTokenDecimals(
 
   useEffect(() => {
     if (!contractAddress || !rpcUrl) {
+      setDecimals(undefined);
       return;
     }
 
     let cancelled = false;
     setIsLoading(true);
     setError(undefined);
+    setDecimals(undefined);
 
     const fetchDecimals = async () => {
       try {
