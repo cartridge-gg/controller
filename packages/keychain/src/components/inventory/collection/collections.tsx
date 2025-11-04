@@ -26,7 +26,7 @@ export function Collections() {
 
   return status === "loading" ? (
     <LoadingState />
-  ) : status === "error" || (!collections.length) ? (
+  ) : status === "error" || !collections.length ? (
     <EmptyState />
   ) : (
     <div className="grid grid-cols-2 gap-4 place-items-center select-none">

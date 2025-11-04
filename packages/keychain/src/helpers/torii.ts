@@ -99,7 +99,7 @@ export default {
         });
         allTokens.push(...tokens.items);
       }
-      
+
       if (allTokens.length !== 0) {
         return {
           items: allTokens.filter((token) => !!token.token_id),
@@ -169,4 +169,3 @@ export default {
     }
   },
 };
-

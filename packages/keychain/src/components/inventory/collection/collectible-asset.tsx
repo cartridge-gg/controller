@@ -112,7 +112,8 @@ export function CollectibleAsset() {
   const remaining = useMemo(() => {
     if (!asset) return 0;
     return (
-      (asset.amount || 0) - selfOrders.reduce((acc, order) => acc + order.quantity, 0)
+      (asset.amount || 0) -
+      selfOrders.reduce((acc, order) => acc + order.quantity, 0)
     );
   }, [asset, selfOrders]);
 

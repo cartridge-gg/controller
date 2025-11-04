@@ -132,7 +132,11 @@ export function useCollection({
           if (!owner) return; // Skip assets without owners
           const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
           const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
-          const balance = balances.find((b) => BigInt(b.token_id || "0") === BigInt(asset.token_id || "0"))?.balance || 0;
+          const balance =
+            balances.find(
+              (b) =>
+                BigInt(b.token_id || "0") === BigInt(asset.token_id || "0"),
+            )?.balance || 0;
           newAssets[`${contractAddress}-${asset.token_id || ""}`] = {
             tokenId: asset.token_id || "",
             name: metadata?.name || asset.name,
@@ -141,7 +145,8 @@ export function useCollection({
             attributes: Array.isArray(metadata?.attributes)
               ? metadata.attributes
               : [],
-            amount: contract.contract_type === ERC1155 ? Number(balance) : undefined,
+            amount:
+              contract.contract_type === ERC1155 ? Number(balance) : undefined,
             owner: owner,
           };
         });
@@ -246,7 +251,9 @@ export function useCollections(): UseCollectionsResponse {
           }
           const oldImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(contractAddress).toString(16)}/${asset.token_id}/image`;
           const newImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/${asset.token_id}/image`;
-          const type = contracts.find((c) => c.contract_address === contractAddress)?.contract_type;
+          const type = contracts.find(
+            (c) => c.contract_address === contractAddress,
+          )?.contract_type;
           collections[contractAddress] = {
             address: contractAddress,
             name: asset.name || metadata?.name || "",

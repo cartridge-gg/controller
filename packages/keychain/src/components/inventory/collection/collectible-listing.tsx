@@ -96,7 +96,11 @@ export function CollectibleListing() {
     return [tokenId, ...paramsTokenIds];
   }, [tokenId, paramsTokenIds]);
 
-  const { collection: collectible, assets, status } = useCollection({
+  const {
+    collection: collectible,
+    assets,
+    status,
+  } = useCollection({
     contractAddress: contractAddress,
     tokenIds,
   });

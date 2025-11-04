@@ -20,7 +20,11 @@ export function Collectible() {
 
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { collection: collectible, assets, status } = useCollection({
+  const {
+    collection: collectible,
+    assets,
+    status,
+  } = useCollection({
     contractAddress: address,
   });
 
