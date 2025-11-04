@@ -6,7 +6,7 @@ import {
   CardTitle,
   Thumbnail,
 } from "@cartridge/ui";
-import { convertTokenAmountToUSD } from "@/hooks/tokens";
+import { convertTokenAmountToUSD, formatBalance } from "@/hooks/tokens";
 import type { ParsedSessionPolicies } from "@/hooks/session";
 import { usePriceByAddressesQuery } from "@cartridge/ui/utils/api/cartridge";
 import { getChecksumAddress } from "starknet";
@@ -75,7 +75,9 @@ export function SpendingLimitCard({
         const isUnlimited = BigInt(amount) >= BigInt(MAX_UINT128);
 
         // Format the token amount
-        const formattedAmount = isUnlimited ? "Unlimited" : Number(amount);
+        const formattedAmount = isUnlimited
+          ? "Unlimited"
+          : formatBalance(BigInt(amount));
 
         // Calculate USD value if price is available
         const usdValue =

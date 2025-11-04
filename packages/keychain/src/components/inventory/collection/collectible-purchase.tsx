@@ -32,7 +32,7 @@ import { useTokens } from "@/hooks/token";
 import { useQuery } from "react-query";
 import { useEntrypoints } from "@/hooks/entrypoints";
 import { useNavigation } from "@/context/navigation";
-import { useCollectible } from "@/hooks/collectible";
+import { useCollection } from "@/hooks/collection";
 import { ExecutionContainer } from "@/components/ExecutionContainer";
 import {
   CLIENT_FEE_NUMERATOR,
@@ -67,7 +67,7 @@ export function CollectiblePurchase() {
     );
   }, [tokenOrders]);
 
-  useCollectible({
+  useCollection({
     contractAddress: contractAddress,
     tokenIds: tokenId ? [tokenId] : [],
   });

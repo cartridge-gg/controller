@@ -7,6 +7,7 @@ import { cn, CodeIcon } from "@cartridge/ui";
 import { useMemo } from "react";
 import { AggregateCard } from "./AggregateCard";
 import { ContractCard } from "./ContractCard";
+import { toArray } from "@cartridge/controller";
 
 export function VerifiedSessionSummary({
   game,
@@ -21,7 +22,22 @@ export function VerifiedSessionSummary({
   const { isEditable } = useCreateSession();
   // Separate contracts based on methods and type
   const { otherContracts, vrfContracts } = useMemo(() => {
-    const allContracts = Object.entries(contracts ?? {});
+    const allContracts = Object.entries(contracts ?? {})
+      .map(([address, contract]) => {
+        // Filter out approve methods since they're shown on spending limit page
+        const methods = toArray(contract.methods).filter(
+          (method) => method.entrypoint !== "approve",
+        );
+        return [
+          address,
+          {
+            ...contract,
+            methods,
+          },
+        ] as const;
+      })
+      // Filter out contracts that only had approve methods
+      .filter(([, contract]) => contract.methods.length > 0);
 
     const vrfContracts = allContracts.filter(([, contract]) => {
       return contract.meta?.type === "VRF";
