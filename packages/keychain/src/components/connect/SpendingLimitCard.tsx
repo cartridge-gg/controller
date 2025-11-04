@@ -49,10 +49,12 @@ export function SpendingLimitCard({
         !tokens[checksumAddress] &&
         !registeredAddresses.current.has(checksumAddress)
       ) {
+        console.log("Registering token:", checksumAddress);
         registeredAddresses.current.add(checksumAddress);
         registerPair(checksumAddress);
       }
     });
+    console.log("Current tokens:", Object.keys(tokens));
   }, [tokenContracts, tokens, registerPair]);
 
   if (tokenContracts.length === 0) {

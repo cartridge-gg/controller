@@ -187,16 +187,22 @@ export function TokensProvider({
   );
 
   useEffect(() => {
+    console.log("Price data received:", priceData?.priceByAddresses?.length, "prices for", addresses.length, "addresses");
+    console.log("Addresses:", addresses);
     if (priceData?.priceByAddresses) {
+      console.log("Prices:", priceData.priceByAddresses.map(p => ({ base: p.base, amount: p.amount })));
       setTokens((prevTokens) => {
         const newTokens = { ...prevTokens };
         priceData.priceByAddresses.forEach((price) => {
           const address = getChecksumAddress(price.base);
           if (newTokens[address]) {
+            console.log("Setting price for", address);
             newTokens[address] = {
               ...newTokens[address],
               price,
             };
+          } else {
+            console.log("Token not found for price:", address);
           }
         });
         setIsPricesLoaded(true);
