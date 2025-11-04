@@ -149,18 +149,44 @@ export function TokensProvider({
     async () => {
       if (!controller) return;
 
-      const updatedTokens = { ...tokens };
+      // Get fresh token addresses to query
+      const tokenAddresses = Object.keys(tokens);
+      console.log("Balance query running for tokens:", tokenAddresses);
+
+      // Fetch balances for all current tokens
+      const balanceUpdates: Record<string, bigint> = {};
       await Promise.all(
-        Object.values(updatedTokens).map(async (token) => {
-          const balance = await token.contract.balanceOf(controller.address());
-          updatedTokens[token.address] = {
-            ...token,
-            balance,
-          };
+        tokenAddresses.map(async (address) => {
+          try {
+            const token = tokens[address];
+            const balance = await token.contract.balanceOf(
+              controller.address(),
+            );
+            balanceUpdates[address] = balance;
+          } catch (error) {
+            console.error(`Error fetching balance for ${address}:`, error);
+          }
         }),
       );
 
-      setTokens(updatedTokens);
+      // Use functional update to merge with latest state
+      setTokens((prevTokens) => {
+        const updatedTokens = { ...prevTokens };
+        Object.entries(balanceUpdates).forEach(([address, balance]) => {
+          if (updatedTokens[address]) {
+            updatedTokens[address] = {
+              ...updatedTokens[address],
+              balance,
+            };
+          }
+        });
+        console.log(
+          "Balance query updated tokens keys:",
+          Object.keys(updatedTokens),
+        );
+        return updatedTokens;
+      });
+
       if (!initialLoadComplete) {
         setInitialLoadComplete(true);
       }
@@ -228,6 +254,7 @@ export function TokensProvider({
       if (!controller) return;
 
       const normalizedAddress = getChecksumAddress(address);
+      console.log("registerPair called for:", normalizedAddress);
 
       const contract = new ERC20Contract({
         address: normalizedAddress,
@@ -249,9 +276,16 @@ export function TokensProvider({
           balance,
         };
 
+        console.log("Loaded token metadata:", metadata.name, metadata.symbol);
+
         setTokens((prevTokens) => {
+          console.log(
+            "setTokens called, prevTokens keys:",
+            Object.keys(prevTokens),
+          );
           // Check if token already exists
           if (prevTokens[normalizedAddress]) {
+            console.log("Token already exists, skipping");
             return prevTokens;
           }
 
@@ -260,6 +294,7 @@ export function TokensProvider({
             [normalizedAddress]: newToken,
           };
 
+          console.log("Updated tokens keys:", Object.keys(updatedTokens));
           setAdresses(Object.keys(updatedTokens));
           return updatedTokens;
         });
