@@ -47,7 +47,8 @@ export function SpendingLimitCard({
         registerPair(checksumAddress);
       }
     });
-  }, [tokenContracts, tokens, registerPair]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tokenContracts, registerPair]);
 
   if (tokenContracts.length === 0) {
     return null;
@@ -89,7 +90,7 @@ export function SpendingLimitCard({
         const usdValue =
           !isUnlimited && price
             ? convertTokenAmountToUSD(BigInt(amount), decimals, price)
-            : "Unlimited";
+            : null;
 
         return (
           <CardContent key={address} className="flex flex-row gap-3 p-3 w-full">
