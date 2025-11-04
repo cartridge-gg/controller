@@ -77,6 +77,15 @@ export function SpendingLimitCard({
         const checksumAddress = getChecksumAddress(address);
         const token = tokens[checksumAddress];
 
+        console.log(`Processing token ${checksumAddress}:`, {
+          contractName: contract.name,
+          amount,
+          tokenDecimals: token?.decimals,
+          metaDecimals: contract.meta?.decimals,
+          hasPrice: !!token?.price,
+          price: token?.price,
+        });
+
         // Use decimals and price from TokensProvider, with fallbacks to metadata
         const decimals = token?.decimals ?? contract.meta?.decimals ?? 18;
         const price = token?.price;
