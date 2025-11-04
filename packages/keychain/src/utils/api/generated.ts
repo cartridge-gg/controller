@@ -1178,6 +1178,7 @@ export type Deployment = Node & {
 };
 
 export type DeploymentLogsArgs = {
+  container?: InputMaybe<Scalars["String"]>;
   limit?: InputMaybe<Scalars["Int"]>;
   order?: InputMaybe<Order>;
   region?: InputMaybe<Scalars["String"]>;
