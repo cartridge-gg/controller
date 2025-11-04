@@ -31,9 +31,9 @@ export function SpendingLimitPage({
       <HeaderInner
         className="pb-0"
         title={
-          theme.name.toLowerCase() === "cartridge"
+          theme?.name?.toLowerCase() === "cartridge"
             ? "Connect Controller"
-            : `Connect to ${theme.name}`
+            : `Connect to ${theme?.name || "App"}`
         }
       />
       <LayoutContent className="pb-0">
