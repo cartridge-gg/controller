@@ -1,9 +1,9 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   TokensContext,
   TokensContextValue,
 } from "@/components/provider/tokens";
-import { getChecksumAddress } from "starknet";
+import { Call, getChecksumAddress, RpcProvider } from "starknet";
 
 export function useTokens(): TokensContextValue {
   const context = useContext(TokensContext);
@@ -154,4 +154,62 @@ export function creditsToUSD(credits: number) {
 
 export function usdToCredits(usd: number) {
   return usd * CREDITS_PER_USD;
+}
+
+/**
+ * Hook to fetch token decimals from a contract
+ * @param contractAddress - The address of the token contract
+ * @param rpcUrl - The RPC URL to use for the provider
+ * @returns Object with decimals, isLoading, and error states
+ */
+export function useTokenDecimals(
+  contractAddress: string | undefined,
+  rpcUrl: string,
+) {
+  const [decimals, setDecimals] = useState<number | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | undefined>(undefined);
+
+  useEffect(() => {
+    if (!contractAddress || !rpcUrl) {
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoading(true);
+    setError(undefined);
+
+    const fetchDecimals = async () => {
+      try {
+        const provider = new RpcProvider({ nodeUrl: rpcUrl });
+        const checksumAddress = getChecksumAddress(contractAddress);
+
+        const result = await provider.callContract({
+          contractAddress: checksumAddress,
+          entrypoint: "decimals",
+          calldata: [],
+        } as Call);
+
+        if (!cancelled) {
+          setDecimals(Number(result[0]));
+          setIsLoading(false);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err : new Error("Failed to fetch decimals"),
+          );
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchDecimals();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [contractAddress, rpcUrl]);
+
+  return { decimals, isLoading, error };
 }
