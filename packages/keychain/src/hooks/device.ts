@@ -10,7 +10,7 @@ const DESKTOP_WIDTH = 432;
 
 // Helper function to detect mobile device immediately
 const isMobileDevice = () => {
-  return typeof window !== "undefined" && window.innerWidth !== DESKTOP_WIDTH;
+  return typeof window !== "undefined" && window.innerWidth < DESKTOP_WIDTH;
 };
 
 export function useDevice() {
