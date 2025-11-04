@@ -422,4 +422,127 @@ describe("ConnectRoute", () => {
       });
     });
   });
+
+  describe("Success screen", () => {
+    beforeEach(() => {
+      // Clear sessionStorage before each test
+      sessionStorage.clear();
+    });
+
+    it("shows success screen when showSuccess flag is set in sessionStorage", () => {
+      // Set up sessionStorage to trigger success screen
+      sessionStorage.setItem("showSuccess", "true");
+      sessionStorage.setItem("authMethod", JSON.stringify("webauthn"));
+      sessionStorage.setItem("isNew", "true");
+
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        verified: true,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      // Should show ConnectionSuccess component
+      expect(screen.getByText(/Success!/i)).toBeInTheDocument();
+      expect(screen.getByText(/Sign Up|Log In/i)).toBeInTheDocument();
+    });
+
+    it("hides success screen after timeout", async () => {
+      vi.useFakeTimers();
+
+      // Set up sessionStorage to trigger success screen
+      sessionStorage.setItem("showSuccess", "true");
+      sessionStorage.setItem("authMethod", JSON.stringify("webauthn"));
+      sessionStorage.setItem("isNew", "false");
+
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        verified: true,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      // Should show success screen initially
+      expect(screen.getByText(/Success!/i)).toBeInTheDocument();
+
+      // Fast-forward time by 1 second (the timeout duration)
+      vi.advanceTimersByTime(1000);
+
+      await waitFor(() => {
+        // Success screen should be hidden after timeout
+        expect(screen.queryByText(/Success!/i)).not.toBeInTheDocument();
+      });
+
+      vi.useRealTimers();
+    });
+
+    it("does not show success screen when controller is not available", () => {
+      sessionStorage.setItem("showSuccess", "true");
+      sessionStorage.setItem("authMethod", JSON.stringify("webauthn"));
+      sessionStorage.setItem("isNew", "true");
+
+      mockUseConnection.mockReturnValue({
+        controller: null,
+        policies: null,
+        verified: false,
+      });
+
+      const { container } = renderWithProviders(<ConnectRoute />);
+
+      // Should return null when controller is not available
+      expect(container.firstChild).toBeNull();
+    });
+
+    it("clears sessionStorage flags after showing success screen", async () => {
+      vi.useFakeTimers();
+
+      sessionStorage.setItem("showSuccess", "true");
+      sessionStorage.setItem("authMethod", JSON.stringify("webauthn"));
+      sessionStorage.setItem("isNew", "true");
+
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        verified: true,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      // Wait for useEffect to clear sessionStorage
+      await waitFor(() => {
+        expect(sessionStorage.getItem("showSuccess")).toBeNull();
+        expect(sessionStorage.getItem("authMethod")).toBeNull();
+        expect(sessionStorage.getItem("isNew")).toBeNull();
+      });
+
+      vi.useRealTimers();
+    });
+
+    it("prevents auto-connect when showing success screen", async () => {
+      sessionStorage.setItem("showSuccess", "true");
+      sessionStorage.setItem("authMethod", JSON.stringify("webauthn"));
+      sessionStorage.setItem("isNew", "true");
+
+      mockUseConnection.mockReturnValue({
+        controller: mockController,
+        policies: null,
+        verified: true,
+      });
+
+      renderWithProviders(<ConnectRoute />);
+
+      // Should show success screen
+      expect(screen.getByText(/Success!/i)).toBeInTheDocument();
+
+      // Should NOT auto-connect while showing success screen
+      await waitFor(
+        () => {
+          expect(mockParams.resolve).not.toHaveBeenCalled();
+        },
+        { timeout: 500 },
+      );
+    });
+  });
 });

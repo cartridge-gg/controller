@@ -412,10 +412,6 @@ export function CreateController({
   } = useCreateController({
     isSlot,
     signers,
-    onAuthenticationSuccess: () => {
-      // Success screen is now handled in ConnectRoute
-      // Just hide the loading/form view so ConnectRoute can render
-    },
   });
 
   // Combine internal and external loading states

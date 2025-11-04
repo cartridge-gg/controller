@@ -202,9 +202,18 @@ describe("CreateController", () => {
       authMethod: undefined,
       setAuthMethod: vi.fn(),
     });
+    mockUseUsernameValidation.mockReturnValue({
+      status: "valid",
+      exists: false, // This makes isNew=true in ConnectionLoading
+      error: undefined,
+      signers: undefined,
+    });
     renderComponent();
-    const submitButton = screen.getByTestId("submit-button");
-    expect(submitButton).toBeDisabled();
+    // When loading, ConnectionLoading component is shown instead of the form
+    // The submit button should not be visible
+    expect(screen.queryByTestId("submit-button")).not.toBeInTheDocument();
+    // Check for loading indicator - ConnectionLoading shows "Sign Up" or "Log In" in the title
+    expect(screen.getByText(/Sign Up|Log In/i)).toBeInTheDocument();
   });
   it("shows error message when validation fails", async () => {
     const errorMessage =
