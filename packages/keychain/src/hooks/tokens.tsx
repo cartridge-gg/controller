@@ -173,6 +173,8 @@ export function useTokenDecimals(
   useEffect(() => {
     if (!contractAddress || !rpcUrl) {
       setDecimals(undefined);
+      setError(undefined);
+      setIsLoading(false);
       return;
     }
 
