@@ -88,11 +88,13 @@ export function convertTokenAmountToUSD(
   const priceAmount = BigInt(price.amount);
 
   // Calculate USD value entirely in BigInt
-  // Formula: (amount * priceAmount) / (10 ** decimals)
-  const valueInBaseUnits = (amount * priceAmount) / BigInt(10 ** decimals);
+  // Formula: (amount * priceAmount) / (10^token_decimals * 10^price_decimals)
+  // This accounts for both the token's decimals and the price's decimals
+  const totalDecimals = BigInt(10 ** decimals) * BigInt(10 ** price.decimals);
+  const valueInSmallestUnit = (amount * priceAmount) / totalDecimals;
 
-  // Convert to decimal for display, handling the price decimals
-  const valueInUsd = Number(valueInBaseUnits) / 10 ** price.decimals;
+  // Convert to decimal for display
+  const valueInUsd = Number(valueInSmallestUnit);
 
   // Handle zero amount
   if (valueInUsd === 0) {
