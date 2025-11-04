@@ -1,14 +1,11 @@
 import { useMemo } from "react";
-import { useTraceabilitiesQuery } from "@cartridge/ui/utils/api/cartridge";
 import { formatAddress } from "@cartridge/ui/utils";
 import { useUsernames } from "./account";
 import { getChecksumAddress } from "starknet";
 import { useMarketplace } from "@/hooks/marketplace";
 import { erc20Metadata } from "@cartridge/presets";
-import { useConnection } from "@/hooks/connection";
+import { useTransfers } from "@/hooks/transfers";
 import makeBlockie from "ethereum-blockies-base64";
-
-const LIMIT = 0;
 
 export interface CardProps {
   key: string;
@@ -52,68 +49,42 @@ export function useTraceabilities({
   tokenId,
 }: TraceabilitiesProps): UseTraceabilitiesResponse {
   const { sales: salesData, listings: listingsData } = useMarketplace();
-  const { project } = useConnection();
-
-  const { data, status } = useTraceabilitiesQuery(
-    {
-      projects: [
-        {
-          project: project ?? "",
-          date: "",
-          contractAddress: contractAddress.toLowerCase(),
-          tokenId: tokenId,
-          limit: LIMIT,
-        },
-      ],
-    },
-    {
-      queryKey: ["traceabilities", project, contractAddress, tokenId],
-      enabled: !!project && !!contractAddress && !!tokenId,
-    },
+  const { data: transfersData, status } = useTransfers(
+    contractAddress,
+    tokenId,
   );
 
   const traceabilities = useMemo(() => {
-    if (!data) return [];
-    const { traceabilities } = data;
+    if (!transfersData || transfersData.length === 0) return {};
     const newTraceabilities: { [key: string]: Traceability } = {};
-    traceabilities?.items.forEach((item) => {
-      item.transfers.forEach(
-        ({
-          amount,
-          contractAddress,
-          decimals,
-          eventId,
-          executedAt,
-          fromAddress,
-          toAddress,
-          metadata,
-          name,
-          symbol,
-          tokenId,
-          transactionHash,
-        }) => {
-          const key = `${transactionHash}-${eventId}`;
-          const traceability: Traceability = {
-            project: item.meta.project,
-            amount: Number(amount),
-            contractAddress,
-            decimals: Number(decimals),
-            eventId,
-            executedAt,
-            fromAddress,
-            toAddress,
-            metadata,
-            name,
-            symbol,
-            tokenId,
-            transactionHash,
-          };
-          newTraceabilities[key] = traceability;
-        },
-      );
+
+    transfersData.forEach((transfer) => {
+      // Extract transaction hash from event_id
+      // event_id format: "txHash:eventIndex"
+      const eventId = transfer.event_id || "";
+      const transactionHash = eventId.split(":")[0] || "";
+
+      const key = `${transactionHash}-${eventId}`;
+      const traceability: Traceability = {
+        project: "", // Project is not available from TokenTransfer
+        amount: Number(transfer.amount),
+        contractAddress: transfer.contract_address,
+        decimals: 0, // Not available in TokenTransfer
+        eventId: eventId,
+        executedAt: new Date(transfer.executed_at * 1000).toISOString(), // Convert timestamp to ISO string
+        fromAddress: transfer.from_address,
+        toAddress: transfer.to_address,
+        metadata: "", // Not available in TokenTransfer
+        name: "", // Not available in TokenTransfer
+        symbol: "", // Not available in TokenTransfer
+        tokenId: transfer.token_id || "",
+        transactionHash: transactionHash,
+      };
+      newTraceabilities[key] = traceability;
     });
+
     return newTraceabilities;
-  }, [data]);
+  }, [transfersData]);
 
   const addresses = useMemo(() => {
     return Object.values(traceabilities).flatMap((traceability) => [
