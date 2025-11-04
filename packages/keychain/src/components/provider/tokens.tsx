@@ -83,7 +83,7 @@ export function TokensProvider({
   feeToken = DEFAULT_FEE_TOKEN,
   refetchInterval = 30000,
 }: TokensProviderProps) {
-  const { controller } = useConnection();
+  const { controller, chainId } = useConnection();
   const [tokens, setTokens] = useState<Record<string, ERC20>>({});
   const [addresses, setAdresses] = useState<string[]>([]);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
