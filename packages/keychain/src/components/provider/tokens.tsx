@@ -85,9 +85,23 @@ export function TokensProvider({
 }: TokensProviderProps) {
   const { controller, chainId } = useConnection();
   const [tokens, setTokens] = useState<Record<string, ERC20>>({});
-  const [addresses, setAdresses] = useState<string[]>([]);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [isPricesLoaded, setIsPricesLoaded] = useState(false);
+
+  // Memoize addresses to prevent unnecessary re-renders and API calls
+  const addresses = useMemo(() => Object.keys(tokens).sort(), [tokens]);
+
+  // Debounced addresses - only updates after 1 second of no changes
+  // This prevents excessive API calls when registering multiple tokens rapidly
+  const [debouncedAddresses, setDebouncedAddresses] = useState<string[]>([]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedAddresses(addresses);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [addresses]);
 
   useEffect(() => {
     if (!controller) {
@@ -123,7 +137,6 @@ export function TokensProvider({
     );
 
     setTokens(initialTokens);
-    setAdresses(Object.keys(initialTokens));
 
     // Then update balances asynchronously
     Object.keys(initialTokens).forEach(async (address) => {
@@ -200,16 +213,16 @@ export function TokensProvider({
     isLoading: isPriceLoading,
     error: priceError,
   } = useQuery(
-    ["token-prices-ekubo", addresses, chainId],
+    ["token-prices-ekubo", debouncedAddresses.join(","), chainId],
     async () => {
-      if (addresses.length === 0 || !chainId) return [];
+      if (debouncedAddresses.length === 0 || !chainId) return [];
 
       const network = chainIdToEkuboNetwork(chainId);
       const USDC_DECIMALS = 6;
       const ONE_USDC = BigInt(10 ** USDC_DECIMALS); // 1 USDC
 
       const prices = await Promise.allSettled(
-        addresses.map(async (address) => {
+        debouncedAddresses.map(async (address) => {
           try {
             const checksumAddress = getChecksumAddress(address);
 
@@ -257,7 +270,7 @@ export function TokensProvider({
     },
     {
       refetchInterval,
-      enabled: addresses.length > 0,
+      enabled: debouncedAddresses.length > 0,
       staleTime: 30000,
     },
   );
@@ -279,7 +292,7 @@ export function TokensProvider({
         return newTokens;
       });
     }
-  }, [priceData, addresses, isPricesLoaded]);
+  }, [priceData]);
 
   const registerPair = useCallback(
     async (address: string) => {
@@ -313,16 +326,13 @@ export function TokensProvider({
             return prevTokens;
           }
 
-          const updatedTokens = {
+          return {
             ...prevTokens,
             [normalizedAddress]: newToken,
           };
-
-          setAdresses(Object.keys(updatedTokens));
-          return updatedTokens;
         });
-      } catch (error) {
-        console.error(`Failed to load token ${normalizedAddress}:`, error);
+      } catch {
+        // Failed to load token - skip
       }
     },
     [controller],
