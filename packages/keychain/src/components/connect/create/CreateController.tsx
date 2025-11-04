@@ -31,6 +31,7 @@ import {
 } from "@/hooks/viewport";
 import { useDevice } from "@/hooks/device";
 import { AccountSearchResult } from "@/hooks/account";
+import { ConnectionLoading } from "../ConnectionLoading";
 
 interface CreateControllerViewProps {
   theme: VerifiableControllerTheme;
@@ -593,7 +594,12 @@ export function CreateController({
     }
   }, [authenticationStep, setAuthMethod]);
 
-  return (
+  return isLoading ? (
+    <ConnectionLoading
+      isNew={validation.exists === false}
+      authMethod={authMethod}
+    />
+  ) : (
     <>
       <CreateControllerView
         theme={theme}
